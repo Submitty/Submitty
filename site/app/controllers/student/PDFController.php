@@ -10,9 +10,17 @@ class PDFController extends AbstractController {
     public function run() {
         switch ($_REQUEST['action']) {
             case 'view_annotated_pdf':
-                return $this->showAnnotatedPdf();
+                $this->showAnnotatedPdf();
                 break;
+            case 'download_annotated_pdf':
+                $this->downloadAnnotatedPdf();
+                return;
         }
+    }
+
+    private function downloadAnnotatedPdf(){
+        $PDFGenerator = new PDFGenerator();
+        return "test";
     }
 
     private function showAnnotatedPdf(){
@@ -38,6 +46,6 @@ class PDFController extends AbstractController {
             }
         }
 
-        $this->core->getOutput()->renderOutput(array('PDF'), 'showPDFEmbedded', $gradeable_id, $user_id, $filename, $annotation_jsons, true);
+        return $this->core->getOutput()->renderOutput(array('PDF'), 'showPDFEmbedded', $gradeable_id, $user_id, $filename, $annotation_jsons, true);
     }
 }

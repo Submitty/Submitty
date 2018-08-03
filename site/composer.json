@@ -15,6 +15,8 @@
     "php-coveralls/php-coveralls": "^2"
   },
   "require": {
-    "twig/twig": "^2.0"
+    "twig/twig": "^2.0",
+    "tecnickcom/tcpdf": "^6.2",
+    "setasign/fpdi": "^2.0"
   }
 }
