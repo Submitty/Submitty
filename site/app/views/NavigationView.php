@@ -142,17 +142,6 @@ class NavigationView extends AbstractView {
         $top_buttons = [];
 
         // ======================================================================================
-        // SITE THEME BUTTON -- only visible to instructors
-        // ======================================================================================
-        if($this->core->getUser()->accessAdmin()) {
-            $top_buttons[] = new Button($this->core, [
-                "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper', 'action' => 'upload_wrapper')),
-                "title" => "Site Theme",
-                "class" => "btn btn-primary"
-            ]);
-        }
-
-        // ======================================================================================
         // COURSE MATERIALS BUTTON -- visible to everyone
         // ======================================================================================
         $course_path = $this->core->getConfig()->getCoursePath();
