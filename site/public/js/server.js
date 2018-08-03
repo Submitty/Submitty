@@ -1511,14 +1511,58 @@ function changeDisplayOptions(option, thread_id){
     window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'option': option, 'thread_id': thread_id}));
 }
 
-function dynamicScrollNextPage(element) {
-    if($(element).data("dynamic_lock_full")) {
-        return;
-    }
+function dynamicScrollLoadPage(element, atEnd) {
     if($(element).data("dynamic_lock_load")) {
         return;
     }
-    $(".thread_list .fa-spinner").show();
+    var load_page = $(element).attr(atEnd?"next_page":"prev_page");
+    if(load_page == -1) {
+        return;
+    }
+    var load_page_callback;
+    var load_page_fail_callback;
+    var arrow_up = $(element).find(".fa-arrow-up");
+    var arrow_down = $(element).find(".fa-arrow-down");
+    var spinner_up = arrow_up.prev();
+    var spinner_down = arrow_down.next();
+    if(atEnd){
+        arrow_down.hide();
+        spinner_down.show();
+        load_page_callback = function(content, count) {
+            spinner_down.hide();
+            arrow_down.before(content);
+            if(count == 0) {
+                // Stop further loads
+                $(element).attr("next_page", -1);
+            } else {
+                $(element).attr("next_page", parseInt(load_page) + 1);
+                arrow_down.show();
+                dynamicScrollLoadIfScrollVisible($(element));
+            }
+        };
+        load_page_fail_callback = function(content, count) {
+            spinner_down.hide();
+        };
+    }
+    else {
+        arrow_up.hide();
+        spinner_up.show();
+        load_page_callback = function(content, count) {
+            spinner_up.hide();
+            arrow_up.after(content);
+            if(count == 0) {
+                // Stop further loads
+                $(element).attr("prev_page", -1);
+            } else {
+                $(element).attr("prev_page", parseInt(load_page) - 1);
+                arrow_up.show();
+                dynamicScrollLoadIfScrollVisible($(element));
+            }
+        };
+        load_page_fail_callback = function(content, count) {
+            spinner_up.hide();
+        };
+    }
     $(element).data("dynamic_lock_load", true);
     
     var urlPattern = $(element).data("urlPattern");
@@ -1526,8 +1570,7 @@ function dynamicScrollNextPage(element) {
     var currentCategoriesId = $(element).data("currentCategoriesId",);
     var course = $(element).data("course",);
 
-    var next_page = $(element).attr("next_page");  
-    var next_url = urlPattern.replace("{{#}}", next_page);
+    var next_url = urlPattern.replace("{{#}}", load_page);
            
     var categories_value = $("#thread_category").val();
     var thread_status_value = $("#thread_status_select").val();
@@ -1547,20 +1590,12 @@ function dynamicScrollNextPage(element) {
                 var content = x.html;
                 var count = x.count;
                 content = `${content}`;
-                $(element).find(".fa-spinner").before(content);
-                $(element).attr("next_page", parseInt(next_page) + 1);
                 $(element).data("dynamic_lock_load", false);
-                $(".thread_list .fa-spinner").hide();
-                if(count == 0) {
-                    // Don't load more
-                    $(element).data("dynamic_lock_full", true);
-                } else {
-                    dynamicScrollLoadIfScrollVisible($(element));
-                }
+                load_page_callback(content, count);
             },
             error: function(){
                 $(element).data("dynamic_lock_load", false);
-                $(".thread_list .fa-spinner").hide();
+                load_page_fail_callback();
                 window.alert("Something went wrong while trying to load more threads. Please try again.");
             }
     });
@@ -1568,7 +1603,7 @@ function dynamicScrollNextPage(element) {
 
 function dynamicScrollLoadIfScrollVisible(jElement) {
     if(jElement[0].scrollHeight <= jElement[0].clientHeight) {
-        dynamicScrollNextPage(jElement[0]);
+        dynamicScrollLoadPage(jElement[0],true);
     }
 }
 
@@ -1582,10 +1617,15 @@ function dynamicScrollContentOnDemand(jElement, urlPattern, currentThreadId, cur
     $(jElement).scroll(function(){ 
         var element = $(this)[0];
         var sensitivity = 3;
+        var isTop = element.scrollTop < sensitivity;
         var isBottom = (element.scrollHeight - element.offsetHeight - element.scrollTop) < sensitivity;
-        if(isBottom) {
-            dynamicScrollNextPage(element);
+        if(isTop) {
+            element.scrollTop = sensitivity;
+            dynamicScrollLoadPage(element,false);
+        } else if(isBottom) {
+            dynamicScrollLoadPage(element,true);
         }
+
     });
 }
 
@@ -1638,11 +1678,11 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course){
                var x = JSON.parse(r).html;
                x = `${x}`;
                var jElement = $(".thread_list");
-               jElement.children(":not(.fa-spinner)").remove();
+               jElement.children(":not(.fa)").remove();
                jElement.prepend(x);
+               jElement.attr("prev_page", '-1');
                jElement.attr("next_page", '2');
                jElement.data("dynamic_lock_load", false);
-               jElement.data("dynamic_lock_full", false);
                $(".thread_list .fa-spinner").hide();
                dynamicScrollLoadIfScrollVisible(jElement);
             },

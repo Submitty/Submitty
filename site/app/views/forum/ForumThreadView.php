@@ -318,7 +318,9 @@ HTML;
 		} else {
 			$return .= <<<HTML
 				<div id="forum_wrapper">
-					<div id="thread_list" class="thread_list" next_page='2'>
+					<div id="thread_list" class="thread_list" prev_page='-1' next_page='2'>
+					<i class="fa fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
+					<i class="fa fa-arrow-up fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
 HTML;
 				$activeThreadAnnouncement = false;
 				$activeThreadTitle = "";
@@ -337,6 +339,7 @@ HTML;
 			$return .= <<<HTML
 
 				
+					<i class="fa fa-arrow-down fa-2x fa-fw fill-available" style="color:gray;" aria-hidden="true"></i>
 					<i class="fa fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
 					</div>
 					<script type="text/javascript">
