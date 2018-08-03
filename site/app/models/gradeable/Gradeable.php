@@ -1231,6 +1231,7 @@ class Gradeable extends AbstractModel {
      * @param string $registration_section Registration section to give team.  Leave blank to inherit from leader.
      * @param int $rotating_section Rotating section to give team.  Set to -1 to inherit from leader
      * @throws \Exception If creating directories for the team fails, or writing team history fails
+     *  Note: The team in the database may have already been created if an exception is thrown
      */
     public function createTeam(User $leader, array $members, string $registration_section = '', int $rotating_section = -1) {
         $all_members = $members;
@@ -1255,8 +1256,15 @@ class Gradeable extends AbstractModel {
             $rotating_section = $leader->getRotatingSection();
         }
 
-        // Get our team id before creating the team
-        $team_id = $this->core->getQueries()->generateTeamId($leader->getId());
+        // Create the team in the database
+        $team_id = $this->core->getQueries()->createTeam($gradeable_id, $leader->getId(), $registration_section, $rotating_section);
+
+        // Force the other team members to accept the invitation from this newly created team
+        $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $leader->getId());
+        foreach ($members as $i => $member) {
+            $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $member->getId());
+            $this->core->getQueries()->acceptTeamInvitation($team_id, $member->getId());
+        }
 
         // Create the submission directory if it doesn't exist
         $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id);
@@ -1282,16 +1290,6 @@ class Gradeable extends AbstractModel {
         }
         if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
             throw new \Exception("Failed to write to team history to settings file");
-        }
-
-        // Create the team in the database only after the above operations succeed
-        $this->core->getQueries()->createTeamById($gradeable_id, $team_id, $leader->getId(), $registration_section, $rotating_section);
-
-        // Force the other team members to accept the invitation from this newly created team
-        $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $leader->getId());
-        foreach ($members as $i => $member) {
-            $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $member->getId());
-            $this->core->getQueries()->acceptTeamInvitation($team_id, $member->getId());
         }
     }
 }

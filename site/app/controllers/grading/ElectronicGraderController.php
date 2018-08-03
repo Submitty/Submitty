@@ -727,7 +727,7 @@ class ElectronicGraderController extends GradingController {
             try {
                 $gradeable->createTeam($leader, $members);
             } catch (\Exception $e) {
-                $this->core->addErrorMessage("Failed to create team ($leader_id): {$e->getMessage()}");
+                $this->core->addErrorMessage("Team may not have been properly initialized ($leader_id): {$e->getMessage()}");
             }
         }
 
@@ -831,7 +831,7 @@ class ElectronicGraderController extends GradingController {
             try {
                 $gradeable->createTeam($leader, $users);
             } catch (\Exception $e) {
-                $this->core->addErrorMessage("ERROR: {$e->getMessage()}");
+                $this->core->addErrorMessage("Team may not have been properly initialized: {$e->getMessage()}");
                 $this->core->redirect($return_url);
             }
         } else {

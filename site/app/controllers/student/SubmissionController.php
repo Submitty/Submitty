@@ -543,8 +543,7 @@ class SubmissionController extends AbstractController {
                 try {
                     $gradeable->createTeam($leader_user, $members);
                 } catch (\Exception $e) {
-                    $this->core->addErrorMessage('Failed to create team: ' . $e->getMessage());
-                    // TODO: do something in these errors cases
+                    $this->core->addErrorMessage('Team may not have been properly initialized: ' . $e->getMessage());
                 }
 
                 // Once team is created, load in the graded gradeable
