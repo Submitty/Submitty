@@ -172,6 +172,10 @@ elseif ($core->getUser() === null) {
         $_REQUEST['page'] = 'no_access';
     }
 }
+else if ($core->getConfig()->isCourseLoaded() && $core->getUser()->getRegistrationSection() === null && !$core->getUser()->accessAdmin()) {
+    $_REQUEST['component'] = 'navigation';
+    $_REQUEST['page'] = 'no_access';
+}
 // Log the user action if they were logging in, logging out, or uploading something
 if ($core->getUser() !== null) {
     if (empty($_COOKIE['submitty_token'])) {
