@@ -830,6 +830,7 @@ class ElectronicGraderController extends GradingController {
             $leader = $this->core->getQueries()->getUserById($leader_id);
             try {
                 $gradeable->createTeam($leader, $users);
+                $this->core->addSuccessMessage("Created New Team {$team_id}");
             } catch (\Exception $e) {
                 $this->core->addErrorMessage("Team may not have been properly initialized: {$e->getMessage()}");
                 $this->core->redirect($return_url);
@@ -891,7 +892,6 @@ class ElectronicGraderController extends GradingController {
             }
         }
 
-        $this->core->addSuccessMessage("Created New Team {$team_id}");
         $this->core->redirect($return_url);
     }
 
