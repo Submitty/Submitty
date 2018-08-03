@@ -754,33 +754,24 @@ function updateProgressPoints(c_index) {
     current_question_text.html(summary_text);
 
     var custom_message = $('textarea[name=mark_text_custom_'+c_index+']').val();
-    if(editModeEnabled){
-        $('#mark_points_custom-' + c_index)[0].disabled=true;
-        $('#mark_text_custom-'+c_index)[0].disabled=true;
-        $('#mark_points_custom-' + c_index)[0].style.cursor="not-allowed";
-        $('#mark_text_custom-' + c_index)[0].style.cursor="not-allowed";
-        $('#mark_icon_custom-' + c_index)[0].style.cursor="not-allowed";
+    $('#mark_points_custom-' + c_index)[0].disabled=true;
+    $('#mark_points_custom-' + c_index)[0].style.cursor="not-allowed";
+    $('#mark_text_custom-' + c_index)[0].style.cursor="not-allowed";
+    $('#mark_icon_custom-' + c_index)[0].style.cursor="not-allowed";
+    if(!editModeEnabled){
+        $('#mark_text_custom-'+c_index)[0].disabled=false;
+        $('#mark_text_custom-' + c_index)[0].style.cursor="text";
+        if(!custom_message == ""){
+            $('#mark_points_custom-' + c_index)[0].disabled=false;
+            $('#mark_points_custom-' + c_index)[0].style.cursor="default";
+            $('#mark_icon_custom-' + c_index)[0].style.cursor="pointer";
+        }  
     }
     else{
-        $('#mark_points_custom-' + c_index)[0].disabled=false;
-        $('#mark_text_custom-'+c_index)[0].disabled=false;
-        $('#mark_points_custom-' + c_index)[0].style.cursor="default";
-        $('#mark_text_custom-' + c_index)[0].style.cursor="text";
-        $('#mark_icon_custom-' + c_index)[0].style.cursor="pointer";  
+        $('#mark_text_custom-'+c_index)[0].disabled=true;
     }
     if(custom_message == ""){
-        $('#mark_points_custom-' + c_index)[0].disabled=true;
-        $('#mark_points_custom-' + c_index)[0].style.cursor="not-allowed";
-        $('#mark_icon_custom-' + c_index)[0].style.cursor="not-allowed";
-        $('#mark_points_custom-' + c_index)[0].value="";
-    }
-    else {
-        $('#mark_points_custom-' + c_index)[0].disabled = false;
-        $('#mark_points_custom-' + c_index)[0].style.cursor = "default";
-        $('#mark_icon_custom-' + c_index)[0].style.cursor = "pointer";
-        if ($('#mark_points_custom-' + c_index)[0].value == "") {
-            $('#mark_points_custom-' + c_index)[0].value = "0";
-        }
+        $('#mark_points_custom-' + c_index)[0].value="0";
     }
     calculatePercentageTotal();
 }
