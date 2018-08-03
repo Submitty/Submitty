@@ -788,6 +788,14 @@ class ElectronicGraderController extends GradingController {
         $new_team = ($_POST['new_team'] ?? '') === 'true' ? true : false;
         $leader_id = $_POST['new_team_user_id'] ?? '';
         $team_id = $_POST['edit_team_team_id'] ?? '';
+        $reg_section = $_POST['reg_section'] ?? 'NULL';
+        $rot_section = $_POST['rot_section'] ?? 'NULL';
+
+        if ($rot_section === 'NULL') {
+            $rot_section = 0;
+        } else {
+            $rot_section = intval($rot_section);
+        }
 
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
         if ($gradeable === false) {
@@ -829,7 +837,7 @@ class ElectronicGraderController extends GradingController {
         if ($new_team) {
             $leader = $this->core->getQueries()->getUserById($leader_id);
             try {
-                $gradeable->createTeam($leader, $users);
+                $gradeable->createTeam($leader, $users, $reg_section, $rot_section);
                 $this->core->addSuccessMessage("Created New Team {$team_id}");
             } catch (\Exception $e) {
                 $this->core->addErrorMessage("Team may not have been properly initialized: {$e->getMessage()}");
@@ -859,10 +867,8 @@ class ElectronicGraderController extends GradingController {
                 }
             }
 
-            $reg_section = $_POST['reg_section'] === "NULL" ? null : $_POST['reg_section'];
-            $rot_section = $_POST['rot_section'] === "NULL" ? null : intval($_POST['rot_section']);
-            $this->core->getQueries()->updateTeamRegistrationSection($team_id, $reg_section);
-            $this->core->getQueries()->updateTeamRotatingSection($team_id, $rot_section);
+            $this->core->getQueries()->updateTeamRegistrationSection($team_id, $reg_section === 'NULL' ? null : $reg_section);
+            $this->core->getQueries()->updateTeamRotatingSection($team_id, $rot_section === 0 ? null : $rot_section);
             foreach ($add_user_ids as $id) {
                 $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $id);
                 $this->core->getQueries()->acceptTeamInvitation($team_id, $id);

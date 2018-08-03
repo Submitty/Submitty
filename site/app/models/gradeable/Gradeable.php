@@ -1228,8 +1228,8 @@ class Gradeable extends AbstractModel {
      * Creates a new team with the provided members
      * @param User $leader The team leader (first user)
      * @param User[] $members The team members (not including leader).
-     * @param string $registration_section Registration section to give team.  Leave blank to inherit from leader.
-     * @param int $rotating_section Rotating section to give team.  Set to -1 to inherit from leader
+     * @param string $registration_section Registration section to give team.  Leave blank to inherit from leader. 'NULL' for null section.
+     * @param int $rotating_section Rotating section to give team.  Set to -1 to inherit from leader. 0 for null section.
      * @throws \Exception If creating directories for the team fails, or writing team history fails
      *  Note: The team in the database may have already been created if an exception is thrown
      */
@@ -1251,9 +1251,13 @@ class Gradeable extends AbstractModel {
         // Inherit rotating/registration section from leader if not provided
         if ($registration_section === '') {
             $registration_section = $leader->getRegistrationSection();
+        } else if($registration_section === 'NULL') {
+            $registration_section = null;
         }
         if ($rotating_section < 0) {
             $rotating_section = $leader->getRotatingSection();
+        } else if ($rotating_section === 0) {
+            $rotating_section = null;
         }
 
         // Create the team in the database
