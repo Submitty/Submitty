@@ -768,7 +768,14 @@ function updateProgressPoints(c_index) {
             $('#mark_points_custom-' + c_index)[0].value = "0";
         }
     }
-
+    if(editModeEnabled){
+        $('#mark_points_custom-' + c_index)[0].disabled=true;
+        $('#mark_text_custom-'+c_index)[0].disabled=true;
+        $('#mark_points_custom-' + c_index)[0].style.cursor="not-allowed";
+        $('#mark_text_custom-' + c_index)[0].style.cursor="not-allowed";
+        $('#mark_icon_custom-' + c_index)[0].style.cursor="not-allowed";
+        
+    }
     calculatePercentageTotal();
 }
 
@@ -1085,11 +1092,20 @@ function saveMark(c_index, sync, override, successCallback, errorCallback) {
         }
         var overwrite = ($('#overwrite-id').is(':checked')) ? ("true") : ("false");
         ajaxSaveGradedComponent(gradeable.id, gradeable.components[c_index-1].id, gradeable.user_id, gradeable.active_version, custom_points, custom_message, overwrite, mark_ids, true, function(response) {
-            if (gradeable.components[c_index-1].hasGrade === false) {
+            var hasGrade = false;
+            for (var m_index = 0; m_index < arr_length; m_index++) {
+                var current_mark_id=grading_data.gradeable.components[c_index-1].marks[m_index].id;
+                if ((getMark(c_index, current_mark_id).has) == true) {
+                    hasGrade = true;
+                }                
+            }
+            custom_message = current_row.find('textarea[name=mark_text_custom_'+c_index+']').val();
+            if (hasGrade === false && (custom_message === "" || custom_message == undefined)) {
                 gradedByElement.text("Ungraded!");
                 component.grader = null;
             } 
             else {
+                component.grader = grading_data.you;
                 component.grader.id = grading_data.your_user_id;
                 gradedByElement.text("Graded by " + component.grader.id + "!");
             }
@@ -1159,7 +1175,7 @@ function saveMarkEditMode(c_index, sync, successCallback, errorCallback, data, o
                             alert('Error saving marks! (' + response.message + ')');
                             return;
                         }
-                        if (gradeable.components[c_index-1].hasGrade === false) {
+                        if (gradeable.components[c_index-1].has_grade === false) {
                             gradedByElement.text("Ungraded!");
                             component.grader = null;
                         } 
@@ -1187,7 +1203,7 @@ function saveMarkEditMode(c_index, sync, successCallback, errorCallback, data, o
                     gradedByElement.hide();
                     savingElement.show();
                     ajaxSaveMark(gradeable.id, gradeable.components[c_index-1].id, getMark(c_index, current_mark_id).id, getMark(c_index, current_mark_id).points, escapeHTML(getMark(c_index, current_mark_id).name), true, function(response) {
-                        if (gradeable.components[c_index-1].hasGrade === false) {
+                        if (gradeable.components[c_index-1].has_grade === false) {
                             gradedByElement.text("Ungraded!");
                             component.grader = null;
                         } 
@@ -1217,6 +1233,9 @@ function saveMarkEditMode(c_index, sync, successCallback, errorCallback, data, o
 
     var current_title = $('#title-' + c_index);
     var custom_points  = current_row.find('input[name=mark_points_custom_'+c_index+']').val();
+    if (typeof custom_points != 'number') {
+        custom_points=0;
+    }
     var custom_message = current_row.find('textarea[name=mark_text_custom_'+c_index+']').val();
 
     // Updates the total number of points and text
@@ -1236,12 +1255,11 @@ function saveMarkEditMode(c_index, sync, successCallback, errorCallback, data, o
     }
     var overwrite = ($('#overwrite-id').is(':checked')) ? ("true") : ("false");
     calculateMarksPoints(c_index);
-    var c=orderArray;
     //TODO save the mark order
    /* ajaxSaveMarkOrder(gradeable.id, gradeable.components[c_index-1].id, orderArray, true, function(data){
         console.log("data");
     }); */
-    var x=grading_data.gradeable.components[c_index-1].marks;
+    calculateMarksPoints(c_index);
 }
 
 //finds what mark is currently open
@@ -1329,6 +1347,7 @@ function openMark(c_index) {
             }
         }
     }
+    updateProgressPoints(c_index);
 }
 
 /**
