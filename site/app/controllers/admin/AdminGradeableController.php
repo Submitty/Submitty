@@ -47,6 +47,9 @@ class AdminGradeableController extends AbstractController {
             case 'rebuild_assignment':
                 $this->rebuildAssignmentRequest();
                 break;
+            case 'check_refresh':
+                $this->checkRefresh();
+                break;
             default:
                 $this->newPage();
                 break;
@@ -196,6 +199,15 @@ class AdminGradeableController extends AbstractController {
         $cmake_out_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $gradeable->getId(), 'log_cmake_output.txt');
         $cmake_output = is_file($cmake_out_dir) ? file_get_contents($cmake_out_dir) : null;
 
+        $is_in_rebuild_queue = $this->isInRebuildQueue($gradeable->getId());
+
+        $check_refresh_url = $this->core->buildUrl([
+            'component' => 'admin',
+            'page' => 'admin_gradeable',
+            'action' => 'check_refresh',
+            'id' => $gradeable->getId()
+        ]);
+
         // $this->inherit_teams_list = $this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams();
 
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
@@ -232,6 +244,10 @@ class AdminGradeableController extends AbstractController {
 
             //build outputs
             'cmake_output' => htmlentities($cmake_output),
+
+            // rebuild queue information
+            'is_in_rebuild_queue' => $is_in_rebuild_queue,
+            'check_refresh_url' => $check_refresh_url,
 
             'upload_config_url' => $this->core->buildUrl([
                 'component' => 'admin',
@@ -1144,6 +1160,23 @@ class AdminGradeableController extends AbstractController {
 
     }
 
+    private function checkRefresh() {
+        $g_id = $_REQUEST['id'];
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        if(!$this->isInRebuildQueue($g_id)) {
+            $refresh_string = "REFRESH_ME";
+            $refresh_bool = true;
+            $this->core->addSuccessMessage("Finished rebuild of {$g_id}");
+        }
+        else {
+            $refresh_string = "NO_REFRESH";
+            $refresh_bool = false;
+        }
+        $this->core->getOutput()->renderString($refresh_string);
+        return array('refresh' => $refresh_bool, 'string' => $refresh_string);
+    }
+
     //return to the navigation page
     private function returnToNav() {
         $this->core->redirect($this->core->buildUrl(array()));
@@ -1157,5 +1190,12 @@ class AdminGradeableController extends AbstractController {
             'id' => $gradeable_id,
             'nav_tab' => '-1']);
         header('Location: ' . $url);
+    }
+
+    private function isInRebuildQueue($gradeable_id) {
+        // Check the rebuild queue for the file indicating that a config rebuild is in process
+        $rebuild_filename = 'PROCESSING_'.$this->core->getConfig()->getSemester().'__'.$this->core->getConfig()->getCourse().'__'.$gradeable_id.'.json';
+        $daemon_queue_dir = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $rebuild_filename);
+        return is_file($daemon_queue_dir);
     }
 }
