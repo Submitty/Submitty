@@ -16,29 +16,29 @@ class WrapperController extends AbstractController {
         'override.css'
     ];
 
-	public function run() {
-	    if (!$this->core->getAccess()->canI("admin.wrapper")) {
-	        $this->core->getOutput()->showError("You do not have permission to do this.");
+    public function run() {
+        if (!$this->core->getAccess()->canI("admin.wrapper")) {
+            $this->core->getOutput()->showError("You do not have permission to do this.");
         }
-		switch($_REQUEST['action']) {
+        switch($_REQUEST['action']) {
             case 'process_upload_html':
                 $this->processUploadHTML();
                 break;
             case 'delete_uploaded_html':
                 $this->deleteUploadedHTML();
                 break;
-			case 'show_page':
-			default:
-				$this->uploadWrapperPage();
-				break;
-		}
-	}
+            case 'show_page':
+            default:
+                $this->uploadWrapperPage();
+                break;
+        }
+    }
 
-	private function uploadWrapperPage() {
-		$this->core->getOutput()->renderOutput(array('admin', 'Wrapper'), 'displayPage', $this->core->getConfig()->getWrapperFiles());
-	}
+    private function uploadWrapperPage() {
+        $this->core->getOutput()->renderOutput(array('admin', 'Wrapper'), 'displayPage', $this->core->getConfig()->getWrapperFiles());
+    }
 
-	private function processUploadHTML() {
+    private function processUploadHTML() {
         $filename = $_REQUEST['location'];
         $location = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site', $filename);
 
@@ -83,8 +83,8 @@ class WrapperController extends AbstractController {
             $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper',
                 'action' => 'show_page')));
         }
-	    if(!@unlink($location)) {
-	        $this->core->addErrorMessage("Deletion failed: Could not unlink file");
+        if(!@unlink($location)) {
+            $this->core->addErrorMessage("Deletion failed: Could not unlink file");
             $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper',
                 'action' => 'show_page')));
         }

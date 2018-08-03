@@ -4,7 +4,6 @@ namespace app\libraries;
 use app\exceptions\OutputException;
 use app\models\Breadcrumb;
 
-
 /**
  * Class Output
  *
@@ -265,7 +264,6 @@ class Output {
         $return .= $this->renderHeader();
         $return .= $this->output_buffer;
         $return .= $this->renderFooter();
-
         return $return;
     }
 

@@ -2,8 +2,6 @@
 
 namespace app\views;
 
-use app\libraries\FileUtils;
-
 class GlobalView extends AbstractView {
     public function header($breadcrumbs, $wrapper_urls, $css=array(), $js=array()) {
         $messages = [];
