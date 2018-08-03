@@ -258,6 +258,7 @@ class Gradeable extends AbstractModel {
 
     /**
      * All \DateTime properties for ELECTRONIC gradeables with ta grading
+     * Note: this is in validation order
      */
     const date_properties_elec_ta = [
         'ta_view_start_date',
@@ -270,6 +271,7 @@ class Gradeable extends AbstractModel {
 
     /**
      * All \DateTime properties for ELECTRONIC gradeables with no ta grading
+     * Note: this is in validation order
      */
     const date_properties_elec_no_ta = [
         'ta_view_start_date',
@@ -280,6 +282,7 @@ class Gradeable extends AbstractModel {
 
     /**
      * All \DateTime properties for ELECTRONIC exam gradeables
+     * Note: this is in validation order
      */
     const date_properties_elec_exam = [
         'ta_view_start_date',
@@ -291,7 +294,8 @@ class Gradeable extends AbstractModel {
 
     /**
      * All \DateTime properties relevant for all types
-     *  Note: This is also the set for no student upload AND no ta grading
+     * Note: This is also the set for no student upload AND no ta grading
+     * Note: this is in validation order
      */
     const date_properties_bare = [
         'ta_view_start_date',
