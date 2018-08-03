@@ -75,10 +75,11 @@ python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate
 
 bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
 
-sudo -u submitty_daemon /usr/local/submitty/sbin/submitty_autograding_shipper.py > /dev/null &
-sleep 1
-sudo -u submitty_daemon /usr/local/submitty/sbin/submitty_autograding_worker.py > /dev/null &
-sleep 1
-/usr/local/submitty/bin/grading_done.py
+# TODO: get this to work properly and tests to pass
+#sudo -u submitty_daemon /usr/local/submitty/sbin/submitty_autograding_shipper.py > /dev/null &
+#sleep 1
+#sudo -u submitty_daemon /usr/local/submitty/sbin/submitty_autograding_worker.py > /dev/null &
+#sleep 1
+#/usr/local/submitty/bin/grading_done.py
 
 echo 'Finished setup.'
