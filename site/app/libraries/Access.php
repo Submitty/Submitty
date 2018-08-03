@@ -452,9 +452,11 @@ class Access {
 
         if (self::checkBits($checks, self::CHECK_COURSE_STATUS)) {
             $course_status = $this->core->getQueries()->getCourseStatus($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
+            // only instructors should be able to access courses with status 2 or if they are in null registration section
             if($group !== User::GROUP_INSTRUCTOR && ($course_status === 2 || $user->getRegistrationSection() === null)) {
                 return false;
             }
+            // no one can view courses with status greater than 2
             else if ($course_status > 2) {
                 return false;
             }
