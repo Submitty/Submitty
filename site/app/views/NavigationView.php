@@ -660,6 +660,7 @@ class NavigationView extends AbstractView {
                 ]);
             }
         } else if ($list_section === GradeableList::CLOSED) {
+            $button = new Button($this->core, [
                 "subtitle" => "OPEN TO \nGRADING NOW",
                 "href" => $this->core->buildUrl([
                     'component' => 'admin',
