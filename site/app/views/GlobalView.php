@@ -21,11 +21,6 @@ class GlobalView extends AbstractView {
 
         $pageTitle = $this->core->getConfig()->isCourseLoaded() ? $this->core->getFullCourseName() : "Submitty";
 
-        //Allow courses to override css
-        if ($this->core->getConfig()->isCourseLoaded() && file_exists($this->core->getConfig()->getCoursePath()."/config/override.css")) {
-            $css[] = $this->core->getConfig()->getCoursePath()."/config/override.css";
-        }
-
         $navURLs = [];
         if ($this->core->getConfig()->isCourseLoaded() && $this->core->userLoaded() && $this->core->getUser()->accessAdmin()) {
             $navURLs[] = [

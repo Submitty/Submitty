@@ -281,6 +281,11 @@ class Output {
                     'file' => pathinfo($file, PATHINFO_FILENAME)
                 ]);
             },  $wrapper_files);
+
+            if (array_key_exists('override.css', $wrapper_urls)) {
+                $this->css[] = $wrapper_urls['override.css'];
+            }
+
             return $this->renderTemplate('Global', 'header', $this->breadcrumbs, $wrapper_urls, $this->css, $this->js);
         }
         else {
