@@ -378,6 +378,13 @@ EOF
     chmod 0640 /etc/apache2/suexec/www-data
 
 
+	#############
+	#NPM install
+	#############
+
+	curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+	sudo apt-get install -y nodejs
+
     #################################################################
     # PHP SETUP
     #################
@@ -612,13 +619,6 @@ if [ ${WORKER} == 0 ]; then
         ${SUBMITTY_INSTALL_DIR}/sbin/setcsvfields.py 13 12 15 7
     fi
 fi
-
-#############
-#NPM install
-#############
-
-curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
-sudo apt-get install -y nodejs
 
 #################################################################
 # DOCKER SETUP
