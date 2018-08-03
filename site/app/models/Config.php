@@ -317,32 +317,6 @@ class Config extends AbstractModel {
         }
 
         foreach ($keys as $key) {
-
-            // DEFAULT FOR FORUM
-            if (!isset($config[$section][$key]) &&
-                $key == "forum_enabled") {
-              $config[$section][$key] = false;
-            }
-            // DEFAULT FOR REGRADE ENABLED
-            if (!isset($config[$section][$key]) &&
-                $key == "regrade_enabled") {
-              $config[$section][$key] = false;
-            }
-            if (!isset($config[$section][$key]) &&
-                $key == "regrade_message") {
-              $config[$section][$key] = "Frivolous regrade requests may result in a grade deduction or loss of late days";
-            }
-            // DEFAULT FOR PRIVATE_REPOSITORY
-            if (!isset($config[$section][$key]) &&
-                $key == "private_repository") {
-              $config[$section][$key] = "";
-            }
-            // DEFAULT FOR ROOM_SEATING_GRADEABLE_ID
-            if (!isset($config[$section][$key]) &&
-                $key == "room_seating_gradeable_id") {
-                $config[$section][$key] = "";
-            }
-
             if (!isset($config[$section][$key])) {
               throw new ConfigException("Missing config setting {$section}.{$key} in configuration ini file");
             }

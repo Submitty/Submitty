@@ -39,7 +39,7 @@ class ConfigurationController extends AbstractController {
             'regrade_enabled'                => $this->core->getConfig()->isRegradeEnabled(),
             'regrade_message'                => $this->core->getConfig()->getRegradeMessage(),
             'private_repository'             => $this->core->getConfig()->getPrivateRepository(),
-            'room_seating_gradeable_id'         => $this->core->getConfig()->getRoomSeatingGradeableId()
+            'room_seating_gradeable_id'      => $this->core->getConfig()->getRoomSeatingGradeableId()
         );
 
         // this is not displaying the value being stored in the config, should be fixed (also default value needs to be fixed)
