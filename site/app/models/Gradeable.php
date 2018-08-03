@@ -88,8 +88,7 @@ use app\libraries\Utils;
  * @method int getStudentAllowedLateDays()
  * @method int getRegradeStatus()
  * @method \DateTime getRegradeRequestDate()
- * @method int getJustRegraded()
- * @method bool getIsRegradeAllowed()
+ * @method bool isRegradeAllowed()
  */
 class Gradeable extends AbstractModel {
     
@@ -145,7 +144,7 @@ class Gradeable extends AbstractModel {
     protected $regrade_request_date = null;
 
     /** @property @var bool */
-    protected $is_regrade_allowed = true;
+    protected $regrade_allowed = true;
 
     /** @property @var bool */
     protected $ta_grades_released = false;
@@ -327,8 +326,6 @@ class Gradeable extends AbstractModel {
     /** @property @var int */
     protected $curr_late_charged = 0;
 
-    /** @property @var boolean */
-    protected $just_regraded = false;
 
     public function __construct(Core $core, $details=array(), User $user = null) {
         parent::__construct($core);
@@ -371,7 +368,7 @@ class Gradeable extends AbstractModel {
             $this->max_team_size = $details['eg_max_team_size'];
             $this->team_lock_date = new \DateTime($details['eg_team_lock_date'], $timezone);
             $this->regrade_request_date = new \DateTime($details['eg_regrade_request_date'], $timezone);
-            $this->is_regrade_allowed = $details['eg_is_regrade_allowed'];
+            $this->regrade_allowed = $details['eg_regrade_allowed'];
             $this->regrade_status = $this->core->getQueries()->getRegradeRequestStatus($this->user->getId(), $this->id);
             if ($this->team_assignment) {
                 $this->team = $this->core->getQueries()->getTeamByGradeableAndUser($this->id, $this->user->getId());
@@ -1596,7 +1593,7 @@ class Gradeable extends AbstractModel {
         }
         return $pages;
     }
-public function getIsRegradeAllowed(){
+public function isRegradeAllowed(){
         if($this->regrade_request_date === null){
             return true;
         }

@@ -2811,7 +2811,7 @@ AND gc_id IN (
                 $this->course_db->convertBoolean($gradeable->isPeerGrading()),
                 $gradeable->getPeerGradeSet(),
                 DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
-                $this->course_db->convertBoolean($gradeable->getIsRegradeAllowed())
+                $this->course_db->convertBoolean($gradeable->isRegradeAllowed())
             ];
             $this->course_db->query("
                 INSERT INTO electronic_gradeable(
@@ -2834,7 +2834,7 @@ AND gc_id IN (
                   eg_peer_grading,
                   eg_peer_grade_set,
                   eg_regrade_request_date,
-                  eg_is_regrade_allowed)
+                  eg_regrade_allowed)
                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
         }
 
@@ -2933,7 +2933,7 @@ AND gc_id IN (
                     $this->course_db->convertBoolean($gradeable->isPeerGrading()),
                     $gradeable->getPeerGradeSet(),
                     DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
-                    $this->course_db->convertBoolean($gradeable->getIsRegradeAllowed()),
+                    $this->course_db->convertBoolean($gradeable->isRegradeAllowed()),
                     $gradeable->getId()
                 ];
                 $this->course_db->query("

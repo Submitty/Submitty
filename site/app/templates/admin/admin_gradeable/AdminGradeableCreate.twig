@@ -73,10 +73,10 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
     <br /><br /><br />
         Will regrade requests be enabled for this assignment?
         <br />
-        <input type="radio" id="yes_is_regrade_allowed" name="is_regrade_allowed" value="true" class="bool_val auto_save"
-                {{ action != 'new' and gradeable.getIsRegradeAllowed() ? 'checked' : '' }} /> Yes
-        <input type="radio" id="no_is_regrade_allowed" name="is_regrade_allowed" value="false" class="bool_val auto_save"
-                {{ not (action != 'new' and gradeable.getIsRegradeAllowed()) ? 'checked' : '' }} /> No
+        <input type="radio" id="yes_regrade_allowed" name="regrade_allowed" value="true" class="bool_val auto_save"
+                {{ action != 'new' and gradeable.isRegradeAllowed() ? 'checked' : '' }} /> Yes
+        <input type="radio" id="no_regrade_allowed" name="regrade_allowed" value="false" class="bool_val auto_save"
+                {{ not (action != 'new' and gradeable.isRegradeAllowed()) ? 'checked' : '' }} /> No
     {% endif %}
     <br /><br />
 
@@ -252,7 +252,7 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_grades">sylla
     }
 
     function onIsRegradeAllowedChange(){
-        if($('#yes_is_regrade_allowed').is(':checked')){
+        if($('#yes_regrade_allowed').is(':checked')){
          //   $('.regrade_request_date').hide();
             disableElementChildren('.regrade_request_date', false);
         }
@@ -338,7 +338,7 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_grades">sylla
 
         //Hide Regrade Request Date if Regrade Requests are not enabled
         onIsRegradeAllowedChange();
-        $('[name="is_regrade_allowed"]').change(onIsRegradeAllowedChange);
+        $('[name="regrade_allowed"]').change(onIsRegradeAllowedChange);
     });
 
     function checkForm() {

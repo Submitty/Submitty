@@ -35,7 +35,7 @@
     Grades Released Date (grades will be visible to students)
 
     <div class="electronic_file">
-    {% if is_regrade_allowed != true or regrade_enabled != true %}
+    {% if regrade_allowed != true or regrade_enabled != true %}
         <div class="regrade_request_date" hidden>
     {% else %}
         <div class="regrade_request_date">

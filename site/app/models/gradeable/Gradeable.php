@@ -69,9 +69,8 @@ use app\models\User;
  * @method float getPrecision()
  * @method void setPrecision($grading_precision)
  * @method Component[] getComponents()
- * @method bool getJustRegraded()
- * @method bool getIsRegradeAllowed()
- * @method void setIsRegradeAllowed($is_regrade_allowed)
+ * @method bool isRegradeAllowed()
+ * @method void setRegradeAllowed($regrade_allowed)
  */
 class Gradeable extends AbstractModel {
     /* Properties for all types of gradeables */
@@ -178,10 +177,8 @@ class Gradeable extends AbstractModel {
     protected $late_days = 0;
     /** @property @var \DateTime The deadline for submitting a regrade request */
     protected $regrade_request_date = null;
-    /** @property @var boolean Has the gradeable been regraded recently (the student hasn't yet viewed the result*/
-    protected $just_regraded = false;
     /** @property @var boolean are regrade requests enabled for this assignment*/
-    protected $is_regrade_allowed = true;
+    protected $regrade_allowed = true;
     /**
      * Gradeable constructor.
      * @param Core $core
@@ -216,7 +213,7 @@ class Gradeable extends AbstractModel {
             $this->setPeerGradeSet($details['peer_grade_set']);
             $this->setLateSubmissionAllowed($details['late_submission_allowed']);
             $this->setPrecision($details['precision']);
-            $this->setIsRegradeAllowed($details['is_regrade_allowed']);
+            $this->setRegradeAllowed($details['regrade_allowed']);
         }
 
         // Set dates last
@@ -1180,7 +1177,7 @@ class Gradeable extends AbstractModel {
 
         return $sections;
     }
-    public function getIsRegradeAllowed(){
+    public function isRegradeAllowed(){
         if($this->regrade_request_date === null){
             return true;
         }
