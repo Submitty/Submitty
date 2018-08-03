@@ -125,6 +125,7 @@
         Custom:
         <textarea
             name="mark_text_custom_{{ c_index }}"
+            id="mark_text_custom-{{ c_index }}"
             onkeyup="updateCustomMarkText(this); autoResizeComment(event); checkIfSelected(this);"
             onchange="updateCustomMarkText(this); checkIfSelected(this); updateProgressPoints({{ c_index }});"
             onclick="event.stopPropagation();"
