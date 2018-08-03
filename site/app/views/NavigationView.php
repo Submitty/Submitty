@@ -142,12 +142,12 @@ class NavigationView extends AbstractView {
         $top_buttons = [];
 
         // ======================================================================================
-        // UPLOAD SITE WRAPPER BUTTON -- only visible to instructors
+        // SITE THEME BUTTON -- only visible to instructors
         // ======================================================================================
         if($this->core->getUser()->accessAdmin()) {
             $top_buttons[] = new Button($this->core, [
                 "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper', 'action' => 'upload_wrapper')),
-                "title" => "Upload Site Wrapper [WIP]",
+                "title" => "Site Theme",
                 "class" => "btn btn-primary"
             ]);
         }
