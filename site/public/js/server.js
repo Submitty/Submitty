@@ -1131,7 +1131,7 @@ function downloadFileWithAnyRole(file_name, path) {
     if (file.indexOf("/") != -1) {
         file = file.substring(file.lastIndexOf('/')+1);
     }
-    window.location = buildUrl({'component': 'misc', 'page': 'download_file_with_any_role', 'dir': 'uploads/course_materials', 'file': file, 'path': path});
+    window.location = buildUrl({'component': 'misc', 'page': 'download_file_with_any_role', 'dir': 'course_materials', 'file': file, 'path': path});
 }
 
 function changeColor(div, hexColor){
