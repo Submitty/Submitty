@@ -1,5 +1,5 @@
 $(function() {
-    $("input,textarea").on("change", function() {
+    $("input,textarea,select").on("change", function() {
         var elem = this;
         let formData = new FormData();
         formData.append('csrf_token', csrfToken);
@@ -14,7 +14,11 @@ $(function() {
         formData.append("entry", entry);
 
         $.ajax({
-            url: buildUrl({'component': 'admin', 'page': 'configuration', 'action': 'update'}),
+            url: buildUrl({
+                'component': 'admin',
+                'page': 'configuration',
+                'action': 'update'
+            }),
             data: formData,
             type: "POST",
             processData: false,
