@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\controllers\admin\WrapperController;
 use app\exceptions\ConfigException;
 use app\libraries\Core;
 use app\libraries\FileUtils;
@@ -134,6 +135,9 @@ class Config extends AbstractModel {
 
     /** @property @var array */
     protected $course_database_params = array();
+
+    /** @property @var array */
+    protected $wrapper_files = array();
 
     /** @property @var string */
     protected $course_name;
@@ -308,8 +312,18 @@ class Config extends AbstractModel {
         }
 
         $this->site_url = $this->base_url."index.php?semester=".$this->semester."&course=".$this->course;
+
+        $wrapper_files_path = FileUtils::joinPaths($this->getCoursePath(), 'site');
+        foreach (WrapperController::WRAPPER_FILES as $file) {
+            $path = FileUtils::joinPaths($wrapper_files_path, $file);
+            if (file_exists($path)) {
+                $this->wrapper_files[$file] = $path;
+            }
+        }
+
         $this->course_loaded = true;
-   }
+    }
+
 
     private function setConfigValues($config, $section, $keys) {
         if (!isset($config[$section]) || !is_array($config[$section])) {
@@ -384,6 +398,16 @@ class Config extends AbstractModel {
 
     public function saveCourseIni($save) {
         IniParser::writeFile($this->course_ini_path, array_merge($this->course_ini, $save));
+    }
+
+    public function wrapperEnabled() {
+        return $this->course_loaded
+            && (count($this->wrapper_files) > 0);
+    }
+
+    public function getWrapperFiles() {
+        //Return empty if not logged in because we can't access them
+        return ($this->core->getUser() === null ? [] : $this->wrapper_files);
     }
 
     public function readCourseIni() {

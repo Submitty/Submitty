@@ -18,6 +18,9 @@ class MiscController extends AbstractController {
             case 'display_file':
                 $this->displayFile();
                 break;
+            case 'read_file':
+                $this->readFile();
+                break;
             case 'download_file':
                 $this->downloadFile();
                 break;
@@ -178,6 +181,27 @@ class MiscController extends AbstractController {
         $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
                                                     'page' => 'course_materials',
                                                     'action' => 'view_course_materials_page')));
+    }
+
+    private function readFile() {
+        $dir = $_REQUEST["dir"];
+        $path = $this->core->getAccess()->resolveDirPath($dir, $_REQUEST["path"]);
+
+        // security check
+        if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
+            $this->core->getOutput()->showError("You do not have access to this file");
+            return false;
+        }
+
+        //Since this can serve raw html files we should make sure they're coming from a valid source
+        if (!array_key_exists("csrf_token", $_REQUEST) || !$this->core->checkCsrfToken($_REQUEST["csrf_token"])) {
+            $this->core->getOutput()->showError("Invalid csrf token");
+            return false;
+        }
+
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        readfile(pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . basename(rawurldecode(htmlspecialchars_decode($_REQUEST['path']))));
     }
 
     private function downloadFile($download_with_any_role = false) {
