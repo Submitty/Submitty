@@ -82,6 +82,8 @@ class Access {
     /** If the current set of flags requires the "gradeable_version" argument */
     const REQUIRE_ARG_VERSION           = 1 << 27;
 
+    /** If the current set of flags requires that the course status be checked */
+    const CHECK_COURSE_STATUS           = 1 << 31;
     // Broader user group access cases since generally actions are "minimum this group"
 
     const ALLOW_MIN_STUDENT               = self::ALLOW_INSTRUCTOR | self::ALLOW_FULL_ACCESS_GRADER | self::ALLOW_LIMITED_ACCESS_GRADER | self::ALLOW_STUDENT;
@@ -105,6 +107,8 @@ class Access {
 
     public function __construct(Core $core) {
         $this->core = $core;
+
+        $this->permissions["view_course"] = self::ALLOW_MIN_STUDENT | self::CHECK_COURSE_STATUS;
 
         $this->permissions["grading.electronic.status"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP;
         $this->permissions["grading.electronic.status.full"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
@@ -442,6 +446,16 @@ class Access {
 
             //Check if they can access the path!
             if (!$this->canUserAccessPath($action, $path, $dir, $user, $args)) {
+                return false;
+            }
+        }
+
+        if (self::checkBits($checks, self::CHECK_COURSE_STATUS)) {
+            $course_status = $this->core->getQueries()->getCourseStatus($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
+            if($group !== User::GROUP_INSTRUCTOR && ($course_status === 2 || $user->getRegistrationSection() === null)) {
+                return false;
+            }
+            else if ($course_status > 2) {
                 return false;
             }
         }
