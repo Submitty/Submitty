@@ -201,7 +201,6 @@ class AdminGradeableController extends AbstractController {
 
         $is_in_rebuild_queue = $this->isInRebuildQueue($gradeable->getId());
 
-
         $check_refresh_url = $this->core->buildUrl([
             'component' => 'admin',
             'page' => 'admin_gradeable',
@@ -1097,7 +1096,7 @@ class AdminGradeableController extends AbstractController {
             'page' => 'admin_gradeable',
             'action' => 'edit_gradeable_page',
             'id' => $g_id,
-            'nav_tab' => '1',
+            'nav_tab' => '1'
         )));
     }
 
