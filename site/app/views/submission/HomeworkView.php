@@ -78,7 +78,7 @@ class HomeworkView extends AbstractView {
             && $gradeable->isTaGrading()
             && $graded_gradeable !== null
             && $graded_gradeable->isTaGradingComplete()
-            && $gradeable->getIsRegradeAllowed() 
+            && $gradeable->isRegradeAllowed() 
             && (DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()) > date("Y-m-d H:m:s"))
             && $submission_count !== 0;
             

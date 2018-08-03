@@ -2956,7 +2956,7 @@ AND gc_id IN (
                       eg_peer_grading=?,
                       eg_peer_grade_set=?,
                       eg_regrade_request_date=?,
-                      eg_is_regrade_allowed=?
+                      eg_regrade_allowed=?
                     WHERE g_id=?", $params);
             }
         }
