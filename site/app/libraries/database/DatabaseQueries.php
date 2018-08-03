@@ -305,13 +305,13 @@ class DatabaseQueries {
     }
 
     public function searchThreads($searchQuery){
-    	$this->course_db->query("SELECT post_content, p_id, p_author, thread_id, thread_title, author, pin, anonymous, timestamp_post FROM (SELECT t.id as thread_id, t.title as thread_title, p.id as p_id, t.created_by as author, t.pinned as pin, p.timestamp as timestamp_post, p.content as post_content, p.anonymous, p.author_user_id as p_author, to_tsvector(p.content) || to_tsvector(p.author_user_id) || to_tsvector(t.title) as document from posts p, threads t JOIN (SELECT thread_id, timestamp from posts where parent_id = -1) p2 ON p2.thread_id = t.id where t.id = p.thread_id and p.deleted=false and t.deleted=false) p_doc JOIN (SELECT thread_id as t_id, timestamp from posts where parent_id = -1) p2 ON p2.t_id = p_doc.thread_id  where p_doc.document @@ plainto_tsquery(:q)", array(':q' => $searchQuery));
-    	return $this->course_db->rows();
+        $this->course_db->query("SELECT post_content, p_id, p_author, thread_id, thread_title, author, pin, anonymous, timestamp_post FROM (SELECT t.id as thread_id, t.title as thread_title, p.id as p_id, t.created_by as author, t.pinned as pin, p.timestamp as timestamp_post, p.content as post_content, p.anonymous, p.author_user_id as p_author, to_tsvector(p.content) || to_tsvector(p.author_user_id) || to_tsvector(t.title) as document from posts p, threads t JOIN (SELECT thread_id, timestamp from posts where parent_id = -1) p2 ON p2.thread_id = t.id where t.id = p.thread_id and p.deleted=false and t.deleted=false) p_doc JOIN (SELECT thread_id as t_id, timestamp from posts where parent_id = -1) p2 ON p2.t_id = p_doc.thread_id  where p_doc.document @@ plainto_tsquery(:q)", array(':q' => $searchQuery));
+        return $this->course_db->rows();
     }
 
     public function threadExists(){
-		$this->course_db->query("SELECT id from threads LIMIT 1");
-		return count($this->course_db->rows()) == 1;
+        $this->course_db->query("SELECT id from threads LIMIT 1");
+        return count($this->course_db->rows()) == 1;
     }
 
     /**
@@ -621,7 +621,7 @@ ORDER BY egd.g_version", array($g_id, $user_id));
     public function getUsersByRegistrationSections($sections, $orderBy="registration_section") {
         $return = array();
         if (count($sections) > 0) {
-        	$orderBy = str_replace("registration_section","SUBSTRING(registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(registration_section, '[0-9]+')::INT, -1), SUBSTRING(registration_section, '[^0-9]*$')",$orderBy);
+            $orderBy = str_replace("registration_section","SUBSTRING(registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(registration_section, '[0-9]+')::INT, -1), SUBSTRING(registration_section, '[^0-9]*$')",$orderBy);
             $query = implode(",", array_fill(0, count($sections), "?"));
             $this->course_db->query("SELECT * FROM users AS u WHERE registration_section IN ({$query}) ORDER BY {$orderBy}", $sections);
             foreach ($this->course_db->rows() as $row) {
@@ -771,7 +771,7 @@ ORDER BY {$orderby}", $params);
     }
 
     public function getGradedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team) {
-         $u_or_t="u";
+        $u_or_t="u";
         $users_or_teams="users";
         $user_or_team_id="user_id";
         if($is_team){
@@ -807,6 +807,81 @@ ORDER BY {$u_or_t}.{$section_key}", $params);
         }
         return $return;
     }
+    public function getDoubleGradedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team) {
+        $u_or_t="u";
+        $users_or_teams="users";
+        $user_or_team_id="user_id";
+        if($is_team){
+            $u_or_t="t";
+            $users_or_teams="gradeable_teams";
+            $user_or_team_id="team_id";
+        }
+        $return = array();
+        $params = array($g_id);
+        $where = "";
+        if (count($sections) > 0) {
+            $where = "WHERE {$section_key} IN (".implode(",", array_fill(0, count($sections), "?")).")";
+            $params = array_merge($params, $sections);
+        }
+        $this->course_db->query("
+SELECT {$u_or_t}.{$section_key}, count({$u_or_t}.*) as cnt
+FROM {$users_or_teams} AS {$u_or_t}
+INNER JOIN (
+  SELECT * FROM gradeable_data AS gd
+  LEFT JOIN (
+  gradeable_component_data AS gcd
+  INNER JOIN gradeable_component AS gc ON gc.gc_id = gcd.gc_id AND gc.gc_is_peer = {$this->course_db->convertBoolean(false)}
+  )AS gcd ON gcd.gd_id = gd.gd_id WHERE gcd.g_id=? AND gcd_verifier_id IS NOT NULL
+) AS gd ON {$u_or_t}.{$user_or_team_id} = gd.gd_{$user_or_team_id}
+{$where}
+GROUP BY {$u_or_t}.{$section_key}
+ORDER BY {$u_or_t}.{$section_key}", $params);
+        foreach ($this->course_db->rows() as $row) {
+            if ($row[$section_key] === null) {
+                $row[$section_key] = "NULL";
+            }
+            $return[$row[$section_key]] = intval($row['cnt']);
+        }
+        return $return;
+    }
+    public function getVerifiedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team) {
+        $u_or_t="u";
+        $users_or_teams="users";
+        $user_or_team_id="user_id";
+        if($is_team){
+            $u_or_t="t";
+            $users_or_teams="gradeable_teams";
+            $user_or_team_id="team_id";
+        }
+        $return = array();
+        $params = array($g_id);
+        $where = "";
+        if (count($sections) > 0) {
+            $where = "WHERE {$u_or_t}.{$section_key} IN (".implode(",", array_fill(0, count($sections), "?")).")";
+            $params = array_merge($params, $sections);
+        }
+        $this->course_db->query("
+SELECT {$u_or_t}.{$section_key}, count({$u_or_t}.*) as cnt
+FROM {$users_or_teams} AS {$u_or_t}
+INNER JOIN (
+  SELECT * FROM gradeable_data AS gd
+  LEFT JOIN (
+  gradeable_component_data AS gcd
+  INNER JOIN gradeable_component AS gc ON gc.gc_id = gcd.gc_id AND gc.gc_is_peer = {$this->course_db->convertBoolean(false)}
+  INNER JOIN users AS u2 ON gcd_grader_id = user_id
+  )AS gcd ON gcd.gd_id = gd.gd_id WHERE gcd.g_id=? AND ((gcd_verifier_id IS NOT NULL) OR user_group < 3)
+) AS gd ON {$u_or_t}.{$user_or_team_id} = gd.gd_{$user_or_team_id}
+{$where}
+GROUP BY {$u_or_t}.{$section_key}
+ORDER BY {$u_or_t}.{$section_key}", $params);
+        foreach ($this->course_db->rows() as $row) {
+            if ($row[$section_key] === null) {
+                $row[$section_key] = "NULL";
+            }
+            $return[$row[$section_key]] = intval($row['cnt']);
+        }
+        return $return;
+    }
     public function getAverageComponentScores($g_id, $section_key, $is_team) {
         $u_or_t="u";
         $users_or_teams="users";
@@ -823,7 +898,7 @@ SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_score
   CASE WHEN (gc_default + sum_points + gcd_score) > gc_upper_clamp THEN gc_upper_clamp
   WHEN (gc_default + sum_points + gcd_score) < gc_lower_clamp THEN gc_lower_clamp
   ELSE (gc_default + sum_points + gcd_score) END AS comp_score FROM(
-    SELECT gcd.gc_id, gd.gd_{$user_or_team_id}, egv.{$user_or_team_id}, gc_title, gc_max_value, gc_is_peer, gc_order, gc_lower_clamp, gc_default, gc_upper_clamp,
+    SELECT gcd.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, gc_lower_clamp, gc_default, gc_upper_clamp,
     CASE WHEN sum_points IS NULL THEN 0 ELSE sum_points END AS sum_points, gcd_score
     FROM gradeable_component_data AS gcd
     LEFT JOIN gradeable_component AS gc ON gcd.gc_id=gc.gc_id
@@ -842,7 +917,7 @@ SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_score
     INNER JOIN(
       SELECT {$u_or_t}.{$user_or_team_id}, {$u_or_t}.{$section_key}
       FROM {$users_or_teams} AS {$u_or_t}
-      WHERE {$u_or_t}.{$section_key} IS NOT NULL
+      WHERE {$u_or_t}.{$user_or_team_id} IS NOT NULL
     ) AS {$u_or_t} ON gd.gd_{$user_or_team_id}={$u_or_t}.{$user_or_team_id}
     INNER JOIN(
       SELECT egv.{$user_or_team_id}, egv.active_version
@@ -1327,10 +1402,14 @@ VALUES (?, ?, ?)", $params);
      * @param GradeableComponent $component
      */
     public function insertGradeableComponentData($gd_id, GradeableComponent $component) {
-        $params = array($component->getId(), $gd_id, $component->getScore(), $component->getComment(), $component->getGrader()->getId(), $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"));
+        $verifier = null;
+        if($component->getVerifier() !== null){
+            $verifier = $component->$getVerifier()->getId();
+        }
+        $params = array($component->getId(), $gd_id, $component->getScore(), $component->getComment(), $component->getGrader()->getId(), $verifier, $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"));
         $this->course_db->query("
-INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment, gcd_grader_id, gcd_graded_version, gcd_grade_time)
-VALUES (?, ?, ?, ?, ?, ?, ?)", $params);
+INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment, gcd_grader_id, gcd_verifier_id, gcd_graded_version, gcd_grade_time)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?)", $params);
     }
 
     // FIXME
@@ -1346,14 +1425,14 @@ VALUES (?, ?, ?, ?, ?, ?, ?)", $params);
      * @param string             $grader_id
      * @param GradeableComponent $component
      */
-    public function updateGradeableComponentData($gd_id, $grader_id, GradeableComponent $component) {
+    public function updateGradeableComponentData($gd_id, $grader_id, $verifier_id, GradeableComponent $component) {
         $params = array($component->getScore(), $component->getComment(), $component->getGradedVersion(),
-                        $component->getGradeTime()->format("Y-m-d H:i:s"), $grader_id, $component->getId(), $gd_id);
+                        $component->getGradeTime()->format("Y-m-d H:i:s"), $grader_id, $verifier_id, $component->getId(), $gd_id);
         $this->course_db->query("
 UPDATE gradeable_component_data
 SET
   gcd_score=?, gcd_component_comment=?, gcd_graded_version=?, gcd_grade_time=?,
-  gcd_grader_id=?
+  gcd_grader_id=?, gcd_verifier_id=?
 WHERE gc_id=? AND gd_id=?", $params);
     }
 
@@ -1391,7 +1470,7 @@ DELETE FROM gradeable_component_data WHERE gc_id=? AND gd_id=?", $params);
 
    public function deleteGradeableComponentMarkData($gd_id, $gc_id, $grader_id, GradeableComponentMark $mark) {
            $params = array($gc_id, $gd_id, $mark->getId());
-	           $this->course_db->query("
+               $this->course_db->query("
 DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=?", $params);
     }
 
@@ -1480,8 +1559,8 @@ WHERE gcm_id=?", $params);
     }
 
     public function getGreatestGradeableComponentMarkOrder(GradeableComponent $component) {
-    	$this->course_db->query("SELECT MAX(gcm_order) as max FROM gradeable_component_mark WHERE gc_id=? ", array($component->getId()));
-    	$row = $this->course_db->row();
+       $this->course_db->query("SELECT MAX(gcm_order) as max FROM gradeable_component_mark WHERE gc_id=? ", array($component->getId()));
+       $row = $this->course_db->row();
         return $row['max'];
 
     }
@@ -1825,12 +1904,12 @@ ORDER BY {$section_key}", $params);
             $params = array_merge($sections, $params);
         }
         $orderBy="";
- 		if($section_key == "registration_section") {
- 			$orderBy = "SUBSTRING(registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(registration_section, '[0-9]+')::INT, -1), SUBSTRING(registration_section, '[^0-9]*$')";
- 		}
- 		else {
- 			$orderBy = $section_key;
- 		}
+                if($section_key == "registration_section") {
+                    $orderBy = "SUBSTRING(registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(registration_section, '[0-9]+')::INT, -1), SUBSTRING(registration_section, '[^0-9]*$')";
+                }
+                else {
+                    $orderBy = $section_key;
+                }
         $this->course_db->query("
 SELECT count(*) as cnt, {$section_key}
 FROM users
@@ -1862,12 +1941,12 @@ ORDER BY {$orderBy}", $params);
             $params = array_merge($sections, $params);
         }
         $orderBy="";
- 		if($section_key == "registration_section") {
- 			$orderBy = "SUBSTRING(registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(registration_section, '[0-9]+')::INT, -1), SUBSTRING(registration_section, '[^0-9]*$')";
- 		}
- 		else {
- 			$orderBy = $section_key;
- 		}
+        if($section_key == "registration_section") {
+            $orderBy = "SUBSTRING(registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(registration_section, '[0-9]+')::INT, -1), SUBSTRING(registration_section, '[^0-9]*$')";
+        }
+        else {
+            $orderBy = $section_key;
+        }
 
         $this->course_db->query("
 SELECT count(*) as cnt, {$section_key}
@@ -1963,9 +2042,9 @@ ORDER BY gt.{$section_key}", $params);
      * @param string $csv_option value determined by selected radio button
      */
     public function updateLateDays($user_id, $timestamp, $days, $csv_option=null) {
-		//q.v. PostgresqlDatabaseQueries.php
-		throw new NotImplementedException();
-	}
+        //q.v. PostgresqlDatabaseQueries.php
+        throw new NotImplementedException();
+    }
 
     /**
      * Delete a given user's allowed late days entry at given effective time

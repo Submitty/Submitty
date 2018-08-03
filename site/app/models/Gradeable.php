@@ -396,6 +396,8 @@ class Gradeable extends AbstractModel {
                                       'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_publish', 'array_gcm_order');
             $user_fields = array('user_id', 'anon_id', 'user_firstname', 'user_preferred_firstname', 'user_lastname',
                                  'user_email', 'user_group');
+            $user_fields2 = array('user_id2', 'anon_id2', 'user_firstname2', 'user_preferred_firstname2', 'user_lastname2',
+                                 'user_email2', 'user_group2');
 
             for ($i = 0; $i < count($details['array_gc_id']); $i++) {
                 $component_details = array();
@@ -425,6 +427,17 @@ class Gradeable extends AbstractModel {
                                     $user_details[$key] = $details["array_gcd_{$key}"][$j];
                                 }
                                 $grade_details[$j]['gcd_grader'] = $this->core->loadModel(User::class, $user_details);
+                            }
+                            if (isset($details['array_gcd_user_id2'][$j])) {
+                                $user_details2 = array();
+                                foreach ($user_fields2 as $key) {
+                                    $key2=substr($key, 0, -1);
+                                    $user_details2[$key2] = $details["array_gcd_{$key}"][$j];
+                                }
+                                $grade_details[$j]['gcd_verifier'] = $this->core->loadModel(User::class, $user_details2);
+                            }
+                            else{
+                                $grade_details[$j]['gcd_verifier'] = null;
                             }
                         }
                     }

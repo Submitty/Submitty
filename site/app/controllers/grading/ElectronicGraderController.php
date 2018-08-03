@@ -288,7 +288,7 @@ class ElectronicGraderController extends GradingController {
             if($verifyAll || $component->getId() == $component_id){
                 //Only verify the component if we weren't already the grader.
                 if($component->getGrader()->getId() !== $this->core->getUser()->getId()){
-                    $component->setGrader($this->core->getUser());
+                    $component->setVerifier($this->core->getUser());
                     $component->saveGradeableComponentData($gradeable->getGdId());
                     $verified = true;
                 }
@@ -331,6 +331,8 @@ class ElectronicGraderController extends GradingController {
 
         $no_team_users = array();
         $graded_components = array();
+        $verified_components = array();
+        $doubleGraded_components = array();
         $graders = array();
         $average_scores = array();
         $sections = array();
@@ -405,6 +407,8 @@ class ElectronicGraderController extends GradingController {
                 $team_users = array();
             }
             $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
+            $verified_components = $this->core->getQueries()->getVerifiedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
+            $doubleGraded_components = $this->core->getQueries()->getDoubleGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
             $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id, $section_key, $gradeable->isTeamAssignment());
             $autograded_average = $this->core->getQueries()->getAverageAutogradedScores($gradeable_id, $section_key, $gradeable->isTeamAssignment());
             $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id, $section_key, $gradeable->isTeamAssignment());
@@ -440,40 +444,71 @@ class ElectronicGraderController extends GradingController {
                 $sections['all']['graded_components'] -= $my_grading;
             }
             else {
-                foreach ($total_users as $key => $value) {                           
+                foreach ($total_users as $key => $value) {  
                     if(array_key_exists($key, $num_submitted)){
                         $sections[$key] = array(
                             'total_components' => $num_submitted[$key] * $num_components,
                             'graded_components' => 0,
-                            'graders' => array()
+                            'verified_components' => 0,
+                            'doubleGraded_components' => 0,
+                            'graders' => array(),
                         );
+                        if ($gradeable->isTeamAssignment()) {
+                            $sections[$key]['no_team'] = $no_team_users[$key];
+                                $sections[$key]['team'] = $team_users[$key];
+                        }
+                        if (isset($graders[$key])) {
+                            $sections[$key]['graders'] = $graders[$key];
+                        }
+                        if (isset($graded_components[$key])) {
+                            // Clamp to total components if unsubmitted assigment is graded for whatever reason
+                            $sections[$key]['graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
+                        }
+                        if (isset($verified_components[$key])) {
+                            // Clamp to total components if unsubmitted assigment is graded for whatever reason
+                            $sections[$key]['verified_components'] = min(intval($verified_components[$key]), $sections[$key]['total_components']);
+                        }
+                        if (isset($doubleGraded_components[$key])) {
+                            // Clamp to total components if unsubmitted assigment is graded for whatever reason
+                            $sections[$key]['doubleGraded_components'] = min(intval($doubleGraded_components[$key]), $sections[$key]['total_components']);
+                        }
+                      
                     } else{
                         $sections[$key] = array(
                             'total_components' => 0,
                             'graded_components' => 0,
                             'graders' => array()
                         );
-                    }
-                    if ($gradeable->isTeamAssignment()) {
-                        $sections[$key]['no_team'] = $no_team_users[$key];
-                        $sections[$key]['team'] = $team_users[$key];
-                    }
-                    if (isset($graded_components[$key])) {
-                        // Clamp to total components if unsubmitted assigment is graded for whatever reason
-                        $sections[$key]['graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
-                    }
-                    if (isset($graders[$key])) {
-                        $sections[$key]['graders'] = $graders[$key];
+                        if ($gradeable->isTeamAssignment()) {
+                            $sections[$key]['no_team'] = $no_team_users[$key];
+                            $sections[$key]['team'] = $team_users[$key];
+                        }
+                        if (isset($graded_components[$key])) {
+                            // Clamp to total components if unsubmitted assigment is graded for whatever reason
+                            $sections[$key]['graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
+                        }
+                        if (isset($verified_components[$key])) {
+                            // Clamp to total components if unsubmitted assigment is graded for whatever reason
+                            $sections[$key]['verified_components'] = min(intval($verified_components[$key]), $sections[$key]['total_components']);
+                        }
+                        if (isset($doubleGraded_components[$key])) {
+                            // Clamp to total components if unsubmitted assigment is graded for whatever reason
+                            $sections[$key]['doubleGraded_components'] = min(intval($doubleGraded_components[$key]), $sections[$key]['total_components']);
+                        }
+            
+                        if (isset($graders[$key])) {
+                            $sections[$key]['graders'] = $graders[$key];
 
-                        if ($key !== "NULL") {
-                            $valid_graders = array();
-                            foreach ($graders[$key] as $valid_grader) {
-                                /* @var User $valid_grader */
-                                if ($this->core->getAccess()->canUser($valid_grader, "grading.electronic.grade", ["gradeable" => $gradeable])) {
-                                    $valid_graders[] = $valid_grader->getDisplayedFirstName();
+                            if ($key !== "NULL") {
+                                $valid_graders = array();
+                                foreach ($graders[$key] as $valid_grader) {
+                                    /* @var User $valid_grader */
+                                    if ($this->core->getAccess()->canUser($valid_grader, "grading.electronic.grade", ["gradeable" => $gradeable])) {
+                                        $valid_graders[] = $valid_grader->getDisplayedFirstName();
+                                    }
                                 }
+                                $sections[$key]["valid_graders"] = $valid_graders;
                             }
-                            $sections[$key]["valid_graders"] = $valid_graders;
                         }
                     }
                 }
@@ -483,7 +518,7 @@ class ElectronicGraderController extends GradingController {
         $rotating_but_not_registered = count($this->core->getQueries()->getUnregisteredStudentsWithRotatingSection());
 
         $show_warnings = $this->core->getAccess()->canI("grading.electronic.status.warnings");
-
+        $this->core->getOutput()->addInternalCss('ta-grading.css');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'statusPage', $gradeable, $sections, $component_averages, $autograded_average, $overall_average, $total_submissions, $registered_but_not_rotating, $rotating_but_not_registered, $viewed_grade, $section_key, $regrade_requests, $show_warnings);
     }
     public function showDetails() {
@@ -621,7 +656,6 @@ class ElectronicGraderController extends GradingController {
         $show_edit_teams = $this->core->getAccess()->canI("grading.electronic.show_edit_teams") && $gradeable->isTeamAssignment();
         $show_import_teams_button = $show_edit_teams && (count($all_teams) > count($empty_teams));
         $show_export_teams_button = $show_edit_teams && (count($all_teams) == count($empty_teams));
-
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $rows, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams);
 
         if ($show_edit_teams) {
@@ -973,11 +1007,15 @@ class ElectronicGraderController extends GradingController {
             }
             if($team){
                 $graded = array_sum($this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, 'registration_section',$team));
+                $verified = array_sum($this->core->getQueries()->getVerifiedComponentsCountByGradingSections($gradeable_id, $sections, 'registration_section',$team));
+                $doubleGraded = array_sum($this->core->getQueries()->getDoubleGradedComponentsCountByGradingSections($gradeable_id, $sections, 'registration_section',$team));
                 $total = array_sum($this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections, 'registration_section'));
                 $total_submitted=array_sum($this->core->getQueries()->getSubmittedTeamCountByGradingSections($gradeable_id, $sections, 'registration_section'));
             }
             else {
-                $graded = array_sum($this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, 'registration_section', $team));
+                $graded = array_sum($this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, 'registration_section',$team));
+                $verified = array_sum($this->core->getQueries()->getVerifiedComponentsCountByGradingSections($gradeable_id, $sections, 'registration_section', $team));
+                $doubleGraded = array_sum($this->core->getQueries()->getDoubleGradedComponentsCountByGradingSections($gradeable_id, $sections, 'registration_section',$team));
                 $total = array_sum($this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'registration_section'));
                 $total_submitted=array_sum($this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, 'registration_section'));
             }
@@ -1009,6 +1047,8 @@ class ElectronicGraderController extends GradingController {
                 $total_submitted=array_sum($this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable->getId(), $sections, 'rotating_section'));
             }
             $graded = array_sum($this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, 'rotating_section', $team));
+            $verified = array_sum($this->core->getQueries()->getVerifiedComponentsCountByGradingSections($gradeable_id, $sections, 'rotating_section', $team));
+            $doubleGraded = array_sum($this->core->getQueries()->getDoubleGradedComponentsCountByGradingSections($gradeable_id, $sections, 'rotating_section', $team));
         }
         //multiplies users and the number of components a gradeable has together
         if($team) {
@@ -1208,6 +1248,57 @@ class ElectronicGraderController extends GradingController {
         } catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
+        if($all_false === true) {
+            $component->deleteData($gradeable->getGdId());
+            $debug = 'delete';
+        } else {
+                //only change the component information is the mark was modified or component and its gradeable are out of sync.
+                if ($component->getGrader() === null || ($overwrite === "true" && !$this->core->getUser()->accessFullGrading())) {
+                    $component->setGrader($this->core->getUser());
+                    $component->setVerifier(null);
+                }
+                else if($overwrite === "true" && $this->core->getUser()->accessFullGrading()){
+                    $component->setVerifier($this->core->getUser());
+                }
+            $version_updated = "true";
+            $component->setGradedVersion($_POST['active_version']);
+            $component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+            $component->setComment($_POST['custom_message']);
+            $component->setScore($_POST['custom_points']);
+            $debug = $component->saveGradeableComponentData($gradeable->getGdId());
+        }
+
+        $index = 0;
+        //delete marks that have been deleted
+        // save existing marks
+        if (array_key_exists('marks', $_POST)) {
+            foreach ($_POST['marks'] as $post_mark) {
+                if (isset($_POST['num_existing_marks'])) {
+                    if ($index >= $_POST['num_existing_marks']) {
+                        break;
+                    }
+                }
+                $mark = null;
+                foreach ($component->getMarks() as $cmark) {
+                    if ($cmark->getId() == $post_mark['id']) {
+                        $mark = $cmark;
+                        break;
+                    }
+                }
+                if ($mark != null) {
+                    $mark->setId($post_mark['id']);
+                    $mark->setPoints($post_mark['points']);
+                    $mark->setNote($post_mark['note']);
+                    $mark->setOrder($post_mark['order']);
+                    $mark->setHasMark($post_mark['selected'] == 'true');
+                    $mark->save();
+                    if ($all_false === false) {
+                        $mark->saveGradeableComponentMarkData($gradeable->getGdId(), $component->getId(), $component->getGrader()->getId());
+                    }
+                    $index++;
+                }
+            }
+
     }
 
     public function saveGradedComponent(TaGradedGradeable $ta_graded_gradeable, GradedComponent $graded_component, User $grader, float $custom_points, string $custom_message, array $mark_ids, int $component_version, bool $overwrite) {
@@ -1655,7 +1746,7 @@ class ElectronicGraderController extends GradingController {
         return $response;
     }
 
-    private function getStats($gradeable, &$sections, $graders=array(), $total_users=array(), $no_team_users=array(), $graded_components=array()) {
+    private function getStats($gradeable, &$sections, $graders=array(), $total_users=array(), $no_team_users=array(), $graded_components=array(), $verified_components=array(), $doubleGraded_components=array()) {
         $gradeable_id = $gradeable->getId();
         if ($gradeable->isGradeByRegistration()) {
             if(!$this->core->getAccess()->canI("grading.electronic.get_marked_users.full_stats")){
@@ -1693,11 +1784,15 @@ class ElectronicGraderController extends GradingController {
                 $total_users = $this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections, $section_key);
                 $no_team_users = $this->core->getQueries()->getUsersWithoutTeamByGradingSections($gradeable_id, $sections, $section_key);
                 $graded_components = $this->core->getQueries()->getGradedComponentsCountByTeamGradingSections($gradeable_id, $sections, $section_key, true);
+                $verified_components = $this->core->getQueries()->getVerifiedComponentsCountByTeamGradingSections($gradeable_id, $sections, $section_key, true);
+                $doubleGraded_components = $this->core->getQueries()->getDoubleGradedComponentsCountByTeamGradingSections($gradeable_id, $sections, $section_key, true);
             }
             else {
                 $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key);
                 $no_team_users = array();
                 $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, false);
+                $verified_components = $this->core->getQueries()->getVerifiedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, false);
+                $doubleGraded_components = $this->core->getQueries()->getDoubleGradedComponentsCountByTeamGradingSections($gradeable_id, $sections, $section_key, false);
             }
         }
 
@@ -1708,6 +1803,8 @@ class ElectronicGraderController extends GradingController {
                 $sections[$key] = array(
                     'total_components' => $value * $num_components,
                     'graded_components' => 0,
+                    'verified_components' => 0,
+                    'doubleGraded_components' => 0,
                     'graders' => array()
                 );
                 if ($gradeable->isTeamAssignment()) {
@@ -1715,6 +1812,12 @@ class ElectronicGraderController extends GradingController {
                 }
                 if (isset($graded_components[$key])) {
                     $sections[$key]['graded_components'] = intval($graded_components[$key]);
+                }
+                if (isset($verified_components[$key])) {
+                    $sections[$key]['verified_components'] = intval($verified_components[$key]);
+                }
+                if (isset($doubleGraded_components[$key])) {
+                    $sections[$key]['doubleGraded_components'] = intval($doubleGraded_components[$key]);
                 }
                 if (isset($graders[$key])) {
                     $sections[$key]['graders'] = $graders[$key];

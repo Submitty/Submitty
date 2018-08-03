@@ -31,9 +31,9 @@ class PostgresqlDatabaseQueries extends DatabaseQueries{
 SELECT u.*, sr.grading_registration_sections
 FROM users u
 LEFT JOIN (
-	SELECT array_agg(sections_registration_id) as grading_registration_sections, user_id
-	FROM grading_registration
-	GROUP BY user_id
+  SELECT array_agg(sections_registration_id) as grading_registration_sections, user_id
+  FROM grading_registration
+  GROUP BY user_id
 ) as sr ON u.user_id=sr.user_id
 WHERE u.user_id=?", array($user_id));
         if (count($this->course_db->rows()) > 0) {
@@ -72,9 +72,9 @@ GROUP BY user_id", array($user_id));
 SELECT u.*, sr.grading_registration_sections
 FROM users u
 LEFT JOIN (
-	SELECT array_agg(sections_registration_id) as grading_registration_sections, user_id
-	FROM grading_registration
-	GROUP BY user_id
+  SELECT array_agg(sections_registration_id) as grading_registration_sections, user_id
+  FROM grading_registration
+  GROUP BY user_id
 ) as sr ON u.user_id=sr.user_id
 ORDER BY {$orderBy}");
         $return = array();
@@ -92,9 +92,9 @@ ORDER BY {$orderBy}");
 SELECT u.*, sr.grading_registration_sections
 FROM users u
 LEFT JOIN (
-	SELECT array_agg(sections_registration_id) as grading_registration_sections, user_id
-	FROM grading_registration
-	GROUP BY user_id
+  SELECT array_agg(sections_registration_id) as grading_registration_sections, user_id
+  FROM grading_registration
+  GROUP BY user_id
 ) as sr ON u.user_id=sr.user_id
 WHERE u.user_group < 4
 ORDER BY SUBSTRING(u.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(u.registration_section, '[0-9]+')::INT, -1), SUBSTRING(u.registration_section, '[^0-9]*$'), u.user_id");
@@ -282,6 +282,7 @@ SELECT";
   gd.array_gcd_score,
   gd.array_gcd_component_comment,
   gd.array_gcd_grader_id,
+  gd.array_gcd_verifier_id,
   gd.array_gcd_graded_version,
   gd.array_gcd_grade_time,
   gd.array_gcd_user_id,
@@ -291,6 +292,13 @@ SELECT";
   gd.array_gcd_user_lastname,
   gd.array_gcd_user_email,
   gd.array_gcd_user_group,
+  gd.array_gcd_user_id2,
+  gd.array_gcd_anon_id2,
+  gd.array_gcd_user_firstname2,
+  gd.array_gcd_user_preferred_firstname2,
+  gd.array_gcd_user_lastname2,
+  gd.array_gcd_user_email2,
+  gd.array_gcd_user_group2,
   CASE WHEN egd.active_version IS NULL THEN
     0 ELSE
     egd.active_version
@@ -363,6 +371,7 @@ LEFT JOIN (
     in_gcd.array_gcd_score,
     in_gcd.array_gcd_component_comment,
     in_gcd.array_gcd_grader_id,
+    in_gcd.array_gcd_verifier_id,
     in_gcd.array_gcd_graded_version,
     in_gcd.array_gcd_grade_time,
     in_gcd.array_array_gcm_mark,
@@ -372,7 +381,14 @@ LEFT JOIN (
     in_gcd.array_gcd_user_preferred_firstname,
     in_gcd.array_gcd_user_lastname,
     in_gcd.array_gcd_user_email,
-    in_gcd.array_gcd_user_group
+    in_gcd.array_gcd_user_group,
+    in_gcd.array_gcd_user_id2,
+    in_gcd.array_gcd_anon_id2,
+    in_gcd.array_gcd_user_firstname2,
+    in_gcd.array_gcd_user_preferred_firstname2,
+    in_gcd.array_gcd_user_lastname2,
+    in_gcd.array_gcd_user_email2,
+    in_gcd.array_gcd_user_group2
   FROM gradeable_data as in_gd
   LEFT JOIN (
     SELECT
@@ -381,6 +397,14 @@ LEFT JOIN (
       array_agg(gcd_score) AS array_gcd_score,
       array_agg(gcd_component_comment) AS array_gcd_component_comment,
       array_agg(gcd_grader_id) AS array_gcd_grader_id,
+      array_agg(gcd_verifier_id) AS array_gcd_verifier_id,
+      array_agg(u2.user_id) AS array_gcd_user_id2,
+      array_agg(u2.anon_id) AS array_gcd_anon_id2,
+      array_agg(u2.user_firstname) AS array_gcd_user_firstname2,
+      array_agg(u2.user_preferred_firstname) AS array_gcd_user_preferred_firstname2,
+      array_agg(u2.user_lastname) AS array_gcd_user_lastname2,
+      array_agg(u2.user_email) AS array_gcd_user_email2,
+      array_agg(u2.user_group) AS array_gcd_user_group2,
       array_agg(gcd_graded_version) AS array_gcd_graded_version,
       array_agg(gcd_grade_time) AS array_gcd_grade_time,
       array_agg(array_gcm_mark) AS array_array_gcm_mark,
@@ -402,6 +426,7 @@ LEFT JOIN (
     ON gcd.gc_id=gcmd.gc_id AND gcd.gd_id=gcmd.gd_id AND gcmd.gcd_grader_id=gcd.gcd_grader_id
     ) AS gcd
     INNER JOIN users AS u ON gcd.gcd_grader_id = u.user_id
+    LEFT JOIN users AS u2 ON gcd.gcd_verifier_id = u2.user_id
     GROUP BY gcd.gd_id
   ) AS in_gcd ON in_gd.gd_id = in_gcd.gd_id
 ) AS gd ON g.g_id = gd.g_id AND (gd.gd_user_id = u.user_id OR u.user_id IN (
@@ -476,9 +501,10 @@ ORDER BY ".implode(", ", $order_by);
                                 'gc_default', 'gc_max_value', 'gc_upper_clamp', 'gc_is_text', 'gc_is_peer',
                                 'gc_order', 'gc_page', 'array_gcm_mark', 'array_gcm_id', 'array_gc_id',
                                 'array_gcm_points', 'array_gcm_note', 'array_gcm_publish', 'array_gcm_order', 'gcd_gc_id', 'gcd_score',
-                                'gcd_component_comment', 'gcd_grader_id', 'gcd_graded_version', 'gcd_grade_time',
+                                'gcd_component_comment', 'gcd_grader_id','gcd_verifier_id', 'gcd_graded_version', 'gcd_grade_time',
                                 'gcd_user_id', 'gcd_user_firstname', 'gcd_user_preferred_firstname',
-                                'gcd_user_lastname', 'gcd_user_email', 'gcd_user_group');
+                                'gcd_user_lastname', 'gcd_user_email', 'gcd_user_group', 'gcd_user_id2', 'gcd_user_firstname2', 'gcd_user_preferred_firstname2',
+                                'gcd_user_lastname2', 'gcd_user_email2', 'gcd_user_group2');
                 $bools = array('gc_is_text', 'gc_is_peer');
                 foreach ($fields as $key) {
                     if (isset($row['array_' . $key])) {
@@ -788,7 +814,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
      */
     public function updateLateDays($user_id, $timestamp, $days, $csv_option=null) {
         //Update query and values list.
-		$query = "
+    $query = "
             INSERT INTO late_days (user_id, since_timestamp, allowed_late_days)
             VALUES(?,?,?)
             ON CONFLICT (user_id, since_timestamp) DO UPDATE
@@ -798,15 +824,15 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
         switch ($csv_option) {
         case 'csv_option_preserve_higher':
-        	//Does NOT overwrite a higher (or same) value of allowed late days.
-        	$query .= "AND late_days.allowed_late_days<?";
-        	$vals[] = $days;
-        	break;
+          //Does NOT overwrite a higher (or same) value of allowed late days.
+          $query .= "AND late_days.allowed_late_days<?";
+          $vals[] = $days;
+          break;
         case 'csv_option_overwrite_all':
         default:
-        	//Default behavior: overwrite all late days for user and timestamp.
-        	//No adjustment to SQL query.
-    	}
+          //Default behavior: overwrite all late days for user and timestamp.
+          //No adjustment to SQL query.
+      }
 
         $this->course_db->query($query, $vals);
     }
@@ -1305,10 +1331,10 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   json_agg(gcd_score) AS array_score,
                   json_agg(gcd_component_comment) AS array_comment,
                   json_agg(gcd_grader_id) AS array_grader_id,
+                  json_agg(gcd_verifier_id) AS array_gcd_verifier_id,
                   json_agg(gcd_graded_version) AS array_graded_version,
                   json_agg(gcd_grade_time) AS array_grade_time,
                   json_agg(string_mark_id) AS array_mark_id,
-
                   json_agg(ug.user_id) AS array_grader_user_id,
                   json_agg(ug.anon_id) AS array_grader_anon_id,
                   json_agg(ug.user_firstname) AS array_grader_user_firstname,
@@ -1343,7 +1369,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                       FROM grading_registration
                       GROUP BY user_id
                     ) AS sr ON u.user_id=sr.user_id
-                  ) AS ug ON ug.user_id=in_gcd.gcd_grader_id
+                  ) AS ug ON ug.user_id=in_gcd.gcd_grader_id OR ug.user_id=in_gcd.gcd_verifier_id
                 GROUP BY in_gcd.gd_id
               ) AS gcd ON gcd.gd_id=gd.gd_id
 
@@ -1440,7 +1466,6 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             // Always construct an instance even if there is no data
             $auto_graded_gradeable = new AutoGradedGradeable($this->core, $graded_gradeable, $row);
             $graded_gradeable->setAutoGradedGradeable($auto_graded_gradeable);
-
             $graded_components_by_id = [];
             /** @var AutoGradedVersion[] $graded_versions */
             $graded_versions = [];
@@ -1527,7 +1552,6 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 }
                 $ta_graded_gradeable->setGradedComponentContainersFromDatabase($containers);
             }
-
             if (isset($db_row_split['version'])) {
                 // Create all of the AutoGradedVersions
                 for ($i = 0; $i < count($db_row_split['version']); ++$i) {

@@ -100,10 +100,10 @@ CREATE FUNCTION csv_to_numeric_gradeable(vcode text[], gradeable_id text, grader
         LOOP
           IF istext[j] THEN
           --COME BACK AND FIX: need to put in gcd_grade_time...double check to see that CSV upload still works for numeric/text
-            INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_component_comment, gcd_grader_id, gcd_graded_version, gcd_grade_time) VALUES (gcids[j], gdid, line[j+1], grader_id, NULL);
+            INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_component_comment, gcd_grader_id, gcd_verifier_id ,gcd_graded_version, gcd_grade_time) VALUES (gcids[j], gdid, line[j+1], grader_id, NULL, NULL);
           ELSE
             score := CAST(line[j+1] AS NUMERIC);
-            INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_score, gcd_grader_id, gcd_graded_version, gcd_grade_time) VALUES (gcids[j], gdid, score, grader_id, NULL);
+            INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_score, gcd_grader_id, gcd_verifier_id, gcd_graded_version, gcd_grade_time) VALUES (gcids[j], gdid, score, grader_id, NULL, NULL);
           END IF;
         END LOOP;
 
@@ -257,6 +257,7 @@ CREATE TABLE gradeable_component_data (
     gcd_score numeric NOT NULL,
     gcd_component_comment character varying NOT NULL,
     gcd_grader_id character varying(255) NOT NULL,
+    gcd_verifier_id character varying(255) NULL,
     gcd_graded_version integer,
     gcd_grade_time timestamp(6) with time zone NOT NULL
     -- CONSTRAINT gradeable_component_data_check CHECK (check_valid_score(gcd_score, gc_id)) -
@@ -541,29 +542,29 @@ CREATE TABLE forum_posts_history (
 );
 
 CREATE TABLE "thread_categories" (
-	"thread_id" int NOT NULL,
-	"category_id" int NOT NULL
+    "thread_id" int NOT NULL,
+    "category_id" int NOT NULL
 );
 
 CREATE TABLE "categories_list" (
-	"category_id" serial NOT NULL,
-	"category_desc" varchar NOT NULL,
-	"rank" int,
-	"color" varchar DEFAULT '#000080' NOT NULL,
-	CONSTRAINT categories_list_pk PRIMARY KEY ("category_id")
+    "category_id" serial NOT NULL,
+    "category_desc" varchar NOT NULL,
+    "rank" int,
+    "color" varchar DEFAULT '#000080' NOT NULL,
+    CONSTRAINT categories_list_pk PRIMARY KEY ("category_id")
 );
 
 CREATE TABLE "student_favorites" (
-	"id" serial NOT NULL,
-	"user_id" character varying NOT NULL,
-	"thread_id" int,
-	CONSTRAINT student_favorites_pk PRIMARY KEY ("id")
+    "id" serial NOT NULL,
+    "user_id" character varying NOT NULL,
+    "thread_id" int,
+    CONSTRAINT student_favorites_pk PRIMARY KEY ("id")
 );
 
 CREATE TABLE "viewed_responses" (
-	"thread_id" int NOT NULL,
-	"user_id" character varying NOT NULL,
-	"timestamp" timestamp with time zone NOT NULL
+    "thread_id" int NOT NULL,
+    "user_id" character varying NOT NULL,
+    "timestamp" timestamp with time zone NOT NULL
 );
 
 
@@ -837,6 +838,13 @@ ALTER TABLE ONLY gradeable_component_data
 
 ALTER TABLE ONLY gradeable_component_data
   ADD CONSTRAINT gradeable_component_data_gcd_grader_id_fkey FOREIGN KEY (gcd_grader_id) REFERENCES users(user_id) ON UPDATE CASCADE;
+
+--
+-- Name: gradeable_component_data_gcd_verifier_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gradeable_component_data
+  ADD CONSTRAINT gradeable_component_data_gcd_verifier_id_fkey FOREIGN KEY (gcd_verifier_id) REFERENCES users(user_id) ON UPDATE CASCADE;
 
 --
 -- Name: gradeable_component_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -

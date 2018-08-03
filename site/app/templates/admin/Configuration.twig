@@ -141,7 +141,16 @@
                 </div>
             </div>
             <div class="option">
-                <div class="option-input"><input type="text" name="regrade_message" value="{{ fields['regrade_message'] }}" /></div>
+                <div class="option-input"><input type="checkbox" name="verify_enabled" value="true" {{ fields['verify_enabled'] ? 'checked': '' }} /></div>
+                <div class="option-desc">
+                    <div class="option-title">Limited Access Grader Verification</div>
+                    <div class="option-alt">Grading by limited access graders (undergraduate mentors) requires verification by full access graders (graduate TAs or instructors)</div>
+                </div>
+            </div>
+            <div class="option">
+                <div class="option-input">
+                    <input type="text" name="regrade_message" value="{{ fields['regrade_message'] }}" />
+                </div>
                 <div class="option-desc">
                     <div class="option-title">Regrade Warning Message</div>
                     <div class="option-alt">Input the warning message show to students while submitting a regrade request.</div>
