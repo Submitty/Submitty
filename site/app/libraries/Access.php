@@ -147,6 +147,7 @@ class Access {
 
         //Per-directory access permissions
         $this->permissions["path.read.uploads"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_FILE_DIRECTORY;
+        $this->permissions["path.read.site"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY;
         //TODO: Timed access control
         $this->permissions["path.read.course_materials"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY;
         //TODO: Check deleted posts
@@ -157,6 +158,7 @@ class Access {
 
         $this->permissions["path.write.submissions"] = self::ALLOW_MIN_STUDENT | self::ALLOW_ONLY_SELF_GRADEABLE | self::CHECK_FILE_DIRECTORY;
         $this->permissions["path.write.uploads"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_FILE_DIRECTORY;
+        $this->permissions["path.write.site"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_FILE_DIRECTORY;
         $this->permissions["path.write.checkout"] = self::DENY_ALL | self::CHECK_FILE_DIRECTORY;
         $this->permissions["path.write.results"] = self::DENY_ALL | self::CHECK_FILE_DIRECTORY;
         $this->permissions["path.write.course_materials"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_FILE_DIRECTORY;
@@ -222,6 +224,14 @@ class Access {
             "permissions" => [
                 "path.read" => "path.read.uploads",
                 "path.write" => "path.write.uploads",
+            ]
+        ];
+        $this->directories["site"] = [
+            "base" => $this->core->getConfig()->getCoursePath() . "/site",
+            "subparts" => [],
+            "permissions" => [
+                "path.read" => "path.read.site",
+                "path.write" => "path.write.site",
             ]
         ];
         $this->directories["course_materials"] = [

@@ -184,12 +184,13 @@ class MiscController extends AbstractController {
     }
 
     private function readFile($download_with_any_role = false) {
+        $dir = $_REQUEST["dir"];
+        $path = $this->core->getAccess()->resolveDirPath($dir, $_REQUEST["path"]);
+
         // security check
-        $error_string="";
-        if (!$this->checkValidAccess(false,$error_string, $download_with_any_role)) {
-            $message = "You do not have access to that page. ".$error_string;
-            $this->core->addErrorMessage($message);
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
+            $this->core->getOutput()->showError("You do not have access to this file");
+            return false;
         }
         $filename = rawurldecode(htmlspecialchars_decode($_REQUEST['file']));
         $this->core->getOutput()->useHeader(false);
