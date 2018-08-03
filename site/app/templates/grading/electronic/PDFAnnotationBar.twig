@@ -6,7 +6,8 @@
         <a value="pen" class="fa fa-pencil toolbar-item"></a>
         {#TODO: In the future, we want a erase function rather than a clear function#}
         {#<a value="clear" class="fa fa-ban toolbar-action" style="text-align: center; margin-left: 8px; font-size: 25px; padding-bottom: 10px"></a>#}
-        <a value="rect" class="fa fa-object-group toolbar-item"></a>
+        {#<a value="rect" class="fa fa-object-group toolbar-item"></a>#}
+        <a value="rotate" class="fa fa-rotate-right toolbar-action"></a>
         <a value="text" class="fa fa-font toolbar-item"></a>
         <a value="zoomin" class="fa fa-plus toolbar-action"></a>
         <a value="zoomcustom" class="toolbar-action">100%</a>
@@ -21,6 +22,9 @@
         <br>
         Color:
         <input id="pen_color_selector" type="color" value="#ff0000" style="width:30px">
+        <br>
+        Scroll lock:
+        <input id="scroll_lock_mode" type="checkbox">
     </div>
     <div id="text_selection" class="selection_panel">
         Size:
