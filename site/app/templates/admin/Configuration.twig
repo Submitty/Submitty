@@ -1,13 +1,13 @@
 <div class="content">
     <h2>Course Settings</h2>
-    <form id="configForm" method="post" action="{{ core.buildUrl({'component': 'admin', 'page': 'configuration', 'action': 'update'}) }}">
+    <div id="config">
         <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
         <div class="panel">
             <div class="option">
-                <div class="option-input"><input class="required" type="text" name="course_name" value="{{ fields['course_name']|raw }}" placeholder="(Required)" /></div>
+                <div class="option-input"><input type="text" name="course_name" value="{{ fields['course_name']|raw }}" /></div>
                 <div class="option-desc">
-                    <div class="option-title">Course Name</div>
-                    <div class="option-alt">Input the course name that should appear in the header of the site</div>
+                    <div class="option-title">Full Course Name</div>
+                    <div class="option-alt">Input the course name that should appear in the header of the site (your course code is {{ core.getConfig().getCourse() }})</div>
                 </div>
             </div>
 
@@ -165,5 +165,5 @@
                 </div>
             </div>
         </div>
-    </form>
+    </div>
 </div>

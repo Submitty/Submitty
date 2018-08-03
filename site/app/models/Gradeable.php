@@ -81,7 +81,7 @@ use app\libraries\Utils;
  * @method int|null getGdId()
  * @method void setGdId(int $gd_id)
  * @method \DateTime getUserViewedDate()
- * @method float getTotalPeerGradingNonExtraCredit()
+ * @method float getTotalPeerGradingPoints()
  * @method int getLateDayExceptions()
  * @method int getAllowedLateDays()
  * @method int getLateDays()
@@ -284,11 +284,9 @@ class Gradeable extends AbstractModel {
 
     protected $been_tagraded = false;
 
-    protected $total_tagrading_non_extra_credit = 0;
-    protected $total_tagrading_extra_credit = 0;
+    protected $total_ta_grading_points = 0;
     
-    protected $total_peer_grading_non_extra_credit = 0;
-    protected $total_peer_grading_extra_credit=0;
+    protected $total_peer_grading_points = 0;
 
     /** @property @var \app\models\User|null */
     protected $user = null;
@@ -455,7 +453,7 @@ class Gradeable extends AbstractModel {
 
                 if (!$component_for_info->getIsText()) {
                     $max_value = $component_for_info->getMaxValue();
-                    $this->total_tagrading_non_extra_credit += $max_value;
+                    $this->total_ta_grading_points += $max_value;
                 }
             }
             // We don't sort by order within the DB as we're aggregating the component details into an array so we'd
@@ -924,8 +922,8 @@ class Gradeable extends AbstractModel {
         return $points;
     }
 
-    public function getTotalTANonExtraCreditPoints() {
-        return $this->total_tagrading_non_extra_credit;
+    public function getTotalTAPoints() {
+        return $this->total_ta_grading_points;
     }
 
     public function getTAViewDate(){
@@ -1238,7 +1236,7 @@ class Gradeable extends AbstractModel {
             "graded_autograder_points" => $this->getGradedAutograderPoints(),
             "total_autograder_non_extra_credit_points" => $this->getTotalAutograderNonExtraCreditPoints(),
             "graded_ta_points" => $this->getGradedTAPoints(),
-            "total_ta_non_extra_credit_points" => $this->getTotalTANonExtraCreditPoints(),
+            "total_ta_points" => $this->getTotalTAPoints(),
             "components" => []
         ];
 
@@ -1414,66 +1412,6 @@ class Gradeable extends AbstractModel {
 
             return $sections;
         }
-    }
-
-    /**
-     * Get a list of all grading sections
-     * @return GradingSection[]
-     */
-    public function getAllGradingSections() {
-        if ($this->getPeerGrading()) {
-            //Todo: What are all sections when you have peer grading?
-        }
-
-        $users = [];
-        $teams = [];
-
-        if ($this->isGradeByRegistration()) {
-            if ($this->isTeamAssignment()) {
-                $all_teams = $this->core->getQueries()->getTeamsByGradeableId($this->getId());
-                foreach ($all_teams as $team) {
-                    /** @var Team $team */
-                    $teams[$team->getRegistrationSection()][] = $team;
-                }
-            } else {
-                $all_users = $this->core->getQueries()->getAllUsers();
-                foreach ($all_users as $user) {
-                    /** @var User $user */
-                    $users[$user->getRegistrationSection()][] = $user;
-                }
-            }
-            $section_names = $this->core->getQueries()->getRegistrationSections();
-            foreach ($section_names as $i => $section) {
-                $section_names[$i] = $section['sections_registration_id'];
-            }
-            $graders = $this->core->getQueries()->getGradersForRegistrationSections($section_names);
-        } else {
-            if ($this->isTeamAssignment()) {
-                $all_teams = $this->core->getQueries()->getTeamsByGradeableId($this->getId());
-                foreach ($all_teams as $team) {
-                    /** @var Team $team */
-                    $teams[$team->getRotatingSection()][] = $team;
-                }
-            } else {
-                $all_users = $this->core->getQueries()->getAllUsers();
-                foreach ($all_users as $user) {
-                    /** @var User $user */
-                    $users[$user->getRotatingSection()][] = $user;
-                }
-            }
-            $section_names = $this->core->getQueries()->getRotatingSections();
-            foreach ($section_names as $i => $section) {
-                $section_names[$i] = $section['sections_rotating_id'];
-            }
-            $graders = $this->core->getQueries()->getGradersForRotatingSections($this->getId(), $section_names);
-        }
-
-        $sections = [];
-        foreach ($section_names as $section_name) {
-            $sections[] = new GradingSection($this->core, $this->isGradeByRegistration(), $section_name, $graders[$section_name] ?? [], $users[$section_name] ?? null, $teams[$section_name] ?? null);
-        }
-
-        return $sections;
     }
 
     /**

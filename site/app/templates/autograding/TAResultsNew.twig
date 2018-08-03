@@ -18,15 +18,24 @@
             <i>Any regrade requests are due within 7 days of posting</i>
             <p>
                 {% if overall_comment|length != 0 %}
-                    <hr>
-                    Overall note from Grader:
-                    <span class='gradeable_comment'>{{ overall_comment }}</span>
-                {% endif %}
+            <hr>
+            Overall note from Grader:
+            <span class='gradeable_comment'>{{ overall_comment }}</span>
+            {% endif %}
             </p>
         </div>
         {% if any_late_days_used %}
             <a name="show_late_table" style="float:right" class="btn btn-primary" href="{{ late_days_url }}">Show my late days information</a>
         {% endif %}
+        <div class="box half" style="float: right; width: 25%; word-break: break-word">
+            View/Download submission with feedback:
+            <br />
+            {% for file in uploaded_files %}
+                {{ file.name }}
+                <a class="btn btn-primary" onclick="openUrl('{{ core.buildUrl({'component':'student', 'page':'PDF', 'action':'download_annotated_pdf', 'gradeable_id': gradeable_id, 'file_name': file.name}) }}')">Download <i class="fa fa-download"></i></a>
+                <a class="btn btn-primary" onclick="openUrl('{{ core.buildUrl({'component':'student', 'page':'PDF', 'action':'view_annotated_pdf', 'gradeable_id': gradeable_id, 'file_name': file.name}) }}')">View Popup <i class="fa fa-window-restore"></i></a>
+            {% endfor %}
+        </div>
         {# /Overview #}
 
         {# Manual total #}
@@ -51,38 +60,38 @@
                     <div style="float:left; word-break: break-word;">
                         <p style="padding-bottom: 10px;">{{ component.student_comment }}</p>
                         <p>
-                            <table class="gradeable_comment">
-                                {% for mark in component.marks if mark.show_mark %}
-                                    <tr>
-                                        <td>
-                                            {% if mark.earned %}
-                                                <i class="fa fa-check-square-o fa-1g"></i>
-                                            {% else %}
-                                                <i class="fa fa-square-o fa-1g"></i>
-                                            {% endif %}
-                                        </td>
-                                        <td style="text-align: right">
-                                            {{ mark.points|number_format(num_decimals) }}
-                                        </td>
-                                        <td>
-                                            {{ mark.title }}
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                                {% if component.total_score != 0 or component.comment != '' %}
-                                    <tr>
-                                        <td>
+                        <table class="gradeable_comment">
+                            {% for mark in component.marks if mark.show_mark %}
+                                <tr>
+                                    <td>
+                                        {% if mark.earned %}
                                             <i class="fa fa-check-square-o fa-1g"></i>
-                                        </td>
-                                        <td style="text-align: right">
-                                            {{ component.custom_mark_score|number_format(num_decimals) }}
-                                        </td>
-                                        <td>
-                                            {{ component.comment }}
-                                        </td>
-                                    </tr>
-                                {% endif %}
-                            </table>
+                                        {% else %}
+                                            <i class="fa fa-square-o fa-1g"></i>
+                                        {% endif %}
+                                    </td>
+                                    <td style="text-align: right">
+                                        {{ mark.points|number_format(num_decimals) }}
+                                    </td>
+                                    <td>
+                                        {{ mark.title }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            {% if component.total_score != 0 or component.comment != '' %}
+                                <tr>
+                                    <td>
+                                        <i class="fa fa-check-square-o fa-1g"></i>
+                                    </td>
+                                    <td style="text-align: right">
+                                        {{ component.custom_mark_score|number_format(num_decimals) }}
+                                    </td>
+                                    <td>
+                                        {{ component.comment }}
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </table>
                         </p>
                     </div>
                 </div>
@@ -102,8 +111,8 @@
         {# /Total auto + manual #}
     </div>
     {% if regrade_available %}
-    <div id="ShowRegradeRequestButton">
-        <button type="button" title="Show Regrade Requests" onclick="toggleRegradeRequests()" style="margin-right:10px;" class="btn btn-default"> Show Regrade Request </button>
-    </div>
+        <div id="ShowRegradeRequestButton">
+            <button type="button" title="Show Regrade Requests" onclick="toggleRegradeRequests()" style="margin-right:10px;" class="btn btn-default"> Show Regrade Request </button>
+        </div>
     {% endif %}
 {% endif %}

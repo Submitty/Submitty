@@ -1053,7 +1053,7 @@ function toggleDiv(id) {
 }
 
 
-function checkRefreshSubmissionPage(url) {
+function checkRefreshPage(url) {
     setTimeout(function() {
         check_server(url)
     }, 1000);
@@ -1065,7 +1065,7 @@ function check_server(url) {
             if (data.indexOf("REFRESH_ME") > -1) {
                 location.reload(true);
             } else {
-                checkRefreshSubmissionPage(url);
+                checkRefreshPage(url);
             }
         }
     );
