@@ -278,7 +278,8 @@ class Output {
                     'page' => 'read_file',
                     'dir' => 'site',
                     'path' => $file,
-                    'file' => pathinfo($file, PATHINFO_FILENAME)
+                    'file' => pathinfo($file, PATHINFO_FILENAME),
+                    'csrf_token' => $this->core->getCsrfToken()
                 ]);
             },  $wrapper_files);
 
@@ -302,7 +303,8 @@ class Output {
                     'page' => 'read_file',
                     'dir' => 'site',
                     'path' => $file,
-                    'file' => pathinfo($file, PATHINFO_FILENAME)
+                    'file' => pathinfo($file, PATHINFO_FILENAME),
+                    'csrf_token' => $this->core->getCsrfToken()
                 ]);
             },  $wrapper_files);
             return $this->renderTemplate('Global', 'footer', (microtime(true) - $this->start_time), $wrapper_urls);
