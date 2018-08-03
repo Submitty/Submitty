@@ -811,8 +811,8 @@ class ElectronicGraderController extends GradingController {
                 $this->core->addErrorMessage("ERROR: {$id} is already on this team");
                 $this->core->redirect($return_url);
             }
-            // filter empty strings
-            if ($id !== "") {
+            // filter empty strings and leader
+            if ($id !== "" && $id !== $leader_id) {
                 $user_ids[] = $id;
             }
         }
