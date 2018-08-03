@@ -195,7 +195,7 @@ fi
 usermod -a -G docker "${DAEMON_USER}"
 
 pip3 install -U pip
-pip3 install python-pam
+su - ${CGI_USER} -c "pip3 install --user python-pam"
 pip3 install PyYAML
 pip3 install psycopg2-binary
 pip3 install sqlalchemy
@@ -215,14 +215,6 @@ pip3 install parso
 
 # Python3 implementation of python-clang bindings (may not work < 6.0)
 pip3 install clang
-
-sudo chmod -R 555 /usr/local/lib/python*/*
-sudo chmod 555 /usr/lib/python*/dist-packages
-sudo chmod 500 /usr/local/lib/python*/dist-packages/pam.py*
-
-if [ ${WORKER} == 0 ]; then
-    sudo chown ${CGI_USER} /usr/local/lib/python*/dist-packages/pam.py*
-fi
 
 #################################################################
 # JAR SETUP
@@ -599,7 +591,7 @@ if [ ${WORKER} == 0 ]; then
         chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/site_errors
 
         # Call helper script that makes the courses and refreshes the database
-        python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py --submission_url ${SUBMISSION_URL}
+        python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py --no_submissions --submission_url ${SUBMISSION_URL}
 
         #################################################################
         # SET CSV FIELDS (for classlist upload data)
