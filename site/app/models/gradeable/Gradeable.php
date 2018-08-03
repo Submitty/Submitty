@@ -420,6 +420,10 @@ class Gradeable extends AbstractModel {
         return $errors;
     }
 
+    /**
+     * Gets the dates that require validation for the gradeable's current configuration.
+     * @return string[] array of date property names that need validation
+     */
     private function getDateValidationSet() {
         if ($this->type === GradeableType::ELECTRONIC_FILE) {
             if (!$this->isStudentSubmit()) {
