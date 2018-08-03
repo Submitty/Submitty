@@ -16,12 +16,12 @@
         </div> {# /#site-body #}
         {% if wrapper_urls['right_sidebar.html'] != null %}
             {# uploaded homepage redirect can go here? #}
-            <iframe sandbox id="right_sidebar" src="{{ wrapper_urls['right_sidebar.html'] }}" frameborder="0"></iframe>
+            <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="right_sidebar" src="{{ wrapper_urls['right_sidebar.html'] }}" frameborder="0"></iframe>
         {% endif %}
     </div> {# /#center-container #}
     {% if wrapper_urls['bottom_bar.html'] != null %}
         {# uploaded homepage redirect can go here? #}
-        <iframe sandbox id="bottom_bar" src="{{ wrapper_urls['bottom_bar.html'] }}" frameborder="0"></iframe>
+        <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="bottom_bar" src="{{ wrapper_urls['bottom_bar.html'] }}" frameborder="0"></iframe>
     {% endif %}
 </div> {# /#container #}
 {% if is_debug %}

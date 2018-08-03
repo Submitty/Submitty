@@ -17,12 +17,12 @@
 <div id="container">
     {% if wrapper_urls['top_bar.html'] != null %}
         {# uploaded homepage redirect can go here? #}
-        <iframe sandbox id="top_bar" src="{{ wrapper_urls['top_bar.html'] }}" frameborder="0"></iframe>
+        <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="top_bar" src="{{ wrapper_urls['top_bar.html'] }}" frameborder="0"></iframe>
     {% endif %}
     <div id="center-container">
         {% if wrapper_urls['left_sidebar.html'] != null %}
             {# uploaded sidebar can go here? #}
-            <iframe sandbox id="left_sidebar" src="{{ wrapper_urls['left_sidebar.html'] }}" frameborder="0"></iframe>
+            <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="left_sidebar" src="{{ wrapper_urls['left_sidebar.html'] }}" frameborder="0"></iframe>
         {% endif %}
         <div id="site-body">
             <div id='messages'>
