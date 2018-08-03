@@ -145,7 +145,7 @@ HTML;
 		that have been created after applying filter and to be
 		displayed in the left panel.
 	*/
-	public function showForumThreads($user, $posts, $threadsHead, $show_deleted, $display_option, $max_thread) {
+	public function showForumThreads($user, $posts, $threadsHead, $show_deleted, $show_merged_thread, $display_option, $max_thread) {
 		if(!$this->forumAccess()){
 			$this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
 			return;
@@ -154,7 +154,7 @@ HTML;
 		$threadExists = $this->core->getQueries()->threadExists();
 		$filteredThreadExists = (count($threadsHead)>0);
 		$currentThread = -1;
-		$currentCategoryId = array();
+		$currentCategoriesIds = array();
 		$currentCourse = $this->core->getConfig()->getCourse();
 		$threadFiltering = $threadExists && !$filteredThreadExists && !(empty($_COOKIE[$currentCourse . '_forum_categories']) && empty($_COOKIE['forum_thread_status']));
 
@@ -227,10 +227,20 @@ HTML;
 		$currentThread = isset($_GET["thread_id"]) && is_numeric($_GET["thread_id"]) && (int)$_GET["thread_id"] < $max_thread && (int)$_GET["thread_id"] > 0 ? (int)$_GET["thread_id"] : $posts[0]["thread_id"];
 		$currentCategoriesIds = $this->core->getQueries()->getCategoriesIdForThread($currentThread);
 	}
+	if($show_merged_thread) {
+		$show_merged_thread_class = "active";
+		$show_merged_thread_action = "alterShowMergeThreadStatus(0, '{$currentCourse}');";
+		$show_merged_thread_title = "Hide Merged Threads";
+	} else {
+		$show_merged_thread_class = "";
+		$show_merged_thread_action = "alterShowMergeThreadStatus(1, '{$currentCourse}');";
+		$show_merged_thread_title = "Show Merged Threads";
+	}
 	$return .= <<<HTML
 		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
 		<div style="background-color: #E9EFEF; box-shadow:0 2px 15px -5px #888888;border-radius:3px;margin-left:20px;margin-top:10px; height:40px; margin-bottom:10px;margin-right:20px;" id="forum_bar">
 		<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Create thread" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}"><i class="fa fa-plus-circle"></i> Create Thread</a>
+		<a class="btn btn-primary {$show_merged_thread_class}" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="{$show_merged_thread_title}" onclick="{$show_merged_thread_action}">{$show_merged_thread_title}</a>
 HTML;
 	if($this->core->getUser()->getGroup() <= 2){
 		if($show_deleted) {
@@ -507,7 +517,18 @@ HTML;
 					$end = 10;
 					foreach($threads as $thread){
 						$first_post = $this->core->getQueries()->getFirstPostForThread($thread["id"]);
-						$date = date_create($first_post['timestamp']);
+						if(is_null($first_post)) {
+							// Thread without any posts(eg. Merged Thread)
+							$first_post = array('content' => "");
+							$date = null;
+						} else {
+							$date = date_create($first_post['timestamp']);
+						}
+						if($thread['merged_thread_id'] != -1){
+							// For the merged threads
+							$thread['status'] = 0;
+						}
+
 						$class = "thread_box";
 						// $current_categories_ids should be subset of $thread["categories_ids"]
 						$issubset = (count(array_intersect($current_categories_ids, $thread["categories_ids"])) == count($current_categories_ids));
@@ -577,6 +598,12 @@ HTML;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i>
 HTML;
 						}
+						if($thread['merged_thread_id'] != -1) {
+							$return .= <<<HTML
+							<i class="fa fa-link" style="padding-left:3px;position:relative; float:right; display:inline-block; color: white; -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: black;" title="Thread Merged" aria-hidden="true"></i>
+HTML;
+						}
 						if (!isset($thread['status'])) {
                             $thread['status'] = 0;
                         }
@@ -609,8 +636,12 @@ HTML;
 							<span class="label_forum" style="background-color: {$category_content[1]}">{$category_content[0]}</span>
 HTML;
 						}
+						if(!is_null($date)) {
+							$return .= <<<HTML
+							<h5 style="float:right; font-weight:normal;margin-top:5px">{$function_date($date,"n/j g:i A")}</h5>
+HTML;
+						}
 						$return .= <<<HTML
-						<h5 style="float:right; font-weight:normal;margin-top:5px">{$function_date($date,"n/j g:i A")}</h5>
 						</div>
 						</a>
 						<hr style="margin-top: 0px;margin-bottom:0px;">
