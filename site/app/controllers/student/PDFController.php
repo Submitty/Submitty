@@ -4,6 +4,7 @@ namespace app\controllers\student;
 
 
 use app\controllers\AbstractController;
+use app\models\PDFGenerator;
 use app\libraries\FileUtils;
 
 class PDFController extends AbstractController {
@@ -19,7 +20,7 @@ class PDFController extends AbstractController {
     }
 
     private function downloadAnnotatedPdf(){
-        $PDFGenerator = new PDFGenerator();
+        $PDFGenerator = new PDFGenerator($this->core);
         return "test";
     }
 
