@@ -383,4 +383,8 @@ class Output {
     public function addBreadcrumb($string, $url=null, $top=false, $icon=false) {
         $this->breadcrumbs[] = new Breadcrumb($this->core, $string, $url, $top, $icon);
     }
+
+    public function addRoomTemplatesTwigPath() {
+        $this->twig_loader->addPath(FileUtils::joinPaths(dirname(dirname(__DIR__)), 'room_templates'), $namespace = 'room_templates');
+    }
 }
