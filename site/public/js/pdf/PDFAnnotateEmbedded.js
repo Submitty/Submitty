@@ -119,6 +119,8 @@ function render(gradeable_id, user_id, grader_id, file_name) {
                 clicked_button.addClass('tool-selected');
                 switch($(selected[0]).attr('value')){
                     case 'pen':
+                        $('#file_content').css('overflow', 'auto');
+                        $('#scroll_lock_mode').removeAttr('checked');
                         UI.disablePen();
                         break;
                     case 'cursor':
@@ -239,13 +241,17 @@ function render(gradeable_id, user_id, grader_id, file_name) {
 (function () {
     let penSize;
     let penColor;
-
+    let scrollLock;
     function initPen() {
         let init_size = localStorage.getItem('pen/size') || 3;
         let init_color = localStorage.getItem('pen/color') || '#ff0000';
         document.getElementById('pen_size_selector').value = init_size;
         document.getElementById('pen_size_value').value = init_size;
         document.getElementById('pen_color_selector').value = init_color;
+        if($('#scroll_lock_mode').is(':checked')) {
+            scrollLock = true;
+        }
+
         setPen(init_size, init_color);
     }
 
@@ -264,6 +270,10 @@ function render(gradeable_id, user_id, grader_id, file_name) {
             localStorage.setItem('pen/color', penColor);
         }
 
+        if (modified && scrollLock) {
+            $('#file_content').css('overflow', 'hidden');
+        }
+
         if (modified) {
             UI.setPen(penSize, penColor);
         }
@@ -276,6 +286,15 @@ function render(gradeable_id, user_id, grader_id, file_name) {
     document.getElementById('pen_size_selector').addEventListener('change', function(e){
         let value = e.target.value ? e.target.value : e.srcElement.value;
         setPen(value, penColor);
+    });
+    document.getElementById('scroll_lock_mode').addEventListener('change', function(e){
+        if(!$('#scroll_lock_mode').is(':checked')){
+            $('#file_content').css('overflow', 'auto');
+            scrollLock = false;
+        } else {
+            $('#file_content').css('overflow', 'hidden');
+            scrollLock = true;
+        }
     });
     initPen();
 })();

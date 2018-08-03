@@ -138,29 +138,24 @@ class ElectronicGraderController extends GradingController {
         $user_id = $_POST['user_id'] ?? NULL;
         $filename = $_POST['filename'] ?? NULL;
         $active_version = $this->core->getQueries()->getGradeable($gradeable_id, $user_id)->getActiveVersion();
-        $annotation_file_name = preg_replace('/\\.[^.\\s]{3,4}$/', '', $filename). '_' .$this->core->getUser()->getId().'.json';
-        $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $user_id, $active_version, $annotation_file_name);
+        $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $user_id, $active_version);
         $annotation_jsons = [];
-        if(is_file($annotation_path)) {
-            $dir_iter = new \DirectoryIterator(dirname($annotation_path . '/'));
-            foreach ($dir_iter as $fileinfo) {
-                if (!$fileinfo->isDot()) {
-                    $grader_id = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileinfo->getFilename());
-                    $grader_id = explode('_', $grader_id)[1];
-                    $annotation_jsons[$grader_id] = file_get_contents($fileinfo->getPathname());
+        //Dir iterator needs the first file.
+        if(is_dir($annotation_path)){
+            $first_file = scandir($annotation_path)[2];
+            $annotation_path = FileUtils::joinPaths($annotation_path, $first_file);
+            if(is_file($annotation_path)) {
+                $dir_iter = new \DirectoryIterator(dirname($annotation_path . '/'));
+                foreach ($dir_iter as $fileinfo) {
+                    if (!$fileinfo->isDot()) {
+                        $grader_id = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileinfo->getFilename());
+                        $grader_id = explode('_', $grader_id)[1];
+                        $annotation_jsons[$grader_id] = file_get_contents($fileinfo->getPathname());
+                    }
                 }
             }
         }
-        $this->core->getOutput()->useFooter(false);
-        $this->core->getOutput()->useHeader(false);
-        //TODO: Add a new view
-        return $this->core->getOutput()->renderTwigOutput('grading/electronic/PDFAnnotationEmbedded.twig', [
-            'gradeable_id' => $gradeable_id,
-            'grader_id' => $this->core->getUser()->getId(),
-            'user_id' => $user_id,
-            'filename' => $filename,
-            'annotation_jsons' => json_encode($annotation_jsons, 128)
-        ]);
+        $this->core->getOutput()->renderOutput(array('PDF'), 'showPDFEmbedded', $gradeable_id, $user_id, $filename, $annotation_jsons, false);
     }
 
     public function showPDFAnnotationFullPage(){
