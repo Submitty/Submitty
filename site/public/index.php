@@ -174,6 +174,7 @@ elseif ($core->getUser() === null) {
     }
 }
 else if ($core->getConfig()->isCourseLoaded() && !$core->getAccess()->canI("course.view", ["semester" => $core->getConfig()->getSemester(), "course" => $core->getConfig()->getCourse()])) {
+
     $_REQUEST['component'] = 'navigation';
     $_REQUEST['page'] = 'no_access';
 }
