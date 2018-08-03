@@ -17,6 +17,9 @@ class WrapperController extends AbstractController {
     ];
 
 	public function run() {
+	    if (!$this->core->getAccess()->canI("admin.wrapper")) {
+	        $this->core->getOutput()->showError("You do not have permission to do this.");
+        }
 		switch($_REQUEST['action']) {
             case 'process_upload_html':
                 $this->processUploadHTML();
@@ -36,10 +39,11 @@ class WrapperController extends AbstractController {
 	}
 
 	private function processUploadHTML() {
-        if (!isset($_REQUEST['csrf_token']) || !$this->core->checkCsrfToken($_REQUEST['csrf_token'])) {
-            $this->core->addErrorMessage("Upload failed: Invalid CSRF token");
-            $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper',
-                'action' => 'show_page')));
+        $filename = $_REQUEST['location'];
+        $location = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site', $filename);
+
+        if (!$this->core->getAccess()->canI("path.write.site", ["dir" => "site", "path" => $location])) {
+            $this->core->getOutput()->showError("You do not have permission to do this.");
         }
 
         if (empty($_FILES) || !isset($_FILES['wrapper_upload'])) {
@@ -49,15 +53,13 @@ class WrapperController extends AbstractController {
         }
         $upload = $_FILES['wrapper_upload'];
 
-
         if(!isset($_REQUEST['location']) || !in_array($_REQUEST['location'], WrapperController::WRAPPER_FILES)) {
             $this->core->addErrorMessage("Upload failed: Invalid location");
             $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper',
                 'action' => 'show_page')));
         }
-        $filename = $_REQUEST['location'];
 
-        if (!@copy($upload['tmp_name'], FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site', $filename))) {
+        if (!@copy($upload['tmp_name'], $location)) {
             $this->core->addErrorMessage("Upload failed: Could not copy file");
             $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper',
                 'action' => 'show_page')));
@@ -69,17 +71,19 @@ class WrapperController extends AbstractController {
     }
 
     private function deleteUploadedHTML() {
+        $filename = $_REQUEST['location'];
+        $location = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site', $filename);
+
+        if (!$this->core->getAccess()->canI("path.write.site", ["dir" => "site", "path" => $location])) {
+            $this->core->getOutput()->showError("You do not have permission to do this.");
+        }
 
         if(!isset($_REQUEST['location']) || !in_array($_REQUEST['location'], WrapperController::WRAPPER_FILES)) {
             $this->core->addErrorMessage("Delete failed: Invalid filename");
             $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper',
                 'action' => 'show_page')));
         }
-        $filename = $_REQUEST['location'];
-
-	    $filepath = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site', $filename);
-
-	    if(!@unlink($filepath)) {
+	    if(!@unlink($location)) {
 	        $this->core->addErrorMessage("Deletion failed: Could not unlink file");
             $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper',
                 'action' => 'show_page')));
