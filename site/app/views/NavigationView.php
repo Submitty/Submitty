@@ -78,17 +78,65 @@ class NavigationView extends AbstractView {
         ]);
     }
 
-    public function showGradeables($sections_to_list, $graded_gradeables) {
+    public function showGradeables($sections_to_list, $graded_gradeables, array $submit_everyone) {
         // ======================================================================================
-        // DISPLAY CUSTOM BANNER (typically used for exam seating assignments)
+        // DISPLAY CUSTOM BANNER (previously used to display room seating assignments)
         // note: placement of this information this may eventually be re-designed
         // ======================================================================================
-        $message_file_path = $this->core->getConfig()->getCoursePath() . "/reports/summary_html/" . $this->core->getUser()->getId() . "_message.html";
-        $message_file_contents = "";
-        if (file_exists($message_file_path)) {
-            $message_file_contents = file_get_contents($message_file_path);
-        }
         $display_custom_message = $this->core->getConfig()->displayCustomMessage();
+        $message_file_contents = "";
+        if($display_custom_message) {
+            $message_file_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "reports", "summary_html", $this->core->getUser()->getId() . "_message.html");
+            $display_custom_message = is_file($message_file_path);
+            if ($display_custom_message) {
+                $message_file_contents = file_get_contents($message_file_path);
+            }
+        }
+
+
+        // ======================================================================================
+        // DISPLAY ROOM SEATING (used to display room seating assignments)
+        // ======================================================================================
+        $display_room_seating = $this->core->getConfig()->displayRoomSeating();
+        $user_seating_details = null;
+        $gradeable_title = null;
+        $seating_config = null;
+        // If the instructor has selected a gradeable for room seating
+        if($display_room_seating) {
+            $this->core->getOutput()->addRoomTemplatesTwigPath();
+            // use the room seating gradeable id to find the title to display.
+            $gradeable_id = $this->core->getConfig()->getRoomSeatingGradeableId();
+            $gradeable_ids_and_titles = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
+            foreach($gradeable_ids_and_titles as $gradeable_id_and_title) {
+                if($gradeable_id_and_title['g_id'] === $gradeable_id) {
+                    $gradeable_title = $gradeable_id_and_title['g_title'];
+                    break;
+                }
+            }
+
+            $seating_user_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'seating', $gradeable_id, $this->core->getUser()->getId() . ".json");
+            // if the instructor has generated a report for the student for this gradeable
+            if(is_file($seating_user_path)) {
+                $user_seating_details = json_decode(file_get_contents($seating_user_path));
+
+                $seating_config_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'uploads', 'seating',
+                    $gradeable_id, $user_seating_details->building, $user_seating_details->room.'.json');
+                // if the report the instructor generated corresponds to a valid room config
+                if(is_file($seating_config_path)) {
+                    $seating_config = file_get_contents($seating_config_path);
+                }
+            }
+            else {
+                // mimic the result format of json_decode when there is no file to decode
+                // and make each field the default value
+                $user_seating_details = new \stdClass();
+                $user_seating_details->building =
+                $user_seating_details->zone     =
+                $user_seating_details->row      =
+                $user_seating_details->seat     = "SEE INSTRUCTOR";
+            }
+        }
+
 
         /* @var Button[] $top_buttons */
         $top_buttons = [];
@@ -107,7 +155,7 @@ class NavigationView extends AbstractView {
             ]);
         }
 
-	      // ======================================================================================
+        // ======================================================================================
         // IMAGES BUTTON -- visible to limited access graders and up
         // ======================================================================================
         $images_course_path = $this->core->getConfig()->getCoursePath();
@@ -147,19 +195,19 @@ class NavigationView extends AbstractView {
             ]);
 
         }
+
         // ======================================================================================
         // LATE DAYS TABLE BUTTON
         // ======================================================================================
-
         $top_buttons[] = new Button($this->core, [
             "href" => $this->core->buildUrl(array('component' => 'student', 'page' => 'view_late_table')),
             "title" => "Show my late days information",
             "class" => "btn btn-primary"
         ]);
+
         // ======================================================================================
         // FORUM BUTTON
         // ======================================================================================
-
         if ($this->core->getConfig()->isForumEnabled()) {
             $top_buttons[] = new Button($this->core, [
                 "href" => $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')),
@@ -167,6 +215,7 @@ class NavigationView extends AbstractView {
                 "class" => "btn btn-primary"
             ]);
         }
+
         // ======================================================================================
         // GRADES SUMMARY BUTTON
         // ======================================================================================
@@ -197,7 +246,8 @@ class NavigationView extends AbstractView {
                     "name" => $gradeable->getTitle(),
                     "url" => $gradeable->getInstructionsUrl(),
                     "can_delete" => $this->core->getUser()->accessAdmin() && $gradeable->canDelete(),
-                    "buttons" => $this->getButtons($gradeable, $graded_gradeable, $list_section)
+                    "buttons" => $this->getButtons($gradeable, $graded_gradeable, $list_section, $submit_everyone[$gradeable->getId()]),
+                    "has_build_error" => $gradeable->anyBuildErrors()
                 ];
             }
 
@@ -211,7 +261,11 @@ class NavigationView extends AbstractView {
             "top_buttons" => $top_buttons,
             "sections" => $render_sections,
             "message_file_contents" => $message_file_contents,
-            "display_custom_message" => $display_custom_message
+            "display_custom_message" => $display_custom_message,
+            "user_seating_details" => $user_seating_details,
+            "display_room_seating" => $display_room_seating,
+            "gradeable_title" => $gradeable_title,
+            "seating_config" => $seating_config
         ]);
     }
 
@@ -220,12 +274,13 @@ class NavigationView extends AbstractView {
      * @param Gradeable $gradeable
      * @param GradedGradeable|null $graded_gradeable The graded gradeble instance, or null if no data yet
      * @param int $list_section
+     * @param bool $submit_everyone If the user can submit for another user
      * @return array
      */
-    private function getButtons(Gradeable $gradeable, $graded_gradeable, int $list_section): array {
+    private function getButtons(Gradeable $gradeable, $graded_gradeable, int $list_section, bool $submit_everyone): array {
         $buttons = [];
         $buttons[] = $this->hasTeamButton($gradeable) ? $this->getTeamButton($gradeable, $graded_gradeable) : null;
-        $buttons[] = $this->hasSubmitButton($gradeable) ? $this->getSubmitButton($gradeable, $graded_gradeable, $list_section) : null;
+        $buttons[] = $this->hasSubmitButton($gradeable) ? $this->getSubmitButton($gradeable, $graded_gradeable, $list_section, $submit_everyone) : null;
 
         if ($this->hasGradeButton($gradeable)) {
             $buttons[] = $this->getGradeButton($gradeable, $list_section);
@@ -234,7 +289,6 @@ class NavigationView extends AbstractView {
         //Admin buttons
         if ($this->core->getUser()->accessAdmin()) {
             $buttons[] = $this->hasEditButton() ? $this->getEditButton($gradeable) : null;
-            $buttons[] = $this->hasRebuildButton($gradeable) ? $this->getRebuildButton($gradeable) : null;
             $buttons[] = $this->hasQuickLinkButton() ? $this->getQuickLinkButton($gradeable, $list_section) : null;
         }
 
@@ -284,13 +338,6 @@ class NavigationView extends AbstractView {
         return $this->core->getUser()->accessAdmin();
     }
 
-    /**
-     * @param Gradeable $gradeable
-     * @return bool
-     */
-    private function hasRebuildButton(Gradeable $gradeable): bool {
-        return ($this->core->getUser()->accessAdmin()) && ($gradeable->getType() == GradeableType::ELECTRONIC_FILE);
-    }
 
     /**
      * @return bool
@@ -353,9 +400,10 @@ class NavigationView extends AbstractView {
      * @param Gradeable $gradeable
      * @param GradedGradeable|null $graded_gradeable
      * @param int $list_section
+     * @param bool $submit_everyone If the user can submit for another user
      * @return Button|null
      */
-    private function getSubmitButton(Gradeable $gradeable, $graded_gradeable, int $list_section) {
+    private function getSubmitButton(Gradeable $gradeable, $graded_gradeable, int $list_section, bool $submit_everyone) {
         $class = self::gradeableSections[$list_section]["button_type_submission"];
         $title = self::gradeableSections[$list_section]["prefix"];
         $display_date = ($list_section == GradeableList::FUTURE || $list_section == GradeableList::BETA) ?
@@ -449,15 +497,17 @@ class NavigationView extends AbstractView {
                 $title = "TA GRADE NOT AVAILABLE";
             }
         } else {
-            // This means either the user isn't on a team, or has no submissions yet
+            // This means either the user isn't on a team
             if ($gradeable->isTeamAssignment()) {
                 // team assignment, no team
-                $title = "MUST BE ON A TEAM TO SUBMIT";
-                $disabled = true;
+                if (!$submit_everyone) {
+                    $title = "MUST BE ON A TEAM TO SUBMIT";
+                    $disabled = true;
+                }
                 if ($list_section > GradeableList::OPEN) {
                     $class = "btn-danger";
-                    if ($this->core->getUser()->accessAdmin()) {
-                        // team assignment, no team (admin)
+                    if ($submit_everyone) {
+                        // team assignment, no team
                         $title = "OVERDUE SUBMISSION";
                         $disabled = false;
                     }
@@ -598,21 +648,6 @@ class NavigationView extends AbstractView {
             "class" => "fa fa-pencil",
             "title_on_hover" => true,
             "aria_label" => "edit gradeable {$gradeable->getId()}"
-        ]);
-        return $button;
-    }
-
-    /**
-     * @param Gradeable $gradeable
-     * @return Button|null
-     */
-    private function getRebuildButton(Gradeable $gradeable) {
-        $button = new Button($this->core, [
-            "title" => "Rebuild",
-            "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'rebuild_assignment', 'id' => $gradeable->getId())),
-            "class" => "fa fa-wrench",
-            "title_on_hover" => true,
-            "aria_label" => "rebuild gradeable {$gradeable->getId()}"
         ]);
         return $button;
     }
