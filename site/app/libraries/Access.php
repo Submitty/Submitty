@@ -57,21 +57,23 @@ class Access {
     const CHECK_COMPONENT_PEER_STUDENT  = 1 << 12 | self::REQUIRE_ARG_COMPONENT;
     /** Check if they can access the given file and directory */
     const CHECK_FILE_DIRECTORY          = 1 << 13 | self::REQUIRE_ARGS_DIR_PATH;
+    /** Require that the given file exists */
+    const CHECK_FILE_EXISTS             = 1 << 14 | self::REQUIRE_ARGS_DIR_PATH;
     /**
      * If the gradeable does not allow students to view any version, then check if this is the active version.
      * Only applies to students, and only when $gradeable->getStudentAnyVersion() is false
      */
-    const CHECK_STUDENT_ANY_VERSION     = 1 << 14 | self::REQUIRE_ARG_GRADEABLE | self::REQUIRE_ARG_VERSION;
+    const CHECK_STUDENT_ANY_VERSION     = 1 << 15 | self::REQUIRE_ARG_GRADEABLE | self::REQUIRE_ARG_VERSION;
     /**
      * Check that students are allowed to view the given gradeable
      * Only applies to students
      */
-    const CHECK_STUDENT_VIEW            = 1 << 15 | self::REQUIRE_ARG_GRADEABLE;
+    const CHECK_STUDENT_VIEW            = 1 << 16 | self::REQUIRE_ARG_GRADEABLE;
     /**
      * Check that students are allowed to download the given gradeable
      * Only applies to students
      */
-    const CHECK_STUDENT_DOWNLOAD        = 1 << 16 | self::REQUIRE_ARG_GRADEABLE;
+    const CHECK_STUDENT_DOWNLOAD        = 1 << 17 | self::REQUIRE_ARG_GRADEABLE;
 
     /** If the current set of flags requires the "gradeable" argument */
     const REQUIRE_ARG_GRADEABLE         = 1 << 24;
@@ -149,9 +151,9 @@ class Access {
         $this->permissions["path.read.uploads"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_FILE_DIRECTORY;
         $this->permissions["path.read.site"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY;
         //TODO: Timed access control
-        $this->permissions["path.read.course_materials"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY;
+        $this->permissions["path.read.course_materials"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY | self::CHECK_FILE_EXISTS;
         //TODO: Check deleted posts
-        $this->permissions["path.read.forum_attachments"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY;
+        $this->permissions["path.read.forum_attachments"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY | self::CHECK_FILE_EXISTS;
         //TODO: Can students see their results?
         $this->permissions["path.read.results"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_HAS_SUBMISSION | self::CHECK_FILE_DIRECTORY;
         $this->permissions["path.read.submissions"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_STUDENT_VIEW | self::CHECK_STUDENT_DOWNLOAD | self::CHECK_STUDENT_ANY_VERSION | self::CHECK_FILE_DIRECTORY;
@@ -722,14 +724,15 @@ class Access {
             return false;
         }
 
+        $checks = $this->permissions[$action];
         $info = $this->directories[$dir];
 
         //Get the real path
         $path = $this->resolveDirPath($dir, $path);
         $relative_path = substr($path, strlen($info["base"]) + 1);
 
-        //If it doesn't exist we can't access it
-        if (!file_exists($path)) {
+        //If it doesn't exist we can't read it
+        if (self::checkBits($checks, self::CHECK_FILE_EXISTS) && !file_exists($path)) {
             return false;
         }
 
