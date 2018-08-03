@@ -74,7 +74,8 @@ class Access {
     const CHECK_STUDENT_DOWNLOAD        = 1 << 16 | self::REQUIRE_ARG_GRADEABLE;
 
     /** Check that the course status is such that the user can view the course */
-    const CHECK_COURSE_STATUS           = 1 << 17;
+    const CHECK_COURSE_STATUS           = 1 << 18
+        ;
 
     /** If the current set of flags requires the "gradeable" argument */
     const REQUIRE_ARG_GRADEABLE         = 1 << 24;
