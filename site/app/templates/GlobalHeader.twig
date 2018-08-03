@@ -23,20 +23,20 @@
     {% endfor %}
 </div>
 <div id="container">
-    {% if wrapper_files['top_bar'] != null %}
+    {% if wrapper_urls['top_bar'] != null %}
         {#<div id="upper-left-container">#}
             {# uploaded homepage redirect can go here? #}
-            <iframe id="upper-container" src="http://192.168.56.101/index.php?semester=f18&course=sample&component=misc&page=download_file&dir=uploads&file=md5coll.c&path=/var/local/submitty/courses/f18/sample/site/top_bar.html" frameborder="0"></iframe>
+            <iframe id="upper-container" src="{{ wrapper_urls['top_bar'] }}" frameborder="0"></iframe>
             {#{{ include('@site_uploads/upper-left.html') }}#}
         {#</div>#}
     {% else %}
         <div id="empty-container"></div>
     {% endif %}
     <div id="center-container">
-        {% if wrapper_files['left_sidebar'] != null %}
+        {% if wrapper_urls['left_sidebar'] != null %}
             {#<div id="lower-left-container">#}
                 {# uploaded sidebar can go here? #}
-                <iframe id="left-container" src="http://192.168.56.101/index.php?semester=f18&course=sample&component=misc&page=download_file&dir=uploads&file=md5coll.c&path=/var/local/submitty/courses/f18/sample/site/left_sidebar.html" frameborder="0"></iframe>
+                <iframe id="left-container" src="{{ wrapper_urls['left_sidebar'] }}" frameborder="0"></iframe>
                 {#{{ include('@site_uploads/lower-left.html') }}#}
             {#</div>#}
         {% else %}

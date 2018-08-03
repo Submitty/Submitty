@@ -275,7 +275,16 @@ class Output {
     private function renderHeader() {
         if ($this->use_header) {
             $wrapper_files = $this->core->getConfig()->getWrapperFiles();
-            return $this->renderTemplate('Global', 'header', $this->breadcrumbs, $wrapper_files, $this->css, $this->js);
+            $wrapper_urls = array_map(function($file) {
+                return $this->core->buildUrl([
+                    'component' => 'misc',
+                    'page' => 'read_file',
+                    'dir' => 'site',
+                    'path' => $file,
+                    'file' => pathinfo($file, PATHINFO_FILENAME)
+                ]);
+            },  $wrapper_files);
+            return $this->renderTemplate('Global', 'header', $this->breadcrumbs, $wrapper_urls, $this->css, $this->js);
         }
         else {
             return '';
@@ -285,7 +294,16 @@ class Output {
     private function renderFooter() {
         if ($this->use_footer) {
             $wrapper_files = $this->core->getConfig()->getWrapperFiles();
-            return $this->renderTemplate('Global', 'footer', (microtime(true) - $this->start_time), $wrapper_files);
+            $wrapper_urls = array_map(function($file) {
+                return $this->core->buildUrl([
+                    'component' => 'misc',
+                    'page' => 'read_file',
+                    'dir' => 'site',
+                    'path' => $file,
+                    'file' => pathinfo($file, PATHINFO_FILENAME)
+                ]);
+            },  $wrapper_files);
+            return $this->renderTemplate('Global', 'footer', (microtime(true) - $this->start_time), $wrapper_urls);
         } else {
             return '';
         }

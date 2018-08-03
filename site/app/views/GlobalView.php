@@ -5,7 +5,7 @@ namespace app\views;
 use app\libraries\FileUtils;
 
 class GlobalView extends AbstractView {
-    public function header($breadcrumbs, $wrapper_files, $css=array(), $js=array()) {
+    public function header($breadcrumbs, $wrapper_urls, $css=array(), $js=array()) {
         $messages = [];
         foreach (array('error', 'notice', 'success') as $type) {
             foreach ($_SESSION['messages'][$type] as $key => $error) {
@@ -73,18 +73,18 @@ class GlobalView extends AbstractView {
             "base_url" => $this->core->getConfig()->getBaseUrl(),
             "site_url" => $this->core->getConfig()->getSiteUrl(),
             "wrapper_enabled" => $this->core->getConfig()->wrapperEnabled(),
-            "wrapper_files" => $wrapper_files
+            "wrapper_urls" => $wrapper_urls
         ]);
      }
 
-    public function footer($runtime, $wrapper_files) {
+    public function footer($runtime, $wrapper_urls) {
         return $this->core->getOutput()->renderTwigTemplate("GlobalFooter.twig", [
             "runtime" => $runtime,
             "wrapper_enabled" => $this->core->getConfig()->wrapperEnabled(),
             "is_debug" => $this->core->getConfig()->isDebug(),
             "submitty_queries" => $this->core->getSubmittyDB() ? $this->core->getSubmittyDB()->getPrintQueries() : [],
             "course_queries" => $this->core->getCourseDB() ? $this->core->getCourseDB()->getPrintQueries() : [],
-            "wrapper_files" => $wrapper_files
+            "wrapper_urls" => $wrapper_urls
         ]);
     }
 
