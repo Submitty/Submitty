@@ -3,9 +3,7 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
-use app\libraries\Core;
-use app\libraries\IniParser;
-use app\libraries\Output;
+use app\libraries\FileUtils;
 
 class ConfigurationController extends AbstractController {
     public function run() {
@@ -22,7 +20,8 @@ class ConfigurationController extends AbstractController {
         }
     }
 
-    public function viewConfiguration() {
+    public function viewConfiguration()
+    {
         $fields = array(
             'course_name'                    => $this->core->getConfig()->getCourseName(),
             'course_home_url'                => $this->core->getConfig()->getCourseHomeUrl(),
@@ -39,34 +38,39 @@ class ConfigurationController extends AbstractController {
             'forum_enabled'                  => $this->core->getConfig()->isForumEnabled(),
             'regrade_enabled'                => $this->core->getConfig()->isRegradeEnabled(),
             'regrade_message'                => $this->core->getConfig()->getRegradeMessage(),
-            'private_repository'             => $this->core->getConfig()->getPrivateRepository()
+            'private_repository'             => $this->core->getConfig()->getPrivateRepository(),
+            'room_seating_gradeable_id'      => $this->core->getConfig()->getRoomSeatingGradeableId()
         );
 
-        foreach (array('upload_message', 'course_email', 'regrade_message') as $key) {
-            if (isset($_SESSION['request'][$key])) {
-                $fields[$key] = htmlentities($_SESSION['request'][$key]);
-            }
-        }
-
+        // this is not displaying the value being stored in the config, should be fixed (also default value needs to be fixed)
         $fields['course_name'] = $this->core->getDisplayedCourseName();
 
-        foreach (array('default_hw_late_days', 'default_student_late_days') as $key) {
-            if (isset($_SESSION['request'][$key])) {
-                $fields[$key] = intval($_SESSION['request'][$key]);
-            }
-        }
-
-        foreach (array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary', 'display_custom_message', 'regrade_enabled') as $key) {
-            if (isset($_SESSION['request'][$key])) {
-                $fields[$key] = ($_SESSION['request'][$key] == true) ? true : false;
-            }
-        }
-
         if (isset($_SESSION['request'])) {
+            foreach (array('upload_message', 'course_email', 'regrade_message') as $key) {
+                if (isset($_SESSION['request'][$key])) {
+                    $fields[$key] = htmlentities($_SESSION['request'][$key]);
+                }
+            }
+
+            foreach (array('default_hw_late_days', 'default_student_late_days') as $key) {
+                if (isset($_SESSION['request'][$key])) {
+                    $fields[$key] = intval($_SESSION['request'][$key]);
+                }
+            }
+
+            foreach (array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary',
+                         'display_custom_message', 'regrade_enabled') as $key) {
+                if (isset($_SESSION['request'][$key])) {
+                    $fields[$key] = ($_SESSION['request'][$key] == true) ? true : false;
+                }
+            }
+
             unset($_SESSION['request']);
         }
 
-        $this->core->getOutput()->renderOutput(array('admin', 'Configuration'), 'viewConfig', $fields);
+        $gradeable_seating_options = $this->getGradeableSeatingOptions();
+
+        $this->core->getOutput()->renderOutput(array('admin', 'Configuration'), 'viewConfig', $fields, $gradeable_seating_options);
     }
 
     public function updateConfiguration() {
@@ -89,13 +93,24 @@ class ConfigurationController extends AbstractController {
                 return $this->core->getOutput()->renderJsonFail('Course name cannot be blank');
             }
         }
+        else if($name === "room_seating_gradeable_id") {
+            $gradeable_seating_options = $this->getGradeableSeatingOptions();
+            $gradeable_ids = array();
+            foreach($gradeable_seating_options as $option) {
+                $gradeable_ids[] = $option['g_id'];
+            }
+            if(!in_array($entry, $gradeable_ids)) {
+                return $this->core->getOutput()->renderJsonFail('Invalid gradeable chosen for seating');
+            }
+        }
         else if(in_array($name, array('default_hw_late_days', 'default_student_late_days'))) {
             if(!ctype_digit($entry)) {
                 return $this->core->getOutput()->renderJsonFail('Must enter a number for this field');
             }
             $entry = intval($entry);
         }
-        else if(in_array($name, array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary', 'display_custom_message', 'forum_enabled', 'regrade_enabled'))) {
+        else if(in_array($name, array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary',
+                                      'display_custom_message', 'forum_enabled', 'regrade_enabled'))) {
             $entry = $entry === "true" ? true : false;
         }
         else if($name === 'upload_message') {
@@ -110,5 +125,22 @@ class ConfigurationController extends AbstractController {
         $this->core->getConfig()->saveCourseIni(['course_details' => $config_ini['course_details']]);
 
         return $this->core->getOutput()->renderJsonSuccess();
+    }
+
+    private function getGradeableSeatingOptions() {
+        $gradeable_seating_options = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
+
+        $seating_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'seating');
+
+        $gradeable_seating_options = array_filter($gradeable_seating_options, function($seating_option) use($seating_dir) {
+            return is_dir(FileUtils::joinPaths($seating_dir, $seating_option['g_id']));
+        });
+
+        $empty_option = [[
+            'g_id' => "",
+            'g_title' => "--None--"
+        ]];
+
+        return $empty_option + $gradeable_seating_options;
     }
 }

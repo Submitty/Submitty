@@ -77,7 +77,7 @@
                 <div class="option-input"><input type="checkbox" name="display_custom_message" value="true" {{ fields['display_custom_message'] ? 'checked' : '' }} /></div>
                 <div class="option-desc">
                     <div class="option-title">Display Custom Message</div>
-                    <div class="option-alt">The primary use of the custom message is to announce Exam Zone Seating Assignments.</div>
+                    <div class="option-alt">Should custom message be displayed to students.</div>
                 </div>
             </div>
 
@@ -140,11 +140,28 @@
                     <div class="option-alt">Choose whether students can submit regrade requests for assignments.</div>
                 </div>
             </div>
+
             <div class="option">
                 <div class="option-input"><input type="text" name="regrade_message" value="{{ fields['regrade_message'] }}" /></div>
                 <div class="option-desc">
                     <div class="option-title">Regrade Warning Message</div>
                     <div class="option-alt">Input the warning message show to students while submitting a regrade request.</div>
+                </div>
+            </div>
+
+            <div class="option">
+                <div class="option-input">
+                    <select name="room_seating_gradeable_id">
+                        {% for seating_option in gradeable_seating_options %}
+                            <option value="{{ seating_option['g_id'] }}"{{ fields['room_seating_gradeable_id'] == seating_option['g_id'] ? ' selected' : ''}}>
+                                {{ seating_option['g_title'] }} {{ seating_option['g_id'] != "" ? "<" ~ seating_option['g_id'] ~ ">" : "" }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="option-desc">
+                    <div class="option-title">Room Seating Gradeable</div>
+                    <div class="option-alt">The gradeable for which seating will be shown to students. (select --None-- to not display)</div>
                 </div>
             </div>
         </div>
