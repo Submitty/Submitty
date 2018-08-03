@@ -73,6 +73,9 @@ class Access {
      */
     const CHECK_STUDENT_DOWNLOAD        = 1 << 16 | self::REQUIRE_ARG_GRADEABLE;
 
+    /** Check that the course status is such that the user can view the course */
+    const CHECK_COURSE_STATUS           = 1 << 17;
+
     /** If the current set of flags requires the "gradeable" argument */
     const REQUIRE_ARG_GRADEABLE         = 1 << 24;
     /** If the current set of flags requires the "gradeable" argument */
@@ -81,9 +84,10 @@ class Access {
     const REQUIRE_ARGS_DIR_PATH         = 1 << 26;
     /** If the current set of flags requires the "gradeable_version" argument */
     const REQUIRE_ARG_VERSION           = 1 << 27;
+    /** If the current set of flags requires the "semester" and "course" arguments */
+    const REQUIRE_ARGS_SEMESTER_COURSE  = 1 << 28;
 
-    /** If the current set of flags requires that the course status be checked */
-    const CHECK_COURSE_STATUS           = 1 << 31;
+
     // Broader user group access cases since generally actions are "minimum this group"
 
     const ALLOW_MIN_STUDENT               = self::ALLOW_INSTRUCTOR | self::ALLOW_FULL_ACCESS_GRADER | self::ALLOW_LIMITED_ACCESS_GRADER | self::ALLOW_STUDENT;
@@ -108,7 +112,7 @@ class Access {
     public function __construct(Core $core) {
         $this->core = $core;
 
-        $this->permissions["view_course"] = self::ALLOW_MIN_STUDENT | self::CHECK_COURSE_STATUS;
+        $this->permissions["course.view"] = self::ALLOW_MIN_STUDENT | self::REQUIRE_ARGS_SEMESTER_COURSE | self::CHECK_COURSE_STATUS;
 
         $this->permissions["grading.electronic.status"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP;
         $this->permissions["grading.electronic.status.full"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
@@ -398,6 +402,8 @@ class Access {
                     }
                 }
             }
+
+
             if (self::checkBits($checks, self::REQUIRE_ARG_VERSION)) {
                 /* @var int $version */
                 $version = $this->requireArg($args, "gradeable_version");
@@ -450,15 +456,19 @@ class Access {
             }
         }
 
-        if (self::checkBits($checks, self::CHECK_COURSE_STATUS)) {
-            $course_status = $this->core->getQueries()->getCourseStatus($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
-            // only instructors should be able to access courses with status 2 or if they are in null registration section
-            if($group !== User::GROUP_INSTRUCTOR && ($course_status === 2 || $user->getRegistrationSection() === null)) {
-                return false;
-            }
-            // no one can view courses with status greater than 2
-            else if ($course_status > 2) {
-                return false;
+        if (self::checkBits($checks, self::REQUIRE_ARGS_SEMESTER_COURSE)) {
+            $semester = $this->requireArg($args, "semester");
+            $course = $this->requireArg($args, "course");
+            if (self::checkBits($checks, self::CHECK_COURSE_STATUS)) {
+                $course_status = $this->core->getQueries()->getCourseStatus($semester, $course);
+                // only instructors should be able to access courses with status 2 or if they are in null registration section
+                if($group !== User::GROUP_INSTRUCTOR && ($course_status === 2 || $user->getRegistrationSection() === null)) {
+                    return false;
+                }
+                // no one can view courses with status greater than 2
+                else if ($course_status > 2) {
+                    return false;
+                }
             }
         }
 
