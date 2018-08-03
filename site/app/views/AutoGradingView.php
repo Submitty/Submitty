@@ -380,9 +380,10 @@ class AutoGradingView extends AbstractView {
     /**
      * @param TaGradedGradeable $ta_graded_gradeable
      * @param bool $regrade_available
+     * @param array $uploaded_files
      * @return string
      */
-    public function showTAResultsNew(TaGradedGradeable $ta_graded_gradeable, bool $regrade_available) {
+    public function showTAResultsNew(TaGradedGradeable $ta_graded_gradeable, bool $regrade_available, array $uploaded_files) {
         $gradeable = $ta_graded_gradeable->getGradedGradeable()->getGradeable();
         $active_version = $ta_graded_gradeable->getGradedGradeable()->getAutoGradedGradeable()->getActiveVersion();
         $version_instance = $ta_graded_gradeable->getGradedVersionInstance();
@@ -472,7 +473,7 @@ class AutoGradingView extends AbstractView {
                 }, $component->getMarks())
             ];
         }, $gradeable->getComponents());
-//        $uploaded_files = $ta_graded_gradeable->getGradedGradeable()->get
+
         return $this->core->getOutput()->renderTwigTemplate('autograding/TAResultsNew.twig', [
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
             'ta_graded_version' => $version_instance !== null ? $version_instance->getVersion() : 'INCONSISTENT',
@@ -492,7 +493,9 @@ class AutoGradingView extends AbstractView {
             'active_same_as_graded' => $active_same_as_graded,
             'regrade_available' => $regrade_available,
             'regrade_message' => $regrade_message,
-            'num_decimals' => $num_decimals
+            'num_decimals' => $num_decimals,
+            'uploaded_files' => $uploaded_files,
+            'gradeable_id' => $gradeable->getId()
         ]);
     }
 }

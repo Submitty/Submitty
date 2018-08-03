@@ -754,27 +754,24 @@ function updateProgressPoints(c_index) {
     current_question_text.html(summary_text);
 
     var custom_message = $('textarea[name=mark_text_custom_'+c_index+']').val();
-    if(custom_message == ""){
-        $('#mark_points_custom-' + c_index)[0].disabled=true;
-        $('#mark_points_custom-' + c_index)[0].style.cursor="not-allowed";
-        $('#mark_icon_custom-' + c_index)[0].style.cursor="not-allowed";
-        $('#mark_points_custom-' + c_index)[0].value="";
+    $('#mark_points_custom-' + c_index)[0].disabled=true;
+    $('#mark_points_custom-' + c_index)[0].style.cursor="not-allowed";
+    $('#mark_text_custom-' + c_index)[0].style.cursor="not-allowed";
+    $('#mark_icon_custom-' + c_index)[0].style.cursor="not-allowed";
+    if(!editModeEnabled){
+        $('#mark_text_custom-'+c_index)[0].disabled=false;
+        $('#mark_text_custom-' + c_index)[0].style.cursor="text";
+        if(!custom_message == ""){
+            $('#mark_points_custom-' + c_index)[0].disabled=false;
+            $('#mark_points_custom-' + c_index)[0].style.cursor="default";
+            $('#mark_icon_custom-' + c_index)[0].style.cursor="pointer";
+        }  
     }
-    else {
-        $('#mark_points_custom-' + c_index)[0].disabled = false;
-        $('#mark_points_custom-' + c_index)[0].style.cursor = "default";
-        $('#mark_icon_custom-' + c_index)[0].style.cursor = "pointer";
-        if ($('#mark_points_custom-' + c_index)[0].value == "") {
-            $('#mark_points_custom-' + c_index)[0].value = "0";
-        }
-    }
-    if(editModeEnabled){
-        $('#mark_points_custom-' + c_index)[0].disabled=true;
+    else{
         $('#mark_text_custom-'+c_index)[0].disabled=true;
-        $('#mark_points_custom-' + c_index)[0].style.cursor="not-allowed";
-        $('#mark_text_custom-' + c_index)[0].style.cursor="not-allowed";
-        $('#mark_icon_custom-' + c_index)[0].style.cursor="not-allowed";
-        
+    }
+    if(custom_message == ""){
+        $('#mark_points_custom-' + c_index)[0].value="0";
     }
     calculatePercentageTotal();
 }
@@ -1070,11 +1067,10 @@ function saveMark(c_index, sync, override, successCallback, errorCallback) {
 
         var current_title = $('#title-' + c_index);
         var custom_points  = current_row.find('input[name=mark_points_custom_'+c_index+']').val();
-        if (typeof custom_points != 'number') {
-            custom_points=0;
-        }
         var custom_message = current_row.find('textarea[name=mark_text_custom_'+c_index+']').val();
-
+        if(custom_message === "" || custom_message == undefined){
+            custom_points="0";
+        }
         // Updates the total number of points and text
         var current_question_text = $('#rubric-textarea-' + c_index);
         var component = getComponent(c_index);
