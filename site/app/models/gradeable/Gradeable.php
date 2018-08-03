@@ -449,6 +449,7 @@ class Gradeable extends AbstractModel {
     /**
      * Asserts that the provided set of dates are valid for this gradeable's configuration
      * @param \DateTime[] $dates
+     * @throws ValidationException With all messages for each invalid property
      */
     private function assertDates(array $dates) {
         // Get the date set we validate against
