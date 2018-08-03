@@ -75,11 +75,18 @@ fi
 
 #####################################
 # Installing & building PDF annotator
-
 pushd ${SUBMITTY_REPOSITORY}/../pdf-annotate.js
 npm install
 npm run-script build
-cp dist/pdf-annoate.js ${SUBMITTY_INSTALL_DIR}/site/public/js/pdf/pdf-annotate.js
-chmod -R 440 ${SUBMITTY_INSTALL_DIR}/site/public/js/pdf/pdf-annotate.js
-chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site/public/js/pdf/pdf-annotate.js
+if [ $DEBUGGING_ENABLED = true ]; then
+	cp dist/pdf-annotate.min.js ${SUBMITTY_REPOSITORY}/site/public/js/pdf/pdf-annotate.min.js
+	chmod -R 440 ${SUBMITTY_REPOSITORY}/site/public/js/pdf/pdf-annotate.min.js
+	chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_REPOSITORY}/site/public/js/pdf/pdf-annotate.min.js
+else
+	cp dist/pdf-annotate.js ${SUBMITTY_REPOSITORY}/site/public/js/pdf/pdf-annotate.js
+	chmod -R 440 ${SUBMITTY_REPOSITORY}/site/public/js/pdf/pdf-annotate.js
+	chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_REPOSITORY}/site/public/js/pdf/pdf-annotate.js
+fi
+
+
 popd
