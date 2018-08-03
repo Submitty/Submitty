@@ -645,7 +645,14 @@ function checkMarks(c_index) {
             return false;
         }
     });
-
+    var current_row = $('#mark_custom_id-'+c_index);
+    var custom_message = current_row.find('textarea[name=mark_text_custom_'+c_index+']').val();
+    if(custom_message !== "" && custom_message !== undefined){
+        all_false = false;
+        first_mark.toggleClass("mark-has", false);
+        getMark(c_index, targetId).has = false;
+        return false;
+    }
     if(all_false === false) {
         first_mark.toggleClass("mark-has", false);
         getMark(c_index, targetId).has = false;
@@ -858,7 +865,11 @@ function selectMark(c_index, m_id) {
     
     var mark = getMark(c_index, m_id);
     mark.has = !mark.has;
-
+    var current_row = $('#mark_custom_id-'+c_index);
+    var custom_message = current_row.find('textarea[name=mark_text_custom_'+c_index+']').val();
+    if(custom_message !== "" && custom_message !== undefined){
+        skip = false;
+    }
     //actually checks the mark then checks if the first mark is still valid
     var check = $("#mark_id-" + c_index + "-" + m_id + "-check");
     check.toggleClass("mark-has", mark.has);
@@ -1327,10 +1338,10 @@ function openMark(c_index) {
         for(let i = 0; i < files.length; i++){
             if(files[i].innerText.trim() == "upload.pdf"){
                 if($("#file_view").is(":visible")){
-                    $('#submission_browser').animate({scrollTop: ((page-1)*(841.89+29)+80)}, 500);
+                    $('#file_content').animate({scrollTop: ((page-1)*(841.89+29))}, 500);
                 } else {
                     expandFile("upload.pdf", files[i].getAttribute("file-url")).then(function(){
-                        $('#submission_browser').animate({scrollTop: ((page-1)*(841.89+29)+80)}, 500);
+                        $('#file_content').animate({scrollTop: ((page-1)*(841.89+29))}, 500);
                     });
                 }
             }
