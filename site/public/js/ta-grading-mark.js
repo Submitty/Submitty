@@ -128,7 +128,7 @@ function getMarkView(c_index, m_index, m_id, editEnabled) {
     });
 }
 
-function ajaxGetMarkData(gradeable_id, user_id, question_id, successCallback, errorCallback) {
+function ajaxGetMarkData(gradeable_id, user_id, component_id, successCallback, errorCallback) {
     $.getJSON({
             url: buildUrl({
                 'component': 'grading',
@@ -136,7 +136,7 @@ function ajaxGetMarkData(gradeable_id, user_id, question_id, successCallback, er
                 'action': 'get_mark_data',
                 'gradeable_id' : gradeable_id,
                 'anon_id' : user_id,
-                'component_id' : question_id
+                'component_id' : component_id
             }),
             success: function(response) {
                 if (response.status !== 'success') {
@@ -158,16 +158,20 @@ function ajaxGetMarkData(gradeable_id, user_id, question_id, successCallback, er
 }
 
 function ajaxGetGeneralCommentData(gradeable_id, user_id, successCallback, errorCallback) {
-    $.ajax({
+    $.getJSON({
         type: "POST",
         url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'get_gradeable_comment'}),
         data: {
             'gradeable_id' : gradeable_id,
             'anon_id' : user_id
         },
-        success: function(data) {
+        success: function(response) {
+            if (response.status !== 'success') {
+                alert('Something went wrong saving the comment: ' + response.message);
+                return;
+            }
             if (typeof(successCallback) === "function") {
-                successCallback(data);
+                successCallback(response.data);
             }
         },
         error: (typeof(errorCallback) === "function") ? errorCallback : function() {
@@ -177,26 +181,29 @@ function ajaxGetGeneralCommentData(gradeable_id, user_id, successCallback, error
     })
 }
 
-function ajaxAddNewMark(gradeable_id, user_id, component, note, points, sync, successCallback, errorCallback) {
+function ajaxAddNewMark(gradeable_id, component_id, note, points, sync, successCallback, errorCallback) {
     note = (note ? note : "");
     points = (points ? points : 0);
     if (!note.trim())
         console.error("Shouldn't add blank mark!");
     
-    $.ajax({
+    $.getJSON({
             type: "POST",
             url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'add_one_new_mark'}),
             async: false,
             data: {
                 'gradeable_id' : gradeable_id,
-                'anon_id' : user_id,
-                'gradeable_component_id' : component,
+                'component_id' : component_id,
                 'note' : note,
                 'points' : points
             },
-            success: function(data) {
+            success: function(response) {
+                if (response.status !== 'success') {
+                    alert('Something went wrong adding the mark: ' + response.message);
+                    return;
+                }
                 if (typeof(successCallback) === "function") {
-                    successCallback(data);
+                    successCallback(response.data);
                 }
             },
             error: (typeof(errorCallback) === "function") ? errorCallback : function() {
@@ -205,20 +212,26 @@ function ajaxAddNewMark(gradeable_id, user_id, component, note, points, sync, su
             }
         })
 }
-function ajaxDeleteMark(gradeable_id, user_id, component, mark, sync, successCallback, errorCallback) {
-    $.ajax({
+function ajaxDeleteMark(gradeable_id, component_id, mark_id, sync, successCallback, errorCallback) {
+    $.getJSON({
             type: "POST",
             url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'delete_one_mark'}),
             async: false,
             data: {
                 'gradeable_id' : gradeable_id,
-                'anon_id' : user_id,
-                'gradeable_component_id' : component,
-                'gradeable_component_mark_id' : mark
+                'component_id' : component_id,
+                'mark_id' : mark_id
             },
-            success: function(data) {
+            success: function(response) {
+                if (response.status !== 'success') {
+                    alert('Something went wrong saving the comment: ' + response.message);
+                    if (typeof(errorCallback) === "function") {
+                        errorCallback(response.data);
+                    }
+                    return;
+                }
                 if (typeof(successCallback) === "function") {
-                    successCallback(data);
+                    successCallback(response.data);
                 }
             },
             error: (typeof(errorCallback) === "function") ? errorCallback : function() {
@@ -227,18 +240,22 @@ function ajaxDeleteMark(gradeable_id, user_id, component, mark, sync, successCal
             }
         })
 }
-function ajaxGetMarkedUsers(gradeable_id, gradeable_component_id, m_id, successCallback, errorCallback) {
-    $.ajax({
+function ajaxGetMarkedUsers(gradeable_id, component_id, mark_id, successCallback, errorCallback) {
+    $.getJSON({
         type: "POST",
         url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'get_marked_users'}),
         data: {
             'gradeable_id' : gradeable_id,
-            'gradeable_component_id' : gradeable_component_id,
-            'gradeable_component_mark_id' : m_id
+            'component_id' : component_id,
+            'mark_id' : mark_id
         },
-        success: function(data) {
+        success: function(response) {
+            if (response.status !== 'success') {
+                alert('Something went wrong getting the users with that mark: ' + response.message);
+                return;
+            }
             if (typeof(successCallback) === "function") {
-                successCallback(data);
+                successCallback(response.data);
             }
         },
         error: (typeof(errorCallback) === "function") ? errorCallback : function() {
@@ -247,20 +264,23 @@ function ajaxGetMarkedUsers(gradeable_id, gradeable_component_id, m_id, successC
     })
 }
 
-function ajaxSaveGeneralComment(gradeable_id, user_id, active_version, gradeable_comment, sync, successCallback, errorCallback) {
-    $.ajax({
+function ajaxSaveGeneralComment(gradeable_id, user_id, gradeable_comment, sync, successCallback, errorCallback) {
+    $.getJSON({
         type: "POST",
         url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_general_comment'}),
         async: sync,
         data: {
             'gradeable_id' : gradeable_id,
             'anon_id' : user_id,
-            'active_version' : active_version,
             'gradeable_comment' : gradeable_comment
         },
-        success: function(data) {
+        success: function(response) {
+            if (response.status !== 'success') {
+                alert('Something went wrong saving the comment: ' + response.message);
+                return;
+            }
             if (typeof(successCallback) === "function") {
-                successCallback(data);
+                successCallback(response.data);
             }
         },
         error: (typeof(errorCallback) === "function") ? errorCallback : function() {
@@ -505,8 +525,6 @@ function updateMarksOnPage(c_index) {
 function updateGeneralComment() {
     var gradeable = getGradeable();
     ajaxGetGeneralCommentData(gradeable.id, gradeable.user_id, function(data) {
-        data = JSON.parse(data);
-        
         $('#comment-id-general').val(data['data']);
     });
 }
@@ -550,35 +568,34 @@ function addMark(me, c_index, sync, successCallback, errorCallback) {
 
             updateCookies();
 
-            ajaxAddNewMark(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, note, points, false, function(data) {
-                data = JSON.parse(data);
-                mark.id = data.id;
-                getComponent(c_index).marks.push(mark);
-                parent.append(getMarkView(c_index, mark.order, mark.id, editModeEnabled));
+            ajaxAddNewMark(getGradeable().id, getComponent(c_index).id, note, points, false, function() {
+                updateMarksOnPage(c_index);
             });
         }
     };
 }
 
-function deleteMark(mark, c_index, last_num, sync, successCallback, errorCallback) {
-    var parent = $('#marks-parent-'+c_index);
-    var index=-1;
-    for(var i=0; i<getComponent(c_index).marks.length; i++){
-        if(getComponent(c_index).marks[i].id==last_num){
-            index=i;
+function deleteMark(c_index, mark_id, sync) {
+    let component = getComponent(c_index);
+    var parent = $('#marks-parent-' + c_index);
+    var index = -1;
+    let mark = undefined;
+    for (var i = 0; i < component.marks.length; i++) {
+        if (component.marks[i].id === mark_id) {
+            index = i;
+            mark = component.marks[i];
             break;
         }
     }
-    var mark=getComponent(c_index).marks[index];
-    getComponent(c_index).marks.splice(index, 1);
-    var last_row = $('[name=mark_'+c_index+']').last().attr('id');
-    var mark_data = new Array(getComponent(c_index).marks.length);
-    parent.empty();
-    for(var i=0; i<getComponent(c_index).marks.length; i++){
-        var current_mark_id=grading_data.gradeable.components[c_index-1].marks[i].id;
-        parent.append(getMarkView(c_index, i, current_mark_id, editModeEnabled));
-    }
-    ajaxDeleteMark(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, mark.id, false);
+
+    ajaxDeleteMark(getGradeable().id, component.id, mark.id, false, function () {
+        component.marks.splice(index, 1);
+        parent.empty();
+        for (var i = 0; i < component.marks.length; i++) {
+            var current_mark_id = grading_data.gradeable.components[c_index - 1].marks[i].id;
+            parent.append(getMarkView(c_index, i, current_mark_id, editModeEnabled));
+        }
+    });
 }
 
 // gets all the information from the database to return some stats and a list of students with that mark
@@ -586,36 +603,34 @@ function showMarklist(me) {
     var gradeable = getGradeable();
 
     var question_num = parseInt($(me).attr('id').split('-')[1]);
-    var order_num = parseInt($(me).attr('id').split('-')[2]);
+    var mark_id = parseInt($(me).attr('id').split('-')[2]);
     var gradeable_component_id = $('#marks-parent-' + question_num)[0].dataset.question_id;
     
-    ajaxGetMarkedUsers(gradeable.id, gradeable_component_id, order_num, function(data) {
-        data = JSON.parse(data);
-
+    ajaxGetMarkedUsers(gradeable.id, gradeable_component_id, mark_id, function(data) {
         // Calculate total and graded component amounts
         var graded = 0, total = 0;
-        for (var x in data['sections']) {
-            graded += parseInt(data['sections'][x]['graded_components']);
-            total += parseInt(data['sections'][x]['total_components']);
+        for (var x in data.sections) {
+            graded += parseInt(data.sections[x]['graded_components']);
+            total += parseInt(data.sections[x]['total_components']);
         }
 
         // Set information in the popup
-        $("#student-marklist-popup-question-name")[0].innerHTML = data['name_info']['question_name'];
-        $("#student-marklist-popup-mark-note")[0].innerHTML = data['name_info']['mark_note'];
+        $("#student-marklist-popup-question-name")[0].innerHTML = $("#component_name-" + question_num).text();
+        $("#student-marklist-popup-mark-note")[0].innerHTML = $("textarea[name=mark_text_" + question_num  +"_" + mark_id + "]").val();
         
-        $("#student-marklist-popup-student-amount")[0].innerHTML = data['data'].length;
+        $("#student-marklist-popup-student-amount")[0].innerHTML = data.submitter_ids.length;
         $("#student-marklist-popup-graded-components")[0].innerHTML = graded;
         $("#student-marklist-popup-total-components")[0].innerHTML = total;
         
         // Create list of students
         var students_html = "";
-        for (var x = 0; x < data['data'].length; x++) {
-            var id = data['data'][x]['gd_user_id'] || data['data'][x]['gd_team_id'];
+        for (var x = 0; x < data.submitter_ids.length; x++) {
+            var id = data.submitter_ids[x];
 
             var href = window.location.href.replace(/&who_id=([a-z0-9_]*)/, "&who_id="+id);
             students_html +=
                 "<a " + (id != null ? "href='"+href+"'" : "") + ">" +
-                id + (x != data['data'].length - 1 ? ", " : "") +
+                id + (x != data.submitter_ids.length - 1 ? ", " : "") +
                 "</a>";
         }
         
@@ -1014,7 +1029,7 @@ function saveGeneralComment(sync, successCallback, errorCallback) {
     var overwrite = $('#overwrite-id').is(":checked");
     $(current_question_text[0]).text(gradeable_comment);
     
-    ajaxSaveGeneralComment(gradeable.id, gradeable.user_id, gradeable.active_version, gradeable_comment, sync, successCallback, errorCallback);
+    ajaxSaveGeneralComment(gradeable.id, gradeable.user_id, gradeable_comment, sync, successCallback, errorCallback);
 }
 
 // Saves the last opened mark so that exiting the page doesn't
@@ -1158,7 +1173,7 @@ function saveMarkEditMode(c_index, sync, successCallback, errorCallback, data, o
             var DBvsYours = (DB_m_id === id && (DB_score !== points || DB_note !== note || DB_order !== order));
             if(DBvsOR && DBvsYours && ORvsYours){
                 //CONFLICT!
-                if(confirm("There was a conflict saving the mark you call "+ note +" (another user changed this mark while you were editing. Would you like your changes to overwrite the other users?")){
+                if(confirm("There was a conflict saving the mark you call "+ note +" (another user changed this mark while you were editing). Would you like your changes to overwrite the other users?")){
                     calculatePercentageTotal();
                     var gradedByElement = $('#graded-by-' + c_index);
                     var savingElement = $('#graded-saving-' + c_index);

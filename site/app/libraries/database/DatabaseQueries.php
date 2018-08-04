@@ -1398,28 +1398,24 @@ DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=?
 // END FIXME
 
 
+    /**
+     * Gets the ids of all submitters who received a mark
+     * @param Mark $mark
+     * @return string[]
+     */
+    public function getSubmittersWhoGotMark(Mark $mark) {
+        // Switch the column based on gradeable team-ness
+        $submitter_type = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'gd_team_id' : 'gd_user_id';
+        $this->course_db->query("
+            SELECT gd.{$submitter_type}
+            FROM gradeable_component_mark_data gcmd
+              JOIN gradeable_data gd ON gd.gd_id=gcmd.gd_id
+            WHERE gcm_id = ?", [$mark->getId()]);
 
-    public function getUsersWhoGotMark($gc_id, GradeableComponentMark $mark, bool $team) {
-        $return_data = array();
-        $params = array($gc_id, $mark->getId());
-
-        if ($team) {
-            $this->course_db->query("
-                SELECT gd.gd_team_id
-                  FROM gradeable_component_mark_data gcmd
-                  JOIN gradeable_data gd ON gd.gd_id = gcmd.gd_id
-                 WHERE gc_id = ? AND gcm_id = ?
-            ", $params);
-            return $this->course_db->rows();
-        } else {
-            $this->course_db->query("
-                SELECT gd.gd_user_id
-                  FROM gradeable_component_mark_data gcmd
-                  JOIN gradeable_data gd ON gd.gd_id = gcmd.gd_id
-                 WHERE gc_id = ? AND gcm_id = ?
-            ", $params);
-            return $this->course_db->rows();
-        }
+        // Map the results into a non-associative array of team/user ids
+        return array_map(function ($row) use ($submitter_type) {
+            return $row[$submitter_type];
+        }, $this->course_db->rows());
     }
 
     public function insertGradeableComponentMarkData($gd_id, $gc_id, $gcd_grader_id, GradeableComponentMark $mark) {
