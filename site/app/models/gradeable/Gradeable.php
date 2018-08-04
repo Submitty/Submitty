@@ -659,12 +659,53 @@ class Gradeable extends AbstractModel {
     }
 
     /**
-     * Deletes a component from this gradeable without checking if grades exist for it yet.
-     * DANGER: THIS CAN BE A VERY DESTRUCTIVE ACTION -- USE ONLY WHEN EXPLICITLY REQUESTED
-     * @param Component $component
-     * @throws \InvalidArgumentException If this gradeable doesn't own the provided component
+     * Adds a new component to this gradeable with the provided properties
+     * @param string $title
+     * @param string $ta_comment
+     * @param string $student_comment
+     * @param float $lower_clamp
+     * @param float $default
+     * @param float $max_value
+     * @param float $upper_clamp
+     * @param bool $text
+     * @param bool $peer
+     * @param int $pdf_page set to Component::PDF_PAGE_NONE if not a pdf assignment
+     * @return Component the created component
      */
-    public function forceDeleteComponent(Component $component) {
+    public function addComponent(string $title, string $ta_comment, string $student_comment, float $lower_clamp,
+                                 float $default, float $max_value, float $upper_clamp, bool $text, bool $peer, int $pdf_page) {
+        $component = new Component($this->core, $this, [
+            'title' => $title,
+            'ta_comment' => $ta_comment,
+            'student_comment' => $student_comment,
+            'lower_clamp' => $lower_clamp,
+            'default' => $default,
+            'max_value' => $max_value,
+            'upper_clamp' => $upper_clamp,
+            'text' => $text,
+            'peer' => $peer,
+            'page' => $pdf_page,
+            'id' => 0,
+            'order' => count($this->components)
+        ]);
+        $this->components[] = $component;
+        return $component;
+    }
+
+    /**
+     * Base method for deleting components.  This isn't exposed as public so
+     *  its make very clear that a delete component operation is being forceful.
+     * @param Component $component
+     * @param bool $force true to delete the component if it has grades
+     * @throws \InvalidArgumentException If this gradeable doesn't own the provided component or
+     *          $force is false and the component has grades
+     */
+    private function deleteComponentInner(Component $component, bool $force = false) {
+        // Don't delete if the component has grades (and we aren't forcing)
+        if($component->anyGrades() && !$force) {
+            throw new \InvalidArgumentException('Attempt to delete a component with grades!');
+        }
+
         // Calculate our components array without the provided component
         $new_components = array_udiff($this->components, [$component], Utils::getCompareByReference());
 
@@ -675,6 +716,25 @@ class Gradeable extends AbstractModel {
 
         // Finally, set our array to the new one
         $this->components = $new_components;
+    }
+
+    /**
+     * Deletes a component from this gradeable
+     * @param Component $component
+     * @throws \InvalidArgumentException If this gradeable doesn't own the provided component or if the component has grades
+     */
+    public function deleteComponent(Component $component) {
+        $this->deleteComponentInner($component, false);
+    }
+
+    /**
+     * Deletes a component from this gradeable without checking if grades exist for it yet.
+     * DANGER: THIS CAN BE A VERY DESTRUCTIVE ACTION -- USE ONLY WHEN EXPLICITLY REQUESTED
+     * @param Component $component
+     * @throws \InvalidArgumentException If this gradeable doesn't own the provided component
+     */
+    public function forceDeleteComponent(Component $component) {
+        $this->deleteComponentInner($component, true);
     }
 
     /**
@@ -1162,5 +1222,78 @@ class Gradeable extends AbstractModel {
         }
 
         return $sections;
+    }
+
+    /**
+     * Creates a new team with the provided members
+     * @param User $leader The team leader (first user)
+     * @param User[] $members The team members (not including leader).
+     * @param string $registration_section Registration section to give team.  Leave blank to inherit from leader. 'NULL' for null section.
+     * @param int $rotating_section Rotating section to give team.  Set to -1 to inherit from leader. 0 for null section.
+     * @throws \Exception If creating directories for the team fails, or writing team history fails
+     *  Note: The team in the database may have already been created if an exception is thrown
+     */
+    public function createTeam(User $leader, array $members, string $registration_section = '', int $rotating_section = -1) {
+        $all_members = $members;
+        $all_members[] = $leader;
+
+        // Validate parameters
+        $gradeable_id = $this->getId();
+        foreach ($all_members as $member) {
+            if (!($member instanceof User)) {
+                throw new \InvalidArgumentException('User array contained non-user object');
+            }
+            if ($this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $member->getId()) !== null) {
+                throw new \InvalidArgumentException("{$member->getId()} is already on a team");
+            }
+        }
+
+        // Inherit rotating/registration section from leader if not provided
+        if ($registration_section === '') {
+            $registration_section = $leader->getRegistrationSection();
+        } else if($registration_section === 'NULL') {
+            $registration_section = null;
+        }
+        if ($rotating_section < 0) {
+            $rotating_section = $leader->getRotatingSection();
+        } else if ($rotating_section === 0) {
+            $rotating_section = null;
+        }
+
+        // Create the team in the database
+        $team_id = $this->core->getQueries()->createTeam($gradeable_id, $leader->getId(), $registration_section, $rotating_section);
+
+        // Force the other team members to accept the invitation from this newly created team
+        $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $leader->getId());
+        foreach ($members as $i => $member) {
+            $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $member->getId());
+            $this->core->getQueries()->acceptTeamInvitation($team_id, $member->getId());
+        }
+
+        // Create the submission directory if it doesn't exist
+        $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id);
+        if (!FileUtils::createDir($gradeable_path)) {
+            throw new \Exception("Failed to make folder for this assignment");
+        }
+
+        // Create the team submission directory if it doesn't exist
+        $user_path = FileUtils::joinPaths($gradeable_path, $team_id);
+        if (!FileUtils::createDir($user_path)) {
+            throw new \Exception("Failed to make folder for this assignment for the team");
+        }
+
+        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO")
+            . " " . $this->core->getConfig()->getTimezone()->getName();
+        $settings_file = FileUtils::joinPaths($user_path, "user_assignment_settings.json");
+
+        $json = array("team_history" => array(array("action" => "admin_create", "time" => $current_time,
+            "admin_user" => $this->core->getUser()->getId(), "first_user" => $leader->getId())));
+        foreach ($members as $member) {
+            $json["team_history"][] = array("action" => "admin_add_user", "time" => $current_time,
+                "admin_user" => $this->core->getUser()->getId(), "added_user" => $member->getId());
+        }
+        if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
+            throw new \Exception("Failed to write to team history to settings file");
+        }
     }
 }
