@@ -1,20 +1,29 @@
 {% import _self as self %}
+{# Looks mismatched because this is a continuation of GlobalHeader.twig #}
+            <div id="push"></div>
+            <div id="footer">
+                <span id="copyright">&copy; 2017 RPI | An <a href="https://rcos.io" target="_blank">RCOS project</a></span>|
+                <span id="github">
+                    <a href="https://github.com/Submitty/Submitty" target="_blank" title="Fork us on GitHub" aria-label="Visit our GitHub">
+                        <i class="fa fa-github fa-lg"></i>
+                    </a>
+                </span>
 
-{# Looks weird but this is actually a continuation of GlobalHeader.twig #}
-    <div id="push"></div>
-</div>
-<div id="footer">
-    <span id="copyright">&copy; 2017 RPI | An <a href="https://rcos.io" target="_blank">RCOS project</a></span>|
-    <span id="github">
-        <a href="https://github.com/Submitty/Submitty" target="_blank" title="Fork us on GitHub" aria-label="Visit our GitHub">
-            <i class="fa fa-github fa-lg"></i>
-        </a>
-    </span>
-
-    {% if is_debug %}
-    <a href="#" onClick="togglePageDetails();">Show Page Details</a>
+                {% if is_debug %}
+                    <a href="#" onClick="togglePageDetails();">Show Page Details</a>
+                {% endif %}
+            </div>
+        </div> {# /#site-body #}
+        {% if wrapper_urls['right_sidebar.html'] != null %}
+            {# uploaded homepage redirect can go here? #}
+            <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="right_sidebar" src="{{ wrapper_urls['right_sidebar.html'] }}" frameborder="0"></iframe>
+        {% endif %}
+    </div> {# /#center-container #}
+    {% if wrapper_urls['bottom_bar.html'] != null %}
+        {# uploaded homepage redirect can go here? #}
+        <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="bottom_bar" src="{{ wrapper_urls['bottom_bar.html'] }}" frameborder="0"></iframe>
     {% endif %}
-</div>
+</div> {# /#container #}
 {% if is_debug %}
     <div id='page-info'>
         Runtime: {{ runtime }}<br /><br />

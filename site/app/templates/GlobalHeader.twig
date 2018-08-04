@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <title>{{ page_title }}</title>
@@ -15,57 +14,68 @@
 </head>
 <script>var onAjaxInit;</script>
 <body data-site-url="{{ site_url }}" data-csrf-token="{{ core.getCsrfToken() }}" onload="if (onAjaxInit) { onAjaxInit(); }">
-<div id='messages'>
-    {% for message in messages %}
-    <div id='{{ message.type }}-{{ message.key }}' class="inner-message alert alert-{{ message.type }}">
-        <a class="fa fa-times message-close" onClick="removeMessagePopup('{{ message.type }}-{{ message.key }}');"></a>
-        <i class="fa fa-times-circle"></i> {{ message.error }}
-    </div>
-    {% endfor %}
-</div>
 <div id="container">
-{% if nav_urls|length > 0 %}
-    <div id="nav">
-        <ul>
-            {% for url in nav_urls %}
-            <li>
-                <a href="{{ url.href }}">{{ url.title }}</a>
-            </li>
-            {% endfor %}
-        </ul>
-    </div>
-{% endif %}
-    <div id="header">
-        <div id="header-text">
-            <a href="http://submitty.org" target=_blank><div id="logo-submitty"></div></a>
-            <h2>
-                {% if core.userLoaded() %}
-                <span id="login">
-                    Hello <span id="login-id">{{ user_first_name }}</span>
-                </span> (<a id='logout' href='{{ core.buildUrl({'component': 'authentication', 'page': 'logout'}) }}'>Logout</a>)
-                {% else %}
-                <span id="login-guest">Welcome to Submitty</span>
-                {% endif %}
-            </h2>
-            <h2>
-                {% for b in breadcrumbs %}
-                    {% if loop.index0 > 0 and not b.getIcon() %}
-                        &gt;
-                    {% endif %}
-                    {% if b.getUrl() != null and b.getUrl() != "" %}
-                        {% if b.getIcon() %}
-                            <a class="external" href="{{ b.getUrl() }}" target="_blank"><i style="margin-left: 10px;" class="fa fa-external-link"></i></a>
-                        {% else %}
-                            {% if b.getTop() %}
-                                <a target="_top" href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
-                            {% else %}
-                                <a href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
-                            {% endif %}
-                        {% endif %}
-                    {% else %}
-                        {{ b.getTitle() }}
-                    {% endif %}
+    {% if wrapper_urls['top_bar.html'] != null %}
+        {# uploaded homepage redirect can go here? #}
+        <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="top_bar" src="{{ wrapper_urls['top_bar.html'] }}" frameborder="0"></iframe>
+    {% endif %}
+    <div id="center-container">
+        {% if wrapper_urls['left_sidebar.html'] != null %}
+            {# uploaded sidebar can go here? #}
+            <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="left_sidebar" src="{{ wrapper_urls['left_sidebar.html'] }}" frameborder="0"></iframe>
+        {% endif %}
+        <div id="site-body">
+            <div id='messages'>
+                {% for message in messages %}
+                    <div id='{{ message.type }}-{{ message.key }}' class="inner-message alert alert-{{ message.type }}">
+                        <a class="fa fa-times message-close" onClick="removeMessagePopup('{{ message.type }}-{{ message.key }}');"></a>
+                        <i class="fa fa-times-circle"></i> {{ message.error }}
+                    </div>
                 {% endfor %}
-            </h2>
-        </div>
-    </div>
+            </div>
+            {% if nav_urls|length > 0 %}
+                <div id="nav">
+                    <ul>
+                        {% for url in nav_urls %}
+                        <li>
+                            <a href="{{ url.href }}">{{ url.title }}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+            <div id="header">
+                <div id="header-text">
+                    <a href="http://submitty.org" target=_blank><div id="logo-submitty"></div></a>
+                    <h2>
+                        {% if core.userLoaded() %}
+                        <span id="login">
+                            Hello <span id="login-id">{{ core.getUser().getDisplayedFirstName() }}</span>
+                        </span> (<a id='logout' href='{{ core.buildUrl({'component': 'authentication', 'page': 'logout'}) }}'>Logout</a>)
+                        {% else %}
+                        <span id="login-guest">Welcome to Submitty</span>
+                        {% endif %}
+                    </h2>
+                    <h2>
+                        {% for b in breadcrumbs %}
+                            {% if loop.index0 > 0 and not b.getIcon() %}
+                                &gt;
+                            {% endif %}
+                            {% if b.getUrl() != null and b.getUrl() != "" %}
+                                {% if b.getIcon() %}
+                                    <a class="external" href="{{ b.getUrl() }}" target="_blank"><i style="margin-left: 10px;" class="fa fa-external-link"></i></a>
+                                {% else %}
+                                    {% if b.getTop() %}
+                                        <a target="_top" href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
+                                    {% else %}
+                                        <a href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
+                                    {% endif %}
+                                {% endif %}
+                            {% else %}
+                                {{ b.getTitle() }}
+                            {% endif %}
+                        {% endfor %}
+                    </h2>
+                </div>
+            </div>
+{# Looks mismatched because this lines up with GlobalFooter.twig #}

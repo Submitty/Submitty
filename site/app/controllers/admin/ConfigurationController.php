@@ -42,9 +42,6 @@ class ConfigurationController extends AbstractController {
             'room_seating_gradeable_id'      => $this->core->getConfig()->getRoomSeatingGradeableId()
         );
 
-        // this is not displaying the value being stored in the config, should be fixed (also default value needs to be fixed)
-        $fields['course_name'] = $this->core->getDisplayedCourseName();
-
         if (isset($_SESSION['request'])) {
             foreach (array('upload_message', 'course_email', 'regrade_message') as $key) {
                 if (isset($_SESSION['request'][$key])) {
@@ -88,12 +85,7 @@ class ConfigurationController extends AbstractController {
         }
         $entry = $_POST['entry'];
 
-        if($name === "course_name") {
-            if($entry === "") {
-                return $this->core->getOutput()->renderJsonFail('Course name cannot be blank');
-            }
-        }
-        else if($name === "room_seating_gradeable_id") {
+        if($name === "room_seating_gradeable_id") {
             $gradeable_seating_options = $this->getGradeableSeatingOptions();
             $gradeable_ids = array();
             foreach($gradeable_seating_options as $option) {
