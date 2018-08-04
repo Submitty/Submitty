@@ -3,7 +3,7 @@
 namespace app\views;
 
 class GlobalView extends AbstractView {
-    public function header($breadcrumbs, $css=array(), $js=array()) {
+    public function header($breadcrumbs, $wrapper_urls, $css=array(), $js=array()) {
         $messages = [];
         foreach (array('error', 'notice', 'success') as $type) {
             foreach ($_SESSION['messages'][$type] as $key => $error) {
@@ -18,11 +18,6 @@ class GlobalView extends AbstractView {
         }
 
         $pageTitle = $this->core->getConfig()->isCourseLoaded() ? $this->core->getFullCourseName() : "Submitty";
-
-        //Allow courses to override css
-        if ($this->core->getConfig()->isCourseLoaded() && file_exists($this->core->getConfig()->getCoursePath()."/config/override.css")) {
-            $css[] = $this->core->getConfig()->getCoursePath()."/config/override.css";
-        }
 
         $navURLs = [];
         if ($this->core->getConfig()->isCourseLoaded() && $this->core->userLoaded()) {
@@ -60,6 +55,10 @@ class GlobalView extends AbstractView {
                         "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism')),
                         "title" => "Lichen Plagiarism Detection [WIP]"
                     ];
+                    $navURLs[] = [
+                        "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper')),
+                        "title" => "Site Theme"
+                    ];
                 }
             }
         }
@@ -73,16 +72,20 @@ class GlobalView extends AbstractView {
             "breadcrumbs" => $breadcrumbs,
             "user_first_name" => $this->core->getUser() ? $this->core->getUser()->getDisplayedFirstName() : "",
             "base_url" => $this->core->getConfig()->getBaseUrl(),
-            "site_url" => $this->core->getConfig()->getSiteUrl()
+            "site_url" => $this->core->getConfig()->getSiteUrl(),
+            "wrapper_enabled" => $this->core->getConfig()->wrapperEnabled(),
+            "wrapper_urls" => $wrapper_urls
         ]);
      }
 
-    public function footer($runtime) {
+    public function footer($runtime, $wrapper_urls) {
         return $this->core->getOutput()->renderTwigTemplate("GlobalFooter.twig", [
             "runtime" => $runtime,
+            "wrapper_enabled" => $this->core->getConfig()->wrapperEnabled(),
             "is_debug" => $this->core->getConfig()->isDebug(),
             "submitty_queries" => $this->core->getSubmittyDB() ? $this->core->getSubmittyDB()->getPrintQueries() : [],
             "course_queries" => $this->core->getCourseDB() ? $this->core->getCourseDB()->getPrintQueries() : [],
+            "wrapper_urls" => $wrapper_urls
         ]);
     }
 
