@@ -2089,7 +2089,7 @@ ORDER BY u.user_group ASC,
     }
 
     public function getCourseStatus($semester, $course) {
-        $this->submitty_db->query("SELECT c.status FROM courses c WHERE c.semester=? AND c.course=?", array($semester, $course));
+        $this->submitty_db->query("SELECT status FROM courses WHERE semester=? AND course=?", array($semester, $course));
         return $this->submitty_db->rows()[0]['status'];
     }
 
