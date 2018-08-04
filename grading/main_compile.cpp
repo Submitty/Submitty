@@ -132,8 +132,9 @@ int main(int argc, char *argv[]) {
   for (unsigned int i = 0; i < tc->size(); i++) {
 
     std::cout << "========================================================" << std::endl;
-
-    TestCase my_testcase(config_json,i);
+    //Compilation steps must not have a docker name.
+    std::string container_name = "";
+    TestCase my_testcase(config_json,i,container_name);
 
     if (my_testcase.isFileCheck()) {
 

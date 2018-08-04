@@ -371,13 +371,12 @@ bool validShowValue(const nlohmann::json& v) {
 }
 
 
-TestCase::TestCase (nlohmann::json &whole_config, int which_testcase) :
-  _json((*whole_config.find("testcases"))[which_testcase]) {
+TestCase::TestCase (nlohmann::json &whole_config, int which_testcase, std::string docker_name) :
+  _json((*whole_config.find("testcases"))[which_testcase]), CONTAINER_NAME(docker_name) {
 
   test_case_id = next_test_case_id;
   next_test_case_id++;
   General_Helper();
-
   if (isFileCheck()) {
     FileCheck_Helper();
   } else if (isCompilation()) {
@@ -391,7 +390,7 @@ TestCase::TestCase (nlohmann::json &whole_config, int which_testcase) :
   if (itr != _json.end()) {
     assert (itr->is_array());
     VerifyGraderDeductions(*itr);
-    std::vector<std::string> commands = stringOrArrayOfStrings(_json,"command");
+    std::vector<std::string> commands = this->getCommands();
     AddDefaultGraders(commands,*itr,whole_config);
 
      for (int i = 0; i < (*itr).size(); i++) {
@@ -439,6 +438,41 @@ TestCase::TestCase (nlohmann::json &whole_config, int which_testcase) :
   }
 }
 
+std::vector<std::string> TestCase::getCommands() const {
+
+  //TODO potential point of failure
+  std::vector<nlohmann::json> containers = mapOrArrayOfMaps(this->_json, "containers");
+
+
+  if (this->CONTAINER_NAME == ""){
+    //TODO add back in if possible.
+    //assert(containers.size() == 1);
+    return stringOrArrayOfStrings(containers[0], "commands");
+  }
+
+  bool found = false;
+  nlohmann::json command_map;
+  //If we ARE running in a docker container, we must find the commands that are bound for us.
+  for(std::vector<nlohmann::json>::const_iterator it = containers.begin(); it != containers.end(); ++it) {
+    nlohmann::json::const_iterator val = it->find("container_name");
+    std::string curr_target = *val;
+    std::cout << "target is " << curr_target << " our name is " << this->CONTAINER_NAME << std::endl;
+    if(curr_target == this->CONTAINER_NAME){
+      std::cout << "found it!" << std::endl;
+      found = true;
+      command_map = *it;
+      break;
+    }
+  }
+
+  if(!found){
+    std::cout << "ERROR: Could not find " << this->CONTAINER_NAME << " in the command map." << std::endl;
+    std::vector<std::string> empty;
+    return empty;
+  }
+
+  return stringOrArrayOfStrings(command_map, "commands");
+}
 
 void TestCase::General_Helper() {
   nlohmann::json::iterator itr;
@@ -539,7 +573,7 @@ void TestCase::Compilation_Helper() {
 
   if (f_itr != _json.end()) {
 
-    std::vector<std::string> commands = stringOrArrayOfStrings(_json,"command");
+    std::vector<std::string> commands = this->getCommands();
     assert (commands.size() > 0);
     for (int i = 0; i < commands.size(); i++) {
       w_itr = _json.find("warning_deduction");
@@ -863,7 +897,9 @@ void AddSubmissionLimitTestCase(nlohmann::json &config_json) {
   nlohmann::json::iterator tc = config_json.find("testcases");
   assert (tc != config_json.end());
   for (unsigned int i = 0; i < tc->size(); i++) {
-    TestCase my_testcase(config_json,i);
+    //This input to testcase is only necessary if the testcase needs to retrieve its 'commands'
+    std::string container_name = "";
+    TestCase my_testcase(config_json,i,container_name);
     int points = (*tc)[i].value("points",0);
     if (points > 0) {
       total_points += points;

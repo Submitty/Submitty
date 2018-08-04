@@ -279,8 +279,9 @@ void ValidateATestCase(nlohmann::json config_json, int which_testcase,
                        int &nonhidden_automated_points_possible,
                        nlohmann::json &all_testcases,
                        std::ofstream& gradefile) {
-
-    TestCase my_testcase(config_json,which_testcase);
+    //This input to the testcase constructor does nothing unless we attempt to access the 'commands' object.
+    std::string container_name = "";
+    TestCase my_testcase(config_json,which_testcase,container_name);
     std::string title = "Test " + std::to_string(which_testcase+1) + " " + my_testcase.getTitle();
     int possible_points = my_testcase.getPoints();
     std::cout << title << " - points: " << possible_points << std::endl;
