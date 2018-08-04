@@ -1516,7 +1516,7 @@ function dynamicScrollLoadPage(element, atEnd) {
         return;
     }
     var load_page = $(element).attr(atEnd?"next_page":"prev_page");
-    if(load_page == -1) {
+    if(load_page <= 0) {
         return;
     }
     var load_page_callback;
@@ -1525,6 +1525,7 @@ function dynamicScrollLoadPage(element, atEnd) {
     var arrow_down = $(element).find(".fa-arrow-down");
     var spinner_up = arrow_up.prev();
     var spinner_down = arrow_down.next();
+    $(element).data("dynamic_lock_load", true);
     if(atEnd){
         arrow_down.hide();
         spinner_down.show();
@@ -1554,8 +1555,11 @@ function dynamicScrollLoadPage(element, atEnd) {
                 // Stop further loads
                 $(element).attr("prev_page", -1);
             } else {
-                $(element).attr("prev_page", parseInt(load_page) - 1);
-                arrow_up.show();
+                var prev_page = parseInt(load_page) - 1;
+                $(element).attr("prev_page", prev_page);
+                if(prev_page >= 1) {
+                    arrow_up.show();
+                }
                 dynamicScrollLoadIfScrollVisible($(element));
             }
         };
@@ -1563,7 +1567,6 @@ function dynamicScrollLoadPage(element, atEnd) {
             spinner_up.hide();
         };
     }
-    $(element).data("dynamic_lock_load", true);
     
     var urlPattern = $(element).data("urlPattern");
     var currentThreadId = $(element).data("currentThreadId",);
