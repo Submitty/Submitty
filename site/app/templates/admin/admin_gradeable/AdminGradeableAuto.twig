@@ -199,5 +199,9 @@
 
         // Update the text box when the path config changes
         $('.select_config_path').change(onConfigPathChange);
+
+        {% if is_in_rebuild_queue %}
+            checkRefreshPage("{{ check_refresh_url|raw }}");
+        {% endif %}
     });
 </script>

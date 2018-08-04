@@ -123,7 +123,7 @@ class DatabaseQueries {
      *
      * @return ordered threads after filter
      */
-    public function loadThreadBlock($categories_ids, $thread_status, $show_deleted, $current_user, $blockSize, $blockNumber){
+    public function loadThreadBlock($categories_ids, $thread_status, $show_deleted, $show_merged_thread, $current_user, $blockSize, $blockNumber){
         // $blockNumber is 1 based index
         if($blockNumber < 1) {
             return array();
@@ -143,10 +143,10 @@ class DatabaseQueries {
         }
 
         $query_delete = $show_deleted?"true":"deleted = false";
-        $query_delete .= " and merged_thread_id = -1";
+        $query_merge_thread = $show_merged_thread?"true":"merged_thread_id = -1";
         $query_select_categories = "SELECT thread_id, array_to_string(array_agg(w.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc, array_to_string(array_agg(w.color),'|') as categories_color FROM categories_list w JOIN thread_categories e ON e.category_id = w.category_id GROUP BY e.thread_id";
 
-        $query = "SELECT t.*, categories_ids, categories_desc, categories_color, (case when sf.user_id is NULL then false else true end) as favorite, (case when exists(select 1 from posts p where p.author_user_id = ? and p.thread_id = t.id) then true else false end) as current_user_posted FROM threads t JOIN ({$query_select_categories}) AS QSC ON QSC.thread_id = t.id LEFT JOIN student_favorites sf ON sf.thread_id = t.id and sf.user_id = ? WHERE {$query_delete} and ? = (SELECT count(*) FROM thread_categories tc WHERE tc.thread_id = t.id and category_id IN ({$query_multiple_qmarks})) and {$query_status} ORDER BY pinned DESC, favorite DESC, t.id DESC LIMIT ? OFFSET ?";
+        $query = "SELECT t.*, categories_ids, categories_desc, categories_color, (case when sf.user_id is NULL then false else true end) as favorite, (case when exists(select 1 from posts p where p.author_user_id = ? and p.thread_id = t.id) then true else false end) as current_user_posted FROM threads t JOIN ({$query_select_categories}) AS QSC ON QSC.thread_id = t.id LEFT JOIN student_favorites sf ON sf.thread_id = t.id and sf.user_id = ? WHERE {$query_delete} and {$query_merge_thread} and ? = (SELECT count(*) FROM thread_categories tc WHERE tc.thread_id = t.id and category_id IN ({$query_multiple_qmarks})) and {$query_status} ORDER BY pinned DESC, favorite DESC, t.id DESC LIMIT ? OFFSET ?";
 
         // Parameters
         $query_parameters   = array();
@@ -209,7 +209,12 @@ class DatabaseQueries {
 
     public function getFirstPostForThread($thread_id) {
         $this->course_db->query("SELECT * FROM posts WHERE parent_id = -1 AND thread_id = ?", array($thread_id));
-        return $this->course_db->rows()[0];
+        $rows = $this->course_db->rows();
+        if(count($rows) > 0) {
+            return $rows[0];
+        } else {
+            return null;
+        }
     }
 
     public function getPost($post_id){
@@ -1394,28 +1399,24 @@ DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=?
 // END FIXME
 
 
+    /**
+     * Gets the ids of all submitters who received a mark
+     * @param Mark $mark
+     * @return string[]
+     */
+    public function getSubmittersWhoGotMark(Mark $mark) {
+        // Switch the column based on gradeable team-ness
+        $submitter_type = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'gd_team_id' : 'gd_user_id';
+        $this->course_db->query("
+            SELECT gd.{$submitter_type}
+            FROM gradeable_component_mark_data gcmd
+              JOIN gradeable_data gd ON gd.gd_id=gcmd.gd_id
+            WHERE gcm_id = ?", [$mark->getId()]);
 
-    public function getUsersWhoGotMark($gc_id, GradeableComponentMark $mark, bool $team) {
-        $return_data = array();
-        $params = array($gc_id, $mark->getId());
-
-        if ($team) {
-            $this->course_db->query("
-                SELECT gd.gd_team_id
-                  FROM gradeable_component_mark_data gcmd
-                  JOIN gradeable_data gd ON gd.gd_id = gcmd.gd_id
-                 WHERE gc_id = ? AND gcm_id = ?
-            ", $params);
-            return $this->course_db->rows();
-        } else {
-            $this->course_db->query("
-                SELECT gd.gd_user_id
-                  FROM gradeable_component_mark_data gcmd
-                  JOIN gradeable_data gd ON gd.gd_id = gcmd.gd_id
-                 WHERE gc_id = ? AND gcm_id = ?
-            ", $params);
-            return $this->course_db->rows();
-        }
+        // Map the results into a non-associative array of team/user ids
+        return array_map(function ($row) use ($submitter_type) {
+            return $row[$submitter_type];
+        }, $this->course_db->rows());
     }
 
     public function insertGradeableComponentMarkData($gd_id, $gc_id, $gcd_grader_id, GradeableComponentMark $mark) {
@@ -2202,7 +2203,7 @@ AND gc_id IN (
 
     public function existsAnnouncements($show_deleted = false){
         $query_delete = $show_deleted?"true":"deleted = false";
-        $this->course_db->query("SELECT MAX(id) FROM threads where {$query_delete} AND pinned = true");
+        $this->course_db->query("SELECT MAX(id) FROM threads where {$query_delete} AND  merged_thread_id = -1 AND pinned = true");
         $result = $this->course_db->rows();
         return empty($result[0]["max"]) ? -1 : $result[0]["max"];
     }
@@ -2277,12 +2278,13 @@ AND gc_id IN (
     public function getPostsForThread($current_user, $thread_id, $show_deleted = false, $option = "tree"){
       $query_delete = $show_deleted?"true":"deleted = false";
       if($thread_id == -1) {
-        $announcement_id = $this->existsAnnouncements($show_deleted);
-        if($announcement_id == -1){
-          $this->course_db->query("SELECT MAX(id) as max from threads WHERE {$query_delete} and pinned = false");
-          $thread_id = $this->course_db->rows()[0]["max"];
+        $this->course_db->query("SELECT MAX(id) as max from threads WHERE deleted = false and merged_thread_id = -1 GROUP BY pinned ORDER BY pinned DESC");
+        $rows = $this->course_db->rows();
+        if(!empty($rows)) {
+            $thread_id = $rows[0]["max"];
         } else {
-          $thread_id = $announcement_id;
+            // No thread found, hence no posts found
+            return array();
         }
       }
       $history_query = "LEFT JOIN forum_posts_history fph ON (fph.post_id is NULL OR (fph.post_id = posts.id and NOT EXISTS (SELECT 1 from forum_posts_history WHERE post_id = fph.post_id and edit_timestamp > fph.edit_timestamp )))";
@@ -2300,7 +2302,7 @@ AND gc_id IN (
     }
 
     public function getRootPostOfNonMergedThread($thread_id, &$title, &$message) {
-        $this->course_db->query("SELECT title FROM threads WHERE id = ? and merged_thread_id = -1 and merged_post_id = -1 and deleted = false", array($thread_id));
+        $this->course_db->query("SELECT title FROM threads WHERE id = ? and merged_thread_id = -1 and merged_post_id = -1", array($thread_id));
         $result_rows = $this->course_db->rows();
         if(count($result_rows) == 0) {
             $message = "Can't find thread";
@@ -2336,7 +2338,7 @@ AND gc_id IN (
             $this->findChildren($child_root_post, $child_thread_id, $children);
 
             // $merged_post_id is PK of linking node and $merged_thread_id is immediate parent thread_id
-            $this->course_db->query("UPDATE threads SET merged_thread_id = ?, merged_post_id = ?, deleted = true WHERE id = ?", array($parent_thread_id, $child_root_post, $child_thread_id));
+            $this->course_db->query("UPDATE threads SET merged_thread_id = ?, merged_post_id = ? WHERE id = ?", array($parent_thread_id, $child_root_post, $child_thread_id));
             foreach($children as $post_id){
                 $this->course_db->query("UPDATE posts SET thread_id = ? WHERE id = ?", array($parent_thread_id,$post_id));
             }
@@ -2613,11 +2615,41 @@ AND gc_id IN (
     }
 
     /**
+     * Gets a user or team submitter by id
+     * @param string $id User or team id
+     * @return Submitter|null
+     */
+    public function getSubmitterById(string $id) {
+        $user = $this->core->getQueries()->getUserById($id);
+        if ($user !== null) {
+            return new Submitter($this->core, $user);
+        }
+        $team = $this->core->getQueries()->getTeamById($id);
+        if ($team !== null) {
+            return new Submitter($this->core, $team);
+        }
+        //TODO: Do we have other types of submitters?
+        return null;
+    }
+
+    /**
+     * Gets user or team submitters by id
+     * @param string[] $ids User or team ids
+     * @return Submitter[]
+     */
+    public function getSubmittersById(array $ids) {
+        //Get Submitter for each id in ids
+        return array_map(function($id) {
+            return $this->getSubmitterById($id);
+        }, $ids);
+    }
+
+    /**
      * Gets a single GradedGradeable associated with the provided gradeable and
      *  user/team.  Note: The user's team for this gradeable will be retrived if provided
      * @param \app\models\gradeable\Gradeable $gradeable
-     * @param $user|null The id of the user to get data for
-     * @param $team|null The id of the team to get data for
+     * @param string|null $user The id of the user to get data for
+     * @param string|null $team The id of the team to get data for
      * @return GradedGradeable|null The GradedGradeable or null if none found
      * @throws \InvalidArgumentException If any GradedGradeable or GradedComponent fails to construct
      */
@@ -2626,6 +2658,21 @@ AND gc_id IN (
             return $gg;
         }
         return null;
+    }
+
+    /**
+     * Gets a single GradedGradeable associated with the provided gradeable and
+     *  submitter.  Note: The user's team for this gradeable will be retrived if provided
+     * @param \app\models\gradeable\Gradeable $gradeable
+     * @param Submitter|null $submitter The submitter to get data for
+     * @return GradedGradeable|null The GradedGradeable or null if none found
+     * @throws \InvalidArgumentException If any GradedGradeable or GradedComponent fails to construct
+     */
+    public function getGradedGradeableForSubmitter(\app\models\gradeable\Gradeable $gradeable, Submitter $submitter) {
+        //Either user or team is set, the other should be null
+        $user_id = $submitter->getUser() ? $submitter->getUser()->getId() : null;
+        $team_id = $submitter->getTeam() ? $submitter->getTeam()->getId() : null;
+        return $this->getGradedGradeable($gradeable, $user_id, $team_id);
     }
 
     /**

@@ -6,6 +6,12 @@
     </div>
 {% endif %}
 
+{% if display_room_seating %}
+    <div class="content">
+        {% include 'navigation/RoomSeating.twig' %}
+    </div>
+{% endif %}
+
 <div class="content">
     <div class="nav-buttons">
         {% for button in top_buttons %}

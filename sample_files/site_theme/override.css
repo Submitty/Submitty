@@ -1,0 +1,18 @@
+/* Whole page background */
+body {
+    background-image: url(http://www.cs.rpi.edu/~cutler/classes/visualization/S18/images/vinca_minor_mirrored.jpg);
+}
+
+/* Make the center site have a transparent white bg instead of the blue gradient */
+#site-body {
+    background: rgba(240,240,240, 0.85) !important;
+}
+
+/* Force sidebars to 220px to line up with the image in top_bar.html */
+#container #left_sidebar, #container #right_sidebar {
+    width: 220px !important;
+    min-width: 220px !important;
+    background-color: rgba(220,220,220,0.65 );
+}
+
+/* Add your own custom css (and/or rainbows) here */
