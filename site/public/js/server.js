@@ -1534,8 +1534,8 @@ function dynamicScrollLoadPage(element, atEnd) {
     }
     var load_page_callback;
     var load_page_fail_callback;
-    var arrow_up = $(element).find(".fa-arrow-up");
-    var arrow_down = $(element).find(".fa-arrow-down");
+    var arrow_up = $(element).find(".fa-caret-up");
+    var arrow_down = $(element).find(".fa-caret-down");
     var spinner_up = arrow_up.prev();
     var spinner_down = arrow_down.next();
     $(element).data("dynamic_lock_load", true);
@@ -1673,7 +1673,7 @@ function alterShowMergeThreadStatus(newStatus, course) {
     location.reload();
 }
 
-function modifyThreadList(currentThreadId, currentCategoriesId, course){
+function modifyThreadList(currentThreadId, currentCategoriesId, course, success_callback){
     var categories_value = $("#thread_category").val();
     var thread_status_value = $("#thread_status_select").val();
     categories_value = (categories_value == null)?"":categories_value.join("|");
@@ -1695,14 +1695,17 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course){
                x = `${x}`;
                var jElement = $(".thread_list");
                jElement.children(":not(.fa)").remove();
-               $(".thread_list .fa-arrow-up").after(x);
+               $(".thread_list .fa-caret-up").after(x);
                jElement.attr("prev_page", '-1');
                jElement.attr("next_page", '2');
                jElement.data("dynamic_lock_load", false);
                $(".thread_list .fa-spinner").hide();
-               $(".thread_list .fa-arrow-up").hide();
-               $(".thread_list .fa-arrow-down").show();
+               $(".thread_list .fa-caret-up").hide();
+               $(".thread_list .fa-caret-down").show();
                dynamicScrollLoadIfScrollVisible(jElement);
+               if(success_callback != null) {
+                  success_callback();
+               }
             },
             error: function(){
                window.alert("Something went wrong when trying to filter. Please try again.");

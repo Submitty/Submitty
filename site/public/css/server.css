@@ -879,6 +879,17 @@ table .instructor .two-options{
     width: 10%;
 }
 
+.hover_glow {
+    opacity: 0.5;
+    filter: alpha(opacity=40);
+    z-index: 1;
+}
+
+.hover_glow:hover {
+    opacity: 1.0;
+    filter: alpha(opacity=100);
+}
+
 .cat-buttons:hover {
     opacity: 0.8;
     filter: alpha(opacity=80);
