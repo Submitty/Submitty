@@ -1695,11 +1695,13 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course){
                x = `${x}`;
                var jElement = $(".thread_list");
                jElement.children(":not(.fa)").remove();
-               jElement.prepend(x);
+               $(".thread_list .fa-arrow-up").after(x);
                jElement.attr("prev_page", '-1');
                jElement.attr("next_page", '2');
                jElement.data("dynamic_lock_load", false);
                $(".thread_list .fa-spinner").hide();
+               $(".thread_list .fa-arrow-up").hide();
+               $(".thread_list .fa-arrow-down").show();
                dynamicScrollLoadIfScrollVisible(jElement);
             },
             error: function(){
