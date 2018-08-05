@@ -14,7 +14,12 @@ html {
 }
 
 body {
+    font-family: 'Source Sans Pro', sans-serif;
+    height: 100%;
+    position: relative;
+}
 
+#site-body {
     /* OLD SEAFOAM GREEN COLOR */
     /* background-color: #B6CECE; */
 
@@ -27,10 +32,6 @@ body {
 
     background: linear-gradient(#0a6496, #b8d5e5);
     background-attachment: fixed;
-
-    font-family: 'Source Sans Pro', sans-serif;
-    height: 100%;
-    position: relative;
 }
 
 a, a:hover, a:link, a:visited {
@@ -254,11 +255,6 @@ table tr.table-header {
     padding: 5px 10px;
 }
 
-#nav li a {
-    width: 100%;
-    height: 100%;
-}
-
 #nav li a:hover {
     text-decoration: none;
 }
@@ -296,9 +292,8 @@ table tr.table-header {
     min-height: 125px;
     height: auto;
     width: 100%;
-    box-shadow: 0 2px 15px -5px #888888;
     font-family: 'Open Sans Condensed', sans-serif;
-
+    overflow: hidden;
 }
 
 #header-text {
@@ -308,7 +303,7 @@ table tr.table-header {
 
     /*margin-top: 5px;*/
     margin-left: 20px;
-    width: 100%
+    width: 100%;
 }
 
 #header a,
@@ -333,7 +328,6 @@ table tr.table-header {
     width: 357px;
     background: url('../img/submitty_logo.png') no-repeat;
     background-size: 357px 125px;
-
 }
 
 .content {
@@ -351,6 +345,10 @@ table tr.table-header {
 #footer {
     margin-top: 30px;
     z-index: 20;
+}
+
+#push {
+    flex-grow: 1;
 }
 
 #push, #footer {
@@ -877,6 +875,10 @@ table .instructor .two-options{
     padding-bottom: 10px !important;
 }
 
+.td-open {
+    width: 10%;
+}
+
 .cat-buttons:hover {
     opacity: 0.8;
     filter: alpha(opacity=80);
@@ -997,6 +999,11 @@ table .instructor .two-options{
     text-align: right;
 }
 
+.popup-form .form-button-container .btn {
+    box-sizing: unset;
+    min-width: 4em;
+}
+
 .popup-form.decent div {
     width: initial;
     display: block;
@@ -1042,6 +1049,7 @@ table .instructor .two-options{
     margin-bottom: 60px;
 }
 
+/* Makes the cursor change to a hand on the checkpoints so that it is clear they can be clicked on */
 .cell-grade {
     cursor: pointer;
 }
@@ -1049,6 +1057,13 @@ table .instructor .two-options{
 .cell-grade {
     border-left: 1px solid #dddddd;
 }
+
+/* Makes the grade and time on checkpoint pages not visible at first */
+.simple-grade-grader,
+.simple-grade-date {
+    display: none;
+}
+
 
 .tooltip {
     position: relative;
@@ -1159,6 +1174,47 @@ end of styles used in the admin gradeable page
     text-align: center;
 }
 
+/* styles for the colors for the electronic grader details page */
+/* color for no grader */
+.grader-NULL {
+    color: white;
+    text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
+}
+
+/* color for student/peer grading */
+.grader-4 {
+    color: #cc66ff; /* purple */
+}
+
+/* color for a limited access grader */
+.grader-3 {
+    color: #ffcc33;  /* yellow */
+}
+
+/* color for an instructor or full access grader */
+.grader-2,
+.grader-1 {
+    color: #33cc33;  /* green */
+}
+
+/* color for double graded */
+.grader-double {
+    color: #006699;  /* dark blue */
+}
+
+/* prevents line break in the graded questions column */
+.td-graded-questions {
+    white-space: nowrap;
+}
+
+/* color for nav page edit button for rebuild error on gradeable */
+.edit-build-error {
+    color: red;
+}
 
 .required::-webkit-input-placeholder { color: red; }
 .required:-moz-placeholder { color: red; }
@@ -1188,4 +1244,83 @@ end of styles used in the admin gradeable page
     width: 420px;
     min-width: 400px;
     border-radius: 5px;
+}
+
+/* Site Wrapper */
+
+#container {
+    display: flex;
+    flex-direction: column;
+}
+
+#container #center-container {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+}
+
+#site-body {
+    flex-grow: 2;
+    display: flex;
+    flex-direction: column;
+}
+
+#container iframe#top_bar, #container iframe#bottom_bar {
+    height: 60px;
+}
+
+#container iframe#left_sidebar, #container iframe#right_sidebar {
+    width: 200px;
+}
+
+/* Site Wrapper View */
+
+.wrapper-example {
+    width: 400px;
+    height: 240px;
+    display: flex;
+    flex-direction: column;
+}
+.wrapper-example .wrapper-center {
+    display: flex;
+    flex-grow: 2;
+    flex-direction: row;
+}
+.wrapper-example .wrapper-top,
+.wrapper-example .wrapper-left,
+.wrapper-example .wrapper-body,
+.wrapper-example .wrapper-right,
+.wrapper-example .wrapper-bottom {
+    flex-grow: 1;
+    border: 1px solid #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+.wrapper-example .wrapper-body {
+    flex-grow: 5;
+}
+.wrapper-top {
+    background-color: #ff9999;
+}
+.wrapper-left {
+    background-color: #ffff66;
+}
+.wrapper-body {
+    background-color: #ffffff;
+}
+.wrapper-right {
+    background-color: #99ff99;
+}
+.wrapper-bottom {
+    background-color: #99ccff;
+}
+.wrapper-upload th {
+    background-color: #f4f4f4;
+}
+
+.wrapper-upload td, .wrapper-upload th {
+    padding: 4px;
+    border: 1px solid #000;
 }

@@ -132,6 +132,9 @@ class BaseTestCase(unittest.TestCase):
         self.driver.find_element_by_xpath("//div[@id='header-text']/h2[2]/a[text()='{}']".format(text)).click()
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(loaded_selector))
 
+    def wait_after_ajax(self):
+        WebDriverWait(self.driver, 10).until(lambda driver: driver.execute_script("return jQuery.active == 0"))    
+
     @staticmethod
     def wait_user_input():
         """

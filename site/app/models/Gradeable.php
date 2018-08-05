@@ -81,12 +81,13 @@ use app\libraries\Utils;
  * @method int|null getGdId()
  * @method void setGdId(int $gd_id)
  * @method \DateTime getUserViewedDate()
- * @method float getTotalPeerGradingNonExtraCredit()
+ * @method float getTotalPeerGradingPoints()
  * @method int getLateDayExceptions()
  * @method int getAllowedLateDays()
  * @method int getLateDays()
  * @method int getStudentAllowedLateDays()
  * @method int getRegradeStatus()
+ * @method int getJustRegraded()
  */
 class Gradeable extends AbstractModel {
     
@@ -283,11 +284,9 @@ class Gradeable extends AbstractModel {
 
     protected $been_tagraded = false;
 
-    protected $total_tagrading_non_extra_credit = 0;
-    protected $total_tagrading_extra_credit = 0;
+    protected $total_ta_grading_points = 0;
     
-    protected $total_peer_grading_non_extra_credit = 0;
-    protected $total_peer_grading_extra_credit=0;
+    protected $total_peer_grading_points = 0;
 
     /** @property @var \app\models\User|null */
     protected $user = null;
@@ -317,6 +316,9 @@ class Gradeable extends AbstractModel {
 
     /** @property @var int */
     protected $curr_late_charged = 0;
+
+    /** @property @var boolean */
+    protected $just_regraded = false;
 
     public function __construct(Core $core, $details=array(), User $user = null) {
         parent::__construct($core);
@@ -451,7 +453,7 @@ class Gradeable extends AbstractModel {
 
                 if (!$component_for_info->getIsText()) {
                     $max_value = $component_for_info->getMaxValue();
-                    $this->total_tagrading_non_extra_credit += $max_value;
+                    $this->total_ta_grading_points += $max_value;
                 }
             }
             // We don't sort by order within the DB as we're aggregating the component details into an array so we'd
@@ -920,8 +922,8 @@ class Gradeable extends AbstractModel {
         return $points;
     }
 
-    public function getTotalTANonExtraCreditPoints() {
-        return $this->total_tagrading_non_extra_credit;
+    public function getTotalTAPoints() {
+        return $this->total_ta_grading_points;
     }
 
     public function getTAViewDate(){
@@ -1018,7 +1020,9 @@ class Gradeable extends AbstractModel {
     public function resetUserViewedDate() {
         $this->core->getQueries()->resetUserViewedDate($this);
     }
-
+    public function setJustRegraded($bool) {
+        $this->just_regraded=$bool;
+    }
     public function getActiveDaysLate() {
         $return =  DateUtils::calculateDayDiff($this->due_date, $this->submission_time);
         if ($return < 0) {
@@ -1232,7 +1236,7 @@ class Gradeable extends AbstractModel {
             "graded_autograder_points" => $this->getGradedAutograderPoints(),
             "total_autograder_non_extra_credit_points" => $this->getTotalAutograderNonExtraCreditPoints(),
             "graded_ta_points" => $this->getGradedTAPoints(),
-            "total_ta_non_extra_credit_points" => $this->getTotalTANonExtraCreditPoints(),
+            "total_ta_points" => $this->getTotalTAPoints(),
             "components" => []
         ];
 
@@ -1403,7 +1407,7 @@ class Gradeable extends AbstractModel {
 
             $sections = [];
             foreach ($section_names as $section_name) {
-                $sections[] = new GradingSection($this->core, $this->isGradeByRegistration(), $section_name, $graders[$section_name], $users[$section_name] ?? null, $teams[$section_name] ?? null);
+                $sections[] = new GradingSection($this->core, $this->isGradeByRegistration(), $section_name, $graders[$section_name] ?? [], $users[$section_name] ?? null, $teams[$section_name] ?? null);
             }
 
             return $sections;

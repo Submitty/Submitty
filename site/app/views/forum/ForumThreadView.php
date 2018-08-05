@@ -85,9 +85,9 @@ HTML;
 HTML;
 			foreach($data as $post) {
 				$author = htmlentities($post['author'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-				$full_name = $this->core->getQueries()->getDisplayUserNameFromUserId($post["p_author"]);
-				$first_name = htmlentities(trim($full_name["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-				$last_name = htmlentities(trim($full_name["last_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+				$user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($post["p_author"]);
+				$first_name = htmlentities(trim($user_info["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+				$last_name = htmlentities(trim($user_info["last_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 				$visible_username = $first_name . " " . substr($last_name, 0 , 1) . ".";
 
 				if($post["anonymous"]){
@@ -141,21 +141,23 @@ HTML;
     }
 	
 	/** Shows Forums thread splash page, including all posts
-		for a specific thread, in addition to all of the threads
-		that have been created to be displayed in the left panel.
+		for a specific thread, in addition to head of the threads
+		that have been created after applying filter and to be
+		displayed in the left panel.
 	*/
-	public function showForumThreads($user, $posts, $threads, $show_deleted, $display_option, $max_thread) {
+	public function showForumThreads($user, $posts, $threadsHead, $show_deleted, $show_merged_thread, $display_option, $max_thread) {
 		if(!$this->forumAccess()){
 			$this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
 			return;
 		}
 
 		$threadExists = $this->core->getQueries()->threadExists();
-		$thread_count = count($threads);
+		$filteredThreadExists = (count($threadsHead)>0);
 		$currentThread = -1;
-		$currentCategoryId = array();
+		$currentCategoriesIds = array();
 		$currentCourse = $this->core->getConfig()->getCourse();
-		$threadFiltering = $threadExists && $thread_count == 0 && !empty($_COOKIE[$currentCourse . '_forum_categories']);
+		$threadFiltering = $threadExists && !$filteredThreadExists && !(empty($_COOKIE[$currentCourse . '_forum_categories']) && empty($_COOKIE['forum_thread_status']));
+
 
 		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
 		
@@ -221,14 +223,24 @@ HTML;
 			</script>
 HTML;
 	}
-	if($thread_count > 0 || $threadFiltering) {
+	if($filteredThreadExists || $threadFiltering) {
 		$currentThread = isset($_GET["thread_id"]) && is_numeric($_GET["thread_id"]) && (int)$_GET["thread_id"] < $max_thread && (int)$_GET["thread_id"] > 0 ? (int)$_GET["thread_id"] : $posts[0]["thread_id"];
 		$currentCategoriesIds = $this->core->getQueries()->getCategoriesIdForThread($currentThread);
+	}
+	if($show_merged_thread) {
+		$show_merged_thread_class = "active";
+		$show_merged_thread_action = "alterShowMergeThreadStatus(0, '{$currentCourse}');";
+		$show_merged_thread_title = "Hide Merged Threads";
+	} else {
+		$show_merged_thread_class = "";
+		$show_merged_thread_action = "alterShowMergeThreadStatus(1, '{$currentCourse}');";
+		$show_merged_thread_title = "Show Merged Threads";
 	}
 	$return .= <<<HTML
 		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
 		<div style="background-color: #E9EFEF; box-shadow:0 2px 15px -5px #888888;border-radius:3px;margin-left:20px;margin-top:10px; height:40px; margin-bottom:10px;margin-right:20px;" id="forum_bar">
 		<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Create thread" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}"><i class="fa fa-plus-circle"></i> Create Thread</a>
+		<a class="btn btn-primary {$show_merged_thread_class}" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="{$show_merged_thread_title}" onclick="{$show_merged_thread_action}">{$show_merged_thread_title}</a>
 HTML;
 	if($this->core->getUser()->getGroup() <= 2){
 		if($show_deleted) {
@@ -249,11 +261,19 @@ HTML;
 HTML;
 
 	$cookieSelectedCategories = '';
+	$cookieSelectedThreadStatus = '';
 	$category_ids_array = array_column($categories, 'category_id');
 	if(!empty($_COOKIE[$currentCourse . '_forum_categories'])) {
 		foreach(explode('|', $_COOKIE[$currentCourse . '_forum_categories']) as $selectedId) {
 			if(in_array((int)$selectedId, $category_ids_array)) {
 				$cookieSelectedCategories[] = $selectedId;
+			}
+		}
+	}
+	if(!empty($_COOKIE['forum_thread_status'])) {
+		foreach(explode('|', $_COOKIE['forum_thread_status']) as $selectedStatus) {
+			if(in_array((int)$selectedStatus, array(-1,0,1))) {
+				$cookieSelectedThreadStatus[] = $selectedStatus;
 			}
 		}
 	}
@@ -296,28 +316,34 @@ HTML;
 				</div>
 HTML;
 		} else {
-
 			$return .= <<<HTML
 				<div id="forum_wrapper">
-					<div id="thread_list" class="thread_list">
+					<div id="thread_list" class="thread_list" next_page='2'>
 HTML;
 				$activeThreadAnnouncement = false;
 				$activeThreadTitle = "";
 				$function_date = 'date_format';
 				$activeThread = array();
-				$return .= $this->displayThreadList($threads, false, $activeThreadAnnouncement, $activeThreadTitle, $activeThread, $currentThread, $currentCategoriesIds);
+				$return .= $this->displayThreadList($threadsHead, false, $activeThreadAnnouncement, $activeThreadTitle, $activeThread, $currentThread, $currentCategoriesIds);
 				if(count($activeThread) == 0) {
 					$activeThread = $this->core->getQueries()->getThread($currentThread)[0];
 					$activeThreadTitle = $activeThread['title'];
 				}
-					$activeThreadTitle = htmlentities(html_entity_decode($activeThreadTitle, ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+			$activeThreadTitle = htmlentities(html_entity_decode($activeThreadTitle, ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
 			$thread_id = -1;
 			$userAccessToAnon = ($this->core->getUser()->getGroup() < 4) ? true : false;
 			$title_html = '';
 			$return .= <<<HTML
 
+				
+					<i class="fa fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
 					</div>
+					<script type="text/javascript">
+						$(function(){
+							dynamicScrollContentOnDemand($('.thread_list'), buildUrl({'component': 'forum', 'page': 'get_threads', 'page_number':'{{#}}'}), {$currentThread}, '', '{$currentCourse}');
+						});
+					</script>
 					<div style="display:inline-block;width:70%; float: right;" id="posts_list" class="posts_list">
 HTML;
 
@@ -449,18 +475,9 @@ HTML;
 
         if($this->core->getUser()->getGroup() <= 2){
             $current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
-            $current_thead_date = date_create($current_thread_first_post["timestamp"]);
-            $merge_thread_list = array();
-            for($i = 0; $i < count($threads); $i++){
-                $first_post = $this->core->getQueries()->getFirstPostForThread($threads[$i]["id"]);
-                $date = date_create($first_post['timestamp']);
-                if($current_thead_date>$date) {
-                    array_push($merge_thread_list, $threads[$i]);
-                }
-            }
-
+            $current_thread_date = $current_thread_first_post["timestamp"];
             $return .= $this->core->getOutput()->renderTwigTemplate("forum/MergeThreadsForm.twig", [
-                "merge_thread_list" => $merge_thread_list,
+                "current_thread_date" => $current_thread_date,
                 "current_thread" => $currentThread
             ]);
         }
@@ -473,6 +490,7 @@ HTML;
             "current_category_ids" => $currentCategoriesIds,
             "current_course" => $currentCourse,
             "cookie_selected_categories" => $cookieSelectedCategories,
+            "cookie_selected_thread_status" => $cookieSelectedThreadStatus,
             "display_option" => $display_option,
             "thread_exists" => $threadExists
         ]);
@@ -499,7 +517,18 @@ HTML;
 					$end = 10;
 					foreach($threads as $thread){
 						$first_post = $this->core->getQueries()->getFirstPostForThread($thread["id"]);
-						$date = date_create($first_post['timestamp']);
+						if(is_null($first_post)) {
+							// Thread without any posts(eg. Merged Thread)
+							$first_post = array('content' => "");
+							$date = null;
+						} else {
+							$date = date_create($first_post['timestamp']);
+						}
+						if($thread['merged_thread_id'] != -1){
+							// For the merged threads
+							$thread['status'] = 0;
+						}
+
 						$class = "thread_box";
 						// $current_categories_ids should be subset of $thread["categories_ids"]
 						$issubset = (count(array_intersect($current_categories_ids, $thread["categories_ids"])) == count($current_categories_ids));
@@ -548,6 +577,10 @@ HTML;
 							$titleDisplay .= "...";
 						}
 						$titleDisplay = htmlentities($titleDisplay, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+						if($thread["current_user_posted"]) {
+							$icon = '<i class="fa fa-comments"></i> ';
+							$titleDisplay = $icon . $titleDisplay;
+						}
 						$first_post_content = htmlentities($first_post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 						$return .= <<<HTML
 						<a href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread['id']))}">
@@ -563,6 +596,12 @@ HTML;
 							$return .= <<<HTML
 							<i class="fa fa-thumb-tack" style="padding-left:3px;position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i>
+HTML;
+						}
+						if($thread['merged_thread_id'] != -1) {
+							$return .= <<<HTML
+							<i class="fa fa-link" style="padding-left:3px;position:relative; float:right; display:inline-block; color: white; -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: black;" title="Thread Merged" aria-hidden="true"></i>
 HTML;
 						}
 						if (!isset($thread['status'])) {
@@ -597,8 +636,12 @@ HTML;
 							<span class="label_forum" style="background-color: {$category_content[1]}">{$category_content[0]}</span>
 HTML;
 						}
+						if(!is_null($date)) {
+							$return .= <<<HTML
+							<h5 style="float:right; font-weight:normal;margin-top:5px">{$function_date($date,"n/j g:i A")}</h5>
+HTML;
+						}
 						$return .= <<<HTML
-						<h5 style="float:right; font-weight:normal;margin-top:5px">{$function_date($date,"n/j g:i A")}</h5>
 						</div>
 						</a>
 						<hr style="margin-top: 0px;margin-bottom:0px;">
@@ -655,6 +698,7 @@ HTML;
 	}
 
 	public function createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level, $display_option){
+		$current_user = $this->core->getUser()->getId();
 		$post_html = "";
 		$post_id = $post["id"];
 		$thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
@@ -665,9 +709,10 @@ HTML;
 		} else {
 			$edit_date = null;
 		}
-		$full_name = $this->core->getQueries()->getDisplayUserNameFromUserId($post["author_user_id"]);
-		$first_name = htmlentities(trim($full_name["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-		$last_name = htmlentities(trim($full_name["last_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+		$user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($post["author_user_id"]);
+		$author_email = htmlentities(trim($user_info['user_email']), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+		$first_name = htmlentities(trim($user_info["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+		$last_name = htmlentities(trim($user_info["last_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 		$visible_username = $first_name . " " . substr($last_name, 0 , 1) . ".";
 
 
@@ -733,7 +778,12 @@ HTML;
 		$return .= <<<HTML
 			<span style="margin-top:8px;margin-left:10px;float:right;">							
 HTML;
-
+       if($this->core->getUser()->getGroup() <= 2 && $post["author_user_id"]!=$current_user){
+            $return .= <<<HTML
+                <a style=" margin-right:2px;display:inline-block; color:black; " onClick='$(this).next().toggle();' title="Show/Hide email address"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+                <a href="mailto:{$author_email}" style="display: none;">{$author_email}</a>
+HTML;
+}
 		if($this->core->getUser()->getGroup() <= 2){
 			$info_name = $first_name . " " . $last_name . " (" . $post['author_user_id'] . ")";
 			$visible_user_json = json_encode($visible_username);

@@ -175,6 +175,14 @@ class GradedComponent extends AbstractModel {
         return $this->getTaGradedGradeable()->getGradedGradeable()->getGradeable()->roundPointValue($score);
     }
 
+    /**
+     * Gets if this GradedComponent is new (not in db yet)
+     * @return bool
+     */
+    public function isNew() {
+        return $this->db_mark_ids === null;
+    }
+
     /* Overridden setters with validation */
 
     /**
@@ -252,7 +260,7 @@ class GradedComponent extends AbstractModel {
      * Sets the score the submitter received for this component--clamped or custom mark--not clamped
      * @param float $score
      */
-    public function setScore($score) {
+    public function setScore(float $score) {
         if ($this->component->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {
             $this->score = $score;
         } else {
