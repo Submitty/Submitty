@@ -55,6 +55,9 @@ class Output {
         $this->twig->addFunction(new \Twig_Function("render_template", function(... $args) {
             return call_user_func_array('self::renderTemplate', $args);
         }, ["is_safe" => ["html"]]));
+        if($this->core->getConfig()->wrapperEnabled()) {
+            $this->twig_loader->addPath(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site'), $namespace = 'site_uploads');
+        }
     }
 
     public function setInternalResources() {
@@ -266,7 +269,23 @@ class Output {
 
     private function renderHeader() {
         if ($this->use_header) {
-            return $this->renderTemplate('Global', 'header', $this->breadcrumbs, $this->css, $this->js);
+            $wrapper_files = $this->core->getConfig()->getWrapperFiles();
+            $wrapper_urls = array_map(function($file) {
+                return $this->core->buildUrl([
+                    'component' => 'misc',
+                    'page' => 'read_file',
+                    'dir' => 'site',
+                    'path' => $file,
+                    'file' => pathinfo($file, PATHINFO_FILENAME),
+                    'csrf_token' => $this->core->getCsrfToken()
+                ]);
+            },  $wrapper_files);
+
+            if (array_key_exists('override.css', $wrapper_urls)) {
+                $this->css[] = $wrapper_urls['override.css'];
+            }
+
+            return $this->renderTemplate('Global', 'header', $this->breadcrumbs, $wrapper_urls, $this->css, $this->js);
         }
         else {
             return '';
@@ -274,7 +293,22 @@ class Output {
     }
 
     private function renderFooter() {
-        return ($this->use_footer) ? $this->renderTemplate('Global', 'footer', (microtime(true) - $this->start_time)) : "";
+        if ($this->use_footer) {
+            $wrapper_files = $this->core->getConfig()->getWrapperFiles();
+            $wrapper_urls = array_map(function($file) {
+                return $this->core->buildUrl([
+                    'component' => 'misc',
+                    'page' => 'read_file',
+                    'dir' => 'site',
+                    'path' => $file,
+                    'file' => pathinfo($file, PATHINFO_FILENAME),
+                    'csrf_token' => $this->core->getCsrfToken()
+                ]);
+            },  $wrapper_files);
+            return $this->renderTemplate('Global', 'footer', (microtime(true) - $this->start_time), $wrapper_urls);
+        } else {
+            return '';
+        }
     }
 
     public function bufferOutput() {

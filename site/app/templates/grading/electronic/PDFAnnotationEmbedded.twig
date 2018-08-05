@@ -38,9 +38,18 @@
 </div>
 
 <script>
-    let annotations = JSON.parse({{ annotation_jsons|json_encode|raw }});
-    for(let grader in annotations){
-        localStorage.setItem('{{ filename }}/' + grader +'/annotations', annotations[grader]);
+
+    try {
+        let annotations = JSON.parse({{ annotation_jsons|json_encode|raw }});
+        for(let grader in annotations){
+            localStorage.setItem('{{ filename }}/' + grader +'/annotations', annotations[grader]);
+        }
+    } catch {
+        alert("Can't fetch annotations");
     }
+    {% if student_popup is defined and student_popup == true %}
+    render("{{ gradeable_id }}", "{{ user_id }}", '{{ filename }}', '{{ pdf_url_base }}');
+    {% else %}
     render("{{ gradeable_id }}", "{{ user_id }}", "{{ grader_id }}", '{{ filename }}');
+    {% endif %}
 </script>
