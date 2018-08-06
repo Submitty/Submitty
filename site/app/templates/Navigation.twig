@@ -80,6 +80,10 @@
                 aria-label="{{ button.getAriaLabel() }}"
             {% endif %}
         >
+            {% if button.getNotificationsCount() > 0 %}
+                <span class="notification_badge">{{  button.getNotificationsCount() }} </span>
+            {% endif %}
+
             {% if not button.isTitleOnHover() and button.getTitle() != null %}
                 {{ button.getTitle() }}
             {% endif %}

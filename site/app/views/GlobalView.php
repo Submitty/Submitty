@@ -63,6 +63,11 @@ class GlobalView extends AbstractView {
             }
         }
 
+        $notifications_info = null;
+        if ($this->core->getUser() && $this->core->getConfig()->isCourseLoaded()) {
+            $notifications_info = $this->core->getQueries()->getUnreadNotificationsCount($this->core->getUser()->getId(), null);
+        }
+
         return $this->core->getOutput()->renderTwigTemplate("GlobalHeader.twig", [
             "messages" => $messages,
             "css" => $css,
@@ -73,6 +78,7 @@ class GlobalView extends AbstractView {
             "user_first_name" => $this->core->getUser() ? $this->core->getUser()->getDisplayedFirstName() : "",
             "base_url" => $this->core->getConfig()->getBaseUrl(),
             "site_url" => $this->core->getConfig()->getSiteUrl(),
+            "notifications_info" => $notifications_info,
             "wrapper_enabled" => $this->core->getConfig()->wrapperEnabled(),
             "wrapper_urls" => $wrapper_urls
         ]);

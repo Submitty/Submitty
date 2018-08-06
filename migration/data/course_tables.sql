@@ -499,6 +499,25 @@ CREATE TABLE regrade_discussion (
     deleted BOOLEAN DEFAULT FALSE NOT NULL
 );
 
+--
+-- Name: notifications_component_enum; Type: ENUM; Schema: public; Owner: -
+--
+CREATE TYPE notifications_component AS ENUM ('forum');
+
+--
+-- Name: notifications; Type: TABLE; Schema: public; Owner: -
+--
+CREATE TABLE notifications (
+    id serial NOT NULL PRIMARY KEY,
+    component notifications_component NOT NULL,
+    metadata TEXT NOT NULL,
+    content TEXT NOT NULL,
+    from_user_id VARCHAR(255),
+    to_user_id VARCHAR(255) NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    seen_at timestamp with time zone
+);
+
 
 -- Begins Forum 
 
@@ -1038,12 +1057,28 @@ ALTER TABLE ONLY teams
 
 ALTER TABLE ONLY teams
     ADD CONSTRAINT teams_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
+
 --
 -- Name: regrade_discussion; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY regrade_discussion
     ADD CONSTRAINT regrade_discussion_regrade_requests_id_fk FOREIGN KEY (regrade_id) REFERENCES regrade_requests(id) ON UPDATE CASCADE;
+
+--
+-- Name: notifications_to_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY notifications
+    ADD CONSTRAINT notifications_to_user_id_fkey FOREIGN KEY (to_user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
+
+--
+-- Name: notifications_from_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY notifications
+    ADD CONSTRAINT notifications_from_user_id_fkey FOREIGN KEY (from_user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
+
 -- Forum Key relationships
 
 ALTER TABLE "posts" ADD CONSTRAINT "posts_fk0" FOREIGN KEY ("thread_id") REFERENCES "threads"("id");
