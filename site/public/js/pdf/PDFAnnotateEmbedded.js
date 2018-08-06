@@ -3,8 +3,6 @@ let documentId = '';
 let PAGE_HEIGHT;
 let RENDER_OPTIONS = {
     documentId,
-    //User id in this case is the grader
-    userId: null,
     pdfDocument: null,
     scale: parseFloat(localStorage.getItem('scale')) || 1,
     rotate: parseInt(localStorage.getItem('rotate')) || 0
@@ -15,7 +13,6 @@ let GENERAL_INFORMATION = {
     file_name: "",
 }
 
-PDFAnnotate.setStoreAdapter(new PDFAnnotate.LocalStoreAdapter());
 PDFJS.workerSrc = 'js/pdf/pdf.worker.js';
 
 /*
@@ -59,7 +56,7 @@ function render(gradeable_id, user_id, grader_id, file_name) {
             GENERAL_INFORMATION.gradeable_id = gradeable_id;
             GENERAL_INFORMATION.file_name = file_name;
             RENDER_OPTIONS.documentId = file_name;
-            RENDER_OPTIONS.userId = grader_id;
+            PDFAnnotate.setStoreAdapter(new PDFAnnotate.LocalStoreAdapter(grader_id));
             // documentId = file_name;
             var pdfData = JSON.parse(data);
             pdfData = atob(pdfData);
