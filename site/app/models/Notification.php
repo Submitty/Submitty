@@ -203,7 +203,12 @@ class Notification extends AbstractModel {
      * @return $trimmed_message
      */
     private function textShortner($message) {
-        return mb_strimwidth(str_replace("\n", " ", $message), 0, 40, "...");
+        $max_length = 40;
+        $message = str_replace("\n", " ", $message);
+        if(strlen($message) > $max_length) {
+            $message = substr($message, 0, $max_length - 3) . "...";
+        }
+        return $message;
     }
 
     /**
