@@ -128,12 +128,12 @@ function getMarkView(c_index, m_index, m_id, editEnabled) {
     });
 }
 
-function ajaxGetMarkData(gradeable_id, user_id, component_id, successCallback, errorCallback) {
+function ajaxGetGradedComponent(gradeable_id, user_id, component_id, successCallback, errorCallback) {
     $.getJSON({
             url: buildUrl({
                 'component': 'grading',
                 'page': 'electronic',
-                'action': 'get_mark_data',
+                'action': 'get_graded_component',
                 'gradeable_id' : gradeable_id,
                 'anon_id' : user_id,
                 'component_id' : component_id
@@ -468,7 +468,7 @@ function updateMarksOnPage(c_index) {
     }
     parent.children().remove();
     parent.append("<tr><td colspan='4'>Loading...</td></tr>");
-    ajaxGetMarkData(gradeable.id, gradeable.user_id, component.id, function(data) {
+    ajaxGetGradedComponent(gradeable.id, gradeable.user_id, component.id, function(data) {
         // If nothing has changed, then don't update
         if (!haveMarksChanged(c_index, data)){
             return;
@@ -1055,7 +1055,7 @@ function saveLastOpenedMark(sync, successCallback, errorCallback) {
 function saveMark(c_index, sync, override, successCallback, errorCallback) {
     var gradeable = grading_data.gradeable;
     if(editModeEnabled){
-        ajaxGetMarkData(gradeable.id, gradeable.user_id, gradeable.components[c_index-1].id , function(data){
+        ajaxGetGradedComponent(gradeable.id, gradeable.user_id, gradeable.components[c_index-1].id , function(data){
         saveMarkEditMode(c_index, sync, successCallback, errorCallback, data, override);
        }); 
         return;

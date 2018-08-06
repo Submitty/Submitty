@@ -1,11 +1,11 @@
-<div id="grading_rubric" class="draggable rubric_panel {{ gradeable.useTAGrading() ? "" : "empty" }}" style="right:15px; top:140px; width:48%; height:42%;">
+<div id="grading_rubric" class="draggable rubric_panel {{ is_ta_grading ? "" : "empty" }}" style="right:15px; top:140px; width:48%; height:42%;">
     <div class="draggable_content">
         <span class="grading_label">Grading Rubric</span>
-        {% if gradeable.useTAGrading() %}
+        {% if is_ta_grading %}
             <div style="float: right; position: relative; top: 10px; right: 1%;">
                 {# Verify all button #}
                 {% if display_verify_all %}
-                    <input id='verifyAllButton' type='button' style="display: inline;" class="btn btn-default" value='Verify All' onclick='verifyMark("{{ gradeable.getId() }}",-1,"{{ user.getAnonId() }}",true);'/>
+                    <input id='verifyAllButton' type='button' style="display: inline;" class="btn btn-default" value='Verify All' onclick='verifyMark("{{ gradeable_id }}",-1,"{{ submitter_id }}",true);'/>
                 {% endif %}
                 {# /Edit Mode Button #}
                 <span> <input id='EditModeButton' type='checkbox' value='Enable Editing Mode' onclick='toggleEditMode(); updateCookies();'/> Enable Editing Mode</span>
@@ -19,38 +19,46 @@
             </div>
 
             {# Wrong version warnings #}
-            {% if gradeable.getActiveVersion() == 0 %}
-                {% if gradeable.hasSubmitted() %}
+            {% if not has_active_version %}
+                {% if has_submission %}
                     {# Cancelled submission #}
                     <div class="red-message" style="text-align: center">Cancelled Submission</div>
                 {% else %}
                     {# No submission #}
                     <div class="red-message" style="text-align: center">No Submission</div>
                 {% endif %}
-            {% elseif gradeable.getCurrentVersionNumber() != gradeable.getActiveVersion() %}
+            {% elseif version_conflict %}
                 {# Opened a different version #}
                 <div class="red-message" style="text-align: center">Select the correct submission version to grade</div>
             {% endif %}
 
             <div class="inner-container" id="grading-box">
-                {% if gradeable.getActiveVersion() == 0 %}
-                    <h4>No Submission</h4>
+                {% if has_active_version %}
                     <script type="application/javascript">
-                        var grading_data = null;
+                        $(document).ready(function () {
+                            ajaxGetGradeableRubric('{{ gradeable_id }}', function (gradeable) {
+                                ajaxGetGradedGradeable('{{ gradeable_id }}', '{{ submitter_id }}', function (graded_gradeable) {
+                                    renderGradingGradeable(gradeable, graded_gradeable)
+                                        .then(function (elements) {
+                                            $("#grading-box").append(elements);
+                                            updateAllProgressPoints();
+                                        })
+                                        .catch(function (err) {
+                                            alert("Could not render gradeable: " + err.message);
+                                            console.error(err);
+                                        });
+                                }, function (message, data) {
+                                    alert('Could not fetch graded gradeable: ' + message);
+                                    console.log(data);
+                                });
+                            }, function (message, data) {
+                                alert('Could not fetch gradeable rubric: ' + message);
+                                console.log(data);
+                            });
+                        });
                     </script>
                 {% else %}
-                    <script type="application/javascript">
-                        var grading_data = {{ grading_data|raw }};
-                        renderGradeable(grading_data)
-                            .then(function(elements) {
-                                $("#grading-box").append(elements);
-                                updateAllProgressPoints();
-                            })
-                            .catch(function(err) {
-                                alert("Could not render gradeable: " + err.message);
-                                console.error(err);
-                            });
-                    </script>
+                    <h4>No Submission</h4>
                 {% endif %}
             </div>
         {% else %}

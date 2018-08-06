@@ -3,25 +3,28 @@
  * @param grading_data Gradeable data structure (see Gradeable.php/getGradedData())
  * @returns {Promise} Will fire when the template is loaded and rendered
  */
-function renderGradeable(grading_data) {
+function renderGradingGradeable(gradeable, graded_gradeable) {
     return new Promise(function(accept, reject) {
         Twig.twig({
-            id: "Gradeable",
-            href: "templates/grading/Gradeable.twig",
+            id: "GradeGradeable",
+            href: "templates/grading/GradeGradeable.twig",
             async: true,
             load: function (template) {
-                accept(template.render(grading_data));
+                accept(template.render({
+                    'gradeable': gradeable,
+                    'graded_gradeable': graded_gradeable
+                }));
             },
             error: reject
         });
         Twig.twig({
-            id: "Component",
-            href: "templates/grading/Component.twig",
+            id: "GradeComponent",
+            href: "templates/grading/GradeComponent.twig",
             async: true
         });
         Twig.twig({
-            id: "Mark",
-            href: "templates/grading/Mark.twig",
+            id: "GradeMark",
+            href: "templates/grading/GradeMark.twig",
             async: true
         });
     });

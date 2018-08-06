@@ -158,6 +158,14 @@ class AutoGradedGradeable extends AbstractModel {
         return $this->hasActiveVersion() && $this->getActiveVersionInstance()->isAutogradingComplete();
     }
 
+    /**
+     * Gets if there are any submissions for this submitter
+     * @return bool
+     */
+    public function hasSubmission() {
+        return count($this->auto_graded_versions) > 0;
+    }
+
     /* Queue status access methods */
 
     /**

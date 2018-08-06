@@ -1,0 +1,28 @@
+{% extends "Mark.twig" %}
+{#
+Required Input (see Mark.twig for inherited input requirements):
+    mark_selected
+
+#}
+
+{% block row_extra_properties %}
+    class="{{ mark.publish ? "is_publish" : "" }}"
+    onclick="selectMark('{{ component_id }}', '{{ mark.id }}'); event.stopPropagation();"
+{% endblock %}
+
+{% block checkbox_classes %}
+    {{ mark_selected ? "mark-has" : "" }}
+{% endblock %}
+
+{% block points_extra_properties %}
+    readonly
+    onmouseup="$(this).blur();"
+{% endblock %}
+
+{% block points_classes %}
+    mark-uneditable
+{% endblock %}
+
+{% block title_classes %}
+    mark-uneditable
+{% endblock %}

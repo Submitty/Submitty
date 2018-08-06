@@ -3,6 +3,7 @@
 namespace app\views\grading;
 
 use app\models\Gradeable;
+use app\models\gradeable\GradedGradeable;
 use app\models\SimpleStat;
 use app\models\Team;
 use app\models\User;
@@ -440,25 +441,25 @@ class ElectronicGraderView extends AbstractView {
 
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
-    public function hwGradingPage(Gradeable $gradeable, float $progress, string $prev_id, string $next_id, $not_in_my_section=false, $show_hidden_cases=false, $can_verify) {
+    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, string $prev_id, string $next_id, $not_in_my_section=false, $show_hidden_cases=false, $can_verify) {
         $peer = false;
         if($this->core->getUser()->getGroup()==User::GROUP_STUDENT && $gradeable->getPeerGrading()) {
             $peer = true;
         }
 
         $return = "";
-        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderPDFBar');
-        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderNavigationBar', $gradeable, $progress, $prev_id, $next_id, $not_in_my_section, $peer);
-        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderAutogradingPanel', $gradeable, $show_hidden_cases);
-        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderSubmissionPanel', $gradeable);
+        //$return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderPDFBar');
+        //$return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderNavigationBar', $gradeable, $progress, $prev_id, $next_id, $not_in_my_section, $peer);
+        //$return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderAutogradingPanel', $gradeable, $show_hidden_cases);
+        //$return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderSubmissionPanel', $gradeable);
         $user = $gradeable->getUser();
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
-        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRubricPanel', $gradeable, $user, $can_verify);
+        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify);
         if(!$peer) {
-            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderInformationPanel', $gradeable, $user);
+            //$return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderInformationPanel', $gradeable, $user);
         }
         if($gradeable->getRegradeStatus() !== 0){
-            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRegradePanel', $gradeable);
+           // $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRegradePanel', $gradeable);
         }
         if ($gradeable->getActiveVersion() == 0) {
             if ($gradeable->hasSubmitted()) {
@@ -611,42 +612,37 @@ class ElectronicGraderView extends AbstractView {
 
     /**
      * Render the Grading Rubric panel
-     * @param Gradeable $gradeable
-     * @param User $user
+     * @param GradedGradeable $graded_gradeable
      * @return string
      */
-    public function renderRubricPanel(Gradeable $gradeable, User $user, bool $can_verify) {
+    public function renderRubricPanel(GradedGradeable $graded_gradeable, int $display_version, bool $can_verify) {
         $return = "";
+        $gradeable = $graded_gradeable->getGradeable();
 
-        $disabled = $gradeable->getActiveVersion() == 0 || $gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion();
+        // Disable grading if the requested version isn't the active one
+        $grading_disabled = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() == 0
+            || $display_version != $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
 
-        $grading_data = [
-            "gradeable" => $gradeable->getGradedData(),
-            "you" => $this->core->getUser(),
-            "your_user_id" => $this->core->getUser()->getId(),
-            "disabled" => $disabled,
-            "can_verify" => $can_verify // If any can be then this is set
-        ];
-
-        //Assign correct page numbers
-        $pages = $gradeable->getComponentPages();
-        foreach ($pages as $i => $page) {
-            $grading_data["gradeable"]["components"][$i]["page"] = $page;
-        }
-
-        $grading_data = json_encode($grading_data, JSON_PRETTY_PRINT);
+        $version_conflict = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() !== $display_version;
+        $has_active_version = $graded_gradeable->getAutoGradedGradeable()->hasActiveVersion();
+        $has_submission = $graded_gradeable->getAutoGradedGradeable()->hasSubmission();
 
         $this->core->getOutput()->addInternalJs('twig.min.js');
         $this->core->getOutput()->addInternalJs('ta-grading-keymap.js');
         $this->core->getOutput()->addInternalJs('ta-grading.js');
         $this->core->getOutput()->addInternalJs('ta-grading-mark.js');
+        $this->core->getOutput()->addInternalJs('electronic-grading-rubric.js');
         $this->core->getOutput()->addInternalJs('gradeable.js');
 
         $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/RubricPanel.twig", [
-            "gradeable" => $gradeable,
+            "gradeable_id" => $gradeable->getId(),
+            "is_ta_grading" => $gradeable->isTaGrading(),
+            "submitter_id" => $graded_gradeable->getSubmitter()->getId(),
             "display_verify_all" => $can_verify,
-            "user" => $user,
-            "grading_data" => $grading_data
+            "grading_disabled" => $grading_disabled,
+            "has_submission" => $has_submission,
+            "has_active_version" => $has_active_version,
+            "version_conflict" => $version_conflict,
         ]);
         return $return;
     }

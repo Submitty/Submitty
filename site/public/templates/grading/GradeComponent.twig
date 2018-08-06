@@ -1,0 +1,103 @@
+{% extends "Component.twig" %}
+{#
+Required inputs:
+    gradeable_id
+    precision
+    component: {id, title, ta_comment, student_comment, page}
+    graded_component: {grader_id, submitter_id, comment, score, graded_version}
+
+    display_verify_user = can_verify and grader_id is defined and grader_id != your_user_id
+    version_conflict = graded_component.graded_version != -1 and graded_gradeable.auto_graded_gradeable.active_version != graded_component.graded_version
+#}
+
+{% block badge_block %}
+<span id="gradebar-{{ component.id }}" class="badge gradebar">
+    ? / ?
+</span>
+{% endblock %}
+
+{% block component_block %}
+    <b><span id="progress_points-{{ component.id }}" style="display: none;" data-changedisplay1="true"></span></b>
+    <b><span id="component_name-{{ component.id }}">{{ component.title }}</span></b>
+
+    {% if version_conflict %}
+        <span id='wrong_version_{{ component.id }}' class="version-warning">
+            Please edit or ensure that comments from version {{ graded_component.graded_version }} still apply.
+        </span>
+    {% endif %}
+
+    <span class="grader-container">
+        {% if display_verify_user %}
+            <span class="verify-container">
+                <input type="button" class = "btn btn-default" onclick="verifyMark('{{ gradeable_id }}','{{ component.id }}','{{ graded_component.submitter_id }}'); event.stopPropagation();" value = "Verify Grader"/>
+            </span>
+        {% endif %}
+        <span id="graded-by-{{ component.id }}" class="graded-by">
+            {% if grader_id is defined %}
+                Graded by {{ graded_component.grader_id }}
+            {% else %}
+                Ungraded!
+            {% endif %}
+        </span>
+        <span id="graded-saving-{{ component.id }}" style="display: none;" class="graded-by">Saving...</span>
+    </span>
+{% endblock %}
+
+{% block ta_note %}
+    {% if component.ta_comment != "" %}
+        <br/>
+        <div class="ta-student-note">
+            <i><b>Note to TA: </b>{{ component.ta_comment }}</i>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block page_number %}
+    {% if component.page != 0 %}
+        <i>Page #: {{ component.page }}</i>
+    {% endif %}
+{% endblock %}
+
+{% block student_note %}
+    {% if component.student_comment != "" %}
+        <div class="ta-student-note">
+            <i><b>Note to Student: </b>{{ component.student_comment }}</i>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block component_footer %}
+    {# Custom mark #}
+    <div class="box" id="mark_custom_id-{{ component.id }}" style="display: none;" data-changedisplay1="true">
+        <span
+            onclick="event.stopPropagation();"
+            class="{{ graded_component.score == 0 and component.comment == "" ? "" : "mark-has" }} mark"
+            name="mark_icon_{{ component.id }}_custom"
+            id="mark_icon_custom-{{ component.id }}"
+        ></span>
+        <input
+            name="mark_points_custom_{{ component.id }}"
+            id="mark_points_custom-{{ component.id }}"
+            type="number"
+            step="{{ precision }}"
+            onchange="updateCustomMarkPoints(this); checkIfSelected(this); updateProgressPoints({{ component.id }});"
+            onclick="event.stopPropagation();"
+            data-component_index="{{ component.id }}"
+            value="{{ graded_component.score }}" class="mark-score"
+        >
+        Custom:
+        <textarea
+            name="mark_text_custom_{{ component.id }}"
+            id="mark_text_custom-{{ component.id }}"
+            onkeyup="updateCustomMarkText(this); autoResizeComment(event); checkIfSelected(this);"
+            onchange="updateCustomMarkText(this); checkIfSelected(this); updateProgressPoints({{ component.id }});"
+            onclick="event.stopPropagation();"
+            data-component_index="{{ component.id }}"
+            cols="120"
+            rows="1"
+            placeholder="Custom message for student..."
+            class="mark-note-custom"
+        >{{ graded_component.comment }}</textarea>
+    </div>
+    {# /Custom mark #}
+{% endblock %}

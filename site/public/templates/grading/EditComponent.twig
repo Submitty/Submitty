@@ -1,0 +1,13 @@
+{% extends "Component.twig" %}
+
+{% block component_footer %}
+    {# Add new mark #}
+    <div id="marks-extra-{{ component.id }}" style="display: none;" data-question_id="{{ component.id }}" data-changedisplay1="true">
+        {# todo: peer grading #}
+        <span>
+                <span class="add-common-mark" onclick="{{ break_onclick }} addMark(this,'{{ component.id }}'); event.stopPropagation(); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
+                Add New Common Mark</span>
+            </span>
+    </div>
+    {# /Add new mark #}
+{% endblock %}

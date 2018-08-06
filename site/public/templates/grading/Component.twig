@@ -1,81 +1,54 @@
-{% set display_verify_user = can_verify and component.grader != null and component.grader.id != your_user_id %}
+{#
+Required Input:
+    component: {id}
+#}
 
-<div id="title-{{ c_index }}" class="box component" onclick="{{ break_onlcick }}; toggleMark({{ c_index }}, true);">
+<div id="title-{{ component.id }}" class="box component" onclick="{% block component_click %}{{ break_onclick }}; toggleMark({{ component.id }}, true);{% endblock %}">
 
     {# Title bar #}
     <div class="box-title">
 
-        <span id="gradebar-{{ c_index }}" class="badge gradebar">
-            ? / ?
-        </span>
+        {% block badge_block %}
+        {% endblock %}
 
         <span data-changebg="true">
-            <b><span id="progress_points-{{ c_index }}" style="display: none;" data-changedisplay1="true"></span></b>
-            <b><span id="component_name-{{ c_index }}">{{ component.name }}</span></b>
-
-            {% if component.graded_version != -1 and gradeable.active_version != component.graded_version %}
-                <span id='wrong_version_{{ c_index }}' class="version-warning">
-                    Please edit or ensure that comments from version {{ component.graded_version }} still apply.
-                </span>
-            {% endif %}
-
-            <span class="grader-container">
-                {% if display_verify_user %}
-                    <span class="verify-container">
-                        <input type="button" class = "btn btn-default" onclick="verifyMark('{{ gradeable.id }}','{{ component.id }}','{{ gradeable.user_id }}'); event.stopPropagation();" value = "Verify Grader"/>
-                    </span>
-                {% endif %}
-                <span id="graded-by-{{ c_index }}" class="graded-by">
-                    {% if component.grader == null %}
-                        Ungraded!
-                    {% else %}
-                        Graded by {{ component.grader.id }}
-                    {% endif %}
-                </span>
-                <span id="graded-saving-{{ c_index }}" style="display: none;" class="graded-by">Saving...</span>
-            </span>
+            {% block component_block %}{% endblock component_block %}
         </span>
 
         {# Notes to TA/Student #}
-        <span id="ta_note-{{ c_index }}" style="display: none;" data-changedisplay1="true">
-            {% if component.ta_comment != "" %}
-                <br/>
-                <div class="ta-student-note">
-                    <i><b>Note to TA: </b>{{ component.ta_comment }}</i>
-                </div>
-            {% endif %}
+        <span id="ta_note-{{ component.id }}" style="display: none;" data-changedisplay1="true">
+            {% block ta_note %}
+            {% endblock %}
         </span>
-        <span id="page-{{ c_index }}" style="display: none;">
-            {% if component.page != 0 %}
-                <i>Page #: {{ component.page }}</i>
-            {% endif %}
+        <span id="page-{{ component.id }}" style="display: none;">
+            {% block page_number %}
+            {% endblock %}
         </span>
+
+        {# Saving status #}
         <span class="done-container">
-            <span id="save-mark-{{ c_index }}" style="display: none;" data-changedisplay1="true">
+            <span id="save-mark-{{ component.id }}" style="display: none;" data-changedisplay1="true">
                 <i class="fa fa-check done-button" aria-hidden="true">Done</i>
             </span>
         </span>
 
-        <span id="student_note-{{ c_index }}" style="display: none;" data-changedisplay1="true">
-            {% if component.student_comment != "" %}
-                <div class="ta-student-note">
-                    <i><b>Note to Student: </b>{{ component.student_comment }}</i>
-                </div>
-            {% endif %}
+        <span id="student_note-{{ component.id }}" style="display: none;" data-changedisplay1="true">
+            {% block student_note %}
+            {% endblock %}
         </span>
         {# /Notes to TA/Student #}
 
         {# Todo: reimplement cancel button #}
         {#
-        <span id="title-cancel-{{ c_index }}" style="font-size: 12px; display: none; width: 5%;" colspan="0" data-changebg="true" data-changedisplay1="true">
-            <span id="cancel-mark-{{ c_index }}" onclick="{{ break_onclick }}; closeMark(${c}, true);" style="cursor: pointer; float: right;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
+        <span id="title-cancel-{{ component.id }}" style="font-size: 12px; display: none; width: 5%;" colspan="0" data-changebg="true" data-changedisplay1="true">
+            <span id="cancel-mark-{{ component.id }}" onclick="{{ break_onclick }}; closeMark(${c}, true);" style="cursor: pointer; float: right;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
         </span>
         #}
 
-        {# Summary text #}
-        <div id="summary-{{ c_index }}" data-changedisplay2="true" data-question_id="{{ component.id }}">
-            <div id="rubric-{{ c_index }}">
-                <span id="rubric-textarea-{{ c_index }}" class="summary-text">...</span>
+        {# Summary text TODO: what is this for? #}
+        <div id="summary-{{ component.id }}" data-changedisplay2="true" data-question_id="{{ component.id }}">
+            <div id="rubric-{{ component.id }}">
+                <span id="rubric-textarea-{{ component.id }}" class="summary-text">...</span>
             </div>
         </div>
         {# /Summary text #}
@@ -83,7 +56,7 @@
     {# /Title bar #}
 
     {# Marks table #}
-    <table class="ta-rubric-table" id="marks-parent-{{ c_index }}" style="display: none;" data-question_id="{{ component.id }}" data-changedisplay1="true">
+    <table class="ta-rubric-table" id="marks-parent-{{ component.id }}" style="display: none;" data-question_id="{{ component.id }}" data-changedisplay1="true">
     {# This is currently all handled by JS, but here is how you'd render these from Twig: #}
     {#
         {% for mark in component.marks %}
@@ -94,47 +67,6 @@
     </table>
     {# /Marks table #}
 
-    {# Add new mark #}
-    <div id="marks-extra-{{ c_index }}" style="display: none;" data-question_id="{{ component.id }}" data-changedisplay1="true">
-        {# todo: peer grading #}
-        <span>
-            <span class="add-common-mark" onclick="{{ break_onclick }} addMark(this,'{{ c_index }}'); event.stopPropagation(); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
-            Add New Common Mark</span>
-        </span>
-    </div>
-    {# /Add new mark #}
-
-    {# Custom mark #}
-    <div class="box" id="mark_custom_id-{{ c_index }}" style="display: none;" data-changedisplay1="true">
-        <span
-            onclick="event.stopPropagation();"
-            class="{{ component.score == 0 and component.comment == "" ? "" : "mark-has" }} mark"
-            name="mark_icon_{{ c_index }}_custom"
-            id="mark_icon_custom-{{ c_index }}"
-        ></span>
-        <input
-            name="mark_points_custom_{{ c_index }}"
-            id="mark_points_custom-{{ c_index }}"
-            type="number"
-            step="{{ gradeable.precision }}"
-            onchange="updateCustomMarkPoints(this); checkIfSelected(this); updateProgressPoints({{ c_index }});"
-            onclick="event.stopPropagation();"
-            data-component_index="{{ c_index }}"
-            value="{{ component.score }}" class="mark-score"
-        >
-        Custom:
-        <textarea
-            name="mark_text_custom_{{ c_index }}"
-            id="mark_text_custom-{{ c_index }}"
-            onkeyup="updateCustomMarkText(this); autoResizeComment(event); checkIfSelected(this);"
-            onchange="updateCustomMarkText(this); checkIfSelected(this); updateProgressPoints({{ c_index }});"
-            onclick="event.stopPropagation();"
-            data-component_index="{{ c_index }}"
-            cols="120"
-            rows="1"
-            placeholder="Custom message for student..."
-            class="mark-note-custom"
-        >{{ component.comment }}</textarea>
-    </div>
-    {# /Custom mark #}
+    {% block component_footer %}
+    {% endblock %}
 </div>
