@@ -1422,6 +1422,7 @@ class Gradeable(object):
             assert self.ta_view_date < self.submission_open_date
             assert self.submission_open_date < self.submission_due_date
             assert self.submission_due_date < self.grade_start_date
+            assert self.grade_released_date < self.regrade_request_date
             if self.gradeable_config is not None:
                 if self.sample_path is not None:
                     if os.path.isfile(os.path.join(self.sample_path, "submissions.yml")):
@@ -1438,7 +1439,6 @@ class Gradeable(object):
                                                 "for {}".format(self.sample_path))
         assert self.ta_view_date < self.grade_start_date
         assert self.grade_start_date < self.grade_released_date
-        assert self.grade_released_date < self.regrade_request_date
 
         self.components = []
         for i in range(len(gradeable['components'])):

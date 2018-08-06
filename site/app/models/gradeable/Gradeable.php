@@ -1177,7 +1177,10 @@ class Gradeable extends AbstractModel {
 
         return $sections;
     }
-    //return true if students can currently submit regrades for this assignment, false otherwise
+    /**
+     * return true if students can currently submit regrades for this assignment, false otherwise
+     * @return bool
+     */
     public function isRegradeOpen(){
         if($this->core->getConfig()->isRegradeEnabled()==true && $this->isTaGradeReleased() && $this->regrade_allowed && ($this->regrade_request_date > new \DateTime('now', $this->core->getConfig()->getTimezone()))){
             return true;
