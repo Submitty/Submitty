@@ -73,6 +73,8 @@ input[type="url"],
 input[type="search"],
 input[type="tel"],
 input[type="color"] {
+    height: 20px;
+    box-sizing: content-box;
     padding: 4px 6px;
     font-size: 14px;
     line-height: 20px;
