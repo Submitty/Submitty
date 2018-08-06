@@ -880,8 +880,8 @@ table .instructor .two-options{
 }
 
 .hover_glow {
-    opacity: 0.5;
-    filter: alpha(opacity=40);
+    opacity: 0.9;
+    filter: alpha(opacity=90);
     z-index: 1;
 }
 
