@@ -36,7 +36,6 @@ body {
 
 a, a:hover, a:link, a:visited {
     cursor: pointer;
-    text-decoration: none;
 }
 
 a,
@@ -45,12 +44,33 @@ a:link,
 a.external,
 a.external:visited,
 a.external:link {
-    color: #000000;
+    color: #2627ee;
 }
 
 a:hover,
 a.external:hover {
-    color: #2627ee;
+    color: #131399;
+}
+a:active,
+a.external:active {
+    color: #991313;
+}
+
+a.btn-success, a.btn-primary, a.btn-danger,
+a.fa.btn-success, a.btn-primary, a.btn-danger,
+a.btn-success > i.fa, a.btn-primary > i.fa, a.btn-danger > i.fa {
+    color: #ffffff;
+}
+
+a.btn-default,
+a.fa.btn-default,
+a.fa,
+a > i.fa {
+    color: #000000;
+}
+
+a.btn {
+    text-decoration: none;
 }
 
 /****************************
@@ -297,13 +317,7 @@ table tr.table-header {
     overflow: hidden;
 }
 
-#header-text {
-
-    font-weight: 300;
-    display: flex;
-    width: 100%;
-    align-items: center ;
-}
+#header-text {font-weight: 300;display: flex;/* width: 100%; */align-items: center;}
 
 #header a,
 #header a:link,
@@ -819,7 +833,11 @@ table tr.table-header {
     padding:5px;
     overflow-y: auto;
     word-wrap: break-word;
+}
 
+#thread_list a {
+    text-decoration: none;
+    color: initial;
 }
 
 .create_thread_button {
