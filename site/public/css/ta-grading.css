@@ -8,6 +8,7 @@
      cursor: move;
      z-index:40;
      border: solid 6px #FFD700;
+     box-sizing: content-box;
 }
 
 #footer {
@@ -346,7 +347,6 @@ progress::-webkit-progress-value {
 
 .rubric-textarea {
     width:95%;
-    height:100%;
     min-height:20px;
     float:left;
     word-break: break-word;
@@ -445,7 +445,6 @@ tr.is_publish {
 
 .gradeable .general-comment-entry {
     width:98%;
-    height:100%;
     min-height:100px;
     resize:none;
     float:left;
@@ -506,7 +505,6 @@ tr.is_publish {
 
 .gradeable .summary-text {
     width:95%;
-    height:100%;
     min-height:20px;
     font-family: 'Source Sans Pro', sans-serif;
     float:left;
@@ -527,6 +525,7 @@ tr.is_publish {
     justify-content: center;
     width: 1.5em;
     height: 1.5em;
+    box-sizing: content-box;
     border: 2px solid #000;
     border-radius: 4px;
     color: #888;
