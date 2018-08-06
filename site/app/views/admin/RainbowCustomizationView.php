@@ -53,8 +53,7 @@ HTML;
 <input type="submit" name="generate_json2" value="Submit" onclick="ExtractBuckets();"/>
 </form>
 <div id="list_wrapper">
-<!--<div id="buckets_used">-->
-<div style="width50%;float:left;position: relative;" id="buckets_used">
+<div style="width:45%;float:left;" id="buckets_used">
 <h3>Assigned Buckets</h3>
 <ol id="buckets_used_list" style="min-height:50px;background-color:blue;">
 <li>Test item 1</li>
@@ -64,8 +63,7 @@ HTML;
 HTML;
 
         $return .= <<< HTML
-<!--<div style="float:right;position: relative; right: 50px;" id="buckets_available">-->
-<div style="width:50%;float:right;" id="buckets_available">
+<div style="width45%;display:inline-block;margin-left:50px;" id="buckets_available">
 <h3>Available Buckets</h3>
 <ol id="buckets_available_list" style="min-height:50px;background-color:yellow;">
 HTML;
