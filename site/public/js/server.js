@@ -1525,12 +1525,12 @@ function changeDisplayOptions(option, thread_id){
 }
 
 function dynamicScrollLoadPage(element, atEnd) {
-    if($(element).data("dynamic_lock_load")) {
-        return;
-    }
     var load_page = $(element).attr(atEnd?"next_page":"prev_page");
     if(load_page == 0) {
-        return;
+        return false;
+    }
+    if($(element).data("dynamic_lock_load")) {
+        return null;
     }
     var load_page_callback;
     var load_page_fail_callback;
@@ -1551,8 +1551,8 @@ function dynamicScrollLoadPage(element, atEnd) {
             } else {
                 $(element).attr("next_page", parseInt(load_page) + 1);
                 arrow_down.show();
-                dynamicScrollLoadIfScrollVisible($(element));
             }
+            dynamicScrollLoadIfScrollVisible($(element));
         };
         load_page_fail_callback = function(content, count) {
             spinner_down.hide();
@@ -1573,8 +1573,8 @@ function dynamicScrollLoadPage(element, atEnd) {
                 if(prev_page >= 1) {
                     arrow_up.show();
                 }
-                dynamicScrollLoadIfScrollVisible($(element));
             }
+            dynamicScrollLoadIfScrollVisible($(element));
         };
         load_page_fail_callback = function(content, count) {
             spinner_up.hide();
@@ -1615,11 +1615,14 @@ function dynamicScrollLoadPage(element, atEnd) {
                 window.alert("Something went wrong while trying to load more threads. Please try again.");
             }
     });
+    return true;
 }
 
 function dynamicScrollLoadIfScrollVisible(jElement) {
     if(jElement[0].scrollHeight <= jElement[0].clientHeight) {
-        dynamicScrollLoadPage(jElement[0],true);
+        if(dynamicScrollLoadPage(jElement[0], true) === false) {
+            dynamicScrollLoadPage(jElement[0], false);
+        }
     }
 }
 
