@@ -83,58 +83,73 @@
     {# /Title bar #}
 
     {# Marks table #}
-    <table class="ta-rubric-table" id="marks-parent-{{ c_index }}" style="display: none;" data-question_id="{{ component.id }}" data-changedisplay1="true">
-    {# This is currently all handled by JS, but here is how you'd render these from Twig: #}
-    {#
-        {% for mark in component.marks %}
-            {% set m_index = loop.index0 %}
-            {% include "Mark.twig" %}
-        {% endfor %}
-    #}
+    <table class="ta-rubric-table" id="mark-table-{{ c_index }}" style="display: none;" data-changedisplay1="true">
+        <tbody id="marks-parent-{{ c_index }}" data-question_id="{{ component.id }}">
+            {# This is currently all handled by JS, but here is how you'd render these from Twig: #}
+            {#
+                {% for mark in component.marks %}
+                    {% set m_index = loop.index0 %}
+                    {% include "Mark.twig" %}
+                {% endfor %}
+            #}
+        </tbody>
+        <tbody>
+            {# Add new mark #}
+            <tr id="marks-extra-{{ c_index }}" style="display: none;" data-question_id="{{ component.id }}" data-changedisplay1="true">
+                <td colspan="6">
+                    {# todo: peer grading #}
+                    <span>
+                        <span class="add-common-mark" onclick="{{ break_onclick }} addMark(this,'{{ c_index }}'); event.stopPropagation(); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
+                        Add New Common Mark</span>
+                    </span>
+                </td>
+            </tr>
+            {# /Add new mark #}
+            {# Custom mark #}
+            <tr id="mark_custom_id-{{ c_index }}" style="display: none;" data-changedisplay1="true">
+                <td colspan="1" class="mark-score-container">
+                    <div class="mark-cell-box">
+                        <span
+                                onclick="event.stopPropagation();"
+                                class="{{ component.score == 0 and component.comment == "" ? "" : "mark-has" }} mark"
+                                name="mark_icon_{{ c_index }}_custom"
+                                id="mark_icon_custom-{{ c_index }}"
+                        ></span>
+                        <input
+                                name="mark_points_custom_{{ c_index }}"
+                                id="mark_points_custom-{{ c_index }}"
+                                type="number"
+                                step="{{ gradeable.precision }}"
+                                onchange="updateCustomMarkPoints(this); checkIfSelected(this); updateProgressPoints({{ c_index }});"
+                                onclick="event.stopPropagation();"
+                                data-component_index="{{ c_index }}"
+                                value="{{ component.score }}" class="mark-score"
+                        >
+                    </div>
+                </td>
+                <td colspan="5">
+                    <div class="mark-cell-box">
+                        <span class="mark-custom-label">
+                            Custom:
+                        </span>
+                        <textarea
+                                name="mark_text_custom_{{ c_index }}"
+                                id="mark_text_custom-{{ c_index }}"
+                                onkeyup="updateCustomMarkText(this); autoResizeComment(event); checkIfSelected(this);"
+                                onchange="updateCustomMarkText(this); checkIfSelected(this); updateProgressPoints({{ c_index }});"
+                                onclick="event.stopPropagation();"
+                                data-component_index="{{ c_index }}"
+                                cols="120"
+                                rows="1"
+                                placeholder="Custom message for student..."
+                                class="mark-note-custom"
+                        >{{ component.comment }}</textarea>
+                    </div>
+                </td>
+            </tr>
+            {# /Custom mark #}
+        </tbody>
     </table>
     {# /Marks table #}
 
-    {# Add new mark #}
-    <div id="marks-extra-{{ c_index }}" style="display: none;" data-question_id="{{ component.id }}" data-changedisplay1="true">
-        {# todo: peer grading #}
-        <span>
-            <span class="add-common-mark" onclick="{{ break_onclick }} addMark(this,'{{ c_index }}'); event.stopPropagation(); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
-            Add New Common Mark</span>
-        </span>
-    </div>
-    {# /Add new mark #}
-
-    {# Custom mark #}
-    <div class="box" id="mark_custom_id-{{ c_index }}" style="display: none;" data-changedisplay1="true">
-        <span
-            onclick="event.stopPropagation();"
-            class="{{ component.score == 0 and component.comment == "" ? "" : "mark-has" }} mark"
-            name="mark_icon_{{ c_index }}_custom"
-            id="mark_icon_custom-{{ c_index }}"
-        ></span>
-        <input
-            name="mark_points_custom_{{ c_index }}"
-            id="mark_points_custom-{{ c_index }}"
-            type="number"
-            step="{{ gradeable.precision }}"
-            onchange="updateCustomMarkPoints(this); checkIfSelected(this); updateProgressPoints({{ c_index }});"
-            onclick="event.stopPropagation();"
-            data-component_index="{{ c_index }}"
-            value="{{ component.score }}" class="mark-score"
-        >
-        Custom:
-        <textarea
-            name="mark_text_custom_{{ c_index }}"
-            id="mark_text_custom-{{ c_index }}"
-            onkeyup="updateCustomMarkText(this); autoResizeComment(event); checkIfSelected(this);"
-            onchange="updateCustomMarkText(this); checkIfSelected(this); updateProgressPoints({{ c_index }});"
-            onclick="event.stopPropagation();"
-            data-component_index="{{ c_index }}"
-            cols="120"
-            rows="1"
-            placeholder="Custom message for student..."
-            class="mark-note-custom"
-        >{{ component.comment }}</textarea>
-    </div>
-    {# /Custom mark #}
 </div>
