@@ -7,7 +7,6 @@ class RainbowCustomizationView extends AbstractView{
     public function printForm($customization_data){
         $return = "";
         $return .= <<<HTML
-<script src="js/Sortable.js"></script>
 
 <script type="text/javascript">
     function ExtractBuckets(){
@@ -55,9 +54,11 @@ HTML;
 </form>
 <div id="list_wrapper">
 <!--<div id="buckets_used">-->
-<div style="width50%;float:left" id="buckets_used">
+<div style="width50%;float:left;position: relative;" id="buckets_used">
 <h3>Assigned Buckets</h3>
-<ol id="buckets_used_list" style="min-height:50px">
+<ol id="buckets_used_list" style="min-height:50px;background-color:blue;">
+<li>Test item 1</li>
+<li>Test item 2</li>
 </ol>
 </div>
 HTML;
@@ -66,7 +67,7 @@ HTML;
 <!--<div style="float:right;position: relative; right: 50px;" id="buckets_available">-->
 <div style="width:50%;float:right;" id="buckets_available">
 <h3>Available Buckets</h3>
-<ol id="buckets_available_list" style="min-height:50px">
+<ol id="buckets_available_list" style="min-height:50px;background-color:yellow;">
 HTML;
         foreach(array_keys($customization_data) as $bucket){
             $return .= "<li>$bucket</li>";
@@ -78,16 +79,35 @@ HTML;
 </div>
 
 <style type="text/css">
-#buckets li{
+#buckets_available_list li{
     font-weight: bold;
+}
+
+#buckets_used_list li{
+    font-style: italic;
 }
 </style>
 
 <script type="text/javascript">
-    var el_available = document.getElementById('buckets_available_list');
-    var sortable_available = Sortable.create(el_available,{group:"bucket_group",onSort:function (evt){BalanceLists();}});
-    var el_used = document.getElementById('buckets_used_list');
-    var sortable_used = Sortable.create(el_used,{group:"bucket_group",onSort:function (evt){BalanceLists();}});
+    /*$('#buckets_available_list').sortable();
+    $('#buckets_available_list').disableSelection();
+    $('#buckets_available_list').on("sort",function(e,u) {BalanceLists();});
+    $('#buckets_used_list').sortable({connectWith: "#buckets_available_list"});
+    $('#buckets_used_list').disableSelection();
+    $('#buckets_used_list').on("sort",function(e,u) {BalanceLists();});
+    $('#buckets_available_list').sortable("option","connectWith", "#buckets_used_list");*/
+
+    $("#buckets_available_list,#buckets_used_list").sortable({
+        connectWith: "#buckets_available_list,#buckets_used_list",
+        update: function (e,u) {
+            BalanceLists();
+        }
+    });
+    $("#buckets_available_list,#buckets_used_list").disableSelection();
+
+    //var sortable_available = Sortable.create(el_available,{group:"bucket_group",onSort:function (evt){BalanceLists();}});
+    //var el_used = document.getElementById('buckets_used_list');
+    //var sortable_used = Sortable.create(el_used,{group:"bucket_group",onSort:function (evt){BalanceLists();}});
 </script>
 
 HTML;

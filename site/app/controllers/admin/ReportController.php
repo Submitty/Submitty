@@ -9,6 +9,8 @@ use app\libraries\GradeableType;
 use app\libraries\Output;
 use app\models\Gradeable;
 use app\models\GradeSummary;
+use app\models\RainbowCustomization;
+//use app\views\admin\RainbowCustomizationview; //Should be using the RainbowCustomizationController which can in turn interact with the view
 
 /*
 use app\report\CSVReportView;
