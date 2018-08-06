@@ -6,9 +6,8 @@ let RENDER_OPTIONS = {
     //User id in this case is the grader
     userId: null,
     pdfDocument: null,
-    // scale: parseFloat(localStorage.getItem(`${documentId}/scale`), 10) || 0.5,
-    scale: 1,
-    rotate: parseInt(localStorage.getItem(`${documentId}/rotate`), 10) || 0
+    scale: parseFloat(localStorage.getItem('scale')) || 1,
+    rotate: parseInt(localStorage.getItem('rotate')) || 0
 };
 let GENERAL_INFORMATION = {
     user_id: "",
@@ -20,28 +19,30 @@ PDFAnnotate.setStoreAdapter(new PDFAnnotate.LocalStoreAdapter());
 PDFJS.workerSrc = 'js/pdf/pdf.worker.js';
 
 /*
-This chunk renders the page when scrolling. It also makes sure that no page is rendered more than once.
+ * This chunk renders the page when scrolling. It also makes sure that no page is rendered more than once.
+ * NOTE: Currently this is disabled because it causes too many bugs. Will re-enable if performance becomes a
+ * big issue.
  */
 let NUM_PAGES = 0;
-let renderedPages = [];
-let okToRender = false;
-document.getElementById('submission_browser').addEventListener('scroll', function (e) {
-    let visiblePageNum = Math.round(e.target.scrollTop / PAGE_HEIGHT) + 1;
-    let visiblePage = document.querySelector(`.page[data-page-number="${visiblePageNum}"][data-loaded="false"]`);
-
-    if (renderedPages.indexOf(visiblePageNum) == -1){
-        okToRender = true;
-        renderedPages.push(visiblePageNum);
-    } else {
-        okToRender = false;
-    }
-
-    if (visiblePage && okToRender) {
-        setTimeout(function () {
-            UI.renderPage(visiblePageNum, RENDER_OPTIONS);
-        });
-    }
-});
+// let renderedPages = [];
+// let okToRender = false;
+// document.getElementById('file_content').addEventListener('scroll', function (e) {
+//     let visiblePageNum = Math.round(e.target.scrollTop / PAGE_HEIGHT) + 1;
+//     let visiblePage = document.querySelector(`.page[data-page-number="${visiblePageNum}"][data-loaded="false"]`);
+//
+//     if (renderedPages.indexOf(visiblePageNum) == -1){
+//         okToRender = true;
+//         renderedPages.push(visiblePageNum);
+//     } else {
+//         okToRender = false;
+//     }
+//
+//     if (visiblePage && okToRender) {
+//         setTimeout(function () {
+//             UI.renderPage(visiblePageNum, RENDER_OPTIONS);
+//         });
+//     }
+// });
 
 function render(gradeable_id, user_id, grader_id, file_name) {
     let url = buildUrl({'component': 'misc', 'page': 'base64_encode_pdf'});
@@ -95,18 +96,30 @@ function render(gradeable_id, user_id, grader_id, file_name) {
 }
 //Toolbar stuff
 (function (){
+    let active_toolbar = true;
+    const debounce = (fn, time, ...args) => {
+        if(active_toolbar){
+            fn(args);
+            active_toolbar = false;
+            setTimeout(function(){
+                active_toolbar = true;
+            }, time);
+        }
+    }
     function setActiveToolbarItem(option){
         let selected = $('.tool-selected');
+        let clicked_button = $("a[value="+option+"]");
         if(option != selected.attr('value')){
             //There are two classes for the icons; toolbar-action and toolbar-item.
             //toolbar-action are single use buttons such as download and clear
             //toolbar-item are continuous options such as pen, text, etc.
-            let clicked_button = $("a[value="+option+"]");
             if(!clicked_button.hasClass('toolbar-action')){
                 $(selected[0]).removeClass('tool-selected');
                 clicked_button.addClass('tool-selected');
                 switch($(selected[0]).attr('value')){
                     case 'pen':
+                        $('#file_content').css('overflow', 'auto');
+                        $('#scroll_lock_mode').removeAttr('checked');
                         UI.disablePen();
                         break;
                     case 'cursor':
@@ -132,16 +145,23 @@ function render(gradeable_id, user_id, grader_id, file_name) {
                     saveFile();
                     break;
                 case 'zoomin':
-                    zoom('in');
+                    debounce(zoom, 500, 'in');
                     break;
                 case 'zoomout':
-                    zoom('out');
+                    debounce(zoom, 500, 'out');
+                    break;
+                case 'zoomcustom':
+                    debounce(zoom, 500, 'custom');
+                    break;
+                case 'rotate':
+                    debounce(rotate, 500);
                     break;
                 case 'text':
                     UI.enableText();
                     break;
             }
         } else {
+            //For color and size select
             switch(option){
                 case 'pen':
                     $("#pen_selection").toggle();
@@ -153,14 +173,37 @@ function render(gradeable_id, user_id, grader_id, file_name) {
         }
     }
 
-    function zoom(option){
-        if(option == 'in'){
-            RENDER_OPTIONS.scale += 0.1;
-        } else {
-            RENDER_OPTIONS.scale -= 0.1;
-        }
+    function rotate(){
+        RENDER_OPTIONS.rotate += 90;
+        localStorage.setItem('rotate', RENDER_OPTIONS.rotate);
+        render(GENERAL_INFORMATION.gradeable_id, GENERAL_INFORMATION.user_id, RENDER_OPTIONS.userId, GENERAL_INFORMATION.file_name);
+    }
 
-        UI.renderPage(1, RENDER_OPTIONS);
+    function zoom(option, custom_val){
+        let zoom_flag = true;
+        let zoom_level = RENDER_OPTIONS.scale;
+        if(option == 'in'){
+            zoom_level += 1;
+        } else if(option == 'out'){
+            zoom_level -= 1;
+        } else {
+            if(custom_val != null){
+                zoom_level = custom_val/100;
+            } else {
+                zoom_flag = false;
+            }
+            $('#zoom_selection').toggle();
+        }
+        if(zoom_level > 10 || zoom_level < 0.25){
+            alert("Cannot zoom more");
+            return;
+        }
+        RENDER_OPTIONS.scale = zoom_level;
+        $("a[value='zoomcustom']").text(parseInt(RENDER_OPTIONS.scale * 100) + "%");
+        if(zoom_flag){
+            localStorage.setItem('scale', RENDER_OPTIONS.scale);
+            render(GENERAL_INFORMATION.gradeable_id, GENERAL_INFORMATION.user_id, RENDER_OPTIONS.userId, GENERAL_INFORMATION.file_name);
+        }
     }
 
     function clearCanvas(){
@@ -174,15 +217,8 @@ function render(gradeable_id, user_id, grader_id, file_name) {
     }
 
     function saveFile(){
-        $('#save_status').text("Saved");
-        $('#save_status').css('color', 'black');
         let url = buildUrl({'component': 'grading','page': 'electronic', 'action': 'save_pdf_annotation'});
         let annotation_layer = localStorage.getItem(`${RENDER_OPTIONS.documentId}/${RENDER_OPTIONS.userId}/annotations`);
-        // let count = 0;
-        // for (let i = 0; i < JSON.parse(annotation_layer).length; i++){
-        //     count+= JSON.parse(annotation_layer)[i]['lines'].length;
-        // }
-        // console.log(count);
         $.ajax({
             type: 'POST',
             url: url,
@@ -191,7 +227,8 @@ function render(gradeable_id, user_id, grader_id, file_name) {
                 GENERAL_INFORMATION
             },
             success: function(data){
-
+                $('#save_status').text("Saved");
+                $('#save_status').css('color', 'black');
             }
         });
     }
@@ -200,19 +237,30 @@ function render(gradeable_id, user_id, grader_id, file_name) {
         setActiveToolbarItem(e.target.getAttribute('value'));
     }
     document.getElementById('pdf_annotation_icons').addEventListener('click', handleToolbarClick);
+    //TODO: Find a better home for this, shouldn't be here.
+    document.getElementById('reset_zoom').addEventListener('click', function(){
+        zoom('custom', 100);
+    });
+    document.getElementById('zoom_percent_selector').addEventListener('change', function(e){
+        zoom('custom', e.target.value);
+    });
 })();
 
 // Pen stuff
 (function () {
     let penSize;
     let penColor;
-
+    let scrollLock;
     function initPen() {
         let init_size = localStorage.getItem('pen/size') || 3;
         let init_color = localStorage.getItem('pen/color') || '#ff0000';
         document.getElementById('pen_size_selector').value = init_size;
         document.getElementById('pen_size_value').value = init_size;
         document.getElementById('pen_color_selector').value = init_color;
+        if($('#scroll_lock_mode').is(':checked')) {
+            scrollLock = true;
+        }
+
         setPen(init_size, init_color);
     }
 
@@ -224,11 +272,14 @@ function render(gradeable_id, user_id, grader_id, file_name) {
             penSize = size;
             localStorage.setItem('pen/size', penSize);
         }
-
         if (penColor !== color) {
             modified = true;
             penColor = color;
             localStorage.setItem('pen/color', penColor);
+        }
+
+        if (modified && scrollLock) {
+            $('#file_content').css('overflow', 'hidden');
         }
 
         if (modified) {
@@ -237,11 +288,21 @@ function render(gradeable_id, user_id, grader_id, file_name) {
     }
 
     document.getElementById('pen_color_selector').addEventListener('change', function(e){
-        this.value = e.srcElement.value;
-        setPen(penSize, e.srcElement.value);
+        let value = e.target.value ? e.target.value : e.srcElement.value;
+        setPen(penSize, value);
     });
     document.getElementById('pen_size_selector').addEventListener('change', function(e){
-        setPen(e.srcElement.value, penColor);
+        let value = e.target.value ? e.target.value : e.srcElement.value;
+        setPen(value, penColor);
+    });
+    document.getElementById('scroll_lock_mode').addEventListener('change', function(e){
+        if(!$('#scroll_lock_mode').is(':checked')){
+            $('#file_content').css('overflow', 'auto');
+            scrollLock = false;
+        } else {
+            $('#file_content').css('overflow', 'hidden');
+            scrollLock = true;
+        }
     });
     initPen();
 })();
@@ -278,10 +339,12 @@ function render(gradeable_id, user_id, grader_id, file_name) {
         }
     }
     document.getElementById('text_color_selector').addEventListener('change', function(e){
-        setText(textSize, e.srcElement.value);
+        let value = e.target.value ? e.target.value : e.srcElement.value;
+        setText(textSize, value);
     });
     document.getElementById('text_size_selector').addEventListener('change', function(e){
-        setText(e.srcElement.value, textColor);
+        let value = e.target.value ? e.target.value : e.srcElement.value;
+        setText(value, textColor);
     });
     initText();
 })();
@@ -294,4 +357,3 @@ $(window).unload(function() {
         }
     }
 });
-

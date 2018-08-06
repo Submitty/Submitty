@@ -158,22 +158,21 @@ class AutoGradingView extends AbstractView {
     }
 
     /**
-     * @param Gradeable $gradeable
-     * @param $index
+     * @param \app\models\gradeable\GradedGradeable $graded_gradeable
+     * @param AutoGradedVersion $version version to display
+     * @param AutoGradedTestcase $testcase testcase to display
      * @param $popup_css_file
      * @param string $who
      * @param bool $show_hidden
      * @return string
      * @throws \Exception
      */
-    public function loadAutoChecks(Gradeable $gradeable, $index, $popup_css_file, $who, $show_hidden = false) {
-        $gradeable->loadResultDetails();
-        $testcase = $gradeable->getTestcases()[$index];
-
-        if ($testcase->isHidden() && !$show_hidden) {
+    public function loadAutoChecks(\app\models\gradeable\GradedGradeable $graded_gradeable, AutoGradedVersion $version, AutoGradedTestcase $testcase, $popup_css_file, $who, $show_hidden = false) {
+        if ($testcase->getTestcase()->isHidden() && !$show_hidden) {
             return "";
         }
 
+        $gradeable = $graded_gradeable->getGradeable();
         $checks = [];
 
         foreach ($testcase->getAutochecks() as $autocheck) {
@@ -254,9 +253,10 @@ class AutoGradingView extends AbstractView {
         }
 
         return $this->core->getOutput()->renderTwigTemplate("autograding/AutoChecks.twig", [
-            "gradeable" => $gradeable,
+            "gradeable_id" => $gradeable->getId(),
             "checks" => $checks,
-            "index" => $index,
+            "display_version" => $version->getVersion(),
+            "index" => $testcase->getTestcase()->getIndex(),
             "who" => $who,
             "popup_css_file" => $popup_css_file,
         ]);
@@ -339,7 +339,7 @@ class AutoGradingView extends AbstractView {
         }
         //get total score and max possible score
         $graded_score = $gradeable->getGradedTAPoints();
-        $graded_max = $gradeable->getTotalTANonExtraCreditPoints();
+        $graded_max = $gradeable->getTotalTAPoints();
         //change title if autograding exists or not
         //display a sum of autograding and instructor points if both exist
         $has_autograding = false;
@@ -383,9 +383,10 @@ class AutoGradingView extends AbstractView {
     /**
      * @param TaGradedGradeable $ta_graded_gradeable
      * @param bool $regrade_available
+     * @param array $uploaded_files
      * @return string
      */
-    public function showTAResultsNew(TaGradedGradeable $ta_graded_gradeable, bool $regrade_available) {
+    public function showTAResultsNew(TaGradedGradeable $ta_graded_gradeable, bool $regrade_available, array $uploaded_files) {
         $gradeable = $ta_graded_gradeable->getGradedGradeable()->getGradeable();
         $active_version = $ta_graded_gradeable->getGradedGradeable()->getAutoGradedGradeable()->getActiveVersion();
         $version_instance = $ta_graded_gradeable->getGradedVersionInstance();
@@ -418,7 +419,7 @@ class AutoGradingView extends AbstractView {
 
         //get total score and max possible score
         $total_score = $graded_score = $ta_graded_gradeable->getTotalScore();
-        $total_max = $graded_max = $gradeable->getTaNonExtraCreditPoints();
+        $total_max = $graded_max = $gradeable->getTaPoints();
 
         //change title if autograding exists or not
         //display a sum of autograding and instructor points if both exist
@@ -496,7 +497,9 @@ class AutoGradingView extends AbstractView {
             'active_same_as_graded' => $active_same_as_graded,
             'regrade_available' => $regrade_available,
             'regrade_message' => $regrade_message,
-            'num_decimals' => $num_decimals
+            'num_decimals' => $num_decimals,
+            'uploaded_files' => $uploaded_files,
+            'gradeable_id' => $gradeable->getId()
         ]);
     }
 }

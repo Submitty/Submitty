@@ -2,7 +2,13 @@
 
 {% if display_custom_message %}
     <div class="content">
-        {{ message_file_contents }}
+        {{ message_file_contents|raw }}
+    </div>
+{% endif %}
+
+{% if display_room_seating %}
+    <div class="content">
+        {% include 'navigation/RoomSeating.twig' %}
     </div>
 {% endif %}
 

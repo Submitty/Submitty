@@ -11,7 +11,7 @@
 
         <span data-changebg="true">
             <b><span id="progress_points-{{ c_index }}" style="display: none;" data-changedisplay1="true"></span></b>
-            <b>{{ component.name }}</b>
+            <b><span id="component_name-{{ c_index }}">{{ component.name }}</span></b>
 
             {% if component.graded_version != -1 and gradeable.active_version != component.graded_version %}
                 <span id='wrong_version_{{ c_index }}' class="version-warning">
@@ -68,7 +68,7 @@
         {# Todo: reimplement cancel button #}
         {#
         <span id="title-cancel-{{ c_index }}" style="font-size: 12px; display: none; width: 5%;" colspan="0" data-changebg="true" data-changedisplay1="true">
-            <span id="cancel-mark-{{ c_index }}" onclick="{{ break_onclick }}; closeMark(${c}, false);" style="cursor: pointer; float: right;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
+            <span id="cancel-mark-{{ c_index }}" onclick="{{ break_onclick }}; closeMark(${c}, true);" style="cursor: pointer; float: right;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
         </span>
         #}
 
@@ -125,6 +125,7 @@
         Custom:
         <textarea
             name="mark_text_custom_{{ c_index }}"
+            id="mark_text_custom-{{ c_index }}"
             onkeyup="updateCustomMarkText(this); autoResizeComment(event); checkIfSelected(this);"
             onchange="updateCustomMarkText(this); checkIfSelected(this); updateProgressPoints({{ c_index }});"
             onclick="event.stopPropagation();"
