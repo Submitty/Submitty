@@ -504,6 +504,7 @@ tr.is_publish {
 }
 
 .gradeable .summary-text {
+    word-wrap: break-word;
     width:95%;
     min-height:20px;
     font-family: 'Source Sans Pro', sans-serif;
