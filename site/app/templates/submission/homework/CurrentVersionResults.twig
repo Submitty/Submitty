@@ -67,7 +67,7 @@
             </p>
         {% endif %}
         <script type="text/javascript">
-            checkRefreshSubmissionPage("{{ check_refresh_submission_url|e('js') }}")
+            checkRefreshPage("{{ check_refresh_submission_url|e('js') }}")
         </script>
     {% elseif results is not defined %}
         <p class="red-message">

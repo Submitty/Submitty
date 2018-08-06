@@ -8,6 +8,10 @@ use app\libraries\FileUtils;
  * Class Team
  *
  * @method string getId()
+ * @method string[] getMemberUserIds()
+ * @method string[] getInvitedUserIds()
+ * @method User[] getMemberUsers()
+ * @method User[] getInvitedUsers()
  */
 class Team extends AbstractModel {
      
@@ -32,7 +36,7 @@ class Team extends AbstractModel {
 
     /**
      * Team constructor.
-     * @parma Core  $core
+     * @param Core  $core
      * @param array $details
      */
     public function __construct(Core $core, $details) {

@@ -69,6 +69,15 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
             {{ action != 'new' and gradeable.getTaGrading() ? 'checked' : '' }} /> Yes
     <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val auto_save"
             {{ not (action != 'new' and gradeable.getTaGrading()) ? 'checked' : '' }} /> No
+    {% if regrade_enabled == true %}
+    <br /><br /><br />
+        Will regrade requests be enabled for this assignment?
+        <br />
+        <input type="radio" id="yes_regrade_allowed" name="regrade_allowed" value="true" class="bool_val auto_save"
+                {{ action != 'new' and gradeable.isRegradeAllowed() ? 'checked' : '' }} /> Yes
+        <input type="radio" id="no_regrade_allowed" name="regrade_allowed" value="false" class="bool_val auto_save"
+                {{ not (action != 'new' and gradeable.isRegradeAllowed()) ? 'checked' : '' }} /> No
+    {% endif %}
     <br /><br />
 
     {% if action == 'new' or action == 'template' %}
@@ -242,6 +251,17 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_grades">sylla
         setVcsUrl($('#subdirectory').val());
     }
 
+    function onIsRegradeAllowedChange(){
+        if($('#yes_regrade_allowed').is(':checked')){
+         //   $('.regrade_request_date').hide();
+            disableElementChildren('.regrade_request_date', false);
+        }
+        else{
+         //   $('.regrade_request_date').show();
+            disableElementChildren('.regrade_request_date', true);
+        }
+    }
+
     var vcs_base_url = "{{ vcs_base_url }}";
     function setVcsUrl(subdirectory) {
         if (subdirectory.indexOf('://') > -1 || subdirectory[0] == '/') {
@@ -316,6 +336,9 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_grades">sylla
         $('#subdirectory').keypress(onVcsSubdirChange);
         $('#subdirectory').keyup(onVcsSubdirChange);
 
+        //Hide Regrade Request Date if Regrade Requests are not enabled
+        onIsRegradeAllowedChange();
+        $('[name="regrade_allowed"]').change(onIsRegradeAllowedChange);
     });
 
     function checkForm() {
