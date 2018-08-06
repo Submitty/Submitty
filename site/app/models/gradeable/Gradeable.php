@@ -235,7 +235,8 @@ class Gradeable extends AbstractModel {
         'grade_due_date',
         'grade_released_date',
         'grade_locked_date',
-        'team_lock_date'
+        'team_lock_date',
+        'regrade_request_date'
     ];
 
     /**
@@ -250,7 +251,8 @@ class Gradeable extends AbstractModel {
         'grade_released_date' => 'Grades Released',
         'grade_locked_date' => 'Grades Locked',
         'team_lock_date' => 'Teams Locked',
-        'late_days' => 'Late Days'
+        'late_days' => 'Late Days',
+        'regrade_request_date' => 'Regrade Requests\' Due'
     ];
 
     /**
@@ -274,7 +276,8 @@ class Gradeable extends AbstractModel {
         'submission_due_date',
         'grade_start_date',
         'grade_due_date',
-        'grade_released_date'
+        'grade_released_date',
+        'regrade_request_date'
     ];
 
     /**
@@ -297,7 +300,7 @@ class Gradeable extends AbstractModel {
         'grade_start_date',
         'grade_due_date',
         'grade_released_date',
-        //regrade date
+        'regrade_request_date'
     ];
 
     /**
