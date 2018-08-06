@@ -119,7 +119,9 @@ class BaseTestCase(unittest.TestCase):
             self.driver.find_element_by_id('logout').click()
             self.driver.find_element_by_id('login-guest')
 
-    def click_class(self, course, course_name):
+    def click_class(self, course, course_name=None):
+        if course_name is None:
+            course_name = course.upper()
         self.driver.find_element_by_id(self.get_current_semester() + '_' + course).click()
         WebDriverWait(self.driver, BaseTestCase.WAIT_TIME).until(EC.title_is(course_name))
 
