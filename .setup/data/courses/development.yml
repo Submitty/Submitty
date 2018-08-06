@@ -19,6 +19,7 @@ gradeables:
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
   g_grade_released_date: +1010 days
+  eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: cpp_simple_lab
@@ -38,6 +39,7 @@ gradeables:
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
   g_grade_released_date: +1010 days
+  eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0
   
 - gradeable_config: cpp_cats
@@ -57,6 +59,7 @@ gradeables:
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
   g_grade_released_date: +1010 days
+  eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0
   
 - gradeable_config: minimal_code_editing
@@ -76,6 +79,7 @@ gradeables:
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
   g_grade_released_date: +1010 days
+  eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0
   
 - gradeable_config: cpp_custom
@@ -95,6 +99,7 @@ gradeables:
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
   g_grade_released_date: +1010 days
+  eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0
   
 - gradeable_config: cpp_hidden_tests
@@ -114,6 +119,7 @@ gradeables:
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
   g_grade_released_date: +1010 days
+  eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0
   
 - gradeable_config: c_failure_messages
@@ -133,6 +139,7 @@ gradeables:
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
   g_grade_released_date: +1010 days
+  eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0
   
 - gradeable_config: python_simple_homework
@@ -152,6 +159,7 @@ gradeables:
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
   g_grade_released_date: +1010 days
+  eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0
   
 - gradeable_config: python_linehighlight
@@ -171,6 +179,7 @@ gradeables:
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
   g_grade_released_date: +1010 days
+  eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0
   
 - gradeable_config: python_multipart_static_analysis
@@ -190,6 +199,7 @@ gradeables:
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
   g_grade_released_date: +1010 days
+  eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0
   
 - gradeable_config: iclicker_upload
@@ -209,6 +219,7 @@ gradeables:
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
   g_grade_released_date: +1010 days
+  eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0
   
 - gradeable_config: paragraph_textboxes
@@ -228,6 +239,7 @@ gradeables:
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
   g_grade_released_date: +1010 days
+  eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0
   
 - gradeable_config: pdf_word_count
@@ -247,6 +259,7 @@ gradeables:
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
   g_grade_released_date: +1010 days
+  eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: test_notes_upload
@@ -266,6 +279,7 @@ gradeables:
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
   g_grade_released_date: +1010 days
+  eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: choice_of_language
@@ -285,6 +299,7 @@ gradeables:
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
   g_grade_released_date: +1010 days
+  eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: cpp_provided_code
@@ -304,4 +319,5 @@ gradeables:
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
   g_grade_released_date: +1010 days
+  eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0

@@ -1377,6 +1377,7 @@ class Gradeable(object):
             self.submission_open_date = dateutils.parse_datetime(gradeable['eg_submission_open_date'])
             self.submission_due_date = dateutils.parse_datetime(gradeable['eg_submission_due_date'])
             self.team_lock_date = dateutils.parse_datetime(gradeable['eg_submission_due_date'])
+            self.regrade_request_date = dateutils.parse_datetime(gradeable['eg_regrade_request_date'])
             self.student_view = True
             self.student_submit = True
             self.student_download = False
@@ -1421,6 +1422,7 @@ class Gradeable(object):
             assert self.ta_view_date < self.submission_open_date
             assert self.submission_open_date < self.submission_due_date
             assert self.submission_due_date < self.grade_start_date
+            assert self.grade_released_date < self.regrade_request_date
             if self.gradeable_config is not None:
                 if self.sample_path is not None:
                     if os.path.isfile(os.path.join(self.sample_path, "submissions.yml")):
@@ -1487,7 +1489,8 @@ class Gradeable(object):
                          eg_student_view=self.student_view, 
                          eg_student_submit=self.student_submit, eg_student_download=self.student_download,
                          eg_student_any_version=self.student_any_version, eg_config_path=self.config_path,
-                         eg_late_days=self.late_days, eg_precision=self.precision, eg_peer_grading=self.peer_grading)
+                         eg_late_days=self.late_days, eg_precision=self.precision, eg_peer_grading=self.peer_grading,
+                         eg_regrade_request_date=self.regrade_request_date)
 
         for component in self.components:
             component.create(self.id, conn, component_table, mark_table)
@@ -1504,6 +1507,7 @@ class Gradeable(object):
         if self.type == 0:
             form_json['date_submit'] = dateutils.write_submitty_date(self.submission_open_date)
             form_json['date_due'] = dateutils.write_submitty_date(self.submission_due_date)
+            form_json['regrade_request_date'] = dateutils.write_submitty_date(self.regrade_request_date)
         form_json['date_grade'] = dateutils.write_submitty_date(self.grade_start_date)
         form_json['date_released'] = dateutils.write_submitty_date(self.grade_released_date)
 

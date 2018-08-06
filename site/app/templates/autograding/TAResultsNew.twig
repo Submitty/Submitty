@@ -15,7 +15,9 @@
         {# Overview #}
         <div class="box half" style="padding: 10px; width: 40%; word-break: break-word;">
             <p>Version #{{ ta_graded_version }} graded by: {{ grader_names|join(", ") }}</p>
-            <i>Any regrade requests are due within 7 days of posting</i>
+            {% if regrade_available %}
+                <i>Any regrade requests are due by {{ regrade_date }}</i>
+            {% endif %}
             <p>
                 {% if overall_comment|length != 0 %}
             <hr>
