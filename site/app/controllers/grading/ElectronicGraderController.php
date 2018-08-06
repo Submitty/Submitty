@@ -1222,6 +1222,275 @@ class ElectronicGraderController extends GradingController {
     }
 
     /**
+     * Route for saving a component's properties (not its marks)
+     */
+    public function ajaxSaveComponent() {
+        // Required parameters
+        $gradeable_id = $_POST['gradeable_id'] ?? '';
+        $component_id = $_POST['component_id'] ?? '';
+        $title = $_POST['title'] ?? '';
+        $ta_comment = $_POST['ta_comment'] ?? '';
+        $student_comment = $_POST['student_comment'] ?? '';
+        $lower_clamp = $_POST['lower_clamp'] ?? null;
+        $default = $_POST['default'] ?? null;
+        $max_value = $_POST['max_value'] ?? null;
+        $upper_clamp = $_POST['upper_clamp'] ?? null;
+        $peer = $_POST['peer'] ?? 'false';
+        $page = $_POST['page'] ?? '';
+
+        // Validate required parameters
+        if ($lower_clamp === null) {
+            $this->core->getOutput()->renderJsonFail('Missing lower_clamp parameter');
+            return;
+        }
+        if ($default === null) {
+            $this->core->getOutput()->renderJsonFail('Missing default parameter');
+            return;
+        }
+        if ($max_value === null) {
+            $this->core->getOutput()->renderJsonFail('Missing max_value parameter');
+            return;
+        }
+        if ($upper_clamp === null) {
+            $this->core->getOutput()->renderJsonFail('Missing upper_clamp parameter');
+            return;
+        }
+        if ($page === '') {
+            $this->core->getOutput()->renderJsonFail('Missing page parameter');
+        }
+        if (!is_numeric($lower_clamp)) {
+            $this->core->getOutput()->renderJsonFail('Invalid lower_clamp parameter');
+            return;
+        }
+        if (!is_numeric($default)) {
+            $this->core->getOutput()->renderJsonFail('Invalid default parameter');
+            return;
+        }
+        if (!is_numeric($max_value)) {
+            $this->core->getOutput()->renderJsonFail('Invalid max_value parameter');
+            return;
+        }
+        if (!is_numeric($upper_clamp)) {
+            $this->core->getOutput()->renderJsonFail('Invalid upper_clamp parameter');
+            return;
+        }
+        if (strval(intval($page)) !== $page) {
+            $this->core->getOutput()->renderJsonFail('Invalid page parameter');
+        }
+        $peer = $peer === 'true';
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+
+        // get the component
+        $component = $this->tryGetComponent($gradeable, $component_id);
+        if ($component === false) {
+            return;
+        }
+
+        // checks if user has permission
+        if (!$this->core->getAccess()->canI("grading.electronic.save_component", ["gradeable" => $gradeable])) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to save components');
+            return;
+        }
+
+        try {
+            // Once we've parsed the inputs and checked permissions, perform the operation
+            $component->setTitle($title);
+            $component->setTaComment($ta_comment);
+            $component->setStudentComment($student_comment);
+            $component->setPoints([
+                'lower_clamp' => $lower_clamp,
+                'default' => $default,
+                'max_value' => $max_value,
+                'upper_clamp' => $upper_clamp
+            ]);
+            $component->setPage($page);
+            $component->setPeer($peer);
+            $this->core->getQueries()->saveComponent($component);
+            $this->core->getOutput()->renderJsonSuccess();
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
+        }
+    }
+
+    /**
+     * Route for saving the order of components in a gradeable
+     */
+    public function ajaxSaveComponentOrder() {
+        // Required parameters
+        $gradeable_id = $_POST['gradeable_id'] ?? '';
+        $order = json_decode($_POST['order'] ?? '[]', true);
+
+        // Validate required parameters
+        if (count($order) === 0) {
+            $this->core->getOutput()->renderJsonFail('Missing order parameter');
+            return;
+        }
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+
+        // checks if user has permission
+        if (!$this->core->getAccess()->canI("grading.electronic.save_component", ["gradeable" => $gradeable])) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to save marks');
+            return;
+        }
+
+        try {
+            // Once we've parsed the inputs and checked permissions, perform the operation
+            $this->saveComponentOrder($gradeable, $order);
+            $this->core->getOutput()->renderJsonSuccess();
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
+        }
+    }
+
+    public function saveComponentOrder(Gradeable $gradeable, array $orders) {
+        foreach ($gradeable->getComponents() as $component) {
+            if (!isset($orders[$component->getId()])) {
+                throw new \InvalidArgumentException('Missing component id in order array');
+            }
+            $order = $orders[$component->getId()];
+            if (!is_int($order) || $order < 0) {
+                throw new \InvalidArgumentException('All order values must be non-negative integers');
+            }
+            $component->setOrder(intval($order));
+        }
+        $this->core->getQueries()->updateGradeable($gradeable);
+    }
+
+    /**
+     * Route for adding a new component to a gradeable
+     */
+    public function ajaxAddNewComponent() {
+        // Required parameters
+        $gradeable_id = $_POST['gradeable_id'] ?? '';
+        $title = $_POST['title'] ?? '';
+        $ta_comment = $_POST['ta_comment'] ?? '';
+        $student_comment = $_POST['student_comment'] ?? '';
+        $lower_clamp = $_POST['lower_clamp'] ?? null;
+        $default = $_POST['default'] ?? null;
+        $max_value = $_POST['max_value'] ?? null;
+        $upper_clamp = $_POST['upper_clamp'] ?? null;
+        $peer = $_POST['peer'] ?? 'false';
+        $page = $_POST['page'] ?? '';
+
+        // Validate required parameters
+        if ($lower_clamp === null) {
+            $this->core->getOutput()->renderJsonFail('Missing lower_clamp parameter');
+            return;
+        }
+        if ($default === null) {
+            $this->core->getOutput()->renderJsonFail('Missing default parameter');
+            return;
+        }
+        if ($max_value === null) {
+            $this->core->getOutput()->renderJsonFail('Missing max_value parameter');
+            return;
+        }
+        if ($upper_clamp === null) {
+            $this->core->getOutput()->renderJsonFail('Missing upper_clamp parameter');
+            return;
+        }
+        if ($page === '') {
+            $this->core->getOutput()->renderJsonFail('Missing page parameter');
+        }
+        if (!is_numeric($lower_clamp)) {
+            $this->core->getOutput()->renderJsonFail('Invalid lower_clamp parameter');
+            return;
+        }
+        if (!is_numeric($default)) {
+            $this->core->getOutput()->renderJsonFail('Invalid default parameter');
+            return;
+        }
+        if (!is_numeric($max_value)) {
+            $this->core->getOutput()->renderJsonFail('Invalid max_value parameter');
+            return;
+        }
+        if (!is_numeric($upper_clamp)) {
+            $this->core->getOutput()->renderJsonFail('Invalid upper_clamp parameter');
+            return;
+        }
+        if (strval(intval($page)) !== $page) {
+            $this->core->getOutput()->renderJsonFail('Invalid page parameter');
+        }
+        $peer = $peer === 'true';
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+
+        // checks if user has permission
+        if (!$this->core->getAccess()->canI("grading.electronic.add_new_component", ["gradeable" => $gradeable])) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to add components');
+            return;
+        }
+
+        try {
+            // Once we've parsed the inputs and checked permissions, perform the operation
+            $component = $gradeable->addComponent($title, $ta_comment, $student_comment, $lower_clamp, $default,
+                $max_value, $upper_clamp, false, $peer, $page);
+            $this->core->getQueries()->updateGradeable($gradeable);
+            $this->core->getOutput()->renderJsonSuccess(['component_id' => $component->getId()]);
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
+        }
+    }
+
+    /**
+     * Route for deleting a component from a gradeable
+     */
+    public function ajaxDeleteComponent() {
+        // Required parameters
+        $gradeable_id = $_POST['gradeable_id'] ?? '';
+        $component_id = $_POST['component_id'] ?? '';
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+
+        // get the component
+        $component = $this->tryGetComponent($gradeable, $component_id);
+        if ($component === false) {
+            return;
+        }
+
+        // checks if user has permission
+        if (!$this->core->getAccess()->canI("grading.electronic.delete_component", ["gradeable" => $gradeable])) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to delete components');
+            return;
+        }
+
+        try {
+            // Once we've parsed the inputs and checked permissions, perform the operation
+            $gradeable->deleteComponent($component);
+            $this->core->getQueries()->updateGradeable($gradeable);
+            $this->core->getOutput()->renderJsonSuccess();
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
+        }
+    }
+
+    /**
      * Route for saving a mark's title/point value
      */
     public function ajaxSaveMark() {
