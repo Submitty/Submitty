@@ -10,7 +10,9 @@ use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\libraries\Core;
 use app\models\AbstractModel;
+use app\models\GradingSection;
 use app\models\Team;
+use app\models\User;
 
 /**
  * All data describing the configuration of a gradeable
@@ -31,7 +33,7 @@ use app\models\Team;
  * @method \DateTime getGradeStartDate()
  * @method \DateTime getGradeReleasedDate()
  * @method \DateTime getGradeLockedDate()
- * @method \DateTime getMinGradingGroup()
+ * @method int getMinGradingGroup()
  * @method string getSyllabusBucket()
  * @method void setSyllabusBucket($bucket)
  * @method string getTaInstructions()
@@ -86,6 +88,8 @@ class Gradeable extends AbstractModel {
     protected $syllabus_bucket = "homework";
     /** @property @var Component[] An array of all of this gradeable's components */
     protected $components = [];
+    /** @property @var Component[] An array of all gradeable components loaded from the database */
+    private $db_components = [];
 
     /* (private) Lazy-loaded Properties */
 
@@ -93,6 +97,8 @@ class Gradeable extends AbstractModel {
     private $any_manual_grades = null;
     /** @property @var bool If any submissions exist */
     private $any_submissions = null;
+    /** @property @var bool If any errors occurred in the build output */
+    private $any_build_errors = null;
     /** @property @var Team[] Any teams that have been formed */
     private $teams = null;
     /** @property @var string[][] Which graders are assigned to which rotating sections (empty if $grade_by_registration is true)
@@ -102,6 +108,10 @@ class Gradeable extends AbstractModel {
     private $rotating_grader_sections_modified = false;
     /** @property @var AutogradingConfig The object that contains the autograding config data */
     private $autograding_config = null;
+    /** @property @var array Array of all split pdf uploads. Each key is a filename and then each element is an array
+     * that contains filename, file path, and the file size.
+     */
+    private $split_pdf_files = null;
 
     /* Properties exclusive to numeric-text/checkpoint gradeables */
 
@@ -162,7 +172,6 @@ class Gradeable extends AbstractModel {
     protected $submission_due_date = null;
     /** @property @var int The number of late days allowed */
     protected $late_days = 0;
-
     /**
      * Gradeable constructor.
      * @param Core $core
@@ -241,6 +250,14 @@ class Gradeable extends AbstractModel {
             }
         }
         throw new \InvalidArgumentException('Component id did not exist in gradeable');
+    }
+
+    /**
+     * Gets an array of components set to be deleted
+     * @return Component[]
+     */
+    public function getDeletedComponents() {
+        return array_udiff($this->db_components, $this->components, Utils::getCompareByReference());
     }
 
     /**
@@ -617,17 +634,117 @@ class Gradeable extends AbstractModel {
      * @param Component[] $components Must be an array of only Component
      */
     public function setComponents(array $components) {
+        $components = array_values($components);
         foreach ($components as $component) {
             if (!($component instanceof Component)) {
                 throw new \InvalidArgumentException('Object in components array wasn\'t a component');
             }
         }
-        $this->components = array_values($components);
+
+        // Get the implied deleted components from this operation and ensure we aren't deleting any
+        //  components that have grades already
+        $deleted_components = array_udiff($this->components, $components, Utils::getCompareByReference());
+        if (in_array(true, array_map(function (Component $component) {
+            return $component->anyGrades();
+        }, $deleted_components))) {
+            throw new \InvalidArgumentException('Call to setComponents implied deletion of component with grades');
+        }
+
+        $this->components = $components;
 
         // sort by order
-        usort($this->components, function(Component $a, Component $b) {
+        usort($this->components, function (Component $a, Component $b) {
             return $a->getOrder() - $b->getOrder();
         });
+    }
+
+    /**
+     * Adds a new component to this gradeable with the provided properties
+     * @param string $title
+     * @param string $ta_comment
+     * @param string $student_comment
+     * @param float $lower_clamp
+     * @param float $default
+     * @param float $max_value
+     * @param float $upper_clamp
+     * @param bool $text
+     * @param bool $peer
+     * @param int $pdf_page set to Component::PDF_PAGE_NONE if not a pdf assignment
+     * @return Component the created component
+     */
+    public function addComponent(string $title, string $ta_comment, string $student_comment, float $lower_clamp,
+                                 float $default, float $max_value, float $upper_clamp, bool $text, bool $peer, int $pdf_page) {
+        $component = new Component($this->core, $this, [
+            'title' => $title,
+            'ta_comment' => $ta_comment,
+            'student_comment' => $student_comment,
+            'lower_clamp' => $lower_clamp,
+            'default' => $default,
+            'max_value' => $max_value,
+            'upper_clamp' => $upper_clamp,
+            'text' => $text,
+            'peer' => $peer,
+            'page' => $pdf_page,
+            'id' => 0,
+            'order' => count($this->components)
+        ]);
+        $this->components[] = $component;
+        return $component;
+    }
+
+    /**
+     * Base method for deleting components.  This isn't exposed as public so
+     *  its make very clear that a delete component operation is being forceful.
+     * @param Component $component
+     * @param bool $force true to delete the component if it has grades
+     * @throws \InvalidArgumentException If this gradeable doesn't own the provided component or
+     *          $force is false and the component has grades
+     */
+    private function deleteComponentInner(Component $component, bool $force = false) {
+        // Don't delete if the component has grades (and we aren't forcing)
+        if($component->anyGrades() && !$force) {
+            throw new \InvalidArgumentException('Attempt to delete a component with grades!');
+        }
+
+        // Calculate our components array without the provided component
+        $new_components = array_udiff($this->components, [$component], Utils::getCompareByReference());
+
+        // If it wasn't removed from our components, it was either already deleted, or never belonged to us
+        if (count($new_components) === count($this->components)) {
+            throw new \InvalidArgumentException('Attempt to delete component that did not belong to this gradeable');
+        }
+
+        // Finally, set our array to the new one
+        $this->components = $new_components;
+    }
+
+    /**
+     * Deletes a component from this gradeable
+     * @param Component $component
+     * @throws \InvalidArgumentException If this gradeable doesn't own the provided component or if the component has grades
+     */
+    public function deleteComponent(Component $component) {
+        $this->deleteComponentInner($component, false);
+    }
+
+    /**
+     * Deletes a component from this gradeable without checking if grades exist for it yet.
+     * DANGER: THIS CAN BE A VERY DESTRUCTIVE ACTION -- USE ONLY WHEN EXPLICITLY REQUESTED
+     * @param Component $component
+     * @throws \InvalidArgumentException If this gradeable doesn't own the provided component
+     */
+    public function forceDeleteComponent(Component $component) {
+        $this->deleteComponentInner($component, true);
+    }
+
+    /**
+     * Sets the array of the components, only called from the database
+     * @param Component[] $components
+     * @internal
+     */
+    public function setComponentsFromDatabase(array $components) {
+        $this->setComponents($components);
+        $this->db_components = $this->components;
     }
 
     /**
@@ -710,6 +827,16 @@ class Gradeable extends AbstractModel {
     }
 
 
+    /**
+     * Gets all of the teams formed for this gradeable
+     * @return Team[]
+     */
+    public function getTeams() {
+        if($this->teams === null) {
+            $this->teams = $this->core->getQueries()->getTeamsByGradeableId($this->getId());
+        }
+        return $this->teams;
+    }
 
     /**
      * Gets if this gradeable has any manual grades (any GradedGradeables exist)
@@ -731,11 +858,15 @@ class Gradeable extends AbstractModel {
             // Until we find a submission, assume there are none
             $this->any_submissions = false;
             if ($this->type === GradeableType::ELECTRONIC_FILE) {
-                $semester = $this->core->getConfig()->getSemester();
-                $course = $this->core->getConfig()->getCourse();
-                $submission_path = "/var/local/submitty/courses/" . $semester . "/" . $course . "/" . "submissions/" . $this->getId();
+                $submission_path = FileUtils::joinPaths(
+                    $this->core->getConfig()->getSubmittyPath(),
+                    'courses',
+                    $this->core->getConfig()->getSemester(),
+                    $this->core->getConfig()->getCourse(),
+                    'submissions',
+                    $this->getId());
                 if (is_dir($submission_path)) {
-                    $this->any_submissions = false;
+                    $this->any_submissions = true;
                 }
             }
         }
@@ -743,14 +874,20 @@ class Gradeable extends AbstractModel {
     }
 
     /**
-     * Gets all of the teams formed for this gradeable
-     * @return Team[]
+     * Gets if this gradeable had any build errors during the last build attempt
+     * @return bool
      */
-    public function getTeams() {
-        if($this->teams === null) {
-            $this->teams = $this->core->getQueries()->getTeamsByGradeableId($this->getId());
+    public function anyBuildErrors() {
+        if ($this->any_build_errors === null) {
+            $build_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $this->getId(), "log_cmake_output.txt");
+
+            // Default to true so if the file isn't found it counts as a 'build error'
+            $this->any_build_errors = true;
+            if (file_exists($build_file)) {
+                $this->any_build_errors = strpos(file_get_contents($build_file), "error") !== false;
+            }
         }
-        return $this->teams;
+        return $this->any_build_errors;
     }
 
     /**
@@ -836,5 +973,327 @@ class Gradeable extends AbstractModel {
             }
         }
         return $count;
+    }
+
+    /**
+     * Gets the percent of grading complete for the provided user for this gradeable
+     * @param User $grader
+     * @return float The percentage (0 to 1) of grading completed or NAN if none required
+     */
+    public function getGradingProgress(User $grader) {
+        //This code is taken from the ElectronicGraderController, it used to calculate the TA percentage.
+        $total_users = array();
+        $graded_components = array();
+        if ($this->isGradeByRegistration()) {
+            if (!$grader->accessFullGrading()) {
+                $sections = $grader->getGradingRegistrationSections();
+            } else {
+                $sections = $this->core->getQueries()->getRegistrationSections();
+                foreach ($sections as $i => $section) {
+                    $sections[$i] = $section['sections_registration_id'];
+                }
+            }
+            $section_key = 'registration_section';
+        } else {
+            if (!$grader->accessFullGrading()) {
+                $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($this->getId(), $grader->getId());
+            } else {
+                $sections = $this->core->getQueries()->getRotatingSections();
+                foreach ($sections as $i => $section) {
+                    $sections[$i] = $section['sections_rotating_id'];
+                }
+            }
+            $section_key = 'rotating_section';
+        }
+        $num_submitted = [];
+        if (count($sections) > 0) {
+            if ($this->isTeamAssignment()) {
+                $total_users = $this->core->getQueries()->getTotalTeamCountByGradingSections($this->getId(), $sections, $section_key);
+                $graded_components = $this->core->getQueries()->getGradedComponentsCountByTeamGradingSections($this->getId(), $sections, $section_key);
+                $num_submitted = $this->core->getQueries()->getTotalSubmittedTeamCountByGradingSections($this->getId(), $sections, $section_key);
+            } else {
+                $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key);
+                $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment());
+                $num_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($this->getId(), $sections, $section_key);
+            }
+        }
+
+        $num_components = $this->core->getQueries()->getTotalComponentCount($this->getId());
+        $sections = array();
+        if (count($total_users) > 0) {
+            foreach ($num_submitted as $key => $value) {
+                $sections[$key] = array(
+                    'total_components' => $value * $num_components,
+                    'graded_components' => 0,
+                );
+                if (isset($graded_components[$key])) {
+                    // Clamp to total components if unsubmitted assigment is graded for whatever reason
+                    $sections[$key]['graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
+                }
+            }
+        }
+        $components_graded = 0;
+        $components_total = 0;
+        foreach ($sections as $key => $section) {
+            if ($key === "NULL") {
+                continue;
+            }
+            $components_graded += $section['graded_components'];
+            $components_total += $section['total_components'];
+        }
+        if ($components_total === 0) {
+            return NAN;
+        }
+        return $components_graded / $components_total;
+    }
+
+    /**
+     * Gets the info about split pdf upload files
+     * @return array An array (indexed by file name) of arrays each containing file info.
+     *      See FileUtils::getAllFiles for more details.
+     */
+    public function getSplitPdfFiles() {
+        if ($this->split_pdf_files === null) {
+            $upload_path = FileUtils::joinPaths(
+                $this->core->getConfig()->getCoursePath(),
+                'uploads', 'split_pdf',
+                $this->id
+            );
+            $this->split_pdf_files = FileUtils::getAllFiles($upload_path);
+        }
+        return $this->split_pdf_files;
+    }
+
+    /**
+     * Gets if the grades released date has passed yet
+     * @return bool
+     */
+    public function isTaGradeReleased() {
+        return $this->grade_released_date < new \DateTime("now", $this->core->getConfig()->getTimezone());
+    }
+
+    /**
+     * Gets if the submission open date has passed yet
+     * @return bool
+     */
+    public function isSubmissionOpen() {
+        return $this->submission_open_date < new \DateTime("now", $this->core->getConfig()->getTimezone());
+    }
+
+    /**
+     * Gets the total possible non-extra-credit ta points
+     * @return float
+     */
+    public function getTaPoints() {
+        $total = 0.0;
+        foreach($this->getComponents() as $component) {
+            $total += $component->getMaxValue();
+        }
+        return $total;
+    }
+
+    /**
+     * Get a list of all grading sections assigned to a given user
+     * @param User $user
+     * @return GradingSection[]
+     */
+    public function getGradingSectionsForUser(User $user) {
+        if ($this->isPeerGrading() && $user->getGroup() === User::GROUP_STUDENT) {
+            $users = $this->core->getQueries()->getPeerAssignment($this->getId(), $user->getId());
+            //TODO: Peer grading team assignments
+            return [new GradingSection($this->core, false, "Peer", [$user], $users, [])];
+        } else {
+            $users = [];
+            $teams = [];
+
+            if ($this->isGradeByRegistration()) {
+                $section_names = $user->getGradingRegistrationSections();
+
+                if ($this->isTeamAssignment()) {
+                    foreach ($section_names as $section) {
+                        $teams[$section] = [];
+                    }
+                    $all_teams = $this->core->getQueries()->getTeamsByGradeableAndRegistrationSections($this->getId(), $section_names);
+                    foreach ($all_teams as $team) {
+                        /** @var Team $team */
+                        $teams[$team->getRegistrationSection()][] = $team;
+                    }
+                } else {
+                    foreach ($section_names as $section) {
+                        $users[$section] = [];
+                    }
+                    $all_users = $this->core->getQueries()->getUsersByRegistrationSections($section_names);
+                    foreach ($all_users as $user) {
+                        /** @var User $user */
+                        $users[$user->getRegistrationSection()][] = $user;
+                    }
+                }
+                $graders = $this->core->getQueries()->getGradersForRegistrationSections($section_names);
+            } else {
+                $section_names = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($this->getId(), $user->getId());
+
+                if ($this->isTeamAssignment()) {
+                    foreach ($section_names as $section) {
+                        $teams[$section] = [];
+                    }
+                    $all_teams = $this->core->getQueries()->getTeamsByGradeableAndRotatingSections($this->getId(), $section_names);
+                    foreach ($all_teams as $team) {
+                        /** @var Team $team */
+                        $teams[$team->getRotatingSection()][] = $team;
+                    }
+                } else {
+                    foreach ($section_names as $section) {
+                        $users[$section] = [];
+                    }
+                    $all_users = $this->core->getQueries()->getUsersByRotatingSections($section_names);
+                    foreach ($all_users as $user) {
+                        /** @var User $user */
+                        $users[$user->getRotatingSection()][] = $user;
+                    }
+                }
+                $graders = $this->core->getQueries()->getGradersForRotatingSections($this->getId(), $section_names);
+            }
+
+            $sections = [];
+            foreach ($section_names as $section_name) {
+                $sections[] = new GradingSection($this->core, $this->isGradeByRegistration(), $section_name,
+                    $graders[$section_name] ?? [], $users[$section_name] ?? null, $teams[$section_name] ?? null);
+            }
+
+            return $sections;
+        }
+    }
+
+    /**
+     * Get a list of all grading sections
+     * @return GradingSection[]
+     */
+    public function getAllGradingSections() {
+        if ($this->isPeerGrading()) {
+            //Todo: What are all sections when you have peer grading?
+        }
+
+        $users = [];
+        $teams = [];
+
+        if ($this->isGradeByRegistration()) {
+            if ($this->isTeamAssignment()) {
+                $all_teams = $this->core->getQueries()->getTeamsByGradeableId($this->getId());
+                foreach ($all_teams as $team) {
+                    /** @var Team $team */
+                    $teams[$team->getRegistrationSection()][] = $team;
+                }
+            } else {
+                $all_users = $this->core->getQueries()->getAllUsers();
+                foreach ($all_users as $user) {
+                    /** @var User $user */
+                    $users[$user->getRegistrationSection()][] = $user;
+                }
+            }
+            $section_names = $this->core->getQueries()->getRegistrationSections();
+            foreach ($section_names as $i => $section) {
+                $section_names[$i] = $section['sections_registration_id'];
+            }
+            $graders = $this->core->getQueries()->getGradersForRegistrationSections($section_names);
+        } else {
+            if ($this->isTeamAssignment()) {
+                $all_teams = $this->core->getQueries()->getTeamsByGradeableId($this->getId());
+                foreach ($all_teams as $team) {
+                    /** @var Team $team */
+                    $teams[$team->getRotatingSection()][] = $team;
+                }
+            } else {
+                $all_users = $this->core->getQueries()->getAllUsers();
+                foreach ($all_users as $user) {
+                    /** @var User $user */
+                    $users[$user->getRotatingSection()][] = $user;
+                }
+            }
+            $section_names = $this->core->getQueries()->getRotatingSections();
+            foreach ($section_names as $i => $section) {
+                $section_names[$i] = $section['sections_rotating_id'];
+            }
+            $graders = $this->core->getQueries()->getGradersForRotatingSections($this->getId(), $section_names);
+        }
+
+        $sections = [];
+        foreach ($section_names as $section_name) {
+            $sections[] = new GradingSection($this->core, $this->isGradeByRegistration(), $section_name, $graders[$section_name] ?? [], $users[$section_name] ?? null, $teams[$section_name] ?? null);
+        }
+
+        return $sections;
+    }
+
+    /**
+     * Creates a new team with the provided members
+     * @param User $leader The team leader (first user)
+     * @param User[] $members The team members (not including leader).
+     * @param string $registration_section Registration section to give team.  Leave blank to inherit from leader. 'NULL' for null section.
+     * @param int $rotating_section Rotating section to give team.  Set to -1 to inherit from leader. 0 for null section.
+     * @throws \Exception If creating directories for the team fails, or writing team history fails
+     *  Note: The team in the database may have already been created if an exception is thrown
+     */
+    public function createTeam(User $leader, array $members, string $registration_section = '', int $rotating_section = -1) {
+        $all_members = $members;
+        $all_members[] = $leader;
+
+        // Validate parameters
+        $gradeable_id = $this->getId();
+        foreach ($all_members as $member) {
+            if (!($member instanceof User)) {
+                throw new \InvalidArgumentException('User array contained non-user object');
+            }
+            if ($this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $member->getId()) !== null) {
+                throw new \InvalidArgumentException("{$member->getId()} is already on a team");
+            }
+        }
+
+        // Inherit rotating/registration section from leader if not provided
+        if ($registration_section === '') {
+            $registration_section = $leader->getRegistrationSection();
+        } else if($registration_section === 'NULL') {
+            $registration_section = null;
+        }
+        if ($rotating_section < 0) {
+            $rotating_section = $leader->getRotatingSection();
+        } else if ($rotating_section === 0) {
+            $rotating_section = null;
+        }
+
+        // Create the team in the database
+        $team_id = $this->core->getQueries()->createTeam($gradeable_id, $leader->getId(), $registration_section, $rotating_section);
+
+        // Force the other team members to accept the invitation from this newly created team
+        $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $leader->getId());
+        foreach ($members as $i => $member) {
+            $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $member->getId());
+            $this->core->getQueries()->acceptTeamInvitation($team_id, $member->getId());
+        }
+
+        // Create the submission directory if it doesn't exist
+        $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id);
+        if (!FileUtils::createDir($gradeable_path)) {
+            throw new \Exception("Failed to make folder for this assignment");
+        }
+
+        // Create the team submission directory if it doesn't exist
+        $user_path = FileUtils::joinPaths($gradeable_path, $team_id);
+        if (!FileUtils::createDir($user_path)) {
+            throw new \Exception("Failed to make folder for this assignment for the team");
+        }
+
+        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO")
+            . " " . $this->core->getConfig()->getTimezone()->getName();
+        $settings_file = FileUtils::joinPaths($user_path, "user_assignment_settings.json");
+
+        $json = array("team_history" => array(array("action" => "admin_create", "time" => $current_time,
+            "admin_user" => $this->core->getUser()->getId(), "first_user" => $leader->getId())));
+        foreach ($members as $member) {
+            $json["team_history"][] = array("action" => "admin_add_user", "time" => $current_time,
+                "admin_user" => $this->core->getUser()->getId(), "added_user" => $member->getId());
+        }
+        if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
+            throw new \Exception("Failed to write to team history to settings file");
+        }
     }
 }

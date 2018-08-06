@@ -1,7 +1,75 @@
+{% import _self as self %}
+{% if btn_type == "request" %}
+    <div>
+        <h3>Regrade Request</h3>
+    </div>
+    <div>
+        <p>"{{ regradeMessage }}"</p>
+    </div>
+    {% set message = "Request Regrade" %}
+{% elseif btn_type == "admin_open" %}
+    <div>
+        <h3>Regrade Request
+            <span>
+                <span class="fa fa-hourglass" style="font-size: 16px; color: #af0000"></span> 
+                <span class="red-message">Regrade Request Awaiting Review</span>
+            </span> 
+        </h3>
+    </div>
+    {% set message = "Type response here" %}
+    {% set button_message = "Respond and Resolve request" %}
+{% elseif btn_type == "admin_closed" %}
+    <div>
+        <h3>Regrade Request
+            <span>
+                <span class="fa fa-check" style="font-size: 16px; color: #008800"></span>  
+                <span class="green-message">Regrade Request Has Been Reviewed</span>
+            </span>
+        </h3>
+    </div>
+    {% set message = "Type response here" %}
+    {% set button_message = "Post Message" %}
+{% elseif btn_type == "pending" %}
+    <div>
+        <h3>Regrade Request
+            <script type="text/javascript">
+                toggleRegradeRequests();
+                document.getElementById("ShowRegradeRequestButton").style.display = 'none'
+            </script>
+        <span>
+            <span class="fa fa-hourglass" style="font-size: 16px; color: #af0000"></span> 
+            <span class="red-message">Regrade Request Being Reviewed</span>
+        </span> 
+        </h3>
+    </div>
+    <div>
+        <p>"{{ regradeMessage }}"</p>
+    </div>
+    {% set message = "Additional Details" %}
+    {% set button_message = "Submit Additional Information" %}
+{% elseif btn_type == "completed" %}
+    <div>
+        <h3>Regrade Request
+            <script type="text/javascript">
+                toggleRegradeRequests();
+                document.getElementById("ShowRegradeRequestButton").style.display = 'none'
+            </script>
+        <span>
+            <span class="fa fa-check" style="font-size: 16px; color: #008800"></span>  
+            <span class="green-message">Regrade Request Has Been Reviewed</span>
+        </span>
+        </h3>
+    </div>
+    <div>
+        <p>"{{ regradeMessage }}"</p>
+    </div>
+    {% set message = "Request Reviewed" %}
+    {% set button_message = "Send Information Without Reopening Regrade Request" %}
+{% endif %}
 {% for post in posts %}
-    <div style="margin-top: 20px ">
-        <div class='{{ is_staff ? "post_box important" : "post_box" }} {{ loop.index0 == 0 ? "first_post" : "" }}' style="padding:20px;">
-            <p>{{ post.content }}</p>
+    <div style="margin-top: 20px;">
+        <div class='{{ post.is_staff ? "post_box important" : "post_box" }} {{ loop.index0 == 0 ? "first_post" : "" }}' style="padding:20px;">
+            <p style='white-space:pre'>{{ post.content }}</p>
             <hr>
             <div style="float:right">
                 <b>{{ post.name }}</b> &nbsp;
@@ -10,40 +78,65 @@
         </div>
     </div>
 {% endfor %}
-
-{% if core.getUser().accessGrading() %}
-    {% set reply_message = "Reply" %}
-    {% set reply_placeholder = "Enter your reply here" %}
-{% else %}
-    {% set reply_message = "Request further TA/Instructor action" %}
-    {% set reply_placeholder = "If you believe you require more review, enter a reply here to request further TA/Instructor action..." %}
-{% endif %}
-
-{% if core.getUser().accessGrading() or gradeable.getRegradeStatus() != 0 %}
 <div style="padding:20px;">
-    <form method="POST" id="replyTextForm" action="{{ core.buildUrl({'component': 'student',
-            'action': 'make_request_post',
-            'regrade_id': thread_id,
-            'gradeable_id': gradeable.getId(),
-            'user_id': core.getUser().getId()
-        }) }}">
-        <textarea name="replyTextArea" id="replyTextArea" style="resize:none;min-height:100px;width:100%; font-family: inherit;" rows="10" cols="30" placeholder="{{ reply_placeholder }}" id="makeRequestPost" required></textarea>
-        <input type="submit" value="{{ reply_message }}" id="submitPost" class="btn btn-default" style="margin-top: 15px; float: right">
-        <button type="button" title="Insert a link" onclick="addBBCode(1, '#replyTextArea')" style="margin-right:10px;" class="btn btn-default">Link <i class="fa fa-link fa-1x"></i></button><button title="Insert a code segment" type="button" onclick="addBBCode(0, '#replyTextArea')" class="btn btn-default">Code <i class="fa fa-code fa-1x"></i></button>
+    <form method="POST" id="replyTextForm" action="{{ url }}">
+        <input type="hidden" id="thread_id" name="thread_id" value="{{ thread_id }}">
+        <input type="hidden" id="g_id" name="g_id" value="{{ gradeable.getId() }}">
+        <input type="hidden" id="u_id" name="u_id" value="{{ core.getUser().getId() }}">
+        <input type="hidden" id="status" name="status" value="1">
+        <textarea name="replyTextArea" id="replyTextArea" style="resize:none;min-height:100px;width:100%; font-family: inherit;" rows="10" cols="30" placeholder="{{ message }}" required></textarea>
+        {% if btn_type == 'pending' %}
+            {# Request pending, we can submit new posts #}
+            <input type="submit" value="{{ button_message }}" class="btn btn-primary" style="margin-top: 15px; float: right" onclick="$('#status').val(-1);">
+            <input type="button" class="btn btn-default" id="cancelRegrade" value="Cancel Regrade Request" style="margin-top: 15px; float: right" onclick="changeRegradeStatus({{ thread_id }}, '{{ gradeable.getId() }}', '{{ core.getUser().getId() }}', 1);">
+            {{ self.bbcode_buttons() }}
+        {% elseif btn_type == 'completed' %}
+            {# Request closed #}
+            <input type="button" class="btn btn-primary" id="cancelRegrade" value="Reopen Regrade Request Without Responding" style="margin-top: 15px; float: right" onclick="changeRegradeStatus({{ thread_id }}, '{{ gradeable.getId()}}', '{{ core.getUser().getId() }}', -1);">
+            <input type="submit" value="{{ button_message }}" class="btn btn-default" style="margin-top: 15px; float: right" onclick="$('#status').val(1);">
+            {{ self.bbcode_buttons() }}
+        {% elseif btn_type == 'admin_open' %}
+            {# Admin, request is open #}
+            <input type="submit" value="Respond and Resolve Regrade Request" class="btn btn-primary" style="margin-top: 15px; float: right" onclick="$('#status').val(1);">
+            {{ self.bbcode_buttons() }}
+            <input type="submit" class="btn btn-default" id="extraInfoRegrade" value="Request Additional Information" style="margin-top: 15px; float: right" onclick="$('#status').val(-1);">
+            <input type="button" class="btn btn-default" id="cancelRegrade" value="Resolve Regrade Request Without Response" style="margin-top: 15px; float: right" onclick="changeRegradeStatus({{ thread_id }}, '{{ gradeable.getId()}}', '{{ core.getUser().getId() }}', 1);">
+        {% elseif btn_type == 'admin_closed' %}
+            {# Admin, request is closed #}
+            <input type="submit" value="Post" class="btn btn-primary" style="margin-top: 15px; float: right" onclick="$('#status').val(1);">
+            <input type="button" class="btn btn-default" id="cancelRegrade" value="Open Regrade Request" style="margin-top: 15px; float: right" onclick="changeRegradeStatus({{ thread_id }}, '{{ gradeable.getId()}}', '{{ core.getUser().getId() }}', -1);">
+            {{ self.bbcode_buttons() }}
+        {% else %}
+            {# No request yet #}
+            <input type="submit" value="Submit Regrade Request" class="btn btn-primary" style="margin-top: 15px; float: right" onclick="$('#status').val(-1);">
+            {{ self.bbcode_buttons() }}
+        {% endif %}
     </form>
 </div>
-{% endif %}
-
 <script type="text/javascript">
     $("#replyTextForm").submit(function(event) {
+        var thread_id=$("#thread_id").val();
+        var g_id=$("#g_id").val();
+        var u_id=$("#u_id").val();
+        var status=$("#status").val();
+
         $.ajax({
             type: "POST",
             url: $(this).attr("action"),
             data: $(this).serialize(),
             success: function(data){
-                window.location.reload();
+                changeRegradeStatus(thread_id, g_id, u_id, status);
             }
         });
         event.preventDefault();
     });
 </script>
+
+{% macro bbcode_buttons() %}
+    <button type="button" title="Insert a link" onclick="addBBCode(1, '#replyTextArea')" style="margin-right:10px;" class="btn btn-default">
+        Link <i class="fa fa-link fa-1x"></i>
+    </button>
+    <button title="Insert a code segment" type="button" onclick="addBBCode(0, '#replyTextArea')" class="btn btn-default">
+        Code <i class="fa fa-code fa-1x"></i>
+    </button>
+{% endmacro %}

@@ -60,6 +60,6 @@ if(__name__ == "__main__"):
 			os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c \"INSERT INTO threads (title, created_by, pinned, deleted, merged_thread_id, merged_post_id, is_visible) VALUES (\'{:s}\', \'{:s}\', false, false, -1, -1, true)\" > /dev/null""".format(*variables, "Thread{:d}".format(i+1), "aphacker"))
 			os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c \"INSERT INTO thread_categories (thread_id, category_id) VALUES ({:d}, 1)\" > /dev/null""".format(*variables, i+1))
 			for pid in range(posts):
-				os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c \"INSERT INTO posts (thread_id, parent_id, author_user_id, content, timestamp, anonymous, deleted, resolved, type, has_attachment) VALUES ({}, {}, {}, {}, \'{}\', false, false, false, 0, false)\" > /dev/null""".format(*variables, i+1, -1 if pid == 0 else i*posts + pid, "'aphacker'", "'Post{:d}'".format(i*posts + pid+1), datetime.now()))
+				os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c \"INSERT INTO posts (thread_id, parent_id, author_user_id, content, timestamp, anonymous, deleted, type, has_attachment) VALUES ({}, {}, {}, {}, \'{}\', false, false, 0, false)\" > /dev/null""".format(*variables, i+1, -1 if pid == 0 else i*posts + pid, "'aphacker'", "'Post{:d}'".format(i*posts + pid+1), datetime.now()))
 
 

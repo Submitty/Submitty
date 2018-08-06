@@ -11,7 +11,7 @@
 
         <span data-changebg="true">
             <b><span id="progress_points-{{ c_index }}" style="display: none;" data-changedisplay1="true"></span></b>
-            <b>{{ component.name }}</b>
+            <b><span id="component_name-{{ c_index }}">{{ component.name }}</span></b>
 
             {% if component.graded_version != -1 and gradeable.active_version != component.graded_version %}
                 <span id='wrong_version_{{ c_index }}' class="version-warning">
@@ -68,7 +68,7 @@
         {# Todo: reimplement cancel button #}
         {#
         <span id="title-cancel-{{ c_index }}" style="font-size: 12px; display: none; width: 5%;" colspan="0" data-changebg="true" data-changedisplay1="true">
-            <span id="cancel-mark-{{ c_index }}" onclick="{{ break_onclick }}; closeMark(${c}, false);" style="cursor: pointer; float: right;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
+            <span id="cancel-mark-{{ c_index }}" onclick="{{ break_onclick }}; closeMark(${c}, true);" style="cursor: pointer; float: right;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
         </span>
         #}
 
@@ -106,11 +106,35 @@
 
     {# Custom mark #}
     <div class="box" id="mark_custom_id-{{ c_index }}" style="display: none;" data-changedisplay1="true">
-        <span onclick="event.stopPropagation();">
-            <i class="fa {{ component.score == 0 and component.comment == "" ? "fa-square-o" : "fa-square" }} mark fa-lg mark-selector" name="mark_icon_{{ c_index }}_custom" id="mark_icon_custom-{{ c_index }}"></i>&nbsp;
-        </span>
-        <input name="mark_points_custom_{{ c_index }}" id="mark_points_custom-{{ c_index }}" type="number" step="{{ gradeable.precision }}" onchange="updateCustomMarkPoints(this); checkIfSelected(this); updateProgressPoints({{ c_index }});" onclick="event.stopPropagation();" data-component_index="{{ c_index }}" value="{{ component.score }}" class="mark-score">
-        Custom: <textarea name="mark_text_custom_{{ c_index }}" onkeyup="updateCustomMarkText(this); autoResizeComment(event); checkIfSelected(this);" onchange="updateCustomMarkText(this); checkIfSelected(this); updateProgressPoints({{ c_index }});" onclick="event.stopPropagation();" data-component_index="{{ c_index }}" cols="120" rows="1" placeholder="Custom message for student..." class="mark-note-custom">{{ component.comment }}</textarea>
+        <span
+            onclick="event.stopPropagation();"
+            class="{{ component.score == 0 and component.comment == "" ? "" : "mark-has" }} mark"
+            name="mark_icon_{{ c_index }}_custom"
+            id="mark_icon_custom-{{ c_index }}"
+        ></span>
+        <input
+            name="mark_points_custom_{{ c_index }}"
+            id="mark_points_custom-{{ c_index }}"
+            type="number"
+            step="{{ gradeable.precision }}"
+            onchange="updateCustomMarkPoints(this); checkIfSelected(this); updateProgressPoints({{ c_index }});"
+            onclick="event.stopPropagation();"
+            data-component_index="{{ c_index }}"
+            value="{{ component.score }}" class="mark-score"
+        >
+        Custom:
+        <textarea
+            name="mark_text_custom_{{ c_index }}"
+            id="mark_text_custom-{{ c_index }}"
+            onkeyup="updateCustomMarkText(this); autoResizeComment(event); checkIfSelected(this);"
+            onchange="updateCustomMarkText(this); checkIfSelected(this); updateProgressPoints({{ c_index }});"
+            onclick="event.stopPropagation();"
+            data-component_index="{{ c_index }}"
+            cols="120"
+            rows="1"
+            placeholder="Custom message for student..."
+            class="mark-note-custom"
+        >{{ component.comment }}</textarea>
     </div>
     {# /Custom mark #}
 </div>

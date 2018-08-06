@@ -91,6 +91,8 @@ $core->loadConfig($semester, $course);
 $core->loadAuthentication();
 //Load Twig templating engine after the config is loaded but before any output is shown
 $core->getOutput()->loadTwig();
+/** @noinspection PhpUnhandledExceptionInspection */
+$core->loadGradingQueue();
 
 if($core->getConfig()->getInstitutionName() !== ""){
     $core->getOutput()->addBreadcrumb($core->getConfig()->getInstitutionName(), "");

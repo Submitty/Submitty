@@ -66,12 +66,14 @@ class Utils {
      * as tokens and other things where uniqueness is of absolute importance. The generated
      * string is twice as long as the given number of bytes as the parameter.
      *
+     * @noinspection PhpDocMissingThrowsInspection
+     *
      * @param int $bytes
      *
      * @return string
-     * @throws \Exception
      */
     public static function generateRandomString($bytes = 16) {
+        /** @noinspection PhpUnhandledExceptionInspection */
         return bin2hex(random_bytes($bytes));
     }
     
@@ -234,5 +236,17 @@ class Utils {
             return 0.0;
         }
         return $result;
+    }
+
+    /**
+     * Gets a function to compare two objects by reference for functions like 'array_udiff'
+     *  Credit to method: https://stackoverflow.com/a/27830923/2972004
+     * As noted in the comments (and observed), simply comparing two references using `===` will not work
+     * @return \Closure
+     */
+    public static function getCompareByReference() {
+        return function ($a, $b) {
+            return strcmp(spl_object_hash($a), spl_object_hash($b));
+        };
     }
 }

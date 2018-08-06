@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\controllers\admin\WrapperController;
 use app\exceptions\ConfigException;
 use app\libraries\Core;
 use app\libraries\FileUtils;
@@ -43,11 +44,13 @@ use app\libraries\Utils;
  * @method string getUsernameChangeText()
  * @method bool isForumEnabled()
  * @method bool isRegradeEnabled()
+ * @method string getRegradeMessage()
  * @method string getVcsBaseUrl()
  * @method string getCourseEmail()
  * @method string getVcsUser()
  * @method string getVcsType()
  * @method string getPrivateRepository()
+ * @method string getRoomSeatingGradeableId()
  */
 
 class Config extends AbstractModel {
@@ -133,6 +136,9 @@ class Config extends AbstractModel {
     /** @property @var array */
     protected $course_database_params = array();
 
+    /** @property @var array */
+    protected $wrapper_files = array();
+
     /** @property @var string */
     protected $course_name;
     /** @property @var string */
@@ -166,11 +172,17 @@ class Config extends AbstractModel {
     protected $forum_enabled;
     /** @property @var bool */
     protected $regrade_enabled;
+    /** @property @var string */
+    protected $regrade_message;
+    /** @property @var string|null */
+    protected $room_seating_gradeable_id;
 
     /**
      * Config constructor.
      *
      * @param Core   $core
+     * @param $semester
+     * @param $course
      */
     public function __construct(Core $core, $semester, $course) {
         parent::__construct($core);
@@ -267,7 +279,7 @@ class Config extends AbstractModel {
             throw new ConfigException("Could not find course config file: ".$course_ini, true);
         }
         $this->course_ini_path = $course_ini;
-        $this->course_ini = IniParser::readFile($this->course_ini_path);
+        $this->course_ini = $this->readCourseIni();
 
         if (!isset($this->course_ini['database_details']) || !is_array($this->course_ini['database_details'])) {
             throw new ConfigException("Missing config section 'database_details' in ini file");
@@ -277,7 +289,7 @@ class Config extends AbstractModel {
 
         $array = array('course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
             'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_rainbow_grades_summary',
-            'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type', 'private_repository', 'forum_enabled', 'regrade_enabled');
+            'display_custom_message', 'room_seating_gradeable_id', 'course_email', 'vcs_base_url', 'vcs_type', 'private_repository', 'forum_enabled', 'regrade_enabled', 'regrade_message');
         $this->setConfigValues($this->course_ini, 'course_details', $array);
 
         if (isset($this->course_ini['hidden_details'])) {
@@ -300,8 +312,18 @@ class Config extends AbstractModel {
         }
 
         $this->site_url = $this->base_url."index.php?semester=".$this->semester."&course=".$this->course;
+
+        $wrapper_files_path = FileUtils::joinPaths($this->getCoursePath(), 'site');
+        foreach (WrapperController::WRAPPER_FILES as $file) {
+            $path = FileUtils::joinPaths($wrapper_files_path, $file);
+            if (file_exists($path)) {
+                $this->wrapper_files[$file] = $path;
+            }
+        }
+
         $this->course_loaded = true;
-   }
+    }
+
 
     private function setConfigValues($config, $section, $keys) {
         if (!isset($config[$section]) || !is_array($config[$section])) {
@@ -309,35 +331,6 @@ class Config extends AbstractModel {
         }
 
         foreach ($keys as $key) {
-
-
-            // TEMPORARY WORKAROUND FOR BACKWARDS COMPATIBILITY OF
-            // CHANGED COURSE CONFIG VARIABLE.
-            // FIXME: THIS CAN BE REMOVED WITH THE NEXT MAJOR RELEASE
-            if (!isset($config[$section][$key]) &&
-                $key == "display_rainbow_grades_summary" &&
-                isset($config[$section]["display_iris_grades_summary"])) {
-              $config[$section][$key] = $config[$section]["display_iris_grades_summary"];
-            }
-            // END TEMPORARY WORKAROUND
-
-
-            // DEFAULT FOR FORUM
-            if (!isset($config[$section][$key]) &&
-                $key == "forum_enabled") {
-              $config[$section][$key] = false;
-            }
-            // DEFAULT FOR REGRADE
-            if (!isset($config[$section][$key]) &&
-                $key == "regrade_enabled") {
-              $config[$section][$key] = false;
-            }
-            // DEFAULT FOR PRIVATE_REPOSITORY
-            if (!isset($config[$section][$key]) &&
-                $key == "private_repository") {
-              $config[$section][$key] = "";
-            }
-
             if (!isset($config[$section][$key])) {
               throw new ConfigException("Missing config setting {$section}.{$key} in configuration ini file");
             }
@@ -392,11 +385,32 @@ class Config extends AbstractModel {
         return $this->display_rainbow_grades_summary;
     }
 
+    /**
+     * @return bool
+     */
+    public function displayRoomSeating() {
+        return $this->room_seating_gradeable_id !== "";
+    }
+
     public function getLogPath() {
         return $this->submitty_log_path;
     }
 
     public function saveCourseIni($save) {
         IniParser::writeFile($this->course_ini_path, array_merge($this->course_ini, $save));
+    }
+
+    public function wrapperEnabled() {
+        return $this->course_loaded
+            && (count($this->wrapper_files) > 0);
+    }
+
+    public function getWrapperFiles() {
+        //Return empty if not logged in because we can't access them
+        return ($this->core->getUser() === null ? [] : $this->wrapper_files);
+    }
+
+    public function readCourseIni() {
+        return IniParser::readFile($this->course_ini_path);
     }
 }

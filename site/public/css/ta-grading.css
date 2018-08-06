@@ -21,13 +21,13 @@
 }
 
 .grading_toolbar {
-    position:relative;
-    display: block;
-    float: left;
-    padding-top:3px;
-    padding-bottom:3px;
-    background-color: #edf6f6;
-}
+     position:relative;
+     display: block;
+     float: left;
+     padding-top:3px;
+     padding-bottom:3px;
+     background-color: #edf6f6;
+ }
 
 .grading_toolbar i:not(.icon-disabled):hover {
     cursor: pointer;
@@ -520,15 +520,28 @@ tr.is_publish {
 /* Marks */
 
 .gradeable .mark {
-
-}
-
-.gradeable .mark-selector {
     visibility: visible;
     cursor: pointer;
-    position: relative;
-    top: 2px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5em;
+    height: 1.5em;
+    border: 2px solid #000;
+    border-radius: 4px;
+    color: #888;
+    font-size: 10px;
+    font-family: 'Source Sans Pro', sans-serif;
+    margin-top: -1px;
+    text-align: center;
+    vertical-align: middle;
 }
+
+.gradeable .mark.mark-has {
+    color: #ccc;
+    background-color: #000;
+}
+
 
 .gradeable input.mark-score {
     resize:none;
@@ -549,8 +562,8 @@ tr.is_publish {
     resize:none;
 }
 
-.gradeable .mark-editable {
-    cursor: default;
+.gradeable .mark-uneditable {
+    cursor: pointer;
     border: none;
     outline: none;
     background-color: initial;

@@ -8,9 +8,9 @@ use app\libraries\Output;
 use app\libraries\Utils;
 use app\models\Config;
 use app\models\User;
+use ReflectionException;
 
 class BaseUnitTest extends \PHPUnit\Framework\TestCase {
-    /** @noinspection PhpDocMissingThrowsInspection */
     /** @noinspection PhpDocSignatureInspection */
     /**
      * Creates a mocked the Core object predefining things with known values so that we don't have to do this
@@ -24,7 +24,6 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
     protected function createMockCore($config_values=array(), $user_config=array()) {
         $core = $this->createMock(Core::class);
 
-        /** @noinspection PhpUnhandledExceptionInspection */
         $config = $this->createMockModel(Config::class);
         if (isset($config_values['semester'])) {
             $config->method('getSemester')->willReturn($config_values['semester']);
@@ -83,7 +82,6 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
         else {
             $user->method('accessAdmin')->willReturn(false);
         }
-        
 
         $core->method('getUser')->willReturn($user);
 
@@ -103,11 +101,11 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
      * and does slow testing down some, but it's easier than having to manually update a list of needed functions
      * when mocking these things.
      *
+     * @noinspection PhpDocMissingThrowsInspection
+     *
      * @param string $class
      *
      * @return \PHPUnit\Framework\MockObject\MockObject
-     *
-     * @throws \ReflectionException
      */
     public function createMockModel($class) {
         $builder = $this->getMockBuilder($class)
@@ -116,6 +114,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
             ->disableArgumentCloning()
             ->disallowMockingUnknownTypes();
 
+        /** @noinspection PhpUnhandledExceptionInspection */
         $reflection = new \ReflectionClass($class);
         $methods = array();
         $matches = array();
@@ -132,5 +131,25 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
         }
         $builder->setMethods(array_unique($methods));
         return $builder->getMock();
+    }
+
+    /**
+     * Call protected/private method of a class.
+     * https://jtreminio.com/blog/unit-testing-tutorial-part-3-testing-protected-private-methods-coverage-reports-and-crap
+     *
+     * @param object &$object    Instantiated object that we will run method on.
+     * @param string $methodName Method name to call
+     * @param array  $parameters Array of parameters to pass into method.
+     *
+     * @throws ReflectionException
+     * @return mixed Method return.
+     */
+    public function invokeMethod(&$object, $methodName, ...$parameters)
+    {
+        $reflection = new \ReflectionClass(get_class($object));
+        $method = $reflection->getMethod($methodName);
+        $method->setAccessible(true);
+
+        return $method->invokeArgs($object, $parameters);
     }
 }

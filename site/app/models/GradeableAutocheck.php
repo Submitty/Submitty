@@ -12,22 +12,23 @@ use app\libraries\Utils;
  * Contains information pertaining to the autocheck element that's contained within a
  * GradeableTestcase. There is 0+ autochecks per GradeableTestcase.
  *
+ * @method string getIndex()
  * @method DiffViewer getDiffViewer()
  * @method string getDescription()
  * @method array[] getMessages()
  */
 class GradeableAutocheck extends AbstractModel {
     
-    /** @var string */
+    /** @property @var string */
     protected $index;
     
     /** @var DiffViewer DiffViewer instance to hold the student, instructor, and differences */
     protected $diff_viewer;
     
-    /** @var string Description to show for displaying the diff */
+    /** @property @var string Description to show for displaying the diff */
     protected $description = "";
     
-    /** @var array[] Message to show underneath the description for a diff */
+    /** @property @var array[] Message to show underneath the description for a diff */
     protected $messages = array();
 
     /**
