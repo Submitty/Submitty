@@ -622,6 +622,7 @@ class ElectronicGraderView extends AbstractView {
 
         $grading_data = [
             "gradeable" => $gradeable->getGradedData(),
+            "you" => $this->core->getUser(),
             "your_user_id" => $this->core->getUser()->getId(),
             "disabled" => $disabled,
             "can_verify" => $can_verify // If any can be then this is set

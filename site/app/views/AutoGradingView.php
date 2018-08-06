@@ -337,7 +337,7 @@ class AutoGradingView extends AbstractView {
         }
         //get total score and max possible score
         $graded_score = $gradeable->getGradedTAPoints();
-        $graded_max = $gradeable->getTotalTANonExtraCreditPoints();
+        $graded_max = $gradeable->getTotalTAPoints();
         //change title if autograding exists or not
         //display a sum of autograding and instructor points if both exist
         $has_autograding = false;
@@ -380,9 +380,10 @@ class AutoGradingView extends AbstractView {
     /**
      * @param TaGradedGradeable $ta_graded_gradeable
      * @param bool $regrade_available
+     * @param array $uploaded_files
      * @return string
      */
-    public function showTAResultsNew(TaGradedGradeable $ta_graded_gradeable, bool $regrade_available) {
+    public function showTAResultsNew(TaGradedGradeable $ta_graded_gradeable, bool $regrade_available, array $uploaded_files) {
         $gradeable = $ta_graded_gradeable->getGradedGradeable()->getGradeable();
         $active_version = $ta_graded_gradeable->getGradedGradeable()->getAutoGradedGradeable()->getActiveVersion();
         $version_instance = $ta_graded_gradeable->getGradedVersionInstance();
@@ -415,7 +416,7 @@ class AutoGradingView extends AbstractView {
 
         //get total score and max possible score
         $total_score = $graded_score = $ta_graded_gradeable->getTotalScore();
-        $total_max = $graded_max = $gradeable->getTaNonExtraCreditPoints();
+        $total_max = $graded_max = $gradeable->getTaPoints();
 
         //change title if autograding exists or not
         //display a sum of autograding and instructor points if both exist
@@ -492,7 +493,9 @@ class AutoGradingView extends AbstractView {
             'active_same_as_graded' => $active_same_as_graded,
             'regrade_available' => $regrade_available,
             'regrade_message' => $regrade_message,
-            'num_decimals' => $num_decimals
+            'num_decimals' => $num_decimals,
+            'uploaded_files' => $uploaded_files,
+            'gradeable_id' => $gradeable->getId()
         ]);
     }
 }

@@ -14,7 +14,12 @@ html {
 }
 
 body {
+    font-family: 'Source Sans Pro', sans-serif;
+    height: 100%;
+    position: relative;
+}
 
+#site-body {
     /* OLD SEAFOAM GREEN COLOR */
     /* background-color: #B6CECE; */
 
@@ -27,10 +32,6 @@ body {
 
     background: linear-gradient(#0a6496, #b8d5e5);
     background-attachment: fixed;
-
-    font-family: 'Source Sans Pro', sans-serif;
-    height: 100%;
-    position: relative;
 }
 
 a, a:hover, a:link, a:visited {
@@ -254,11 +255,6 @@ table tr.table-header {
     padding: 5px 10px;
 }
 
-#nav li a {
-    width: 100%;
-    height: 100%;
-}
-
 #nav li a:hover {
     text-decoration: none;
 }
@@ -296,7 +292,6 @@ table tr.table-header {
     min-height: 125px;
     height: auto;
     width: 100%;
-    box-shadow: 0 2px 15px -5px #888888;
     font-family: 'Open Sans Condensed', sans-serif;
     overflow: hidden;
 }
@@ -350,6 +345,10 @@ table tr.table-header {
 #footer {
     margin-top: 30px;
     z-index: 20;
+}
+
+#push {
+    flex-grow: 1;
 }
 
 #push, #footer {
@@ -1247,3 +1246,81 @@ end of styles used in the admin gradeable page
     border-radius: 5px;
 }
 
+/* Site Wrapper */
+
+#container {
+    display: flex;
+    flex-direction: column;
+}
+
+#container #center-container {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+}
+
+#site-body {
+    flex-grow: 2;
+    display: flex;
+    flex-direction: column;
+}
+
+#container iframe#top_bar, #container iframe#bottom_bar {
+    height: 60px;
+}
+
+#container iframe#left_sidebar, #container iframe#right_sidebar {
+    width: 200px;
+}
+
+/* Site Wrapper View */
+
+.wrapper-example {
+    width: 400px;
+    height: 240px;
+    display: flex;
+    flex-direction: column;
+}
+.wrapper-example .wrapper-center {
+    display: flex;
+    flex-grow: 2;
+    flex-direction: row;
+}
+.wrapper-example .wrapper-top,
+.wrapper-example .wrapper-left,
+.wrapper-example .wrapper-body,
+.wrapper-example .wrapper-right,
+.wrapper-example .wrapper-bottom {
+    flex-grow: 1;
+    border: 1px solid #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+.wrapper-example .wrapper-body {
+    flex-grow: 5;
+}
+.wrapper-top {
+    background-color: #ff9999;
+}
+.wrapper-left {
+    background-color: #ffff66;
+}
+.wrapper-body {
+    background-color: #ffffff;
+}
+.wrapper-right {
+    background-color: #99ff99;
+}
+.wrapper-bottom {
+    background-color: #99ccff;
+}
+.wrapper-upload th {
+    background-color: #f4f4f4;
+}
+
+.wrapper-upload td, .wrapper-upload th {
+    padding: 4px;
+    border: 1px solid #000;
+}

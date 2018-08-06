@@ -1053,7 +1053,7 @@ function toggleDiv(id) {
 }
 
 
-function checkRefreshSubmissionPage(url) {
+function checkRefreshPage(url) {
     setTimeout(function() {
         check_server(url)
     }, 1000);
@@ -1065,7 +1065,7 @@ function check_server(url) {
             if (data.indexOf("REFRESH_ME") > -1) {
                 location.reload(true);
             } else {
-                checkRefreshSubmissionPage(url);
+                checkRefreshPage(url);
             }
         }
     );
@@ -1131,8 +1131,21 @@ function downloadFileWithAnyRole(file_name, path) {
     if (file.indexOf("/") != -1) {
         file = file.substring(file.lastIndexOf('/')+1);
     }
-    window.location = buildUrl({'component': 'misc', 'page': 'download_file_with_any_role', 'dir': 'uploads/course_materials', 'file': file, 'path': path});
+    window.location = buildUrl({'component': 'misc', 'page': 'download_file_with_any_role', 'dir': 'course_materials', 'file': file, 'path': path});
 }
+
+function checkColorActivated() {
+    var pos = 0;
+    var seq = "&&((%'%'BA\r";
+    $(document.body).keyup(function colorEvent(e) {
+        pos = seq.charCodeAt(pos) === e.keyCode ? pos + 1 : 0;
+        if (pos === seq.length) {
+            setInterval(function() { $("*").addClass("rainbow"); }, 100);
+            $(document.body).off('keyup', colorEvent);
+        }
+    });
+}
+$(checkColorActivated);
 
 function changeColor(div, hexColor){
     div.style.color = hexColor;
@@ -1609,6 +1622,11 @@ function saveScrollLocationOnRefresh(id){
 
 function alterShowDeletedStatus(newStatus) {
     document.cookie = "show_deleted=" + newStatus + "; path=/;";
+    location.reload();
+}
+
+function alterShowMergeThreadStatus(newStatus, course) {
+    document.cookie = course + "_show_merged_thread=" + newStatus + "; path=/;";
     location.reload();
 }
 

@@ -15,8 +15,6 @@ cache:
 # best compatibility.
 jobs:
   fast_finish: true
-  allow_failures:
-    - php: 7.2
 
   include:
     # Warm up the pip and composer caches to use it for the rest of the build stages
