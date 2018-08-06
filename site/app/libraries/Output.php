@@ -65,6 +65,7 @@ class Output {
         $this->addInternalCss('jquery-ui.min.css');
         $this->addInternalCss('server.css');
         $this->addInternalCss('bootstrap.css');
+        $this->addInternalCss('bootstrap-grid.css');
         $this->addInternalCss('diff-viewer.css');
         $this->addInternalCss('glyphicons-halflings.css');
 

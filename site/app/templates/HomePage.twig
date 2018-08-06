@@ -1,63 +1,61 @@
 <div class="content">
-    <div class="sub">
-        <div class="container", style = "min-width:100px; width: auto !important; width: 100px;">
-            <div class="box half">
-                <h2>About You</h2>
-                <table>
-                    <tbody>
+    <div class="row">
+        <div class="box col-md-6">
+            <h2>About You</h2>
+            <table>
+                <tbody>
+                <tr>
+                    <td><b>Username:</b> {{ user.getId() }} </td>
+                </tr>
+                <tr>
+                    <td><b>First Name:</b> {{ user.getDisplayedFirstName() }} </td>
+                    <td><a onclick="userNameChange()"><i class="fa fa-pencil" aria-hidden="true"></i></a></td>
+                </tr>
+                <tr>
+                    <td><b>Last Name:</b> {{ user.getLastName() }} </td>
+                </tr>
+                {% if show_change_password %}
                     <tr>
-                        <td><b>Username:</b> {{ user.getId() }} </td>
+                        <td><b>Change Password</b></td>
+                        <td><a onclick="passwordChange()"><i class="fa fa-pencil" aria-hidden="true"></i></a></td>
                     </tr>
-                    <tr>
-                        <td><b>First Name:</b> {{ user.getDisplayedFirstName() }} </td>
-                        <td><a onclick="userNameChange()"><i class="fa fa-pencil" aria-hidden="true"></i></a></td>
-                    </tr>
-                    <tr>
-                        <td><b>Last Name:</b> {{ user.getLastName() }} </td>
-                    </tr>
-                    {% if show_change_password %}
-                        <tr>
-                            <td><b>Change Password</b></td>
-                            <td><a onclick="passwordChange()"><i class="fa fa-pencil" aria-hidden="true"></i></a></td>
-                        </tr>
-                    {% endif %}
-                    </tbody>
-                </table>
-            </div>
-            <div class="box half">
-                {% for ranks in statuses %}
-                    {% if loop.index == 1 or ranks|length > 0 %}
-                        <h2>Your {{ loop.index == 1 ? "" : "Archived " }}Courses</h2>
-                        <table width='95%'>
-                            <tbody>
-                            {% for rank in ranks %}
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+        <div class="box col-md-6">
+            {% for ranks in statuses %}
+                {% if loop.index == 1 or ranks|length > 0 %}
+                    <h2>Your {{ loop.index == 1 ? "" : "Archived " }}Courses</h2>
+                    <table class="courses-table">
+                        <tbody>
+                        {% for rank in ranks %}
+                            <tr>
+                                <td colspan="8">
+                                    <h3>{{ rank.title }}</h3>
+                                </td>
+                            </tr>
+                            {% for course in rank.courses %}
                                 <tr>
-                                    <td colspan="8">
-                                        <h3>{{ rank.title }}</h3>
+                                    <td style="width:85%" colspan="30">
+                                        <a id="{{ course.getSemester() }}_{{ course.getTitle() }}" class="btn btn-primary btn-block" style=" white-space: normal;" href="{{ core.buildUrl({'component': 'navigation', 'course': course.getTitle(), 'semester': course.getSemester()}) }}">
+                                            {{ course.getSemester() }} {{ course.getTitle() }}
+                                            {% if course.getDisplayName() != "" %}
+                                                {{ course.getDisplayName() }}
+                                            {% endif %}
+                                            {{ user.accessAdmin() }}
+                                        </a>
                                     </td>
                                 </tr>
-                                {% for course in rank.courses %}
-                                    <tr>
-                                        <td style="width:85%" colspan="30">
-                                            <a id="{{ course.getSemester() }}_{{ course.getTitle() }}" class="btn btn-primary btn-block" style=" white-space: normal;" href="{{ core.buildUrl({'component': 'navigation', 'course': course.getTitle(), 'semester': course.getSemester()}) }}">
-                                                {{ course.getSemester() }} {{ course.getTitle() }}
-                                                {% if course.getDisplayName() != "" %}
-                                                    {{ course.getDisplayName() }}
-                                                {% endif %}
-                                                {{ user.accessAdmin() }}
-                                            </a>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
                             {% endfor %}
-                            </tbody>
-                        </table>
-                        {% if not (loop.index == statuses|length or statuses[loop.index0 + 1]|length == 0) %}
-                            <br>
-                        {% endif %}
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    {% if not (loop.index == statuses|length or statuses[loop.index0 + 1]|length == 0) %}
+                        <br>
                     {% endif %}
-                {% endfor %}
-            </div>
+                {% endif %}
+            {% endfor %}
         </div>
     </div>
 </div>

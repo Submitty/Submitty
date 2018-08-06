@@ -333,8 +333,8 @@ table tr.table-header {
     box-shadow: 0 2px 15px -5px #888888;
     background-color: #E9EFEF;
     border-radius: 3px;
-    padding: 2%;
-    margin: 2% 15px;
+    padding: 15px 30px;
+    margin: 15px;
 }
 
 .content h2 {
@@ -348,10 +348,6 @@ table tr.table-header {
 
 #push {
     flex-grow: 1;
-}
-
-#push, #footer {
-    height: 20px;
 }
 
 #footer a {
@@ -1336,3 +1332,6 @@ end of styles used in the admin gradeable page
     margin-left: 10px;
 }
 
+.courses-table {
+    width: 100%;
+}
