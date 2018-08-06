@@ -201,7 +201,7 @@ class TaGradedGradeable extends AbstractModel {
      */
     public function getTotalScorePercent($clamp = false) {
         return Utils::safeCalcPercent($this->getTotalScore(),
-            $this->getGradedGradeable()->getGradeable()->getTaNonExtraCreditPoints(), $clamp);
+            $this->getGradedGradeable()->getGradeable()->getTaPoints(), $clamp);
     }
 
     /**

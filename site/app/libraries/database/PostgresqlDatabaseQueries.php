@@ -243,6 +243,8 @@ SELECT";
   eg.eg_team_assignment,
   eg.eg_max_team_size,
   eg.eg_team_lock_date,
+  eg.eg_regrade_request_date,
+  eg.eg_regrade_allowed,
   eg.eg_use_ta_grading,
   eg.eg_student_view,
   eg.eg_student_submit,
@@ -976,7 +978,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
     public function getTeamsByGradeableAndRegistrationSections($g_id, $sections, $orderBy="registration_section") {
         $return = array();
         if (count($sections) > 0) {
-            $orderBy = str_replace("registration_section","SUBSTRING(registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(registration_section, '[0-9]+')::INT, -1), SUBSTRING(registration_section, '[^0-9]*$')",$orderBy);
+            $orderBy = str_replace("gt.registration_section","SUBSTRING(gt.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(gt.registration_section, '[0-9]+')::INT, -1), SUBSTRING(gt.registration_section, '[^0-9]*$')",$orderBy);
             $placeholders = implode(",", array_fill(0, count($sections), "?"));
             $params = [$g_id];
             $params = array_merge($params, $sections);
@@ -1609,6 +1611,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   eg_team_assignment AS team_assignment,
                   eg_max_team_size AS team_size_max,
                   eg_team_lock_date AS team_lock_date,
+                  eg_regrade_request_date AS regrade_request_date,
+                  eg_regrade_allowed AS regrade_allowed,
                   eg_use_ta_grading AS ta_grading,
                   eg_student_view AS student_view,
                   eg_student_submit AS student_submit,

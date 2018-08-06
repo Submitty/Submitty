@@ -1,10 +1,11 @@
 import tempfile
 import os
 import urllib
+from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import Select
+from selenium.webdriver.common.keys import Keys
 from .base_testcase import BaseTestCase
 
 class TestForum(BaseTestCase):
@@ -13,12 +14,12 @@ class TestForum(BaseTestCase):
 
     def init_and_enable_discussion(self):
         self.driver.find_element_by_id(self.get_current_semester() + '_sample').click()
-        if len(self.driver.find_elements_by_xpath("//a[contains(text(),'Discussion Forum')]")) == 0:
+        if len(self.driver.find_elements_by_xpath("//a[contains(string(),'Discussion Forum')]")) == 0:
             self.driver.find_element_by_xpath("//a[contains(text(),'Course Settings')]").click()
             self.driver.find_element_by_name("forum_enabled").click()
             self.driver.find_element_by_xpath("//button[@form = 'configForm']").click()
             self.driver.find_element_by_xpath("//a[contains(text(),'sample')]").click()
-        self.driver.find_element_by_xpath("//a[contains(text(),'Discussion Forum')]").click()
+        self.driver.find_element_by_xpath("//a[contains(string(),'Discussion Forum')]").click()
         self.forum_page_url = self.driver.current_url
 
     def switch_to_page_create_thread(self):
@@ -76,10 +77,26 @@ class TestForum(BaseTestCase):
 
     def thread_exists(self, title):
         assert 'page=view_thread' in self.driver.current_url
-        return len(self.driver.find_elements_by_xpath("//div[contains(@class, 'thread_box') and contains(string(),'{}')]".format(title))) > 0
+        target_xpath = "//div[contains(@class, 'thread_box') and contains(string(),'{}')]".format(title)
+        loading_spinner = self.driver.find_element_by_xpath("//div[@id='thread_list']/i");
+        while True:
+            # Scroll down in thread list until required thread is found
+            divs = self.driver.find_elements_by_xpath(target_xpath)
+            if len(divs) > 0:
+                # Thread Found
+                break
+            thread_list = self.driver.find_element_by_id("thread_list")
+            # Scroll Dowm
+            self.driver.execute_script('arguments[0].scrollTop = arguments[0].scrollHeight', thread_list)
+            if not loading_spinner.is_displayed():
+                break
+            self.wait_after_ajax()
+            assert not loading_spinner.is_displayed()
+        return len(self.driver.find_elements_by_xpath(target_xpath)) > 0
 
     def view_thread(self, title, return_info = False):
         assert 'page=view_thread' in self.driver.current_url
+        self.thread_exists(title)
         div = self.driver.find_element_by_xpath("//div[contains(@class, 'thread_box') and contains(string(),'{}')]".format(title))
         if return_info:
             categories = []
@@ -87,6 +104,9 @@ class TestForum(BaseTestCase):
                 categories.append(element.text.strip())
             return {'categories': categories}
         div.click()
+        thread_title = self.driver.find_elements_by_xpath("//div[contains(@class, 'post_box') and contains(@class, 'first_post')]/h3[contains(string(),'{}')]".format(title))
+        assert len(thread_title) > 0
+        assert thread_title[0].text.strip() == title.strip()
 
     def find_posts(self, content, must_exists = True, move_to_thread = None, check_attachment = None):
         if move_to_thread is not None:
@@ -156,11 +176,11 @@ class TestForum(BaseTestCase):
             assert self.driver.find_element_by_id("merge-threads").value_of_css_property("display") == "none"
 
     def test_basic_operations_thread(self):
-        title = "E2E Sample Title"
-        content = "E2E Sample Content"
-        reply_content1 = "E2E sample reply 1 content"
-        reply_content2 = "E2E sample reply 2 content"
-        reply_content3 = "E2E sample reply 3 content"
+        title = "E2E Sample Title E2E"
+        content = "E2E Sample Content E2E"
+        reply_content1 = "E2E sample reply 1 content E2E"
+        reply_content2 = "E2E sample reply 2 content E2E"
+        reply_content3 = "E2E sample reply 3 content E2E"
 
         self.init_and_enable_discussion()
         for upload_attachment in [False, True]:
@@ -180,16 +200,16 @@ class TestForum(BaseTestCase):
 
     def test_forum_merge_thread(self):
         self.init_and_enable_discussion()
-        title1 = "E2E Test 1"
-        title2 = "E2E Test 2"
-        title3 = "E2E Test 3"
-        content1 = "E2E Content 1"
-        content2 = "E2E Content 2"
-        content3 = "E2E Content 3"
+        title1 = "E2E Test 1 E2E"
+        title2 = "E2E Test 2 E2E"
+        title3 = "E2E Test 3 E2E"
+        content1 = "E2E Content 1 E2E"
+        content2 = "E2E Content 2 E2E"
+        content3 = "E2E Content 3 E2E"
 
-        reply1 = "E2E Reply 1"
-        reply2 = "E2E Reply 2"
-        reply3 = "E2E Reply 3"
+        reply1 = "E2E Reply 1 E2E"
+        reply2 = "E2E Reply 2 E2E"
+        reply3 = "E2E Reply 3 E2E"
 
         content1_attachment = self.create_thread(title1, content1, upload_attachment = True)
         self.reply_and_test(content1, reply1, first_post = True)
@@ -223,12 +243,12 @@ class TestForum(BaseTestCase):
         self.delete_thread(title1)
 
     def test_categories(self):
-        title1 = "E2E Sample Title 1"
-        content1 = "E2E Sample Content 1"
-        title2 = "E2E Sample Title 2"
-        content2 = "E2E Sample Content 2"
-        title3 = "E2E Sample Title 3"
-        content3 = "E2E Sample Content 3"
+        title1 = "E2E Sample Title 1 E2E"
+        content1 = "E2E Sample Content 1 E2E"
+        title2 = "E2E Sample Title 2 E2E"
+        content2 = "E2E Sample Content 2 E2E"
+        title3 = "E2E Sample Title 3 E2E"
+        content3 = "E2E Sample Content 3 E2E"
 
         self.init_and_enable_discussion()
 
@@ -247,6 +267,32 @@ class TestForum(BaseTestCase):
         self.delete_thread(title1)
         self.delete_thread(title2)
         assert not self.thread_exists(title3)
+
+    def test_infinite_scroll(self):
+        self.init_and_enable_discussion()
+        list_title = []
+        list_content = []
+        # Creation of 22 thread and then deleting them will be slow
+        for i in range(0,22):
+            list_title.append("E2E Sample Title {} E2E".format(i))
+            list_content.append("E2E Sample Content {} E2E".format(i))
+
+        # Create Threads
+        for title,content in zip(list_title, list_content):
+            assert not self.thread_exists(title)
+            self.create_thread(title, content)
+
+        # Check Threads
+        for title in list_title:
+            self.view_thread(title)
+        self.view_thread(list_title[0])
+        self.view_thread(list_title[-1])
+
+        # Delete Threads
+        for title in list_title:
+            assert self.thread_exists(title)
+            self.delete_thread(title)
+            assert not self.thread_exists(title)
 
 if __name__ == "__main__":
     import unittest

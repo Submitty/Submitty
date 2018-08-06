@@ -538,9 +538,13 @@ class SubmissionController extends AbstractController {
             else{
                 //If the team doesn't exist yet, we need to build a new one. (Note, we have already checked in ajaxvalidgradeable
                 //that all users are either on the same team or no team).
-                // TODO: this method uses the old gradeable model, but calls functions that also exist in the new model,
-                // TODO:    so its ok, but fragile
-                ElectronicGraderController::CreateTeamWithLeaderAndUsers($this->core, $gradeable, $leader, $user_ids);
+                $members = $this->core->getQueries()->getUsersById($user_ids);
+                $leader_user = $this->core->getQueries()->getUserById($leader);
+                try {
+                    $gradeable->createTeam($leader_user, $members);
+                } catch (\Exception $e) {
+                    $this->core->addErrorMessage('Team may not have been properly initialized: ' . $e->getMessage());
+                }
 
                 // Once team is created, load in the graded gradeable
                 $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $leader);

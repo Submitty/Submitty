@@ -42,6 +42,11 @@
     <br />
 
     <div class="electronic_file electronic_file_dates">
+        <div class="regrade_request_date" {{ regrade_allowed != true or regrade_enabled != true ? 'hidden' : '' }}>
+            <input name="regrade_request_date" id="regrade_request_date" class="date_picker" type="text" value="{{ gradeable.getRegradeRequestDate()|date(date_format) }}">
+            Regrade Request Due Date (Regrade Requests must be sent by this date)
+        </div>
+
         How many late days may students use on this assignment?
         <input style="width: 50px" id="late_days" name="late_days" class="int_val" type="text" value="{{ gradeable.getLateDays() }}"/>
 
@@ -64,7 +69,7 @@
         if($('#radio_electronic_file').is(':checked')) {
             elecDateBoxes.prop('disabled', false);
             $('.manual_grading_dates input').prop('disabled', $('#no_ta_grade').is(':checked'));
-            $('#date_team_lock').prop('disabled', !{{ gradeable.isTeamAssignment() ? 'true' : 'false' }});
+            $('#date_team_lock').prop('disabled', {{ gradeable.isTeamAssignment() ? 'false' : 'true' }});
         }
     }
 

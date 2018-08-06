@@ -212,7 +212,7 @@ class NavigationView extends AbstractView {
             $top_buttons[] = new Button($this->core, [
                 "href" => $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')),
                 "title" => "Discussion Forum",
-                "class" => "btn btn-primary"
+                "class" => "btn btn-primary",
             ]);
         }
 
@@ -728,5 +728,4 @@ class NavigationView extends AbstractView {
     public function deleteGradeableForm() {
         return $this->core->getOutput()->renderTwigTemplate("navigation/DeleteGradeableForm.twig");
     }
-
 }

@@ -47,6 +47,9 @@ class AdminGradeableController extends AbstractController {
             case 'rebuild_assignment':
                 $this->rebuildAssignmentRequest();
                 break;
+            case 'check_refresh':
+                $this->checkRefresh();
+                break;
             default:
                 $this->newPage();
                 break;
@@ -112,6 +115,7 @@ class AdminGradeableController extends AbstractController {
             'action' => $gradeable !== null ? 'template' : 'new',
             'template_list' => $template_list,
             'syllabus_buckets' => self::syllabus_buckets,
+            'regrade_enabled' => $this->core->getConfig()->isRegradeEnabled()
         ]);
     }
 
@@ -196,6 +200,15 @@ class AdminGradeableController extends AbstractController {
         $cmake_out_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $gradeable->getId(), 'log_cmake_output.txt');
         $cmake_output = is_file($cmake_out_dir) ? file_get_contents($cmake_out_dir) : null;
 
+        $is_in_rebuild_queue = $this->isInRebuildQueue($gradeable->getId());
+
+        $check_refresh_url = $this->core->buildUrl([
+            'component' => 'admin',
+            'page' => 'admin_gradeable',
+            'action' => 'check_refresh',
+            'id' => $gradeable->getId()
+        ]);
+
         // $this->inherit_teams_list = $this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams();
 
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
@@ -207,7 +220,8 @@ class AdminGradeableController extends AbstractController {
             'date_format' => 'Y-m-d H:i:sO',
             'syllabus_buckets' => self::syllabus_buckets,
             'gradeable_components_enc' => json_encode($gradeable_components_enc),
-
+            'regrade_allowed' => $gradeable->isRegradeAllowed(),
+            'regrade_enabled' => $this->core->getConfig()->isRegradeEnabled(),
             // Non-Gradeable-model data
             'gradeable_section_history' => $gradeable_section_history,
             'num_rotating_sections' => $num_rotating_sections,
@@ -232,6 +246,10 @@ class AdminGradeableController extends AbstractController {
 
             //build outputs
             'cmake_output' => htmlentities($cmake_output),
+
+            // rebuild queue information
+            'is_in_rebuild_queue' => $is_in_rebuild_queue,
+            'check_refresh_url' => $check_refresh_url,
 
             'upload_config_url' => $this->core->buildUrl([
                 'component' => 'admin',
@@ -827,7 +845,7 @@ class AdminGradeableController extends AbstractController {
                 'ta_grading' => $details['ta_grading'] === 'true',
                 'team_size_max' => $details['team_size_max'],
                 'vcs_subdirectory' => $details['vcs_subdirectory'],
-
+                'regrade_allowed' => $details['regrade_allowed'] === 'true',
                 'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/python_simple_homework/config',
 
                 // TODO: properties that aren't supported yet
@@ -859,7 +877,8 @@ class AdminGradeableController extends AbstractController {
             'grade_released_date' => (clone $tonight)->add(new \DateInterval('P14D')),
             'team_lock_date' => (clone $tonight)->add(new \DateInterval('P7D')),
             'submission_open_date' => (clone $tonight),
-            'submission_due_date' => (clone $tonight)->add(new \DateInterval('P7D'))
+            'submission_due_date' => (clone $tonight)->add(new \DateInterval('P7D')),
+            'regrade_request_date' => (clone $tonight)->add(new \DateInterval('P21D'))
         ]);
 
         // Finally, construct the gradeable
@@ -929,7 +948,8 @@ class AdminGradeableController extends AbstractController {
             'student_submit',
             'student_download',
             'student_download_any_version',
-            'peer_grading'
+            'peer_grading',
+            'regrade_allowed'
         ];
 
         // Date properties all need to be set at once
@@ -1150,6 +1170,23 @@ class AdminGradeableController extends AbstractController {
 
     }
 
+    private function checkRefresh() {
+        $g_id = $_REQUEST['id'];
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        if(!$this->isInRebuildQueue($g_id)) {
+            $refresh_string = "REFRESH_ME";
+            $refresh_bool = true;
+            $this->core->addSuccessMessage("Finished rebuild of {$g_id}");
+        }
+        else {
+            $refresh_string = "NO_REFRESH";
+            $refresh_bool = false;
+        }
+        $this->core->getOutput()->renderString($refresh_string);
+        return array('refresh' => $refresh_bool, 'string' => $refresh_string);
+    }
+
     //return to the navigation page
     private function returnToNav() {
         $this->core->redirect($this->core->buildUrl(array()));
@@ -1163,5 +1200,12 @@ class AdminGradeableController extends AbstractController {
             'id' => $gradeable_id,
             'nav_tab' => '-1']);
         header('Location: ' . $url);
+    }
+
+    private function isInRebuildQueue($gradeable_id) {
+        // Check the rebuild queue for the file indicating that a config rebuild is in process
+        $rebuild_filename = 'PROCESSING_'.$this->core->getConfig()->getSemester().'__'.$this->core->getConfig()->getCourse().'__'.$gradeable_id.'.json';
+        $daemon_queue_dir = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $rebuild_filename);
+        return is_file($daemon_queue_dir);
     }
 }
