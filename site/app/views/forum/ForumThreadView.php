@@ -323,7 +323,8 @@ HTML;
 					$arrowup_visibility = ($initialPageNumber == 1)?"display:none;":"";
 					$return .= <<<HTML
 					<div id="thread_list" class="thread_list" prev_page='{$prev_page}' next_page='{$next_page}'>
-						<a class="fa btn-sm btn-primary hover_glow" style="position: absolute;left: 22.5%;bottom: -4%;" onclick="updateThreads(function(){$('#thread_list').animate({ scrollTop: 0 }, 'fast');});"><i class="fa fa-2x fa-angle-double-up" title="Move to top"></i></a>
+						<a class="fa btn-sm btn-primary hover_glow" style="position: absolute;left: 22.5%;" onclick="updateThreads(true, function(){ $('#thread_list').animate({ scrollTop: 0 }, 'fast');});"><i class="fa fa-2x fa-angle-double-up" title="Move to top"></i></a>
+						<a class="fa btn-sm btn-primary hover_glow" style="position: absolute;left: 22.5%;bottom: -4%;" onclick="updateThreads(false, function(){ $('#thread_list').animate({ scrollTop: $('#thread_list').prop('scrollHeight') }, 'fast');});"><i class="fa fa-2x fa-angle-double-down" title="Move to bottom"></i></a>
 						<i class="fa fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
 						<i class="fa fa-caret-up fa-2x fa-fw fill-available" style="color:gray;{$arrowup_visibility}" aria-hidden="true"></i>
 HTML;

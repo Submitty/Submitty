@@ -576,7 +576,7 @@ class ForumController extends AbstractController {
     }
 
     public function getThreads(){
-        $pageNumber = !empty($_GET["page_number"]) && is_numeric($_GET["page_number"]) ? (int)$_GET["page_number"] : -1;
+        $pageNumber = !empty($_GET["page_number"]) && is_numeric($_GET["page_number"]) ? (int)$_GET["page_number"] : 1;
         $show_deleted = $this->showDeleted();
         $currentCourse = $this->core->getConfig()->getCourse();
         $show_merged_thread = $this->showMergedThreads($currentCourse);
@@ -606,7 +606,8 @@ class ForumController extends AbstractController {
         $this->core->getOutput()->useFooter(false);
         return $this->core->getOutput()->renderJson(array(
                 "html" => $this->core->getOutput()->getOutput(),
-                "count" => count($threads)
+                "count" => count($threads),
+                "page_number" => $pageNumber,
             ));
     }
 
@@ -668,7 +669,7 @@ class ForumController extends AbstractController {
         if(!empty($posts)){
             $thread_id = $posts[0]["thread_id"];
         }
-        $pageNumber = -1;
+        $pageNumber = 0;
         $threads = $this->getSortedThreads($category_id, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $pageNumber, $thread_id);
 
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber);

@@ -1529,7 +1529,7 @@ function dynamicScrollLoadPage(element, atEnd) {
         return;
     }
     var load_page = $(element).attr(atEnd?"next_page":"prev_page");
-    if(load_page <= 0) {
+    if(load_page == 0) {
         return;
     }
     var load_page_callback;
@@ -1547,7 +1547,7 @@ function dynamicScrollLoadPage(element, atEnd) {
             arrow_down.before(content);
             if(count == 0) {
                 // Stop further loads
-                $(element).attr("next_page", -1);
+                $(element).attr("next_page", 0);
             } else {
                 $(element).attr("next_page", parseInt(load_page) + 1);
                 arrow_down.show();
@@ -1566,7 +1566,7 @@ function dynamicScrollLoadPage(element, atEnd) {
             arrow_up.after(content);
             if(count == 0) {
                 // Stop further loads
-                $(element).attr("prev_page", -1);
+                $(element).attr("prev_page", 0);
             } else {
                 var prev_page = parseInt(load_page) - 1;
                 $(element).attr("prev_page", prev_page);
@@ -1673,14 +1673,14 @@ function alterShowMergeThreadStatus(newStatus, course) {
     location.reload();
 }
 
-function modifyThreadList(currentThreadId, currentCategoriesId, course, success_callback){
+function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirstPage, success_callback){
     var categories_value = $("#thread_category").val();
     var thread_status_value = $("#thread_status_select").val();
     categories_value = (categories_value == null)?"":categories_value.join("|");
     thread_status_value = (thread_status_value == null)?"":thread_status_value.join("|");
     document.cookie = course + "_forum_categories=" + categories_value + ";";
     document.cookie = "forum_thread_status=" + thread_status_value + ";";
-    var url = buildUrl({'component': 'forum', 'page': 'get_threads', 'page_number': '1'});
+    var url = buildUrl({'component': 'forum', 'page': 'get_threads', 'page_number': (loadFirstPage?'1':'-1')});
     $.ajax({
             url: url,
             type: "POST",
@@ -1691,17 +1691,24 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, success_
                 currentCategoriesId: currentCategoriesId,
             },
             success: function(r){
-               var x = JSON.parse(r).html;
+               var x = JSON.parse(r);
+               var page_number = parseInt(x.page_number);
+               x = x.html;
                x = `${x}`;
                var jElement = $(".thread_list");
                jElement.children(":not(.fa)").remove();
                $(".thread_list .fa-caret-up").after(x);
-               jElement.attr("prev_page", '-1');
-               jElement.attr("next_page", '2');
+               jElement.attr("prev_page", page_number - 1);
+               jElement.attr("next_page", page_number + 1);
                jElement.data("dynamic_lock_load", false);
                $(".thread_list .fa-spinner").hide();
-               $(".thread_list .fa-caret-up").hide();
-               $(".thread_list .fa-caret-down").show();
+               if(loadFirstPage) {
+                   $(".thread_list .fa-caret-up").hide();
+                   $(".thread_list .fa-caret-down").show();
+               } else {
+                   $(".thread_list .fa-caret-up").show();
+                   $(".thread_list .fa-caret-down").hide();
+               }
                dynamicScrollLoadIfScrollVisible(jElement);
                if(success_callback != null) {
                   success_callback();
