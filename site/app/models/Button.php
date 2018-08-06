@@ -14,6 +14,7 @@ use app\libraries\Core;
  * @method bool isTitleOnHover()
  * @method float|null getProgress()
  * @method string|null getAriaLabel()
+ * @method int getNotificationsCount()
  */
 class Button extends AbstractModel {
     /** @var string|null $title */
@@ -32,6 +33,8 @@ class Button extends AbstractModel {
     protected $title_on_hover;
     /** @var string|null $aria_label */
     protected $aria_label;
+    /** @var int $notifications_count */
+    protected $notifications_count;
 
     /**
      * @param Core $core
@@ -50,6 +53,7 @@ class Button extends AbstractModel {
         }
         $this->title_on_hover = $details["title_on_hover"] ?? false;
         $this->aria_label = $details["aria_label"] ?? null;
+        $this->notifications_count = $details["notifications_count"] ?? 0;
     }
 
 }

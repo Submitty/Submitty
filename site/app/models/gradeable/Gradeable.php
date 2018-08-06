@@ -34,6 +34,7 @@ use app\models\User;
  * @method \DateTime getGradeReleasedDate()
  * @method \DateTime getGradeLockedDate()
  * @method int getMinGradingGroup()
+ * @method \DateTime getRegradeRequestDate()
  * @method string getSyllabusBucket()
  * @method void setSyllabusBucket($bucket)
  * @method string getTaInstructions()
@@ -68,6 +69,8 @@ use app\models\User;
  * @method float getPrecision()
  * @method void setPrecision($grading_precision)
  * @method Component[] getComponents()
+ * @method bool isRegradeAllowed()
+ * @method void setRegradeAllowed($regrade_allowed)
  */
 class Gradeable extends AbstractModel {
     /* Properties for all types of gradeables */
@@ -172,6 +175,10 @@ class Gradeable extends AbstractModel {
     protected $submission_due_date = null;
     /** @property @var int The number of late days allowed */
     protected $late_days = 0;
+    /** @property @var \DateTime The deadline for submitting a regrade request */
+    protected $regrade_request_date = null;
+    /** @property @var boolean are regrade requests enabled for this assignment*/
+    protected $regrade_allowed = true;
     /**
      * Gradeable constructor.
      * @param Core $core
@@ -206,6 +213,7 @@ class Gradeable extends AbstractModel {
             $this->setPeerGradeSet($details['peer_grade_set']);
             $this->setLateSubmissionAllowed($details['late_submission_allowed']);
             $this->setPrecision($details['precision']);
+            $this->setRegradeAllowed($details['regrade_allowed']);
         }
 
         // Set dates last
@@ -220,7 +228,8 @@ class Gradeable extends AbstractModel {
         'team_lock_date',
         'submission_open_date',
         'submission_due_date',
-        'grade_locked_date'
+        'grade_locked_date',
+        'regrade_request_date'
     ];
 
     public function toArray() {
@@ -344,6 +353,7 @@ class Gradeable extends AbstractModel {
         $submission_open_date = $dates['submission_open_date'];
         $submission_due_date = $dates['submission_due_date'];
         $late_days = $dates['late_days'];
+        $regrade_request_date = $dates['regrade_request_date'];
 
         $late_interval = null;
         if ($late_days < 0) {
@@ -395,6 +405,9 @@ class Gradeable extends AbstractModel {
                 }
                 if (Utils::compareNullableGt($grade_start_date, $grade_released_date)) {
                     $errors['grade_released_date'] = 'Grades Released Date must be later than the Manual Grading Open Date';
+                }
+                if (Utils::compareNullableGt($grade_released_date, $regrade_request_date)) {
+                    $errors['regrade_request_date'] = 'Regrade Request Date must be after Grades Released Date';
                 }
             } else {
                 if (Utils::compareNullableGt($max_due, $grade_released_date)) {
@@ -458,6 +471,7 @@ class Gradeable extends AbstractModel {
             $this->submission_open_date = $dates['submission_open_date'];
             $this->submission_due_date = $dates['submission_due_date'];
             $this->late_days = $dates['late_days'];
+            $this->regrade_request_date = $dates['regrade_request_date'];
         }
         $this->modified = true;
     }
@@ -1222,6 +1236,17 @@ class Gradeable extends AbstractModel {
         }
 
         return $sections;
+    }
+  
+    /**
+     * return true if students can currently submit regrades for this assignment, false otherwise
+     * @return bool
+     */
+    public function isRegradeOpen() {
+        if ($this->core->getConfig()->isRegradeEnabled()==true && $this->isTaGradeReleased() && $this->regrade_allowed && ($this->regrade_request_date > new \DateTime('now', $this->core->getConfig()->getTimezone()))) {
+            return true;
+        }
+        return false;
     }
 
     /**
