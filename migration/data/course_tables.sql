@@ -140,6 +140,8 @@ CREATE TABLE electronic_gradeable (
     eg_allow_late_submission boolean DEFAULT true NOT NULL,
     eg_peer_grade_set integer DEFAULT (0) NOT NULL,
     eg_precision numeric NOT NULL,
+    eg_regrade_allowed boolean DEFAULT true NOT NULL,
+    eg_regrade_request_date timestamp(6) with time zone NOT NULL,
     CONSTRAINT eg_submission_date CHECK ((eg_submission_open_date <= eg_submission_due_date))
 );
 

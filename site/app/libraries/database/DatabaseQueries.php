@@ -2959,7 +2959,9 @@ AND gc_id IN (
                 $gradeable->getLateDays(),
                 $gradeable->getPrecision(),
                 $this->course_db->convertBoolean($gradeable->isPeerGrading()),
-                $gradeable->getPeerGradeSet()
+                $gradeable->getPeerGradeSet(),
+                DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
+                $this->course_db->convertBoolean($gradeable->isRegradeAllowed())
             ];
             $this->course_db->query("
                 INSERT INTO electronic_gradeable(
@@ -2980,8 +2982,10 @@ AND gc_id IN (
                   eg_late_days,
                   eg_precision,
                   eg_peer_grading,
-                  eg_peer_grade_set)
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
+                  eg_peer_grade_set,
+                  eg_regrade_request_date,
+                  eg_regrade_allowed)
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
         }
 
         // Make sure to create the rotating sections
@@ -3078,6 +3082,8 @@ AND gc_id IN (
                     $gradeable->getPrecision(),
                     $this->course_db->convertBoolean($gradeable->isPeerGrading()),
                     $gradeable->getPeerGradeSet(),
+                    DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
+                    $this->course_db->convertBoolean($gradeable->isRegradeAllowed()),
                     $gradeable->getId()
                 ];
                 $this->course_db->query("
@@ -3098,7 +3104,9 @@ AND gc_id IN (
                       eg_late_days=?,
                       eg_precision=?,
                       eg_peer_grading=?,
-                      eg_peer_grade_set=?
+                      eg_peer_grade_set=?,
+                      eg_regrade_request_date=?,
+                      eg_regrade_allowed=?
                     WHERE g_id=?", $params);
             }
         }
