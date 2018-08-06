@@ -732,6 +732,12 @@ table tr.table-header {
     padding-right: 2px;
     margin-left: 5px;
     border-radius: 2px;
+    color: white;
+    font-weight: bold;
+}
+
+#header #login a.btn-primary {
+    color: white;
 }
 
 #forum_wrapper{
