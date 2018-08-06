@@ -33,7 +33,6 @@ use app\models\AbstractModel;
  * @method int getOrder()
  * @method void setOrder($order)
  * @method int getPage()
- * @method void setPage($page)
  * @method Mark[] getMarks()
  */
 class Component extends AbstractModel {
@@ -161,6 +160,17 @@ class Component extends AbstractModel {
             throw new \InvalidArgumentException('Gradeable Cannot be null!');
         }
         $this->gradeable = $gradeable;
+    }
+
+    /**
+     * Sets the page number for this component
+     * @param int $page
+     */
+    public function setPage(int $page) {
+        if ($page < 0) {
+            $page = -1; // student-assigned
+        }
+        $this->page = $page;
     }
 
     const point_properties = [
