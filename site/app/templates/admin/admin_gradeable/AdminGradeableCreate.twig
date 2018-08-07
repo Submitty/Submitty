@@ -273,16 +273,16 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_grades">sylla
     }
 
     function onIsRegradeAllowedChange() {
-        if($('#yes_regrade_allowed').is(':checked')){
-         //   $('.regrade_request_date').hide();
+        if ($('#yes_regrade_allowed').is(':checked')) {
+            //   $('.regrade_request_date').hide();
             disableElementChildren('.regrade_request_date', false);
         }
-        else{
-         //   $('.regrade_request_date').show();
+        else {
+            //   $('.regrade_request_date').show();
             disableElementChildren('.regrade_request_date', true);
         }
         updateDateDisplay();
-
+    }
 
     function onLateSubmissionAllowedChanged() {
         let lateSubmissionParts = $('.yes-late-submission');
