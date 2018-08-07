@@ -1,0 +1,70 @@
+<script type="text/javascript">
+    function ExtractBuckets(){
+        var x = new Array();
+        var bucket_list = $("#buckets_used_list li");
+        bucket_list.each(function(idx,li){
+            x.push($(li).text());
+        })
+
+        $("#generate_json").val(JSON.stringify(x));
+        $("#custom_form").submit();
+    }
+
+    function BalanceLists(){
+        var max_h = Math.max($("#buckets_used").height(),$("#buckets_available").height());
+        $("#list_wrapper").height(max_h);
+    }
+
+    $(document).ready(function(){
+        BalanceLists();
+    })
+</script>
+
+<div class="content">
+    Form would be printed here. Right now the data received is:<br />
+    <pre>{{ customization_data_print }}</pre>
+    <br />
+    If you'd like to try submitting something...
+    <form id="custom_form" method="post" action="">
+        <input type="hidden" id="generate_json" name="generate_json" value="true" />
+        Fake text box: <input type="text" name="demo_text" value="" /><br />
+        <input type="submit" name="generate_json2" value="Submit" onclick="ExtractBuckets();"/>
+    </form>
+    <div id="list_wrapper">
+        <div style="width:45%;float:left;" id="buckets_used">
+            <h3>Assigned Buckets</h3>
+            <ol id="buckets_used_list" style="min-height:50px;background-color:blue;">
+                <li>Test item 1</li>
+                <li>Test item 2</li>
+            </ol>
+        </div>
+        <div style="width45%;display:inline-block;margin-left:50px;" id="buckets_available">
+            <h3>Available Buckets</h3>
+            <ol id="buckets_available_list" style="min-height:50px;background-color:yellow;">
+                {%  for bucket in customization_data|keys %}
+                <li>{{ bucket }}</li>
+                {% endfor %}
+            </ol>
+        </div>
+    </div>
+</div>
+
+<style type="text/css">
+    #buckets_available_list li{
+        font-weight: bold;
+    }
+
+    #buckets_used_list li{
+        font-style: italic;
+    }
+</style>
+
+<script type="text/javascript">
+    $("#buckets_available_list,#buckets_used_list").sortable({
+        connectWith: "#buckets_available_list,#buckets_used_list",
+        update: function (e,u) {
+            BalanceLists();
+        }
+    });
+    $("#buckets_available_list,#buckets_used_list").disableSelection();
+</script>

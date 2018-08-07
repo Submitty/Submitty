@@ -260,7 +260,11 @@ class ReportController extends AbstractController {
     public function generateCustomization(){
         $customization = new RainbowCustomization($this->core);
         $customization->buildCustomization();
-        if(isset($_POST["generate_json"])){
+        $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig',[
+            "customization_data_print" => print_r($customization->getCustomizationData(),true),
+            "customization_data" => $customization->getCustomizationData()
+        ]);
+        /*if(isset($_POST["generate_json"])){
             $customization->processForm();
             if($customization->error()){
                 $this->core->getOutput()->renderOutput(array('admin','RainbowCustomization'),'printError',$customization->getErrorMessages());
@@ -276,7 +280,7 @@ class ReportController extends AbstractController {
         }
         else{
             $this->core->getOutput()->renderOutput(array('admin','RainbowCustomization'),'printForm',$customization->getCustomizationData());
-        }
+        }*/
 
 
     }
