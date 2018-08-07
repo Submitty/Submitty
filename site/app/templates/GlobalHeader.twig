@@ -51,6 +51,14 @@
                         {% if core.userLoaded() %}
                         <span id="login">
                             Hello <span id="login-id">{{ core.getUser().getDisplayedFirstName() }}</span>
+                            {% if notifications_info is not null %}
+                            <a class="btn btn-sm btn-primary" title="Notifications" style="color: white;" href="{{ core.buildUrl({'component': 'navigation', 'page': 'notifications'}) }}">
+                                <i class="fa fa-bell"></i>
+                                {% if notifications_info > 0 %}
+                                <span class="notification_badge" style="color: white;font-weight: bold;">{{ notifications_info }}</span>
+                                {% endif %}
+                            </a>
+                            {% endif %}
                         </span> (<a id='logout' href='{{ core.buildUrl({'component': 'authentication', 'page': 'logout'}) }}'>Logout</a>)
                         {% else %}
                         <span id="login-guest">Welcome to Submitty</span>
