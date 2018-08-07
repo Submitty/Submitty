@@ -1372,6 +1372,7 @@ class Gradeable(object):
 
         self.ta_view_date = dateutils.parse_datetime(gradeable['g_ta_view_start_date'])
         self.grade_start_date = dateutils.parse_datetime(gradeable['g_grade_start_date'])
+        self.grade_due_date = dateutils.parse_datetime(gradeable['g_grade_due_date'])
         self.grade_released_date = dateutils.parse_datetime(gradeable['g_grade_released_date'])
         if self.type == 0:
             self.submission_open_date = dateutils.parse_datetime(gradeable['eg_submission_open_date'])
@@ -1438,7 +1439,8 @@ class Gradeable(object):
                                 raise TypeError("Cannot have dictionary inside of list for submissions "
                                                 "for {}".format(self.sample_path))
         assert self.ta_view_date < self.grade_start_date
-        assert self.grade_start_date < self.grade_released_date
+        assert self.grade_start_date < self.grade_due_date
+        assert self.grade_due_date <= self.grade_released_date
 
         self.components = []
         for i in range(len(gradeable['components'])):
@@ -1466,6 +1468,7 @@ class Gradeable(object):
                      g_grade_by_registration=self.grade_by_registration,
                      g_ta_view_start_date=self.ta_view_date,
                      g_grade_start_date=self.grade_start_date,
+                     g_grade_due_date=self.grade_due_date,
                      g_grade_released_date=self.grade_released_date,
                      g_syllabus_bucket=self.syllabus_bucket,
                      g_min_grading_group=self.min_grading_group,
@@ -1509,6 +1512,7 @@ class Gradeable(object):
             form_json['date_due'] = dateutils.write_submitty_date(self.submission_due_date)
             form_json['regrade_request_date'] = dateutils.write_submitty_date(self.regrade_request_date)
         form_json['date_grade'] = dateutils.write_submitty_date(self.grade_start_date)
+        form_json['date_grade_due'] = dateutils.write_submitty_date(self.grade_due_date)
         form_json['date_released'] = dateutils.write_submitty_date(self.grade_released_date)
 
         if self.type == 0:

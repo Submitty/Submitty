@@ -873,6 +873,7 @@ class AdminGradeableController extends AbstractController {
         $gradeable_create_data = array_merge($gradeable_create_data, [
             'ta_view_start_date' => (clone $tonight)->sub(new \DateInterval('P1D')),
             'grade_start_date' => (clone $tonight)->add(new \DateInterval('P10D')),
+            'grade_due_date' => (clone $tonight)->add(new \DateInterval('P14D')),
             'grade_released_date' => (clone $tonight)->add(new \DateInterval('P14D')),
             'team_lock_date' => (clone $tonight)->add(new \DateInterval('P7D')),
             'submission_open_date' => (clone $tonight),
@@ -963,13 +964,6 @@ class AdminGradeableController extends AbstractController {
                 $date_set = true;
             }
         }
-        if ($date_set) {
-            try {
-                $gradeable->setDates($dates);
-            } catch (ValidationException $e) {
-                $errors = array_merge($errors, $e->getDetails());
-            }
-        }
 
         // Apply other new values for all properties submitted
         foreach ($details as $prop => $post_val) {
@@ -989,6 +983,16 @@ class AdminGradeableController extends AbstractController {
             } catch (\Exception $e) {
                 // If something goes wrong, record it so we can tell the user
                 $errors[$prop] = $e->getMessage();
+            }
+        }
+
+        // Set the dates last just in case the request contained parameters that
+        //  affect date validation
+        if ($date_set) {
+            try {
+                $gradeable->setDates($dates);
+            } catch (ValidationException $e) {
+                $errors = array_merge($errors, $e->getDetails());
             }
         }
 
@@ -1116,6 +1120,8 @@ class AdminGradeableController extends AbstractController {
         //what happens on the quick link depends on the action
         if ($action === "release_grades_now") {
             if ($dates['grade_released_date'] > $now) {
+                // Also set the grade due date so our dates are valid
+                $dates['grade_due_date'] = $now;
                 $dates['grade_released_date'] = $now;
                 $message .= "Released grades for ";
                 $success = true;

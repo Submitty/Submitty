@@ -1,12 +1,12 @@
 <div id="gradeable-dates">
     <input name="ta_view_start_date" id="date_ta_view" class="date_picker" type="text" value="{{ gradeable.getTaViewStartDate()|date(date_format) }}">
-    TA Beta Testing Date (gradeable visible to TAs)
+    TA Beta Testing Date (visible to TAs)
 
     <br />
 
 
-    <div class="electronic_file">
-        <div class="team_yes">
+    <div class="electronic_file electronic_file_dates">
+        <div class="team_yes team_yes_dates">
             <input name="team_lock_date" id="date_team_lock" class="date_picker" type="text" value="{{ gradeable.getTeamLockDate()|date(date_format) }}">
             Team Lock Date (Instructors can still manually manage teams)
 
@@ -24,9 +24,14 @@
         <br />
     </div>
 
-    <div class="manual_grading">
+    <div class="manual_grading manual_grading_dates">
         <input name="grade_start_date" id="date_grade" class="date_picker" type="text" value="{{ gradeable.getGradeStartDate()|date(date_format) }}">
-        TA/Instructor Manual Grading Open Date (graders may begin grading)
+        TA/Instructor Manual Grading Open Date (grading may begin)
+
+        <br />
+
+        <input name="grade_due_date" id="date_grade_due" class="date_picker" type="text" value="{{ gradeable.getGradeDueDate()|date(date_format) }}">
+        TA/Instructor Manual Grading Due Date
 
         <br />
     </div>
@@ -34,24 +39,41 @@
     <input name="grade_released_date" id="date_released" class="date_picker" type="text" value="{{ gradeable.getGradeReleasedDate()|date(date_format) }}">
     Grades Released Date (grades will be visible to students)
 
-    <div class="electronic_file">
-    {% if regrade_allowed != true or regrade_enabled != true %}
-        <div class="regrade_request_date" hidden>
-    {% else %}
-        <div class="regrade_request_date">
-    {% endif %}
-            <input name="regrade_request_date" id="regrade_request_date" class="date_picker" type="text" value="{{ gradeable.getRegradeRequestDate()|date(date_format) }}">
+    <br />
+
+    <div class="electronic_file electronic_file_dates">
+        <div class="regrade_request_date" {{ regrade_allowed != true or regrade_enabled != true ? 'hidden' : '' }}>
+            <input name="regrade_request_date" id="date_regrade_request" class="date_picker" type="text" value="{{ gradeable.getRegradeRequestDate()|date(date_format) }}">
             Regrade Request Due Date (Regrade Requests must be sent by this date)
-            <br />
         </div>
+
         How many late days may students use on this assignment?
         <input style="width: 50px" id="late_days" name="late_days" class="int_val" type="text" value="{{ gradeable.getLateDays() }}"/>
 
         <br />
     </div>
+
+    <input type="button" class="btn btn-default" value="Show All Dates" id="show_all_dates" onclick="showAllDates()" />
+    <input type="button" class="btn btn-primary" value="Hide Irrelevant Dates" id="hide_dates" onclick="hideDates()" hidden/>
+    <span id="gray_date_warning" hidden>Warning, grayed-out dates above may not be backed by real data or may not represent the most up-to-date data</span>
 </div>
 
 <script type="text/javascript">
+    function showAllDates() {
+        $('#gradeable-dates').find('div,input').show();
+        $('#gray_date_warning').show();
+        $('#hide_dates').show();
+        $('#show_all_dates').hide();
+    }
+
+    // This hides the dates by calling the event handlers that do that automatically
+    function hideDates() {
+        $('#gray_date_warning').hide();
+        onGradeableTypeChange();
+        onTeamAssignmentChange();
+        onManualGradingChange();
+        onIsRegradeAllowedChange();
+    }
 
     $(document).ready(function() {
         $(function() {
@@ -78,6 +100,8 @@
                 }
             });
         });
+
+        updateDateDisplay();
     });
 
 </script>
