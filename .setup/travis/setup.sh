@@ -64,10 +64,22 @@ ${AUTH_METHOD}" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --
 
 bash -c "echo 'export PATH=${PATH}' >> /home/${PHP_USER}/.profile"
 bash -c "echo 'export PATH=${PATH}' >> /home/${PHP_USER}/.bashrc"
+bash -c "echo 'export PATH=${PATH}' >> /home/${DAEMON_USER}/.bashrc"
+bash -c "echo 'export PATH=${PATH}' >> /home/${DAEMON_USER}/.bashrc"
 # necessary so that PHP_USER has access to /home/travis/.phpenv/shims/composer
 usermod -a -G travis ${PHP_USER}
+usermod -a -G travis submitty_daemon
 
 # necessary to pass config path as submitty_repository is a symlink
 python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
 
 bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
+
+# TODO: get this to work properly and tests to pass
+#sudo -u submitty_daemon /usr/local/submitty/sbin/submitty_autograding_shipper.py > /dev/null &
+#sleep 1
+#sudo -u submitty_daemon /usr/local/submitty/sbin/submitty_autograding_worker.py > /dev/null &
+#sleep 1
+#/usr/local/submitty/bin/grading_done.py
+
+echo 'Finished setup.'
