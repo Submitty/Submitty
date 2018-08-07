@@ -260,9 +260,11 @@ class ReportController extends AbstractController {
     public function generateCustomization(){
         $customization = new RainbowCustomization($this->core);
         $customization->buildCustomization();
+
         $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig',[
             "customization_data_print" => print_r($customization->getCustomizationData(),true),
-            "customization_data" => $customization->getCustomizationData()
+            "customization_data" => $customization->getCustomizationData(),
+            "available_buckets" => $customization->getAvailableBuckets()
         ]);
         /*if(isset($_POST["generate_json"])){
             $customization->processForm();

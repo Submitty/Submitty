@@ -1,23 +1,14 @@
 <script type="text/javascript">
     function ExtractBuckets(){
-        var x = new Array();
-        var bucket_list = $("#buckets_used_list li");
+        var x = [];
+        var bucket_list = $("#buckets_used_list").find("li");
         bucket_list.each(function(idx,li){
             x.push($(li).text());
-        })
+        });
 
         $("#generate_json").val(JSON.stringify(x));
         $("#custom_form").submit();
     }
-
-    function BalanceLists(){
-        var max_h = Math.max($("#buckets_used").height(),$("#buckets_available").height());
-        $("#list_wrapper").height(max_h);
-    }
-
-    $(document).ready(function(){
-        BalanceLists();
-    })
 </script>
 
 <div class="content">
@@ -33,19 +24,21 @@
     <div id="list_wrapper">
         <div style="width:45%;float:left;" id="buckets_used">
             <h3>Assigned Buckets</h3>
-            <ol id="buckets_used_list" style="min-height:50px;background-color:blue;">
-                <li>Test item 1</li>
-                <li>Test item 2</li>
+            <ol id="buckets_used_list" style="min-height:50px;background-color:beige;">
+                {# <li>Test item 1</li> #}
+                {# <li>Test item 2</li> #}
             </ol>
         </div>
-        <div style="width45%;display:inline-block;margin-left:50px;" id="buckets_available">
+        <div style="width:45%;display:inline-block;margin-left:50px;" id="buckets_available">
             <h3>Available Buckets</h3>
-            <ol id="buckets_available_list" style="min-height:50px;background-color:yellow;">
-                {%  for bucket in customization_data|keys %}
+            <ol id="buckets_available_list" style="min-height:50px;background-color:lightgreen;">
+                {%  for bucket in available_buckets %}
                 <li>{{ bucket }}</li>
                 {% endfor %}
             </ol>
         </div>
+    </div>
+    <div id="Category/Gradeable Configuration:">
     </div>
 </div>
 
@@ -60,11 +53,41 @@
 </style>
 
 <script type="text/javascript">
-    $("#buckets_available_list,#buckets_used_list").sortable({
+    var old_index;
+    var new_index;
+    var old_parent;
+    var new_parent;
+    var bucket_lists = $("#buckets_available_list,#buckets_used_list");
+    var available_list = $("#buckets_available_list");
+    var used_list = $("#buckets_used_list");
+    bucket_lists.sortable({
         connectWith: "#buckets_available_list,#buckets_used_list",
-        update: function (e,u) {
-            BalanceLists();
+        start: function(e,u){
+            old_index = u.item.index();
+            old_parent = u.item.parent().attr("id");
+        },
+        update: function(e,u){
+            new_index = u.item.index();
+            new_parent = u.item.parent().attr("id");
+            //console.log("Moved " + u.item.text() + " from " + old_parent + "," + old_index.toString() + " to " + new_parent + "," + new_index.toString());
+
+            //TODO: Implement this part!
+            //Change position of an existing used item
+            if (old_parent == new_parent && new_parent == "buckets_used_list"){
+                console.log("Rearranging!")
+            }
+            else if(old_parent !=  new_parent && this.id == new_parent){
+                //XXX: In case of an update that moves across lists, we make it the new parent's job
+
+                //Added a new bucket from available->used
+                if(new_parent == "buckets_used_list"){
+                    console.log("Adding!")
+                }
+                else{ //Removed a bucket from used
+                    console.log("Removing!")
+                }
+            }
         }
     });
-    $("#buckets_available_list,#buckets_used_list").disableSelection();
+    bucket_lists.disableSelection();
 </script>
