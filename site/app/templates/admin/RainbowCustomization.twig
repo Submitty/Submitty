@@ -13,6 +13,25 @@
     //Forces element's value to be in range [0.0,100.0]
     function ClampPercent(el){
         el.value = Math.min(Math.max(el.value,0.0),100.0);
+        UpdateUsedPercentage();
+    }
+
+    function UpdateUsedPercentage(){
+        var val = 0.0;
+        $("input[id^='percent']").filter(function(){
+            return $(this).parent().css("display") != "none";
+        }).each(function(){
+            console.log($(this).attr('id'));
+            console.log($(this).val());
+            val += parseFloat($(this).val());
+        });
+        $("#used_percentage").text(val.toString() + "%");
+        if(val>100.0){
+            $("#used_percentage").css({"color":"red","font-weight":"bold"});
+        }
+        else{
+            $("#used_percentage").css({"color":"black","font-weight":""});
+        }
     }
 </script>
 
@@ -30,9 +49,16 @@
         <div style="width:45%;float:left;" id="buckets_used">
             <h3>Assigned Buckets</h3>
             <ol id="buckets_used_list" style="min-height:50px;background-color:beige;">
-                {# <li>Test item 1</li> #}
-                {# <li>Test item 2</li> #}
+                {%  for bucket in used_buckets %}
+                    <li>
+                        <div class="bucket-percent" style="display: inline;">
+                            <input type="text" value="0" onblur="ClampPercent(this);" id="percent-{{ bucket }}"><span style="margin-right: 10px;">%</span>
+                        </div>
+                        {{ bucket }}
+                    </li>
+                {% endfor %}
             </ol>
+            Total: <span id="used_percentage">0%</span>
         </div>
         <div style="width:45%;display:inline-block;margin-left:50px;" id="buckets_available">
             <h3>Available Buckets</h3>
@@ -107,6 +133,8 @@
                     console.log("Removing!")
                     percent_input.css("display","none");
                 }
+
+                UpdateUsedPercentage();
             }
         }
     });

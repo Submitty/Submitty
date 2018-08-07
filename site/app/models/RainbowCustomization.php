@@ -45,7 +45,8 @@ class RainbowCustomization extends AbstractModel{
         //$gids = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
         $gradeables = $this->core->getQueries()->getAllGradeables();
         foreach ($gradeables as $gradeable){
-            $bucket = $gradeable->getBucket();
+            //XXX: 'none (for practice only)' we want to truncate to just 'none', otherwise use full bucket name
+            $bucket = $gradeable->getBucket() == "none (for practice only)" ? "none" : $gradeable->getBucket();
             if(!isset($this->customization_data[$bucket])){
                 $this->customization_data[$bucket] = [];
             }
