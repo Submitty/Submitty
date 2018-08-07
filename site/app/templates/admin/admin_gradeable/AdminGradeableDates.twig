@@ -55,15 +55,17 @@
         <input type="radio" id = "no_late_submission" name="late_submission_allowed" value ="false"
                 {{ not (action != 'new' and gradeable.isLateSubmissionAllowed()) ? 'checked' :  '' }}> No
         <br />
-        How many late days may students use on this assignment?
-        <input style="width: 50px" id="late_days" name="late_days" class="int_val" type="text" value="{{ gradeable.getLateDays() }}"/>
+        <div class="yes-late-submission">
+            How many late days may students use on this assignment?
+            <input style="width: 50px" id="late_days" name="late_days" class="int_val" type="text" value="{{ gradeable.getLateDays() }}"/>
 
-        <br />
+            <br />
 
-        <span id="late-days">Submissions received after the deadline will be automatically recorded as a zero if late days are not allowed
-        for this assignment (or the student does not have sufficient late days to cover the submission) and no excused
-        absence extension is entered for this student for this gradeable (see <a href="http://submitty.org/student/late_days">Late Days & Extensions</a>)
-        </span>
+            <span id="late-days-message">Submissions received after the deadline will be automatically recorded as a zero if late days are not allowed
+                for this assignment (or the student does not have sufficient late days to cover the submission) and no excused
+                absence extension is entered for this student for this gradeable (see <a href="http://submitty.org/student/late_days">Late Days & Extensions</a>)
+            </span>
+        </div>
     </div>
 
     <input type="button" class="btn btn-default" value="Show All Dates" id="show_all_dates" onclick="showAllDates()" />
@@ -86,6 +88,7 @@
         onTeamAssignmentChange();
         onManualGradingChange();
         onIsRegradeAllowedChange();
+        onLateSubmissionAllowedChanged();
     }
 
     $(document).ready(function() {
