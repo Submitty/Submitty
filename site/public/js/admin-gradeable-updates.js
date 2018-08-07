@@ -272,7 +272,7 @@ function saveRubric(redirect = true) {
     let values = serializeRubric();
 
     $('#save_status').html('Saving Rubric...');
-    $.ajax({
+    $.getJSON({
         type: "POST",
         url: buildUrl({
             'component': 'admin',
@@ -281,25 +281,28 @@ function saveRubric(redirect = true) {
             'id': $('#g_id').val()
         }),
         data: values,
-        success: function (data, textStatus, xhr) {
-            console.log('Request returned status code ' + xhr.status);
-            delete errors['rubric'];
-            updateErrors();
-            if(redirect) {
-                window.location.replace(buildUrl({
-                    'component': 'admin',
-                    'page': 'admin_gradeable',
-                    'action': 'edit_gradeable_page',
-                    'id': $('#g_id').val(),
-                    'nav_tab': '2'
-                }));
+        success: function (response) {
+            if (response.status === 'success') {
+                delete errors['rubric'];
+                updateErrorMessage();
+                if (redirect) {
+                    window.location.replace(buildUrl({
+                        'component': 'admin',
+                        'page': 'admin_gradeable',
+                        'action': 'edit_gradeable_page',
+                        'id': $('#g_id').val(),
+                        'nav_tab': '2'
+                    }));
+                }
+            } else {
+                errors['rubric'] = response.message;
+                updateErrorMessage();
+                alert('Error saving rubric, you may have tried to delete a component with grades.  Refresh the page');
             }
         },
-        error: function (data) {
-            console.log('[Error]: Request returned status code ' + data.status);
-            errors['rubric'] = data;
-            updateErrors(data.responseText);
-            alert('Error saving rubric, you may have tried to delete a component with grades.  Refresh the page');
+        error: function (response) {
+            alert('Error saving rubric.  Refresh the page');
+            console.error('Failed to parse response from server: ' + response);
         }
     });
 }

@@ -261,17 +261,6 @@ class AdminGradeableController extends AbstractController {
 
     /* Http request methods (i.e. ajax) */
 
-    // FIXME: replace with AbstractController::tryGetGradeable when this controller uses JSEND
-    private function tryGetGradeable_($gradeable_id) {
-        try {
-            return $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        } catch (\Exception $exception) {
-            http_response_code(404);
-            $this->core->getOutput()->renderJson(['errors' => 'Gradeable with provided id does not exist!']);
-            return null;
-        }
-    }
-
     private function newComponent(Gradeable $gradeable) {
         return new Component($this->core, $gradeable, [
             'id' => 0,
@@ -329,28 +318,21 @@ class AdminGradeableController extends AbstractController {
     }
 
     private function updateRubricRequest() {
-        $gradeable = $this->tryGetGradeable_($_REQUEST['id']);
-        if ($gradeable === null) {
+        $gradeable_id = $_REQUEST['id'] ?? '';
+
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
             return;
         }
+
         try {
-            $result = $this->updateRubric($gradeable, $_POST);
+            $this->updateRubric($gradeable, $_POST);
+            $this->core->getOutput()->renderJsonSuccess();
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
         } catch (\Exception $e) {
-            $result = ['rubric' => 'Error saving rubric'];
-
+            $this->core->getOutput()->renderJsonError($e->getMessage());
         }
-
-        $response_data = [];
-
-        if (count($result) === 0) {
-            http_response_code(204); // NO CONTENT
-        } else {
-            $response_data['errors'] = $result;
-            http_response_code(400);
-        }
-
-        // Finally, send the requester back the information
-        $this->core->getOutput()->renderJson($response_data);
     }
 
     // Parses the checkpoint details from the user form into a Component.  NOTE: order is not set here
@@ -707,8 +689,6 @@ class AdminGradeableController extends AbstractController {
 
         // Save to the database
         $this->core->getQueries()->updateGradeable($gradeable);
-
-        return [];
     }
 
     private function updateGradersRequest() {
