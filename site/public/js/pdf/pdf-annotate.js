@@ -1234,10 +1234,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _renderArrow2 = _interopRequireDefault(_renderArrow);
 	
-	var _PDFJSAnnotate = __webpack_require__(1);
-	
-	var _PDFJSAnnotate2 = _interopRequireDefault(_PDFJSAnnotate);
-	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var isFirefox = /firefox/i.test(navigator.userAgent);
@@ -1381,7 +1377,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // Set attributes
 	    child.setAttribute('data-pdf-annotate-id', annotation.uuid);
 	    child.setAttribute('data-pdf-annotate-type', annotation.type);
-	    child.setAttribute('data-pdf-annotate-userId', _PDFJSAnnotate2.default.getStoreAdapter().userId);
+	    child.setAttribute('data-pdf-annotate-userId', annotation.userId);
 	    child.setAttribute('aria-hidden', true);
 	
 	    svg.appendChild(transform(child, viewport));
@@ -2230,13 +2226,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	      },
 	      getAnnotation: function getAnnotation(documentId, annotationId) {
-	        return Promise.resolve(getAnnotations(documentId, userId)[findAnnotation(documentId, annotationId)]);
+	        return Promise.resolve(getAnnotations(documentId, userId)[findAnnotation(documentId, userId, annotationId)]);
 	      },
 	      addAnnotation: function addAnnotation(documentId, pageNumber, annotation) {
 	        return new Promise(function (resolve, reject) {
 	          annotation.class = 'Annotation';
 	          annotation.uuid = (0, _uuid2.default)();
 	          annotation.page = pageNumber;
+	          annotation.userId = userId;
 	
 	          var annotations = getAnnotations(documentId, userId);
 	          annotations.push(annotation);
@@ -2248,7 +2245,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      editAnnotation: function editAnnotation(documentId, annotationId, annotation) {
 	        return new Promise(function (resolve, reject) {
 	          var annotations = getAnnotations(documentId, userId);
-	          annotations[findAnnotation(documentId, annotationId)] = annotation;
+	          annotations[findAnnotation(documentId, userId, annotationId)] = annotation;
 	          updateAnnotations(documentId, userId, annotations);
 	
 	          resolve(annotation);
@@ -2256,7 +2253,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      },
 	      deleteAnnotation: function deleteAnnotation(documentId, annotationId) {
 	        return new Promise(function (resolve, reject) {
-	          var index = findAnnotation(documentId, annotationId);
+	          var index = findAnnotation(documentId, userId, annotationId);
 	          if (index > -1) {
 	            var annotations = getAnnotations(documentId, userId);
 	            annotations.splice(index, 1);
@@ -2345,10 +2342,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	function updateAnnotations(documentId, userId, annotations) {
 	  localStorage.setItem(documentId + '/' + userId + '/annotations', JSON.stringify(annotations));
 	}
-	
-	function findAnnotation(documentId, annotationId) {
+	/**
+	 * 
+	 * @param {String} documentId Document id of the annotation
+	 * @param {String} userId User id of the annotation
+	 * @param {String} annotationId The id of the annotation
+	 * 
+	 * This function finds all the annotation made by one user.
+	 * 
+	 * @return {int} The index of the annotation in localstorage
+	 */
+	function findAnnotation(documentId, userId, annotationId) {
 	  var index = -1;
-	  var annotations = getAnnotations(documentId);
+	  var annotations = getAnnotations(documentId, userId);
 	  for (var i = 0, l = annotations.length; i < l; i++) {
 	    if (annotations[i].uuid === annotationId) {
 	      index = i;
@@ -3755,11 +3761,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _PDFJSAnnotate2 = _interopRequireDefault(_PDFJSAnnotate);
 	
+	var _config = __webpack_require__(27);
+	
+	var _config2 = _interopRequireDefault(_config);
+	
 	var _utils = __webpack_require__(6);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
+	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+	
 	var _canerase = false;
+	var userId = "user";
 	
 	function handleDocumentMouseDown(e) {
 	  _canerase = true;
@@ -3772,23 +3785,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	function handleDocumentMouseMove(e) {
 	  if (_canerase) {
 	    var target = (0, _utils.findAnnotationAtPoint)(e.clientX, e.clientY);
-	    if (target) {
-	      var annotationUserId = target.getAttribute('data-pdf-annotate-userId');
-	      console.log(annotationUserId);
-	      // let nodes = document.querySelectorAll(`[data-pdf-annotate-id="${annotationId}"]`);
-	      // let svg = overlay.parentNode.querySelector(config.annotationSvgQuery());
-	      // let { documentId } = getMetadata(svg);
+	    if (target && target.getAttribute('data-pdf-annotate-userId') == userId) {
+	      var _getMetadata = (0, _utils.getMetadata)(target.parentElement),
+	          documentId = _getMetadata.documentId;
 	
-	      // [...nodes].forEach((n) => {
-	      //   n.parentNode.removeChild(n);
-	      // });
+	      var annotationId = target.getAttribute('data-pdf-annotate-id');
+	      var nodes = document.querySelectorAll('[data-pdf-annotate-id="' + annotationId + '"]');
+	      [].concat(_toConsumableArray(nodes)).forEach(function (n) {
+	        n.parentNode.removeChild(n);
+	      });
 	
-	      // PDFJSAnnotate.getStoreAdapter().deleteAnnotation(documentId, annotationId);
+	      _PDFJSAnnotate2.default.getStoreAdapter().deleteAnnotation(documentId, annotationId);
 	    }
 	  }
 	}
 	
 	function enableEraser() {
+	  userId = _PDFJSAnnotate2.default.getStoreAdapter().userId;
 	  document.addEventListener('mousemove', handleDocumentMouseMove);
 	  document.addEventListener('mousedown', handleDocumentMouseDown);
 	  document.addEventListener('mouseup', handleDocumentMouseUp);
@@ -3796,6 +3809,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	function disableEraser() {
 	  document.removeEventListener('mousemove', handleDocumentMouseMove);
+	  document.removeEventListener('mousedown', handleDocumentMouseDown);
+	  document.removeEventListener('mouseup', handleDocumentMouseUp);
 	}
 
 /***/ },

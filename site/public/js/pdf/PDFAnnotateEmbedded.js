@@ -121,6 +121,9 @@ function render(gradeable_id, user_id, grader_id, file_name) {
                         $('#scroll_lock_mode').removeAttr('checked');
                         UI.disablePen();
                         break;
+                    case 'eraser':
+                        UI.disableEraser();
+                        break;
                     case 'cursor':
                         UI.disableEdit();
                         break;
@@ -133,6 +136,9 @@ function render(gradeable_id, user_id, grader_id, file_name) {
             switch(option){
                 case 'pen':
                     UI.enablePen();
+                    break;
+                case 'eraser':
+                    UI.enableEraser();
                     break;
                 case 'cursor':
                     UI.enableEdit();
