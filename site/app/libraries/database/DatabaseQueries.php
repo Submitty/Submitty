@@ -2085,6 +2085,11 @@ ORDER BY u.user_group ASC,
         return $return;
     }
 
+    public function getCourseStatus($semester, $course) {
+        $this->submitty_db->query("SELECT status FROM courses WHERE semester=? AND course=?", array($semester, $course));
+        return $this->submitty_db->rows()[0]['status'];
+    }
+
     public function getPeerAssignment($gradeable_id, $grader) {
         $this->course_db->query("SELECT user_id FROM peer_assign WHERE g_id=? AND grader_id=?", array($gradeable_id, $grader));
         $return = array();
