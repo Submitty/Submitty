@@ -54,6 +54,7 @@
     </div>
 
     <input type="button" class="btn btn-default" value="Show All Dates" id="show_all_dates" onclick="showAllDates()" />
+    <input type="button" class="btn btn-primary" value="Hide Irrelevant Dates" id="hide_dates" onclick="hideDates()" hidden/>
     <span id="gray_date_warning" hidden>Warning, grayed-out dates above may not be backed by real data or may not represent the most up-to-date data</span>
 </div>
 
@@ -61,23 +62,17 @@
     function showAllDates() {
         $('#gradeable-dates').find('div,input').show();
         $('#gray_date_warning').show();
+        $('#hide_dates').show();
+        $('#show_all_dates').hide();
     }
 
-    function updateDateDisplay() {
-        let elecDateBoxes = $('.electronic_file_dates input');
-        elecDateBoxes.prop('disabled', true);
-        if ($('#radio_electronic_file').is(':checked')) {
-            elecDateBoxes.prop('disabled', false);
-            $('.manual_grading_dates input').prop('disabled', $('#no_ta_grade').is(':checked'));
-            $('#date_team_lock').prop('disabled', {{ gradeable.isTeamAssignment() ? 'false' : 'true' }});
-
-            {# Use this 'each' trick since 'no_regrade_allowed' may not be defined if regrade requests not enabled #}
-            let regradeReqDate = $('#date_regrade_request');
-            regradeReqDate.prop('disabled', true);
-            $('#no_regrade_allowed').each(function () {
-                regradeReqDate.prop('disabled', $(this).is(':checked'));
-            });
-        }
+    // This hides the dates by calling the event handlers that do that automatically
+    function hideDates() {
+        $('#gray_date_warning').hide();
+        onGradeableTypeChange();
+        onTeamAssignmentChange();
+        onManualGradingChange();
+        onIsRegradeAllowedChange();
     }
 
     $(document).ready(function() {

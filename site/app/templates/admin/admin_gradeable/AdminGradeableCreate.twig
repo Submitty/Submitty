@@ -182,6 +182,25 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_grades">sylla
 </div>
 
 <script type="text/javascript">
+    function updateDateDisplay() {
+        let elecDateBoxes = $('.electronic_file_dates input');
+        elecDateBoxes.prop('disabled', true);
+        if ($('#radio_electronic_file').is(':checked')) {
+            elecDateBoxes.prop('disabled', false);
+            $('.manual_grading_dates input').prop('disabled', $('#no_ta_grade').is(':checked'));
+            $('#date_team_lock').prop('disabled', {{ gradeable.isTeamAssignment() ? 'false' : 'true' }});
+
+            {# Use this 'each' trick since 'no_regrade_allowed' may not be defined if regrade requests not enabled #}
+            let regradeReqDate = $('#date_regrade_request');
+            regradeReqDate.prop('disabled', true);
+            $('#no_regrade_allowed').each(function () {
+                regradeReqDate.prop('disabled', $(this).is(':checked'));
+            });
+        }
+        $('#hide_dates').hide();
+        $('#show_all_dates').show();
+    }
+
     //
     // Event Handlers
     //
