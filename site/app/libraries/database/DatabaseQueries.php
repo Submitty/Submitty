@@ -2085,6 +2085,11 @@ ORDER BY u.user_group ASC,
         return $return;
     }
 
+    public function getCourseStatus($semester, $course) {
+        $this->submitty_db->query("SELECT status FROM courses WHERE semester=? AND course=?", array($semester, $course));
+        return $this->submitty_db->rows()[0]['status'];
+    }
+
     public function getPeerAssignment($gradeable_id, $grader) {
         $this->course_db->query("SELECT user_id FROM peer_assign WHERE g_id=? AND grader_id=?", array($gradeable_id, $grader));
         $return = array();
@@ -2919,6 +2924,7 @@ AND gc_id IN (
             $this->course_db->convertBoolean($gradeable->isGradeByRegistration()),
             DateUtils::dateTimeToString($gradeable->getTaViewStartDate()),
             DateUtils::dateTimeToString($gradeable->getGradeStartDate()),
+            DateUtils::dateTimeToString($gradeable->getGradeDueDate()),
             DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()),
             $gradeable->getGradeLockedDate() !== null ?
                 DateUtils::dateTimeToString($gradeable->getGradeLockedDate()) : null,
@@ -2935,11 +2941,12 @@ AND gc_id IN (
               g_grade_by_registration,
               g_ta_view_start_date,
               g_grade_start_date,
+              g_grade_due_date,
               g_grade_released_date,
               g_grade_locked_date,
               g_min_grading_group,
               g_syllabus_bucket)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             $params = [
                 $gradeable->getId(),
@@ -3042,6 +3049,7 @@ AND gc_id IN (
                 $this->course_db->convertBoolean($gradeable->isGradeByRegistration()),
                 DateUtils::dateTimeToString($gradeable->getTaViewStartDate()),
                 DateUtils::dateTimeToString($gradeable->getGradeStartDate()),
+                DateUtils::dateTimeToString($gradeable->getGradeDueDate()),
                 DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()),
                 $gradeable->getGradeLockedDate() !== null ?
                     DateUtils::dateTimeToString($gradeable->getGradeLockedDate()) : null,
@@ -3058,6 +3066,7 @@ AND gc_id IN (
                   g_grade_by_registration=?, 
                   g_ta_view_start_date=?, 
                   g_grade_start_date=?,
+                  g_grade_due_date=?,
                   g_grade_released_date=?,
                   g_grade_locked_date=?,
                   g_min_grading_group=?, 
