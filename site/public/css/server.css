@@ -43,7 +43,9 @@ a:visited,
 a:link,
 a.external,
 a.external:visited,
-a.external:link {
+a.external:link,
+a.fa:hover,
+a > i.fa:hover {
     color: #2627ee;
 }
 
