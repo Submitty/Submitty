@@ -75,6 +75,9 @@ class Access {
      */
     const CHECK_STUDENT_DOWNLOAD        = 1 << 17 | self::REQUIRE_ARG_GRADEABLE;
 
+    /** Check that the course status is such that the user can view the course */
+    const CHECK_COURSE_STATUS           = 1 << 18;
+
     /** If the current set of flags requires the "gradeable" argument */
     const REQUIRE_ARG_GRADEABLE         = 1 << 24;
     /** If the current set of flags requires the "gradeable" argument */
@@ -83,6 +86,9 @@ class Access {
     const REQUIRE_ARGS_DIR_PATH         = 1 << 26;
     /** If the current set of flags requires the "gradeable_version" argument */
     const REQUIRE_ARG_VERSION           = 1 << 27;
+    /** If the current set of flags requires the "semester" and "course" arguments */
+    const REQUIRE_ARGS_SEMESTER_COURSE  = 1 << 28;
+
 
     // Broader user group access cases since generally actions are "minimum this group"
 
@@ -107,6 +113,8 @@ class Access {
 
     public function __construct(Core $core) {
         $this->core = $core;
+
+        $this->permissions["course.view"] = self::ALLOW_MIN_STUDENT | self::REQUIRE_ARGS_SEMESTER_COURSE | self::CHECK_COURSE_STATUS;
 
         $this->permissions["grading.electronic.status"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP;
         $this->permissions["grading.electronic.status.full"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
@@ -409,6 +417,8 @@ class Access {
                     }
                 }
             }
+
+
             if (self::checkBits($checks, self::REQUIRE_ARG_VERSION)) {
                 /* @var int $version */
                 $version = $this->requireArg($args, "gradeable_version");
@@ -458,6 +468,26 @@ class Access {
             //Check if they can access the path!
             if (!$this->canUserAccessPath($action, $path, $dir, $user, $args)) {
                 return false;
+            }
+        }
+
+        if (self::checkBits($checks, self::REQUIRE_ARGS_SEMESTER_COURSE)) {
+            $semester = $this->requireArg($args, "semester");
+            $course = $this->requireArg($args, "course");
+            if (self::checkBits($checks, self::CHECK_COURSE_STATUS)) {
+                $course_status = $this->core->getQueries()->getCourseStatus($semester, $course);
+                // only instructors should be able to access courses with status archived==2
+                if($course_status === 2 && $group !== User::GROUP_INSTRUCTOR) {
+                    return false;
+                }
+                // only students with a non-null registration section should be able to view courses (and only active==1 courses)
+                else if($group === User::GROUP_STUDENT && ($course_status !== 1 || $user->getRegistrationSection() === null)) {
+                    return false;
+                }
+                // no one can view courses with status greater than 2
+                else if ($course_status > 2) {
+                    return false;
+                }
             }
         }
 
