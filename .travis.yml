@@ -37,6 +37,7 @@ jobs:
         - pip3 install pause
         - pip3 install tzlocal
         - pip3 install paramiko
+        - pip3 install psutil
       script: skip
     - <<: *00-cache
       php: 7.1
@@ -50,7 +51,7 @@ jobs:
       stage: 01 lint
       php: 7.0
       script:
-        - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
+        - find -L . -path ./site/vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
     - <<: *01-lint
       php: 7.1
       if: branch = master OR type = pull_request
@@ -142,6 +143,7 @@ jobs:
         - pip3 install selenium
         - pip3 install pause
         - pip3 install paramiko
+        - pip3 install psutil
         - wget http://chromedriver.storage.googleapis.com/2.38/chromedriver_linux64.zip
         - unzip chromedriver_linux64.zip
         - sudo chmod u+x chromedriver

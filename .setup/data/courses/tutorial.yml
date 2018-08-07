@@ -15,6 +15,7 @@ gradeables:
     eg_submission_open_date: -2 days
     eg_submission_due_date: +4 days
     g_grade_start_date: +7 days
+    g_grade_due_date: +9 days
     g_grade_released_date: +9 days
     eg_regrade_request_date: +16 days
     eg_max_random_submissions: 0
@@ -33,6 +34,7 @@ gradeables:
     eg_submission_open_date: -2 days
     eg_submission_due_date: +4 days
     g_grade_start_date: +7 days
+    g_grade_due_date: +9 days
     g_grade_released_date: +9 days
     eg_regrade_request_date: +16 days
     eg_max_random_submissions: 0
@@ -51,6 +53,7 @@ gradeables:
     eg_submission_open_date: -2 days
     eg_submission_due_date: +4 days
     g_grade_start_date: +7 days
+    g_grade_due_date: +9 days
     g_grade_released_date: +9 days
     eg_regrade_request_date: +16 days
     eg_max_random_submissions: 0
@@ -69,6 +72,7 @@ gradeables:
     eg_submission_open_date: -2 days
     eg_submission_due_date: +4 days
     g_grade_start_date: +7 days
+    g_grade_due_date: +9 days
     g_grade_released_date: +9 days
     eg_regrade_request_date: +16 days
     eg_max_random_submissions: 0
@@ -87,6 +91,7 @@ gradeables:
     eg_submission_open_date: -2 days
     eg_submission_due_date: +4 days
     g_grade_start_date: +7 days
+    g_grade_due_date: +9 days
     g_grade_released_date: +9 days
     eg_regrade_request_date: +16 days
     eg_max_random_submissions: 0
@@ -105,6 +110,7 @@ gradeables:
     eg_submission_open_date: -2 days
     eg_submission_due_date: +4 days
     g_grade_start_date: +7 days
+    g_grade_due_date: +9 days
     g_grade_released_date: +9 days
     eg_regrade_request_date: +16 days
     eg_max_random_submissions: 0
@@ -123,6 +129,7 @@ gradeables:
     eg_submission_open_date: -2 days
     eg_submission_due_date: +4 days
     g_grade_start_date: +7 days
+    g_grade_due_date: +9 days
     g_grade_released_date: +9 days
     eg_regrade_request_date: +16 days
     eg_max_random_submissions: 0
@@ -141,6 +148,7 @@ gradeables:
     eg_submission_open_date: -2 days
     eg_submission_due_date: +4 days
     g_grade_start_date: +7 days
+    g_grade_due_date: +9 days
     g_grade_released_date: +9 days
     eg_regrade_request_date: +16 days
     eg_max_random_submissions: 0
@@ -159,6 +167,7 @@ gradeables:
     eg_submission_open_date: -2 days
     eg_submission_due_date: +4 days
     g_grade_start_date: +7 days
+    g_grade_due_date: +9 days
     g_grade_released_date: +9 days
     eg_regrade_request_date: +16 days
     eg_max_random_submissions: 0
@@ -177,6 +186,7 @@ gradeables:
     eg_submission_open_date: -2 days
     eg_submission_due_date: +4 days
     g_grade_start_date: +7 days
+    g_grade_due_date: +9 days
     g_grade_released_date: +9 days
     eg_regrade_request_date: +16 days
     eg_max_random_submissions: 0
@@ -195,6 +205,7 @@ gradeables:
     eg_submission_open_date: -2 days
     eg_submission_due_date: +4 days
     g_grade_start_date: +7 days
+    g_grade_due_date: +9 days
     g_grade_released_date: +9 days
     eg_regrade_request_date: +16 days
     eg_max_random_submissions: 0
@@ -213,6 +224,7 @@ gradeables:
     eg_submission_open_date: -2 days
     eg_submission_due_date: +4 days
     g_grade_start_date: +7 days
+    g_grade_due_date: +9 days
     g_grade_released_date: +9 days
     eg_regrade_request_date: +16 days
     eg_max_random_submissions: 0
@@ -231,6 +243,7 @@ gradeables:
     eg_submission_open_date: -2 days
     eg_submission_due_date: +4 days
     g_grade_start_date: +7 days
+    g_grade_due_date: +9 days
     g_grade_released_date: +9 days
     eg_regrade_request_date: +16 days
     eg_max_random_submissions: 0
@@ -249,6 +262,7 @@ gradeables:
     eg_submission_open_date: -2 days
     eg_submission_due_date: +4 days
     g_grade_start_date: +7 days
+    g_grade_due_date: +9 days
     g_grade_released_date: +9 days
     eg_regrade_request_date: +16 days
     eg_max_random_submissions: 0
@@ -267,6 +281,7 @@ gradeables:
     eg_submission_open_date: -2 days
     eg_submission_due_date: +4 days
     g_grade_start_date: +7 days
+    g_grade_due_date: +9 days
     g_grade_released_date: +9 days
     eg_regrade_request_date: +16 days
     eg_max_random_submissions: 0

@@ -65,9 +65,9 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
 <fieldset class="gradeable_type_options electronic_file" id="electronic_file">
     Will any or all of this assignment be manually graded (e.g., by the TAs or the instructor)?
     <br />
-    <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val auto_save"
+    <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val auto_save date-related"
             {{ action != 'new' and gradeable.getTaGrading() ? 'checked' : '' }} /> Yes
-    <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val auto_save"
+    <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val auto_save date-related"
             {{ not (action != 'new' and gradeable.getTaGrading()) ? 'checked' : '' }} /> No
     {% if regrade_enabled == true %}
     <br /><br /><br />
@@ -182,6 +182,25 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_grades">sylla
 </div>
 
 <script type="text/javascript">
+    function updateDateDisplay() {
+        let elecDateBoxes = $('.electronic_file_dates input');
+        elecDateBoxes.prop('disabled', true);
+        if ($('#radio_electronic_file').is(':checked')) {
+            elecDateBoxes.prop('disabled', false);
+            $('.manual_grading_dates input').prop('disabled', $('#no_ta_grade').is(':checked'));
+            $('#date_team_lock').prop('disabled', {{ gradeable.isTeamAssignment() ? 'false' : 'true' }});
+
+            {# Use this 'each' trick since 'no_regrade_allowed' may not be defined if regrade requests not enabled #}
+            let regradeReqDate = $('#date_regrade_request');
+            regradeReqDate.prop('disabled', true);
+            $('#no_regrade_allowed').each(function () {
+                regradeReqDate.prop('disabled', $(this).is(':checked'));
+            });
+        }
+        $('#hide_dates').hide();
+        $('#show_all_dates').show();
+    }
+
     //
     // Event Handlers
     //
@@ -234,6 +253,7 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_grades">sylla
             disableElementChildren('.manual_grading', true);
             disableElementChildren('.no_manual_grading', false);
         }
+        updateDateDisplay();
     }
 
     function onUploadTypeChange() {
@@ -260,6 +280,7 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_grades">sylla
          //   $('.regrade_request_date').show();
             disableElementChildren('.regrade_request_date', true);
         }
+        updateDateDisplay();
     }
 
     var vcs_base_url = "{{ vcs_base_url }}";

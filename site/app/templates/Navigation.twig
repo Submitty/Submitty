@@ -67,7 +67,10 @@
 
 {% macro renderButton(button) %}
     {% if button != null %}
-        <a class="{{ button.getClass() }}" name="{{ button.getTitle()|lower }}_button"
+        <a class="{{ button.getClass() }}"
+            {% if button.getTitle() != null %}
+                name="{{ button.getTitle()|lower }}_button"
+            {% endif %}
             {% if button.isDisabled() %}
                 disabled
             {% else %}

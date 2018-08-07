@@ -178,13 +178,13 @@ else:
     DATABASE_HOST = get_input('What is the database host?', defaults['database_host'])
     print()
 
-    DATABASE_USER = get_input('What is the database user?', defaults['database_user'])
+    DATABASE_USER = get_input('What is the database user/role?', defaults['database_user'])
     print()
 
     default = ''
     if 'database_password' in defaults and DATABASE_USER == defaults['database_user']:
         default = '(Leave blank to use same password)'
-    DATABASE_PASS = get_input('What is the database password for {}? {}'.format(DATABASE_USER, default))
+    DATABASE_PASS = get_input('What is the password for the database user/role {}? {}'.format(DATABASE_USER, default))
     if DATABASE_PASS == '' and DATABASE_USER == defaults['database_user'] and 'database_password' in defaults:
         DATABASE_PASS = defaults['database_password']
     print()
@@ -344,7 +344,7 @@ if not args.worker:
         #make a tmp folder and copy autograding workers to it
         tmp_folder = tempfile.mkdtemp()
         tmp_autograding_workers_file = os.path.join(tmp_folder, "autograding_workers.json")
-        os.rename(WORKERS_JSON, tmp_autograding_workers_file)
+        shutil.move(WORKERS_JSON, tmp_autograding_workers_file)
 
 if os.path.isdir(CONFIG_INSTALL_DIR):
     shutil.rmtree(CONFIG_INSTALL_DIR)
@@ -355,7 +355,7 @@ os.chmod(CONFIG_INSTALL_DIR, 0o755)
 #If the workers.json exists, finish rescuing it (copy it back).
 if not tmp_autograding_workers_file == "":
     #copy autograding workers back
-    os.rename(tmp_autograding_workers_file, WORKERS_JSON)
+    shutil.move(tmp_autograding_workers_file, WORKERS_JSON)
     #remove the tmp folder
     os.removedirs(tmp_folder)
     #make sure the permissions are correct.
