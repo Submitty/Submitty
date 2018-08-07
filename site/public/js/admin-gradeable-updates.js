@@ -1,104 +1,98 @@
 
 let errors = {};
-function updateErrors(data) {
-    $('#ajax_raw').html(data);
-    if(Object.keys(errors).length !== 0) {
+function updateErrorMessage() {
+    if (Object.keys(errors).length !== 0) {
         $('#save_status').html('<span style="color: red">Some Changes Failed!</span>');
-        $('#ajax_debug').html(errors);
     }
     else {
         $('#save_status').html('All Changes Saved');
-        $('#ajax_debug').html('');
     }
 }
 
 function setError(name, err) {
-    $('input[name="' + name + '"]').each(function (i, elem) {
+    $('[name="' + name + '"]').each(function (i, elem) {
         elem.title = err;
         elem.style.backgroundColor = '#FDD';
     });
-    errors[name] = err[1];
+    errors[name] = err;
 }
-function clearError(name) {
-    $('input[name="' + name + '"]').each(function (i, elem) {
+
+function clearError(name, update) {
+    $('[name="' + name + '"]').each(function (i, elem) {
         elem.title = '';
         elem.style.backgroundColor = '';
+        if(update !== undefined) {
+            $(elem).val(update);
+        }
     });
     // remove the error for this property
     delete errors[name];
 }
-function getErrorCallback(props) {
-    return function(data) {
-        let arr = JSON.parse(data);
-        props.forEach(function (name) {
-            if(name in arr['errors']) {
-                setError(name, arr['errors'][name]);
-            }
-            else {
-                clearError(name);
-            }
-        });
-        updateErrors(data);
-    }
-}
-function getSuccessCallback(props) {
-    return function() {
-        props.forEach(clearError);
-        updateErrors();
-    }
-}
 
 $(document).ready(function () {
-    updateErrors();
-
-    window.onbeforeunload = function(event) {
-        if(Object.keys(errors).length !== 0) {
+    window.onbeforeunload = function (event) {
+        if (Object.keys(errors).length !== 0) {
             event.returnValue = 1;
         }
     };
     $('input,select,textarea').change(function () {
-        if($(this).hasClass('ignore')) {
+        if ($(this).hasClass('ignore')) {
             return;
         }
         // If its rubric-related, then make different request
-        if($('#gradeable_rubric').find('[name="' + this.name + '"]').length > 0) {
+        if ($('#gradeable_rubric').find('[name="' + this.name + '"]').length > 0) {
             // ... but don't automatically save electronic rubric data
-            if(!$('#radio_electronic_file').is(':checked')) {
+            if (!$('#radio_electronic_file').is(':checked')) {
                 saveRubric(false);
             }
             return;
         }
-        if($('#grader_assignment').find('[name="' + this.name + '"]').length > 0) {
+        if ($('#grader_assignment').find('[name="' + this.name + '"]').length > 0) {
             saveGraders();
             return;
         }
         // Don't save if it we're ignoring it
-        if($(this).hasClass('ignore')) {
+        if ($(this).hasClass('ignore')) {
             return;
         }
 
         let data = {};
         data[this.name] = $(this).val();
         let addDataToRequest = function (i, val) {
-            if(val.type === 'radio' && !$(val).is(':checked')) {
+            if (val.type === 'radio' && !$(val).is(':checked')) {
                 return;
             }
             data[val.name] = $(val).val();
         };
 
         // If its date-related, then submit all date data
-        if($('#gradeable-dates').find('input[name="' + this.name + '"]').length > 0
+        if ($('#gradeable-dates').find('input[name="' + this.name + '"]').length > 0
             || $(this).hasClass('date-related')) {
             $('#gradeable-dates :input,.date-related').each(addDataToRequest);
         }
         ajaxUpdateGradeableProperty($('#g_id').val(), data,
-            getSuccessCallback(Object.keys(data)), getErrorCallback(Object.keys(data)));
+            function (data) {
+                for (let key in data) {
+                    if (data.hasOwnProperty(key)) {
+                        clearError(key, data[key]);
+                    }
+                }
+                updateErrorMessage();
+            },
+            function (message, data) {
+                for (let key in data) {
+                    if (data.hasOwnProperty(key)) {
+                        setError(key, data[key]);
+                    }
+                }
+                updateErrorMessage();
+            });
     });
 });
 
 function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, errorCallback) {
     $('#save_status').html('Saving...');
-    $.ajax({
+    $.getJSON({
         type: "POST",
         url: buildUrl({
             'component': 'admin',
@@ -107,17 +101,18 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
             'id': gradeable_id
         }),
         data: p_values,
-        success: function (data, textStatus, xhr) {
-            console.log('Request returned status code ' + xhr.status);
-            if (typeof(successCallback) === "function") {
-                successCallback();
+        success: function (response) {
+            if (response.status === 'success') {
+                successCallback(response.data);
+            } else if (response.status === 'fail') {
+                errorCallback(response.message, response.data);
+            } else {
+                alert('Internal server error');
+                console.error(response.message);
             }
         },
-        error: function (data) {
-            console.log('[Error]: Request returned status code ' + data.status);
-            if (typeof(errorCallback) === "function") {
-                errorCallback(data.responseText);
-            }
+        error: function (response) {
+            console.error('Failed to parse response from server: ' + response);
         }
     });
 }
@@ -347,7 +342,7 @@ function saveGraders() {
         },
         error: function (data) {
             console.log('[Error]: Request returned status code ' + data.status);
-            updateErrors(data.responseText);
+            updateErrors();
         }
     });
 }

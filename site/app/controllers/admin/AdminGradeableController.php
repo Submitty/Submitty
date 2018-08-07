@@ -329,9 +329,6 @@ class AdminGradeableController extends AbstractController {
     }
 
     private function updateRubricRequest() {
-        // Assume something will go wrong
-        http_response_code(500);
-
         $gradeable = $this->tryGetGradeable_($_REQUEST['id']);
         if ($gradeable === null) {
             return;
@@ -901,40 +898,33 @@ class AdminGradeableController extends AbstractController {
     }
 
     private function updateGradeableRequest() {
-        $result = $this->updateGradeableById($_REQUEST['id'], $_POST);
-        if ($result === null) {
-            http_response_code(404);
+        $gradeable_id = $_REQUEST['id'] ?? '';
+
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
             return;
         }
 
-        $response_data = [];
-
-        if (count($result) === 0) {
-            http_response_code(204); // NO CONTENT
-        } else {
-            http_response_code(400);
+        try {
+            $response_props = $this->updateGradeable($gradeable, $_POST);
+            // Finally, send the requester back the information
+            $this->core->getOutput()->renderJsonSuccess($response_props);
+        } catch (ValidationException $e) {
+            $this->core->getOutput()->renderJsonFail('See "data" for details', $e->getDetails());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
         }
-        $response_data['errors'] = $result;
-
-        // Finally, send the requester back the information
-        $this->core->getOutput()->renderJson($response_data);
-    }
-
-    private function updateGradeableById($gradeable_id, $details) {
-        $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        if ($gradeable === null) {
-            return null;
-        }
-        return $this->updateGradeable($gradeable, $details);
     }
 
     private function updateGradeable(Gradeable $gradeable, $details) {
-        $errors = array();
+        $errors = [];
+
+        // Implicitly updated properties to tell the client about
+        $updated_properties = [];
 
         // If the post array is 0, that means that the name of the element was blank
         if (count($details) === 0) {
-            $errors['general'] = 'Request contained no properties, perhaps the name was blank?';
-            return $errors;
+            throw new \InvalidArgumentException('Request contained no properties, perhaps the name was blank?');
         }
 
         // Trigger a rebuild if the config / due date changes
@@ -991,6 +981,8 @@ class AdminGradeableController extends AbstractController {
         if ($date_set) {
             try {
                 $gradeable->setDates($dates);
+                $updated_properties = $gradeable->getDateStrings();
+                $updated_properties['late_days'] = $gradeable->getLateDays();
             } catch (ValidationException $e) {
                 $errors = array_merge($errors, $e->getDetails());
             }
@@ -1004,15 +996,14 @@ class AdminGradeableController extends AbstractController {
             }
         }
 
-        // Be strict.  Only apply database changes if there were no errors. (allow warnings)
-        if (count($errors) === 0) {
-            try {
-                $this->core->getQueries()->updateGradeable($gradeable);
-            } catch (\Exception $e) {
-                $errors['db'] = $e;
-            }
+        // Be strict.  Only apply database changes if there were no errors
+        if(count($errors) !== 0) {
+            throw new ValidationException('', $errors);
         }
-        return $errors;
+        $this->core->getQueries()->updateGradeable($gradeable);
+
+        // Only return updated properties if the changes were applied
+        return $updated_properties;
     }
 
     private function deleteGradeable() {
