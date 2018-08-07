@@ -16,24 +16,20 @@
     <div class="col-md-auto" id="sidebar">
         <div id="nav-buttons">
             <ul>
-                {% if nav_urls|length > 0 %}
-                    <li class="heading">Instructor Actions</li>
-                    {% for url in nav_urls %}
+                {% for name, group in top_buttons if group.buttons|length > 0 %}
+                    {% if loop.index != 1 %}
+                        <li></li>
+                        <li class="line"></li>
+                        <li></li>
+                    {% endif %}
+                    <li class="heading">{{ group.name }}</li>
+                    {% for button in group.buttons %}
                         <li>
-                            <a href="{{ url.href }}">{{ url.title }}</a>
+                            <a href="{{ button.href }}">
+                                {{ button.title }}
+                            </a>
                         </li>
                     {% endfor %}
-                    <li></li>
-                    <li class="line"></li>
-                    <li></li>
-                {% endif %}
-                <li class="heading">Student Resources</li>
-                {% for button in top_buttons %}
-                    <li>
-                        <a href="{{ button.href }}">
-                            {{ button.title }}
-                        </a>
-                    </li>
                 {% endfor %}
             </ul>
         </div>

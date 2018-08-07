@@ -141,102 +141,72 @@ class NavigationView extends AbstractView {
         /* @var Button[] $top_buttons */
         $top_buttons = [];
 
-        // ======================================================================================
-        // COURSE MATERIALS BUTTON -- visible to everyone
-        // ======================================================================================
-        $course_path = $this->core->getConfig()->getCoursePath();
-        $course_materials_path = $course_path."/uploads/course_materials";
-        $any_files = FileUtils::getAllFiles($course_materials_path);
-        if ($this->core->getUser()->getGroup()=== 1 || !empty($any_files)) {
-            $top_buttons[] = [
-                "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'course_materials', 'action' => 'view_course_materials_page')),
-                "title" => "Course Materials",
-            ];
-        }
-
-        // ======================================================================================
-        // LATE DAYS TABLE BUTTON
-        // ======================================================================================
-        $top_buttons[] = [
-            "href" => $this->core->buildUrl(array('component' => 'student', 'page' => 'view_late_table')),
-            "title" => "Late Days",
+        $top_buttons["instructor"] = [
+            "name" => "Instructor Actions",
+            "buttons" => []
+        ];
+        $top_buttons["grader"] = [
+            "name" => "Grader Resources",
+            "buttons" => []
+        ];
+        $top_buttons["student"] = [
+            "name" => "Student Resources",
+            "buttons" => []
         ];
 
-        // ======================================================================================
-        // FORUM BUTTON
-        // ======================================================================================
-        if ($this->core->getConfig()->isForumEnabled()) {
-            $top_buttons[] = [
-                "href" => $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')),
-                "title" => "Discussion Forum",
-            ];
-        }
-
-        // ======================================================================================
-        // GRADES SUMMARY BUTTON
-        // ======================================================================================
-        $display_rainbow_grades_summary = $this->core->getConfig()->displayRainbowGradesSummary();
-        if ($display_rainbow_grades_summary) {
-            $top_buttons[] = [
-                "href" => $this->core->buildUrl(array('component' => 'student', 'page' => 'rainbow')),
-                "title" => "Grades",
-            ];
-        }
-
-        $navURLs = [];
         if ($this->core->getConfig()->isCourseLoaded() && $this->core->userLoaded()) {
             if ($this->core->getUser()->accessGrading()) {
                 if ($this->core->getUser()->accessAdmin()) {
-                    $navURLs[] = [
-                        "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'view_gradeable_page')),
-                        "title" => "New Gradeable",
-                    ];
-                    $navURLs[] = [
-                        "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable', 'action' => 'upload_config')),
-                        "title" => "Upload Config",
-                    ];
-                    $navURLs[] = [
+                    $top_buttons["instructor"]["buttons"][] = [
                         "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'configuration', 'action' => 'view')),
                         "title" => "Course Settings"
                     ];
-                    $navURLs[] = [
-                        "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users')),
-                        "title" => "Students"
+                    $top_buttons["instructor"]["buttons"][] = [
+                        "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_extension')),
+                        "title" => "Excused Absences"
                     ];
-                    $navURLs[] = [
+                    $top_buttons["instructor"]["buttons"][] = [
                         "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'graders')),
                         "title" => "Graders"
                     ];
-                    $navURLs[] = [
-                        "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'rotating_sections')),
-                        "title" => "Setup Sections"
+                    $top_buttons["instructor"]["buttons"][] = [
+                        "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'reports', 'action' => 'reportpage')),
+                        "title" => "Grade Reports"
                     ];
-                    $navURLs[] = [
+                    $top_buttons["instructor"]["buttons"][] = [
                         "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_late')),
                         "title" => "Late Days Allowed"
                     ];
-                    $navURLs[] = [
-                        "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_extension')),
-                        "title" => "Excused Absence Extensions"
+                    $top_buttons["instructor"]["buttons"][] = [
+                        "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'view_gradeable_page')),
+                        "title" => "New Gradeable",
                     ];
-                    $navURLs[] = [
-                        "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'reports', 'action' => 'reportpage')),
-                        "title" => "Grade Summaries / CSV Report"
-                    ];
-                    $navURLs[] = [
+                    $top_buttons["instructor"]["buttons"][] = [
                         "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism')),
-                        "title" => "Lichen Plagiarism Detection [WIP]"
+                        "title" => "Plagiarism Detection"
                     ];
-                    $navURLs[] = [
+                    $top_buttons["instructor"]["buttons"][] = [
+                        "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'rotating_sections')),
+                        "title" => "Setup Sections"
+                    ];
+                    $top_buttons["instructor"]["buttons"][] = [
                         "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper')),
                         "title" => "Site Theme"
+                    ];
+                    $top_buttons["instructor"]["buttons"][] = [
+                        "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users')),
+                        "title" => "Students"
+                    ];
+                    $top_buttons["instructor"]["buttons"][] = [
+                        "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable', 'action' => 'upload_config')),
+                        "title" => "Upload Config",
                     ];
                 }
                 $images_course_path = $this->core->getConfig()->getCoursePath();
                 $images_path = Fileutils::joinPaths($images_course_path,"uploads/student_images");
                 $any_images_files = FileUtils::getAllFiles($images_path, array(), true);
                 if ($this->core->getUser()->getGroup()=== 1 && count($any_images_files)===0) {
-                    $navURLs[] = [
+                    $top_buttons["grader"]["buttons"][] = [
                         "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page')),
                         "title" => "Upload Student Photos",
                     ];
@@ -244,7 +214,7 @@ class NavigationView extends AbstractView {
                 else if (count($any_images_files)!==0 && $this->core->getUser()->accessGrading()) {
                     $sections = $this->core->getUser()->getGradingRegistrationSections();
                     if (!empty($sections) || $this->core->getUser()->getGroup() !== 3) {
-                        $navURLs[] = [
+                        $top_buttons["grader"]["buttons"][] = [
                             "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page')),
                             "title" => "Student Photos",
                         ];
@@ -252,6 +222,36 @@ class NavigationView extends AbstractView {
                 }
             }
         }
+
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $course_materials_path = $course_path."/uploads/course_materials";
+        $any_files = FileUtils::getAllFiles($course_materials_path);
+        if ($this->core->getUser()->getGroup()=== 1 || !empty($any_files)) {
+            $top_buttons["student"]["buttons"][] = [
+                "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'course_materials', 'action' => 'view_course_materials_page')),
+                "title" => "Course Materials",
+            ];
+        }
+
+        if ($this->core->getConfig()->isForumEnabled()) {
+            $top_buttons["student"]["buttons"][] = [
+                "href" => $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')),
+                "title" => "Discussion Forum",
+            ];
+        }
+
+        $display_rainbow_grades_summary = $this->core->getConfig()->displayRainbowGradesSummary();
+        if ($display_rainbow_grades_summary) {
+            $top_buttons["student"]["buttons"][] = [
+                "href" => $this->core->buildUrl(array('component' => 'student', 'page' => 'rainbow')),
+                "title" => "Grades",
+            ];
+        }
+
+        $top_buttons["student"]["buttons"][] = [
+            "href" => $this->core->buildUrl(array('component' => 'student', 'page' => 'view_late_table')),
+            "title" => "Late Days",
+        ];
 
         // ======================================================================================
         // INDEX OF ALL GRADEABLES
@@ -284,7 +284,6 @@ class NavigationView extends AbstractView {
         }
         return $this->core->getOutput()->renderTwigTemplate("Navigation.twig", [
             "top_buttons" => $top_buttons,
-            "nav_urls" => $navURLs,
             "sections" => $render_sections,
             "message_file_contents" => $message_file_contents,
             "display_custom_message" => $display_custom_message,
