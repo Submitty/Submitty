@@ -1136,8 +1136,8 @@ class ElectronicGraderController extends GradingController {
         //  Note: instructors see all components, some may not be visible in non-super-edit-mode
         $return['components'] = array_map(function (Component $component) {
             return $component->toArray();
-        }, array_filter($gradeable->getComponents(), function (Component $component) use ($grader) {
-            return $this->core->getAccess()->canI('grading.electronic.view_component', ['component' => $component]);
+        }, array_filter($gradeable->getComponents(), function (Component $component) use ($grader, $gradeable) {
+            return $this->core->getAccess()->canUser($grader, 'grading.electronic.view_component', ['gradeable' => $gradeable, 'component' => $component]);
         }));
         // return $grader->getGroup() === User::GROUP_INSTRUCTOR || ($component->isPeer() === ($grader->getGroup() === User::GROUP_STUDENT));
         return $return;
@@ -1182,7 +1182,50 @@ class ElectronicGraderController extends GradingController {
      * Route for getting information about a individual grader
      */
     public function ajaxGetGradedGradeable() {
+        $gradeable_id = $_GET['gradeable_id'] ?? '';
+        $anon_id = $_GET['anon_id'] ?? '';
 
+        $grader = $this->core->getUser();
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+
+        // Get user id from the anon id
+        $user_id = $this->tryGetUserIdFromAnonId($anon_id);
+        if ($user_id === false) {
+            return;
+        }
+
+        // Get the graded gradeable
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id);
+        if ($graded_gradeable === false) {
+            return;
+        }
+
+        // checks if user has permission
+        if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $graded_gradeable])) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to get graded gradeable');
+            return;
+        }
+
+        // Get / create the TA grade
+        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+
+        try {
+            // Once we've parsed the inputs and checked permissions, perform the operation
+            $response_data = null;
+            if ($ta_graded_gradeable !== null) {
+                $response_data = $ta_graded_gradeable->toArray($grader);
+            }
+            $this->core->getOutput()->renderJsonSuccess($response_data);
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
+        }
     }
 
     /**
@@ -1978,7 +2021,7 @@ class ElectronicGraderController extends GradingController {
         }
 
         // checks if user has permission
-        if (!$this->core->getAccess()->canI("grading.electronic.get_mark_data", ["gradeable" => $graded_gradeable, "component" => $component])) {
+        if (!$this->core->getAccess()->canI("grading.electronic.view_component_grade", ["gradeable" => $graded_gradeable, "component" => $component])) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to get component data');
             return;
         }
@@ -1991,9 +2034,11 @@ class ElectronicGraderController extends GradingController {
 
         try {
             // Once we've parsed the inputs and checked permissions, perform the operation
+            $response_data = null;
             if ($graded_component !== null) {
-                $this->core->getOutput()->renderJsonSuccess($graded_component->toArray());
+                $response_data = $graded_component->toArray();
             }
+            $this->core->getOutput()->renderJsonSuccess($response_data);
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
         } catch (\Exception $e) {

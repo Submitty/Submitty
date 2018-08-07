@@ -83,7 +83,7 @@ class TaGradedGradeable extends AbstractModel {
             /** @var GradedComponentContainer $container */
             foreach ($this->graded_component_containers as $container) {
                 $graded_components[] = $graded_component = $container->getGradedComponent($grader);
-                $details['graded_components'][$container->getComponent()->getId()] = $graded_component;
+                $details['graded_components'][$container->getComponent()->getId()] = $graded_component->toArray();
                 $graders[$graded_component->getGrader()->getId()] = $graded_component->getGrader();
             }
         } else {
@@ -91,16 +91,6 @@ class TaGradedGradeable extends AbstractModel {
             foreach ($this->graded_component_containers as $container) {
                 $details['graded_components'][$container->getComponent()->getId()] = $container->toArray();
                 $graded_components = array_merge($graded_components, $container->getGradedComponents());
-            }
-        }
-
-        // When serializing a graded gradeable, put the grader information into
-        //  the graded gradeable instead of each component so if one grader  grades
-        //  multiple components, their information only gets sent once
-        foreach ($graded_components as $graded_component) {
-            // Only set once if multiple components have the same grader
-            if (!isset($details['graders'][$graded_component->getGrader()->getId()])) {
-                $details['graders'][$graded_component->getGrader()->getId()] = $graded_component->getGrader()->toArray();
             }
         }
 
@@ -171,7 +161,7 @@ class TaGradedGradeable extends AbstractModel {
      * Gets the version number for the submission associated with this grade
      * @param bool $strict if true, all grades for this gradeable must have a consistent version
      *                      otherwise, return the first valid version number found
-     * @return bool|int
+     * @return bool|int returns false if $strict is true and the versions aren't consistent
      */
     public function getGradedVersion($strict = true) {
         $version = false;

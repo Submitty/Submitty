@@ -4,37 +4,48 @@ NO_COMPONENT_ID = -1;
 /// Component ID of the "General Comment" box at the bottom
 GENERAL_MESSAGE_ID = -2;
 
-OPENEDMARKS = [];
+OPENEDCOMPONENTS = [];
 /**
- * Get the page-wide Gradeable object (see Gradeable.php/getGradedData())
+ * Get the page-wide Gradeable object
  * @returns Object Gradeable data
  */
 function getGradeable() {
-    if (typeof(grading_data) === 'undefined' || grading_data === null){
-        return null;
-    }
-    return grading_data.gradeable;
+    return gradeable;
 }
 
 /**
- * Get a specific component in the global Gradeable (see GradeableComponent.php/getGradedData())
- * @param c_index 1-indexed component index
+ * Get the page-wide Anon-id object
+ * @returns {string} Anonymous id of the submitter
+ */
+function getAnonId() {
+    return anon_id;
+}
+
+/**
+ * Get a specific component in the global Gradeable
+ * @param component_id Unique component id
  * @returns Object Component data
  */
-function getComponent(c_index) {
-    return grading_data.gradeable.components[c_index - 1];
+function getComponent(component_id) {
+    let components = getGradeable().components;
+    for (let i = 0; i < components.length; i++) {
+        if (components[i].id === component_id) {
+            return components[i];
+        }
+    }
+    return null;
 }
 
 /**
- * Get a specific mark in a mark in the global Gradeable (see GradeableComponentMark.php/getGradeData())
- * @param c_index 1-indexed component index
- * @param m_id Unique mark id
+ * Get a specific mark in a mark in the global Gradeable
+ * @param component_id Unique component id
+ * @param mark_id Unique mark id
  * @returns Object Mark data
  */
-function getMark(c_index, m_id){
-    var marks = grading_data.gradeable.components[c_index-1].marks;
-    for(var i=0; i<marks.length; i++){
-        if(marks[i].id == m_id){
+function getMark(component_id, mark_id) {
+    let marks = getComponent(component_id).marks;
+    for (let i = 0; i < marks.length; i++) {
+        if (marks[i].id === mark_id) {
             return marks[i];
         }
     }
@@ -42,12 +53,26 @@ function getMark(c_index, m_id){
 }
 
 /**
+ * Removes a mark from the global Gradeable
+ * @param component_id
+ * @param mark_id
+ */
+function removeMark(component_id, mark_id) {
+    let component = getComponent(component_id);
+    for (let i = 0; i < component.marks.length; i++) {
+        if (component.marks[i].id === mark_id) {
+            component.marks.splice(i, 1);
+        }
+    }
+}
+
+/**
  * DOM callback for changing the number of points for a mark
  * @param me DOM Element for the mark points entry
  */
 function updateMarkPoints(me) {
-    getMark(me.dataset.component_index, me.dataset.mark_index).points = parseFloat($(me).val());
-    updateProgressPoints(me.dataset.component_index);
+    getMark(me.dataset.component_id, me.dataset.mark_id).points = parseFloat($(me).val());
+    updateProgressPoints(me.dataset.component_id);
 }
 
 /**
@@ -55,8 +80,9 @@ function updateMarkPoints(me) {
  * @param me DOM Element for the mark note entry
  */
 function updateMarkText(me) {
-    getMark(me.dataset.component_index, me.dataset.mark_index).name = $(me).val();
-    updateProgressPoints(me.dataset.component_index);
+    getMark(me.dataset.component_id, me.dataset.mark_id).name = $(me).val();
+    // TODO: This function isn't named very well
+    updateProgressPoints(me.dataset.component_id);
 }
 
 /**
@@ -64,10 +90,8 @@ function updateMarkText(me) {
  * @param me DOM Element for the common mark points entry
  */
 function updateCustomMarkPoints(me) {
-    var component = getComponent(me.dataset.component_index);
-    var val = $(me).val();
-    component.score = parseFloat(val);
-    updateProgressPoints(me.dataset.component_index);
+    getComponent(me.dataset.component_id).score = parseFloat($(me).val());
+    updateProgressPoints(me.dataset.component_id);
 }
 
 /**
@@ -75,285 +99,481 @@ function updateCustomMarkPoints(me) {
  * @param me DOM Element for the common mark note entry
  */
 function updateCustomMarkText(me) {
-    var component = getComponent(me.dataset.component_index);
-    var val = $(me).val();
-    component.comment = val;
+    let component = getComponent(me.dataset.component_id);
+    let markText = $(me).val();
+    component.comment = markText;
 
-    //If we set custom mark to empty then we're clearing it. So unset the point value too.
-    if (val === "") {
+    // If we set custom mark to empty then we're clearing it. So unset the point value too.
+    if (markText === "") {
         component.score = 0;
     }
 
-    updateProgressPoints(me.dataset.component_index);
+    updateCommonMarkState(component.id);
+    updateProgressPoints(component.id);
 }
 
-//if type == 0 number input, type == 1 textarea
-function checkIfSelected(me) {
-    var table_row = $(me.parentElement);
-    var is_selected = false;
-    var icon = table_row.find(".mark");
-    var number_input = table_row.find("input");
-    var text_input = table_row.find("textarea");
-    var question_num = parseInt(icon.attr('name').split('_')[2]);
+/**
+ * Updates the 'checked' state of the common-mark box for a DOM element
+ * @param component_id Unique component id
+ */
+function updateCommonMarkState(component_id) {
+    let table_row = $('#mark_custom_id-' + component_id);
+    let is_selected = false;
+    let icon = table_row.find(".mark");
+    let number_input = table_row.find("input");
+    let text_input = table_row.find("textarea");
 
-    if(number_input.val() != 0 || text_input.val() != "") {
+    if (parseFloat(number_input.val()) !== 0.0 || text_input.val() !== "") {
         is_selected = true;
     }
 
     icon.toggleClass("mark-has", is_selected);
-    checkMarks(question_num);
+    updateFirstMarkState(component_id);
 }
 
 /**
  * Render and return a view for the given mark
- * @param {int} c_index 1-indexed component index of the mark
- * @param {int} m_index 0-indexed mark index
- * @param {string} m_id Unique mark id
- * @param {bool} editEnabled If editing mode is enabled
+ * @param {int} component_id Unique component id
+ * @param {int} mark_id Unique mark id
+ * @param {bool} gradeEnabled If the mark is in 'grade' mode
+ * @param {bool} editable If the mark is in 'edit' mode and can be edited
  * @returns DOM structure for the mark
  */
-function getMarkView(c_index, m_index, m_id, editEnabled) {
-    //If m_index == 0, it's the No Credit / Full Credit item and we should not be allowed to edit it
-    var editable = editEnabled && m_index !== 0;
-
-    return Twig.twig({ref: "Mark"}).render({
-        gradeable: getGradeable(),
-        component: getComponent(c_index),
-        mark: getMark(c_index, m_id),
-        c_index: c_index,
-        m_index: m_index,
-        m_id: m_id,
-        editable: editable,
-        editEnabled: editEnabled
+function getMarkView(component_id, mark_id, gradeEnabled, editable) {
+    let template = gradeEnabled ? 'GradeMark' : 'EditMark';
+    return Twig.twig({ref: template}).render({
+        mark: getMark(component_id, mark_id),
+        precision: getGradeable().precision,
+        component_id: component_id,
+        editable: editable
     });
 }
 
-function ajaxGetGradedComponent(gradeable_id, user_id, component_id, successCallback, errorCallback) {
+/**
+ * ajax call to fetch the gradeable's rubric
+ * @param {string} gradeable_id
+ * @param {function|undefined} successCallback
+ * @param {function|undefined} errorCallback
+ */
+function ajaxGetGradeableRubric(gradeable_id, successCallback = undefined, errorCallback = undefined) {
     $.getJSON({
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'get_graded_component',
-                'gradeable_id' : gradeable_id,
-                'anon_id' : user_id,
-                'component_id' : component_id
-            }),
-            success: function(response) {
-                if (response.status !== 'success') {
-                    console.error('Failed to fetch marks: ' + response.message);
-                    if (typeof(errorCallback) === "function") {
-                        errorCallback(response.data);
-                    }
-                    alert("There was an error fetching marks. Please report this message to your instructor and refresh the page: " + response.message);
-                }
-                else if (typeof(successCallback) === "function") {
-                    successCallback(response.data);
-                }
-            },
-            error: (typeof(errorCallback) === "function") ? errorCallback : function(err) {
-                console.error("Failed to parse mark data response.  The server isn't playing nice...");
-  //              alert("There was an error with fetching marks. Please refresh the page and try agian.");
-            }
-    })
-}
-
-function ajaxGetGeneralCommentData(gradeable_id, user_id, successCallback, errorCallback) {
-    $.getJSON({
-        type: "POST",
-        url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'get_gradeable_comment'}),
-        data: {
-            'gradeable_id' : gradeable_id,
-            'anon_id' : user_id
-        },
-        success: function(response) {
+        type: "GET",
+        url: buildUrl({
+            'component': 'grading',
+            'page': 'electronic',
+            'action': 'get_gradeable_rubric',
+            'gradeable_id': gradeable_id
+        }),
+        success: function (response) {
             if (response.status !== 'success') {
-                alert('Something went wrong saving the comment: ' + response.message);
-                return;
-            }
-            if (typeof(successCallback) === "function") {
-                successCallback(response.data);
-            }
-        },
-        error: (typeof(errorCallback) === "function") ? errorCallback : function() {
-            console.error("Couldn't get the general gradeable comment");
-            alert("Failed to retrieve the general comment");
-        }
-    })
-}
-
-function ajaxAddNewMark(gradeable_id, component_id, note, points, sync, successCallback, errorCallback) {
-    note = (note ? note : "");
-    points = (points ? points : 0);
-    if (!note.trim())
-        console.error("Shouldn't add blank mark!");
-    
-    $.getJSON({
-            type: "POST",
-            url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'add_one_new_mark'}),
-            async: false,
-            data: {
-                'gradeable_id' : gradeable_id,
-                'component_id' : component_id,
-                'note' : note,
-                'points' : points
-            },
-            success: function(response) {
-                if (response.status !== 'success') {
-                    alert('Something went wrong adding the mark: ' + response.message);
+                if (typeof(errorCallback) === 'function') {
+                    errorCallback(response.message, response.data);
                     return;
                 }
-                if (typeof(successCallback) === "function") {
-                    successCallback(response.data);
-                }
-            },
-            error: (typeof(errorCallback) === "function") ? errorCallback : function() {
-                console.error("Something went wrong with adding a mark...");
-                alert("There was an error with adding a mark. Please refresh the page and try agian.");
-            }
-        })
-}
-function ajaxDeleteMark(gradeable_id, component_id, mark_id, sync, successCallback, errorCallback) {
-    $.getJSON({
-            type: "POST",
-            url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'delete_one_mark'}),
-            async: false,
-            data: {
-                'gradeable_id' : gradeable_id,
-                'component_id' : component_id,
-                'mark_id' : mark_id
-            },
-            success: function(response) {
-                if (response.status !== 'success') {
-                    alert('Something went wrong saving the comment: ' + response.message);
-                    if (typeof(errorCallback) === "function") {
-                        errorCallback(response.data);
-                    }
-                    return;
-                }
-                if (typeof(successCallback) === "function") {
-                    successCallback(response.data);
-                }
-            },
-            error: (typeof(errorCallback) === "function") ? errorCallback : function() {
-                console.error("Something went wrong with deleting a mark...");
-                alert("There was an error with deleting a mark. Please refresh the page and try agian.");
-            }
-        })
-}
-function ajaxGetMarkedUsers(gradeable_id, component_id, mark_id, successCallback, errorCallback) {
-    $.getJSON({
-        type: "POST",
-        url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'get_marked_users'}),
-        data: {
-            'gradeable_id' : gradeable_id,
-            'component_id' : component_id,
-            'mark_id' : mark_id
-        },
-        success: function(response) {
-            if (response.status !== 'success') {
-                alert('Something went wrong getting the users with that mark: ' + response.message);
-                return;
-            }
-            if (typeof(successCallback) === "function") {
-                successCallback(response.data);
-            }
-        },
-        error: (typeof(errorCallback) === "function") ? errorCallback : function() {
-            console.error("Couldn't get the information on marks");
-        }
-    })
-}
-
-function ajaxSaveGeneralComment(gradeable_id, user_id, gradeable_comment, sync, successCallback, errorCallback) {
-    $.getJSON({
-        type: "POST",
-        url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_general_comment'}),
-        async: sync,
-        data: {
-            'gradeable_id' : gradeable_id,
-            'anon_id' : user_id,
-            'gradeable_comment' : gradeable_comment
-        },
-        success: function(response) {
-            if (response.status !== 'success') {
-                alert('Something went wrong saving the comment: ' + response.message);
-                return;
-            }
-            if (typeof(successCallback) === "function") {
-                successCallback(response.data);
-            }
-        },
-        error: (typeof(errorCallback) === "function") ? errorCallback : function() {
-            console.error("There was an error with saving the general gradeable comment.");
-            alert("There was an error with saving the comment. Please refresh the page and try agian.");
-        }
-    })
-}
-
-// 'order' format: [ <mark0-id> : <order0>, <mark1-id> : <order1>, ... ]
-function ajaxSaveMarkOrder(gradeable_id, component_id, order, async, successCallback, errorCallback) {
-    $.getJSON({
-        type: "POST",
-        url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_mark_order'}),
-        async: async,
-        data: {
-            'gradeable_id': gradeable_id,
-            'component_id': component_id,
-            'order': JSON.stringify(order)
-        },
-        success: function(response) {
-            if (response.status !== 'success') {
-                console.error('Failed to save mark order: ' + response.message);
-                if (typeof(errorCallback) === "function") {
-                    errorCallback(response.data);
-                }
-                alert("There was an error saving mark order. Please report this message to your instructor and refresh the page: " + response.message);
+                alert('Something went wrong fetching the gradeable rubric: ' + response.message);
             }
             else if (typeof(successCallback) === "function") {
                 successCallback(response.data);
             }
         },
-        error: (typeof(errorCallback) === "function") ? errorCallback : function(err) {
+        error: function (err) {
             console.error("Failed to parse response.  The server isn't playing nice...");
-            alert("There was an error with fetching marks. Please refresh the page and try agian.");
+            console.error(err);
+            alert("There was an error with fetching marks. Please refresh the page and try again.");
         }
     });
 }
 
-function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, active_version, custom_points, custom_message, overwrite, mark_ids, async, successCallback, errorCallback) {
+/**
+ * ajax call to get the entire graded gradeable for a user
+ * @param {string} gradeable_id
+ * @param {string} anon_id
+ * @param {function} successCallback
+ * @param {function} errorCallback
+ */
+function ajaxGetGradedGradeable(gradeable_id, anon_id, successCallback = undefined, errorCallback = undefined) {
     $.getJSON({
-        type: "POST",
-        url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_graded_component'}),
-        async: async,
-        data: {
-            'gradeable_id' : gradeable_id,
-            'component_id' : component_id,
-            'anon_id' : anon_id,
-            'active_version' : active_version,
-            'custom_points' : custom_points,
-            'custom_message' : custom_message,
-            'overwrite' : overwrite,
-            'mark_ids' : mark_ids
-        },
-        success: function(response) {
-            if (response.status === 'fail') {
-                console.error('Failed to save component: ' + response.message);
-            } else if (response.status === 'error') {
-                console.error('Internal error while saving component: ' + response.message);
+        type: "GET",
+        url: buildUrl({
+            'component': 'grading',
+            'page': 'electronic',
+            'action': 'get_graded_gradeable',
+            'gradeable_id': gradeable_id,
+            'anon_id': anon_id
+        }),
+        success: function (response) {
+            if (response.status !== 'success') {
+                if (typeof(errorCallback) === 'function') {
+                    errorCallback(response.message, response.data);
+                    return;
+                }
+                alert('Something went wrong fetching the graded gradeable: ' + response.message);
             }
-            if (typeof(successCallback) === "function") {
-                successCallback(response);
+            else if (typeof(successCallback) === "function") {
+                successCallback(response.data);
             }
         },
-        error: errorCallback
+        error: function (err) {
+            console.error("Failed to parse response.  The server isn't playing nice...");
+            console.error(err);
+            alert("There was an error with fetching marks. Please refresh the page and try again.");
+        }
+    });
+}
+
+/**
+ * ajax call to fetch an updated Graded Component
+ * @param {string} gradeable_id
+ * @param {int} component_id
+ * @param {string} anon_id
+ * @param {function|undefined} successCallback
+ * @param {function|undefined} errorCallback
+ */
+function ajaxGetGradedComponent(gradeable_id, component_id, anon_id, successCallback = undefined, errorCallback = undefined) {
+    $.getJSON({
+        url: buildUrl({
+            'component': 'grading',
+            'page': 'electronic',
+            'action': 'get_graded_component',
+            'gradeable_id': gradeable_id,
+            'anon_id': anon_id,
+            'component_id': component_id
+        }),
+        success: function (response) {
+            if (response.status !== 'success') {
+                if (typeof(errorCallback) === 'function') {
+                    errorCallback(response.message, response.data);
+                    return;
+                }
+                alert('Something went wrong fetching the component grade: ' + response.message);
+            }
+            else if (typeof(successCallback) === "function") {
+                successCallback(response.data);
+            }
+        },
+        error: function (err) {
+            console.error("Failed to parse response.  The server isn't playing nice...");
+            console.error(err);
+            alert("There was an error with fetching marks. Please refresh the page and try again.");
+        }
     })
 }
 
-function ajaxSaveMark(gradeable_id, component_id, mark_id, points, note, async, successCallback, errorCallback) {
+/**
+ * ajax call to fetch the general comment for the gradeable
+ * @param {string} gradeable_id
+ * @param {string} anon_id
+ * @param {function|undefined} successCallback
+ * @param {function|undefined} errorCallback
+ */
+function ajaxGetGeneralComment(gradeable_id, anon_id, successCallback = undefined, errorCallback = undefined) {
     $.getJSON({
         type: "POST",
-        url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_mark'}),
-        async: async,
+        url: buildUrl({
+            'component': 'grading',
+            'page': 'electronic',
+            'action': 'get_gradeable_comment'
+        }),
+        data: {
+            'gradeable_id': gradeable_id,
+            'anon_id': anon_id
+        },
+        success: function (response) {
+            if (response.status !== 'success') {
+                if (typeof(errorCallback) === 'function') {
+                    errorCallback(response.message, response.data);
+                    return;
+                }
+                alert('Something went wrong saving the comment: ' + response.message);
+            }
+            else if (typeof(successCallback) === "function") {
+                successCallback(response.data);
+            }
+        },
+        error: function (err) {
+            console.error("Failed to parse response.  The server isn't playing nice...");
+            console.error(err);
+            alert("There was an error with fetching marks. Please refresh the page and try again.");
+        }
+    })
+}
+
+/**
+ * ajax call to add a new mark to the component
+ * @param {string} gradeable_id
+ * @param {int} component_id
+ * @param {string} note
+ * @param {float} points
+ * @param {function|undefined} successCallback
+ * @param {function|undefined} errorCallback
+ */
+function ajaxAddNewMark(gradeable_id, component_id, note, points, successCallback = undefined, errorCallback = undefined) {
+    $.getJSON({
+        type: "POST",
+        url: buildUrl({
+            'component': 'grading',
+            'page': 'electronic',
+            'action': 'add_new_mark'
+        }),
+        data: {
+            'gradeable_id': gradeable_id,
+            'component_id': component_id,
+            'note': note,
+            'points': points
+        },
+        success: function (response) {
+            if (response.status !== 'success') {
+                if (typeof(errorCallback) === 'function') {
+                    errorCallback(response.message, response.data);
+                    return;
+                }
+                alert('Something went wrong adding the new mark: ' + response.message);
+            }
+            else if (typeof(successCallback) === "function") {
+                successCallback(response.data);
+            }
+        },
+        error: function (err) {
+            console.error("Failed to parse response.  The server isn't playing nice...");
+            console.error(err);
+            alert("There was an error with fetching marks. Please refresh the page and try again.");
+        }
+    })
+}
+
+/**
+ * ajax call to delete a mark
+ * @param {string} gradeable_id
+ * @param {int} component_id
+ * @param {int} mark_id
+ * @param {function|undefined} successCallback
+ * @param {function|undefined} errorCallback
+ */
+function ajaxDeleteMark(gradeable_id, component_id, mark_id, successCallback = undefined, errorCallback = undefined) {
+    $.getJSON({
+        type: "POST",
+        url: buildUrl({
+            'component': 'grading',
+            'page': 'electronic',
+            'action': 'delete_one_mark'
+        }),
+        data: {
+            'gradeable_id': gradeable_id,
+            'component_id': component_id,
+            'mark_id': mark_id
+        },
+        success: function (response) {
+            if (response.status !== 'success') {
+                if (typeof(errorCallback) === 'function') {
+                    errorCallback(response.message, response.data);
+                    return;
+                }
+                alert('Something went wrong deleting the mark: ' + response.message);
+            }
+            else if (typeof(successCallback) === "function") {
+                successCallback(response.data);
+            }
+        },
+        error: function (err) {
+            console.error("Failed to parse response.  The server isn't playing nice...");
+            console.error(err);
+            alert("There was an error with fetching marks. Please refresh the page and try again.");
+        }
+    })
+}
+
+/**
+ * ajax call to get the stats about a mark
+ * @param {string} gradeable_id
+ * @param {int} component_id
+ * @param {int} mark_id
+ * @param {function|undefined} successCallback
+ * @param {function|undefined} errorCallback
+ */
+function ajaxGetMarkedUsers(gradeable_id, component_id, mark_id, successCallback = undefined, errorCallback = undefined) {
+    $.getJSON({
+        type: "POST",
+        url: buildUrl({
+            'component': 'grading',
+            'page': 'electronic',
+            'action': 'get_marked_users'
+        }),
+        data: {
+            'gradeable_id': gradeable_id,
+            'component_id': component_id,
+            'mark_id': mark_id
+        },
+        success: function (response) {
+            if (response.status !== 'success') {
+                if (typeof(errorCallback) === 'function') {
+                    errorCallback(response.message, response.data);
+                    return;
+                }
+                alert('Something went wrong getting mark stats: ' + response.message);
+            }
+            else if (typeof(successCallback) === "function") {
+                successCallback(response.data);
+            }
+        },
+        error: function (err) {
+            console.error("Failed to parse response.  The server isn't playing nice...");
+            console.error(err);
+            alert("There was an error with fetching marks. Please refresh the page and try again.");
+        }
+    })
+}
+
+/**
+ * ajax call to save the general comment for the graded gradeable
+ * @param {string} gradeable_id
+ * @param {string} anon_id
+ * @param {string} gradeable_comment
+ * @param {function|undefined} successCallback
+ * @param {function|undefined} errorCallback
+ */
+function ajaxSaveGeneralComment(gradeable_id, anon_id, gradeable_comment, successCallback = undefined, errorCallback = undefined) {
+    $.getJSON({
+        type: "POST",
+        url: buildUrl({
+            'component': 'grading',
+            'page': 'electronic',
+            'action': 'save_general_comment'
+        }),
+        data: {
+            'gradeable_id': gradeable_id,
+            'anon_id': anon_id,
+            'gradeable_comment': gradeable_comment
+        },
+        success: function (response) {
+            if (response.status !== 'success') {
+                if (typeof(errorCallback) === 'function') {
+                    errorCallback(response.message, response.data);
+                    return;
+                }
+                alert('Something went wrong saving the general comment: ' + response.message);
+            }
+            else if (typeof(successCallback) === "function") {
+                successCallback(response.data);
+            }
+        },
+        error: function (err) {
+            console.error("Failed to parse response.  The server isn't playing nice...");
+            console.error(err);
+            alert("There was an error with fetching marks. Please refresh the page and try again.");
+        }
+    })
+}
+
+/**
+ * ajax call to update the order of marks in a component
+ * @param {string} gradeable_id
+ * @param {int} component_id
+ * @param {*} order format: { <mark0-id> : <order0>, <mark1-id> : <order1>, ... }
+ * @param {function|undefined} successCallback
+ * @param {function|undefined} errorCallback
+ */
+function ajaxSaveMarkOrder(gradeable_id, component_id, order, successCallback = undefined, errorCallback = undefined) {
+    $.getJSON({
+        type: "POST",
+        url: buildUrl({
+            'component': 'grading',
+            'page': 'electronic',
+            'action': 'save_mark_order'
+        }),
+        data: {
+            'gradeable_id': gradeable_id,
+            'component_id': component_id,
+            'order': JSON.stringify(order)
+        },
+        success: function (response) {
+            if (response.status !== 'success') {
+                if (typeof(errorCallback) === 'function') {
+                    errorCallback(response.message, response.data);
+                    return;
+                }
+                alert('Something went wrong reordering marks: ' + response.message);
+            }
+            else if (typeof(successCallback) === "function") {
+                successCallback(response.data);
+            }
+        },
+        error: function (err) {
+            console.error("Failed to parse response.  The server isn't playing nice...");
+            console.error(err);
+            alert("There was an error with fetching marks. Please refresh the page and try again.");
+        }
+    });
+}
+
+/**
+ * ajax call to save the grading information for a component and submitter
+ * @param {string} gradeable_id
+ * @param {int} component_id
+ * @param {string} anon_id
+ * @param {int} active_version
+ * @param {float} custom_points
+ * @param {string} custom_message
+ * @param {bool} overwrite True to overwrite the component's grader
+ * @param {int[]} mark_ids
+ * @param {function|undefined} successCallback
+ * @param {function|undefined} errorCallback
+ */
+function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, active_version, custom_points, custom_message, overwrite, mark_ids, successCallback = undefined, errorCallback = undefined) {
+    $.getJSON({
+        type: "POST",
+        url: buildUrl({
+            'component': 'grading',
+            'page': 'electronic',
+            'action': 'save_graded_component'
+        }),
+        data: {
+            'gradeable_id': gradeable_id,
+            'component_id': component_id,
+            'anon_id': anon_id,
+            'active_version': active_version,
+            'custom_points': custom_points,
+            'custom_message': custom_message,
+            'overwrite': overwrite,
+            'mark_ids': mark_ids
+        },
+        success: function (response) {
+            if (response.status !== 'success') {
+                if (typeof(errorCallback) === 'function') {
+                    errorCallback(response.message, response.data);
+                    return;
+                }
+                alert('Something went wrong saving the graded component: ' + response.message);
+            }
+            else if (typeof(successCallback) === "function") {
+                successCallback(response.data);
+            }
+        },
+        error: function (err) {
+            console.error("Failed to parse response.  The server isn't playing nice...");
+            console.error(err);
+            alert("There was an error with fetching marks. Please refresh the page and try again.");
+        }
+    })
+}
+
+/**
+ * ajax call to save mark point value / note
+ * @param {string} gradeable_id
+ * @param {int} component_id
+ * @param {int} mark_id
+ * @param {float} points
+ * @param {string} note
+ * @param {function|undefined} successCallback
+ * @param {function|undefined} errorCallback
+ */
+function ajaxSaveMark(gradeable_id, component_id, mark_id, points, note, successCallback = undefined, errorCallback = undefined) {
+    $.getJSON({
+        type: "POST",
+        url: buildUrl({
+            'component': 'grading',
+            'page': 'electronic',
+            'action': 'save_mark'
+        }),
         data: {
             'gradeable_id' : gradeable_id,
             'component_id' : component_id,
@@ -361,18 +581,23 @@ function ajaxSaveMark(gradeable_id, component_id, mark_id, points, note, async, 
             'points' : points,
             'note' : note,
         },
-        success: function(response) {
-            if (response.status === 'fail') {
-                console.error('Failed to save mark: ' + response.message);
-            } else if (response.status === 'error') {
-                console.error('Internal error while saving mark: ' + response.message);
+        success: function (response) {
+            if (response.status !== 'success') {
+                if (typeof(errorCallback) === 'function') {
+                    errorCallback(response.message, response.data);
+                    return;
+                }
+                alert('Something went wrong saving the mark: ' + response.message);
             }
-            if (typeof(successCallback) === "function") {
-                successCallback(response);
+            else if (typeof(successCallback) === "function") {
+                successCallback(response.data);
             }
         },
-        // FIXME: this feels ... wrong
-        error: successCallback
+        error: function (err) {
+            console.error("Failed to parse response.  The server isn't playing nice...");
+            console.error(err);
+            alert("There was an error with fetching marks. Please refresh the page and try again.");
+        }
     });
 }
 
@@ -409,6 +634,7 @@ function haveMarksChanged(c_index, data) {
 
     return false;
 }
+
 /**
   * Determine which order two marks should be displayed in. Used
   * With the sortable list of marks
@@ -422,15 +648,16 @@ function compareOrder(mark1, mark2){
     }
     return 0;
 }
+
 /**
  * Reload marks for a component and render them in the list
- * @param {int} c_index 1-indexed component index
+ * @param {int} component_id
  */
-function updateMarksOnPage(c_index) {
-    var gradeable = getGradeable();
-    var component = getComponent(c_index);
-    var parent = $('#marks-parent-'+c_index);
-    var points = calculateMarksPoints(c_index);
+function updateComponent(component_id) {
+    let gradeable = getGradeable();
+    let component = getComponent(component_id);
+    let parent = $('#marks-parent-'+component_id);
+
     //Disabling reorder marks for now, renable by replacing the if statement with if(EditModeEnabled==true)
     if(false){
         var sortableMarks=$('#marks-parent-'+c_index);
@@ -523,13 +750,16 @@ function updateMarksOnPage(c_index) {
 
 
 function updateGeneralComment() {
-    var gradeable = getGradeable();
-    ajaxGetGeneralCommentData(gradeable.id, gradeable.user_id, function(data) {
+    ajaxGetGeneralComment(getGradeable().id, getAnonId(), function(data) {
         $('#comment-id-general').val(data['data']);
     });
 }
 
-function addMark(me, c_index, sync, successCallback, errorCallback) {
+/**
+ * Opens the add mark popup
+ * @param {int} component_id
+ */
+function addMark(component_id) {
     // Hide all other (potentially) open popups
     $('.popup-form').css('display', 'none');
     
@@ -542,59 +772,30 @@ function addMark(me, c_index, sync, successCallback, errorCallback) {
     $("#mark-creation-popup-error").css("display", "none");
     
     $("#mark-creation-popup-confirm")[0].onclick = function() {
-        var note = $("#mark-creation-popup-note")[0].value;
-        var points = parseFloat($("#mark-creation-popup-points")[0].value);
+        let note = $("#mark-creation-popup-note")[0].value;
+        let points = parseFloat($("#mark-creation-popup-points")[0].value);
         
         if (!note.trim()) {
             $("#mark-creation-popup-error").css("display", "inherit");
         } else {
             $('#mark-creation-popup').css('display', 'none');
-            var max=-1;
-            for(var j=0; j<getComponent(c_index).marks.length; j++){
-                if(max<parseInt(getComponent(c_index).marks[j].id)){
-                    max=parseInt(getComponent(c_index).marks[j].id);
-                }
-            }
-            var parent = $('#marks-parent-'+c_index);
-            var x      = $('tr[name=mark_'+c_index+']').length;
 
-            var mark = {
-                name: note,
-                points: points,
-                publish: false,
-                has: false,
-                order: getComponent(c_index).marks.length
-            };
-
+            // TODO: why
             updateCookies();
 
-            ajaxAddNewMark(getGradeable().id, getComponent(c_index).id, note, points, false, function() {
-                updateMarksOnPage(c_index);
+            ajaxAddNewMark(getGradeable().id, getComponent(component_id).id, note, points, function() {
+                updateComponent(component_id);
             });
         }
     };
 }
 
-function deleteMark(c_index, mark_id, sync) {
-    let component = getComponent(c_index);
-    var parent = $('#marks-parent-' + c_index);
-    var index = -1;
-    let mark = undefined;
-    for (var i = 0; i < component.marks.length; i++) {
-        if (component.marks[i].id === mark_id) {
-            index = i;
-            mark = component.marks[i];
-            break;
-        }
-    }
-
-    ajaxDeleteMark(getGradeable().id, component.id, mark.id, false, function () {
-        component.marks.splice(index, 1);
-        parent.empty();
-        for (var i = 0; i < component.marks.length; i++) {
-            var current_mark_id = grading_data.gradeable.components[c_index - 1].marks[i].id;
-            parent.append(getMarkView(c_index, i, current_mark_id, editModeEnabled));
-        }
+// TODO: Ended here.  A lot of the code can be removed if we go to a model of always
+// TODO:    getting the most up-to-date component after modifying the rubric then reconstructing
+// TODO:    the UI with the new data.
+function deleteMark(component_id, mark_id) {
+    ajaxDeleteMark(getGradeable().id, component_id, mark_id, function () {
+        updateComponent(component_id);
     });
 }
 
@@ -644,14 +845,14 @@ function showMarklist(me) {
 }
 
 //check if the first mark (Full/no credit) should be selected
-function checkMarks(c_index) {
-    c_index = parseInt(c_index);
-    var mark_table = $('#marks-parent-'+c_index);
-    var targetId=getComponent(c_index).marks[0].id;
-    var first_mark = mark_table.find('span[name=mark_icon_'+c_index+'_'+targetId+']');
+function updateFirstMarkState(component_id) {
+    component_id = parseInt(component_id);
+    var mark_table = $('#marks-parent-'+component_id);
+    var targetId=getComponent(component_id).marks[0].id;
+    var first_mark = mark_table.find('span[name=mark_icon_'+component_id+'_'+targetId+']');
     var all_false = true; //ignores the first mark
     mark_table.find('.mark').each(function() {
-        if($(this).attr('name') == 'mark_icon_'+c_index+'_0')
+        if($(this).attr('name') == 'mark_icon_'+component_id+'_0')
         {
             return;
         }
@@ -660,8 +861,8 @@ function checkMarks(c_index) {
             return false;
         }
     });
-    var current_row = $('#mark_custom_id-'+c_index);
-    var custom_message = current_row.find('textarea[name=mark_text_custom_'+c_index+']').val();
+    var current_row = $('#mark_custom_id-'+component_id);
+    var custom_message = current_row.find('textarea[name=mark_text_custom_'+component_id+']').val();
     if(custom_message !== "" && custom_message !== undefined){
         all_false = false;
         first_mark.toggleClass("mark-has", false);
@@ -886,7 +1087,7 @@ function selectMark(c_index, m_id) {
     var check = $("#mark_id-" + c_index + "-" + m_id + "-check");
     check.toggleClass("mark-has", mark.has);
     if (skip === false) {
-        checkMarks(c_index);
+        updateFirstMarkState(component_id);
     }
 
     //updates the progress points in the title

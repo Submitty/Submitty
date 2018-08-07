@@ -637,7 +637,7 @@ class ElectronicGraderView extends AbstractView {
         $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/RubricPanel.twig", [
             "gradeable_id" => $gradeable->getId(),
             "is_ta_grading" => $gradeable->isTaGrading(),
-            "submitter_id" => $graded_gradeable->getSubmitter()->getId(),
+            "anon_id" => $graded_gradeable->getSubmitter()->getAnonId(),
             "display_verify_all" => $can_verify,
             "grading_disabled" => $grading_disabled,
             "has_submission" => $has_submission,
