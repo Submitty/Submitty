@@ -17,7 +17,6 @@ class TestForum(BaseTestCase):
         if len(self.driver.find_elements_by_xpath("//a[contains(string(),'Discussion Forum')]")) == 0:
             self.driver.find_element_by_xpath("//a[contains(text(),'Course Settings')]").click()
             self.driver.find_element_by_name("forum_enabled").click()
-            #self.driver.find_element_by_xpath("//button[@form = 'configForm']").click()
             self.driver.find_element_by_xpath("//a[contains(text(),'sample')]").click()
         self.driver.find_element_by_xpath("//a[contains(string(),'Discussion Forum')]").click()
         self.forum_page_url = self.driver.current_url
