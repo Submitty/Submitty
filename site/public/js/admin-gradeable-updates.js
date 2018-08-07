@@ -21,6 +21,8 @@ function clearError(name, update) {
     $('[name="' + name + '"]').each(function (i, elem) {
         elem.title = '';
         elem.style.backgroundColor = '';
+        
+        // Update the value if provided
         if(update !== undefined) {
             $(elem).val(update);
         }
@@ -71,18 +73,25 @@ $(document).ready(function () {
             $('#gradeable-dates :input,.date-related').each(addDataToRequest);
         }
         ajaxUpdateGradeableProperty($('#g_id').val(), data,
-            function (data) {
+            function (response_data) {
+                // Clear errors by setting new values
+                for (let key in response_data) {
+                    if (response_data.hasOwnProperty(key)) {
+                        clearError(key, response_data[key]);
+                    }
+                }
+                // Clear errors by just removing red background
                 for (let key in data) {
                     if (data.hasOwnProperty(key)) {
-                        clearError(key, data[key]);
+                        clearError(key);
                     }
                 }
                 updateErrorMessage();
             },
-            function (message, data) {
-                for (let key in data) {
-                    if (data.hasOwnProperty(key)) {
-                        setError(key, data[key]);
+            function (message, response_data) {
+                for (let key in response_data) {
+                    if (response_data.hasOwnProperty(key)) {
+                        setError(key, response_data[key]);
                     }
                 }
                 updateErrorMessage();
