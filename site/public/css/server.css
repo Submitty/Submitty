@@ -24,13 +24,12 @@ body {
     /* background-color: #B6CECE; */
 
     /* Submitty Logo blue */
-    /* background-color: #0a6496; */
+    background-color: #f6fbfe;
 
     /* A lighter shade of blue grey */
-    background: #b8d5e5;
+    /* background: #b8d5e5; */
     /* a gradient! */
-
-    background: linear-gradient(#0a6496, #b8d5e5);
+    /* background: linear-gradient(#0a6496, #b8d5e5); */
     background-attachment: fixed;
 }
 
@@ -309,11 +308,12 @@ table tr.table-header {
 }
 
 #header {
-    background-color: #edf6f6;
+    background-color: #ffffff;
+    box-shadow: 0 2px 10px -5px #888888;
     min-height: 125px;
     height: auto;
     width: 100%;
-    font-family: 'Open Sans Condensed', sans-serif;
+    font-family: 'Calibri', sans-serif;
     overflow: hidden;
 }
 
@@ -362,7 +362,7 @@ table tr.table-header {
 
 .content {
     box-shadow: 0 2px 15px -5px #888888;
-    background-color: #E9EFEF;
+    background-color: #ffffff;
     border-radius: 3px;
     padding: 30px;
     margin: 15px;
@@ -461,6 +461,12 @@ table tr.table-header {
 
 .fa-red {
     color: red;
+}
+
+.menu {
+    font-size: 20px;
+    display: flex;
+    align-items: center;
 }
 
 #alerts {
@@ -852,8 +858,11 @@ table tr.table-header {
 
 table .colspan{
 	padding: 10px;
-	font-size: 28px;
+	font-size: 22px;
 	font-weight: 600;
+}
+table .hr {
+    border-bottom: 1px solid #ccc;
 }
 table .bar{
 	height:20px;
@@ -861,7 +870,12 @@ table .bar{
 table .gradeable_title {
 	padding-left: 50px;
 }
-
+table .gradeable_row td:first-child {
+    padding-left: 15px;
+}
+table .gradeable_row td:last-child {
+    padding-right: 15px;
+}
 table .has-url:hover {
 	cursor: pointer;
 	color: #3232FF;
@@ -898,23 +912,65 @@ table .instructor .two-options{
 	width: 15%;
 }
 
-.nav_header{
-  text-align:center;
-  background-color:#bfbfbf;
+#nav-body {
+    margin-top: 15px;
 }
 
-.nav-buttons {
-    float: right;
+#nav-buttons {
+    width:100%;
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-items: center;
+}
+
+#sidebar {
+    width: 200px;
+    padding: 20px;
+    padding-right: 0;
+    margin-left: 10px;
+}
+
+#nav-buttons ul li {
+    padding: 6px;
+    list-style: none;
+}
+
+#nav-buttons ul li a {
+    text-decoration: none;
+    color: #006398;
+}
+
+#nav-buttons ul li.line {
+    border-bottom: 1px solid #bbb;
+    padding-bottom: 0;
+    margin-left: -20px;
+    margin-right: -20px;
+    margin-bottom: -10px;
+}
+
+#nav-buttons ul li.heading {
+    margin-left: -15px;
+    font-weight: bold;
+    font-variant: all-small-caps;
+    font-size: 20px;
+}
+
+.spacer {
+    flex-grow: 1;
+}
+
+.nav-buttons a {
+    margin-left: 5px;
 }
 
 .btn-nav {
     width:100%;
 }
 
-.btn-nav-submit, .btn-nav-grade {
-    padding: 0px !important;
-    padding-top: 10px !important;
-    padding-bottom: 10px !important;
+.btn.btn-nav-submit, .btn.btn-nav-grade {
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 
 .td-open {

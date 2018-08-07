@@ -12,57 +12,79 @@
     </div>
 {% endif %}
 
-<div class="content">
-    <div class="nav-buttons">
-        {% for button in top_buttons %}
-            {{ self.renderButton(button) }}
-        {% endfor %}
-    </div>
-
-    <table class="gradeable_list" style="width:100%;">
-        {% if sections|length > 0 %}
-            {% for list_section, info in sections %}
-                <tr class="bar">
-                    <td colspan="10">{# spacing #}</td>
-                </tr>
-                <tr class="colspan nav-title-row" id="{{ info.section_id }}">
-                    <td colspan="4">
-                        {{ info.title }}
-                        {% if info.subtitle != "" %}
-                            &nbsp;&nbsp; <em>{{ info.subtitle }}</em>
-                        {% endif %}
-                    </td>
-                </tr>
-                <tbody id="{{ info.section_id }}_tbody">
-                    {% for g_info in info.gradeables %}
-                    <tr class="gradeable_row" id="{{ g_info.id }}">
-                        <td>
-                            <label>{{ g_info.name }}</label>
-                            {% if g_info.url|trim != "" %}
-                                <a class="external" href="{{ g_info.url }}" target="_blank">
-                                    <i style="margin-left: 10px;" class="fa fa-external-link"></i>
-                                </a>
-                            {% endif %}
-                            {% if g_info.can_delete %}
-                                <i class="fa fa-times" style="color:red; cursor:pointer;" aria-hidden="true" onclick='newDeleteGradeableForm("{{ core.buildUrl({'component': 'admin', 'page': 'admin_gradeable', 'action': 'delete_gradeable', 'id': g_info.id}) }}","{{ g_info.name }}");'></i>
-                            {% endif %}
-                        </td>
-                        {% for button in g_info.buttons %}
-                            <td style="padding: 20px;"{{ 'btn-nav-open' in button.getClass() ? ' class="td-open"' : button.getTitle() == 'Edit' and g_info.has_build_error ? ' class="edit-build-error"' : '' }}>{{ self.renderButton(button) }}</td>
-                        {% endfor %}
-                    </tr>
+<div class="row">
+    <div class="col-md-auto" id="sidebar">
+        <div id="nav-buttons">
+            <ul>
+                {% if nav_urls|length > 0 %}
+                    <li class="heading">Instructor Actions</li>
+                    {% for url in nav_urls %}
+                        <li>
+                            <a href="{{ url.href }}">{{ url.title }}</a>
+                        </li>
                     {% endfor %}
-                </tbody>
-                <tr class="colspan">
-                    <td colspan="10" style="border-bottom:2px black solid;">{# hr #}</td>
-                </tr>
-            {% endfor %}
-        {% else %}
-            <div class="container">
-                <p>There are currently no assignments posted.  Please check back later.</p>
-            </div>
-        {% endif %}
-    </table>
+                    <li></li>
+                    <li class="line"></li>
+                    <li></li>
+                {% endif %}
+                <li class="heading">Student Actions</li>
+                {% for button in top_buttons %}
+                    <li>
+                        <a href="{{ button.href }}">
+                            {{ button.title }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="col-md" id="nav-body">
+        <div class="content">
+            <h2>Assignments</h2>
+
+            <table class="gradeable_list" style="width:100%;">
+                {% if sections|length > 0 %}
+                    {% for list_section, info in sections %}
+                        <tr class="bar">
+                            <td colspan="10">{# spacing #}</td>
+                        </tr>
+                        <tr class="colspan nav-title-row" id="{{ info.section_id }}">
+                            <td colspan="4">
+                                {{ info.title }}
+                                {% if info.subtitle != "" %}
+                                    &nbsp;&nbsp; <em>{{ info.subtitle }}</em>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr class="colspan">
+                            <td colspan="10" class="hr">{# hr #}</td>
+                        </tr>
+                        <tbody id="{{ info.section_id }}_tbody">
+                            {% for g_info in info.gradeables %}
+                            <tr class="gradeable_row" id="{{ g_info.id }}">
+                                <td>
+                                    <label>{{ g_info.name }}</label>
+                                    {% if g_info.url|trim != "" %}
+                                        <a class="external" href="{{ g_info.url }}" target="_blank">
+                                            <i style="margin-left: 10px;" class="fa fa-external-link"></i>
+                                        </a>
+                                    {% endif %}
+                                </td>
+                                {% for button in g_info.buttons %}
+                                    <td style="padding: 20px;"{{ 'btn-nav-open' in button.getClass() ? ' class="td-open"' : button.getTitle() == 'Edit' and g_info.has_build_error ? ' class="edit-build-error"' : '' }}>{{ self.renderButton(button) }}</td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    {% endfor %}
+                {% else %}
+                    <div class="container">
+                        <p>There are currently no assignments posted.  Please check back later.</p>
+                    </div>
+                {% endif %}
+            </table>
+        </div>
+    </div>
 </div>
 
 {% macro renderButton(button) %}
