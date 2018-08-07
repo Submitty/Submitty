@@ -49,7 +49,6 @@ use app\models\User;
  * @method int getTeamSizeMax()
  * @method \DateTime getTeamLockDate()
  * @method bool isTaGrading()
- * @method void setTaGrading($use_ta_grading)
  * @method bool isStudentView()
  * @method void setStudentView($can_student_view)
  * @method bool isStudentSubmit()
@@ -71,7 +70,6 @@ use app\models\User;
  * @method void setPrecision($grading_precision)
  * @method Component[] getComponents()
  * @method bool isRegradeAllowed()
- * @method void setRegradeAllowed($regrade_allowed)
  */
 class Gradeable extends AbstractModel {
     /* Properties for all types of gradeables */
@@ -207,7 +205,7 @@ class Gradeable extends AbstractModel {
             $this->setVcsSubdirectory($details['vcs_subdirectory']);
             $this->setTeamAssignmentInternal($details['team_assignment']);
             $this->setTeamSizeMax($details['team_size_max']);
-            $this->setTaGrading($details['ta_grading']);
+            $this->setTaGradingInternal($details['ta_grading']);
             $this->setStudentView($details['student_view']);
             $this->setStudentSubmit($details['student_submit']);
             $this->setStudentDownload($details['student_download']);
@@ -216,7 +214,7 @@ class Gradeable extends AbstractModel {
             $this->setPeerGradeSet($details['peer_grade_set']);
             $this->setLateSubmissionAllowed($details['late_submission_allowed']);
             $this->setPrecision($details['precision']);
-            $this->setRegradeAllowed($details['regrade_allowed']);
+            $this->setRegradeAllowedInternal($details['regrade_allowed']);
         }
 
         // Set dates last
@@ -595,6 +593,18 @@ class Gradeable extends AbstractModel {
     }
 
     /**
+     * Gets all of the gradeable's date values as strings indexed by property name
+     * @return string[]
+     */
+    public function getDateStrings() {
+        $dates = [];
+        foreach (self::date_properties as $property) {
+            $dates[$property] = DateUtils::dateTimeToString($this->$property);
+        }
+        return $dates;
+    }
+
+    /**
      * Gets the rotating section grader assignment
      * @return array An array (indexed by user id) of arrays of section ids
      */
@@ -925,6 +935,56 @@ class Gradeable extends AbstractModel {
         }
         $this->rotating_grader_sections = $parsed_graders_sections;
         $this->rotating_grader_sections_modified = true;
+    }
+
+    /**
+     * Sets whether regrades are allowed for this gradeable
+     * @param bool $regrade_allowed
+     */
+    public function setRegradeAllowed(bool $regrade_allowed) {
+        $old = $this->regrade_allowed;
+        $this->regrade_allowed = $regrade_allowed;
+
+        try {
+            // Asserts that this date information is valid after changing this property
+            $this->setDates($this->getDates());
+        } finally {
+            // Reset to the old value if validation fails
+            $this->regrade_allowed = $old;
+        }
+    }
+
+    /**
+     * @param bool $regrade_allowed
+     * @internal
+     */
+    private function setRegradeAllowedInternal(bool $regrade_allowed) {
+        $this->regrade_allowed = $regrade_allowed;
+    }
+
+    /**
+     * Sets whether this gradeable will use ta grading
+     * @param bool $ta_grading
+     */
+    public function setTaGrading(bool $ta_grading) {
+        $old = $this->ta_grading;
+        $this->ta_grading = $ta_grading;
+
+        try {
+            // Asserts that this date information is valid after changing this property
+            $this->setDates($this->getDates());
+        } finally {
+            // Reset to the old value if validation fails
+            $this->ta_grading = $old;
+        }
+    }
+
+    /**
+     * @param bool $ta_grading
+     * @internal
+     */
+    private function setTaGradingInternal(bool $ta_grading) {
+        $this->ta_grading = $ta_grading;
     }
 
     /**
