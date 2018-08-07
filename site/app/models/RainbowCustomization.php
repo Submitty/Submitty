@@ -22,13 +22,14 @@ class RainbowCustomization extends AbstractModel{
     /*XXX: It's also going to be annoying to have "none (for practice only)" since in customization it's "none"
      * which is a lot nicer to type.
      */
+    //XXX: 'none (for practice only)' we want to truncate to just 'none'.
     const syllabus_buckets = [
         'homework', 'assignment', 'problem-set',
         'quiz', 'test', 'exam',
         'exercise', 'lecture-exercise', 'reading', 'lab', 'recitation', 'worksheet',
         'project',
         'participation', 'note',
-        'none (for practice only)'];
+        'none'];
 
 
     public function __construct(Core $main_core) {
