@@ -90,8 +90,28 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
 
 
                     #TODO: START THE ROUTER FIRST, THEN GIVE IT A SECOND
-
+                    if 'router' in container_info:
+                      name = 'router'
+                      info = container_info['router']
+                      c_id = info['container_id']
+                      mounted_directory = info['mounted_directory']
+                      full_name = '{0}_{1}'.format(which_untrusted, 'router')
+                      print('spinning up docker {0} with root directory {1} and c_id {2}'.format(full_name, mounted_directory, c_id))
+                      p = subprocess.Popen(['docker', 'exec', '-w', mounted_directory,
+                                                        c_id,
+                                                        os.path.join(mounted_directory, 'my_runner.out'),
+                                                        queue_obj['gradeable'],
+                                                        queue_obj['who'],
+                                                        str(queue_obj['version']),
+                                                        submission_string,
+                                                        str(testcase_num),
+                                                        name],
+                                                        stdout=logfile)
+                      processes.append(p)
+                    time.sleep(1)
                     for name, info in container_info.items():
+                        # if name == 'router':
+                        #   continue
                         print('TESTCASE {0} DOING WORK ON AND PASSING IN {1}'.format(testcase_num, name))
                         c_id = info['container_id']
                         mounted_directory = info['mounted_directory']
@@ -326,6 +346,8 @@ def network_containers(container_info,target_folder,test_input_folder,job_id,is_
 
       aliases = []
       for endpoint in endpoints:
+          if endpoint in aliases:
+            continue
           aliases.append('--alias')
           aliases.append(endpoint)
 
