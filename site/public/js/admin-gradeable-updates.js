@@ -21,7 +21,7 @@ function clearError(name, update) {
     $('[name="' + name + '"]').each(function (i, elem) {
         elem.title = '';
         elem.style.backgroundColor = '';
-        
+
         // Update the value if provided
         if(update !== undefined) {
             $(elem).val(update);
@@ -334,7 +334,7 @@ function saveGraders() {
     let values = serializeGraders();
 
     $('#save_status').html('Saving Graders...');
-    $.ajax({
+    $.getJSON({
         type: "POST",
         url: buildUrl({
             'component': 'admin',
@@ -345,13 +345,19 @@ function saveGraders() {
         data: {
             graders: values
         },
-        success: function (data, textStatus, xhr) {
-            console.log('Request returned status code ' + xhr.status);
-            updateErrors();
+        success: function (response) {
+            if (response.status !== 'success') {
+                alert('Error saving graders!');
+                console.error(response.message);
+                errors['graders'] = '';
+            } else {
+                delete errors['graders'];
+            }
+            updateErrorMessage();
         },
-        error: function (data) {
-            console.log('[Error]: Request returned status code ' + data.status);
-            updateErrors();
+        error: function (response) {
+            alert('Error saving graders!');
+            console.error('Failed to parse response from server: ' + response);
         }
     });
 }

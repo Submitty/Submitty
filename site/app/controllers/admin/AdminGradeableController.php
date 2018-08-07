@@ -712,63 +712,54 @@ class AdminGradeableController extends AbstractController {
     }
 
     private function updateGradersRequest() {
-        $gradeable = $this->tryGetGradeable_($_REQUEST['id']);
-        if ($gradeable === null) {
+        $gradeable_id = $_REQUEST['id'] ?? '';
+
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
             return;
         }
 
-        $result = $this->updateGraders($gradeable, $_POST);
-
-        $response_data = [];
-
-        if (count($result) === 0) {
-            http_response_code(204); // NO CONTENT
-        } else {
-            http_response_code(400);
+        try {
+            $this->updateGraders($gradeable, $_POST);
+            // Finally, send the requester back the information
+            $this->core->getOutput()->renderJsonSuccess();
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail('Error setting graders' . $e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
         }
-        $response_data['errors'] = $result;
-
-        // Finally, send the requester back the information
-        $this->core->getOutput()->renderJson($response_data);
     }
 
     private function updateGraders(Gradeable $gradeable, $details) {
         if (!isset($details['graders'])) {
-            return ['graders' => 'Blank Submission!'];
+            throw new \InvalidArgumentException('Missing "graders" parameter');
         }
 
-        try {
-            $gradeable->setRotatingGraderSections($details['graders']);
-        } catch (\Exception $exception) {
-            return ['graders' => $exception];
-        }
-
+        $gradeable->setRotatingGraderSections($details['graders']);
         $this->core->getQueries()->updateGradeable($gradeable);
-        return [];
     }
 
     private function createGradeableRequest() {
-        $gradeable_id = $_POST['id'];
-        $result = $this->createGradeable($gradeable_id, $_POST);
+        $gradeable_id = $_POST['id'] ?? '';
 
-        if ($result === null) {
+        try {
+            $build_result = $this->createGradeable($gradeable_id, $_POST);
+
             // Finally, redirect to the edit page
-            $this->redirectToEdit($gradeable_id);
-        } else {
-            if ($result[0] == 1) { // Request Error
-                http_response_code(400);
-            } else if ($result[0] == 2) { // Server Error
-                http_response_code(500);
+            if ($build_result !== null) {
+                $this->core->addErrorMessage($build_result);
             }
-            // TODO: good way to handle these errors
-            die($result[1]);
+            $this->redirectToEdit($gradeable_id);
+        } catch (\Exception $e) {
+            $this->core->addErrorMessage($e);
+            $this->core->redirect($this->core->buildUrl());
         }
     }
 
     private function createGradeable($gradeable_id, $details) {
         // Make sure the gradeable doesn't already exist
         if ($this->core->getQueries()->existsGradeable($gradeable_id)) {
-            return [1, 'Gradeable Already Exists!'];
+            throw new \InvalidArgumentException('Gradeable already exists');
         }
 
         // Create the gradeable with good default information
@@ -798,7 +789,7 @@ class AdminGradeableController extends AbstractController {
             $template_id = $details['gradeable_template'];
             $template_gradeable = $this->core->getQueries()->getGradeableConfig($template_id);
             if ($template_gradeable === null) {
-                return [1, 'Template Id does not exist!'];
+                throw new \InvalidArgumentException('Template gradeable does not exist');
             }
 
             // Setup the create data from the template
@@ -888,13 +879,7 @@ class AdminGradeableController extends AbstractController {
         $this->core->getQueries()->createGradeable($gradeable); // creates the gradeable
 
         // start the build
-        $result = $this->enqueueBuild($gradeable);
-        if ($result !== null) {
-            // TODO: what key should this get?
-            return [2, "Build queue entry failed: $result"];
-        }
-
-        return null;
+        return $this->enqueueBuild($gradeable);
     }
 
     private function updateGradeableRequest() {
