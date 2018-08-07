@@ -2218,7 +2218,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var _this = _possibleConstructorReturn(this, (LocalStoreAdapter.__proto__ || Object.getPrototypeOf(LocalStoreAdapter)).call(this, {
 	      getAnnotations: function getAnnotations(documentId, pageNumber) {
 	        return new Promise(function (resolve, reject) {
-	          var annotations = _getAnnotations().filter(function (i) {
+	          var annotations = getAllAnnotations().filter(function (i) {
 	            return i.page === pageNumber && i.class === 'Annotation';
 	          });
 	
@@ -2230,7 +2230,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	      },
 	      getAnnotation: function getAnnotation(documentId, annotationId) {
-	        return Promise.resolve(_getAnnotations(documentId, userId)[findAnnotation(documentId, annotationId)]);
+	        return Promise.resolve(getAnnotations(documentId, userId)[findAnnotation(documentId, annotationId)]);
 	      },
 	      addAnnotation: function addAnnotation(documentId, pageNumber, annotation) {
 	        return new Promise(function (resolve, reject) {
@@ -2238,7 +2238,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          annotation.uuid = (0, _uuid2.default)();
 	          annotation.page = pageNumber;
 	
-	          var annotations = _getAnnotations(documentId, userId);
+	          var annotations = getAnnotations(documentId, userId);
 	          annotations.push(annotation);
 	          updateAnnotations(documentId, userId, annotations);
 	
@@ -2247,7 +2247,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      },
 	      editAnnotation: function editAnnotation(documentId, annotationId, annotation) {
 	        return new Promise(function (resolve, reject) {
-	          var annotations = _getAnnotations(documentId, userId);
+	          var annotations = getAnnotations(documentId, userId);
 	          annotations[findAnnotation(documentId, annotationId)] = annotation;
 	          updateAnnotations(documentId, userId, annotations);
 	
@@ -2258,7 +2258,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return new Promise(function (resolve, reject) {
 	          var index = findAnnotation(documentId, annotationId);
 	          if (index > -1) {
-	            var annotations = _getAnnotations(documentId, userId);
+	            var annotations = getAnnotations(documentId, userId);
 	            annotations.splice(index, 1);
 	            updateAnnotations(documentId, userId, annotations);
 	          }
@@ -2268,7 +2268,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      },
 	      getComments: function getComments(documentId, annotationId) {
 	        return new Promise(function (resolve, reject) {
-	          resolve(_getAnnotations(documentId, userId).filter(function (i) {
+	          resolve(getAnnotations(documentId, userId).filter(function (i) {
 	            return i.class === 'Comment' && i.annotation === annotationId;
 	          }));
 	        });
@@ -2282,7 +2282,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            content: content
 	          };
 	
-	          var annotations = _getAnnotations(documentId, userId);
+	          var annotations = getAnnotations(documentId, userId);
 	          annotations.push(comment);
 	          updateAnnotations(documentId, userId, annotations);
 	
@@ -2291,9 +2291,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      },
 	      deleteComment: function deleteComment(documentId, commentId) {
 	        return new Promise(function (resolve, reject) {
-	          _getAnnotations(documentId, userId);
+	          getAnnotations(documentId, userId);
 	          var index = -1;
-	          var annotations = _getAnnotations(documentId, userId);
+	          var annotations = getAnnotations(documentId, userId);
 	          for (var i = 0, l = annotations.length; i < l; i++) {
 	            if (annotations[i].uuid === commentId) {
 	              index = i;
@@ -2328,7 +2328,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.default = LocalStoreAdapter;
 	
 	
-	function _getAnnotations() {
+	function getAllAnnotations() {
 	  var all_annotations = [];
 	  for (var i = 0; i < localStorage.length; i++) {
 	    if (localStorage.key(i).includes('annotations')) {
@@ -2338,7 +2338,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return all_annotations;
 	}
 	
-	function _getAnnotations(documentId, userId) {
+	function getAnnotations(documentId, userId) {
 	  return JSON.parse(localStorage.getItem(documentId + '/' + userId + '/annotations')) || [];
 	}
 	
@@ -2348,7 +2348,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	function findAnnotation(documentId, annotationId) {
 	  var index = -1;
-	  var annotations = _getAnnotations(documentId);
+	  var annotations = getAnnotations(documentId);
 	  for (var i = 0, l = annotations.length; i < l; i++) {
 	    if (annotations[i].uuid === annotationId) {
 	      index = i;
@@ -3773,8 +3773,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (_canerase) {
 	    var target = (0, _utils.findAnnotationAtPoint)(e.clientX, e.clientY);
 	    if (target) {
-	      console.log(target);
-	      var annotationId = target.getAttribute('data-pdf-annotate-id');
+	      var annotationUserId = target.getAttribute('data-pdf-annotate-userId');
+	      console.log(annotationUserId);
 	      // let nodes = document.querySelectorAll(`[data-pdf-annotate-id="${annotationId}"]`);
 	      // let svg = overlay.parentNode.querySelector(config.annotationSvgQuery());
 	      // let { documentId } = getMetadata(svg);
