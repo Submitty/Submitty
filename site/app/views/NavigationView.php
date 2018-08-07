@@ -648,7 +648,7 @@ class NavigationView extends AbstractView {
      */
     private function getEditButton(Gradeable $gradeable) {
         $button = new Button($this->core, [
-            "title" => "Edit",
+            "title" => "Edit Gradeable Configuration",
             "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'edit_gradeable_page', 'id' => $gradeable->getId())),
             "class" => "fa fa-pencil",
             "title_on_hover" => true,
