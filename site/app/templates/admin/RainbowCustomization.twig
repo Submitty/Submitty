@@ -10,10 +10,22 @@
         $("#custom_form").submit();
     }
 
+    //Forces element's value to be non-negative
+    function ClampPoints(el){
+        el.value = Math.max(0.0,el.value);
+    }
+
     //Forces element's value to be in range [0.0,100.0]
     function ClampPercent(el){
         el.value = Math.min(Math.max(el.value,0.0),100.0);
         UpdateUsedPercentage();
+        var tmp = el.id.split("-");
+        var bucket = "";
+        var i;
+        for(i=1;i<tmp.length; i++){
+            bucket += tmp[i];
+        }
+        $("#config-percent-"+bucket).text(el.value + "%");
     }
 
     function UpdateUsedPercentage(){
@@ -21,8 +33,6 @@
         $("input[id^='percent']").filter(function(){
             return $(this).parent().css("display") != "none";
         }).each(function(){
-            console.log($(this).attr('id'));
-            console.log($(this).val());
             val += parseFloat($(this).val());
         });
         $("#used_percentage").text(val.toString() + "%");
@@ -33,6 +43,7 @@
             $("#used_percentage").css({"color":"black","font-weight":""});
         }
     }
+
 </script>
 
 <div class="content">
@@ -74,7 +85,25 @@
             </ol>
         </div>
     </div>
-    <div id="Category/Gradeable Configuration:">
+    <div id="gradeable_config" style="background-color:peachpuff;margin-top:50px;width:600px;padding:5px;">
+        <h2>Category/Gradeable Configuration:</h2>
+        {% for bucket, gradeables in customization_data %}
+        <div id="config-{{ bucket }}" style="margin-top:25px;">
+            <h3 style="display:inline">{{ bucket }}</h3>:
+            <input type="text" value="{{ gradeables|length }}" id="config-count-{{ bucket }}" style="display:inline;"> items
+            <span style="float:right;" id="config-percent-{{ bucket }}">0%</span>
+            <div style="margin-top:10px">
+                <ol style="list-style-type: none;" id="gradeables-list-{{ bucket }}">
+                {% for gradeable in gradeables %}
+                    <li>
+                    <input type="text" value="{{ gradeable["max_score"] }}" id="maxscore-{{ gradeable["id"] }}" style="margin-right: 10px;display:inline;" onblur="ClampPoints(this);">
+                    {{ gradeable["title"] }}
+                    </li>
+                {% endfor %}
+                </ol>
+            </div>
+        </div>
+        {% endfor %}
     </div>
 </div>
 
@@ -139,4 +168,6 @@
         }
     });
     bucket_lists.disableSelection();
+
+    $("ol[id^='gradeables-list']").sortable();
 </script>
