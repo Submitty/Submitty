@@ -940,6 +940,7 @@ class Gradeable extends AbstractModel {
     /**
      * Sets whether regrades are allowed for this gradeable
      * @param bool $regrade_allowed
+     * @throws ValidationException If date validation fails in this new regrade request configuration
      */
     public function setRegradeAllowed(bool $regrade_allowed) {
         $old = $this->regrade_allowed;
@@ -948,9 +949,12 @@ class Gradeable extends AbstractModel {
         try {
             // Asserts that this date information is valid after changing this property
             $this->setDates($this->getDates());
-        } finally {
+        } catch (ValidationException $e) {
             // Reset to the old value if validation fails
             $this->regrade_allowed = $old;
+
+            // This line brings me great pain
+            throw $e;
         }
     }
 
@@ -965,6 +969,7 @@ class Gradeable extends AbstractModel {
     /**
      * Sets whether this gradeable will use ta grading
      * @param bool $ta_grading
+     * @throws ValidationException If date validation fails in this new TA grading configuration
      */
     public function setTaGrading(bool $ta_grading) {
         $old = $this->ta_grading;
@@ -973,9 +978,12 @@ class Gradeable extends AbstractModel {
         try {
             // Asserts that this date information is valid after changing this property
             $this->setDates($this->getDates());
-        } finally {
+        } catch (ValidationException $e) {
             // Reset to the old value if validation fails
             $this->ta_grading = $old;
+
+            // This line brings me great pain
+            throw $e;
         }
     }
 
