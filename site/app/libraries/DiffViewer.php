@@ -78,6 +78,28 @@ class DiffViewer {
      */
     private $white_spaces = array();
 
+    const SPECIAL_CHARS_ORIGINAL = 'original';
+    const SPECIAL_CHARS_ESCAPE = 'escape';
+    const SPECIAL_CHARS_UNICODE = 'unicode';
+
+    static function isValidSpecialCharsOption($option) {
+        return in_array($option, [
+            self::SPECIAL_CHARS_ORIGINAL,
+            self::SPECIAL_CHARS_UNICODE,
+            self::SPECIAL_CHARS_ESCAPE
+        ]);
+    }
+
+    const EXPECTED = 'expected';
+    const ACTUAL = 'actual';
+
+    static function isValidType($type) {
+        return in_array($type, [
+            self::EXPECTED,
+            self::ACTUAL
+        ]);
+    }
+
     /**
      * Reset the DiffViewer to its starting values.
      */
@@ -204,8 +226,8 @@ class DiffViewer {
             $diff = FileUtils::readJsonFile($diff_file);
         }
         
-        $this->diff = array("expected" => array(), "actual" => array());
-        $this->add = array("expected" => array(), "actual" => array());
+        $this->diff = array(self::EXPECTED => array(), self::ACTUAL => array());
+        $this->add = array(self::EXPECTED => array(), self::ACTUAL => array());
 
         if (isset($diff['differences']) && $can_diff) {
             $diffs = $diff['differences'];
@@ -218,45 +240,45 @@ class DiffViewer {
             foreach ($diffs as $diff) {
                 $act_ins = 0;
                 $exp_ins = 0;
-                $act_start = $diff["actual"]['start'];
+                $act_start = $diff[self::ACTUAL]['start'];
                 $act_final = $act_start;
-                if (isset($diff["actual"]['line'])) {
-                    $act_ins = count($diff["actual"]['line']);
-                    foreach ($diff["actual"]['line'] as $line) {
+                if (isset($diff[self::ACTUAL]['line'])) {
+                    $act_ins = count($diff[self::ACTUAL]['line']);
+                    foreach ($diff[self::ACTUAL]['line'] as $line) {
                         $line_num = $line['line_number'];
                         if (isset($line['char_number'])) {
-                            $this->diff["actual"][$line_num] = $this->compressRange($line['char_number']);
+                            $this->diff[self::ACTUAL][$line_num] = $this->compressRange($line['char_number']);
                         } else {
-                            $this->diff["actual"][$line_num] = array();
+                            $this->diff[self::ACTUAL][$line_num] = array();
                         }
                         $act_final = $line_num;
                     }
                 }
 
-                $exp_start = $diff["expected"]['start'];
+                $exp_start = $diff[self::EXPECTED]['start'];
                 $exp_final = $exp_start;
-                if (isset($diff["expected"]['line'])) {
-                    $exp_ins = count($diff["expected"]['line']);
-                    foreach ($diff["expected"]['line'] as $line) {
+                if (isset($diff[self::EXPECTED]['line'])) {
+                    $exp_ins = count($diff[self::EXPECTED]['line']);
+                    foreach ($diff[self::EXPECTED]['line'] as $line) {
                         $line_num = $line['line_number'];
                         if (isset($line['char_number'])) {
-                            $this->diff["expected"][$line_num] = $this->compressRange($line['char_number']);
+                            $this->diff[self::EXPECTED][$line_num] = $this->compressRange($line['char_number']);
                         } else {
-                            $this->diff["expected"][$line_num] = array();
+                            $this->diff[self::EXPECTED][$line_num] = array();
                         }
                         $exp_final = $line_num;
                     }
                 }
 
-                $this->link["actual"][($act_start)] = (isset($this->link["actual"])) ? count($this->link["actual"]) : 0;
-                $this->link["expected"][($exp_start)] = (isset($this->link["expected"])) ? count($this->link["expected"]) : 0;
+                $this->link[self::ACTUAL][($act_start)] = (isset($this->link[self::ACTUAL])) ? count($this->link[self::ACTUAL]) : 0;
+                $this->link[self::EXPECTED][($exp_start)] = (isset($this->link[self::EXPECTED])) ? count($this->link[self::EXPECTED]) : 0;
 
                 // Do we need to insert blank lines into actual?
                 if ($act_ins < $exp_ins) {
-                    $this->add["actual"][($act_final)] = $exp_ins - $act_ins;
+                    $this->add[self::ACTUAL][($act_final)] = $exp_ins - $act_ins;
                 } // Or into expected?
                 else if ($act_ins > $exp_ins) {
-                    $this->add["expected"][($exp_final)] = $act_ins - $exp_ins;
+                    $this->add[self::EXPECTED][($exp_final)] = $act_ins - $exp_ins;
                 }
             }
         }
@@ -313,10 +335,10 @@ class DiffViewer {
      * @return string actual html
      * @throws \Exception
      */
-    public function getDisplayActual($option="original") {
+    public function getDisplayActual($option = self::SPECIAL_CHARS_ORIGINAL) {
         $this->buildViewer();
         if ($this->display_actual) {
-            return $this->getDisplay($this->actual, "actual", $option);
+            return $this->getDisplay($this->actual, self::ACTUAL, $option);
         }
         else {
             return "";
@@ -367,10 +389,10 @@ class DiffViewer {
      * @return string expected html
      * @throws \Exception
      */
-    public function getDisplayExpected($option="original") {
+    public function getDisplayExpected($option = self::SPECIAL_CHARS_ORIGINAL) {
         $this->buildViewer();
         if ($this->display_expected) {
-            return $this->getDisplay($this->expected, "expected", $option);
+            return $this->getDisplay($this->expected, self::EXPECTED, $option);
         }
         else {
             return "";
@@ -390,7 +412,7 @@ class DiffViewer {
      * @return string html to be displayed to user
      * @throws \Exception
      */
-    private function getDisplay($lines, $type="expected", $option="original") {
+    private function getDisplay($lines, $type = self::EXPECTED, $option = self::SPECIAL_CHARS_ORIGINAL) {
         $this->buildViewer();
         $start = null;
         $html = "<div class='diff-container'><div class='diff-code'>\n";
@@ -435,15 +457,15 @@ class DiffViewer {
                 foreach ($this->diff[$type][$i] as $diff) {
                     $html_orig = htmlentities(substr($lines[$i], $current, ($diff[0] - $current)));
                     $html_orig_error = htmlentities(substr($lines[$i], $diff[0], ($diff[1] - $diff[0] + 1)));
-                    if($option == "original"){
+                    if($option == self::SPECIAL_CHARS_ORIGINAL){
                         $html .= $html_orig;
                         $html .= "<span class='highlight-char'>".$html_orig_error."</span>";
-                    } else if($option == "with_unicode") {
+                    } else if($option == self::SPECIAL_CHARS_UNICODE) {
                         $html_no_empty = $this->replaceEmptyChar($html_orig);
                         $html_no_empty_error = $this->replaceEmptyChar($html_orig_error);
                         $html .= $html_no_empty;
                         $html .= "<span class='highlight-char'>".$html_no_empty_error."</span>";
-                    } else if($option == "with_escape") {
+                    } else if($option == self::SPECIAL_CHARS_ESCAPE) {
                         $html_no_empty = $this->replaceEmptyCharWithEscape($html_orig);
                         $html_no_empty_error = $this->replaceEmptyCharWithEscape($html_orig_error);
                         $html .= $html_no_empty;
@@ -453,28 +475,28 @@ class DiffViewer {
                 }
                 $html .= "<span class='line_code_inner'>";
                 $inner = htmlentities(substr($lines[$i], $current));
-                if ($option === 'with_unicode') {
+                if ($option === self::SPECIAL_CHARS_UNICODE) {
                     $inner = $this->replaceEmptyChar($inner);
                 }
-                elseif ($option === 'with_escape') {
+                elseif ($option === self::SPECIAL_CHARS_ESCAPE) {
                     $inner = $this->replaceEmptyCharWithEscape($inner);
                 }
                 $html .= "{$inner}</span>";
             }
             else {
                 if (isset($lines[$i])) {
-                    if($option == "original"){
+                    if($option == self::SPECIAL_CHARS_ORIGINAL){
                         $html .= htmlentities($lines[$i]);
-                    } else if($option == "with_unicode"){
+                    } else if($option == self::SPECIAL_CHARS_UNICODE){
                         $html .= $this->replaceEmptyChar(htmlentities($lines[$i]));
-                    } else if($option == "with_escape"){
+                    } else if($option == self::SPECIAL_CHARS_ESCAPE){
                         $html .= $this->replaceEmptyCharWithEscape(htmlentities($lines[$i]));
                     }
                 }
             }
-            if($option == "with_unicode"){
+            if($option == self::SPECIAL_CHARS_UNICODE) {
                 $html .= '<span style="border: 1px solid blue">&#9166;</span>';
-            } else if($option == "with_escape"){
+            } else if($option == self::SPECIAL_CHARS_ESCAPE) {
                 $html .= '<span style="border: 1px solid blue">\\n</span>';
             }
             $html .= "</span></div>\n";
@@ -589,7 +611,7 @@ class DiffViewer {
     public function existsDifference() {
         $this->buildViewer();
         $return = false;
-        foreach(array("expected", "actual") as $key) {
+        foreach(array(self::EXPECTED, self::ACTUAL) as $key) {
             if(count($this->diff[$key]) > 0 || count($this->add[$key]) > 0) {
                 $return = true;
             }

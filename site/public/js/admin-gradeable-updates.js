@@ -90,8 +90,9 @@ $(document).ready(function () {
         };
 
         // If its date-related, then submit all date data
-        if($('#gradeable-dates').find('input[name="' + this.name + '"]').length > 0) {
-            $('#gradeable-dates :input').each(addDataToRequest);
+        if($('#gradeable-dates').find('input[name="' + this.name + '"]').length > 0
+            || $(this).hasClass('date-related')) {
+            $('#gradeable-dates :input,.date-related').each(addDataToRequest);
         }
         ajaxUpdateGradeableProperty($('#g_id').val(), data,
             getSuccessCallback(Object.keys(data)), getErrorCallback(Object.keys(data)));

@@ -13,6 +13,9 @@
             {% if can_download %}
                 <a onclick='downloadFile("{{ file.relative_name|url_encode }}","{{ file.path|url_encode }}")'>
                     <i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
+            {% endif %}
+
+            {% if loop.index != files|length %}
                 <br />
             {% endif %}
         {% endfor %}
@@ -67,7 +70,7 @@
             </p>
         {% endif %}
         <script type="text/javascript">
-            checkRefreshSubmissionPage("{{ check_refresh_submission_url|e('js') }}")
+            checkRefreshPage("{{ check_refresh_submission_url|e('js') }}")
         </script>
     {% elseif results is not defined %}
         <p class="red-message">
