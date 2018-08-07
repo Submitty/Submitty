@@ -276,8 +276,7 @@ class Gradeable extends AbstractModel {
         'submission_due_date',
         'grade_start_date',
         'grade_due_date',
-        'grade_released_date',
-        'regrade_request_date'
+        'grade_released_date'
     ];
 
     /**
@@ -299,8 +298,7 @@ class Gradeable extends AbstractModel {
         'ta_view_start_date',
         'grade_start_date',
         'grade_due_date',
-        'grade_released_date',
-        'regrade_request_date'
+        'grade_released_date'
     ];
 
     /**
@@ -443,18 +441,24 @@ class Gradeable extends AbstractModel {
         if ($this->type === GradeableType::ELECTRONIC_FILE) {
             if (!$this->isStudentSubmit()) {
                 if ($this->isTaGrading()) {
-                    return self::date_properties_elec_exam;
+                    $result = self::date_properties_elec_exam;
                 } else {
-                    return self::date_properties_bare;
+                    $result = self::date_properties_bare;
                 }
             } else if ($this->isTaGrading()) {
-                return self::date_properties_elec_ta;
+                $result = self::date_properties_elec_ta;
             } else {
-                return self::date_properties_elec_no_ta;
+                $result = self::date_properties_elec_no_ta;
+            }
+
+            // Only add in regrade request date if its allowed & enabled
+            if($this->isTaGrading() && $this->core->getConfig()->isRegradeEnabled() && $this->isRegradeAllowed()) {
+                $result[] = 'regrade_request_date';
             }
         } else {
-            return self::date_properties_simple;
+            $result = self::date_properties_simple;
         }
+        return $result;
     }
 
     /**
@@ -464,14 +468,10 @@ class Gradeable extends AbstractModel {
      */
     private function assertDates(array $dates) {
         // Get the date set we validate against
-        $errors = [];
-
-        // Get the date set for validation
         $date_set = $this->getDateValidationSet();
 
         // Get the validation errors
-        $errors = array_merge($errors, self::validateDateSet($date_set, $dates));
-
+        $errors = self::validateDateSet($date_set, $dates);
 
         // Put any special exceptions to the normal validation rules here...
 
