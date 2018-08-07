@@ -45,10 +45,12 @@
 <style type="text/css">
     #buckets_available_list li{
         font-weight: bold;
+        list-style-type: none;
     }
 
     #buckets_used_list li{
         font-style: italic;
+        list-style-type: none;
     }
 </style>
 
@@ -67,6 +69,11 @@
             old_parent = u.item.parent().attr("id");
         },
         update: function(e,u){
+            /* TODO: The UI either needs to be visually clear or we need to do some sort of height adjustment
+             * to make sure that one list isn't way longer than the other, otherwise it won't be intuitive where
+             * the user can and can't drop a bucket successfully.
+             */
+
             new_index = u.item.index();
             new_parent = u.item.parent().attr("id");
             //console.log("Moved " + u.item.text() + " from " + old_parent + "," + old_index.toString() + " to " + new_parent + "," + new_index.toString());
