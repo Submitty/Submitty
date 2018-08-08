@@ -716,6 +716,15 @@ table tr.table-header {
     border-radius: 3px;
 }
 
+.notification_badge{
+    background-color: red;
+    float: right;
+    padding-left: 2px;
+    padding-right: 2px;
+    margin-left: 5px;
+    border-radius: 2px;
+}
+
 #forum_wrapper{
     height: 70vh;
     margin-left:20px;

@@ -21,6 +21,7 @@ use app\models\GradeableComponent;
 use app\models\GradeableComponentMark;
 use app\models\GradeableVersion;
 use app\models\User;
+use app\models\Notification;
 use app\models\SimpleLateUser;
 use app\models\Team;
 use app\models\Course;
@@ -2170,6 +2171,11 @@ ORDER BY u.user_group ASC,
         return $return;
     }
 
+    public function getCourseStatus($semester, $course) {
+        $this->submitty_db->query("SELECT status FROM courses WHERE semester=? AND course=?", array($semester, $course));
+        return $this->submitty_db->rows()[0]['status'];
+    }
+
     public function getPeerAssignment($gradeable_id, $grader) {
         $this->course_db->query("SELECT user_id FROM peer_assign WHERE g_id=? AND grader_id=?", array($gradeable_id, $grader));
         $return = array();
@@ -2399,7 +2405,7 @@ AND gc_id IN (
         return $root_post;
     }
 
-    public function mergeThread($parent_thread_id, $child_thread_id, &$message){
+    public function mergeThread($parent_thread_id, $child_thread_id, &$message, &$child_root_post){
         try{
             $this->course_db->beginTransaction();
             $parent_thread_title = null;
@@ -2464,6 +2470,109 @@ AND gc_id IN (
     public function getAllAnonIds() {
         $this->course_db->query("SELECT anon_id FROM users");
         return $this->course_db->rows();
+    }
+
+    /**
+     * Generate notifcation rows
+     *
+     * @param Notification $notification
+     */
+    public function pushNotification($notification){
+        $params = array();
+        $params[] = $notification->getComponent();
+        $params[] = $notification->getNotifyMetadata();
+        $params[] = $notification->getNotifyContent();
+        $params[] = $notification->getNotifySource();
+
+        if(empty($notification->getNotifyTarget())) {
+            // Notify all users
+            $target_users_query = "SELECT user_id FROM users";
+        } else {
+            // To a specific user
+            $params[] = $notification->getNotifyTarget();
+            $target_users_query = "SELECT ?::text as user_id";
+        }
+
+        if($notification->getNotifyNotToSource()){
+            $ignore_self_query = "WHERE user_id <> ?";
+            $params[] = $notification->getNotifySource();
+        }
+        else {
+            $ignore_self_query = "";
+        }
+        $this->course_db->query("INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id)
+                    SELECT ?, ?, ?, current_timestamp, ?, user_id as to_user_id FROM ({$target_users_query}) as u {$ignore_self_query}",
+                    $params);
+    }
+
+    /**
+     * Returns notifications for a user
+     *
+     * @param string $user_id
+     * @param bool $show_all
+     * @return array(Notification)
+     */
+    public function getUserNotifications($user_id, $show_all){
+        if($show_all){
+            $seen_status_query = "true";
+        } else {
+            $seen_status_query = "seen_at is NULL";
+        }
+        $this->course_db->query("SELECT id, component, metadata, content,
+                (case when seen_at is NULL then false else true end) as seen,
+                (extract(epoch from current_timestamp) - extract(epoch from created_at)) as elapsed_time, created_at
+                FROM notifications WHERE to_user_id = ? and {$seen_status_query} ORDER BY created_at DESC", array($user_id));
+        $rows = $this->course_db->rows();
+        $results = array();
+        foreach ($rows as $row) {
+            $results[] = new Notification($this->core, array(
+                    'view_only' => true,
+                    'id' => $row['id'],
+                    'component' => $row['component'],
+                    'metadata' => $row['metadata'],
+                    'content' => $row['content'],
+                    'seen' => $row['seen'],
+                    'elapsed_time' => $row['elapsed_time'],
+                    'created_at' => $row['created_at']
+                ));
+        }
+        return $results;
+    }
+
+    public function getNotificationInfoById($user_id, $notification_id){
+        $this->course_db->query("SELECT metadata FROM notifications WHERE to_user_id = ? and id = ?", array($user_id, $notification_id));
+        return $this->course_db->row();
+    }
+
+    public function getUnreadNotificationsCount($user_id, $component){
+        $parameters = array($user_id);
+        if(is_null($component)){
+            $component_query = "true";
+        } else {
+            $component_query = "component = ?";
+            $parameters[] = $component;
+        }
+        $this->course_db->query("SELECT count(*) FROM notifications WHERE to_user_id = ? and seen_at is NULL and {$component_query}", $parameters);
+        return $this->course_db->row()['count'];
+    }
+
+    /**
+     * Marks $user_id notifications as seen
+     *
+     * @param sting $user_id
+     * @param int $notification_id  if $notification_id != -1 then marks corresponding as seen else mark all notifications as seen
+     */
+    public function markNotificationAsSeen($user_id, $notification_id){
+        $parameters = array();
+        $parameters[] = $user_id;
+        if($notification_id == -1) {
+            $id_query = "true";
+        } else {
+            $id_query = "id = ?";
+            $parameters[] = $notification_id;
+        }
+        $this->course_db->query("UPDATE notifications SET seen_at = current_timestamp
+                WHERE to_user_id = ? and seen_at is NULL and {$id_query}", $parameters);
     }
 
     /**
@@ -2901,6 +3010,7 @@ AND gc_id IN (
             $this->course_db->convertBoolean($gradeable->isGradeByRegistration()),
             DateUtils::dateTimeToString($gradeable->getTaViewStartDate()),
             DateUtils::dateTimeToString($gradeable->getGradeStartDate()),
+            DateUtils::dateTimeToString($gradeable->getGradeDueDate()),
             DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()),
             $gradeable->getGradeLockedDate() !== null ?
                 DateUtils::dateTimeToString($gradeable->getGradeLockedDate()) : null,
@@ -2917,11 +3027,12 @@ AND gc_id IN (
               g_grade_by_registration,
               g_ta_view_start_date,
               g_grade_start_date,
+              g_grade_due_date,
               g_grade_released_date,
               g_grade_locked_date,
               g_min_grading_group,
               g_syllabus_bucket)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             $params = [
                 $gradeable->getId(),
@@ -2941,7 +3052,9 @@ AND gc_id IN (
                 $gradeable->getLateDays(),
                 $gradeable->getPrecision(),
                 $this->course_db->convertBoolean($gradeable->isPeerGrading()),
-                $gradeable->getPeerGradeSet()
+                $gradeable->getPeerGradeSet(),
+                DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
+                $this->course_db->convertBoolean($gradeable->isRegradeAllowed())
             ];
             $this->course_db->query("
                 INSERT INTO electronic_gradeable(
@@ -2962,8 +3075,10 @@ AND gc_id IN (
                   eg_late_days,
                   eg_precision,
                   eg_peer_grading,
-                  eg_peer_grade_set)
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
+                  eg_peer_grade_set,
+                  eg_regrade_request_date,
+                  eg_regrade_allowed)
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
         }
 
         // Make sure to create the rotating sections
@@ -3020,6 +3135,7 @@ AND gc_id IN (
                 $this->course_db->convertBoolean($gradeable->isGradeByRegistration()),
                 DateUtils::dateTimeToString($gradeable->getTaViewStartDate()),
                 DateUtils::dateTimeToString($gradeable->getGradeStartDate()),
+                DateUtils::dateTimeToString($gradeable->getGradeDueDate()),
                 DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()),
                 $gradeable->getGradeLockedDate() !== null ?
                     DateUtils::dateTimeToString($gradeable->getGradeLockedDate()) : null,
@@ -3036,6 +3152,7 @@ AND gc_id IN (
                   g_grade_by_registration=?, 
                   g_ta_view_start_date=?, 
                   g_grade_start_date=?,
+                  g_grade_due_date=?,
                   g_grade_released_date=?,
                   g_grade_locked_date=?,
                   g_min_grading_group=?, 
@@ -3060,6 +3177,8 @@ AND gc_id IN (
                     $gradeable->getPrecision(),
                     $this->course_db->convertBoolean($gradeable->isPeerGrading()),
                     $gradeable->getPeerGradeSet(),
+                    DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
+                    $this->course_db->convertBoolean($gradeable->isRegradeAllowed()),
                     $gradeable->getId()
                 ];
                 $this->course_db->query("
@@ -3080,7 +3199,9 @@ AND gc_id IN (
                       eg_late_days=?,
                       eg_precision=?,
                       eg_peer_grading=?,
-                      eg_peer_grade_set=?
+                      eg_peer_grade_set=?,
+                      eg_regrade_request_date=?,
+                      eg_regrade_allowed=?
                     WHERE g_id=?", $params);
             }
         }
