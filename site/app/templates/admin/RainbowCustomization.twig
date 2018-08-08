@@ -20,6 +20,9 @@
         var bucket = "";
         var i;
         for(i=offset;i<tmp.length; i++){
+            if(i>offset){
+                bucket += "-";
+            }
             bucket += tmp[i];
         }
         return bucket;
@@ -35,16 +38,17 @@
     function UpdateUsedPercentage(){
         var val = 0.0;
         $("input[id^='percent']").filter(function(){
-            return $(this).parent().css("display") != "none";
+            return $(this).parent().css("display") !== "none";
         }).each(function(){
             val += parseFloat($(this).val());
         });
-        $("#used_percentage").text(val.toString() + "%");
+        var percentage_span = $("#used_percentage");
+        percentage_span.text(val.toString() + "%");
         if(val>100.0){
-            $("#used_percentage").css({"color":"red","font-weight":"bold"});
+            percentage_span.css({"color":"red","font-weight":"bold"});
         }
         else{
-            $("#used_percentage").css({"color":"black","font-weight":""});
+            percentage_span.css({"color":"black","font-weight":""});
         }
     }
 
@@ -57,10 +61,22 @@
         });
 
         //For each bucket that IS being used, show it
-        $("#buckets_used_list").find("input").each(function() {
+        var used_buckets = $("#buckets_used_list").find("input");
+        if(used_buckets.length === 0){
+            return;
+        }
+        var prev_bucket = ExtractBucketName(used_buckets.first().attr("id"),1);
+        $("#config-"+prev_bucket).prependTo("#config-wrapper").css("display","block");
+
+        used_buckets.each(function() {
             //Extract the bucket name
             var bucket = ExtractBucketName($(this).attr("id"),1);
-            $("#config-"+bucket).css("display","block");
+            console.log("prev_bucket: " + prev_bucket + " bucket: " + bucket);
+            if(bucket !== prev_bucket) {
+                $("#config-" + bucket).css("display", "block");
+                $("#config-" + prev_bucket).after($("#config-"+bucket));
+                prev_bucket = bucket;
+            }
         });
     }
 
@@ -107,33 +123,36 @@
     </div>
     <div id="gradeable_config" style="background-color:peachpuff;margin-top:50px;width:1000px;padding:5px;">
         <h2>Category/Gradeable Configuration:</h2>
+        <div id="config-wrapper">
         {% for bucket, gradeables in customization_data %}
-        <div id="config-{{ bucket }}" style="margin-top:25px;min-height:100px;display:none;">
-            <h3 style="display:inline">{{ bucket|capitalize }}</h3>:
-            <input type="text" value="{{ gradeables|length }}" id="config-count-{{ bucket }}" style="display:inline;"> items
-            <span style="float:right;" id="config-percent-{{ bucket }}">0%</span>
-            <div style="float:right">
-                Point Distribution:<br>
-                <input type="radio" id="curve-normalize-{{ bucket }}" name="curve-{{ bucket }}">
-                <label for="curve-normalize-{{ bucket }}">Normalized/Equal Weight</label><br>
-                <input type="radio" id="curve-maxpt-{{ bucket }}" name="curve-{{ bucket }}">
-                <label for="curve-maxpt-{{ bucket }}">Max Point Based</label><br>
-                <input type="radio" id="curve-custom-{{ bucket }}" name="curve-{{ bucket }}">
-                <label for="curve-custom-{{ bucket }}">Custom %</label>
+
+            <div id="config-{{ bucket }}" style="margin-top:25px;min-height:100px;display:none;">
+                <h3 style="display:inline">{{ bucket|capitalize }}</h3>:
+                <input type="text" value="{{ gradeables|length }}" id="config-count-{{ bucket }}" style="display:inline;"> items
+                <span style="float:right;" id="config-percent-{{ bucket }}">0%</span>
+                <div style="float:right">
+                    Point Distribution:<br>
+                    <input type="radio" id="curve-normalize-{{ bucket }}" name="curve-{{ bucket }}">
+                    <label for="curve-normalize-{{ bucket }}">Normalized/Equal Weight</label><br>
+                    <input type="radio" id="curve-maxpt-{{ bucket }}" name="curve-{{ bucket }}">
+                    <label for="curve-maxpt-{{ bucket }}">Max Point Based</label><br>
+                    <input type="radio" id="curve-custom-{{ bucket }}" name="curve-{{ bucket }}">
+                    <label for="curve-custom-{{ bucket }}">Custom %</label>
+                </div>
+                <div style="margin-top:10px">
+                    <ol style="list-style-type: none;" id="gradeables-list-{{ bucket }}">
+                    {% for gradeable in gradeables %}
+                        <li>
+                            <input type="text" value="{{ gradeable["max_score"] }}" id="maxscore-{{ gradeable["id"] }}" style="margin-right: 10px;display:inline;" onblur="ClampPoints(this);">
+                            {{ gradeable["title"] }}
+                            <span style="font-style: italic;font-size: 0.8em;">{{ gradeable["id"] }}</span>
+                        </li>
+                    {% endfor %}
+                    </ol>
+                </div>
             </div>
-            <div style="margin-top:10px">
-                <ol style="list-style-type: none;" id="gradeables-list-{{ bucket }}">
-                {% for gradeable in gradeables %}
-                    <li>
-                        <input type="text" value="{{ gradeable["max_score"] }}" id="maxscore-{{ gradeable["id"] }}" style="margin-right: 10px;display:inline;" onblur="ClampPoints(this);">
-                        {{ gradeable["title"] }}
-                        <span style="font-style: italic;font-size: 0.8em;">{{ gradeable["id"] }}</span>
-                    </li>
-                {% endfor %}
-                </ol>
-            </div>
-        </div>
         {% endfor %}
+        </div>
     </div>
 </div>
 
@@ -173,30 +192,28 @@
             new_parent = u.item.parent().attr("id");
             //console.log("Moved " + u.item.text() + " from " + old_parent + "," + old_index.toString() + " to " + new_parent + "," + new_index.toString());
 
-            //TODO: Implement this part!
             //Change position of an existing used item
-            if (old_parent == new_parent && new_parent == "buckets_used_list"){
-                console.log("Rearranging!")
+            if (old_parent === new_parent && new_parent === "buckets_used_list"){
+                //console.log("Rearranging!");
+                UpdateVisibilityBuckets();
             }
-            else if(old_parent !=  new_parent && this.id == new_parent){
+            else if(old_parent !==  new_parent && this.id === new_parent){
                 //XXX: In case of an update that moves across lists, we make it the new parent's job
-
                 var percent_input = $(u.item).find(".bucket-percent");
 
                 //Added a new bucket from available->used
-                if(new_parent == "buckets_used_list"){
-                    console.log("Adding!")
+                if(new_parent === "buckets_used_list"){
+                    //console.log("Adding!");
                     percent_input.css("display","inline");
-                    UpdateVisibilityBuckets();
                 }
                 else{ //Removed a bucket from used
-                    console.log("Removing!")
+                    //console.log("Removing!");
                     percent_input.css("display","none");
-                    UpdateVisibilityBuckets();
                 }
-
+                UpdateVisibilityBuckets();
                 UpdateUsedPercentage();
             }
+
         }
     });
     bucket_lists.disableSelection();
