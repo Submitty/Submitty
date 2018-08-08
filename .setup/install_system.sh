@@ -86,7 +86,6 @@ if [ ${VAGRANT} == 1 ]; then
     echo "Non-interactive vagrant script..."
 
     export DEBIAN_FRONTEND=noninteractive
-    shift
 
     # Setting it up to allow SSH as root by default
     mkdir -p -m 700 /root/.ssh
