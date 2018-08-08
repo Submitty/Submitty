@@ -23,7 +23,9 @@ Point precision:
 <br /><br />
 
 <div class="electronic_file" id="gradeable_rubric">
-Is this a PDF with a page assigned to each component?
+Are student submissions/uploads a single file PDF with a fixed/prescribed format?<br>
+And do you expect each specific problem/item/component to appear on a specific page number of the PDF document?
+
 <fieldset>
     <input type="radio" id="yes_pdf_page" name="pdf_page" value="true"
             {{ is_pdf_page ? 'checked' : '' }} /> Yes
@@ -34,11 +36,11 @@ Is this a PDF with a page assigned to each component?
 
     <div id="pdf_page">
         <br />
-        Who will assign pages to components?
+        Who will assign page numbers to problems/item/components?<br>
         <input type="radio" id="no_pdf_page_student" name="pdf_page_student" value="false"
-                {{ not is_pdf_page_student ? 'checked' : '' }} /> Instructor
+                {{ not is_pdf_page_student ? 'checked' : '' }} /> Instructor (specify the starting page number for each problem/item/component below)<br>
         <input type="radio" id="yes_pdf_page_student" name="pdf_page_student" value="true"
-                {{ is_pdf_page_student ? 'checked' : '' }} /> Student
+                {{ is_pdf_page_student ? 'checked' : '' }} /> Student (student will be asked for page numbers at submission time)
     </div>
 </fieldset>
 <table class="electronic_file table table-bordered" id="gradeable_rubric" style=" border: 1px solid #AAA;">
