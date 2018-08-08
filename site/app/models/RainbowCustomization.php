@@ -42,14 +42,18 @@ class RainbowCustomization extends AbstractModel{
         //This function should examine the DB(?) / a file(?) and if customization settings already exist, use them. Otherwise, populate with defaults.
         $this->customization_data = [];
 
+        foreach (self::syllabus_buckets as $bucket){
+            $this->customization_data[$bucket] = [];
+        }
+
         //$gids = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
         $gradeables = $this->core->getQueries()->getAllGradeables();
         foreach ($gradeables as $gradeable){
             //XXX: 'none (for practice only)' we want to truncate to just 'none', otherwise use full bucket name
             $bucket = $gradeable->getBucket() == "none (for practice only)" ? "none" : $gradeable->getBucket();
-            if(!isset($this->customization_data[$bucket])){
+            /*if(!isset($this->customization_data[$bucket])){
                 $this->customization_data[$bucket] = [];
-            }
+            }*/
             /*XXX: Right now we aren't yet worried about pulling in from existing customization.json but if we do, then what happens in the event of a conflict?
              * I'm tempted to say for version 1.0, too bad, we override with the version from the DB (since that's more up to date), if the gradeable exists
              * In a later version we may want to highlight it in red or something, and ask the user which number to use? I'm not sure if there's a use case for using
