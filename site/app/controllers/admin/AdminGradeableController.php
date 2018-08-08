@@ -115,6 +115,7 @@ class AdminGradeableController extends AbstractController {
             'action' => $gradeable !== null ? 'template' : 'new',
             'template_list' => $template_list,
             'syllabus_buckets' => self::syllabus_buckets,
+            'regrade_enabled' => $this->core->getConfig()->isRegradeEnabled()
         ]);
     }
 
@@ -219,7 +220,8 @@ class AdminGradeableController extends AbstractController {
             'date_format' => 'Y-m-d H:i:sO',
             'syllabus_buckets' => self::syllabus_buckets,
             'gradeable_components_enc' => json_encode($gradeable_components_enc),
-
+            'regrade_allowed' => $gradeable->isRegradeAllowed(),
+            'regrade_enabled' => $this->core->getConfig()->isRegradeEnabled(),
             // Non-Gradeable-model data
             'gradeable_section_history' => $gradeable_section_history,
             'num_rotating_sections' => $num_rotating_sections,
@@ -843,7 +845,7 @@ class AdminGradeableController extends AbstractController {
                 'ta_grading' => $details['ta_grading'] === 'true',
                 'team_size_max' => $details['team_size_max'],
                 'vcs_subdirectory' => $details['vcs_subdirectory'],
-
+                'regrade_allowed' => $details['regrade_allowed'] === 'true',
                 'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/python_simple_homework/config',
 
                 // TODO: properties that aren't supported yet
@@ -871,10 +873,12 @@ class AdminGradeableController extends AbstractController {
         $gradeable_create_data = array_merge($gradeable_create_data, [
             'ta_view_start_date' => (clone $tonight)->sub(new \DateInterval('P1D')),
             'grade_start_date' => (clone $tonight)->add(new \DateInterval('P10D')),
+            'grade_due_date' => (clone $tonight)->add(new \DateInterval('P14D')),
             'grade_released_date' => (clone $tonight)->add(new \DateInterval('P14D')),
             'team_lock_date' => (clone $tonight)->add(new \DateInterval('P7D')),
             'submission_open_date' => (clone $tonight),
-            'submission_due_date' => (clone $tonight)->add(new \DateInterval('P7D'))
+            'submission_due_date' => (clone $tonight)->add(new \DateInterval('P7D')),
+            'regrade_request_date' => (clone $tonight)->add(new \DateInterval('P21D'))
         ]);
 
         // Finally, construct the gradeable
@@ -944,7 +948,8 @@ class AdminGradeableController extends AbstractController {
             'student_submit',
             'student_download',
             'student_download_any_version',
-            'peer_grading'
+            'peer_grading',
+            'regrade_allowed'
         ];
 
         // Date properties all need to be set at once
@@ -957,13 +962,6 @@ class AdminGradeableController extends AbstractController {
                 // Unset dates so we don't try and use it in the other loop
                 unset($details[$date_property]);
                 $date_set = true;
-            }
-        }
-        if ($date_set) {
-            try {
-                $gradeable->setDates($dates);
-            } catch (ValidationException $e) {
-                $errors = array_merge($errors, $e->getDetails());
             }
         }
 
@@ -985,6 +983,16 @@ class AdminGradeableController extends AbstractController {
             } catch (\Exception $e) {
                 // If something goes wrong, record it so we can tell the user
                 $errors[$prop] = $e->getMessage();
+            }
+        }
+
+        // Set the dates last just in case the request contained parameters that
+        //  affect date validation
+        if ($date_set) {
+            try {
+                $gradeable->setDates($dates);
+            } catch (ValidationException $e) {
+                $errors = array_merge($errors, $e->getDetails());
             }
         }
 
@@ -1112,6 +1120,8 @@ class AdminGradeableController extends AbstractController {
         //what happens on the quick link depends on the action
         if ($action === "release_grades_now") {
             if ($dates['grade_released_date'] > $now) {
+                // Also set the grade due date so our dates are valid
+                $dates['grade_due_date'] = $now;
                 $dates['grade_released_date'] = $now;
                 $message .= "Released grades for ";
                 $success = true;

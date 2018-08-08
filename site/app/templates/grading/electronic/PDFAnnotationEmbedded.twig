@@ -40,9 +40,16 @@
 <script>
 
     try {
+        for(let i = 0 ; i < localStorage.length; i++){
+            if(localStorage.key(i).includes('annotations')){
+                localStorage.removeItem(localStorage.key(i));
+            }
+        }
         let annotations = JSON.parse({{ annotation_jsons|json_encode|raw }});
         for(let grader in annotations){
-            localStorage.setItem('{{ filename }}/' + grader +'/annotations', annotations[grader]);
+            if(annotations[grader] !== ""){
+                localStorage.setItem('{{ filename }}/' + grader +'/annotations', annotations[grader]);
+            }
         }
     } catch {
         alert("Can't fetch annotations");

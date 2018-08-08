@@ -17,6 +17,15 @@
     padding-left: 4px;
 }
 
+.toolbar-item[value^="eraser"] {
+    padding-left: 2px;
+    padding-right: 3px;
+    padding-bottom: 5px;
+    margin-left: 3px;
+    margin-top: -2px;
+    margin-bottom: 4px;
+}
+
 .toolbar-item[value^="cursor"] {
     padding-right: 5px;
     margin-left: 4px;
@@ -63,6 +72,7 @@
     bottom: 30px;
     left: 50%;
     z-index:41;
+    box-sizing: content-box;
 }
 
 .selection_panel {
