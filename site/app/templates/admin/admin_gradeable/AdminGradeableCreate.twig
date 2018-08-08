@@ -69,13 +69,13 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
             {{ action != 'new' and gradeable.getTaGrading() ? 'checked' : '' }} /> Yes
     <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val auto_save date-related"
             {{ not (action != 'new' and gradeable.getTaGrading()) ? 'checked' : '' }} /> No
-    {% if regrade_enabled == true %}
+    {% if regrade_enabled %}
     <br /><br /><br />
         Will regrade requests be enabled for this assignment?
         <br />
-        <input type="radio" id="yes_regrade_allowed" name="regrade_allowed" value="true" class="bool_val auto_save"
+        <input type="radio" id="yes_regrade_allowed" name="regrade_allowed" value="true" class="bool_val auto_save date-related"
                 {{ action != 'new' and gradeable.isRegradeAllowed() ? 'checked' : '' }} /> Yes
-        <input type="radio" id="no_regrade_allowed" name="regrade_allowed" value="false" class="bool_val auto_save"
+        <input type="radio" id="no_regrade_allowed" name="regrade_allowed" value="false" class="bool_val auto_save date-related"
                 {{ not (action != 'new' and gradeable.isRegradeAllowed()) ? 'checked' : '' }} /> No
     {% endif %}
     <br /><br />
