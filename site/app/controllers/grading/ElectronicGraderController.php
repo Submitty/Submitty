@@ -58,8 +58,8 @@ class ElectronicGraderController extends GradingController {
             case 'get_overall_comment':
                 $this->ajaxGetOverallComment();
                 break;
-            case 'get_marked_users':
-                $this->ajaxGetSubmittersThatGotMark();
+            case 'get_mark_stats':
+                $this->ajaxGetMarkStats();
                 break;
             case 'add_new_mark':
                 $this->ajaxAddNewMark();
@@ -2084,9 +2084,9 @@ class ElectronicGraderController extends GradingController {
     }
 
     /**
-     * Route for getting all submitters that received a mark
+     * Route for getting all submitters that received a mark and stats about that mark
      */
-    public function ajaxGetSubmittersThatGotMark() {
+    public function ajaxGetMarkStats() {
         // Required parameters
         $gradeable_id = $_POST['gradeable_id'] ?? '';
         $component_id = $_POST['component_id'] ?? '';
@@ -2120,7 +2120,7 @@ class ElectronicGraderController extends GradingController {
 
         try {
             // Once we've parsed the inputs and checked permissions, perform the operation
-            $results = $this->getSubmittersThatGotMark($mark, $grader);
+            $results = $this->getMarkStats($mark, $grader);
             $this->core->getOutput()->renderJsonSuccess($results);
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
@@ -2129,7 +2129,7 @@ class ElectronicGraderController extends GradingController {
         }
     }
 
-    private function getSubmittersThatGotMark(Mark $mark, User $grader) {
+    private function getMarkStats(Mark $mark, User $grader) {
         // TODO: filter users based on who the grader is allowed to see
         $submitter_ids = $this->core->getQueries()->getSubmittersWhoGotMark($mark);
 
