@@ -581,19 +581,20 @@ class Gradeable extends AbstractModel {
     }
 
     /**
-     * Gets all of the gradeable's date values indexed by property name
-     * @return \DateTime[]
+     * Gets all of the gradeable's date values indexed by property name (including late_days)
+     * @return mixed[]
      */
     public function getDates() {
         $dates = [];
         foreach(self::date_properties as $property) {
             $dates[$property] = $this->$property;
         }
+        $dates['late_days'] = $this->late_days;
         return $dates;
     }
 
     /**
-     * Gets all of the gradeable's date values as strings indexed by property name
+     * Gets all of the gradeable's date values as strings indexed by property name (including late_days)
      * @return string[]
      */
     public function getDateStrings() {
@@ -601,6 +602,7 @@ class Gradeable extends AbstractModel {
         foreach (self::date_properties as $property) {
             $dates[$property] = DateUtils::dateTimeToString($this->$property);
         }
+        $dates['late_days'] = strval($this->late_days);
         return $dates;
     }
 
