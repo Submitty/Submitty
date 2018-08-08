@@ -1,4 +1,4 @@
-<!--
+{#
 Will this assignment have peer grading?
 <fieldset>
     <input type="radio" id="peer_yes_radio" name="eg_peer_grading" value="true" class="peer_yes" {{ gradeable.isPeerGrading() ? 'checked' : '' }}/> Yes
@@ -12,7 +12,8 @@ Will this assignment have peer grading?
         <input style='width: 50px' type='text' name="eg_peer_grade_complete_score" value="{{ admin_gradeable.getPeerGradeCompleteScore() }}" class='int_val' />
     </div>
 </fieldset>
-<br />-->
+<br />
+#}
 
 Point precision:
 <input style='width: 50px' type='text' id="point_precision_id" name='precision' onchange="fixPointPrecision(this);" value="{{ gradeable.getPrecision() }}" class="float_val" />
@@ -80,10 +81,10 @@ Is this a PDF with a page assigned to each component?
                             {% endif %}
 
                             <a onclick="deleteMark(this)" {{ first ? 'hidden' : '' }}> <i class="fa fa-times" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-                            <!--
+                            {#
                             <a onclick="moveMarkDown(this)"> <i class="fa fa-arrow-down" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                             <a onclick="moveMarkUp(this)"> <i class="fa fa-arrow-up" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-                            -->
+                            #}
                             <br>
                         </div>
                         {% set first = false %}
@@ -92,7 +93,7 @@ Is this a PDF with a page assigned to each component?
                 </div>
             </td>
 
-            <td style="background-color:#EEE;">
+            <td style="background-color:#EEE; width: 210px;">
                 {% set old_max = question.getMaxValue() %}
                 {% set old_upper_clamp = question.getUpperClamp() %}
                 {% set old_lower_clamp = question.getLowerClamp() %}
@@ -121,20 +122,19 @@ Is this a PDF with a page assigned to each component?
 
                 <div id="pdf_page_{{ num }}" class="pdf_page_input" style="{{ not is_pdf_page or is_pdf_page_student ? 'display:none;' : '' }}">Page:&nbsp;&nbsp;<input type="number" name="page_component_{{ num }}" value="{{ question.getPage() }}" class="page_component" max="1000" step="1" style="width:50px; resize:none;"/></div>
 
-                <!--
+                {#
                 <div id="peer_checkbox_{{ num }}" class="peer_input" style="{{ not gradeable.isPeerGrading() ? 'display: none;' : '' }}>Peer Component:&nbsp;&nbsp;<input type="checkbox" name="peer_component_{{ num }}" value="on" class="peer_component" {{ question.getIsPeer() ? 'checked' : '' }} /></div>
-                -->
+                #}
+                {#
                 {% if num > 1 %}
-                    <!--
                     <a id="delete-{{ num }}" class="question-icon" onclick="deleteQuestion({{ num }});">
                     <i class="fa fa-times" aria-hidden="true"></i></a>
                     <a id="down-{{ num }}" class="question-icon" onclick="moveQuestionDown({{ num }});">
                     <i class="fa fa-arrow-down" aria-hidden="true"></i></a>
                     <a id="up-{{ num }}" class="question-icon" onclick="moveQuestionUp({{ num }});">
                     <i class="fa fa-arrow-up" aria-hidden="true"></i></a>
-                    -->
                 {% endif %}
-
+                #}
             </td>
         </tr>
         {% set num = num + 1 %}

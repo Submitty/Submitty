@@ -42,12 +42,12 @@
 {% macro query_list(queries) %}
     <table>
         <tr>
-            <th style="width: 2em"></th>
+            <th class="query-list"></th>
             <th></th>
         </tr>
         {% for query in queries %}
             <tr>
-                <td style="text-align: right;">
+                <td class="index">
                     {{ loop.index }}&nbsp;&nbsp;
                 </td>
                 <td>
