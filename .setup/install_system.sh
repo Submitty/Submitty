@@ -56,6 +56,7 @@ DAEMONPHP_GROUP=submitty_daemonphp
 #################
 
 export VAGRANT=0
+export NO_SUBMISSIONS=0
 export WORKER=0
 
 # Read through the flags passed to the script reading them in and setting
