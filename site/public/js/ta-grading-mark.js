@@ -89,7 +89,7 @@ function updateCustomMarkText(me) {
 
 //if type == 0 number input, type == 1 textarea
 function checkIfSelected(me) {
-    var table_row = $(me.parentElement);
+    var table_row = $(me.parentElement.parentElement.parentElement);
     var is_selected = false;
     var icon = table_row.find(".mark");
     var number_input = table_row.find("input");
