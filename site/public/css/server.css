@@ -338,6 +338,10 @@ table tr.table-header {
     padding-top: 25px;
 }
 
+.text-center {
+    text-align: center;
+}
+
 #logo-submitty {
     height: 125px;
     width: 357px;
@@ -929,7 +933,7 @@ table .instructor .two-options{
 }
 
 #sidebar {
-    width: 200px;
+    width: 220px;
     padding: 20px;
     padding-right: 0;
     margin-left: 10px;
@@ -938,6 +942,7 @@ table .instructor .two-options{
 #nav-buttons ul li {
     padding: 6px;
     list-style: none;
+    margin-bottom: -2px;
 }
 
 #nav-buttons ul li a {
@@ -951,6 +956,15 @@ table .instructor .two-options{
     margin-left: -20px;
     margin-right: -20px;
     margin-bottom: -10px;
+}
+
+#nav-buttons ul li.short-line {
+    border-bottom: 1px solid #ddd;
+    margin-left: 6px;
+    margin-right: 10px;
+    padding-bottom: 0;
+    margin-top: 4px;
+    margin-bottom: 4px;
 }
 
 #nav-buttons ul li.heading {

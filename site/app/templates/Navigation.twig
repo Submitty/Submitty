@@ -16,27 +16,23 @@
     <div class="col-md-auto" id="sidebar">
         <div id="nav-buttons">
             <ul>
-                {% for name, group in top_buttons if group.buttons|length > 0 %}
-                    {% if loop.index != 1 %}
-                        <li></li>
-                        <li class="line"></li>
-                        <li></li>
-                    {% endif %}
-                    <li class="heading">{{ group.name }}</li>
-                    {% for button in group.buttons %}
+                {% for button in top_buttons %}
+                    {% if button.title == "" %}
+                        <li class="short-line"></li>
+                    {% else %}
                         <li>
                             <a href="{{ button.href }}">
                                 {{ button.title }}
                             </a>
                         </li>
-                    {% endfor %}
+                    {% endif %}
                 {% endfor %}
             </ul>
         </div>
     </div>
     <div class="col-md" id="nav-body">
         <div class="content">
-            <h2>Assignments</h2>
+            <h2>Navigation</h2>
 
             <table class="gradeable_list" style="width:100%;">
                 {% if sections|length > 0 %}
@@ -64,6 +60,9 @@
                                         <a class="external" href="{{ g_info.url }}" target="_blank">
                                             <i style="margin-left: 10px;" class="fa fa-external-link"></i>
                                         </a>
+                                    {% endif %}
+                                    {% if g_info.can_delete %}
+                                        <i class="fa fa-times" style="color:red; cursor:pointer;" aria-hidden="true" onclick='newDeleteGradeableForm("{{ core.buildUrl({'component': 'admin', 'page': 'admin_gradeable', 'action': 'delete_gradeable', 'id': g_info.id}) }}","{{ g_info.name }}");'></i>
                                     {% endif %}
                                 </td>
                                 {% for button in g_info.buttons %}
