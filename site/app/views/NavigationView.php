@@ -142,15 +142,34 @@ class NavigationView extends AbstractView {
         $top_buttons = [];
 
         // ======================================================================================
+        // CREATE NEW GRADEABLE BUTTON -- only visible to instructors
+        // ======================================================================================
+        if ($this->core->getUser()->accessAdmin()) {
+            $top_buttons[] = new Button($this->core, [
+                "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'view_gradeable_page')),
+                "title" => "+ Create New Gradeable",
+                "class" => "btn btn-primary"
+            ]);
+            //$top_buttons[] = new Button($this->core, [
+            //    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable', 'action' => 'upload_config')),
+            //    "title" => "Upload Config",
+            //    "class" => "btn btn-primary"
+            //]);
+
+        }
+
+        // ======================================================================================
         // COURSE MATERIALS BUTTON -- visible to everyone
         // ======================================================================================
         $course_path = $this->core->getConfig()->getCoursePath();
         $course_materials_path = $course_path."/uploads/course_materials";
         $any_files = FileUtils::getAllFiles($course_materials_path);
         if ($this->core->getUser()->getGroup()=== 1 || !empty($any_files)) {
-            $top_buttons[] = new Button($this->core, [
+          $label = "Course Materials";
+          if (empty($any_files)) { $label = "Upload Course Materials"; }
+          $top_buttons[] = new Button($this->core, [
                 "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'course_materials', 'action' => 'view_course_materials_page')),
-                "title" => "Course Materials",
+                "title" => $label,
                 "class" => "btn btn-primary"
             ]);
         }
@@ -180,32 +199,6 @@ class NavigationView extends AbstractView {
         }
 
         // ======================================================================================
-        // CREATE NEW GRADEABLE BUTTON -- only visible to instructors
-        // ======================================================================================
-        if ($this->core->getUser()->accessAdmin()) {
-            $top_buttons[] = new Button($this->core, [
-                "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'view_gradeable_page')),
-                "title" => "New Gradeable",
-                "class" => "btn btn-primary"
-            ]);
-            $top_buttons[] = new Button($this->core, [
-                "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable', 'action' => 'upload_config')),
-                "title" => "Upload Config",
-                "class" => "btn btn-primary"
-            ]);
-
-        }
-
-        // ======================================================================================
-        // LATE DAYS TABLE BUTTON
-        // ======================================================================================
-        $top_buttons[] = new Button($this->core, [
-            "href" => $this->core->buildUrl(array('component' => 'student', 'page' => 'view_late_table')),
-            "title" => "Show my late days information",
-            "class" => "btn btn-primary"
-        ]);
-
-        // ======================================================================================
         // FORUM BUTTON
         // ======================================================================================
         if ($this->core->getConfig()->isForumEnabled()) {
@@ -215,6 +208,15 @@ class NavigationView extends AbstractView {
                 "class" => "btn btn-primary",
             ]);
         }
+
+        // ======================================================================================
+        // LATE DAYS TABLE BUTTON
+        // ======================================================================================
+        $top_buttons[] = new Button($this->core, [
+            "href" => $this->core->buildUrl(array('component' => 'student', 'page' => 'view_late_table')),
+            "title" => "Show my Late Days Information",
+            "class" => "btn btn-primary"
+        ]);
 
         // ======================================================================================
         // GRADES SUMMARY BUTTON
@@ -646,7 +648,7 @@ class NavigationView extends AbstractView {
      */
     private function getEditButton(Gradeable $gradeable) {
         $button = new Button($this->core, [
-            "title" => "Edit",
+            "title" => "Edit Gradeable Configuration",
             "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'edit_gradeable_page', 'id' => $gradeable->getId())),
             "class" => "fa fa-pencil",
             "title_on_hover" => true,

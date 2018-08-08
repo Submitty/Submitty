@@ -7,6 +7,7 @@
     <link rel='stylesheet' type='text/css' href='{{ css_ref }}' />
     {% endfor %}
 
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
     {% for js_ref in js %}
     <script type='text/javascript' src='{{ js_ref }}'></script>
@@ -44,46 +45,50 @@
                     </ul>
                 </div>
             {% endif %}
-            <div id="header">
-                <div id="header-text">
-                    <a href="http://submitty.org" target=_blank><div id="logo-submitty"></div></a>
-                    <h2>
-                        {% if core.userLoaded() %}
-                        <span id="login">
-                            Hello <span id="login-id">{{ core.getUser().getDisplayedFirstName() }}</span>
-                            {% if notifications_info is not null %}
-                            <a class="btn btn-sm btn-primary" title="Notifications" style="color: white;" href="{{ core.buildUrl({'component': 'navigation', 'page': 'notifications'}) }}">
-                                <i class="fa fa-bell"></i>
-                                {% if notifications_info > 0 %}
-                                <span class="notification_badge" style="color: white;font-weight: bold;">{{ notifications_info }}</span>
-                                {% endif %}
-                            </a>
-                            {% endif %}
-                        </span> (<a id='logout' href='{{ core.buildUrl({'component': 'authentication', 'page': 'logout'}) }}'>Logout</a>)
-                        {% else %}
-                        <span id="login-guest">Welcome to Submitty</span>
-                        {% endif %}
-                    </h2>
-                    <h2>
-                        {% for b in breadcrumbs %}
-                            {% if loop.index0 > 0 and not b.getIcon() %}
-                                &gt;
-                            {% endif %}
-                            {% if b.getUrl() != null and b.getUrl() != "" %}
-                                {% if b.getIcon() %}
-                                    <a class="external" href="{{ b.getUrl() }}" target="_blank"><i style="margin-left: 10px;" class="fa fa-external-link"></i></a>
-                                {% else %}
-                                    {% if b.getTop() %}
-                                        <a target="_top" href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
-                                    {% else %}
-                                        <a href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
+            <div id="header" class="row">
+                <div class="col-12 col-md" id="header-text">
+                    <div>
+                        <h2>
+                            {% if core.userLoaded() %}
+                            <span id="login">
+                                Hello <span id="login-id">{{ core.getUser().getDisplayedFirstName() }}</span>
+                                {% if notifications_info is not null %}
+                                <a class="btn btn-sm btn-primary" title="Notifications" href="{{ core.buildUrl({'component': 'navigation', 'page': 'notifications'}) }}">
+                                    <i class="fa fa-bell"></i>
+                                    {% if notifications_info > 0 %}
+                                    <span class="notification_badge">{{ notifications_info }}</span>
                                     {% endif %}
+                                </a>
                                 {% endif %}
+                            </span> (<a id='logout' href='{{ core.buildUrl({'component': 'authentication', 'page': 'logout'}) }}'>Logout</a>)
                             {% else %}
-                                {{ b.getTitle() }}
+                            <span id="login-guest">Welcome to Submitty</span>
                             {% endif %}
-                        {% endfor %}
-                    </h2>
+                        </h2>
+                        <h2>
+                            {% for b in breadcrumbs %}
+                                {% if loop.index0 > 0 and not b.getIcon() %}
+                                    &gt;
+                                {% endif %}
+                                {% if b.getUrl() != null and b.getUrl() != "" %}
+                                    {% if b.getIcon() %}
+                                            <a class="external" href="{{ b.getUrl() }}" target="_blank"><i class="fa fa-external-link"></i></a>
+                                    {% else %}
+                                        {% if b.getTop() %}
+                                            <a target="_top" href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
+                                        {% else %}
+                                            <a href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
+                                        {% endif %}
+                                    {% endif %}
+                                {% else %}
+                                    {{ b.getTitle() }}
+                                {% endif %}
+                            {% endfor %}
+                        </h2>
+                    </div>
                 </div>
+                <a class="col-12 col-md-auto" id="logo-box" href="http://submitty.org" target=_blank>
+                    <div id="logo-submitty"></div>
+                </a>
             </div>
 {# Looks mismatched because this lines up with GlobalFooter.twig #}

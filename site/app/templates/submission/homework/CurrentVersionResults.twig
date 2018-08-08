@@ -3,9 +3,9 @@
 </div>
 
 {# Submitted files #}
-<div class="sub">
-    <h4>Submitted Files</h4>
-    <div class="box half">
+<h4>Submitted Files</h4>
+<div class="row">
+    <div class="box col-md-6">
         {% for file in files %}
             {{ file.relative_name }} ({{ (file.size / 1024) | number_format(2) | default(-1) }}kb)
 
@@ -25,7 +25,7 @@
             Download all files: <a onclick='downloadZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}")'><i class="fa fa-download" aria-hidden="true" title="Download zip of all files"></i></a>
         {% endif %}
     </div>
-    <div class="box half">
+    <div class="box col-md-6">
         submission timestamp: {{ submission_time|date('m/d/Y h:i:s A') }}<br />
         days late: {{ days_late }} (before extensions)<br />
         {% if results is defined %}
