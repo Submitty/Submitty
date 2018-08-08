@@ -80,4 +80,23 @@
                     <div id="logo-submitty"></div>
                 </a>
             </div>
+            <div class="row">
+                <div class="col-md-auto" id="sidebar">
+                    <div id="nav-buttons">
+                        <ul>
+                            {% for button in sidebar_buttons %}
+                                {% if button.title == "" %}
+                                    <li class="short-line"></li>
+                                {% else %}
+                                    <li>
+                                        <a href="{{ button.href }}">
+                                            {{ button.title }}
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md" id="nav-body">
 {# Looks mismatched because this lines up with GlobalFooter.twig #}

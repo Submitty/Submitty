@@ -930,6 +930,7 @@ table .instructor .two-options{
     flex-direction: column;
     align-content: center;
     justify-items: center;
+    padding-top: 15px;
 }
 
 #sidebar {

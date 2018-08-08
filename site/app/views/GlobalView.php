@@ -3,7 +3,7 @@
 namespace app\views;
 
 class GlobalView extends AbstractView {
-    public function header($breadcrumbs, $wrapper_urls, $css=array(), $js=array()) {
+    public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $css=array(), $js=array()) {
         $messages = [];
         foreach (array('error', 'notice', 'success') as $type) {
             foreach ($_SESSION['messages'][$type] as $key => $error) {
@@ -29,6 +29,7 @@ class GlobalView extends AbstractView {
             "css" => $css,
             "js" => $js,
             "page_title" => $pageTitle,
+            "sidebar_buttons" => $sidebar_buttons,
             "breadcrumbs" => $breadcrumbs,
             "user_first_name" => $this->core->getUser() ? $this->core->getUser()->getDisplayedFirstName() : "",
             "base_url" => $this->core->getConfig()->getBaseUrl(),

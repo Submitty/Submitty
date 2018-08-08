@@ -1,6 +1,7 @@
 <?php
 
 namespace app\libraries;
+use app\controllers\GlobalController;
 use app\exceptions\OutputException;
 use app\models\Breadcrumb;
 
@@ -31,6 +32,8 @@ class Output {
     private $twig = null;
     /** @var \Twig_LoaderInterface $twig */
     private $twig_loader = null;
+    /** @var GlobalController $controller */
+    private $controller;
 
     /**
      * @var Core
@@ -40,6 +43,7 @@ class Output {
     public function __construct(Core $core) {
         $this->core = $core;
         $this->start_time = microtime(true);
+        $this->controller = new GlobalController($core);
     }
 
     public function loadTwig() {
@@ -275,23 +279,7 @@ class Output {
 
     private function renderHeader() {
         if ($this->use_header) {
-            $wrapper_files = $this->core->getConfig()->getWrapperFiles();
-            $wrapper_urls = array_map(function($file) {
-                return $this->core->buildUrl([
-                    'component' => 'misc',
-                    'page' => 'read_file',
-                    'dir' => 'site',
-                    'path' => $file,
-                    'file' => pathinfo($file, PATHINFO_FILENAME),
-                    'csrf_token' => $this->core->getCsrfToken()
-                ]);
-            },  $wrapper_files);
-
-            if (array_key_exists('override.css', $wrapper_urls)) {
-                $this->css[] = $wrapper_urls['override.css'];
-            }
-
-            return $this->renderTemplate('Global', 'header', $this->breadcrumbs, $wrapper_urls, $this->css, $this->js);
+            return $this->controller->header();
         }
         else {
             return '';
@@ -300,18 +288,7 @@ class Output {
 
     private function renderFooter() {
         if ($this->use_footer) {
-            $wrapper_files = $this->core->getConfig()->getWrapperFiles();
-            $wrapper_urls = array_map(function($file) {
-                return $this->core->buildUrl([
-                    'component' => 'misc',
-                    'page' => 'read_file',
-                    'dir' => 'site',
-                    'path' => $file,
-                    'file' => pathinfo($file, PATHINFO_FILENAME),
-                    'csrf_token' => $this->core->getCsrfToken()
-                ]);
-            },  $wrapper_files);
-            return $this->renderTemplate('Global', 'footer', (microtime(true) - $this->start_time), $wrapper_urls);
+            return $this->controller->footer();
         } else {
             return '';
         }
@@ -426,5 +403,33 @@ class Output {
 
     public function addRoomTemplatesTwigPath() {
         $this->twig_loader->addPath(FileUtils::joinPaths(dirname(dirname(__DIR__)), 'room_templates'), $namespace = 'room_templates');
+    }
+
+    /**
+     * @return array
+     */
+    public function getBreadcrumbs() {
+        return $this->breadcrumbs;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCss() {
+        return $this->css;
+    }
+
+    /**
+     * @return array
+     */
+    public function getJs() {
+        return $this->js;
+    }
+
+    /**
+     * @return float
+     */
+    public function getRunTime() {
+        return (microtime(true) - $this->start_time);
     }
 }
