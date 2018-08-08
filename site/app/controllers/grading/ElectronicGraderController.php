@@ -149,7 +149,7 @@ class ElectronicGraderController extends GradingController {
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $user_id, $active_version);
         $annotation_jsons = [];
         //Dir iterator needs the first file.
-        if(is_dir($annotation_path)){
+        if(is_dir($annotation_path) && count(scandir($annotation_path)) > 2){
             $first_file = scandir($annotation_path)[2];
             $annotation_path = FileUtils::joinPaths($annotation_path, $first_file);
             if(is_file($annotation_path)) {
