@@ -35,6 +35,7 @@
         $("#config-percent-"+ExtractBucketName(el.id,1)).text(el.value + "%");
     }
 
+    //Updates the sum of percentage points accounted for by the buckets being used
     function UpdateUsedPercentage(){
         var val = 0.0;
         $("input[id^='percent']").filter(function(){
@@ -52,6 +53,7 @@
         }
     }
 
+    //Updates which buckets have full configuration shown (inc. each gradeable), and the ordering
     function UpdateVisibilityBuckets(){
         //For each bucket that isn't being used, hide it
         $("#buckets_available_list").find("input").each(function() {
@@ -218,7 +220,8 @@
     });
     bucket_lists.disableSelection();
     
-    $("ol[id^='gradeables-list']").sortable().disableSelection();
+    var gradeables_lists = $("ol[id^='gradeables-list']").sortable();
+    gradeables_lists.disableSelection();
 
     $(document).ready(function(){
        UpdateVisibilityBuckets();
