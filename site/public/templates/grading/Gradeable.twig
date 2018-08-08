@@ -25,7 +25,7 @@
     function unloadSave() {
         if (!__unloadRequestSent) {
             __unloadRequestSent = true;
-            saveLastOpenedMark(false, function () {
+            saveLastOpenedComponent(false, function () {
             }, function () {
                 // Unable to save so try saving at a different time
                 __unloadRequestSent = false;

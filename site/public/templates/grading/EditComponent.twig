@@ -1,11 +1,23 @@
 {% extends "Component.twig" %}
 
+{% block ta_note %}
+    <textarea id="ta-comment-{{ component.id }}" placeholder="Note to TAs">{{ component.ta_comment }}</textarea>
+{% endblock %}
+
+{% block page_number %}
+    <input id="page-number-{{ component.id }}" type="number" step="1" min="1" value="{{ component.page }}" {{ component.page < 1 ? 'hidden' : '' }}/>
+{% endblock %}
+
+{% block student_note %}
+    <textarea id="student-comment-{{ component.id }}" placeholder="Note to Student">{{ component.student_comment }}</textarea>
+{% endblock %}
+
 {% block component_footer %}
     {# Add new mark #}
     <div id="marks-extra-{{ component.id }}" style="display: none;" data-question_id="{{ component.id }}" data-changedisplay1="true">
         {# todo: peer grading #}
         <span>
-                <span class="add-common-mark" onclick="{{ break_onclick }} addMark(this,'{{ component.id }}'); event.stopPropagation(); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
+                <span class="add-common-mark" onclick="addMark(this,'{{ component.id }}'); event.stopPropagation()"><i class="fa fa-plus-square" aria-hidden="true"></i>
                 Add New Common Mark</span>
             </span>
     </div>

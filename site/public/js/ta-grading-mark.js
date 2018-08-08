@@ -5,9 +5,13 @@ NO_COMPONENT_ID = -1;
 GENERAL_MESSAGE_ID = -2;
 
 OPENEDCOMPONENTS = [];
+
+gradeable = null;
+anon_id = null;
+
 /**
  * Get the page-wide Gradeable object
- * @returns Object Gradeable data
+ * @returns {Object} Gradeable data
  */
 function getGradeable() {
     return gradeable;
@@ -22,11 +26,11 @@ function getAnonId() {
 }
 
 /**
- * Get a specific component in the global Gradeable
- * @param component_id Unique component id
- * @returns Object Component data
+ * Fetches a given component from the server
+ * @param {int} component_id
+ * @returns {Object} Component data
  */
-function getComponent(component_id) {
+function fetchComponent(component_id) {
     let components = getGradeable().components;
     for (let i = 0; i < components.length; i++) {
         if (components[i].id === component_id) {
@@ -37,13 +41,14 @@ function getComponent(component_id) {
 }
 
 /**
- * Get a specific mark in a mark in the global Gradeable
- * @param component_id Unique component id
- * @param mark_id Unique mark id
- * @returns Object Mark data
+ * Gets a mark instance from a component instance and mark id
+ *  Note: This component can come from `fetchComponent` or from `getComponentFromDOM`
+ * @param {Object} component
+ * @param {int} mark_id
+ * @returns {*}
  */
-function getMark(component_id, mark_id) {
-    let marks = getComponent(component_id).marks;
+function getMark(component, mark_id) {
+    let marks = component.marks;
     for (let i = 0; i < marks.length; i++) {
         if (marks[i].id === mark_id) {
             return marks[i];
@@ -53,70 +58,26 @@ function getMark(component_id, mark_id) {
 }
 
 /**
- * Removes a mark from the global Gradeable
- * @param component_id
- * @param mark_id
+ * Gets a Component instance with data extracted from the DOM
+ * @param {int} component_id
+ * @return {Object}
  */
-function removeMark(component_id, mark_id) {
-    let component = getComponent(component_id);
-    for (let i = 0; i < component.marks.length; i++) {
-        if (component.marks[i].id === mark_id) {
-            component.marks.splice(i, 1);
-        }
+function getComponentFromDOM(component_id) {
+
+}
+
+/**
+ * Sets the custom mark for a component in the DOM
+ * @param {int} component_id
+ * @param {number} points
+ * @param {string} text
+ */
+function setCustomMarkToDOM(component_id, points, text) {
+
+    if(text === '') {
+        //uncheck mark and set points to zero
     }
-}
-
-/**
- * DOM callback for changing the number of points for a mark
- * @param me DOM Element for the mark points entry
- */
-function updateMarkPoints(me) {
-    getMark(me.dataset.component_id, me.dataset.mark_id).points = parseFloat($(me).val());
-    updateProgressPoints(me.dataset.component_id);
-}
-
-/**
- * DOM callback for changing the note for a mark
- * @param me DOM Element for the mark note entry
- */
-function updateMarkText(me) {
-    getMark(me.dataset.component_id, me.dataset.mark_id).name = $(me).val();
-    // TODO: This function isn't named very well
-    updateProgressPoints(me.dataset.component_id);
-}
-
-/**
- * DOM callback for changing the number of points for a common mark
- * @param me DOM Element for the common mark points entry
- */
-function updateCustomMarkPoints(me) {
-    getComponent(me.dataset.component_id).score = parseFloat($(me).val());
-    updateProgressPoints(me.dataset.component_id);
-}
-
-/**
- * DOM callback for changing the note for a common mark
- * @param me DOM Element for the common mark note entry
- */
-function updateCustomMarkText(me) {
-    let component = getComponent(me.dataset.component_id);
-    let markText = $(me).val();
-    component.comment = markText;
-
-    // If we set custom mark to empty then we're clearing it. So unset the point value too.
-    if (markText === "") {
-        component.score = 0;
-    }
-
-    updateCommonMarkState(component.id);
-    updateProgressPoints(component.id);
-}
-
-/**
- * Updates the 'checked' state of the common-mark box for a DOM element
- * @param component_id Unique component id
- */
-function updateCommonMarkState(component_id) {
+    // TODO: do something
     let table_row = $('#mark_custom_id-' + component_id);
     let is_selected = false;
     let icon = table_row.find(".mark");
@@ -128,15 +89,43 @@ function updateCommonMarkState(component_id) {
     }
 
     icon.toggleClass("mark-has", is_selected);
-    updateFirstMarkState(component_id);
+}
+
+/**
+ * Removes a mark from the DOM
+ * @param {int} component_id
+ * @param {int} mark_id
+ */
+function removeMarkFromDOM(component_id, mark_id) {
+
+}
+
+function getMarkFromDOM(component_id, mark_id) {
+
+}
+
+function getGradedComponentFromDOM(component_id) {
+
+}
+
+/**
+ * DOM callback for changing the note for the custom mark
+ * @param {int} component_id
+ */
+function updateCustomMarkText(component_id) {
+    let component = getComponentFromDOM(component_id);
+    setCustomMarkToDOM(component.id, component.score, component.comment);
+
+    updateFirstMarkState(component.id);
+    updateProgressPoints(component.id);
 }
 
 /**
  * Render and return a view for the given mark
  * @param {int} component_id Unique component id
  * @param {int} mark_id Unique mark id
- * @param {bool} gradeEnabled If the mark is in 'grade' mode
- * @param {bool} editable If the mark is in 'edit' mode and can be edited
+ * @param {boolean} gradeEnabled If the mark is in 'grade' mode
+ * @param {boolean} editable If the mark is in 'edit' mode and can be edited
  * @returns DOM structure for the mark
  */
 function getMarkView(component_id, mark_id, gradeEnabled, editable) {
@@ -390,13 +379,13 @@ function ajaxDeleteMark(gradeable_id, component_id, mark_id, successCallback = u
  * @param {function|undefined} successCallback
  * @param {function|undefined} errorCallback
  */
-function ajaxGetMarkedUsers(gradeable_id, component_id, mark_id, successCallback = undefined, errorCallback = undefined) {
+function ajaxGetMarkStats(gradeable_id, component_id, mark_id, successCallback = undefined, errorCallback = undefined) {
     $.getJSON({
         type: "POST",
         url: buildUrl({
             'component': 'grading',
             'page': 'electronic',
-            'action': 'get_marked_users'
+            'action': 'get_mark_stats'
         }),
         data: {
             'gradeable_id': gradeable_id,
@@ -428,10 +417,11 @@ function ajaxGetMarkedUsers(gradeable_id, component_id, mark_id, successCallback
  * @param {string} gradeable_id
  * @param {string} anon_id
  * @param {string} gradeable_comment
+ * @param {boolean} async
  * @param {function|undefined} successCallback
  * @param {function|undefined} errorCallback
  */
-function ajaxSaveGeneralComment(gradeable_id, anon_id, gradeable_comment, successCallback = undefined, errorCallback = undefined) {
+function ajaxSaveOveralComment(gradeable_id, anon_id, gradeable_comment, async, successCallback = undefined, errorCallback = undefined) {
     $.getJSON({
         type: "POST",
         url: buildUrl({
@@ -439,6 +429,7 @@ function ajaxSaveGeneralComment(gradeable_id, anon_id, gradeable_comment, succes
             'page': 'electronic',
             'action': 'save_general_comment'
         }),
+        async: async,
         data: {
             'gradeable_id': gradeable_id,
             'anon_id': anon_id,
@@ -513,12 +504,13 @@ function ajaxSaveMarkOrder(gradeable_id, component_id, order, successCallback = 
  * @param {int} active_version
  * @param {float} custom_points
  * @param {string} custom_message
- * @param {bool} overwrite True to overwrite the component's grader
+ * @param {boolean} overwrite True to overwrite the component's grader
  * @param {int[]} mark_ids
+ * @param {boolean} async
  * @param {function|undefined} successCallback
  * @param {function|undefined} errorCallback
  */
-function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, active_version, custom_points, custom_message, overwrite, mark_ids, successCallback = undefined, errorCallback = undefined) {
+function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, active_version, custom_points, custom_message, overwrite, mark_ids, async, successCallback = undefined, errorCallback = undefined) {
     $.getJSON({
         type: "POST",
         url: buildUrl({
@@ -526,6 +518,7 @@ function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, active_ver
             'page': 'electronic',
             'action': 'save_graded_component'
         }),
+        async: async,
         data: {
             'gradeable_id': gradeable_id,
             'component_id': component_id,
@@ -601,7 +594,67 @@ function ajaxSaveMark(gradeable_id, component_id, mark_id, points, note, success
     });
 }
 
-function haveMarksChanged(c_index, data) {
+/**
+ * ajax call to verify the grader of a component
+ * @param {string} gradeable_id
+ * @param {int} component_id
+ * @param {string} anon_id
+ * @param {function|undefined} successCallback
+ * @param {function|undefined} errorCallback
+ */
+function ajaxVerifyComponent(gradeable_id, component_id, anon_id, verifyAll, successCallback = undefined, errorCallback = undefined){
+    var action = (verifyAll) ? 'verify_all' : 'verify_grader';
+    $.ajax({
+        type: "POST",
+        url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': action}),
+        async: true,
+        data: {
+            'gradeable_id' : gradeable_id,
+            'component_id' : component_id,
+            'anon_id' : anon_id,
+        },
+        success: function (response) {
+            if (response.status !== 'success') {
+                if (typeof(errorCallback) === 'function') {
+                    errorCallback(response.message, response.data);
+                    return;
+                }
+                alert('Something went wrong saving the mark: ' + response.message);
+            }
+            else if (typeof(successCallback) === "function") {
+                successCallback(response.data);
+            }
+        },
+        error: function (err) {
+            console.error("Failed to parse response.  The server isn't playing nice...");
+            console.error(err);
+            alert("There was an error with fetching marks. Please refresh the page and try again.");
+        }
+    })
+}
+
+/**
+ * ajax call to verify all graders of a component
+ * @param {string} gradeable_id
+ * @param {int} component_id
+ * @param {string} anon_id
+ * @param {function|undefined} successCallback
+ * @param {function|undefined} errorCallback
+ */
+function ajaxAllVerifyComponents() {
+
+}
+
+/**
+ * TODO: figure this out
+ * Compares the initially loaded, the DOM, and the most recent remote marks for differences
+ *  to determine if there is a conflict that requires user action
+ * @param {int} component_id
+ * @returns Object with mark_id properties each containing 'local', 'remote', and 'dom' properties, which
+ *                  hold a mark's 'point' value and 'title' state, along with a conflict 'resolution' of
+ *                  'dom', 'remote', and 'conflict'
+ */
+function getMarkDiffs(component_id) {
     var marks = $('[name=mark_'+c_index+']');
     var mark_notes = $('[name^=mark_text_'+c_index+']');
     var mark_scores = $('[name^=mark_points_'+c_index+']');
@@ -650,10 +703,10 @@ function compareOrder(mark1, mark2){
 }
 
 /**
- * Reload marks for a component and render them in the list
+ * TODO:Reload marks for a component and render them in the list
  * @param {int} component_id
  */
-function updateComponent(component_id) {
+function refreshComponentMarkList(component_id) {
     let gradeable = getGradeable();
     let component = getComponent(component_id);
     let parent = $('#marks-parent-'+component_id);
@@ -748,10 +801,21 @@ function updateComponent(component_id) {
     });
 }
 
+/**
+ * Saves the DOM state of a component to the server.  If there are conflicts in mark configs,
+ *  those will be indicated TODO
+ * @param {int} component_id
+ */
+function saveComponent(component_id) {
 
+}
+
+/**
+ * Fetches the up-to-date overall comment for the graded gradeable and displays it
+ */
 function updateGeneralComment() {
-    ajaxGetGeneralComment(getGradeable().id, getAnonId(), function(data) {
-        $('#comment-id-general').val(data['data']);
+    ajaxGetGeneralComment(getGradeable().id, getAnonId(), function (data) {
+        $('#comment-id-general').val(data);
     });
 }
 
@@ -793,60 +857,66 @@ function addMark(component_id) {
 // TODO: Ended here.  A lot of the code can be removed if we go to a model of always
 // TODO:    getting the most up-to-date component after modifying the rubric then reconstructing
 // TODO:    the UI with the new data.
+/**
+ * Deletes a mark from the server and from the mark list
+ * @param {int} component_id
+ * @param {int} mark_id
+ */
 function deleteMark(component_id, mark_id) {
     ajaxDeleteMark(getGradeable().id, component_id, mark_id, function () {
-        updateComponent(component_id);
+        removeMarkFromDOM(component_id, mark_id);
     });
 }
 
-// gets all the information from the database to return some stats and a list of students with that mark
-function showMarklist(me) {
-    var gradeable = getGradeable();
-
-    var question_num = parseInt($(me).attr('id').split('-')[1]);
-    var mark_id = parseInt($(me).attr('id').split('-')[2]);
-    var gradeable_component_id = $('#marks-parent-' + question_num)[0].dataset.question_id;
-    
-    ajaxGetMarkedUsers(gradeable.id, gradeable_component_id, mark_id, function(data) {
+/**
+ * Shows the users that got a mark and some stats about that mark
+ * @param {int} component_id
+ * @param {int} mark_id
+ */
+function showMarkStats(component_id, mark_id) {
+    ajaxGetMarkStats(getGradeable().id, component_id, mark_id, function (data) {
         // Calculate total and graded component amounts
-        var graded = 0, total = 0;
-        for (var x in data.sections) {
+        let graded = 0, total = 0;
+        for (let x in data.sections) {
             graded += parseInt(data.sections[x]['graded_components']);
             total += parseInt(data.sections[x]['total_components']);
         }
 
         // Set information in the popup
-        $("#student-marklist-popup-question-name")[0].innerHTML = $("#component_name-" + question_num).text();
-        $("#student-marklist-popup-mark-note")[0].innerHTML = $("textarea[name=mark_text_" + question_num  +"_" + mark_id + "]").val();
-        
+        $("#student-marklist-popup-question-name")[0].innerHTML = $("#component_name-" + component_id).text();
+        $("#student-marklist-popup-mark-note")[0].innerHTML = $("textarea[name=mark_text_" + component_id + "_" + mark_id + "]").val();
+
         $("#student-marklist-popup-student-amount")[0].innerHTML = data.submitter_ids.length;
         $("#student-marklist-popup-graded-components")[0].innerHTML = graded;
         $("#student-marklist-popup-total-components")[0].innerHTML = total;
-        
-        // Create list of students
-        var students_html = "";
-        for (var x = 0; x < data.submitter_ids.length; x++) {
-            var id = data.submitter_ids[x];
 
-            var href = window.location.href.replace(/&who_id=([a-z0-9_]*)/, "&who_id="+id);
+        // Create list of students
+        let students_html = "";
+        for (let x = 0; x < data.submitter_ids.length; x++) {
+            let id = data.submitter_ids[x];
+
+            let href = window.location.href.replace(/&who_id=([a-z0-9_]*)/, "&who_id=" + id);
             students_html +=
-                "<a " + (id != null ? "href='"+href+"'" : "") + ">" +
-                id + (x != data.submitter_ids.length - 1 ? ", " : "") +
+                "<a " + (id != null ? "href='" + href + "'" : "") + ">" +
+                id + (x !== data.submitter_ids.length - 1 ? ", " : "") +
                 "</a>";
         }
-        
+
         // Hide all other (potentially) open popups
         $('.popup-form').css('display', 'none');
-        
+
         // Display and update the popup
         $("#student-marklist-popup").css("display", "block");
         $("#student-marklist-popup-student-names")[0].innerHTML = students_html;
     })
 }
 
-//check if the first mark (Full/no credit) should be selected
+/**
+ * Checks if the first mark (full/no credit) should be selected, and selects it if it should
+ * @param {int} component_id
+ * @returns {boolean}
+ */
 function updateFirstMarkState(component_id) {
-    component_id = parseInt(component_id);
     var mark_table = $('#marks-parent-'+component_id);
     var targetId=getComponent(component_id).marks[0].id;
     var first_mark = mark_table.find('span[name=mark_icon_'+component_id+'_'+targetId+']');
@@ -877,12 +947,11 @@ function updateFirstMarkState(component_id) {
 
 /**
  * Calculate the number of points a component has with the given selected marks
- * @param c_index 1-indexed component index
- * @returns Either "None Selected" or the point value
+ * @param {int} component_id
+ * @returns {int|null}
  */
-function calculateMarksPoints(c_index) {
-    c_index = parseInt(c_index);
-    var component = getComponent(c_index);
+function calculateMarksPoints(component_id) {
+    let component = getComponentFromDOM(component_id);
     var lower_clamp = component.lower_clamp;
     var current_points = component.default;
     var upper_clamp = component.upper_clamp;
@@ -924,6 +993,7 @@ function calculateMarksPoints(c_index) {
 }
 
 /**
+ * TODO: most of this should be moved to the DOM-access layer
  * Update the display of a component's score, marks, and background
  * @param c_index 1-indexed component index
  */
@@ -1060,15 +1130,15 @@ function updateBadge(badge, current, total) {
 
 /**
  * DOM callback for toggling a mark
- * @param c_index 1-indexed component index
- * @param m_id Unique mark id
+ * @param {int} component_id
+ * @param {int} mark_id
  */
-function selectMark(c_index, m_id) {
+function toggleMark(component_id, mark_id) {
     if(editModeEnabled==true){
         return;
     }
     var skip = true; //if the table is all false initially, skip check marks.
-    var mark_table = $('#marks-parent-'+c_index);
+    var mark_table = $('#marks-parent-'+component_id);
     mark_table.find('.mark').each(function() {
         if($(this)[0].classList.contains('mark-has')) {
             skip = false;
@@ -1095,11 +1165,10 @@ function selectMark(c_index, m_id) {
 }
 
 /**
- * Closes all the questions except the one being opened
- * openClose toggles alot of listed elements in order to work
- * @param c_index 1-indexed component index
+ * Loads a component from the server and displays it as open on the page
+ * @param {int} component_id
  */
-function openClose(c_index) {
+function openComponent(component_id) {
     var row_num = parseInt(c_index);
     var total_num = getGradeable().components.length;
 
@@ -1116,11 +1185,27 @@ function openClose(c_index) {
 }
 
 /**
+ * Closes the provided component
+ * @param {int} component_id
+ */
+function closeComponent(component_id) {
+
+}
+
+/**
+ * Closes all open components and the comment
+ */
+function closeAll() {
+
+}
+
+/**
+ * TODO: wtf.  I think this has some work for closing/opening components
  * Set if a component should be visible
  * @param c_index 1-indexed component index
  * @param show If the component should be visible
  */
-function setMarkVisible(c_index, show) {
+function EVILsetMarkVisible(c_index, show) {
     var page = ($('#page-' + c_index)[0]).innerHTML;
 
     var title           = $('#title-' + c_index);
@@ -1192,7 +1277,7 @@ function setMarkVisible(c_index, show) {
 }
 
 /**
- * Set if the general comment box should be visible
+ * Set if the overall comment box should be visible
  * @param gshow If it should be visible
  */
 function setGeneralVisible(gshow) {
@@ -1212,8 +1297,13 @@ function setGeneralVisible(gshow) {
     updateCookies();
 }
 
-// Saves the general comment
-function saveGeneralComment(sync, successCallback, errorCallback) {
+/**
+ * Saves the overall comment for this graded gradeable
+ * @param async
+ * @param successCallback
+ * @param errorCallback
+ */
+function saveOverallComment(async = true, successCallback = undefined, errorCallback = undefined) {
     var gradeable = getGradeable();
 
     if ($('#extra-general')[0].style.display === "none") {
@@ -1230,12 +1320,16 @@ function saveGeneralComment(sync, successCallback, errorCallback) {
     var overwrite = $('#overwrite-id').is(":checked");
     $(current_question_text[0]).text(gradeable_comment);
     
-    ajaxSaveGeneralComment(gradeable.id, gradeable.user_id, gradeable_comment, sync, successCallback, errorCallback);
+    ajaxSaveOveralComment(gradeable.id, gradeable.user_id, gradeable_comment, async, successCallback, errorCallback);
 }
 
-// Saves the last opened mark so that exiting the page doesn't
-//  have the ta lose their grading data
-function saveLastOpenedMark(sync, successCallback, errorCallback) {
+/**
+ * Saves the currently opened component(s) and the overall comment to the server
+ * @param {boolean} async
+ * @param {function|undefined} successCallback
+ * @param {function|undefined} errorCallback
+ */
+function saveGradedGradeable(async, successCallback, errorCallback) {
     var gradeable = getGradeable();
 
     // Find open mark
@@ -1253,7 +1347,16 @@ function saveLastOpenedMark(sync, successCallback, errorCallback) {
     // If no open mark was found, then save general comment
     saveGeneralComment(sync, successCallback, errorCallback);
 }
-function saveMark(c_index, sync, override, successCallback, errorCallback) {
+
+/**
+ * Saves a graded component to the server
+ * @param {int} component_id
+ * @param {boolean} async
+ * @param override_grader
+ * @param {function|undefined} successCallback
+ * @param {function|undefined} errorCallback
+ */
+function saveGradedComponent(component_id, async, override_grader, successCallback, errorCallback) {
     var gradeable = grading_data.gradeable;
     if(editModeEnabled){
         ajaxGetGradedComponent(gradeable.id, gradeable.user_id, gradeable.components[c_index-1].id , function(data){
@@ -1334,7 +1437,16 @@ function saveMark(c_index, sync, override, successCallback, errorCallback) {
     calculateMarksPoints(c_index);
 }
 
-function saveMarkEditMode(c_index, sync, successCallback, errorCallback, data, override){
+/**
+ * Saves a component's marks to the server, checking for mark conflicts
+ * @param c_index
+ * @param async
+ * @param successCallback
+ * @param errorCallback
+ * @param data
+ * @param override
+ */
+function saveComponentMarks(c_index, async, successCallback, errorCallback, data, override){
     var gradeable = getGradeable();
     var component = grading_data.gradeable.components[c_index-1];
     var arr_length = data['marks'].length;
@@ -1474,8 +1586,25 @@ function saveMarkEditMode(c_index, sync, successCallback, errorCallback, data, o
     calculateMarksPoints(c_index);
 }
 
-//finds what mark is currently open
-function findCurrentOpenedMark() {
+function updateVerifiedStates() {
+
+    // If no components to be verified
+    document.getElementById("verifyAllButton").style.display = "none";
+}
+
+function verifyComponent(component_id) {
+
+}
+
+function verifyAllComponents() {
+
+}
+
+/**
+ * Gets an array of ids of all open components
+ * @returns {array}
+ */
+function getOpenComponentIds() {
     if ($('#grading_rubric').length === 0 || $('#summary-general').length === 0) {
         return NO_COMPONENT_ID;
     }
@@ -1509,92 +1638,35 @@ function findCurrentOpenedMark() {
     }
 }
 
-function verifyMark(gradeable_id, component_id, user_id, verifyAll){
-    var action = (verifyAll) ? 'verify_all' : 'verify_grader';
-    $.ajax({
-        type: "POST",
-        url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': action}),
-        async: true,
-        data: {
-            'gradeable_id' : gradeable_id,
-            'component_id' : component_id,
-            'anon_id' : user_id,
-        },
-        success: function(data) {
-            window.location.reload();
-            console.log("verified user");
-            if(action === 'verify_all')
-                document.getElementById("verifyAllButton").style.display = "none";
-        },
-        error: function() {
-            alert("failed to verify grader");
-        }
-    })
+/**
+ * Gets if the overall comment box is open
+ * @returns {boolean}
+ */
+function isOverallCommentOpen() {
+
 }
 
 /**
- * Open the given component (if it's not open already), saving changes on any previous components
- * @param c_index 1-indexed component index
+ * DOM callback to open/close a component
+ * @param {int} component_id
+ * @param {boolean} save If changes made to the component should be saved
  */
-function openMark(c_index) {
-    saveLastOpenedMark(true);
-    updateMarksOnPage(c_index);
-    //If it's already open, then openClose() will close it
-    if (findCurrentOpenedMark() !== c_index) {
-        openClose(c_index);
-    }
-    let page = getComponent(c_index)['page'];
-    if(page){
-        //841.89 os the pdf page height, 29 is the margin, 80 is the top part.
-        let files = $('.openable-element-submissions');
-        for(let i = 0; i < files.length; i++){
-            if(files[i].innerText.trim() == "upload.pdf"){
-                if($("#file_view").is(":visible")){
-                    $('#file_content').animate({scrollTop: ((page-1)*(841.89+29))}, 500);
-                } else {
-                    expandFile("upload.pdf", files[i].getAttribute("file-url")).then(function(){
-                        $('#file_content').animate({scrollTop: ((page-1)*(841.89+29))}, 500);
-                    });
-                }
-            }
-        }
-    }
-    updateProgressPoints(c_index);
-}
-
-/**
- * Close the given component (if it's open), optionally saving changes
- * @param c_index 1-indexed component index
- * @param save If changes should be saved
- */
-function closeMark(c_index, save) {
-    //Can't close a closed mark
-    if (findCurrentOpenedMark() !== c_index) {
-        return;
-    }
-    saveLastOpenedMark(true);
-    updateMarksOnPage(c_index);
-    setMarkVisible(c_index, false);
-}
-
-/**
- * Toggle if a component should be visible
- * @param c_index 1-indexed component index
- * @param save If changes should be saved
- */
-function toggleMark(id, save) {
+function toggleComponentOpen(component_id, save) {
     if (findCurrentOpenedMark() === id) {
-        closeMark(id, save);
+        if(save) {
+            saveComponent(component_id);
+        }
+        closeComponent(component_id);
         updateCookies();
     } else {
-        openMark(id);
+        openComponent(component_id);
     }
 }
 
 /**
  * Open the general message input (if it's not open already), saving changes on any previous mark
  */
-function openGeneralMessage() {
+function openOverallComment() {
     saveLastOpenedMark(true);
     saveGeneralComment(true);
 
@@ -1608,15 +1680,9 @@ function openGeneralMessage() {
  * Close the general message input (if it's open), optionally saving changes
  * @param save If changes should be saved
  */
-function closeGeneralMessage(save) {
-    //Cannot save it if it is not being edited
-    if (findCurrentOpenedMark() !== GENERAL_MESSAGE_ID) {
-        return;
-    }
-
+function closeOverallComment(save) {
     if (save) {
-        saveLastOpenedMark(true);
-        saveGeneralComment(true);
+        saveOverallComment();
     } else {
         updateGeneralComment();
     }
@@ -1624,13 +1690,13 @@ function closeGeneralMessage(save) {
 }
 
 /**
- * Toggle if the general comment should be visible
- * @param save If changes should be saved
+ * Toggle if the overall comment should be visible
+ * @param {boolean} save If changes should be saved
  */
-function toggleGeneralMessage(save) {
-    if (findCurrentOpenedMark() === -2) {
-        closeGeneralMessage(save);
+function toggleOverallComment(save) {
+    if (isOverallCommentOpen()) {
+        closeOverallComment(save);
     } else {
-        openGeneralMessage();
+        openOverallComment();
     }
 }

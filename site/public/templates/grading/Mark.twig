@@ -25,7 +25,7 @@ Required Input:
         </span>
         <input
             name="mark_points_{{ component_id }}_{{ mark.id }}"
-            type="number" onchange="updateMarkPoints(this);"
+            type="number" onchange="updateProgressPoints({{ component_id }});"
             step="{{ precision }}"
             {% block points_extra_properties %}
             {% endblock %}
@@ -38,7 +38,7 @@ Required Input:
     <td colspan="2">
         <textarea
             name="mark_text_{{ component_id }}_{{ mark.id }}"
-            onchange="updateMarkText(this);"
+            onchange="updateProgressPoints({{ component_id }});"
             onkeyup="autoResizeComment(event);"
             onclick="event.stopPropagation();"
             rows="1"

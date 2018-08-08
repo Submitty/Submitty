@@ -3,7 +3,7 @@ Required Input:
     component: {id}
 #}
 
-<div id="title-{{ component.id }}" class="box component" onclick="{% block component_click %}{{ break_onclick }}; toggleMark({{ component.id }}, true);{% endblock %}">
+<div id="title-{{ component.id }}" class="box component" onclick="{% block component_click %}{% endblock %}">
 
     {# Title bar #}
     <div class="box-title">
@@ -14,13 +14,14 @@ Required Input:
         <span data-changebg="true">
             {% block component_block %}{% endblock component_block %}
         </span>
+        <br/>
 
         {# Notes to TA/Student #}
-        <span id="ta_note-{{ component.id }}" style="display: none;" data-changedisplay1="true">
+        <span id="ta_note-{{ component.id }}">
             {% block ta_note %}
             {% endblock %}
         </span>
-        <span id="page-{{ component.id }}" style="display: none;">
+        <span id="page-{{ component.id }}">
             {% block page_number %}
             {% endblock %}
         </span>

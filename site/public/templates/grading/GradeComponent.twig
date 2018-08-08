@@ -10,6 +10,10 @@ Required inputs:
     version_conflict = graded_component.graded_version != -1 and graded_gradeable.auto_graded_gradeable.active_version != graded_component.graded_version
 #}
 
+{% block component_click %}
+    {{ version_conflict ? 'return false' : '' }}toggleMark({{ component.id }}, true)
+{% endblock %}
+
 {% block badge_block %}
 <span id="gradebar-{{ component.id }}" class="badge gradebar">
     ? / ?
@@ -45,7 +49,6 @@ Required inputs:
 
 {% block ta_note %}
     {% if component.ta_comment != "" %}
-        <br/>
         <div class="ta-student-note">
             <i><b>Note to TA: </b>{{ component.ta_comment }}</i>
         </div>
@@ -80,7 +83,7 @@ Required inputs:
             id="mark_points_custom-{{ component.id }}"
             type="number"
             step="{{ precision }}"
-            onchange="updateCustomMarkPoints(this)"
+            onchange="updateProgressPoints({{ component.id }})"
             onclick="event.stopPropagation();"
             data-component_index="{{ component.id }}"
             value="{{ graded_component.score }}" class="mark-score"
@@ -89,8 +92,7 @@ Required inputs:
         <textarea
             name="mark_text_custom_{{ component.id }}"
             id="mark_text_custom-{{ component.id }}"
-            onkeyup="updateCustomMarkText(this); autoResizeComment(event)"
-            onchange="updateCustomMarkText(this)"
+            onkeyup="updateCustomMarkText({{ component_id }}); autoResizeComment(event)"
             onclick="event.stopPropagation()"
             data-component_index="{{ component.id }}"
             cols="120"

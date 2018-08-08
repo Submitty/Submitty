@@ -319,15 +319,14 @@ function changeEditorStyle(newStyle){
 
 //-----------------------------------------------------------------------------
 // Student navigation
-//TODO figure out why the confirms below are happening
 function gotoPrevStudent() {
     if(getGradeable()!=null){
-        saveLastOpenedMark(true, function () {
+        saveLastOpenedComponent(true, function () {
             window.location = $("#prev-student")[0].dataset.href;
         }, function () {
-        //    if (confirm("Could not save last mark, change student anyway?")) {
+            if (confirm("Could not save open component, change student anyway?")) {
                 window.location = $("#prev-student")[0].dataset.href;
-       //     }
+            }
         });
     }
     else{
@@ -337,12 +336,12 @@ function gotoPrevStudent() {
 
 function gotoNextStudent() {
     if(getGradeable()!=null){
-        saveLastOpenedMark(true, function () {
+        saveLastOpenedComponent(true, function () {
             window.location = $("#next-student")[0].dataset.href;
         }, function () {
-         //   if (confirm("Could not save last mark, change student anyway?")) {
+            if (confirm("Could not save open component, change student anyway?")) {
                 window.location = $("#next-student")[0].dataset.href;
-         //   }
+            }
         });
     }
     else{
