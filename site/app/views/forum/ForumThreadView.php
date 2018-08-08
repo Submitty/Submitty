@@ -319,7 +319,7 @@ HTML;
 				<div id="forum_wrapper">
 HTML;
 					$next_page = $initialPageNumber + 1;
-					$prev_page = ($initialPageNumber == 1)?-1:($initialPageNumber - 1);
+					$prev_page = ($initialPageNumber == 1)?0:($initialPageNumber - 1);
 					$arrowup_visibility = ($initialPageNumber == 1)?"display:none;":"";
 					$return .= <<<HTML
 					<div id="thread_list" class="thread_list" prev_page='{$prev_page}' next_page='{$next_page}'>
