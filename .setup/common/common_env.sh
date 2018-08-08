@@ -22,4 +22,6 @@ SUBMITTY_DATA_DIR=/var/local/submitty
 PHP_USER=submitty_php
 PHP_GROUP=submitty_php
 
+DAEMON_USER=submitty_daemon
+
 CGI_USER=submitty_cgi

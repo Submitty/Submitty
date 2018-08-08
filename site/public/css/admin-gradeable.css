@@ -7,6 +7,10 @@ input[readonly] {
     border:none;
 }
 
+input[disabled] {
+    background: #999;
+}
+
 #gradeable-dates input[type="text"] {
     width: 200px;
 }
