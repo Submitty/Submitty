@@ -217,8 +217,8 @@
         }
     });
     bucket_lists.disableSelection();
-
-    $("ol[id^='gradeables-list']").sortable();
+    
+    $("ol[id^='gradeables-list']").sortable().disableSelection();
 
     $(document).ready(function(){
        UpdateVisibilityBuckets();
