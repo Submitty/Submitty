@@ -1,3 +1,5 @@
+// import colorPicker from "./colorPicker";
+
 const { UI } = PDFAnnotate;
 let documentId = '';
 let PAGE_HEIGHT;
@@ -243,12 +245,32 @@ function render(gradeable_id, user_id, grader_id, file_name) {
     }
     document.getElementById('pdf_annotation_icons').addEventListener('click', handleToolbarClick);
     //TODO: Find a better home for this, shouldn't be here.
-    document.getElementById('reset_zoom').addEventListener('click', function(){
-        zoom('custom', 100);
-    });
-    document.getElementById('zoom_percent_selector').addEventListener('change', function(e){
-        zoom('custom', e.target.value);
-    });
+    // document.getElementById('reset_zoom').addEventListener('click', function(){
+    //     zoom('custom', 100);
+    // });
+    // document.getElementById('zoom_percent_selector').addEventListener('change', function(e){
+    //     zoom('custom', e.target.value);
+    // });
+})();
+
+// Color selection
+(function () {
+    let main_color;
+    function initColors(){
+        colorPicker.test();
+        let init_color = localStorage.getItem('main_color') || '#ff0000';
+        document.getElementById('color_selector').style.backgroundColor = init_color;
+        setColor(init_color);
+    }
+
+    function setColor(color){
+        if(main_color != color){
+            main_color = color;
+            localStorage.setItem('main_color', color);
+            document.getElementById('color_selector').style.backgroundColor = color;
+        }
+    }
+    initColors();
 })();
 
 // Pen stuff

@@ -487,9 +487,9 @@ class ElectronicGraderView extends AbstractView {
     }
 
     public function renderPDFBar(){
-        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/PDFAnnotationBar.twig", [
-
-        ]);
+//        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/PDFAnnotationBar.twig", [
+//
+//        ]);
     }
 
     /**
