@@ -552,7 +552,7 @@ fi
 echo -e "Install python_submitty_utils"
 
 pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
-python3 setup.py -q install
+pip3 install .
 
 # fix permissions
 chmod -R 555 /usr/local/lib/python*/*

@@ -36,7 +36,6 @@ body {
 
 a, a:hover, a:link, a:visited {
     cursor: pointer;
-    text-decoration: none;
 }
 
 a,
@@ -44,13 +43,36 @@ a:visited,
 a:link,
 a.external,
 a.external:visited,
-a.external:link {
-    color: #000000;
+a.external:link,
+a.fa:hover,
+a > i.fa:hover {
+    color: #2627ee;
 }
 
 a:hover,
 a.external:hover {
-    color: #2627ee;
+    color: #131399;
+}
+a:active,
+a.external:active {
+    color: #991313;
+}
+
+a.btn-success, a.btn-primary, a.btn-danger,
+a.fa.btn-success, a.btn-primary, a.btn-danger,
+a.btn-success > i.fa, a.btn-primary > i.fa, a.btn-danger > i.fa {
+    color: #ffffff;
+}
+
+a.btn-default,
+a.fa.btn-default,
+a.fa,
+a > i.fa {
+    color: #000000;
+}
+
+a.btn {
+    text-decoration: none;
 }
 
 /****************************
@@ -74,6 +96,7 @@ input[type="search"],
 input[type="tel"],
 input[type="color"] {
     height: 20px;
+    box-sizing: content-box;
     padding: 4px 6px;
     font-size: 14px;
     line-height: 20px;
@@ -296,15 +319,7 @@ table tr.table-header {
     overflow: hidden;
 }
 
-#header-text {
-
-    font-weight: 300;
-    display: inline-block;
-
-    /*margin-top: 5px;*/
-    margin-left: 20px;
-    width: 100%;
-}
+#header-text {font-weight: 300;display: flex;/* width: 100%; */align-items: center;}
 
 #header a,
 #header a:link,
@@ -322,20 +337,37 @@ table tr.table-header {
 }
 
 #logo-submitty {
-    float: right;
-    margin-right: 20px;
     height: 125px;
     width: 357px;
     background: url('../img/submitty_logo.png') no-repeat;
     background-size: 357px 125px;
 }
 
+@media (min-width: 357px) {
+    #logo-submitty {
+        float: right;
+        margin-right: -15px;
+    }
+}
+@media (max-width: 356px) {
+    #logo-box {
+        margin: 0;
+        padding: 0;
+    }
+    #logo-submitty {
+        width: 100%;
+        height: 0;
+        padding-top: calc(125% / 357 * 100);
+        background-size: contain;
+    }
+}
+
 .content {
     box-shadow: 0 2px 15px -5px #888888;
     background-color: #E9EFEF;
     border-radius: 3px;
-    padding: 2%;
-    margin: 2% 15px;
+    padding: 30px;
+    margin: 15px;
 }
 
 .content h2 {
@@ -349,10 +381,6 @@ table tr.table-header {
 
 #push {
     flex-grow: 1;
-}
-
-#push, #footer {
-    height: 20px;
 }
 
 #footer a {
@@ -389,9 +417,6 @@ table tr.table-header {
 }
 
 .sub {
-    margin-left: 1%;
-    margin-top: 1%;
-    margin-bottom: 1%;
 }
 
 .sub::after {
@@ -723,6 +748,12 @@ table tr.table-header {
     padding-right: 2px;
     margin-left: 5px;
     border-radius: 2px;
+    color: white;
+    font-weight: bold;
+}
+
+#header #login a.btn-primary {
+    color: white;
 }
 
 #forum_wrapper{
@@ -804,7 +835,11 @@ table tr.table-header {
     padding:5px;
     overflow-y: auto;
     word-wrap: break-word;
+}
 
+#thread_list a {
+    text-decoration: none;
+    color: initial;
 }
 
 .create_thread_button {
@@ -1332,4 +1367,20 @@ end of styles used in the admin gradeable page
 .wrapper-upload td, .wrapper-upload th {
     padding: 4px;
     border: 1px solid #000;
+}
+
+.query-list {
+    width: 2em;
+}
+
+.query-list .index {
+    text-align: right;
+}
+
+#header .fa-external-link {
+    margin-left: 10px;
+}
+
+.courses-table {
+    width: 100%;
 }
