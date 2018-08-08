@@ -38,23 +38,6 @@
                 <div class="col-12 col-sm" id="header-text">
                     <div>
                         <h2>
-                            {% if core.userLoaded() %}
-                            <span id="login">
-                                Hello <span id="login-id">{{ core.getUser().getDisplayedFirstName() }}</span>
-                            </span> (<a id='logout' href='{{ core.buildUrl({'component': 'authentication', 'page': 'logout'}) }}'>Logout</a>)
-                            {% else %}
-                            <span id="login-guest">Welcome to Submitty</span>
-                            {% endif %}
-                            {% if notifications_info is not null %}
-                                <a title="Notifications" href="{{ core.buildUrl({'component': 'navigation', 'page': 'notifications'}) }}">
-                                    <i class="fa fa-bell"></i>
-                                    {% if notifications_info > 0 %}
-                                        <span class="notification_badge">{{ notifications_info }}</span>
-                                    {% endif %}
-                                </a>
-                            {% endif %}
-                        </h2>
-                        <h2>
                             {% for b in breadcrumbs %}
                                 {% if loop.index0 > 0 and not b.getIcon() %}
                                     &gt;
@@ -85,6 +68,25 @@
                     <div class="col-md-auto" id="sidebar">
                         <div id="nav-buttons">
                             <ul>
+                                {% if core.userLoaded() %}
+                                    <li id="login">
+                                        <span id="login-id">{{ core.getUser().getDisplayedFirstName() }}</span>
+                                    </li>
+                                    {% if notifications_info is not null %}
+                                        <li>
+                                            <a title="Notifications" href="{{ core.buildUrl({'component': 'navigation', 'page': 'notifications'}) }}">
+                                                Notifications
+                                                {% if notifications_info > 0 %}
+                                                    <span class="notification_badge">{{ notifications_info }}</span>
+                                                {% endif %}
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                    <li>
+                                        <a id='logout' href='{{ core.buildUrl({'component': 'authentication', 'page': 'logout'}) }}'>Logout</a>
+                                    </li>
+                                {% endif %}
+                                <li class="short-line"></li>
                                 {% for button in sidebar_buttons %}
                                     {% if button.title == "" %}
                                         <li class="short-line"></li>
