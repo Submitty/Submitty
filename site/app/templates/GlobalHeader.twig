@@ -88,7 +88,11 @@
                                 {% if button.title == "" %}
                                     <li class="short-line"></li>
                                 {% else %}
-                                    <li>
+                                    <li
+                                        {% if button.selected %}
+                                            class="selected"
+                                        {% endif %}
+                                    >
                                         <a href="{{ button.href }}">
                                             {{ button.title }}
                                         </a>

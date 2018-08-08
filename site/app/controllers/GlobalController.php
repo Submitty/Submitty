@@ -142,6 +142,21 @@ class GlobalController extends AbstractController {
             "title" => "My Late Days",
         ];
 
+        $current_route = $_SERVER["REQUEST_URI"];
+        foreach ($sidebar_buttons as &$button) {
+            if (array_key_exists("href", $button)) {
+                $href = $button["href"];
+                $parse = parse_url($href);
+                $path = isset($parse['path']) ? $parse['path'] : '';
+                $query = isset($parse['query']) ? '?' . $parse['query'] : '';
+                $fragment = isset($parse['fragment']) ? '#' . $parse['fragment'] : '';
+                $route = $path . $query . $fragment;
+
+                $button["selected"] = $this->routeEquals($route, $current_route);
+            }
+        }
+        unset($button); //Reference cleanup
+
         return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $css, $js);
     }
 
@@ -159,6 +174,10 @@ class GlobalController extends AbstractController {
         },  $wrapper_files);
         $runtime = $this->core->getOutput()->getRunTime();
         return $this->core->getOutput()->renderTemplate('Global', 'footer', $runtime, $wrapper_urls);
+    }
+
+    private function routeEquals(string $a, string $b) {
+        return $a === $b;
     }
 
 }
