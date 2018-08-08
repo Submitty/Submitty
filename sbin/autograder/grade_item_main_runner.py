@@ -60,6 +60,12 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
             grade_item.copy_contents_into(job_id,tmp_work_subission ,testcase_folder,tmp_logs)
             grade_item.copy_contents_into(job_id,tmp_work_compiled  ,testcase_folder,tmp_logs)
             grade_item.copy_contents_into(job_id,tmp_work_checkout  ,testcase_folder,tmp_logs)
+            
+            grade_item.untrusted_grant_rwx_access(which_untrusted, tmp_work_test_input)
+            grade_item.untrusted_grant_rwx_access(which_untrusted, tmp_work_subission)
+            grade_item.untrusted_grant_rwx_access(which_untrusted, tmp_work_compiled)
+            grade_item.untrusted_grant_rwx_access(which_untrusted, tmp_work_checkout)
+
             #copy the compiled runner to the test directory
             shutil.copy(my_runner,testcase_folder)
             my_testcase_runner = os.path.join(testcase_folder, 'my_runner.out')
@@ -115,6 +121,7 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                 #move back to the tmp_work directory (up one level)
                 os.chdir(tmp_work)
 
+
         
         print ("LOGGING END my_runner.out",file=logfile)
         logfile.flush()
@@ -136,4 +143,5 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
             msg='RUNNER ERROR: had to kill {} process(es)'.format(killall_success)
             print ("pid",os.getpid(),msg)
             grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,"","",msg)
+    
     return runner_success
