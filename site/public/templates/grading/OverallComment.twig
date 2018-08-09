@@ -5,8 +5,8 @@ Required Parameters:
 -overall_comment: the text to show in box
 
 #}
-{% set break_onclick = disabled ? "return false;" : "" %}
-<div class="box general-comment" onclick="{{ break_onclick }}; onClickOverallComment(this);">
+<div class="box general-comment"
+     onclick="{{ disabled ? '' : 'onClickOverallComment(this)'}}">
     <div class="box-title">
         <span id="title-general">
             <b>General Comment</b>
@@ -18,7 +18,9 @@ Required Parameters:
     </div>
     <div>
         {% if editable %}
-            <textarea id="overall-comment" rows="5" class="general-comment-entry"
+            <textarea id="overall-comment"
+                      rows="5"
+                      class="general-comment-entry"
                       onkeyup="autoResizeComment(event);"
                       placeholder="Overall message for student about the gradeable..."
             >{{ overall_comment }}</textarea>

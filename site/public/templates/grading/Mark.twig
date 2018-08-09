@@ -8,7 +8,8 @@ Required Input:
 TODO: add 'publish' support
 #}
 {% set extra_classes = editable ? '' : 'mark-uneditable' %}
-<div class="mark-container"
+<div id="mark-{{ mark.id }}"
+     class="mark-container"
      data-component_id="{{ component_id }}"
      data-mark_id="{{ mark.id }}"
      onclick="{{ editable ? '' : 'onToggleMark' }}"

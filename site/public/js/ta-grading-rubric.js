@@ -547,13 +547,16 @@ function setRubricDOMElements(elements) {
 }
 
 /**
- * Gets the DOM element for a component
+ * Gets the JQuery selector for the component id
  * @param component_id
  * @return DOM Element of the component
- * @throws Error if the component id doesn't exist
  */
 function getComponentDOMElement(component_id) {
     return $('#component-' + component_id);
+}
+
+function getMarkDOMElement(mark_id) {
+    return $('#mark-' + mark_id);
 }
 
 /**
@@ -561,7 +564,6 @@ function getComponentDOMElement(component_id) {
  * TODO: support instructor edit mode
  * @param {int} component_id
  * @return {Object}
- * @throws Error if the component id doesn't exist
  */
 function getComponentFromDOM(component_id) {
     let domElement = getComponentDOMElement(component_id);
@@ -579,7 +581,6 @@ function getComponentFromDOM(component_id) {
  * TODO: support publish
  * @param component_id
  * @return {Array}
- * @throws Error if the component id doesn't exist
  */
 function getMarkListFromDOM(component_id) {
     let domElement = getComponentDOMElement(component_id);
@@ -600,7 +601,6 @@ function getMarkListFromDOM(component_id) {
  * Extracts a graded component object from the DOM
  * @param {int} component_id
  * @return {Object}
- * @throws Error if the component id doesn't exist
  */
 function getGradedComponentFromDOM(component_id) {
     let domElement = getComponentDOMElement(component_id);
@@ -654,7 +654,7 @@ function getComponentFirstMarkId(component_id) {
  * @throws Error if the component id doesn't exist
  */
 function showMarkList(component_id) {
-    $(getComponentDOMElement(component_id)).find('#mark-list').show();
+    getComponentDOMElement(component_id).find('.ta-rubric-table').show();
 }
 
 /**
@@ -664,7 +664,7 @@ function showMarkList(component_id) {
  * @throws Error if the component id doesn't exist
  */
 function isComponentOpen(component_id) {
-
+    return getComponentDOMElement(component_id).find('.ta-rubric-table').is(':hidden');
 }
 
 /**
@@ -672,7 +672,7 @@ function isComponentOpen(component_id) {
  * @return {boolean}
  */
 function isOverallCommentOpen() {
-
+    return $('textarea#overall-comment').length > 0;
 }
 
 /**
@@ -682,7 +682,7 @@ function isOverallCommentOpen() {
  * @throws Error If the mark id doesn't exist
  */
 function isMarkChecked(mark_id) {
-
+    getMarkDOMElement(mark_id).find('span.mark-selected').length > 0;
 }
 
 /**
