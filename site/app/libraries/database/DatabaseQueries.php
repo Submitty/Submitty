@@ -1119,11 +1119,11 @@ ORDER BY g.sections_rotating_id, g.user_id", $params);
      */
     public function getCountUsersRotatingSections() {
         $this->course_db->query("
-SELECT rotating_section, count(*) as count
-FROM users
-WHERE registration_section IS NOT NULL
-GROUP BY rotating_section
-ORDER BY rotating_section");
+            SELECT rotating_section, count(*) as count
+            FROM users
+            WHERE registration_section IS NOT NULL
+            GROUP BY rotating_section
+            ORDER BY rotating_section");
         return $this->course_db->rows();
     }
 
@@ -1156,30 +1156,70 @@ ORDER BY rotating_section");
      */
     public function getCountNullUsersRotatingSections() {
         $this->course_db->query("
-SELECT rotating_section, count(*) as count
-FROM users
-WHERE registration_section IS NULL
-GROUP BY rotating_section
-ORDER BY rotating_section");
+            SELECT rotating_section, count(*) as count
+            FROM users
+            WHERE registration_section IS NULL
+            GROUP BY rotating_section
+            ORDER BY rotating_section");
         return $this->course_db->rows();
     }
 
     public function getRegisteredUserIdsWithNullRotating() {
         $this->course_db->query("
-SELECT user_id
-FROM users
-WHERE rotating_section IS NULL AND registration_section IS NOT NULL
-ORDER BY user_id ASC");
+            SELECT user_id
+            FROM users
+            WHERE rotating_section IS NULL AND registration_section IS NOT NULL
+            ORDER BY user_id ASC");
         return array_map(function($elem) { return $elem['user_id']; }, $this->course_db->rows());
     }
 
     public function getRegisteredUserIds() {
         $this->course_db->query("
-SELECT user_id
-FROM users
-WHERE registration_section IS NOT NULL
-ORDER BY user_id ASC");
+            SELECT user_id
+            FROM users
+            WHERE registration_section IS NOT NULL
+            ORDER BY user_id ASC");
         return array_map(function($elem) { return $elem['user_id']; }, $this->course_db->rows());
+    }
+
+    /**
+     * Get all team ids for all gradeables
+     * @return string[][] Map of gradeable_id => [ team ids ]
+     */
+    public function getTeamIdsAllGradeables() {
+        $this->course_db->query("SELECT team_id, g_id FROM gradeable_teams");
+
+        $gradeable_ids = [];
+        $rows = $this->course_db->rows();
+        foreach ($rows as $row) {
+            $g_id = $row['g_id'];
+            $team_id = $row['team_id'];
+            if (!array_key_exists($g_id, $gradeable_ids)) {
+                $gradeable_ids[$g_id] = [];
+            }
+            $gradeable_ids[$g_id][] = $team_id;
+        }
+        return $gradeable_ids;
+    }
+
+    /**
+     * Get all team ids for all gradeables where the teams are in rotating section NULL
+     * @return string[][] Map of gradeable_id => [ team ids ]
+     */
+    public function getTeamIdsWithNullRotating() {
+        $this->course_db->query("SELECT team_id, g_id FROM gradeable_teams WHERE rotating_section IS NULL");
+
+        $gradeable_ids = [];
+        $rows = $this->course_db->rows();
+        foreach ($rows as $row) {
+            $g_id = $row['g_id'];
+            $team_id = $row['team_id'];
+            if (!array_key_exists($g_id, $gradeable_ids)) {
+                $gradeable_ids[$g_id] = [];
+            }
+            $gradeable_ids[$g_id][] = $team_id;
+        }
+        return $gradeable_ids;
     }
 
     public function setAllUsersRotatingSectionNull() {
@@ -1192,6 +1232,10 @@ ORDER BY user_id ASC");
 
     public function deleteAllRotatingSections() {
         $this->course_db->query("DELETE FROM sections_rotating");
+    }
+
+    public function setAllTeamsRotatingSectionNull() {
+        $this->course_db->query("UPDATE gradeable_teams SET rotating_section=NULL");
     }
 
     public function getMaxRotatingSection() {
