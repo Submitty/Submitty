@@ -270,7 +270,7 @@ function ajaxSaveOverallComment(gradeable_id, anon_id, gradeable_comment, async 
  * @param {string} gradeable_id
  * @param {int} component_id
  * @param {string} title
- * @param {float} points
+ * @param {number} points
  * @return {Promise} Rejects except when the response returns status 'success'
  */
 function ajaxAddNewMark(gradeable_id, component_id, title, points) {
@@ -550,6 +550,7 @@ function setRubricDOMElements(elements) {
  * Gets the DOM element for a component
  * @param component_id
  * @return {TODO}
+ * @throws Error if the component id doesn't exist
  */
 function getComponentDOMElement(component_id) {
 
@@ -559,6 +560,7 @@ function getComponentDOMElement(component_id) {
  * Extracts a component object from the DOM
  * @param {int} component_id
  * @return {Object}
+ * @throws Error if the component id doesn't exist
  */
 function getComponentFromDOM(component_id) {
 
@@ -568,11 +570,16 @@ function getComponentFromDOM(component_id) {
  * Extracts a graded component object from the DOM
  * @param {int} component_id
  * @return {Object}
+ * @throws Error if the component id doesn't exist
  */
 function getGradedComponentFromDOM(component_id) {
 
 }
 
+/**
+ * Gets the overall comment message stored in the DOM
+ * @return {string} This will always be blank in instructor edit mode
+ */
 function getOverallCommentFromDOM() {
 
 }
@@ -594,9 +601,20 @@ function getOpenComponentIdFromCookie() {
 }
 
 /**
+ * Gets the id of the no credit / full credit mark of a component
+ * @param {int} component_id
+ * @return {int}
+ * @throws Error if the component id doesn't exist
+ */
+function getComponentFirstMarkId(component_id) {
+
+}
+
+/**
  * Shows the mark list for a provided component
  *  Note: this is NOT the same as openComponent.
  * @param {int} component_id
+ * @throws Error if the component id doesn't exist
  */
 function showMarkList(component_id) {
     $(getComponentDOMElement(component_id)).find("TODO").show();
@@ -606,6 +624,7 @@ function showMarkList(component_id) {
  * Gets if a component is open
  * @param component_id
  * @return {boolean}
+ * @throws Error if the component id doesn't exist
  */
 function isComponentOpen(component_id) {
 
@@ -623,14 +642,25 @@ function isOverallCommentOpen() {
  * Gets if a mark is 'checked'
  * @param {int} mark_id
  * @return {boolean}
+ * @throws Error If the mark id doesn't exist
  */
 function isMarkChecked(mark_id) {
 
 }
 
 /**
+ * Gets if a mark was marked for deletion
+ * @param {int} mark_id
+ */
+function isMarkDeleted(mark_id) {
+
+}
+
+/**
  * Gets if the state of the custom mark is such that it should appear checked
- * @param component_id
+ * @param {int} component_id
+ * @throws Error if the component id doesn't exist
+ * @throws Error if the component is opened in edit mode
  */
 function isCustomMarkChecked(component_id) {
 
@@ -641,6 +671,69 @@ function isCustomMarkChecked(component_id) {
  * TODO:
  */
 
+/**
+ * Called when a mark is marked for deletion
+ * @param me DOM Element of the delete button
+ */
+function onDeleteMark(me) {
+
+}
+
+/**
+ * Called when the point value of a common mark changes
+ * @param me DOM Element of the mark point entry
+ */
+function onMarkPointsChange(me) {
+
+}
+
+/**
+ * Called when the mark stats button is pressed
+ * @param me DOM Element of the mark stats button
+ */
+function onGetMarkStats(me) {
+
+}
+
+/**
+ * Called when a component gets clicked (for opening)
+ * @param me DOM Element of the component div
+ */
+function onClickComponent(me) {
+
+}
+
+/**
+ * Called when the 'cancel' button is pressed on an open component
+ * @param me DOM Element of the cancel button
+ */
+function onCancelComponent(me) {
+
+}
+
+/**
+ * Called when the 'save' button is pressed on an open component
+ * @param me DOM Element of the save button
+ */
+function onSaveComponent(me) {
+
+}
+
+/**
+ * Called when a mark is clicked in grade mode
+ * @param me DOM Element of the mark row
+ */
+function onToggleMark(me) {
+
+}
+
+/**
+ * Called when one of the custom mark fields changes
+ * @param me DOM Element of one of the custom mark's elements
+ */
+function onCustomMarkChange(me) {
+
+}
 
 /**
  * Put all of the primary logic of the TA grading rubric here
@@ -724,11 +817,11 @@ function openCookieComponent() {
 }
 
 /**
- * Callback for clicking on a component
+ * Toggles a the open/close state of a component
  * @param {int} component_id the component's id
  * @return {Promise}
  */
-function onComponentClick(component_id) {
+function toggleComponent(component_id) {
     // Component is open, so close it
     if (isComponentOpen(component_id)) {
         return closeComponent(component_id);
@@ -757,10 +850,10 @@ function onComponentClick(component_id) {
 }
 
 /**
- * Callback for clicking on the overall comment box
+ * Toggles a the open/close state of the general comment
  * @return {Promise}
  */
-function onOverallCommentClick() {
+function toggleOverallComment() {
     // Overall comment open, so close it
     if (isOverallCommentOpen()) {
         return closeOverallComment();
@@ -780,19 +873,19 @@ function onOverallCommentClick() {
 }
 
 /**
- * Callback for clicking on a common mark during grade mode
+ * Toggles the state of a mark in grade mode
  * @return {Promise}
  */
-function onCommonMarkGrade(mark_id) {
-    return isMarkChecked(mark_id) ? unCheckMark(mark_id) : checkMark(mark_id);
+function toggleCommonMark(component_id, mark_id) {
+    return isMarkChecked(mark_id) ? unCheckMark(component_id, mark_id) : checkMark(component_id, mark_id);
 }
 
 /**
- * Callback for any of the custom mark fields changing
+ * Call to update the custom mark state when any of the custom mark fields change
  * @param {int} component_id
  * @return {Promise}
  */
-function onCustomMarkChange(component_id) {
+function updateCustomMark(component_id) {
     if (isCustomMarkChecked(component_id)) {
         // Uncheck the first mark just in case it's checked
         return unCheckFirstMark(component_id);
@@ -885,7 +978,6 @@ function closeComponentInstructorEdit(component_id, saveChanges) {
             return renderInstructorEditComponent(component, false);
         });
 }
-
 
 /**
  * Closes a component for grading mode and saves changes
@@ -995,20 +1087,34 @@ function closeOverallComment(saveChanges = true) {
 
 /**
  * Checks the requested mark and refreshes the component
+ * @param {int} component_id
  * @param {int} mark_id
  * @return {Promise}
  */
-function checkMark(mark_id) {
+function checkMark(component_id, mark_id) {
 
 }
 
 /**
  * Un-checks the requested mark and refreshes the component
+ * @param {int} component_id
  * @param {int} mark_id
  * @return {Promise}
  */
-function unCheckMark(mark_id) {
+function unCheckMark(component_id, mark_id) {
+    // First fetch the necessary information from the DOM
+    let gradedComponent = getGradedComponentFromDOM();
 
+    // Then remove the mark id from the array
+    for(let i = 0; i < gradedComponent.mark_ids.length; ++i) {
+        if(gradedComponent.mark_ids[i] === mark_id) {
+            gradedComponent.mark_ids.splice(i, 1);
+            break;
+        }
+    }
+
+    // Finally, re-render the component
+    return renderGradingComponent(getComponentFromDOM(component_id), gradedComponent, false, true);
 }
 
 /**
@@ -1017,7 +1123,7 @@ function unCheckMark(mark_id) {
  * @return {Promise}
  */
 function unCheckFirstMark(component_id) {
-
+    return unCheckMark(component_id, getComponentFirstMarkId(component_id));
 }
 
 /**
@@ -1048,7 +1154,7 @@ function saveMarkList(component_id) {
                     })
                     .then(function (success) {
                         // Success of false counts as a conflict
-                        if (!success) {
+                        if (success !== true) {
                             conflictMarks[domMark.id] = {
                                 domMark: domMark,
                                 serverMark: serverMark,
@@ -1088,7 +1194,8 @@ function saveMarkList(component_id) {
  * @return {Promise} Promise resolves with an array of marks to save
  */
 function promptUserMarkConflicts(conflictMarks) {
-
+    // TODO: this needs to handle conflicts where a mark was deleted when someone
+    // TODO: else changed it  See all paths where tryResolveMarkSave returns false
 }
 
 /**
@@ -1107,18 +1214,62 @@ function marksEqual(mark0, mark1) {
  *  @return {Promise<boolean>}
  */
 function tryResolveMarkSave(gradeable_id, component_id, domMark, serverMark, oldServerMark) {
-    if (marksEqual(domMark, serverMark) || marksEqual(domMark, oldServerMark)) {
-        // If the domMark is not unique, then we don't need to do anything
-        return Promise.resolve(true);
-    } else if (!marksEqual(serverMark, oldServerMark)) {
-        // The domMark is unique, and the serverMark is also unique,
-        // which means all 3 versions are different, which is a conflict state
-        return Promise.resolve(false);
+    if (oldServerMark !== null) {
+        if (serverMark !== null) {
+            // Mark edited under normal conditions
+            if (marksEqual(domMark, serverMark) || marksEqual(domMark, oldServerMark)) {
+                // If the domMark is not unique, then we don't need to do anything
+                return Promise.resolve(true);
+            } else if (!marksEqual(serverMark, oldServerMark)) {
+                // The domMark is unique, and the serverMark is also unique,
+                // which means all 3 versions are different, which is a conflict state
+                return Promise.resolve(false);
+            } else if (isMarkDeleted(domMark.id)) {
+                // domMark was deleted and serverMark hasn't changed from oldServerMark,
+                //  so try to delete the mark
+                return ajaxDeleteMark(gradeable_id, component_id, domMark.id)
+                    .catch(function (err) {
+                        // Catch here so failed deletions (because someone has received it)
+                        //  don't make everything else fail
+                        alert('Could not delete mark! ' + err.message);
+                    })
+                    .then(function () {
+                        // Success, then return true
+                        return Promise.resolve(true);
+                    });
+            } else {
+                // The domMark is unique and the serverMark is the same as the oldServerMark
+                //  so we should save the domMark to the server
+                return ajaxSaveMark(gradeable_id, component_id, domMark.id, domMark.points, domMark.title)
+                    .then(function () {
+                        // Success, then return true
+                        return Promise.resolve(true);
+                    });
+            }
+        } else {
+            // This means it was deleted from the server.
+            if (!marksEqual(domMark, oldServerMark)) {
+                // And the mark changed, which is a conflict state
+                return Promise.resolve(false);
+            } else {
+                // And the mark didn't change, so don't do anything
+                return Promise.resolve(true);
+            }
+        }
+    } else {
+        // This means it didn't exist when we started editing, so serverMark must also be null
+        if (isMarkDeleted(domMark.id)) {
+            // The mark was marked for deletion, but never existed... so do nothing
+            return Promise.resolve(true);
+        } else {
+            // The mark never existed and isn't deleted, so its new
+            return ajaxAddNewMark(gradeable_id, component_id, domMark.title, domMark.points)
+                .then(function () {
+                    // Success, then return true
+                    return Promise.resolve(true);
+                });
+        }
     }
-
-    // If we got here, this means the dom mark is unique and the serverMark is the same as the oldServerMark
-    //  so we should save the domMark to the server
-    return ajaxSaveMark(gradeable_id, component_id, domMark.id, domMark.points, domMark.title);
 }
 
 /**
