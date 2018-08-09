@@ -505,10 +505,6 @@ table tr.table-header {
     margin-bottom: 40px;
 }
 
-.option-desc {
-    width: 60%;
-}
-
 .option-title {
     font-weight: bold;
     font-size: 18px;
@@ -519,9 +515,7 @@ table tr.table-header {
 }
 
 .option-input {
-    float: right;
     margin-top: 10px;
-    width: 40%;
 }
 
 .option-input > textarea,
