@@ -94,8 +94,7 @@ input[type="url"],
 input[type="search"],
 input[type="tel"],
 input[type="color"] {
-    height: 20px;
-    box-sizing: content-box;
+    height: 30px;
     padding: 4px 6px;
     font-size: 14px;
     line-height: 20px;
@@ -543,12 +542,17 @@ table tr.table-header {
     padding-right: 10px;
 }
 
+#login-box {
+    min-width: 300px;
+    flex-grow: 1;
+}
+
 #login {
 }
 
 #login input[type="text"],
 #login input[type="password"] {
-    width: 50%;
+    width: 100%;
     margin-bottom: 5px;
 }
 

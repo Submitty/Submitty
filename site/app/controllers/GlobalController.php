@@ -270,6 +270,8 @@ class GlobalController extends AbstractController {
     }
 
     private function routeEquals(string $a, string $b) {
+        //TODO: Have an actual router and use that instead of this string comparison
+
         $parse_a = parse_url($a);
         $parse_b = parse_url($b);
 
@@ -283,10 +285,23 @@ class GlobalController extends AbstractController {
             return false;
         }
 
+        //Query parameters to discard when checking routes
+        $ignored_params = [
+            "success_login"
+        ];
+
         //Query strings can be in (basically) arbitrary order. Make sure they at least
         // have the same parts though
         $query_a = array_filter(explode("&", $query_a));
         $query_b = array_filter(explode("&", $query_b));
+
+        $query_a = array_filter($query_a, function($param) use($ignored_params) {
+            return !in_array(explode("=", $param)[0], $ignored_params);
+        });
+        $query_b = array_filter($query_b, function($param) use($ignored_params) {
+            return !in_array(explode("=", $param)[0], $ignored_params);
+        });
+
         $diff_a = array_values(array_diff($query_a, $query_b));
         $diff_b = array_values(array_diff($query_b, $query_a));
         $diff = array_merge($diff_a, $diff_b);
