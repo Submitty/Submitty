@@ -193,7 +193,7 @@ class TaGradedGradeable extends AbstractModel {
 
     /**
      * Gets the manual grading points the student earned
-     * @return int
+     * @return float
      */
     public function getTotalScore() {
         $points_earned = 0.0;

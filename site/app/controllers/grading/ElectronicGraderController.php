@@ -1218,7 +1218,7 @@ class ElectronicGraderController extends GradingController {
             // Once we've parsed the inputs and checked permissions, perform the operation
             $response_data = null;
             if ($ta_graded_gradeable !== null) {
-                $response_data = $ta_graded_gradeable->toArray($grader);
+                $response_data = $this->getGradedGradeable($ta_graded_gradeable, $grader);
             }
             $this->core->getOutput()->renderJsonSuccess($response_data);
         } catch (\InvalidArgumentException $e) {
@@ -1226,6 +1226,31 @@ class ElectronicGraderController extends GradingController {
         } catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
+    }
+
+    public function getGradedGradeable(TaGradedGradeable $ta_graded_gradeable, User $grader) {
+        $response_data = $ta_graded_gradeable->toArray($grader);
+
+        $graded_gradeable = $ta_graded_gradeable->getGradedGradeable();
+        $gradeable = $graded_gradeable->getGradeable();
+
+        // If there is autograding, also send that information
+        $auto_grading_total = $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
+        if ($auto_grading_total > 0) {
+            $response_data['auto_grading_total'] = $auto_grading_total;
+
+            // Furthermore, if the user has a grade, send that information
+            if ($graded_gradeable->getAutoGradedGradeable()->hasActiveVersion()) {
+                $response_data['auto_grading_earned'] = $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance()->getTotalPoints();
+            }
+        }
+
+        // If it is graded at all, then send ta score information
+        if ($ta_graded_gradeable->getPercentGraded() !== 0.0) {
+            $response_data['ta_grading_earned'] = $ta_graded_gradeable->getTotalScore();
+            $response_data['ta_grading_total'] = $gradeable->getTaPoints();
+        }
+        return $response_data;
     }
 
     /**
