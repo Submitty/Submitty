@@ -72,7 +72,7 @@
                             <div id="nav-buttons">
                                 <ul>
                                     {% for button in sidebar_buttons %}
-                                        {{ self.render_button(button) }}
+                                        {{ self.render_sidebar_button(button) }}
                                     {% endfor %}
                                 </ul>
                             </div>
@@ -83,7 +83,7 @@
                     <div id="nav-positioner">
 {# Looks mismatched because this lines up with GlobalFooter.twig #}
 
-{% macro render_button(button) %}
+{% macro render_sidebar_button(button) %}
     {% if button.getTitle() == "" %}
         <li class="short-line"></li>
     {% else %}
@@ -91,6 +91,9 @@
             {% if button.getIcon() != null %}
                 <a class="collapse-icon {{ button.getClass() }}" href="{{ button.getHref() }}" data-toggle="tooltip" title="{{ button.getTitle() }}">
                     <i class="fa {{ button.getIcon() }}"></i>
+                    {% if button.getBadge() > 0 %}
+                        <span class="notification_badge">{{  button.getBadge() }} </span>
+                    {% endif %}
                 </a>
             {% endif %}
             {% if button.getHref() == null %}
