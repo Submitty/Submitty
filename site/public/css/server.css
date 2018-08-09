@@ -945,17 +945,19 @@ table .instructor .two-options{
 #nav-buttons ul li {
     list-style: none;
     margin-bottom: -2px;
-}
-
-#nav-buttons ul li.selected {
     margin-left: -30px;
     margin-right: -30px;
-    padding-left: 30px;
+}
+
+#nav-buttons ul li a.nav-row.selected {
     background-color: #d9e1e2;
+    font-weight: bold;
+    color: #000000;
 }
 
 #nav-buttons ul li .nav-row {
     padding: 6px;
+    padding-left: 36px;
     width: 100%;
     display: block;
 }
@@ -963,11 +965,6 @@ table .instructor .two-options{
 #nav-buttons ul li a.nav-row {
     color: #006398;
     text-decoration: none;
-}
-
-#nav-buttons ul li.selected a {
-    font-weight: bold;
-    color: #000000;
 }
 
 #nav-buttons ul li.line {

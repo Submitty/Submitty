@@ -84,11 +84,7 @@
     {% if button.getTitle() == "" %}
         <li class="short-line"></li>
     {% else %}
-        <li
-            {% if button.getClass() != "" %}
-                class="{{ button.getClass() }}"
-            {% endif %}
-        >
+        <li>
             {% if button.getHref() == null %}
                 <span
                     {% if button.getClass() != "" %}

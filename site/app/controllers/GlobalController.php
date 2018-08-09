@@ -260,10 +260,11 @@ class GlobalController extends AbstractController {
         $query_b = array_filter(explode("&", $query_b));
         $diff_a = array_values(array_diff($query_a, $query_b));
         $diff_b = array_values(array_diff($query_b, $query_a));
-        if (count($diff_a) > 0) {
+        $diff = array_merge($diff_a, $diff_b);
+        if (count($diff) > 0) {
             //Wacky checking because the navigation page is the default when there
             // is no route in the query
-            if (count($diff_a) === 1 && count($diff_b) === 0 && $diff_a[0] === "component=navigation") {
+            if (count($diff) === 1 && $diff[0] === "component=navigation") {
                 return true;
             }
             return false;
