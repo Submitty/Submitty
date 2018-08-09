@@ -421,6 +421,7 @@ class Gradeable extends AbstractModel {
                             $grade_details[$j]['array_gcm_mark'] = $details['array_array_gcm_mark'][$j];
                             $grade_details[$j]['gcd_score'] = $details['array_gcd_score'][$j];
                             $grade_details[$j]['gcd_component_comment'] = $details['array_gcd_component_comment'][$j];
+                            $grade_details[$j]['gcd_has_custom'] = $details['array_gcd_has_custom'][$j];
                             $grade_details[$j]['gcd_graded_version'] = $details['array_gcd_graded_version'][$j];                            
                             $grade_details[$j]['gcd_grade_time'] = $details['array_gcd_grade_time'][$j];
 

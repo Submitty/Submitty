@@ -666,7 +666,8 @@ function checkMarks(c_index) {
     });
     var current_row = $('#mark_custom_id-'+c_index);
     var custom_message = current_row.find('textarea[name=mark_text_custom_'+c_index+']').val();
-    if(custom_message !== "" && custom_message !== undefined){
+    var custom_has = current_row.find('span[name=mark_custom_id-'+c_index+'-check]').val();
+    if(custom_has){
         all_false = false;
         first_mark.toggleClass("mark-has", false);
         getMark(c_index, targetId).has = false;
@@ -685,7 +686,8 @@ function checkMarks(c_index) {
  */
 function calculateMarksPoints(c_index) {
     c_index = parseInt(c_index);
-    var component = getComponent(c_index);
+    var gradeable = grading_data.gradeable;
+    var component = gradeable.components[c_index-1];
     var lower_clamp = component.lower_clamp;
     var current_points = component.default;
     var upper_clamp = component.upper_clamp;
@@ -704,7 +706,9 @@ function calculateMarksPoints(c_index) {
     }
 
     var custom_points = component.score;
-    if (component.comment !== "") {
+    var custom_has = component.customMarkChecked;
+    console.log(custom_has);
+    if (custom_has) {
         if (isNaN(custom_points)) {
             current_points += 0;
         } else {
@@ -776,12 +780,12 @@ function updateProgressPoints(c_index) {
     $('#mark_points_custom-' + c_index)[0].disabled=false;
     $('#mark_points_custom-' + c_index)[0].style.cursor="default";
     $('#mark_text_custom-' + c_index)[0].style.cursor="text";
-    $('#mark_icon_custom-' + c_index)[0].style.cursor="pointer";
+   // $('#mark_icon_custom-' + c_index)[0].style.cursor="pointer";
     if(editModeEnabled){
         $('#mark_text_custom-'+c_index)[0].disabled=true;
         $('#mark_points_custom-' + c_index)[0].style.cursor="not-allowed";
         $('#mark_text_custom-' + c_index)[0].style.cursor="not-allowed";
-        $('#mark_icon_custom-' + c_index)[0].style.cursor="not-allowed";
+     //   $('#mark_icon_custom-' + c_index)[0].style.cursor="not-allowed";
     }
     calculatePercentageTotal();
 }
@@ -851,7 +855,18 @@ function updateBadge(badge, current, total) {
         badge.html("&ndash; / " + total)
     }
 }
-
+/**
+ * DOM callback for toggling a the custom Mmark
+ * @param c_index 1-indexed component index
+ */
+function selectCustomMark(c_index){
+    var gradeable = grading_data.gradeable;
+    var component = gradeable.components[c_index-1];
+    var check = $("#mark_custom_id-" + c_index + "-check");
+    check.toggleClass("mark-has", component.customMarkChecked);
+    checkMarks(c_index);
+    updateProgressPoints(c_index);
+}
 /**
  * DOM callback for toggling a mark
  * @param c_index 1-indexed component index
@@ -1078,7 +1093,7 @@ function saveMark(c_index, sync, override, successCallback, errorCallback) {
         var current_title = $('#title-' + c_index);
         var custom_points  = current_row.find('input[name=mark_points_custom_'+c_index+']').val();
         var custom_message = current_row.find('textarea[name=mark_text_custom_'+c_index+']').val();
-        var custom_has = current_row.find('icon[name=mark_icon_custom_'+c_index+']').val();
+        var custom_has = current_row.find('span[name=mark_custom_id-'+c_index+'-check]').val();
       /*  if(custom_message === "" || custom_message == undefined){
             custom_points="0";
         } */

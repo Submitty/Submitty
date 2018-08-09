@@ -1088,6 +1088,7 @@ class ElectronicGraderController extends GradingController {
         $component_id = $_POST['component_id'] ?? '';
         $custom_message = $_POST['custom_message'] ?? null;
         $custom_points = $_POST['custom_points'] ?? null;
+        $custom_has = $_POST['custom_has'] ?? null;
         $component_version = $_POST['active_version'] ?? null;
 
         // Optional marks parameter
@@ -1172,12 +1173,12 @@ class ElectronicGraderController extends GradingController {
         $graded_component = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
         try {
             // Once we've parsed the inputs and checked permissions, perform the operation
-            if(($custom_message == "" || $custom_message == 'undefined')  && ($custom_points != 0 || )){
+            if(($custom_message == "" || $custom_message == 'undefined')  && ($custom_points != 0 || $custom_has)){
                 $this->core->getOutput()->renderJsonFail('Custom Mark must have a message');   
             }
             else{
                 $results = $this->saveGradedComponent($ta_graded_gradeable, $graded_component, $grader, $custom_points,
-                $custom_message, $marks, $component_version, $overwrite);
+                $custom_message, $custom_has, $marks, $component_version, $overwrite);
                 $this->core->getOutput()->renderJsonSuccess($results);
             }
         } catch (\InvalidArgumentException $e) {
@@ -1187,7 +1188,7 @@ class ElectronicGraderController extends GradingController {
         }
     }
 
-    public function saveGradedComponent(TaGradedGradeable $ta_graded_gradeable, GradedComponent $graded_component, User $grader, float $custom_points, string $custom_message, array $mark_ids, int $component_version, bool $overwrite) {
+    public function saveGradedComponent(TaGradedGradeable $ta_graded_gradeable, GradedComponent $graded_component, User $grader, float $custom_points, string $custom_message, bool $custom_has, array $mark_ids, int $component_version, bool $overwrite) {
         // Only update the grader if we're set to overwrite it
         if ($overwrite) {
             $graded_component->setGrader($grader);
@@ -1198,6 +1199,7 @@ class ElectronicGraderController extends GradingController {
         }
         $graded_component->setComment($custom_message);
         $graded_component->setScore($custom_points);
+        $graded_component->setCustomMarkChecked($custom_has);
         $graded_component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
 
         // Set the marks the submitter received

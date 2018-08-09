@@ -35,9 +35,11 @@ use app\libraries\Core;
  * @method void setIsPeer(bool $peer_grading)
  * @method int getOrder()
  * @method float getScore()
+ * @method bool isCustomMarkChecked()
  * @method setScore(float $score)
  * @method string getComment()
  * @method void setComment(string $comment)
+ * @method bool setCustomMarkChecked($checked)
  * @method User getGrader()
  * @method int getGradedVersion()
  * @method void setGradedVersion(int $graded_version)
@@ -73,6 +75,8 @@ class GradeableComponent extends AbstractModel {
     protected $score = 0;
     /** @property @var string Comment that grader has put on the custom "mark" while grading for student */
     protected $comment = "";
+    /** @property @var bool Is the custom mark selected */
+    protected $customMarkChecked = false;
     /** @property @var int for page number */
     protected $page = 0;
 
@@ -128,7 +132,7 @@ class GradeableComponent extends AbstractModel {
             // will need to add a total score
             $this->score = floatval($details['gcd_score']);
             $this->comment = $details['gcd_component_comment'];
-            $this->score = floatval($details['gcd_score']);
+            $this->customMarkChecked = $details['gcd_has_custom'];
             if ($this->comment === null) {
                 $this->comment = "";
             }

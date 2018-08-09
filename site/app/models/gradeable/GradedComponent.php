@@ -15,8 +15,9 @@ use app\models\User;
  * @method int getComponentId()
  * @method float getScore()
  * @method string getComment()
- *
+ * @method bool isCustomMarkChecked()
  * @method void setComment($comment)
+ * @method bool setCustomMarkChecked($checked)
  * @method string getGraderId()
  * @method int getGradedVersion()
  * @method void setGradedVersion($graded_version)
@@ -46,11 +47,12 @@ class GradedComponent extends AbstractModel {
 
     /** @property @var bool True if the marks array was modified after construction */
     protected $marks_modified = false;
-
     /** @property @var float The score for this component (or custom mark point value) */
     protected $score = 0;
     /** @property @var string The comment on this mark / custom mark description */
     protected $comment = "";
+    /** @property @var bool Is the custom mark selected */
+    protected $customMarkChecked = false;
     /** @property @var string The Id of the grader who most recently updated the component's grade */
     protected $grader_id = "";
     /** @property @var int The submission version this grade is for */
@@ -271,6 +273,13 @@ class GradedComponent extends AbstractModel {
         }
         $this->score = $this->getComponent()->getGradeable()->roundPointValue($this->score);
         $this->modified = true;
+    }
+    /**
+     * Sets whether the custom mark is checked
+     * @param bool $checked
+     */
+    public function setCustomMarkChecked(bool $checked){
+        $customMarkChecked=$checked;
     }
 
     /* Intentionally Unimplemented accessor methods */

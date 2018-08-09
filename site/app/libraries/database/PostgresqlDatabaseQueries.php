@@ -283,6 +283,7 @@ SELECT";
   gd.array_gcd_gc_id,
   gd.array_gcd_score,
   gd.array_gcd_component_comment,
+  gd.array_gcd_has_custom,
   gd.array_gcd_grader_id,
   gd.array_gcd_graded_version,
   gd.array_gcd_grade_time,
@@ -364,6 +365,7 @@ LEFT JOIN (
     in_gcd.array_gcd_gc_id,
     in_gcd.array_gcd_score,
     in_gcd.array_gcd_component_comment,
+    in_gcd.array_gcd_has_custom,
     in_gcd.array_gcd_grader_id,
     in_gcd.array_gcd_graded_version,
     in_gcd.array_gcd_grade_time,
@@ -382,6 +384,7 @@ LEFT JOIN (
       array_agg(gc_id) AS array_gcd_gc_id,
       array_agg(gcd_score) AS array_gcd_score,
       array_agg(gcd_component_comment) AS array_gcd_component_comment,
+      array_agg(gcd_has_custom) AS array_gcd_has_custom,
       array_agg(gcd_grader_id) AS array_gcd_grader_id,
       array_agg(gcd_graded_version) AS array_gcd_graded_version,
       array_agg(gcd_grade_time) AS array_gcd_grade_time,
@@ -478,7 +481,7 @@ ORDER BY ".implode(", ", $order_by);
                                 'gc_default', 'gc_max_value', 'gc_upper_clamp', 'gc_is_text', 'gc_is_peer',
                                 'gc_order', 'gc_page', 'array_gcm_mark', 'array_gcm_id', 'array_gc_id',
                                 'array_gcm_points', 'array_gcm_note', 'array_gcm_publish', 'array_gcm_order', 'gcd_gc_id', 'gcd_score',
-                                'gcd_component_comment', 'gcd_grader_id', 'gcd_graded_version', 'gcd_grade_time',
+                                'gcd_component_comment', 'gcd_has_custom', 'gcd_grader_id', 'gcd_graded_version', 'gcd_grade_time',
                                 'gcd_user_id', 'gcd_user_firstname', 'gcd_user_preferred_firstname',
                                 'gcd_user_lastname', 'gcd_user_email', 'gcd_user_group');
                 $bools = array('gc_is_text', 'gc_is_peer');

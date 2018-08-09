@@ -106,15 +106,20 @@
             </tr>
             {# /Add new mark #}
             {# Custom mark #}
-            <tr id="mark_custom_id-{{ c_index }}" style="display: none;" data-changedisplay1="true">
+            <tr id="mark_custom_id-{{ c_index }}" style="display: none;" data-changedisplay1="true" >
                 <td colspan="1" class="mark-score-container">
                     <div class="mark-cell-box">
-                        <span
-                                onclick="event.stopPropagation();"
-                                class="{{ component.score == 0 and component.comment == "" ? "" : "mark-has" }} mark"
-                                name="mark_icon_{{ c_index }}_custom"
-                                id="mark_icon_custom-{{ c_index }}"
-                        ></span>
+                        {% if not editEnabled %}
+                            <span
+                                name="mark_custom_id-{{ c_index }}-check"
+                                id="mark_custom_id-{{ c_index }}-check"
+                                onclick="selectCustomMark('{{ c_index }}'); event.stopPropagation();"
+                                data-component_index="{{ c_index }}"
+                                class="{{ component.customMarkChecked ? "customMark-has" : "" }} mark custom-mark-selector"
+                                name="mark_custom_icon_{{ c_index }}"
+                            >
+                            </span>
+                        {% endif %}
                         <input
                                 name="mark_points_custom_{{ c_index }}"
                                 id="mark_points_custom-{{ c_index }}"
