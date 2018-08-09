@@ -630,8 +630,7 @@ class ElectronicGraderView extends AbstractView {
         $this->core->getOutput()->addInternalJs('twig.min.js');
         $this->core->getOutput()->addInternalJs('ta-grading-keymap.js');
         $this->core->getOutput()->addInternalJs('ta-grading.js');
-        $this->core->getOutput()->addInternalJs('ta-grading-mark.js');
-        $this->core->getOutput()->addInternalJs('electronic-grading-rubric.js');
+        $this->core->getOutput()->addInternalJs('ta-grading-rubric.js');
         $this->core->getOutput()->addInternalJs('gradeable.js');
 
         $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/RubricPanel.twig", [

@@ -36,26 +36,7 @@
                 {% if has_active_version %}
                     <script type="application/javascript">
                         $(document).ready(function () {
-                            ajaxGetGradeableRubric('{{ gradeable_id }}', function (gradeable) {
-                                global_gradeable = gradeable;
-                                ajaxGetGradedGradeable('{{ gradeable_id }}', '{{ anon_id }}', function (graded_gradeable) {
-                                    renderGradingGradeable(gradeable, graded_gradeable)
-                                        .then(function (elements) {
-                                            $("#grading-box").append(elements);
-                                            updateAllProgressPoints();
-                                        })
-                                        .catch(function (err) {
-                                            alert("Could not render gradeable: " + err.message);
-                                            console.error(err);
-                                        });
-                                }, function (message, data) {
-                                    alert('Could not fetch graded gradeable: ' + message);
-                                    console.log(data);
-                                });
-                            }, function (message, data) {
-                                alert('Could not fetch gradeable rubric: ' + message);
-                                console.log(data);
-                            });
+                            initializeGradingRubric('{{ gradeable_id }}', '{{ anon_id }}');
                         });
                     </script>
                 {% else %}
