@@ -760,6 +760,22 @@ function onCustomMarkChange(me) {
 }
 
 /**
+ * Callback for the 'verify' buttons
+ * @param me DOM Element of the verify button
+ */
+function onVerifyComponent(me) {
+
+}
+
+/**
+ * Callback for the 'verify all' button
+ * @param me DOM Element of the verify all button
+ */
+function onVerifyAll(me) {
+
+}
+
+/**
  * Put all of the primary logic of the TA grading rubric here
  *
  */

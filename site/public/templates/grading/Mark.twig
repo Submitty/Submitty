@@ -3,59 +3,46 @@ Required Input:
     precision
     component_id
     mark: {id, title, publish, order}
-
+    is_checked
+    editable
+TODO: add 'publish' support
 #}
+{% set extra_classes = editable ? '' : 'mark-uneditable' %}
 <tr
-    id="mark_id-{{ component_id }}-{{ mark.id }}"
-    data-component_id="{{ component_id }}"
-    data-mark_id="{{ mark.id }}"
+        data-component_id="{{ component_id }}"
+        data-mark_id="{{ mark.id }}"
+        onclick="{{ editable ? '' : 'onToggleMark' }}"
 >
-    <td
-        colspan="1"
-        class="mark-score-container"
-    >
-        <span
-            id="mark_id-{{ component_id }}-{{ mark.id }}-check"
-            onclick="selectMark('{{ component_id }}', '{{ mark.id }}'); event.stopPropagation();"
-            data-component_index="{{ component_id }}"
-            data-mark_index="{{ mark.id }}"
-            class="{% block checkbox_classes %}{% endblock %} mark mark-selector"
-        >
-        {{ mark.order + 1 }}
-        </span>
+    <td colspan="1" class="mark-score-container">
+        {% if not editable %}
+            <span class="{{ is_checked ? 'mark-selected' : '' }} mark mark-selector">
+                {{ mark.order + 1 }}
+            </span>
+        {% endif %}
         <input
-            name="mark_points_{{ component_id }}_{{ mark.id }}"
-            type="number" onchange="updateProgressPoints({{ component_id }});"
-            step="{{ precision }}"
-            {% block points_extra_properties %}
-            {% endblock %}
-            value="{{ mark.points }}"
-            data-component_index="{{ component_id }}"
-            data-mark_index="{{ mark.id }}"
-            class="mark-score {% block points_classes %}{% endblock %}"
+                type="number"
+                onchange="onMarkPointsChange(this)"
+                step="{{ precision }}"
+                value="{{ mark.points }}"
+                class="mark-score {{ extra_classes }}"
         >
     </td>
     <td colspan="2">
         <textarea
-            name="mark_text_{{ component_id }}_{{ mark.id }}"
-            onchange="updateProgressPoints({{ component_id }});"
-            onkeyup="autoResizeComment(event);"
-            onclick="event.stopPropagation();"
-            rows="1"
-            cols="120"
-            data-component_index="{{ component_id }}"
-            data-mark_index="{{ mark.id }}"
-            class="mark-note {% block title_classes %}{% endblock %}"
+                onkeyup="autoResizeComment(event);"
+                rows="1"
+                cols="120"
+                class="mark-note {{ extra_classes }}"
         >{{ mark.title|escape }}</textarea>
     </td>
     <td>
-        <span id="mark_info_id-{{ component_id }}-{{ mark.id }}"
-              onclick="saveMark('{{ component_id }}' ); showMarklist(this); event.stopPropagation();"
-        >
-            <i class="fa fa-users icon-got-this-mark"></i>
+        <span onclick="onGetMarkStats(this)">
+            <i class="fa fa-users icon-mark-stats"></i>
         </span>
+        {% if editable %}
+            <span onclick="onDeleteMark(this)">
+                <i class="fa fa-trash icon-delete-mark"></i>
+            </span>
+        {% endif %}
     </td>
-
-    {% block extra_content %}
-    {% endblock %}
 </tr>

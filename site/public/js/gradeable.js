@@ -22,11 +22,6 @@ function renderGradingGradeable(gradeable, graded_gradeable) {
             href: "templates/grading/GradeComponent.twig",
             async: true
         });
-        Twig.twig({
-            id: "GradeMark",
-            href: "templates/grading/GradeMark.twig",
-            async: true
-        });
     });
 }
 

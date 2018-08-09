@@ -1,73 +1,56 @@
 {#
 Required Input:
     component: {id}
+    show_mark_list: If the marks table should be started hidden or not
 #}
 
-<div id="title-{{ component.id }}" class="box component" onclick="{% block component_click %}{% endblock %}">
+{% set mark_list_visibility = show_mark_list ? '' : 'hidden' %}
+<div class="box component" data-component_id="{{ component.id }}" onclick="{% block component_click %}{% endblock %}">
 
     {# Title bar #}
     <div class="box-title">
-
         {% block badge_block %}
         {% endblock %}
 
-        <span data-changebg="true">
-            {% block component_block %}{% endblock component_block %}
+        <span>
+            {% block header_block %}{% endblock %}
         </span>
         <br/>
 
-        {# Notes to TA/Student #}
-        <span id="ta_note-{{ component.id }}">
+        <span data-component_id="{{ component.id }}" {{ mark_list_visibility }}>
             {% block ta_note %}
             {% endblock %}
         </span>
-        <span id="page-{{ component.id }}">
+
+        <span data-component_id="{{ component.id }}" {{ mark_list_visibility }}>
+            {% block student_note %}
+            {% endblock %}
+        </span>
+
+        {# Page number #}
+        <span data-component_id="{{ component.id }}" {{ mark_list_visibility }}>
             {% block page_number %}
             {% endblock %}
         </span>
 
         {# Saving status #}
-        <span class="done-container">
-            <span id="save-mark-{{ component.id }}" style="display: none;" data-changedisplay1="true">
-                <i class="fa fa-check done-button" aria-hidden="true">Done</i>
-            </span>
-        </span>
-
-        <span id="student_note-{{ component.id }}" style="display: none;" data-changedisplay1="true">
-            {% block student_note %}
-            {% endblock %}
-        </span>
-        {# /Notes to TA/Student #}
-
-        {# Todo: reimplement cancel button #}
-        {#
-        <span id="title-cancel-{{ component.id }}" style="font-size: 12px; display: none; width: 5%;" colspan="0" data-changebg="true" data-changedisplay1="true">
-            <span id="cancel-mark-{{ component.id }}" onclick="{{ break_onclick }}; closeMark(${c}, true);" style="cursor: pointer; float: right;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
-        </span>
-        #}
-
-        {# Summary text TODO: what is this for? #}
-        <div id="summary-{{ component.id }}" data-changedisplay2="true" data-question_id="{{ component.id }}">
-            <div id="rubric-{{ component.id }}">
-                <span id="rubric-textarea-{{ component.id }}" class="summary-text">...</span>
-            </div>
-        </div>
-        {# /Summary text #}
+        {% import "SavingTools.twig" with {
+            'editable': show_mark_list,
+            'cancel_on_click': disabled ? '' : 'onCancelComponent(this)'
+        } only %}
     </div>
     {# /Title bar #}
 
     {# Marks table #}
-    <table class="ta-rubric-table" id="marks-parent-{{ component.id }}" style="display: none;" data-question_id="{{ component.id }}" data-changedisplay1="true">
-    {# This is currently all handled by JS, but here is how you'd render these from Twig: #}
-    {#
+    <table class="ta-rubric-table" data-component_id="{{ component.id }}" {{ mark_list_visibility }}>
         {% for mark in component.marks %}
-            {% set m_index = loop.index0 %}
+            {% set first_mark = loop.index0 == 0 %}
+            {% block mark_parameters %}{% endblock %}
             {% include "Mark.twig" %}
         {% endfor %}
-    #}
     </table>
     {# /Marks table #}
 
-    {% block component_footer %}
+    {% block mark_list_footer %}
     {% endblock %}
 </div>

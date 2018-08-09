@@ -1,0 +1,25 @@
+{#
+Renders the 'Save' 'Cancel' 'Saving...' and 'Done' bits that are on the right side
+    of components and the overall comment
+
+Required Parameters:
+-editable: true to show the 'save/cancel' text, otherwise show 'done' text
+-cancel_on_click: callback for the cancel button's on-click event
+#}
+<span class="save-info">
+    {% if editable %}
+        <span id="save-info-overall-cancel" onclick="{{ cancel_on_click }}">
+            <i class="fa fa-times cancel-button" aria-hidden="true">Cancel</i>
+        </span>
+        <span id="save-info-overall-save">
+            <i class="fa fa-check save-button" aria-hidden="true">Save</i>
+        </span>
+    {% else %}
+        <span id="save-info-overall-done">
+            <i class="fa fa-check save-button" aria-hidden="true">Done</i>
+        </span>
+        <span id="save-info-overall-saving" hidden>
+            <i class="fa fa-check save-button" aria-hidden="true">Saving...</i>
+        </span>
+    {% endif %}
+</span>

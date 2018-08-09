@@ -288,7 +288,7 @@ progress::-webkit-progress-value {
     width: 14px;
 }
 
-.icon-got-this-mark {
+.icon-mark-stats {
     visibility: visible; 
     cursor: pointer; 
     position: relative; 
@@ -537,7 +537,7 @@ tr.is_publish {
     vertical-align: middle;
 }
 
-.gradeable .mark.mark-has {
+.gradeable .mark.mark-selected {
     color: #ccc;
     background-color: #000;
 }

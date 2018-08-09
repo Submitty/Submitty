@@ -1,49 +1,51 @@
 {% extends "Component.twig" %}
+{% import "Functions.twig" as functions %}
 {#
 Required inputs:
-    gradeable_id
     precision
-    component: {id, title, ta_comment, student_comment, page}
-    graded_component: {grader_id, submitter_id, comment, score, graded_version}
+    component: {id, title, ta_comment, student_comment, page, total_points}
+    graded_component: {grader_id, verifier_id, submitter_id, comment, score, mark_ids, graded_version, total_score}
 
-    display_verify_user = can_verify and grader_id is defined and grader_id != your_user_id
-    version_conflict = graded_component.graded_version != -1 and graded_gradeable.auto_graded_gradeable.active_version != graded_component.graded_version
+    display_verify_grader = can_verify and grader_id is defined and grader_id != your_user_id
+    disabled = version_conflict = graded_component.graded_version != -1 and graded_gradeable.auto_graded_gradeable.active_version != graded_component.graded_version
 #}
 
 {% block component_click %}
-    {{ version_conflict ? 'return false' : '' }}toggleMark({{ component.id }}, true)
+    {{ disabled ? '' : 'onClickComponent(this)' }}
 {% endblock %}
 
 {% block badge_block %}
-<span id="gradebar-{{ component.id }}" class="badge gradebar">
-    ? / ?
-</span>
+    <strong id="grading_total"
+            class="badge {{ functions.getBadgeStyle(graded_component.total_score, component.total_points) }}">
+        {{ graded_component.total_score | default('-') }} / {{ component.total_points }}
+    </strong>
 {% endblock %}
 
-{% block component_block %}
-    <b><span id="progress_points-{{ component.id }}" style="display: none;" data-changedisplay1="true"></span></b>
-    <b><span id="component_name-{{ component.id }}">{{ component.title }}</span></b>
+{% block header_block %}
+    <b>{{ component.title }}</b>
 
-    {% if version_conflict %}
-        <span id='wrong_version_{{ component.id }}' class="version-warning">
+    {% if disabled %}
+        <span class="version-warning">
             Please edit or ensure that comments from version {{ graded_component.graded_version }} still apply.
         </span>
     {% endif %}
 
     <span class="grader-container">
-        {% if display_verify_user %}
+        {% if display_verify_grader %}
             <span class="verify-container">
-                <input type="button" class = "btn btn-default" onclick="verifyMark('{{ gradeable_id }}','{{ component.id }}','{{ graded_component.submitter_id }}'); event.stopPropagation();" value = "Verify Grader"/>
+                <input type="button" class="btn btn-default" onclick="onVerifyComponent(this)" value="Verify Grader"/>
             </span>
         {% endif %}
-        <span id="graded-by-{{ component.id }}" class="graded-by">
-            {% if grader_id is defined %}
+        <span class="graded-by">
+            {% if graded_component.grader_id is defined %}
                 Graded by {{ graded_component.grader_id }}
+                {% if graded_component.verifier_id is defined %}
+                    / {{ graded_component.verifier_id }}
+                {% endif %}
             {% else %}
                 Ungraded!
             {% endif %}
         </span>
-        <span id="graded-saving-{{ component.id }}" style="display: none;" class="graded-by">Saving...</span>
     </span>
 {% endblock %}
 
@@ -69,36 +71,28 @@ Required inputs:
     {% endif %}
 {% endblock %}
 
-{% block component_footer %}
+{% block mark_parameters %}
+    {% set is_checked = mark.id in graded_component.mark_ids %}
+{% endblock %}
+
+{% block mark_list_footer %}
     {# Custom mark #}
-    <div class="box" id="mark_custom_id-{{ component.id }}" style="display: none;" data-changedisplay1="true">
-        <span
-            onclick="event.stopPropagation();"
-            class="{{ graded_component.score == 0 and component.comment == "" ? "" : "mark-has" }} mark"
-            name="mark_icon_{{ component.id }}_custom"
-            id="mark_icon_custom-{{ component.id }}"
-        ></span>
+    <div class="box" onclick="event.stopPropagation()">
+        <span class="{{ graded_component.score == 0 and component.comment == "" ? "" : "mark-has" }} mark"></span>
         <input
-            name="mark_points_custom_{{ component.id }}"
-            id="mark_points_custom-{{ component.id }}"
-            type="number"
-            step="{{ precision }}"
-            onchange="updateProgressPoints({{ component.id }})"
-            onclick="event.stopPropagation();"
-            data-component_index="{{ component.id }}"
-            value="{{ graded_component.score }}" class="mark-score"
-        >
+                type="number"
+                step="{{ precision }}"
+                onchange="onCustomMarkChange(this)"
+                data-component_index="{{ component.id }}"
+                value="{{ graded_component.score }}" class="mark-score">
         Custom:
         <textarea
-            name="mark_text_custom_{{ component.id }}"
-            id="mark_text_custom-{{ component.id }}"
-            onkeyup="updateCustomMarkText({{ component_id }}); autoResizeComment(event)"
-            onclick="event.stopPropagation()"
-            data-component_index="{{ component.id }}"
-            cols="120"
-            rows="1"
-            placeholder="Custom message for student..."
-            class="mark-note-custom"
+                onchange="onCustomMarkChange(this)"
+                data-component_id="{{ component.id }}"
+                cols="120"
+                rows="1"
+                placeholder="Custom message for student..."
+                class="mark-note-custom"
         >{{ graded_component.comment }}</textarea>
     </div>
     {# /Custom mark #}
