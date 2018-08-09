@@ -241,7 +241,35 @@ class GlobalController extends AbstractController {
     }
 
     private function routeEquals(string $a, string $b) {
-        return $a === $b;
+        $parse_a = parse_url($a);
+        $parse_b = parse_url($b);
+
+        $path_a = isset($parse_a['path']) ? $parse_a['path'] : '';
+        $path_b = isset($parse_b['path']) ? $parse_b['path'] : '';
+        $query_a = isset($parse_a['query']) ? $parse_a['query'] : '';
+        $query_b = isset($parse_b['query']) ? $parse_b['query'] : '';
+
+        //Different paths, different urls
+        if ($path_a !== $path_b) {
+            return false;
+        }
+
+        //Query strings can be in (basically) arbitrary order. Make sure they at least
+        // have the same parts though
+        $query_a = array_filter(explode("&", $query_a));
+        $query_b = array_filter(explode("&", $query_b));
+        $diff_a = array_values(array_diff($query_a, $query_b));
+        $diff_b = array_values(array_diff($query_b, $query_a));
+        if (count($diff_a) > 0) {
+            //Wacky checking because the navigation page is the default when there
+            // is no route in the query
+            if (count($diff_a) === 1 && count($diff_b) === 0 && $diff_a[0] === "component=navigation") {
+                return true;
+            }
+            return false;
+        }
+
+        return true;
     }
 
 }
