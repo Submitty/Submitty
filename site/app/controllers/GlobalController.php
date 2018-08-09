@@ -209,9 +209,11 @@ class GlobalController extends AbstractController {
         }
 
         if ($this->core->userLoaded()) {
-            $sidebar_buttons[] = new Button($this->core, [
-                "class" => "nav-row short-line",
-            ]);
+            if ($this->core->getConfig()->isCourseLoaded()) {
+                $sidebar_buttons[] = new Button($this->core, [
+                    "class" => "nav-row short-line",
+                ]);
+            }
 
             $sidebar_buttons[] = new Button($this->core, [
                 "href" => "javascript: toggleSidebar();",
