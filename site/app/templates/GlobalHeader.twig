@@ -68,12 +68,14 @@
             <div class="row">
                 {% if sidebar_buttons|length > 0 %}
                     <div class="col-md-auto" id="sidebar">
-                        <div id="nav-buttons">
-                            <ul>
-                                {% for button in sidebar_buttons %}
-                                    {{ self.render_button(button) }}
-                                {% endfor %}
-                            </ul>
+                        <div id="nav-buttons-visible">
+                            <div id="nav-buttons">
+                                <ul>
+                                    {% for button in sidebar_buttons %}
+                                        {{ self.render_button(button) }}
+                                    {% endfor %}
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 {% endif %}

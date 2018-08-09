@@ -385,7 +385,7 @@ table tr.table-header {
 }
 
 #footer {
-    margin-top: 30px;
+    margin-top: 15px;
     z-index: 20;
 }
 
@@ -402,8 +402,6 @@ table tr.table-header {
 }
 
 #footer {
-    background-color: #edf6f6;
-    position: relative;
     width: 100%;
     padding: 5px 0;
     text-align: center;
@@ -926,7 +924,7 @@ table .instructor .two-options{
     margin-top: 15px;
     margin-left: 30px;
 }
-
+    
 #nav-positioner {
     margin-left: -30px;
 }
@@ -944,6 +942,13 @@ table .instructor .two-options{
 
 #sidebar.collapsed #nav-buttons {
     width: 240px;
+}
+
+#sidebar.collapsed #nav-buttons-visible {
+    width: 60px;
+    overflow: hidden;
+    margin-left: -15px;
+    padding-left: 15px;
 }
 
 #sidebar {
