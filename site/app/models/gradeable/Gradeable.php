@@ -597,11 +597,12 @@ class Gradeable extends AbstractModel {
      * @return string[]
      */
     public function getDateStrings() {
-        $dates = [];
-        foreach (self::date_properties as $property) {
-            $dates[$property] = DateUtils::dateTimeToString($this->$property);
+        $date_strings = [];
+        $now = new \DateTime('now', $this->core->getConfig()->getTimezone());
+        foreach ($this->getDates() as $date_prop => $date_val) {
+            $date_strings[$date_prop] = DateUtils::dateTimeToString($date_val ?? $now);
         }
-        return $dates;
+        return $date_strings;
     }
 
     /**
