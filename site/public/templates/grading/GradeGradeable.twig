@@ -1,5 +1,9 @@
 {% extends "Gradeable.twig" %}
 
+{% block header_content %}
+    <span id="anon-id" data-anon_id="{{ anon_id }}" hidden></span>
+{% endblock %}
+
 {% block generate_component %}
     {% set graded_component = graded_components[component.id] %}
     {% include "GradeComponent.twig" %}

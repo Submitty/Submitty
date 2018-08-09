@@ -5,7 +5,12 @@ Required Input:
 #}
 
 {% set mark_list_visibility = show_mark_list ? '' : 'hidden' %}
-<div class="box component" data-component_id="{{ component.id }}" onclick="{% block component_click %}{% endblock %}">
+<div id="component-{{ component.id }}" class="box component" data-component_id="{{ component.id }}"
+     onclick="{% block component_click %}{% endblock %}"
+     data-title="{{ component.title }}"
+     data-ta_comment="{{ component.ta_comment }}"
+     data-student_comment="{{ component.student_comment }}"
+     data-page="{{ component.page }}">
 
     {# Title bar #}
     <div class="box-title">

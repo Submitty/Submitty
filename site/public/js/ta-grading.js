@@ -715,28 +715,3 @@ function adjustSize(name) {
     textarea.style.height = "";
     textarea.style.height = Math.min(textarea.scrollHeight, 300) + "px";
 }
-//-----------------------------------------------------------------------------
-// Edit Mode
-//TODO save properly so that the mark can be reopened automatically
-function toggleEditMode(){
-    var id=findCurrentOpenedMark();
-    var temp=editModeEnabled;
-    editModeEnabled=true;
-    if(findCurrentOpenedMark()>0){
-        toggleMark(id, true);        
-    }
-    if(temp==null){
-        editModeEnabled=false;
-    }
-    else{
-        editModeEnabled=!temp;
-    }
-    if(findCurrentOpenedMark()>0){
-        if(editModeEnabled==false){
-            $('#marks-extra-'+findCurrentOpenedMark())[0].style.display="none";
-        }
-        if(editModeEnabled==true){
-            $('#marks-extra-'+findCurrentOpenedMark())[0].style.display="block";
-        }
-    }
-}

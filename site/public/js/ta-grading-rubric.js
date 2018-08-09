@@ -501,7 +501,7 @@ function ajaxAllVerifyComponents() {
  * @return {string}
  */
 function getGradeableId() {
-
+    return $('#gradeable_rubric').data('gradeable_id');
 }
 
 /**
@@ -509,7 +509,7 @@ function getGradeableId() {
  * @return {string}
  */
 function getAnonId() {
-
+    return $('#anon-id').data('anon_id');
 }
 
 /**
@@ -518,7 +518,7 @@ function getAnonId() {
  *  @return {boolean}
  */
 function isInstructorEditEnabled() {
-
+    return false; // TODO
 }
 
 /**
@@ -527,7 +527,7 @@ function isInstructorEditEnabled() {
  *  @return {boolean}
  */
 function isEditModeEnabled() {
-
+    return $('#edit-mode-enabled').is(':checked');
 }
 
 /**
@@ -535,7 +535,7 @@ function isEditModeEnabled() {
  * @return {boolean}
  */
 function isOverwriteGraderEnabled() {
-
+    return $('#overwrite-id').is(':checked');
 }
 
 /**
@@ -549,11 +549,11 @@ function setRubricDOMElements(elements) {
 /**
  * Gets the DOM element for a component
  * @param component_id
- * @return {TODO}
+ * @return DOM Element of the component
  * @throws Error if the component id doesn't exist
  */
 function getComponentDOMElement(component_id) {
-
+    return $('#component-' + component_id);
 }
 
 /**
@@ -563,7 +563,35 @@ function getComponentDOMElement(component_id) {
  * @throws Error if the component id doesn't exist
  */
 function getComponentFromDOM(component_id) {
+    let domElement = getComponentDOMElement(component_id);
+    return {
+        title: domElement.data('title'),
+        ta_comment: domElement.data('ta_comment'),
+        student_comment: domElement.data('student_comment'),
+        page: domElement.data('page'),
+        marks: getMarkListFromDOM(component_id)
+    };
+}
 
+/**
+ * Extracts an array of marks from the DOM
+ * TODO: support publish
+ * @param component_id
+ * @return {Array}
+ */
+function getMarkListFromDOM(component_id) {
+    let domElement = getComponentDOMElement(component_id);
+    let markList = [];
+    let i = 0;
+    domElement.find('.ta-rubric-table tr').each(function() {
+        markList.push({
+            points: $(this).find('input[type=number]').val(),
+            title: $(this).find('textarea').text(),
+            order: i
+        });
+        i++;
+    });
+    return markList;
 }
 
 /**
@@ -617,7 +645,7 @@ function getComponentFirstMarkId(component_id) {
  * @throws Error if the component id doesn't exist
  */
 function showMarkList(component_id) {
-    $(getComponentDOMElement(component_id)).find("TODO").show();
+    $(getComponentDOMElement(component_id)).find('#mark-list').show();
 }
 
 /**
@@ -776,6 +804,23 @@ function onVerifyAll(me) {
 }
 
 /**
+ * Callback for the 'edit mode' checkbox changing states
+ * @param me DOM Element of the checkbox
+ */
+function onToggleEditMode(me) {
+    // Get the open components so we know which one to open once they're all saved
+    let open_component_ids = getOpenComponentIds();
+    let reopen_component_id = -1;
+    if (open_component_ids.length !== 0) {
+        reopen_component_id = open_component_ids[0];
+    }
+
+    closeAllComponents(true).then(function () {
+        return openComponent(reopen_component_id);
+    });
+}
+
+/**
  * Put all of the primary logic of the TA grading rubric here
  *
  */
@@ -857,16 +902,11 @@ function openCookieComponent() {
 }
 
 /**
- * Toggles a the open/close state of a component
- * @param {int} component_id the component's id
- * @param {boolean} saveChanges
- * @return {Promise}
+ * Closes all open components and the overall comment
+ * @param save_changes
+ * @return {Promise<void>}
  */
-function toggleComponent(component_id, saveChanges) {
-    // Component is open, so close it
-    if (isComponentOpen(component_id)) {
-        return closeComponent(component_id);
-    }
+function closeAllComponents(save_changes) {
     let sequence = Promise.resolve();
 
     // Overall Comment box is open, so close it
@@ -883,9 +923,23 @@ function toggleComponent(component_id, saveChanges) {
             return closeComponent(id);
         });
     });
+    return sequence;
+}
 
-    // Finally, open the component
-    return sequence.then(function () {
+/**
+ * Toggles a the open/close state of a component
+ * @param {int} component_id the component's id
+ * @param {boolean} saveChanges
+ * @return {Promise}
+ */
+function toggleComponent(component_id, saveChanges) {
+    // Component is open, so close it
+    if (isComponentOpen(component_id)) {
+        return closeComponent(component_id);
+    }
+
+    return closeAllComponents(saveChanges)
+        .then(function () {
         return openComponent(component_id);
     });
 }
@@ -1177,7 +1231,7 @@ function unCheckFirstMark(component_id) {
 function saveMarkList(component_id) {
     return ajaxGetComponentRubric(getGradeableId(), component_id)
         .then(function (component) {
-            let domMarkList = getComponentFromDOM(component_id).marks;
+            let domMarkList = getMarkListFromDOM(component_id);
             let serverMarkList = component.marks;
             let oldServerMarkList = OLD_MARK_LIST[component_id];
 
