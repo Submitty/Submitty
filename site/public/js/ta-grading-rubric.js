@@ -558,6 +558,7 @@ function getComponentDOMElement(component_id) {
 
 /**
  * Extracts a component object from the DOM
+ * TODO: support instructor edit mode
  * @param {int} component_id
  * @return {Object}
  * @throws Error if the component id doesn't exist
@@ -578,12 +579,13 @@ function getComponentFromDOM(component_id) {
  * TODO: support publish
  * @param component_id
  * @return {Array}
+ * @throws Error if the component id doesn't exist
  */
 function getMarkListFromDOM(component_id) {
     let domElement = getComponentDOMElement(component_id);
     let markList = [];
     let i = 0;
-    domElement.find('.ta-rubric-table tr').each(function() {
+    domElement.find('.ta-rubric-table .mark-container').each(function() {
         markList.push({
             points: $(this).find('input[type=number]').val(),
             title: $(this).find('textarea').text(),
@@ -601,7 +603,14 @@ function getMarkListFromDOM(component_id) {
  * @throws Error if the component id doesn't exist
  */
 function getGradedComponentFromDOM(component_id) {
-
+    let domElement = getComponentDOMElement(component_id);
+    return {
+        score: domElement.data(''),
+        ta_comment: domElement.data('ta_comment'),
+        student_comment: domElement.data('student_comment'),
+        page: domElement.data('page'),
+        marks: getMarkListFromDOM(component_id)
+    };
 }
 
 /**
@@ -1199,7 +1208,7 @@ function checkMark(component_id, mark_id) {
  */
 function unCheckMark(component_id, mark_id) {
     // First fetch the necessary information from the DOM
-    let gradedComponent = getGradedComponentFromDOM();
+    let gradedComponent = getGradedComponentFromDOM(component_id);
 
     // Then remove the mark id from the array
     for(let i = 0; i < gradedComponent.mark_ids.length; ++i) {

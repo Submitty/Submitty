@@ -13,7 +13,8 @@ function renderGradingGradeable(gradeable, graded_gradeable) {
             load: function (template) {
                 accept(template.render({
                     'gradeable': gradeable,
-                    'graded_gradeable': graded_gradeable
+                    'graded_gradeable': graded_gradeable,
+                    'editable': false
                 }));
             },
             error: reject

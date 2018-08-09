@@ -8,34 +8,32 @@ Required Input:
 TODO: add 'publish' support
 #}
 {% set extra_classes = editable ? '' : 'mark-uneditable' %}
-<tr
-        data-component_id="{{ component_id }}"
-        data-mark_id="{{ mark.id }}"
-        onclick="{{ editable ? '' : 'onToggleMark' }}"
+<div class="mark-container"
+     data-component_id="{{ component_id }}"
+     data-mark_id="{{ mark.id }}"
+     onclick="{{ editable ? '' : 'onToggleMark' }}"
 >
-    <td colspan="1" class="mark-score-container">
-        {% if not editable %}
-            <span class="{{ is_checked ? 'mark-selected' : '' }} mark mark-selector">
-                {{ mark.order + 1 }}
-            </span>
-        {% endif %}
-        <input
-                type="number"
-                onchange="onMarkPointsChange(this)"
-                step="{{ precision }}"
-                value="{{ mark.points }}"
-                class="mark-score {{ extra_classes }}"
+    {% if not editable %}
+        <span class="{{ is_checked ? 'mark-selected' : '' }} mark mark-selector">
+            {{ mark.order + 1 }}
+        </span>
+    {% endif %}
+    <span>
+        <input type="number"
+               onchange="onMarkPointsChange(this)"
+               step="{{ precision }}"
+               value="{{ mark.points }}"
+               class="mark-score {{ extra_classes }}"
         >
-    </td>
-    <td colspan="2">
-        <textarea
-                onkeyup="autoResizeComment(event);"
-                rows="1"
-                cols="120"
-                class="mark-note {{ extra_classes }}"
+    </span>
+    <span>
+        <textarea onkeyup="autoResizeComment(event);"
+                  rows="1"
+                  cols="120"
+                  class="mark-note {{ extra_classes }}"
         >{{ mark.title|escape }}</textarea>
-    </td>
-    <td>
+    </span>
+    <span>
         <span onclick="onGetMarkStats(this)">
             <i class="fa fa-users icon-mark-stats"></i>
         </span>
@@ -44,5 +42,5 @@ TODO: add 'publish' support
                 <i class="fa fa-trash icon-delete-mark"></i>
             </span>
         {% endif %}
-    </td>
-</tr>
+    </span>
+</div>

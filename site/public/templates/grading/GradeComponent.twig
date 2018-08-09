@@ -75,25 +75,28 @@ Required inputs:
     {% set is_checked = mark.id in graded_component.mark_ids %}
 {% endblock %}
 
-{% block mark_list_footer %}
-    {# Custom mark #}
-    <div class="box" onclick="event.stopPropagation()">
-        <span class="{{ graded_component.score == 0 and component.comment == "" ? "" : "mark-has" }} mark"></span>
-        <input
-                type="number"
-                step="{{ precision }}"
-                onchange="onCustomMarkChange(this)"
-                data-component_index="{{ component.id }}"
-                value="{{ graded_component.score }}" class="mark-score">
-        Custom:
-        <textarea
-                onchange="onCustomMarkChange(this)"
-                data-component_id="{{ component.id }}"
-                cols="120"
-                rows="1"
-                placeholder="Custom message for student..."
-                class="mark-note-custom"
-        >{{ graded_component.comment }}</textarea>
-    </div>
+{% block extra_mark_rows %}
+    {# Custom mark (only display in non-edit mode #}
+    {% if not editable %}
+        <div class="box" onclick="event.stopPropagation()">
+            <span class="{{ graded_component.score == 0 and component.comment == "" ? "" : "mark-selected" }} mark"></span>
+            <input
+                    type="number"
+                    step="{{ precision }}"
+                    onchange="onCustomMarkChange(this)"
+                    data-component_index="{{ component.id }}"
+                    value="{{ graded_component.score }}"
+                    class="mark-score">
+            Custom:
+            <textarea
+                    onchange="onCustomMarkChange(this)"
+                    data-component_id="{{ component.id }}"
+                    cols="120"
+                    rows="1"
+                    placeholder="Custom message for student..."
+                    class="mark-note-custom"
+            >{{ graded_component.comment }}</textarea>
+        </div>
+    {% endif %}
     {# /Custom mark #}
 {% endblock %}
