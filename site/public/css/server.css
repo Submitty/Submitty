@@ -378,6 +378,12 @@ table tr.table-header {
     margin-bottom: 20px;
 }
 
+.subtitle {
+    font-size: smaller;
+    word-wrap: unset;
+    white-space: normal;
+}
+
 #footer {
     margin-top: 30px;
     z-index: 20;
@@ -752,8 +758,8 @@ table tr.table-header {
 .notification_badge{
     background-color: red;
     float: right;
-    padding-left: 2px;
-    padding-right: 2px;
+    padding-left: 5px;
+    padding-right: 5px;
     margin-left: 5px;
     border-radius: 2px;
     color: white;
@@ -937,7 +943,6 @@ table .instructor .two-options{
 }
 
 #nav-buttons ul li {
-    padding: 6px;
     list-style: none;
     margin-bottom: -2px;
 }
@@ -945,13 +950,19 @@ table .instructor .two-options{
 #nav-buttons ul li.selected {
     margin-left: -30px;
     margin-right: -30px;
-    padding-left: 36px;
+    padding-left: 30px;
     background-color: #d9e1e2;
 }
 
-#nav-buttons ul li a {
-    text-decoration: none;
+#nav-buttons ul li .nav-row {
+    padding: 6px;
+    width: 100%;
+    display: block;
+}
+
+#nav-buttons ul li a.nav-row {
     color: #006398;
+    text-decoration: none;
 }
 
 #nav-buttons ul li.selected a {

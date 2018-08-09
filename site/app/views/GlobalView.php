@@ -3,7 +3,7 @@
 namespace app\views;
 
 class GlobalView extends AbstractView {
-    public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $css=array(), $js=array()) {
+    public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, $css=array(), $js=array()) {
         $messages = [];
         foreach (array('error', 'notice', 'success') as $type) {
             foreach ($_SESSION['messages'][$type] as $key => $error) {
@@ -18,11 +18,6 @@ class GlobalView extends AbstractView {
         }
 
         $pageTitle = $this->core->getConfig()->isCourseLoaded() ? $this->core->getFullCourseName() : "Submitty";
-
-        $notifications_info = null;
-        if ($this->core->getUser() && $this->core->getConfig()->isCourseLoaded()) {
-            $notifications_info = $this->core->getQueries()->getUnreadNotificationsCount($this->core->getUser()->getId(), null);
-        }
 
         return $this->core->getOutput()->renderTwigTemplate("GlobalHeader.twig", [
             "messages" => $messages,

@@ -8,33 +8,43 @@ use app\libraries\Core;
  * @package app\models
  * @method string getTitle()
  * @method string|null getSubtitle()
- * @method string getHref()
+ * @method string|null getHref()
  * @method string getClass()
  * @method bool isDisabled()
  * @method bool isTitleOnHover()
  * @method float|null getProgress()
  * @method string|null getAriaLabel()
- * @method int getNotificationsCount()
+ * @method string|null getBadge()
+ *
+ * @method void setTitle(string $title)
+ * @method void setSubtitle(string|null $subtitle)
+ * @method void setHref(string|null $href)
+ * @method void setClass(string $class)
+ * @method void setDisabled(bool $disabled)
+ * @method void setTitleOnHover(bool $titleOnHover)
+ * @method void setProgress(float|null $progress)
+ * @method void setAriaLabel(string|null $ariaLabel)
+ * @method void setBadge(string|null $badge)
  */
 class Button extends AbstractModel {
-    /** @var string|null $title */
+    /** @property @var string|null $title */
     protected $title;
-    /** @var string|null $subtitle */
+    /** @property @var string|null $subtitle */
     protected $subtitle;
-    /** @var string $href */
+    /** @property @var string|null $href */
     protected $href;
-    /** @var string $class */
+    /** @property @var string $class */
     protected $class;
-    /** @var bool $disabled */
+    /** @property @var bool $disabled */
     protected $disabled;
-    /** @var float|null $progress */
+    /** @property @var float|null $progress */
     protected $progress;
-    /** @var bool $title_on_hover */
+    /** @property @var bool $title_on_hover */
     protected $title_on_hover;
-    /** @var string|null $aria_label */
+    /** @property @var string|null $aria_label */
     protected $aria_label;
-    /** @var int $notifications_count */
-    protected $notifications_count;
+    /** @property @var string|null $badge */
+    protected $badge;
 
     /**
      * @param Core $core
@@ -44,7 +54,7 @@ class Button extends AbstractModel {
         parent::__construct($core);
         $this->title    = $details["title"] ?? null;
         $this->subtitle = $details["subtitle"] ?? null;
-        $this->href     = $details["href"] ?? "";
+        $this->href     = $details["href"] ?? null;
         $this->class    = $details["class"] ?? "btn";
         $this->disabled = $details["disabled"] ?? false;
         $this->progress = $details["progress"] ?? null;
@@ -53,7 +63,7 @@ class Button extends AbstractModel {
         }
         $this->title_on_hover = $details["title_on_hover"] ?? false;
         $this->aria_label = $details["aria_label"] ?? null;
-        $this->notifications_count = $details["notifications_count"] ?? 0;
+        $this->badge = $details["badge"] ?? null;
     }
 
 }

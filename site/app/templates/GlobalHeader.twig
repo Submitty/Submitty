@@ -1,3 +1,5 @@
+{% import _self as self %}
+
 <html lang="en">
 <head>
     <title>{{ page_title }}</title>
@@ -68,39 +70,8 @@
                     <div class="col-md-auto" id="sidebar">
                         <div id="nav-buttons">
                             <ul>
-                                {% if core.userLoaded() %}
-                                    <li id="login">
-                                        <span id="login-id">{{ core.getUser().getDisplayedFirstName() }}</span>
-                                    </li>
-                                    {% if notifications_info is not null %}
-                                        <li>
-                                            <a title="Notifications" href="{{ core.buildUrl({'component': 'navigation', 'page': 'notifications'}) }}">
-                                                Notifications
-                                                {% if notifications_info > 0 %}
-                                                    <span class="notification_badge">{{ notifications_info }}</span>
-                                                {% endif %}
-                                            </a>
-                                        </li>
-                                    {% endif %}
-                                    <li>
-                                        <a id='logout' href='{{ core.buildUrl({'component': 'authentication', 'page': 'logout'}) }}'>Logout</a>
-                                    </li>
-                                {% endif %}
-                                <li class="short-line"></li>
                                 {% for button in sidebar_buttons %}
-                                    {% if button.title == "" %}
-                                        <li class="short-line"></li>
-                                    {% else %}
-                                        <li
-                                            {% if button.selected %}
-                                                class="selected"
-                                            {% endif %}
-                                        >
-                                            <a href="{{ button.href }}">
-                                                {{ button.title }}
-                                            </a>
-                                        </li>
-                                    {% endif %}
+                                    {{ self.render_button(button) }}
                                 {% endfor %}
                             </ul>
                         </div>
@@ -108,3 +79,39 @@
                 {% endif %}
                 <div class="col-md" id="nav-body">
 {# Looks mismatched because this lines up with GlobalFooter.twig #}
+
+{% macro render_button(button) %}
+    {% if button.getTitle() == "" %}
+        <li class="short-line"></li>
+    {% else %}
+        <li
+            {% if button.getClass() != "" %}
+                class="{{ button.getClass() }}"
+            {% endif %}
+        >
+            {% if button.getHref() == null %}
+                <span
+                    {% if button.getClass() != "" %}
+                        class="{{ button.getClass() }}"
+                    {% endif %}
+                >
+                    {{ button.getTitle() }}
+                    {% if button.getBadge() > 0 %}
+                        <span class="notification_badge">{{  button.getBadge() }} </span>
+                    {% endif %}
+                </span>
+            {% else %}
+                <a href="{{ button.getHref() }}"
+                    {% if button.getClass() != "" %}
+                        class="{{ button.getClass() }}"
+                    {% endif %}
+                >
+                    {{ button.getTitle() }}
+                    {% if button.getBadge() > 0 %}
+                        <span class="notification_badge">{{  button.getBadge() }} </span>
+                    {% endif %}
+                </a>
+            {% endif %}
+        </li>
+    {% endif %}
+{% endmacro %}
