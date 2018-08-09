@@ -30,12 +30,12 @@
             <th>Current File</th>
         </tr>
         <tr class="wrapper-top">
-            <td>Top Bar</td>
+            <td id="Top_Bar">Top Bar</td>
             <td>
                 <form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_html'}) }}" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
                     <input type="hidden" name="location" value="top_bar.html">
-                    <input type="file" name="wrapper_upload">
+                    <input type="file" name="wrapper_upload" id="wrapper_upload" aria-labelledby="wrapper_upload Top_Bar">
                     <input type="submit" class="btn btn-default" value="Upload" />
                 </form>
             </td>
@@ -51,12 +51,12 @@
             </td>
         </tr>
         <tr class="wrapper-left">
-            <td>Left Sidebar</td>
+            <td id="Left_Bar">Left Sidebar</td>
             <td>
                 <form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_html'}) }}" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
                     <input type="hidden" name="location" value="left_sidebar.html">
-                    <input type="file" name="wrapper_upload">
+                    <input type="file" name="wrapper_upload" id="wrapper_upload" aria-labelledby="wrapper_upload Left_Bar">
                     <input type="submit" class="btn btn-default" value="Upload" />
                 </form>
             </td>
@@ -72,12 +72,12 @@
             </td>
         </tr>
         <tr class="wrapper-right">
-            <td>Right Sidebar</td>
+            <td id="Right_Bar">Right Sidebar</td>
             <td>
                 <form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_html'}) }}" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
                     <input type="hidden" name="location" value="right_sidebar.html">
-                    <input type="file" name="wrapper_upload">
+                    <input type="file" name="wrapper_upload" id="wrapper_upload" aria-labelledby="wrapper_upload Right_Bar">
                     <input type="submit" class="btn btn-default" value="Upload" />
                 </form>
             </td>
@@ -93,12 +93,12 @@
             </td>
         </tr>
         <tr class="wrapper-bottom">
-            <td>Bottom Bar</td>
+            <td id="Bottom_Bar">Bottom Bar</td>
             <td>
                 <form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_html'}) }}" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
                     <input type="hidden" name="location" value="bottom_bar.html">
-                    <input type="file" name="wrapper_upload">
+                    <input type="file" name="wrapper_upload" id="wrapper_upload" aria-labelledby="wrapper_upload Bottom_Bar">
                     <input type="submit" class="btn btn-default" value="Upload" />
                 </form>
             </td>
@@ -114,12 +114,12 @@
             </td>
         </tr>
         <tr class="wrapper-css">
-            <td>Custom CSS</td>
+            <td id="Custom_CSS">Custom CSS</td>
             <td>
                 <form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_html'}) }}" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
                     <input type="hidden" name="location" value="override.css">
-                    <input type="file" name="wrapper_upload">
+                    <input type="file" name="wrapper_upload" id="wrapper_upload" aria-labelledby="wrapper_upload Custom_CSS">
                     <input type="submit" class="btn btn-default" value="Upload" />
                 </form>
             </td>

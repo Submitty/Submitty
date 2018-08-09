@@ -75,21 +75,25 @@
             <div class="box col-md-6">
                 <br /><br />
                 <div class="option">
-                    <div class="option-input"><input type="text" name="add_reg_section" value="" placeholder="Eg: 3" /></div>
+                    <div class="option-input"><input type="text" name="add_reg_section" id="add_reg_section" value="" placeholder="Eg: 3" /></div>
                     <div class="option-desc">
-                        <div class="option-title">Add Registration Section</div>
-                        <div class="option-alt">
-                            Enter a registration section which is not already a registration section.
-                        </div>
+                    	<label for="add_reg_section">
+							<div class="option-title">Add Registration Section</div>
+							<div class="option-alt">
+								Enter a registration section which is not already a registration section.
+							</div>
+						</label>
                     </div>
                 </div>
                 <div class="option">
-                    <div class="option-input"><input type="text" name="delete_reg_section" value="" placeholder="Eg: 3" /></div>
+                    <div class="option-input"><input type="text" name="delete_reg_section" id="delete_reg_section" value="" placeholder="Eg: 3" /></div>
                     <div class="option-desc">
-                        <div class="option-title">Delete a Registration Section</div>
-                        <div class="option-alt">
-                            Registration Section to be deleted should not have any student enrolled in it and no grader should be assigned to grade the section.
-                        </div>
+                    	<label for="delete_reg_section">
+							<div class="option-title">Delete a Registration Section</div>
+							<div class="option-alt">
+								Registration Section to be deleted should not have any student enrolled in it and no grader should be assigned to grade the section.
+							</div>
+						</label>
                     </div><br />
                     <input style="margin-top: 20px; margin-right: 20px; float:right" type="submit" class="btn btn-primary" value="Submit" />
                 </div>
@@ -141,20 +145,24 @@
                 </div>
             </div>
             <div class="box col-md-6">
-                Place students in <input type="text" name="sections" placeholder="#" style="width: 25px" /> rotating sections
-                <select name="rotating_type">
-                    <option value="random">randomly</option>
-                    <option value="alphabetically">alphabetically</option>
-                </select><br /><br />
-                <label>
-                    <input type="radio" style="margin-top: -2px" name="sort_type" value="drop_null" /> Only remove unregistered students (registration section=NULL) from rotating sections
-                </label><br /><br />
-                <label>
-                    <input type="radio" style="margin-top: -2px" name="sort_type" value="fewest" /> Remove unregistered students (registration section=NULL) from rotating sections and put newly registered students into rotating section with fewest members
-                </label><br /><br />
-                <label>
-                    <input type="radio" style="margin-top: -2px" name="sort_type" value="redo" /> Redo rotating sections completely
-                </label><br />
+   				<fieldset>
+					<legend>
+						<label>Place students in <input type="text" name="sections" placeholder="#" style="width: 25px" /></label> <label>rotating sections
+						<select name="rotating_type">
+							<option value="random">randomly</option>
+							<option value="alphabetically">alphabetically</option>
+						</select></label><br /><br />
+					</legend>
+					<label>
+						<input type="radio" style="margin-top: -2px" name="sort_type" value="drop_null" /> Only remove unregistered students (registration section=NULL) from rotating sections
+					</label><br /><br />
+					<label>
+						<input type="radio" style="margin-top: -2px" name="sort_type" value="fewest" /> Remove unregistered students (registration section=NULL) from rotating sections and put newly registered students into rotating section with fewest members
+					</label><br /><br />
+					<label>
+						<input type="radio" style="margin-top: -2px" name="sort_type" value="redo" /> Redo rotating sections completely
+					</label><br />
+                </fieldset>
                 <input style="margin-top: 20px; margin-right: 20px; float:right" type="submit" class="btn btn-primary" value="Submit" />
             </div>
         </div>
