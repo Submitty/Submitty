@@ -101,8 +101,7 @@
             }
             // handle pdf
             if (url_file.substring(url_file.length - 3) === "pdf") {
-                alert("Please use the pdf viewer by clicking on the right arrow");
-                {#iframe.html("<iframe id='" + iframeId + "' src='{{ site_url|escape("js") }}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' height='1200px' style='border: 0'></iframe>");#}
+                expandFile(html_file, url_file);
             }
             else {
                 iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{{ core.getConfig().getSiteUrl() }}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' style='border: 0'></iframe>");

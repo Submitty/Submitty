@@ -63,8 +63,15 @@ function render(gradeable_id, user_id, grader_id, file_name) {
             RENDER_OPTIONS.documentId = file_name;
             PDFAnnotate.setStoreAdapter(new PDFAnnotate.LocalStoreAdapter(grader_id));
             // documentId = file_name;
-            var pdfData = JSON.parse(data);
-            pdfData = atob(pdfData);
+
+            let pdfData;
+            try {
+                pdfData = JSON.parse(data);
+                pdfData = atob(pdfData);
+            } catch (err){
+                alert("Please select 'Grade this version' in Student Information panel. If it is already selected, " +
+                    "then the PDF is either corrupt or broken");
+            }
             PDFJS.getDocument({data:pdfData}).then((pdf) => {
                 RENDER_OPTIONS.pdfDocument = pdf;
                 let viewer = document.getElementById('viewer');
