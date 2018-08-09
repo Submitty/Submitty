@@ -1,66 +1,29 @@
 {% extends "Gradeable.twig" %}
 
 {% block generate_component %}
-    {% set graded_component = graded_gradeable.graded_components[component.id] %}
+    {% set graded_component = graded_components[component.id] %}
     {% include "GradeComponent.twig" %}
 {% endblock %}
 
-{% set break_onclick = grading_disabled ? "return false;" : "" %}
 {% block footer_content %}
 {# General Comment #}
-    <div class="box general-comment">
-        <div class="box-title" onclick="{{ break_onclick }}; toggleGeneralMessage(true);">
-                <span id="title-general" onclick="{{ break_onclick }}; toggleGeneralMessage(true);" data-changebg="true">
-                    <b>General Comment</b>
-                    <span class="done-container">
-                        <span id="save-mark-general" style="display: none;" data-changedisplay1="true">
-                            <i class="fa fa-check done-button" aria-hidden="true">Done</i>
-                        </span>
-                    </span>
-                </span>
-            <span id="title-cancel-general" class="cancel-container" data-changebg="true" data-changedisplay1="true">
-                <span id="cancel-mark-general" onclick="{{ break_onclick }}; closeGeneralMessage(false);" data-changedisplay1="true">
-                    <i class="fa fa-times cancel-button" aria-hidden="true">Cancel</i>
-                </span>
-            </span>
-        </div>
-        <div>
-            <div class="box" id="summary-general" onclick="{{ break_onclick }}; openGeneralMessage();" data-changedisplay2="true">
-                <div class="box-title">
-                        <span id="rubric-custom">
-                            <span id="rubric-textarea-custom" class="rubric-textarea">{{ overall_comment }}</span>
-                        </span>
-                </div>
-            </div>
-            <span id="extra-general" style="display: none" data-changebg="true" data-changedisplay1="true">
-                <div class="box">
-                    <div class="box-title">
-                        <span>
-                            <textarea id="comment-id-general" name="comment-general" rows="5" class="general-comment-entry"
-                                      onkeyup="autoResizeComment(event);" placeholder="Overall message for student about the gradeable..."
-                                    {{ grading_disabled ? "disabled" : "" }}>{{ overall_comment }}</textarea>
-                        </span>
-                    </div>
-                </div>
-            </span>
-        </div>
+    <div id="overall-comment-container">
+        {% include "OverallComment.twig" with {
+                'disabled': grading_disabled,
+                'editable': false,
+                'overall_comment': overall_comment
+            } only %}
     </div>
 {# /General Comment #}
 
 {# Total Box #}
-    <div class="box">
-        <div class="box-title badge-container">
-            <strong id="grading_total" class="badge">? / ?</strong>
-            <strong>Grading Total</strong>
-        </div>
-        <div class="box-title badge-container">
-            <strong id="autograding_total" class="badge">? / ?</strong>
-            <strong>Auto-Grading Total</strong>
-        </div>
-        <div class="box-title badge-container">
-            <strong id="score_total" class="badge">? / ?</strong>
-            <strong>Total</strong>
-        </div>
+    <div id="total-score-container">
+        {% include "TotalScoreBox.twig" with {
+            'auto_grading_earned': auto_grading_earned,
+            'auto_grading_total': auto_grading_total,
+            'ta_grading_earned': ta_grading_earned,
+            'ta_grading_total': ta_grading_total
+        } only %}
     </div>
 {# /Total Box #}
 {% endblock %}

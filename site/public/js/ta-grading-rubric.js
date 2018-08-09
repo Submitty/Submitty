@@ -696,7 +696,7 @@ function onGetMarkStats(me) {
 }
 
 /**
- * Called when a component gets clicked (for opening)
+ * Called when a component gets clicked (for opening / closing)
  * @param me DOM Element of the component div
  */
 function onClickComponent(me) {
@@ -716,6 +716,30 @@ function onCancelComponent(me) {
  * @param me DOM Element of the save button
  */
 function onSaveComponent(me) {
+
+}
+
+/**
+ * Called when the overall comment box get clicked (for opening / closing)
+ * @param me DOM Element of the overall comment box
+ */
+function onClickOverallComment(me) {
+
+}
+
+/**
+ * Called when the 'cancel' button is pressed on the overall comment box
+ * @param me DOM element of the cancel button
+ */
+function onCancelOverallComment(me) {
+
+}
+
+/**
+ * Called when the 'save' button is pressed on the overall comment box
+ * @param me DOM element of the save button
+ */
+function onSaveOverallComment(me) {
 
 }
 
@@ -819,9 +843,10 @@ function openCookieComponent() {
 /**
  * Toggles a the open/close state of a component
  * @param {int} component_id the component's id
+ * @param {boolean} saveChanges
  * @return {Promise}
  */
-function toggleComponent(component_id) {
+function toggleComponent(component_id, saveChanges) {
     // Component is open, so close it
     if (isComponentOpen(component_id)) {
         return closeComponent(component_id);
@@ -851,12 +876,13 @@ function toggleComponent(component_id) {
 
 /**
  * Toggles a the open/close state of the general comment
+ * @param {boolean} saveChanges
  * @return {Promise}
  */
-function toggleOverallComment() {
+function toggleOverallComment(saveChanges) {
     // Overall comment open, so close it
     if (isOverallCommentOpen()) {
-        return closeOverallComment();
+        return closeOverallComment(saveChanges);
     }
 
     // Close all open components.  There shouldn't be more than one,
