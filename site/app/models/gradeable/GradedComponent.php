@@ -15,6 +15,7 @@ use app\models\User;
  * @method int getComponentId()
  * @method float getScore()
  * @method string getComment()
+ *
  * @method void setComment($comment)
  * @method string getGraderId()
  * @method int getGradedVersion()

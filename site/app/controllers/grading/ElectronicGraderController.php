@@ -1170,12 +1170,16 @@ class ElectronicGraderController extends GradingController {
 
         // Get / create the graded component
         $graded_component = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
-
         try {
             // Once we've parsed the inputs and checked permissions, perform the operation
-            $results = $this->saveGradedComponent($ta_graded_gradeable, $graded_component, $grader, $custom_points,
+            if(($custom_message == "" || $custom_message == 'undefined')  && ($custom_points != 0 || )){
+                $this->core->getOutput()->renderJsonFail('Custom Mark must have a message');   
+            }
+            else{
+                $results = $this->saveGradedComponent($ta_graded_gradeable, $graded_component, $grader, $custom_points,
                 $custom_message, $marks, $component_version, $overwrite);
-            $this->core->getOutput()->renderJsonSuccess($results);
+                $this->core->getOutput()->renderJsonSuccess($results);
+            }
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
         } catch (\Exception $e) {

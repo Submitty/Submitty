@@ -320,7 +320,7 @@ function ajaxSaveMarkOrder(gradeable_id, component_id, order, async, successCall
     });
 }
 
-function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, active_version, custom_points, custom_message, overwrite, mark_ids, async, successCallback, errorCallback) {
+function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, active_version, custom_points, custom_message, custom_has, overwrite, mark_ids, async, successCallback, errorCallback) {
     $.getJSON({
         type: "POST",
         url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_graded_component'}),
@@ -332,12 +332,16 @@ function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, active_ver
             'active_version' : active_version,
             'custom_points' : custom_points,
             'custom_message' : custom_message,
+            'custom_has' : custom_has,
             'overwrite' : overwrite,
             'mark_ids' : mark_ids
         },
         success: function(response) {
             if (response.status === 'fail') {
                 console.error('Failed to save component: ' + response.message);
+                if(response.message == "Custom Mark must have a message"){
+                    alert("The Custom Mark must have a message to have a non 0 point value");
+                }
             } else if (response.status === 'error') {
                 console.error('Internal error while saving component: ' + response.message);
             }
@@ -769,24 +773,15 @@ function updateProgressPoints(c_index) {
     current_question_text.html(summary_text);
 
     var custom_message = $('textarea[name=mark_text_custom_'+c_index+']').val();
-    $('#mark_points_custom-' + c_index)[0].disabled=true;
-    $('#mark_points_custom-' + c_index)[0].style.cursor="not-allowed";
-    $('#mark_text_custom-' + c_index)[0].style.cursor="not-allowed";
-    $('#mark_icon_custom-' + c_index)[0].style.cursor="not-allowed";
-    if(!editModeEnabled){
-        $('#mark_text_custom-'+c_index)[0].disabled=false;
-        $('#mark_text_custom-' + c_index)[0].style.cursor="text";
-        if(!custom_message == ""){
-            $('#mark_points_custom-' + c_index)[0].disabled=false;
-            $('#mark_points_custom-' + c_index)[0].style.cursor="default";
-            $('#mark_icon_custom-' + c_index)[0].style.cursor="pointer";
-        }  
-    }
-    else{
+    $('#mark_points_custom-' + c_index)[0].disabled=false;
+    $('#mark_points_custom-' + c_index)[0].style.cursor="default";
+    $('#mark_text_custom-' + c_index)[0].style.cursor="text";
+    $('#mark_icon_custom-' + c_index)[0].style.cursor="pointer";
+    if(editModeEnabled){
         $('#mark_text_custom-'+c_index)[0].disabled=true;
-    }
-    if(custom_message == ""){
-        $('#mark_points_custom-' + c_index)[0].value="0";
+        $('#mark_points_custom-' + c_index)[0].style.cursor="not-allowed";
+        $('#mark_text_custom-' + c_index)[0].style.cursor="not-allowed";
+        $('#mark_icon_custom-' + c_index)[0].style.cursor="not-allowed";
     }
     calculatePercentageTotal();
 }
@@ -1083,9 +1078,10 @@ function saveMark(c_index, sync, override, successCallback, errorCallback) {
         var current_title = $('#title-' + c_index);
         var custom_points  = current_row.find('input[name=mark_points_custom_'+c_index+']').val();
         var custom_message = current_row.find('textarea[name=mark_text_custom_'+c_index+']').val();
-        if(custom_message === "" || custom_message == undefined){
+        var custom_has = current_row.find('icon[name=mark_icon_custom_'+c_index+']').val();
+      /*  if(custom_message === "" || custom_message == undefined){
             custom_points="0";
-        }
+        } */
         // Updates the total number of points and text
         var current_question_text = $('#rubric-textarea-' + c_index);
         var component = getComponent(c_index);
@@ -1102,7 +1098,7 @@ function saveMark(c_index, sync, override, successCallback, errorCallback) {
             custom_message = escapeHTML(custom_message);
         }
         var overwrite = ($('#overwrite-id').is(':checked')) ? ("true") : ("false");
-        ajaxSaveGradedComponent(gradeable.id, gradeable.components[c_index-1].id, gradeable.user_id, gradeable.active_version, custom_points, custom_message, overwrite, mark_ids, true, function(response) {
+        ajaxSaveGradedComponent(gradeable.id, gradeable.components[c_index-1].id, gradeable.user_id, gradeable.active_version, custom_points, custom_message, custom_has, overwrite, mark_ids, true, function(response) {
             var hasGrade = false;
             for (var m_index = 0; m_index < arr_length; m_index++) {
                 var current_mark_id=grading_data.gradeable.components[c_index-1].marks[m_index].id;
@@ -1127,7 +1123,7 @@ function saveMark(c_index, sync, override, successCallback, errorCallback) {
                 successCallback(response);                           
         }, errorCallback ? errorCallback : function() {
             console.error("Something went wront with saving marks...");
-       //     alert("There was an error with saving the grade. Please refresh the page and try agian.");
+            alert("There was an error with saving the grade. Please refresh the page and try agian.");
         });
     }
     calculateMarksPoints(c_index);
@@ -1244,9 +1240,9 @@ function saveMarkEditMode(c_index, sync, successCallback, errorCallback, data, o
 
     var current_title = $('#title-' + c_index);
     var custom_points  = current_row.find('input[name=mark_points_custom_'+c_index+']').val();
-    if (typeof custom_points != 'number') {
+   /* if (typeof custom_points != 'number') {
         custom_points=0;
-    }
+    }*/
     var custom_message = current_row.find('textarea[name=mark_text_custom_'+c_index+']').val();
 
     // Updates the total number of points and text

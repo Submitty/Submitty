@@ -923,7 +923,7 @@ class Course(object):
                                         score = generate_probability_space({0.7: max_value_score, 0.2: uppser_clamp_score, 0.08: -max_value_score, 0.02: -99999})
                                     grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S%z")
                                     self.conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
-                                                 gcd_score=score, gcd_component_comment=generate_random_ta_comment(),
+                                                 gcd_score=score, gcd_component_comment=generate_random_ta_comment(), gcd_has_custom=false,
                                                  gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time, gcd_graded_version=versions_to_submit)
                                     first = True
                                     first_set = False
@@ -953,7 +953,7 @@ class Course(object):
                                 score = random.randint(component.lower_clamp * 2, component.upper_clamp * 2) / 2
                             grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S%z")
                             self.conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
-                                         gcd_score=score, gcd_component_comment="", gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time, gcd_graded_version=-1)
+                                         gcd_score=score, gcd_component_comment="", gcd_has_custom=false, gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time, gcd_graded_version=-1)
         #This segment adds the sample forum posts for the sample course only
         if self.code == "sample": 
             self.add_sample_forum_data()
