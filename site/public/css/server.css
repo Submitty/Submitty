@@ -949,7 +949,10 @@ table .instructor .two-options{
 #sidebar {
     width: 220px;
     margin: 0;
-    transition: width 0.5s ease-out;
+}
+
+#sidebar.animate {
+    transition: 0.25s ease-out;
 }
 
 #sidebar.collapsed {
@@ -977,11 +980,25 @@ table .instructor .two-options{
 }
 
 #sidebar.collapsed #nav-buttons ul li .nav-row {
-    padding-left: 60px;
+    display: none;
 }
 
-#sidebar.collapsed #nav-buttons ul li span.nav-row {
+#nav-buttons ul li .collapse-icon {
     display: none;
+}
+
+#sidebar.collapsed #nav-buttons ul li .collapse-icon {
+    display: inline-block;
+    font-size: 24px;
+    width: 60px;
+    padding: 6px;
+    text-align: center;
+    z-index: 1000;
+}
+
+#nav-buttons ul li .nav-row.collapse-icon i.fa {
+    margin-left: 0;
+    width: 48px;
 }
 
 #nav-buttons ul li a.nav-row {
@@ -997,15 +1014,20 @@ table .instructor .two-options{
     color: #790000;
 }
 
-#nav-buttons ul li a.nav-row i.fa, #sidebar.collapsed #nav-buttons ul li a.nav-row i.fa {
+#nav-buttons ul li a.nav-row i.fa {
     color: #000000;
 }
 
-#sidebar.collapsed #nav-buttons ul li a.nav-row:hover i.fa {
+#nav-buttons ul li a.collapse-icon i.fa {
+    color: #000000;
+    z-index: 1000;
+}
+
+#nav-buttons ul li a.collapse-icon:hover i.fa {
     color: #006398;
 }
 
-#sidebar.collapsed #nav-buttons ul li a.nav-row:active i.fa {
+#nav-buttons ul li a.collapse-icon:active i.fa {
     color: #790000;
 }
 
@@ -1013,12 +1035,6 @@ table .instructor .two-options{
     margin-left: -33px;
     width: 30px;
     text-align: center;
-}
-
-#sidebar.collapsed #nav-buttons ul li .nav-row i.fa {
-    font-size: 24px;
-    margin-left: -60px;
-    width: 60px;
 }
 
 #nav-buttons ul li.line {

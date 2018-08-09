@@ -86,6 +86,11 @@
         <li class="short-line"></li>
     {% else %}
         <li>
+            {% if button.getIcon() != null %}
+                <a class="collapse-icon {{ button.getClass() }}" href="{{ button.getHref() }}" data-toggle="tooltip" title="{{ button.getTitle() }}">
+                    <i class="fa {{ button.getIcon() }}"></i>
+                </a>
+            {% endif %}
             {% if button.getHref() == null %}
                 <span
                     {% if button.getClass() != "" %}

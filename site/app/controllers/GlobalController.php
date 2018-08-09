@@ -42,6 +42,7 @@ class GlobalController extends AbstractController {
 
         $sidebar_buttons = [];
         if ($this->core->userLoaded()) {
+
             $sidebar_buttons[] = new Button($this->core, [
                 "href" => null,
                 "title" => $this->core->getUser()->getDisplayedFirstName(),
@@ -54,7 +55,7 @@ class GlobalController extends AbstractController {
                     "href" => $this->core->buildUrl(array('component' => 'navigation')),
                     "title" => "Navigation",
                     "class" => "nav-row",
-                    "icon" => "fa-list-ul"
+                    "icon" => "fa-home"
                 ]);
             }
 
@@ -115,19 +116,19 @@ class GlobalController extends AbstractController {
                     "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users')),
                     "title" => "Students",
                     "class" => "nav-row",
-                    "icon" => "fa-users"
+                    "icon" => "fa-graduation-cap"
                 ]);
                 $sidebar_buttons[] = new Button($this->core, [
                     "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'graders')),
                     "title" => "Graders",
                     "class" => "nav-row",
-                    "icon" => "fa-users"
+                    "icon" => "fa-address-book"
                 ]);
                 $sidebar_buttons[] = new Button($this->core, [
                     "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'rotating_sections')),
                     "title" => "Setup Sections",
                     "class" => "nav-row",
-                    "icon" => "fa-question-circle"
+                    "icon" => "fa-users"
                 ]);
             }
 
@@ -140,7 +141,7 @@ class GlobalController extends AbstractController {
                         "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page')),
                         "title" => "Upload Student Photos",
                         "class" => "nav-row",
-                        "icon" => "fa-question-circle"
+                        "icon" => "fa-id-card"
                     ]);
                 } else if (count($any_images_files) !== 0 && $this->core->getUser()->accessGrading()) {
                     $sections = $this->core->getUser()->getGradingRegistrationSections();
@@ -149,7 +150,7 @@ class GlobalController extends AbstractController {
                             "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page')),
                             "title" => "Student Photos",
                             "class" => "nav-row",
-                            "icon" => "fa-question-circle"
+                            "icon" => "fa-id-card"
                         ]);
                     }
                 }
@@ -195,7 +196,7 @@ class GlobalController extends AbstractController {
                     "href" => $this->core->buildUrl(array('component' => 'student', 'page' => 'rainbow')),
                     "title" => "My Grades",
                     "class" => "nav-row",
-                    "icon" => "fa-question-circle"
+                    "icon" => "fa-line-chart"
                 ]);
             }
 
@@ -213,10 +214,10 @@ class GlobalController extends AbstractController {
             ]);
 
             $sidebar_buttons[] = new Button($this->core, [
-                "href" => "javascript: $('#sidebar').toggleClass('collapsed');",
+                "href" => "javascript: toggleSidebar();",
                 "title" => "Collapse Sidebar",
                 "class" => "nav-row",
-                "icon" => "fa-columns"
+                "icon" => "fa-bars"
             ]);
 
             $sidebar_buttons[] = new Button($this->core, [
