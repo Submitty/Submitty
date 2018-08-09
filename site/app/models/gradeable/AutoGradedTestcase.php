@@ -46,7 +46,7 @@ class AutoGradedTestcase extends AbstractModel {
         if (isset($details['autochecks'])) {
             foreach ($details['autochecks'] as $idx => $autocheck) {
                 $index = "id_{$testcase->getIndex()}_{$idx}";
-                $this->autochecks[] = new GradeableAutocheck(
+                $this->autochecks[$idx] = new GradeableAutocheck(
                     $this->core, $autocheck,
                     $this->core->getConfig()->getCoursePath(),
                     $result_path, $index
@@ -75,6 +75,20 @@ class AutoGradedTestcase extends AbstractModel {
      */
     public function getTestcase() {
         return $this->testcase;
+    }
+
+    /**
+     * Gets an Autocheck instance from its index
+     * @param int $index
+     * @return GradeableAutocheck
+     * @throws \InvalidArgumentException If the provided index does not exist
+     */
+    public function getAutocheck(int $index) {
+        $result = $this->autochecks[$index] ?? null;
+        if ($result === null) {
+            throw new \InvalidArgumentException('Testcase did not contain autocheck at provided index');
+        }
+        return $result;
     }
 
     /**

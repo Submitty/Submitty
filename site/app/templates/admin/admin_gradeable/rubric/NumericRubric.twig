@@ -1,8 +1,8 @@
 <div id="gradeable_rubric">
-    How many numeric items? <input style="width: 50px" id="numeric_num-items" name="num_numeric_items" type="text" value="0" class="int_val" onchange="calculateTotalScore();"/>
+    How many numeric items? <input style="width: 50px" id="numeric_num-items" name="num_numeric_items" type="text" value="0" class="int_val ignore" onchange="calculateTotalScore();"/>
     &emsp;&emsp;
 
-    How many text items? <input style="width: 50px" id="numeric_num_text_items" name="num_text_items" type="text" value="0" class="int_val"/>
+    How many text items? <input style="width: 50px" id="numeric_num_text_items" name="num_text_items" type="text" value="0" class="int_val ignore"/>
     <br /> <br />
 
     <div class="multi-field-wrapper-numeric">
@@ -120,7 +120,7 @@
             --numText;
         }
 
-        $('#numeric_num_text_items').on('input', function (e) {
+        $('#numeric_num_text_items').on('change', function (e) {
             var requestedText = this.value;
             if (isNaN(requestedText) || requestedText < 0) {
                 requestedText = 0;
@@ -136,7 +136,7 @@
             saveRubric(false);
         });
 
-        $('#numeric_num-items').on('input', function (e) {
+        $('#numeric_num-items').on('change', function (e) {
             var requestedNumeric = this.value;
             if (isNaN(requestedNumeric) || requestedNumeric < 0) {
                 requestedNumeric = 0;

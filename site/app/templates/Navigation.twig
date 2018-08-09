@@ -2,7 +2,13 @@
 
 {% if display_custom_message %}
     <div class="content">
-        {{ message_file_contents }}
+        {{ message_file_contents|raw }}
+    </div>
+{% endif %}
+
+{% if display_room_seating %}
+    <div class="content">
+        {% include 'navigation/RoomSeating.twig' %}
     </div>
 {% endif %}
 
@@ -42,7 +48,7 @@
                             {% endif %}
                         </td>
                         {% for button in g_info.buttons %}
-                            <td style="padding: 20px;"{{ 'btn-nav-open' in button.getClass() ? ' class="td-open"' : '' }}>{{ self.renderButton(button) }}</td>
+                            <td style="padding: 20px;"{{ 'btn-nav-open' in button.getClass() ? ' class="td-open"' : button.getTitle() == 'Edit' and g_info.has_build_error ? ' class="edit-build-error"' : '' }}>{{ self.renderButton(button) }}</td>
                         {% endfor %}
                     </tr>
                     {% endfor %}
@@ -61,7 +67,10 @@
 
 {% macro renderButton(button) %}
     {% if button != null %}
-        <a class="{{ button.getClass() }}" name="{{ button.getTitle()|lower }}_button"
+        <a class="{{ button.getClass() }}"
+            {% if button.getTitle() != null %}
+                name="{{ button.getTitle()|lower }}_button"
+            {% endif %}
             {% if button.isDisabled() %}
                 disabled
             {% else %}
@@ -74,6 +83,10 @@
                 aria-label="{{ button.getAriaLabel() }}"
             {% endif %}
         >
+            {% if button.getNotificationsCount() > 0 %}
+                <span class="notification_badge">{{  button.getNotificationsCount() }} </span>
+            {% endif %}
+
             {% if not button.isTitleOnHover() and button.getTitle() != null %}
                 {{ button.getTitle() }}
             {% endif %}

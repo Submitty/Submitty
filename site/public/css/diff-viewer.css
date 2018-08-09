@@ -83,3 +83,7 @@
     white-space: pre;
     padding-left: 10px;
 }
+
+.diff-code .whitespace {
+    border: 1px solid blue;
+}

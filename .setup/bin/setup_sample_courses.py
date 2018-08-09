@@ -1372,11 +1372,13 @@ class Gradeable(object):
 
         self.ta_view_date = dateutils.parse_datetime(gradeable['g_ta_view_start_date'])
         self.grade_start_date = dateutils.parse_datetime(gradeable['g_grade_start_date'])
+        self.grade_due_date = dateutils.parse_datetime(gradeable['g_grade_due_date'])
         self.grade_released_date = dateutils.parse_datetime(gradeable['g_grade_released_date'])
         if self.type == 0:
             self.submission_open_date = dateutils.parse_datetime(gradeable['eg_submission_open_date'])
             self.submission_due_date = dateutils.parse_datetime(gradeable['eg_submission_due_date'])
             self.team_lock_date = dateutils.parse_datetime(gradeable['eg_submission_due_date'])
+            self.regrade_request_date = dateutils.parse_datetime(gradeable['eg_regrade_request_date'])
             self.student_view = True
             self.student_submit = True
             self.student_download = False
@@ -1421,6 +1423,7 @@ class Gradeable(object):
             assert self.ta_view_date < self.submission_open_date
             assert self.submission_open_date < self.submission_due_date
             assert self.submission_due_date < self.grade_start_date
+            assert self.grade_released_date < self.regrade_request_date
             if self.gradeable_config is not None:
                 if self.sample_path is not None:
                     if os.path.isfile(os.path.join(self.sample_path, "submissions.yml")):
@@ -1436,7 +1439,8 @@ class Gradeable(object):
                                 raise TypeError("Cannot have dictionary inside of list for submissions "
                                                 "for {}".format(self.sample_path))
         assert self.ta_view_date < self.grade_start_date
-        assert self.grade_start_date < self.grade_released_date
+        assert self.grade_start_date < self.grade_due_date
+        assert self.grade_due_date <= self.grade_released_date
 
         self.components = []
         for i in range(len(gradeable['components'])):
@@ -1464,6 +1468,7 @@ class Gradeable(object):
                      g_grade_by_registration=self.grade_by_registration,
                      g_ta_view_start_date=self.ta_view_date,
                      g_grade_start_date=self.grade_start_date,
+                     g_grade_due_date=self.grade_due_date,
                      g_grade_released_date=self.grade_released_date,
                      g_syllabus_bucket=self.syllabus_bucket,
                      g_min_grading_group=self.min_grading_group,
@@ -1487,7 +1492,8 @@ class Gradeable(object):
                          eg_student_view=self.student_view, 
                          eg_student_submit=self.student_submit, eg_student_download=self.student_download,
                          eg_student_any_version=self.student_any_version, eg_config_path=self.config_path,
-                         eg_late_days=self.late_days, eg_precision=self.precision, eg_peer_grading=self.peer_grading)
+                         eg_late_days=self.late_days, eg_precision=self.precision, eg_peer_grading=self.peer_grading,
+                         eg_regrade_request_date=self.regrade_request_date)
 
         for component in self.components:
             component.create(self.id, conn, component_table, mark_table)
@@ -1504,7 +1510,9 @@ class Gradeable(object):
         if self.type == 0:
             form_json['date_submit'] = dateutils.write_submitty_date(self.submission_open_date)
             form_json['date_due'] = dateutils.write_submitty_date(self.submission_due_date)
+            form_json['regrade_request_date'] = dateutils.write_submitty_date(self.regrade_request_date)
         form_json['date_grade'] = dateutils.write_submitty_date(self.grade_start_date)
+        form_json['date_grade_due'] = dateutils.write_submitty_date(self.grade_due_date)
         form_json['date_released'] = dateutils.write_submitty_date(self.grade_released_date)
 
         if self.type == 0:

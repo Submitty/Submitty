@@ -201,7 +201,7 @@ class TaGradedGradeable extends AbstractModel {
      */
     public function getTotalScorePercent($clamp = false) {
         return Utils::safeCalcPercent($this->getTotalScore(),
-            $this->getGradedGradeable()->getGradeable()->getTaNonExtraCreditPoints(), $clamp);
+            $this->getGradedGradeable()->getGradeable()->getTaPoints(), $clamp);
     }
 
     /**
@@ -321,6 +321,14 @@ class TaGradedGradeable extends AbstractModel {
                 throw new \InvalidArgumentException('Invalid date string format');
             }
         }
+        $this->modified = true;
+    }
+
+    /**
+     * Resets the user_viewed_date to be as if the student never saw the grade
+     */
+    public function resetUserViewedDate() {
+        $this->user_viewed_date = null;
         $this->modified = true;
     }
 

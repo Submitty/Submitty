@@ -14,7 +14,6 @@ class CourseMaterialsView extends AbstractView {
      * @return string
      */
     public function listCourseMaterials($user_group) {
-
         $this->core->getOutput()->addBreadcrumb("Course Materials", $this->core->buildUrl(array('component' => 'grading', 'page' => 'course_materials', 'action' => 'view_course_materials_page')));
         function add_files($core, &$files, &$file_datas, &$file_release_dates, $expected_path, $json, $course_materials_array, $start_dir_name, $user_group) {
             $files[$start_dir_name] = array();
@@ -51,7 +50,7 @@ class CourseMaterialsView extends AbstractView {
                 }
 
                 if ($student_access && $isShareToOther === '0') {
-                    continue; // skip this so we don't add to the courseMaterialsArray
+                    continue; // skip this so don't add to the courseMaterialsArray
                 }
 
                 $path = explode('/', $file);
@@ -84,6 +83,7 @@ class CourseMaterialsView extends AbstractView {
         $path_length = strlen($expected_path)+1;
         $course_materials_array = FileUtils::getAllFilesTrimSearchPath($expected_path, $path_length);
         $this->core->getOutput()->addInternalJs("drag-and-drop.js");
+        //Sort the files/folders in alphabetical order
         usort($course_materials_array, 'strnatcasecmp');
 
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
@@ -91,7 +91,13 @@ class CourseMaterialsView extends AbstractView {
 
         add_files($this->core, $submissions, $file_shares, $file_release_dates, $expected_path, $json, $course_materials_array, 'course_materials', $user_group);
 
-        $instructor_permission = ($user_group === 1);
+        //Check if user has permissions to access page (not instructor when no course materials available)
+        if ($user_group !== 1 && count($course_materials_array) == 0) {
+            // nothing to view
+            $this->core->addErrorMessage("You have no permission to access this page");
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            return;
+        }
 
         return $this->core->getOutput()->renderTwigTemplate("course/CourseMaterials.twig", [
             "courseMaterialsArray" => $course_materials_array,
@@ -101,7 +107,7 @@ class CourseMaterialsView extends AbstractView {
             "submissions" => $submissions,
             "fileShares" => $file_shares,
             "fileReleaseDates" => $file_release_dates,
-            "hasInstructorPermission" => $instructor_permission
+            "userGroup" => $user_group
         ]);
     }
 }

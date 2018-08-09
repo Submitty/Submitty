@@ -4,6 +4,7 @@ NO_COMPONENT_ID = -1;
 /// Component ID of the "General Comment" box at the bottom
 GENERAL_MESSAGE_ID = -2;
 
+OPENEDMARKS = [];
 /**
  * Get the page-wide Gradeable object (see Gradeable.php/getGradedData())
  * @returns Object Gradeable data
@@ -33,7 +34,7 @@ function getComponent(c_index) {
 function getMark(c_index, m_id){
     var marks = grading_data.gradeable.components[c_index-1].marks;
     for(var i=0; i<marks.length; i++){
-        if(marks[i].id === m_id){
+        if(marks[i].id == m_id){
             return marks[i];
         }
     }
@@ -88,7 +89,7 @@ function updateCustomMarkText(me) {
 
 //if type == 0 number input, type == 1 textarea
 function checkIfSelected(me) {
-    var table_row = $(me.parentElement);
+    var table_row = $(me.parentElement.parentElement.parentElement);
     var is_selected = false;
     var icon = table_row.find(".mark");
     var number_input = table_row.find("input");
@@ -127,38 +128,50 @@ function getMarkView(c_index, m_index, m_id, editEnabled) {
     });
 }
 
-function ajaxGetMarkData(gradeable_id, user_id, question_id, successCallback, errorCallback) {
-    $.ajax({
-            type: "POST",
-            url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'get_mark_data'}),
-            data: {
+function ajaxGetMarkData(gradeable_id, user_id, component_id, successCallback, errorCallback) {
+    $.getJSON({
+            url: buildUrl({
+                'component': 'grading',
+                'page': 'electronic',
+                'action': 'get_mark_data',
                 'gradeable_id' : gradeable_id,
                 'anon_id' : user_id,
-                'gradeable_component_id' : question_id,
-            },
-            success: function(data) {
-                if (typeof(successCallback) === "function") {
-                    successCallback(data);
+                'component_id' : component_id
+            }),
+            success: function(response) {
+                if (response.status !== 'success') {
+                    console.error('Failed to fetch marks: ' + response.message);
+                    if (typeof(errorCallback) === "function") {
+                        errorCallback(response.data);
+                    }
+                    alert("There was an error fetching marks. Please report this message to your instructor and refresh the page: " + response.message);
+                }
+                else if (typeof(successCallback) === "function") {
+                    successCallback(response.data);
                 }
             },
             error: (typeof(errorCallback) === "function") ? errorCallback : function(err) {
-                console.error("Something went wront with fetching marks!");
-                alert("There was an error with fetching marks. Please refresh the page and try agian.");
+                console.error("Failed to parse mark data response.  The server isn't playing nice...");
+  //              alert("There was an error with fetching marks. Please refresh the page and try agian.");
             }
     })
 }
 
 function ajaxGetGeneralCommentData(gradeable_id, user_id, successCallback, errorCallback) {
-    $.ajax({
+    $.getJSON({
         type: "POST",
         url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'get_gradeable_comment'}),
         data: {
             'gradeable_id' : gradeable_id,
             'anon_id' : user_id
         },
-        success: function(data) {
+        success: function(response) {
+            if (response.status !== 'success') {
+                alert('Something went wrong saving the comment: ' + response.message);
+                return;
+            }
             if (typeof(successCallback) === "function") {
-                successCallback(data);
+                successCallback(response.data);
             }
         },
         error: (typeof(errorCallback) === "function") ? errorCallback : function() {
@@ -168,26 +181,29 @@ function ajaxGetGeneralCommentData(gradeable_id, user_id, successCallback, error
     })
 }
 
-function ajaxAddNewMark(gradeable_id, user_id, component, note, points, sync, successCallback, errorCallback) {
+function ajaxAddNewMark(gradeable_id, component_id, note, points, sync, successCallback, errorCallback) {
     note = (note ? note : "");
     points = (points ? points : 0);
     if (!note.trim())
         console.error("Shouldn't add blank mark!");
     
-    $.ajax({
+    $.getJSON({
             type: "POST",
             url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'add_one_new_mark'}),
             async: false,
             data: {
                 'gradeable_id' : gradeable_id,
-                'anon_id' : user_id,
-                'gradeable_component_id' : component,
+                'component_id' : component_id,
                 'note' : note,
                 'points' : points
             },
-            success: function(data) {
+            success: function(response) {
+                if (response.status !== 'success') {
+                    alert('Something went wrong adding the mark: ' + response.message);
+                    return;
+                }
                 if (typeof(successCallback) === "function") {
-                    successCallback(data);
+                    successCallback(response.data);
                 }
             },
             error: (typeof(errorCallback) === "function") ? errorCallback : function() {
@@ -196,20 +212,26 @@ function ajaxAddNewMark(gradeable_id, user_id, component, note, points, sync, su
             }
         })
 }
-function ajaxDeleteMark(gradeable_id, user_id, component, mark, sync, successCallback, errorCallback) {
-    $.ajax({
+function ajaxDeleteMark(gradeable_id, component_id, mark_id, sync, successCallback, errorCallback) {
+    $.getJSON({
             type: "POST",
             url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'delete_one_mark'}),
             async: false,
             data: {
                 'gradeable_id' : gradeable_id,
-                'anon_id' : user_id,
-                'gradeable_component_id' : component,
-                'gradeable_component_mark_id' : mark
+                'component_id' : component_id,
+                'mark_id' : mark_id
             },
-            success: function(data) {
+            success: function(response) {
+                if (response.status !== 'success') {
+                    alert('Something went wrong saving the comment: ' + response.message);
+                    if (typeof(errorCallback) === "function") {
+                        errorCallback(response.data);
+                    }
+                    return;
+                }
                 if (typeof(successCallback) === "function") {
-                    successCallback(data);
+                    successCallback(response.data);
                 }
             },
             error: (typeof(errorCallback) === "function") ? errorCallback : function() {
@@ -218,18 +240,22 @@ function ajaxDeleteMark(gradeable_id, user_id, component, mark, sync, successCal
             }
         })
 }
-function ajaxGetMarkedUsers(gradeable_id, gradeable_component_id, m_id, successCallback, errorCallback) {
-    $.ajax({
+function ajaxGetMarkedUsers(gradeable_id, component_id, mark_id, successCallback, errorCallback) {
+    $.getJSON({
         type: "POST",
         url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'get_marked_users'}),
         data: {
             'gradeable_id' : gradeable_id,
-            'gradeable_component_id' : gradeable_component_id,
-            'gradeable_component_mark_id' : m_id
+            'component_id' : component_id,
+            'mark_id' : mark_id
         },
-        success: function(data) {
+        success: function(response) {
+            if (response.status !== 'success') {
+                alert('Something went wrong getting the users with that mark: ' + response.message);
+                return;
+            }
             if (typeof(successCallback) === "function") {
-                successCallback(data);
+                successCallback(response.data);
             }
         },
         error: (typeof(errorCallback) === "function") ? errorCallback : function() {
@@ -238,20 +264,23 @@ function ajaxGetMarkedUsers(gradeable_id, gradeable_component_id, m_id, successC
     })
 }
 
-function ajaxSaveGeneralComment(gradeable_id, user_id, active_version, gradeable_comment, sync, successCallback, errorCallback) {
-    $.ajax({
+function ajaxSaveGeneralComment(gradeable_id, user_id, gradeable_comment, sync, successCallback, errorCallback) {
+    $.getJSON({
         type: "POST",
         url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_general_comment'}),
         async: sync,
         data: {
             'gradeable_id' : gradeable_id,
             'anon_id' : user_id,
-            'active_version' : active_version,
             'gradeable_comment' : gradeable_comment
         },
-        success: function(data) {
+        success: function(response) {
+            if (response.status !== 'success') {
+                alert('Something went wrong saving the comment: ' + response.message);
+                return;
+            }
             if (typeof(successCallback) === "function") {
-                successCallback(data);
+                successCallback(response.data);
             }
         },
         error: (typeof(errorCallback) === "function") ? errorCallback : function() {
@@ -261,30 +290,90 @@ function ajaxSaveGeneralComment(gradeable_id, user_id, active_version, gradeable
     })
 }
 
-function ajaxSaveMarks(gradeable_id, user_id, gradeable_component_id, num_mark, active_version, custom_points, custom_message, overwrite, marks, num_existing_marks, sync, successCallback, errorCallback) {
-    $.ajax({
+// 'order' format: [ <mark0-id> : <order0>, <mark1-id> : <order1>, ... ]
+function ajaxSaveMarkOrder(gradeable_id, component_id, order, async, successCallback, errorCallback) {
+    $.getJSON({
         type: "POST",
-        url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_one_component'}),
-        async: sync,
+        url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_mark_order'}),
+        async: async,
+        data: {
+            'gradeable_id': gradeable_id,
+            'component_id': component_id,
+            'order': JSON.stringify(order)
+        },
+        success: function(response) {
+            if (response.status !== 'success') {
+                console.error('Failed to save mark order: ' + response.message);
+                if (typeof(errorCallback) === "function") {
+                    errorCallback(response.data);
+                }
+                alert("There was an error saving mark order. Please report this message to your instructor and refresh the page: " + response.message);
+            }
+            else if (typeof(successCallback) === "function") {
+                successCallback(response.data);
+            }
+        },
+        error: (typeof(errorCallback) === "function") ? errorCallback : function(err) {
+            console.error("Failed to parse response.  The server isn't playing nice...");
+            alert("There was an error with fetching marks. Please refresh the page and try agian.");
+        }
+    });
+}
+
+function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, active_version, custom_points, custom_message, overwrite, mark_ids, async, successCallback, errorCallback) {
+    $.getJSON({
+        type: "POST",
+        url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_graded_component'}),
+        async: async,
         data: {
             'gradeable_id' : gradeable_id,
-            'anon_id' : user_id,
-            'gradeable_component_id' : gradeable_component_id,
-            'num_mark' : num_mark,
+            'component_id' : component_id,
+            'anon_id' : anon_id,
             'active_version' : active_version,
             'custom_points' : custom_points,
             'custom_message' : custom_message,
             'overwrite' : overwrite,
-            'marks' : marks,
-            'num_existing_marks' : num_existing_marks,
+            'mark_ids' : mark_ids
         },
-        success: function(data) {
+        success: function(response) {
+            if (response.status === 'fail') {
+                console.error('Failed to save component: ' + response.message);
+            } else if (response.status === 'error') {
+                console.error('Internal error while saving component: ' + response.message);
+            }
             if (typeof(successCallback) === "function") {
-                successCallback(data);
+                successCallback(response);
             }
         },
         error: errorCallback
     })
+}
+
+function ajaxSaveMark(gradeable_id, component_id, mark_id, points, note, async, successCallback, errorCallback) {
+    $.getJSON({
+        type: "POST",
+        url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'save_mark'}),
+        async: async,
+        data: {
+            'gradeable_id' : gradeable_id,
+            'component_id' : component_id,
+            'mark_id' : mark_id,
+            'points' : points,
+            'note' : note,
+        },
+        success: function(response) {
+            if (response.status === 'fail') {
+                console.error('Failed to save mark: ' + response.message);
+            } else if (response.status === 'error') {
+                console.error('Internal error while saving mark: ' + response.message);
+            }
+            if (typeof(successCallback) === "function") {
+                successCallback(response);
+            }
+        },
+        // FIXME: this feels ... wrong
+        error: successCallback
+    });
 }
 
 function haveMarksChanged(c_index, data) {
@@ -295,27 +384,26 @@ function haveMarksChanged(c_index, data) {
     var custom_mark_text = $('textarea[name=mark_text_custom_'+c_index+']');
 
     // Check if there were added/removed marks
-    //    data['data'].length-1 to account for custom mark
-    if (data['data'].length-1 != marks.length)
+    if (data.marks.length != marks.length)
         return true;
 
     // Check to see if any note or score value is different
     for (var x = 0; x < marks.length; x++) {
-        if (mark_notes[x].innerHTML != data['data'][x]['note'] ||
-              mark_scores[x].value != data['data'][x]['score'])
+        if (mark_notes[x].innerHTML != data.marks[x].title ||
+              mark_scores[x].value != data.marks[x].points)
             return true;
     }
     
     // Check to see if custom mark changed
-    if (data['data'][marks.length]['custom_note'] != custom_mark_text.val())
+    if (data.comment != custom_mark_text.val())
         return true;
-    if (data['data'][marks.length]['custom_score'] != custom_mark_points.val())
+    if (data.score != custom_mark_points.val())
         return true;
 
-    // We always have a custom mark, so if length is 1 we have no common marks.
+    // If length is 0 we have no common marks.
     // This is Very Bad because there should always be at least the No Credit mark.
     // Only thing we can do from here though is let requests go.
-    if (data['data'].length === 1) {
+    if (data.marks.length === 0) {
         return true;
     }
 
@@ -343,7 +431,8 @@ function updateMarksOnPage(c_index) {
     var component = getComponent(c_index);
     var parent = $('#marks-parent-'+c_index);
     var points = calculateMarksPoints(c_index);
-    if(editModeEnabled==true){
+    //Disabling reorder marks for now, renable by replacing the if statement with if(EditModeEnabled==true)
+    if(false){
         var sortableMarks=$('#marks-parent-'+c_index);
         var sortEvent = function (event, ui){
             var rows=sortableMarks.find("tr:not(.ui-sortable-placeholder)");
@@ -380,7 +469,6 @@ function updateMarksOnPage(c_index) {
     parent.children().remove();
     parent.append("<tr><td colspan='4'>Loading...</td></tr>");
     ajaxGetMarkData(gradeable.id, gradeable.user_id, component.id, function(data) {
-        data = JSON.parse(data);
         // If nothing has changed, then don't update
         if (!haveMarksChanged(c_index, data)){
             return;
@@ -390,13 +478,12 @@ function updateMarksOnPage(c_index) {
 
         // Custom mark
         {
-            var x = data['data'].length-1;
-            var score = data['data'][x]['custom_score'];
-            var note  = data['data'][x]['custom_note'];
-            
+            let note = data.comment;
+            let score = data.score;
+
             var score_el = $('input[name=mark_points_custom_'+c_index+']');
             var note_el = $('textarea[name=mark_text_custom_'+c_index+']');
-            score_el.val(parseFloat(score));
+            score_el.val(score);
             note_el.val(note);
             var icon = $('i[name=mark_icon_'+c_index+'_custom]');
             icon.toggleClass("mark-has", (note !== "" && note !== undefined));
@@ -406,32 +493,28 @@ function updateMarksOnPage(c_index) {
         }
         //Clear extra marks
         getComponent(c_index).marks = [];
-
+        
+        OPENEDMARKS.splice(0,OPENEDMARKS.length);
         // Add all marks back
-        for (var m_index = 0; m_index < data['data'].length - 1; m_index++) {
-            var is_publish = data['data'][m_index]['is_publish'] == 't';
-            var m_id       = data['data'][m_index]['id'];
-            var hasMark    = data['data'][m_index]['has_mark'];
-            var score      = data['data'][m_index]['score'];
-            var note       = data['data'][m_index]['note'];
-            var order      = data['data'][m_index]['order'];
+        for (var m_index = 0; m_index < data.marks.length; m_index++) {
+            let mark = {};
+            mark.publish  = data.marks[m_index].publish;
+            mark.id       = data.marks[m_index].id;
+            mark.has      = data.marks[m_index].has_mark;
+            mark.points   = data.marks[m_index].points;
+            mark.name     = data.marks[m_index].title;
+            mark.order    = data.marks[m_index].order;
 
-            if (m_id === undefined) {
+            if (mark.id === undefined) {
                 continue;
             }
 
-            var mark = {};
-            mark.id = m_id;
-            mark.publish = is_publish;
-            mark.has = hasMark;
-            mark.points = score;
-            mark.name = note;
-            mark.order = order;
             getComponent(c_index).marks.push(mark);
-
-            parent.append(getMarkView(c_index, m_index, m_id, editModeEnabled));
+            
+            OPENEDMARKS.push(mark);
+            parent.append(getMarkView(c_index, m_index, mark.id, editModeEnabled));
             if((editModeEnabled==null || editModeEnabled==false)){
-                var current_mark = $('#mark_id-'+c_index+'-'+m_id);
+                var current_mark = $('#mark_id-'+c_index+'-'+mark.id);
                 $('#marks-extra-'+c_index)[0].style.display="none";
             }
         }
@@ -442,8 +525,6 @@ function updateMarksOnPage(c_index) {
 function updateGeneralComment() {
     var gradeable = getGradeable();
     ajaxGetGeneralCommentData(gradeable.id, gradeable.user_id, function(data) {
-        data = JSON.parse(data);
-        
         $('#comment-id-general').val(data['data']);
     });
 }
@@ -487,35 +568,34 @@ function addMark(me, c_index, sync, successCallback, errorCallback) {
 
             updateCookies();
 
-            ajaxAddNewMark(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, note, points, false, function(data) {
-                data = JSON.parse(data);
-                mark.id = data.id;
-                getComponent(c_index).marks.push(mark);
-                parent.append(getMarkView(c_index, mark.order, mark.id, editModeEnabled));
+            ajaxAddNewMark(getGradeable().id, getComponent(c_index).id, note, points, false, function() {
+                updateMarksOnPage(c_index);
             });
         }
     };
 }
 
-function deleteMark(mark, c_index, last_num, sync, successCallback, errorCallback) {
-    var parent = $('#marks-parent-'+c_index);
-    var index=-1;
-    for(var i=0; i<getComponent(c_index).marks.length; i++){
-        if(getComponent(c_index).marks[i].id==last_num){
-            index=i;
+function deleteMark(c_index, mark_id, sync) {
+    let component = getComponent(c_index);
+    var parent = $('#marks-parent-' + c_index);
+    var index = -1;
+    let mark = undefined;
+    for (var i = 0; i < component.marks.length; i++) {
+        if (component.marks[i].id === mark_id) {
+            index = i;
+            mark = component.marks[i];
             break;
         }
     }
-    var mark=getComponent(c_index).marks[index];
-    getComponent(c_index).marks.splice(index, 1);
-    var last_row = $('[name=mark_'+c_index+']').last().attr('id');
-    var mark_data = new Array(getComponent(c_index).marks.length);
-    parent.empty();
-    for(var i=0; i<getComponent(c_index).marks.length; i++){
-        var current_mark_id=grading_data.gradeable.components[c_index-1].marks[i].id;
-        parent.append(getMarkView(c_index, i, current_mark_id, editModeEnabled));
-    }
-    ajaxDeleteMark(getGradeable().id, getGradeable().user_id, getComponent(c_index).id, mark.id, false);
+
+    ajaxDeleteMark(getGradeable().id, component.id, mark.id, false, function () {
+        component.marks.splice(index, 1);
+        parent.empty();
+        for (var i = 0; i < component.marks.length; i++) {
+            var current_mark_id = grading_data.gradeable.components[c_index - 1].marks[i].id;
+            parent.append(getMarkView(c_index, i, current_mark_id, editModeEnabled));
+        }
+    });
 }
 
 // gets all the information from the database to return some stats and a list of students with that mark
@@ -523,36 +603,34 @@ function showMarklist(me) {
     var gradeable = getGradeable();
 
     var question_num = parseInt($(me).attr('id').split('-')[1]);
-    var order_num = parseInt($(me).attr('id').split('-')[2]);
+    var mark_id = parseInt($(me).attr('id').split('-')[2]);
     var gradeable_component_id = $('#marks-parent-' + question_num)[0].dataset.question_id;
     
-    ajaxGetMarkedUsers(gradeable.id, gradeable_component_id, order_num, function(data) {
-        data = JSON.parse(data);
-
+    ajaxGetMarkedUsers(gradeable.id, gradeable_component_id, mark_id, function(data) {
         // Calculate total and graded component amounts
         var graded = 0, total = 0;
-        for (var x in data['sections']) {
-            graded += parseInt(data['sections'][x]['graded_components']);
-            total += parseInt(data['sections'][x]['total_components']);
+        for (var x in data.sections) {
+            graded += parseInt(data.sections[x]['graded_components']);
+            total += parseInt(data.sections[x]['total_components']);
         }
 
         // Set information in the popup
-        $("#student-marklist-popup-question-name")[0].innerHTML = data['name_info']['question_name'];
-        $("#student-marklist-popup-mark-note")[0].innerHTML = data['name_info']['mark_note'];
+        $("#student-marklist-popup-question-name")[0].innerHTML = $("#component_name-" + question_num).text();
+        $("#student-marklist-popup-mark-note")[0].innerHTML = $("textarea[name=mark_text_" + question_num  +"_" + mark_id + "]").val();
         
-        $("#student-marklist-popup-student-amount")[0].innerHTML = data['data'].length;
+        $("#student-marklist-popup-student-amount")[0].innerHTML = data.submitter_ids.length;
         $("#student-marklist-popup-graded-components")[0].innerHTML = graded;
         $("#student-marklist-popup-total-components")[0].innerHTML = total;
         
         // Create list of students
         var students_html = "";
-        for (var x = 0; x < data['data'].length; x++) {
-            var id = data['data'][x]['gd_user_id'] || data['data'][x]['gd_team_id'];
+        for (var x = 0; x < data.submitter_ids.length; x++) {
+            var id = data.submitter_ids[x];
 
             var href = window.location.href.replace(/&who_id=([a-z0-9_]*)/, "&who_id="+id);
             students_html +=
                 "<a " + (id != null ? "href='"+href+"'" : "") + ">" +
-                id + (x != data['data'].length - 1 ? ", " : "") +
+                id + (x != data.submitter_ids.length - 1 ? ", " : "") +
                 "</a>";
         }
         
@@ -582,7 +660,14 @@ function checkMarks(c_index) {
             return false;
         }
     });
-
+    var current_row = $('#mark_custom_id-'+c_index);
+    var custom_message = current_row.find('textarea[name=mark_text_custom_'+c_index+']').val();
+    if(custom_message !== "" && custom_message !== undefined){
+        all_false = false;
+        first_mark.toggleClass("mark-has", false);
+        getMark(c_index, targetId).has = false;
+        return false;
+    }
     if(all_false === false) {
         first_mark.toggleClass("mark-has", false);
         getMark(c_index, targetId).has = false;
@@ -684,21 +769,25 @@ function updateProgressPoints(c_index) {
     current_question_text.html(summary_text);
 
     var custom_message = $('textarea[name=mark_text_custom_'+c_index+']').val();
+    $('#mark_points_custom-' + c_index)[0].disabled=true;
+    $('#mark_points_custom-' + c_index)[0].style.cursor="not-allowed";
+    $('#mark_text_custom-' + c_index)[0].style.cursor="not-allowed";
+    $('#mark_icon_custom-' + c_index)[0].style.cursor="not-allowed";
+    if(!editModeEnabled){
+        $('#mark_text_custom-'+c_index)[0].disabled=false;
+        $('#mark_text_custom-' + c_index)[0].style.cursor="text";
+        if(!custom_message == ""){
+            $('#mark_points_custom-' + c_index)[0].disabled=false;
+            $('#mark_points_custom-' + c_index)[0].style.cursor="default";
+            $('#mark_icon_custom-' + c_index)[0].style.cursor="pointer";
+        }  
+    }
+    else{
+        $('#mark_text_custom-'+c_index)[0].disabled=true;
+    }
     if(custom_message == ""){
-        $('#mark_points_custom-' + c_index)[0].disabled=true;
-        $('#mark_points_custom-' + c_index)[0].style.cursor="not-allowed";
-        $('#mark_icon_custom-' + c_index)[0].style.cursor="not-allowed";
-        $('#mark_points_custom-' + c_index)[0].value="";
+        $('#mark_points_custom-' + c_index)[0].value="0";
     }
-    else {
-        $('#mark_points_custom-' + c_index)[0].disabled = false;
-        $('#mark_points_custom-' + c_index)[0].style.cursor = "default";
-        $('#mark_icon_custom-' + c_index)[0].style.cursor = "pointer";
-        if ($('#mark_points_custom-' + c_index)[0].value == "") {
-            $('#mark_points_custom-' + c_index)[0].value = "0";
-        }
-    }
-
     calculatePercentageTotal();
 }
 
@@ -785,10 +874,14 @@ function selectMark(c_index, m_id) {
             return false;
         }
     });
-
+    
     var mark = getMark(c_index, m_id);
     mark.has = !mark.has;
-
+    var current_row = $('#mark_custom_id-'+c_index);
+    var custom_message = current_row.find('textarea[name=mark_text_custom_'+c_index+']').val();
+    if(custom_message !== "" && custom_message !== undefined){
+        skip = false;
+    }
     //actually checks the mark then checks if the first mark is still valid
     var check = $("#mark_id-" + c_index + "-" + m_id + "-check");
     check.toggleClass("mark-has", mark.has);
@@ -832,7 +925,7 @@ function setMarkVisible(c_index, show) {
     var title           = $('#title-' + c_index);
  //   var cancel_button   = $('#title-cancel-' + c_index);
     var current_summary = $('#summary-' + c_index);
-
+    // Deprecated, saving for reference
     if (show) {
         // if the component has a page saved, open the PDF to that page
         // opening directories/frames based off of code in openDiv and openFrame functions
@@ -936,7 +1029,7 @@ function saveGeneralComment(sync, successCallback, errorCallback) {
     var overwrite = $('#overwrite-id').is(":checked");
     $(current_question_text[0]).text(gradeable_comment);
     
-    ajaxSaveGeneralComment(gradeable.id, gradeable.user_id, gradeable.active_version, gradeable_comment, sync, successCallback, errorCallback);
+    ajaxSaveGeneralComment(gradeable.id, gradeable.user_id, gradeable_comment, sync, successCallback, errorCallback);
 }
 
 // Saves the last opened mark so that exiting the page doesn't
@@ -946,7 +1039,7 @@ function saveLastOpenedMark(sync, successCallback, errorCallback) {
 
     // Find open mark
     var index = 1;
-    var mark = $('#marks-parent-' + index);
+    var mark = $('#mark-table-' + index);
     while(mark.length > 0) {
         // If mark is open, then save it
         if (mark[0].style.display !== 'none') {
@@ -954,162 +1047,230 @@ function saveLastOpenedMark(sync, successCallback, errorCallback) {
             saveMark(index, sync, successCallback, errorCallback);
             return;
         }
-        mark = $('#marks-parent-' + (++index));
+        mark = $('#mark-table-' + (++index));
     }
     // If no open mark was found, then save general comment
     saveGeneralComment(sync, successCallback, errorCallback);
 }
-
-function saveMark(c_index, sync, successCallback, errorCallback) {
-    var gradeable = getGradeable();
-
-    if ($('#marks-parent-' + c_index)[0].style.display === "none") {
-        //Nothing to save so we are fine
-        if (typeof(successCallback) === "function") {
-            successCallback();
-        }
+function saveMark(c_index, sync, override, successCallback, errorCallback) {
+    var gradeable = grading_data.gradeable;
+    if(editModeEnabled){
+        ajaxGetMarkData(gradeable.id, gradeable.user_id, gradeable.components[c_index-1].id , function(data){
+        saveMarkEditMode(c_index, sync, successCallback, errorCallback, data, override);
+       }); 
         return;
     }
-    
-    var arr_length = $('tr[name=mark_'+c_index+']').length;
-    
+    else{
+
+        if ($('#marks-parent-' + c_index)[0].style.display === "none") {
+            //Nothing to save so we are fine
+            if (typeof(successCallback) === "function") {
+                successCallback();
+            }
+            return;
+        }
+        
+        var arr_length = $('tr[name=mark_'+c_index+']').length;
+        
+        var mark_data = new Array(arr_length);
+        var existing_marks_num = 0;
+        var gradedByElement = $('#graded-by-' + c_index);
+        var savingElement = $('#graded-saving-' + c_index);
+        var ungraded = gradedByElement.text() === "Ungraded!";
+        gradedByElement.hide();
+        var current_row = $('#mark_custom_id-'+c_index);
+
+        var current_title = $('#title-' + c_index);
+        var custom_points  = current_row.find('input[name=mark_points_custom_'+c_index+']').val();
+        var custom_message = current_row.find('textarea[name=mark_text_custom_'+c_index+']').val();
+        if(custom_message === "" || custom_message == undefined){
+            custom_points="0";
+        }
+        // Updates the total number of points and text
+        var current_question_text = $('#rubric-textarea-' + c_index);
+        var component = getComponent(c_index);
+        
+        var arr_length = mark_data.length;
+        var mark_ids = [];
+        for (var m_index = 0; m_index < arr_length; m_index++) {
+            var current_mark_id=grading_data.gradeable.components[c_index-1].marks[m_index].id;
+            if ((getMark(c_index, current_mark_id).has) == true) {
+                mark_ids.push(current_mark_id);
+            }                
+        }
+        if(custom_message != "") {
+            custom_message = escapeHTML(custom_message);
+        }
+        var overwrite = ($('#overwrite-id').is(':checked')) ? ("true") : ("false");
+        ajaxSaveGradedComponent(gradeable.id, gradeable.components[c_index-1].id, gradeable.user_id, gradeable.active_version, custom_points, custom_message, overwrite, mark_ids, true, function(response) {
+            var hasGrade = false;
+            for (var m_index = 0; m_index < arr_length; m_index++) {
+                var current_mark_id=grading_data.gradeable.components[c_index-1].marks[m_index].id;
+                if ((getMark(c_index, current_mark_id).has) == true) {
+                    hasGrade = true;
+                }                
+            }
+            custom_message = current_row.find('textarea[name=mark_text_custom_'+c_index+']').val();
+            if (hasGrade === false && (custom_message === "" || custom_message == undefined)) {
+                gradedByElement.text("Ungraded!");
+                component.grader = null;
+            } 
+            else {
+                component.grader = grading_data.you;
+                component.grader.id = grading_data.your_user_id;
+                gradedByElement.text("Graded by " + component.grader.id + "!");
+            }
+                //Just graded it
+            gradedByElement.show();
+            savingElement.hide();
+            if (typeof(successCallback) === "function")
+                successCallback(response);                           
+        }, errorCallback ? errorCallback : function() {
+            console.error("Something went wront with saving marks...");
+       //     alert("There was an error with saving the grade. Please refresh the page and try agian.");
+        });
+    }
+    calculateMarksPoints(c_index);
+}
+
+function saveMarkEditMode(c_index, sync, successCallback, errorCallback, data, override){
+    var gradeable = getGradeable();
+    var component = grading_data.gradeable.components[c_index-1];
+    var arr_length = data['marks'].length;
+    var orderArray = {};
     var mark_data = new Array(arr_length);
     var existing_marks_num = 0;
     // Gathers all the mark's data (ex. points, note, etc.)
-    //getComponent(c_index).marks.sort(compareOrder);
     for(var m_index=0; m_index < arr_length; m_index++){
+        var current_question_text = $('#rubric-textarea-' + c_index);
         if(grading_data.gradeable.components[c_index-1].marks[m_index]==null){
             grading_data.gradeable.components[c_index-1].marks.splice(m_index, 1);
         }
         else{
-            var current_mark_id=grading_data.gradeable.components[c_index-1].marks[m_index].id;
+            for(var m_index2=0; m_index2 < arr_length; m_index2++){
+                var x=data['marks'][arr_length-m_index2-1]['id'];
+            }
+            var y=grading_data.gradeable.components[c_index-1].marks;
+            var current_mark_id=data['marks'][arr_length-m_index-1]['id'];
             var current_row = $('#mark_id-'+c_index+'-'+getMark(c_index, current_mark_id).id);
             var info_mark   = $('#mark_info_id-'+c_index+'-'+getMark(c_index, current_mark_id).id);
             var success     = true;
-            mark_data[m_index] = {
-                id      : getMark(c_index, current_mark_id).id,
-                points  : getMark(c_index, getMark(c_index, current_mark_id).id).points,
-                note    : getMark(c_index, getMark(c_index, current_mark_id).id).name,
-                selected: getMark(c_index, getMark(c_index, current_mark_id).id).has,
-                order   : getMark(c_index, getMark(c_index, current_mark_id).id).order
-            };
-            //info_mark[0].style.display = '';
+            var DB_m_id       = data['marks'][arr_length-m_index-1]['id'];
+            var DB_score      = data['marks'][arr_length-m_index-1]['points'];
+            var DB_note       = data['marks'][arr_length-m_index-1]['title'];
+            var DB_order      = data['marks'][arr_length-m_index-1]['order'];
+            var id = getMark(c_index, current_mark_id).id;
+            var points = getMark(c_index, current_mark_id).points;
+            var note = getMark(c_index, current_mark_id).name;
+            var selected = getMark(c_index, current_mark_id).has;
+            var order = getMark(c_index, current_mark_id).order;
+            var DBvsOR = true;
+            var ORvsYours = true;
+            if(arr_length - m_index - 1 < OPENEDMARKS.length){
+                DBvsOR = (DB_m_id === OPENEDMARKS[arr_length - m_index - 1].id && (DB_score !== OPENEDMARKS[arr_length - m_index - 1].points || DB_note !== OPENEDMARKS[arr_length - m_index - 1].name || DB_order !== OPENEDMARKS[arr_length - m_index - 1].order));  
+                ORvsYours = (id === OPENEDMARKS[arr_length - m_index - 1].id && (points !== OPENEDMARKS[arr_length - m_index - 1].points || note !== OPENEDMARKS[arr_length - m_index - 1].name || order !== OPENEDMARKS[arr_length - m_index - 1].order));              
+            }
+            var DBvsYours = (DB_m_id === id && (DB_score !== points || DB_note !== note || DB_order !== order));
+            if(DBvsOR && DBvsYours && ORvsYours){
+                //CONFLICT!
+                if(confirm("There was a conflict saving the mark you call "+ note +" (another user changed this mark while you were editing). Would you like your changes to overwrite the other users?")){
+                    calculatePercentageTotal();
+                    var gradedByElement = $('#graded-by-' + c_index);
+                    var savingElement = $('#graded-saving-' + c_index);
+                    var ungraded = gradedByElement.text() === "Ungraded!";
+                    var x=getMark(c_index, current_mark_id).points;
+                    gradedByElement.hide();
+                    savingElement.show();
+                    ajaxSaveMark(gradeable.id, gradeable.components[c_index-1].id, getMark(c_index, current_mark_id).id, getMark(c_index, current_mark_id).points, escapeHTML(getMark(c_index, current_mark_id).name), true, function(response) {
+                    if (response.status !== 'success') {
+                            alert('Error saving marks! (' + response.message + ')');
+                            return;
+                        }
+                        if (gradeable.components[c_index-1].has_grade === false) {
+                            gradedByElement.text("Ungraded!");
+                            component.grader = null;
+                        } 
+                        else {
+                            component.grader.id = grading_data.your_user_id;
+                            gradedByElement.text("Graded by " + component.grader.id + "!");
+                        }
+                            //Just graded it
+                        gradedByElement.show();
+                        savingElement.hide();
+                        if (typeof(successCallback) === "function")
+                            successCallback(data);
+                            
+                    }, errorCallback ? errorCallback : function() {
+                        console.error("Something went wront with saving marks...");
+             //           alert("There was an error with saving the grade. Please refresh the page and try agian.");
+                    });
+                }
+            }
+            else if ((DBvsYours && DBvsOR) || override){
+                calculatePercentageTotal();
+                    var gradedByElement = $('#graded-by-' + c_index);
+                    var savingElement = $('#graded-saving-' + c_index);
+                    var ungraded = gradedByElement.text() === "Ungraded!";
+                    gradedByElement.hide();
+                    savingElement.show();
+                    ajaxSaveMark(gradeable.id, gradeable.components[c_index-1].id, getMark(c_index, current_mark_id).id, getMark(c_index, current_mark_id).points, escapeHTML(getMark(c_index, current_mark_id).name), true, function(response) {
+                        if (gradeable.components[c_index-1].has_grade === false) {
+                            gradedByElement.text("Ungraded!");
+                            component.grader = null;
+                        } 
+                        else {
+                            component.grader.id = grading_data.your_user_id;
+                            gradedByElement.text("Graded by " + component.grader.id + "!");
+                        }
+                            //Just graded it
+                        gradedByElement.show();
+                        savingElement.hide();
+                        if (typeof(successCallback) === "function")
+                            successCallback(data);                           
+                    }, errorCallback ? errorCallback : function() {
+                        console.error("Something went wront with saving marks...");
+               //         alert("There was an error with saving the grade. Please refresh the page and try agian.");
+                    });
+            }
             existing_marks_num++;
         }
+        orderArray[getMark(c_index, current_mark_id).id]=getMark(c_index, current_mark_id).order;
     }
+    var gradedByElement = $('#graded-by-' + c_index);
+    var savingElement = $('#graded-saving-' + c_index);
+    var ungraded = gradedByElement.text() === "Ungraded!";
+   // gradedByElement.hide();
     var current_row = $('#mark_custom_id-'+c_index);
 
     var current_title = $('#title-' + c_index);
     var custom_points  = current_row.find('input[name=mark_points_custom_'+c_index+']').val();
+    if (typeof custom_points != 'number') {
+        custom_points=0;
+    }
     var custom_message = current_row.find('textarea[name=mark_text_custom_'+c_index+']').val();
 
     // Updates the total number of points and text
     var current_question_text = $('#rubric-textarea-' + c_index);
     var component = getComponent(c_index);
     
-    var lower_clamp    = parseFloat(component.lower_clamp);
-    var current_points = parseFloat(component.default);
-    var upper_clamp    = parseFloat(component.upper_clamp);
-
-    var new_text   = "";
-    var first_text = true;
-    var all_false  = true;
-    var arr_length = mark_data.length
+    var arr_length = mark_data.length;
+    var mark_ids = [];
     for (var m_index = 0; m_index < arr_length; m_index++) {
-        if (mark_data[m_index].selected === true) {
-            all_false = false;
-            
-            current_points += parseFloat(mark_data[m_index].points);
-            mark_data[m_index].note = escapeHTML(mark_data[m_index].note);
-            
-            var prepend = (!first_text) ? ("\<br>") : ("");
-            var points  = (parseFloat(mark_data[m_index].points) != 0) ? ("(" + mark_data[m_index].points + ") ") : ("");
-            
-            new_text += prepend + "* " + points + mark_data[m_index].note;
-            if (first_text) {
-                first_text = false;
-            }
+        var current_mark_id=grading_data.gradeable.components[c_index-1].marks[m_index].id;
+        if ((getMark(c_index, current_mark_id).has) == true) {
+            mark_ids.push(current_mark_id);
         }                
     }
-    if (!isNaN(parseFloat(custom_points))) {
-        current_points += parseFloat(custom_points);
-        
-        if (parseFloat(custom_points) != 0) {
-            all_false = false;
-        }
-    }
-
     if(custom_message != "") {
         custom_message = escapeHTML(custom_message);
-        
-        var prepend = (!first_text) ? ("\<br>") : ("");
-        var points  = (parseFloat(custom_points) != 0) ? ("(" + custom_points + ") ") : ("");
-        
-        new_text += prepend + "* " + points + custom_message;
-        if (first_text) {
-            first_text = false;
-        }
-        
-        all_false = false;
     }
-
-    var new_background="#F9F9F9";
-    if (all_false) {
-        new_text = "Click me to grade!";
-        new_background="#E9EFEF";
-    }
-
-    // Clamp points
-    current_points = Math.min(Math.max(current_points, lower_clamp), upper_clamp);
-    
-    current_question_text.html(new_text);
-
-    calculatePercentageTotal();
-
-    var gradedByElement = $('#graded-by-' + c_index);
-    var savingElement = $('#graded-saving-' + c_index);
-    var ungraded = gradedByElement.text() === "Ungraded!";
-
-    gradedByElement.hide();
-    savingElement.show();
     var overwrite = ($('#overwrite-id').is(':checked')) ? ("true") : ("false");
-    ajaxSaveMarks(gradeable.id, gradeable.user_id, component.id, arr_length, gradeable.active_version, custom_points, custom_message, overwrite, mark_data, existing_marks_num, false, function(data) {
-        data = JSON.parse(data);
-        if (all_false === true) {
-            //We've reset
-            gradedByElement.text("Ungraded!");
-            component.grader = null;
-        } else {
-            if (component.grader === null || (data.modified && (ungraded || overwrite === "true"))) {
-                if (component.grader === null) {
-                    component.grader = {
-                        id: ""
-                    };
-                }
-                component.grader.id = grading_data.your_user_id;
-            }
-            //Just graded it
-            gradedByElement.text("Graded by " + component.grader.id + "!");
-        }
-
-        gradedByElement.show();
-        savingElement.hide();
-
-        if(data['version_updated'] === "true") {
-            if ($('#wrong_version_' + c_index).length)
-                $('#wrong_version_' + c_index)[0].innerHTML = "";
-        }
-        
-        if (typeof(successCallback) === "function")
-            successCallback(data);
-            
-    }, errorCallback ? errorCallback : function() {
-        console.error("Something went wront with saving marks...");
-        alert("There was an error with saving the grade. Please refresh the page and try agian.");
-    });
-    ajaxGetMarkData(gradeable.id, gradeable.user_id, m_index, function(data) {
-        data = JSON.parse(data);
-    });
+    calculateMarksPoints(c_index);
+    //TODO save the mark order
+   /* ajaxSaveMarkOrder(gradeable.id, gradeable.components[c_index-1].id, orderArray, true, function(data){
+        console.log("data");
+    }); */
+    calculateMarksPoints(c_index);
 }
 
 //finds what mark is currently open
@@ -1176,15 +1337,28 @@ function verifyMark(gradeable_id, component_id, user_id, verifyAll){
  */
 function openMark(c_index) {
     saveLastOpenedMark(true);
-    saveMark(c_index, true);
     updateMarksOnPage(c_index);
-    if(editModeEnabled==true){
-     //   $('#marks-extra-'+c_index)[0].style.display="block";
-    }
     //If it's already open, then openClose() will close it
     if (findCurrentOpenedMark() !== c_index) {
         openClose(c_index);
     }
+    let page = getComponent(c_index)['page'];
+    if(page){
+        //841.89 os the pdf page height, 29 is the margin, 80 is the top part.
+        let files = $('.openable-element-submissions');
+        for(let i = 0; i < files.length; i++){
+            if(files[i].innerText.trim() == "upload.pdf"){
+                if($("#file_view").is(":visible")){
+                    $('#file_content').animate({scrollTop: ((page-1)*(841.89+29))}, 500);
+                } else {
+                    expandFile("upload.pdf", files[i].getAttribute("file-url")).then(function(){
+                        $('#file_content').animate({scrollTop: ((page-1)*(841.89+29))}, 500);
+                    });
+                }
+            }
+        }
+    }
+    updateProgressPoints(c_index);
 }
 
 /**
@@ -1197,11 +1371,7 @@ function closeMark(c_index, save) {
     if (findCurrentOpenedMark() !== c_index) {
         return;
     }
-
-    if (save) {
-        saveLastOpenedMark(true);
-        saveMark(c_index, true);
-    }
+    saveLastOpenedMark(true);
     updateMarksOnPage(c_index);
     setMarkVisible(c_index, false);
 }

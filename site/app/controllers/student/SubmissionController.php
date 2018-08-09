@@ -203,7 +203,7 @@ class SubmissionController extends AbstractController {
                 $late_days_use = max(0, $days_late - $extensions);
                 if ($graded_gradeable !== null
                     && $gradeable->isTaGradeReleased()
-                    && $gradeable->isTaGrading() 
+                    && $gradeable->isTaGrading()
                     && $graded_gradeable->isTaGradingComplete()) {
                     $graded_gradeable->getOrCreateTaGradedGradeable()->setUserViewedDate($now);
                     $this->core->getQueries()->saveTaGradedGradeable($graded_gradeable->getTaGradedGradeable());
@@ -290,7 +290,7 @@ class SubmissionController extends AbstractController {
             $return = array('success' => false, 'message' => $msg);
             $this->core->getOutput()->renderJson($return);
             return $return;
-        } else if (count($graded_gradeables) > 0) {
+        } else if (count($graded_gradeables) > 1) {
             // Not all users were on the same team
             $msg = "Inconsistent teams. One or more users are on different teams.";
             $return = array('success' => false, 'message' => $msg);
@@ -314,8 +314,8 @@ class SubmissionController extends AbstractController {
     * Its error checking has overlap with ajaxUploadSubmission.
     */
     private function ajaxBulkUpload() {
-        // make sure is admin
-        if (!$this->core->getUser()->accessGrading()) {
+        // make sure is at least full access grader
+        if (!$this->core->getUser()->accessFullGrading()) {
             $msg = "You do not have access to that page.";
             $this->core->addErrorMessage($msg);
             return $this->uploadResult($msg, false);
@@ -471,8 +471,9 @@ class SubmissionController extends AbstractController {
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
             return $this->uploadResult("Invalid CSRF token.", false);
         }
-        // make sure is grader
-        if (!$this->core->getUser()->accessGrading()) {
+
+        // make sure is at least full access grader
+        if (!$this->core->getUser()->accessFullGrading()) {
             $msg = "You do not have access to that page.";
             $this->core->addErrorMessage($msg);
             return $this->uploadResult($msg, false);
@@ -537,9 +538,13 @@ class SubmissionController extends AbstractController {
             else{
                 //If the team doesn't exist yet, we need to build a new one. (Note, we have already checked in ajaxvalidgradeable
                 //that all users are either on the same team or no team).
-                // TODO: this method uses the old gradeable model, but calls functions that also exist in the new model,
-                // TODO:    so its ok, but fragile
-                ElectronicGraderController::CreateTeamWithLeaderAndUsers($this->core, $gradeable, $leader, $user_ids);
+                $members = $this->core->getQueries()->getUsersById($user_ids);
+                $leader_user = $this->core->getQueries()->getUserById($leader);
+                try {
+                    $gradeable->createTeam($leader_user, $members);
+                } catch (\Exception $e) {
+                    $this->core->addErrorMessage('Team may not have been properly initialized: ' . $e->getMessage());
+                }
 
                 // Once team is created, load in the graded gradeable
                 $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $leader);
@@ -694,8 +699,8 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Invalid CSRF token.", false);
         }
 
-        // make sure is grader
-        if (!$this->core->getUser()->accessGrading()) {
+        // make sure is at least full access grader
+        if (!$this->core->getUser()->accessFullGrading()) {
             $msg = "You do not have access to that page.";
             $this->core->addErrorMessage($msg);
             return $this->uploadResult($msg, false);
@@ -1379,7 +1384,7 @@ class SubmissionController extends AbstractController {
         }
 
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
-            return $this->uploadResultMessage("Invalid CSRF token.", false);
+            return $this->uploadResultMessage("Invalid CSRF token.", false, false);
         }
 
         $uploaded_files = array();
@@ -1501,7 +1506,7 @@ class SubmissionController extends AbstractController {
       }
 
       if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
-          return $this->uploadResultMessage("Invalid CSRF token.", false);
+          return $this->uploadResultMessage("Invalid CSRF token.", false, false);
       }
 
       $expand_zip = "";
@@ -1516,7 +1521,7 @@ class SubmissionController extends AbstractController {
 
       $n = strpos($requested_path, '..');
       if ($n !== false) {
-          return $this->uploadResultMessage(".. is not supported in the path.", false);
+          return $this->uploadResultMessage(".. is not supported in the path.", false, false);
       }
 
       $uploaded_files = array();
