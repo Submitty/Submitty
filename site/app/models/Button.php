@@ -15,6 +15,7 @@ use app\libraries\Core;
  * @method float|null getProgress()
  * @method string|null getAriaLabel()
  * @method string|null getBadge()
+ * @method string|null getIcon()
  *
  * @method void setTitle(string $title)
  * @method void setSubtitle(string|null $subtitle)
@@ -25,6 +26,7 @@ use app\libraries\Core;
  * @method void setProgress(float|null $progress)
  * @method void setAriaLabel(string|null $ariaLabel)
  * @method void setBadge(string|null $badge)
+ * @method void setIcon(string|null $icon)
  */
 class Button extends AbstractModel {
     /** @property @var string|null $title */
@@ -45,6 +47,8 @@ class Button extends AbstractModel {
     protected $aria_label;
     /** @property @var string|null $badge */
     protected $badge;
+    /** @property @var string|null $icon */
+    protected $icon;
 
     /**
      * @param Core $core
@@ -64,6 +68,7 @@ class Button extends AbstractModel {
         $this->title_on_hover = $details["title_on_hover"] ?? false;
         $this->aria_label = $details["aria_label"] ?? null;
         $this->badge = $details["badge"] ?? null;
+        $this->icon = $details["icon"] ?? null;
     }
 
 }

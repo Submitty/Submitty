@@ -78,6 +78,7 @@
                     </div>
                 {% endif %}
                 <div class="col-md" id="nav-body">
+                    <div id="nav-positioner">
 {# Looks mismatched because this lines up with GlobalFooter.twig #}
 
 {% macro render_button(button) %}
@@ -91,6 +92,10 @@
                         class="{{ button.getClass() }}"
                     {% endif %}
                 >
+                    {% if button.getIcon() != null %}
+                        <i class="fa {{ button.getIcon() }}"></i>
+                    {% endif %}
+
                     {{ button.getTitle() }}
                     {% if button.getBadge() > 0 %}
                         <span class="notification_badge">{{  button.getBadge() }} </span>
@@ -102,6 +107,10 @@
                         class="{{ button.getClass() }}"
                     {% endif %}
                 >
+                    {% if button.getIcon() != null %}
+                        <i class="fa {{ button.getIcon() }}"></i>
+                    {% endif %}
+
                     {{ button.getTitle() }}
                     {% if button.getBadge() > 0 %}
                         <span class="notification_badge">{{  button.getBadge() }} </span>

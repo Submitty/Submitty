@@ -924,22 +924,36 @@ table .instructor .two-options{
 
 #nav-body {
     margin-top: 15px;
+    margin-left: 30px;
+}
+
+#nav-positioner {
+    margin-left: -30px;
 }
 
 #nav-buttons {
-    width:100%;
+    width: 230px;
     display: flex;
     flex-direction: column;
     align-content: center;
     justify-items: center;
-    padding-top: 15px;
+    padding: 20px;
+    margin-left: -5px;
+    padding-top: 50px;
+}
+
+#sidebar.collapsed #nav-buttons {
+    width: 240px;
 }
 
 #sidebar {
     width: 220px;
-    padding: 20px;
-    padding-right: 0;
-    margin-left: 10px;
+    margin: 0;
+    transition: width 0.5s ease-out;
+}
+
+#sidebar.collapsed {
+    width: 0;
 }
 
 #nav-buttons ul li {
@@ -962,9 +976,49 @@ table .instructor .two-options{
     display: block;
 }
 
+#sidebar.collapsed #nav-buttons ul li .nav-row {
+    padding-left: 60px;
+}
+
+#sidebar.collapsed #nav-buttons ul li span.nav-row {
+    display: none;
+}
+
 #nav-buttons ul li a.nav-row {
     color: #006398;
     text-decoration: none;
+}
+
+#nav-buttons ul li a.nav-row:hover {
+    color: #002334;
+}
+
+#nav-buttons ul li a.nav-row:active {
+    color: #790000;
+}
+
+#nav-buttons ul li a.nav-row i.fa, #sidebar.collapsed #nav-buttons ul li a.nav-row i.fa {
+    color: #000000;
+}
+
+#sidebar.collapsed #nav-buttons ul li a.nav-row:hover i.fa {
+    color: #006398;
+}
+
+#sidebar.collapsed #nav-buttons ul li a.nav-row:active i.fa {
+    color: #790000;
+}
+
+#nav-buttons ul li .nav-row i.fa {
+    margin-left: -33px;
+    width: 30px;
+    text-align: center;
+}
+
+#sidebar.collapsed #nav-buttons ul li .nav-row i.fa {
+    font-size: 24px;
+    margin-left: -60px;
+    width: 60px;
 }
 
 #nav-buttons ul li.line {
@@ -982,6 +1036,10 @@ table .instructor .two-options{
     padding-bottom: 0;
     margin-top: 4px;
     margin-bottom: 4px;
+}
+
+#sidebar.collapsed #nav-buttons ul li.short-line {
+    margin-left: -30px;
 }
 
 #nav-buttons ul li.heading {
@@ -1396,6 +1454,10 @@ end of styles used in the admin gradeable page
     flex-grow: 2;
     display: flex;
     flex-direction: column;
+}
+
+#site-body > .row {
+    flex-wrap: nowrap;
 }
 
 #container iframe#top_bar, #container iframe#bottom_bar {
