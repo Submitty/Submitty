@@ -53,7 +53,7 @@ class GlobalController extends AbstractController {
             if ($this->core->getConfig()->isCourseLoaded()) {
                 $sidebar_buttons[] = new Button($this->core, [
                     "href" => $this->core->buildUrl(array('component' => 'navigation')),
-                    "title" => "Navigation",
+                    "title" => "Home",
                     "class" => "nav-row",
                     "icon" => "fa-home"
                 ]);
