@@ -1,6 +1,7 @@
-// import colorPicker from "./colorPicker";
-
 const { UI } = PDFAnnotate;
+
+let currentTool;
+
 let documentId = '';
 let PAGE_HEIGHT;
 let RENDER_OPTIONS = {
@@ -67,6 +68,10 @@ function render(gradeable_id, user_id, grader_id, file_name) {
             PDFJS.getDocument({data:pdfData}).then((pdf) => {
                 RENDER_OPTIONS.pdfDocument = pdf;
                 let viewer = document.getElementById('viewer');
+                $(viewer).on('touchstart touchmove', function(e){
+                    //Let touchscreen work
+                    e.preventDefault();
+                });
                 viewer.innerHTML = '';
                 NUM_PAGES = pdf.pdfInfo.numPages;
                 for (let i=0; i<NUM_PAGES; i++) {
@@ -137,9 +142,11 @@ function render(gradeable_id, user_id, grader_id, file_name) {
             }
             switch(option){
                 case 'pen':
+                    currentTool = 'pen';
                     UI.enablePen();
                     break;
                 case 'eraser':
+                    currentTool = 'eraser';
                     UI.enableEraser();
                     break;
                 case 'cursor':
@@ -164,6 +171,7 @@ function render(gradeable_id, user_id, grader_id, file_name) {
                     debounce(rotate, 500);
                     break;
                 case 'text':
+                    currentTool = 'text';
                     UI.enableText();
                     break;
             }
@@ -244,23 +252,31 @@ function render(gradeable_id, user_id, grader_id, file_name) {
         setActiveToolbarItem(e.target.getAttribute('value'));
     }
     document.getElementById('pdf_annotation_icons').addEventListener('click', handleToolbarClick);
-    //TODO: Find a better home for this, shouldn't be here.
-    // document.getElementById('reset_zoom').addEventListener('click', function(){
-    //     zoom('custom', 100);
-    // });
-    // document.getElementById('zoom_percent_selector').addEventListener('change', function(e){
-    //     zoom('custom', e.target.value);
-    // });
 })();
 
-// Color selection
+// Color/size selection
 (function () {
     let main_color;
     function initColors(){
-        colorPicker.test();
         let init_color = localStorage.getItem('main_color') || '#ff0000';
         document.getElementById('color_selector').style.backgroundColor = init_color;
         setColor(init_color);
+    }
+
+    function colorMenuToggle(e){
+        let shouldShow = !$('#color_selector_menu').is(':visible');
+        $('.selection-menu').hide();
+        shouldShow && $('#color_selector_menu').toggle();
+    }
+
+    function sizeMenuToggle(){
+        let shouldShow = !$('#size_selector_menu').is(':visible');
+        $('.selection-menu').hide();
+        shouldShow && $('#size_selector_menu').toggle();
+    }
+
+    function changeColor(e){
+        setColor(e.srcElement.getAttribute('value'))
     }
 
     function setColor(color){
@@ -270,6 +286,9 @@ function render(gradeable_id, user_id, grader_id, file_name) {
             document.getElementById('color_selector').style.backgroundColor = color;
         }
     }
+    document.getElementById("color_selector").addEventListener('click', colorMenuToggle);
+    document.getElementById("size_selector").addEventListener('click', sizeMenuToggle);
+    document.addEventListener('colorchange', changeColor);
     initColors();
 })();
 
@@ -280,10 +299,9 @@ function render(gradeable_id, user_id, grader_id, file_name) {
     let scrollLock;
     function initPen() {
         let init_size = localStorage.getItem('pen/size') || 3;
-        let init_color = localStorage.getItem('pen/color') || '#ff0000';
+        let init_color = localStorage.getItem('main_color') || '#FF0000';
         document.getElementById('pen_size_selector').value = init_size;
         document.getElementById('pen_size_value').value = init_size;
-        document.getElementById('pen_color_selector').value = init_color;
         if($('#scroll_lock_mode').is(':checked')) {
             scrollLock = true;
         }
@@ -302,7 +320,6 @@ function render(gradeable_id, user_id, grader_id, file_name) {
         if (penColor !== color) {
             modified = true;
             penColor = color;
-            localStorage.setItem('pen/color', penColor);
         }
 
         if (modified && scrollLock) {
@@ -314,22 +331,12 @@ function render(gradeable_id, user_id, grader_id, file_name) {
         }
     }
 
-    document.getElementById('pen_color_selector').addEventListener('change', function(e){
-        let value = e.target.value ? e.target.value : e.srcElement.value;
-        setPen(penSize, value);
-    });
     document.getElementById('pen_size_selector').addEventListener('change', function(e){
         let value = e.target.value ? e.target.value : e.srcElement.value;
         setPen(value, penColor);
     });
-    document.getElementById('scroll_lock_mode').addEventListener('change', function(e){
-        if(!$('#scroll_lock_mode').is(':checked')){
-            $('#file_content').css('overflow', 'auto');
-            scrollLock = false;
-        } else {
-            $('#file_content').css('overflow', 'hidden');
-            scrollLock = true;
-        }
+    document.addEventListener('colorchange', function(e){
+        setPen(penSize, e.srcElement.getAttribute('value'));
     });
     initPen();
 })();
@@ -341,9 +348,8 @@ function render(gradeable_id, user_id, grader_id, file_name) {
 
     function initText() {
         let init_size = localStorage.getItem('text/size') || 12;
-        let init_color = localStorage.getItem('text/color') || '#000000';
+        let init_color = localStorage.getItem('main_color') || '#FF0000';
         document.getElementById('text_size_selector').value = init_size;
-        document.getElementById('text_color_selector').value = init_color;
         setText(init_size, init_color);
     }
 
@@ -358,18 +364,16 @@ function render(gradeable_id, user_id, grader_id, file_name) {
         if (textColor !== color) {
             modified = true;
             textColor = color;
-            localStorage.setItem('text/color', textColor);
         }
 
         if (modified) {
             UI.setText(textSize, textColor);
         }
     }
-    document.getElementById('text_color_selector').addEventListener('change', function(e){
-        let value = e.target.value ? e.target.value : e.srcElement.value;
-        setText(textSize, value);
+    document.addEventListener('colorchange', function(e){
+        setText(textSize, e.srcElement.getAttribute('value'));
     });
-    document.getElementById('text_size_selector').addEventListener('change', function(e){
+    document.getElementById('text_size_selector').addEventListener('change', function(e) {
         let value = e.target.value ? e.target.value : e.srcElement.value;
         setText(value, textColor);
     });

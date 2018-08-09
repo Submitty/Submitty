@@ -3573,6 +3573,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Handle document.touchdown or document.pointerdown event
 	 */
 	function handleDocumentPointerdown(e) {
+	  e.preventDefault();
 	  path = null;
 	  lines = [];
 	  _candraw = true;
@@ -3620,12 +3621,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Event} e The DOM event to be handled
 	 */
 	function handleDocumentPointermove(e) {
+	  if (!e.srcElement.classList.contains('annotationLayer')) {
+	    return;
+	  }
 	  if (_candraw) {
 	    savePoint(e.clientX, e.clientY);
 	  }
 	}
 	
 	function handleDocumentPointermoveChrome(e) {
+	  if (!e.srcElement.classList.contains('annotationLayer')) {
+	    return;
+	  }
 	  if (_candraw) {
 	    savePoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
 	  }
@@ -4575,7 +4582,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (input || !(0, _utils.findSVGAtPoint)(e.clientX, e.clientY)) {
 	    return;
 	  }
-	
+	  if (!e.srcElement.classList.contains('annotationLayer')) {
+	    return;
+	  }
 	  input = document.createElement('input');
 	  input.setAttribute('id', 'pdf-annotate-text-input');
 	  input.setAttribute('placeholder', 'Enter text');

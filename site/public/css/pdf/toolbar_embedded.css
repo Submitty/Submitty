@@ -32,3 +32,43 @@
     vertical-align: middle;
     margin-top: -5px;
 }
+
+.toolbar-action[value^='save']{
+    font-family: 'Source Sans Pro', sans-serif;
+    font-size: 16px;
+}
+
+.selection-menu {
+    display: none;
+    position: absolute;
+    width: 150px;
+    height: 80px;
+    border: 1px solid #7dfa78;
+    background: #a4dad573;
+    top: auto;
+}
+
+#text_size_selector {
+    padding: initial;
+    font-size: initial;
+    border: initial;
+    height: initial;
+    background-size: initial;
+}
+
+#color_selector_menu {
+    left: 295px;
+}
+
+#size_selector_menu {
+    left: 327px;
+}
+
+.color {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 1px solid #000;
+    vertical-align: middle;
+    margin: 2px;
+}
