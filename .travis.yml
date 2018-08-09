@@ -149,7 +149,7 @@ jobs:
         - sudo chmod u+x chromedriver
         - sudo mv chromedriver /usr/bin/
         - pushd ${TRAVIS_BUILD_DIR}/python_submitty_utils
-        - python3 setup.py install
+        - pip3 install .
         - popd
       before_script:
         # Doing this helps chromedriver from hanging for some mysterious reason
@@ -240,7 +240,7 @@ jobs:
         - pip3 install paramiko
         - pip3 install psycopg2-binary
         - pushd ${TRAVIS_BUILD_DIR}/python_submitty_utils
-        - python3 setup.py install
+        - pip3 install .
         - popd
         - sudo bash .setup/travis/autograder.sh
         - psql -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
