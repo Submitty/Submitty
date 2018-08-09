@@ -29,3 +29,7 @@ function renderGradingGradeable(gradeable, graded_gradeable) {
         });
     });
 }
+
+function renderInstructorEditGradeable(gradeable) {
+
+}
