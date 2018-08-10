@@ -159,7 +159,7 @@ class ElectronicGraderController extends GradingController {
                         $no_extension = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileinfo->getFilename());
                         $pdf_info = explode('_', $no_extension);
                         $pdf_id = $pdf_info[0];
-                        $grader_id = $pdf_id[1];
+                        $grader_id = $pdf_info[1];
                         if($pdf_id.'.pdf' === $filename){
                             $annotation_jsons[$grader_id] = file_get_contents($fileinfo->getPathname());
                         }
