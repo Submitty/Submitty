@@ -3812,12 +3812,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	  document.addEventListener('mousemove', handleDocumentMouseMove);
 	  document.addEventListener('mousedown', handleDocumentMouseDown);
 	  document.addEventListener('mouseup', handleDocumentMouseUp);
+	  document.addEventListener('touchstart', handleDocumentMouseDown);
+	  document.addEventListener('touchmove', handleDocumentMouseMove);
+	  document.addEventListener('touchend', handleDocumentMouseUp);
 	}
 	
 	function disableEraser() {
 	  document.removeEventListener('mousemove', handleDocumentMouseMove);
 	  document.removeEventListener('mousedown', handleDocumentMouseDown);
 	  document.removeEventListener('mouseup', handleDocumentMouseUp);
+	  document.removeEventListener('touchstart', handleDocumentMouseDown);
+	  document.removeEventListener('touchmove', handleDocumentMouseMove);
+	  document.removeEventListener('touchend', handleDocumentMouseUp);
 	}
 
 /***/ },
