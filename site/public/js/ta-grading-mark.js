@@ -89,7 +89,7 @@ function updateCustomMarkText(me) {
 
 //if type == 0 number input, type == 1 textarea
 function checkIfSelected(me) {
-    var table_row = $(me.parentElement);
+    var table_row = $(me.parentElement.parentElement.parentElement);
     var is_selected = false;
     var icon = table_row.find(".mark");
     var number_input = table_row.find("input");
@@ -1039,7 +1039,7 @@ function saveLastOpenedMark(sync, successCallback, errorCallback) {
 
     // Find open mark
     var index = 1;
-    var mark = $('#marks-parent-' + index);
+    var mark = $('#mark-table-' + index);
     while(mark.length > 0) {
         // If mark is open, then save it
         if (mark[0].style.display !== 'none') {
@@ -1047,7 +1047,7 @@ function saveLastOpenedMark(sync, successCallback, errorCallback) {
             saveMark(index, sync, successCallback, errorCallback);
             return;
         }
-        mark = $('#marks-parent-' + (++index));
+        mark = $('#mark-table-' + (++index));
     }
     // If no open mark was found, then save general comment
     saveGeneralComment(sync, successCallback, errorCallback);
