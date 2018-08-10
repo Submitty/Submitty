@@ -1,4 +1,7 @@
 <div class="content">
+    <span class="pull-right">
+        <a href="{{ theme_url }}" class="btn btn-default">Site Theme</a>
+    </span>
     <h2>Course Settings</h2>
     <div id="config">
         <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
@@ -49,10 +52,10 @@
         <div class="option row">
             <div class="option-desc col-md-8">
                 <div class="option-title">Course Autograding Config Directory</div>
-                <div class="option-alt">Use your own directory for storing gradeable configs. Will appear in the create/edit gradeable page</div>
+                <div class="option-alt">Use your own directory for storing gradeable configs. Will appear in the create/edit gradeable page.<br>Leave blank if you do not have a private repository for gradeable configurations.</div>
             </div>
             <div class="option-input col-md-4">
-                <input type="text" placeholder="Leave blank if you do not have a private repository for gradeable configurations" name="private_repository" value="{{ fields['private_repository'] }}" />
+                <input type="text" name="private_repository" value="{{ fields['private_repository'] }}" />
             </div>
         </div>
 
@@ -65,7 +68,6 @@
         </div>
 
         <div class="option row">
-            </div>
             <div class="option-desc col-md-8">
                 <div class="option-title">Version Control System (VCS) Type</div>
                 <div class="option-alt">Choose the type of VCS if students are submitting via VCS repository.</div>
@@ -76,6 +78,7 @@
                 <input type="radio" name="vcs_type" id="vcs_type_svn" value="svn" {{ (fields['vcs_type'] == 'svn') ? 'checked' : '' }}/> SVN
                 <input type="radio" name="vcs_type" id="vcs_type_mer" value="mer" {{ (fields['vcs_type'] == 'mer') ? 'checked' : '' }}/> Mercurial
                 #}
+            </div>
         </div>
 
         <div class="option row">
