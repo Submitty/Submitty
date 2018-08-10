@@ -586,7 +586,7 @@ function getMarkListFromDOM(component_id) {
     let domElement = getComponentDOMElement(component_id);
     let markList = [];
     let i = 0;
-    domElement.find('.ta-rubric-table .mark-container').each(function() {
+    domElement.find('.ta-rubric-table .mark-container').each(function () {
         markList.push({
             points: $(this).find('input[type=number]').val(),
             title: $(this).find('textarea').text(),
@@ -679,10 +679,9 @@ function isOverallCommentOpen() {
  * Gets if a mark is 'checked'
  * @param {int} mark_id
  * @return {boolean}
- * @throws Error If the mark id doesn't exist
  */
 function isMarkChecked(mark_id) {
-    getMarkDOMElement(mark_id).find('span.mark-selected').length > 0;
+    return getMarkDOMElement(mark_id).find('span.mark-selected').length > 0;
 }
 
 /**
@@ -695,9 +694,9 @@ function isMarkDeleted(mark_id) {
 
 /**
  * Gets if the state of the custom mark is such that it should appear checked
+ * Note: if the component is in edit mode, this will never return true
  * @param {int} component_id
- * @throws Error if the component id doesn't exist
- * @throws Error if the component is opened in edit mode
+ * @return {boolean}
  */
 function isCustomMarkChecked(component_id) {
 
@@ -885,13 +884,12 @@ function initializeGradingRubric(gradeable_id, anon_id) {
  * @param {string} gradeable_id
  */
 function initializeInstructorEditRubric(gradeable_id) {
-    let gradeable_tmp = null;
     ajaxGetGradeableRubric(gradeable_id)
         .catch(function (err) {
             alert('Could not fetch gradeable rubric: ' + err.message);
         })
-        .then(function (graded_gradeable) {
-            return renderInstructorEditGradeable(gradeable_tmp, graded_gradeable);
+        .then(function (gradeable) {
+            return renderInstructorEditGradeable(gradeable);
         })
         .then(function (elements) {
             setRubricDOMElements(elements);
@@ -949,8 +947,8 @@ function toggleComponent(component_id, saveChanges) {
 
     return closeAllComponents(saveChanges)
         .then(function () {
-        return openComponent(component_id);
-    });
+            return openComponent(component_id);
+        });
 }
 
 /**
@@ -1028,20 +1026,18 @@ function openComponentInstructorEdit(component_id) {
 function openComponentGrading(component_id) {
     let component_tmp = null;
     let gradeable_id = getGradeableId();
-    let anon_id = getAnonId();
-    let edit_mode = isEditModeEnabled();
     return ajaxGetComponentRubric(gradeable_id, component_id)
         .then(function (component) {
             // Set the global mark list data for this component for conflict resolution
             OLD_MARK_LIST[component_id] = component.marks;
 
             component_tmp = component;
-            return ajaxGetGradedComponent(gradeable_id, component_id, anon_id);
+            return ajaxGetGradedComponent(gradeable_id, component_id, getAnonId());
         })
         .then(function (graded_component) {
             // Render the grading component with edit mode if enabled,
             //  and 'true' to show the mark list
-            return renderGradingComponent(component_tmp, graded_component, edit_mode, true);
+            return renderGradingComponent(component_tmp, graded_component, isEditModeEnabled(), true);
         });
 }
 
@@ -1094,8 +1090,8 @@ function closeComponentInstructorEdit(component_id, saveChanges) {
 function closeComponentGrading(component_id, saveChanges) {
     let sequence = Promise.resolve();
     let gradeable_id = getGradeableId();
-    let component_tmp = null;
     let anon_id = getAnonId();
+    let component_tmp = null;
 
     if (!saveChanges) {
         // We aren't saving changes, so fetch the up-to-date grade / rubric data
@@ -1138,6 +1134,11 @@ function closeComponentGrading(component_id, saveChanges) {
 
     // Finally, render the graded component in non-edit mode with the mark list hidden
     return sequence.then(function (graded_component) {
+        // If this wasn't set (fetched from the remote), just load it from the DOM
+        if (component_tmp === null) {
+            component_tmp = getComponentFromDOM(component_id);
+        }
+
         return renderGradingComponent(component_tmp, graded_component, false, false);
     });
 }
@@ -1211,8 +1212,8 @@ function unCheckMark(component_id, mark_id) {
     let gradedComponent = getGradedComponentFromDOM(component_id);
 
     // Then remove the mark id from the array
-    for(let i = 0; i < gradedComponent.mark_ids.length; ++i) {
-        if(gradedComponent.mark_ids[i] === mark_id) {
+    for (let i = 0; i < gradedComponent.mark_ids.length; ++i) {
+        if (gradedComponent.mark_ids[i] === mark_id) {
             gradedComponent.mark_ids.splice(i, 1);
             break;
         }
@@ -1281,7 +1282,17 @@ function saveMarkList(component_id) {
 
                     marks.forEach(function (mark) {
                         sequence1 = sequence1.then(function () {
-                            return ajaxSaveMark(gradeable_id, component_id, mark.id, mark.points, mark.title);
+                            if (isMarkDeleted(mark.id)) {
+                                // This should be a pretty rare case
+                                return ajaxDeleteMark(gradeable_id, component_id, mark.id)
+                                    .catch(function (err) {
+                                        // Catch here so failed deletions (because someone has received it)
+                                        //  don't make everything else fail
+                                        alert('Could not delete mark! ' + err.message);
+                                    });
+                            } else {
+                                return ajaxSaveMark(gradeable_id, component_id, mark.id, mark.points, mark.title);
+                            }
                         });
                     });
                     return sequence1;
