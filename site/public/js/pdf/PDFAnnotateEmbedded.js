@@ -14,7 +14,7 @@ let GENERAL_INFORMATION = {
     file_name: "",
 }
 
-PDFJS.workerSrc = 'js/pdf/pdf.worker.js';
+PDFJS.workerSrc = 'js/pdf/pdf.worker.min.js';
 
 /*
  * This chunk renders the page when scrolling. It also makes sure that no page is rendered more than once.
@@ -65,6 +65,12 @@ function render(gradeable_id, user_id, grader_id, file_name) {
             PDFJS.getDocument({data:pdfData}).then((pdf) => {
                 RENDER_OPTIONS.pdfDocument = pdf;
                 let viewer = document.getElementById('viewer');
+                $(viewer).on('touchstart touchmove', function(e){
+                    //Let touchscreen work
+                    if(currentTool == "pen" || currentTool == "text"){
+                        e.preventDefault();
+                    }
+                });
                 viewer.innerHTML = '';
                 NUM_PAGES = pdf.pdfInfo.numPages;
                 for (let i=0; i<NUM_PAGES; i++) {
