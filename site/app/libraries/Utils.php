@@ -66,12 +66,14 @@ class Utils {
      * as tokens and other things where uniqueness is of absolute importance. The generated
      * string is twice as long as the given number of bytes as the parameter.
      *
+     * @noinspection PhpDocMissingThrowsInspection
+     *
      * @param int $bytes
      *
      * @return string
-     * @throws \Exception
      */
     public static function generateRandomString($bytes = 16) {
+        /** @noinspection PhpUnhandledExceptionInspection */
         return bin2hex(random_bytes($bytes));
     }
     
@@ -210,5 +212,41 @@ class Utils {
      */
     public static function compareNullableGt($gtL, $gtR) {
         return $gtL !== null && $gtR !== null && $gtL > $gtR;
+    }
+
+    /**
+     * Calculates a percent value (0 to 1) for the given dividend and divisor.
+     *  This method will suppress divide-by-zero warnings and just return NAN
+     * @param int $dividend The number being divided
+     * @param int $divisor The number to divide with
+     * @param bool $clamp If the result should be at most 1 (more than 100% impossible)
+     * @return float
+     */
+    public static function safeCalcPercent($dividend, $divisor, $clamp = false) {
+        if (intval($divisor) === 0) {
+            return NAN;
+        }
+
+        // Convert dividend to float so we don't truncate the quotient
+        $result = floatval($dividend) / $divisor;
+
+        if ($result > 1.0 && $clamp === true) {
+            return 1.0;
+        } else if ($result < 0.0) {
+            return 0.0;
+        }
+        return $result;
+    }
+
+    /**
+     * Gets a function to compare two objects by reference for functions like 'array_udiff'
+     *  Credit to method: https://stackoverflow.com/a/27830923/2972004
+     * As noted in the comments (and observed), simply comparing two references using `===` will not work
+     * @return \Closure
+     */
+    public static function getCompareByReference() {
+        return function ($a, $b) {
+            return strcmp(spl_object_hash($a), spl_object_hash($b));
+        };
     }
 }

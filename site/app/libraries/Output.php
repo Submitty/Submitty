@@ -55,6 +55,9 @@ class Output {
         $this->twig->addFunction(new \Twig_Function("render_template", function(... $args) {
             return call_user_func_array('self::renderTemplate', $args);
         }, ["is_safe" => ["html"]]));
+        if($this->core->getConfig()->wrapperEnabled()) {
+            $this->twig_loader->addPath(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site'), $namespace = 'site_uploads');
+        }
     }
 
     public function setInternalResources() {
@@ -62,6 +65,7 @@ class Output {
         $this->addInternalCss('jquery-ui.min.css');
         $this->addInternalCss('server.css');
         $this->addInternalCss('bootstrap.css');
+        $this->addInternalCss('bootstrap-grid.css');
         $this->addInternalCss('diff-viewer.css');
         $this->addInternalCss('glyphicons-halflings.css');
 
@@ -122,6 +126,77 @@ class Output {
         $this->output_buffer = json_encode($json, JSON_PRETTY_PRINT);
         $this->useFooter(false);
         $this->useHeader(false);
+    }
+
+    /**
+     * Renders a json response for the "success" case
+     *  (see http://submitty.org/developer/json_responses)
+     * @param mixed|null $data Response data
+     * @return array the unencoded response
+     */
+    public function renderJsonSuccess($data = null) {
+        $response = [
+            'status' => 'success',
+            'data' => $data
+        ];
+
+        $this->renderJson($response);
+
+        // Because sometimes the controllers want to return the response array
+        return $response;
+    }
+
+    /**
+     * Renders a json response for the "fail" case
+     *  (see http://submitty.org/developer/json_responses)
+     * @param string $message A non-blank failure message
+     * @param mixed|null $data Response data
+     * @param array $extra Extra data merged into the response array
+     * @return array the unencoded response
+     */
+    public function renderJsonFail($message, $data = null, $extra = []) {
+        $response = [
+            'status' => 'fail',
+            'message' => $message,
+        ];
+
+        if ($data !== null) {
+            $response['data'] = $data;
+        }
+
+        // Merge $response second so it overwrites conflicting keys in $extra
+        $response = array_merge($extra, $response);
+        $this->renderJson($response);
+
+        // Because sometimes the controllers want to return the response array
+        return $response;
+    }
+
+    /**
+     * Renders a json response for the "error" case
+     *  (see http://submitty.org/developer/json_responses)
+     * @param string $message A non-blank error message
+     * @param mixed|null $data Response data
+     * @param int $code Code to identify error case
+     * @return array the unencoded response
+     */
+    public function renderJsonError($message, $data = null, $code = null) {
+        $response = [
+            'status' => 'error',
+            'message' => $message,
+            'data' => $data
+        ];
+
+        if ($data !== null) {
+            $response['data'] = $data;
+        }
+        if ($code !== null) {
+            $response['code'] = $code;
+        }
+        $this->renderJson($response);
+
+        // Because sometimes the controllers want to return the response array
+        return $response;
     }
     
     public function renderString($string) {
@@ -195,7 +270,23 @@ class Output {
 
     private function renderHeader() {
         if ($this->use_header) {
-            return $this->renderTemplate('Global', 'header', $this->breadcrumbs, $this->css, $this->js);
+            $wrapper_files = $this->core->getConfig()->getWrapperFiles();
+            $wrapper_urls = array_map(function($file) {
+                return $this->core->buildUrl([
+                    'component' => 'misc',
+                    'page' => 'read_file',
+                    'dir' => 'site',
+                    'path' => $file,
+                    'file' => pathinfo($file, PATHINFO_FILENAME),
+                    'csrf_token' => $this->core->getCsrfToken()
+                ]);
+            },  $wrapper_files);
+
+            if (array_key_exists('override.css', $wrapper_urls)) {
+                $this->css[] = $wrapper_urls['override.css'];
+            }
+
+            return $this->renderTemplate('Global', 'header', $this->breadcrumbs, $wrapper_urls, $this->css, $this->js);
         }
         else {
             return '';
@@ -203,7 +294,22 @@ class Output {
     }
 
     private function renderFooter() {
-        return ($this->use_footer) ? $this->renderTemplate('Global', 'footer', (microtime(true) - $this->start_time)) : "";
+        if ($this->use_footer) {
+            $wrapper_files = $this->core->getConfig()->getWrapperFiles();
+            $wrapper_urls = array_map(function($file) {
+                return $this->core->buildUrl([
+                    'component' => 'misc',
+                    'page' => 'read_file',
+                    'dir' => 'site',
+                    'path' => $file,
+                    'file' => pathinfo($file, PATHINFO_FILENAME),
+                    'csrf_token' => $this->core->getCsrfToken()
+                ]);
+            },  $wrapper_files);
+            return $this->renderTemplate('Global', 'footer', (microtime(true) - $this->start_time), $wrapper_urls);
+        } else {
+            return '';
+        }
     }
 
     public function bufferOutput() {
@@ -311,5 +417,9 @@ class Output {
     
     public function addBreadcrumb($string, $url=null, $top=false, $icon=false) {
         $this->breadcrumbs[] = new Breadcrumb($this->core, $string, $url, $top, $icon);
+    }
+
+    public function addRoomTemplatesTwigPath() {
+        $this->twig_loader->addPath(FileUtils::joinPaths(dirname(dirname(__DIR__)), 'room_templates'), $namespace = 'room_templates');
     }
 }

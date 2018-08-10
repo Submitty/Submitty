@@ -7,20 +7,12 @@ input[readonly] {
     border:none;
 }
 
-#gradeable-dates input[type="text"] {
-    width: 200px;
+input[disabled] {
+    background: #999;
 }
 
-.table-wrapper {
-    position: relative;
-}
-.table-scroll {
-    width: 1150px;
-    overflow-x: auto;
-    margin-top: 20px;
-}
-.table-wrapper table {
-    width:100%;
+#gradeable-dates input[type="text"] {
+    width: 200px;
 }
 
 select {
@@ -87,7 +79,7 @@ select {
 
 .nav-bar {
     cursor: pointer;
-    width: 160px;
+    min-width: 150px;
     vertical-align: center;
     padding-right: 10px;
     padding-left: 10px;
@@ -113,4 +105,22 @@ fieldset {
 legend{
     padding: 2px;
     font-size: 12pt;
+}
+
+.table-wrapper {
+    position: relative;
+}
+.table-scroll {
+    width: 1150px;
+    overflow-x: auto;
+    margin-top: 20px;
+}
+.table-wrapper table {
+    width:100%;
+}
+
+table#grader-history th, table#grader-history td {
+    padding: 8px;
+    border: 3px solid black;
+    text-align: center;
 }

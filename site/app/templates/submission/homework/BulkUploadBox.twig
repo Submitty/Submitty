@@ -1,5 +1,5 @@
 <div class="content">
-    {% if gradeable.isTeamAssignment() %}
+    {% if team_assignment %}
         <h2>Unassigned Team PDF Uploads (Please Enter the User Id of One Team Member)</h2>
     {% else %}
         <h2>Unassigned PDF Uploads</h2>
@@ -20,9 +20,8 @@
             </thead>
             <tbody>
                 {% for file in files %}
-                    {% set index = loop.index %}
                     <tr class="tr tr-vertically-centered">
-                        <td>{{ index }}</td>
+                        <td>{{ loop.index }}</td>
                         <td>{{ file.clean_timestamp }}</td>
                         <td>
                             {{ file.filename_full }}
@@ -36,21 +35,21 @@
                         </td>
                         <td>
                             <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
-                            <div id="users_{{ index }}">
-                                <input type="text" id="bulk_user_id_{{ index }}[0]" value =""/>
-                                {% if gradeable.isTeamAssignment() %}
+                            <div id="users_{{ loop.index }}">
+                                <input type="text" id="bulk_user_id_{{ loop.index }}[0]" value =""/>
+                                {% if team_assignment %}
                                     {# (size - 1) because twig loops are range inclusive #}
-                                    {% for i in 1..(gradeable.getMaxTeamSize() - 1) %}
-                                        <input type="text" id="bulk_user_id_{{ index }}[{{ i }}]" value =""/>
+                                    {% for i in 1..(max_team_size - 1) %}
+                                        <input type="text" id="bulk_user_id_{{ loop.index }}[{{ i }}]" value =""/>
                                     {% endfor %}
                                 {% endif %}
                             </div>
                         </td>
                         <td>
-                            <button type="button" id="bulk_submit_{{ index }}" class="btn btn-success">Submit</button>
+                            <button type="button" id="bulk_submit_{{ loop.index }}" class="btn btn-success">Submit</button>
                         </td>
                         <td>
-                            <button type="button" id="bulk_delete_{{ index }}" class="btn btn-danger">Delete</button>
+                            <button type="button" id="bulk_delete_{{ loop.index }}" class="btn btn-danger">Delete</button>
                         </td>
                     </tr>
                 {% endfor %}
@@ -78,10 +77,10 @@
                 if (!confirm(message)) {
                     return;
                 }
-                deleteSplitItem("{{ core.getCsrfToken() }}", "{{ gradeable.getId() }}", path, count);
+                deleteSplitItem("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", path, count);
                 moveNextInput(count);
             } else {
-                validateUserId("{{ core.getCsrfToken() }}", "{{ gradeable.getId() }}", user_ids, true, path, count, "", makeSubmission);
+                validateUserId("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_ids, true, path, count, "", makeSubmission);
             }
             e.preventDefault();
             e.stopPropagation();
@@ -96,7 +95,7 @@
                 $("input[id^='"+name+"']").each(function(){ user_ids.push(this.value); });
                 var js_count_array = {{ count_array|json_encode|raw }};
                 var path = js_count_array[count];
-                validateUserId("{{ core.getCsrfToken() }}", "{{ gradeable.getId() }}", user_ids, true, path, count, "", makeSubmission);
+                validateUserId("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_ids, true, path, count, "", makeSubmission);
                 e.preventDefault();
                 e.stopPropagation();
             }

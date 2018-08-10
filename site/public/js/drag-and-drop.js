@@ -70,6 +70,16 @@ function drop(e){
     }
 }
 
+// add files dragged
+function dropWithMultipleZips(e){
+    draghandle(e);
+    var filestream= e.dataTransfer.files;
+    var part = get_part_number(e);
+    for(var i=0; i<filestream.length; i++){
+        addFileWithCheck(filestream[i], part, false); // check for folders
+    }
+}
+
 function get_part_number(e){
     if(e.target.id.substring(0, 6) == "upload"){
         return e.target.id.substring(6);
@@ -80,10 +90,10 @@ function get_part_number(e){
 }
 
 // copy files selected from the file browser
-function addFilesFromInput(part){
+function addFilesFromInput(part, check_duplicate_zip=true){
     var filestream = document.getElementById("input_file" + part).files;
     for(var i=0; i<filestream.length; i++){
-        addFile(filestream[i], part); // folders will not be selected in file browser, no need for check
+        addFile(filestream[i], part, check_duplicate_zip); // folders will not be selected in file browser, no need for check
     }
     $('#input_file' + part).val("");
 }
@@ -110,7 +120,7 @@ function fileExists(file, part){
 }
 
 // add file with folder check
-function addFileWithCheck(file, part){
+function addFileWithCheck(file, part, check_duplicate_zip=true){
     // try to open file if it looks suspicious:
     // no type, or with size of a typical folder size
     if(!file.type || file.size%4096 == 0){
@@ -120,7 +130,7 @@ function addFileWithCheck(file, part){
         reader.readAsBinaryString(file);
     }
     else{
-        addFile(file, part);
+        addFile(file, part, check_duplicate_zip);
     }
 }
 
@@ -133,11 +143,11 @@ function isFolder(file){
     return function(e){ alert("Upload failed: " + file.name + " might be a folder."); }
 }
 
-function addFile(file, part){
+function addFile(file, part, check_duplicate_zip=true){
     var i = fileExists(file, part);
     if( i[0] == -1 ){    // file does not exist
         // empty bucket if file is a zip and bucket is not empty
-        if(file.name.substring(file.name.length - 4, file.name.length) == ".zip" && file_array[part-1].length + previous_files[part-1].length > 0 ){
+        if(check_duplicate_zip && file.name.substring(file.name.length - 4, file.name.length) == ".zip" && file_array[part-1].length + previous_files[part-1].length > 0 ){
             if(confirm("Note: All files currently in the bucket will be deleted if you try to upload a zip: " + file.name + ". Do you want to continue?")){
                 deleteFiles(part);
             }
@@ -328,7 +338,7 @@ function moveNextInput(count) {
             offset = inputOffset;
         }
         var speed = 500;
-        $('html, body').animate({scrollTop:offset}, speed); 
+        $('html, body').animate({scrollTop:offset}, speed);
     }
 }
 
@@ -382,64 +392,55 @@ function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, 
                 data = JSON.parse(data);
                 if (data['success']) {
                     if(data['previous_submission']) { // if there is a previous submission, give the user merge options
-                        $(function() {
-                            var dialog = $('<div><p>This user/team has a previous submission.<br>What file(s) should be contained in the new submission?</p><br>\
-                                <input type="radio" id="instructor-submit-option-new" name="instructor-submit"><label for="instructor-submit-option-new">only the new files</label><br>\
-                                <input type="radio" id="instructor-submit-option-merge-1" name="instructor-submit"><label for="instructor-submit-option-merge-1">old files and new files -- old files with the same name will be renamed.</label><br>\
-                                <input type="radio" id="instructor-submit-option-merge-2" name="instructor-submit"><label for="instructor-submit-option-merge-2">old files and new files -- old files with the same name will be overwritten.</label></div>')
-                                .dialog({
-                                open: function(event, ui) { // on open, set either the new submission or merge no clobber option to checked based on the whether or not the toggle-merge-default checkbox is checked.
+                        var form = $("#previous-submission-form");
+                        var submitter = form.find(".submit-button");
+                        var closer = form.find(".close-button");
 
-                                    $(".ui-dialog-titlebar-close", ui.dialog | ui).hide();
-                                    var radio_idx;
-                                    if(localStorage.getItem("instructor-submit-option") === null) {
-                                        radio_idx = 0;
-                                    }
-                                    else {
-                                        radio_idx = parseInt(localStorage.getItem("instructor-submit-option"));
-                                    }
-                                    $(this).find('input:radio')[radio_idx].checked = true;
-                                    $(this).parent().find(".btn-success").focus();
-                                },
-                                buttons: [
-                                    {
-                                        text: "Submit",
-                                        class: "btn btn-success",
-                                        click: function() { // on click, make submission based on which radio input was checked
-                                            if($("#instructor-submit-option-new").is(":checked")) {
-                                                localStorage.setItem("instructor-submit-option", "0");
-                                                makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id);
-                                            }
-                                            else if($("#instructor-submit-option-merge-1").is(":checked")) {
-                                                localStorage.setItem("instructor-submit-option", "1");
-                                                makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id, merge_previous=true);
-                                            }
-                                            else if($("#instructor-submit-option-merge-2").is(":checked")) {
-                                                localStorage.setItem("instructor-submit-option", "2");
-                                                makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id, merge_previous=true, clobber=true);
-                                            }
-                                            dialog.dialog('destroy');
-                                        }
-                                    },
-                                    {
-                                        text: "Cancel",
-                                        class: "btn btn-danger",
-                                        click: function() {
-                                            if($("#instructor-submit-option-new").is(":checked")) {
-                                                localStorage.setItem("instructor-submit-option", "0");
-                                            }
-                                            else if($("#instructor-submit-option-merge-1").is(":checked")) {
-                                                localStorage.setItem("instructor-submit-option", "1");
-                                            }
-                                            else if($("#instructor-submit-option-merge-2").is(":checked")) {
-                                                localStorage.setItem("instructor-submit-option", "2");
-                                            }
-                                            dialog.dialog('destroy');
-                                        }
-                                    }
-                                ]
-                            });
+                        submitter.off('click');
+                        closer.off('click');
+
+                        submitter.on('click', function() { // on click, make submission based on which radio input was checked
+                            if($("#instructor-submit-option-new").is(":checked")) {
+                                localStorage.setItem("instructor-submit-option", "0");
+                                makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id);
+                            }
+                            else if($("#instructor-submit-option-merge-1").is(":checked")) {
+                                localStorage.setItem("instructor-submit-option", "1");
+                                makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id, true);
+                            }
+                            else if($("#instructor-submit-option-merge-2").is(":checked")) {
+                                localStorage.setItem("instructor-submit-option", "2");
+                                makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id, true, true);
+                            }
+                            form.css("display", "none");
                         });
+
+                        closer.on('click', function() {
+                            if($("#instructor-submit-option-new").is(":checked")) {
+                                localStorage.setItem("instructor-submit-option", "0");
+                            }
+                            else if($("#instructor-submit-option-merge-1").is(":checked")) {
+                                localStorage.setItem("instructor-submit-option", "1");
+                            }
+                            else if($("#instructor-submit-option-merge-2").is(":checked")) {
+                                localStorage.setItem("instructor-submit-option", "2");
+                            }
+                            form.css("display", "none");
+                        });
+
+                        $('.popup-form').css('display', 'none');
+                        form.css("display", "block");
+
+                        // on open, set either the new submission or merge no clobber option to checked based on the whether or not the toggle-merge-default checkbox is checked.
+                        var radio_idx;
+                        if(localStorage.getItem("instructor-submit-option") === null) {
+                            radio_idx = 0;
+                        }
+                        else {
+                            radio_idx = parseInt(localStorage.getItem("instructor-submit-option"));
+                        }
+                        form.find('input:radio')[radio_idx].checked = true;
+                        form.find(".btn-success").focus();
                     }
                     else { // if no previous submissions, no merging will be necessary
                         makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id);
@@ -472,7 +473,7 @@ function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, 
 function submitSplitItem(csrf_token, gradeable_id, user_id, path, count, merge_previous=false, clobber=false) {
     var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload_split', 'gradeable_id': gradeable_id, 'merge': merge_previous, 'clobber': clobber});
     var return_url = buildUrl({'component': 'student','gradeable_id': gradeable_id});
-    
+
     var formData = new FormData();
 
     formData.append('csrf_token', csrf_token);
@@ -796,6 +797,162 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
         error: function(error) {
             $("#submit").prop("disabled", false);
             alert("ERROR! Please contact administrator that you could not upload files.");
+        }
+    });
+}
+
+/**
+ * @param csrf_token
+ */
+function handleDownloadImages(csrf_token) {
+    var image_submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload_images_files'});
+    var return_url = buildUrl({'component': 'grading', 'page': 'images', 'action': 'view_images_page'});
+    var formData = new FormData();
+    formData.append('csrf_token', csrf_token);
+
+
+    // Files selected
+    for (var i = 0; i < file_array.length; i++) {
+        for (var j = 0; j < file_array[i].length; j++) {
+            if (file_array[i][j].name.indexOf("'") != -1 ||
+                file_array[i][j].name.indexOf("\"") != -1) {
+                alert("ERROR! You may not use quotes in your filename: " + file_array[i][j].name);
+                return;
+            }
+            else if (file_array[i][j].name.indexOf("\\") != -1 ||
+                file_array[i][j].name.indexOf("/") != -1) {
+                alert("ERROR! You may not use a slash in your filename: " + file_array[i][j].name);
+                return;
+            }
+            else if (file_array[i][j].name.indexOf("<") != -1 ||
+                file_array[i][j].name.indexOf(">") != -1) {
+                alert("ERROR! You may not use angle brackets in your filename: " + file_array[i][j].name);
+                return;
+            }
+        formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);
+        }
+    }
+
+    $.ajax({
+        url: image_submit_url,
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function(data) {
+            try {
+                data = JSON.parse(data);
+
+                if (data['success']) {
+                    window.location.href = return_url;
+                }
+                else {
+                    alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
+                }
+            }
+            catch (e) {
+                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
+                    "send it to an administrator, as well as what you were doing and what files you were uploading.");
+            }
+        },
+        error: function(data) {
+            window.location.href = buildUrl({'component': 'grading', 'page': 'images', 'action': 'view_images_page'});
+        }
+    });
+}
+
+/**
+ * @param csrf_token
+ */
+
+function handleUploadCourseMaterials(csrf_token, expand_zip, cmPath, requested_path) {
+    var submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload_course_materials_files'});
+    var return_url = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'view_course_materials_page'});
+    var formData = new FormData();
+
+    formData.append('csrf_token', csrf_token);
+    formData.append('expand_zip', expand_zip);
+    formData.append('requested_path', requested_path);
+
+    var target_path = cmPath; // this one has slash at the end.
+    if (requested_path && requested_path.trim().length) {
+        target_path = cmPath + requested_path;
+    }
+
+    if (target_path[target_path.length-1] == '/')
+        target_path = target_path.slice(0, -1); // remove slash
+
+	var filesToBeAdded = false;
+    // Files selected
+    for (var i = 0; i < file_array.length; i++) {
+        for (var j = 0; j < file_array[i].length; j++) {
+            if (file_array[i][j].name.indexOf("'") != -1 ||
+                file_array[i][j].name.indexOf("\"") != -1) {
+                alert("ERROR! You may not use quotes in your filename: " + file_array[i][j].name);
+                return;
+            }
+            else if (file_array[i][j].name.indexOf("\\") != -1 ||
+                file_array[i][j].name.indexOf("/") != -1) {
+                alert("ERROR! You may not use a slash in your filename: " + file_array[i][j].name);
+                return;
+            }
+            else if (file_array[i][j].name.indexOf("<") != -1 ||
+                file_array[i][j].name.indexOf(">") != -1) {
+                alert("ERROR! You may not use angle brackets in your filename: " + file_array[i][j].name);
+                return;
+            }
+
+            var file = new File([""], target_path + "/" + file_array[i][j].name);
+            var k = fileExists(file, 1);
+            // Check conflict here
+            if ( k[0] == 1 )
+            {
+                var skip_confirmation = false;
+                if (expand_zip == 'on') {
+                    var extension = getFileExtension(file_array[i][j].name);
+                    if (extension.toLowerCase() == "zip") {
+                        skip_confirmation = true; // skip the zip if there is conflict when in expand zip choice.
+                    }
+                }
+                if(!skip_confirmation && !confirm("Note: " + file_array[i][j].name + " already exists. Do you want to replace it?")){
+                    continue;
+                }
+            }
+
+            formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);
+            filesToBeAdded = true;
+        }
+    }
+
+    if (filesToBeAdded == false){
+        return;
+    }
+
+
+    $.ajax({
+        url: submit_url,
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function(data) {
+            try {
+                var jsondata = JSON.parse(data);
+
+                if (jsondata['success']) {
+                    window.location.href = return_url;
+                }
+                else {
+                    alert("ERROR! Please contact administrator with following error:\n\n" + jsondata['message']);
+                }
+            }
+            catch (e) {
+                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
+                    "send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadCourseMaterials]");
+            }
+        },
+        error: function(data) {
+            window.location.href = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'view_course_materials_page'});
         }
     });
 }

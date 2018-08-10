@@ -2,7 +2,8 @@ code: development
 instructor: instructor
 gradeables:
 
-- components:
+- gradeable_config: upload_only
+  components:
   - gc_lower_clamp: 0
     gc_default: 5
     gc_max_value: 5
@@ -13,15 +14,17 @@ gradeables:
         gcm_points : 0
       - gcm_note: Question 1 Mark 1
         gcm_points : -5
-  gradeable_config: upload_only
   g_ta_view_start_date: -2 days
   eg_submission_open_date: -1 days
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
+  g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
+  eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0
 
-- components:
+- gradeable_config: cpp_simple_lab
+  components:
   - gc_lower_clamp: 0
     gc_default: 5
     gc_max_value: 5
@@ -32,15 +35,17 @@ gradeables:
         gcm_points : 0
       - gcm_note: Question 1 Mark 1
         gcm_points : -5
-  gradeable_config: cpp_simple_lab
   g_ta_view_start_date: -2 days
   eg_submission_open_date: -1 days
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
+  g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
+  eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0
   
-- components:
+- gradeable_config: cpp_cats
+  components:
   - gc_lower_clamp: 0
     gc_default: 5
     gc_max_value: 5
@@ -51,15 +56,17 @@ gradeables:
         gcm_points : 0
       - gcm_note: Question 1 Mark 1
         gcm_points : -5
-  gradeable_config: cpp_cats
   g_ta_view_start_date: -2 days
   eg_submission_open_date: -1 days
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
+  g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
+  eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0
   
-- components:
+- gradeable_config: minimal_code_editing
+  components:
   - gc_lower_clamp: 0
     gc_default: 5
     gc_max_value: 5
@@ -70,15 +77,17 @@ gradeables:
         gcm_points : 0
       - gcm_note: Question 1 Mark 1
         gcm_points : -5
-  gradeable_config: minimal_code_editing
   g_ta_view_start_date: -2 days
   eg_submission_open_date: -1 days
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
+  g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
+  eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0
   
-- components:
+- gradeable_config: cpp_custom
+  components:
   - gc_lower_clamp: 0
     gc_default: 5
     gc_max_value: 5
@@ -89,15 +98,17 @@ gradeables:
         gcm_points : 0
       - gcm_note: Question 1 Mark 1
         gcm_points : -5
-  gradeable_config: cpp_custom
   g_ta_view_start_date: -2 days
   eg_submission_open_date: -1 days
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
+  g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
+  eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0
   
-- components:
+- gradeable_config: cpp_hidden_tests
+  components:
   - gc_lower_clamp: 0
     gc_default: 5
     gc_max_value: 5
@@ -108,15 +119,17 @@ gradeables:
         gcm_points : 0
       - gcm_note: Question 1 Mark 1
         gcm_points : -5
-  gradeable_config: cpp_hidden_tests
   g_ta_view_start_date: -2 days
   eg_submission_open_date: -1 days
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
+  g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
+  eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0
   
-- components:
+- gradeable_config: c_failure_messages
+  components:
   - gc_lower_clamp: 0
     gc_default: 5
     gc_max_value: 5
@@ -127,15 +140,17 @@ gradeables:
         gcm_points : 0
       - gcm_note: Question 1 Mark 1
         gcm_points : -5
-  gradeable_config: c_failure_messages
   g_ta_view_start_date: -2 days
   eg_submission_open_date: -1 days
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
+  g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
+  eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0
   
-- components:
+- gradeable_config: python_simple_homework
+  components:
   - gc_lower_clamp: 0
     gc_default: 5
     gc_max_value: 5
@@ -146,15 +161,17 @@ gradeables:
         gcm_points : 0
       - gcm_note: Question 1 Mark 1
         gcm_points : -5
-  gradeable_config: python_simple_homework
   g_ta_view_start_date: -2 days
   eg_submission_open_date: -1 days
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
+  g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
+  eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0
   
-- components:
+- gradeable_config: python_linehighlight
+  components:
   - gc_lower_clamp: 0
     gc_default: 5
     gc_max_value: 5
@@ -165,15 +182,17 @@ gradeables:
         gcm_points : 0
       - gcm_note: Question 1 Mark 1
         gcm_points : -5
-  gradeable_config: python_linehighlight
   g_ta_view_start_date: -2 days
   eg_submission_open_date: -1 days
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
+  g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
+  eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0
   
-- components:
+- gradeable_config: python_multipart_static_analysis
+  components:
   - gc_lower_clamp: 0
     gc_default: 5
     gc_max_value: 5
@@ -184,15 +203,17 @@ gradeables:
         gcm_points : 0
       - gcm_note: Question 1 Mark 1
         gcm_points : -5
-  gradeable_config: python_multipart_static_analysis
   g_ta_view_start_date: -2 days
   eg_submission_open_date: -1 days
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
+  g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
+  eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0
   
-- components:
+- gradeable_config: iclicker_upload
+  components:
   - gc_lower_clamp: 0
     gc_default: 5
     gc_max_value: 5
@@ -203,15 +224,17 @@ gradeables:
         gcm_points : 0
       - gcm_note: Question 1 Mark 1
         gcm_points : -5
-  gradeable_config: iclicker_upload
   g_ta_view_start_date: -2 days
   eg_submission_open_date: -1 days
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
+  g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
+  eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0
   
-- components:
+- gradeable_config: paragraph_textboxes
+  components:
   - gc_lower_clamp: 0
     gc_default: 5
     gc_max_value: 5
@@ -222,15 +245,17 @@ gradeables:
         gcm_points : 0
       - gcm_note: Question 1 Mark 1
         gcm_points : -5
-  gradeable_config: paragraph_textboxes
   g_ta_view_start_date: -2 days
   eg_submission_open_date: -1 days
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
+  g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
+  eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0
   
-- components:
+- gradeable_config: pdf_word_count
+  components:
   - gc_lower_clamp: 0
     gc_default: 5
     gc_max_value: 5
@@ -241,15 +266,17 @@ gradeables:
         gcm_points : 0
       - gcm_note: Question 1 Mark 1
         gcm_points : -5
-  gradeable_config: pdf_word_count
   g_ta_view_start_date: -2 days
   eg_submission_open_date: -1 days
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
+  g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
+  eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0
 
-- components:
+- gradeable_config: test_notes_upload
+  components:
   - gc_lower_clamp: 0
     gc_default: 5
     gc_max_value: 5
@@ -260,15 +287,17 @@ gradeables:
         gcm_points : 0
       - gcm_note: Question 1 Mark 1
         gcm_points : -5
-  gradeable_config: test_notes_upload
   g_ta_view_start_date: -2 days
   eg_submission_open_date: -1 days
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
+  g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
+  eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0
 
-- components:
+- gradeable_config: choice_of_language
+  components:
   - gc_lower_clamp: 0
     gc_default: 5
     gc_max_value: 5
@@ -279,15 +308,17 @@ gradeables:
         gcm_points : 0
       - gcm_note: Question 1 Mark 1
         gcm_points : -5
-  gradeable_config: choice_of_language
   g_ta_view_start_date: -2 days
   eg_submission_open_date: -1 days
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
+  g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
+  eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0
 
-- components:
+- gradeable_config: cpp_provided_code
+  components:
   - gc_lower_clamp: 0
     gc_default: 5
     gc_max_value: 5
@@ -298,10 +329,11 @@ gradeables:
         gcm_points : 0
       - gcm_note: Question 1 Mark 1
         gcm_points : -5
-  gradeable_config: cpp_provided_code
   g_ta_view_start_date: -2 days
   eg_submission_open_date: -1 days
   eg_submission_due_date: +1000 days
   g_grade_start_date: +1005 days
+  g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
+  eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0

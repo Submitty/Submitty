@@ -81,12 +81,14 @@ use app\libraries\Utils;
  * @method int|null getGdId()
  * @method void setGdId(int $gd_id)
  * @method \DateTime getUserViewedDate()
- * @method float getTotalPeerGradingNonExtraCredit()
+ * @method float getTotalPeerGradingPoints()
  * @method int getLateDayExceptions()
  * @method int getAllowedLateDays()
  * @method int getLateDays()
  * @method int getStudentAllowedLateDays()
  * @method int getRegradeStatus()
+ * @method \DateTime getRegradeRequestDate()
+ * @method bool isRegradeAllowed()
  */
 class Gradeable extends AbstractModel {
     
@@ -137,6 +139,12 @@ class Gradeable extends AbstractModel {
 
     /** @property @var \DateTime|null Date for when the grade will be released to students */
     protected $grade_released_date = null;
+
+    /** @property @var \DateTime|null Date by when regrade requests can be submitted */
+    protected $regrade_request_date = null;
+
+    /** @property @var bool */
+    protected $regrade_allowed = true;
 
     /** @property @var bool */
     protected $ta_grades_released = false;
@@ -283,11 +291,9 @@ class Gradeable extends AbstractModel {
 
     protected $been_tagraded = false;
 
-    protected $total_tagrading_non_extra_credit = 0;
-    protected $total_tagrading_extra_credit = 0;
+    protected $total_ta_grading_points = 0;
     
-    protected $total_peer_grading_non_extra_credit = 0;
-    protected $total_peer_grading_extra_credit=0;
+    protected $total_peer_grading_points = 0;
 
     /** @property @var \app\models\User|null */
     protected $user = null;
@@ -317,6 +323,7 @@ class Gradeable extends AbstractModel {
 
     /** @property @var int */
     protected $curr_late_charged = 0;
+
 
     public function __construct(Core $core, $details=array(), User $user = null) {
         parent::__construct($core);
@@ -358,6 +365,8 @@ class Gradeable extends AbstractModel {
             //$this->inherit_teams_from = $details['eg_inherit_teams_from'];
             $this->max_team_size = $details['eg_max_team_size'];
             $this->team_lock_date = new \DateTime($details['eg_team_lock_date'], $timezone);
+            $this->regrade_request_date = new \DateTime($details['eg_regrade_request_date'], $timezone);
+            $this->regrade_allowed = $details['eg_regrade_allowed'];
             $this->regrade_status = $this->core->getQueries()->getRegradeRequestStatus($this->user->getId(), $this->id);
             if ($this->team_assignment) {
                 $this->team = $this->core->getQueries()->getTeamByGradeableAndUser($this->id, $this->user->getId());
@@ -451,7 +460,7 @@ class Gradeable extends AbstractModel {
 
                 if (!$component_for_info->getIsText()) {
                     $max_value = $component_for_info->getMaxValue();
-                    $this->total_tagrading_non_extra_credit += $max_value;
+                    $this->total_ta_grading_points += $max_value;
                 }
             }
             // We don't sort by order within the DB as we're aggregating the component details into an array so we'd
@@ -920,8 +929,8 @@ class Gradeable extends AbstractModel {
         return $points;
     }
 
-    public function getTotalTANonExtraCreditPoints() {
-        return $this->total_tagrading_non_extra_credit;
+    public function getTotalTAPoints() {
+        return $this->total_ta_grading_points;
     }
 
     public function getTAViewDate(){
@@ -1018,7 +1027,9 @@ class Gradeable extends AbstractModel {
     public function resetUserViewedDate() {
         $this->core->getQueries()->resetUserViewedDate($this);
     }
-
+    public function setJustRegraded($bool) {
+        $this->just_regraded=$bool;
+    }
     public function getActiveDaysLate() {
         $return =  DateUtils::calculateDayDiff($this->due_date, $this->submission_time);
         if ($return < 0) {
@@ -1033,7 +1044,15 @@ class Gradeable extends AbstractModel {
         }
         return $return;
     }
-    
+
+    public function hasBuildError(){
+        $build_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $this->getId(), "log_cmake_output.txt");
+        if(strpos(file_get_contents($build_file),"error") !== false) {
+            return true;
+        }
+        return false;
+    }
+
     public function validateVersions($active_check = null) {
         //active check is the gradeable version this gradeable has
         if($active_check === null) {
@@ -1224,7 +1243,7 @@ class Gradeable extends AbstractModel {
             "graded_autograder_points" => $this->getGradedAutograderPoints(),
             "total_autograder_non_extra_credit_points" => $this->getTotalAutograderNonExtraCreditPoints(),
             "graded_ta_points" => $this->getGradedTAPoints(),
-            "total_ta_non_extra_credit_points" => $this->getTotalTANonExtraCreditPoints(),
+            "total_ta_points" => $this->getTotalTAPoints(),
             "components" => []
         ];
 
@@ -1331,4 +1350,192 @@ class Gradeable extends AbstractModel {
         }
     }
 
+    /**
+     * Get a list of all grading sections assigned to a given user
+     * @param User $user
+     * @return GradingSection[]
+     */
+    public function getGradingSectionsForUser(User $user) {
+        if ($this->getPeerGrading() && $user->getGroup() === 4) {
+            $users = $this->core->getQueries()->getPeerAssignment($this->getId(), $user->getId());
+            //TODO: Peer grading team assignments
+            return [new GradingSection($this->core, false, "Peer", [$user], $users, [])];
+        } else {
+            $users = [];
+            $teams = [];
+
+            if ($this->isGradeByRegistration()) {
+                $section_names = $user->getGradingRegistrationSections();
+
+                if ($this->isTeamAssignment()) {
+                    foreach ($section_names as $section) {
+                        $teams[$section] = [];
+                    }
+                    $all_teams = $this->core->getQueries()->getTeamsByGradeableAndRegistrationSections($this->getId(), $section_names);
+                    foreach ($all_teams as $team) {
+                        /** @var Team $team */
+                        $teams[$team->getRegistrationSection()][] = $team;
+                    }
+                } else {
+                    foreach ($section_names as $section) {
+                        $users[$section] = [];
+                    }
+                    $all_users = $this->core->getQueries()->getUsersByRegistrationSections($section_names);
+                    foreach ($all_users as $user) {
+                        /** @var User $user */
+                        $users[$user->getRegistrationSection()][] = $user;
+                    }
+                }
+                $graders = $this->core->getQueries()->getGradersForRegistrationSections($section_names);
+            } else {
+                $section_names = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($this->getId(), $user->getId());
+
+                if ($this->isTeamAssignment()) {
+                    foreach ($section_names as $section) {
+                        $teams[$section] = [];
+                    }
+                    $all_teams = $this->core->getQueries()->getTeamsByGradeableAndRotatingSections($this->getId(), $section_names);
+                    foreach ($all_teams as $team) {
+                        /** @var Team $team */
+                        $teams[$team->getRotatingSection()][] = $team;
+                    }
+                } else {
+                    foreach ($section_names as $section) {
+                        $users[$section] = [];
+                    }
+                    $all_users = $this->core->getQueries()->getUsersByRotatingSections($section_names);
+                    foreach ($all_users as $user) {
+                        /** @var User $user */
+                        $users[$user->getRotatingSection()][] = $user;
+                    }
+                }
+                $graders = $this->core->getQueries()->getGradersForRotatingSections($this->getId(), $section_names);
+            }
+
+            $sections = [];
+            foreach ($section_names as $section_name) {
+                $sections[] = new GradingSection($this->core, $this->isGradeByRegistration(), $section_name, $graders[$section_name] ?? [], $users[$section_name] ?? null, $teams[$section_name] ?? null);
+            }
+
+            return $sections;
+        }
+    }
+
+    /**
+     * Get the percent completed grading for the current user
+     * @return array [total_components, percent]
+     */
+    public function getGradingProgress(): array {
+        //This code is taken from the ElectronicGraderController, it used to calculate the TA percentage.
+        $total_users = array();
+        $graded_components = array();
+        if ($this->isGradeByRegistration()) {
+            if (!$this->core->getUser()->accessFullGrading()) {
+                $sections = $this->core->getUser()->getGradingRegistrationSections();
+            } else {
+                $sections = $this->core->getQueries()->getRegistrationSections();
+                foreach ($sections as $i => $section) {
+                    $sections[$i] = $section['sections_registration_id'];
+                }
+            }
+            $section_key = 'registration_section';
+        } else {
+            if (!$this->core->getUser()->accessFullGrading()) {
+                $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($this->getId(), $this->core->getUser()->getId());
+            } else {
+                $sections = $this->core->getQueries()->getRotatingSections();
+                foreach ($sections as $i => $section) {
+                    $sections[$i] = $section['sections_rotating_id'];
+                }
+            }
+            $section_key = 'rotating_section';
+        }
+        if (count($sections) > 0) {
+            if ($this->isTeamAssignment()) {
+                $total_users = $this->core->getQueries()->getTotalTeamCountByGradingSections($this->getId(), $sections, $section_key);
+                $graded_components = $this->core->getQueries()->getGradedComponentsCountByTeamGradingSections($this->getId(), $sections, $section_key);
+                $num_submitted = $this->core->getQueries()->getTotalSubmittedTeamCountByGradingSections($this->getId(), $sections, $section_key);
+            } else {
+                $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key);
+                $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment());
+                $num_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($this->getId(), $sections, $section_key);
+            }
+        }
+
+        $num_components = $this->core->getQueries()->getTotalComponentCount($this->getId());
+        $sections = array();
+        if (count($total_users) > 0) {
+            foreach ($num_submitted as $key => $value) {
+                $sections[$key] = array(
+                    'total_components' => $value * $num_components,
+                    'graded_components' => 0,
+                );
+                if (isset($graded_components[$key])) {
+                    // Clamp to total components if unsubmitted assigment is graded for whatever reason
+                    $sections[$key]['graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
+                }
+            }
+        }
+        $components_graded = 0;
+        $components_total = 0;
+        foreach ($sections as $key => $section) {
+            if ($key === "NULL") {
+                continue;
+            }
+            $components_graded += $section['graded_components'];
+            $components_total += $section['total_components'];
+        }
+        if ($components_total == 0) {
+            $percent = 0;
+        } else {
+            $percent = $components_graded / $components_total;
+            $percent = $percent * 100;
+        }
+        return array($components_total, $percent);
+    }
+
+    /**
+     * @return array
+     */
+    public function getComponentPages() {
+        // if use student components, get the values for pages from the student's submissions
+        $files = $this->getSubmittedFiles();
+        $student_pages = array();
+        foreach ($files as $filename => $content) {
+            if ($filename == "student_pages.json") {
+                $student_pages = FileUtils::readJsonFile($content["path"]);
+            }
+        }
+
+        $pages = [];
+
+        foreach ($this->getComponents() as $component) {
+            $page = intval($component->getPage());
+            // if the page is determined by the student json
+            if ($page == -1) {
+                $order = $component->getOrder();
+                // usually the order matches the json
+                if ($student_pages[intval($order)]["order"] == intval($order)) {
+                    $page = intval($student_pages[intval($order)]["page #"]);
+                } // otherwise, iterate through until the order matches
+                else {
+                    foreach ($student_pages as $student_page) {
+                        if ($student_page["order"] == intval($order)) {
+                            $page = intval($student_page["page #"]);
+                            break;
+                        }
+                    }
+                }
+            }
+            $pages[] = $page;
+        }
+        return $pages;
+    }
+    //return true if students can currently submit regrades for this assignment, false otherwise
+    public function isRegradeOpen(){
+        if($this->core->getConfig()->isRegradeEnabled()==true && $this->isTaGradeReleased() && $this->regrade_allowed && ($this->regrade_request_date > new \DateTime('now', $this->core->getConfig()->getTimezone()))){
+            return true;
+        }
+        return false;
+    }
 }

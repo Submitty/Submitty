@@ -66,33 +66,31 @@ SUBMITTY_DATA_DIR = args.data_dir
 if not os.path.isdir(SUBMITTY_DATA_DIR) or not os.access(SUBMITTY_DATA_DIR, os.R_OK | os.W_OK):
     raise SystemExit('Data directory {} does not exist or is not accessible'.format(SUBMITTY_DATA_DIR))
 
-SUBMITTY_TUTORIAL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'GIT_CHECKOUT','Tutorial')
-
 TAGRADING_LOG_PATH = os.path.join(SUBMITTY_DATA_DIR, 'logs')
 AUTOGRADING_LOG_PATH = os.path.join(SUBMITTY_DATA_DIR, 'logs', 'autograding')
 
 ##############################################################################
 
 # recommended names for special users & groups related to the SUBMITTY system
-HWPHP_USER = 'hwphp'
-HWPHP_GROUP = 'hwphp'
-HWCGI_USER = 'hwcgi'
-HWCRON_USER = 'hwcron'
-HWCRON_GROUP = 'hwcron'
+PHP_USER = 'submitty_php'
+PHP_GROUP = 'submitty_php'
+CGI_USER = 'submitty_cgi'
+DAEMON_USER = 'submitty_daemon'
+DAEMON_GROUP = 'submitty_daemon'
 
 if not args.worker:
-    HWPHP_UID, HWPHP_GID = get_ids(HWPHP_USER)
-    HWCGI_UID, HWCGI_GID = get_ids(HWCGI_USER)
+    PHP_UID, PHP_GID = get_ids(PHP_USER)
+    CGI_UID, CGI_GID = get_ids(CGI_USER)
     # System Groups
-    HWCRONPHP_GROUP = 'hwcronphp'
+    DAEMONPHP_GROUP = 'submitty_daemonphp'
     try:
-        grp.getgrnam(HWCRONPHP_GROUP)
+        grp.getgrnam(DAEMONPHP_GROUP)
     except KeyError:
-        raise SystemExit("ERROR: Could not find group: " + HWCRONPHP_GROUP)
+        raise SystemExit("ERROR: Could not find group: " + DAEMONPHP_GROUP)
 
-HWCRON_UID, HWCRON_GID = get_ids(HWCRON_USER)
+DAEMON_UID, DAEMON_GID = get_ids(DAEMON_USER)
 
-COURSE_BUILDERS_GROUP = 'course_builders'
+COURSE_BUILDERS_GROUP = 'submitty_course_builders'
 try:
     grp.getgrnam(COURSE_BUILDERS_GROUP)
 except KeyError:
@@ -100,7 +98,8 @@ except KeyError:
 
 ##############################################################################
 
-# This value must be at least 60: assumed in INSTALL_SUBMITTY.sh generation of crontab
+# This is the upper limit of the number of parallel grading threads on
+# this machine
 NUM_UNTRUSTED = 60
 
 FIRST_UNTRUSTED_UID, FIRST_UNTRUSTED_GID = get_ids('untrusted00')
@@ -132,9 +131,9 @@ SITE_CONFIG_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "site", "config")
 ##############################################################################
 
 defaults = {'database_host': 'localhost',
-            'database_user': 'hsdbu',
+            'database_user': 'submitty_dbuser',
             'submission_url': '',
-            'submitty_supervisor': 'submitty',
+            'supervisor_user': 'submitty',
             'vcs_url': '',
             'authentication_method': 1,
             'institution_name' : '',
@@ -148,7 +147,10 @@ if os.path.isfile(CONFIGURATION_JSON):
         loaded_defaults = json.load(conf_file)
     #no need to authenticate on a worker machine (no website)
     if not args.worker:
-        loaded_defaults['authentication_method'] = 1 if loaded_defaults['authentication_method'] == 'PamAuthentication' else 2
+        if 'authentication_method' in loaded_defaults:
+            loaded_defaults['authentication_method'] = 1 if loaded_defaults['authentication_method'] == 'PamAuthentication' else 2
+        else:
+            loaded_defaults['authentication_method'] = 2
 
 # grab anything not loaded in (useful for backwards compatibility if a new default is added that 
 # is not in an existing config file.)
@@ -171,18 +173,18 @@ print('Hit enter to use default in []')
 print()
 
 if args.worker:
-    SUBMITTY_SUPERVISOR = get_input('What is the id for your submitty user?', defaults['submitty_supervisor'])
+    SUPERVISOR_USER = get_input('What is the id for your submitty user?', defaults['supervisor_user'])
 else:
     DATABASE_HOST = get_input('What is the database host?', defaults['database_host'])
     print()
 
-    DATABASE_USER = get_input('What is the database user?', defaults['database_user'])
+    DATABASE_USER = get_input('What is the database user/role?', defaults['database_user'])
     print()
 
     default = ''
     if 'database_password' in defaults and DATABASE_USER == defaults['database_user']:
         default = '(Leave blank to use same password)'
-    DATABASE_PASS = get_input('What is the database password for {}? {}'.format(DATABASE_USER, default))
+    DATABASE_PASS = get_input('What is the password for the database user/role {}? {}'.format(DATABASE_USER, default))
     if DATABASE_PASS == '' and DATABASE_USER == defaults['database_user'] and 'database_password' in defaults:
         DATABASE_PASS = defaults['database_password']
     print()
@@ -257,20 +259,18 @@ config['first_untrusted_gid'] = FIRST_UNTRUSTED_UID
 config['num_grading_scheduler_workers'] = NUM_GRADING_SCHEDULER_WORKERS
 
 
-config['hwcron_user'] = HWCRON_USER
-config['hwcron_uid'] = HWCRON_UID
-config['hwcron_gid'] = HWCRON_GID    
+config['daemon_user'] = DAEMON_USER
+config['daemon_uid'] = DAEMON_UID
+config['daemon_gid'] = DAEMON_GID
 
 if args.worker:
-    config['submitty_supervisor'] = SUBMITTY_SUPERVISOR
+    config['supervisor_user'] = SUPERVISOR_USER
 else:
-    config['submitty_tutorial_dir'] = SUBMITTY_TUTORIAL_DIR
-
-    config['hwphp_user'] = HWPHP_USER
-    config['hwcgi_user'] = HWCGI_USER
-    config['hwcronphp_group'] = HWCRONPHP_GROUP
-    config['hwphp_uid'] = HWPHP_UID
-    config['hwphp_gid'] = HWPHP_GID
+    config['php_user'] = PHP_USER
+    config['cgi_user'] = CGI_USER
+    config['daemonphp_group'] = DAEMONPHP_GROUP
+    config['php_uid'] = PHP_UID
+    config['php_gid'] = PHP_GID
 
     config['database_host'] = DATABASE_HOST
     config['database_user'] = DATABASE_USER
@@ -344,7 +344,7 @@ if not args.worker:
         #make a tmp folder and copy autograding workers to it
         tmp_folder = tempfile.mkdtemp()
         tmp_autograding_workers_file = os.path.join(tmp_folder, "autograding_workers.json")
-        os.rename(WORKERS_JSON, tmp_autograding_workers_file)
+        shutil.move(WORKERS_JSON, tmp_autograding_workers_file)
 
 if os.path.isdir(CONFIG_INSTALL_DIR):
     shutil.rmtree(CONFIG_INSTALL_DIR)
@@ -355,11 +355,11 @@ os.chmod(CONFIG_INSTALL_DIR, 0o755)
 #If the workers.json exists, finish rescuing it (copy it back).
 if not tmp_autograding_workers_file == "":
     #copy autograding workers back
-    os.rename(tmp_autograding_workers_file, WORKERS_JSON)
+    shutil.move(tmp_autograding_workers_file, WORKERS_JSON)
     #remove the tmp folder
     os.removedirs(tmp_folder)
     #make sure the permissions are correct.
-    shutil.chown(WORKERS_JSON, 'root',HWCRON_GID)
+    shutil.chown(WORKERS_JSON, 'root',DAEMON_GID)
     os.chmod(WORKERS_JSON, 0o460)
 
 ##############################################################################
@@ -379,7 +379,7 @@ if not args.worker:
 
         with open(WORKERS_JSON, 'w') as workers_file:
             json.dump(worker_dict, workers_file, indent=4)
-    shutil.chown(WORKERS_JSON, 'root',HWCRON_GID)
+    shutil.chown(WORKERS_JSON, 'root',DAEMON_GID)
     os.chmod(WORKERS_JSON, 0o460)
 
 ##############################################################################
@@ -395,7 +395,7 @@ if not args.worker:
 
     with open(DATABASE_JSON, 'w') as json_file:
         json.dump(config, json_file, indent=2)
-    shutil.chown(DATABASE_JSON, 'www-data', HWCRONPHP_GROUP)
+    shutil.chown(DATABASE_JSON, 'www-data', DAEMONPHP_GROUP)
     os.chmod(DATABASE_JSON, 0o440)
 
 ##############################################################################
@@ -409,7 +409,6 @@ config['autograding_log_path'] = AUTOGRADING_LOG_PATH
 config['timezone'] = tzlocal.get_localzone().zone
 
 if not args.worker:
-    config['submitty_tutorial_dir'] = SUBMITTY_TUTORIAL_DIR
     config['site_log_path'] = TAGRADING_LOG_PATH
     config['submission_url'] = SUBMISSION_URL
     config['vcs_url'] = VCS_URL
@@ -430,23 +429,23 @@ config['num_grading_scheduler_workers'] = NUM_GRADING_SCHEDULER_WORKERS
 config['num_untrusted'] = NUM_UNTRUSTED
 config['first_untrusted_uid'] = FIRST_UNTRUSTED_UID
 config['first_untrusted_gid'] = FIRST_UNTRUSTED_UID
-config['hwcron_uid'] = HWCRON_UID
-config['hwcron_gid'] = HWCRON_GID
-config['hwcron_user'] = HWCRON_USER
+config['daemon_uid'] = DAEMON_UID
+config['daemon_gid'] = DAEMON_GID
+config['daemon_user'] = DAEMON_USER
 config['course_builders_group'] = COURSE_BUILDERS_GROUP
 
 if not args.worker:
-    config['hwphp_uid'] = HWPHP_UID
-    config['hwphp_gid'] = HWPHP_GID
-    config['hwphp_user'] = HWPHP_USER
-    config['hwcgi_user'] = HWCGI_USER
-    config['hwcronphp_group'] = HWCRONPHP_GROUP
+    config['php_uid'] = PHP_UID
+    config['php_gid'] = PHP_GID
+    config['php_user'] = PHP_USER
+    config['cgi_user'] = CGI_USER
+    config['daemonphp_group'] = DAEMONPHP_GROUP
 else:
-    config['submitty_supervisor'] = SUBMITTY_SUPERVISOR
+    config['supervisor_user'] = SUPERVISOR_USER
 
 with open(SUBMITTY_USERS_JSON, 'w') as json_file:
     json.dump(config, json_file, indent=2)
-shutil.chown(SUBMITTY_USERS_JSON, 'root', HWCRON_GROUP)
+shutil.chown(SUBMITTY_USERS_JSON, 'root', DAEMON_GROUP)
 os.chmod(SUBMITTY_USERS_JSON, 0o440)
 
 ##############################################################################

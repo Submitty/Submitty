@@ -3,10 +3,30 @@
 # Usage:
 #   install_system.sh [--vagrant] [--worker] [<extra> <extra> ...]
 
+err_message() {
+    >&2 echo -e "
+#####################################################################
+
+                        INSTALLATION FAILURE
+
+Something has gone wrong in the installation process. If you feel
+that this is in error, please create an issue on our issue tracker at
+https://github.com/Submitty/Submitty including an output of the build
+log to better help us diagnose what has gone wrong.
+#####################################################################
+"
+}
+
+# Display our error message if something fails below
+trap 'err_message' ERR
+
+# print commands as we execute and fail early
+set -ev
+
 # this script must be run by root or sudo
 if [[ "$UID" -ne "0" ]] ; then
     echo "ERROR: This script must be run by root or sudo"
-    exit
+    exit 1
 fi
 
 #################################################################
@@ -20,6 +40,17 @@ SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
 SUBMITTY_DATA_DIR=/var/local/submitty
 
+
+# USERS / GROUPS
+DAEMON_USER=submitty_daemon
+DAEMON_GROUP=submitty_daemon
+PHP_USER=submitty_php
+PHP_GROUP=submitty_php
+CGI_USER=submitty_cgi
+CGI_GROUP=submitty_cgi
+
+DAEMONPHP_GROUP=submitty_daemonphp
+
 #################################################################
 # PROVISION SETUP
 #################
@@ -31,10 +62,20 @@ if [ "$1" == "--vagrant" ] || [ "$2" == "--vagrant" ]; then
     shift
 
     # Setting it up to allow SSH as root by default
-    mkdir -m 700 /root/.ssh
+    mkdir -p -m 700 /root/.ssh
     cp /home/vagrant/.ssh/authorized_keys /root/.ssh
 
     sed -i -e "s/PermitRootLogin prohibit-password/PermitRootLogin yes/g" /etc/ssh/sshd_config
+
+    # Set up some convinence stuff for the root user on ssh
+     echo -e "
+
+# Convinence stuff for Submitty
+export SUBMITTY_REPOSITORY=${SUBMITTY_REPOSITORY}
+export SUBMITTY_INSTALL_DIR=${SUBMITTY_INSTALL_DIR}
+export SUBMITTY_DATA_DIR=${SUBMITTY_DATA_DIR}
+alias install_submitty='/usr/local/submitty/.setup/INSTALL_SUBMITTY.sh'
+cd ${SUBMITTY_INSTALL_DIR}" >> /root/.bashrc
 else
     #TODO: We should get options for ./.setup/CONFIGURE_SUBMITTY.py script
     export VAGRANT=0
@@ -48,7 +89,9 @@ else
     export WORKER=0
 fi
 
-COURSE_BUILDERS_GROUP=course_builders
+COURSE_BUILDERS_GROUP=submitty_course_builders
+DB_USER=submitty_dbuser
+DATABASE_PASSWORD=submitty_dbuser
 
 #################################################################
 # DISTRO SETUP
@@ -78,16 +121,25 @@ python3 ${SUBMITTY_REPOSITORY}/.setup/bin/create_untrusted_users.py
 # accounts, although you can also use ‘sudo su user’ to change to the
 # desired user on the local machine which works for most things.
 
-# The group hwcronphp allows hwphp to write the submissions, but give
-# read-only access to the hwcron user.  And the hwcron user writes the
-# results, and gives read-only access to the hwphp user.
+# The group DAEMONPHP_GROUP allows the PHP_USER to write the
+# submissions, but give read-only access to the DAEMON_USER.  And the
+# DAEMON_USER writes the results, and gives read-only access to the
+# PHP_USER.
 
-addgroup hwcronphp
+if ! cut -d ':' -f 1 /etc/group | grep -q ${DAEMONPHP_GROUP} ; then
+	addgroup ${DAEMONPHP_GROUP}
+else
+	echo "${DAEMONPHP_GROUP} already exists"
+fi
 
-# The group course_builders allows instructors/head TAs/course
+# The COURSE_BUILDERS_GROUP allows instructors/head TAs/course
 # managers to write website custimization files and run course
 # management scripts.
-addgroup ${COURSE_BUILDERS_GROUP}
+if ! cut -d ':' -f 1 /etc/group | grep -q ${COURSE_BUILDERS_GROUP} ; then
+        addgroup ${COURSE_BUILDERS_GROUP}
+else
+        echo "${COURSE_BUILDERS_GROUP} already exists"
+fi
 
 if [ ${VAGRANT} == 1 ]; then
 	adduser vagrant sudo
@@ -106,35 +158,48 @@ echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwc
 
 #add users not needed on a worker machine.
 if [ ${WORKER} == 0 ]; then
-    adduser hwphp --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-    adduser hwphp hwcronphp
+    if ! cut -d ':' -f 1 /etc/passwd | grep -q ${PHP_USER} ; then
+        adduser "${PHP_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+    fi
+    usermod -a -G "${DAEMONPHP_GROUP}" "${PHP_USER}"
+    if ! cut -d ':' -f 1 /etc/passwd | grep -q ${CGI_USER} ; then
+        adduser "${CGI_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+    fi
+    usermod -a -G "${PHP_GROUP}" "${CGI_USER}"
+    usermod -a -G www-data "${CGI_USER}"
+    # THIS USER SHOULD NOT BE NECESSARY AS A UNIX GROUP
+    #adduser "${DB_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 
-    adduser hwcgi --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-    adduser hwcgi hwphp
-    adduser hwcgi www-data
-    # Add hwcron to hwcgi group so that hwcron can access VCS repos under /var/local/submitty/vcs
-    adduser hwcron hwcgi
-    adduser hsdbu --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-    # NOTE: hwcgi must be in the shadow group so that it has access to the
+    # NOTE: ${CGI_USER} must be in the shadow group so that it has access to the
     # local passwords for pam authentication
-    adduser hwcgi shadow
+    usermod -a -G shadow "${CGI_USER}"
     # FIXME:  umask setting above not complete
     # might need to also set USERGROUPS_ENAB to "no", and manually create
-    # the hwphp and hwcron single user groups.  See also /etc/login.defs
-    echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwphp/.profile
-    echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwcgi/.profile
+    # the PHP_GROUP and DAEMON_GROUP single user groups.  See also /etc/login.defs
+    echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${PHP_USER}/.profile
+    echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${CGI_USER}/.profile
 fi
+
+if ! cut -d ':' -f 1 /etc/passwd | grep -q ${DAEMON_USER} ; then
+    adduser "${DAEMON_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+fi
+
+usermod -a -G "${DAEMONPHP_GROUP}" "${DAEMON_USER}"
+# The VCS directories (/var/local/submitty/vcs) are owned root:www-data, and DAEMON_USER needs access to them for autograding
+usermod -a -G www-data "${DAEMON_USER}"
+
+echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${DAEMON_USER}/.profile
 
 if [ ${VAGRANT} == 1 ]; then
-	# add these users so that they can write to .vagrant/logs folder
+    # add these users so that they can write to .vagrant/logs folder
     if [ ${WORKER} == 0 ]; then
-    	adduser hwphp vagrant
-    	adduser hwcgi vagrant
+        usermod -a -G vagrant "${PHP_USER}"
+        usermod -a -G vagrant "${CGI_USER}"
     fi
-	adduser hwcron vagrant
+    usermod -a -G vagrant "${DAEMON_USER}"
 fi
 
-usermod -aG docker hwcron
+usermod -a -G docker "${DAEMON_USER}"
 
 pip3 install -U pip
 pip3 install python-pam
@@ -150,12 +215,12 @@ pip3 install pause
 pip3 install paramiko
 pip3 install tzlocal
 pip3 install PyPDF2
+pip3 install distro
 
 # for Lichen / Plagiarism Detection
 pip3 install parso
 
-# (yes, we need to run Python2 for clang tokenizer)
-pip install clang
+# Python3 implementation of python-clang bindings (may not work < 6.0)
 pip3 install clang
 
 sudo chmod -R 555 /usr/local/lib/python*/*
@@ -163,7 +228,7 @@ sudo chmod 555 /usr/lib/python*/dist-packages
 sudo chmod 500 /usr/local/lib/python*/dist-packages/pam.py*
 
 if [ ${WORKER} == 0 ]; then
-    sudo chown hwcgi /usr/local/lib/python*/dist-packages/pam.py*
+    sudo chown ${CGI_USER} /usr/local/lib/python*/dist-packages/pam.py*
 fi
 
 #################################################################
@@ -204,9 +269,7 @@ EMMA_VER=2.0.5312
 wget https://github.com/Submitty/emma/archive/${EMMA_VER}.zip -O emma-${EMMA_VER}.zip -o /dev/null > /dev/null 2>&1
 unzip emma-${EMMA_VER}.zip > /dev/null
 mv emma-${EMMA_VER}/lib/emma.jar emma.jar
-rm -rf emma-${EMMA_VER}
-rm emma-${EMMA_VER}.zip
-rm index.html* > /dev/null 2>&1
+rm -rf emma-${EMMA_VER}*
 chmod o+r . *.jar
 
 popd > /dev/null
@@ -224,7 +287,7 @@ unzip jacoco-${JACOCO_VER}.zip -d jacoco-${JACOCO_VER} > /dev/null
 mv jacoco-${JACOCO_VER}/lib/jacococli.jar jacococli.jar
 mv jacoco-${JACOCO_VER}/lib/jacocoagent.jar jacocoagent.jar
 rm -rf jacoco-${JACOCO_VER}
-rm jacoco-${JACOCO_VER}.zip
+rm -f jacoco-${JACOCO_VER}.zip
 
 chmod o+r . *.jar
 
@@ -375,7 +438,7 @@ if [ ${WORKER} == 0 ]; then
     #################
     if [ ${VAGRANT} == 1 ]; then
         PG_VERSION="$(psql -V | grep -m 1 -o -E '[0-9]{1,}.[0-9]{1,}' | head -1)"
-        if [ ! -d "/etc/postgresql/${PG_VERSION}/pg_hba.conf" ]; then
+        if [ ! -d "/etc/postgresql/${PG_VERSION}" ]; then
             # PG 10.x stopped putting the minor version in the folder name
             PG_VERSION="$(psql -V | grep -m 1 -o -E '[0-9]{1,}' | head -1)"
         fi
@@ -429,7 +492,7 @@ if [ ! -d "${clangsrc}" ]; then
     # initial cmake for llvm tools (might take a bit of time)
     mkdir -p ${clangbuild}
     pushd ${clangbuild}
-    cmake -G Ninja ../src/llvm -DCMAKE_INSTALL_PREFIX=${clanginstall} -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD=X86 -DCMAKE_C_COMPILER=/usr/bin/clang-3.8 -DCMAKE_CXX_COMPILER=/usr/bin/clang++-3.8
+    cmake -G Ninja ../src/llvm -DCMAKE_INSTALL_PREFIX=${clanginstall} -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD=X86 -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++
     popd > /dev/null
 
     # add build targets for our tools (src to be installed in INSTALL_SUBMITTY_HELPER.sh)
@@ -456,8 +519,8 @@ else
         SUBMISSION_URL='http://192.168.56.101'
     fi
     echo -e "/var/run/postgresql
-    hsdbu
-    hsdbu
+    ${DB_USER}
+    ${DATABASE_PASSWORD}
     America/New_York
     ${SUBMISSION_URL}
     ${GIT_URL}/git
@@ -471,21 +534,35 @@ fi
 
 if [ ${WORKER} == 1 ]; then
    #Add the submitty user to /etc/sudoers if in worker mode.
-    SUBMITTY_SUPERVISOR=$(jq -r '.submitty_supervisor' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
-    if ! grep -q "${SUBMITTY_SUPERVISOR}" /etc/sudoers; then
+    SUPERVISOR_USER=$(jq -r '.supervisor_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
+    if ! grep -q "${SUPERVISOR_USER}" /etc/sudoers; then
         echo "" >> /etc/sudoers
         echo "#grant the submitty user on this worker machine access to install submitty" >> /etc/sudoers
-        echo "%${SUBMITTY_SUPERVISOR} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh" >> /etc/sudoers
+        echo "%${SUPERVISOR_USER} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh" >> /etc/sudoers
         echo "#grant the submitty user on this worker machine access to the systemctl wrapper" >> /etc/sudoers
-        echo "%${SUBMITTY_SUPERVISOR} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" >> /etc/sudoers
+        echo "%${SUPERVISOR_USER} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" >> /etc/sudoers
     fi
 fi
 
 # Create and setup database for non-workers
 if [ ${WORKER} == 0 ]; then
-    hsdbu_password=`cat ${SUBMITTY_INSTALL_DIR}/.setup/submitty_conf.json | jq .database_password | tr -d '"'`
-    PGPASSWORD=${hsdbu_password} psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE submitty"
-    python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
+    dbuser_password=`cat ${SUBMITTY_INSTALL_DIR}/.setup/submitty_conf.json | jq .database_password | tr -d '"'`
+
+    # create the submitty_dbuser role in postgres (if it does not yet exist
+    su postgres -c "psql -c \"DO \\\$do\\\$ BEGIN IF NOT EXISTS ( SELECT FROM  pg_catalog.pg_roles WHERE  rolname = '${DB_USER}') THEN  CREATE ROLE ${DB_USER} LOGIN PASSWORD '${dbuser_password}'; END IF; END \\\$do\\\$;\""
+
+    # check to see if a submitty master database exists
+    DB_EXISTS=`su -c 'psql -lqt | cut -d \| -f 1 | grep -w submitty || true' postgres`
+
+    if [ "$DB_EXISTS" == "" ]; then
+	echo "Submitty master database does not yet exist"
+	PGPASSWORD=${dbuser_password} psql -d postgres -h localhost -U ${DB_USER} -c "CREATE DATABASE submitty;"
+	python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
+    else
+	echo "Submitty master database already exists"
+    fi
+
+
 fi
 
 echo Beginning Install Submitty Script
@@ -529,17 +606,17 @@ if [ ${WORKER} == 0 ]; then
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding
         ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding ${SUBMITTY_DATA_DIR}/logs/autograding
-        chown hwcron:${COURSE_BUILDERS_GROUP} ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding
-        chown hwcron:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
+        chown ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding
+        chown ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
         chmod 770 ${SUBMITTY_DATA_DIR}/logs/autograding
 
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/access
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/site_errors
         ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/access ${SUBMITTY_DATA_DIR}/logs/access
         ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/site_errors ${SUBMITTY_DATA_DIR}/logs/site_errors
-        chown -R hwphp:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/access
+        chown -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/access
         chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/access
-        chown -R hwphp:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/site_errors
+        chown -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/site_errors
         chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/site_errors
 
         # Call helper script that makes the courses and refreshes the database
@@ -571,10 +648,10 @@ fi
 # cp -R ${SUBMITTY_INSTALL_DIR}/drmemory/ /tmp/docker/
 # cp -R ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools /tmp/docker/
 
-# chown hwcron:hwcron -R /tmp/docker
+# chown ${DAEMON_USER}:${DAEMON_GROUP} -R /tmp/docker
 
 # pushd /tmp/docker
-# su -c 'docker build -t ubuntu:custom -f Dockerfile .' hwcron
+# su -c 'docker build -t ubuntu:custom -f Dockerfile .' ${DAEMON_USER}
 # popd > /dev/null
 
 

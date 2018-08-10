@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 SOURCE="${BASH_SOURCE[0]}"
 # resolve $SOURCE until the file is no longer a symlink
@@ -13,61 +13,73 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source ${DIR}/../common/common_env.sh
 
-#sudo chmod -R 755 /home/travis/build
+# this script must be run by root or sudo
+if [[ "$UID" -ne "0" ]] ; then
+    echo "ERROR: This script must be run by root or sudo"
+    exit 1
+fi
 
-#if [ ! -f "$SELENIUM_JAR" ]; then
-#    echo "Downloading Selenium"
-#    sudo mkdir -p $(dirname "${SELENIUM_JAR}")
-#    sudo wget -O "${SELENIUM_JAR}" "${SELENIUM_DOWNLOAD_URL}"
-#    echo "Downloaded Selenium"
-#fi
+set -ev
 
-sudo bash -c 'echo -e "#%PAM-1.0
+bash -c 'echo -e "#%PAM-1.0
 auth required pam_unix.so
 account required pam_unix.so" > /etc/pam.d/httpd'
-sudo sed -i '25s/^/\#/' /etc/pam.d/common-password
-sudo sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
+sed -i '25s/^/\#/' /etc/pam.d/common-password
+sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
 
-sudo mkdir -p "${SUBMITTY_INSTALL_DIR}"
-sudo mkdir -p "${SUBMITTY_DATA_DIR}"
-sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT
-sudo cp -R "${TRAVIS_BUILD_DIR}" "${SUBMITTY_REPOSITORY}"
+echo 'in travis setup, going to make data dir ' ${SUBMITTY_DATA_DIR}
 
-sudo python3 ${DIR}/../bin/create_untrusted_users.py
+mkdir -p ${SUBMITTY_INSTALL_DIR}
+mkdir -p ${SUBMITTY_DATA_DIR}/courses
+mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT
+cp -R ${TRAVIS_BUILD_DIR} ${SUBMITTY_REPOSITORY}
 
-sudo addgroup hwcronphp
-sudo addgroup course_builders
-sudo adduser hwphp --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-sudo adduser hwcgi --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-sudo adduser hwcgi hwphp
-sudo adduser hwphp shadow
-sudo adduser hwcgi shadow
-sudo adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-sudo adduser hwphp hwcronphp
-sudo adduser hwcron hwcronphp
-sudo adduser hsdbu --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-sudo echo "hsdbu:hsdbu" | sudo chpasswd
+python3 ${DIR}/../bin/create_untrusted_users.py
 
-sudo chown hwphp:hwphp ${SUBMITTY_INSTALL_DIR}
-sudo chown hwphp:hwphp ${SUBMITTY_DATA_DIR}
-sudo chmod 777         ${SUBMITTY_INSTALL_DIR}
-sudo chmod 777         ${SUBMITTY_DATA_DIR}
+addgroup submitty_daemonphp
+addgroup submitty_course_builders
+adduser ${PHP_USER} --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+adduser ${CGI_USER} --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+adduser ${CGI_USER} ${PHP_GROUP}
+adduser ${PHP_USER} shadow
+adduser ${CGI_USER} shadow
+adduser submitty_daemon --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+adduser ${PHP_USER} submitty_daemonphp
+adduser submitty_daemon submitty_daemonphp
+useradd -p $(openssl passwd -1 submitty_dbuser) submitty_dbuser
+
+chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}
+chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_DATA_DIR}
+chmod -R 777 ${SUBMITTY_INSTALL_DIR}
+chmod -R 777 ${SUBMITTY_DATA_DIR}
 
 echo -e "/var/run/postgresql
-hsdbu
-hsdbu
+submitty_dbuser
+submitty_dbpass
 America/New_York
 http://localhost
 http://localhost/git
 
-${AUTH_METHOD}" | sudo python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
+${AUTH_METHOD}" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
 
-sudo bash -c 'echo "export PATH=$PATH" >> /home/hwphp/.profile'
-sudo bash -c 'echo "export PATH=$PATH" >> /home/hwphp/.bashrc'
-# necessary so that hwphp has access to /home/travis/.phpenv/shims/composer
-sudo usermod -a -G travis hwphp
+bash -c "echo 'export PATH=${PATH}' >> /home/${PHP_USER}/.profile"
+bash -c "echo 'export PATH=${PATH}' >> /home/${PHP_USER}/.bashrc"
+bash -c "echo 'export PATH=${PATH}' >> /home/${DAEMON_USER}/.bashrc"
+bash -c "echo 'export PATH=${PATH}' >> /home/${DAEMON_USER}/.bashrc"
+# necessary so that PHP_USER has access to /home/travis/.phpenv/shims/composer
+usermod -a -G travis ${PHP_USER}
+usermod -a -G travis submitty_daemon
 
 # necessary to pass config path as submitty_repository is a symlink
-sudo python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
+python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
 
-sudo bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
+bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
+
+# TODO: get this to work properly and tests to pass
+#sudo -u submitty_daemon /usr/local/submitty/sbin/submitty_autograding_shipper.py > /dev/null &
+#sleep 1
+#sudo -u submitty_daemon /usr/local/submitty/sbin/submitty_autograding_worker.py > /dev/null &
+#sleep 1
+#/usr/local/submitty/bin/grading_done.py
+
+echo 'Finished setup.'

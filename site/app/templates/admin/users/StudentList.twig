@@ -24,7 +24,11 @@
                 </tr>
                 <tbody id="section-{{ registration }}">
                     {% for student in students %}
-                        <tr id="user-{{ student.getId() }}" {% if student.accessGrading() %} style='background: #7bd0f7;' {% endif %}>
+                        <tr id="user-{{ student.getId() }}"
+                            {% if student.accessGrading() %}
+                                style='background: #7bd0f7;'
+                            {% endif %}
+                        >
                             <td>{{ loop.index }}</td>
                             <td>{{ registration }}</td>
                             <td style="text-align: left">{{ student.getId() }}</td>
@@ -36,7 +40,7 @@
                         </tr>
                     {% endfor %}
                 </tbody>
-        {% endfor %}
+            {% endfor %}
         {% else %}
             <tr>
                 <td colspan="8">No students found</td>

@@ -18,3 +18,10 @@ PHP_VERSION=$(php -v)
 SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
 SUBMITTY_DATA_DIR=/var/local/submitty
+
+PHP_USER=submitty_php
+PHP_GROUP=submitty_php
+
+DAEMON_USER=submitty_daemon
+
+CGI_USER=submitty_cgi

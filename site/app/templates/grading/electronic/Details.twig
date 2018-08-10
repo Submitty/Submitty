@@ -40,31 +40,39 @@
         </thead>
         {# /Table header #}
         {# Sections #}
-        {% for section in sections %}
-            {# Section heading #}
+        {% if sections|length == 0 %}
             <tbody>
-                <tr class="info persist-header">
-                    <td colspan="{{ columns|length }}" style="text-align: center">
-                        {% if gradeable.isGradeByRegistration() %}
-                            Students Enrolled in Registration Section {{ section.title }}
-                        {% else %}
-                            Students Assigned to Rotating Section {{ section.title }}
-                        {% endif %}
-                    </td>
-                </tr>
                 <tr class="info">
-                    <td colspan="{{ columns|length }}" style="text-align: center">Graders: {{ section.graders }}</td>
+                    <td colspan="{{ 42 + gradeable.getComponents()|length }}" style="text-align: center"> No Grading To Be Done! :) </td>
                 </tr>
             </tbody>
-            {# /Section heading #}
-            {# Student list #}
-            <tbody>
-                {% for info in section.rows %}
-                    {{ self.render_student(self, section, info.gradeable, loop.index, info, columns) }}
-                {% endfor %}
-            </tbody>
-            {# /Student list #}
-        {% endfor %}
+        {% else %}
+            {% for section in sections %}
+                {# Section heading #}
+                <tbody>
+                    <tr class="info persist-header">
+                        <td colspan="{{ columns|length }}" style="text-align: center">
+                            {% if gradeable.isGradeByRegistration() %}
+                                Students Enrolled in Registration Section {{ section.title }}
+                            {% else %}
+                                Students Assigned to Rotating Section {{ section.title }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr class="info">
+                        <td colspan="{{ columns|length }}" style="text-align: center">Graders: {{ section.graders }}</td>
+                    </tr>
+                </tbody>
+                {# /Section heading #}
+                {# Student list #}
+                <tbody>
+                    {% for info in section.rows %}
+                        {{ self.render_student(self, section, info.gradeable, loop.index, info, columns) }}
+                    {% endfor %}
+                </tbody>
+                {# /Student list #}
+            {% endfor %}
+        {% endif %}
         {# /Sections #}
         {# Empty teams #}
         {% if gradeable.isTeamAssignment() and empty_teams|length > 0 %}
@@ -76,7 +84,7 @@
                     {% set reg_section = team.getRegistrationSection() ?? "NULL" %}
                     {% set rot_section = team.getRotatingSection() ?? "NULL" %}
                     {% set display_section = gradeable.isGradeByRegistration() ? reg_section : rot_section %}
-                    <tr id="empty-team-row-{{ team.getId()}}">
+                    <tr id="empty-team-row-{{ team.getId() }}">
                         <td>
                             {{ loop.index }}
                         </td>
@@ -99,13 +107,11 @@
 </div>
 
 {% macro render_student(self, section, gradeable, index, info, columns) %}
-    {% if gradeable.getUser().accessGrading() %}
-        {% set style = "style='background: #7bd0f7;'" %}
-    {% else %}
-        {% set style = "" %}
-    {% endif %}
-
-    <tr {{ style|raw }}>
+    <tr
+        {% if student.accessGrading() %}
+            style='background: #7bd0f7;'
+        {% endif %}
+    >
         {% for column in columns %}
             {#
                 This is basically a switch statement. It calls the function we need for
@@ -185,10 +191,10 @@
 
 {# Graded Questions #}
 {% macro render_column_graded_questions(self, section, gradeable, index, info, column) %}
-    <td>
-        {%- for component in info.graded_components -%}
-            {%- if loop.index0 != 0 %}, {% endif -%}
-            {{- loop.index -}}
+    <td class="td-graded-questions">
+        {%- for group in info.graded_groups -%}
+            {%- if loop.index0 != 0 %}&nbsp;{% endif -%}
+            <i class="fa fa-circle grader-{{- group -}}"></i>
         {%- endfor -%}
     </td>
 {% endmacro %}
@@ -207,7 +213,7 @@
                 {% set contents = "Regrade Requested" %}
                 {% set btn_class = "btn-danger" %}
             {% else %}
-                {% set contents = gradeable.getGradedTAPoints() ~ " / " ~ gradeable.getTotalTANonExtraCreditPoints() %}
+                {% set contents = gradeable.getGradedTAPoints() ~ " / " ~ gradeable.getTotalTAPoints() %}
                 {% set btn_class = "btn-default" %}
             {% endif %}
         {% else %}
@@ -223,8 +229,11 @@
                 {% endif %}
             {% endif %}
         {% endif %}
-    {% else %}
+    {% elseif gradeable.isTaGrading() %}
         {% set contents = "Grade" %}
+        {% set btn_class = "btn-primary" %}
+    {% else %}
+        {% set contents = "View" %}
         {% set btn_class = "btn-primary" %}
     {% endif %}
     {% set who_id = (gradeable.isTeamAssignment() ? gradeable.getTeam().getId() : gradeable.getUser().getId()) %}
@@ -252,7 +261,7 @@
             {% set score = score + component.getScore() %}
         {% endfor %}
 
-        {% set contents = score ~ " / " ~ gradeable.getTotalPeerGradingNonExtraCredit() %}
+        {% set contents = score ~ " / " ~ gradeable.getTotalPeerGradingPoints() %}
         {% set btn_class = "btn-default" %}
     {% endif %}
     <td>
@@ -298,13 +307,13 @@
 {% macro render_column_team_members(self, section, gradeable, index, info, column) %}
     <td>
         {% if gradeable.getTeam() == null %}
-            {{ gradeable.getUser().getDisplayedFirstName()}}
-            {{ gradeable.getUser().getLastName()}}
+            {{ gradeable.getUser().getDisplayedFirstName() }}
+            {{ gradeable.getUser().getLastName() }}
         {% else %}
-            {%- for member in gradeable.getTeam().getMembers() -%}
+            {%- for member in gradeable.getTeam().getMemberUsers() -%}
                 {%- if loop.index != 1 -%}, {% endif -%}
-                {{- core.getQueries().getUserById(member).getDisplayedFirstName() }}
-                {{ core.getQueries().getUserById(member).getLastName() -}}
+                {{- member.getDisplayedFirstName() }}
+                {{ member.getLastName() -}}
             {%- endfor -%}
         {% endif %}
     </td>
@@ -327,7 +336,7 @@
         {% set graded = 0 %}
     {% endif %}
 
-    {% set total_possible = gradeable.getTotalAutograderNonExtraCreditPoints() + gradeable.getTotalTANonExtraCreditPoints() %}
+    {% set total_possible = gradeable.getTotalAutograderNonExtraCreditPoints() + gradeable.getTotalTAPoints() %}
     <td>
         {% if gradeable.validateVersions() %}
             <div class="{{ box_background }}">{{ graded }} / {{ total_possible }}</div>
@@ -347,9 +356,9 @@
     {% endfor %}
     {#
         instead of autograding_score it should be total autograding possible
-        I don't think total_peer_grading_non_extra_credit ever gets set...it should be set in the gradeable constructor
+        I don't think total_peer_grading_points ever gets set...it should be set in the gradeable constructor
     #}
-    {% set total_possible = gradeable.getGradedNonHiddenPoints() + gradeable.getTotalPeerGradingNonExtraCredit() %}
+    {% set total_possible = gradeable.getGradedNonHiddenPoints() + gradeable.getTotalPeerGradingPoints() %}
     <td>
         {% if gradeable.validateVersions() %}
             <div>{{ graded }} / {{ total_possible }}</div>

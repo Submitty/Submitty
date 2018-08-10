@@ -31,6 +31,8 @@ IF (ASSIGNMENT_INSTALLATION)
   # just the last part of the current directory
   get_filename_component(assignment ${MY_DIR} NAME)
   message("ASSIGNMENT IS ${assignment}")
+  string(TIMESTAMP mytime "%Y/%m/%d %H:%M:%S")
+  message("BUILD TIME IS ${mytime}")
 
   set (my_config_json ${course_dir}/build/${assignment}/config.json)
   set (my_config_json_no_comments ${course_dir}/build/${assignment}/config_no_comments.json)

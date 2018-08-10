@@ -2,17 +2,13 @@
 
 namespace app\controllers;
 
-use app\controllers\AbstractController;
 use app\libraries\Core;
-use app\libraries\DateUtils;
-use app\libraries\ErrorMessages;
-use app\libraries\FileUtils;
 use app\libraries\GradeableType;
-use app\libraries\Logger;
-use app\libraries\Utils;
-use app\models\Gradeable;
-use app\models\GradeableList;
-use app\models\GradeableSection;
+use app\models\gradeable\Gradeable;
+use app\models\gradeable\GradedGradeable;
+use app\models\gradeable\Submitter;
+use app\models\gradeable\GradeableList;
+use app\models\Notification;
 
 class NavigationController extends AbstractController {
     public function __construct(Core $core) {
@@ -23,6 +19,9 @@ class NavigationController extends AbstractController {
         switch ($_REQUEST['page']) {
             case 'no_access':
                 $this->noAccess();
+                break;
+            case 'notifications':
+                $this->notificationsHandler();
                 break;
             default:
                 $this->navigationPage();
@@ -75,7 +74,26 @@ class NavigationController extends AbstractController {
             }
         }
 
-        $this->core->getOutput()->renderOutput('Navigation', 'showGradeables', $sections_to_lists);
+        // Get a single array of the visible gradeables
+        $visible_gradeables = [];
+        $submit_everyone = [];
+        foreach($sections_to_lists as $gradeables) {
+            foreach($gradeables as $gradeable) {
+                $visible_gradeables[] = $gradeable;
+                $submit_everyone[$gradeable->getId()] =
+                    $this->core->getAccess()->canI('gradeable.submit.everyone', ['gradeable' => $gradeable]);
+            }
+        }
+
+        // Get the user data for each gradeable
+        $graded_gradeables = [];
+        if (count($visible_gradeables) !== 0) {
+            foreach ($this->core->getQueries()->getGradedGradeables($visible_gradeables, $user->getId()) as $gg) {
+                $graded_gradeables[$gg->getGradeableId()] = $gg;
+            }
+        }
+
+        $this->core->getOutput()->renderOutput('Navigation', 'showGradeables', $sections_to_lists, $graded_gradeables, $submit_everyone);
         $this->core->getOutput()->renderOutput('Navigation', 'deleteGradeableForm'); 
     }
     
@@ -84,11 +102,12 @@ class NavigationController extends AbstractController {
      * @param Gradeable $gradeable
      * @return bool True if they are
      */
-    private function filterCanView($gradeable) {
+    private function filterCanView(Gradeable $gradeable) {
         $user = $this->core->getUser();
 
         //Remove incomplete gradeables for non-instructors
-        if (!$user->accessAdmin() && $gradeable->getType() == GradeableType::ELECTRONIC_FILE && !$gradeable->hasConfig()) {
+        if (!$user->accessAdmin() && $gradeable->getType() == GradeableType::ELECTRONIC_FILE &&
+            !$gradeable->hasAutogradingConfig()) {
             return false;
         }
 
@@ -98,16 +117,47 @@ class NavigationController extends AbstractController {
         }
 
         // if student view false, never show
-        if (!$gradeable->getStudentView() && !$user->accessGrading()) {
+        if (!$gradeable->isStudentView() && !$user->accessGrading()) {
             return false;
         }
 
         //If we're not instructor and this is not open to TAs
         $date = new \DateTime("now", $this->core->getConfig()->getTimezone());
-        if ($gradeable->getTAViewDate()->format('Y-m-d H:i:s') > $date->format('Y-m-d H:i:s') && !$user->accessAdmin()) {
+        if ($gradeable->getTaViewStartDate() > $date && !$user->accessAdmin()) {
             return false;
         }
 
         return true;
+    }
+
+
+    private function notificationsHandler() {
+        $user_id = $this->core->getUser()->getId();
+        if(!empty($_GET['action']) && !empty($_GET['nid']) && isset($_GET['nid'])) {
+            if($_GET['action'] == 'open_notification' && is_numeric($_GET['nid']) && $_GET['nid'] >= 1) {
+                if(!$_GET['seen']) {
+                    $this->core->getQueries()->markNotificationAsSeen($user_id, $_GET['nid']);
+                }
+                $metadata = $this->core->getQueries()->getNotificationInfoById($user_id, $_GET['nid'])['metadata'];
+                $this->core->redirect(Notification::getUrl($this->core, $metadata));
+            } else if($_GET['action'] == 'mark_as_seen' && is_numeric($_GET['nid']) && $_GET['nid'] >= 1) {
+                $this->core->getQueries()->markNotificationAsSeen($user_id, $_GET['nid']);
+                $this->core->redirect($this->core->buildUrl(array('component' => 'navigation', 'page' => 'notifications')));
+            } else if($_GET['action'] == 'mark_all_as_seen') {
+                $this->core->getQueries()->markNotificationAsSeen($user_id, -1);
+                $this->core->redirect($this->core->buildUrl(array('component' => 'navigation', 'page' => 'notifications')));
+            }
+        } else {
+            // Show Notifications
+            $show_all = (!empty($_GET['show_all']) && $_GET['show_all'])?true:false;
+            $notifications = $this->core->getQueries()->getUserNotifications($user_id, $show_all);
+            $currentCourse = $this->core->getConfig()->getCourse();
+            $this->core->getOutput()->addBreadcrumb("Notifications", $this->core->buildUrl(array('component' => 'navigation', 'page' => 'notifications')));
+            return $this->core->getOutput()->renderTwigOutput("Notifications.twig", [
+                'course' => $currentCourse,
+                'show_all' => $show_all,
+                'notifications' => $notifications
+            ]);
+        }
     }
 }
