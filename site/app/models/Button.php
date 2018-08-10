@@ -10,6 +10,7 @@ use app\libraries\Core;
  * @method string|null getSubtitle()
  * @method string|null getHref()
  * @method string getClass()
+ * @method string|null getId()
  * @method bool isDisabled()
  * @method bool isTitleOnHover()
  * @method float|null getProgress()
@@ -21,6 +22,7 @@ use app\libraries\Core;
  * @method void setSubtitle(string|null $subtitle)
  * @method void setHref(string|null $href)
  * @method void setClass(string $class)
+ * @method void setId(string|null $id)
  * @method void setDisabled(bool $disabled)
  * @method void setTitleOnHover(bool $titleOnHover)
  * @method void setProgress(float|null $progress)
@@ -37,6 +39,8 @@ class Button extends AbstractModel {
     protected $href;
     /** @property @var string $class */
     protected $class;
+    /** @property @var string|null $id */
+    protected $id;
     /** @property @var bool $disabled */
     protected $disabled;
     /** @property @var float|null $progress */
@@ -60,6 +64,7 @@ class Button extends AbstractModel {
         $this->subtitle = $details["subtitle"] ?? null;
         $this->href     = $details["href"] ?? null;
         $this->class    = $details["class"] ?? "btn";
+        $this->id       = $details["id"] ?? null;
         $this->disabled = $details["disabled"] ?? false;
         $this->progress = $details["progress"] ?? null;
         if ($this->progress !== null) {

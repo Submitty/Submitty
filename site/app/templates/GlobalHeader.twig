@@ -101,6 +101,9 @@
                     {% if button.getClass() != "" %}
                         class="{{ button.getClass() }}"
                     {% endif %}
+                    {% if button.getId() != "" %}
+                        id="{{ button.getId() }}"
+                    {% endif %}
                 >
                     {% if button.getIcon() != null %}
                         <i class="fa {{ button.getIcon() }}"></i>
@@ -115,6 +118,9 @@
                 <a href="{{ button.getHref() }}"
                     {% if button.getClass() != "" %}
                         class="{{ button.getClass() }}"
+                    {% endif %}
+                    {% if button.getId() != "" %}
+                        id="{{ button.getId() }}"
                     {% endif %}
                 >
                     {% if button.getIcon() != null %}
