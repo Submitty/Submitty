@@ -109,17 +109,15 @@
             <tr id="mark_custom_id-{{ c_index }}" style="display: none;" data-changedisplay1="true" >
                 <td colspan="1" class="mark-score-container">
                     <div class="mark-cell-box">
-                        {% if not editEnabled %}
                             <span
-                                name="mark_custom_id-{{ c_index }}-check"
-                                id="mark_custom_id-{{ c_index }}-check"
-                                onclick="selectCustomMark('{{ c_index }}'); event.stopPropagation();"
+                                onclick="selectCustomMark({{ c_index }}); event.stopPropagation();"
                                 data-component_index="{{ c_index }}"
-                                class="{{ component.customMarkChecked ? "customMark-has" : "" }} mark custom-mark-selector"
-                                name="mark_custom_icon_{{ c_index }}"
+                                class="{{ component.custom_mark_checked ? "" : "mark-has" }} mark mark-selector"
+                                name="mark_icon_{{ c_index }}_custom"
+                                id="mark_icon_custom-{{ c_index }}"
+                                value="{{ component.has_custom_mark }}" class="mark-has"
                             >
                             </span>
-                        {% endif %}
                         <input
                                 name="mark_points_custom_{{ c_index }}"
                                 id="mark_points_custom-{{ c_index }}"

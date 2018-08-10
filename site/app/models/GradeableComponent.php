@@ -76,7 +76,7 @@ class GradeableComponent extends AbstractModel {
     /** @property @var string Comment that grader has put on the custom "mark" while grading for student */
     protected $comment = "";
     /** @property @var bool Is the custom mark selected */
-    protected $customMarkChecked = false;
+    protected $custom_mark_checked = false;
     /** @property @var int for page number */
     protected $page = 0;
 
@@ -132,7 +132,7 @@ class GradeableComponent extends AbstractModel {
             // will need to add a total score
             $this->score = floatval($details['gcd_score']);
             $this->comment = $details['gcd_component_comment'];
-            $this->customMarkChecked = $details['gcd_has_custom'];
+            $this->custom_mark_checked = $details['gcd_has_custom'];
             if ($this->comment === null) {
                 $this->comment = "";
             }
@@ -273,6 +273,7 @@ class GradeableComponent extends AbstractModel {
             "is_peer" => $this->is_peer,
             "score" => $this->score,
             "comment" => $this->comment,
+            "custom_mark_checked" => $this->custom_mark_checked,
             "graded_version" => $this->graded_version,
             "grade_time" => $this->grade_time,
             "has_grade" => $this->has_grade,

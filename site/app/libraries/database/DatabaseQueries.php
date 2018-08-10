@@ -3192,7 +3192,7 @@ AND gc_id IN (
             $graded_component->getTaGradedGradeable()->getId(),
             $graded_component->getScore(),
             $graded_component->getComment(),
-            $graded_component->isHasCustomChecked(),
+            $graded_component->isCustomMarkChecked(),
             $graded_component->getGraderId(),
             $graded_component->getGradedVersion(),
             DateUtils::dateTimeToString($graded_component->getGradeTime())
@@ -3221,7 +3221,7 @@ AND gc_id IN (
                 $params = [
                     $graded_component->getScore(),
                     $graded_component->getComment(),
-                    $graded_component->isHasCustomChecked(),
+                    $graded_component->isCustomMarkChecked(),
                     $graded_component->getGradedVersion(),
                     DateUtils::dateTimeToString($graded_component->getGradeTime()),
                     $graded_component->getGraderId(),

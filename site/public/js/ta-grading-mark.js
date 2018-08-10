@@ -86,6 +86,9 @@ function updateCustomMarkText(me) {
 
     updateProgressPoints(me.dataset.component_index);
 }
+function updateCustomMarkHas(me){
+    
+}
 
 //if type == 0 number input, type == 1 textarea
 function checkIfSelected(me) {
@@ -489,8 +492,8 @@ function updateMarksOnPage(c_index) {
             var note_el = $('textarea[name=mark_text_custom_'+c_index+']');
             score_el.val(score);
             note_el.val(note);
-            var icon = $('i[name=mark_icon_'+c_index+'_custom]');
-            icon.toggleClass("mark-has", (note !== "" && note !== undefined));
+          //  var icon = $('i[name=mark_icon_'+c_index+'_custom]');
+          //  icon.toggleClass("mark-has", (note !== "" && note !== undefined));
 
             getComponent(c_index).score = score;
             getComponent(c_index).comment = note;
@@ -706,7 +709,7 @@ function calculateMarksPoints(c_index) {
     }
 
     var custom_points = component.score;
-    var custom_has = component.customMarkChecked;
+    var custom_has = component.custom_mark_checked;
     console.log(custom_has);
     if (custom_has) {
         if (isNaN(custom_points)) {
@@ -862,8 +865,9 @@ function updateBadge(badge, current, total) {
 function selectCustomMark(c_index){
     var gradeable = grading_data.gradeable;
     var component = gradeable.components[c_index-1];
-    var check = $("#mark_custom_id-" + c_index + "-check");
-    check.toggleClass("mark-has", component.customMarkChecked);
+    var check = $("#mark_icon_custom-" + c_index);
+    check.toggleClass("mark-has", component.has_custom_mark);
+    console.log(component.custom_mark_checked);
     checkMarks(c_index);
     updateProgressPoints(c_index);
 }
@@ -1093,7 +1097,8 @@ function saveMark(c_index, sync, override, successCallback, errorCallback) {
         var current_title = $('#title-' + c_index);
         var custom_points  = current_row.find('input[name=mark_points_custom_'+c_index+']').val();
         var custom_message = current_row.find('textarea[name=mark_text_custom_'+c_index+']').val();
-        var custom_has = current_row.find('span[name=mark_custom_id-'+c_index+'-check]').val();
+        var custom_has = current_row.find('span[name=mark_icon_'+c_index+'_custom]').val();
+        console.log(custom_has);
       /*  if(custom_message === "" || custom_message == undefined){
             custom_points="0";
         } */

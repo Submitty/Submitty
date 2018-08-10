@@ -52,7 +52,7 @@ class GradedComponent extends AbstractModel {
     /** @property @var string The comment on this mark / custom mark description */
     protected $comment = "";
     /** @property @var bool Is the custom mark selected */
-    protected $customMarkChecked = false;
+    protected $custom_mark_checked = false;
     /** @property @var string The Id of the grader who most recently updated the component's grade */
     protected $grader_id = "";
     /** @property @var int The submission version this grade is for */
@@ -79,16 +79,18 @@ class GradedComponent extends AbstractModel {
 
         $this->setComponent($component);
         $this->setGrader($grader);
-
+        
         $this->setComment($details['comment'] ?? '');
         $this->setGradedVersion($details['graded_version'] ?? 0);
         $this->setGradeTime($details['grade_time'] ?? new \DateTime());
 
         // assign the default score if its not electronic (or rather not a custom mark)
         if ($component->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {
+            $custom_mark_checked = $details['has_custom_mark'] ?? false;
             $score = $details['score'] ?? 0;
         } else {
             $score = $details['score'] ?? $component->getDefault();
+            $custom_mark_checked = $details['has_custom_mark'] ?? false;
         }
         $this->setScore($score);
 
@@ -279,7 +281,7 @@ class GradedComponent extends AbstractModel {
      * @param bool $checked
      */
     public function setCustomMarkChecked(bool $checked){
-        $customMarkChecked=$checked;
+        $custom_mark_checked=$checked;
     }
 
     /* Intentionally Unimplemented accessor methods */
