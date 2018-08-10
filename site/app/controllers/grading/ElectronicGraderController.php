@@ -52,6 +52,9 @@ class ElectronicGraderController extends GradingController {
             case 'get_gradeable_rubric':
                 $this->ajaxGetGradeableRubric();
                 break;
+            case 'get_component_rubric':
+                $this->ajaxGetComponent();
+                break;
             case 'get_graded_gradeable':
                 $this->ajaxGetGradedGradeable();
                 break;
@@ -1253,6 +1256,8 @@ class ElectronicGraderController extends GradingController {
             $response_data['ta_grading_earned'] = $ta_graded_gradeable->getTotalScore();
             $response_data['ta_grading_total'] = $gradeable->getTaPoints();
         }
+
+        $response_data['anon_id'] = $graded_gradeable->getSubmitter()->getAnonId();
         return $response_data;
     }
 

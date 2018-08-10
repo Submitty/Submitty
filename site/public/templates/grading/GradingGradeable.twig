@@ -1,15 +1,16 @@
 {% extends "Gradeable.twig" %}
 
 {% block header_content %}
-    <span id="anon-id" data-anon_id="{{ anon_id }}" hidden></span>
+    <span id="anon-id" data-anon_id="{{ graded_gradeable.anon_id }}" hidden></span>
 {% endblock %}
 
 {% block components_block %}
     {% for component in gradeable.components %}
         <div class="component-container">
-            {% set graded_component = graded_components[component.id] %}
+            {% set graded_component = graded_gradeable.graded_components[component.id] %}
             {% include "GradingComponent.twig" with {
-                'precision': gradeable.precision
+                'precision': gradeable.precision,
+                'show_mark_list': false
             } %}
         </div>
     {% endfor %}

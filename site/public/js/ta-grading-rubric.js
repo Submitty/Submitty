@@ -71,7 +71,7 @@ function ajaxGetComponentRubric(gradeable_id, component_id) {
             url: buildUrl({
                 'component': 'grading',
                 'page': 'electronic',
-                'action': 'get_gradeable_rubric',
+                'action': 'get_component_rubric',
                 'gradeable_id': gradeable_id,
                 'component_id': component_id,
             }),
@@ -529,7 +529,7 @@ function ajaxAllVerifyComponents() {
  * @return {string}
  */
 function getGradeableId() {
-    return $('#gradeable_rubric').data('gradeable_id');
+    return $('#gradeable-rubric').attr('data-gradeable_id');
 }
 
 /**
@@ -537,7 +537,7 @@ function getGradeableId() {
  * @return {string}
  */
 function getAnonId() {
-    return $('#anon-id').data('anon_id');
+    return $('#anon-id').attr('data-anon_id');
 }
 
 /**
@@ -581,7 +581,7 @@ function setRubricDOMElements(elements) {
  * @return {int}
  */
 function getComponentIdFromDOMElement(me) {
-    return parseInt($(me).parent('.component').data('component_id'));
+    return parseInt($(me).parent('.component').attr('data-component_id'));
 }
 
 /**
@@ -590,7 +590,7 @@ function getComponentIdFromDOMElement(me) {
  * @return {int}
  */
 function getMarkIdFromDOMElement(me) {
-    return parseInt($(me).parent('.mark-container').data('mark_id'));
+    return parseInt($(me).parent('.mark-container').attr('data-mark_id'));
 }
 
 /**
@@ -646,10 +646,10 @@ function setComponentContents(component_id, contents) {
 function getComponentFromDOM(component_id) {
     let domElement = getComponentDOMElement(component_id);
     return {
-        title: domElement.data('title'),
-        ta_comment: domElement.data('ta_comment'),
-        student_comment: domElement.data('student_comment'),
-        page: domElement.data('page'),
+        title: domElement.attr('data-title'),
+        ta_comment: domElement.attr('data-ta_comment'),
+        student_comment: domElement.attr('data-student_comment'),
+        page: domElement.attr('data-page'),
         marks: getMarkListFromDOM(component_id)
     };
 }
@@ -687,13 +687,14 @@ function getGradedComponentFromDOM(component_id) {
     // Get all of the marks that are 'selected'
     let mark_ids = [];
     domElement.find('span.mark-selected').each(function () {
-        mark_ids.push(parseInt($(this).data('mark_id')));
+        mark_ids.push(parseInt($(this).attr('data-mark_id')));
     });
 
     return {
         score: parseFloat(customMarkContainer.find('input[type=number]').val()),
         comment: customMarkContainer.find('textarea').text(),
-        mark_ids: mark_ids
+        mark_ids: mark_ids,
+        active_version: domElement.find('.active_version').attr('data-active_version')
     };
 }
 
@@ -720,7 +721,7 @@ function getOverallCommentFromDOM() {
 function getOpenComponentIds() {
     let component_ids = [];
     $('.ta-rubric-table:visible').each(function () {
-        component_ids.push($(this).data('component_id'));
+        component_ids.push($(this).attr('data-component_id'));
     });
     return component_ids;
 }
@@ -731,7 +732,7 @@ function getOpenComponentIds() {
  * @return {int}
  */
 function getComponentIdByOrder(order) {
-    return $('.component-container')[order].find('.component').data('component_id');
+    return $('.component-container')[order].find('.component').attr('data-component_id');
 }
 
 /**
@@ -757,7 +758,7 @@ function getComponentOrderById(component_id) {
  * @return {int}
  */
 function getNextComponentId(component_id) {
-    return $('#component-' + component_id).parent().next().child().data('component_id');
+    return $('#component-' + component_id).parent().next().child().attr('data-component_id');
 }
 
 /**
@@ -766,7 +767,7 @@ function getNextComponentId(component_id) {
  * @return {int}
  */
 function getPrevComponentId(component_id) {
-    return $('#component-' + component_id).parent().prev().child().data('component_id');
+    return $('#component-' + component_id).parent().prev().child().attr('data-component_id');
 }
 
 /**
@@ -824,7 +825,7 @@ function showMarkList(component_id) {
  * @throws Error if the component id doesn't exist
  */
 function isComponentOpen(component_id) {
-    return getComponentDOMElement(component_id).find('.ta-rubric-table').is(':hidden');
+    return !getComponentDOMElement(component_id).find('.ta-rubric-table').is(':hidden');
 }
 
 /**
@@ -1205,7 +1206,7 @@ function addNewMark(component_id) {
     if (!isInstructorEditEnabled()) {
         let graded_component = getGradedComponentFromDOM(component_id);
         promise = promise.then(function () {
-            return renderGradingComponent(component, graded_component, true, true);
+            return injectGradingComponent(component, graded_component, true, true);
         });
     } else {
         promise = promise.then(function () {
@@ -1277,7 +1278,7 @@ function openComponentGrading(component_id) {
         .then(function (graded_component) {
             // Render the grading component with edit mode if enabled,
             //  and 'true' to show the mark list
-            return renderGradingComponent(component_tmp, graded_component, isEditModeEnabled(), true);
+            return injectGradingComponent(component_tmp, graded_component, isEditModeEnabled(), true);
         });
 }
 
@@ -1379,7 +1380,7 @@ function closeComponentGrading(component_id, saveChanges) {
             component_tmp = getComponentFromDOM(component_id);
         }
 
-        return renderGradingComponent(component_tmp, graded_component, false, false);
+        return injectGradingComponent(component_tmp, graded_component, false, false);
     });
 }
 
@@ -1445,7 +1446,7 @@ function checkMark(component_id, mark_id) {
     gradedComponent.mark_ids.push(mark_id);
 
     // Finally, re-render the component
-    return renderGradingComponent(getComponentFromDOM(component_id), gradedComponent, false, true);
+    return injectGradingComponent(getComponentFromDOM(component_id), gradedComponent, false, true);
 }
 
 /**
@@ -1467,7 +1468,7 @@ function unCheckMark(component_id, mark_id) {
     }
 
     // Finally, re-render the component
-    return renderGradingComponent(getComponentFromDOM(component_id), gradedComponent, false, true);
+    return injectGradingComponent(getComponentFromDOM(component_id), gradedComponent, false, true);
 }
 
 /**
@@ -1651,8 +1652,8 @@ function saveGradedComponent(component_id) {
     return ajaxSaveGradedComponent(
         getGradeableId(), component_id, getAnonId(),
         gradedComponent.active_version,
-        gradedComponent.custom_points,
-        gradedComponent.custom_message,
+        gradedComponent.score,
+        gradedComponent.comment,
         isOverwriteGraderEnabled(),
         gradedComponent.mark_ids, true);
 }

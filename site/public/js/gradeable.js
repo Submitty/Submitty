@@ -71,7 +71,8 @@ function renderGradingGradeable(gradeable, graded_gradeable) {
             return Twig.twig({ref: "GradingGradeable"}).render({
                 'gradeable': gradeable,
                 'graded_gradeable': graded_gradeable,
-                'editable': false
+                'editable': false,
+                'grading_disabled': false // TODO:
             });
         });
 }
