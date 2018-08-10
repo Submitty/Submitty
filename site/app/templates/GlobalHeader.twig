@@ -89,7 +89,15 @@
     {% else %}
         <li>
             {% if button.getIcon() != null %}
-                <a class="collapse-icon {{ button.getClass() }}" href="{{ button.getHref() }}" data-toggle="tooltip" title="{{ button.getTitle() }}">
+                <a
+                    class="collapse-icon {{ button.getClass() }}"
+                    href="{{ button.getHref() }}"
+                    data-toggle="tooltip"
+                    title="{{ button.getTitle() }}"
+                    {% if button.getId() != "" %}
+                        id="{{ button.getId() }}"
+                    {% endif %}
+                >
                     <i class="fa {{ button.getIcon() }}"></i>
                     {% if button.getBadge() > 0 %}
                         <span class="notification_badge">{{  button.getBadge() }} </span>

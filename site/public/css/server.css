@@ -1562,3 +1562,7 @@ end of styles used in the admin gradeable page
 .courses-table {
     width: 100%;
 }
+
+.courses-table .btn {
+    margin-bottom: 3px;
+}
