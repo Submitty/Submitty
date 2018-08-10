@@ -36,9 +36,7 @@ $(function() {
     }
 
     $('body').css({'position':'fixed', 'width':'100%'});
-    if(getGradeable()!=null){
-        calculatePercentageTotal();
-    }
+
     var progressbar = $(".progressbar"),
         value = progressbar.val();
     $(".progress-value").html("<b>" + value + '%</b>');
@@ -277,25 +275,7 @@ function updateCookies(){
         autoscroll = "off";
     }
     document.cookie = "autoscroll=" + autoscroll + "; path=/;";
-    if(getGradeable()!=null){
-        document.cookie = "opened_mark=" + findCurrentOpenedMark() + "; path=/;";
-        var testcases = findOpenTestcases();
-        testcases = JSON.stringify(testcases);
-        document.cookie = "testcases=" + testcases + "; path=/;";
-    }
-    if (findCurrentOpenedMark() > 0 || findCurrentOpenedMark() === GENERAL_MESSAGE_ID) {
-        if (findCurrentOpenedMark() === GENERAL_MESSAGE_ID) {
-            var current_mark = document.getElementById('title-general');
-        } else {
-            var current_mark = document.getElementById('title-' + findCurrentOpenedMark());
-        }
-        var top_pos = current_mark.offsetTop;
-        var rubric_box = document.getElementById('grading-box');
-        top_pos += rubric_box.offsetTop;
-        document.cookie = "scroll_pixel=" + top_pos + "; path=/;";
-    } else {
-        document.cookie = "scroll_pixel=" + 0 + "; path=/;";
-    }
+
     var files = [];
     $('#file-container').children().each(function() {
         $(this).children('div[id^=div_viewer_]').each(function() {
@@ -320,32 +300,32 @@ function changeEditorStyle(newStyle){
 //-----------------------------------------------------------------------------
 // Student navigation
 function gotoPrevStudent() {
-    if(getGradeable()!=null){
-        saveLastOpenedComponent(true, function () {
+    if (getGradeableId() !== '') {
+        closeAllComponents(true).then(function () {
             window.location = $("#prev-student")[0].dataset.href;
-        }, function () {
+        }).catch(function () {
             if (confirm("Could not save open component, change student anyway?")) {
                 window.location = $("#prev-student")[0].dataset.href;
             }
         });
     }
-    else{
-        window.location = $("#prev-student")[0].dataset.href; 
+    else {
+        window.location = $("#prev-student")[0].dataset.href;
     }
 }
 
 function gotoNextStudent() {
-    if(getGradeable()!=null){
-        saveLastOpenedComponent(true, function () {
+    if (getGradeableId() !== '') {
+        closeAllComponents(true).then(function () {
             window.location = $("#next-student")[0].dataset.href;
-        }, function () {
+        }).catch(function () {
             if (confirm("Could not save open component, change student anyway?")) {
                 window.location = $("#next-student")[0].dataset.href;
             }
         });
     }
-    else{
-       window.location = $("#next-student")[0].dataset.href; 
+    else {
+        window.location = $("#next-student")[0].dataset.href;
     }
 }
 //Navigate to the prev / next student buttons
@@ -472,37 +452,57 @@ registerKeyHandler({name: "Toggle Regrade Requests Panel", code: "KeyX"}, functi
 // Show/hide components
 
 registerKeyHandler({name: "Open Next Component", code: 'ArrowDown'}, function(e) {
-    var current = findCurrentOpenedMark();
-    var numQuestions = getGradeable().components.length;
-    if (current === NO_COMPONENT_ID) {
-        openMark(1);
-        $('#title-' + 1)[0].scrollIntoView();
-    } else if (current === numQuestions) {
-        openGeneralMessage();
-        $('#title-general')[0].scrollIntoView();
-    } else if (current === GENERAL_MESSAGE_ID) {
-        closeGeneralMessage(true);
+    let openComponentId = getFirstOpenComponentId();
+    let numComponents = getComponentCount();
+
+    if(isOverallCommentOpen()) {
+        // Overall comment is open, so just close it
+        closeOverallComment(true);
+    } else if (openComponentId === NO_COMPONENT_ID) {
+        // No component is open, so open the first one
+        let componentId = getComponentIdByOrder(0);
+        openComponent(componentId).then(function () {
+            getComponentDOMElement(componentId).scrollIntoView();
+        });
+    } else if (openComponentId === numComponents) {
+        // Last component is open, so open the general comment
+        openOverallComment().then(function () {
+            getOverallCommentDOMElement().scrollIntoView();
+        });
     } else {
-        openMark(current + 1);
-        $('#title-' + (current + 1))[0].scrollIntoView();
+        // Any other case, open the next one
+        let nextComponentId = getNextComponentId(openComponentId);
+        openComponent(nextComponentId).then(function () {
+            getComponentDOMElement(nextComponentId).scrollIntoView();
+        });
     }
     e.preventDefault();
 });
 
 registerKeyHandler({name: "Open Previous Component", code: 'ArrowUp'}, function(e) {
-    var current = findCurrentOpenedMark();
-    var numQuestions = getGradeable().components.length;
-    if (current === NO_COMPONENT_ID) {
-        openGeneralMessage();
-        $('#title-general')[0].scrollIntoView();
-    } else if (current === 1) {
-        closeMark(1, true);
-    } else if (current === GENERAL_MESSAGE_ID) {
-        openMark(numQuestions);
-        $('#title-' + numQuestions)[0].scrollIntoView();
+    let openComponentId = getFirstOpenComponentId();
+    let numComponents = getComponentCount();
+
+    if(isOverallCommentOpen()) {
+        // Overall comment open, so open the last component
+        openComponent(getComponentIdByOrder(numComponents-1)).then(function () {
+            getComponentDOMElement(numComponents-1).scrollIntoView();
+        });
+    }
+    else if (openComponentId === NO_COMPONENT_ID) {
+        // No Component is open, so open the overall comment
+        openOverallComment().then(function () {
+            getOverallCommentDOMElement().scrollIntoView();
+        });
+    } else if (openComponentId === getComponentIdByOrder(0)) {
+        // First component is open, so close it
+        closeAllComponents(true);
     } else {
-        openMark(current - 1);
-        $('#title-' + (current - 1))[0].scrollIntoView();
+        // Any other case, open the previous one
+        let prevComponentId = getPrevComponentId(openComponentId);
+        openComponent(prevComponentId).then(function () {
+            getComponentDOMElement(prevComponentId).scrollIntoView();
+        });
     }
     e.preventDefault();
 });

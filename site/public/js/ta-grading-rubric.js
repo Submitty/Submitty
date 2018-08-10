@@ -10,6 +10,8 @@
  */
 OLD_MARK_LIST = {};
 
+NO_COMPONENT_ID = -1;
+
 /**
  * Keep All of the ajax functions at the top of this file
  *
@@ -39,17 +41,19 @@ function ajaxGetGradeableRubric(gradeable_id) {
                 'page': 'electronic',
                 'action': 'get_gradeable_rubric',
                 'gradeable_id': gradeable_id
-            })
-        }).then(function (response) {
-            if (response.status !== 'success') {
-                console.error('Something went wrong fetching the gradeable rubric: ' + response.message);
-                reject(new Error(response.message));
-            } else {
-                resolve(response.data)
+            }),
+            success: function (response) {
+                if (response.status !== 'success') {
+                    console.error('Something went wrong fetching the gradeable rubric: ' + response.message);
+                    reject(new Error(response.message));
+                } else {
+                    resolve(response.data)
+                }
+            },
+            error: function (err) {
+                displayAjaxError(err);
+                reject(err);
             }
-        }).catch(function (err) {
-            displayAjaxError(err);
-            reject(err);
         });
     });
 }
@@ -70,17 +74,19 @@ function ajaxGetComponentRubric(gradeable_id, component_id) {
                 'action': 'get_gradeable_rubric',
                 'gradeable_id': gradeable_id,
                 'component_id': component_id,
-            })
-        }).then(function (response) {
-            if (response.status !== 'success') {
-                console.error('Something went wrong fetching the component rubric: ' + response.message);
-                reject(new Error(response.message));
-            } else {
-                resolve(response.data)
+            }),
+            success: function (response) {
+                if (response.status !== 'success') {
+                    console.error('Something went wrong fetching the component rubric: ' + response.message);
+                    reject(new Error(response.message));
+                } else {
+                    resolve(response.data)
+                }
+            },
+            error: function (err) {
+                displayAjaxError(err);
+                reject(err);
             }
-        }).catch(function (err) {
-            displayAjaxError(err);
-            reject(err);
         });
     });
 }
@@ -102,16 +108,18 @@ function ajaxGetGradedGradeable(gradeable_id, anon_id) {
                 'gradeable_id': gradeable_id,
                 'anon_id': anon_id
             }),
-        }).then(function (response) {
-            if (response.status !== 'success') {
-                console.error('Something went wrong fetching the gradeable grade: ' + response.message);
-                reject(new Error(response.message));
-            } else {
-                resolve(response.data)
+            success: function (response) {
+                if (response.status !== 'success') {
+                    console.error('Something went wrong fetching the gradeable grade: ' + response.message);
+                    reject(new Error(response.message));
+                } else {
+                    resolve(response.data)
+                }
+            },
+            error: function (err) {
+                displayAjaxError(err);
+                reject(err);
             }
-        }).catch(function (err) {
-            displayAjaxError(err);
-            reject(err);
         });
     });
 }
@@ -134,16 +142,18 @@ function ajaxGetGradedComponent(gradeable_id, component_id, anon_id) {
                 'anon_id': anon_id,
                 'component_id': component_id
             }),
-        }).then(function (response) {
-            if (response.status !== 'success') {
-                console.error('Something went wrong fetching the component grade: ' + response.message);
-                reject(new Error(response.message));
-            } else {
-                resolve(response.data)
+            success: function (response) {
+                if (response.status !== 'success') {
+                    console.error('Something went wrong fetching the component grade: ' + response.message);
+                    reject(new Error(response.message));
+                } else {
+                    resolve(response.data)
+                }
+            },
+            error: function (err) {
+                displayAjaxError(err);
+                reject(err);
             }
-        }).catch(function (err) {
-            displayAjaxError(err);
-            reject(err);
         });
     });
 }
@@ -181,16 +191,18 @@ function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, active_ver
                 'overwrite': overwrite,
                 'mark_ids': mark_ids
             },
-        }).then(function (response) {
-            if (response.status !== 'success') {
-                console.error('Something went wrong saving the component grade: ' + response.message);
-                reject(new Error(response.message));
-            } else {
-                resolve(response.data)
+            success: function (response) {
+                if (response.status !== 'success') {
+                    console.error('Something went wrong saving the component grade: ' + response.message);
+                    reject(new Error(response.message));
+                } else {
+                    resolve(response.data)
+                }
+            },
+            error: function (err) {
+                displayAjaxError(err);
+                reject(err);
             }
-        }).catch(function (err) {
-            displayAjaxError(err);
-            reject(err);
         });
     });
 }
@@ -214,16 +226,18 @@ function ajaxGetOverallComment(gradeable_id, anon_id) {
                 'gradeable_id': gradeable_id,
                 'anon_id': anon_id
             },
-        }).then(function (response) {
-            if (response.status !== 'success') {
-                console.error('Something went wrong fetching the gradeable comment: ' + response.message);
-                reject(new Error(response.message));
-            } else {
-                resolve(response.data)
+            success: function (response) {
+                if (response.status !== 'success') {
+                    console.error('Something went wrong fetching the gradeable comment: ' + response.message);
+                    reject(new Error(response.message));
+                } else {
+                    resolve(response.data)
+                }
+            },
+            error: function (err) {
+                displayAjaxError(err);
+                reject(err);
             }
-        }).catch(function (err) {
-            displayAjaxError(err);
-            reject(err);
         });
     });
 }
@@ -251,16 +265,18 @@ function ajaxSaveOverallComment(gradeable_id, anon_id, gradeable_comment, async 
                 'anon_id': anon_id,
                 'gradeable_comment': gradeable_comment
             },
-        }).then(function (response) {
-            if (response.status !== 'success') {
-                console.error('Something went wrong saving the overall comment: ' + response.message);
-                reject(new Error(response.message));
-            } else {
-                resolve(response.data)
+            success: function (response) {
+                if (response.status !== 'success') {
+                    console.error('Something went wrong saving the overall comment: ' + response.message);
+                    reject(new Error(response.message));
+                } else {
+                    resolve(response.data)
+                }
+            },
+            error: function (err) {
+                displayAjaxError(err);
+                reject(err);
             }
-        }).catch(function (err) {
-            displayAjaxError(err);
-            reject(err);
         });
     });
 }
@@ -288,16 +304,18 @@ function ajaxAddNewMark(gradeable_id, component_id, title, points) {
                 'title': title,
                 'points': points
             },
-        }).then(function (response) {
-            if (response.status !== 'success') {
-                console.error('Something went wrong adding a new mark: ' + response.message);
-                reject(new Error(response.message));
-            } else {
-                resolve(response.data)
+            success: function (response) {
+                if (response.status !== 'success') {
+                    console.error('Something went wrong adding a new mark: ' + response.message);
+                    reject(new Error(response.message));
+                } else {
+                    resolve(response.data)
+                }
+            },
+            error: function (err) {
+                displayAjaxError(err);
+                reject(err);
             }
-        }).catch(function (err) {
-            displayAjaxError(err);
-            reject(err);
         });
     });
 }
@@ -323,16 +341,18 @@ function ajaxDeleteMark(gradeable_id, component_id, mark_id) {
                 'component_id': component_id,
                 'mark_id': mark_id
             },
-        }).then(function (response) {
-            if (response.status !== 'success') {
-                console.error('Something went wrong deleting the mark: ' + response.message);
-                reject(new Error(response.message));
-            } else {
-                resolve(response.data)
+            success: function (response) {
+                if (response.status !== 'success') {
+                    console.error('Something went wrong deleting the mark: ' + response.message);
+                    reject(new Error(response.message));
+                } else {
+                    resolve(response.data)
+                }
+            },
+            error: function (err) {
+                displayAjaxError(err);
+                reject(err);
             }
-        }).catch(function (err) {
-            displayAjaxError(err);
-            reject(err);
         });
     });
 }
@@ -363,16 +383,18 @@ function ajaxSaveMark(gradeable_id, component_id, mark_id, points, title) {
                 'points': points,
                 'title': title,
             },
-        }).then(function (response) {
-            if (response.status !== 'success') {
-                console.error('Something went wrong saving the mark: ' + response.message);
-                reject(new Error(response.message));
-            } else {
-                resolve(response.data)
+            success: function (response) {
+                if (response.status !== 'success') {
+                    console.error('Something went wrong saving the mark: ' + response.message);
+                    reject(new Error(response.message));
+                } else {
+                    resolve(response.data)
+                }
+            },
+            error: function (err) {
+                displayAjaxError(err);
+                reject(err);
             }
-        }).catch(function (err) {
-            displayAjaxError(err);
-            reject(err);
         });
     });
 }
@@ -398,16 +420,18 @@ function ajaxGetMarkStats(gradeable_id, component_id, mark_id) {
                 'component_id': component_id,
                 'mark_id': mark_id
             },
-        }).then(function (response) {
-            if (response.status !== 'success') {
-                console.error('Something went wrong getting mark stats: ' + response.message);
-                reject(new Error(response.message));
-            } else {
-                resolve(response.data)
+            success: function (response) {
+                if (response.status !== 'success') {
+                    console.error('Something went wrong getting mark stats: ' + response.message);
+                    reject(new Error(response.message));
+                } else {
+                    resolve(response.data)
+                }
+            },
+            error: function (err) {
+                displayAjaxError(err);
+                reject(err);
             }
-        }).catch(function (err) {
-            displayAjaxError(err);
-            reject(err);
         });
     });
 }
@@ -433,16 +457,18 @@ function ajaxSaveMarkOrder(gradeable_id, component_id, order) {
                 'component_id': component_id,
                 'order': JSON.stringify(order)
             },
-        }).then(function (response) {
-            if (response.status !== 'success') {
-                console.error('Something went wrong saving the mark order: ' + response.message);
-                reject(new Error(response.message));
-            } else {
-                resolve(response.data)
+            success: function (response) {
+                if (response.status !== 'success') {
+                    console.error('Something went wrong saving the mark order: ' + response.message);
+                    reject(new Error(response.message));
+                } else {
+                    resolve(response.data)
+                }
+            },
+            error: function (err) {
+                displayAjaxError(err);
+                reject(err);
             }
-        }).catch(function (err) {
-            displayAjaxError(err);
-            reject(err);
         });
     });
 }
@@ -466,16 +492,18 @@ function ajaxVerifyComponent(gradeable_id, component_id, anon_id) {
                 'component_id': component_id,
                 'anon_id': anon_id,
             },
-        }).then(function (response) {
-            if (response.status !== 'success') {
-                console.error('Something went wrong verifying the component: ' + response.message);
-                reject(new Error(response.message));
-            } else {
-                resolve(response.data)
+            success: function (response) {
+                if (response.status !== 'success') {
+                    console.error('Something went wrong verifying the component: ' + response.message);
+                    reject(new Error(response.message));
+                } else {
+                    resolve(response.data)
+                }
+            },
+            error: function (err) {
+                displayAjaxError(err);
+                reject(err);
             }
-        }).catch(function (err) {
-            displayAjaxError(err);
-            reject(err);
         });
     });
 }
@@ -488,7 +516,7 @@ function ajaxVerifyComponent(gradeable_id, component_id, anon_id) {
  * @return {Promise} Rejects except when the response returns status 'success'
  */
 function ajaxAllVerifyComponents() {
-
+    // TODO:
 }
 
 /**
@@ -543,20 +571,70 @@ function isOverwriteGraderEnabled() {
  * @param elements
  */
 function setRubricDOMElements(elements) {
-    $("#grading-box").append(elements);
+    let gradingBox = $("#grading-box");
+    gradingBox.html(elements);
+}
+
+/**
+ * Gets the component id of a DOM element inside a component
+ * @param me DOM element
+ * @return {int}
+ */
+function getComponentIdFromDOMElement(me) {
+    return parseInt($(me).parent('.component').data('component_id'));
+}
+
+/**
+ * Gets the mark id of a DOM element inside a mark
+ * @param me DOM element
+ * @return {int}
+ */
+function getMarkIdFromDOMElement(me) {
+    return parseInt($(me).parent('.mark-container').data('mark_id'));
 }
 
 /**
  * Gets the JQuery selector for the component id
+ * Note: This is not the component container
  * @param component_id
- * @return DOM Element of the component
+ * @return {jQuery}
  */
 function getComponentDOMElement(component_id) {
     return $('#component-' + component_id);
 }
 
+/**
+ * Gets the JQuery selector for the mark id
+ * @param mark_id
+ * @return {jQuery}
+ */
 function getMarkDOMElement(mark_id) {
     return $('#mark-' + mark_id);
+}
+
+/**
+ * Gets the JQuery selector for the overall comment container
+ * @return {jQuery}
+ */
+function getOverallCommentDOMElement() {
+    return $('#overall-comment-container');
+}
+
+/**
+ * Sets the HTML contents of the overall comment container
+ * @param {string} contents
+ */
+function setOverallCommentContents(contents) {
+    getOverallCommentDOMElement().html(contents);
+}
+
+/**
+ * Sets the HTML contents of the specified component container
+ * @param {int} component_id
+ * @param {string} contents
+ */
+function setComponentContents(component_id, contents) {
+    getComponentDOMElement(component_id).parent('.component-container').html(contents);
 }
 
 /**
@@ -604,12 +682,18 @@ function getMarkListFromDOM(component_id) {
  */
 function getGradedComponentFromDOM(component_id) {
     let domElement = getComponentDOMElement(component_id);
+    let customMarkContainer = domElement.find('.custom-mark-container');
+
+    // Get all of the marks that are 'selected'
+    let mark_ids = [];
+    domElement.find('span.mark-selected').each(function () {
+        mark_ids.push(parseInt($(this).data('mark_id')));
+    });
+
     return {
-        score: domElement.data(''),
-        ta_comment: domElement.data('ta_comment'),
-        student_comment: domElement.data('student_comment'),
-        page: domElement.data('page'),
-        marks: getMarkListFromDOM(component_id)
+        score: parseFloat(customMarkContainer.find('input[type=number]').val()),
+        comment: customMarkContainer.find('textarea').text(),
+        mark_ids: mark_ids
     };
 }
 
@@ -618,7 +702,15 @@ function getGradedComponentFromDOM(component_id) {
  * @return {string} This will always be blank in instructor edit mode
  */
 function getOverallCommentFromDOM() {
+    let staticComment = $('span#overall-comment');
+    let editComment = $('textarea#overall-comment');
 
+    if (editComment.length > 0) {
+        return editComment.text();
+    } else if (editComment.length > 0) {
+        return staticComment.html();
+    }
+    return '';
 }
 
 /**
@@ -626,7 +718,75 @@ function getOverallCommentFromDOM() {
  * @return {Array}
  */
 function getOpenComponentIds() {
+    let component_ids = [];
+    $('.ta-rubric-table:visible').each(function () {
+        component_ids.push($(this).data('component_id'));
+    });
+    return component_ids;
+}
 
+/**
+ * Gets the component id from its order on the page
+ * @param order
+ * @return {int}
+ */
+function getComponentIdByOrder(order) {
+    return $('.component-container')[order].find('.component').data('component_id');
+}
+
+/**
+ * Gets the order of a component in the list
+ * @param {int} component_id
+ * @return {int}
+ */
+function getComponentOrderById(component_id) {
+    let i = 0;
+    let order = 0;
+    $('.component-container').each(function () {
+        if ($(this).find('#component-' + component_id)) {
+            order = i;
+        }
+        i++;
+    });
+    return order;
+}
+
+/**
+ * Gets the id of the next component in the list
+ * @param {int} component_id
+ * @return {int}
+ */
+function getNextComponentId(component_id) {
+    return $('#component-' + component_id).parent().next().child().data('component_id');
+}
+
+/**
+ * Gets the id of the previous component in the list
+ * @param {int} component_id
+ * @return {int}
+ */
+function getPrevComponentId(component_id) {
+    return $('#component-' + component_id).parent().prev().child().data('component_id');
+}
+
+/**
+ * Gets the first open component on the page
+ * @return {int}
+ */
+function getFirstOpenComponentId() {
+    let component_ids = getOpenComponentIds();
+    if (component_ids.length === 0) {
+        return NO_COMPONENT_ID;
+    }
+    return component_ids[0];
+}
+
+/**
+ * Gets the number of components on the page
+ * @return {int}
+ */
+function getComponentCount() {
+    return $('.component-container').length;
 }
 
 /**
@@ -634,7 +794,7 @@ function getOpenComponentIds() {
  * @return {int} Returns zero of no open component exists
  */
 function getOpenComponentIdFromCookie() {
-
+    return 0; //TODO:
 }
 
 /**
@@ -685,11 +845,23 @@ function isMarkChecked(mark_id) {
 }
 
 /**
- * Gets if a mark was marked for deletion
+ * Toggles the state of a mark
  * @param {int} mark_id
  */
-function isMarkDeleted(mark_id) {
+function toggleMarkChecked(mark_id) {
+    if (isEditModeEnabled()) {
+        return;
+    }
+    getMarkDOMElement(mark_id).find('.mark-selector').toggleClass('mark-selected');
+}
 
+/**
+ * Gets if a mark was marked for deletion
+ * @param {int} mark_id
+ * @return {boolean}
+ */
+function isMarkDeleted(mark_id) {
+    return getMarkDOMElement(mark_id).hasClass('mark-deleted');
 }
 
 /**
@@ -699,20 +871,48 @@ function isMarkDeleted(mark_id) {
  * @return {boolean}
  */
 function isCustomMarkChecked(component_id) {
-
+    if (isEditModeEnabled()) {
+        return false;
+    }
+    let gradedComponent = getGradedComponentFromDOM(component_id);
+    return gradedComponent.comment !== '';
 }
 
 /**
  * DOM Callback methods
- * TODO:
+ *
  */
+
+/**
+ * Called when the 'add new mark' div gets pressed
+ * @param me DOM element of the 'add new mark' div
+ */
+function onAddNewMark(me) {
+    addNewMark(getComponentIdFromDOMElement(me))
+        .catch(function (err) {
+            console.error(err);
+            alert('Error adding mark!');
+        });
+}
 
 /**
  * Called when a mark is marked for deletion
  * @param me DOM Element of the delete button
  */
 function onDeleteMark(me) {
+    $(me).parent('.mark-container').toggleClass('mark-deleted');
+    $(me).hide();
+    $(me).sibling('.restore-mark-container').show();
+}
 
+/**
+ * Called when a mark marked for deletion gets restored
+ * @param me DOM Element of the restore button
+ */
+function onRestoreMark(me) {
+    $(me).parent('.mark-container').toggleClass('mark-deleted');
+    $(me).hide();
+    $(me).sibling('.delete-mark-container').show();
 }
 
 /**
@@ -720,7 +920,11 @@ function onDeleteMark(me) {
  * @param me DOM Element of the mark point entry
  */
 function onMarkPointsChange(me) {
-
+    refreshGradedComponent(getComponentIdFromDOMElement(me), true)
+        .catch(function (err) {
+            console.err(err);
+            alert('Error updating component!');
+        });
 }
 
 /**
@@ -728,15 +932,19 @@ function onMarkPointsChange(me) {
  * @param me DOM Element of the mark stats button
  */
 function onGetMarkStats(me) {
-
+    //TODO:
 }
 
 /**
  * Called when a component gets clicked (for opening / closing)
- * @param me DOM Element of the component div
+ * @param me DOM Element of the component header div
  */
 function onClickComponent(me) {
-
+    toggleComponent(getComponentIdFromDOMElement(me), true)
+        .catch(function (err) {
+            console.error(err);
+            alert('Error opening/closing component!');
+        });
 }
 
 /**
@@ -744,15 +952,11 @@ function onClickComponent(me) {
  * @param me DOM Element of the cancel button
  */
 function onCancelComponent(me) {
-
-}
-
-/**
- * Called when the 'save' button is pressed on an open component
- * @param me DOM Element of the save button
- */
-function onSaveComponent(me) {
-
+    toggleComponent(getComponentIdFromDOMElement(me), false)
+        .catch(function (err) {
+            console.error(err);
+            alert('Error closing component!');
+        });
 }
 
 /**
@@ -760,7 +964,11 @@ function onSaveComponent(me) {
  * @param me DOM Element of the overall comment box
  */
 function onClickOverallComment(me) {
-
+    toggleOverallComment(true)
+        .catch(function (err) {
+            console.error(err);
+            alert('Error opening/closing overall comment!');
+        });
 }
 
 /**
@@ -768,23 +976,23 @@ function onClickOverallComment(me) {
  * @param me DOM element of the cancel button
  */
 function onCancelOverallComment(me) {
-
-}
-
-/**
- * Called when the 'save' button is pressed on the overall comment box
- * @param me DOM element of the save button
- */
-function onSaveOverallComment(me) {
-
+    toggleOverallComment(false)
+        .catch(function (err) {
+            console.error(err);
+            alert('Error closing overall comment!');
+        });
 }
 
 /**
  * Called when a mark is clicked in grade mode
- * @param me DOM Element of the mark row
+ * @param me DOM Element of the mark div
  */
 function onToggleMark(me) {
-
+    toggleCommonMark(getComponentIdFromDOMElement(me), getMarkIdFromDOMElement(me))
+        .catch(function (err) {
+            console.error(err);
+            alert('Error toggling mark!');
+        });
 }
 
 /**
@@ -792,7 +1000,11 @@ function onToggleMark(me) {
  * @param me DOM Element of one of the custom mark's elements
  */
 function onCustomMarkChange(me) {
-
+    updateCustomMark(getComponentIdFromDOMElement(me))
+        .catch(function (err) {
+            console.error(err);
+            alert('Error updating custom mark!');
+        });
 }
 
 /**
@@ -800,7 +1012,7 @@ function onCustomMarkChange(me) {
  * @param me DOM Element of the verify button
  */
 function onVerifyComponent(me) {
-
+    // TODO:
 }
 
 /**
@@ -808,7 +1020,7 @@ function onVerifyComponent(me) {
  * @param me DOM Element of the verify all button
  */
 function onVerifyAll(me) {
-
+    // TODO:
 }
 
 /**
@@ -976,6 +1188,34 @@ function toggleOverallComment(saveChanges) {
 }
 
 /**
+ * Adds a new mark to the DOM and refreshes the display
+ * @param {int} component_id
+ * @return {Promise}
+ */
+function addNewMark(component_id) {
+    let component = getComponentFromDOM(component_id);
+    component.marks.push({
+        id: 0,
+        title: '',
+        score: 0.0,
+        publish: false,
+        order: component.marks.length
+    });
+    let promise = Promise.resolve();
+    if (!isInstructorEditEnabled()) {
+        let graded_component = getGradedComponentFromDOM(component_id);
+        promise = promise.then(function () {
+            return renderGradingComponent(component, graded_component, true, true);
+        });
+    } else {
+        promise = promise.then(function () {
+            return injectInstructorEditComponent(component, true);
+        });
+    }
+    return promise;
+}
+
+/**
  * Toggles the state of a mark in grade mode
  * @return {Promise}
  */
@@ -1013,7 +1253,7 @@ function openComponentInstructorEdit(component_id) {
 
             // Render the component in instructor edit mode
             //  and 'true' to show the mark list
-            return renderInstructorEditComponent(component, true);
+            return injectInstructorEditComponent(component, true);
         });
 }
 
@@ -1076,7 +1316,7 @@ function closeComponentInstructorEdit(component_id, saveChanges) {
         })
         .then(function (component) {
             // Render the component with a hidden mark list
-            return renderInstructorEditComponent(component, false);
+            return injectInstructorEditComponent(component, false);
         });
 }
 
@@ -1198,7 +1438,14 @@ function closeOverallComment(saveChanges = true) {
  * @return {Promise}
  */
 function checkMark(component_id, mark_id) {
+    // First fetch the necessary information from the DOM
+    let gradedComponent = getGradedComponentFromDOM(component_id);
 
+    // Then add the mark id to the array
+    gradedComponent.mark_ids.push(mark_id);
+
+    // Finally, re-render the component
+    return renderGradingComponent(getComponentFromDOM(component_id), gradedComponent, false, true);
 }
 
 /**
@@ -1312,6 +1559,12 @@ function saveMarkList(component_id) {
 function promptUserMarkConflicts(conflictMarks) {
     // TODO: this needs to handle conflicts where a mark was deleted when someone
     // TODO: else changed it  See all paths where tryResolveMarkSave returns false
+
+    let acceptMarks = [];
+    for (let marks in conflictMarks) {
+        acceptMarks.push(marks.domMark);
+    }
+    return Promise.resolve(acceptMarks);
 }
 
 /**
@@ -1412,7 +1665,7 @@ function saveGradedComponent(component_id) {
  * @return {Promise}
  */
 function refreshGradedComponent(component_id, showMarkList) {
-    return renderGradingComponent(
+    return injectGradingComponent(
         getComponentFromDOM(component_id),
         getGradedComponentFromDOM(component_id),
         isEditModeEnabled(), showMarkList);
@@ -1420,14 +1673,12 @@ function refreshGradedComponent(component_id, showMarkList) {
 
 /**
  * Re-renders the component with the data in the DOM
- * Note: This is only for instructor edit mode.  For grade mode,
- *  use `refreshGradedComponent`
  * @param component_id
  * @param {boolean} showMarkList Whether the mark list should be visible
  * @return {Promise}
  */
-function refreshComponent(component_id, showMarkList) {
-    return renderInstructorEditComponent(getComponentFromDOM(component_id), showMarkList);
+function refreshInstructorEditComponent(component_id, showMarkList) {
+    return injectInstructorEditComponent(getComponentFromDOM(component_id), showMarkList);
 }
 
 /**
@@ -1436,7 +1687,7 @@ function refreshComponent(component_id, showMarkList) {
  * @return {Promise}
  */
 function refreshOverallComment(showEditable) {
-    return renderOverallComment(getOverallCommentFromDOM(), showEditable);
+    return injectOverallComment(getOverallCommentFromDOM(), showEditable);
 }
 
 /**
@@ -1445,7 +1696,7 @@ function refreshOverallComment(showEditable) {
  * @param {boolean} showMarkList Whether the mark list should be visible
  * @return {Promise}
  */
-function renderInstructorEditComponent(component, showMarkList) {
+function injectInstructorEditComponent(component, showMarkList) {
 
 }
 
@@ -1453,19 +1704,26 @@ function renderInstructorEditComponent(component, showMarkList) {
  * Renders the provided component/graded_component object for grading/editing
  * @param {Object} component
  * @param {Object} graded_component
- * @param {boolean} edit_mode Whether the component should appear in edit or grade mode
+ * @param {boolean} editable Whether the component should appear in edit or grade mode
  * @param {boolean} showMarkList Whether to show the mark list or not
  * @return {Promise}
  */
-function renderGradingComponent(component, graded_component, edit_mode, showMarkList) {
-
+function injectGradingComponent(component, graded_component, editable, showMarkList) {
+    renderGradingComponent(component, graded_component, editable, showMarkList)
+        .then(function (elements) {
+            setComponentContents(component.id, elements);
+        });
 }
 
 /**
  * Renders the overall comment
  * @param {string} comment
  * @param {boolean} editable If the comment should be rendered in edit mode
+ * @return {Promise}
  */
-function renderOverallComment(comment, editable) {
-
+function injectOverallComment(comment, editable) {
+    return renderOverallComment(comment, editable)
+        .then(function (elements) {
+            setOverallCommentContents(elements);
+        });
 }

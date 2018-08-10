@@ -542,7 +542,6 @@ tr.is_publish {
     background-color: #000;
 }
 
-
 .gradeable input.mark-score {
     resize:none;
     width: 50px;
@@ -550,16 +549,6 @@ tr.is_publish {
 
 .gradeable .mark-score-container {
     width: 90px;
-}
-
-.gradeable .mark-note {
-    width: calc(100% - 40px);
-    resize:none;
-}
-
-.gradeable .mark-note-custom {
-    width: calc(100% - 165px);
-    resize:none;
 }
 
 .gradeable .mark-uneditable {

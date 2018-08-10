@@ -6,7 +6,7 @@ Function for getting the badge style for a given set of total and earned points
         {% set percent = earned / total %}
         {% if percent < 0.5 %}
             red-background
-        {% else if percent < 0.8 %}
+        {% elseif percent < 0.8 %}
             yellow-background
         {% else %}
             green-background

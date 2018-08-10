@@ -2,10 +2,9 @@
     {% block header_content %}
     {% endblock %}
 {# Components #}
-    {% for component in gradeable.components %}
-        {% block generate_component %}
-        {% endblock %}
-    {% endfor %}
+    {# twig.js doens't support blocks inside of for loops ... ANNOYING #}
+    {% block components_block %}
+    {% endblock %}
 {# /Components #}
 
     {% block footer_content %}

@@ -88,8 +88,11 @@ class ElectronicGraderController extends GradingController {
             case 'save_pdf_annotation':
                 $this->savePDFAnnotation();
                 break;
+            case '':
+                $this->showStatus();
+                break;
             default:
-//                $this->showStatus();
+                // TODO: this is for testing
                 throw new \InvalidArgumentException('AHHH');
                 break;
         }

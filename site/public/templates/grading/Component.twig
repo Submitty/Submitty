@@ -5,15 +5,16 @@ Required Input:
 #}
 
 {% set mark_list_visibility = show_mark_list ? '' : 'hidden' %}
-<div id="component-{{ component.id }}" class="box component" data-component_id="{{ component.id }}"
-     onclick="{% block component_click %}{% endblock %}"
+<div id="component-{{ component.id }}"
+     class="box component"
+     data-component_id="{{ component.id }}"
      data-title="{{ component.title }}"
      data-ta_comment="{{ component.ta_comment }}"
      data-student_comment="{{ component.student_comment }}"
      data-page="{{ component.page }}">
 
-    {# Title bar #}
-    <div class="box-title">
+    {# Title bar (only part that triggers collapse on click) #}
+    <div class="box-title" onclick="{% block component_click %}{% endblock %}">
         {% block badge_block %}
         {% endblock %}
 
@@ -39,7 +40,7 @@ Required Input:
         </span>
 
         {# Saving status #}
-        {% import "SavingTools.twig" with {
+        {% include "SavingTools.twig" with {
             'editable': show_mark_list,
             'cancel_on_click': disabled ? '' : 'onCancelComponent(this)'
         } only %}
@@ -48,11 +49,16 @@ Required Input:
 
     {# Marks table #}
     <div class="ta-rubric-table" data-component_id="{{ component.id }}" {{ mark_list_visibility }}>
-        {% for mark in component.marks %}
-            {% set first_mark = loop.index0 == 0 %}
-            {% block mark_parameters %}{% endblock %}
-            {% include "Mark.twig" %}
-        {% endfor %}
+        {# twig.js doens't support blocks inside of for loops ... ANNOYING #}
+        {% block marks_block %}
+        {% endblock %}
+        {% if editable %}
+            <div class="add-new-mark">
+                <span onclick="onAddNewMark(this);">
+                    <i class="fa fa-plus-square" aria-hidden="true">Add new mark</i>
+                </span>
+            </div>
+        {% endif %}
         {% block extra_mark_rows %}
         {% endblock %}
     </div>

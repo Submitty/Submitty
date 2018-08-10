@@ -15,7 +15,8 @@ TODO: add 'publish' support
      onclick="{{ editable ? '' : 'onToggleMark' }}"
 >
     {% if not editable %}
-        <span class="{{ is_checked ? 'mark-selected' : '' }} mark mark-selector">
+        <span class="{{ is_checked ? 'mark-selected' : '' }} mark mark-selector"
+              data-mark_id="{{ mark.id }}">
             {{ mark.order + 1 }}
         </span>
     {% endif %}
@@ -25,6 +26,8 @@ TODO: add 'publish' support
                step="{{ precision }}"
                value="{{ mark.points }}"
                class="mark-score {{ extra_classes }}"
+               data-component_id="{{ component_id }}"
+               data-mark_id="{{ mark.id }}"
         >
     </span>
     <span>
@@ -32,6 +35,8 @@ TODO: add 'publish' support
                   rows="1"
                   cols="120"
                   class="mark-note {{ extra_classes }}"
+                  data-component_id="{{ component_id }}"
+                  data-mark_id="{{ mark.id }}"
         >{{ mark.title|escape }}</textarea>
     </span>
     <span>
@@ -39,8 +44,11 @@ TODO: add 'publish' support
             <i class="fa fa-users icon-mark-stats"></i>
         </span>
         {% if editable %}
-            <span onclick="onDeleteMark(this)">
-                <i class="fa fa-trash icon-delete-mark"></i>
+            <span class="delete-mark-container" onclick="onDeleteMark(this)">
+                <i class="fa fa-trash"></i>
+            </span>
+            <span class="restore-mark-container" onclick="onRestoreMark(this)" hidden>
+                <i class="fa fa-shower"></i>
             </span>
         {% endif %}
     </span>

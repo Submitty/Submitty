@@ -11,7 +11,7 @@ Required Parameters:
         <span id="title-general">
             <b>General Comment</b>
         </span>
-        {% import "SavingTools.twig" with {
+        {% include "SavingTools.twig" with {
             'editable': editable,
             'cancel_on_click': disabled ? '' : 'onCancelOverallComment(this)'
         } only %}
