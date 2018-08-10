@@ -73,16 +73,16 @@ class GlobalController extends AbstractController {
         if ($this->core->userLoaded() && $this->core->getConfig()->isCourseLoaded()) {
             if ($this->core->getUser()->accessAdmin()) {
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'configuration', 'action' => 'view')),
-                    "title" => "Course Settings",
-                    "class" => "nav-row",
-                    "icon" => "fa-gear"
-                ]);
-                $sidebar_buttons[] = new Button($this->core, [
                     "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'view_gradeable_page')),
                     "title" => "New Gradeable",
                     "class" => "nav-row",
                     "icon" => "fa-plus-square"
+                ]);
+                $sidebar_buttons[] = new Button($this->core, [
+                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'configuration', 'action' => 'view')),
+                    "title" => "Course Settings",
+                    "class" => "nav-row",
+                    "icon" => "fa-gear"
                 ]);
             }
 
