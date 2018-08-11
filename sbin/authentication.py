@@ -6,6 +6,7 @@ import subprocess
 import uuid
 
 import requests
+from requests.exceptions import RequestException
 from sqlalchemy import create_engine, MetaData, Table, bindparam
 from submitty_utils.user import get_php_db_password
 
@@ -132,24 +133,13 @@ def check_pam(username, password):
     :param password:
     :return: boolean if PAM succeeded (True) or failed (False) to authenticate the username/password
     """
-    authenticated = False
-    filename = uuid.uuid4().hex
-    filepath = os.path.join('/tmp', filename)
-    with os.fdopen(os.open(filepath, os.O_CREAT | os.O_RDWR, 0o640), 'w') as fd:
-        json.dump({'username': username, 'password': password}, fd)
-
     # noinspection PyBroadException
     try:
-        r = requests.get(CGI_URL.rstrip('/') + '/pam_check.cgi?file=' + filename)
+        r = requests.post(CGI_URL.rstrip('/') + '/pam_check.cgi', data={'username': username, 'password': password})
         response = r.json()
-        authenticated = response['authenticated']
-    except:
-        pass
-    finally:
-        # print(filepath)
-        os.remove(filepath)
-        pass
-    return authenticated
+        return response['authenticated']
+    except RequestException:
+        return False
 
 
 def open_database():
