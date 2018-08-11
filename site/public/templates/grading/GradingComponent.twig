@@ -85,24 +85,22 @@ Required inputs:
 {% block extra_mark_rows %}
     {# Custom mark (only display in non-edit mode #}
     {% if not editable %}
-        <div class="flex-row custom-mark-container">
-            <span class="{{ graded_component.score == 0 and component.comment == "" ? "" : "mark-selected" }} mark"></span>
-            <input
-                    type="number"
-                    step="{{ precision }}"
-                    onchange="onCustomMarkChange(this)"
-                    data-component_index="{{ component.id }}"
-                    value="{{ graded_component.score }}"
-                    class="mark-score">
-            Custom:
-            <textarea
-                    onchange="onCustomMarkChange(this)"
-                    data-component_id="{{ component.id }}"
-                    cols="120"
-                    rows="1"
-                    placeholder="Custom message for student..."
-                    class="mark-note-custom"
-            >{{ graded_component.comment }}</textarea>
+        <div class="mark-container row">
+            <span class="{{ graded_component.score == 0 and component.comment == "" ? "" : "mark-selected" }} mark-selector col-no-gutters"></span>
+            <span class="col-no-gutters mark-score">
+                <input type="number"
+                       step="{{ precision }}"
+                       onchange="onCustomMarkChange(this)"
+                       value="{{ graded_component.score }}">
+            </span>
+            <span class="col-sm mark-title">
+                Custom:
+                <textarea onchange="onCustomMarkChange(this)"
+                          rows="1"
+                          placeholder="Custom message for student..."
+                          class="mark-note-custom"
+                >{{ graded_component.comment }}</textarea>
+            </span>
         </div>
     {% endif %}
     {# /Custom mark #}

@@ -10,7 +10,7 @@ TODO: add 'publish' support
 {% set extra_classes = editable ? '' : 'mark-uneditable' %}
 <div id="mark-{{ mark.id }}"
      class="mark-container row"
-     data-component_id="{{ component_id }}"
+     data-component_id="{{ component.id }}"
      data-mark_id="{{ mark.id }}"
      onclick="{{ editable ? '' : 'onToggleMark' }}"
 >

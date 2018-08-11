@@ -508,7 +508,7 @@ tr.is_publish {
 }
 
 .gradeable .mark-container {
-    min-height: 25px;
+    min-height: 28px;
 }
 
 .gradeable .mark-selector {
@@ -535,8 +535,7 @@ tr.is_publish {
 }
 
 .gradeable .mark-container span.mark-score {
-    min-width: 50px;
-    max-width: 80px;
+    width: 60px;
     justify-content: flex-end;
 }
 
@@ -544,9 +543,12 @@ tr.is_publish {
     justify-content: flex-start;
 }
 
+.gradeable .mark-container span.mark-title textarea {
+}
+
 .gradeable .mark-container .mark-score input {
     text-align: right;
-    width: 80px;
+    width: 100%;
     margin: 2px;
 }
 
