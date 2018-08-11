@@ -50,6 +50,7 @@ CGI_USER=submitty_cgi
 CGI_GROUP=submitty_cgi
 
 DAEMONPHP_GROUP=submitty_daemonphp
+DAEMONCGI_GROUP=submitty_daemoncgi
 
 #################################################################
 # PROVISION SETUP
@@ -132,6 +133,12 @@ else
 	echo "${DAEMONPHP_GROUP} already exists"
 fi
 
+if ! cut -d ':' -f 1 /etc/group | grep -q ${DAEMONCGI_GROUP} ; then
+    addgroup ${DAEMONCGI_GROUP}
+else
+    echo "${DAEMONCGI_GROUP} already exists"
+fi
+
 # The COURSE_BUILDERS_GROUP allows instructors/head TAs/course
 # managers to write website custimization files and run course
 # management scripts.
@@ -149,11 +156,6 @@ fi
 sed -i  "s/^UMASK.*/UMASK 027/g"  /etc/login.defs
 grep -q "^UMASK 027" /etc/login.defs || (echo "ERROR! failed to set umask" && exit)
 
-adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-adduser hwcron hwcronphp
-# The VCS directories (/var/local/submitty/vcs) are owned root:www-data, and hwcron needs access to them for autograding
-adduser hwcron www-data
-
 echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwcron/.profile
 
 #add users not needed on a worker machine.
@@ -166,7 +168,7 @@ if [ ${WORKER} == 0 ]; then
         adduser "${CGI_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
     fi
     usermod -a -G "${PHP_GROUP}" "${CGI_USER}"
-    usermod -a -G www-data "${CGI_USER}"
+    usermod -a -G "${DAEMONCGI_GROUP}" "${CGI_USER}"
     # THIS USER SHOULD NOT BE NECESSARY AS A UNIX GROUP
     #adduser "${DB_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 
@@ -184,9 +186,9 @@ if ! cut -d ':' -f 1 /etc/passwd | grep -q ${DAEMON_USER} ; then
     adduser "${DAEMON_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 fi
 
+# The VCS directores (/var/local/submitty/vcs) are owfned by root:$DAEMONCGI_GROUP
 usermod -a -G "${DAEMONPHP_GROUP}" "${DAEMON_USER}"
-# The VCS directories (/var/local/submitty/vcs) are owned root:www-data, and DAEMON_USER needs access to them for autograding
-usermod -a -G www-data "${DAEMON_USER}"
+usermod -a -G "${DAEMONCGI_GROUP}" "${DAEMON_USER}"
 
 echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${DAEMON_USER}/.profile
 

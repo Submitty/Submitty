@@ -87,6 +87,11 @@ if not args.worker:
         grp.getgrnam(DAEMONPHP_GROUP)
     except KeyError:
         raise SystemExit("ERROR: Could not find group: " + DAEMONPHP_GROUP)
+    DAEMONCGI_GROUP = 'submitty_daemoncgi'
+    try:
+        grp.getgrnam(DAEMONCGI_GROUP)
+    except KeyError:
+        raise SystemExit("ERROR: Could not find group: " + DAEMONCGI_GROUP)
 
 DAEMON_UID, DAEMON_GID = get_ids(DAEMON_USER)
 
@@ -269,6 +274,7 @@ else:
     config['php_user'] = PHP_USER
     config['cgi_user'] = CGI_USER
     config['daemonphp_group'] = DAEMONPHP_GROUP
+    config['daemoncgi_group'] = DAEMONCGI_GROUP
     config['php_uid'] = PHP_UID
     config['php_gid'] = PHP_GID
 
@@ -395,7 +401,7 @@ if not args.worker:
 
     with open(DATABASE_JSON, 'w') as json_file:
         json.dump(config, json_file, indent=2)
-    shutil.chown(DATABASE_JSON, 'www-data', DAEMONPHP_GROUP)
+    shutil.chown(DATABASE_JSON, 'root', DAEMONPHP_GROUP)
     os.chmod(DATABASE_JSON, 0o440)
 
 ##############################################################################
