@@ -2,8 +2,6 @@
 
 import json
 import os
-import subprocess
-import sys
 
 import requests
 from requests.exceptions import RequestException
