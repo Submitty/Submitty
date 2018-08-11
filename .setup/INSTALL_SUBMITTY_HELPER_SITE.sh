@@ -6,7 +6,7 @@
 
 echo -e "Copy the submission website"
 
-if [ -z ${SUBMITTY_INSTALL_DIR+x} ]; then
+if [ -z ${PHP_USER+x} ]; then
     # constants are not initialized,
     CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../config
     SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
