@@ -1031,13 +1031,15 @@ function onVerifyAll(me) {
 function onToggleEditMode(me) {
     // Get the open components so we know which one to open once they're all saved
     let open_component_ids = getOpenComponentIds();
-    let reopen_component_id = -1;
+    let reopen_component_id = NO_COMPONENT_ID;
     if (open_component_ids.length !== 0) {
         reopen_component_id = open_component_ids[0];
     }
 
     closeAllComponents(true).then(function () {
-        return openComponent(reopen_component_id);
+        if (reopen_component_id !== NO_COMPONENT_ID) {
+            return openComponent(reopen_component_id);
+        }
     });
 }
 
