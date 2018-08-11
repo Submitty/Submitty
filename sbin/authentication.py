@@ -20,8 +20,6 @@ DATABASE_HOST = OPEN_JSON['database_host']
 DATABASE_USER = OPEN_JSON['database_user']
 DATABASE_PASS = OPEN_JSON['database_password']
 
-AUTHENTICATION_METHOD = OPEN_JSON['authentication_method']
-
 
 def check_password(environ, user, password):
     """
