@@ -12,7 +12,11 @@ Required Input:
      data-title="{{ component.title }}"
      data-ta_comment="{{ component.ta_comment }}"
      data-student_comment="{{ component.student_comment }}"
-     data-page="{{ component.page }}">
+     data-page="{{ component.page }}"
+     data-lower_clamp="{{ component.lower_clamp }}"
+     data-default="{{ component.default }}"
+     data-max_value="{{ component.max_value }}"
+     data-upper_clamp="{{ component.upper_clamp }}">
 
     {# Title bar (only part that triggers collapse on click) #}
     <div class="box-title" onclick="{% block component_click %}{% endblock %}">

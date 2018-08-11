@@ -39,7 +39,7 @@ function loadTemplates() {
  */
 function calculateGradedComponentTotalScore(component, graded_component) {
     // Calculate the total
-    let total = component.default;
+    let total = component.default + graded_component.score;
     component.marks.forEach(function(mark) {
         if(graded_component.mark_ids.includes(mark.id)) {
             total += mark.points;

@@ -16,11 +16,13 @@ TODO: add 'publish' support
 >
     {% if not editable %}
         <span class="{{ is_checked ? 'mark-selected' : '' }} mark-selector col-no-gutters"
-              data-mark_id="{{ mark.id }}">
+              data-mark_id="{{ mark.id }}"
+              onclick="onToggleMark(this);">
             {{ mark.order + 1 }}
         </span>
     {% endif %}
-    <span class="col-no-gutters mark-score">
+    <span class="col-no-gutters mark-points"
+          data-points="{{ mark.points }}">
         {% if editable %}
             <input type="number"
                    onchange="onMarkPointsChange(this)"
@@ -30,7 +32,8 @@ TODO: add 'publish' support
             {{ mark.points }}
         {% endif %}
     </span>
-    <span class="col-sm mark-title">
+    <span class="col-sm mark-title"
+          data-title="{{ mark.title|escape }}">
         {% if editable %}
             <input type="text" value="{{ mark.title|escape }}"/>
         {% else %}

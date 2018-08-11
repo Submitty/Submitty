@@ -12,6 +12,8 @@ OLD_MARK_LIST = {};
 
 NO_COMPONENT_ID = -1;
 
+CUSTOM_MARK_ID = 0;
+
 /**
  * Keep All of the ajax functions at the top of this file
  *
@@ -581,7 +583,7 @@ function setRubricDOMElements(elements) {
  * @return {int}
  */
 function getComponentIdFromDOMElement(me) {
-    return parseInt($(me).parent('.component').attr('data-component_id'));
+    return parseInt($(me).parents('.component').attr('data-component_id'));
 }
 
 /**
@@ -590,7 +592,7 @@ function getComponentIdFromDOMElement(me) {
  * @return {int}
  */
 function getMarkIdFromDOMElement(me) {
-    return parseInt($(me).parent('.mark-container').attr('data-mark_id'));
+    return parseInt($(me).parents('.mark-container').attr('data-mark_id'));
 }
 
 /**
@@ -646,10 +648,15 @@ function setComponentContents(component_id, contents) {
 function getComponentFromDOM(component_id) {
     let domElement = getComponentDOMElement(component_id);
     return {
+        id: component_id,
         title: domElement.attr('data-title'),
         ta_comment: domElement.attr('data-ta_comment'),
         student_comment: domElement.attr('data-student_comment'),
-        page: domElement.attr('data-page'),
+        page: parseInt(domElement.attr('data-page')),
+        lower_clamp: parseFloat(domElement.attr('data-lower_clamp')),
+        default: parseFloat(domElement.attr('data-default')),
+        max_value: parseFloat(domElement.attr('data-max_value')),
+        upper_clamp: parseFloat(domElement.attr('data-upper_clamp')),
         marks: getMarkListFromDOM(component_id)
     };
 }
@@ -665,11 +672,25 @@ function getMarkListFromDOM(component_id) {
     let markList = [];
     let i = 0;
     domElement.find('.ta-rubric-table .mark-container').each(function () {
-        markList.push({
-            points: $(this).find('input[type=number]').val(),
-            title: $(this).find('textarea').text(),
-            order: i
-        });
+        if (isEditModeEnabled()) {
+            markList.push({
+                id: parseInt($(this).attr('data-mark_id')),
+                points: parseFloat($(this).find('input[type=number]').val()),
+                title: $(this).find('textarea').text(),
+                order: i
+            });
+        } else {
+            // Don't add the custom mark
+            if ($(this).hasClass('custom-mark-container')) {
+                return;
+            }
+            markList.push({
+                id: parseInt($(this).attr('data-mark_id')),
+                points: parseFloat($(this).find('.mark-points').attr('data-points')),
+                title: $(this).find('.mark-title').attr('data-title'),
+                order: i
+            });
+        }
         i++;
     });
     return markList;
@@ -686,15 +707,25 @@ function getGradedComponentFromDOM(component_id) {
 
     // Get all of the marks that are 'selected'
     let mark_ids = [];
+    let customMarkSelected = false;
     domElement.find('span.mark-selected').each(function () {
-        mark_ids.push(parseInt($(this).attr('data-mark_id')));
+        let mark_id = parseInt($(this).attr('data-mark_id'));
+        if(mark_id === CUSTOM_MARK_ID) {
+            customMarkSelected = true;
+        } else {
+            mark_ids.push(mark_id);
+        }
     });
 
+    let dataDOMElement = domElement.find('.graded-gradeable-data')
     return {
-        score: parseFloat(customMarkContainer.find('input[type=number]').val()),
-        comment: customMarkContainer.find('textarea').text(),
+        score: customMarkSelected ? parseFloat(customMarkContainer.find('input[type=number]').val()) : 0.0,
+        comment: customMarkSelected ? customMarkContainer.find('textarea').text() : '',
         mark_ids: mark_ids,
-        active_version: domElement.find('.active_version').attr('data-active_version')
+        graded_version: parseInt(dataDOMElement.attr('data-graded_version')),
+        grade_time: dataDOMElement.attr('data-grade_time'),
+        grader_id: dataDOMElement.attr('data-grader_id'),
+        verifier_id: dataDOMElement.attr('data-verifier_id')
     };
 }
 
@@ -901,7 +932,7 @@ function onAddNewMark(me) {
  * @param me DOM Element of the delete button
  */
 function onDeleteMark(me) {
-    $(me).parent('.mark-container').toggleClass('mark-deleted');
+    $(me).parents('.mark-container').toggleClass('mark-deleted');
     $(me).hide();
     $(me).sibling('.restore-mark-container').show();
 }
@@ -911,7 +942,7 @@ function onDeleteMark(me) {
  * @param me DOM Element of the restore button
  */
 function onRestoreMark(me) {
-    $(me).parent('.mark-container').toggleClass('mark-deleted');
+    $(me).parents('.mark-container').toggleClass('mark-deleted');
     $(me).hide();
     $(me).sibling('.delete-mark-container').show();
 }
@@ -1712,7 +1743,7 @@ function injectInstructorEditComponent(component, showMarkList) {
  * @return {Promise}
  */
 function injectGradingComponent(component, graded_component, editable, showMarkList) {
-    renderGradingComponent(component, graded_component, editable, showMarkList)
+    return renderGradingComponent(component, graded_component, editable, showMarkList)
         .then(function (elements) {
             setComponentContents(component.id, elements);
         });

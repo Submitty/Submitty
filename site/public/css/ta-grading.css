@@ -534,7 +534,7 @@ tr.is_publish {
     justify-content: center;
 }
 
-.gradeable .mark-container span.mark-score {
+.gradeable .mark-container span.mark-points {
     width: 60px;
     justify-content: flex-end;
 }
@@ -546,7 +546,7 @@ tr.is_publish {
 .gradeable .mark-container span.mark-title textarea {
 }
 
-.gradeable .mark-container .mark-score input {
+.gradeable .mark-container .mark-points input {
     text-align: right;
     width: 100%;
     margin: 2px;

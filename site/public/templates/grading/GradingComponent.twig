@@ -25,7 +25,11 @@ Required inputs:
 
 {% block header_block %}
     <b>{{ component.title }}</b>
-    <span class="active_version" data-active_version="{{ graded_component.active_version }}" hidden></span>
+    <span class="graded-gradeable-data"
+          data-graded_version="{{ graded_component.graded_version }}"
+          data-grade_time="{{ graded_component.grade_time }}"
+          data-grader_id="{{ graded_component.grader_id }}"
+          data-verifier_id="" hidden></span>
 
     {% if disabled %}
         <span class="version-warning">
@@ -85,8 +89,9 @@ Required inputs:
 {% block extra_mark_rows %}
     {# Custom mark (only display in non-edit mode #}
     {% if not editable %}
-        <div class="mark-container row">
-            <span class="{{ graded_component.score == 0 and component.comment == "" ? "" : "mark-selected" }} mark-selector col-no-gutters"></span>
+        <div class="custom-mark-container mark-container row">
+            <span class="{{ graded_component.score == 0 and component.comment == "" ? "" : "mark-selected" }} mark-selector col-no-gutters"
+                  data-mark_id="0"></span>
             <span class="col-no-gutters mark-score">
                 <input type="number"
                        step="{{ precision }}"
