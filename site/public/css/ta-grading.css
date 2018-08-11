@@ -503,8 +503,8 @@ tr.is_publish {
 /* Marks */
 
 .gradeable span.col-no-gutters {
-    padding-left: 0;
-    padding-right: 0;
+    padding-left: 1px;
+    padding-right: 1px;
 }
 
 .gradeable .mark-container {
@@ -512,22 +512,14 @@ tr.is_publish {
 }
 
 .gradeable .mark-selector {
-    visibility: visible;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
     min-width: 20px;
-    box-sizing: content-box;
+    margin: 2px;
     border: 2px solid #000;
     border-radius: 4px;
     color: #888;
     font-size: 10px;
     font-family: 'Source Sans Pro', sans-serif;
     text-align: center;
-    vertical-align: middle;
-    margin: 2px;
-    flex-grow: unset;
 }
 
 .gradeable .mark-selector.mark-selected {
@@ -536,17 +528,26 @@ tr.is_publish {
 }
 
 .gradeable .mark-container span {
+    display: inline-flex;
+    box-sizing: content-box;
+    align-items: center;
+    justify-content: center;
 }
 
-.gradeable .mark-score {
+.gradeable .mark-container span.mark-score {
     min-width: 50px;
-    width: 50px;
-    text-align: right;
+    max-width: 80px;
+    justify-content: flex-end;
 }
 
-.gradeable .mark-score input {
+.gradeable .mark-container span.mark-title {
+    justify-content: flex-start;
+}
+
+.gradeable .mark-container .mark-score input {
     text-align: right;
-    width: 100%;
+    width: 80px;
+    margin: 2px;
 }
 
 .gradeable .mark-tools {
@@ -563,4 +564,5 @@ tr.is_publish {
 }
 .mark-container .col-sm input {
     width: 100%;
+    margin: 2px;
 }

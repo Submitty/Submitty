@@ -30,9 +30,9 @@ TODO: add 'publish' support
             {{ mark.points }}
         {% endif %}
     </span>
-    <span class="col-sm">
+    <span class="col-sm mark-title">
         {% if editable %}
-            <input value="{{ mark.title|escape }}"/>
+            <input type="text" value="{{ mark.title|escape }}"/>
         {% else %}
             {{ mark.title|escape }}
         {% endif %}
