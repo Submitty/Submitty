@@ -3,18 +3,17 @@
 import json
 import os
 import subprocess
-import uuid
+import sys
 
 import requests
 from requests.exceptions import RequestException
 from sqlalchemy import create_engine, MetaData, Table, bindparam
-from submitty_utils.user import get_php_db_password
 
 CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
 
 with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
     OPEN_JSON = json.load(open_file)
-DATA_DIR = OPEN_JSON['submitty_data_dir']
+SUBMISSION_URL = OPEN_JSON['submission_url']
 CGI_URL = OPEN_JSON['cgi_url']
 
 with open(os.path.join(CONFIG_PATH, 'database.json')) as open_file:
@@ -84,16 +83,20 @@ def check_password(environ, user, password):
     engine = connection = metadata = None
     authenticated = False
 
-    if AUTHENTICATION_METHOD == 'PamAuthentication':
-        authenticated = check_pam(user, password)
-        # print(authenticated)
-    elif AUTHENTICATION_METHOD == 'DatabaseAuthentication':
-        engine, connection, metadata = open_database()
-        authenticated = check_database(user, password, connection, metadata)
+    data = {
+        'no_redirect': 'true',
+        'user_id': user,
+        'password': password,
+    }
+
+    try:
+        req = requests.post(SUBMISSION_URL + '/index.php?component=authentication&page=checkLogin', data=data)
+        response = req.json()
+        authenticated = response['status'] == 'success'
+    except RequestException:
+        pass
 
     if authenticated is not True or user == user_id:
-        close_database(engine, connection)
-        close_database(course_engine, course_connection)
         return authenticated
 
     if is_team:
@@ -126,22 +129,6 @@ def check_password(environ, user, password):
     return authenticated
 
 
-def check_pam(username, password):
-    """
-
-    :param username:
-    :param password:
-    :return: boolean if PAM succeeded (True) or failed (False) to authenticate the username/password
-    """
-    # noinspection PyBroadException
-    try:
-        r = requests.post(CGI_URL.rstrip('/') + '/pam_check.cgi', data={'username': username, 'password': password})
-        response = r.json()
-        return response['authenticated']
-    except RequestException:
-        return False
-
-
 def open_database():
     db = 'submitty'
     if os.path.isdir(DATABASE_HOST):
@@ -159,21 +146,6 @@ def close_database(engine, connection):
     if engine is not None:
         connection.close()
         engine.dispose()
-
-
-def check_database(username, password, connection, metadata):
-    password = get_php_db_password(password)
-
-    users_table = Table('users', metadata, autoload=True)
-    select = users_table.select().where(users_table.c.user_id == bindparam('user_id'))
-    user = connection.execute(select, user_id=username).fetchone()
-    if user is None:
-        authenticated = None
-    else:
-        php = "print(password_verify('{}', '{}') == true ? 'true' : 'false');".format(password, user['password'])
-        authenticated = subprocess.check_output(['php', '-r', php]) == 'true'
-
-    return authenticated
 
 
 if __name__ == "__main__":

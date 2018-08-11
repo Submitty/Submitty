@@ -89,15 +89,24 @@ class AuthenticationController extends AbstractController {
      */
     public function checkLogin() {
         $redirect = array();
+        $no_redirect = !empty($_POST['no_redirect']) ? $_POST['no_redirect'] == 'true' : false;
         $_POST['stay_logged_in'] = (isset($_POST['stay_logged_in']));
         if (!isset($_POST['user_id']) || !isset($_POST['password'])) {
-            $this->core->addErrorMessage("Cannot leave user id or password blank");
+            $msg = 'Cannot leave user id or password blank';
+
             foreach ($_REQUEST as $key => $value) {
                 if (substr($key, 0, 4) == "old_") {
                     $redirect[$key] = $_REQUEST['old'][$value];
                 }
             }
-            $this->core->redirect($this->core->buildUrl($redirect));
+            if ($no_redirect) {
+                $this->core->getOutput()->renderJsonFail($msg);
+            }
+            else {
+                $this->core->addErrorMessage("Cannot leave user id or password blank");
+                $this->core->redirect($this->core->buildUrl($redirect));
+            }
+            return false;
         }
         $this->core->getAuthentication()->setUserId($_POST['user_id']);
         $this->core->getAuthentication()->setPassword($_POST['password']);
@@ -107,19 +116,33 @@ class AuthenticationController extends AbstractController {
                     $redirect[substr($key, 4)] = $value;
                 }
             }
-            $this->core->addSuccessMessage("Successfully logged in as ".htmlentities($_POST['user_id']));
+            $msg = "Successfully logged in as ".htmlentities($_POST['user_id']);
+            $this->core->addSuccessMessage($msg);
             $redirect['success_login'] = "true";
 
-            $this->core->redirect($this->core->buildUrl($redirect));
+            if ($no_redirect) {
+                $this->core->getOutput()->renderJsonSuccess(['message' => $msg, 'authenticated' => true]);
+            }
+            else {
+                $this->core->redirect($this->core->buildUrl($redirect));
+            }
+            return true;
         }
         else {
-            $this->core->addErrorMessage("Could not login using that user id or password");
+            $msg = "Could not login using that user id or password";
+            $this->core->addErrorMessage($msg);
             foreach ($_REQUEST as $key => $value) {
                 if (substr($key, 0, 4) == "old_") {
                     $redirect[substr($key, 4)] = $value;
                 }
             }
-            $this->core->redirect($this->core->buildUrl($redirect));
+            if ($no_redirect) {
+                $this->core->getOutput()->renderJsonFail($msg);
+            }
+            else {
+                $this->core->redirect($this->core->buildUrl($redirect));
+            }
+            return false;
         }
     }
 }
