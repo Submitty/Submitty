@@ -12,30 +12,11 @@ use app\models\Config;
 use tests\BaseUnitTest;
 
 class PamAuthenticationTester extends BaseUnitTest {
-    /** @var string */
-    private $tmp_path;
-    public function setUp() {
-        $this->tmp_path = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
-        FileUtils::createDir(FileUtils::joinPaths($this->tmp_path, 'tmp', 'pam'), 0777, true);
-    }
-
-    /**
-     * We have to do this tearDown as a shutdown function due to the fact that the PamAuthentication
-     */
-    public function tearDown() {
-        FileUtils::recursiveChmod($this->tmp_path, 0777);
-        $iter = new \FilesystemIterator(FileUtils::joinPaths($this->tmp_path, 'tmp', 'pam'), \FilesystemIterator::SKIP_DOTS);
-        $this->assertEquals(0, iterator_count($iter));
-        $this->assertTrue(FileUtils::recursiveRmdir($this->tmp_path));
-    }
 
     private function getMockCore($curl_response) {
-        $config = $this->createMockModel(Config::class);
-        $config->method('getSubmittyPath')->willReturn($this->tmp_path);
         $queries = $this->createMock(DatabaseQueries::class);
         $queries->method('getSubmittyUser')->willReturn(true);
         $core = $this->createMock(Core::class);
-        $core->method('getConfig')->willReturn($config);
         $core->method('getQueries')->willReturn($queries);
         $core->method('curlRequest')->willReturn($curl_response);
         return $core;
@@ -105,35 +86,12 @@ class PamAuthenticationTester extends BaseUnitTest {
      * @expectedExceptionMessage Error attempting to authenticate against PAM: Invalid HTTP Code 0.
      */
     public function testCurlThrow() {
-        $config = $this->createMockModel(Config::class);
-        $config->method('getSubmittyPath')->willReturn($this->tmp_path);
         $queries = $this->createMock(DatabaseQueries::class);
         $queries->method('getSubmittyUser')->willReturn(true);
         $core = $this->createMock(Core::class);
-        $core->method('getConfig')->willReturn($config);
         $core->method('getQueries')->willReturn($queries);
         $ch = curl_init();
         $core->method('curlRequest')->willThrowException(new CurlException($ch, ''));
-        /** @noinspection PhpParamsInspection */
-        $pam = new PamAuthentication($core);
-        $pam->setUserId('test');
-        $pam->setPassword('test');
-        $pam->authenticate();
-    }
-
-    /**
-     * @expectedException \app\exceptions\AuthenticationException
-     * @expectedExceptionMessage Could not create tmp user PAM file.
-     */
-    public function testCannotCreateFile() {
-        chmod(FileUtils::joinPaths($this->tmp_path, 'tmp', 'pam'), 0555);
-        $config = $this->createMockModel(Config::class);
-        $config->method('getSubmittyPath')->willReturn($this->tmp_path);
-        $queries = $this->createMock(DatabaseQueries::class);
-        $queries->method('getSubmittyUser')->willReturn(true);
-        $core = $this->createMock(Core::class);
-        $core->method('getConfig')->willReturn($config);
-        $core->method('getQueries')->willReturn($queries);
         /** @noinspection PhpParamsInspection */
         $pam = new PamAuthentication($core);
         $pam->setUserId('test');
