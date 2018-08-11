@@ -11,6 +11,8 @@ use app\models\gradeable\TaGradedGradeable;
 use app\models\User;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
+use app\libraries\Utils;
+use app\libraries\DateUtils;
 
 class AutoGradingView extends AbstractView {
 
@@ -356,9 +358,9 @@ class AutoGradingView extends AbstractView {
         $regrade_message = $this->core->getConfig()->getRegradeMessage();
         //Clamp full gradeable score to zero
         $total_score = max($total_score, 0);
-
+        $regrade_date=DateUtils::dateTimeToString($gradeable->getRegradeRequestDate());
         $num_decimals = strlen(substr(strrchr((string)$gradeable->getPointPrecision(), "."), 1));
-
+        $allow_regrade= $gradeable->isRegradeOpen();
         $uploaded_files = $gradeable->getSubmittedFiles();
         return $this->core->getOutput()->renderTwigTemplate("autograding/TAResults.twig", [
             "gradeable" => $gradeable,
@@ -370,7 +372,8 @@ class AutoGradingView extends AbstractView {
             "total_score" => $total_score,
             "total_max" => $total_max,
             "active_same_as_graded" => $active_same_as_graded,
-            "regrade_enabled" => $regrade_enabled,
+            "allow_regrade" => $allow_regrade,
+            "regrade_date" => $regrade_date,
             "regrade_message" => $regrade_message,
             "num_decimals" => $num_decimals,
             "uploaded_files" => $uploaded_files
@@ -429,7 +432,6 @@ class AutoGradingView extends AbstractView {
             $total_max += $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
         }
         $regrade_message = $this->core->getConfig()->getRegradeMessage();
-
         //Clamp full gradeable score to zero
         $total_score = max($total_score, 0);
         $total_score = $gradeable->roundPointValue($total_score);
@@ -439,7 +441,9 @@ class AutoGradingView extends AbstractView {
             'page' => 'view_late_table',
             'g_id' => $gradeable->getId()
         ]);
-
+        $regrade_allowed = $gradeable->isRegradeAllowed();
+        $regrade_date = $gradeable->getRegradeRequestDate();
+        $regrade_date=DateUtils::dateTimeToString($gradeable->getRegradeRequestDate());
         // Get the number of decimal places for floats to display nicely
         $num_decimals = 0;
         $precision_parts = explode('.', strval($gradeable->getPrecision()));
@@ -481,7 +485,7 @@ class AutoGradingView extends AbstractView {
             'overall_comment' => $ta_graded_gradeable->getOverallComment(),
             'is_peer' => $gradeable->isPeerGrading(),
             'components' => $component_data,
-
+            'regrade_date' => $regrade_date,
             'late_days_url' => $late_days_url,
             'grader_names' => $grader_names,
             'grading_complete' => $grading_complete,

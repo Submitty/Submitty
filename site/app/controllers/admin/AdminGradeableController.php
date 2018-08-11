@@ -115,6 +115,7 @@ class AdminGradeableController extends AbstractController {
             'action' => $gradeable !== null ? 'template' : 'new',
             'template_list' => $template_list,
             'syllabus_buckets' => self::syllabus_buckets,
+            'regrade_enabled' => $this->core->getConfig()->isRegradeEnabled()
         ]);
     }
 
@@ -219,7 +220,8 @@ class AdminGradeableController extends AbstractController {
             'date_format' => 'Y-m-d H:i:sO',
             'syllabus_buckets' => self::syllabus_buckets,
             'gradeable_components_enc' => json_encode($gradeable_components_enc),
-
+            'regrade_allowed' => $gradeable->isRegradeAllowed(),
+            'regrade_enabled' => $this->core->getConfig()->isRegradeEnabled(),
             // Non-Gradeable-model data
             'gradeable_section_history' => $gradeable_section_history,
             'num_rotating_sections' => $num_rotating_sections,
@@ -258,17 +260,6 @@ class AdminGradeableController extends AbstractController {
     }
 
     /* Http request methods (i.e. ajax) */
-
-    // FIXME: replace with AbstractController::tryGetGradeable when this controller uses JSEND
-    private function tryGetGradeable_($gradeable_id) {
-        try {
-            return $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        } catch (\Exception $exception) {
-            http_response_code(404);
-            $this->core->getOutput()->renderJson(['errors' => 'Gradeable with provided id does not exist!']);
-            return null;
-        }
-    }
 
     private function newComponent(Gradeable $gradeable) {
         return new Component($this->core, $gradeable, [
@@ -327,31 +318,21 @@ class AdminGradeableController extends AbstractController {
     }
 
     private function updateRubricRequest() {
-        // Assume something will go wrong
-        http_response_code(500);
+        $gradeable_id = $_REQUEST['id'] ?? '';
 
-        $gradeable = $this->tryGetGradeable_($_REQUEST['id']);
-        if ($gradeable === null) {
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
             return;
         }
+
         try {
-            $result = $this->updateRubric($gradeable, $_POST);
+            $this->updateRubric($gradeable, $_POST);
+            $this->core->getOutput()->renderJsonSuccess();
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
         } catch (\Exception $e) {
-            $result = ['rubric' => 'Error saving rubric'];
-
+            $this->core->getOutput()->renderJsonError($e->getMessage());
         }
-
-        $response_data = [];
-
-        if (count($result) === 0) {
-            http_response_code(204); // NO CONTENT
-        } else {
-            $response_data['errors'] = $result;
-            http_response_code(400);
-        }
-
-        // Finally, send the requester back the information
-        $this->core->getOutput()->renderJson($response_data);
     }
 
     // Parses the checkpoint details from the user form into a Component.  NOTE: order is not set here
@@ -708,68 +689,57 @@ class AdminGradeableController extends AbstractController {
 
         // Save to the database
         $this->core->getQueries()->updateGradeable($gradeable);
-
-        return [];
     }
 
     private function updateGradersRequest() {
-        $gradeable = $this->tryGetGradeable_($_REQUEST['id']);
-        if ($gradeable === null) {
+        $gradeable_id = $_REQUEST['id'] ?? '';
+
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
             return;
         }
 
-        $result = $this->updateGraders($gradeable, $_POST);
-
-        $response_data = [];
-
-        if (count($result) === 0) {
-            http_response_code(204); // NO CONTENT
-        } else {
-            http_response_code(400);
+        try {
+            $this->updateGraders($gradeable, $_POST);
+            // Finally, send the requester back the information
+            $this->core->getOutput()->renderJsonSuccess();
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail('Error setting graders' . $e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
         }
-        $response_data['errors'] = $result;
-
-        // Finally, send the requester back the information
-        $this->core->getOutput()->renderJson($response_data);
     }
 
     private function updateGraders(Gradeable $gradeable, $details) {
         if (!isset($details['graders'])) {
-            return ['graders' => 'Blank Submission!'];
+            throw new \InvalidArgumentException('Missing "graders" parameter');
         }
 
-        try {
-            $gradeable->setRotatingGraderSections($details['graders']);
-        } catch (\Exception $exception) {
-            return ['graders' => $exception];
-        }
-
+        $gradeable->setRotatingGraderSections($details['graders']);
         $this->core->getQueries()->updateGradeable($gradeable);
-        return [];
     }
 
     private function createGradeableRequest() {
-        $gradeable_id = $_POST['id'];
-        $result = $this->createGradeable($gradeable_id, $_POST);
+        $gradeable_id = $_POST['id'] ?? '';
 
-        if ($result === null) {
+        try {
+            $build_result = $this->createGradeable($gradeable_id, $_POST);
+
             // Finally, redirect to the edit page
-            $this->redirectToEdit($gradeable_id);
-        } else {
-            if ($result[0] == 1) { // Request Error
-                http_response_code(400);
-            } else if ($result[0] == 2) { // Server Error
-                http_response_code(500);
+            if ($build_result !== null) {
+                $this->core->addErrorMessage($build_result);
             }
-            // TODO: good way to handle these errors
-            die($result[1]);
+            $this->redirectToEdit($gradeable_id);
+        } catch (\Exception $e) {
+            $this->core->addErrorMessage($e);
+            $this->core->redirect($this->core->buildUrl());
         }
     }
 
     private function createGradeable($gradeable_id, $details) {
         // Make sure the gradeable doesn't already exist
         if ($this->core->getQueries()->existsGradeable($gradeable_id)) {
-            return [1, 'Gradeable Already Exists!'];
+            throw new \InvalidArgumentException('Gradeable already exists');
         }
 
         // Create the gradeable with good default information
@@ -799,7 +769,7 @@ class AdminGradeableController extends AbstractController {
             $template_id = $details['gradeable_template'];
             $template_gradeable = $this->core->getQueries()->getGradeableConfig($template_id);
             if ($template_gradeable === null) {
-                return [1, 'Template Id does not exist!'];
+                throw new \InvalidArgumentException('Template gradeable does not exist');
             }
 
             // Setup the create data from the template
@@ -843,7 +813,7 @@ class AdminGradeableController extends AbstractController {
                 'ta_grading' => $details['ta_grading'] === 'true',
                 'team_size_max' => $details['team_size_max'],
                 'vcs_subdirectory' => $details['vcs_subdirectory'],
-
+                'regrade_allowed' => $details['regrade_allowed'] === 'true',
                 'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/python_simple_homework/config',
 
                 // TODO: properties that aren't supported yet
@@ -871,10 +841,12 @@ class AdminGradeableController extends AbstractController {
         $gradeable_create_data = array_merge($gradeable_create_data, [
             'ta_view_start_date' => (clone $tonight)->sub(new \DateInterval('P1D')),
             'grade_start_date' => (clone $tonight)->add(new \DateInterval('P10D')),
+            'grade_due_date' => (clone $tonight)->add(new \DateInterval('P14D')),
             'grade_released_date' => (clone $tonight)->add(new \DateInterval('P14D')),
             'team_lock_date' => (clone $tonight)->add(new \DateInterval('P7D')),
             'submission_open_date' => (clone $tonight),
-            'submission_due_date' => (clone $tonight)->add(new \DateInterval('P7D'))
+            'submission_due_date' => (clone $tonight)->add(new \DateInterval('P7D')),
+            'regrade_request_date' => (clone $tonight)->add(new \DateInterval('P21D'))
         ]);
 
         // Finally, construct the gradeable
@@ -887,50 +859,37 @@ class AdminGradeableController extends AbstractController {
         $this->core->getQueries()->createGradeable($gradeable); // creates the gradeable
 
         // start the build
-        $result = $this->enqueueBuild($gradeable);
-        if ($result !== null) {
-            // TODO: what key should this get?
-            return [2, "Build queue entry failed: $result"];
-        }
-
-        return null;
+        return $this->enqueueBuild($gradeable);
     }
 
     private function updateGradeableRequest() {
-        $result = $this->updateGradeableById($_REQUEST['id'], $_POST);
-        if ($result === null) {
-            http_response_code(404);
+        $gradeable_id = $_REQUEST['id'] ?? '';
+
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
             return;
         }
 
-        $response_data = [];
-
-        if (count($result) === 0) {
-            http_response_code(204); // NO CONTENT
-        } else {
-            http_response_code(400);
+        try {
+            $response_props = $this->updateGradeable($gradeable, $_POST);
+            // Finally, send the requester back the information
+            $this->core->getOutput()->renderJsonSuccess($response_props);
+        } catch (ValidationException $e) {
+            $this->core->getOutput()->renderJsonFail('See "data" for details', $e->getDetails());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
         }
-        $response_data['errors'] = $result;
-
-        // Finally, send the requester back the information
-        $this->core->getOutput()->renderJson($response_data);
-    }
-
-    private function updateGradeableById($gradeable_id, $details) {
-        $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        if ($gradeable === null) {
-            return null;
-        }
-        return $this->updateGradeable($gradeable, $details);
     }
 
     private function updateGradeable(Gradeable $gradeable, $details) {
-        $errors = array();
+        $errors = [];
+
+        // Implicitly updated properties to tell the client about
+        $updated_properties = [];
 
         // If the post array is 0, that means that the name of the element was blank
         if (count($details) === 0) {
-            $errors['general'] = 'Request contained no properties, perhaps the name was blank?';
-            return $errors;
+            throw new \InvalidArgumentException('Request contained no properties, perhaps the name was blank?');
         }
 
         // Trigger a rebuild if the config / due date changes
@@ -944,7 +903,8 @@ class AdminGradeableController extends AbstractController {
             'student_submit',
             'student_download',
             'student_download_any_version',
-            'peer_grading'
+            'peer_grading',
+            'regrade_allowed'
         ];
 
         // Date properties all need to be set at once
@@ -957,13 +917,6 @@ class AdminGradeableController extends AbstractController {
                 // Unset dates so we don't try and use it in the other loop
                 unset($details[$date_property]);
                 $date_set = true;
-            }
-        }
-        if ($date_set) {
-            try {
-                $gradeable->setDates($dates);
-            } catch (ValidationException $e) {
-                $errors = array_merge($errors, $e->getDetails());
             }
         }
 
@@ -988,6 +941,17 @@ class AdminGradeableController extends AbstractController {
             }
         }
 
+        // Set the dates last just in case the request contained parameters that
+        //  affect date validation
+        if ($date_set) {
+            try {
+                $gradeable->setDates($dates);
+                $updated_properties = $gradeable->getDateStrings();
+            } catch (ValidationException $e) {
+                $errors = array_merge($errors, $e->getDetails());
+            }
+        }
+
         if ($trigger_rebuild) {
             $result = $this->enqueueBuild($gradeable);
             if ($result !== null) {
@@ -996,15 +960,14 @@ class AdminGradeableController extends AbstractController {
             }
         }
 
-        // Be strict.  Only apply database changes if there were no errors. (allow warnings)
-        if (count($errors) === 0) {
-            try {
-                $this->core->getQueries()->updateGradeable($gradeable);
-            } catch (\Exception $e) {
-                $errors['db'] = $e;
-            }
+        // Be strict.  Only apply database changes if there were no errors
+        if(count($errors) !== 0) {
+            throw new ValidationException('', $errors);
         }
-        return $errors;
+        $this->core->getQueries()->updateGradeable($gradeable);
+
+        // Only return updated properties if the changes were applied
+        return $updated_properties;
     }
 
     private function deleteGradeable() {
@@ -1112,6 +1075,8 @@ class AdminGradeableController extends AbstractController {
         //what happens on the quick link depends on the action
         if ($action === "release_grades_now") {
             if ($dates['grade_released_date'] > $now) {
+                // Also set the grade due date so our dates are valid
+                $dates['grade_due_date'] = $now;
                 $dates['grade_released_date'] = $now;
                 $message .= "Released grades for ";
                 $success = true;

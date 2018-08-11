@@ -87,7 +87,7 @@ class TestSimpleGrader(BaseTestCase):
                     if prev_section_num is not None:
                         # check that the ordering is correct
                         self.assertTrue(prev_section_num < section_num)
-                prev_section_num = section_num
+                    prev_section_num = section_num
 
         reg_func = self.insert_kwargs(template_func, expected_text="Students Enrolled in Registration Section")
         rot_func = self.insert_kwargs(template_func, expected_text="Students Assigned to Rotating Section")
