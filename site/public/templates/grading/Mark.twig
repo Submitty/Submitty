@@ -9,47 +9,43 @@ TODO: add 'publish' support
 #}
 {% set extra_classes = editable ? '' : 'mark-uneditable' %}
 <div id="mark-{{ mark.id }}"
-     class="mark-container"
+     class="mark-container row"
      data-component_id="{{ component_id }}"
      data-mark_id="{{ mark.id }}"
      onclick="{{ editable ? '' : 'onToggleMark' }}"
 >
     {% if not editable %}
-        <span class="{{ is_checked ? 'mark-selected' : '' }} mark mark-selector"
+        <span class="{{ is_checked ? 'mark-selected' : '' }} mark-selector col-no-gutters"
               data-mark_id="{{ mark.id }}">
             {{ mark.order + 1 }}
         </span>
     {% endif %}
-    <span>
-        <input type="number"
-               onchange="onMarkPointsChange(this)"
-               step="{{ precision }}"
-               value="{{ mark.points }}"
-               class="mark-score {{ extra_classes }}"
-               data-component_id="{{ component_id }}"
-               data-mark_id="{{ mark.id }}"
-        >
-    </span>
-    <span>
-        <textarea onkeyup="autoResizeComment(event);"
-                  rows="1"
-                  cols="120"
-                  class="mark-note {{ extra_classes }}"
-                  data-component_id="{{ component_id }}"
-                  data-mark_id="{{ mark.id }}"
-        >{{ mark.title|escape }}</textarea>
-    </span>
-    <span>
-        <span onclick="onGetMarkStats(this)">
-            <i class="fa fa-users icon-mark-stats"></i>
-        </span>
+    <span class="col-no-gutters mark-score">
         {% if editable %}
-            <span class="delete-mark-container" onclick="onDeleteMark(this)">
-                <i class="fa fa-trash"></i>
-            </span>
-            <span class="restore-mark-container" onclick="onRestoreMark(this)" hidden>
-                <i class="fa fa-shower"></i>
-            </span>
+            <input type="number"
+                   onchange="onMarkPointsChange(this)"
+                   step="{{ precision }}"
+                   value="{{ mark.points }}" />
+        {% else %}
+            {{ mark.points }}
         {% endif %}
     </span>
+    <span class="col-sm">
+        {% if editable %}
+            <input value="{{ mark.title|escape }}"/>
+        {% else %}
+            {{ mark.title|escape }}
+        {% endif %}
+    </span>
+    <span class="col-no-gutters mark-tools" onclick="onGetMarkStats(this)">
+        <i class="fa fa-users icon-mark-stats"></i>
+    </span>
+    {% if editable %}
+        <span class="delete-mark-container col-no-gutters mark-tools" onclick="onDeleteMark(this)">
+            <i class="fa fa-trash"></i>
+        </span>
+        <span class="restore-mark-container col-no-gutters mark-tools" onclick="onRestoreMark(this)" hidden>
+            <i class="fa fa-shower"></i>
+        </span>
+    {% endif %}
 </div>

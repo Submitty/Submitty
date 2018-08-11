@@ -355,24 +355,8 @@ progress::-webkit-progress-value {
 }
 
 .ta-rubric-table {
-    width: 100%;
     border-collapse: collapse;
     border-radius: 4px;
-}
-
-.ta-rubric-table th, 
-.ta-rubric-table td {
-    padding: 5px;
-    vertical-align: top;
-    border: 1px solid #dddddd;
-}
-
-.ta-rubric-table th {
-  font-weight: bold;
-}
-
-.ta-rubric-table thead th {
-  vertical-align: bottom;
 }
 
 .ta-rubric-table caption + thead tr:first-child th,
@@ -518,22 +502,22 @@ tr.is_publish {
 
 /* Marks */
 
-.gradeable .mark-container {}
-
-.gradeable .mark-cell-box {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
+.gradeable span.col-no-gutters {
+    padding-left: 0;
+    padding-right: 0;
 }
 
-.gradeable .mark {
+.gradeable .mark-container {
+    min-height: 25px;
+}
+
+.gradeable .mark-selector {
     visibility: visible;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 1.5em;
-    min-height: 1.5em;
+    min-width: 20px;
     box-sizing: content-box;
     border: 2px solid #000;
     border-radius: 4px;
@@ -542,22 +526,33 @@ tr.is_publish {
     font-family: 'Source Sans Pro', sans-serif;
     text-align: center;
     vertical-align: middle;
+    margin: 2px;
+    flex-grow: unset;
 }
 
-.gradeable .mark.mark-selected {
+.gradeable .mark-selector.mark-selected {
     color: #ccc;
     background-color: #000;
 }
 
-.gradeable input.mark-score {
-    resize:none;
-    width: 100%;
+.gradeable .mark-container span {
+}
+
+.gradeable .mark-score {
+    min-width: 50px;
+    width: 50px;
     text-align: right;
 }
 
-.gradeable .mark-score-container {
-    flex-direction: row;
-    align-items: center;
+.gradeable .mark-score input {
+    text-align: right;
+    width: 100%;
+}
+
+.gradeable .mark-tools {
+    min-width: 20px;
+    width: 20px;
+    text-align: right;
 }
 
 .gradeable .mark-uneditable {
@@ -565,4 +560,7 @@ tr.is_publish {
     border: none;
     outline: none;
     background-color: initial;
+}
+.mark-container .col-sm input {
+    width: 100%;
 }

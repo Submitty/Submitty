@@ -85,7 +85,7 @@ Required inputs:
 {% block extra_mark_rows %}
     {# Custom mark (only display in non-edit mode #}
     {% if not editable %}
-        <div class="box custom-mark-container">
+        <div class="flex-row custom-mark-container">
             <span class="{{ graded_component.score == 0 and component.comment == "" ? "" : "mark-selected" }} mark"></span>
             <input
                     type="number"
