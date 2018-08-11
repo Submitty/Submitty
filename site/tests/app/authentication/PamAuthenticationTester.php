@@ -14,9 +14,11 @@ use tests\BaseUnitTest;
 class PamAuthenticationTester extends BaseUnitTest {
 
     private function getMockCore($curl_response) {
+        $config = $this->createMockModel(Config::class);
         $queries = $this->createMock(DatabaseQueries::class);
         $queries->method('getSubmittyUser')->willReturn(true);
         $core = $this->createMock(Core::class);
+        $core->method('getConfig')->willReturn($config);
         $core->method('getQueries')->willReturn($queries);
         $core->method('curlRequest')->willReturn($curl_response);
         return $core;
@@ -86,9 +88,11 @@ class PamAuthenticationTester extends BaseUnitTest {
      * @expectedExceptionMessage Error attempting to authenticate against PAM: Invalid HTTP Code 0.
      */
     public function testCurlThrow() {
+        $config = $this->createMockModel(Config::class);
         $queries = $this->createMock(DatabaseQueries::class);
         $queries->method('getSubmittyUser')->willReturn(true);
         $core = $this->createMock(Core::class);
+        $core->method('getConfig')->willReturn($config);
         $core->method('getQueries')->willReturn($queries);
         $ch = curl_init();
         $core->method('curlRequest')->willThrowException(new CurlException($ch, ''));
