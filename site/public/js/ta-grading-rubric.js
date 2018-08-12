@@ -691,7 +691,7 @@ function getMarkListFromDOM(component_id) {
             markList.push({
                 id: parseInt($(this).attr('data-mark_id')),
                 points: parseFloat($(this).find('input[type=number]').val()),
-                title: $(this).find('textarea').text(),
+                title: $(this).find('textarea').val(),
                 order: i
             });
         } else {
@@ -734,8 +734,9 @@ function getGradedComponentFromDOM(component_id) {
 
     let dataDOMElement = domElement.find('.graded-gradeable-data')
     return {
-        score: customMarkSelected ? parseFloat(customMarkContainer.find('input[type=number]').val()) : 0.0,
-        comment: customMarkSelected ? customMarkContainer.find('textarea').text() : '',
+        score: parseFloat(customMarkContainer.find('input[type=number]').val()),
+        comment: customMarkContainer.find('textarea').val(),
+        custom_mark_selected: customMarkSelected,
         mark_ids: mark_ids,
         graded_version: parseInt(dataDOMElement.attr('data-graded_version')),
         grade_time: dataDOMElement.attr('data-grade_time'),
@@ -753,7 +754,7 @@ function getOverallCommentFromDOM() {
     let editComment = $('textarea#overall-comment');
 
     if (editComment.length > 0) {
-        return editComment.text();
+        return editComment.val();
     } else if (editComment.length > 0) {
         return staticComment.html();
     }
@@ -1048,6 +1049,25 @@ function onToggleMark(me) {
  */
 function onCustomMarkChange(me) {
     updateCustomMark(getComponentIdFromDOMElement(me))
+        .catch(function (err) {
+            console.error(err);
+            alert('Error updating custom mark!');
+        });
+}
+
+/**
+ * Toggles the 'checked' state of the custom mark.  This effectively
+ *  makes the 'score' and 'comment' values 0 and '' respectively when
+ *  loading the graded component from the DOM, but leaves the values in
+ *  the DOM if the user toggles this again.
+ * @param me
+ */
+function onToggleCustomMark(me) {
+    let component_id = getComponentIdFromDOMElement(me);
+    let customMark = getCustomMarkDOMElement(component_id);
+
+    customMark.find('.mark-selector').toggleClass('mark-selected');
+    updateCustomMark(component_id)
         .catch(function (err) {
             console.error(err);
             alert('Error updating custom mark!');
@@ -1700,8 +1720,8 @@ function saveGradedComponent(component_id) {
     return ajaxSaveGradedComponent(
         getGradeableId(), component_id, getAnonId(),
         gradedComponent.active_version,
-        gradedComponent.score,
-        gradedComponent.comment,
+        gradedComponent.custom_mark_selected ? gradedComponent.score : 0.0,
+        gradedComponent.custom_mark_selected ? gradedComponent.comment : '',
         isOverwriteGraderEnabled(),
         gradedComponent.mark_ids, true);
 }

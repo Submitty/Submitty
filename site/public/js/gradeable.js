@@ -38,10 +38,15 @@ function loadTemplates() {
  * @return {number}
  */
 function calculateGradedComponentTotalScore(component, graded_component) {
+    // If the mark selected isn't defined, then assume its true
+    if (graded_component.custom_mark_selected === undefined) {
+        graded_component.custom_mark_selected = true;
+    }
+
     // Calculate the total
-    let total = component.default + graded_component.score;
-    component.marks.forEach(function(mark) {
-        if(graded_component.mark_ids.includes(mark.id)) {
+    let total = component.default + (graded_component.custom_mark_selected ? graded_component.score : 0.0);
+    component.marks.forEach(function (mark) {
+        if (graded_component.mark_ids.includes(mark.id)) {
             total += mark.points;
         }
     });

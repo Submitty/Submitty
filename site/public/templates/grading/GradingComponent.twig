@@ -90,8 +90,9 @@ Required inputs:
     {# Custom mark (only display in non-edit mode #}
     {% if not editable %}
         <div class="custom-mark-container mark-container row">
-            <span class="{{ graded_component.score == 0 and component.comment == "" ? "" : "mark-selected" }} mark-selector col-no-gutters"
-                  data-mark_id="0">
+            <span class="{{ (graded_component.custom_mark_selected is defined ? not graded_component.custom_mark_selected : graded_component.score == 0 and component.comment == "") ? "" : "mark-selected" }} mark-selector col-no-gutters"
+                  data-mark_id="0"
+                  onclick="onToggleCustomMark(this)">
             </span>
             <span class="col-no-gutters mark-score">
                 <input type="number"
