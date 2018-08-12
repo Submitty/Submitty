@@ -149,6 +149,10 @@ function ajaxGetGradedComponent(gradeable_id, component_id, anon_id) {
                     console.error('Something went wrong fetching the component grade: ' + response.message);
                     reject(new Error(response.message));
                 } else {
+                    // null is not the same as undefined, so we need to make that conversion before resolving
+                    if(response.data === null) {
+                        response.data = undefined;
+                    }
                     resolve(response.data)
                 }
             },

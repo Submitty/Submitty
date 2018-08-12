@@ -26,7 +26,7 @@ Required inputs:
 {% block header_block %}
     <b>{{ component.title }}</b>
     <span class="graded-gradeable-data"
-          data-graded_version="{{ graded_component.graded_version }}"
+          data-graded_version="{{ graded_component.graded_version | default('0') }}"
           data-grade_time="{{ graded_component.grade_time }}"
           data-grader_id="{{ graded_component.grader_id }}"
           data-verifier_id="" hidden></span>
@@ -90,7 +90,7 @@ Required inputs:
     {# Custom mark (only display in non-edit mode #}
     {% if not editable %}
         <div class="custom-mark-container mark-container row">
-            <span class="{{ (graded_component.custom_mark_selected is defined ? not graded_component.custom_mark_selected : graded_component.score == 0 and component.comment == "") ? "" : "mark-selected" }} mark-selector col-no-gutters"
+            <span class="{{ graded_component.custom_mark_selected ? "" : "mark-selected" }} mark-selector col-no-gutters"
                   data-mark_id="0"
                   onclick="onToggleCustomMark(this)">
             </span>
@@ -98,7 +98,7 @@ Required inputs:
                 <input type="number"
                        step="{{ precision }}"
                        onchange="onCustomMarkChange(this)"
-                       value="{{ graded_component.score }}">
+                       value="{{ graded_component.score | default('0')}}">
             </span>
             <span class="col-sm mark-title">
                 Custom:

@@ -38,22 +38,54 @@ function loadTemplates() {
  * @return {number}
  */
 function calculateGradedComponentTotalScore(component, graded_component) {
-    // If the mark selected isn't defined, then assume its true
-    if (graded_component.custom_mark_selected === undefined) {
-        graded_component.custom_mark_selected = true;
-    }
+    let markCount = 0;
 
     // Calculate the total
-    let total = component.default + (graded_component.custom_mark_selected ? graded_component.score : 0.0);
+    let total = component.default;
+    if (graded_component.custom_mark_selected) {
+        total += graded_component.custom_mark_selected ? graded_component.score : 0.0;
+        markCount++;
+    }
     component.marks.forEach(function (mark) {
         if (graded_component.mark_ids.includes(mark.id)) {
             total += mark.points;
+            markCount++;
         }
     });
 
+    // If there were no marks earned, then there is no 'total'
+    if (markCount === 0) {
+        return undefined;
+    }
+
     // Then clamp it in range
-    total = Math.min(component.upper_clamp, Math.max(total, component.lower_clamp));
-    return total;
+    return Math.min(component.upper_clamp, Math.max(total, component.lower_clamp));
+}
+
+function prepGradedComponent(component, graded_component) {
+    if (graded_component === undefined) {
+        return undefined;
+    }
+
+    // The custom mark selected property isn't set
+    if (graded_component.custom_mark_selected === undefined) {
+        graded_component.custom_mark_selected = graded_component.points !== 0.0 && graded_component.message !== '';
+    }
+
+    // Calculate the total score
+    if (graded_component.total_score === undefined) {
+        graded_component.total_score = calculateGradedComponentTotalScore(component, graded_component);
+    }
+
+    // Unset blank properties
+    if (graded_component.grader_id === '') {
+        graded_component.grader_id = undefined;
+    }
+    if (graded_component.verifier_id === '') {
+        graded_component.verifier_id = undefined;
+    }
+
+    return graded_component;
 }
 
 /**
@@ -66,12 +98,11 @@ function renderGradingGradeable(gradeable, graded_gradeable) {
     return loadTemplates()
         .then(function () {
             // Calculate the total scores
-            for(let i = 0; i < gradeable.components.length; i++) {
-                graded_gradeable.graded_components[gradeable.components[i].id].total_score = calculateGradedComponentTotalScore(
-                    gradeable.components[i],
-                    graded_gradeable.graded_components[gradeable.components[i].id]
-                );
-            }
+            gradeable.components.forEach(function (component) {
+                graded_gradeable.graded_components[component.id]
+                    = prepGradedComponent(component, graded_gradeable.graded_components[component.id]);
+            });
+
             // TODO: i don't think this is async
             return Twig.twig({ref: "GradingGradeable"}).render({
                 'gradeable': gradeable,
@@ -92,8 +123,8 @@ function renderGradingGradeable(gradeable, graded_gradeable) {
  */
 function renderGradingComponent(component, graded_component, editable, showMarkList) {
     return new Promise(function (resolve, reject) {
-        // Make sure this is calculated so the badge can be displayed properly
-        graded_component.total_score = calculateGradedComponentTotalScore(component, graded_component);
+        // Make sure we prep the graded component before rendering
+        graded_component = prepGradedComponent(component, graded_component);
 
         // TODO: i don't think this is async
         resolve(Twig.twig({ref: "GradingComponent"}).render({
