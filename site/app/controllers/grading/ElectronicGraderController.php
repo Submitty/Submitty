@@ -1289,11 +1289,11 @@ class ElectronicGraderController extends GradingController {
             return;
         }
         if ($component_version === null) {
-            $this->core->getOutput()->renderJsonFail('Missing active_version parameter');
+            $this->core->getOutput()->renderJsonFail('Missing graded_version parameter');
             return;
         }
         if (!ctype_digit($component_version)) {
-            $this->core->getOutput()->renderJsonFail('Invalid active_version parameter');
+            $this->core->getOutput()->renderJsonFail('Invalid graded_version parameter');
             return;
         }
 
