@@ -1355,9 +1355,9 @@ class ElectronicGraderController extends GradingController {
 
         try {
             // Once we've parsed the inputs and checked permissions, perform the operation
-            $results = $this->saveGradedComponent($ta_graded_gradeable, $graded_component, $grader, $custom_points,
+            $this->saveGradedComponent($ta_graded_gradeable, $graded_component, $grader, $custom_points,
                 $custom_message, $marks, $component_version, $overwrite);
-            $this->core->getOutput()->renderJsonSuccess($results);
+            $this->core->getOutput()->renderJsonSuccess();
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
         } catch (\Exception $e) {
@@ -1395,12 +1395,6 @@ class ElectronicGraderController extends GradingController {
 
         // Finally, save the changes to the database
         $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
-
-        // Response 'data'
-        return [
-            'component_reset' => $graded_component === null,
-            'version_updated' => $version_updated
-        ];
     }
 
     /**

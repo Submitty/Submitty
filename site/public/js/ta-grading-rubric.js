@@ -1414,7 +1414,6 @@ function closeComponentGrading(component_id, saveChanges) {
             })
             .then(function (component) {
                 component_tmp = component;
-                return ajaxGetGradedComponent(gradeable_id, component_id, anon_id);
             });
     } else {
         // We are saving changes...
@@ -1429,31 +1428,29 @@ function closeComponentGrading(component_id, saveChanges) {
                 })
                 .then(function (component) {
                     component_tmp = component;
-                    return ajaxGetGradedComponent(gradeable_id, component_id, anon_id);
                 });
         } else {
             // We're in grade mode, so save the graded component
             sequence = sequence
                 .then(function () {
                     return saveGradedComponent(component_id);
-                })
-                .then(function () {
-                    // This 'then' statement is here since the final 'then' expects a 'graded_component'
-                    //  'resolve' parameter
-                    return Promise.resolve(getGradedComponentFromDOM(component_id));
                 });
         }
     }
 
     // Finally, render the graded component in non-edit mode with the mark list hidden
-    return sequence.then(function (graded_component) {
-        // If this wasn't set (fetched from the remote), just load it from the DOM
-        if (component_tmp === null) {
-            component_tmp = getComponentFromDOM(component_id);
-        }
+    return sequence
+        .then(function () {
+            return ajaxGetGradedComponent(gradeable_id, component_id, anon_id);
+        })
+        .then(function (graded_component) {
+            // If this wasn't set (fetched from the remote), just load it from the DOM
+            if (component_tmp === null) {
+                component_tmp = getComponentFromDOM(component_id);
+            }
 
-        return injectGradingComponent(component_tmp, graded_component, false, false);
-    });
+            return injectGradingComponent(component_tmp, graded_component, false, false);
+        });
 }
 
 /**
