@@ -922,12 +922,45 @@ function isMarkDeleted(mark_id) {
  * @param {int} component_id
  * @return {boolean}
  */
-function isCustomMarkChecked(component_id) {
+function hasCustomMark(component_id) {
     if (isEditModeEnabled()) {
         return false;
     }
     let gradedComponent = getGradedComponentFromDOM(component_id);
     return gradedComponent.comment !== '';
+}
+
+/**
+ * Gets if the custom mark on a component is 'checked'
+ * @param {int} component_id
+ * @return {boolean}
+ */
+function isCustomMarkChecked(component_id) {
+    return getCustomMarkDOMElement(component_id).find('.mark-selected').length > 0;
+}
+
+/**
+ * Checks the custom mark checkbox
+ * @param {int} component_id
+ */
+function checkDOMCustomMark(component_id) {
+    getCustomMarkDOMElement(component_id).find('.mark-selector').addClass('mark-selected');
+}
+
+/**
+ * Un-checks the custom mark checkbox
+ * @param {int} component_id
+ */
+function unCheckDOMCustomMark(component_id) {
+    getCustomMarkDOMElement(component_id).find('.mark-selector').removeClass('mark-selected');
+}
+
+/**
+ * Toggles the state of the custom mark checkbox in the DOM
+ * @param {int} component_id
+ */
+function toggleDOMCustomMark(component_id) {
+    getCustomMarkDOMElement(component_id).find('.mark-selector').toggleClass('mark-selected');
 }
 
 /**
@@ -1068,13 +1101,11 @@ function onCustomMarkChange(me) {
  */
 function onToggleCustomMark(me) {
     let component_id = getComponentIdFromDOMElement(me);
-    let customMark = getCustomMarkDOMElement(component_id);
-
-    customMark.find('.mark-selector').toggleClass('mark-selected');
-    updateCustomMark(component_id)
+    toggleDOMCustomMark(component_id);
+    toggleCustomMark(component_id)
         .catch(function (err) {
             console.error(err);
-            alert('Error updating custom mark!');
+            alert('Error toggling custom mark!');
         });
 }
 
@@ -1302,6 +1333,27 @@ function toggleCommonMark(component_id, mark_id) {
  * @return {Promise}
  */
 function updateCustomMark(component_id) {
+    if (hasCustomMark(component_id)) {
+        // Check the mark if it isn't already
+        checkDOMCustomMark(component_id);
+
+        // Uncheck the first mark just in case it's checked
+        return unCheckFirstMark(component_id);
+    } else {
+        // Automatically uncheck the custom mark if it's no longer relevant
+        unCheckDOMCustomMark(component_id);
+
+        // Note: this is in the else block since `unCheckFirstMark` calls this function
+        return refreshGradedComponent(component_id, true);
+    }
+}
+
+/**
+ * Call to toggle the custom mark 'checked' state without removing its data
+ * @param {int} component_id
+ * @return {Promise}
+ */
+function toggleCustomMark(component_id) {
     if (isCustomMarkChecked(component_id)) {
         // Uncheck the first mark just in case it's checked
         return unCheckFirstMark(component_id);
@@ -1510,6 +1562,14 @@ function closeOverallComment(saveChanges = true) {
 function checkMark(component_id, mark_id) {
     // First fetch the necessary information from the DOM
     let gradedComponent = getGradedComponentFromDOM(component_id);
+
+    // Uncheck the first mark if it's checked
+    let firstMarkId = getComponentFirstMarkId(component_id);
+    if (isMarkChecked(firstMarkId)) {
+        // If first mark is checked, it will be the first element in the array
+        // TODO: probably
+        gradedComponent.mark_ids.splice(0, 1);
+    }
 
     // Then add the mark id to the array
     gradedComponent.mark_ids.push(mark_id);
