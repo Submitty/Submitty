@@ -17,7 +17,6 @@ use app\models\User;
  * @method void setOverallComment($comment)
  * @method int getId()
  * @method \DateTime|null getUserViewedDate()
- * @method GradedComponentContainer[] getGradedComponentContainers()
  */
 class TaGradedGradeable extends AbstractModel {
     /** @property @var GradedGradeable A reference to the graded gradeable this Ta grade belongs to */
@@ -104,6 +103,14 @@ class TaGradedGradeable extends AbstractModel {
 //        $details['graded_percent'] = $graded_percent;
 
         return $details;
+    }
+
+    /**
+     * Gets all component containers
+     * @return GradedComponentContainer[]
+     */
+    public function getGradedComponentContainers() {
+        return $this->graded_component_containers;
     }
 
     /**
