@@ -69,7 +69,7 @@ function prepGradedComponent(component, graded_component) {
 
     // The custom mark selected property isn't set
     if (graded_component.custom_mark_selected === undefined) {
-        graded_component.custom_mark_selected = graded_component.points !== 0.0 && graded_component.message !== '';
+        graded_component.custom_mark_selected = graded_component.comment !== '';
     }
 
     // Calculate the total score
