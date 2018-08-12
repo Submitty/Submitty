@@ -544,6 +544,9 @@ tr.is_publish {
 }
 
 .gradeable .mark-container span.mark-title textarea {
+    width: 100%;
+    resize: vertical;
+    min-height: 20px;
 }
 
 .gradeable .mark-container .mark-points input {
