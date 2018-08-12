@@ -91,7 +91,8 @@ Required inputs:
     {% if not editable %}
         <div class="custom-mark-container mark-container row">
             <span class="{{ graded_component.score == 0 and component.comment == "" ? "" : "mark-selected" }} mark-selector col-no-gutters"
-                  data-mark_id="0"></span>
+                  data-mark_id="0">
+            </span>
             <span class="col-no-gutters mark-score">
                 <input type="number"
                        step="{{ precision }}"

@@ -12,12 +12,11 @@ TODO: add 'publish' support
      class="mark-container row"
      data-component_id="{{ component.id }}"
      data-mark_id="{{ mark.id }}"
-     onclick="{{ editable ? '' : 'onToggleMark' }}"
+     onclick="{{ editable ? '' : 'onToggleMark(this)' }}"
 >
     {% if not editable %}
         <span class="{{ is_checked ? 'mark-selected' : '' }} mark-selector col-no-gutters"
-              data-mark_id="{{ mark.id }}"
-              onclick="onToggleMark(this);">
+              data-mark_id="{{ mark.id }}">
             {{ mark.order + 1 }}
         </span>
     {% endif %}

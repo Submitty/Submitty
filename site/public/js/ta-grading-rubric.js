@@ -583,6 +583,9 @@ function setRubricDOMElements(elements) {
  * @return {int}
  */
 function getComponentIdFromDOMElement(me) {
+    if ($(me).hasClass('component')) {
+        return parseInt($(me).attr('data-component_id'));
+    }
     return parseInt($(me).parents('.component').attr('data-component_id'));
 }
 
@@ -592,6 +595,9 @@ function getComponentIdFromDOMElement(me) {
  * @return {int}
  */
 function getMarkIdFromDOMElement(me) {
+    if ($(me).hasClass('mark-container')) {
+        return parseInt($(me).attr('data-mark_id'));
+    }
     return parseInt($(me).parents('.mark-container').attr('data-mark_id'));
 }
 
@@ -612,6 +618,15 @@ function getComponentDOMElement(component_id) {
  */
 function getMarkDOMElement(mark_id) {
     return $('#mark-' + mark_id);
+}
+
+/**
+ * Gets the JQuery selector for the component's custom mark
+ * @param {int} component_id
+ * @return {jQuery}
+ */
+function getCustomMarkDOMElement(component_id) {
+    return getComponentDOMElement(component_id).find('.custom-mark-container');
 }
 
 /**
@@ -836,7 +851,7 @@ function getOpenComponentIdFromCookie() {
  * @throws Error if the component id doesn't exist
  */
 function getComponentFirstMarkId(component_id) {
-
+    return parseInt(getComponentDOMElement(component_id).find('.mark-container').first().attr('data-mark_id'));
 }
 
 /**
