@@ -165,7 +165,7 @@ function ajaxGetGradedComponent(gradeable_id, component_id, anon_id) {
  * @param {string} gradeable_id
  * @param {int} component_id
  * @param {string} anon_id
- * @param {int} active_version
+ * @param {int} graded_version
  * @param {float} custom_points
  * @param {string} custom_message
  * @param {boolean} overwrite True to overwrite the component's grader
@@ -173,7 +173,7 @@ function ajaxGetGradedComponent(gradeable_id, component_id, anon_id) {
  * @param {boolean} async
  * @return {Promise} Rejects except when the response returns status 'success'
  */
-function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, active_version, custom_points, custom_message, overwrite, mark_ids, async) {
+function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, graded_version, custom_points, custom_message, overwrite, mark_ids, async) {
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "POST",
@@ -187,7 +187,7 @@ function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, active_ver
                 'gradeable_id': gradeable_id,
                 'component_id': component_id,
                 'anon_id': anon_id,
-                'active_version': active_version,
+                'graded_version': graded_version,
                 'custom_points': custom_points,
                 'custom_message': custom_message,
                 'overwrite': overwrite,
@@ -1719,7 +1719,7 @@ function saveGradedComponent(component_id) {
     let gradedComponent = getGradedComponentFromDOM(component_id);
     return ajaxSaveGradedComponent(
         getGradeableId(), component_id, getAnonId(),
-        gradedComponent.active_version,
+        gradedComponent.graded_version,
         gradedComponent.custom_mark_selected ? gradedComponent.score : 0.0,
         gradedComponent.custom_mark_selected ? gradedComponent.comment : '',
         isOverwriteGraderEnabled(),

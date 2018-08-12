@@ -1270,7 +1270,7 @@ class ElectronicGraderController extends GradingController {
         $component_id = $_POST['component_id'] ?? '';
         $custom_message = $_POST['custom_message'] ?? null;
         $custom_points = $_POST['custom_points'] ?? null;
-        $component_version = $_POST['active_version'] ?? null;
+        $component_version = $_POST['graded_version'] ?? null;
 
         // Optional marks parameter
         $marks = $_POST['mark_ids'] ?? [];

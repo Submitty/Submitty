@@ -100,7 +100,8 @@ function renderGradingComponent(component, graded_component, editable, showMarkL
             'component': component,
             'graded_component': graded_component,
             'editable': editable,
-            'show_mark_list': showMarkList
+            'show_mark_list': showMarkList,
+            'grading_disabled': false // TODO:
         }));
     });
 }
