@@ -8,6 +8,7 @@
      cursor: move;
      z-index:40;
      border: solid 6px #FFD700;
+     box-sizing: content-box;
 }
 
 #footer {
@@ -346,7 +347,6 @@ progress::-webkit-progress-value {
 
 .rubric-textarea {
     width:95%;
-    height:100%;
     min-height:20px;
     float:left;
     word-break: break-word;
@@ -445,7 +445,6 @@ tr.is_publish {
 
 .gradeable .general-comment-entry {
     width:98%;
-    height:100%;
     min-height:100px;
     resize:none;
     float:left;
@@ -505,8 +504,8 @@ tr.is_publish {
 }
 
 .gradeable .summary-text {
+    word-wrap: break-word;
     width:95%;
-    height:100%;
     min-height:20px;
     font-family: 'Source Sans Pro', sans-serif;
     float:left;
@@ -519,20 +518,28 @@ tr.is_publish {
 
 /* Marks */
 
+.gradeable .mark-container {}
+
+.gradeable .mark-cell-box {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
 .gradeable .mark {
     visibility: visible;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.5em;
-    height: 1.5em;
+    min-width: 1.5em;
+    min-height: 1.5em;
+    box-sizing: content-box;
     border: 2px solid #000;
     border-radius: 4px;
     color: #888;
     font-size: 10px;
     font-family: 'Source Sans Pro', sans-serif;
-    margin-top: -1px;
     text-align: center;
     vertical-align: middle;
 }
@@ -545,20 +552,26 @@ tr.is_publish {
 
 .gradeable input.mark-score {
     resize:none;
-    width: 50px;
+    width: 100%;
+    text-align: right;
 }
 
 .gradeable .mark-score-container {
-    width: 90px;
+    flex-direction: row;
+    align-items: center;
 }
 
 .gradeable .mark-note {
-    width: calc(100% - 40px);
+    width: 100%;
     resize:none;
 }
 
+.gradeable .mark-custom-label {
+    margin-right: 0.5em;
+}
+
 .gradeable .mark-note-custom {
-    width: calc(100% - 165px);
+    width: 100%;
     resize:none;
 }
 

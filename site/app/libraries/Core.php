@@ -453,15 +453,26 @@ class Core {
      * assuming that we
      *
      * @param string $url
+     * @param mixed $data
      *
      * @return string
      *
      * @throws \app\exceptions\CurlException
      */
-    public function curlRequest(string $url) {
+    public function curlRequest(string $url, $data = null) {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        if (!empty($data)) {
+            if (is_array($data)) {
+                $data = http_build_query($data);
+            }
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/x-www-form-urlencoded; charset=utf-8',
+            ]);
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        }
         try {
             $return = curl_exec($ch);
             $http_code = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);

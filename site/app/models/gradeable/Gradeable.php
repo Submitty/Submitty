@@ -49,7 +49,6 @@ use app\models\User;
  * @method int getTeamSizeMax()
  * @method \DateTime getTeamLockDate()
  * @method bool isTaGrading()
- * @method void setTaGrading($use_ta_grading)
  * @method bool isStudentView()
  * @method void setStudentView($can_student_view)
  * @method bool isStudentSubmit()
@@ -71,7 +70,6 @@ use app\models\User;
  * @method void setPrecision($grading_precision)
  * @method Component[] getComponents()
  * @method bool isRegradeAllowed()
- * @method void setRegradeAllowed($regrade_allowed)
  */
 class Gradeable extends AbstractModel {
     /* Properties for all types of gradeables */
@@ -207,7 +205,7 @@ class Gradeable extends AbstractModel {
             $this->setVcsSubdirectory($details['vcs_subdirectory']);
             $this->setTeamAssignmentInternal($details['team_assignment']);
             $this->setTeamSizeMax($details['team_size_max']);
-            $this->setTaGrading($details['ta_grading']);
+            $this->setTaGradingInternal($details['ta_grading']);
             $this->setStudentView($details['student_view']);
             $this->setStudentSubmit($details['student_submit']);
             $this->setStudentDownload($details['student_download']);
@@ -216,7 +214,7 @@ class Gradeable extends AbstractModel {
             $this->setPeerGradeSet($details['peer_grade_set']);
             $this->setLateSubmissionAllowed($details['late_submission_allowed']);
             $this->setPrecision($details['precision']);
-            $this->setRegradeAllowed($details['regrade_allowed']);
+            $this->setRegradeAllowedInternal($details['regrade_allowed']);
         }
 
         // Set dates last
@@ -276,8 +274,7 @@ class Gradeable extends AbstractModel {
         'submission_due_date',
         'grade_start_date',
         'grade_due_date',
-        'grade_released_date',
-        'regrade_request_date'
+        'grade_released_date'
     ];
 
     /**
@@ -299,8 +296,7 @@ class Gradeable extends AbstractModel {
         'ta_view_start_date',
         'grade_start_date',
         'grade_due_date',
-        'grade_released_date',
-        'regrade_request_date'
+        'grade_released_date'
     ];
 
     /**
@@ -443,18 +439,24 @@ class Gradeable extends AbstractModel {
         if ($this->type === GradeableType::ELECTRONIC_FILE) {
             if (!$this->isStudentSubmit()) {
                 if ($this->isTaGrading()) {
-                    return self::date_properties_elec_exam;
+                    $result = self::date_properties_elec_exam;
                 } else {
-                    return self::date_properties_bare;
+                    $result = self::date_properties_bare;
                 }
             } else if ($this->isTaGrading()) {
-                return self::date_properties_elec_ta;
+                $result = self::date_properties_elec_ta;
             } else {
-                return self::date_properties_elec_no_ta;
+                $result = self::date_properties_elec_no_ta;
+            }
+
+            // Only add in regrade request date if its allowed & enabled
+            if($this->isTaGrading() && $this->core->getConfig()->isRegradeEnabled() && $this->isRegradeAllowed()) {
+                $result[] = 'regrade_request_date';
             }
         } else {
-            return self::date_properties_simple;
+            $result = self::date_properties_simple;
         }
+        return $result;
     }
 
     /**
@@ -464,26 +466,22 @@ class Gradeable extends AbstractModel {
      */
     private function assertDates(array $dates) {
         // Get the date set we validate against
-        $errors = [];
-
-        // Get the date set for validation
         $date_set = $this->getDateValidationSet();
 
         // Get the validation errors
-        $errors = array_merge($errors, self::validateDateSet($date_set, $dates));
-
+        $errors = self::validateDateSet($date_set, $dates);
 
         // Put any special exceptions to the normal validation rules here...
 
         // Check that the grades released date isn't before the 'max due date' (submission due date + late days)
         $submission_due_date = $dates['submission_due_date'];
-        if ($this->type === GradeableType::ELECTRONIC_FILE && $this->isStudentSubmit() && $submission_due_date !== null) {
+        if ($this->type === GradeableType::ELECTRONIC_FILE && $submission_due_date !== null) {
             $late_days = intval($dates['late_days'] ?? 0);
             /** @noinspection PhpUnhandledExceptionInspection */
             $max_due_date = (clone $submission_due_date)->add(new \DateInterval('P' . strval($late_days) . 'D'));
             if ($max_due_date > $dates['grade_released_date']) {
                 $errors['grade_released_date'] = self::date_display_names['grade_released_date'] . ' Date must be later than the ' .
-                    self::date_display_names['submission_due_date'] . ' + ' . self::date_display_names['late_days'];
+                    self::date_display_names['submission_due_date'] . ' Date + ' . self::date_display_names['late_days'];
             }
         }
 
@@ -583,15 +581,30 @@ class Gradeable extends AbstractModel {
     }
 
     /**
-     * Gets all of the gradeable's date values indexed by property name
-     * @return \DateTime[]
+     * Gets all of the gradeable's date values indexed by property name (including late_days)
+     * @return mixed[]
      */
     public function getDates() {
         $dates = [];
-        foreach(self::date_properties as $property) {
+        foreach (self::date_properties as $property) {
             $dates[$property] = $this->$property;
         }
+        $dates['late_days'] = $this->late_days;
         return $dates;
+    }
+
+    /**
+     * Gets all of the gradeable's date values as strings indexed by property name (including late_days)
+     * @return string[]
+     */
+    public function getDateStrings() {
+        $date_strings = [];
+        $now = new \DateTime('now', $this->core->getConfig()->getTimezone());
+        foreach (self::date_properties as $property) {
+            $date_strings[$property] = DateUtils::dateTimeToString($this->$property ?? $now);
+        }
+        $date_strings['late_days'] = strval($this->late_days);
+        return $date_strings;
     }
 
     /**
@@ -925,6 +938,64 @@ class Gradeable extends AbstractModel {
         }
         $this->rotating_grader_sections = $parsed_graders_sections;
         $this->rotating_grader_sections_modified = true;
+    }
+
+    /**
+     * Sets whether regrades are allowed for this gradeable
+     * @param bool $regrade_allowed
+     * @throws ValidationException If date validation fails in this new regrade request configuration
+     */
+    public function setRegradeAllowed(bool $regrade_allowed) {
+        $old = $this->regrade_allowed;
+        $this->regrade_allowed = $regrade_allowed;
+
+        try {
+            // Asserts that this date information is valid after changing this property
+            $this->setDates($this->getDates());
+        } catch (ValidationException $e) {
+            // Reset to the old value if validation fails
+            $this->regrade_allowed = $old;
+
+            // This line brings me great pain
+            throw $e;
+        }
+    }
+
+    /**
+     * @param bool $regrade_allowed
+     * @internal
+     */
+    private function setRegradeAllowedInternal(bool $regrade_allowed) {
+        $this->regrade_allowed = $regrade_allowed;
+    }
+
+    /**
+     * Sets whether this gradeable will use ta grading
+     * @param bool $ta_grading
+     * @throws ValidationException If date validation fails in this new TA grading configuration
+     */
+    public function setTaGrading(bool $ta_grading) {
+        $old = $this->ta_grading;
+        $this->ta_grading = $ta_grading;
+
+        try {
+            // Asserts that this date information is valid after changing this property
+            $this->setDates($this->getDates());
+        } catch (ValidationException $e) {
+            // Reset to the old value if validation fails
+            $this->ta_grading = $old;
+
+            // This line brings me great pain
+            throw $e;
+        }
+    }
+
+    /**
+     * @param bool $ta_grading
+     * @internal
+     */
+    private function setTaGradingInternal(bool $ta_grading) {
+        $this->ta_grading = $ta_grading;
     }
 
     /**

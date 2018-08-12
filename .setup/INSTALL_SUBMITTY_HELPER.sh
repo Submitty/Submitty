@@ -282,11 +282,6 @@ mkdir -p ${SUBMITTY_DATA_DIR}/tmp
 chown root:root ${SUBMITTY_DATA_DIR}/tmp
 chmod 511 ${SUBMITTY_DATA_DIR}/tmp
 
-# tmp folder to hold files for PAM authentication. Needs to be writable by PHP_USER and only readable by CGI_USER
-mkdir -p ${SUBMITTY_DATA_DIR}/tmp/pam
-chown ${PHP_USER}:${CGI_USER} ${SUBMITTY_DATA_DIR}/tmp/pam
-chmod 750 ${SUBMITTY_DATA_DIR}/tmp/pam
-
 ########################################################################################################################
 ########################################################################################################################
 # RSYNC NOTES
@@ -552,7 +547,7 @@ fi
 echo -e "Install python_submitty_utils"
 
 pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
-python3 setup.py -q install
+pip3 install .
 
 # fix permissions
 chmod -R 555 /usr/local/lib/python*/*
