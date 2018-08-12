@@ -81,9 +81,12 @@ class TaGradedGradeable extends AbstractModel {
         if ($grader !== null) {
             /** @var GradedComponentContainer $container */
             foreach ($this->graded_component_containers as $container) {
-                $graded_components[] = $graded_component = $container->getGradedComponent($grader);
-                $details['graded_components'][$container->getComponent()->getId()] = $graded_component->toArray();
-                $graders[$graded_component->getGrader()->getId()] = $graded_component->getGrader();
+                $graded_component = $container->getGradedComponent($grader);
+                if ($graded_component !== null) {
+                    $graded_components[] = $graded_component;
+                    $details['graded_components'][$container->getComponent()->getId()] = $graded_component->toArray();
+                    $graders[$graded_component->getGrader()->getId()] = $graded_component->getGrader();
+                }
             }
         } else {
             /** @var GradedComponentContainer $container */
