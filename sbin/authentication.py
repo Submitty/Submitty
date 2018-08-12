@@ -42,17 +42,19 @@ def check_password(environ, user, password):
         return None
 
     data = {
-        'no_redirect': 'true',
-        'username': user,
+        'user_id': user,
         'password': password,
         'gradeable_id': gradeable,
         'id': unknown_id,
     }
 
     try:
-        req = requests.post(SUBMISSION_URL + '/index.php?semester={}&course={}&component=authentication&page=checkLogin'.format(semester, course), data=data)
+        req = requests.post(SUBMISSION_URL + '/index.php?semester={}&course={}&component=authentication&page=vcs_login'.format(semester, course), data=data)
         response = req.json()
-        return response['status'] == 'success'
+        if response['status'] == 'error':
+            return None
+        else:
+            return response['status'] == 'success'
     except RequestException:
         pass
     return False

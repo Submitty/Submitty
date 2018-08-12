@@ -15,7 +15,10 @@ from sqlalchemy import create_engine, MetaData, Table, bindparam
 
 CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
 
-VCS_GROUP = 'hwcgi'
+with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
+    JSON = json.load(open_file)
+DAEMONCGI_GROUP = JSON['daemoncgi_group']
+
 with open(os.path.join(CONFIG_PATH, 'database.json')) as open_file:
     JSON = json.load(open_file)
 DATABASE_HOST = JSON['database_host']
@@ -34,7 +37,7 @@ def create_folder(folder):
         os.system('git init --bare --shared')
         for root, dirs, files in os.walk(folder):
             for entry in files + dirs:
-                shutil.chown(os.path.join(root, entry), group=VCS_GROUP)
+                shutil.chown(os.path.join(root, entry), group=DAEMONCGI_GROUP)
 
 
 parser = argparse.ArgumentParser(description="Generate git repositories for a specific course and homework")
@@ -64,13 +67,12 @@ vcs_course = os.path.join(VCS_FOLDER, args.semester, args.course)
 
 if not os.path.isdir(vcs_course):
     os.makedirs(vcs_course, mode=0o770, exist_ok=True)
-    shutil.chown(VCS_FOLDER, group=VCS_GROUP)
+    shutil.chown(VCS_FOLDER, group=DAEMONCGI_GROUP)
     for root, dirs, files in os.walk(VCS_FOLDER):
         for entry in dirs:
-            shutil.chown(os.path.join(root, entry), group=VCS_GROUP)
+            shutil.chown(os.path.join(root, entry), group=DAEMONCGI_GROUP)
 
-is_team = False;
-
+is_team = False
 
 # We will always pass in the name of the desired repository.
 #
@@ -108,7 +110,7 @@ else:
 
 if not os.path.isdir(os.path.join(vcs_course, args.repo_name)):
     os.makedirs(os.path.join(vcs_course, args.repo_name), mode=0o770)
-    shutil.chown(os.path.join(vcs_course, args.repo_name), group=VCS_GROUP)
+    shutil.chown(os.path.join(vcs_course, args.repo_name), group=DAEMONCGI_GROUP)
 
 
 if is_team:

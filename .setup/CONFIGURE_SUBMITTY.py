@@ -201,8 +201,10 @@ else:
                                'https://submitty.cs.rpi.edu)', defaults['submission_url']).rstrip('/')
     print()
 
-    VCS_URL = get_input('What is the url for VCS? (ex: http://192.168.56.102/git or https://submitty-vcs.cs.rpi.edu/git', defaults['vcs_url']).rstrip('/')
-    print()
+    #VCS_URL = get_input('What is the url for VCS? (ex: http://192.168.56.102/git or https://submitty-vcs.cs.rpi.edu/git', defaults['vcs_url']).rstrip('/')
+    #print()
+
+    VCS_URL = SUBMISSION_URL
 
     INSTITUTION_NAME = get_input('What is the name of your institution? (Leave blank/type "none" if not desired)',
                              defaults['institution_name'])
@@ -446,6 +448,7 @@ if not args.worker:
     config['php_user'] = PHP_USER
     config['cgi_user'] = CGI_USER
     config['daemonphp_group'] = DAEMONPHP_GROUP
+    config['daemoncgi_group'] = DAEMONCGI_GROUP
 else:
     config['supervisor_user'] = SUPERVISOR_USER
 

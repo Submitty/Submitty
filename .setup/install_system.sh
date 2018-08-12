@@ -156,8 +156,6 @@ fi
 sed -i  "s/^UMASK.*/UMASK 027/g"  /etc/login.defs
 grep -q "^UMASK 027" /etc/login.defs || (echo "ERROR! failed to set umask" && exit)
 
-echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwcron/.profile
-
 #add users not needed on a worker machine.
 if [ ${WORKER} == 0 ]; then
     if ! cut -d ':' -f 1 /etc/passwd | grep -q ${PHP_USER} ; then
@@ -525,7 +523,6 @@ else
     ${DATABASE_PASSWORD}
     America/New_York
     ${SUBMISSION_URL}
-    ${GIT_URL}/git
 
     1" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
 

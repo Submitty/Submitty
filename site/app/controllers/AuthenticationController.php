@@ -154,7 +154,7 @@ class AuthenticationController extends AbstractController {
             || empty($_POST['id']) || !$this->core->getConfig()->isCourseLoaded()) {
             $msg = 'Missing value for one of the fields';
 
-            $this->core->getOutput()->renderJsonFail($msg);
+            $this->core->getOutput()->renderJsonError($msg);
             return false;
         }
         $this->core->getAuthentication()->setUserId($_POST['user_id']);
@@ -166,7 +166,7 @@ class AuthenticationController extends AbstractController {
         }
 
         $user = $this->core->getQueries()->getUserById($_POST['user_id']);
-        $gradeable = $this->core->getQueries()->getGradeable($_POST['gradeable_id']);
+        $gradeable = $this->core->getQueries()->getGradeableConfig($_POST['gradeable_id']);
         if ($user === null || $gradeable === null) {
             $msg = "Could not find that user or gradeable for that course";
             $this->core->getOutput()->renderJsonFail($msg);
@@ -179,7 +179,7 @@ class AuthenticationController extends AbstractController {
                 return false;
             }
         }
-        else if (!$user->accessFullGrading() || $_POST['user_id'] !== $_POST['id']) {
+        else if (!$user->accessFullGrading() && $_POST['user_id'] !== $_POST['id']) {
             $msg = "This user cannot check out that repo.";
             $this->core->getOutput()->renderJsonFail($msg);
             return false;
