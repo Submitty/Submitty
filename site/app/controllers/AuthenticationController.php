@@ -166,23 +166,27 @@ class AuthenticationController extends AbstractController {
         }
 
         $user = $this->core->getQueries()->getUserById($_POST['user_id']);
-        $gradeable = $this->core->getQueries()->getGradeableConfig($_POST['gradeable_id']);
-        if ($user === null || $gradeable === null) {
-            $msg = "Could not find that user or gradeable for that course";
+        if ($user === null) {
+            $msg = "Could not find that user for that course";
             $this->core->getOutput()->renderJsonFail($msg);
             return false;
         }
-        if ($gradeable->isTeamAssignment()) {
+        else if (!$user->accessFullGrading()) {
+            $msg = "This user cannot check out that repo.";
+            $this->core->getOutput()->renderJsonFail($msg);
+            return false;
+        }
+
+        $gradeable = $this->core->getQueries()->getGradeableConfig($_POST['gradeable_id']);
+        if ($gradeable !== null && $gradeable->isTeamAssignment()) {
             if (!$this->core->getQueries()->getTeamById($_POST['id'])->hasMember($_POST['user_id'])) {
                 $msg = "This user is not a member of that team.";
                 $this->core->getOutput()->renderJsonFail($msg);
                 return false;
             }
         }
-        else if (!$user->accessFullGrading() && $_POST['user_id'] !== $_POST['id']) {
-            $msg = "This user cannot check out that repo.";
-            $this->core->getOutput()->renderJsonFail($msg);
-            return false;
+        elseif ($_POST['user_id'] !== $_POST['id']) {
+            return true;
         }
 
         $msg = "Successfully logged in as {$_POST['user_id']}";
