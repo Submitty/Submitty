@@ -1962,7 +1962,7 @@ class ElectronicGraderController extends GradingController {
     public function ajaxSaveOverallComment() {
         $gradeable_id = $_POST['gradeable_id'] ?? '';
         $anon_id = $_POST['anon_id'] ?? '';
-        $comment = $_POST['gradeable_comment'] ?? '';
+        $comment = $_POST['overall_comment'] ?? '';
 
         // Get the gradeable
         $gradeable = $this->tryGetGradeable($gradeable_id);

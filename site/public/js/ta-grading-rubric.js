@@ -226,7 +226,7 @@ function ajaxGetOverallComment(gradeable_id, anon_id) {
             url: buildUrl({
                 'component': 'grading',
                 'page': 'electronic',
-                'action': 'get_gradeable_comment'
+                'action': 'get_overall_comment'
             }),
             data: {
                 'gradeable_id': gradeable_id,
@@ -252,24 +252,24 @@ function ajaxGetOverallComment(gradeable_id, anon_id) {
  * ajax call to save the general comment for the graded gradeable
  * @param {string} gradeable_id
  * @param {string} anon_id
- * @param {string} gradeable_comment
+ * @param {string} overall_comment
  * @param {boolean} async
  * @return {Promise} Rejects except when the response returns status 'success'
  */
-function ajaxSaveOverallComment(gradeable_id, anon_id, gradeable_comment, async = true) {
+function ajaxSaveOverallComment(gradeable_id, anon_id, overall_comment, async = true) {
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "POST",
             url: buildUrl({
                 'component': 'grading',
                 'page': 'electronic',
-                'action': 'save_general_comment'
+                'action': 'save_overall_comment'
             }),
             async: async,
             data: {
                 'gradeable_id': gradeable_id,
                 'anon_id': anon_id,
-                'gradeable_comment': gradeable_comment
+                'overall_comment': overall_comment
             },
             success: function (response) {
                 if (response.status !== 'success') {
@@ -1268,7 +1268,7 @@ function toggleComponent(component_id, saveChanges) {
 }
 
 /**
- * Toggles a the open/close state of the general comment
+ * Toggles a the open/close state of the overall comment
  * @param {boolean} saveChanges
  * @return {Promise}
  */
@@ -1529,7 +1529,7 @@ function closeComponent(component_id, saveChanges = true) {
 function openOverallComment() {
     return ajaxGetOverallComment(getGradeableId(), getAnonId())
         .then(function (comment) {
-            return renderOverallComment(comment, true);
+            return injectOverallComment(comment, true);
         })
         .catch(function (err) {
             console.error(err);
@@ -1543,14 +1543,25 @@ function openOverallComment() {
  * @return {Promise}
  */
 function closeOverallComment(saveChanges = true) {
-    return ajaxSaveOverallComment(getGradeableId(), getAnonId(), getOverallCommentFromDOM())
-        .then(function () {
-            return refreshOverallComment(false);
-        })
-        .catch(function (err) {
-            console.error(err);
-            alert('Error saving overall comment! Refresh the page and try again!');
-        });
+    if (saveChanges) {
+        return ajaxSaveOverallComment(getGradeableId(), getAnonId(), getOverallCommentFromDOM())
+            .then(function () {
+                return refreshOverallComment(false);
+            })
+            .catch(function (err) {
+                console.error(err);
+                alert('Error saving overall comment! Refresh the page and try again!');
+            });
+    } else {
+        return ajaxGetOverallComment(getGradeableId(), getAnonId())
+            .then(function (comment) {
+                return injectOverallComment(comment, false);
+            })
+            .catch(function (err) {
+                console.error(err);
+                alert('Error fetching overall comment! Refresh the page and try again!');
+            });
+    }
 }
 
 /**
