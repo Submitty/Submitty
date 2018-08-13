@@ -1322,7 +1322,7 @@ function closeAllComponents(save_changes) {
 function toggleComponent(component_id, saveChanges) {
     // Component is open, so close it
     if (isComponentOpen(component_id)) {
-        return closeComponent(component_id);
+        return closeComponent(component_id, saveChanges);
     }
 
     return closeAllComponents(saveChanges)

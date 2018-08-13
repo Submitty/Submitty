@@ -47,7 +47,7 @@ Required Input:
         {# Saving status #}
         {% include "SavingTools.twig" with {
             'editable': show_mark_list,
-            'cancel_on_click': disabled ? '' : 'onCancelComponent(this)'
+            'cancel_on_click': 'onCancelComponent(this)'
         } only %}
     </div>
     {# /Title bar #}
