@@ -621,7 +621,7 @@ class Gradeable extends AbstractModel {
 
     /**
      * Gets the autograding configuration object
-     * @return AutogradingConfig
+     * @return AutogradingConfig|null returns null if loading from the disk fails
      */
     public function getAutogradingConfig() {
         if($this->autograding_config === null) {
