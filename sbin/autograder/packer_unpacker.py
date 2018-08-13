@@ -22,7 +22,7 @@ with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
 SUBMISSION_URL = OPEN_JSON['submission_url']
 VCS_URL = OPEN_JSON['vcs_url']
 if VCS_URL is None or len(VCS_URL) == 0:
-    VCS_URL = SUBMISSION_URL
+    VCS_URL = SUBMISSION_URL.rstrip('/') + '/{$vcs_type}'
 SUBMITTY_INSTALL_DIR = OPEN_JSON['submitty_install_dir']
 SUBMITTY_DATA_DIR = OPEN_JSON['submitty_data_dir']
 
@@ -63,9 +63,11 @@ def get_vcs_info(top_dir, semester, course, gradeable, userid,  teamid):
     vcs_type = course_ini['course_details']['vcs_type'].strip('"')
     vcs_base_url = course_ini['course_details']['vcs_base_url'].strip('"')
     if len(vcs_base_url) == 0:
-        vcs_base_url = "/".join([VCS_URL, vcs_type, semester, course]).rstrip('/') + "/"
+        vcs_base_url = "/".join([VCS_URL, semester, course]).rstrip('/') + "/"
     vcs_base_url = vcs_base_url.replace(SUBMISSION_URL, os.path.join(SUBMITTY_DATA_DIR, 'vcs'))
+    vcs_base_url = vcs_base_url.replace('{$vcs_type}', vcs_type)
     vcs_subdirectory = form_json["subdirectory"] if is_vcs else ''
+    vcs_subdirectory = vcs_subdirectory.replace("{$vcs_type}", vcs_type)
     vcs_subdirectory = vcs_subdirectory.replace("{$gradeable_id}", gradeable)
     vcs_subdirectory = vcs_subdirectory.replace("{$user_id}", userid)
     vcs_subdirectory = vcs_subdirectory.replace("{$team_id}", teamid)

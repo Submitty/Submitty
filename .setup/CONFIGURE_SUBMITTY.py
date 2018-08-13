@@ -201,10 +201,8 @@ else:
                                'https://submitty.cs.rpi.edu)', defaults['submission_url']).rstrip('/')
     print()
 
-    #VCS_URL = get_input('What is the url for VCS? (ex: http://192.168.56.102/git or https://submitty-vcs.cs.rpi.edu/git', defaults['vcs_url']).rstrip('/')
-    #print()
-
-    VCS_URL = SUBMISSION_URL
+    VCS_URL = get_input('What is the url for VCS? (Leave blank to default to submission url + {$vcs_type}) (ex: http://192.168.56.101/{$vcs_type} or https://submitty-vcs.cs.rpi.edu/{$vcs_type}', defaults['vcs_url']).rstrip('/')
+    print()
 
     INSTITUTION_NAME = get_input('What is the name of your institution? (Leave blank/type "none" if not desired)',
                              defaults['institution_name'])

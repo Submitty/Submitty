@@ -1516,6 +1516,7 @@ class Gradeable extends AbstractModel {
         }
         $repo = $vcs_path;
 
+        $repo = str_replace('{$vcs_type}', $this->core->getConfig()->getVcsType(), $repo);
         $repo = str_replace('{$gradeable_id}', $this->getId(), $repo);
         $repo = str_replace('{$user_id}', $user->getId(), $repo);
         if ($this->isTeamAssignment() && $team !== null) {

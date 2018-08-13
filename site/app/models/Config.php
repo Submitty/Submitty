@@ -252,7 +252,12 @@ class Config extends AbstractModel {
         $this->base_url = rtrim($this->base_url, "/")."/";
         $this->cgi_url = $this->base_url."cgi-bin/";
 
-        $this->vcs_url = !empty($submitty_json['vcs_url']) ? rtrim($submitty_json['vcs_url'], "/")."/" : $this->base_url;
+        if (empty($submitty_json['vcs_url'])) {
+            $this->vcs_url = $this->base_url . '{$vcs_type}/';
+        }
+        else {
+            $this->vcs_url = rtrim($submitty_json['vcs_url'], '/').'/';
+        }
 
         // Check that the paths from the config file are valid
         foreach(array('submitty_path', 'submitty_log_path') as $path) {
@@ -293,7 +298,7 @@ class Config extends AbstractModel {
         $this->setConfigValues($this->course_ini, 'course_details', $array);
 
         if (empty($this->vcs_base_url)) {
-            $this->vcs_base_url = $this->vcs_url . $this->getVcsType() . '/'. $this->semester . '/' . $this->course;
+            $this->vcs_base_url = $this->vcs_url . $this->semester . '/' . $this->course;
         }
 
         $this->vcs_base_url = rtrim($this->vcs_base_url, "/")."/";
