@@ -58,7 +58,7 @@ submitty_dbuser
 submitty_dbpass
 America/New_York
 http://localhost
-http://localhost/git
+
 
 ${AUTH_METHOD}" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
 

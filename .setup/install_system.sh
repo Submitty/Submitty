@@ -524,6 +524,7 @@ else
     America/New_York
     ${SUBMISSION_URL}
 
+
     1" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
 
     else
