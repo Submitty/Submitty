@@ -947,7 +947,6 @@ class AdminGradeableController extends AbstractController {
             try {
                 $gradeable->setDates($dates);
                 $updated_properties = $gradeable->getDateStrings();
-                $updated_properties['late_days'] = $gradeable->getLateDays();
             } catch (ValidationException $e) {
                 $errors = array_merge($errors, $e->getDetails());
             }
