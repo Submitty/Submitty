@@ -75,6 +75,9 @@ export SUBMITTY_REPOSITORY=${SUBMITTY_REPOSITORY}
 export SUBMITTY_INSTALL_DIR=${SUBMITTY_INSTALL_DIR}
 export SUBMITTY_DATA_DIR=${SUBMITTY_DATA_DIR}
 alias install_submitty='/usr/local/submitty/.setup/INSTALL_SUBMITTY.sh'
+alias install_submitty_site='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/INSTALL_SUBMITTY_HELPER_SITE.sh'
+alias install_submitty_bin='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/INSTALL_SUBMITTY_HELPER_BIN.sh'
+alias submitty_code_watcher='python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/code_watcher.py'
 cd ${SUBMITTY_INSTALL_DIR}" >> /root/.bashrc
 else
     #TODO: We should get options for ./.setup/CONFIGURE_SUBMITTY.py script
