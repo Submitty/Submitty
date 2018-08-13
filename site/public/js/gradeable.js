@@ -9,7 +9,8 @@ function loadTemplates() {
         {id: 'GradingComponent', href: "templates/grading/GradingComponent.twig"},
         {id: 'Component', href: "templates/grading/Component.twig"},
         {id: 'Mark', href: "templates/grading/Mark.twig"},
-        {id: 'OverallComment', href: "templates/grading/OverallComment.twig"}
+        {id: 'OverallComment', href: "templates/grading/OverallComment.twig"},
+        {id: 'TotalScoreBox', href: "templates/grading/TotalScoreBox.twig"}
     ];
     let promises = [];
     templates.forEach(function (template) {
@@ -155,5 +156,17 @@ function renderOverallComment(comment, editable) {
             'editable': editable,
             'disabled': false
         }));
+    });
+}
+
+/**
+ * Asynchronously renders the total scores box
+ * @param {Object} scores
+ * @return {Promise}
+ */
+function renderTotalScoreBox(scores) {
+    return new Promise(function (resolve, reject) {
+        // TODO: i don't think this is async
+        resolve(Twig.twig({ref: "TotalScoreBox"}).render(scores));
     });
 }

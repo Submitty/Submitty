@@ -659,6 +659,14 @@ function setComponentContents(component_id, contents) {
 }
 
 /**
+ * Sets the HTMl contents of the total scores box
+ * @param {string} contents
+ */
+function setTotalScoreBoxContents(contents) {
+    $('#total-score-container').html(contents);
+}
+
+/**
  * Extracts a component object from the DOM
  * TODO: support instructor edit mode
  * @param {int} component_id
@@ -736,7 +744,7 @@ function getGradedComponentFromDOM(component_id) {
         }
     });
 
-    let dataDOMElement = domElement.find('.graded-gradeable-data')
+    let dataDOMElement = domElement.find('.graded-component-data')
     return {
         score: parseFloat(customMarkContainer.find('input[type=number]').val()),
         comment: customMarkContainer.find('textarea').val(),
@@ -747,6 +755,62 @@ function getGradedComponentFromDOM(component_id) {
         grader_id: dataDOMElement.attr('data-grader_id'),
         verifier_id: dataDOMElement.attr('data-verifier_id')
     };
+}
+
+/**
+ * Gets the scores data from the DOM (auto grading earned/possible and ta grading possible)
+ * @return {Object}
+ */
+function getScoresFromDOM() {
+    let dataDOMElement = $('#gradeable-scores-id');
+
+    // Get the TA grading scores
+    let scores = {
+        ta_grading_earned: getTaGradingEarned(),
+        ta_grading_total: getTaGradingTotal()
+    };
+
+    // Then check if auto grading scorse exist before adding them
+    let autoGradingTotal = dataDOMElement.attr('data-auto_grading_total');
+    if (autoGradingTotal !== '') {
+        scores.auto_grading_earned = parseInt(dataDOMElement.attr('data-auto_grading_earned'));
+        scores.auto_grading_total = parseInt(autoGradingTotal);
+    }
+
+    return scores;
+}
+
+/**
+ * Gets the number of ta grading points the student has been awarded
+ * @return {number|undefined} Undefined if no score data exists
+ */
+function getTaGradingEarned() {
+    let total = 0.0;
+    let anyPoints = false;
+    $('.graded-component-data').each(function () {
+        let pointsEarned = $(this).attr('data-total_score');
+        if (pointsEarned === '') {
+            return;
+        }
+        total += parseFloat(pointsEarned);
+        anyPoints = true;
+    });
+    if (!anyPoints) {
+        return undefined;
+    }
+    return total;
+}
+
+/**
+ * Gets the number of ta grading points that can be earned
+ * @return {number}
+ */
+function getTaGradingTotal() {
+    let total = 0.0;
+    $('.component').each(function () {
+        total += parseFloat($(this).attr('data-max_value'));
+    });
+    return total;
 }
 
 /**
@@ -1502,6 +1566,9 @@ function closeComponentGrading(component_id, saveChanges) {
             }
 
             return injectGradingComponent(component_tmp, graded_component, false, false);
+        })
+        .then(function () {
+            return refreshTotalScoreBox();
         });
 }
 
@@ -1832,6 +1899,14 @@ function refreshOverallComment(showEditable) {
 }
 
 /**
+ * Refreshes the 'total scores' box at the bottom of the gradeable
+ * @return {Promise}
+ */
+function refreshTotalScoreBox() {
+    return injectTotalScoreBox(getScoresFromDOM());
+}
+
+/**
  * Renders the provided component object for instructor edit mode
  * @param {Object} component
  * @param {boolean} showMarkList Whether the mark list should be visible
@@ -1866,5 +1941,17 @@ function injectOverallComment(comment, editable) {
     return renderOverallComment(comment, editable)
         .then(function (elements) {
             setOverallCommentContents(elements);
+        });
+}
+
+/**
+ * Renders the total scores box
+ * @param {Object} scores
+ * @return {Promise}
+ */
+function injectTotalScoreBox(scores) {
+    return renderTotalScoreBox(scores)
+        .then(function (elements) {
+            setTotalScoreBoxContents(elements);
         });
 }

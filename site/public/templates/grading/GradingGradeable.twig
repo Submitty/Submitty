@@ -2,6 +2,9 @@
 
 {% block header_content %}
     <span id="anon-id" data-anon_id="{{ graded_gradeable.anon_id }}" hidden></span>
+    <span id="gradeable-scores-id"
+          data-auto_grading_earned="{{ graded_gradeable.auto_grading_earned }}"
+          data-auto_grading_total="{{ graded_gradeable.auto_grading_total }}" hidden></span>
 {% endblock %}
 
 {% block components_block %}

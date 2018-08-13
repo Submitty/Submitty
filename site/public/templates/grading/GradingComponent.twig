@@ -25,7 +25,8 @@ Required inputs:
 
 {% block header_block %}
     <b>{{ component.title }}</b>
-    <span class="graded-gradeable-data"
+    <span class="graded-component-data"
+          data-total_score="{{ graded_component.total_score }}"
           data-graded_version="{{ graded_component.graded_version | default('0') }}"
           data-grade_time="{{ graded_component.grade_time }}"
           data-grader_id="{{ graded_component.grader_id }}"
