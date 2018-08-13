@@ -5,14 +5,14 @@
     <input type="hidden" value='{{ download_info_json }}' id="download_info_json_id">
     <div style="width:300px">
         {% for section in reg_sections %}
-            <input type="checkbox" value="{{ section.sections_registration_id }}" id="{{ section.sections_registration_id }}"><label for="{{ section.sections_registration_id }}">Registration Section {{ section.sections_registration_id }}</label><br>
+            <input type="checkbox" value="{{ section.sections_registration_id }}" id="registration_section_{{ section.sections_registration_id }}"><label for="registration_section_{{ section.sections_registration_id }}">Registration Section {{ section.sections_registration_id }}</label><br>
         {% endfor %}
         <input type="checkbox" value="NULL" id="NULL"><label for="NULL">Registration Section NULL</label><br>
     </div>
     <div style="width:300px">
         <input type="checkbox" value="instructor" id="instructor"><label for="instructor">Instructor</label><br>
         <input type="checkbox" value="full_access_grader" id="full_access_grader"><label for="full_access_grader">Full Access Graders</label><br>
-        <input type="checkbox" value="limited_access_grader" id="limited_access_grader"><label for="limited_access_grader">Limited Access Graders</labek><br>
+        <input type="checkbox" value="limited_access_grader" id="limited_access_grader"><label for="limited_access_grader">Limited Access Graders</label><br>
     </div><br>
     {% if use_database %}
         <div style="width: 60%">
