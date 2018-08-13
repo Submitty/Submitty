@@ -568,9 +568,11 @@ bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
 # (re)start the submitty grading scheduler daemon
 systemctl restart submitty_autograding_shipper
 systemctl restart submitty_autograding_worker
+systemctl restart submitty_daemon_jobs_handler
 # also, set it to automatically start on boot
-sudo systemctl enable submitty_autograding_shipper
-sudo systemctl enable submitty_autograding_worker
+systemctl enable submitty_autograding_shipper
+systemctl enable submitty_autograding_worker
+systemctl enable submitty_daemon_jobs_handler
 
 #Setup website authentication if not in worker mode.
 if [ ${WORKER} == 0 ]; then
@@ -616,7 +618,7 @@ if [ ${WORKER} == 0 ]; then
         chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/site_errors
 
         # Call helper script that makes the courses and refreshes the database
-        python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py --submission_url ${SUBMISSION_URL}
+        python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py --no_submissions --submission_url ${SUBMISSION_URL}
 
         #################################################################
         # SET CSV FIELDS (for classlist upload data)
