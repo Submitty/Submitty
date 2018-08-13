@@ -30,10 +30,10 @@
 {# Total Box #}
     <div id="total-score-container">
         {% include "TotalScoreBox.twig" with {
-            'auto_grading_earned': auto_grading_earned,
-            'auto_grading_total': auto_grading_total,
-            'ta_grading_earned': ta_grading_earned,
-            'ta_grading_total': ta_grading_total
+            'auto_grading_earned': graded_gradeable.auto_grading_earned,
+            'auto_grading_total': graded_gradeable.auto_grading_total,
+            'ta_grading_earned': graded_gradeable.ta_grading_earned,
+            'ta_grading_total': graded_gradeable.ta_grading_total
         } only %}
     </div>
 {# /Total Box #}

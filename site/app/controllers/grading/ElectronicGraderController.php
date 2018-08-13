@@ -1240,10 +1240,9 @@ class ElectronicGraderController extends GradingController {
         $graded_gradeable = $ta_graded_gradeable->getGradedGradeable();
         $gradeable = $graded_gradeable->getGradeable();
 
-        // If there is autograding, also send that information
-        $auto_grading_total = $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
-        if ($auto_grading_total > 0) {
-            $response_data['auto_grading_total'] = $auto_grading_total;
+        // If there is autograding, also send that information TODO: this should be restricted to non-peer
+        if ($gradeable->getAutogradingConfig()->anyPoints()) {
+            $response_data['auto_grading_total'] = $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
 
             // Furthermore, if the user has a grade, send that information
             if ($graded_gradeable->getAutoGradedGradeable()->hasActiveVersion()) {

@@ -9,21 +9,24 @@ Required Parameters:
 #}
 {% if auto_grading_total is defined %}
     <div class="box-title badge-container">
-        <strong id="grading_total" class="badge {{ functions.getBadgeStyle(auto_grading_earned, auto_grading_total) }}">
+        <strong id="autograding_total" class="badge {{ functions.getBadgeStyle(auto_grading_earned, ta_grading_total) }}">
             {{ auto_grading_earned | default('-') }} / {{ auto_grading_total }}
         </strong>
-        <strong>Grading Total</strong>
+        <strong>Auto-Grading Total</strong>
     </div>
+{% else %}
+    {% set auto_grading_total = 0 %}
+    {% set auto_grading_earned = 0 %}
 {% endif %}
 <div class="box-title badge-container">
-    <strong id="autograding_total" class="badge {{ functions.getBadgeStyle(ta_grading_earned, ta_grading_total) }}">
+    <strong id="grading_total" class="badge {{ functions.getBadgeStyle(ta_grading_earned, ta_grading_total) }}">
         {{ ta_grading_earned | default('-') }} / {{ ta_grading_total }}
     </strong>
-    <strong>Auto-Grading Total</strong>
+    <strong>Grading Total</strong>
 </div>
 <div class="box-title badge-container">
     <strong id="score_total" class="badge {{ functions.getBadgeStyle((ta_grading_earned + auto_grading_earned), (ta_grading_total + auto_grading_total)) }}">
-        {{ (ta_grading_earned + auto_grading_earned) | default('-') }} / {{ ta_grading_total + auto_grading_total|default(0) }}
+        {{ (ta_grading_earned + auto_grading_earned) | default('-') }} / {{ ta_grading_total + auto_grading_total }}
     </strong>
     <strong>Total</strong>
 </div>
