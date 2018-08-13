@@ -1566,9 +1566,6 @@ function closeComponentGrading(component_id, saveChanges) {
             }
 
             return injectGradingComponent(component_tmp, graded_component, false, false);
-        })
-        .then(function () {
-            return refreshTotalScoreBox();
         });
 }
 
@@ -1928,6 +1925,9 @@ function injectGradingComponent(component, graded_component, editable, showMarkL
     return renderGradingComponent(component, graded_component, editable, showMarkList)
         .then(function (elements) {
             setComponentContents(component.id, elements);
+        })
+        .then(function () {
+            return refreshTotalScoreBox();
         });
 }
 
