@@ -555,10 +555,16 @@ tr.is_publish {
     margin: 2px;
 }
 
-.gradeable .mark-tools {
+.gradeable .mark-disabled span {
+    cursor: not-allowed;
+    opacity: 0.3;
+}
+
+.gradeable span.mark-tools {
     min-width: 20px;
     width: 20px;
     text-align: right;
+    opacity: 1.0;
 }
 
 .gradeable .mark-uneditable {

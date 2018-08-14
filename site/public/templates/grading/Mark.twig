@@ -5,14 +5,15 @@ Required Input:
     mark: {id, title, publish, order}
     is_checked
     editable
+    mark_disabled
 TODO: add 'publish' support
 #}
 {% set extra_classes = editable ? '' : 'mark-uneditable' %}
 <div id="mark-{{ mark.id }}"
-     class="mark-container row"
+     class="mark-container row {{ mark_disabled ? 'mark-disabled' : '' }} "
      data-component_id="{{ component.id }}"
      data-mark_id="{{ mark.id }}"
-     onclick="{{ editable ? '' : 'onToggleMark(this)' }}"
+     onclick="{{ editable or mark_disabled ? '' : 'onToggleMark(this)' }}"
 >
     {% if not editable %}
         <span class="{{ is_checked ? 'mark-selected' : '' }} mark-selector col-no-gutters"
