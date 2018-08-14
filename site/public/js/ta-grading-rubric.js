@@ -573,6 +573,7 @@ function isEditModeEnabled() {
  * does not change before the components close
  */
 function updateEditModeEnabled() {
+    // noinspection JSUndeclaredVariable
     EDIT_MODE_ENABLED = $('#edit-mode-enabled').is(':checked');
 }
 
@@ -581,6 +582,7 @@ function updateEditModeEnabled() {
  * @return {boolean}
  */
 function isOverwriteGraderEnabled() {
+    // noinspection JSValidateTypes
     return $('#overwrite-id').is(':checked');
 }
 
@@ -949,6 +951,7 @@ function getFirstOpenComponentId() {
  * @return {int}
  */
 function getComponentCount() {
+    // noinspection JSValidateTypes
     return $('.component-container').length;
 }
 
