@@ -527,6 +527,10 @@ tr.is_publish {
     background-color: #000;
 }
 
+.gradeable .mark-selector.hidden {
+    display: none;
+}
+
 .gradeable .mark-container span {
     display: inline-flex;
     box-sizing: content-box;

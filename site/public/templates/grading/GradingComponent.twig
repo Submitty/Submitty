@@ -111,6 +111,12 @@ Required inputs:
                 >{{ graded_component.comment }}</textarea>
             </span>
         </div>
+    {% else %}
+        <div class="custom-mark-data"
+             data-selected="{{ graded_component.custom_mark_selected }}"
+             data-score="{{ graded_component.score }}"
+             data-comment="{{ graded_component.comment }}"
+             hidden></div>
     {% endif %}
     {# /Custom mark #}
 {% endblock %}

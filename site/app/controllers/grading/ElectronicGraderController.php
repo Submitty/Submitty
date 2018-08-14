@@ -1674,7 +1674,7 @@ class ElectronicGraderController extends GradingController {
         $component_id = $_POST['component_id'] ?? '';
         $mark_id = $_POST['mark_id'] ?? '';
         $points = $_POST['points'] ?? '';
-        $title = $_POST['note'] ?? null;
+        $title = $_POST['title'] ?? null;
 
         // Validate required parameters
         if ($title === null) {

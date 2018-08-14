@@ -703,7 +703,7 @@ function getMarkListFromDOM(component_id) {
             markList.push({
                 id: parseInt($(this).attr('data-mark_id')),
                 points: parseFloat($(this).find('input[type=number]').val()),
-                title: $(this).find('textarea').val(),
+                title: $(this).find('input[type=text]').val(),
                 order: i
             });
         } else {
@@ -737,17 +737,29 @@ function getGradedComponentFromDOM(component_id) {
     let customMarkSelected = false;
     domElement.find('span.mark-selected').each(function () {
         let mark_id = parseInt($(this).attr('data-mark_id'));
-        if(mark_id === CUSTOM_MARK_ID) {
+        if (mark_id === CUSTOM_MARK_ID) {
             customMarkSelected = true;
         } else {
             mark_ids.push(mark_id);
         }
     });
 
-    let dataDOMElement = domElement.find('.graded-component-data')
+    let score = 0.0;
+    let comment = '';
+    if (isEditModeEnabled()) {
+        let customMarkDOMElement = domElement.find('.custom-mark-data');
+        score = parseFloat(customMarkDOMElement.attr('data-score'));
+        comment = customMarkDOMElement.attr('data-comment');
+        customMarkSelected = customMarkDOMElement.attr('data-selected') === 'true'
+    } else {
+        score = parseFloat(customMarkContainer.find('input[type=number]').val());
+        comment = customMarkContainer.find('textarea').val();
+    }
+
+    let dataDOMElement = domElement.find('.graded-component-data');
     return {
-        score: parseFloat(customMarkContainer.find('input[type=number]').val()),
-        comment: customMarkContainer.find('textarea').val(),
+        score: score,
+        comment: comment,
         custom_mark_selected: customMarkSelected,
         mark_ids: mark_ids,
         graded_version: parseInt(dataDOMElement.attr('data-graded_version')),
@@ -1220,9 +1232,9 @@ function onToggleEditMode(me) {
  * @return {Object}
  */
 function getMarkFromMarkArray(marks, mark_id) {
-    for (let mark in marks) {
-        if (mark.id === mark_id) {
-            return mark;
+    for (let i = 0; i < marks.length; ++i) {
+        if (marks[i].id === mark_id) {
+            return marks[i];
         }
     }
     return null;
@@ -1691,7 +1703,8 @@ function unCheckFirstMark(component_id) {
  * @return {Promise}
  */
 function saveMarkList(component_id) {
-    return ajaxGetComponentRubric(getGradeableId(), component_id)
+    let gradeable_id = getGradeableId();
+    return ajaxGetComponentRubric(gradeable_id, component_id)
         .then(function (component) {
             let domMarkList = getMarkListFromDOM(component_id);
             let serverMarkList = component.marks;
@@ -1708,7 +1721,7 @@ function saveMarkList(component_id) {
                 let oldServerMark = getMarkFromMarkArray(oldServerMarkList, domMark.id);
                 sequence = sequence
                     .then(function () {
-                        return tryResolveMarkSave(domMark, serverMark, oldServerMark);
+                        return tryResolveMarkSave(gradeable_id, component_id, domMark, serverMark, oldServerMark);
                     })
                     .then(function (success) {
                         // Success of false counts as a conflict
