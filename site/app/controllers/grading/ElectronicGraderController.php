@@ -1855,7 +1855,7 @@ class ElectronicGraderController extends GradingController {
         $gradeable_id = $_POST['gradeable_id'] ?? '';
         $component_id = $_POST['component_id'] ?? '';
         $points = $_POST['points'] ?? '';
-        $title = $_POST['note'] ?? null;
+        $title = $_POST['title'] ?? null;
 
         // Validate required parameters
         if ($title === null) {
@@ -1884,7 +1884,7 @@ class ElectronicGraderController extends GradingController {
         }
 
         // checks if user has permission
-        if (!$this->core->getAccess()->canI("grading.electronic.add_one_new_mark", ["gradeable" => $gradeable])) {
+        if (!$this->core->getAccess()->canI("grading.electronic.add_new_mark", ["gradeable" => $gradeable])) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to add mark');
             return;
         }
@@ -1934,7 +1934,7 @@ class ElectronicGraderController extends GradingController {
         }
 
         // checks if user has permission
-        if (!$this->core->getAccess()->canI("grading.electronic.delete_one_mark", ["gradeable" => $gradeable])) {
+        if (!$this->core->getAccess()->canI("grading.electronic.delete_mark", ["gradeable" => $gradeable])) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to delete marks');
             return;
         }

@@ -1,8 +1,7 @@
 {#
 Required Input:
-    precision
-    component_id
-    mark: {id, title, publish, order}
+    component: {id, precision}
+    mark: {id, title, publish, order, deleted}
     is_checked
     editable
     mark_disabled
@@ -10,7 +9,7 @@ TODO: add 'publish' support
 #}
 {% set extra_classes = editable ? '' : 'mark-uneditable' %}
 <div id="mark-{{ mark.id }}"
-     class="mark-container row {{ not editable and mark_disabled ? 'mark-disabled' : '' }} "
+     class="mark-container row {{ not editable and mark_disabled ? 'mark-disabled' : '' }} {{ mark.deleted ? 'mark-deleted' : '' }}"
      data-component_id="{{ component.id }}"
      data-mark_id="{{ mark.id }}"
      onclick="{{ editable or mark_disabled ? '' : 'onToggleMark(this)' }}"
@@ -24,7 +23,7 @@ TODO: add 'publish' support
         {% if editable %}
             <input type="number"
                    onchange="onMarkPointsChange(this)"
-                   step="{{ precision }}"
+                   step="{{ component.precision }}"
                    value="{{ mark.points }}" />
         {% else %}
             {{ mark.points }}

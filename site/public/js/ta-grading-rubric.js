@@ -14,6 +14,8 @@ NO_COMPONENT_ID = -1;
 
 CUSTOM_MARK_ID = 0;
 
+MARK_ID_COUNTER = 0;
+
 /**
  * Keep All of the ajax functions at the top of this file
  *
@@ -340,7 +342,7 @@ function ajaxDeleteMark(gradeable_id, component_id, mark_id) {
             url: buildUrl({
                 'component': 'grading',
                 'page': 'electronic',
-                'action': 'delete_one_mark'
+                'action': 'delete_mark'
             }),
             data: {
                 'gradeable_id': gradeable_id,
@@ -573,6 +575,14 @@ function isOverwriteGraderEnabled() {
 }
 
 /**
+ * Gets a unique mark id for adding new marks
+ * @return {int}
+ */
+function getNewMarkId() {
+    return MARK_ID_COUNTER--;
+}
+
+/**
  * Sets the DOM elements to render for the entire rubric
  * @param elements
  */
@@ -704,7 +714,8 @@ function getMarkListFromDOM(component_id) {
                 id: parseInt($(this).attr('data-mark_id')),
                 points: parseFloat($(this).find('input[type=number]').val()),
                 title: $(this).find('input[type=text]').val(),
-                order: i
+                order: i,
+                deleted: $(this).hasClass('mark-deleted')
             });
         } else {
             // Don't add the custom mark
@@ -1062,8 +1073,6 @@ function onAddNewMark(me) {
  */
 function onDeleteMark(me) {
     $(me).parents('.mark-container').toggleClass('mark-deleted');
-    $(me).hide();
-    $(me).sibling('.restore-mark-container').show();
 }
 
 /**
@@ -1072,8 +1081,6 @@ function onDeleteMark(me) {
  */
 function onRestoreMark(me) {
     $(me).parents('.mark-container').toggleClass('mark-deleted');
-    $(me).hide();
-    $(me).sibling('.delete-mark-container').show();
 }
 
 /**
@@ -1375,7 +1382,7 @@ function toggleOverallComment(saveChanges) {
 function addNewMark(component_id) {
     let component = getComponentFromDOM(component_id);
     component.marks.push({
-        id: 0,
+        id: getNewMarkId(),
         title: '',
         score: 0.0,
         publish: false,
@@ -1763,6 +1770,7 @@ function saveMarkList(component_id) {
                     return sequence1;
                 });
         })
+        // TODO: improve this error handling
         .catch(function (err) {
             console.log(err);
             alert('Error Saving Rubric! Please refresh the page and try again');
@@ -1801,17 +1809,18 @@ function marksEqual(mark0, mark1) {
  *  @return {Promise<boolean>}
  */
 function tryResolveMarkSave(gradeable_id, component_id, domMark, serverMark, oldServerMark) {
+    let markDeleted = isMarkDeleted(domMark.id);
     if (oldServerMark !== null) {
         if (serverMark !== null) {
             // Mark edited under normal conditions
-            if (marksEqual(domMark, serverMark) || marksEqual(domMark, oldServerMark)) {
+            if ((marksEqual(domMark, serverMark) || marksEqual(domMark, oldServerMark)) && !markDeleted) {
                 // If the domMark is not unique, then we don't need to do anything
                 return Promise.resolve(true);
             } else if (!marksEqual(serverMark, oldServerMark)) {
                 // The domMark is unique, and the serverMark is also unique,
                 // which means all 3 versions are different, which is a conflict state
                 return Promise.resolve(false);
-            } else if (isMarkDeleted(domMark.id)) {
+            } else if (markDeleted) {
                 // domMark was deleted and serverMark hasn't changed from oldServerMark,
                 //  so try to delete the mark
                 return ajaxDeleteMark(gradeable_id, component_id, domMark.id)
@@ -1845,7 +1854,7 @@ function tryResolveMarkSave(gradeable_id, component_id, domMark, serverMark, old
         }
     } else {
         // This means it didn't exist when we started editing, so serverMark must also be null
-        if (isMarkDeleted(domMark.id)) {
+        if (markDeleted) {
             // The mark was marked for deletion, but never existed... so do nothing
             return Promise.resolve(true);
         } else {
@@ -1854,6 +1863,11 @@ function tryResolveMarkSave(gradeable_id, component_id, domMark, serverMark, old
                 .then(function () {
                     // Success, then return true
                     return Promise.resolve(true);
+                })
+                .catch(function(err) {
+                    // This means the user's mark was invalid
+                    alert('Failed to add mark: ' + err);
+                    throw err;
                 });
         }
     }

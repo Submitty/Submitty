@@ -564,6 +564,22 @@ tr.is_publish {
     opacity: 0.3;
 }
 
+.gradeable .mark-deleted {
+    background: #FFAAAA
+}
+
+.gradeable .mark-deleted span.delete-mark-container {
+    display: none;
+}
+
+.gradeable span.restore-mark-container {
+    display: none;
+}
+
+.gradeable .mark-deleted span.restore-mark-container {
+    display: inherit;
+}
+
 .gradeable span.mark-tools {
     min-width: 20px;
     width: 20px;
