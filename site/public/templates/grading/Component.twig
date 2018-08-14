@@ -111,11 +111,10 @@
                     <div class="mark-cell-box">
                             <span
                                 onclick="selectCustomMark({{ c_index }}); event.stopPropagation();"
-                                data-component_index="{{ c_index }}"
-                                class="{{ component.custom_mark_checked ? "" : "mark-has" }} mark mark-selector"
-                                name="mark_icon_{{ c_index }}_custom"
+                                data-component_index="{{ c_index }}"                                name="mark_icon_{{ c_index }}_custom"
                                 id="mark_icon_custom-{{ c_index }}"
-                                value="{{ component.has_custom_mark }}" class="mark-has"
+                                value="{{ component.custom_mark_checked }}"
+                                class="{{ component.custom_mark_checked ? "mark-has" : "" }} mark mark-selector"
                             >
                             </span>
                         <input
@@ -123,7 +122,7 @@
                                 id="mark_points_custom-{{ c_index }}"
                                 type="number"
                                 step="{{ gradeable.precision }}"
-                                onchange="updateCustomMarkPoints(this); checkIfSelected(this); updateProgressPoints({{ c_index }});"
+                                onchange="updateCustomMarkPoints(this); updateProgressPoints({{ c_index }});"
                                 onclick="event.stopPropagation();"
                                 data-component_index="{{ c_index }}"
                                 value="{{ component.score }}" class="mark-score"
@@ -138,8 +137,8 @@
                         <textarea
                                 name="mark_text_custom_{{ c_index }}"
                                 id="mark_text_custom-{{ c_index }}"
-                                onkeyup="updateCustomMarkText(this); autoResizeComment(event); checkIfSelected(this);"
-                                onchange="updateCustomMarkText(this); checkIfSelected(this); updateProgressPoints({{ c_index }});"
+                                onkeyup="updateCustomMarkText(this); autoResizeComment(event);"
+                                onchange="updateCustomMarkText(this); updateProgressPoints({{ c_index }});"
                                 onclick="event.stopPropagation();"
                                 data-component_index="{{ c_index }}"
                                 cols="120"

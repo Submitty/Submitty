@@ -1472,6 +1472,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 'comp_id',
                 'score',
                 'comment',
+                'custom_mark',
                 'grader_id',
                 'graded_version',
                 'grade_time',

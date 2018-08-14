@@ -343,7 +343,7 @@ function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, active_ver
             if (response.status === 'fail') {
                 console.error('Failed to save component: ' + response.message);
                 if(response.message == "Custom Mark must have a message"){
-                    alert("The Custom Mark must have a message to have a non 0 point value");
+                    alert("The Custom Mark must have a message to have a non 0 point value or be checked");
                 }
             } else if (response.status === 'error') {
                 console.error('Internal error while saving component: ' + response.message);
@@ -655,6 +655,7 @@ function checkMarks(c_index) {
     c_index = parseInt(c_index);
     var mark_table = $('#marks-parent-'+c_index);
     var targetId=getComponent(c_index).marks[0].id;
+    var counter=0;
     var first_mark = mark_table.find('span[name=mark_icon_'+c_index+'_'+targetId+']');
     var all_false = true; //ignores the first mark
     mark_table.find('.mark').each(function() {
@@ -663,20 +664,23 @@ function checkMarks(c_index) {
             return;
         }
         if($(this)[0].classList.contains('mark-has')) {
-            all_false = false;
-            return false;
+            counter++;
         }
     });
     var current_row = $('#mark_custom_id-'+c_index);
-    var custom_message = current_row.find('textarea[name=mark_text_custom_'+c_index+']').val();
-    var custom_has = current_row.find('span[name=mark_custom_id-'+c_index+'-check]').val();
+    var custom_has = getComponent(c_index).custom_mark_checked;
+    console.log(custom_has);
     if(custom_has){
+        counter++;
+    }
+    console.log(counter);
+    /*if(custom_has){
         all_false = false;
         first_mark.toggleClass("mark-has", false);
         getMark(c_index, targetId).has = false;
         return false;
-    }
-    if(all_false === false) {
+    }*/
+    if(counter > 1) {
         first_mark.toggleClass("mark-has", false);
         getMark(c_index, targetId).has = false;
     }
@@ -709,8 +713,8 @@ function calculateMarksPoints(c_index) {
     }
 
     var custom_points = component.score;
-    var custom_has = component.custom_mark_checked;
-    console.log(custom_has);
+    var custom_has = getComponent(c_index).custom_mark_checked;
+  //  console.log(custom_has);
     if (custom_has) {
         if (isNaN(custom_points)) {
             current_points += 0;
@@ -780,7 +784,7 @@ function updateProgressPoints(c_index) {
     current_question_text.html(summary_text);
 
     var custom_message = $('textarea[name=mark_text_custom_'+c_index+']').val();
-    $('#mark_points_custom-' + c_index)[0].disabled=false;
+    $('#mark_text_custom-'+c_index)[0].disabled=false;
     $('#mark_points_custom-' + c_index)[0].style.cursor="default";
     $('#mark_text_custom-' + c_index)[0].style.cursor="text";
    // $('#mark_icon_custom-' + c_index)[0].style.cursor="pointer";
@@ -867,7 +871,8 @@ function selectCustomMark(c_index){
     var component = gradeable.components[c_index-1];
     var check = $("#mark_icon_custom-" + c_index);
     check.toggleClass("mark-has", component.has_custom_mark);
-    console.log(component.custom_mark_checked);
+    var current_row = $('#mark_custom_id-'+c_index);
+    getComponent(c_index).custom_mark_checked = !getComponent(c_index).custom_mark_checked;
     checkMarks(c_index);
     updateProgressPoints(c_index);
 }
@@ -892,8 +897,7 @@ function selectMark(c_index, m_id) {
     var mark = getMark(c_index, m_id);
     mark.has = !mark.has;
     var current_row = $('#mark_custom_id-'+c_index);
-    var custom_message = current_row.find('textarea[name=mark_text_custom_'+c_index+']').val();
-    if(custom_message !== "" && custom_message !== undefined){
+    if(getComponent(c_index).custom_mark_checked){
         skip = false;
     }
     //actually checks the mark then checks if the first mark is still valid
@@ -1097,8 +1101,7 @@ function saveMark(c_index, sync, override, successCallback, errorCallback) {
         var current_title = $('#title-' + c_index);
         var custom_points  = current_row.find('input[name=mark_points_custom_'+c_index+']').val();
         var custom_message = current_row.find('textarea[name=mark_text_custom_'+c_index+']').val();
-        var custom_has = current_row.find('span[name=mark_icon_'+c_index+'_custom]').val();
-        console.log(custom_has);
+        var custom_has = getComponent(c_index).custom_mark_checked;
       /*  if(custom_message === "" || custom_message == undefined){
             custom_points="0";
         } */
@@ -1118,6 +1121,7 @@ function saveMark(c_index, sync, override, successCallback, errorCallback) {
             custom_message = escapeHTML(custom_message);
         }
         var overwrite = ($('#overwrite-id').is(':checked')) ? ("true") : ("false");
+        console.log(custom_has);
         ajaxSaveGradedComponent(gradeable.id, gradeable.components[c_index-1].id, gradeable.user_id, gradeable.active_version, custom_points, custom_message, custom_has, overwrite, mark_ids, true, function(response) {
             var hasGrade = false;
             for (var m_index = 0; m_index < arr_length; m_index++) {
@@ -1126,8 +1130,8 @@ function saveMark(c_index, sync, override, successCallback, errorCallback) {
                     hasGrade = true;
                 }                
             }
-            custom_message = current_row.find('textarea[name=mark_text_custom_'+c_index+']').val();
-            if (hasGrade === false && (custom_message === "" || custom_message == undefined)) {
+            custom_has = getComponent(c_index).custom_mark_checked;
+            if (hasGrade === false && !custom_has) {
                 gradedByElement.text("Ungraded!");
                 component.grader = null;
             } 

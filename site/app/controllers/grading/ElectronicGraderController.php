@@ -1173,7 +1173,7 @@ class ElectronicGraderController extends GradingController {
         $graded_component = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
         try {
             // Once we've parsed the inputs and checked permissions, perform the operation
-            if(($custom_message == "" || $custom_message == 'undefined')  && ($custom_points != 0 || $custom_has)){
+            if(($custom_message == "" || $custom_message == 'undefined')  && ($custom_points != 0 || $custom_has === true)){
                 $this->core->getOutput()->renderJsonFail('Custom Mark must have a message');   
             }
             else{

@@ -15,7 +15,6 @@ use app\models\User;
  * @method int getComponentId()
  * @method float getScore()
  * @method string getComment()
- * @method bool isCustomMarkChecked()
  * @method void setComment($comment)
  * @method bool setCustomMarkChecked($checked)
  * @method string getGraderId()
@@ -52,7 +51,7 @@ class GradedComponent extends AbstractModel {
     /** @property @var string The comment on this mark / custom mark description */
     protected $comment = "";
     /** @property @var bool Is the custom mark selected */
-    protected $custom_mark_checked = false;
+    protected $custom_mark_checked = true;
     /** @property @var string The Id of the grader who most recently updated the component's grade */
     protected $grader_id = "";
     /** @property @var int The submission version this grade is for */
@@ -79,18 +78,17 @@ class GradedComponent extends AbstractModel {
 
         $this->setComponent($component);
         $this->setGrader($grader);
-        
+        //print_r($details);
         $this->setComment($details['comment'] ?? '');
         $this->setGradedVersion($details['graded_version'] ?? 0);
         $this->setGradeTime($details['grade_time'] ?? new \DateTime());
-
+        $this->setCustomMarkChecked($details['custom_mark'] ?? false);
+        $custom_mark_checked = $details['custom_mark'] ?? false;
         // assign the default score if its not electronic (or rather not a custom mark)
         if ($component->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {
-            $custom_mark_checked = $details['has_custom_mark'] ?? false;
             $score = $details['score'] ?? 0;
         } else {
             $score = $details['score'] ?? $component->getDefault();
-            $custom_mark_checked = $details['has_custom_mark'] ?? false;
         }
         $this->setScore($score);
 
@@ -163,7 +161,17 @@ class GradedComponent extends AbstractModel {
     public function hasMark(Mark $mark) {
         return $this->hasMarkId($mark->getId());
     }
-
+    
+    /**
+     * Gets if this graded component's custom mark is checked
+     * @return bool
+     */
+    public function isCustomMarkChecked(){
+        if($this->custom_mark_checked==true){
+            return 'true';
+        }
+        return 'false';
+    }
     /**
      * Gets the total number of points earned for this component
      *  (including mark points)
