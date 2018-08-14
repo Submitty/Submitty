@@ -719,29 +719,43 @@ function getMarkListFromDOM(component_id) {
     let markList = [];
     let i = 0;
     domElement.find('.ta-rubric-table .mark-container').each(function () {
-        if (isEditModeEnabled()) {
-            markList.push({
-                id: parseInt($(this).attr('data-mark_id')),
-                points: parseFloat($(this).find('input[type=number]').val()),
-                title: $(this).find('input[type=text]').val(),
-                order: i,
-                deleted: $(this).hasClass('mark-deleted')
-            });
-        } else {
-            // Don't add the custom mark
-            if ($(this).hasClass('custom-mark-container')) {
-                return;
-            }
-            markList.push({
-                id: parseInt($(this).attr('data-mark_id')),
-                points: parseFloat($(this).find('.mark-points').attr('data-points')),
-                title: $(this).find('.mark-title').attr('data-title'),
-                order: i
-            });
+        let mark = getMarkFromDOM(parseInt($(this).attr('data-mark_id')));
+
+        // Don't add the custom mark
+        if(mark === null) {
+            return;
         }
+        mark.order = i;
+        markList.push(mark);
         i++;
     });
     return markList;
+}
+
+/**
+ * Extracts a mark from the DOM
+ * @param {int} mark_id
+ * @return {Object}
+ */
+function getMarkFromDOM(mark_id) {
+    let domElement = getMarkDOMElement(mark_id);
+    if (isEditModeEnabled()) {
+        return {
+            id: parseInt(domElement.attr('data-mark_id')),
+            points: parseFloat(domElement.find('input[type=number]').val()),
+            title: domElement.find('input[type=text]').val(),
+            deleted: domElement.hasClass('mark-deleted')
+        };
+    } else {
+        if (domElement.hasClass('custom-mark-container')) {
+            return null;
+        }
+        return {
+            id: parseInt(domElement.attr('data-mark_id')),
+            points: parseFloat(domElement.find('.mark-points').attr('data-points')),
+            title: domElement.find('.mark-title').attr('data-title'),
+        };
+    }
 }
 
 /**
@@ -1061,6 +1075,38 @@ function toggleDOMCustomMark(component_id) {
 }
 
 /**
+ * Opens the 'users who got mark' dialog
+ * @param {string} component_title
+ * @param {string} mark_title
+ * @param {int} gradedComponentCount
+ * @param {int} totalComponentCount
+ * @param {Array} submitterIds
+ */
+function openMarkStatsPopup(component_title, mark_title, gradedComponentCount, totalComponentCount, submitterIds) {
+    let popup = $('#student-marklist-popup');
+
+    popup.find('.question-title').html(component_title);
+    popup.find('.mark-title').html(mark_title);
+    popup.find('.submitter-count').html(submitterIds.length);
+    popup.find('.graded-component-count').html(gradedComponentCount);
+    popup.find('.total-component-count').html(totalComponentCount);
+
+    // Create an array of links for each submitter
+    let submitterHtmlElements = [];
+    submitterIds.forEach(function (id) {
+        let href = window.location.href.replace(/&who_id=([a-z0-9_]*)/, '&who_id=' + id);
+        submitterHtmlElements.push('<a href="' + href + '">' + id + '</a>');
+    });
+    popup.find('.student-names').html(submitterHtmlElements.join(', '));
+
+    // Hide all other (potentially) open popups
+    $('.popup-form').hide();
+
+    // Open the popup
+    popup.show();
+}
+
+/**
  * DOM Callback methods
  *
  */
@@ -1110,7 +1156,27 @@ function onMarkPointsChange(me) {
  * @param me DOM Element of the mark stats button
  */
 function onGetMarkStats(me) {
-    //TODO:
+    let component_id = getComponentIdFromDOMElement(me);
+    let mark_id = getMarkIdFromDOMElement(me);
+    ajaxGetMarkStats(getGradeableId(), component_id, mark_id)
+        .then(function (stats) {
+            let component_title = getComponentFromDOM(component_id).title;
+            let mark_title = getMarkFromDOM(mark_id).title;
+
+            // TODO: this is too much math in the view.  Make the server do this
+            let graded = 0, total = 0;
+            for (let sectionNumber in stats.sections) {
+                if (stats.sections.hasOwnProperty(sectionNumber)) {
+                    graded += parseInt(stats.sections[sectionNumber]['graded_components']);
+                    total += parseInt(stats.sections[sectionNumber]['total_components']);
+                }
+            }
+
+            openMarkStatsPopup(component_title, mark_title, graded, total, stats.submitter_ids);
+        })
+        .catch(function (err) {
+            alert('Failed to get stats for mark: ' + err.message);
+        });
 }
 
 /**

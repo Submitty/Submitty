@@ -37,7 +37,7 @@ TODO: add 'publish' support
             {{ mark.title|escape }}
         {% endif %}
     </span>
-    <span class="col-no-gutters mark-tools" onclick="onGetMarkStats(this)">
+    <span class="col-no-gutters mark-tools" onclick="onGetMarkStats(this);event.stopPropagation()">
         <i class="fa fa-users icon-mark-stats"></i>
     </span>
     {% if editable %}
