@@ -1063,7 +1063,7 @@ function onAddNewMark(me) {
     addNewMark(getComponentIdFromDOMElement(me))
         .catch(function (err) {
             console.error(err);
-            alert('Error adding mark!');
+            alert('Error adding mark! ' + err.message);
         });
 }
 
@@ -1091,7 +1091,7 @@ function onMarkPointsChange(me) {
     refreshGradedComponent(getComponentIdFromDOMElement(me), true)
         .catch(function (err) {
             console.err(err);
-            alert('Error updating component!');
+            alert('Error updating component! ' + err.message);
         });
 }
 
@@ -1111,7 +1111,7 @@ function onClickComponent(me) {
     toggleComponent(getComponentIdFromDOMElement(me), true)
         .catch(function (err) {
             console.error(err);
-            alert('Error opening/closing component!');
+            alert('Error opening/closing component! ' + err.message);
         });
 }
 
@@ -1123,7 +1123,7 @@ function onCancelComponent(me) {
     toggleComponent(getComponentIdFromDOMElement(me), false)
         .catch(function (err) {
             console.error(err);
-            alert('Error closing component!');
+            alert('Error closing component! ' + err.message);
         });
 }
 
@@ -1135,7 +1135,7 @@ function onClickOverallComment(me) {
     toggleOverallComment(true)
         .catch(function (err) {
             console.error(err);
-            alert('Error opening/closing overall comment!');
+            alert('Error opening/closing overall comment! ' + err.message);
         });
 }
 
@@ -1147,7 +1147,7 @@ function onCancelOverallComment(me) {
     toggleOverallComment(false)
         .catch(function (err) {
             console.error(err);
-            alert('Error closing overall comment!');
+            alert('Error closing overall comment! ' + err.message);
         });
 }
 
@@ -1159,7 +1159,7 @@ function onToggleMark(me) {
     toggleCommonMark(getComponentIdFromDOMElement(me), getMarkIdFromDOMElement(me))
         .catch(function (err) {
             console.error(err);
-            alert('Error toggling mark!');
+            alert('Error toggling mark! ' + err.message);
         });
 }
 
@@ -1171,7 +1171,7 @@ function onCustomMarkChange(me) {
     updateCustomMark(getComponentIdFromDOMElement(me))
         .catch(function (err) {
             console.error(err);
-            alert('Error updating custom mark!');
+            alert('Error updating custom mark! ' + err.message);
         });
 }
 
@@ -1188,7 +1188,7 @@ function onToggleCustomMark(me) {
     toggleCustomMark(component_id)
         .catch(function (err) {
             console.error(err);
-            alert('Error toggling custom mark!');
+            alert('Error toggling custom mark! ' + err.message);
         });
 }
 
@@ -1220,11 +1220,20 @@ function onToggleEditMode(me) {
         reopen_component_id = open_component_ids[0];
     }
 
-    closeAllComponents(true).then(function () {
-        if (reopen_component_id !== NO_COMPONENT_ID) {
-            return openComponent(reopen_component_id);
-        }
-    });
+    closeAllComponents(true)
+        .catch(function (err) {
+            console.error(err);
+            alert('Error closing component! ' + err.message);
+        })
+        .then(function () {
+            if (reopen_component_id !== NO_COMPONENT_ID) {
+                return openComponent(reopen_component_id);
+            }
+        })
+        .catch(function (err) {
+            console.error(err);
+            alert('Error re-opening component! ' + err.message);
+        });
 }
 
 /**
@@ -1497,11 +1506,7 @@ function openComponentGrading(component_id) {
  */
 function openComponent(component_id) {
     // Achieve polymorphism in the interface using this `isInstructorEditEnabled` flag
-    return (isInstructorEditEnabled() ? openComponentInstructorEdit(component_id) : openComponentGrading(component_id))
-        .catch(function (err) {
-            console.error(err);
-            alert('Error loading component!  Refresh the page and try again');
-        });
+    return isInstructorEditEnabled() ? openComponentInstructorEdit(component_id) : openComponentGrading(component_id);
 }
 
 /**
@@ -1596,13 +1601,9 @@ function closeComponentGrading(component_id, saveChanges) {
  */
 function closeComponent(component_id, saveChanges = true) {
     // Achieve polymorphism in the interface using this `isInstructorEditEnabled` flag
-    return (isInstructorEditEnabled()
+    return isInstructorEditEnabled()
         ? closeComponentInstructorEdit(component_id, saveChanges)
-        : closeComponentGrading(component_id, saveChanges))
-        .catch(function (err) {
-            console.error(err);
-            alert('Error saving component!  Refresh the page and try again');
-        });
+        : closeComponentGrading(component_id, saveChanges)
 }
 
 /**
@@ -1613,10 +1614,6 @@ function openOverallComment() {
     return ajaxGetOverallComment(getGradeableId(), getAnonId())
         .then(function (comment) {
             return injectOverallComment(comment, true);
-        })
-        .catch(function (err) {
-            console.error(err);
-            alert('Error fetching overall comment! Refresh the page and try again');
         });
 }
 
@@ -1630,19 +1627,11 @@ function closeOverallComment(saveChanges = true) {
         return ajaxSaveOverallComment(getGradeableId(), getAnonId(), getOverallCommentFromDOM())
             .then(function () {
                 return refreshOverallComment(false);
-            })
-            .catch(function (err) {
-                console.error(err);
-                alert('Error saving overall comment! Refresh the page and try again!');
             });
     } else {
         return ajaxGetOverallComment(getGradeableId(), getAnonId())
             .then(function (comment) {
                 return injectOverallComment(comment, false);
-            })
-            .catch(function (err) {
-                console.error(err);
-                alert('Error fetching overall comment! Refresh the page and try again!');
             });
     }
 }
@@ -1758,9 +1747,8 @@ function saveMarkList(component_id) {
                                 // This should be a pretty rare case
                                 return ajaxDeleteMark(gradeable_id, component_id, mark.id)
                                     .catch(function (err) {
-                                        // Catch here so failed deletions (because someone has received it)
-                                        //  don't make everything else fail
-                                        alert('Could not delete mark! ' + err.message);
+                                        err.message = 'Could not delete mark: ' + err.message;
+                                        throw err;
                                     });
                             } else {
                                 return ajaxSaveMark(gradeable_id, component_id, mark.id, mark.points, mark.title);
@@ -1769,11 +1757,6 @@ function saveMarkList(component_id) {
                     });
                     return sequence1;
                 });
-        })
-        // TODO: improve this error handling
-        .catch(function (err) {
-            console.log(err);
-            alert('Error Saving Rubric! Please refresh the page and try again');
         });
 }
 
@@ -1825,9 +1808,8 @@ function tryResolveMarkSave(gradeable_id, component_id, domMark, serverMark, old
                 //  so try to delete the mark
                 return ajaxDeleteMark(gradeable_id, component_id, domMark.id)
                     .catch(function (err) {
-                        // Catch here so failed deletions (because someone has received it)
-                        //  don't make everything else fail
-                        alert('Could not delete mark! ' + err.message);
+                        err.message = 'Could not delete mark: ' + err.message;
+                        throw err;
                     })
                     .then(function () {
                         // Success, then return true
@@ -1866,8 +1848,8 @@ function tryResolveMarkSave(gradeable_id, component_id, domMark, serverMark, old
                 })
                 .catch(function(err) {
                     // This means the user's mark was invalid
-                    alert('Failed to add mark: ' + err);
-                    throw err;
+                    err.message = 'Failed to add mark: ' + err.message;
+                    throw err
                 });
         }
     }
