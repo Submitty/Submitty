@@ -16,6 +16,8 @@ CUSTOM_MARK_ID = 0;
 
 MARK_ID_COUNTER = 0;
 
+EDIT_MODE_ENABLED = false;
+
 /**
  * Keep All of the ajax functions at the top of this file
  *
@@ -563,7 +565,15 @@ function isInstructorEditEnabled() {
  *  @return {boolean}
  */
 function isEditModeEnabled() {
-    return $('#edit-mode-enabled').is(':checked');
+    return EDIT_MODE_ENABLED;
+}
+
+/**
+ * Updates the edit mode state.  This is used to the mode
+ * does not change before the components close
+ */
+function updateEditModeEnabled() {
+    EDIT_MODE_ENABLED = $('#edit-mode-enabled').is(':checked');
 }
 
 /**
@@ -1226,6 +1236,8 @@ function onToggleEditMode(me) {
             alert('Error closing component! ' + err.message);
         })
         .then(function () {
+            // Only update edit mode once the open components are all closed
+            updateEditModeEnabled();
             if (reopen_component_id !== NO_COMPONENT_ID) {
                 return openComponent(reopen_component_id);
             }
