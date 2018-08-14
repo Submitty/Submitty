@@ -1119,11 +1119,11 @@ ORDER BY g.sections_rotating_id, g.user_id", $params);
      */
     public function getCountUsersRotatingSections() {
         $this->course_db->query("
-            SELECT rotating_section, count(*) as count
-            FROM users
-            WHERE registration_section IS NOT NULL
-            GROUP BY rotating_section
-            ORDER BY rotating_section");
+SELECT rotating_section, count(*) as count
+FROM users
+WHERE registration_section IS NOT NULL
+GROUP BY rotating_section
+ORDER BY rotating_section");
         return $this->course_db->rows();
     }
 
@@ -1156,29 +1156,29 @@ ORDER BY g.sections_rotating_id, g.user_id", $params);
      */
     public function getCountNullUsersRotatingSections() {
         $this->course_db->query("
-            SELECT rotating_section, count(*) as count
-            FROM users
-            WHERE registration_section IS NULL
-            GROUP BY rotating_section
-            ORDER BY rotating_section");
+SELECT rotating_section, count(*) as count
+FROM users
+WHERE registration_section IS NULL
+GROUP BY rotating_section
+ORDER BY rotating_section");
         return $this->course_db->rows();
     }
 
     public function getRegisteredUserIdsWithNullRotating() {
         $this->course_db->query("
-            SELECT user_id
-            FROM users
-            WHERE rotating_section IS NULL AND registration_section IS NOT NULL
-            ORDER BY user_id ASC");
+SELECT user_id
+FROM users
+WHERE rotating_section IS NULL AND registration_section IS NOT NULL
+ORDER BY user_id ASC");
         return array_map(function($elem) { return $elem['user_id']; }, $this->course_db->rows());
     }
 
     public function getRegisteredUserIds() {
         $this->course_db->query("
-            SELECT user_id
-            FROM users
-            WHERE registration_section IS NOT NULL
-            ORDER BY user_id ASC");
+SELECT user_id
+FROM users
+WHERE registration_section IS NOT NULL
+ORDER BY user_id ASC");
         return array_map(function($elem) { return $elem['user_id']; }, $this->course_db->rows());
     }
 
