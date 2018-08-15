@@ -33,7 +33,7 @@
 {% endif %}
 {% if show_categories %}
     {% set categories = core.getQueries().getCategories() %}
-    <div id="category-selection-container" style="margin-bottom:10px;" class="form-group row">
+    <div id="category-selection-container" style="margin-bottom:10px;display: inline-block;" class="form-group row">
         <label for="cat" id="cat_label">Categories</label> <br>
         {% if categories | length == 0 %}
             <span class='category-list-no-element' style="margin-left: 1em;" >
