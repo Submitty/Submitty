@@ -669,7 +669,7 @@ function getOverallCommentDOMElement() {
  */
 function setComponentInProgress(component_id) {
     let domElement = getComponentDOMElement(component_id);
-    domElement.find('.save-tools span').hide();
+    domElement.find('.save-tools div').hide();
     domElement.find('.save-tools-in-progress').show();
 }
 
@@ -678,7 +678,7 @@ function setComponentInProgress(component_id) {
  */
 function setOverallCommentInProgress() {
     let domElement = getOverallCommentDOMElement();
-    domElement.find('.save-tools span').hide();
+    domElement.find('.save-tools div').hide();
     domElement.find('.save-tools-in-progress').show();
 }
 
