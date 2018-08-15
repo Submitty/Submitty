@@ -51,7 +51,7 @@ function clone_or_update_repo {
         # CHECK TO SEE IF VERSION MATCHES OR IS ANCESTOR
         git merge-base --is-ancestor "${min_repo_version}" HEAD 2> /dev/null
         if [ $? -eq 0 ]; then
-            echo -e "    current version matches or exceeds minimum version ${min_repo_version}\n"
+            echo -e "    current version matches or exceeds minimum version ${min_repo_version}"
         else
             echo "    this repository is out of date..."
 
