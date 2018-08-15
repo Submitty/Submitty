@@ -178,10 +178,12 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     # START DOCKER
 
     # NOTE: DOCKER SUPPORT PRELIMINARY -- NEEDS MORE SECURITY BEFORE DEPLOYED ON LIVE SERVER
-
+    complete_config = os.path.join(tmp_autograding,"complete_config.json")
     with open(complete_config, 'r') as infile:
         complete_config_obj = json.load(infile)
-    USE_DOCKER = complete_config_obj.get('docker_enabled', False)
+
+    # intentionally fragile to avoid redundancy
+    USE_DOCKER = complete_config_obj['docker_enabled']
 
 
 
@@ -219,7 +221,6 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     custom_validation_code_path = os.path.join(tmp_autograding,"custom_validation_code")
     bin_path = os.path.join(tmp_autograding,"bin")
     form_json_config = os.path.join(tmp_autograding,"form.json")
-    complete_config = os.path.join(tmp_autograding,"complete_config.json")
 
 
     with open(form_json_config, 'r') as infile:

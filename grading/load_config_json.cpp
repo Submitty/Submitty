@@ -40,6 +40,11 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
   }
 }
 
+void AddDockerConfiguration(nlohmann::json &whole_config) {
+  if (!whole_config["docker_enabled"].is_boolean()){
+    whole_config["docker_enabled"] = false;
+  }
+}
 
 void RewriteDeprecatedMyersDiff(nlohmann::json &whole_config) {
 
@@ -99,6 +104,7 @@ nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid) {
   sstr >> answer;
 
   AddSubmissionLimitTestCase(answer);
+  AddDockerConfiguration(answer);
   AddAutogradingConfiguration(answer);
   if (rcsid != "") {
     CustomizeAutoGrading(rcsid,answer);
