@@ -123,7 +123,7 @@ def handle_migration(args):
                 'password': args.config.database['database_password']
             }
 
-            print("Running {} migrations for {}...".format(args.direction, environment))
+            print("Running {} migrations for {}...".format(args.direction, environment), end="")
             with psycopg2.connect(**params) as connection:
                 migrate_environment(connection, environment, args)
 
@@ -142,7 +142,7 @@ def handle_migration(args):
                     if args.choose_course is None or [semester, course] == args.choose_course:
                         args.semester = semester
                         args.course = course
-                        print("Running {} migrations for {}.{}...".format(args.direction, semester, course))
+                        print("Running {} migrations for {}.{}...".format(args.direction, semester, course), end="")
                         params['dbname'] = 'submitty_{}_{}'.format(semester, course)
                         try:
                             with psycopg2.connect(**params) as connection:
@@ -162,6 +162,8 @@ def migrate_environment(connection, environment, args):
     missing_migrations = OrderedDict()
     migrations = load_migrations(MIGRATIONS_PATH / environment)
 
+    changes=False
+
     if exists:
         with connection.cursor() as cursor:
             cursor.execute('SELECT id, commit_time, status FROM migrations_{} ORDER BY id'.format(environment))
@@ -178,9 +180,12 @@ def migrate_environment(connection, environment, args):
                     missing_migrations[migration['id']] = migration
 
     if len(missing_migrations) > 0:
+        if not changes:
+            print()
         print('Removing {} missing migrations:'.format(len(missing_migrations)))
         for key in missing_migrations:
             remove_migration(connection, missing_migrations[key], environment, args)
+            changes=True
         print()
 
     args.fake = args.set_fake if 'set_fake' in args else False
@@ -188,6 +193,9 @@ def migrate_environment(connection, environment, args):
         keys = list(migrations.keys())
         if args.initial is True:
             key = keys.pop(0)
+            if not changes:
+                print("")
+                changes=True
             run_migration(connection, migrations[key], environment, args)
             args.fake = True
         for key in keys:
@@ -200,9 +208,10 @@ def migrate_environment(connection, environment, args):
             if migrations[key]['status'] == 1:
                 run_migration(connection, migrations[key], environment, args)
                 break
-    print()
+
     print("DONE")
-    print()
+    if changes:
+        print()
 
 
 def remove_migration(connection, migration, environment, args):
