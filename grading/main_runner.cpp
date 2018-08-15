@@ -104,7 +104,7 @@ int main(int argc, char *argv[]) {
       }
       
       
-      std::string logfile = my_testcase.getPrefix() + "execute_logfile.txt";
+      std::string logfile = "execute_logfile.txt";
       // run the command, capturing STDOUT & STDERR
       int exit_no = execute(commands[x]
                             +

@@ -11,7 +11,7 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test03_STDOUT.txt",
+                    "actual_file": "test03/STDOUT_0.txt",
                     "description": "TestRunner output",
                     "messages": [
                         {
@@ -19,19 +19,13 @@
                             "type": "failure"
                         }
                     ]
-                }
-            ],
-            "points_awarded": 1,
-            "test_name": "Test 3 JaCoCo - Running Student JUnit Tests in hw0/tests/"
-        },
-        {
-            "autochecks": [
+                },
                 {
-                    "actual_file": "test04_STDOUT.txt",
+                    "actual_file": "test03/STDOUT_1.txt",
                     "description": "JaCoCo report generation output"
                 },
                 {
-                    "actual_file": "test04_jacoco_report.csv",
+                    "actual_file": "test03/jacoco_report.csv",
                     "description": "JaCoCo coverage report",
                     "messages": [
                         {
@@ -45,13 +39,13 @@
                     ]
                 }
             ],
-            "points_awarded": 3,
-            "test_name": "Test 4 JaCoCo - Generating Coverage Report for Student Tests"
+            "points_awarded": 4,
+            "test_name": "Test 3 JaCoCo - Running Student JUnit Tests in hw0/tests/ and Generating Coverage Report for Student Tests"
         },
         {
             "autochecks": [
                 {
-                    "actual_file": "test05_STDOUT.txt",
+                    "actual_file": "test04/STDOUT.txt",
                     "description": "JUnit output",
                     "messages": [
                         {
@@ -61,82 +55,16 @@
                     ]
                 },
                 {
-                    "actual_file": "test05_execute_logfile.txt",
+                    "actual_file": "test04/execute_logfile.txt",
                     "description": "Execution Logfile"
                 }
             ],
             "points_awarded": 1,
-            "test_name": "Test 5 JaCoCo - Instructor JUnit Tests"
-        },
-        {
-            "autochecks": [
-                {
-                    "actual_file": "test06_STDOUT.txt",
-                    "description": "EMMA instrumentation output"
-                }
-            ],
-            "points_awarded": 0,
-            "test_name": "Test 6 EMMA - Instrumentation of Student Code"
-        },
-        {
-            "autochecks": [
-                {
-                    "actual_file": "test07_STDOUT.txt",
-                    "description": "TestRunner output",
-                    "messages": [
-                        {
-                            "message": "ERROR: JUnit testing has revealed an exception or other failure.  Successful tests = 1/4",
-                            "type": "failure"
-                        }
-                    ]
-                }
-            ],
-            "points_awarded": 1,
-            "test_name": "Test 7 EMMA - Running Student JUnit Tests in hw0/tests/"
-        },
-        {
-            "autochecks": [
-                {
-                    "actual_file": "test08_STDOUT.txt",
-                    "description": "EclEmma report generation output"
-                },
-                {
-                    "actual_file": "test08_emma_report.txt",
-                    "description": "EclEmma coverage report",
-                    "messages": [
-                        {
-                            "message": "ERROR: Insuffficient block coverage below threshold for... hw0 (55/90 = 0.611111)",
-                            "type": "failure"
-                        }
-                    ]
-                }
-            ],
-            "points_awarded": 3,
-            "test_name": "Test 8 EMMA - Generating Coverage Report for Student Tests"
-        },
-        {
-            "autochecks": [
-                {
-                    "actual_file": "test09_STDOUT.txt",
-                    "description": "JUnit output",
-                    "messages": [
-                        {
-                            "message": "ERROR: JUnit testing has revealed an exception or other failure.  Successful tests = 1/4",
-                            "type": "failure"
-                        }
-                    ]
-                },
-                {
-                    "actual_file": "test09_execute_logfile.txt",
-                    "description": "Execution Logfile"
-                }
-            ],
-            "points_awarded": 1,
-            "test_name": "Test 9 EMMA - Instructor JUnit Tests"
+            "test_name": "Test 4 JaCoCo - Instructor JUnit Tests"
         },
         {
             "points_awarded": 0,
-            "test_name": "Test 10 Submission Limit",
+            "test_name": "Test 5 Submission Limit",
             "view_testcase": false
         }
     ]

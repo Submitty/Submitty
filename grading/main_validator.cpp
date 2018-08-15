@@ -109,9 +109,9 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
       std::string actual_file = filenames[FN];
       std::vector<std::string> files;
       // try with and without the prefix
-      wildcard_expansion(files, actual_file, std::cout);
+      wildcard_expansion(files, my_testcase.getPrefix() + actual_file, std::cout);
       if (files.size() == 0) {
-        wildcard_expansion(files, my_testcase.getPrefix() + actual_file, std::cout);
+        wildcard_expansion(files, actual_file, std::cout);
       }
       for (int i = 0; i < files.size(); i++) {
         actual_file = files[i];

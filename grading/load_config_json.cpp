@@ -21,6 +21,7 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
   whole_config["autograding"]["submission_to_runner"].push_back("**/*.py");
   whole_config["autograding"]["submission_to_runner"].push_back("**/*.pdf");
 
+  whole_config["autograding"]["compilation_to_runner"].push_back("**/*.txt");
   whole_config["autograding"]["compilation_to_runner"].push_back("**/*.out");
   whole_config["autograding"]["compilation_to_runner"].push_back("**/*.class");
 

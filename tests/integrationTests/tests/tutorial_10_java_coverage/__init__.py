@@ -14,6 +14,10 @@ SAMPLE_SUBMISSIONS       = SUBMITTY_TUTORIAL_DIR + "/examples/10_java_coverage/s
 
 @prebuild
 def initialize(test):
+    data_path = os.path.join(test.testcase_path, "data")
+    if os.path.isdir(data_path):
+        shutil.rmtree(data_path)
+    os.mkdir(data_path)
     try:
         os.mkdir(os.path.join(test.testcase_path, "assignment_config"))
     except OSError:
@@ -27,7 +31,7 @@ def initialize(test):
 
 def cleanup(test):
     try:
-        shutil.rmtree(test.testcase_path + "/data")
+        shutil.rmtree(os.path.join(test.testcase_path, "data"))
     except OSError:
         pass
     os.mkdir(os.path.join(test.testcase_path, "data"))
@@ -55,8 +59,8 @@ def correct(test):
     test.run_validator()
     test.diff("grade.txt","correct_grade.txt","-b")
     test.json_diff("results.json","correct_results.json")
-    test.diff("test04_jacoco_report.csv","correct_jacoco_report.csv")
-    test.emma_coverage_diff("test08_emma_report.txt","correct_emma_report.txt")
+    test.diff("test03/jacoco_report.csv","correct_jacoco_report.csv")
+    #test.emma_coverage_diff("test08/emma_report.txt","correct_emma_report.txt")
 
 
 @testcase
@@ -76,8 +80,8 @@ def correct_no_coverage(test):
     test.run_validator()
     test.diff("grade.txt","correct_no_coverage_grade.txt","-b")
     test.json_diff("results.json","correct_no_coverage_results.json")
-    test.diff("test04_jacoco_report.csv","correct_no_coverage_jacoco_report.csv")
-    test.emma_coverage_diff("test08_emma_report.txt","correct_no_coverage_emma_report.txt")
+    test.diff("test03/jacoco_report.csv","correct_no_coverage_jacoco_report.csv")
+    #test.emma_coverage_diff("test08/emma_report.txt","correct_no_coverage_emma_report.txt")
 
 
 @testcase
@@ -97,8 +101,8 @@ def buggy_coverage(test):
     test.run_validator()
     test.diff("grade.txt", "buggy_coverage_grade.txt", "-b")
     test.json_diff("results.json", "buggy_coverage_results.json")
-    test.diff("test04_jacoco_report.csv","buggy_coverage_jacoco_report.csv")
-    test.emma_coverage_diff("test08_emma_report.txt","buggy_coverage_emma_report.txt")
+    test.diff("test03/jacoco_report.csv","buggy_coverage_jacoco_report.csv")
+    #test.emma_coverage_diff("test08/emma_report.txt","buggy_coverage_emma_report.txt")
 
 
 @testcase
@@ -118,6 +122,6 @@ def buggy_no_coverage(test):
     test.run_validator()
     test.diff("grade.txt","buggy_no_coverage_grade.txt","-b")
     test.json_diff("results.json","buggy_no_coverage_results.json")
-    test.diff("test04_jacoco_report.csv","buggy_no_coverage_jacoco_report.csv")
-    test.emma_coverage_diff("test08_emma_report.txt","buggy_no_coverage_emma_report.txt")
+    test.diff("test03/jacoco_report.csv","buggy_no_coverage_jacoco_report.csv")
+    #test.emma_coverage_diff("test08/emma_report.txt","buggy_no_coverage_emma_report.txt")
 

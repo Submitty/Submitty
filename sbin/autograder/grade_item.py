@@ -225,54 +225,96 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     with open(complete_config, 'r') as infile:
         complete_config_obj = json.load(infile)
     patterns_submission_to_compilation = complete_config_obj["autograding"]["submission_to_compilation"]
-    pattern_copy("submission_to_compilation",patterns_submission_to_compilation,submission_path,tmp_compilation,tmp_logs)
 
     is_vcs = gradeable_config_obj["upload_type"]=="repository"
     checkout_subdirectory = complete_config_obj["autograding"].get("use_checkout_subdirectory","")
     checkout_subdir_path = os.path.join(checkout_path,checkout_subdirectory)
 
-    if is_vcs:
-        pattern_copy("checkout_to_compilation",patterns_submission_to_compilation,checkout_subdir_path,tmp_compilation,tmp_logs)
-    
-    # copy any instructor provided code files to tmp compilation directory
-    copy_contents_into(job_id,provided_code_path,tmp_compilation,tmp_logs)
-
-    subprocess.call(['ls', '-lR', '.'], stdout=open(tmp_logs + "/overall.txt", 'a'))
-
-    # copy compile.out to the current directory
-    shutil.copy (os.path.join(bin_path,"compile.out"),os.path.join(tmp_compilation,"my_compile.out"))
-
     # give the untrusted user read/write/execute permissions on the tmp directory & files
-    add_permissions_recursive(tmp_compilation,
-                              stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP,
-                              stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP,
-                              stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP)
+    # add_permissions_recursive(tmp_compilation,
+    #                           stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP,
+    #                           stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP,
+    #                           stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP)
+
 
     # add_permissions(tmp,stat.S_IROTH | stat.S_IXOTH) #stat.S_ISGID
     add_permissions(tmp_logs,stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
-    
+   
 
     if USE_DOCKER:
         print("!!!!!!!!!!!!!!!!!!USING DOCKER!!!!!!!!!!!!!!!!!!!!!!!!")
 
+    with open(complete_config, 'r') as infile:
+        config = json.load(infile)
+        my_testcases = config['testcases']
+
     # grab the submission time
-    with open (os.path.join(submission_path,".submit.timestamp"), 'r') as submission_time_file:
+    with open(os.path.join(submission_path,".submit.timestamp"), 'r') as submission_time_file:
         submission_string = submission_time_file.read().rstrip()
 
     with open(os.path.join(tmp_logs,"compilation_log.txt"), 'w') as logfile:
-        if USE_DOCKER:
-            compile_success = subprocess.call(['docker', 'exec', '-w', tmp_compilation, container,
-                                               os.path.join(tmp_compilation, 'my_compile.out'), queue_obj['gradeable'],
-                                               queue_obj['who'], str(queue_obj['version']), submission_string], stdout=logfile)
-        else:
-            compile_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
-                                               which_untrusted,
-                                               os.path.join(tmp_compilation,"my_compile.out"),
-                                               queue_obj["gradeable"],
-                                               queue_obj["who"],
-                                               str(queue_obj["version"]),
-                                               submission_string],
-                                              stdout=logfile)
+        # we start counting from one.
+        executable_path_list = list()
+        for testcase_num in range(1, len(my_testcases)+1):
+            testcase_folder = os.path.join(tmp_compilation, "test{:02}".format(testcase_num))
+
+            if 'type' in my_testcases[testcase_num-1]:
+                if my_testcases[testcase_num-1]['type'] != 'FileCheck' and my_testcases[testcase_num-1]['type'] != 'Compilation':
+                    continue
+
+                if my_testcases[testcase_num-1]['type'] == 'Compilation':
+                    if 'executable_name' in my_testcases[testcase_num-1]:
+                        provided_executable_list = my_testcases[testcase_num-1]['executable_name']
+                        if not isinstance(provided_executable_list, (list,)):
+                            provided_executable_list = list([provided_executable_list])
+                        for executable_name in provided_executable_list:
+                            if executable_name.strip() == '':
+                                continue
+                            executable_path = os.path.join(testcase_folder, executable_name)
+                            executable_path_list.append((executable_path, executable_name))
+            else:
+                continue
+
+            os.makedirs(testcase_folder)
+            
+            pattern_copy("submission_to_compilation",patterns_submission_to_compilation,submission_path,testcase_folder,tmp_logs)
+
+            if is_vcs:
+                pattern_copy("checkout_to_compilation",patterns_submission_to_compilation,checkout_subdir_path,testcase_folder,tmp_logs)
+        
+            # copy any instructor provided code files to tmp compilation directory
+            copy_contents_into(job_id,provided_code_path,testcase_folder,tmp_logs)
+            
+
+            # copy compile.out to the current directory
+            shutil.copy (os.path.join(bin_path,"compile.out"),os.path.join(testcase_folder,"my_compile.out"))
+
+            add_permissions(testcase_folder, stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+
+            untrusted_grant_rwx_access(which_untrusted, testcase_folder)
+
+            add_permissions(os.path.join(testcase_folder,"my_compile.out"), stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+
+
+            if USE_DOCKER:
+                compile_success = subprocess.call(['docker', 'exec', '-w', testcase_folder, container,
+                                                   os.path.join(testcase_folder, 'my_compile.out'), queue_obj['gradeable'],
+                                                   queue_obj['who'], str(queue_obj['version']), submission_string, str(testcase_num)],
+                                                   stdout=logfile,
+                                                   cwd=testcase_folder)
+            else:
+                compile_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
+                                                   which_untrusted,
+                                                   os.path.join(testcase_folder,"my_compile.out"),
+                                                   queue_obj["gradeable"],
+                                                   queue_obj["who"],
+                                                   str(queue_obj["version"]),
+                                                   submission_string,
+                                                   str(testcase_num)],
+                                                   stdout=logfile, 
+                                                   cwd=testcase_folder)
+            # remove the compilation program
+            os.remove(os.path.join(testcase_folder,"my_compile.out"))
 
     if compile_success == 0:
         print (which_machine,which_untrusted,"COMPILATION OK")
@@ -281,9 +323,8 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,message="COMPILATION FAILURE")
 
     untrusted_grant_rwx_access(which_untrusted,tmp_compilation)
-        
-    # remove the compilation program
-    os.remove(os.path.join(tmp_compilation,"my_compile.out"))
+
+
 
     # return to the main tmp directory
     os.chdir(tmp)
@@ -318,10 +359,24 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     if is_vcs:
         pattern_copy("checkout_to_runner",patterns_submission_to_runner,checkout_subdir_path,tmp_work_checkout,tmp_logs)
 
+    # move the compiled files into the tmp_work_compiled directory
+    for path, name in executable_path_list:
+        if not os.path.isfile(path): 
+            continue
+        target_path = os.path.join(tmp_work_compiled, name)
+        if not os.path.exists(target_path):
+            os.makedirs(os.path.dirname(target_path), exist_ok=True)
+        shutil.copy(path, target_path)
+        print('copied over {0}'.format(target_path))
+
+
     patterns_compilation_to_runner = complete_config_obj["autograding"]["compilation_to_runner"]
-    #TODO what does this do?
+    #copy into the actual tmp_work directory for archiving/validating
+    pattern_copy("compilation_to_runner",patterns_compilation_to_runner,tmp_compilation,tmp_work,tmp_logs)
+    #copy into tmp_work_compiled, which is provided to each testcase
+    # TODO change this as our methodology for declaring testcase dependencies becomes more robust
     pattern_copy("compilation_to_runner",patterns_compilation_to_runner,tmp_compilation,tmp_work_compiled,tmp_logs)
-        
+
     # copy input files to tmp_work directory
     copy_contents_into(job_id,test_input_path,tmp_work_test_input,tmp_logs)
 
@@ -399,14 +454,6 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
 
     #todo remove prints.
     print("VALIDATING")
-    print('this is the command that was to be used: \n{0} {1} {2} {3} {4} {5} {6}'.format( 
-                                                 os.path.join(SUBMITTY_INSTALL_DIR,"sbin","untrusted_execute"),
-                                                 which_untrusted,
-                                                 os.path.join(tmp_work,"my_validator.out"),
-                                                 queue_obj["gradeable"],
-                                                 queue_obj["who"],
-                                                 str(queue_obj["version"]),
-                                                 submission_string))
     # validator the validator.out as the untrusted user
     with open(os.path.join(tmp_logs,"validator_log.txt"), 'w') as logfile:
         if USE_DOCKER:

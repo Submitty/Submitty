@@ -7,8 +7,9 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test02_STDOUT.txt",                    "description": "STDOUT.txt",
-                    "difference_file": "test02_0_diff.json",
+                    "actual_file": "test02/STDOUT.txt",                    
+                    "description": "STDOUT.txt",
+                    "difference_file": "test02/0_diff.json",
                     "expected_file": "test_output/testassignment/frame_1.txt"
                 }
             ],
@@ -18,8 +19,9 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test03_STDOUT.txt",                    "description": "STDOUT.txt",
-                    "difference_file": "test03_0_diff.json",
+                    "actual_file": "test03/STDOUT.txt",                    
+                    "description": "STDOUT.txt",
+                    "difference_file": "test03/0_diff.json",
                     "expected_file": "test_output/testassignment/frame_5.txt"
                 }
             ],
@@ -29,8 +31,9 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test04_STDOUT.txt",                    "description": "STDOUT.txt",
-                    "difference_file": "test04_0_diff.json",
+                    "actual_file": "test04/STDOUT.txt",                    
+                    "description": "STDOUT.txt",
+                    "difference_file": "test04/0_diff.json",
                     "expected_file": "test_output/testassignment/frame_10.txt"
                 }
             ],
@@ -40,8 +43,9 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test05_STDOUT.txt",                    "description": "STDOUT.txt",
-                    "difference_file": "test05_0_diff.json",
+                    "actual_file": "test05/STDOUT.txt",                    
+                    "description": "STDOUT.txt",
+                    "difference_file": "test05/0_diff.json",
                     "expected_file": "test_output/testassignment/frame_13.txt"
                 }
             ],
@@ -51,11 +55,13 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test06_execute_logfile.txt",                    "description": "Execution Logfile"
+                    "actual_file": "test06/execute_logfile.txt",                    
+                    "description": "Execution Logfile"
                 },
                 {
-                    "actual_file": "test06_STDERR.txt",                    "description": "STDERR.txt",
-                    "difference_file": "test06_1_diff.json",
+                    "actual_file": "test06/STDERR.txt",                    
+                    "description": "STDERR.txt",
+                    "difference_file": "test06/1_diff.json",
                     "expected_file": "test_output/testassignment/error_nonpositive.txt"
                 }
             ],
@@ -65,11 +71,13 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test07_execute_logfile.txt",                    "description": "Execution Logfile"
+                    "actual_file": "test07/execute_logfile.txt",                    
+                    "description": "Execution Logfile"
                 },
                 {
-                    "actual_file": "test07_STDERR.txt",                    "description": "STDERR.txt",
-                    "difference_file": "test07_1_diff.json",
+                    "actual_file": "test07/STDERR.txt",                    
+                    "description": "STDERR.txt",
+                    "difference_file": "test07/1_diff.json",
                     "expected_file": "test_output/testassignment/error_nonpositive.txt"
                 }
             ],
@@ -79,11 +87,13 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test08_execute_logfile.txt",                    "description": "Execution Logfile"
+                    "actual_file": "test08/execute_logfile.txt",                    
+                    "description": "Execution Logfile"
                 },
                 {
-                    "actual_file": "test08_STDERR.txt",                    "description": "STDERR.txt",
-                    "difference_file": "test08_1_diff.json",
+                    "actual_file": "test08/STDERR.txt",                    
+                    "description": "STDERR.txt",
+                    "difference_file": "test08/1_diff.json",
                     "expected_file": "test_output/testassignment/error_arguments.txt"
                 }
             ],
@@ -93,11 +103,13 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test09_execute_logfile.txt",                    "description": "Execution Logfile"
+                    "actual_file": "test09/execute_logfile.txt",                    
+                    "description": "Execution Logfile"
                 },
                 {
-                    "actual_file": "test09_STDERR.txt",                    "description": "STDERR.txt",
-                    "difference_file": "test09_1_diff.json",
+                    "actual_file": "test09/STDERR.txt",                    
+                    "description": "STDERR.txt",
+                    "difference_file": "test09/1_diff.json",
                     "expected_file": "test_output/testassignment/error_arguments.txt"
                 }
             ],

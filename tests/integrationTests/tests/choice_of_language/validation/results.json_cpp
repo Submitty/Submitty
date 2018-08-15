@@ -3,13 +3,13 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test01_STDOUT.txt",
+                    "actual_file": "test01/STDOUT.txt",
                     "description": "STDOUT.txt",
-                    "difference_file": "test01_0_diff.json",
+                    "difference_file": "test01/0_diff.json",
                     "expected_file": "test_output/testassignment/output.txt"
                 },
                 {
-                    "actual_file": "test01_STDERR.txt",
+                    "actual_file": "test01/STDERR.txt",
                     "description": "Standard Error (STDERR)",
                     "messages": [
                         {
@@ -19,7 +19,7 @@
                     ]
                 },
                 {
-                    "actual_file": "test01_execute_logfile.txt",
+                    "actual_file": "test01/execute_logfile.txt",
                     "description": "Execution Logfile"
                 }
             ],
@@ -29,13 +29,13 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test02_STDOUT.txt",
+                    "actual_file": "test02/STDOUT.txt",
                     "description": "STDOUT.txt",
-                    "difference_file": "test02_0_diff.json",
+                    "difference_file": "test02/0_diff.json",
                     "expected_file": "test_output/testassignment/output.txt"
                 },
                 {
-                    "actual_file": "test02_STDERR.txt",
+                    "actual_file": "test02/STDERR.txt",
                     "description": "Standard Error (STDERR)",
                     "messages": [
                         {
@@ -45,7 +45,7 @@
                     ]
                 },
                 {
-                    "actual_file": "test02_execute_logfile.txt",
+                    "actual_file": "test02/execute_logfile.txt",
                     "description": "Execution Logfile"
                 }
             ],
@@ -55,7 +55,7 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test03_STDERR.txt",
+                    "actual_file": "test03/STDERR.txt",
                     "description": "Compilation Errors and/or Warnings",
                     "messages": [
                         {
@@ -74,7 +74,7 @@
                     ]
                 },
                 {
-                    "actual_file": "test03_execute_logfile.txt",
+                    "actual_file": "test03/execute_logfile.txt",
                     "description": "Execution Logfile"
                 }
             ],
@@ -88,7 +88,7 @@
                     "description": "STDOUT.txt",
                     "messages": [
                         {
-                            "message": "ERROR!  Could not open student file: 'STDOUT.txt'",
+                            "message": "ERROR!  Could not open student file: 'test04/STDOUT.txt'",
                             "type": "failure"
                         }
                     ]
@@ -97,13 +97,13 @@
                     "description": "Standard Error (STDERR)",
                     "messages": [
                         {
-                            "message": "ERROR!  Could not open student file: 'STDERR.txt'",
+                            "message": "ERROR!  Could not open student file: 'test04/STDERR.txt'",
                             "type": "failure"
                         }
                     ]
                 },
                 {
-                    "actual_file": "test04_execute_logfile.txt",
+                    "actual_file": "test04/execute_logfile.txt",
                     "description": "Execution Logfile"
                 }
             ],
@@ -117,9 +117,9 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test06_STDOUT.txt",
+                    "actual_file": "test06/STDOUT.txt",
                     "description": "STDOUT.txt",
-                    "difference_file": "test06_0_diff.json",
+                    "difference_file": "test06/0_diff.json",
                     "expected_file": "test_output/testassignment/output.txt"
                 }
             ],

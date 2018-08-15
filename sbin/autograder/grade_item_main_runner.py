@@ -51,6 +51,9 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
         testcases = complete_config_obj["testcases"]
         # we start counting from one.
         for testcase_num in range(1, len(testcases)+1):
+            if 'type' in testcases[testcase_num-1]:
+              if testcases[testcase_num-1]['type'] == 'FileCheck' or testcases[testcase_num-1]['type'] == 'Compilation':
+                continue
             #make the tmp folder for this testcase.
             testcase_folder = os.path.join(tmp_work, "test{:02}".format(testcase_num))
             os.makedirs(testcase_folder)
@@ -60,11 +63,13 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
             grade_item.copy_contents_into(job_id,tmp_work_subission ,testcase_folder,tmp_logs)
             grade_item.copy_contents_into(job_id,tmp_work_compiled  ,testcase_folder,tmp_logs)
             grade_item.copy_contents_into(job_id,tmp_work_checkout  ,testcase_folder,tmp_logs)
-            
+
+
             grade_item.untrusted_grant_rwx_access(which_untrusted, tmp_work_test_input)
             grade_item.untrusted_grant_rwx_access(which_untrusted, tmp_work_subission)
             grade_item.untrusted_grant_rwx_access(which_untrusted, tmp_work_compiled)
             grade_item.untrusted_grant_rwx_access(which_untrusted, tmp_work_checkout)
+
 
             #copy the compiled runner to the test directory
             shutil.copy(my_runner,testcase_folder)
