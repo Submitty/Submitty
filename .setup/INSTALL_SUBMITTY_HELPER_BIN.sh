@@ -81,3 +81,14 @@ else
 fi
 chmod 750 ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils
 chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/*
+
+# set the permissions here in the case we JUST run this script or else things will break
+if [ -f ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute ]; then
+    chgrp ${DAEMON_GROUP}  ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute
+    chmod 4550             ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute
+fi
+
+if [ -f ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out ]; then
+    chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
+    chmod 550                           ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
+fi
