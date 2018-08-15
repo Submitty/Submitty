@@ -664,6 +664,22 @@ function getOverallCommentDOMElement() {
 }
 
 /**
+ * Enables reordering on marks in an edit-mode component
+ * @param component_id
+ */
+function setupSortableMarks(component_id) {
+    let markList = getComponentDOMElement(component_id).find('.ta-rubric-table');
+    markList.sortable({
+        items: 'div:not(.mark-first)'
+    });
+    markList.disableSelection();
+}
+
+function setupSortableComponents() {
+    //TODO:
+}
+
+/**
  * Sets the HTML contents of the overall comment container
  * @param {string} contents
  */
@@ -678,6 +694,11 @@ function setOverallCommentContents(contents) {
  */
 function setComponentContents(component_id, contents) {
     getComponentDOMElement(component_id).parent('.component-container').html(contents);
+
+    // Enable sorting for this component if in edit mode
+    if(isEditModeEnabled()) {
+        setupSortableMarks(component_id);
+    }
 }
 
 /**
@@ -1837,7 +1858,15 @@ function saveMarkList(component_id) {
                         });
                     });
                     return sequence1;
-                });
+                })
+                .then(function () {
+                    // Finally, save the order
+                    let markOrder = {};
+                    getMarkListFromDOM(component_id).forEach(function (mark) {
+                        markOrder[mark.id] = mark.order;
+                    });
+                    return ajaxSaveMarkOrder(gradeable_id, component_id, markOrder);
+                })
         });
 }
 

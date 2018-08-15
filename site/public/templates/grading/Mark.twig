@@ -9,11 +9,17 @@ TODO: add 'publish' support
 #}
 {% set extra_classes = editable ? '' : 'mark-uneditable' %}
 <div id="mark-{{ mark.id }}"
-     class="mark-container row {{ not editable and mark_disabled ? 'mark-disabled' : '' }} {{ mark.deleted ? 'mark-deleted' : '' }}"
+     class="mark-container row {{ first_mark ? 'mark-first' : '' }} {{ not editable and mark_disabled ? 'mark-disabled' : '' }} {{ mark.deleted ? 'mark-deleted' : '' }}"
      data-component_id="{{ component.id }}"
      data-mark_id="{{ mark.id }}"
      onclick="{{ editable or mark_disabled ? '' : 'onToggleMark(this)' }}"
 >
+    {% if editable %}
+        <span class="reorder-mark-container col-no-gutters {{ first_mark ? 'hidden' : '' }}">
+            <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+        </span>
+    {% endif %}
+    {# Keep the mark checkbox so we can keep graded data when in edit mode to automatically update the component points #}
     <span class="{{ is_checked ? 'mark-selected' : '' }} {{ editable ? 'hidden' : '' }} mark-selector col-no-gutters"
           data-mark_id="{{ mark.id }}">
         {{ mark.order + 1 }}

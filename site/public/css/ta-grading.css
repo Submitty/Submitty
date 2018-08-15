@@ -511,6 +511,10 @@ tr.is_publish {
     min-height: 28px;
 }
 
+.gradeable .container {
+    padding-left: 5px;
+}
+
 .gradeable .mark-selector {
     min-width: 20px;
     margin: 2px;
@@ -529,6 +533,10 @@ tr.is_publish {
 
 .gradeable .mark-selector.hidden {
     display: none;
+}
+
+.gradeable .reorder-mark-container.hidden {
+    visibility: hidden;
 }
 
 .gradeable .mark-container span {
@@ -583,6 +591,13 @@ tr.is_publish {
 
 .gradeable .mark-deleted span.restore-mark-container {
     display: inherit;
+}
+
+.gradeable span.reorder-mark-container {
+    min-width: 20px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .gradeable span.mark-tools {
