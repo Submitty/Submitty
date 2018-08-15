@@ -1428,6 +1428,7 @@ function publishPost() {
 }
 
 function editPost(post_id, thread_id, shouldEditThread) {
+    if(!checkAreYouSureForm()) return;
     var form = $("#thread_form");
     var url = buildUrl({'component': 'forum', 'page': 'get_edit_post_content'});
     $.ajax({
@@ -1620,12 +1621,27 @@ function saveScrollLocationOnRefresh(id){
     });
 }
 
+function checkAreYouSureForm() {
+    var elements = $('form');
+    if(elements.hasClass('dirty')) {
+        if(confirm("You have unsaved changes! Do you want to continue?")) {
+            elements.trigger('reinitialize.areYouSure');
+            return true;
+        } else {
+            return false;
+        }
+    }
+    return true;
+}
+
 function alterShowDeletedStatus(newStatus) {
+    if(!checkAreYouSureForm()) return;
     document.cookie = "show_deleted=" + newStatus + "; path=/;";
     location.reload();
 }
 
 function alterShowMergeThreadStatus(newStatus, course) {
+    if(!checkAreYouSureForm()) return;
     document.cookie = course + "_show_merged_thread=" + newStatus + "; path=/;";
     location.reload();
 }
@@ -2094,6 +2110,7 @@ function hidePosts(text, id) {
 }
 
 function deletePostToggle(isDeletion, thread_id, post_id, author, time){
+    if(!checkAreYouSureForm()) return;
     var page = (isDeletion?"delete_post":"undelete_post");
     var message = (isDeletion?"delete":"undelete");
 
