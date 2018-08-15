@@ -8,12 +8,20 @@
 #   or
 # EXTRA=rpi,matlab vagrant up
 
+extra_command = ''
+if ENV.has_key?('NO_SUBMISSIONS')
+    extra_command << '--no_submissions '
+end
+if ENV.has_key?('EXTRA')
+    extra_command << ENV['EXTRA']
+end
+
 $script = <<SCRIPT
 GIT_PATH=/usr/local/submitty/GIT_CHECKOUT/Submitty
 DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
 VERSION=$(lsb_release -sc | tr '[:upper:]' '[:lower:]')
 mkdir -p ${GIT_PATH}/.vagrant/${DISTRO}/${VERSION}/logs
-bash ${GIT_PATH}/.setup/vagrant/setup_vagrant.sh #{ENV['EXTRA']} 2>&1 | tee ${GIT_PATH}/.vagrant/${DISTRO}/${VERSION}/logs/vagrant.log
+bash ${GIT_PATH}/.setup/vagrant/setup_vagrant.sh #{extra_command} 2>&1 | tee ${GIT_PATH}/.vagrant/${DISTRO}/${VERSION}/logs/vagrant.log
 SCRIPT
 
 unless Vagrant.has_plugin?('vagrant-vbguest')
