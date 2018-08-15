@@ -157,13 +157,14 @@ class AdminGradeableController extends AbstractController {
         $config_select_mode = 'manual';
 
         // These are hard coded default config options.
-        $default_config_paths = ['/usr/local/submitty/more_autograding_examples/upload_only/config',
-            '/usr/local/submitty/more_autograding_examples/iclicker_upload/config',
-            '/usr/local/submitty/more_autograding_examples/left_right_exam_seating/config',
-            '/usr/local/submitty/more_autograding_examples/pdf_exam/config',
-            '/usr/local/submitty/more_autograding_examples/test_notes_upload/config',
-            '/usr/local/submitty/more_autograding_examples/test_notes_upload_3page/config'];
-        foreach ($default_config_paths as $path) {
+        $default_config_paths = [ ['upload_only (1 mb maximum total student file submission)', '/usr/local/submitty/more_autograding_examples/upload_only/config'],
+                                  ['pdf_exam (10 mb maximum total student file submission)', '/usr/local/submitty/more_autograding_examples/pdf_exam/config'],
+                                  ['iclicker_upload (for collecting student iclicker IDs)', '/usr/local/submitty/more_autograding_examples/iclicker_upload/config'],
+                                  ['left_right_exam_seating (for collecting student handedness for exam seating assignment', '/usr/local/submitty/more_autograding_examples/left_right_exam_seating/config'],
+                                  ['test_notes_upload (expects single file, 2 mb maximum, 2-page pdf student submission)', '/usr/local/submitty/more_autograding_examples/test_notes_upload/config'],
+                                  ['test_notes_upload_3page (expects single file, 3 mb maximum, 3-page pdf student submission)', '/usr/local/submitty/more_autograding_examples/test_notes_upload_3page/config'] ];
+        foreach ($default_config_paths as $default_config_path) {
+            $path = $default_config_path[1];
             // If this happens then select the first radio button 'Using Default'
             if ($path === $saved_config_path) {
                 $config_select_mode = 'defaults';
@@ -783,7 +784,7 @@ class AdminGradeableController extends AbstractController {
                 'min_grading_group' => 1,
                 'grade_by_registration' => true,
                 'ta_instructions' => '',
-                'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/python_simple_homework/config',
+                'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/upload_only/config',
                 'student_view' => false,
                 'student_submit' => false,
                 'student_download' => false,
@@ -814,7 +815,7 @@ class AdminGradeableController extends AbstractController {
                 'team_size_max' => $details['team_size_max'],
                 'vcs_subdirectory' => $details['vcs_subdirectory'],
                 'regrade_allowed' => $details['regrade_allowed'] === 'true',
-                'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/python_simple_homework/config',
+                'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/upload_only/config',
 
                 // TODO: properties that aren't supported yet
                 'peer_grading' => false,
