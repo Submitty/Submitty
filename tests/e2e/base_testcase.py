@@ -110,7 +110,7 @@ class BaseTestCase(unittest.TestCase):
         self.driver.find_element_by_name('user_id').send_keys(user_id)
         self.driver.find_element_by_name('password').send_keys(user_password)
         self.driver.find_element_by_name('login').click()
-        self.assertEqual(user_name, self.driver.find_element_by_id("login-id").text)
+        self.assertEqual(user_name, self.driver.find_element_by_id("login-id").get_attribute('innerText').strip(' \t\r\n'))
         self.logged_in = True
 
     def log_out(self):
@@ -127,14 +127,18 @@ class BaseTestCase(unittest.TestCase):
 
     # see Navigation.twig for html attributes to use as arguments
     # loaded_selector must recognize an element on the page being loaded (test_simple_grader.py has xpath example)
-    def click_nav_gradeable_button(self, gradeable_category, gradeable_id, button_name, loaded_selector):
+    def click_nav_grade_button(self, gradeable_category, gradeable_id, button_name, loaded_selector):
         self.driver.find_element_by_xpath("//tbody[@id='{}_tbody']/tr[@id='{}']/td/a[contains(@class, 'btn-nav-grade')]".format(gradeable_category, gradeable_id, button_name)).click()
+        WebDriverWait(self.driver, BaseTestCase.WAIT_TIME).until(EC.presence_of_element_located(loaded_selector))
+
+    def click_nav_submit_button(self, gradeable_category, gradeable_id, button_name, loaded_selector):
+        self.driver.find_element_by_xpath("//tbody[@id='{}_tbody']/tr[@id='{}']/td/a[contains(@class, 'btn-nav-submit')]".format(gradeable_category, gradeable_id, button_name)).click()
         WebDriverWait(self.driver, BaseTestCase.WAIT_TIME).until(EC.presence_of_element_located(loaded_selector))
 
     # clicks the navigation header text to 'go back' pages
     # for homepage, selector can be gradeable list
     def click_header_link_text(self, text, loaded_selector):
-        self.driver.find_element_by_xpath("//div[@id='header-text']/div/h2[2]/a[text()='{}']".format(text)).click()
+        self.driver.find_element_by_xpath("//div[@id='header-text']/div/h2[1]/a[text()='{}']".format(text)).click()
         WebDriverWait(self.driver, BaseTestCase.WAIT_TIME).until(EC.presence_of_element_located(loaded_selector))
 
 
