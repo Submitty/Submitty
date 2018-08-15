@@ -54,7 +54,7 @@
     </script>
     </div>
 {% endif %}
-<div style="margin-bottom:10px;" class="form-group row">
+<div style="margin-bottom:10px;position: relative;" class="form-group row">
     {% if post_box_id %}
         <span style="display:inline-block;">
             <div class="upload_attachment_box" id="upload{{ post_box_id }}" style="cursor: pointer;">
@@ -99,7 +99,7 @@
             </script>
         {% endif %}
     {% endif %}
-    <span style="display:inline-block;float:right;">
+    <span style="display:inline-block;right: 0px;position: absolute;">
         {% if show_anon %}
             <label for="Anon">Anonymous (to class)?</label> <input type="checkbox" id="thread_post_anon" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" data-ays-ignore="true"/>
         {% endif %}
