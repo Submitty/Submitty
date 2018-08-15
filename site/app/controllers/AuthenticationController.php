@@ -78,7 +78,14 @@ class AuthenticationController extends AbstractController {
      * Display the login form to the user
      */
     public function loginForm() {
-        $this->core->getOutput()->renderOutput('Authentication', 'loginForm');
+        $old = $_REQUEST['old'] ?? [];
+
+        //Don't log in to bring us back to login
+        if (array_key_exists("page", $old) && $old["page"] === "login") {
+            unset($old["page"]);
+        }
+
+        $this->core->getOutput()->renderOutput('Authentication', 'loginForm', $old);
     }
     
     /**

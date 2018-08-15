@@ -35,7 +35,7 @@ class TestSimpleGrader(BaseTestCase):
     def run_tests(self, lab_reg_func=None, test_reg_func=None, lab_rot_func=None, test_rot_func=None, users=[("instructor", "Quinn")]):
         def func_wrapper(func):
             def wrapped_func(gradeable_id, gradeable_name):
-                self.click_nav_gradeable_button("items_being_graded", gradeable_id, "grade", (By.XPATH, "//div[@class='content']/h2[1][normalize-space(text())='{}']".format(gradeable_name)))
+                self.click_nav_grade_button("items_being_graded", gradeable_id, "grade", (By.XPATH, "//div[@class='content']/h2[1][normalize-space(text())='{}']".format(gradeable_name)))
                 func()
                 self.click_header_link_text("sample", (By.XPATH, "//table[@class='gradeable_list']"))
             return wrapped_func if func is not None else lambda *args: None
