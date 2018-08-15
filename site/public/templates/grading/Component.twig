@@ -1,7 +1,7 @@
 {#
 Required Input:
-    component: {id}
-    editable: If the marks table should be in edit mode
+    component: {id, title, ta_comment, student_comment, page, lower_clamp, default, max_value, upper_clamp}
+    edit_marks_enabled: If the marks table should be in edit mode
     show_mark_list: If the marks table should be started hidden or not
 #}
 
@@ -19,36 +19,37 @@ Required Input:
      data-upper_clamp="{{ component.upper_clamp }}">
 
     {# Title bar (only part that triggers collapse on click) #}
-    <div class="box-title" onclick="{% block component_click %}{% endblock %}">
-        {% block badge_block %}
-        {% endblock %}
+    <div class="box-title container" onclick="{% block component_click %}{% endblock %}">
+        <div class="row">
+            <span class="col-no-gutters">
+                <div>
+                    {% block left_block %}
+                    {% endblock %}
+                </div>
 
-        <span>
-            {% block header_block %}{% endblock %}
-        </span>
-        <br/>
+                {# Saving status #}
+                {% include "SavingTools.twig" with {
+                    'show_save_tools': show_mark_list,
+                    'cancel_on_click': 'onCancelComponent(this)'
+                } only %}
+            </span>
 
-        <span data-component_id="{{ component.id }}" {{ mark_list_visibility }}>
-            {% block ta_note %}
-            {% endblock %}
-        </span>
+            <div class="col-sm container">
+                <div class="row">
+                    {% block title_block %}
+                    {% endblock %}
+                </div>
+                <div class="row {{ mark_list_visibility }}">
+                    {% block ta_comment_block %}
+                    {% endblock %}
+                </div>
 
-        <span data-component_id="{{ component.id }}" {{ mark_list_visibility }}>
-            {% block student_note %}
-            {% endblock %}
-        </span>
-
-        {# Page number #}
-        <span data-component_id="{{ component.id }}" {{ mark_list_visibility }}>
-            {% block page_number %}
-            {% endblock %}
-        </span>
-
-        {# Saving status #}
-        {% include "SavingTools.twig" with {
-            'editable': show_mark_list,
-            'cancel_on_click': 'onCancelComponent(this)'
-        } only %}
+                <div class="row {{ mark_list_visibility }}">
+                    {% block student_comment_block %}
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
     </div>
     {# /Title bar #}
 
@@ -57,7 +58,7 @@ Required Input:
         {# twig.js doens't support blocks inside of for loops ... ANNOYING #}
         {% block marks_block %}
         {% endblock %}
-        {% if editable %}
+        {% if edit_marks_enabled %}
             <div class="add-new-mark">
                 <span onclick="onAddNewMark(this);">
                     <i class="fa fa-plus-square" aria-hidden="true">Add new mark</i>

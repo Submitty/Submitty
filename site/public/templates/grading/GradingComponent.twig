@@ -16,15 +16,14 @@ Required inputs:
     {{ grading_disabled ? '' : 'onClickComponent(this)' }}
 {% endblock %}
 
-{% block badge_block %}
+{% block left_block %}
     <strong id="grading_total"
             class="badge">
         {{ graded_component.total_score | default('-') }} / {{ component.max_value }}
     </strong>
 {% endblock %}
 
-{% block header_block %}
-    <b>{{ component.title }}</b>
+{% block title_block %}
     <span class="graded-component-data"
           data-total_score="{{ graded_component.total_score }}"
           data-graded_version="{{ graded_component.graded_version | default('0') }}"
@@ -32,50 +31,53 @@ Required inputs:
           data-grader_id="{{ graded_component.grader_id }}"
           data-verifier_id="" hidden></span>
 
+    <span class="component-title col-no-gutters">
+        <b>{{ component.title }}</b>
+    </span>
+
+    {% if component.page != 0 %}
+        <span class="page-number-view col">
+            <i>Page #: {{ component.page }}</i>
+        </span>
+    {% endif %}
+
     {% if disabled %}
-        <span class="version-warning">
+        <span class="version-warning col">
             Please edit or ensure that comments from version {{ graded_component.graded_version }} still apply.
         </span>
     {% endif %}
 
-    <span class="grader-container">
-        {% if display_verify_grader %}
-            <span class="verify-container">
-                <input type="button" class="btn btn-default" onclick="onVerifyComponent(this)" value="Verify Grader"/>
-            </span>
-        {% endif %}
-        <span class="graded-by">
-            {% if graded_component.grader_id is defined %}
-                Graded by {{ graded_component.grader_id }}
-                {% if graded_component.verifier_id is defined %}
-                    / {{ graded_component.verifier_id }}
-                {% endif %}
-            {% else %}
-                Ungraded!
-            {% endif %}
+    {% if display_verify_grader %}
+        <span class="verify-container col">
+            <input type="button" class="btn btn-default" onclick="onVerifyComponent(this)" value="Verify Grader"/>
         </span>
+    {% endif %}
+
+    <span class="graded-by col">
+        {% if graded_component.grader_id is defined %}
+            Graded by {{ graded_component.grader_id }}
+            {% if graded_component.verifier_id is defined %}
+                / {{ graded_component.verifier_id }}
+            {% endif %}
+        {% else %}
+            Ungraded!
+        {% endif %}
     </span>
 {% endblock %}
 
-{% block ta_note %}
+{% block ta_comment_block %}
     {% if component.ta_comment != "" %}
-        <div class="ta-student-note">
+        <span class="ta-student-comment">
             <i><b>Note to TA: </b>{{ component.ta_comment }}</i>
-        </div>
+        </span>
     {% endif %}
 {% endblock %}
 
-{% block page_number %}
-    {% if component.page != 0 %}
-        <i>Page #: {{ component.page }}</i>
-    {% endif %}
-{% endblock %}
-
-{% block student_note %}
+{% block student_comment_block %}
     {% if component.student_comment != "" %}
-        <div class="ta-student-note">
+        <span class="ta-student-comment">
             <i><b>Note to Student: </b>{{ component.student_comment }}</i>
-        </div>
+        </span>
     {% endif %}
 {% endblock %}
 
@@ -90,7 +92,7 @@ Required inputs:
 
 {% block extra_mark_rows %}
     {# Custom mark (only display in non-edit mode #}
-    {% if not editable %}
+    {% if not edit_marks_enabled %}
         <div class="custom-mark-container mark-container row">
             <span class="{{ graded_component.custom_mark_selected ? "mark-selected" : "" }} mark-selector col-no-gutters"
                   data-mark_id="0"

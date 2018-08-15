@@ -455,15 +455,17 @@ tr.is_publish {
 .gradeable .graded-by {
     font-style: italic;
     padding-right: 10px;
+    display: inline-flex;
+    justify-content: flex-end;
 }
 
-.gradeable .ta-student-note {
+.gradeable .hidden {
+    display: none;
+}
+
+.gradeable .ta-student-comment {
     margin-bottom: 5px;
     color: #777;
-}
-
-.gradeable .grader-container {
-    float: right;
 }
 
 .gradeable .verify-container {

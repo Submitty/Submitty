@@ -108,7 +108,7 @@ function renderGradingGradeable(gradeable, graded_gradeable) {
             return Twig.twig({ref: "GradingGradeable"}).render({
                 'gradeable': gradeable,
                 'graded_gradeable': graded_gradeable,
-                'editable': false,
+                'edit_marks_enabled': false,
                 'grading_disabled': false // TODO:
             });
         });
@@ -131,7 +131,7 @@ function renderGradingComponent(component, graded_component, editable, showMarkL
         resolve(Twig.twig({ref: "GradingComponent"}).render({
             'component': component,
             'graded_component': graded_component,
-            'editable': editable,
+            'edit_marks_enabled': editable,
             'show_mark_list': showMarkList,
             'grading_disabled': false // TODO:
         }));

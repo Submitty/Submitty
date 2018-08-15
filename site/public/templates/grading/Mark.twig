@@ -2,31 +2,31 @@
 Required Input:
     component: {id, precision}
     mark: {id, title, publish, order, deleted}
-    is_checked
-    editable
-    mark_disabled
+    is_checked: True if the mark should appear checked in grade mode
+    edit_marks_enabled: True if marks should appear editable
+    edit_component_enabled: True if 'instructor' edit mode is enabled
+    mark_disabled: True if the mark should appear uneditable in 'edit' mode
 TODO: add 'publish' support
 #}
-{% set extra_classes = editable ? '' : 'mark-uneditable' %}
 <div id="mark-{{ mark.id }}"
-     class="mark-container row {{ first_mark ? 'mark-first' : '' }} {{ not editable and mark_disabled ? 'mark-disabled' : '' }} {{ mark.deleted ? 'mark-deleted' : '' }}"
+     class="mark-container row {{ first_mark ? 'mark-first' : '' }} {{ not edit_marks_enabled and mark_disabled ? 'mark-disabled' : '' }} {{ mark.deleted ? 'mark-deleted' : '' }}"
      data-component_id="{{ component.id }}"
      data-mark_id="{{ mark.id }}"
-     onclick="{{ editable or mark_disabled ? '' : 'onToggleMark(this)' }}"
+     onclick="{{ edit_marks_enabled or mark_disabled ? '' : 'onToggleMark(this)' }}"
 >
-    {% if editable %}
+    {% if edit_marks_enabled %}
         <span class="reorder-mark-container col-no-gutters {{ first_mark ? 'hidden' : '' }}">
             <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
         </span>
     {% endif %}
     {# Keep the mark checkbox so we can keep graded data when in edit mode to automatically update the component points #}
-    <span class="{{ is_checked ? 'mark-selected' : '' }} {{ editable ? 'hidden' : '' }} mark-selector col-no-gutters"
+    <span class="{{ is_checked ? 'mark-selected' : '' }} {{ edit_marks_enabled ? 'hidden' : '' }} mark-selector col-no-gutters"
           data-mark_id="{{ mark.id }}">
         {{ mark.order + 1 }}
     </span>
     <span class="col-no-gutters mark-points"
           data-points="{{ mark.points }}">
-        {% if editable %}
+        {% if edit_marks_enabled %}
             <input type="number"
                    onchange="onMarkPointsChange(this)"
                    step="{{ component.precision }}"
@@ -38,7 +38,7 @@ TODO: add 'publish' support
     </span>
     <span class="col-sm mark-title"
           data-title="{{ mark.title|escape }}">
-        {% if editable %}
+        {% if edit_marks_enabled %}
             <input type="text"
                    value="{{ mark.title|escape }}"
                    {{ first_mark ? 'disabled' : '' }}/>
@@ -49,7 +49,7 @@ TODO: add 'publish' support
     <span class="col-no-gutters mark-tools" onclick="onGetMarkStats(this);event.stopPropagation()">
         <i class="fa fa-users icon-mark-stats"></i>
     </span>
-    {% if editable and not first_mark %}
+    {% if edit_marks_enabled and not first_mark %}
         <span class="delete-mark-container col-no-gutters mark-tools" onclick="onDeleteMark(this)">
             <i class="fa fa-trash"></i>
         </span>
