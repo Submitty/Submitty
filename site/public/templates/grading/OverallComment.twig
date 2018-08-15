@@ -5,18 +5,20 @@ Required Parameters:
 -overall_comment: the text to show in box
 
 #}
-<div class="box general-comment"
+<div class="box general-comment container"
      onclick="{{ disabled ? '' : 'onClickOverallComment(this)'}}">
-    <div class="box-title">
-        <span id="title-general">
+    <div class="row">
+        <div class="col">
             <b>General Comment</b>
-        </span>
-        {% include "SavingTools.twig" with {
-            'editable': editable,
-            'cancel_on_click': disabled ? '' : 'onCancelOverallComment(this)'
-        } only %}
+        </div>
+        <div class="col-no-gutters">
+            {% include "SavingTools.twig" with {
+                'show_save_tools': editable,
+                'cancel_on_click': disabled ? '' : 'onCancelOverallComment(this)'
+            } only %}
+        </div>
     </div>
-    <div>
+    <div class="row">
         {% if editable %}
             <textarea id="overall-comment"
                       rows="5"
