@@ -24,13 +24,12 @@ body {
     /* background-color: #B6CECE; */
 
     /* Submitty Logo blue */
-    /* background-color: #0a6496; */
+    background-color: #f6fbfe;
 
     /* A lighter shade of blue grey */
-    background: #b8d5e5;
+    /* background: #b8d5e5; */
     /* a gradient! */
-
-    background: linear-gradient(#0a6496, #b8d5e5);
+    /* background: linear-gradient(#0a6496, #b8d5e5); */
     background-attachment: fixed;
 }
 
@@ -95,8 +94,7 @@ input[type="url"],
 input[type="search"],
 input[type="tel"],
 input[type="color"] {
-    height: 20px;
-    box-sizing: content-box;
+    height: 30px;
     padding: 4px 6px;
     font-size: 14px;
     line-height: 20px;
@@ -311,11 +309,12 @@ table tr.table-header {
 }
 
 #header {
-    background-color: #edf6f6;
-    min-height: 125px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 10px -5px #888888;
+    /* min-height: 125px; */
     height: auto;
     width: 100%;
-    font-family: 'Open Sans Condensed', sans-serif;
+    font-family: 'Calibri', sans-serif;
     overflow: hidden;
 }
 
@@ -332,15 +331,20 @@ table tr.table-header {
     text-decoration: none;
 }
 
+#header a > i.fa {
+    font-size: 20px;
+}
+
 #header-text>h2:nth-child(2) {
     padding-top: 25px;
 }
 
+.text-center {
+    text-align: center;
+}
+
 #logo-submitty {
-    height: 125px;
-    width: 357px;
-    background: url('../img/submitty_logo.png') no-repeat;
-    background-size: 357px 125px;
+    height: 80px;
 }
 
 @media (min-width: 357px) {
@@ -356,15 +360,14 @@ table tr.table-header {
     }
     #logo-submitty {
         width: 100%;
-        height: 0;
-        padding-top: calc(125% / 357 * 100);
+        height: auto;
         background-size: contain;
     }
 }
 
 .content {
     box-shadow: 0 2px 15px -5px #888888;
-    background-color: #E9EFEF;
+    background-color: #ffffff;
     border-radius: 3px;
     padding: 30px;
     margin: 15px;
@@ -374,8 +377,14 @@ table tr.table-header {
     margin-bottom: 20px;
 }
 
+.subtitle {
+    font-size: smaller;
+    word-wrap: unset;
+    white-space: normal;
+}
+
 #footer {
-    margin-top: 30px;
+    margin-top: 15px;
     z-index: 20;
 }
 
@@ -392,8 +401,6 @@ table tr.table-header {
 }
 
 #footer {
-    background-color: #edf6f6;
-    position: relative;
     width: 100%;
     padding: 5px 0;
     text-align: center;
@@ -465,6 +472,12 @@ table tr.table-header {
     color: red;
 }
 
+.menu {
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+}
+
 #alerts {
 
 }
@@ -491,10 +504,6 @@ table tr.table-header {
     margin-bottom: 40px;
 }
 
-.option-desc {
-    width: 60%;
-}
-
 .option-title {
     font-weight: bold;
     font-size: 18px;
@@ -505,9 +514,7 @@ table tr.table-header {
 }
 
 .option-input {
-    float: right;
     margin-top: 10px;
-    width: 40%;
 }
 
 .option-input > textarea,
@@ -535,14 +542,17 @@ table tr.table-header {
     padding-right: 10px;
 }
 
+#login-box {
+    min-width: 300px;
+    flex-grow: 1;
+}
+
 #login {
-    margin: auto;
-    width: 50%;
 }
 
 #login input[type="text"],
 #login input[type="password"] {
-    width: 50%;
+    width: 100%;
     margin-bottom: 5px;
 }
 
@@ -744,8 +754,8 @@ table tr.table-header {
 .notification_badge{
     background-color: red;
     float: right;
-    padding-left: 2px;
-    padding-right: 2px;
+    padding-left: 5px;
+    padding-right: 5px;
     margin-left: 5px;
     border-radius: 2px;
     color: white;
@@ -854,8 +864,11 @@ table tr.table-header {
 
 table .colspan{
 	padding: 10px;
-	font-size: 28px;
+	font-size: 22px;
 	font-weight: 600;
+}
+table .hr {
+    border-bottom: 1px solid #ccc;
 }
 table .bar{
 	height:20px;
@@ -863,7 +876,12 @@ table .bar{
 table .gradeable_title {
 	padding-left: 50px;
 }
-
+table .gradeable_row td:first-child {
+    padding-left: 15px;
+}
+table .gradeable_row td:last-child {
+    padding-right: 15px;
+}
 table .has-url:hover {
 	cursor: pointer;
 	color: #3232FF;
@@ -900,23 +918,179 @@ table .instructor .two-options{
 	width: 15%;
 }
 
-.nav_header{
-  text-align:center;
-  background-color:#bfbfbf;
+#nav-body {
+    margin-top: 15px;
+    margin-left: 30px;
+    display: flex;
+    flex-direction: column;
+}
+    
+#nav-positioner {
+    margin-left: -30px;
+    flex-grow: 1;
 }
 
-.nav-buttons {
-    float: right;
+#nav-buttons {
+    width: 230px;
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-items: center;
+    padding: 20px;
+    margin-left: -5px;
+    padding-top: 50px;
+}
+
+#sidebar.collapsed #nav-buttons {
+    width: 240px;
+}
+
+#sidebar.collapsed #nav-buttons-visible {
+    width: 60px;
+    overflow: hidden;
+    margin-left: -15px;
+    padding-left: 15px;
+}
+
+#sidebar {
+    width: 220px;
+    margin: 0;
+}
+
+#sidebar.animate {
+    transition: 0.25s ease-out;
+}
+
+#sidebar.collapsed {
+    width: 0;
+}
+
+#nav-buttons ul li {
+    list-style: none;
+    margin-bottom: -2px;
+    margin-left: -30px;
+    margin-right: -30px;
+}
+
+#nav-buttons ul li a.nav-row.selected {
+    background-color: #d9e1e2;
+    font-weight: bold;
+    color: #000000;
+}
+
+#nav-buttons ul li .nav-row {
+    padding: 6px;
+    padding-left: 36px;
+    width: 100%;
+    display: block;
+}
+
+#sidebar.collapsed #nav-buttons ul li .nav-row {
+    display: none;
+}
+
+#nav-buttons ul li .collapse-icon {
+    display: none;
+}
+
+#sidebar.collapsed #nav-buttons ul li .collapse-icon {
+    display: inline-block;
+    font-size: 24px;
+    width: 60px;
+    padding: 6px;
+    text-align: center;
+}
+
+#sidebar.collapsed #nav-buttons ul li .nav-row .notification_badge {
+    font-size: 12px;
+    margin-top: -12px;
+    text-align: right;
+    position: relative; /* So it goes on top */
+}
+
+#nav-buttons ul li .nav-row.collapse-icon i.fa {
+    margin-left: 0;
+    width: 48px;
+}
+
+#nav-buttons ul li a.nav-row {
+    color: #006398;
+    text-decoration: none;
+}
+
+#nav-buttons ul li a.nav-row:hover {
+    color: #002334;
+}
+
+#nav-buttons ul li a.nav-row:active {
+    color: #790000;
+}
+
+#nav-buttons ul li a.nav-row i.fa {
+    color: #000000;
+}
+
+#nav-buttons ul li a.collapse-icon i.fa {
+    color: #000000;
+}
+
+#nav-buttons ul li a.collapse-icon:hover i.fa {
+    color: #006398;
+}
+
+#nav-buttons ul li a.collapse-icon:active i.fa {
+    color: #790000;
+}
+
+#nav-buttons ul li .nav-row i.fa {
+    margin-left: -33px;
+    width: 30px;
+    text-align: center;
+}
+
+#nav-buttons ul li.line {
+    border-bottom: 1px solid #bbb;
+    padding-bottom: 0;
+    margin-left: -20px;
+    margin-right: -20px;
+    margin-bottom: -10px;
+}
+
+#nav-buttons ul li.short-line {
+    border-bottom: 1px solid #ddd;
+    margin-left: 6px;
+    margin-right: 10px;
+    padding-bottom: 0;
+    margin-top: 6px;
+    margin-bottom: 4px;
+}
+
+#sidebar.collapsed #nav-buttons ul li.short-line {
+    margin-left: -30px;
+}
+
+#nav-buttons ul li.heading {
+    margin-left: -15px;
+    font-weight: bold;
+    font-variant: all-small-caps;
+    font-size: 20px;
+}
+
+.spacer {
+    flex-grow: 1;
+}
+
+.nav-buttons a {
+    margin-left: 5px;
 }
 
 .btn-nav {
     width:100%;
 }
 
-.btn-nav-submit, .btn-nav-grade {
-    padding: 0px !important;
-    padding-top: 10px !important;
-    padding-bottom: 10px !important;
+.btn.btn-nav-submit, .btn.btn-nav-grade {
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 
 .td-open {
@@ -1309,6 +1483,10 @@ end of styles used in the admin gradeable page
     flex-direction: column;
 }
 
+#site-body > .row {
+    flex-wrap: nowrap;
+}
+
 #container iframe#top_bar, #container iframe#bottom_bar {
     height: 60px;
 }
@@ -1383,4 +1561,8 @@ end of styles used in the admin gradeable page
 
 .courses-table {
     width: 100%;
+}
+
+.courses-table .btn {
+    margin-bottom: 3px;
 }

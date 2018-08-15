@@ -35,11 +35,7 @@ class NavigationController extends AbstractController {
 
     private function navigationPage() {
         $gradeables_list = new GradeableList($this->core);
-        $this->core->getOutput()->addCss("https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,300italic,700");
-        $this->core->getOutput()->addCss("https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic,700italic");
-        $this->core->getOutput()->addCss("https://fonts.googleapis.com/css?family=PT+Sans:700,700italic");
-        $this->core->getOutput()->addCss("https://fonts.googleapis.com/css?family=Inconsolata");
-        
+
         $future_gradeables_list = $gradeables_list->getFutureGradeables();
         $beta_gradeables_list = $gradeables_list->getBetaGradeables();
         $open_gradeables_list = $gradeables_list->getOpenGradeables();
@@ -96,7 +92,7 @@ class NavigationController extends AbstractController {
         $this->core->getOutput()->renderOutput('Navigation', 'showGradeables', $sections_to_lists, $graded_gradeables, $submit_everyone);
         $this->core->getOutput()->renderOutput('Navigation', 'deleteGradeableForm'); 
     }
-    
+
     /**
      * Test if the current user is allowed to view this gradeable
      * @param Gradeable $gradeable

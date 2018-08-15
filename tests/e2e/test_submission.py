@@ -21,7 +21,7 @@ class TestSubmission(BaseTestCase):
     def setup_test_start(self, gradeable_category="open", gradeable_id="open_homework", button_name="submit", loaded_selector=(By.XPATH, "//div[@class='content']/div[1]/h2[1][normalize-space(text())='New submission for: Open Homework']")):
         self.log_in()
         self.click_class("sample", "SAMPLE")
-        self.click_nav_gradeable_button(gradeable_category, gradeable_id, button_name, loaded_selector)
+        self.click_nav_submit_button(gradeable_category, gradeable_id, button_name, loaded_selector)
 
 
     def create_file_paths(self, multiple=False, autograding=False):
@@ -88,7 +88,7 @@ class TestSubmission(BaseTestCase):
 
         # create a set of file names and compare them to the displayed submitted files
         file_names = { os.path.basename(file_path) for file_path in file_paths }
-        submitted_files_text = self.driver.find_element_by_xpath("//div[@class='content']/div[@class='sub']/div[@class='box half'][1]").text
+        submitted_files_text = self.driver.find_element_by_xpath("//div[@id='submitted-files']").text
         for submitted_file_text in submitted_files_text.split("\n"):
             idx = submitted_file_text.rfind('(')
             file_name = submitted_file_text[:idx-1]
@@ -100,7 +100,7 @@ class TestSubmission(BaseTestCase):
             autograding_done = False
             for i in range(6):
                 try:
-                    WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[@class='content']/div[@class='sub']/div[@class='box' and div/@id='tc_0']")))
+                    WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[div/@id='tc_0']")))
                     autograding_done = True
                 except TimeoutException as ex:
                     self.driver.refresh()
