@@ -664,6 +664,25 @@ function getOverallCommentDOMElement() {
 }
 
 /**
+ * Shows the 'in progress' indicator for a component
+ * @param component_id
+ */
+function setComponentInProgress(component_id) {
+    let domElement = getComponentDOMElement(component_id);
+    domElement.find('.save-tools span').hide();
+    domElement.find('.save-tools-in-progress').show();
+}
+
+/**
+ * Shows the 'in progress' indicator for the overall comment
+ */
+function setOverallCommentInProgress() {
+    let domElement = getOverallCommentDOMElement();
+    domElement.find('.save-tools span').hide();
+    domElement.find('.save-tools-in-progress').show();
+}
+
+/**
  * Enables reordering on marks in an edit-mode component
  * @param component_id
  */
@@ -1607,6 +1626,7 @@ function openComponentGrading(component_id) {
  * @return {Promise}
  */
 function openComponent(component_id) {
+    setComponentInProgress(component_id);
     // Achieve polymorphism in the interface using this `isInstructorEditEnabled` flag
     return isInstructorEditEnabled() ? openComponentInstructorEdit(component_id) : openComponentGrading(component_id);
 }
@@ -1702,6 +1722,7 @@ function closeComponentGrading(component_id, saveChanges) {
  * @return {Promise}
  */
 function closeComponent(component_id, saveChanges = true) {
+    setComponentInProgress(component_id);
     // Achieve polymorphism in the interface using this `isInstructorEditEnabled` flag
     return isInstructorEditEnabled()
         ? closeComponentInstructorEdit(component_id, saveChanges)
@@ -1713,6 +1734,7 @@ function closeComponent(component_id, saveChanges = true) {
  * @return {Promise}
  */
 function openOverallComment() {
+    setOverallCommentInProgress();
     return ajaxGetOverallComment(getGradeableId(), getAnonId())
         .then(function (comment) {
             return injectOverallComment(comment, true);
@@ -1725,6 +1747,7 @@ function openOverallComment() {
  * @return {Promise}
  */
 function closeOverallComment(saveChanges = true) {
+    setOverallCommentInProgress();
     if (saveChanges) {
         return ajaxSaveOverallComment(getGradeableId(), getAnonId(), getOverallCommentFromDOM())
             .then(function () {
