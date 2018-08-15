@@ -3,9 +3,7 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
-use app\libraries\Core;
-use app\libraries\IniParser;
-use app\libraries\Output;
+use app\libraries\FileUtils;
 
 class ConfigurationController extends AbstractController {
     public function run() {
@@ -22,104 +20,120 @@ class ConfigurationController extends AbstractController {
         }
     }
 
-    public function viewConfiguration() {
+    public function viewConfiguration()
+    {
         $fields = array(
-            'course_name'               => $this->core->getConfig()->getCourseName(),
-            'course_home_url'           => $this->core->getConfig()->getCourseHomeUrl(),
-            'default_hw_late_days'      => $this->core->getConfig()->getDefaultHwLateDays(),
-            'default_student_late_days' => $this->core->getConfig()->getDefaultStudentLateDays(),
-            'zero_rubric_grades'        => $this->core->getConfig()->shouldZeroRubricGrades(),
-            'upload_message'            => $this->core->getConfig()->getUploadMessage(),
-            'keep_previous_files'       => $this->core->getConfig()->keepPreviousFiles(),
+            'course_name'                    => $this->core->getConfig()->getCourseName(),
+            'course_home_url'                => $this->core->getConfig()->getCourseHomeUrl(),
+            'default_hw_late_days'           => $this->core->getConfig()->getDefaultHwLateDays(),
+            'default_student_late_days'      => $this->core->getConfig()->getDefaultStudentLateDays(),
+            'zero_rubric_grades'             => $this->core->getConfig()->shouldZeroRubricGrades(),
+            'upload_message'                 => $this->core->getConfig()->getUploadMessage(),
+            'keep_previous_files'            => $this->core->getConfig()->keepPreviousFiles(),
             'display_rainbow_grades_summary' => $this->core->getConfig()->displayRainbowGradesSummary(),
-            'display_custom_message'    => $this->core->getConfig()->displayCustomMessage(),
-            'course_email'              => $this->core->getConfig()->getCourseEmail(),
-            'vcs_base_url'              => $this->core->getConfig()->getVcsBaseUrl(),
-            'vcs_type'                  => $this->core->getConfig()->getVcsType(),
-            'forum_enabled'				=> $this->core->getConfig()->isForumEnabled(),
-            'regrade_enabled'           => $this->core->getConfig()->isRegradeEnabled(),
-            'regrade_message'           => $this->core->getConfig()->getRegradeMessage(),
-            'private_repository'        => $this->core->getConfig()->getPrivateRepository()
+            'display_custom_message'         => $this->core->getConfig()->displayCustomMessage(),
+            'course_email'                   => $this->core->getConfig()->getCourseEmail(),
+            'vcs_base_url'                   => $this->core->getConfig()->getVcsBaseUrl(),
+            'vcs_type'                       => $this->core->getConfig()->getVcsType(),
+            'forum_enabled'                  => $this->core->getConfig()->isForumEnabled(),
+            'regrade_enabled'                => $this->core->getConfig()->isRegradeEnabled(),
+            'regrade_message'                => $this->core->getConfig()->getRegradeMessage(),
+            'private_repository'             => $this->core->getConfig()->getPrivateRepository(),
+            'room_seating_gradeable_id'      => $this->core->getConfig()->getRoomSeatingGradeableId()
         );
 
-        foreach (array('upload_message', 'course_email', 'regrade_message') as $key) {
-            if (isset($_SESSION['request'][$key])) {
-                $fields[$key] = htmlentities($_SESSION['request'][$key]);
-            }
-        }
-
-        $fields['course_name'] = $this->core->getDisplayedCourseName();
-
-        foreach (array('default_hw_late_days', 'default_student_late_days') as $key) {
-            if (isset($_SESSION['request'][$key])) {
-                $fields[$key] = intval($_SESSION['request'][$key]);
-            }
-        }
-
-        foreach (array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary', 'display_custom_message', 'regrade_enabled') as $key) {
-            if (isset($_SESSION['request'][$key])) {
-                $fields[$key] = ($_SESSION['request'][$key] == true) ? true : false;
-            }
-        }
-
         if (isset($_SESSION['request'])) {
+            foreach (array('upload_message', 'course_email', 'regrade_message') as $key) {
+                if (isset($_SESSION['request'][$key])) {
+                    $fields[$key] = htmlentities($_SESSION['request'][$key]);
+                }
+            }
+
+            foreach (array('default_hw_late_days', 'default_student_late_days') as $key) {
+                if (isset($_SESSION['request'][$key])) {
+                    $fields[$key] = intval($_SESSION['request'][$key]);
+                }
+            }
+
+            foreach (array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary',
+                         'display_custom_message', 'regrade_enabled') as $key) {
+                if (isset($_SESSION['request'][$key])) {
+                    $fields[$key] = ($_SESSION['request'][$key] == true) ? true : false;
+                }
+            }
+
             unset($_SESSION['request']);
         }
 
-        $this->core->getOutput()->renderOutput(array('admin', 'Configuration'), 'viewConfig', $fields);
+        $gradeable_seating_options = $this->getGradeableSeatingOptions();
+        $config_url = $this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper'));
+
+        $this->core->getOutput()->renderOutput(array('admin', 'Configuration'), 'viewConfig', $fields, $gradeable_seating_options, $config_url);
     }
 
     public function updateConfiguration() {
-        if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
-            $this->core->addErrorMessage("Invalid CSRF token. Try again.");
-            $_SESSION['request'] = $_POST;
-            $this->core->redirect($this->core->buildUrl(array('component' => 'admin',
-                                                              'page' => 'configuration',
-                                                              'action' => 'view')));
+        if (!$this->core->checkCsrfToken()) {
+            return $this->core->getOutput()->renderJsonFail('Invalid CSRF token');
         }
 
-        if (!isset($_POST['course_name']) || $_POST['course_name'] == "") {
-            $this->core->addErrorMessage("Course name can not be blank");
-            $_SESSION['request'] = $_POST;
-            $this->core->redirect($this->core->buildUrl(array('component' => 'admin',
-                                                              'page' => 'configuration',
-                                                              'action' => 'view')));
+        if(!isset($_POST['name'])) {
+            return $this->core->getOutput()->renderJsonFail('Name of config value not provided');
+        }
+        $name = $_POST['name'];
+
+        if(!isset($_POST['entry'])) {
+            return $this->core->getOutput()->renderJsonFail('Name of config entry not provided');
+        }
+        $entry = $_POST['entry'];
+
+        if($name === "room_seating_gradeable_id") {
+            $gradeable_seating_options = $this->getGradeableSeatingOptions();
+            $gradeable_ids = array();
+            foreach($gradeable_seating_options as $option) {
+                $gradeable_ids[] = $option['g_id'];
+            }
+            if(!in_array($entry, $gradeable_ids)) {
+                return $this->core->getOutput()->renderJsonFail('Invalid gradeable chosen for seating');
+            }
+        }
+        else if(in_array($name, array('default_hw_late_days', 'default_student_late_days'))) {
+            if(!ctype_digit($entry)) {
+                return $this->core->getOutput()->renderJsonFail('Must enter a number for this field');
+            }
+            $entry = intval($entry);
+        }
+        else if(in_array($name, array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary',
+                                      'display_custom_message', 'forum_enabled', 'regrade_enabled'))) {
+            $entry = $entry === "true" ? true : false;
+        }
+        else if($name === 'upload_message') {
+            $entry = nl2br($entry);
         }
 
-        foreach (array('default_hw_late_days', 'default_student_late_days') as $key) {
-            $_POST[$key] = (isset($_POST[$key])) ? intval($_POST[$key]) : 0;
+        $config_ini = $this->core->getConfig()->readCourseIni();
+        if(!isset($config_ini['course_details'][$name])) {
+            return $this->core->getOutput()->renderJsonFail('Not a valid config name');
         }
+        $config_ini['course_details'][$name] = $entry;
+        $this->core->getConfig()->saveCourseIni(['course_details' => $config_ini['course_details']]);
 
-        foreach (array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary', 'display_custom_message', 'forum_enabled', 'regrade_enabled') as $key) {
-            $_POST[$key] = (isset($_POST[$key]) && $_POST[$key] == "true") ? true : false;
-        }
+        return $this->core->getOutput()->renderJsonSuccess();
+    }
 
-        $save_array = array(
-            'course_details' => array(
-                'course_name'               => $_POST['course_name'],
-                'course_home_url'           => $_POST['course_home_url'],
-                'default_hw_late_days'      => $_POST['default_hw_late_days'],
-                'default_student_late_days' => $_POST['default_student_late_days'],
-                'zero_rubric_grades'        => $_POST['zero_rubric_grades'],
-                'upload_message'            => nl2br($_POST['upload_message']),
-                'keep_previous_files'       => $_POST['keep_previous_files'],
-                'display_rainbow_grades_summary' => $_POST['display_rainbow_grades_summary'],
-                'display_custom_message'    => $_POST['display_custom_message'],
-                'course_email'              => $_POST['course_email'],
-                'vcs_base_url'              => $_POST['vcs_base_url'],
-                'vcs_type'                  => $_POST['vcs_type'],
-                'forum_enabled'				=> $_POST['forum_enabled'],
-                'regrade_enabled'           => $_POST['regrade_enabled'],
-                'regrade_message'           => $_POST['regrade_message'],
-                'private_repository'        => $_POST['private_repository']
-            )
-        );
+    private function getGradeableSeatingOptions() {
+        $gradeable_seating_options = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
 
-        $this->core->getConfig()->saveCourseIni($save_array);
+        $seating_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'seating');
 
-        $this->core->addSuccessMessage("Site configuration updated");
-        $this->core->redirect($this->core->buildUrl(array('component' => 'admin',
-                                                          'page' => 'configuration',
-                                                          'action' => 'view')));
+        $gradeable_seating_options = array_filter($gradeable_seating_options, function($seating_option) use($seating_dir) {
+            return is_dir(FileUtils::joinPaths($seating_dir, $seating_option['g_id']));
+        });
+
+        $empty_option = [[
+            'g_id' => "",
+            'g_title' => "--None--"
+        ]];
+
+        return $empty_option + $gradeable_seating_options;
     }
 }

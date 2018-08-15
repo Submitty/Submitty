@@ -26,13 +26,13 @@ function buildUrl(parts) {
     return document.body.dataset.siteUrl + constructed;
 }
 
-function changeDiffView(div_name, gradeable_id, who_id, index, autocheck_cnt, helper_id){
+function changeDiffView(div_name, gradeable_id, who_id, version, index, autocheck_cnt, helper_id){
     var actual_div_name = "#" + div_name + "_0";
     var expected_div_name = "#" + div_name + "_1";
     var actual_div = $(actual_div_name).children()[0];
     var expected_div = $(expected_div_name).children()[0];
     var args = {'component': 'grading', 'page': 'electronic', 'action': 'remove_empty'
-        ,'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index, 'autocheck_cnt': autocheck_cnt};
+        ,'gradeable_id': gradeable_id, 'who_id' : who_id, 'version': version, 'index' : index, 'autocheck_cnt': autocheck_cnt};
     var list_white_spaces = {};
     $('#'+helper_id).empty();
     if($("#show_char_"+index+"_"+autocheck_cnt).text() == "Visualize whitespace characters"){
@@ -40,11 +40,11 @@ function changeDiffView(div_name, gradeable_id, who_id, index, autocheck_cnt, he
         $("#show_char_"+index+"_"+autocheck_cnt).addClass('btn-primary');
         $("#show_char_"+index+"_"+autocheck_cnt).html("Display whitespace/non-printing characters as escape sequences");
         list_white_spaces['newline'] = '&#9166;';
-        args['option'] = 'with_unicode'
+        args['option'] = 'unicode'
     } else if($("#show_char_"+index+"_"+autocheck_cnt).text() == "Display whitespace/non-printing characters as escape sequences") {
         $("#show_char_"+index+"_"+autocheck_cnt).html("Original View");
         list_white_spaces['newline'] = '\\n';
-        args['option'] = 'with_escape'
+        args['option'] = 'escape'
     } else {
         $("#show_char_"+index+"_"+autocheck_cnt).removeClass('btn-primary');
         $("#show_char_"+index+"_"+autocheck_cnt).addClass('btn-default');
@@ -55,39 +55,58 @@ function changeDiffView(div_name, gradeable_id, who_id, index, autocheck_cnt, he
     args['which'] = 'expected';
     var url = buildUrl(args);
 
+    let assertSuccess = function(data) {
+        if (data.status === 'fail') {
+            alert("Error loading diff: " + data.message);
+            return false;
+        } else if (data.status === 'error') {
+            alert("Internal server error: " + data.message);
+            return false;
+        }
+        return true;
+    }
+
     $.getJSON({
         url: url,
-        success: function(data) {
-            for(property in data.whitespaces){
-                list_white_spaces[property] = data.whitespaces[property];
+        success: function (response) {
+            if(!assertSuccess(response)) {
+                return;
+            }
+            for (property in response.data.whitespaces) {
+                list_white_spaces[property] = response.data.whitespaces[property];
             }
             $(expected_div).empty();
-            $(expected_div).html(data.html);
+            $(expected_div).html(response.data.html);
             args['which'] = 'actual';
             url = buildUrl(args);
             $.getJSON({
                 url: url,
-                success: function(data) {
-                    for(property in data.whitespaces){
-                        list_white_spaces[property] = data.whitespaces[property];
+                success: function (response) {
+                    if(!assertSuccess(response)) {
+                        return;
                     }
-                    for(property in list_white_spaces){
-                        $('#'+helper_id).append('<span style=\"outline:1px blue solid;\">'+list_white_spaces[property] + "</span> = " + property + " ");
+                    for (property in response.data.whitespaces) {
+                        list_white_spaces[property] = response.data.whitespaces[property];
+                    }
+                    for (property in list_white_spaces) {
+                        $('#' + helper_id).append('<span style=\"outline:1px blue solid;\">' + list_white_spaces[property] + "</span> = " + property + " ");
                     }
                     $(actual_div).empty();
-                    $(actual_div).html(data.html);
+                    $(actual_div).html(response.data.html);
                 },
-                error: function(e) {
-                    alert("Could not load diff, please refresh the page and try again.");}
+                error: function (e) {
+                    alert("Could not load diff, please refresh the page and try again.");
+                }
             });
         },
-        error: function(e) {
-            alert("Could not load diff, please refresh the page and try again.");}
+        error: function (e) {
+            alert("Could not load diff, please refresh the page and try again.");
+        }
     });
 
 }
 
-function loadTestcaseOutput(div_name, gradeable_id, who_id, index){
+function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = ''){
     orig_div_name = div_name
     div_name = "#" + div_name;
     var isVisible = $( div_name ).is( " :visible" );
@@ -99,13 +118,17 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index){
     }else{
         $("#show_char_"+index).toggle();
         var url = buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'load_student_file',
-            'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index});
+            'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index, 'version' : version});
 
-        $.ajax({
+        $.getJSON({
             url: url,
-            success: function(data) {
+            success: function(response) {
+                if (response.status !== 'success') {
+                    alert('Error getting file diff: ' + response.message);
+                    return;
+                }
                 $(div_name).empty();
-                $(div_name).html(data);
+                $(div_name).html(response.data);
                 toggleDiv(orig_div_name);
             },
             error: function(e) {
@@ -251,6 +274,22 @@ function newDeleteGradeableForm(form_action, gradeable_name) {
 }
 
 function newDeleteCourseMaterialForm(form_action, file_name) {
+    var current_y_offset = window.pageYOffset;
+    document.cookie = 'jumpToScrollPostion='+current_y_offset;
+
+    $('[id^=div_viewer_]').each(function() {
+        var number = this.id.replace('div_viewer_', '').trim();
+
+        var elem = $('#div_viewer_' + number);
+        if (elem.hasClass('open')) {
+            document.cookie = "cm_" +number+ "=1;";
+        }
+        else {
+            document.cookie = "cm_" +number+ "=0;";
+        }
+    });
+
+
     $('.popup-form').css('display', 'none');
     var form = $("#delete-course-material-form");
     $('[name="delete-course-material-message"]', form).html('');
@@ -320,8 +359,17 @@ function newUploadCourseMaterialsForm() {
 
 }
 
+function deletePlagiarismResultAndConfigForm(form_action, gradeable_title) {
+    $('.popup-form').css('display', 'none');
+    var form = $("#delete-plagiarism-result-and-config-form");
+    $('[name="gradeable_title"]', form).html('');
+    $('[name="gradeable_title"]', form).append(gradeable_title);
+    $('[name="delete"]', form).attr('action', form_action);
+    form.css("display", "block");
+}
+
 function addMorePriorTermGradeable(prior_term_gradeables) {
-    var form = $("#run-plagiarism-form");
+    var form = $("#save-configuration-form");
     var prior_term_gradeables_number = $('[name="prior_term_gradeables_number"]', form).val();
     var to_append = '<br /><select name="prev_sem_'+ prior_term_gradeables_number +'"><option value="">None</option>';
     $.each(prior_term_gradeables, function(sem,courses_gradeables){
@@ -332,63 +380,25 @@ function addMorePriorTermGradeable(prior_term_gradeables) {
     $('[name="prior_term_gradeables_number"]', form).val(parseInt(prior_term_gradeables_number)+1);
     $("select", form).change(function(){
         var select_element_name = $(this).attr("name");
-        PlagiarismFormOptionChanged(prior_term_gradeables, select_element_name);
+        PlagiarismConfigurationFormOptionChanged(prior_term_gradeables, select_element_name);
     });
 }
 
-function setRankingForGradeable() {
-    var form = $("#gradeables_with_plagiarism_result");
-    var form2 = $("#users_with_plagiarism");
-    var gradeable_id = $('[name="gradeable_id"]', form).val();
-    if(gradeable_id == ""){
-        $('[name="user_id_1"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
-        $('[name="version"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
-        $('[name="user_id_2"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
-        $('[name="code_box_1"]').empty();
-        $('[name="code_box_2"]').empty();
-    }
-    else {
-        var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_plagiarism_ranking_for_gradeable',
-                'gradeable_id': gradeable_id});
-
-        $.ajax({
-            url: url,
-            success: function(data) {
-                var rankings = JSON.parse(data);
-                if(rankings.error){
-                    alert(rankings.error);
-                    return;
-                }
-                var append_options='<option value="">None</option>';
-                $.each(rankings, function(i,user_ranking_info){
-                    append_options += '<option value="'+ user_ranking_info[1] +'">'+ user_ranking_info[3] +'  ('+user_ranking_info[0] +')</option>';
-                });
-                $('[name="user_id_1"]', form2).find('option').remove().end().append(append_options).val('');
-            },
-            error: function(e) {
-                alert("Could not load rankings for plagiarism, please refresh the page and try again.");
-            }
-        })
-    }
-}
-
-function setUserSubmittedCode(changed) {
-    var form = $("#gradeables_with_plagiarism_result");
-    var form2 = $("#users_with_plagiarism");
-    var gradeable_id = $('[name="gradeable_id"]', form).val();
-    var user_id_1 = $('[name="user_id_1"]', form2).val();
+function setUserSubmittedCode(gradeable_id, changed) {
+    var form = $("#users_with_plagiarism");
+    var user_id_1 = $('[name="user_id_1"]', form).val();
     if(user_id_1 == ""){
-        $('[name="version_user_1"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
-        $('[name="user_id_2"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
+        $('[name="version_user_1"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
+        $('[name="user_id_2"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
         $('[name="code_box_1"]').empty();
         $('[name="code_box_2"]').empty();
     }
     else {
-        var version_user_1 = $('[name="version_user_1"]', form2).val();
+        var version_user_1 = $('[name="version_user_1"]', form).val();
         if(changed == 'version_user_1' && version_user_1 == '') {
-            $('[name="user_id_2"]', form2).find('option').remove().end().append('<option value="">None</option>').val('');
-            $('[name="code_box_1"]').empty();
-            $('[name="code_box_2"]').empty();
+            $('[name="user_id_2"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
+            $('[name="code_box_1"]').empty(); 
+            $('[name="code_box_2"]').empty(); 
         }
         else {
             if(changed == 'user_id_1' || changed =='version_user_1') {
@@ -422,7 +432,7 @@ function setUserSubmittedCode(changed) {
                                 append_options += '<option value="'+ version_to_append +'">'+ version_to_append +'</option>';
                             }
                         });
-                        $('[name="version_user_1"]', form2).find('option').remove().end().append(append_options).val(data.code_version_user_1);
+                        $('[name="version_user_1"]', form).find('option').remove().end().append(append_options).val(data.code_version_user_1);
                         $('[name="code_box_1"]').empty().append($('<textarea/>').html(data.display_code1).text());
                     },
                     error: function(e) {
@@ -447,10 +457,10 @@ function setUserSubmittedCode(changed) {
                             }
                             var append_options='<option value="">None</option>';
                             $.each(data, function(i,matching_users){
-                                append_options += '<option value="{&#34;user_id&#34;:&#34;'+ matching_users[0]+'&#34;,&#34;version&#34;:'+ matching_users[1] +'}">'+ matching_users[2]+' ( version:'+matching_users[1]+')</option>';
+                                append_options += '<option value="{&#34;user_id&#34;:&#34;'+ matching_users[0]+'&#34;,&#34;version&#34;:'+ matching_users[1] +'}">'+ matching_users[2]+ ' '+matching_users[3]+' &lt;'+matching_users[0]+'&gt; (version:'+matching_users[1]+')</option>';
                             });
                         }
-                        $('[name="user_id_2"]', form2).find('option').remove().end().append(append_options).val('');
+                        $('[name="user_id_2"]', form).find('option').remove().end().append(append_options).val('');
                     },
                     error: function(e) {
                         alert("Could not load submitted code, please refresh the page and try again.");
@@ -459,7 +469,7 @@ function setUserSubmittedCode(changed) {
                 $('[name="code_box_2"]').empty();
             }
             if (changed == 'user_id_2') {
-                if (($('[name="user_id_2"]', form2).val()) == '') {
+                if (($('[name="user_id_2"]', form).val()) == '') {
                     $('[name="code_box_2"]').empty();
                     var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatinated',
                         'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'user_id_2':'', 'version_user_2': ''});
@@ -480,8 +490,8 @@ function setUserSubmittedCode(changed) {
 
                 }
                 else {
-                    var user_id_2 = JSON.parse($('[name="user_id_2"]', form2).val())["user_id"];
-                    var version_user_2 = JSON.parse($('[name="user_id_2"]', form2).val())["version"];
+                    var user_id_2 = JSON.parse($('[name="user_id_2"]', form).val())["user_id"];
+                    var version_user_2 = JSON.parse($('[name="user_id_2"]', form).val())["version"];
                     var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatinated',
                         'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'user_id_2':user_id_2, 'version_user_2': version_user_2});
                     $.ajax({
@@ -506,17 +516,15 @@ function setUserSubmittedCode(changed) {
     }
 }
 
-function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, where, color , span_clicked, popup_user_2, popup_version_user_2) {
-    var form = $("#gradeables_with_plagiarism_result");
-    var form2 = $("#users_with_plagiarism");
-    var gradeable_id = $('[name="gradeable_id"]', form).val();
-    var user_id_1 = $('[name="user_id_1"]', form2).val();
-    var version_user_1 = $('[name="version_user_1"]', form2).val();
+function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user_1_match_end, where, color , span_clicked, popup_user_2, popup_version_user_2) {
+    var form = $("#users_with_plagiarism");
+    var user_id_1 = $('[name="user_id_1"]', form).val();
+    var version_user_1 = $('[name="version_user_1"]', form).val();
     var version_user_2='';
     var user_id_2='';
-    if($('[name="user_id_2"]', form2).val() != "") {
-        user_id_2 = JSON.parse($('[name="user_id_2"]', form2).val())["user_id"];
-        version_user_2 = JSON.parse($('[name="user_id_2"]', form2).val())["version"];
+    if($('[name="user_id_2"]', form).val() != "") {
+        user_id_2 = JSON.parse($('[name="user_id_2"]', form).val())["user_id"];
+        version_user_2 = JSON.parse($('[name="user_id_2"]', form).val())["version"];
     }
     $('[name="code_box_1"]').find('span').each(function(){
         var attr = $(this).css('background-color');
@@ -530,7 +538,6 @@ function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, 
             $(this).css('background-color',"#ffa500");
         }
     });
-
     var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_matches_for_clicked_match',
                         'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'start':user_1_match_start, 'end': user_1_match_end});
     $.ajax({
@@ -574,7 +581,7 @@ function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, 
             else if(where == 'code_box_1') {
                 var to_append='';
                 $.each(data, function(i,match){
-                    to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick=getMatchesForClickedMatch(event,'+user_1_match_start+','+ user_1_match_end+',"popup","'+ color+ '","","'+match[0]+'",'+match[1]+');>'+ match[0]+' &lt;version:'+match[1]+'&gt;</div></li>';
+                    to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick=getMatchesForClickedMatch("'+gradeable_id+'",event,'+user_1_match_start+','+ user_1_match_end+',"popup","'+ color+ '","","'+match[0]+'",'+match[1]+');>'+ match[3]+' '+match[4]+' &lt;'+match[0]+'&gt; (version:'+match[1]+')</div></li>';                        
                 });
                 to_append = $.parseHTML(to_append);
                 $("#popup_to_show_matches_id").empty().append(to_append);
@@ -589,8 +596,8 @@ function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, 
 
             else if(where == 'popup') {
                 jQuery.ajaxSetup({async:false});
-                $('[name="user_id_2"]', form2).val('{"user_id":"'+popup_user_2+'","version":'+popup_version_user_2+'}');
-                setUserSubmittedCode('user_id_2');
+                $('[name="user_id_2"]', form).val('{"user_id":"'+popup_user_2+'","version":'+popup_version_user_2+'}');
+                setUserSubmittedCode(gradeable_id, 'user_id_2');
                 $('[name="code_box_1"]').find('span').each(function(){
                     var attr = $(this).attr('name');
                     if (typeof attr !== typeof undefined && attr !== false) {
@@ -632,31 +639,36 @@ function getMatchesForClickedMatch(event, user_1_match_start, user_1_match_end, 
     })
 }
 
-function toggleUsersPlagiarism() {
-    var form = $("#gradeables_with_plagiarism_result");
-    var form2 = $("#users_with_plagiarism");
-    var gradeable_id = $('[name="gradeable_id"]', form).val();
-    var user_id_1 = $('[name="user_id_1"]', form2).val();
-    var version_user_1 = $('[name="version_user_1"]', form2).val();
+function toggleUsersPlagiarism(gradeable_id) {
+    var form = $("#users_with_plagiarism");
+    var user_id_1 = $('[name="user_id_1"]', form).val();
+    var version_user_1 = $('[name="version_user_1"]', form).val();
 
-    if( user_id_1 == '' || version_user_1 == '' || $('[name="user_id_2"]', form2).val() == '') return;
+    if( user_id_1 == '' || version_user_1 == '' || $('[name="user_id_2"]', form).val() == '') return;
 
-    var user_id_2 = JSON.parse($('[name="user_id_2"]', form2).val())["user_id"];
-    var version_user_2 = JSON.parse($('[name="user_id_2"]', form2).val())["version"];
-    $('[name="user_id_1"]', form2).val(user_id_2);
+    var user_id_2 = JSON.parse($('[name="user_id_2"]', form).val())["user_id"];
+    var version_user_2 = JSON.parse($('[name="user_id_2"]', form).val())["version"];
+    $('[name="user_id_1"]', form).val(user_id_2);
     jQuery.ajaxSetup({async:false});
-    setUserSubmittedCode('user_id_1');
-    $('[name="version_user_1"]', form2).val(version_user_2);
-    setUserSubmittedCode('version_user_1');
-    $('[name="user_id_2"]', form2).val('{"user_id":"'+user_id_1+'","version":'+version_user_1+'}');
+    setUserSubmittedCode(gradeable_id ,'user_id_1');
+    $('[name="version_user_1"]', form).val(version_user_2);
+    setUserSubmittedCode(gradeable_id, 'version_user_1');
+    $('[name="user_id_2"]', form).val('{"user_id":"'+user_id_1+'","version":'+version_user_1+'}');
     jQuery.ajaxSetup({async:true});
-    setUserSubmittedCode('user_id_2');
+    setUserSubmittedCode(gradeable_id, 'user_id_2');
 }
 
 
-function PlagiarismFormOptionChanged(prior_term_gradeables, select_element_name) {
-    var form = $("#run-plagiarism-form");
+function configureNewGradeableForPlagiarismFormOptionChanged(prior_term_gradeables, select_element_name) {
+    var form = $("#save-configuration-form");
     if(select_element_name == "language") {
+        
+        //
+        // Following code is used to set default window size for different languages
+        // that will appear in 'configureNewGradeableForPlagiarismForm'
+        // to change the default values, just change the val attribute for the language.
+        //
+
         if ($('[name="language"]', form).val() == "python") {
             $('[name="sequence_length"]', form).val('1');
         }
@@ -1041,7 +1053,7 @@ function toggleDiv(id) {
 }
 
 
-function checkRefreshSubmissionPage(url) {
+function checkRefreshPage(url) {
     setTimeout(function() {
         check_server(url)
     }, 1000);
@@ -1053,7 +1065,36 @@ function check_server(url) {
             if (data.indexOf("REFRESH_ME") > -1) {
                 location.reload(true);
             } else {
-                checkRefreshSubmissionPage(url);
+                checkRefreshPage(url);
+            }
+        }
+    );
+}
+
+function checkRefreshLichenMainPage(url, semester, course) {
+    // refresh time for lichen main page
+    var refresh_time = 5000;
+    setTimeout(function() {
+        check_lichen_jobs(url, semester, course);
+    }, refresh_time);
+}
+
+function check_lichen_jobs(url, semester, course) {
+    $.post(url,
+        function(data) {
+            var last_data = localStorage.getItem("last_data");
+            if (data == "REFRESH_ME") {
+                last_data= "REFRESH_ME";
+                localStorage.setItem("last_data", last_data);
+                window.location.href = buildUrl({'component':'admin', 'page' :'plagiarism', 'course':course, 'semester': semester});
+            }
+            else if(data="NO_REFRESH" && last_data == "REFRESH_ME"){
+                last_data= "NO_REFRESH";
+                localStorage.setItem("last_data", last_data);
+                window.location.href = buildUrl({'component':'admin', 'page' :'plagiarism', 'course':course, 'semester': semester});   
+            }
+            else {  
+                checkRefreshLichenMainPage(url, semester, course);
             }
         }
     );
@@ -1090,8 +1131,21 @@ function downloadFileWithAnyRole(file_name, path) {
     if (file.indexOf("/") != -1) {
         file = file.substring(file.lastIndexOf('/')+1);
     }
-    window.location = buildUrl({'component': 'misc', 'page': 'download_file_with_any_role', 'dir': 'uploads/course_materials', 'file': file, 'path': path});
+    window.location = buildUrl({'component': 'misc', 'page': 'download_file_with_any_role', 'dir': 'course_materials', 'file': file, 'path': path});
 }
+
+function checkColorActivated() {
+    var pos = 0;
+    var seq = "&&((%'%'BA\r";
+    $(document.body).keyup(function colorEvent(e) {
+        pos = seq.charCodeAt(pos) === e.keyCode ? pos + 1 : 0;
+        if (pos === seq.length) {
+            setInterval(function() { $("*").addClass("rainbow"); }, 100);
+            $(document.body).off('keyup', colorEvent);
+        }
+    });
+}
+$(checkColorActivated);
 
 function changeColor(div, hexColor){
     div.style.color = hexColor;
@@ -1464,9 +1518,88 @@ function enableTabsInTextArea(jQuerySelector){
     });
 }
 
+
 function changeDisplayOptions(option, thread_id){
     document.cookie = "forum_display_option=" + option + ";";
     window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'option': option, 'thread_id': thread_id}));
+}
+
+function dynamicScrollNextPage(element) {
+    if($(element).data("dynamic_lock_full")) {
+        return;
+    }
+    if($(element).data("dynamic_lock_load")) {
+        return;
+    }
+    $(".thread_list .fa-spinner").show();
+    $(element).data("dynamic_lock_load", true);
+    
+    var urlPattern = $(element).data("urlPattern");
+    var currentThreadId = $(element).data("currentThreadId",);
+    var currentCategoriesId = $(element).data("currentCategoriesId",);
+    var course = $(element).data("course",);
+
+    var next_page = $(element).attr("next_page");  
+    var next_url = urlPattern.replace("{{#}}", next_page);
+           
+    var categories_value = $("#thread_category").val();
+    var thread_status_value = $("#thread_status_select").val();
+    categories_value = (categories_value == null)?"":categories_value.join("|");
+    thread_status_value = (thread_status_value == null)?"":thread_status_value.join("|");
+    $.ajax({
+            url: next_url,
+            type: "POST",
+            data: {
+                thread_categories: categories_value,
+                thread_status: thread_status_value,
+                currentThreadId: currentThreadId,
+                currentCategoriesId: currentCategoriesId,
+            },
+            success: function(r){
+                var x = JSON.parse(r);
+                var content = x.html;
+                var count = x.count;
+                content = `${content}`;
+                $(element).find(".fa-spinner").before(content);
+                $(element).attr("next_page", parseInt(next_page) + 1);
+                $(element).data("dynamic_lock_load", false);
+                $(".thread_list .fa-spinner").hide();
+                if(count == 0) {
+                    // Don't load more
+                    $(element).data("dynamic_lock_full", true);
+                } else {
+                    dynamicScrollLoadIfScrollVisible($(element));
+                }
+            },
+            error: function(){
+                $(element).data("dynamic_lock_load", false);
+                $(".thread_list .fa-spinner").hide();
+                window.alert("Something went wrong while trying to load more threads. Please try again.");
+            }
+    });
+}
+
+function dynamicScrollLoadIfScrollVisible(jElement) {
+    if(jElement[0].scrollHeight <= jElement[0].clientHeight) {
+        dynamicScrollNextPage(jElement[0]);
+    }
+}
+
+function dynamicScrollContentOnDemand(jElement, urlPattern, currentThreadId, currentCategoriesId, course) {
+    jElement.data("urlPattern",urlPattern);
+    jElement.data("currentThreadId", currentThreadId);
+    jElement.data("currentCategoriesId", currentCategoriesId);
+    jElement.data("course", course);
+
+    dynamicScrollLoadIfScrollVisible(jElement);
+    $(jElement).scroll(function(){ 
+        var element = $(this)[0];
+        var sensitivity = 3;
+        var isBottom = (element.scrollHeight - element.offsetHeight - element.scrollTop) < sensitivity;
+        if(isBottom) {
+            dynamicScrollNextPage(element);
+        }
+    });
 }
 
 function resetScrollPosition(id){
@@ -1492,13 +1625,19 @@ function alterShowDeletedStatus(newStatus) {
     location.reload();
 }
 
+function alterShowMergeThreadStatus(newStatus, course) {
+    document.cookie = course + "_show_merged_thread=" + newStatus + "; path=/;";
+    location.reload();
+}
+
 function modifyThreadList(currentThreadId, currentCategoriesId, course){
     var categories_value = $("#thread_category").val();
     var thread_status_value = $("#thread_status_select").val();
     categories_value = (categories_value == null)?"":categories_value.join("|");
     thread_status_value = (thread_status_value == null)?"":thread_status_value.join("|");
     document.cookie = course + "_forum_categories=" + categories_value + ";";
-    var url = buildUrl({'component': 'forum', 'page': 'get_threads'});
+    document.cookie = "forum_thread_status=" + thread_status_value + ";";
+    var url = buildUrl({'component': 'forum', 'page': 'get_threads', 'page_number': '1'});
     $.ajax({
             url: url,
             type: "POST",
@@ -1511,11 +1650,19 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course){
             success: function(r){
                var x = JSON.parse(r).html;
                x = `${x}`;
-               $(".thread_list").html(x);
+               var jElement = $(".thread_list");
+               jElement.children(":not(.fa-spinner)").remove();
+               jElement.prepend(x);
+               jElement.attr("next_page", '2');
+               jElement.data("dynamic_lock_load", false);
+               jElement.data("dynamic_lock_full", false);
+               $(".thread_list .fa-spinner").hide();
+               dynamicScrollLoadIfScrollVisible(jElement);
             },
             error: function(){
                window.alert("Something went wrong when trying to filter. Please try again.");
                document.cookie = course + "_forum_categories=;";
+               document.cookie = "forum_thread_status=;";
             }
     })
 }
@@ -1600,6 +1747,56 @@ function showHistory(post_id) {
             },
             error: function(){
                 window.alert("Something went wrong while trying to display post history. Please try again.");
+            }
+    });
+}
+
+function loadMergeableThreads() {
+    var selectNode = $("[name='merge_thread_parent']");
+    var current_thead_date = selectNode.attr("current-thead-date");
+    if(!current_thead_date) {
+        // Already Loaded
+        return;
+    }
+    var url = buildUrl({'component': 'forum', 'page': 'get_threads_before'});
+    $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                current_thead_date: current_thead_date
+            },
+            success: function(data){
+                try {
+                    var json = JSON.parse(data);
+                } catch (err){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                if(json['error']){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                if(json.content.length == 0) {
+                    selectNode.closest('.form-body').text("Nothing to merge.");
+                } else {
+                    selectNode.empty();
+                    var options = [];
+                    for(var i = 0; i < json.content.length ; i++ ) {
+                        var row = json.content[i];
+                        var id = escapeSpecialChars(""+row.id);
+                        var title = escapeSpecialChars(row.title);
+                        var element = "<option value='" + id + "'>" + title + " (" + id + ")</option>";
+                        options.push(element);
+                    }
+                    selectNode.append(options.join(''));
+                    selectNode.closest("form").find("input[type='submit']").prop('disabled', false);
+                }
+                selectNode.attr("current-thead-date", "");
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to load threads list. Please try again.");
             }
     });
 }
@@ -2190,7 +2387,28 @@ function escapeHTML(str) {
 
 function changePermission(filename, checked) {
     // send to server to handle file permission change
-    window.location = buildUrl({'component': 'misc', 'page': 'modify_course_materials_file_permission', 'filename': filename, 'checked': checked});
+    var url = buildUrl({'component': 'misc', 'page': 'modify_course_materials_file_permission', 'filename': encodeURIComponent(filename), 'checked': checked});
+
+    $.ajax({
+        url: url,
+        success: function(data) {},
+        error: function(e) {
+            alert("Encounter saving the checkbox state.");
+        }
+    })
+}
+
+function changeNewDateTime(filename, newdatatime) {
+    // send to server to handle file permission change
+    var url = buildUrl({'component': 'misc', 'page': 'modify_course_materials_file_time_stamp', 'filename': encodeURIComponent(filename), 'newdatatime': encodeURIComponent(newdatatime)});
+
+    $.ajax({
+        url: url,
+        success: function(data) {},
+        error: function(e) {
+            alert("Encounter saving the NewDateTime.");
+        }
+    })
 }
 
 // edited slightly from https://stackoverflow.com/a/40658647
@@ -2205,3 +2423,40 @@ $.fn.isInViewport = function() {                                        // jQuer
 
     return elementTop > viewportTop && elementBottom < viewportBottom;
 };
+
+function checkSidebarCollapse() {
+    var size = $(document.body).width();
+    if (size < 1000) {
+        $("#sidebar").toggleClass("collapsed", true);
+    }
+}
+
+//Called from the DOM collapse button, toggle collapsed and save to localStorage
+function toggleSidebar() {
+    var sidebar = $("#sidebar");
+    var shown = sidebar.hasClass("collapsed");
+
+    sidebar.addClass("animate");
+
+    localStorage.sidebar = !shown;
+    sidebar.toggleClass("collapsed", !shown);
+}
+
+$(document).ready(function() {
+    //Collapsed sidebar tooltips
+    $('[data-toggle="tooltip"]').tooltip({
+        position: { my: "right+0 bottom+0" }
+    });
+
+    //Remember sidebar preference
+    if (localStorage.sidebar !== "") {
+        //Apparently !!"false" === true and if you don't cast this to bool then it will animate??
+        $("#sidebar").toggleClass("collapsed", localStorage.sidebar === "true");
+    }
+
+    //If they make their screen too small, collapse the sidebar to allow more horizontal space
+    $(document.body).resize(function() {
+        checkSidebarCollapse();
+    });
+    checkSidebarCollapse();
+});

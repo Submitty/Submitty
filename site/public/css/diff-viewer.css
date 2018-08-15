@@ -56,7 +56,6 @@
 .line_number {
     color: gray;
     border-right: 1px solid lightgrey;
-    float: left;
     text-align: right;
     width: auto;
 }
@@ -82,4 +81,8 @@
 .line_code {
     white-space: pre;
     padding-left: 10px;
+}
+
+.diff-code .whitespace {
+    border: 1px solid blue;
 }

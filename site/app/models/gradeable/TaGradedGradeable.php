@@ -52,7 +52,6 @@ class TaGradedGradeable extends AbstractModel {
         $this->setIdFromDatabase($details['id'] ?? 0);
         $this->setOverallComment($details['overall_comment'] ?? '');
         $this->setUserViewedDate($details['user_viewed_date'] ?? null);
-        $this->graded_gradeable->getGradeable()->setJustRegraded($details['just_regraded'] ?? false);
 
         // Default to all blank components
         foreach ($graded_gradeable->getGradeable()->getComponents() as $component) {
@@ -202,7 +201,7 @@ class TaGradedGradeable extends AbstractModel {
      */
     public function getTotalScorePercent($clamp = false) {
         return Utils::safeCalcPercent($this->getTotalScore(),
-            $this->getGradedGradeable()->getGradeable()->getTaNonExtraCreditPoints(), $clamp);
+            $this->getGradedGradeable()->getGradeable()->getTaPoints(), $clamp);
     }
 
     /**
@@ -322,6 +321,14 @@ class TaGradedGradeable extends AbstractModel {
                 throw new \InvalidArgumentException('Invalid date string format');
             }
         }
+        $this->modified = true;
+    }
+
+    /**
+     * Resets the user_viewed_date to be as if the student never saw the grade
+     */
+    public function resetUserViewedDate() {
+        $this->user_viewed_date = null;
         $this->modified = true;
     }
 

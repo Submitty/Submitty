@@ -22,8 +22,7 @@ class CourseMaterialsController extends AbstractController {
 
     public function viewCourseMaterialsPage() {
         $user_group = $this->core->getUser()->getGroup();
-        $instructor_permission = ($user_group === 1);
-        $this->core->getOutput()->renderOutput(array('course', 'CourseMaterials'), 'listCourseMaterials', $instructor_permission);  //todo
+        $this->core->getOutput()->renderOutput(array('course', 'CourseMaterials'), 'listCourseMaterials', $user_group);
     }
 
     public function deleteCourseMaterialsFile() {

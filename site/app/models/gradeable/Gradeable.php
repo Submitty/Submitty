@@ -31,9 +31,11 @@ use app\models\User;
  * @method void setGradeByRegistration($grade_by_reg)
  * @method \DateTime getTaViewStartDate()
  * @method \DateTime getGradeStartDate()
+ * @method \DateTime getGradeDueDate()
  * @method \DateTime getGradeReleasedDate()
  * @method \DateTime getGradeLockedDate()
  * @method int getMinGradingGroup()
+ * @method \DateTime getRegradeRequestDate()
  * @method string getSyllabusBucket()
  * @method void setSyllabusBucket($bucket)
  * @method string getTaInstructions()
@@ -47,7 +49,6 @@ use app\models\User;
  * @method int getTeamSizeMax()
  * @method \DateTime getTeamLockDate()
  * @method bool isTaGrading()
- * @method void setTaGrading($use_ta_grading)
  * @method bool isStudentView()
  * @method void setStudentView($can_student_view)
  * @method bool isStudentSubmit()
@@ -68,7 +69,7 @@ use app\models\User;
  * @method float getPrecision()
  * @method void setPrecision($grading_precision)
  * @method Component[] getComponents()
- * @method bool getJustRegraded()
+ * @method bool isRegradeAllowed()
  */
 class Gradeable extends AbstractModel {
     /* Properties for all types of gradeables */
@@ -89,6 +90,8 @@ class Gradeable extends AbstractModel {
     protected $syllabus_bucket = "homework";
     /** @property @var Component[] An array of all of this gradeable's components */
     protected $components = [];
+    /** @property @var Component[] An array of all gradeable components loaded from the database */
+    private $db_components = [];
 
     /* (private) Lazy-loaded Properties */
 
@@ -156,6 +159,8 @@ class Gradeable extends AbstractModel {
     protected $ta_view_start_date = null;
     /** @property @var \DateTime The date that graders may start grading */
     protected $grade_start_date = null;
+    /** @property @var \DateTime The date that graders must have grades in by */
+    protected $grade_due_date = null;
     /** @property @var \DateTime The date that grades will be released to students */
     protected $grade_released_date = null;
     /** @property @var \DateTime The date after which only instructors may change grades (aka when grades are 'due') */
@@ -171,8 +176,10 @@ class Gradeable extends AbstractModel {
     protected $submission_due_date = null;
     /** @property @var int The number of late days allowed */
     protected $late_days = 0;
-    /** @property @var boolean Has the gradeable been regraded recently (the student hasn't yet viewed the result*/
-    protected $just_regraded = false;
+    /** @property @var \DateTime The deadline for submitting a regrade request */
+    protected $regrade_request_date = null;
+    /** @property @var boolean are regrade requests enabled for this assignment*/
+    protected $regrade_allowed = true;
     /**
      * Gradeable constructor.
      * @param Core $core
@@ -198,7 +205,7 @@ class Gradeable extends AbstractModel {
             $this->setVcsSubdirectory($details['vcs_subdirectory']);
             $this->setTeamAssignmentInternal($details['team_assignment']);
             $this->setTeamSizeMax($details['team_size_max']);
-            $this->setTaGrading($details['ta_grading']);
+            $this->setTaGradingInternal($details['ta_grading']);
             $this->setStudentView($details['student_view']);
             $this->setStudentSubmit($details['student_submit']);
             $this->setStudentDownload($details['student_download']);
@@ -207,6 +214,7 @@ class Gradeable extends AbstractModel {
             $this->setPeerGradeSet($details['peer_grade_set']);
             $this->setLateSubmissionAllowed($details['late_submission_allowed']);
             $this->setPrecision($details['precision']);
+            $this->setRegradeAllowedInternal($details['regrade_allowed']);
         }
 
         // Set dates last
@@ -214,14 +222,91 @@ class Gradeable extends AbstractModel {
         $this->modified = false;
     }
 
+    /**
+     * All \DateTime properties for this class
+     */
     const date_properties = [
         'ta_view_start_date',
-        'grade_start_date',
-        'grade_released_date',
-        'team_lock_date',
         'submission_open_date',
         'submission_due_date',
-        'grade_locked_date'
+        'grade_start_date',
+        'grade_due_date',
+        'grade_released_date',
+        'grade_locked_date',
+        'team_lock_date',
+        'regrade_request_date'
+    ];
+
+    /**
+     * Display names for the different date properties (for forming error messages)
+     */
+    const date_display_names = [
+        'ta_view_start_date' => 'Beta Testing',
+        'submission_open_date' => 'Submission Open',
+        'submission_due_date' => 'Submission Due',
+        'grade_start_date' => 'Grading Open',
+        'grade_due_date' => 'Grading Due',
+        'grade_released_date' => 'Grades Released',
+        'grade_locked_date' => 'Grades Locked',
+        'team_lock_date' => 'Teams Locked',
+        'late_days' => 'Late Days',
+        'regrade_request_date' => 'Regrade Requests\' Due'
+    ];
+
+    /**
+     * All \DateTime properties for NUMERIC_TEXT and CHECKPOINT gradeables
+     * Note: this is in validation order
+     */
+    const date_properties_simple = [
+        'ta_view_start_date',
+        'grade_start_date',
+        'grade_due_date',
+        'grade_released_date'
+    ];
+
+    /**
+     * All \DateTime properties for ELECTRONIC gradeables with ta grading
+     * Note: this is in validation order
+     */
+    const date_properties_elec_ta = [
+        'ta_view_start_date',
+        'submission_open_date',
+        'submission_due_date',
+        'grade_start_date',
+        'grade_due_date',
+        'grade_released_date'
+    ];
+
+    /**
+     * All \DateTime properties for ELECTRONIC gradeables with no ta grading
+     * Note: this is in validation order
+     */
+    const date_properties_elec_no_ta = [
+        'ta_view_start_date',
+        'submission_open_date',
+        'submission_due_date',
+        'grade_released_date'
+    ];
+
+    /**
+     * All \DateTime properties for ELECTRONIC exam gradeables
+     * Note: this is in validation order
+     */
+    const date_properties_elec_exam = [
+        'ta_view_start_date',
+        'grade_start_date',
+        'grade_due_date',
+        'grade_released_date'
+    ];
+
+    /**
+     * All \DateTime properties relevant for all types
+     * Note: This is also the set for no student upload AND no ta grading
+     * Note: this is in validation order
+     */
+    const date_properties_bare = [
+        'ta_view_start_date',
+        'grade_released_date'
     ];
 
     public function toArray() {
@@ -251,6 +336,14 @@ class Gradeable extends AbstractModel {
             }
         }
         throw new \InvalidArgumentException('Component id did not exist in gradeable');
+    }
+
+    /**
+     * Gets an array of components set to be deleted
+     * @return Component[]
+     */
+    public function getDeletedComponents() {
+        return array_udiff($this->db_components, $this->components, Utils::getCompareByReference());
     }
 
     /**
@@ -302,127 +395,159 @@ class Gradeable extends AbstractModel {
     }
 
     /**
-     * Asserts that a set of dates are valid, see docs for `setDates` for the specification
-     * @param array $dates A complete array of property-name-indexed \DateTime objects (or int for 'late_days')
-     * @throws ValidationException With all messages for each invalid property
+     * Validates that a given set dates are strictly increasing
+     * @param string[] $date_properties
+     * @param \DateTime[] $date_values array of \DateTime objects indexed by $date_properties
+     * @return string[] Array of error messages indexed by $date_properties
      */
-    private function assertDates(array $dates) {
-        $errors = [];
-
+    private static function validateDateSet(array $date_properties, array $date_values) {
         // A message to set if the date is null, which happens when: the provided date is null,
         //  or the parsing failed.  In either case, this is an appropriate message
         $invalid_format_message = 'Invalid date-time value!';
 
-        //
-        // NOTE: The function `Utils::compareNullableGt(a,b)` in this context is called so that
-        //          it returns TRUE if the two values being compared are incompatible.  If the function
-        //          returns FALSE then either the condition a>b is false, or one of the values are null.
-        //          THIS NULL CASE MUST BE HANDLED IN SOME OTHER WAY.  As you can see, this is achieved by
-        //          null checks for each date before the comparisons are made.
-        //
-        //    i.e. in the expression 'Utils::compareNullableGt($ta_view_start_date, $submission_open_date)'
-        //      if 'ta_view_start_date' > 'submission_open_date', then the function will return TRUE and
-        //          we set an error for 'ta_view_start_date', but
-        //      if 'ta_view_start_date' <= 'submission_open_date', then the two values are compatible: no error
-        //      In the case that either value is null, the function will return FALSE.  The comparison becomes
-        //      irrelevant and the conditions:
-        //          '$ta_view_start_date === null' and/or '$submission_open_date === null' will set errors
-        //          for those values appropriately
-        //
-
-        $ta_view_start_date = $dates['ta_view_start_date'];
-        $grade_start_date = $dates['grade_start_date'];
-        $grade_released_date = $dates['grade_released_date'];
-        $team_lock_date = $dates['team_lock_date'];
-        $submission_open_date = $dates['submission_open_date'];
-        $submission_due_date = $dates['submission_due_date'];
-        $late_days = $dates['late_days'];
-
-        $late_interval = null;
-        if ($late_days < 0) {
-            $errors['late_days'] = 'Late day count must be a non-negative integer!';
-        } else {
-            try {
-                $late_interval = new \DateInterval('P' . strval($late_days) . 'D');
-            } catch (\Exception $e) {
-                // This is for development debugging. In reality, we should never hit this line
-                $errors['late_days'] = "Error parsing late days: {$e}";
+        // If the dates are null, then their format is invalid
+        $errors = [];
+        foreach ($date_properties as $property) {
+            $date = $date_values[$property] = $date_values[$property] ?? null;
+            if ($date === null) {
+                $errors[$property] = $invalid_format_message;
             }
         }
 
-        $max_due = $submission_due_date;
-        if (!($submission_due_date === null || $late_interval === null)) {
-            $max_due = (clone $submission_due_date)->add($late_interval);
+        // Now, check if they are in increasing order
+        $prev_property = null;
+        foreach ($date_properties as $property) {
+            if ($prev_property !== null) {
+                if ($date_values[$prev_property] !== null && $date_values[$property] !== null) {
+                    if ($date_values[$prev_property] > $date_values[$property]) {
+                        $errors[$prev_property] = self::date_display_names[$prev_property] . ' Date must come before '
+                            . self::date_display_names[$property] . ' Date';
+                    }
+                }
+            }
+            $prev_property = $property;
         }
 
-        if ($ta_view_start_date === null) {
-            $errors['ta_view_start_date'] = $invalid_format_message;
-        }
-        if ($grade_released_date === null) {
-            $errors['grade_released_date'] = $invalid_format_message;
-        }
+        return $errors;
+    }
 
+    /**
+     * Gets the dates that require validation for the gradeable's current configuration.
+     * @return string[] array of date property names that need validation
+     */
+    private function getDateValidationSet() {
         if ($this->type === GradeableType::ELECTRONIC_FILE) {
-            if ($submission_open_date === null) {
-                $errors['submission_open_date'] = $invalid_format_message;
-            }
-            if ($submission_due_date === null) {
-                $errors['submission_due_date'] = $invalid_format_message;
+            if (!$this->isStudentSubmit()) {
+                if ($this->isTaGrading()) {
+                    $result = self::date_properties_elec_exam;
+                } else {
+                    $result = self::date_properties_bare;
+                }
+            } else if ($this->isTaGrading()) {
+                $result = self::date_properties_elec_ta;
+            } else {
+                $result = self::date_properties_elec_no_ta;
             }
 
-            if (Utils::compareNullableGt($ta_view_start_date, $submission_open_date)) {
-                $errors['ta_view_start_date'] = 'TA Beta Testing Date must not be later than Submission Open Date';
-            }
-            if (Utils::compareNullableGt($submission_open_date, $submission_due_date)) {
-                $errors['submission_open_date'] = 'Submission Open Date must not be later than Submission Due Date';
-            }
-            if ($this->ta_grading) {
-                if ($grade_start_date === null) {
-                    $errors['grade_start_date'] = $invalid_format_message;
-                }
-//                if ($grade_locked_date === null) {
-//                    $errors['grade_locked_date'] = $invalid_format_message;
-//                }
-                if (Utils::compareNullableGt($submission_due_date, $grade_start_date)) {
-                    $errors['grade_start_date'] = 'Manual Grading Open Date must be no earlier than Due Date';
-                }
-                if (Utils::compareNullableGt($grade_start_date, $grade_released_date)) {
-                    $errors['grade_released_date'] = 'Grades Released Date must be later than the Manual Grading Open Date';
-                }
-            } else {
-                if (Utils::compareNullableGt($max_due, $grade_released_date)) {
-                    $errors['grade_released_date'] = 'Grades Released Date must be later than the Due Date + Max Late Days';
-                }
-            }
-            if ($this->team_assignment) {
-                if ($team_lock_date === null) {
-                    $errors['team_lock_date'] = $invalid_format_message;
-                }
+            // Only add in regrade request date if its allowed & enabled
+            if($this->isTaGrading() && $this->core->getConfig()->isRegradeEnabled() && $this->isRegradeAllowed()) {
+                $result[] = 'regrade_request_date';
             }
         } else {
+            $result = self::date_properties_simple;
+        }
+        return $result;
+    }
 
-            // TA beta testing date <= manual grading open date <= grades released
-            if (Utils::compareNullableGt($ta_view_start_date, $grade_start_date)) {
-                $errors['ta_view_start_date'] = 'TA Beta Testing date must be before the Grading Open Date';
-            }
-            if (Utils::compareNullableGt($grade_start_date, $grade_released_date)) {
-                $errors['grade_released_date'] = 'Grades Released Date must be later than the Grading Open Date';
+    /**
+     * Asserts that the provided set of dates are valid for this gradeable's configuration
+     * @param \DateTime[] $dates
+     * @throws ValidationException With all messages for each invalid property
+     */
+    private function assertDates(array $dates) {
+        // Get the date set we validate against
+        $date_set = $this->getDateValidationSet();
+
+        // Get the validation errors
+        $errors = self::validateDateSet($date_set, $dates);
+
+        // Put any special exceptions to the normal validation rules here...
+
+        // Check that the grades released date isn't before the 'max due date' (submission due date + late days)
+        $submission_due_date = $dates['submission_due_date'];
+        if ($this->type === GradeableType::ELECTRONIC_FILE && $submission_due_date !== null) {
+            $late_days = intval($dates['late_days'] ?? 0);
+            /** @noinspection PhpUnhandledExceptionInspection */
+            $max_due_date = (clone $submission_due_date)->add(new \DateInterval('P' . strval($late_days) . 'D'));
+            if ($max_due_date > $dates['grade_released_date']) {
+                $errors['grade_released_date'] = self::date_display_names['grade_released_date'] . ' Date must be later than the ' .
+                    self::date_display_names['submission_due_date'] . ' Date + ' . self::date_display_names['late_days'];
             }
         }
 
-        if (count($errors) !== 0) {
+        if (count($errors) > 0) {
             throw new ValidationException('Date validation failed', $errors);
         }
     }
 
     /**
+     * Takes a complete set of dates relevant to this gradeable and, depending on the gradeable's settings,
+     *  coerces all dates to satisfy the database date constraints.  The behavior of this function is undefined
+     *  if called before `assertDates`
+     * @param \DateTime[] $dates Array of dates, indexed by property name
+     * @return \DateTime[] Array of dates, indexed by property name
+     */
+    private function coerceDates(array $dates) {
+        // Takes an array of date properties (in order) and date values (indexed by property)
+        //  and returns the modified date values to comply with the provided order, using
+        //  a compare function, which returns true when first parameter should be coerced
+        //  into the second parameter.
+        $coerce_dates = function(array $date_properties, array $black_list, array $date_values, $compare) {
+            // coerce them to be in increasing order (and fill in nulls)
+            foreach ($date_properties as $i => $property) {
+                // Don't coerce the first date
+                if ($i === 0) {
+                    continue;
+                }
+
+                // Don't coerce a date on the black list
+                if(in_array($property, $black_list)) {
+                    continue;
+                }
+
+                // Get a value for the date to compare against
+                $prev_date = $date_values[$date_properties[$i-1]];
+
+                // This may be null / not set
+                $date = $date_values[$property] ?? null;
+
+                // Coerce the date if it is out of bounds
+                if ($date === null || $compare($date, $prev_date)) {
+                    $date_values[$property] = $prev_date;
+                }
+            }
+            return $date_values;
+        };
+
+        // Blacklist the dates checked by validation
+        $black_list = $this->getDateValidationSet();
+
+		// First coerce in the forward direction, then in the reverse direction
+		return $coerce_dates(array_reverse(self::date_properties), $black_list,
+            $coerce_dates(self::date_properties, $black_list, $dates,
+                function (\DateTime $val, \DateTime $cmp) {
+                    return $val < $cmp;
+                }),
+            function(\DateTime $val, \DateTime $cmp) {
+                return $val > $cmp;
+            }
+        );
+    }
+
+    /**
      * Sets the all of the dates of this gradeable
-     * Validation: All parenthetical values are only relevant for electronic submission and drop out of this expression
-     *  ta_view_start_date <= (submission_open_date) <= (submission_due_date) <= (grade_start_date) <= grade_released_date
-     *      AND
-     *  (submission_due_date + late days) <= grade_released_date
-     *
-     * @param $dates string[]|\DateTime[] An array of dates/date strings indexed by property name
+     * @param array $dates An array of dates/date strings indexed by property name
+     * @throws ValidationException With all messages for each invalid property
      */
     public function setDates(array $dates) {
         // Wrangle the input so we have a fully populated array of \DateTime's (or nulls)
@@ -431,40 +556,55 @@ class Gradeable extends AbstractModel {
         // Asserts that this date information is valid
         $this->assertDates($dates);
 
+        // Coerce any dates that have database constraints, but
+        //  aren't relevant to the current gradeable configuration
+        $dates = $this->coerceDates($dates);
+
         // Manually set each property (instead of iterating over self::date_properties) so the user
         //  can't set dates irrelevant to the gradeable settings
 
         $this->ta_view_start_date = $dates['ta_view_start_date'];
         $this->grade_start_date = $dates['grade_start_date'];
+        $this->grade_due_date = $dates['grade_due_date'];
         $this->grade_released_date = $dates['grade_released_date'];
         $this->grade_locked_date = $dates['grade_locked_date'];
 
         if ($this->type === GradeableType::ELECTRONIC_FILE) {
-            if (!$this->ta_grading) {
-                // No TA grading, but we must set this start date so the database
-                //  doesn't complain when we update it
-                $this->grade_start_date = $dates['grade_released_date'];
-            }
-
             // Set team lock date even if not team assignment because it is NOT NULL in the db
             $this->team_lock_date = $dates['team_lock_date'];
             $this->submission_open_date = $dates['submission_open_date'];
             $this->submission_due_date = $dates['submission_due_date'];
             $this->late_days = $dates['late_days'];
+            $this->regrade_request_date = $dates['regrade_request_date'];
         }
         $this->modified = true;
     }
 
     /**
-     * Gets all of the gradeable's date values indexed by property name
-     * @return \DateTime[]
+     * Gets all of the gradeable's date values indexed by property name (including late_days)
+     * @return mixed[]
      */
     public function getDates() {
         $dates = [];
-        foreach(self::date_properties as $property) {
+        foreach (self::date_properties as $property) {
             $dates[$property] = $this->$property;
         }
+        $dates['late_days'] = $this->late_days;
         return $dates;
+    }
+
+    /**
+     * Gets all of the gradeable's date values as strings indexed by property name (including late_days)
+     * @return string[]
+     */
+    public function getDateStrings() {
+        $date_strings = [];
+        $now = new \DateTime('now', $this->core->getConfig()->getTimezone());
+        foreach (self::date_properties as $property) {
+            $date_strings[$property] = DateUtils::dateTimeToString($this->$property ?? $now);
+        }
+        $date_strings['late_days'] = strval($this->late_days);
+        return $date_strings;
     }
 
     /**
@@ -505,6 +645,11 @@ class Gradeable extends AbstractModel {
 
     /** @internal */
     public function setGradeStartDate($date) {
+        throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
+    }
+
+    /** @internal */
+    public function setGradeDueDate($date) {
         throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
     }
 
@@ -627,17 +772,117 @@ class Gradeable extends AbstractModel {
      * @param Component[] $components Must be an array of only Component
      */
     public function setComponents(array $components) {
+        $components = array_values($components);
         foreach ($components as $component) {
             if (!($component instanceof Component)) {
                 throw new \InvalidArgumentException('Object in components array wasn\'t a component');
             }
         }
-        $this->components = array_values($components);
+
+        // Get the implied deleted components from this operation and ensure we aren't deleting any
+        //  components that have grades already
+        $deleted_components = array_udiff($this->components, $components, Utils::getCompareByReference());
+        if (in_array(true, array_map(function (Component $component) {
+            return $component->anyGrades();
+        }, $deleted_components))) {
+            throw new \InvalidArgumentException('Call to setComponents implied deletion of component with grades');
+        }
+
+        $this->components = $components;
 
         // sort by order
-        usort($this->components, function(Component $a, Component $b) {
+        usort($this->components, function (Component $a, Component $b) {
             return $a->getOrder() - $b->getOrder();
         });
+    }
+
+    /**
+     * Adds a new component to this gradeable with the provided properties
+     * @param string $title
+     * @param string $ta_comment
+     * @param string $student_comment
+     * @param float $lower_clamp
+     * @param float $default
+     * @param float $max_value
+     * @param float $upper_clamp
+     * @param bool $text
+     * @param bool $peer
+     * @param int $pdf_page set to Component::PDF_PAGE_NONE if not a pdf assignment
+     * @return Component the created component
+     */
+    public function addComponent(string $title, string $ta_comment, string $student_comment, float $lower_clamp,
+                                 float $default, float $max_value, float $upper_clamp, bool $text, bool $peer, int $pdf_page) {
+        $component = new Component($this->core, $this, [
+            'title' => $title,
+            'ta_comment' => $ta_comment,
+            'student_comment' => $student_comment,
+            'lower_clamp' => $lower_clamp,
+            'default' => $default,
+            'max_value' => $max_value,
+            'upper_clamp' => $upper_clamp,
+            'text' => $text,
+            'peer' => $peer,
+            'page' => $pdf_page,
+            'id' => 0,
+            'order' => count($this->components)
+        ]);
+        $this->components[] = $component;
+        return $component;
+    }
+
+    /**
+     * Base method for deleting components.  This isn't exposed as public so
+     *  its make very clear that a delete component operation is being forceful.
+     * @param Component $component
+     * @param bool $force true to delete the component if it has grades
+     * @throws \InvalidArgumentException If this gradeable doesn't own the provided component or
+     *          $force is false and the component has grades
+     */
+    private function deleteComponentInner(Component $component, bool $force = false) {
+        // Don't delete if the component has grades (and we aren't forcing)
+        if($component->anyGrades() && !$force) {
+            throw new \InvalidArgumentException('Attempt to delete a component with grades!');
+        }
+
+        // Calculate our components array without the provided component
+        $new_components = array_udiff($this->components, [$component], Utils::getCompareByReference());
+
+        // If it wasn't removed from our components, it was either already deleted, or never belonged to us
+        if (count($new_components) === count($this->components)) {
+            throw new \InvalidArgumentException('Attempt to delete component that did not belong to this gradeable');
+        }
+
+        // Finally, set our array to the new one
+        $this->components = $new_components;
+    }
+
+    /**
+     * Deletes a component from this gradeable
+     * @param Component $component
+     * @throws \InvalidArgumentException If this gradeable doesn't own the provided component or if the component has grades
+     */
+    public function deleteComponent(Component $component) {
+        $this->deleteComponentInner($component, false);
+    }
+
+    /**
+     * Deletes a component from this gradeable without checking if grades exist for it yet.
+     * DANGER: THIS CAN BE A VERY DESTRUCTIVE ACTION -- USE ONLY WHEN EXPLICITLY REQUESTED
+     * @param Component $component
+     * @throws \InvalidArgumentException If this gradeable doesn't own the provided component
+     */
+    public function forceDeleteComponent(Component $component) {
+        $this->deleteComponentInner($component, true);
+    }
+
+    /**
+     * Sets the array of the components, only called from the database
+     * @param Component[] $components
+     * @internal
+     */
+    public function setComponentsFromDatabase(array $components) {
+        $this->setComponents($components);
+        $this->db_components = $this->components;
     }
 
     /**
@@ -693,6 +938,64 @@ class Gradeable extends AbstractModel {
         }
         $this->rotating_grader_sections = $parsed_graders_sections;
         $this->rotating_grader_sections_modified = true;
+    }
+
+    /**
+     * Sets whether regrades are allowed for this gradeable
+     * @param bool $regrade_allowed
+     * @throws ValidationException If date validation fails in this new regrade request configuration
+     */
+    public function setRegradeAllowed(bool $regrade_allowed) {
+        $old = $this->regrade_allowed;
+        $this->regrade_allowed = $regrade_allowed;
+
+        try {
+            // Asserts that this date information is valid after changing this property
+            $this->setDates($this->getDates());
+        } catch (ValidationException $e) {
+            // Reset to the old value if validation fails
+            $this->regrade_allowed = $old;
+
+            // This line brings me great pain
+            throw $e;
+        }
+    }
+
+    /**
+     * @param bool $regrade_allowed
+     * @internal
+     */
+    private function setRegradeAllowedInternal(bool $regrade_allowed) {
+        $this->regrade_allowed = $regrade_allowed;
+    }
+
+    /**
+     * Sets whether this gradeable will use ta grading
+     * @param bool $ta_grading
+     * @throws ValidationException If date validation fails in this new TA grading configuration
+     */
+    public function setTaGrading(bool $ta_grading) {
+        $old = $this->ta_grading;
+        $this->ta_grading = $ta_grading;
+
+        try {
+            // Asserts that this date information is valid after changing this property
+            $this->setDates($this->getDates());
+        } catch (ValidationException $e) {
+            // Reset to the old value if validation fails
+            $this->ta_grading = $old;
+
+            // This line brings me great pain
+            throw $e;
+        }
+    }
+
+    /**
+     * @param bool $ta_grading
+     * @internal
+     */
+    private function setTaGradingInternal(bool $ta_grading) {
+        $this->ta_grading = $ta_grading;
     }
 
     /**
@@ -850,9 +1153,6 @@ class Gradeable extends AbstractModel {
         }
         return $count;
     }
-    public function setJustRegraded($bool) {
-        $this->just_regraded=$bool;
-    }
 
     /**
      * Gets the number of text components if type is GradeableType::NUMERIC_TEXT
@@ -980,7 +1280,7 @@ class Gradeable extends AbstractModel {
      * Gets the total possible non-extra-credit ta points
      * @return float
      */
-    public function getTaNonExtraCreditPoints() {
+    public function getTaPoints() {
         $total = 0.0;
         foreach($this->getComponents() as $component) {
             $total += $component->getMaxValue();
@@ -1052,13 +1352,13 @@ class Gradeable extends AbstractModel {
 
             $sections = [];
             foreach ($section_names as $section_name) {
-                $sections[] = new GradingSection($this->core, $this->isGradeByRegistration(), $section_name, $graders[$section_name] ?? [], $users[$section_name] ?? null, $teams[$section_name] ?? null);
+                $sections[] = new GradingSection($this->core, $this->isGradeByRegistration(), $section_name,
+                    $graders[$section_name] ?? [], $users[$section_name] ?? null, $teams[$section_name] ?? null);
             }
 
             return $sections;
         }
     }
-
 
     /**
      * Get a list of all grading sections
@@ -1118,5 +1418,89 @@ class Gradeable extends AbstractModel {
         }
 
         return $sections;
+    }
+  
+    /**
+     * return true if students can currently submit regrades for this assignment, false otherwise
+     * @return bool
+     */
+    public function isRegradeOpen() {
+        if ($this->core->getConfig()->isRegradeEnabled()==true && $this->isTaGradeReleased() && $this->regrade_allowed && ($this->regrade_request_date > new \DateTime('now', $this->core->getConfig()->getTimezone()))) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Creates a new team with the provided members
+     * @param User $leader The team leader (first user)
+     * @param User[] $members The team members (not including leader).
+     * @param string $registration_section Registration section to give team.  Leave blank to inherit from leader. 'NULL' for null section.
+     * @param int $rotating_section Rotating section to give team.  Set to -1 to inherit from leader. 0 for null section.
+     * @throws \Exception If creating directories for the team fails, or writing team history fails
+     *  Note: The team in the database may have already been created if an exception is thrown
+     */
+    public function createTeam(User $leader, array $members, string $registration_section = '', int $rotating_section = -1) {
+        $all_members = $members;
+        $all_members[] = $leader;
+
+        // Validate parameters
+        $gradeable_id = $this->getId();
+        foreach ($all_members as $member) {
+            if (!($member instanceof User)) {
+                throw new \InvalidArgumentException('User array contained non-user object');
+            }
+            if ($this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $member->getId()) !== null) {
+                throw new \InvalidArgumentException("{$member->getId()} is already on a team");
+            }
+        }
+
+        // Inherit rotating/registration section from leader if not provided
+        if ($registration_section === '') {
+            $registration_section = $leader->getRegistrationSection();
+        } else if($registration_section === 'NULL') {
+            $registration_section = null;
+        }
+        if ($rotating_section < 0) {
+            $rotating_section = $leader->getRotatingSection();
+        } else if ($rotating_section === 0) {
+            $rotating_section = null;
+        }
+
+        // Create the team in the database
+        $team_id = $this->core->getQueries()->createTeam($gradeable_id, $leader->getId(), $registration_section, $rotating_section);
+
+        // Force the other team members to accept the invitation from this newly created team
+        $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $leader->getId());
+        foreach ($members as $i => $member) {
+            $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $member->getId());
+            $this->core->getQueries()->acceptTeamInvitation($team_id, $member->getId());
+        }
+
+        // Create the submission directory if it doesn't exist
+        $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id);
+        if (!FileUtils::createDir($gradeable_path)) {
+            throw new \Exception("Failed to make folder for this assignment");
+        }
+
+        // Create the team submission directory if it doesn't exist
+        $user_path = FileUtils::joinPaths($gradeable_path, $team_id);
+        if (!FileUtils::createDir($user_path)) {
+            throw new \Exception("Failed to make folder for this assignment for the team");
+        }
+
+        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO")
+            . " " . $this->core->getConfig()->getTimezone()->getName();
+        $settings_file = FileUtils::joinPaths($user_path, "user_assignment_settings.json");
+
+        $json = array("team_history" => array(array("action" => "admin_create", "time" => $current_time,
+            "admin_user" => $this->core->getUser()->getId(), "first_user" => $leader->getId())));
+        foreach ($members as $member) {
+            $json["team_history"][] = array("action" => "admin_add_user", "time" => $current_time,
+                "admin_user" => $this->core->getUser()->getId(), "added_user" => $member->getId());
+        }
+        if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
+            throw new \Exception("Failed to write to team history to settings file");
+        }
     }
 }

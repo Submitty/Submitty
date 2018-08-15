@@ -8,6 +8,7 @@ use app\libraries\Output;
 use app\libraries\Utils;
 use app\models\Config;
 use app\models\User;
+use ReflectionException;
 
 class BaseUnitTest extends \PHPUnit\Framework\TestCase {
     /** @noinspection PhpDocSignatureInspection */
@@ -130,5 +131,25 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
         }
         $builder->setMethods(array_unique($methods));
         return $builder->getMock();
+    }
+
+    /**
+     * Call protected/private method of a class.
+     * https://jtreminio.com/blog/unit-testing-tutorial-part-3-testing-protected-private-methods-coverage-reports-and-crap
+     *
+     * @param object &$object    Instantiated object that we will run method on.
+     * @param string $methodName Method name to call
+     * @param array  $parameters Array of parameters to pass into method.
+     *
+     * @throws ReflectionException
+     * @return mixed Method return.
+     */
+    public function invokeMethod(&$object, $methodName, ...$parameters)
+    {
+        $reflection = new \ReflectionClass(get_class($object));
+        $method = $reflection->getMethod($methodName);
+        $method->setAccessible(true);
+
+        return $method->invokeArgs($object, $parameters);
     }
 }

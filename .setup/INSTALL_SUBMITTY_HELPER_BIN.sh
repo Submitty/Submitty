@@ -7,7 +7,7 @@
 
 echo -e "Copy the user scripts"
 
-if [ -z ${SUBMITTY_INSTALL_DIR+x} ]; then
+if [ -z ${DAEMON_USER+x} ]; then
     CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../config
     SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
     SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
@@ -68,7 +68,7 @@ chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/authentication.py
 chmod 555 ${SUBMITTY_INSTALL_DIR}/sbin/killall.py
 
 # DAEMON_USER only things
-array=( build_config_upload.py submitty_autograding_shipper.py submitty_autograding_worker.py submitty_daemon_jobs autograder )
+array=( build_config_upload.py run_lichen_plagiarism.py submitty_autograding_shipper.py submitty_autograding_worker.py submitty_daemon_jobs autograder )
 for i in "${array[@]}"; do
     chown -R root:"${DAEMON_GROUP}" ${SUBMITTY_INSTALL_DIR}/sbin/${i}
     chmod -R 750 ${SUBMITTY_INSTALL_DIR}/sbin/${i}
@@ -81,3 +81,14 @@ else
 fi
 chmod 750 ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils
 chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/*
+
+# set the permissions here in the case we JUST run this script or else things will break
+if [ -f ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute ]; then
+    chgrp ${DAEMON_GROUP}  ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute
+    chmod 4550             ${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute
+fi
+
+if [ -f ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out ]; then
+    chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
+    chmod 550                           ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
+fi
