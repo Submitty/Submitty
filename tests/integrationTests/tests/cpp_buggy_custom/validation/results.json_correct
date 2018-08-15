@@ -7,7 +7,7 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test02_STDOUT.txt",
+                    "actual_file": "test02/STDOUT.txt",
                     "description": "STDOUT.txt",
                     "messages": [
                         {
