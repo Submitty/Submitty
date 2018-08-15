@@ -5,6 +5,7 @@ use app\libraries\Core;
 use app\libraries\ExceptionHandler;
 use app\libraries\Logger;
 use app\libraries\Utils;
+use app\libraries\Access;
 
 /*
  * The user's umask is ignored for the user running php, so we need
@@ -171,6 +172,13 @@ elseif ($core->getUser() === null) {
         $_REQUEST['component'] = 'navigation';
         $_REQUEST['page'] = 'no_access';
     }
+}
+else if ($core->getConfig()->isCourseLoaded()
+         && !$core->getAccess()->canI("course.view", ["semester" => $core->getConfig()->getSemester(), "course" => $core->getConfig()->getCourse()])
+         && $_REQUEST['component'] !== 'authentication') {
+
+    $_REQUEST['component'] = 'navigation';
+    $_REQUEST['page'] = 'no_access';
 }
 // Log the user action if they were logging in, logging out, or uploading something
 if ($core->getUser() !== null) {
