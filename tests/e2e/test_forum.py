@@ -1,7 +1,6 @@
 import tempfile
 import os
 import urllib
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from .base_testcase import BaseTestCase
 
@@ -74,27 +73,25 @@ class TestForum(BaseTestCase):
     def thread_exists(self, title):
         assert 'page=view_thread' in self.driver.current_url
         target_xpath = "//div[contains(@class, 'thread_box') and contains(string(),'{}')]".format(title)
-        loading_spinners = self.driver.find_elements_by_xpath("//i[contains(@class, 'fa-spinner')]");
-        is_loading_spinner_displayed = lambda : loading_spinners[0].is_displayed() or loading_spinners[1].is_displayed()
         move_to_top_button = self.driver.find_element_by_xpath("//i[contains(@class, 'fa-angle-double-up')]")
         # Move to top of thread list
         move_to_top_button.click()
         self.wait_after_ajax()
+        thread_count = int(self.driver.execute_script('return $("#thread_list .thread_box").length;'))
         while True:
             # Scroll down in thread list until required thread is found
             divs = self.driver.find_elements_by_xpath(target_xpath)
             if len(divs) > 0:
                 # Thread Found
                 break
-            thread_list = self.driver.find_element_by_id("thread_list")
             # Scroll Dowm
-            self.driver.execute_script('arguments[0].scrollTop = arguments[0].scrollHeight', thread_list)
-            # Wait for scroll bar to hit bottom
-            WebDriverWait(self.driver, 1)
-            if not is_loading_spinner_displayed():
-                break
+            self.driver.execute_script("$('#thread_list').scrollTop($('#thread_list').prop('scrollHeight'));")
             self.wait_after_ajax()
-            assert not is_loading_spinner_displayed()
+            new_thread_count = int(self.driver.execute_script('return $("#thread_list .thread_box").length;'))
+            assert new_thread_count >= thread_count
+            if thread_count == new_thread_count:
+                break
+            thread_count = new_thread_count
         return len(self.driver.find_elements_by_xpath(target_xpath)) > 0
 
     def view_thread(self, title, return_info = False):
