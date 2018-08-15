@@ -1454,7 +1454,12 @@ function editPost(post_id, thread_id, shouldEditThread) {
                 var user_id = escape(json.user);
                 var post_content = json.post;
                 var anon = json.anon;
-                var time = (new Date(json.post_time));
+                var time = Date.parse(json.post_time);
+                if(!time) {
+                    // Timezone suffix ":00" might be missing
+                    time = Date.parse(json.post_time+":00");
+                }
+                time = new Date(time);
                 var categories_ids = json.categories_ids;
                 var date = time.toLocaleDateString();
                 time = time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
