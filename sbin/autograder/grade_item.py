@@ -26,10 +26,6 @@ with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
     OPEN_JSON = json.load(open_file)
 DAEMON_UID = OPEN_JSON['daemon_uid']
 
-
-# NOTE: DOCKER SUPPORT PRELIMINARY -- NEEDS MORE SECURITY BEFORE DEPLOYED ON LIVE SERVER
-USE_DOCKER = False
-
 def add_permissions(item,perms):
     if os.getuid() == os.stat(item).st_uid:
         os.chmod(item,os.stat(item).st_mode | perms)
@@ -139,6 +135,7 @@ def unzip_this_file(zipfilename,path):
 # ==================================================================================
 
 def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untrusted):
+
     os.chdir(SUBMITTY_DATA_DIR)
     tmp = os.path.join("/var/local/submitty/autograding_tmp/",which_untrusted,"tmp")
 
@@ -180,11 +177,19 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     # --------------------------------------------------------------------
     # START DOCKER
 
+    # NOTE: DOCKER SUPPORT PRELIMINARY -- NEEDS MORE SECURITY BEFORE DEPLOYED ON LIVE SERVER
+
+    with open(complete_config, 'r') as infile:
+        complete_config_obj = json.load(infile)
+    USE_DOCKER = complete_config_obj.get('docker_enabled', False)
+
+
+
     # WIP: This option file facilitated testing...
     #USE_DOCKER = os.path.isfile("/tmp/use_docker")
     #use_docker_string="grading begins, using DOCKER" if USE_DOCKER else "grading begins (not using docker)"
     #grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,submission_path,message=use_docker_string)
-    
+
     container = None
     if USE_DOCKER:
         container = subprocess.check_output(['docker', 'run', '-t', '-d',
@@ -221,8 +226,6 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         gradeable_config_obj = json.load(infile)
     gradeable_deadline_string = gradeable_config_obj["date_due"]
     
-    with open(complete_config, 'r') as infile:
-        complete_config_obj = json.load(infile)
     patterns_submission_to_compilation = complete_config_obj["autograding"]["submission_to_compilation"]
     pattern_copy("submission_to_compilation",patterns_submission_to_compilation,submission_path,tmp_compilation,tmp_logs)
 

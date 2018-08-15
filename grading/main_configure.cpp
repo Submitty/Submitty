@@ -152,7 +152,7 @@ int main(int argc, char *argv[]) {
   j["max_submission_size"] = config_json.value("max_submission_size",MAX_SUBMISSION_SIZE);
 
   j["required_capabilities"] = config_json.value("required_capabilities","default");
-
+  j["docker_enabled"] = config_json.value("docker_enabled",false);
   nlohmann::json::iterator parts = config_json.find("part_names");
   if (parts != config_json.end()) {
     j["part_names"] =  nlohmann::json::array();
