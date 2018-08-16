@@ -174,7 +174,7 @@ class DatabaseQueries {
         }
         // Categories
         if($want_categories) {
-            $query_select_categories = "SELECT thread_id, array_to_string(array_agg(w.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc, array_to_string(array_agg(w.color),'|') as categories_color FROM categories_list w JOIN thread_categories e ON e.category_id = w.category_id GROUP BY e.thread_id";
+            $query_select_categories = "SELECT thread_id, array_to_string(array_agg(w.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc, array_to_string(array_agg(w.color),'|') as categories_color FROM (SELECT thread_id, cl.category_id, cl.category_desc, cl.color FROM categories_list cl JOIN thread_categories e ON e.category_id = cl.category_id ORDER BY cl.rank ASC NULLS LAST) as w GROUP BY thread_id";
 
             $query_raw_select[] = "categories_ids";
             $query_raw_select[] = "categories_desc";
