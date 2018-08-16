@@ -620,22 +620,45 @@ tr.is_publish {
     margin: 2px;
 }
 
-#mark-conflict-popup .mark-conflict-row .mark-resolve-dom {
+#mark-conflict-popup .legend {
+    /* max-width: 80px; */
+}
+
+#mark-conflict-popup .mark-resolve-dom span {
+    border-color: red;
     background-color: red;
 }
 
-#mark-conflict-popup .mark-conflict-row .mark-resolve-old-server{
+#mark-conflict-popup .mark-resolve-old-server span{
+    border-color: blue;
     background-color: blue;
 }
 
-#mark-conflict-popup .mark-conflict-row .mark-resolve-server {
+#mark-conflict-popup .mark-resolve-server span {
+    border-color: orange;
     background-color: orange;
 }
 
-#mark-conflict-popup .mark-conflict-row .title:hover, .points:hover {
-    opacity: 0.7;
+#mark-conflict-popup .mark-conflict-row span {
+    padding: 3px;
+    border-width: 2px;
+    border-radius: 8px;
+    border-style: solid;
+    margin: 2px;
 }
 
-#mark-conflict-popup .mark-conflict-row .title-selected, .points-selected {
-    opacity: 0.6;
+#mark-conflict-popup .mark-conflict-row .title:hover, .points:hover {
+    opacity: 0.9;
+}
+
+#mark-conflict-popup .mark-conflict-row .title:not(.title-selected) {
+    background-color: transparent;
+}
+
+#mark-conflict-popup .mark-conflict-row .points:not(.points-selected) {
+    background-color: transparent;
+}
+
+#mark-conflict-popup .color-swatch {
+    width: 50px;
 }
