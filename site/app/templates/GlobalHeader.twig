@@ -1,3 +1,5 @@
+{% import _self as self %}
+
 <html lang="en">
 <head>
     <title>{{ page_title }}</title>
@@ -34,37 +36,9 @@
                     </div>
                 {% endfor %}
             </div>
-            {% if nav_urls|length > 0 %}
-                <div id="nav">
-                    <ul>
-                        {% for url in nav_urls %}
-                        <li>
-                            <a href="{{ url.href }}">{{ url.title }}</a>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            {% endif %}
             <div id="header" class="row">
-                <div class="col-12 col-md" id="header-text">
+                <div class="col-12 col-sm" id="header-text">
                     <div>
-                        <h2>
-                            {% if core.userLoaded() %}
-                            <span id="login">
-                                Hello <span id="login-id">{{ core.getUser().getDisplayedFirstName() }}</span>
-                                {% if notifications_info is not null %}
-                                <a class="btn btn-sm btn-primary" title="Notifications" href="{{ core.buildUrl({'component': 'navigation', 'page': 'notifications'}) }}">
-                                    <i class="fa fa-bell"></i>
-                                    {% if notifications_info > 0 %}
-                                    <span class="notification_badge">{{ notifications_info }}</span>
-                                    {% endif %}
-                                </a>
-                                {% endif %}
-                            </span> (<a id='logout' href='{{ core.buildUrl({'component': 'authentication', 'page': 'logout'}) }}'>Logout</a>)
-                            {% else %}
-                            <span id="login-guest">Welcome to Submitty</span>
-                            {% endif %}
-                        </h2>
                         <h2>
                             {% for b in breadcrumbs %}
                                 {% if loop.index0 > 0 and not b.getIcon() %}
@@ -87,8 +61,86 @@
                         </h2>
                     </div>
                 </div>
-                <a class="col-12 col-md-auto" id="logo-box" href="http://submitty.org" target=_blank>
-                    <div id="logo-submitty"></div>
+                <a class="col-12 col-sm-auto" id="logo-box" href="http://submitty.org" target=_blank>
+                    <img id="logo-submitty" src="../img/submitty_logo.png" alt="Submitty Logo">
                 </a>
             </div>
+            <div class="row" id="push">
+                {% if sidebar_buttons|length > 0 %}
+                    <div class="col-md-auto" id="sidebar">
+                        <div id="nav-buttons-visible">
+                            <div id="nav-buttons">
+                                <ul>
+                                    {% for button in sidebar_buttons %}
+                                        {{ self.render_sidebar_button(button) }}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                <div class="col-md" id="nav-body">
+                    <div id="nav-positioner">
 {# Looks mismatched because this lines up with GlobalFooter.twig #}
+
+{% macro render_sidebar_button(button) %}
+    {% if button.getTitle() == "" %}
+        <li class="short-line"></li>
+    {% else %}
+        <li>
+            {% if button.getIcon() != null %}
+                <a
+                    class="collapse-icon {{ button.getClass() }}"
+                    href="{{ button.getHref() }}"
+                    data-toggle="tooltip"
+                    title="{{ button.getTitle() }}"
+                    {% if button.getId() != "" %}
+                        id="{{ button.getId() }}"
+                    {% endif %}
+                >
+                    <i class="fa {{ button.getIcon() }}"></i>
+                    {% if button.getBadge() > 0 %}
+                        <span class="notification_badge">{{  button.getBadge() }} </span>
+                    {% endif %}
+                </a>
+            {% endif %}
+            {% if button.getHref() == null %}
+                <span
+                    {% if button.getClass() != "" %}
+                        class="{{ button.getClass() }}"
+                    {% endif %}
+                    {% if button.getId() != "" %}
+                        id="{{ button.getId() }}"
+                    {% endif %}
+                >
+                    {% if button.getIcon() != null %}
+                        <i class="fa {{ button.getIcon() }}"></i>
+                    {% endif %}
+
+                    {{ button.getTitle() }}
+                    {% if button.getBadge() > 0 %}
+                        <span class="notification_badge">{{  button.getBadge() }} </span>
+                    {% endif %}
+                </span>
+            {% else %}
+                <a href="{{ button.getHref() }}"
+                    {% if button.getClass() != "" %}
+                        class="{{ button.getClass() }}"
+                    {% endif %}
+                    {% if button.getId() != "" %}
+                        id="{{ button.getId() }}"
+                    {% endif %}
+                >
+                    {% if button.getIcon() != null %}
+                        <i class="fa {{ button.getIcon() }}"></i>
+                    {% endif %}
+
+                    {{ button.getTitle() }}
+                    {% if button.getBadge() > 0 %}
+                        <span class="notification_badge">{{  button.getBadge() }} </span>
+                    {% endif %}
+                </a>
+            {% endif %}
+        </li>
+    {% endif %}
+{% endmacro %}

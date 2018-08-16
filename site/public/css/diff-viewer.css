@@ -56,7 +56,6 @@
 .line_number {
     color: gray;
     border-right: 1px solid lightgrey;
-    float: left;
     text-align: right;
     width: auto;
 }
