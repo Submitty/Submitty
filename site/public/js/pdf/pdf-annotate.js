@@ -3584,7 +3584,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *
 	 * @param {Event} e The DOM event to be handled
 	 */
-	function handleDocumentKeyupChrome(e) {
+	function handleDocumentPointerupChrome(e) {
 	  saveToStorage(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
 	}
 	
@@ -3714,7 +3714,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (!isFirefox) {
 	    document.addEventListener('touchstart', handleDocumentPointerdown);
 	    document.addEventListener('touchmove', handleDocumentPointermoveChrome);
-	    document.addEventListener('touchend', handleDocumentKeyupChrome);
+	    document.addEventListener('touchend', handleDocumentPointerupChrome);
 	    document.addEventListener('mousedown', handleDocumentPointerdown);
 	    document.addEventListener('mousemove', handleDocumentPointermove);
 	    document.addEventListener('mouseup', handleDocumentPointerup);
@@ -3739,7 +3739,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (!isFirefox) {
 	    document.removeEventListener('touchstart', handleDocumentPointerdown);
 	    document.removeEventListener('touchmove', handleDocumentPointermoveChrome);
-	    document.removeEventListener('touchend', handleDocumentKeyupChrome);
+	    document.removeEventListener('touchend', handleDocumentPointerupChrome);
 	    document.removeEventListener('mousedown', handleDocumentPointerdown);
 	    document.removeEventListener('mousemove', handleDocumentPointermove);
 	    document.removeEventListener('mouseup', handleDocumentPointerup);
@@ -3789,9 +3789,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  _canerase = false;
 	}
 	
+	function handleDocumentTouchMove(e) {
+	  erase((0, _utils.findAnnotationAtPoint)(e.changedTouches[0].clientX, e.changedTouches[0].clientY));
+	}
+	
 	function handleDocumentMouseMove(e) {
+	  erase((0, _utils.findAnnotationAtPoint)(e.clientX, e.clientY));
+	}
+	
+	function erase(target) {
 	  if (_canerase) {
-	    var target = (0, _utils.findAnnotationAtPoint)(e.clientX, e.clientY);
 	    if (target && target.getAttribute('data-pdf-annotate-userId') == userId) {
 	      var _getMetadata = (0, _utils.getMetadata)(target.parentElement),
 	          documentId = _getMetadata.documentId;
