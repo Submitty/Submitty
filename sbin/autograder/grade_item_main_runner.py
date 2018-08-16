@@ -63,7 +63,7 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
             grade_item.copy_contents_into(job_id,tmp_work_subission ,testcase_folder,tmp_logs)
             grade_item.copy_contents_into(job_id,tmp_work_compiled  ,testcase_folder,tmp_logs)
             grade_item.copy_contents_into(job_id,tmp_work_checkout  ,testcase_folder,tmp_logs)
-
+            shutil.copy(my_runner,testcase_folder)
 
             #grade_item.untrusted_grant_rwx_access(which_untrusted, testcase_folder)
             #grade_item.add_permissions(testcase_folder, stat.S_IWGRP)
@@ -72,7 +72,6 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                                       stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
                                       stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
             #copy the compiled runner to the test directory
-            shutil.copy(my_runner,testcase_folder)
             my_testcase_runner = os.path.join(testcase_folder, 'my_runner.out')
 
             os.chdir(testcase_folder)
