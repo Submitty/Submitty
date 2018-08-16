@@ -42,6 +42,30 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
   }
 }
 
+void AddDockerConfiguration(nlohmann::json &whole_config) {
+  
+  // if (!whole_config["docker_enabled"].is_boolean()){
+  //   whole_config["docker_enabled"] = false;
+  // }
+  // if(whole_config["command"]){
+  //   if list
+  //     grab the list
+  //   else
+  //     make a list
+
+  //   whole_config["contianer"] = json
+  //   whole_container["container"]["commands"] = the list
+  // }
+
+  
+  // {
+  //   "container_name" : "docker_A",
+  //   "commands" : ["python3 server.py docker_A two_servers.txt"], //string or array of strings.
+  //   "outgoing_connections" : ["docker_B", "client"],
+  //   "container_image" : "string"
+  // }
+  
+}
 
 void RewriteDeprecatedMyersDiff(nlohmann::json &whole_config) {
 
@@ -102,6 +126,8 @@ nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid) {
 
   AddSubmissionLimitTestCase(answer);
   AddAutogradingConfiguration(answer);
+  AddDockerConfiguration(answer);
+
   if (rcsid != "") {
     CustomizeAutoGrading(rcsid,answer);
   }
