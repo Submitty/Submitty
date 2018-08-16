@@ -480,13 +480,17 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
 
     # grab the result of autograding
     grade_result = ""
-    with open(os.path.join(tmp_work,"grade.txt")) as f:
-        lines = f.readlines()
-        for line in lines:
-            line = line.rstrip('\n')
-            if line.startswith("Automatic grading total:"):
-                grade_result = line
-
+    try:
+        with open(os.path.join(tmp_work,"grade.txt")) as f:
+            lines = f.readlines()
+            for line in lines:
+                line = line.rstrip('\n')
+                if line.startswith("Automatic grading total:"):
+                    grade_result = line
+    except:
+        with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
+            print ("\n\nERROR: Grading incomplete -- Could not open ",os.path.join(tmp_work,"grade.txt"))
+            grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,message="ERROR: grade.txt does not exist")
 
     # --------------------------------------------------------------------
     # MAKE RESULTS DIRECTORY & COPY ALL THE FILES THERE
@@ -512,7 +516,12 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         add_permissions(history_file,stat.S_IRGRP)
     grading_finished = dateutils.get_current_time()
 
-    shutil.copy(os.path.join(tmp_work,"grade.txt"),tmp_results)
+    try:
+        shutil.copy(os.path.join(tmp_work,"grade.txt"),tmp_results)
+    except:
+        with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
+            print ("\n\nERROR: Grading incomplete -- Could not copy ",os.path.join(tmp_work,"grade.txt"))
+        grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,message="ERROR: grade.txt does not exist")
 
     # -------------------------------------------------------------
     # create/append to the results history
@@ -542,12 +551,17 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     with open(os.path.join(tmp_results,"queue_file.json"),'w') as outfile:
         json.dump(queue_obj,outfile,sort_keys=True,indent=4,separators=(',', ': '))
 
-    with open(os.path.join(tmp_work,"results.json"), 'r') as read_file:
-        results_obj = json.load(read_file)
-    if 'revision' in queue_obj.keys():
-        results_obj['revision'] = queue_obj['revision']
-    with open(os.path.join(tmp_results,"results.json"), 'w') as outfile:
-        json.dump(results_obj,outfile,sort_keys=True,indent=4,separators=(',', ': '))
+    try:
+        with open(os.path.join(tmp_work,"results.json"), 'r') as read_file:
+            results_obj = json.load(read_file)
+        if 'revision' in queue_obj.keys():
+            results_obj['revision'] = queue_obj['revision']
+        with open(os.path.join(tmp_results,"results.json"), 'w') as outfile:
+            json.dump(results_obj,outfile,sort_keys=True,indent=4,separators=(',', ': '))
+    except:
+        with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
+            print ("\n\nERROR: Grading incomplete -- Could not open/write ",os.path.join(tmp_work,"results.json"))
+            grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,message="ERROR: results.json read/write error")
 
     write_grade_history.just_write_grade_history(history_file,
                                                  gradeable_deadline_longstring,
