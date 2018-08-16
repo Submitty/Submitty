@@ -107,10 +107,9 @@ def untrusted_grant_rwx_access(which_untrusted,my_dir):
                      which_untrusted,
                      "-exec",
                      "/bin/chmod",
-                     "o+rwx",
+                     "ugo+rwx",
                      "{}",
                      ";"])
-
 
 def zip_my_directory(path,zipfilename):
     zipf = zipfile.ZipFile(zipfilename,'w',zipfile.ZIP_DEFLATED)
@@ -289,11 +288,8 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
             # copy any instructor provided code files to tmp compilation directory
             copy_contents_into(job_id,provided_code_path,testcase_folder,tmp_logs)
             
-
             # copy compile.out to the current directory
             shutil.copy (os.path.join(bin_path,"compile.out"),os.path.join(testcase_folder,"my_compile.out"))
-
-            add_permissions(testcase_folder, stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
             untrusted_grant_rwx_access(which_untrusted, testcase_folder)
 
@@ -329,7 +325,6 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     untrusted_grant_rwx_access(which_untrusted,tmp_compilation)
 
 
-
     # return to the main tmp directory
     os.chdir(tmp)
 
@@ -342,14 +337,14 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         
     tmp_work = os.path.join(tmp,"TMP_WORK")
     tmp_work_test_input = os.path.join(tmp_work, "test_input")
-    tmp_work_subission = os.path.join(tmp_work, "submitted_files")
+    tmp_work_submission = os.path.join(tmp_work, "submitted_files")
     tmp_work_compiled = os.path.join(tmp_work, "compiled_files")
     tmp_work_checkout = os.path.join(tmp_work, "checkout")
     
     os.mkdir(tmp_work)
-    
+
     os.mkdir(tmp_work_test_input)
-    os.mkdir(tmp_work_subission)
+    os.mkdir(tmp_work_submission)
     os.mkdir(tmp_work_compiled)
     os.mkdir(tmp_work_checkout)
 
@@ -359,7 +354,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     # Note: Must preserve the directory structure of compiled files (esp for Java)
 
     patterns_submission_to_runner = complete_config_obj["autograding"]["submission_to_runner"]
-    pattern_copy("submission_to_runner",patterns_submission_to_runner,submission_path,tmp_work_subission,tmp_logs)
+    pattern_copy("submission_to_runner",patterns_submission_to_runner,submission_path,tmp_work_submission,tmp_logs)
     if is_vcs:
         pattern_copy("checkout_to_runner",patterns_submission_to_runner,checkout_subdir_path,tmp_work_checkout,tmp_logs)
 
@@ -391,8 +386,9 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
 
     #set the appropriate permissions for the newly created directories 
     #TODO replaces commented out code below
+
     add_permissions(os.path.join(tmp_work,"my_runner.out"), stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
-    add_permissions(tmp_work_subission, stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+    add_permissions(tmp_work_submission, stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
     add_permissions(tmp_work_compiled, stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
     add_permissions(tmp_work_checkout, stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
@@ -403,26 +399,28 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     #                           stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
     #                           stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
     #                           stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
-
-
     ##################################################################################################
     #call grade_item_main_runner.py
+
     runner_success = grade_item_main_runner.executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submission_string, 
                                                                                     item_name, USE_DOCKER, container, which_untrusted,
                                                                                     job_id, grading_began)
     ##################################################################################################
+
     if runner_success == 0:
         print (which_machine,which_untrusted, "RUNNER OK")
     else:
         print (which_machine,which_untrusted, "RUNNER FAILURE")
         grade_items_logging.log_message(job_id, is_batch_job, which_untrusted, item_name, message="RUNNER FAILURE")
 
-    untrusted_grant_rwx_access(which_untrusted, tmp_work)
+    add_permissions_recursive(tmp_work,
+                          stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                          stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                          stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH) 
     untrusted_grant_rwx_access(which_untrusted, tmp_compilation)
 
     # --------------------------------------------------------------------
     # RUN VALIDATOR
-
     with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
         print ("====================================\nVALIDATION STARTS", file=f)
 
@@ -456,6 +454,8 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
 
     add_permissions(os.path.join(tmp_work,"my_validator.out"), stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
+
+
     #todo remove prints.
     print("VALIDATING")
     # validator the validator.out as the untrusted user
@@ -484,13 +484,17 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
 
     # grab the result of autograding
     grade_result = ""
-    with open(os.path.join(tmp_work,"grade.txt")) as f:
-        lines = f.readlines()
-        for line in lines:
-            line = line.rstrip('\n')
-            if line.startswith("Automatic grading total:"):
-                grade_result = line
-
+    try:
+        with open(os.path.join(tmp_work,"grade.txt")) as f:
+            lines = f.readlines()
+            for line in lines:
+                line = line.rstrip('\n')
+                if line.startswith("Automatic grading total:"):
+                    grade_result = line
+    except:
+        with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
+            print ("\n\nERROR: Grading incomplete -- Could not open ",os.path.join(tmp_work,"grade.txt"))
+            grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,message="ERROR: grade.txt does not exist")
 
     # --------------------------------------------------------------------
     # MAKE RESULTS DIRECTORY & COPY ALL THE FILES THERE
@@ -516,7 +520,12 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         add_permissions(history_file,stat.S_IRGRP)
     grading_finished = dateutils.get_current_time()
 
-    shutil.copy(os.path.join(tmp_work,"grade.txt"),tmp_results)
+    try:
+        shutil.copy(os.path.join(tmp_work,"grade.txt"),tmp_results)
+    except:
+        with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
+            print ("\n\nERROR: Grading incomplete -- Could not copy ",os.path.join(tmp_work,"grade.txt"))
+        grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,message="ERROR: grade.txt does not exist")
 
     # -------------------------------------------------------------
     # create/append to the results history
@@ -546,12 +555,17 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     with open(os.path.join(tmp_results,"queue_file.json"),'w') as outfile:
         json.dump(queue_obj,outfile,sort_keys=True,indent=4,separators=(',', ': '))
 
-    with open(os.path.join(tmp_work,"results.json"), 'r') as read_file:
-        results_obj = json.load(read_file)
-    if 'revision' in queue_obj.keys():
-        results_obj['revision'] = queue_obj['revision']
-    with open(os.path.join(tmp_results,"results.json"), 'w') as outfile:
-        json.dump(results_obj,outfile,sort_keys=True,indent=4,separators=(',', ': '))
+    try:
+        with open(os.path.join(tmp_work,"results.json"), 'r') as read_file:
+            results_obj = json.load(read_file)
+        if 'revision' in queue_obj.keys():
+            results_obj['revision'] = queue_obj['revision']
+        with open(os.path.join(tmp_results,"results.json"), 'w') as outfile:
+            json.dump(results_obj,outfile,sort_keys=True,indent=4,separators=(',', ': '))
+    except:
+        with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
+            print ("\n\nERROR: Grading incomplete -- Could not open/write ",os.path.join(tmp_work,"results.json"))
+            grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,message="ERROR: results.json read/write error")
 
     write_grade_history.just_write_grade_history(history_file,
                                                  gradeable_deadline_longstring,
@@ -570,7 +584,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     if USE_DOCKER:
         with open(os.path.join(tmp_logs,"overall_log.txt"), 'w') as logfile:
             chmod_success = subprocess.call(['docker', 'exec', '-w', tmp_work, container,
-                                             'chmod', '-R', 'o+rwx', '.'], stdout=logfile)
+                                             'chmod', '-R', 'ugo+rwx', '.'], stdout=logfile)
 
     with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
         f.write("FINISHED GRADING!\n")
