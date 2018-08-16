@@ -428,18 +428,21 @@ function toggleRegrade() {
 }
 
 function resetModules() {
+    var width = $("#nav-positioner").width();
+    var height = $("#nav-positioner").height();
+
     $('.fa-list-alt').addClass('icon-selected');
-    $("#autograding_results").attr("style", "z-index:30; left:15px; top:175px; width:48%; height:37%; display:block;");
+    $("#autograding_results").attr("style", "z-index:30; left:0; top:60%; width:48%; height:40%; display:block;");
     $('.fa-pencil-square-o').addClass('icon-selected');
-    $("#grading_rubric").attr("style", "right:15px; z-index:30; top:175px; width:48%; height:37%; display:block;");
+    $("#grading_rubric").attr("style", "left: 50%; z-index:30; top:10%; width:48%; height:68%; display:block;");
     $('.fa-folder-open').addClass('icon-selected');
-    $("#submission_browser").attr("style", "left:15px; z-index:30; bottom:40px; width:48%; height:30%; display:block;");
+    $("#submission_browser").attr("style", "left:0; z-index:30; top:10%; width:48%; height:48%; display:block;");
     $('.fa-user').addClass('icon-selected');
-    $('#bar_wrapper').attr("style", "top: -90px;left: 45%; z-index:40;");
-    $("#student_info").attr("style", "right:15px; bottom:40px; z-index:30; width:48%; height:30%; display:block;");
+    $('#bar_wrapper').attr("style", "top: 0; left: " + ((width - $('#bar_wrapper').width()) / 2) + "; z-index:40;");
+    $("#student_info").attr("style", "left: 50%; top: 80%; z-index:30; width:48%; height:20%; display:block;");
     $('.fa-hand-paper-o').addClass('icon-selected');
     $("#regrade_info").attr("style", "bottom:30px; z-index:30; right:15px; width:48%; height:37%; display:block;");
-    $("#pdf_annotation_bar").attr("style", "left: 58%, z-index:40; top:307px");
+    $("#pdf_annotation_bar").attr("style", "left: 50%; z-index:30; top:10%");
     deleteCookies();
     updateCookies();
 }

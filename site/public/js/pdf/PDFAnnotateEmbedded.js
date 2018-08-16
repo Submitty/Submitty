@@ -3,19 +3,17 @@ let documentId = '';
 let PAGE_HEIGHT;
 let RENDER_OPTIONS = {
     documentId,
-    //User id in this case is the grader
-    userId: null,
     pdfDocument: null,
     scale: parseFloat(localStorage.getItem('scale')) || 1,
     rotate: parseInt(localStorage.getItem('rotate')) || 0
 };
 let GENERAL_INFORMATION = {
+    grader_id: "",
     user_id: "",
     gradeable_id: "",
     file_name: "",
 }
 
-PDFAnnotate.setStoreAdapter(new PDFAnnotate.LocalStoreAdapter());
 PDFJS.workerSrc = 'js/pdf/pdf.worker.js';
 
 /*
@@ -55,11 +53,12 @@ function render(gradeable_id, user_id, grader_id, file_name) {
             filename: file_name
         },
         success: function(data){
+            GENERAL_INFORMATION.grader_id = grader_id;
             GENERAL_INFORMATION.user_id = user_id;
             GENERAL_INFORMATION.gradeable_id = gradeable_id;
             GENERAL_INFORMATION.file_name = file_name;
             RENDER_OPTIONS.documentId = file_name;
-            RENDER_OPTIONS.userId = grader_id;
+            PDFAnnotate.setStoreAdapter(new PDFAnnotate.LocalStoreAdapter(grader_id));
             // documentId = file_name;
             var pdfData = JSON.parse(data);
             pdfData = atob(pdfData);
@@ -122,6 +121,9 @@ function render(gradeable_id, user_id, grader_id, file_name) {
                         $('#scroll_lock_mode').removeAttr('checked');
                         UI.disablePen();
                         break;
+                    case 'eraser':
+                        UI.disableEraser();
+                        break;
                     case 'cursor':
                         UI.disableEdit();
                         break;
@@ -134,6 +136,9 @@ function render(gradeable_id, user_id, grader_id, file_name) {
             switch(option){
                 case 'pen':
                     UI.enablePen();
+                    break;
+                case 'eraser':
+                    UI.enableEraser();
                     break;
                 case 'cursor':
                     UI.enableEdit();
@@ -218,7 +223,7 @@ function render(gradeable_id, user_id, grader_id, file_name) {
 
     function saveFile(){
         let url = buildUrl({'component': 'grading','page': 'electronic', 'action': 'save_pdf_annotation'});
-        let annotation_layer = localStorage.getItem(`${RENDER_OPTIONS.documentId}/${RENDER_OPTIONS.userId}/annotations`);
+        let annotation_layer = localStorage.getItem(`${RENDER_OPTIONS.documentId}/${GENERAL_INFORMATION.grader_id}/annotations`);
         $.ajax({
             type: 'POST',
             url: url,

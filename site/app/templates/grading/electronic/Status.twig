@@ -6,9 +6,9 @@
             No Grading To Be Done! :)
         </div>
     {% else %}
-        <div class="sub">
+        <div class="row">
             {# Left panel #}
-            <div class="box half">
+            <div class="box col-md-6">
                 {% if warnings|length > 0 %}
                     <ul>
                         {% for warning in warnings %}
@@ -79,7 +79,7 @@
 
             {# Right panel #}
             {% if not peer %}
-                <div class="box half">
+                <div class="box col-md-6">
                     <b>Statistics for Completely Graded Assignments: </b>
                     <br/>
                     <div style="margin-left: 20px">

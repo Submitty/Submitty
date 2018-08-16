@@ -55,11 +55,37 @@ DAEMONPHP_GROUP=submitty_daemonphp
 # PROVISION SETUP
 #################
 
-if [ "$1" == "--vagrant" ] || [ "$2" == "--vagrant" ]; then
-    echo "Non-interactive vagrant script..."
-    export VAGRANT=1
-    export DEBIAN_FRONTEND=noninteractive
+export VAGRANT=0
+export NO_SUBMISSIONS=0
+export WORKER=0
+
+# Read through the flags passed to the script reading them in and setting
+# appropriate bash variables, breaking out of this once we hit something we
+# don't recognize as a flag
+while :; do
+    case $1 in
+        --vagrant)
+            export VAGRANT=1
+            ;;
+        --worker)
+            export WORKER=1
+            ;;
+        --no_submissions)
+            export NO_SUBMISSIONS=1
+            echo 'no_submissions'
+            ;;
+        *) # No more options, so break out of the loop.
+            break
+    esac
+
     shift
+done
+
+
+if [ ${VAGRANT} == 1 ]; then
+    echo "Non-interactive vagrant script..."
+
+    export DEBIAN_FRONTEND=noninteractive
 
     # Setting it up to allow SSH as root by default
     mkdir -p -m 700 /root/.ssh
@@ -75,18 +101,20 @@ export SUBMITTY_REPOSITORY=${SUBMITTY_REPOSITORY}
 export SUBMITTY_INSTALL_DIR=${SUBMITTY_INSTALL_DIR}
 export SUBMITTY_DATA_DIR=${SUBMITTY_DATA_DIR}
 alias install_submitty='/usr/local/submitty/.setup/INSTALL_SUBMITTY.sh'
+alias install_submitty_site='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/INSTALL_SUBMITTY_HELPER_SITE.sh'
+alias install_submitty_bin='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/INSTALL_SUBMITTY_HELPER_BIN.sh'
+alias submitty_code_watcher='python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/code_watcher.py'
 cd ${SUBMITTY_INSTALL_DIR}" >> /root/.bashrc
 else
     #TODO: We should get options for ./.setup/CONFIGURE_SUBMITTY.py script
-    export VAGRANT=0
+    :
 fi
 
-if [ "$1" == "--worker" ] || [ "$2" == "--worker" ]; then
-    echo Installing Submitty in worker mode.
-    export WORKER=1
+if [ ${WORKER} == 1 ]; then
+    echo "Installing Submitty in worker mode."
 else
-    echo Installing primary Submitty.
-    export WORKER=0
+    echo "Installing primary Submitty."
+
 fi
 
 COURSE_BUILDERS_GROUP=submitty_course_builders
@@ -545,11 +573,11 @@ if [ ${WORKER} == 0 ]; then
     su postgres -c "psql -c \"DO \\\$do\\\$ BEGIN IF NOT EXISTS ( SELECT FROM  pg_catalog.pg_roles WHERE  rolname = '${DB_USER}') THEN  CREATE ROLE ${DB_USER} LOGIN PASSWORD '${dbuser_password}'; END IF; END \\\$do\\\$;\""
 
     # check to see if a submitty master database exists
-    DB_EXISTS=`su -c 'psql -lqt | cut -d \| -f 1 | grep -w submitty' postgres`
+    DB_EXISTS=`su -c 'psql -lqt | cut -d \| -f 1 | grep -w submitty || true' postgres`
 
     if [ "$DB_EXISTS" == "" ]; then
 	echo "Submitty master database does not yet exist"
-	PGPASSWORD=${dbuser_password} psql -d postgres -h localhost -U ${DB_USER} -c "IF NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'submitty') THEN CREATE DATABASE submitty"
+	PGPASSWORD=${dbuser_password} psql -d postgres -h localhost -U ${DB_USER} -c "CREATE DATABASE submitty;"
 	python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
     else
 	echo "Submitty master database already exists"
@@ -565,9 +593,11 @@ bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
 # (re)start the submitty grading scheduler daemon
 systemctl restart submitty_autograding_shipper
 systemctl restart submitty_autograding_worker
+systemctl restart submitty_daemon_jobs_handler
 # also, set it to automatically start on boot
-sudo systemctl enable submitty_autograding_shipper
-sudo systemctl enable submitty_autograding_worker
+systemctl enable submitty_autograding_shipper
+systemctl enable submitty_autograding_worker
+systemctl enable submitty_daemon_jobs_handler
 
 #Setup website authentication if not in worker mode.
 if [ ${WORKER} == 0 ]; then
@@ -613,8 +643,11 @@ if [ ${WORKER} == 0 ]; then
         chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/site_errors
 
         # Call helper script that makes the courses and refreshes the database
-        python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py --submission_url ${SUBMISSION_URL}
-
+        if [ ${NO_SUBMISSIONS} == 1 ]; then
+            python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py --no_submissions --submission_url ${SUBMISSION_URL}
+        else
+            python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py --submission_url ${SUBMISSION_URL}
+        fi
         #################################################################
         # SET CSV FIELDS (for classlist upload data)
         #################
