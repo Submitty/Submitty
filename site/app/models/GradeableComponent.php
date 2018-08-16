@@ -137,13 +137,6 @@ class GradeableComponent extends AbstractModel {
         if (isset($details['array_gcm_id'])) {
             $mark_fields = array('gcm_id', 'gc_id', 'gcm_points', 'gcm_publish',
                                     'gcm_note', 'gcm_order');
-            foreach ($mark_fields as $key) {
-                $details["array_{$key}"] = explode(',', $details["array_{$key}"]);
-            }
-
-            if (isset($details['array_gcm_mark'])) {
-                $details['array_gcm_mark'] = explode(',', $details['array_gcm_mark']);
-            }
             for ($i = 0; $i < count($details['array_gcm_id']); $i++) {
                 $mark_details = array();
                 foreach ($mark_fields as $key) {
