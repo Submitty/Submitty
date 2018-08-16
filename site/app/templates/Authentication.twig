@@ -1,9 +1,10 @@
-<div class="content">
-    <h2>Submitty Login</h2>
-    <!--
-    <em>Note: Registered students have not yet been uploaded to the Submitty course databases.  Please check back later.</em>
-    -->
-    <div class="sub">
+<div class="row">
+    <div class="col-sm"></div>
+    <div class="content" id="login-box">
+        <h2 id="login-guest">Submitty Login</h2>
+        <!--
+        <em>Note: Registered students have not yet been uploaded to the Submitty course databases.  Please check back later.</em>
+        -->
         <form action="{{ site_url }}" method="post" id="login">
             <input type="hidden" name="component" value="authentication" />
             <input type="hidden" name="page" value="checkLogin" />
@@ -13,7 +14,8 @@
             <input type="text" name="user_id" placeholder="User ID" autofocus/><br />
             <input type="password" name="password" placeholder="Password" /><br />
             <label for="stay_logged_in">Stay Logged In</label> <input type="checkbox" name="stay_logged_in" id="stay_logged_in" checked /><br />
-            <input type="submit" name="login" value="Login" class="btn btn-default" />
+            <input type="submit" name="login" value="Login" class="btn btn-primary" />
         </form>
     </div>
+    <div class="col-sm"></div>
 </div>
