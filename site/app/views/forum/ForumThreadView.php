@@ -145,7 +145,7 @@ HTML;
 		that have been created after applying filter and to be
 		displayed in the left panel.
 	*/
-	public function showForumThreads($user, $posts, $threadsHead, $show_deleted, $show_merged_thread, $display_option, $max_thread) {
+	public function showForumThreads($user, $posts, $threadsHead, $show_deleted, $show_merged_thread, $display_option, $max_thread, $initialPageNumber) {
 		if(!$this->forumAccess()){
 			$this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
 			return;
@@ -183,7 +183,6 @@ HTML;
 
 			$( document ).ready(function() {
 			    enableTabsInTextArea('.post_content_reply');
-				saveScrollLocationOnRefresh('thread_list');
 				saveScrollLocationOnRefresh('posts_list');
 				addCollapsable();
 				$('#{$display_option}').attr('checked', 'checked'); //Saves the radiobutton state when refreshing the page
@@ -318,30 +317,45 @@ HTML;
 		} else {
 			$return .= <<<HTML
 				<div id="forum_wrapper">
-					<div id="thread_list" class="thread_list" next_page='2'>
 HTML;
-				$activeThreadAnnouncement = false;
-				$activeThreadTitle = "";
-				$function_date = 'date_format';
-				$activeThread = array();
-				$return .= $this->displayThreadList($threadsHead, false, $activeThreadAnnouncement, $activeThreadTitle, $activeThread, $currentThread, $currentCategoriesIds);
-				if(count($activeThread) == 0) {
-					$activeThread = $this->core->getQueries()->getThread($currentThread)[0];
-					$activeThreadTitle = $activeThread['title'];
-				}
-			$activeThreadTitle = htmlentities(html_entity_decode($activeThreadTitle, ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+					$next_page = $initialPageNumber + 1;
+					$prev_page = ($initialPageNumber == 1)?0:($initialPageNumber - 1);
+					$arrowup_visibility = ($initialPageNumber == 1)?"display:none;":"";
+					$return .= <<<HTML
+					<div  style="position: relative;width: 25%;height: 100%;display: inline-block;" >
+						<a class="btn-sm btn-primary hover_glow" style="z-index: 1; position: absolute;right: 0px;top: 0px;" onclick="updateThreads(true, function(){ $('#thread_list').animate({ scrollTop: 0 }, 'fast');});"><i class="fa fa-2x fa-angle-double-up" style="position: relative;" title="Move to top"></i></a>
+						<a class="btn-sm btn-primary hover_glow" style=" z-index: 1; position: absolute;right: 0px;bottom: 0px;" onclick="updateThreads(false, function(){ $('#thread_list').animate({ scrollTop: $('#thread_list').prop('scrollHeight') }, 'fast');});"><i class="fa fa-2x fa-angle-double-down" style="position: relative;" title="Move to bottom"></i></a>
+					<div id="thread_list" style="width: 100%;" class="thread_list" prev_page='{$prev_page}' next_page='{$next_page}'>
+						<i class="fa fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
+						<i class="fa fa-caret-up fa-2x fa-fw fill-available" style="color:gray;{$arrowup_visibility}" aria-hidden="true"></i>
+HTML;
+						$activeThreadAnnouncement = false;
+						$activeThreadTitle = "";
+						$function_date = 'date_format';
+						$activeThread = array();
+						$return .= $this->displayThreadList($threadsHead, false, $activeThreadAnnouncement, $activeThreadTitle, $activeThread, $currentThread, $currentCategoriesIds);
+						if(count($activeThread) == 0) {
+							$activeThread = $this->core->getQueries()->getThread($currentThread)[0];
+							$activeThreadTitle = $activeThread['title'];
+						}
+						$activeThreadTitle = htmlentities(html_entity_decode($activeThreadTitle, ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
-			$thread_id = -1;
-			$userAccessToAnon = ($this->core->getUser()->getGroup() < 4) ? true : false;
-			$title_html = '';
-			$return .= <<<HTML
+						$thread_id = -1;
+						$userAccessToAnon = ($this->core->getUser()->getGroup() < 4) ? true : false;
+						$title_html = '';
 
-				
-					<i class="fa fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
+						$return .= <<<HTML
+						<i class="fa fa-caret-down fa-2x fa-fw fill-available" style="color:gray;" aria-hidden="true"></i>
+						<i class="fa fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
+					</div>
 					</div>
 					<script type="text/javascript">
 						$(function(){
 							dynamicScrollContentOnDemand($('.thread_list'), buildUrl({'component': 'forum', 'page': 'get_threads', 'page_number':'{{#}}'}), {$currentThread}, '', '{$currentCourse}');
+							var active_thread = $('#thread_list .active');
+							if(active_thread.length > 0) {
+								active_thread[0].scrollIntoView(true); 
+							}
 						});
 					</script>
 					<div style="display:inline-block;width:70%; float: right;" id="posts_list" class="posts_list">
