@@ -1,0 +1,26 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}mark-conflict-popup{% endblock %}
+{% block title %}Mark Conflicts{% endblock %}
+{% block body %}
+    <h3 class="component-title"></h3>
+    <h4>
+        It looks like someone else also edited the rubric.  Choose the changes you want to keep.
+    </h4>
+    <div class="legend">
+        <div class="mark-resolve-dom">
+            Your Version
+        </div>
+        <div class="mark-resolve-old-server">
+            Original: blue
+        </div>
+        <div class="mark-resolve-server">
+            Other Change: orange
+        </div>
+    </div>
+    <div class="conflict-marks-container">
+    </div>
+{% endblock %}
+{% block buttons %}
+    <a class="btn btn-primary resolve-button">Submit</a>
+    <a class="btn btn-default close-button">Close</a>
+{% endblock %}

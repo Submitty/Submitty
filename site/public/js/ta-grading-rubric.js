@@ -1834,6 +1834,9 @@ function saveMarkList(component_id) {
             // associative array of associative arrays of marks with conflicts {<mark_id>: {domMark, serverMark, oldServerMark}, ...}
             let conflictMarks = {};
 
+            // Also generate a normal array to pass to the conflict popup
+            let conflictMarksArr = [];
+
             let sequence = Promise.resolve();
 
             // For each DOM mark, try to save it
@@ -1850,36 +1853,52 @@ function saveMarkList(component_id) {
                             conflictMarks[domMark.id] = {
                                 domMark: domMark,
                                 serverMark: serverMark,
-                                oldServerMark: oldServerMark
+                                oldServerMark: oldServerMark,
+                                localDeleted: isMarkDeleted(domMark.id)
                             };
+                            conflictMarksArr.push(conflictMarks[domMark.id]);
                         }
                     });
             });
 
             return sequence
                 .then(function () {
+                    // No conflicts, so don't open the popup
+                    if(conflictMarksArr.length === 0) {
+                        return {};
+                    }
+
                     // Prompt the user with any conflicts
-                    return promptUserMarkConflicts(conflictMarks);
+                    return openMarkConflictPopup(component_id, conflictMarksArr);
                 })
                 .then(function (marks) {
                     // Get the resolution of those conflicts and save each
                     let sequence1 = Promise.resolve();
                     let gradeable_id = getGradeableId();
 
-                    marks.forEach(function (mark) {
-                        sequence1 = sequence1.then(function () {
-                            if (isMarkDeleted(mark.id)) {
+                    for (let id in marks) {
+                        if (marks.hasOwnProperty(id)) {
+                            let mark = marks[id];
+                            // Null marks count as 'for deletion'
+                            if (mark === null) {
                                 // This should be a pretty rare case
-                                return ajaxDeleteMark(gradeable_id, component_id, mark.id)
+                                sequence1 = sequence1
+                                    .then(function () {
+                                        return ajaxDeleteMark(gradeable_id, component_id, mark.id);
+                                    })
                                     .catch(function (err) {
-                                        err.message = 'Could not delete mark: ' + err.message;
-                                        throw err;
+                                        // TODO: is this what we want to do?
+                                        // Don't let this error hold up the whole operation
+                                        alert('Could not delete mark: ' + err.message);
                                     });
                             } else {
-                                return ajaxSaveMark(gradeable_id, component_id, mark.id, mark.points, mark.title);
+                                // If not marked for deletion, save normally
+                                sequence1 = sequence1.then(function () {
+                                    return ajaxSaveMark(gradeable_id, component_id, mark.id, mark.points, mark.title);
+                                });
                             }
-                        });
-                    });
+                        }
+                    }
                     return sequence1;
                 })
                 .then(function () {
@@ -1889,24 +1908,8 @@ function saveMarkList(component_id) {
                         markOrder[mark.id] = mark.order;
                     });
                     return ajaxSaveMarkOrder(gradeable_id, component_id, markOrder);
-                })
+                });
         });
-}
-
-/**
- * Prompts the user with an array of conflict marks so they can individually resolve them
- * @param {{domMark, ServerMark, oldServerMark}[]} conflictMarks
- * @return {Promise} Promise resolves with an array of marks to save
- */
-function promptUserMarkConflicts(conflictMarks) {
-    // TODO: this needs to handle conflicts where a mark was deleted when someone
-    // TODO: else changed it  See all paths where tryResolveMarkSave returns false
-
-    let acceptMarks = [];
-    for (let marks in conflictMarks) {
-        acceptMarks.push(marks.domMark);
-    }
-    return Promise.resolve(acceptMarks);
 }
 
 /**
@@ -1959,11 +1962,11 @@ function tryResolveMarkSave(gradeable_id, component_id, domMark, serverMark, old
             }
         } else {
             // This means it was deleted from the server.
-            if (!marksEqual(domMark, oldServerMark)) {
-                // And the mark changed, which is a conflict state
+            if (!marksEqual(domMark, oldServerMark) && !markDeleted) {
+                // And the mark changed and wasn't deleted, which is a conflict state
                 return Promise.resolve(false);
             } else {
-                // And the mark didn't change, so don't do anything
+                // And the mark didn't change or it was deleted, so don't do anything
                 return Promise.resolve(true);
             }
         }

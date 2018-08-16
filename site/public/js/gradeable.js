@@ -10,7 +10,8 @@ function loadTemplates() {
         {id: 'Component', href: "templates/grading/Component.twig"},
         {id: 'Mark', href: "templates/grading/Mark.twig"},
         {id: 'OverallComment', href: "templates/grading/OverallComment.twig"},
-        {id: 'TotalScoreBox', href: "templates/grading/TotalScoreBox.twig"}
+        {id: 'TotalScoreBox', href: "templates/grading/TotalScoreBox.twig"},
+        {id: 'ConflictMarks', href: "templates/grading/ConflictMarks.twig"}
     ];
     let promises = [];
     templates.forEach(function (template) {
@@ -162,11 +163,23 @@ function renderOverallComment(comment, editable) {
 /**
  * Asynchronously renders the total scores box
  * @param {Object} scores
- * @return {Promise}
+ * @return {Promise<string>}
  */
 function renderTotalScoreBox(scores) {
     return new Promise(function (resolve, reject) {
         // TODO: i don't think this is async
         resolve(Twig.twig({ref: "TotalScoreBox"}).render(scores));
     });
+}
+
+/**
+ *
+ * @param conflict_marks
+ * @return {Promise<string>}
+ */
+function renderConflictMarks(conflict_marks) {
+    return new Promise(function (resolve, reject) {
+        // TODO: i don't think this is async
+        resolve(Twig.twig({ref: "ConflictMarks"}).render({conflict_marks: conflict_marks}));
+    })
 }

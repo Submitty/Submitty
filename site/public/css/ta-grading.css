@@ -619,3 +619,23 @@ tr.is_publish {
     width: 100%;
     margin: 2px;
 }
+
+#mark-conflict-popup .mark-conflict-row .mark-resolve-dom {
+    background-color: red;
+}
+
+#mark-conflict-popup .mark-conflict-row .mark-resolve-old-server{
+    background-color: blue;
+}
+
+#mark-conflict-popup .mark-conflict-row .mark-resolve-server {
+    background-color: orange;
+}
+
+#mark-conflict-popup .mark-conflict-row .title:hover, .points:hover {
+    opacity: 0.7;
+}
+
+#mark-conflict-popup .mark-conflict-row .title-selected, .points-selected {
+    opacity: 0.6;
+}

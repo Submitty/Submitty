@@ -1,0 +1,62 @@
+<div class="container mark-conflict-container">
+    {% for conflict in conflict_marks %}
+        <div class="row mark-conflict-row"
+             data-mark_id="{{ conflict.domMark.id }}">
+            <div class="col-no-gutters">
+                Mark id: {{ conflict.domMark.id }}
+            </div>
+            <div class="col container">
+                <div class="row mark-resolve-dom">
+                    {% if not conflict.local_deleted %}
+                        <span class="col-no-gutters points"
+                              onclick="onConflictPointsClick(this)"
+                              data-points="{{ conflict.domMark.points }}">
+                            ({{ conflict.domMark.points }})
+                        </span>
+                        <span class="col-sm title"
+                              onclick="onConflictTitleClick(this)"
+                              data-title="{{ conflict.domMark.title }}">
+                            {{ conflict.domMark.title }}
+                        </span>
+                    {% else %}
+                        <span class="col title points mark-deleted-message"
+                              onclick="onConflictDeleteClick(this)">
+                            You Deleted the Mark.  Choose to Delete Mark.
+                        </span>
+                    {% endif %}
+                </div>
+                <div class="row mark-resolve-old-server">
+                    <span class="col-no-gutters points"
+                          onclick="onConflictPointsClick(this)"
+                          data-points="{{ conflict.oldServerMark.points }}">
+                        ({{ conflict.oldServerMark.points }})
+                    </span>
+                    <span class="col-sm title"
+                          onclick="onConflictTitleClick(this)"
+                          data-title="{{ conflict.oldServerMark.title }}">
+                        {{ conflict.oldServerMark.title }}
+                    </span>
+                </div>
+                <div class="row mark-resolve-server">
+                    {% if conflict.serverMark != null %}
+                        <span class="col-no-gutters points"
+                              onclick="onConflictPointsClick(this)"
+                              data-points="{{ conflict.serverMark.points }}">
+                            ({{ conflict.serverMark.points }})
+                        </span>
+                        <span class="col-sm title"
+                              onclick="onConflictTitleClick(this)"
+                              data-title="{{ conflict.serverMark.title }}">
+                            {{ conflict.serverMark.title }}
+                        </span>
+                    {% else %}
+                        <span class="col title points mark-deleted-message"
+                              onclick="onConflictDeleteClick(this)">
+                            Mark Deleted From Server.  Choose to Delete Mark.
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>

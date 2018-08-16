@@ -630,6 +630,7 @@ class ElectronicGraderView extends AbstractView {
         $this->core->getOutput()->addInternalJs('twig.min.js');
         $this->core->getOutput()->addInternalJs('ta-grading-keymap.js');
         $this->core->getOutput()->addInternalJs('ta-grading.js');
+        $this->core->getOutput()->addInternalJs('ta-grading-rubric-conflict.js');
         $this->core->getOutput()->addInternalJs('ta-grading-rubric.js');
         $this->core->getOutput()->addInternalJs('gradeable.js');
 
@@ -661,8 +662,8 @@ class ElectronicGraderView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/ReceivedMarkForm.twig");
     }
 
-    public function popupNewMark() {
-        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/NewMarkForm.twig");
+    public function popupMarkConflicts() {
+        return $this->core->getOutput()->renderTwigTemplate('grading/electronic/MarkConflictPopup.twig');
     }
 
     public function popupSettings() {
