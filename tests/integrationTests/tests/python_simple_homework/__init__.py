@@ -4,6 +4,7 @@ from lib import prebuild, testcase, SUBMITTY_INSTALL_DIR
 import subprocess
 import os
 import glob
+import shutil
 
 
 ############################################################################
@@ -19,7 +20,10 @@ def initialize(test):
     except OSError:
         pass
     try:
-        os.mkdir(os.path.join(test.testcase_path, "data"))
+        data_path = os.path.join(test.testcase_path, "data")
+        if os.path.isdir(data_path):
+            shutil.rmtree(data_path)
+        os.mkdir(data_path)
     except OSError:
         pass
 
@@ -36,22 +40,23 @@ def initialize(test):
 def cleanup(test):
     # cleanup the non empty logfile
     subprocess.call(["rm","-f",
-        os.path.join(test.testcase_path, "data/", "test01_execute_logfile.txt")])
-    
+        os.path.join(test.testcase_path, "data/", "test01/execute_logfile.txt")])
+    subprocess.call(["rm"] + ["-rf"] +
+            glob.glob(os.path.join(test.testcase_path, "data", "test*")))
 
 @testcase
 def correct(test):
     cleanup(test)
     subprocess.call(["rm"] + ["-f"] +
-            glob.glob(os.path.join(test.testcase_path, "data/", "*.py")))
+            glob.glob(os.path.join(test.testcase_path, "data", "*.py")))
     subprocess.call(["cp",
         os.path.join(SAMPLE_SUBMISSIONS, "part1.py"),
         os.path.join(test.testcase_path, "data")])
     test.run_run()
     test.run_validator()
-    test.diff("test01_STDOUT.txt","data/hw01part1_sol.txt")
-    test.empty_file("test01_STDERR.txt")
-    test.empty_json_diff("test01_0_diff.json")
+    test.diff("test01/STDOUT.txt","data/hw01part1_sol.txt")
+    test.empty_file("test01/STDERR.txt")
+    test.empty_json_diff("test01/0_diff.json")
     test.diff("grade.txt","grade.txt_correct","-b")
     test.json_diff("results.json","results.json_correct")
 
@@ -66,9 +71,9 @@ def buggy(test):
         os.path.join(test.testcase_path, "data")])
     test.run_run()
     test.run_validator()
-    test.diff("test01_STDOUT.txt","test01_STDOUT.txt_buggy")
-    test.empty_file("test01_STDERR.txt")
-    test.json_diff("test01_0_diff.json","test01_0_diff.json_buggy")
+    test.diff("test01/STDOUT.txt","test01_STDOUT.txt_buggy")
+    test.empty_file("test01/STDERR.txt")
+    test.json_diff("test01/0_diff.json","test01_0_diff.json_buggy")
     test.diff("grade.txt","grade.txt_buggy","-b")
     test.json_diff("results.json","results.json_buggy")
 
@@ -83,9 +88,9 @@ def buggy2(test):
         os.path.join(test.testcase_path, "data")])
     test.run_run()
     test.run_validator()
-    test.diff("test01_STDOUT.txt","test01_STDOUT.txt_buggy2")
-    test.empty_file("test01_STDERR.txt")
-    test.json_diff("test01_0_diff.json","test01_0_diff.json_buggy2")
+    test.diff("test01/STDOUT.txt","test01_STDOUT.txt_buggy2")
+    test.empty_file("test01/STDERR.txt")
+    test.json_diff("test01/0_diff.json","test01_0_diff.json_buggy2")
     test.diff("grade.txt","grade.txt_buggy2","-b")
     test.json_diff("results.json","results.json_buggy2")
 
@@ -100,10 +105,10 @@ def syntax_error(test):
         os.path.join(test.testcase_path, "data")])
     test.run_run()
     test.run_validator()
-    test.diff("test01_STDOUT.txt","test01_STDOUT.txt_syntax_error")
-    test.diff("test01_STDERR.txt","test01_STDERR.txt_syntax_error")
-    test.diff("test01_execute_logfile.txt","test01_execute_logfile.txt_syntax_error")
-    test.json_diff("test01_0_diff.json","test01_0_diff.json_syntax_error")
+    test.diff("test01/STDOUT.txt","test01_STDOUT.txt_syntax_error")
+    test.diff("test01/STDERR.txt","test01_STDERR.txt_syntax_error")
+    test.diff("test01/execute_logfile.txt","test01_execute_logfile.txt_syntax_error")
+    test.json_diff("test01/0_diff.json","test01_0_diff.json_syntax_error")
     test.diff("grade.txt","grade.txt_syntax_error","-b")
     test.json_diff("results.json","results.json_syntax_error")
 
@@ -121,9 +126,9 @@ def infinite_loop_too_much_output(test):
     test.run_run()
     test.run_validator()
     # truncate the output before comparing (tolerate changes in the file size cutoff)
-    test.diff_truncate(100,"test01_STDOUT.txt","test01_STDOUT.txt_infinite_loop_too_much_output")
-    test.diff("test01_STDERR.txt","test01_STDERR.txt_infinite_loop_too_much_output")
-    test.diff("test01_execute_logfile.txt","test01_execute_logfile.txt_infinite_loop_too_much_output")
+    test.diff_truncate(100,"test01/STDOUT.txt","test01_STDOUT.txt_infinite_loop_too_much_output")
+    test.diff("test01/STDERR.txt","test01_STDERR.txt_infinite_loop_too_much_output")
+    test.diff("test01/execute_logfile.txt","test01_execute_logfile.txt_infinite_loop_too_much_output")
     test.diff("grade.txt","grade.txt_infinite_loop_too_much_output","-b")
     test.json_diff("results.json","results.json_infinite_loop_too_much_output")
 
@@ -140,9 +145,9 @@ def infinite_loop_time_cutoff(test):
         os.path.join(test.testcase_path, "data")])
     test.run_run()
     test.run_validator()
-    test.empty_file("test01_STDOUT.txt")
-    test.empty_file("test01_STDERR.txt")
-    #test.json_diff("test01_0_diff.json","test01_0_diff.json_time_cutoff")
-    test.diff("test01_execute_logfile.txt","test01_execute_logfile.txt_infinite_loop_time_cutoff")
+    test.empty_file("test01/STDOUT.txt")
+    test.empty_file("test01/STDERR.txt")
+    #test.json_diff("test01/0_diff.json","test01/0_diff.json_time_cutoff")
+    test.diff("test01/execute_logfile.txt","test01_execute_logfile.txt_infinite_loop_time_cutoff")
     test.diff("grade.txt","grade.txt_infinite_loop_time_cutoff","-b")
     test.json_diff("results.json","results.json_infinite_loop_time_cutoff")

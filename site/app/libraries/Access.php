@@ -57,21 +57,26 @@ class Access {
     const CHECK_COMPONENT_PEER_STUDENT  = 1 << 12 | self::REQUIRE_ARG_COMPONENT;
     /** Check if they can access the given file and directory */
     const CHECK_FILE_DIRECTORY          = 1 << 13 | self::REQUIRE_ARGS_DIR_PATH;
+    /** Require that the given file exists */
+    const CHECK_FILE_EXISTS             = 1 << 14 | self::REQUIRE_ARGS_DIR_PATH;
     /**
      * If the gradeable does not allow students to view any version, then check if this is the active version.
      * Only applies to students, and only when $gradeable->getStudentAnyVersion() is false
      */
-    const CHECK_STUDENT_ANY_VERSION     = 1 << 14 | self::REQUIRE_ARG_GRADEABLE | self::REQUIRE_ARG_VERSION;
+    const CHECK_STUDENT_ANY_VERSION     = 1 << 15 | self::REQUIRE_ARG_GRADEABLE | self::REQUIRE_ARG_VERSION;
     /**
      * Check that students are allowed to view the given gradeable
      * Only applies to students
      */
-    const CHECK_STUDENT_VIEW            = 1 << 15 | self::REQUIRE_ARG_GRADEABLE;
+    const CHECK_STUDENT_VIEW            = 1 << 16 | self::REQUIRE_ARG_GRADEABLE;
     /**
      * Check that students are allowed to download the given gradeable
      * Only applies to students
      */
-    const CHECK_STUDENT_DOWNLOAD        = 1 << 16 | self::REQUIRE_ARG_GRADEABLE;
+    const CHECK_STUDENT_DOWNLOAD        = 1 << 17 | self::REQUIRE_ARG_GRADEABLE;
+
+    /** Check that the course status is such that the user can view the course */
+    const CHECK_COURSE_STATUS           = 1 << 18;
 
     /** If the current set of flags requires the "gradeable" argument */
     const REQUIRE_ARG_GRADEABLE         = 1 << 24;
@@ -81,6 +86,9 @@ class Access {
     const REQUIRE_ARGS_DIR_PATH         = 1 << 26;
     /** If the current set of flags requires the "gradeable_version" argument */
     const REQUIRE_ARG_VERSION           = 1 << 27;
+    /** If the current set of flags requires the "semester" and "course" arguments */
+    const REQUIRE_ARGS_SEMESTER_COURSE  = 1 << 28;
+
 
     // Broader user group access cases since generally actions are "minimum this group"
 
@@ -105,6 +113,8 @@ class Access {
 
     public function __construct(Core $core) {
         $this->core = $core;
+
+        $this->permissions["course.view"] = self::ALLOW_MIN_STUDENT | self::REQUIRE_ARGS_SEMESTER_COURSE | self::CHECK_COURSE_STATUS;
 
         $this->permissions["grading.electronic.status"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP;
         $this->permissions["grading.electronic.status.full"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
@@ -142,25 +152,30 @@ class Access {
 
         $this->permissions["gradeable.submit.everyone"] = self::ALLOW_MIN_FULL_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP;
 
-        $this->permissions["path.read"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY;
-        $this->permissions["path.write"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY;
+        $this->permissions["path.read"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY | self::CHECK_FILE_EXISTS;
+        $this->permissions["path.write"] = self::ALLOW_MIN_STUDENT | self::CHECK_CSRF | self::CHECK_FILE_DIRECTORY;
 
         //Per-directory access permissions
-        $this->permissions["path.read.uploads"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_FILE_DIRECTORY;
+        $this->permissions["path.read.uploads"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_FILE_DIRECTORY | self::CHECK_FILE_EXISTS;
+        $this->permissions["path.read.site"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY | self::CHECK_FILE_EXISTS;
         //TODO: Timed access control
-        $this->permissions["path.read.course_materials"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY;
+        $this->permissions["path.read.course_materials"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY | self::CHECK_FILE_EXISTS;
         //TODO: Check deleted posts
-        $this->permissions["path.read.forum_attachments"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY;
+        $this->permissions["path.read.forum_attachments"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY | self::CHECK_FILE_EXISTS;
         //TODO: Can students see their results?
-        $this->permissions["path.read.results"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_HAS_SUBMISSION | self::CHECK_FILE_DIRECTORY;
-        $this->permissions["path.read.submissions"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_STUDENT_VIEW | self::CHECK_STUDENT_DOWNLOAD | self::CHECK_STUDENT_ANY_VERSION | self::CHECK_FILE_DIRECTORY;
+        $this->permissions["path.read.results"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_HAS_SUBMISSION | self::CHECK_FILE_DIRECTORY | self::CHECK_FILE_EXISTS;
+        $this->permissions["path.read.submissions"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_STUDENT_VIEW | self::CHECK_STUDENT_DOWNLOAD | self::CHECK_STUDENT_ANY_VERSION | self::CHECK_FILE_DIRECTORY | self::CHECK_FILE_EXISTS;
 
-        $this->permissions["path.write.submissions"] = self::ALLOW_MIN_STUDENT | self::ALLOW_ONLY_SELF_GRADEABLE | self::CHECK_FILE_DIRECTORY;
-        $this->permissions["path.write.uploads"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_FILE_DIRECTORY;
-        $this->permissions["path.write.checkout"] = self::DENY_ALL | self::CHECK_FILE_DIRECTORY;
-        $this->permissions["path.write.results"] = self::DENY_ALL | self::CHECK_FILE_DIRECTORY;
-        $this->permissions["path.write.course_materials"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_FILE_DIRECTORY;
-        $this->permissions["path.write.forum_attachments"] = self::ALLOW_MIN_STUDENT | self::CHECK_FILE_DIRECTORY;
+        $this->permissions["path.write.submissions"] = self::ALLOW_MIN_STUDENT | self::ALLOW_ONLY_SELF_GRADEABLE | self::CHECK_CSRF | self::CHECK_FILE_DIRECTORY;
+        $this->permissions["path.write.uploads"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_CSRF | self::CHECK_FILE_DIRECTORY;
+        $this->permissions["path.write.site"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_CSRF | self::CHECK_FILE_DIRECTORY;
+        $this->permissions["path.write.checkout"] = self::DENY_ALL | self::CHECK_CSRF | self::CHECK_FILE_DIRECTORY;
+        $this->permissions["path.write.results"] = self::DENY_ALL | self::CHECK_CSRF | self::CHECK_FILE_DIRECTORY;
+        $this->permissions["path.write.course_materials"] = self::ALLOW_MIN_INSTRUCTOR  | self::CHECK_CSRF| self::CHECK_FILE_DIRECTORY;
+        $this->permissions["path.write.forum_attachments"] = self::ALLOW_MIN_STUDENT | self::CHECK_CSRF | self::CHECK_FILE_DIRECTORY;
+
+
+        $this->permissions["admin.wrapper"] = self::ALLOW_MIN_INSTRUCTOR;
     }
 
     /**
@@ -222,6 +237,14 @@ class Access {
             "permissions" => [
                 "path.read" => "path.read.uploads",
                 "path.write" => "path.write.uploads",
+            ]
+        ];
+        $this->directories["site"] = [
+            "base" => $this->core->getConfig()->getCoursePath() . "/site",
+            "subparts" => [],
+            "permissions" => [
+                "path.read" => "path.read.site",
+                "path.write" => "path.write.site",
             ]
         ];
         $this->directories["course_materials"] = [
@@ -294,7 +317,7 @@ class Access {
         }
 
         if (self::checkBits($checks, self::CHECK_CSRF)) {
-            if ($this->core->checkCsrfToken()) {
+            if (!$this->core->checkCsrfToken()) {
                 return false;
             }
         }
@@ -394,6 +417,8 @@ class Access {
                     }
                 }
             }
+
+
             if (self::checkBits($checks, self::REQUIRE_ARG_VERSION)) {
                 /* @var int $version */
                 $version = $this->requireArg($args, "gradeable_version");
@@ -443,6 +468,26 @@ class Access {
             //Check if they can access the path!
             if (!$this->canUserAccessPath($action, $path, $dir, $user, $args)) {
                 return false;
+            }
+        }
+
+        if (self::checkBits($checks, self::REQUIRE_ARGS_SEMESTER_COURSE)) {
+            $semester = $this->requireArg($args, "semester");
+            $course = $this->requireArg($args, "course");
+            if (self::checkBits($checks, self::CHECK_COURSE_STATUS)) {
+                $course_status = $this->core->getQueries()->getCourseStatus($semester, $course);
+                // only instructors should be able to access courses with status archived==2
+                if($course_status === 2 && $group !== User::GROUP_INSTRUCTOR) {
+                    return false;
+                }
+                // only students with a non-null registration section should be able to view courses (and only active==1 courses)
+                else if($group === User::GROUP_STUDENT && ($course_status !== 1 || $user->getRegistrationSection() === null)) {
+                    return false;
+                }
+                // no one can view courses with status greater than 2
+                else if ($course_status > 2) {
+                    return false;
+                }
             }
         }
 
@@ -712,14 +757,15 @@ class Access {
             return false;
         }
 
+        $checks = $this->permissions[$action];
         $info = $this->directories[$dir];
 
         //Get the real path
         $path = $this->resolveDirPath($dir, $path);
         $relative_path = substr($path, strlen($info["base"]) + 1);
 
-        //If it doesn't exist we can't access it
-        if (!file_exists($path)) {
+        //If it doesn't exist we can't read it
+        if (self::checkBits($checks, self::CHECK_FILE_EXISTS) && !file_exists($path)) {
             return false;
         }
 

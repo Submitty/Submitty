@@ -7,7 +7,7 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test02_STDOUT.txt",
+                    "actual_file": "test02/STDOUT.txt",
                     "description": "STDOUT.txt"
                 }
             ],
@@ -17,7 +17,7 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test03_STDOUT.txt",
+                    "actual_file": "test03/STDOUT.txt",
                     "description": "STDOUT.txt"
                 }
             ],
@@ -27,7 +27,7 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test04_STDOUT_0.txt",
+                    "actual_file": "test04/STDOUT_0.txt",
                     "description": "STDOUT_0.txt",
                     "messages": [
                         {
@@ -37,7 +37,7 @@
                     ]
                 },
                 {
-                    "actual_file": "test04_STDOUT_1.txt",
+                    "actual_file": "test04/STDOUT_1.txt",
                     "description": "STDOUT_1.txt"
                 }
             ],

@@ -1,0 +1,56 @@
+<div class="content">
+    <div style="float: right; margin-bottom: 20px;">
+         <a href="{{ core.buildUrl({"component": "navigation", "page": "notifications", "action": "mark_all_as_seen"}) }}" class="btn btn-primary">Mark all as seen</a>
+        {% if show_all %}
+            <a href="{{ core.buildUrl({"component": "navigation", "page": "notifications"}) }}" class="btn btn-primary">Show unread only</a>
+        {% else %}
+            <a href="{{ core.buildUrl({"component": "navigation", "page": "notifications", "show_all": "1"}) }}" class="btn btn-primary">Show All</a>
+        {% endif %}
+    </div>
+    <h2>Notifications</h2>
+    <table class="table table-bordered persist-area">
+                <tr class="info persist-header">
+                    <td colspan="8" style="text-align: center">
+                        {% if show_all %}
+                            All notifications
+                        {% else %}
+                            New notifications
+                        {% endif %}
+                    </td>
+                </tr>
+                <tbody style="text-align: left;">
+                    {% for notification in notifications %}
+                        <tr>
+                            <td colspan="1">
+                                {% if notification.getComponent() == "forum" %}
+                                    <i class="fa fa-comments" title="Forum"></i>
+                                {% endif %}
+                            </td>
+                            <td colspan="4">
+                                <a href="{{ core.buildUrl({"component": "navigation", "page": "notifications", "action": "open_notification", "nid": notification.getId(), "seen": notification.isSeen() }) }}">
+                                    <div style="height: 100%; width: 100%;">
+                                        {{ notification.getNotifyContent() }}
+                                    </div>
+                                </a>
+                            </td>
+                            <td colspan="2">
+                                {{ notification.getNotifyTime() }}
+                            </td>
+                            <td colspan="1">
+                                {% if not notification.isSeen() %}
+                                    <a href="{{ core.buildUrl({"component": "navigation", "page": "notifications", "action": "mark_as_seen", "nid": notification.getId() }) }}" title="Mark as seen">
+                                        <i class="fa fa-check" aria-hidden="true"></i>
+                                    </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+
+            {% if notifications is empty %}
+            <tr>
+                <td colspan="8">No notifications.</td>
+            </tr>
+            {% endif %}        
+    </table>
+</div>

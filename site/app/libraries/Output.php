@@ -1,6 +1,7 @@
 <?php
 
 namespace app\libraries;
+use app\controllers\GlobalController;
 use app\exceptions\OutputException;
 use app\models\Breadcrumb;
 
@@ -31,6 +32,8 @@ class Output {
     private $twig = null;
     /** @var \Twig_LoaderInterface $twig */
     private $twig_loader = null;
+    /** @var GlobalController $controller */
+    private $controller;
 
     /**
      * @var Core
@@ -40,6 +43,7 @@ class Output {
     public function __construct(Core $core) {
         $this->core = $core;
         $this->start_time = microtime(true);
+        $this->controller = new GlobalController($core);
     }
 
     public function loadTwig() {
@@ -55,13 +59,22 @@ class Output {
         $this->twig->addFunction(new \Twig_Function("render_template", function(... $args) {
             return call_user_func_array('self::renderTemplate', $args);
         }, ["is_safe" => ["html"]]));
+        if($this->core->getConfig()->wrapperEnabled()) {
+            $this->twig_loader->addPath(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site'), $namespace = 'site_uploads');
+        }
     }
 
     public function setInternalResources() {
         $this->addCss('https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css');
+        $this->addCss("https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,300italic,700");
+        $this->addCss("https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic,700italic");
+        $this->addCss("https://fonts.googleapis.com/css?family=PT+Sans:700,700italic");
+        $this->addCss("https://fonts.googleapis.com/css?family=Inconsolata");
+
         $this->addInternalCss('jquery-ui.min.css');
         $this->addInternalCss('server.css');
         $this->addInternalCss('bootstrap.css');
+        $this->addInternalCss('bootstrap-grid.css');
         $this->addInternalCss('diff-viewer.css');
         $this->addInternalCss('glyphicons-halflings.css');
 
@@ -266,7 +279,7 @@ class Output {
 
     private function renderHeader() {
         if ($this->use_header) {
-            return $this->renderTemplate('Global', 'header', $this->breadcrumbs, $this->css, $this->js);
+            return $this->controller->header();
         }
         else {
             return '';
@@ -274,7 +287,11 @@ class Output {
     }
 
     private function renderFooter() {
-        return ($this->use_footer) ? $this->renderTemplate('Global', 'footer', (microtime(true) - $this->start_time)) : "";
+        if ($this->use_footer) {
+            return $this->controller->footer();
+        } else {
+            return '';
+        }
     }
 
     public function bufferOutput() {
@@ -382,5 +399,37 @@ class Output {
     
     public function addBreadcrumb($string, $url=null, $top=false, $icon=false) {
         $this->breadcrumbs[] = new Breadcrumb($this->core, $string, $url, $top, $icon);
+    }
+
+    public function addRoomTemplatesTwigPath() {
+        $this->twig_loader->addPath(FileUtils::joinPaths(dirname(dirname(__DIR__)), 'room_templates'), $namespace = 'room_templates');
+    }
+
+    /**
+     * @return array
+     */
+    public function getBreadcrumbs() {
+        return $this->breadcrumbs;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCss() {
+        return $this->css;
+    }
+
+    /**
+     * @return array
+     */
+    public function getJs() {
+        return $this->js;
+    }
+
+    /**
+     * @return float
+     */
+    public function getRunTime() {
+        return (microtime(true) - $this->start_time);
     }
 }

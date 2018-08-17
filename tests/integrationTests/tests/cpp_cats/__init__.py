@@ -4,6 +4,7 @@ from lib import prebuild, testcase, SUBMITTY_INSTALL_DIR
 import subprocess
 import os
 import glob
+import shutil
 
 
 ############################################################################
@@ -19,7 +20,10 @@ def initialize(test):
     except OSError:
         pass
     try:
-        os.mkdir(os.path.join(test.testcase_path, "data"))
+        data_path = os.path.join(test.testcase_path, "data")
+        if os.path.isdir(data_path):
+            shutil.rmtree(data_path)
+        os.mkdir(data_path)
     except OSError:
         pass
 
@@ -39,10 +43,15 @@ def initialize(test):
 
 
 ############################################################################
-
+def cleanup(test):
+    subprocess.call(["rm"] + ["-rf"] +
+                    glob.glob(os.path.join(test.testcase_path, "data", "test*")))
+    subprocess.call(["rm"] + ["-f"] +
+                    glob.glob(os.path.join(test.testcase_path, "data", "results*")))
 
 @testcase
 def allCorrect(test):
+    cleanup(test)
     subprocess.call(["unzip",
         "-q",  # quiet
         "-o",  # overwrite files
@@ -54,32 +63,32 @@ def allCorrect(test):
     test.run_run()
     test.run_validator()
 
-    test.diff("test03_output.txt","data/inst_output.txt")
-    test.diff("test04_output.txt","data/inst_output.txt")
-    test.diff("test05_output.txt","data/inst_output.txt")
-    test.diff("test06_output.txt","data/inst_output.txt")
+    test.diff("test03/output.txt","data/inst_output.txt")
+    test.diff("test04/output.txt","data/inst_output.txt")
+    test.diff("test05/output.txt","data/inst_output.txt")
+    test.diff("test06/output.txt","data/inst_output.txt")
 
-    test.empty_file("test02_STDOUT.txt")
-    test.empty_file("test02_STDERR.txt")
-    test.empty_file("test03_STDOUT.txt")
-    test.empty_file("test03_STDERR.txt")
-    test.empty_file("test04_STDOUT.txt")
-    test.empty_file("test04_STDERR.txt")
-    test.empty_file("test05_STDOUT.txt")
-    test.empty_file("test05_STDERR.txt")
-    test.empty_file("test06_STDOUT.txt")
-    test.empty_file("test06_STDERR.txt")
+    test.empty_file("test02/STDOUT.txt")
+    test.empty_file("test02/STDERR.txt")
+    test.empty_file("test03/STDOUT.txt")
+    test.empty_file("test03/STDERR.txt")
+    test.empty_file("test04/STDOUT.txt")
+    test.empty_file("test04/STDERR.txt")
+    test.empty_file("test05/STDOUT.txt")
+    test.empty_file("test05/STDERR.txt")
+    test.empty_file("test06/STDOUT.txt")
+    test.empty_file("test06/STDERR.txt")
 
-    test.empty_file("test02_execute_logfile.txt")
-    test.empty_file("test03_execute_logfile.txt")
-    test.empty_file("test04_execute_logfile.txt")
-    test.empty_file("test05_execute_logfile.txt")
-    test.empty_file("test06_execute_logfile.txt")
+    test.empty_file("test02/execute_logfile.txt")
+    test.empty_file("test03/execute_logfile.txt")
+    test.empty_file("test04/execute_logfile.txt")
+    test.empty_file("test05/execute_logfile.txt")
+    test.empty_file("test06/execute_logfile.txt")
 
-    test.empty_json_diff("test03_0_diff.json")
-    test.empty_json_diff("test04_0_diff.json")
-    test.empty_json_diff("test05_0_diff.json")
-    test.empty_json_diff("test06_0_diff.json")
+    test.empty_json_diff("test03/0_diff.json")
+    test.empty_json_diff("test04/0_diff.json")
+    test.empty_json_diff("test05/0_diff.json")
+    test.empty_json_diff("test06/0_diff.json")
 
     test.diff("grade.txt","grade.txt_allCorrect","-b")
     test.json_diff("results.json","results.json_allCorrect")
@@ -87,6 +96,7 @@ def allCorrect(test):
 
 @testcase
 def columnSpacingOff(test):
+    cleanup(test)
     subprocess.call(["unzip",
         "-q",  # quiet
         "-o",  # overwrite files
@@ -102,6 +112,7 @@ def columnSpacingOff(test):
 
 @testcase
 def extraLinesAtEnd(test):
+    cleanup(test)
     subprocess.call(["unzip",
         "-q",  # quiet
         "-o",  # overwrite files
@@ -117,6 +128,7 @@ def extraLinesAtEnd(test):
 
 @testcase
 def extraSpacesAtEnd(test):
+    cleanup(test)
     subprocess.call(["unzip",
         "-q",  # quiet
         "-o",  # overwrite files
@@ -132,6 +144,7 @@ def extraSpacesAtEnd(test):
 
 @testcase
 def frontSpacingOff(test):
+    cleanup(test)
     subprocess.call(["unzip",
         "-q",  # quiet
         "-o",  # overwrite files
@@ -147,6 +160,7 @@ def frontSpacingOff(test):
 
 @testcase
 def lineOrderOff(test):
+    cleanup(test)
     subprocess.call(["unzip",
         "-q",  # quiet
         "-o",  # overwrite files
@@ -162,6 +176,7 @@ def lineOrderOff(test):
 
 @testcase
 def spacingOff(test):
+    cleanup(test)
     subprocess.call(["unzip",
         "-q",  # quiet
         "-o",  # overwrite files
@@ -177,6 +192,7 @@ def spacingOff(test):
 
 @testcase
 def spellingOff(test):
+    cleanup(test)
     subprocess.call(["unzip",
         "-q",  # quiet
         "-o",  # overwrite files
