@@ -14,6 +14,10 @@ SAMPLE_SUBMISSIONS       = SUBMITTY_INSTALL_DIR + "/more_autograding_examples/cp
 
 @prebuild
 def initialize(test):
+    data_path = os.path.join(test.testcase_path, "data")
+    if os.path.isdir(data_path):
+        shutil.rmtree(data_path)
+    os.mkdir(data_path)
 
     if os.path.isdir(os.path.join(test.testcase_path, "assignment_config")):
         shutil.rmtree(os.path.join(test.testcase_path, "assignment_config"))
