@@ -109,9 +109,9 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
       std::string actual_file = filenames[FN];
       std::vector<std::string> files;
       // try with and without the prefix
-      wildcard_expansion(files, actual_file, std::cout);
+      wildcard_expansion(files, my_testcase.getPrefix() + actual_file, std::cout);
       if (files.size() == 0) {
-        wildcard_expansion(files, my_testcase.getPrefix() + "_" + actual_file, std::cout);
+        wildcard_expansion(files, actual_file, std::cout);
       }
       for (int i = 0; i < files.size(); i++) {
         actual_file = files[i];
@@ -135,7 +135,7 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
           else {
             // PREPARE THE JSON DIFF FILE
             std::stringstream diff_path;
-            diff_path << my_testcase.getPrefix() << "_" << which_autocheck << "_diff.json";
+            diff_path << my_testcase.getPrefix() << which_autocheck << "_diff.json";
             std::ofstream diff_stream(diff_path.str().c_str());
             result.printJSON(diff_stream);
             std::stringstream expected_path;
@@ -147,10 +147,10 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
             }
             if (show_image_diff)
             {
-              autocheck_j["image_difference_file"] = my_testcase.getPrefix() + "_" + std::to_string(which_autocheck) + "_difference.png";
+              autocheck_j["image_difference_file"] = my_testcase.getPrefix() + std::to_string(which_autocheck) + "_difference.png";
             }
             if (show_actual) {
-             autocheck_j["difference_file"] = my_testcase.getPrefix() + "_" + std::to_string(which_autocheck) + "_diff.json";
+             autocheck_j["difference_file"] = my_testcase.getPrefix() + std::to_string(which_autocheck) + "_diff.json";
             }
           }
         }
@@ -311,12 +311,12 @@ void ValidateATestCase(nlohmann::json config_json, int which_testcase,
         my_score -= ValidateAutoCheck(my_testcase, which_autocheck, autocheck_js, hw_id, testcase_message);
       }
       bool fileExists, fileEmpty;
-      std::string execute_logfile = my_testcase.getPrefix() + "_execute_logfile.txt";
+      std::string execute_logfile = my_testcase.getPrefix() + "execute_logfile.txt";
       fileStatus(execute_logfile, fileExists,fileEmpty);
       bool show_execute_logfile = my_testcase.ShowExecuteLogfile("execute_logfile.txt");
       if (fileExists && !fileEmpty && show_execute_logfile) {
         nlohmann::json autocheck_j;
-        autocheck_j["actual_file"] = my_testcase.getPrefix() + "_execute_logfile.txt";
+        autocheck_j["actual_file"] = my_testcase.getPrefix() + "execute_logfile.txt";
         autocheck_j["description"] = "Execution Logfile";
         autocheck_js.push_back(autocheck_j);
       }

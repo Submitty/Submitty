@@ -4,6 +4,7 @@ from lib import prebuild, testcase, SUBMITTY_INSTALL_DIR
 import subprocess
 import os
 import glob
+import shutil
 
 
 ############################################################################
@@ -19,7 +20,10 @@ def initialize(test):
     except OSError:
         pass
     try:
-        os.mkdir(os.path.join(test.testcase_path, "data"))
+        data_path = os.path.join(test.testcase_path, "data")
+        if os.path.isdir(data_path):
+            shutil.rmtree(data_path)
+        os.mkdir(data_path)
     except OSError:
         pass
     try:
@@ -48,19 +52,19 @@ def initialize(test):
 @testcase
 def run_test(test):
     test.run_run()
-    test.diff("test01_output_correct.txt","data/output_instructor.txt")
-    test.diff("test02_output_duplicates.txt","duplicate_lines.txt")
-    test.diff("test03_output_duplicates.txt","duplicate_lines.txt")
-    test.diff("test04_output_extra.txt","extra_lines.txt")
-    test.diff("test05_output_extra.txt","extra_lines.txt")
-    test.diff("test06_output_missing.txt","missing_lines.txt")
-    test.diff("test07_output_missing.txt","missing_lines.txt")
-    test.diff("test08_output_reordered.txt","output_reordered.txt")
-    test.diff("test09_output_reordered.txt","output_reordered.txt")
+    test.diff("test01/output_correct.txt","data/output_instructor.txt")
+    test.diff("test02/output_duplicates.txt","duplicate_lines.txt")
+    test.diff("test03/output_duplicates.txt","duplicate_lines.txt")
+    test.diff("test04/output_extra.txt","extra_lines.txt")
+    test.diff("test05/output_extra.txt","extra_lines.txt")
+    test.diff("test06/output_missing.txt","missing_lines.txt")
+    test.diff("test07/output_missing.txt","missing_lines.txt")
+    test.diff("test08/output_reordered.txt","output_reordered.txt")
+    test.diff("test09/output_reordered.txt","output_reordered.txt")
     test.run_validator()
     test.json_diff("results.json")
     for i in range(1, 10):
-        test.json_diff("test0%d_0_diff.json" % i)
-        test.empty_file("test0%d_STDERR.txt" % i)
-        test.empty_file("test0%d_STDOUT.txt" % i)
-        test.empty_file("test0%d_execute_logfile.txt" % i)
+        test.json_diff("test{:02}/0_diff.json".format(i), "test{:02}_0_diff.json".format(i))
+        test.empty_file("test{:02}/STDERR.txt".format(i))
+        test.empty_file("test{:02}/STDOUT.txt".format(i))
+        test.empty_file("test{:02}/execute_logfile.txt".format(i))
