@@ -44,25 +44,56 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
 
 void AddDockerConfiguration(nlohmann::json &whole_config) {
   
-  // if (!whole_config["docker_enabled"].is_boolean()){
-  //   whole_config["docker_enabled"] = false;
-  // }
-  // if(whole_config["command"]){
-  //   if list
-  //     grab the list
-  //   else
-  //     make a list
+  if (!whole_config["docker_enabled"].is_boolean()){
+    whole_config["docker_enabled"] = false;
+  }
 
-  //   whole_config["contianer"] = json
-  //   whole_container["container"]["commands"] = the list
-  // }
 
-  
-  // {
-  //   "container_name" : "docker_A",
-  //   "commands" : ["python3 server.py docker_A two_servers.txt"], //string or array of strings.
-  //   "outgoing_connections" : ["docker_B", "client"],
-  //   "container_image" : "string"
+  // for each testcase{
+  //   nlohmann::json this_testcase = whole_config["testcases"][i];
+  //   std::vector<std::string> commands;
+
+  //   // if "command" exists in whole_config, we must wrap it in a container.
+  //   if(this_testcase["command"]){
+  //     if (this_testcase["command"].is_array()){
+  //       commands = this_testcase["command"];
+  //     }
+  //     else{
+  //       commands.push_back(this_testcase["command"]);
+  //     }
+
+  //     this_testcase.remove("command");
+  //   }
+
+  //   assert (this_testcase["containers"].is_null() || commans.size() == 0);
+    
+  //   if(!this_testcase["containers"].is_null()){
+  //     assert(this_testcase["containers"]is_structured());
+  //   }
+
+  //   if(this_testcase["containers"].is_null()){
+  //     this_testcase["containers"] = json::object();
+  //     //commands may have to be a json::array();
+  //     this_testcase["containers"]["commands"] = commands;
+  //   }
+
+  //   assert(this_testcase["containers"]["commands"].size() > 0);
+
+  //   if(this_testcase["containers"]["container_name"].is_null()){
+  //     //pad this out correctly?
+  //     this_testcase["containers"]["container_name"] = "container" + testcase_num; 
+  //   }
+
+  //   if(this_testcase["containers"]["outgoing_connections"].is_null()){
+  //     this_testcase["containers"]["outgoing_connections"] = json::array();
+  //   }
+
+  //   if(this_testcase["containers"]["container_image"].is_null()){
+  //     //TODO: store the default system image somewhere and fill it in here.
+  //     this_testcase["containers"]["container_image"] = "ubuntu:custom";
+  //   }
+
+  //   whole_config["testcases"][i] = this_testcase;
   // }
   
 }
