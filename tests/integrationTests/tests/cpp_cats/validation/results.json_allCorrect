@@ -5,7 +5,7 @@
 			"points_awarded": 2,
                         "autochecks": [
                          {                               "description": "README.txt",
-                               "actual_file": "README.txt"
+                               "actual_file": "test01/README.txt"
                          }
                          ]
                 },
@@ -16,9 +16,9 @@
 		{
 			"test_name": "Test 3 Regular char by char comparision",
 			"autochecks": [
-				{					"actual_file":"test03_output.txt",
+				{					"actual_file":"test03/output.txt",
 					"expected_file":"test_output/testassignment/inst_output.txt",
-					"difference_file":"test03_0_diff.json",
+					"difference_file":"test03/0_diff.json",
 					"description": "output.txt"
 				}
 			],
@@ -27,9 +27,9 @@
 		{
 			"test_name": "Test 4 Test of by word comparison",
 			"autochecks": [
-				{					"actual_file":"test04_output.txt",
+				{					"actual_file":"test04/output.txt",
 					"expected_file":"test_output/testassignment/inst_output.txt",
-					"difference_file":"test04_0_diff.json",
+					"difference_file":"test04/0_diff.json",
 					"description": "output.txt"
 				}
 			],
@@ -38,9 +38,9 @@
 		{
 			"test_name": "Test 5 Test of by line comparison",
 			"autochecks": [
-				{					"actual_file":"test05_output.txt",
+				{					"actual_file":"test05/output.txt",
 					"expected_file":"test_output/testassignment/inst_output.txt",
-					"difference_file":"test05_0_diff.json",
+					"difference_file":"test05/0_diff.json",
 					"description": "output.txt"
 				}
 			],
@@ -49,9 +49,9 @@
 		{
 			"test_name": "Test 6 Test of by line without whitespace comparison",
 			"autochecks": [
-				{					"actual_file":"test06_output.txt",
+				{					"actual_file":"test06/output.txt",
 					"expected_file":"test_output/testassignment/inst_output.txt",
-					"difference_file":"test06_0_diff.json",
+					"difference_file":"test06/0_diff.json",
 					"description": "output.txt"
 				}
 			],
