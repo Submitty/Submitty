@@ -683,6 +683,27 @@ python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py
 chmod o+r ${SUBMITTY_INSTALL_DIR}/config/version.json
 
 
+
+#############################################################################
+# If the migrations have indicated that it is necessary to rebuild all
+# existing gradeables, do so.
+
+REBUILD_ALL_FILENAME=${SUBMITTY_INSTALL_DIR}/REBUILD_ALL_FLAG.txt
+
+if [ -f $REBUILD_ALL_FILENAME ]; then
+    echo -e "\n\nMigration has indicated that the code includes a breaking change for autograding\n\n"
+    echo -e "\n\nMust rebuild ALL GRADEABLES\n\n"
+    for s in /var/local/submitty/courses/*/*; do c=`basename $s`; ${s}/BUILD_${c}.sh --clean; done
+    echo -e "\n\nDone rebuilding ALL GRADEABLES for ALL COURSES\n\n"
+    rm $REBUILD_ALL_FILENAME
+else
+    echo "File $REBUILD_ALL_FILENAME does not exist."
+fi
+
+
+
+#############################################################################
+
 # Restart php-fpm and apache
 if [ "${WORKER}" == 0 ]; then
     if [[ "$#" -ge 1 && $1 == "restart_web" ]]; then

@@ -473,18 +473,6 @@ class Gradeable extends AbstractModel {
 
         // Put any special exceptions to the normal validation rules here...
 
-        // Check that the grades released date isn't before the 'max due date' (submission due date + late days)
-        $submission_due_date = $dates['submission_due_date'];
-        if ($this->type === GradeableType::ELECTRONIC_FILE && $submission_due_date !== null) {
-            $late_days = intval($dates['late_days'] ?? 0);
-            /** @noinspection PhpUnhandledExceptionInspection */
-            $max_due_date = (clone $submission_due_date)->add(new \DateInterval('P' . strval($late_days) . 'D'));
-            if ($max_due_date > $dates['grade_released_date']) {
-                $errors['grade_released_date'] = self::date_display_names['grade_released_date'] . ' Date must be later than the ' .
-                    self::date_display_names['submission_due_date'] . ' Date + ' . self::date_display_names['late_days'];
-            }
-        }
-
         if (count($errors) > 0) {
             throw new ValidationException('Date validation failed', $errors);
         }
