@@ -4,7 +4,7 @@
             "title" : "Lab 1 Checkpoint 1",
             "details" : "python *.py",
             "command" : "python *.py",
-            "points" : 5,
+            "points" : 0,
             "validation" : [
                 {
                     "method" : "diff",

@@ -207,6 +207,11 @@ def setup_folder_for_grading(target_folder, tmp_work, job_id, tmp_logs):
     #copy the compiled runner to the test directory
     shutil.copy(my_runner,target_folder)
 
+    grade_item.add_permissions_recursive(target_folder,
+                                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+
 #docker information is of the form:
 # {
 #   'name' : {

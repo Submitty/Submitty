@@ -135,7 +135,7 @@ int main(int argc, char *argv[]) {
 
     //Compilation steps must not have a docker name.
     std::string container_name = "";
-    TestCase my_testcase(config_json,i,container_name);
+    TestCase my_testcase(config_json,i-1,container_name);
 
     if(testcase_to_compile != i){
       continue;

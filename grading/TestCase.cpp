@@ -371,11 +371,13 @@ bool validShowValue(const nlohmann::json& v) {
 }
 
 
-TestCase::TestCase (nlohmann::json &whole_config, int which_testcase, std::string docker_name) :
+TestCase::TestCase(nlohmann::json &whole_config, int which_testcase, std::string docker_name) :
   _json((*whole_config.find("testcases"))[which_testcase]), CONTAINER_NAME(docker_name) {
 
   test_case_id = next_test_case_id;
   next_test_case_id++;
+
+  //move to load_json
   General_Helper();
   if (isFileCheck()) {
     FileCheck_Helper();
@@ -443,6 +445,7 @@ std::vector<std::string> TestCase::getCommands() const {
   //TODO potential point of failure
   std::vector<nlohmann::json> containers = mapOrArrayOfMaps(this->_json, "containers");
 
+  assert(containers.size() > 0);
 
   if (this->CONTAINER_NAME == ""){
     //TODO add back in if possible.
@@ -456,9 +459,7 @@ std::vector<std::string> TestCase::getCommands() const {
   for(std::vector<nlohmann::json>::const_iterator it = containers.begin(); it != containers.end(); ++it) {
     nlohmann::json::const_iterator val = it->find("container_name");
     std::string curr_target = *val;
-    std::cout << "target is " << curr_target << " our name is " << this->CONTAINER_NAME << std::endl;
     if(curr_target == this->CONTAINER_NAME){
-      std::cout << "found it!" << std::endl;
       found = true;
       command_map = *it;
       break;
