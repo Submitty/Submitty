@@ -3781,11 +3781,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _canerase = false;
 	var userId = "user";
 	
-	function handleDocumentMouseDown(e) {
+	function handleDocumentDown(e) {
 	  _canerase = true;
 	}
 	
-	function handleDocumentMouseUp(e) {
+	function handleDocumentUp(e) {
 	  _canerase = false;
 	}
 	
@@ -3817,20 +3817,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	function enableEraser() {
 	  userId = _PDFJSAnnotate2.default.getStoreAdapter().userId;
 	  document.addEventListener('mousemove', handleDocumentMouseMove);
-	  document.addEventListener('mousedown', handleDocumentMouseDown);
-	  document.addEventListener('mouseup', handleDocumentMouseUp);
-	  document.addEventListener('touchstart', handleDocumentMouseDown);
-	  document.addEventListener('touchmove', handleDocumentMouseMove);
-	  document.addEventListener('touchend', handleDocumentMouseUp);
+	  document.addEventListener('mousedown', handleDocumentDown);
+	  document.addEventListener('mouseup', handleDocumentUp);
+	  document.addEventListener('touchstart', handleDocumentDown);
+	  document.addEventListener('touchmove', handleDocumentTouchMove);
+	  document.addEventListener('touchend', handleDocumentUp);
 	}
 	
 	function disableEraser() {
 	  document.removeEventListener('mousemove', handleDocumentMouseMove);
-	  document.removeEventListener('mousedown', handleDocumentMouseDown);
-	  document.removeEventListener('mouseup', handleDocumentMouseUp);
-	  document.removeEventListener('touchstart', handleDocumentMouseDown);
-	  document.removeEventListener('touchmove', handleDocumentMouseMove);
-	  document.removeEventListener('touchend', handleDocumentMouseUp);
+	  document.removeEventListener('mousedown', handleDocumentDown);
+	  document.removeEventListener('mouseup', handleDocumentUp);
+	  document.removeEventListener('touchstart', handleDocumentDown);
+	  document.removeEventListener('touchmove', handleDocumentTouchMove);
+	  document.removeEventListener('touchend', handleDocumentUp);
 	}
 
 /***/ },
