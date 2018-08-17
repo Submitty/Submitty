@@ -1,6 +1,7 @@
 <?php
 namespace app\models;
 
+use app\exceptions\ValidationException;
 use app\libraries\Core;
 use app\libraries\DatabaseUtils;
 use app\libraries\FileUtils;
@@ -107,6 +108,7 @@ class RainbowCustomization extends AbstractModel{
         foreach($_POST as $field => $value){
             $this->error_messages[] = "$field: $value";
         }
+        throw new ValidationException('Debug Rainbow Grades error', $this->error_messages);
     }
 
     public function error(){

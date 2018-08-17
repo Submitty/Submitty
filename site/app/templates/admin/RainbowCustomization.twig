@@ -82,9 +82,50 @@
         });
     }
 
+    //This function constructs a JSON representation of all the form input
+    function buildJSON(){
+        //TODO: Finish implementation
+        let ret = {
+            'save_customization': true
+        };
+        return ret;
+    }
+
+    //This function attempts to create a new customization.json server-side based on form input
+    function ajaxUpdateJSON(successCallback, errorCallback) {
+        $('#save_status').html('Saving...');
+        $.getJSON({
+            type: "POST",
+            url: buildUrl({
+                'component': 'admin',
+                'page': 'reports',
+                'action': 'customization'
+            }),
+            data: buildJSON(),
+            success: function (response) {
+                if (response.status === 'success') {
+                    $('#save_status').html('Saved successfully');
+                    //successCallback(response.data);
+                } else if (response.status === 'fail') {
+                    $('#save_status').html('Failed to save');
+                    //errorCallback(response.message, response.data);
+                } else {
+                    alert('Internal server error');
+                    console.error(response.message);
+                }
+            },
+            error: function (response) {
+                console.error('Failed to parse response from server: ' + response);
+            }
+        });
+    }
 </script>
 
 <div class="content">
+    <div id="save_status">
+        No changes to save
+    </div>
+    <input type="button" value="Save Changes" onclick="ajaxUpdateJSON();" />
     Form would be printed here. Right now the data received is:<br />
     <pre>{{ customization_data_print }}</pre>
     <br />
