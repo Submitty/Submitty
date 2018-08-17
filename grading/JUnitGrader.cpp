@@ -47,7 +47,7 @@ TestResults* MultipleJUnitTestGrader_doit (const TestCase &tc, const nlohmann::j
   std::string filename = j.value("actual_file","");
 
   // open the specified runtime JUnit output/log file
-  std::ifstream junit_output((tc.getPrefix()+"_"+filename).c_str());
+  std::ifstream junit_output((tc.getPrefix()+filename).c_str());
 
   // check to see if the file was opened successfully
   if (!junit_output.good()) {
@@ -135,7 +135,7 @@ TestResults* JUnitTestGrader_doit (const TestCase &tc, const nlohmann::json& j) 
   std::string filename = j.value("actual_file","");
 
   // open the specified runtime JUnit output/log file
-  std::ifstream junit_output((tc.getPrefix()+"_"+filename).c_str());
+  std::ifstream junit_output((tc.getPrefix()+filename).c_str());
 
   // check to see if the file was opened successfully
   if (!junit_output.good()) {
@@ -245,7 +245,7 @@ TestResults* EmmaInstrumentationGrader_doit (const TestCase &tc, const nlohmann:
   std::string filename = j.value("actual_file","");
 
   // open the specified runtime JUnit output/log file
-  std::ifstream junit_output((tc.getPrefix()+"_"+filename).c_str());
+  std::ifstream junit_output((tc.getPrefix()+filename).c_str());
 
   // check to see if the file was opened successfully
   if (!junit_output.good()) {
@@ -282,7 +282,7 @@ TestResults* EmmaCoverageReportGrader_doit (const TestCase &tc, const nlohmann::
   std::string filename = j.value("actual_file","");
 
   // open the specified runtime JUnit output/log file
-  std::ifstream junit_output((tc.getPrefix()+"_"+filename).c_str());
+  std::ifstream junit_output((tc.getPrefix()+filename).c_str());
 
   // check to see if the file was opened successfully
   if (!junit_output.good()) {
@@ -397,7 +397,7 @@ TestResults* JaCoCoCoverageReportGrader_doit (const TestCase &tc, const nlohmann
   std::string filename = j.value("actual_file","");
 
   // open the specified runtime Jacoco output/log file
-  std::ifstream jacoco_output((tc.getPrefix()+"_"+filename).c_str());
+  std::ifstream jacoco_output((tc.getPrefix()+filename).c_str());
 
   // check to see if the file was opened successfully
   if (!jacoco_output.good()) {

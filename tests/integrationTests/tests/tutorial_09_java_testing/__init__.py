@@ -4,6 +4,7 @@ from lib import prebuild, testcase, SUBMITTY_TUTORIAL_DIR
 import subprocess
 import os
 import glob
+import shutil
 
 
 ############################################################################
@@ -19,7 +20,10 @@ def initialize(test):
     except OSError:
         pass
     try:
-        os.mkdir(os.path.join(test.testcase_path, "data"))
+        data_path = os.path.join(test.testcase_path, "data")
+        if os.path.isdir(data_path):
+            shutil.rmtree(data_path)
+        os.mkdir(data_path)
     except OSError:
         pass
 
@@ -42,8 +46,8 @@ def cleanup(test):
                     glob.glob(os.path.join(test.testcase_path, "data/", "Factorial.class")))
     subprocess.call(["rm"] + ["-f"] +
                     glob.glob(os.path.join(test.testcase_path, "data/", "Factorial.java")))
-    subprocess.call(["rm"] + ["-f"] +
-                    glob.glob(os.path.join(test.testcase_path, "data/", "test*.txt")))
+    subprocess.call(["rm"] + ["-rf"] +
+                    glob.glob(os.path.join(test.testcase_path, "data/", "test*")))
     subprocess.call(["rm"] + ["-f"] +
                     glob.glob(os.path.join(test.testcase_path, "data/grade.txt")))
     subprocess.call(["rm"] + ["-f"] +
@@ -65,13 +69,13 @@ def correct(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.empty_file("test01_STDOUT.txt")
-    test.empty_file("test01_STDERR.txt")
-    test.empty_file("test02_STDOUT.txt")
-    test.empty_file("test02_STDERR.txt")
-    test.junit_diff("test03_STDOUT.txt", "correct_test03_STDOUT.txt")
-    test.empty_file("test03_STDERR.txt")
-    test.empty_file("test03_execute_logfile.txt")
+    test.empty_file("test01/STDOUT.txt")
+    test.empty_file("test01/STDERR.txt")
+    test.empty_file("test02/STDOUT.txt")
+    test.empty_file("test02/STDERR.txt")
+    test.junit_diff("test03/STDOUT.txt", "correct_test03_STDOUT.txt")
+    test.empty_file("test03/STDERR.txt")
+    test.empty_file("test03/execute_logfile.txt")
     test.diff("grade.txt", "correct_grade.txt", "-b")
     test.json_diff("results.json", "correct_results.json")
 
@@ -91,13 +95,13 @@ def does_not_compile(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.empty_file("test01_STDOUT.txt")
-    test.diff("test01_STDERR.txt", "does_not_compile_test01_STDERR.txt")
-    test.empty_file("test02_STDOUT.txt")
-    test.diff("test02_STDERR.txt", "does_not_compile_test02_STDERR.txt")
-    test.junit_diff("test03_STDOUT.txt", "does_not_compile_test03_STDOUT.txt")
-    test.empty_file("test03_STDERR.txt")
-    test.diff("test03_execute_logfile.txt", "exit_status_1.txt")
+    test.empty_file("test01/STDOUT.txt")
+    test.diff("test01/STDERR.txt", "does_not_compile_test01_STDERR.txt")
+    test.empty_file("test02/STDOUT.txt")
+    test.diff("test02/STDERR.txt", "does_not_compile_test02_STDERR.txt")
+    test.junit_diff("test03/STDOUT.txt", "does_not_compile_test03_STDOUT.txt")
+    test.empty_file("test03/STDERR.txt")
+    test.diff("test03/execute_logfile.txt", "exit_status_1.txt")
     test.diff("grade.txt", "does_not_compile_grade.txt", "-b")
     test.json_diff("results.json", "does_not_compile_results.json")
 
@@ -117,13 +121,13 @@ def buggy(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.empty_file("test01_STDOUT.txt")
-    test.empty_file("test01_STDERR.txt")
-    test.empty_file("test02_STDOUT.txt")
-    test.empty_file("test02_STDERR.txt")
-    test.junit_diff("test03_STDOUT.txt", "buggy_test03_STDOUT.txt")
-    test.empty_file("test03_STDERR.txt")
-    test.diff("test03_execute_logfile.txt", "exit_status_1.txt")
+    test.empty_file("test01/STDOUT.txt")
+    test.empty_file("test01/STDERR.txt")
+    test.empty_file("test02/STDOUT.txt")
+    test.empty_file("test02/STDERR.txt")
+    test.junit_diff("test03/STDOUT.txt", "buggy_test03_STDOUT.txt")
+    test.empty_file("test03/STDERR.txt")
+    test.diff("test03/execute_logfile.txt", "exit_status_1.txt")
     test.diff("grade.txt", "buggy_grade.txt", "-b")
     test.json_diff("results.json", "buggy_results.json")
 
@@ -143,12 +147,12 @@ def still_buggy(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.empty_file("test01_STDOUT.txt")
-    test.empty_file("test01_STDERR.txt")
-    test.empty_file("test02_STDOUT.txt")
-    test.empty_file("test02_STDERR.txt")
-    test.junit_diff("test03_STDOUT.txt", "still_buggy_test03_STDOUT.txt")
-    test.empty_file("test03_STDERR.txt")
-    test.diff("test03_execute_logfile.txt", "exit_status_1.txt")
+    test.empty_file("test01/STDOUT.txt")
+    test.empty_file("test01/STDERR.txt")
+    test.empty_file("test02/STDOUT.txt")
+    test.empty_file("test02/STDERR.txt")
+    test.junit_diff("test03/STDOUT.txt", "still_buggy_test03_STDOUT.txt")
+    test.empty_file("test03/STDERR.txt")
+    test.diff("test03/execute_logfile.txt", "exit_status_1.txt")
     test.diff("grade.txt", "still_buggy_grade.txt", "-b")
     test.json_diff("results.json", "still_buggy_results.json")
