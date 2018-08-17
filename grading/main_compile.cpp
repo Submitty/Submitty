@@ -89,13 +89,15 @@ int main(int argc, char *argv[]) {
   std::string rcsid = "";
   int subnum = -1;
   std::string time_of_submission = "";
+  int testcase_to_compile = -1;
 
   /* Check argument usage */
-  if (argc == 5) {
+  if (argc == 6) {
     hw_id = argv[1];
     rcsid = argv[2];
     subnum = atoi(argv[3]);
     time_of_submission = argv[4];
+    testcase_to_compile = atoi(argv[5]);
   }
   else if (argc != 1) {
     std::cerr << "INCORRECT ARGUMENTS TO COMPILER" << std::endl;
@@ -129,19 +131,24 @@ int main(int argc, char *argv[]) {
   // Run each COMPILATION TEST
   nlohmann::json::iterator tc = config_json.find("testcases");
   assert (tc != config_json.end());
-  for (unsigned int i = 0; i < tc->size(); i++) {
+  for (unsigned int i = 1; i <= tc->size(); i++) {
 
+
+    TestCase my_testcase(config_json,i-1);
+
+    if(testcase_to_compile != i){
+      continue;
+    }
+    
     std::cout << "========================================================" << std::endl;
-
-    TestCase my_testcase(config_json,i);
 
     if (my_testcase.isFileCheck()) {
 
       if (my_testcase.isSubmissionLimit()) {
-        std::cout << "TEST " << i+1 << " IS SUBMISSION LIMIT!" << std::endl;
+        std::cout << "TEST " << i << " IS SUBMISSION LIMIT!" << std::endl;
 
       } else {
-        std::cout << "TEST " << i+1 << " IS FILE CHECK!" << std::endl;
+        std::cout << "TEST " << i << " IS FILE CHECK!" << std::endl;
 
         std::vector<std::vector<std::string>> filenames = my_testcase.getFilenames();
         for (int i = 0; i < filenames.size(); i++) {
@@ -157,8 +164,8 @@ int main(int argc, char *argv[]) {
             wildcard_expansion(files, pattern, std::cout);
             for (int i = 0; i < files.size(); i++) {
               std::cout << "  rescue  FILE #" << i << ": " << files[i] << std::endl;
-              std::string new_filename = my_testcase.getPrefix() + "_" + files[i];
-              //std::string new_filename = my_testcase.getPrefix() + "_" + replace_slash_with_double_underscore(files[i]);
+              std::string new_filename = my_testcase.getPrefix() + files[i];
+              //std::string new_filename = my_testcase.getPrefix() + replace_slash_with_double_underscore(files[i]);
               if (new_filename.substr(new_filename.size() - 4,4) == ".cpp" && !special_flag) {
                 new_filename += ".txt";
               }
@@ -188,7 +195,7 @@ int main(int argc, char *argv[]) {
       
       std::vector<std::string> commands = my_testcase.getCommands();
 
-      std::cout << "TEST " << i+1 << " IS COMPILATION!" << std::endl;
+      std::cout << "TEST " << i << " IS COMPILATION!" << std::endl;
 
       assert (commands.size() > 0);
       for (int j = 0; j < commands.size(); j++) {
@@ -201,10 +208,10 @@ int main(int argc, char *argv[]) {
 
         // run the command, capturing STDOUT & STDERR
         int exit_no = execute(commands[j] +
-                              " 1>" + my_testcase.getPrefix() + "_STDOUT" + which + ".txt" +
-                              " 2>" + my_testcase.getPrefix() + "_STDERR" + which + ".txt",
+                              " 1> STDOUT" + which + ".txt" +
+                              " 2> STDERR" + which + ".txt",
                               actions,
-                              my_testcase.getPrefix() + "_execute_logfile.txt",
+                              "execute_logfile.txt",
                               my_testcase.get_test_case_limits(),
                               config_json.value("resource_limits",nlohmann::json()),
                               config_json,
@@ -213,7 +220,7 @@ int main(int argc, char *argv[]) {
         std::cout<< "FINISHED COMMAND, exited with exit_no: "<<exit_no<<std::endl;
       }
     } else {
-      std::cout << "TEST " << i+1 << " IS EXECUTION!" << std::endl;
+      std::cout << "TEST " << i << " IS EXECUTION!" << std::endl;
     }
   }
   std::cout << "========================================================" << std::endl;

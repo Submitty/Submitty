@@ -4,6 +4,7 @@ from lib import prebuild, testcase, SUBMITTY_INSTALL_DIR
 import subprocess
 import os
 import glob
+import shutil
 
 ############################################################################
 # COPY THE ASSIGNMENT FROM THE SAMPLE ASSIGNMENTS DIRECTORIES
