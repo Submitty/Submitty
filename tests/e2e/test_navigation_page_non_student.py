@@ -7,7 +7,7 @@ class TestNavigationPageNonStudent(BaseTestCase):
 
     def test_instructor(self):
         self.log_in(user_id="instructor", user_name="Quinn")
-        self.click_class('sample', 'SAMPLE')
+        self.click_class('sample')
         elements = self.driver.find_elements_by_class_name('nav-title-row')
         self.assertEqual(6, len(elements))
         self.assertEqual("future", elements[0].get_attribute('id'))
@@ -39,7 +39,7 @@ class TestNavigationPageNonStudent(BaseTestCase):
 
     def test_ta(self):
         self.log_in(user_id="ta", user_name="Jill")
-        self.click_class('sample', 'SAMPLE')
+        self.click_class('sample')
         elements = self.driver.find_elements_by_class_name('nav-title-row')
         self.assertEqual(5, len(elements))
         self.assertEqual("beta", elements[0].get_attribute('id'))

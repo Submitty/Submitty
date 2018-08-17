@@ -1053,7 +1053,7 @@ function toggleDiv(id) {
 }
 
 
-function checkRefreshSubmissionPage(url) {
+function checkRefreshPage(url) {
     setTimeout(function() {
         check_server(url)
     }, 1000);
@@ -1065,7 +1065,7 @@ function check_server(url) {
             if (data.indexOf("REFRESH_ME") > -1) {
                 location.reload(true);
             } else {
-                checkRefreshSubmissionPage(url);
+                checkRefreshPage(url);
             }
         }
     );
@@ -1131,8 +1131,21 @@ function downloadFileWithAnyRole(file_name, path) {
     if (file.indexOf("/") != -1) {
         file = file.substring(file.lastIndexOf('/')+1);
     }
-    window.location = buildUrl({'component': 'misc', 'page': 'download_file_with_any_role', 'dir': 'uploads/course_materials', 'file': file, 'path': path});
+    window.location = buildUrl({'component': 'misc', 'page': 'download_file_with_any_role', 'dir': 'course_materials', 'file': file, 'path': path});
 }
+
+function checkColorActivated() {
+    var pos = 0;
+    var seq = "&&((%'%'BA\r";
+    $(document.body).keyup(function colorEvent(e) {
+        pos = seq.charCodeAt(pos) === e.keyCode ? pos + 1 : 0;
+        if (pos === seq.length) {
+            setInterval(function() { $("*").addClass("rainbow"); }, 100);
+            $(document.body).off('keyup', colorEvent);
+        }
+    });
+}
+$(checkColorActivated);
 
 function changeColor(div, hexColor){
     div.style.color = hexColor;
@@ -1511,23 +1524,69 @@ function changeDisplayOptions(option, thread_id){
     window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'option': option, 'thread_id': thread_id}));
 }
 
-function dynamicScrollNextPage(element) {
-    if($(element).data("dynamic_lock_full")) {
-        return;
+function dynamicScrollLoadPage(element, atEnd) {
+    var load_page = $(element).attr(atEnd?"next_page":"prev_page");
+    if(load_page == 0) {
+        return false;
     }
     if($(element).data("dynamic_lock_load")) {
-        return;
+        return null;
     }
-    $(".thread_list .fa-spinner").show();
+    var load_page_callback;
+    var load_page_fail_callback;
+    var arrow_up = $(element).find(".fa-caret-up");
+    var arrow_down = $(element).find(".fa-caret-down");
+    var spinner_up = arrow_up.prev();
+    var spinner_down = arrow_down.next();
     $(element).data("dynamic_lock_load", true);
+    if(atEnd){
+        arrow_down.hide();
+        spinner_down.show();
+        load_page_callback = function(content, count) {
+            spinner_down.hide();
+            arrow_down.before(content);
+            if(count == 0) {
+                // Stop further loads
+                $(element).attr("next_page", 0);
+            } else {
+                $(element).attr("next_page", parseInt(load_page) + 1);
+                arrow_down.show();
+            }
+            dynamicScrollLoadIfScrollVisible($(element));
+        };
+        load_page_fail_callback = function(content, count) {
+            spinner_down.hide();
+        };
+    }
+    else {
+        arrow_up.hide();
+        spinner_up.show();
+        load_page_callback = function(content, count) {
+            spinner_up.hide();
+            arrow_up.after(content);
+            if(count == 0) {
+                // Stop further loads
+                $(element).attr("prev_page", 0);
+            } else {
+                var prev_page = parseInt(load_page) - 1;
+                $(element).attr("prev_page", prev_page);
+                if(prev_page >= 1) {
+                    arrow_up.show();
+                }
+            }
+            dynamicScrollLoadIfScrollVisible($(element));
+        };
+        load_page_fail_callback = function(content, count) {
+            spinner_up.hide();
+        };
+    }
     
     var urlPattern = $(element).data("urlPattern");
     var currentThreadId = $(element).data("currentThreadId",);
     var currentCategoriesId = $(element).data("currentCategoriesId",);
     var course = $(element).data("course",);
 
-    var next_page = $(element).attr("next_page");  
-    var next_url = urlPattern.replace("{{#}}", next_page);
+    var next_url = urlPattern.replace("{{#}}", load_page);
            
     var categories_value = $("#thread_category").val();
     var thread_status_value = $("#thread_status_select").val();
@@ -1547,28 +1606,23 @@ function dynamicScrollNextPage(element) {
                 var content = x.html;
                 var count = x.count;
                 content = `${content}`;
-                $(element).find(".fa-spinner").before(content);
-                $(element).attr("next_page", parseInt(next_page) + 1);
                 $(element).data("dynamic_lock_load", false);
-                $(".thread_list .fa-spinner").hide();
-                if(count == 0) {
-                    // Don't load more
-                    $(element).data("dynamic_lock_full", true);
-                } else {
-                    dynamicScrollLoadIfScrollVisible($(element));
-                }
+                load_page_callback(content, count);
             },
             error: function(){
                 $(element).data("dynamic_lock_load", false);
-                $(".thread_list .fa-spinner").hide();
+                load_page_fail_callback();
                 window.alert("Something went wrong while trying to load more threads. Please try again.");
             }
     });
+    return true;
 }
 
 function dynamicScrollLoadIfScrollVisible(jElement) {
     if(jElement[0].scrollHeight <= jElement[0].clientHeight) {
-        dynamicScrollNextPage(jElement[0]);
+        if(dynamicScrollLoadPage(jElement[0], true) === false) {
+            dynamicScrollLoadPage(jElement[0], false);
+        }
     }
 }
 
@@ -1582,10 +1636,15 @@ function dynamicScrollContentOnDemand(jElement, urlPattern, currentThreadId, cur
     $(jElement).scroll(function(){ 
         var element = $(this)[0];
         var sensitivity = 3;
+        var isTop = element.scrollTop < sensitivity;
         var isBottom = (element.scrollHeight - element.offsetHeight - element.scrollTop) < sensitivity;
-        if(isBottom) {
-            dynamicScrollNextPage(element);
+        if(isTop) {
+            element.scrollTop = sensitivity;
+            dynamicScrollLoadPage(element,false);
+        } else if(isBottom) {
+            dynamicScrollLoadPage(element,true);
         }
+
     });
 }
 
@@ -1612,14 +1671,19 @@ function alterShowDeletedStatus(newStatus) {
     location.reload();
 }
 
-function modifyThreadList(currentThreadId, currentCategoriesId, course){
+function alterShowMergeThreadStatus(newStatus, course) {
+    document.cookie = course + "_show_merged_thread=" + newStatus + "; path=/;";
+    location.reload();
+}
+
+function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirstPage, success_callback){
     var categories_value = $("#thread_category").val();
     var thread_status_value = $("#thread_status_select").val();
     categories_value = (categories_value == null)?"":categories_value.join("|");
     thread_status_value = (thread_status_value == null)?"":thread_status_value.join("|");
     document.cookie = course + "_forum_categories=" + categories_value + ";";
     document.cookie = "forum_thread_status=" + thread_status_value + ";";
-    var url = buildUrl({'component': 'forum', 'page': 'get_threads', 'page_number': '1'});
+    var url = buildUrl({'component': 'forum', 'page': 'get_threads', 'page_number': (loadFirstPage?'1':'-1')});
     $.ajax({
             url: url,
             type: "POST",
@@ -1630,16 +1694,28 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course){
                 currentCategoriesId: currentCategoriesId,
             },
             success: function(r){
-               var x = JSON.parse(r).html;
+               var x = JSON.parse(r);
+               var page_number = parseInt(x.page_number);
+               x = x.html;
                x = `${x}`;
                var jElement = $(".thread_list");
-               jElement.children(":not(.fa-spinner)").remove();
-               jElement.prepend(x);
-               jElement.attr("next_page", '2');
+               jElement.children(":not(.fa)").remove();
+               $(".thread_list .fa-caret-up").after(x);
+               jElement.attr("prev_page", page_number - 1);
+               jElement.attr("next_page", page_number + 1);
                jElement.data("dynamic_lock_load", false);
-               jElement.data("dynamic_lock_full", false);
                $(".thread_list .fa-spinner").hide();
+               if(loadFirstPage) {
+                   $(".thread_list .fa-caret-up").hide();
+                   $(".thread_list .fa-caret-down").show();
+               } else {
+                   $(".thread_list .fa-caret-up").show();
+                   $(".thread_list .fa-caret-down").hide();
+               }
                dynamicScrollLoadIfScrollVisible(jElement);
+               if(success_callback != null) {
+                  success_callback();
+               }
             },
             error: function(){
                window.alert("Something went wrong when trying to filter. Please try again.");
@@ -2405,3 +2481,40 @@ $.fn.isInViewport = function() {                                        // jQuer
 
     return elementTop > viewportTop && elementBottom < viewportBottom;
 };
+
+function checkSidebarCollapse() {
+    var size = $(document.body).width();
+    if (size < 1000) {
+        $("#sidebar").toggleClass("collapsed", true);
+    }
+}
+
+//Called from the DOM collapse button, toggle collapsed and save to localStorage
+function toggleSidebar() {
+    var sidebar = $("#sidebar");
+    var shown = sidebar.hasClass("collapsed");
+
+    sidebar.addClass("animate");
+
+    localStorage.sidebar = !shown;
+    sidebar.toggleClass("collapsed", !shown);
+}
+
+$(document).ready(function() {
+    //Collapsed sidebar tooltips
+    $('[data-toggle="tooltip"]').tooltip({
+        position: { my: "right+0 bottom+0" }
+    });
+
+    //Remember sidebar preference
+    if (localStorage.sidebar !== "") {
+        //Apparently !!"false" === true and if you don't cast this to bool then it will animate??
+        $("#sidebar").toggleClass("collapsed", localStorage.sidebar === "true");
+    }
+
+    //If they make their screen too small, collapse the sidebar to allow more horizontal space
+    $(document.body).resize(function() {
+        checkSidebarCollapse();
+    });
+    checkSidebarCollapse();
+});

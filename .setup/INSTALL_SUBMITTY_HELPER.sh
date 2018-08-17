@@ -35,7 +35,7 @@ if [[ "$UID" -ne "0" ]] ; then
 fi
 
 # check optional argument
-if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow" ]]; then
+if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow" && "$1" != "restart_web" ]]; then
     echo -e "Usage:"
     echo -e "   ./INSTALL_SUBMITTY.sh"
     echo -e "   ./INSTALL_SUBMITTY.sh clean"
@@ -46,6 +46,7 @@ if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow" 
     echo -e "   ./INSTALL_SUBMITTY.sh test  <test_case_1>"
     echo -e "   ./INSTALL_SUBMITTY.sh test  <test_case_1> ... <test_case_n>"
     echo -e "   ./INSTALL_SUBMITTY.sh test_rainbow"
+    echo -e "   ./INSTALL_SUBMITTY.sh restart_web"
     exit 1
 fi
 
@@ -117,7 +118,7 @@ DAEMONPHP_GROUP=$(jq -r '.daemonphp_group' ${SUBMITTY_INSTALL_DIR}/config/submit
 ########################################################################################################################
 ########################################################################################################################
 
-echo -e "\nBeginning installation of the Submitty homework submission server\n"
+echo -e "\nBeginning installation of Submitty\n"
 
 
 #this function takes a single argument, the name of the file to be edited
@@ -281,11 +282,6 @@ fi
 mkdir -p ${SUBMITTY_DATA_DIR}/tmp
 chown root:root ${SUBMITTY_DATA_DIR}/tmp
 chmod 511 ${SUBMITTY_DATA_DIR}/tmp
-
-# tmp folder to hold files for PAM authentication. Needs to be writable by PHP_USER and only readable by CGI_USER
-mkdir -p ${SUBMITTY_DATA_DIR}/tmp/pam
-chown ${PHP_USER}:${CGI_USER} ${SUBMITTY_DATA_DIR}/tmp/pam
-chmod 750 ${SUBMITTY_DATA_DIR}/tmp/pam
 
 ########################################################################################################################
 ########################################################################################################################
@@ -552,7 +548,7 @@ fi
 echo -e "Install python_submitty_utils"
 
 pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
-python3 setup.py -q install
+pip3 install .
 
 # fix permissions
 chmod -R 555 /usr/local/lib/python*/*
@@ -572,8 +568,9 @@ popd > /dev/null
 ################################################################################################################
 ################################################################################################################
 
-
-echo -e "\nCompleted installation of the Submitty homework submission server\n"
+installed_commit=$(jq '.installed_commit' /usr/local/submitty/config/version.json)
+most_recent_git_tag=$(jq '.most_recent_git_tag' /usr/local/submitty/config/version.json)
+echo -e "Completed installation of the Submitty version ${most_recent_git_tag//\"/}, commit ${installed_commit//\"/}\n"
 
 
 ################################################################################################################
@@ -585,7 +582,7 @@ systemctl is-active --quiet submitty_autograding_shipper
 is_shipper_active_now=$?
 if [[ "$is_shipper_active_now" == "0" ]]; then
     systemctl stop submitty_autograding_shipper
-    echo -e "Stopped Submitty Grading Shipper Daemon\n"
+    echo -e "Stopped Submitty Grading Shipper Daemon"
 fi
 systemctl is-active --quiet submitty_autograding_shipper
 is_active_tmp=$?
@@ -601,7 +598,7 @@ systemctl is-active --quiet submitty_autograding_worker
 is_worker_active_now=$?
 if [[ "$is_worker_active_now" == "0" ]]; then
     systemctl stop submitty_autograding_worker
-    echo -e "Stopped Submitty Grading Worker Daemon\n"
+    echo -e "Stopped Submitty Grading Worker Daemon"
 fi
 systemctl is-active --quiet submitty_autograding_worker
 is_active_tmp=$?
@@ -613,9 +610,9 @@ fi
 
 if [ "${WORKER}" == 0 ]; then
     # Stop all foreign worker daemons
-    echo -e "\nStopping worker machine daemons"
+    echo -e -n "Stopping worker machine daemons..."
     sudo -H -u ${DAEMON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py stop --target perform_on_all_workers
-    echo -e "\n"
+    echo -e "done"
 fi
 
 
@@ -685,6 +682,41 @@ done
 python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py
 chmod o+r ${SUBMITTY_INSTALL_DIR}/config/version.json
 
+
+
+#############################################################################
+# If the migrations have indicated that it is necessary to rebuild all
+# existing gradeables, do so.
+
+REBUILD_ALL_FILENAME=${SUBMITTY_INSTALL_DIR}/REBUILD_ALL_FLAG.txt
+
+if [ -f $REBUILD_ALL_FILENAME ]; then
+    echo -e "\n\nMigration has indicated that the code includes a breaking change for autograding\n\n"
+    echo -e "\n\nMust rebuild ALL GRADEABLES\n\n"
+    for s in /var/local/submitty/courses/*/*; do c=`basename $s`; ${s}/BUILD_${c}.sh --clean; done
+    echo -e "\n\nDone rebuilding ALL GRADEABLES for ALL COURSES\n\n"
+    rm $REBUILD_ALL_FILENAME
+else
+    echo "File $REBUILD_ALL_FILENAME does not exist."
+fi
+
+
+
+#############################################################################
+
+# Restart php-fpm and apache
+if [ "${WORKER}" == 0 ]; then
+    if [[ "$#" -ge 1 && $1 == "restart_web" ]]; then
+        echo -n "restarting php7.0-fpm..."
+        systemctl restart php7.0-fpm.service
+        echo "done"
+        echo -n "restarting apache2..."
+        systemctl restart apache2.service
+        echo "done"
+    fi
+fi
+
+
 # If the submitty_autograding_shipper.service,
 # submitty_autograding_worker.service, or
 # submitty_daemon_jobs_handler.service files have changed, we should
@@ -699,10 +731,10 @@ if [[ "$is_shipper_active_before" == "0" ]]; then
     if [[ "$is_shipper_active_after" != "0" ]]; then
         echo -e "\nERROR!  Failed to restart Submitty Grading Shipper Daemon\n"
     fi
-    echo -e "Restarted Submitty Grading Shipper Daemon\n"
+    echo -e "Restarted Submitty Grading Shipper Daemon"
 else
     is_worker_active_before="1"
-    echo -e "NOTE: Submitty Grading Shipper Daemon is not currently running\n"
+    echo -e "\nNOTE: Submitty Grading Shipper Daemon is not currently running\n"
     echo -e "To start the daemon, run:\n   sudo systemctl start submitty_autograding_shipper\n"
 fi
 
@@ -714,9 +746,9 @@ if [[ "$is_worker_active_before" == "0" ]]; then
     if [[ "$is_worker_active_after" != "0" ]]; then
         echo -e "\nERROR!  Failed to restart Submitty Grading Worker Daemon\n"
     fi
-    echo -e "Restarted Submitty Grading Worker Daemon\n"
+    echo -e "Restarted Submitty Grading Worker Daemon"
 else
-    echo -e "NOTE: Submitty Grading Worker Daemon is not currently running\n"
+    echo -e "\nNOTE: Submitty Grading Worker Daemon is not currently running\n"
     echo -e "To start the daemon, run:\n   sudo systemctl start submitty_autograding_worker\n"
 fi
 
@@ -728,9 +760,9 @@ if [[ "$is_jobs_handler_active_before" == "0" ]]; then
     if [[ "$is_jobs_handler_active_after" != "0" ]]; then
         echo -e "\nERROR!  Failed to restart Submitty Jobs Handler Daemon\n"
     fi
-    echo -e "Restarted Submitty Jobs Handler Daemon\n"
+    echo -e "Restarted Submitty Jobs Handler Daemon"
 else
-    echo -e "NOTE: Submitty Jobs Handler Daemon is not currently running\n"
+    echo -e "\nNOTE: Submitty Jobs Handler Daemon is not currently running\n"
     echo -e "To start the daemon, run:\n   sudo systemctl start submitty_daemon_jobs_handler\n"
 fi
 

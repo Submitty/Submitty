@@ -24,7 +24,8 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
   whole_config["autograding"]["compilation_to_runner"].push_back("**/*.out");
   whole_config["autograding"]["compilation_to_runner"].push_back("**/*.class");
 
-  whole_config["autograding"]["compilation_to_validation"].push_back("test*.txt");
+  whole_config["autograding"]["compilation_to_validation"].push_back("test*/STDOUT*.txt");
+  whole_config["autograding"]["compilation_to_validation"].push_back("test*/STDERR*.txt");
 
   whole_config["autograding"]["submission_to_validation"].push_back("**/README.txt");
   whole_config["autograding"]["submission_to_validation"].push_back("textbox_*.txt");

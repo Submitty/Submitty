@@ -45,13 +45,16 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
         print ("LOGGING BEGIN my_runner.out",file=logfile)
         logfile.flush()
         testcases = complete_config_obj["testcases"]
-        # Testcases start counting from one.
+
+        # we start counting from one.
         for testcase_num in range(1, len(testcases)+1):
-            if 'type' in testcases[testcase_num-1] and testcases[testcase_num-1]['type'] == 'FileCheck':
+            if 'type' in testcases[testcase_num-1]:
+              if testcases[testcase_num-1]['type'] == 'FileCheck' or testcases[testcase_num-1]['type'] == 'Compilation':
                 continue
             #make the tmp folder for this testcase.
             testcase_folder = os.path.join(tmp_work, "test{:02}".format(testcase_num))
             os.makedirs(testcase_folder)
+
             os.chdir(testcase_folder)
 
             if USE_DOCKER:
@@ -167,6 +170,11 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
         
         print ("LOGGING END my_runner.out",file=logfile)
         logfile.flush()
+
+
+        # os.system('ls -al {0}'.format(tmp_work))
+        # print('checkpoint (system exit)')
+        # sys.exit(1)
 
         killall_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                                            which_untrusted,
@@ -388,3 +396,4 @@ def clean_up_containers(container_info,job_id,is_batch_job,which_untrusted,submi
             network_destroy_time = (network_destroy_done-grading_began).total_seconds()
             grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,submission_path,"ddt:",
                                             network_destroy_time,"docker network {0} destroyed".format(network_name))
+

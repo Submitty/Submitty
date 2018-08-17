@@ -3,15 +3,15 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test01_output_correct.txt",
+                    "actual_file": "test01/output_correct.txt",
                     "description": "output_correct.txt",
-                    "difference_file": "test01_0_diff.json",
+                    "difference_file": "test01/0_diff.json",
                     "expected_file": "test_output/testassignment/output_instructor.txt"
                 },
                 {
-                    "actual_file": "test01_output_correct.txt",
+                    "actual_file": "test01/output_correct.txt",
                     "description": "output_correct.txt",
-                    "difference_file": "test01_1_diff.json",
+                    "difference_file": "test01/1_diff.json",
                     "expected_file": "test_output/testassignment/output_instructor.txt"
                 }
             ],
@@ -21,9 +21,9 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test02_output_duplicates.txt",
+                    "actual_file": "test02/output_duplicates.txt",
                     "description": "output_duplicates.txt",
-                    "difference_file": "test02_0_diff.json",
+                    "difference_file": "test02/0_diff.json",
                     "expected_file": "test_output/testassignment/output_instructor.txt"
                 }
             ],
@@ -33,9 +33,9 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test03_output_duplicates.txt",
+                    "actual_file": "test03/output_duplicates.txt",
                     "description": "output_duplicates.txt",
-                    "difference_file": "test03_0_diff.json",
+                    "difference_file": "test03/0_diff.json",
                     "expected_file": "test_output/testassignment/output_instructor.txt",
                     "messages": [
                         {
@@ -51,9 +51,9 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test04_output_extra.txt",
+                    "actual_file": "test04/output_extra.txt",
                     "description": "output_extra.txt",
-                    "difference_file": "test04_0_diff.json",
+                    "difference_file": "test04/0_diff.json",
                     "expected_file": "test_output/testassignment/output_instructor.txt"
                 }
             ],
@@ -63,9 +63,9 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test05_output_extra.txt",
+                    "actual_file": "test05/output_extra.txt",
                     "description": "output_extra.txt",
-                    "difference_file": "test05_0_diff.json",
+                    "difference_file": "test05/0_diff.json",
                     "expected_file": "test_output/testassignment/output_instructor.txt",
                     "messages": [
                         {
@@ -81,9 +81,9 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test06_output_missing.txt",
+                    "actual_file": "test06/output_missing.txt",
                     "description": "output_missing.txt",
-                    "difference_file": "test06_0_diff.json",
+                    "difference_file": "test06/0_diff.json",
                     "expected_file": "test_output/testassignment/output_instructor.txt"
                 }
             ],
@@ -93,9 +93,9 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test07_output_missing.txt",
+                    "actual_file": "test07/output_missing.txt",
                     "description": "output_missing.txt",
-                    "difference_file": "test07_0_diff.json",
+                    "difference_file": "test07/0_diff.json",
                     "expected_file": "test_output/testassignment/output_instructor.txt",
                     "messages": [
                         {
@@ -111,9 +111,9 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test08_output_reordered.txt",
+                    "actual_file": "test08/output_reordered.txt",
                     "description": "output_reordered.txt",
-                    "difference_file": "test08_0_diff.json",
+                    "difference_file": "test08/0_diff.json",
                     "expected_file": "test_output/testassignment/output_instructor.txt"
                 }
             ],
@@ -123,9 +123,9 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test09_output_reordered.txt",
+                    "actual_file": "test09/output_reordered.txt",
                     "description": "output_reordered.txt",
-                    "difference_file": "test09_0_diff.json",
+                    "difference_file": "test09/0_diff.json",
                     "expected_file": "test_output/testassignment/output_instructor.txt",
                     "messages": [
                         {

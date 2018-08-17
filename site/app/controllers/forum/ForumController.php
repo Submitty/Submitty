@@ -3,6 +3,7 @@
 namespace app\controllers\forum;
 
 use app\libraries\Core;
+use app\models\Notification;
 use app\controllers\AbstractController;
 use app\libraries\Output;
 use app\libraries\Utils;
@@ -99,6 +100,10 @@ class ForumController extends AbstractController {
 
     private function showDeleted() {
         return ($this->core->getUser()->getGroup() <= 2 && isset($_COOKIE['show_deleted']) && $_COOKIE['show_deleted'] == "1");
+    }
+
+    private function showMergedThreads($currentCourse) {
+        return  (isset($_COOKIE["{$currentCourse}_show_merged_thread"]) && $_COOKIE["{$currentCourse}_show_merged_thread"] == "1");
     }
 
     private function returnUserContentToPage($error, $isThread, $thread_id){
@@ -329,6 +334,10 @@ class ForumController extends AbstractController {
                     }
 
                 }
+                if($announcment){
+                    $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'new_announcement', 'thread_id' => $id, 'thread_title' => $title));
+                    $this->core->getQueries()->pushNotification($notification);
+                }
                 $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $id));
             }
         }
@@ -379,6 +388,11 @@ class ForumController extends AbstractController {
                         move_uploaded_file($_FILES[$file_post]["tmp_name"][$i], $target_file);
                     }
                 }
+                // Notification to parent post author
+                $post = $this->core->getQueries()->getPost($parent_id);
+                $post_author = $post['author_user_id'];
+                $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'reply', 'thread_id' => $thread_id, 'post_id' => $parent_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
+                $this->core->getQueries()->pushNotification($notification);
                 $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'option' => $display_option, 'thread_id' => $thread_id));
             }
         }
@@ -390,6 +404,10 @@ class ForumController extends AbstractController {
         if($this->core->getUser()->getGroup() <= 2){
             $thread_id = $_POST["thread_id"];
             $this->core->getQueries()->setAnnouncement($thread_id, $type);
+            if($type) {
+                $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'updated_announcement', 'thread_id' => $thread_id, 'thread_title' => $this->core->getQueries()->getThreadTitle($thread_id)['title']));
+                $this->core->getQueries()->pushNotification($notification);
+            }
         } else {
             $this->core->addErrorMessage("You do not have permissions to do that.");
         }
@@ -454,6 +472,10 @@ class ForumController extends AbstractController {
             } else {
                 $type = "post";
             }
+            $post = $this->core->getQueries()->getPost($post_id);
+            $post_author = $post['author_user_id'];
+            $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'deleted', 'thread_id' => $thread_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
+            $this->core->getQueries()->pushNotification($notification);
             $this->core->getOutput()->renderJson($response = array('type' => $type));
             return $response;
         } else if($modifyType == 2) { //undelete post or thread
@@ -472,6 +494,10 @@ class ForumController extends AbstractController {
             } else {
                 /// We want to reload same thread again, in both case (thread/post undelete)
                 $type = "post";
+                $post = $this->core->getQueries()->getPost($post_id);
+                $post_author = $post['author_user_id'];
+                $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'undeleted', 'thread_id' => $thread_id, 'post_id' => $post_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
+                $this->core->getQueries()->pushNotification($notification);
                 $this->core->getOutput()->renderJson($response = array('type' => $type));
             }
             return $response;
@@ -484,6 +510,7 @@ class ForumController extends AbstractController {
             }
             $status_edit_thread = $this->editThread();
             $status_edit_post   = $this->editPost();
+            $any_changes = false;
              // Author of first post and thread must be same
             if(is_null($status_edit_thread) && is_null($status_edit_post)) {
                 $this->core->addErrorMessage("No data submitted. Please try again.");
@@ -492,22 +519,31 @@ class ForumController extends AbstractController {
                 if($status_edit_thread || $status_edit_post) {
                     //$type is true
                     $this->core->addSuccessMessage("{$type} updated successfully.");
+                    $any_changes = true;
                 } else {
                     $this->core->addErrorMessage("{$type} updation failed. Please try again.");
                 }
             } else {
                 if($status_edit_thread && $status_edit_post) {
                     $this->core->addSuccessMessage("Thread and post updated successfully.");
+                    $any_changes = true;
                 } else {
                     $type = ($status_edit_thread)?"Thread":"Post";
                     $type_opposite = (!$status_edit_thread)?"Thread":"Post";
                     if($status_edit_thread || $status_edit_post) {
                         //$type is true
                         $this->core->addErrorMessage("{$type} updated successfully. {$type_opposite} updation failed. Please try again.");
+                        $any_changes = true;
                     } else {
                         $this->core->addErrorMessage("Thread and Post updation failed. Please try again.");
                     }
                 }
+            }
+            if($any_changes) {
+                $post = $this->core->getQueries()->getPost($post_id);
+                $post_author = $post['author_user_id'];
+                $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'edited', 'thread_id' => $thread_id, 'post_id' => $post_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
+                $this->core->getQueries()->pushNotification($notification);
             }
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
         }
@@ -548,14 +584,17 @@ class ForumController extends AbstractController {
         return null;
     }
 
-    private function getSortedThreads($categories_ids, $max_thread, $show_deleted, $thread_status, $blockNumber = 1){
-        $blockSize = 10;
+    private function getSortedThreads($categories_ids, $max_thread, $show_deleted, $show_merged_thread, $thread_status, &$blockNumber, $thread_id = -1){
         $current_user = $this->core->getUser()->getId();
         if(!$this->isValidCategories($categories_ids)) {
             // No filter for category
             $categories_ids = array();
         }
-        $ordered_threads = $this->core->getQueries()->loadThreadBlock($categories_ids, $thread_status, $show_deleted, $current_user, $blockSize, $blockNumber);
+
+        $thread_block = $this->core->getQueries()->loadThreadBlock($categories_ids, $thread_status, $show_deleted, $show_merged_thread, $current_user, $blockNumber, $thread_id);
+        $ordered_threads = $thread_block['threads'];
+        $blockNumber = $thread_block['block_number'];
+
         foreach ($ordered_threads as &$thread) {
             $list = array();
             foreach(explode("|", $thread['categories_ids']) as $id ) {
@@ -569,9 +608,10 @@ class ForumController extends AbstractController {
     }
 
     public function getThreads(){
-        $pageNumber = !empty($_GET["page_number"]) && is_numeric($_GET["page_number"]) ? (int)$_GET["page_number"] : -1;
+        $pageNumber = !empty($_GET["page_number"]) && is_numeric($_GET["page_number"]) ? (int)$_GET["page_number"] : 1;
         $show_deleted = $this->showDeleted();
         $currentCourse = $this->core->getConfig()->getCourse();
+        $show_merged_thread = $this->showMergedThreads($currentCourse);
         $categories_ids = array_key_exists('thread_categories', $_POST) && !empty($_POST["thread_categories"]) ? explode("|", $_POST['thread_categories']) : array();
         $thread_status = array_key_exists('thread_status', $_POST) && ($_POST["thread_status"] === "0" || !empty($_POST["thread_status"])) ? explode("|", $_POST['thread_status']) : array();
         if(empty($categories_ids) && !empty($_COOKIE[$currentCourse . '_forum_categories'])){
@@ -587,7 +627,7 @@ class ForumController extends AbstractController {
             $status = (int)$status;
         }
         $max_thread = 0;
-        $threads = $this->getSortedThreads($categories_ids, $max_thread, $show_deleted, $thread_status, $pageNumber);
+        $threads = $this->getSortedThreads($categories_ids, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $pageNumber, -1);
         $currentCategoriesIds = (!empty($_POST['currentCategoriesId'])) ? explode("|", $_POST["currentCategoriesId"]) : array();
         $currentThreadId = array_key_exists('currentThreadId', $_POST) && !empty($_POST["currentThreadId"]) && is_numeric($_POST["currentThreadId"]) ? (int)$_POST["currentThreadId"] : -1;
         $thread_data = array();
@@ -598,7 +638,8 @@ class ForumController extends AbstractController {
         $this->core->getOutput()->useFooter(false);
         return $this->core->getOutput()->renderJson(array(
                 "html" => $this->core->getOutput()->getOutput(),
-                "count" => count($threads)
+                "count" => count($threads),
+                "page_number" => $pageNumber,
             ));
     }
 
@@ -623,8 +664,7 @@ class ForumController extends AbstractController {
 
         $max_thread = 0;
         $show_deleted = $this->showDeleted();
-        $threads = $this->getSortedThreads($category_id, $max_thread, $show_deleted, $thread_status, 1);
-
+        $show_merged_thread = $this->showMergedThreads($currentCourse);
         $current_user = $this->core->getUser()->getId();
 
         $posts = null;
@@ -637,18 +677,34 @@ class ForumController extends AbstractController {
         $option = ($this->core->getUser()->getGroup() <= 2 || $option != 'alpha') ? $option : 'tree';
         if(!empty($_REQUEST["thread_id"])){
             $thread_id = (int)$_REQUEST["thread_id"];
+            $thread = $this->core->getQueries()->getThread($thread_id)[0];
+            if($thread['merged_thread_id'] != -1){
+                // Redirect merged thread to parent
+                $this->core->addSuccessMessage("Requested thread is merged into current thread.");
+                $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread['merged_thread_id'])));
+                return;
+            }
             if($option == "alpha"){
                 $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, $show_deleted, 'alpha');
             } else {
                 $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, $show_deleted, 'tree');
+            }
+            if(empty($posts)){
+                $this->core->addErrorMessage("No posts found for selected thread.");
             }
             
         } 
         if(empty($_REQUEST["thread_id"]) || empty($posts)) {
             $posts = $this->core->getQueries()->getPostsForThread($current_user, -1, $show_deleted);
         }
+        $thread_id = -1;
+        if(!empty($posts)){
+            $thread_id = $posts[0]["thread_id"];
+        }
+        $pageNumber = 0;
+        $threads = $this->getSortedThreads($category_id, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $pageNumber, $thread_id);
 
-        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $threads, $show_deleted, $option, $max_thread);
+        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber);
     }
 
     private function getAllowedCategoryColor() {
@@ -787,7 +843,8 @@ class ForumController extends AbstractController {
         if($this->core->getUser()->getGroup() <= 2){
             if(is_numeric($parent_thread_id) && is_numeric($child_thread_id)) {
                 $message = "";
-                if($this->core->getQueries()->mergeThread($parent_thread_id, $child_thread_id, $message)) {
+                $child_root_post = -1;
+                if($this->core->getQueries()->mergeThread($parent_thread_id, $child_thread_id, $message, $child_root_post)) {
                     $child_thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $child_thread_id);
                     if(is_dir($child_thread_dir)) {
                         $parent_thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $parent_thread_id);
@@ -801,6 +858,13 @@ class ForumController extends AbstractController {
                             rename($child_post_dir, $parent_post_dir);
                         }
                     }
+                    // Notify thread author
+                    $child_thread = $this->core->getQueries()->getThread($child_thread_id)[0];
+                    $child_thread_author = $child_thread['created_by'];
+                    $child_thread_title = $child_thread['title'];
+                    $parent_thread_title =$this->core->getQueries()->getThreadTitle($parent_thread_id)['title'];
+                    $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'merge_thread', 'child_thread_id' => $child_thread_id, 'parent_thread_id' => $parent_thread_id, 'child_thread_title' => $child_thread_title, 'parent_thread_title' => $parent_thread_title, 'child_thread_author' => $child_thread_author, 'child_root_post' => $child_root_post));
+                    $this->core->getQueries()->pushNotification($notification);
                     $this->core->addSuccessMessage("Threads merged!");
                     $thread_id = $parent_thread_id;
                 } else {
@@ -812,5 +876,4 @@ class ForumController extends AbstractController {
         }
         $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
     }
-
 }

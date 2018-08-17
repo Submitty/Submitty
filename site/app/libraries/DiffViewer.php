@@ -495,9 +495,9 @@ class DiffViewer {
                 }
             }
             if($option == self::SPECIAL_CHARS_UNICODE) {
-                $html .= '<span style="border: 1px solid blue">&#9166;</span>';
+                $html .= '<span class="whitespace">&#9166;</span>';
             } else if($option == self::SPECIAL_CHARS_ESCAPE) {
-                $html .= '<span style="border: 1px solid blue">\\n</span>';
+                $html .= '<span class="whitespace">\\n</span>';
             }
             $html .= "</span></div>\n";
 
@@ -564,7 +564,7 @@ class DiffViewer {
      */
     private function replaceUTF($text, $what, &$which, $description){
         $count = 0;
-        $what = '<span style="outline:1px blue solid;">'.$what.'</span>';
+        $what = '<span class="whitespace">'.$what.'</span>';
         $which = str_replace($text, $what, $which,$count);
         if($count > 0) $this->white_spaces[$description] = strip_tags($what);
         return $what;

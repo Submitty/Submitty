@@ -106,7 +106,7 @@ HTML;
 				$posted_on = date_format(date_create($post['timestamp_post']), "n/j g:i A");
 				$return .= <<<HTML
 
-				<tr title="Go to post" style="cursor: pointer;" onclick="window.location = '{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id))}#{$post['p_id']}';" id="search-row-{$author}" class="hoverable">
+				<tr title="Go to post" style="cursor: pointer;" onclick="window.location = '{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id))}#{$post['p_id']}';" id="search-row-{$count}" class="hoverable">
 	                <td align="left"><pre style="font-family: inherit;"><p class="post_content" style="white-space: pre-wrap; ">{$post_content}</p></pre></td>
 	                <td>{$visible_username}</td>
 	                <td>{$posted_on}</td>      
@@ -145,7 +145,7 @@ HTML;
 		that have been created after applying filter and to be
 		displayed in the left panel.
 	*/
-	public function showForumThreads($user, $posts, $threadsHead, $show_deleted, $display_option, $max_thread) {
+	public function showForumThreads($user, $posts, $threadsHead, $show_deleted, $show_merged_thread, $display_option, $max_thread, $initialPageNumber) {
 		if(!$this->forumAccess()){
 			$this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
 			return;
@@ -154,7 +154,7 @@ HTML;
 		$threadExists = $this->core->getQueries()->threadExists();
 		$filteredThreadExists = (count($threadsHead)>0);
 		$currentThread = -1;
-		$currentCategoryId = array();
+		$currentCategoriesIds = array();
 		$currentCourse = $this->core->getConfig()->getCourse();
 		$threadFiltering = $threadExists && !$filteredThreadExists && !(empty($_COOKIE[$currentCourse . '_forum_categories']) && empty($_COOKIE['forum_thread_status']));
 
@@ -183,7 +183,6 @@ HTML;
 
 			$( document ).ready(function() {
 			    enableTabsInTextArea('.post_content_reply');
-				saveScrollLocationOnRefresh('thread_list');
 				saveScrollLocationOnRefresh('posts_list');
 				addCollapsable();
 				$('#{$display_option}').attr('checked', 'checked'); //Saves the radiobutton state when refreshing the page
@@ -227,10 +226,20 @@ HTML;
 		$currentThread = isset($_GET["thread_id"]) && is_numeric($_GET["thread_id"]) && (int)$_GET["thread_id"] < $max_thread && (int)$_GET["thread_id"] > 0 ? (int)$_GET["thread_id"] : $posts[0]["thread_id"];
 		$currentCategoriesIds = $this->core->getQueries()->getCategoriesIdForThread($currentThread);
 	}
+	if($show_merged_thread) {
+		$show_merged_thread_class = "active";
+		$show_merged_thread_action = "alterShowMergeThreadStatus(0, '{$currentCourse}');";
+		$show_merged_thread_title = "Hide Merged Threads";
+	} else {
+		$show_merged_thread_class = "";
+		$show_merged_thread_action = "alterShowMergeThreadStatus(1, '{$currentCourse}');";
+		$show_merged_thread_title = "Show Merged Threads";
+	}
 	$return .= <<<HTML
 		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
 		<div style="background-color: #E9EFEF; box-shadow:0 2px 15px -5px #888888;border-radius:3px;margin-left:20px;margin-top:10px; height:40px; margin-bottom:10px;margin-right:20px;" id="forum_bar">
 		<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Create thread" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}"><i class="fa fa-plus-circle"></i> Create Thread</a>
+		<a class="btn btn-primary {$show_merged_thread_class}" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="{$show_merged_thread_title}" onclick="{$show_merged_thread_action}">{$show_merged_thread_title}</a>
 HTML;
 	if($this->core->getUser()->getGroup() <= 2){
 		if($show_deleted) {
@@ -308,30 +317,45 @@ HTML;
 		} else {
 			$return .= <<<HTML
 				<div id="forum_wrapper">
-					<div id="thread_list" class="thread_list" next_page='2'>
 HTML;
-				$activeThreadAnnouncement = false;
-				$activeThreadTitle = "";
-				$function_date = 'date_format';
-				$activeThread = array();
-				$return .= $this->displayThreadList($threadsHead, false, $activeThreadAnnouncement, $activeThreadTitle, $activeThread, $currentThread, $currentCategoriesIds);
-				if(count($activeThread) == 0) {
-					$activeThread = $this->core->getQueries()->getThread($currentThread)[0];
-					$activeThreadTitle = $activeThread['title'];
-				}
-			$activeThreadTitle = htmlentities(html_entity_decode($activeThreadTitle, ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+					$next_page = $initialPageNumber + 1;
+					$prev_page = ($initialPageNumber == 1)?0:($initialPageNumber - 1);
+					$arrowup_visibility = ($initialPageNumber == 1)?"display:none;":"";
+					$return .= <<<HTML
+					<div  style="position: relative;width: 25%;height: 100%;display: inline-block;" >
+						<a class="btn-sm btn-primary hover_glow" style="z-index: 1; position: absolute;right: 0px;top: 0px;" onclick="updateThreads(true, function(){ $('#thread_list').animate({ scrollTop: 0 }, 'fast');});"><i class="fa fa-2x fa-angle-double-up" style="position: relative;" title="Move to top"></i></a>
+						<a class="btn-sm btn-primary hover_glow" style=" z-index: 1; position: absolute;right: 0px;bottom: 0px;" onclick="updateThreads(false, function(){ $('#thread_list').animate({ scrollTop: $('#thread_list').prop('scrollHeight') }, 'fast');});"><i class="fa fa-2x fa-angle-double-down" style="position: relative;" title="Move to bottom"></i></a>
+					<div id="thread_list" style="width: 100%;" class="thread_list" prev_page='{$prev_page}' next_page='{$next_page}'>
+						<i class="fa fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
+						<i class="fa fa-caret-up fa-2x fa-fw fill-available" style="color:gray;{$arrowup_visibility}" aria-hidden="true"></i>
+HTML;
+						$activeThreadAnnouncement = false;
+						$activeThreadTitle = "";
+						$function_date = 'date_format';
+						$activeThread = array();
+						$return .= $this->displayThreadList($threadsHead, false, $activeThreadAnnouncement, $activeThreadTitle, $activeThread, $currentThread, $currentCategoriesIds);
+						if(count($activeThread) == 0) {
+							$activeThread = $this->core->getQueries()->getThread($currentThread)[0];
+							$activeThreadTitle = $activeThread['title'];
+						}
+						$activeThreadTitle = htmlentities(html_entity_decode($activeThreadTitle, ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
-			$thread_id = -1;
-			$userAccessToAnon = ($this->core->getUser()->getGroup() < 4) ? true : false;
-			$title_html = '';
-			$return .= <<<HTML
+						$thread_id = -1;
+						$userAccessToAnon = ($this->core->getUser()->getGroup() < 4) ? true : false;
+						$title_html = '';
 
-				
-					<i class="fa fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
+						$return .= <<<HTML
+						<i class="fa fa-caret-down fa-2x fa-fw fill-available" style="color:gray;" aria-hidden="true"></i>
+						<i class="fa fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
+					</div>
 					</div>
 					<script type="text/javascript">
 						$(function(){
 							dynamicScrollContentOnDemand($('.thread_list'), buildUrl({'component': 'forum', 'page': 'get_threads', 'page_number':'{{#}}'}), {$currentThread}, '', '{$currentCourse}');
+							var active_thread = $('#thread_list .active');
+							if(active_thread.length > 0) {
+								active_thread[0].scrollIntoView(true); 
+							}
 						});
 					</script>
 					<div style="display:inline-block;width:70%; float: right;" id="posts_list" class="posts_list">
@@ -507,7 +531,18 @@ HTML;
 					$end = 10;
 					foreach($threads as $thread){
 						$first_post = $this->core->getQueries()->getFirstPostForThread($thread["id"]);
-						$date = date_create($first_post['timestamp']);
+						if(is_null($first_post)) {
+							// Thread without any posts(eg. Merged Thread)
+							$first_post = array('content' => "");
+							$date = null;
+						} else {
+							$date = date_create($first_post['timestamp']);
+						}
+						if($thread['merged_thread_id'] != -1){
+							// For the merged threads
+							$thread['status'] = 0;
+						}
+
 						$class = "thread_box";
 						// $current_categories_ids should be subset of $thread["categories_ids"]
 						$issubset = (count(array_intersect($current_categories_ids, $thread["categories_ids"])) == count($current_categories_ids));
@@ -577,6 +612,12 @@ HTML;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i>
 HTML;
 						}
+						if($thread['merged_thread_id'] != -1) {
+							$return .= <<<HTML
+							<i class="fa fa-link" style="padding-left:3px;position:relative; float:right; display:inline-block; color: white; -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: black;" title="Thread Merged" aria-hidden="true"></i>
+HTML;
+						}
 						if (!isset($thread['status'])) {
                             $thread['status'] = 0;
                         }
@@ -609,8 +650,12 @@ HTML;
 							<span class="label_forum" style="background-color: {$category_content[1]}">{$category_content[0]}</span>
 HTML;
 						}
+						if(!is_null($date)) {
+							$return .= <<<HTML
+							<h5 style="float:right; font-weight:normal;margin-top:5px">{$function_date($date,"n/j g:i A")}</h5>
+HTML;
+						}
 						$return .= <<<HTML
-						<h5 style="float:right; font-weight:normal;margin-top:5px">{$function_date($date,"n/j g:i A")}</h5>
 						</div>
 						</a>
 						<hr style="margin-top: 0px;margin-bottom:0px;">

@@ -3,9 +3,9 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test01_STDOUT_0.txt",
+                    "actual_file": "test01/STDOUT_0.txt",
                     "description": "Program Output",
-                    "difference_file": "test01_0_diff.json",
+                    "difference_file": "test01/0_diff.json",
                     "expected_file": "test_output/testassignment/p1_out.txt"
                 },
                 {
@@ -24,9 +24,9 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "part2/p2_bug3.txt",
+                    "actual_file": "test02/part2/p2_bug3.txt",
                     "description": "Program Output",
-                    "difference_file": "test02_0_diff.json",
+                    "difference_file": "test02/0_diff.json",
                     "messages": [
                         {
                             "message": "Incorrect Answer",
@@ -41,9 +41,9 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test03_STDOUT_0.txt",
+                    "actual_file": "test03/STDOUT_0.txt",
                     "description": "Program Output",
-                    "difference_file": "test03_0_diff.json",
+                    "difference_file": "test03/0_diff.json",
                     "expected_file": "test_output/testassignment/p3_out.txt"
                 },
                 {
@@ -80,9 +80,9 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test04_STDOUT_0.txt",
+                    "actual_file": "test04/STDOUT_0.txt",
                     "description": "Program Output",
-                    "difference_file": "test04_0_diff.json",
+                    "difference_file": "test04/0_diff.json",
                     "expected_file": "test_output/testassignment/p4_out.txt"
                 },
                 {

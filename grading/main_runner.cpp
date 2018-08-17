@@ -91,6 +91,7 @@ int main(int argc, char *argv[]) {
     std::cout << "TEST #" << i << std::endl;
 
     std::vector<std::string> commands = my_testcase.getCommands();
+
     std::vector<nlohmann::json> actions  = mapOrArrayOfMaps((*tc)[i-1],"actions");
     assert (commands.size() > 0);
 
@@ -108,7 +109,7 @@ int main(int argc, char *argv[]) {
       }
       
       
-      std::string logfile = my_testcase.getPrefix() + "execute_logfile.txt";
+      std::string logfile = "execute_logfile.txt";
       // run the command, capturing STDOUT & STDERR
       int exit_no = execute(commands[x]
                             +

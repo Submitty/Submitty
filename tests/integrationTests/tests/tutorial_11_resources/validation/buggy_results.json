@@ -7,13 +7,13 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test02_STDOUT.txt",
+                    "actual_file": "test02/STDOUT.txt",
                     "description": "Program Output",
-                    "difference_file": "test02_0_diff.json",
+                    "difference_file": "test02/0_diff.json",
                     "expected_file": "test_output/testassignment/simple_out.txt"
                 },
                 {
-                    "actual_file": "test02_execute_logfile.txt",
+                    "actual_file": "test02/execute_logfile.txt",
                     "description": "Execution Logfile"
                 }
             ],
