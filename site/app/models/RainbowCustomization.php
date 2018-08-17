@@ -46,11 +46,10 @@ class RainbowCustomization extends AbstractModel{
             $this->customization_data[$bucket] = [];
         }
 
-        //$gids = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
-        $gradeables = $this->core->getQueries()->getAllGradeables();
+        $gradeables = $this->core->getQueries()->getGradeableConfigs(null);
         foreach ($gradeables as $gradeable){
             //XXX: 'none (for practice only)' we want to truncate to just 'none', otherwise use full bucket name
-            $bucket = $gradeable->getBucket() == "none (for practice only)" ? "none" : $gradeable->getBucket();
+            $bucket = $gradeable->getSyllabusBucket() == "none (for practice only)" ? "none" : $gradeable->getSyllabusBucket();
             /*if(!isset($this->customization_data[$bucket])){
                 $this->customization_data[$bucket] = [];
             }*/
@@ -62,15 +61,21 @@ class RainbowCustomization extends AbstractModel{
              */
             $this->customization_data[$bucket][] = [
                 "id" => $gradeable->getId(),
-                "title" => $gradeable->getName(),
-                "max_score" => $gradeable->getTotalAutograderNonExtraCreditPoints()+$gradeable->getTotalTAPoints()
+                "title" => $gradeable->getTitle(),
+                "max_score" => $gradeable->getTAPoints()
             ];
+
+            //If the gradeable has autograding points, load the config and add the non-extra-credit autograder total
+            if ($gradeable->hasAutogradingConfig()){
+                $last_index = count($this->customization_data[$bucket])-1;
+                $this->customization_data[$bucket][$last_index]["max_score"] += $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
+            }
         }
 
         //XXX: Assuming that the contents of these buckets will be lowercase
         $this->used_buckets = [];
 
-        /*TODO: Read in used_buckets according to the customization.json if it exists and remove those from the
+        /* TODO: Read in used_buckets according to the customization.json if it exists and remove those from the
          * available_buckets array.
          */
         $this->available_buckets = array_diff(self::syllabus_buckets,$this->used_buckets);
