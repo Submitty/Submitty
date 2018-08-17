@@ -50,6 +50,7 @@ CGI_USER=submitty_cgi
 CGI_GROUP=submitty_cgi
 
 DAEMONPHP_GROUP=submitty_daemonphp
+DAEMONCGI_GROUP=submitty_daemoncgi
 
 #################################################################
 # PROVISION SETUP
@@ -160,6 +161,12 @@ else
 	echo "${DAEMONPHP_GROUP} already exists"
 fi
 
+if ! cut -d ':' -f 1 /etc/group | grep -q ${DAEMONCGI_GROUP} ; then
+    addgroup ${DAEMONCGI_GROUP}
+else
+    echo "${DAEMONCGI_GROUP} already exists"
+fi
+
 # The COURSE_BUILDERS_GROUP allows instructors/head TAs/course
 # managers to write website custimization files and run course
 # management scripts.
@@ -187,7 +194,7 @@ if [ ${WORKER} == 0 ]; then
         adduser "${CGI_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
     fi
     usermod -a -G "${PHP_GROUP}" "${CGI_USER}"
-    usermod -a -G www-data "${CGI_USER}"
+    usermod -a -G "${DAEMONCGI_GROUP}" "${CGI_USER}"
     # THIS USER SHOULD NOT BE NECESSARY AS A UNIX GROUP
     #adduser "${DB_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 
@@ -205,9 +212,9 @@ if ! cut -d ':' -f 1 /etc/passwd | grep -q ${DAEMON_USER} ; then
     adduser "${DAEMON_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 fi
 
+# The VCS directores (/var/local/submitty/vcs) are owfned by root:$DAEMONCGI_GROUP
 usermod -a -G "${DAEMONPHP_GROUP}" "${DAEMON_USER}"
-# The VCS directories (/var/local/submitty/vcs) are owned root:www-data, and DAEMON_USER needs access to them for autograding
-usermod -a -G www-data "${DAEMON_USER}"
+usermod -a -G "${DAEMONCGI_GROUP}" "${DAEMON_USER}"
 
 echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${DAEMON_USER}/.profile
 
@@ -363,15 +370,15 @@ if [ ${WORKER} == 0 ]; then
         rm /etc/apache2/sites*/default-ssl.conf
 
         cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/sites-available/submitty.conf /etc/apache2/sites-available/submitty.conf
-        cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/sites-available/git.conf      /etc/apache2/sites-available/git.conf
+        # cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/sites-available/git.conf      /etc/apache2/sites-available/git.conf
 
         sed -i -e "s/SUBMITTY_URL/${SUBMISSION_URL:7}/g" /etc/apache2/sites-available/submitty.conf
-        sed -i -e "s/GIT_URL/${GIT_URL:7}/g" /etc/apache2/sites-available/git.conf
+        # sed -i -e "s/GIT_URL/${GIT_URL:7}/g" /etc/apache2/sites-available/git.conf
 
         # permissions: rw- r-- ---
         chmod 0640 /etc/apache2/sites-available/*.conf
         a2ensite submitty
-        a2ensite git
+        # a2ensite git
 
         sed -i '25s/^/\#/' /etc/pam.d/common-password
     	sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
@@ -544,7 +551,7 @@ else
     ${DATABASE_PASSWORD}
     America/New_York
     ${SUBMISSION_URL}
-    ${GIT_URL}/git
+
 
     1" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
 

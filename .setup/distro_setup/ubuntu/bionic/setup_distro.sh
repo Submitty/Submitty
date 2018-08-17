@@ -8,7 +8,7 @@ fi
 
 if [ ${VAGRANT} == 1 ]; then
     export SUBMISSION_URL='http://192.168.56.111'
-    export GIT_URL='http://192.168.56.112'
+    export GIT_URL='http://192.168.56.111'
 fi
 
 #################################################################
