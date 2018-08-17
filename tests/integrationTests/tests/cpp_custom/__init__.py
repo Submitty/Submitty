@@ -4,6 +4,7 @@ from lib import prebuild, testcase, SUBMITTY_INSTALL_DIR
 import subprocess
 import os
 import glob
+import shutil
 
 
 ############################################################################
@@ -19,7 +20,10 @@ def initialize(test):
     except OSError:
         pass
     try:
-        os.mkdir(os.path.join(test.testcase_path, "data"))
+        data_path = os.path.join(test.testcase_path, "data")
+        if os.path.isdir(data_path):
+            shutil.rmtree(data_path)
+        os.mkdir(data_path)
     except OSError:
         pass
     try:
@@ -42,10 +46,15 @@ def initialize(test):
 
 
 ############################################################################
-
+def cleanup(test):
+    subprocess.call(["rm"] + ["-rf"] +
+                    glob.glob(os.path.join(test.testcase_path, "data", "test*")))
+    subprocess.call(["rm"] + ["-f"] +
+                    glob.glob(os.path.join(test.testcase_path, "data", "results*")))
 
 @testcase
 def correct(test):
+    cleanup(test)
     subprocess.call(["rm"] + ["-f"] +
                     glob.glob(os.path.join(test.testcase_path, "data/", "*.cpp")))
     subprocess.call(["cp",
@@ -60,6 +69,7 @@ def correct(test):
 
 @testcase
 def missing_label(test):
+    cleanup(test)
     subprocess.call(["rm"] + ["-f"] +
                     glob.glob(os.path.join(test.testcase_path, "data/", "*.cpp")))
     subprocess.call(["cp",
@@ -74,6 +84,7 @@ def missing_label(test):
 
 @testcase
 def wrong_num(test):
+    cleanup(test)
     subprocess.call(["rm"] + ["-f"] +
                     glob.glob(os.path.join(test.testcase_path, "data/", "*.cpp")))
     subprocess.call(["cp",
@@ -88,6 +99,7 @@ def wrong_num(test):
 
 @testcase
 def wrong_total(test):
+    cleanup(test)
     subprocess.call(["rm"] + ["-f"] +
                     glob.glob(os.path.join(test.testcase_path, "data/", "*.cpp")))
     subprocess.call(["cp",
@@ -102,6 +114,7 @@ def wrong_total(test):
 
 @testcase
 def not_random(test):
+    cleanup(test)
     subprocess.call(["rm"] + ["-f"] +
                     glob.glob(os.path.join(test.testcase_path, "data/", "*.cpp")))
     subprocess.call(["cp",
@@ -116,6 +129,7 @@ def not_random(test):
 
 @testcase
 def all_bugs(test):
+    cleanup(test)
     subprocess.call(["rm"] + ["-f"] +
                     glob.glob(os.path.join(test.testcase_path, "data/", "*.cpp")))
     subprocess.call(["cp",

@@ -31,7 +31,7 @@ class BuildConfig(AbstractJob):
 
         try:
             with open(build_output, "w") as output_file:
-                subprocess.call([build_script, semester, course, gradeable], stdout=output_file, stderr=output_file)
+                subprocess.call([build_script, gradeable, "--clean"], stdout=output_file, stderr=output_file)
         except PermissionError:
             print ("error, could not open "+output_file+" for writing")
 

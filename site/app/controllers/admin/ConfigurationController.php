@@ -66,8 +66,9 @@ class ConfigurationController extends AbstractController {
         }
 
         $gradeable_seating_options = $this->getGradeableSeatingOptions();
+        $config_url = $this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper'));
 
-        $this->core->getOutput()->renderOutput(array('admin', 'Configuration'), 'viewConfig', $fields, $gradeable_seating_options);
+        $this->core->getOutput()->renderOutput(array('admin', 'Configuration'), 'viewConfig', $fields, $gradeable_seating_options, $config_url);
     }
 
     public function updateConfiguration() {

@@ -4,6 +4,7 @@ from lib import prebuild, testcase, SUBMITTY_TUTORIAL_DIR
 import subprocess
 import os
 import glob
+import shutil
 
 ############################################################################
 # COPY THE ASSIGNMENT FROM THE SAMPLE ASSIGNMENTS DIRECTORIES
@@ -18,7 +19,10 @@ def initialize(test):
     except OSError:
         pass
     try:
-        os.mkdir(os.path.join(test.testcase_path, "data"))
+        data_path = os.path.join(test.testcase_path, "data")
+        if os.path.isdir(data_path):
+            shutil.rmtree(data_path)
+        os.mkdir(data_path)
     except OSError:
         pass
     subprocess.call(["cp",
@@ -41,7 +45,7 @@ def initialize(test):
 def cleanup(test):
     subprocess.call(["rm"] + ["-f"] +
             glob.glob(os.path.join(test.testcase_path, "data", "part*", "*")))
-    subprocess.call(["rm"] + ["-f"] +
+    subprocess.call(["rm"] + ["-rf"] +
             glob.glob(os.path.join(test.testcase_path, "data", "test*")))
     subprocess.call(["cp"] +
                      glob.glob(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output","*")) +
