@@ -26,14 +26,14 @@ class Config:
     def __init__(self, config_path):
         # These are set dynamically below and are here just so IDE doesn't complain about them not
         # existing
-        self.database = self.submitty = None
+        self.database = self.submitty = self.submitty_users = None
         self.config_path = Path(config_path)
         for key in ('database', 'submitty', 'submitty_users'):
             self.__dict__[key] = self._get_data(key)
 
     def _get_data(self, filename):
         with Path(self.config_path, filename + '.json').open('r') as open_file:
-            return json.load(open_file)
+            return json.load(open_file, object_pairs_hook=OrderedDict)
 
 
 def parse_args():
