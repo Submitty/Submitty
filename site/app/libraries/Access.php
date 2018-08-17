@@ -165,6 +165,7 @@ class Access {
         //TODO: Can students see their results?
         $this->permissions["path.read.results"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_HAS_SUBMISSION | self::CHECK_FILE_DIRECTORY | self::CHECK_FILE_EXISTS;
         $this->permissions["path.read.submissions"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_STUDENT_VIEW | self::CHECK_STUDENT_DOWNLOAD | self::CHECK_STUDENT_ANY_VERSION | self::CHECK_FILE_DIRECTORY | self::CHECK_FILE_EXISTS;
+        $this->permissions["path.read.customization"] = self::ALLOW_INSTRUCTOR | self::CHECK_FILE_DIRECTORY | self::CHECK_FILE_EXISTS;
 
         $this->permissions["path.write.submissions"] = self::ALLOW_MIN_STUDENT | self::ALLOW_ONLY_SELF_GRADEABLE | self::CHECK_CSRF | self::CHECK_FILE_DIRECTORY;
         $this->permissions["path.write.uploads"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_CSRF | self::CHECK_FILE_DIRECTORY;
@@ -172,6 +173,7 @@ class Access {
         $this->permissions["path.write.checkout"] = self::DENY_ALL | self::CHECK_CSRF | self::CHECK_FILE_DIRECTORY;
         $this->permissions["path.write.results"] = self::DENY_ALL | self::CHECK_CSRF | self::CHECK_FILE_DIRECTORY;
         $this->permissions["path.write.course_materials"] = self::ALLOW_MIN_INSTRUCTOR  | self::CHECK_CSRF| self::CHECK_FILE_DIRECTORY;
+        $this->permissions["path.write.customization"] = self::ALLOW_INSTRUCTOR | self::CHECK_CSRF | self::CHECK_FILE_DIRECTORY;
         $this->permissions["path.write.forum_attachments"] = self::ALLOW_MIN_STUDENT | self::CHECK_CSRF | self::CHECK_FILE_DIRECTORY;
 
 
@@ -261,6 +263,14 @@ class Access {
             "permissions" => [
                 "path.read" => "path.read.forum_attachments",
                 "path.write" => "path.write.forum_attachments",
+            ]
+        ];
+        $this->directories["customization"] = [
+            "base" => $this->core->getConfig()->getCoursePath() . "/uploads/customization",
+            "subparts" => [],
+            "permissions" => [
+                "path.read" => "path.read.customization",
+                "path.write" => "path.write.customization",
             ]
         ];
     }
