@@ -59,17 +59,19 @@ class RainbowCustomization extends AbstractModel{
              * the version in the customization.json, but the warning might be nice. Might even be an error state where action is required, just so the user isn't
              * confused when the grade distribution shifts around.
              */
-            $this->customization_data[$bucket][] = [
-                "id" => $gradeable->getId(),
-                "title" => $gradeable->getTitle(),
-                "max_score" => $gradeable->getTAPoints()
-            ];
 
+            $max_score = $gradeable->getTAPoints();
             //If the gradeable has autograding points, load the config and add the non-extra-credit autograder total
             if ($gradeable->hasAutogradingConfig()){
                 $last_index = count($this->customization_data[$bucket])-1;
-                $this->customization_data[$bucket][$last_index]["max_score"] += $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
+                $max_score += $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
             }
+
+            $this->customization_data[$bucket][] = [
+                "id" => $gradeable->getId(),
+                "title" => $gradeable->getTitle(),
+                "max_score" => $max_score
+            ];
         }
 
         //XXX: Assuming that the contents of these buckets will be lowercase
