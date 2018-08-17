@@ -10,7 +10,7 @@ use app\libraries\Output;
 use app\models\Gradeable;
 use app\models\GradeSummary;
 use app\models\RainbowCustomization;
-//use app\views\admin\RainbowCustomizationview; //Should be using the RainbowCustomizationController which can in turn interact with the view
+use app\exceptions\ValidationException;
 
 /*
 use app\report\CSVReportView;
@@ -258,33 +258,57 @@ class ReportController extends AbstractController {
         }
     }
     public function generateCustomization(){
+        //Build a new model, pull in defaults for the course
         $customization = new RainbowCustomization($this->core);
         $customization->buildCustomization();
 
-        $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig',[
-            "customization_data_print" => print_r($customization->getCustomizationData(),true),
-            "customization_data" => $customization->getCustomizationData(),
-            "available_buckets" => $customization->getAvailableBuckets()
-        ]);
-        /*if(isset($_POST["generate_json"])){
-            $customization->processForm();
-            if($customization->error()){
-                $this->core->getOutput()->renderOutput(array('admin','RainbowCustomization'),'printError',$customization->getErrorMessages());
-            }
-            else {
-                //TODO: May want this to just be customization.json or to include the date.
-                $filename = $this->core->getConfig()->getCourse() . "_customization.json";
+        //Try to read in any existing customization.json file, update the model
+        $customization_filename = $this->core->getConfig()->getCoursePath() . "/uploads/customization/customization.json";
+        if(file_exists($customization_filename)) {
+            $customization_filehandle = fopen($customization_filename, "r");
+            /*  TODO: Any reading of existing files goes here, might even want it slightly higher and pass the handle
+             *  or null to RainbowCustomization::buildCustomization($fh);
+             *  Alternately call a new RainbowCustomization::loadCustomization();
+             */
+            fclose($customization_filehandle);
+        }
 
-                //TODO: Enable this when ready
-                //$this->core->renderFile($customization->getCustomizationJSON(),$filename);
-                $this->core->getOutput()->renderOutput(array('admin', 'RainbowCustomization'), 'printCompletedCustomization', $filename);
+        if(isset($_POST["generate_json"])){
+            //Handle user input (the form) being submitted
+            try {
+                $customization->processForm();
+                $customization_filehandle = fopen($customization_filename,"w");
+                fwrite($customization_filehandle,$customization->getCustomizationJSON());
+                fclose($customization_filehandle);
+
+                // Finally, send the requester back the information
+                $this->core->getOutput()->renderJsonSuccess("Succesfully wrote customization.json file");
+            } catch (ValidationException $e) {
+                //Use this to handle any invalid/inconsistent input exceptions thrown during processForm()
+                $this->core->getOutput()->renderJsonFail('See "data" for details', $e->getDetails());
+            } catch (\Exception $e) {
+                //Catches any other exceptions, should be "unexpected" issues
+                $this->core->getOutput()->renderJsonError($e->getMessage());
             }
         }
         else{
-            $this->core->getOutput()->renderOutput(array('admin','RainbowCustomization'),'printForm',$customization->getCustomizationData());
-        }*/
+            //Print the form, since the user hasn't provided us with any data
+            $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig',[
+                "customization_data_print" => print_r($customization->getCustomizationData(),true),
+                "customization_data" => $customization->getCustomizationData(),
+                "available_buckets" => $customization->getAvailableBuckets()
+            ]);
 
-
+            // TODO: For debugging only so we can see if POST changes. Remove this before PR.
+            try {
+                $customization_filehandle = fopen($customization_filename, "w");
+                fwrite($customization_filehandle,"Not-JSON");
+                fclose($customization_filehandle);
+            }
+            catch (\Exception $e) {
+                $this->core->getOutput()->renderJsonError($e->getMessage());
+            }
+        }
     }
 }
 

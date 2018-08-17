@@ -95,9 +95,10 @@ class RainbowCustomization extends AbstractModel{
         return $this->used_buckets;
     }
 
+    //TODO: Implement the real version of this function
     public function getCustomizationJSON(){
         //Logic to trim down the customization data to just what's shown
-        $json_data = [];
+        $json_data = ["Yes-POST"];
         return json_encode($json_data);
     }
 
