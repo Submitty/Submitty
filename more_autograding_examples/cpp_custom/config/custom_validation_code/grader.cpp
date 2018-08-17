@@ -29,7 +29,7 @@ TestResults* TestCase::custom_dispatch(const nlohmann::json& grader) const {
   std::vector<std::string> contents_of_files;
   for (int i = 0; i < filenames.size(); i++) {
     std::string file_contents;
-    std::string f = this->getPrefix() + "_" + filenames[i];
+    std::string f = this->getPrefix() + filenames[i];
     if (!getFileContents(f,file_contents)) {
       return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR!  Could not open student file: '" + f + "'")});
     }    

@@ -3,7 +3,7 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "words_249.pdf",
+                    "actual_file": "test01/words_249.pdf",
                     "description": "*.pdf"
                 }
             ],
@@ -13,7 +13,7 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test02_STDOUT_1.txt",
+                    "actual_file": "test02/STDOUT_1.txt",
                     "description": "Word Count",
                     "messages": [
                         {
@@ -23,7 +23,7 @@
                     ]
                 },
                 {
-                    "actual_file": "test02_plaintext.txt",
+                    "actual_file": "test02/plaintext.txt",
                     "description": "plaintext.txt"
                 }
             ],

@@ -25,8 +25,8 @@
 	    "title" : "NORMAL GRADING:  (hiding the details)",
 	    "command" : [
 		"./a.out",
-		"sort < test02_STDOUT_0.txt",
-		"cut -d \\  -f2-3 < test02_STDOUT_1.txt"
+		"sort < STDOUT_0.txt",
+		"cut -d \\  -f2-3 < STDOUT_1.txt"
 		],
 	    "details" : "./a.out",
 	    "points" : 10,
@@ -78,7 +78,7 @@
 	    "title" : "BEHIND THE SCENES:  checking the sorted output",
 	    "command" : [
 		"./a.out",
-		"sort < test04_STDOUT_0.txt"
+		"sort < STDOUT_0.txt"
 		],
 	    "details" : "./a.out",
 	    "points" : 5,
@@ -104,8 +104,8 @@
 	    "title" : "BEHIND THE SCENES:  checking the second and third words",
 	    "command" : [
 		"./a.out",
-		"sort < test05_STDOUT_0.txt",
-		"cut -d \\  -f2-3 < test05_STDOUT_1.txt"
+		"sort < STDOUT_0.txt",
+		"cut -d \\  -f2-3 < STDOUT_1.txt"
 		],
 	    "details" : "./a.out",
 	    "points" : 5,
