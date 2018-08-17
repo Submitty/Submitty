@@ -126,7 +126,7 @@ bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &s
   }
 
   std::string filename = filenames[0];
-  std::string p_filename = tc.getPrefix() + "_" + filename;
+  std::string p_filename = tc.getPrefix() + filename;
 
   // check for wildcard
   if (p_filename.find('*') != std::string::npos) {
@@ -149,7 +149,7 @@ bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &s
   }
 
   if (!getFileContents(p_filename,student_file_contents)) {
-    messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  Could not open student file: '" + filename + "'"));
+    messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  Could not open student file: '" + p_filename + "'"));
     return false;
   }
   if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_HUGE) {
@@ -643,7 +643,8 @@ std::string TestCase::getTitle() const {
 
 std::string TestCase::getPrefix() const {
   std::stringstream ss;
-  ss << "test" << std::setw(2) << std::setfill('0') << test_case_id;
+  //TODO remove hard coded '/'
+  ss << "test" << std::setw(2) << std::setfill('0') << test_case_id << "/";
   return ss.str();
 }
 

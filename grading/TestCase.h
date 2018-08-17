@@ -97,7 +97,7 @@ public:
     assert (filenames[v].size() > 0);
     return filenames[v][i];
   }
-  std::string getMyPrefixFilename (int v, int i) const { return getPrefix()+"_"+getMyFilename(v,i); }
+  std::string getMyPrefixFilename (int v, int i) const { return getPrefix()+getMyFilename(v,i); }
   std::vector<std::vector<std::string>> getFilenames() const;
 
 
