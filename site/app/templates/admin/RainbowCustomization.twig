@@ -128,7 +128,7 @@
         <div id="config-wrapper">
         {% for bucket, gradeables in customization_data %}
 
-            <div id="config-{{ bucket }}" style="margin-top:25px;min-height:100px;display:none;">
+            <div id="config-{{ bucket }}" style="margin-top:25px;min-height:100px;display:none;" class="bucket_detail_div">
                 <h3 style="display:inline">{{ bucket|capitalize }}</h3>:
                 <input type="text" value="{{ gradeables|length }}" id="config-count-{{ bucket }}" style="display:inline;"> items
                 <span style="float:right;" id="config-percent-{{ bucket }}">0%</span>
@@ -167,6 +167,14 @@
     #buckets_used_list li{
         font-style: italic;
         list-style-type: none;
+    }
+
+    .bucket_detail_div:nth-child(2n){
+        background-color: mediumorchid;
+    }
+
+    .bucket_detail_div:nth-child(2n+1){
+        background-color: lightskyblue;
     }
 </style>
 
