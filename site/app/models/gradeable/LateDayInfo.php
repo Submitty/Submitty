@@ -23,7 +23,16 @@ class LateDayInfo extends AbstractModel {
 
     /** @property @var int The number of unused late days the user has for this gradeable, not including exceptions */
     protected $late_days_available = null;
+    protected $cumulative_late_days_used = null;
 
+    /**
+     * LateDayInfo constructor.
+     * @param Core $core
+     * @param User $user
+     * @param GradedGradeable $graded_gradeable
+     * @param int $cumulative_late_days_used Number of late days used by other gradeables
+     * @param int $late_days_available
+     */
     public function __construct(Core $core, User $user, GradedGradeable $graded_gradeable, int $cumulative_late_days_used, int $late_days_available) {
         parent::__construct($core);
         if (!$graded_gradeable->getSubmitter()->hasUser($user)) {
@@ -38,6 +47,11 @@ class LateDayInfo extends AbstractModel {
             throw new \InvalidArgumentException('Late days available must be at least 0');
         }
         $this->late_days_available = $late_days_available;
+
+        if($cumulative_late_days_used < 0) {
+            throw new \InvalidArgumentException('Late days used must be at least 0');
+        }
+        $this->cumulative_late_days_used = $cumulative_late_days_used;
     }
 
     public function toArray() {
@@ -53,6 +67,10 @@ class LateDayInfo extends AbstractModel {
         ];
     }
 
+    /**
+     * Gets the GradedGradeable associated with this late day info
+     * @return GradedGradeable
+     */
     public function getGradedGradeable() {
         return $this->graded_gradeable;
     }
@@ -88,7 +106,7 @@ class LateDayInfo extends AbstractModel {
     }
 
     public function getLateDaysCharged() {
-        return max($this->getLateDayExceptions() - $this->getDaysLate(), $this->getLateDaysAllowed());
+        return min($this->getLateDayExceptions() - $this->getDaysLate(), $this->getLateDaysAllowed());
     }
 
     public function getDaysLate() {
