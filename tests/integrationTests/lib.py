@@ -7,7 +7,8 @@ import subprocess
 import traceback
 import sys
 from pprint import pprint
-
+import traceback
+import shutil
 # global variable available to be used by the test suite modules
 SUBMITTY_INSTALL_DIR = "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
 SUBMITTY_TUTORIAL_DIR = SUBMITTY_INSTALL_DIR + "/GIT_CHECKOUT/Tutorial"
@@ -135,12 +136,45 @@ def run_tests(names):
     else:
         with bold + red:
             print(str(totalmodules) + "/" + str(len(names)) + " modules passed")
-        sys.exit(1)
+            sys.exit(1)
 
 
 # Run every test currently loaded
 def run_all():
     run_tests(to_run.keys())
+
+# copy the files & directories from source to target
+# it will create directories as needed
+# it's ok if the target directory or subdirectories already exist
+# it will overwrite files with the same name if they exist
+def copy_contents_into(source,target):
+    if not os.path.isdir(target):
+        raise RuntimeError("ERROR: the target directory does not exist '", target, "'")
+    if os.path.isdir(source):
+        for item in os.listdir(source):
+            if os.path.isdir(os.path.join(source,item)):
+                if os.path.isdir(os.path.join(target,item)):
+                    # recurse
+                    copy_contents_into(os.path.join(source,item),os.path.join(target,item))
+                elif os.path.isfile(os.path.join(target,item)):
+                    raise RuntimeError("ERROR: the target subpath is a file not a directory '", os.path.join(target,item), "'")
+                else:
+                    # copy entire subtree
+                    shutil.copytree(os.path.join(source,item),os.path.join(target,item))
+            else:
+                if os.path.exists(os.path.join(target,item)):
+                    os.remove(os.path.join(target,item))
+                try:
+                    shutil.copy(os.path.join(source,item),target)
+                except:
+                    raise RuntimeError("ERROR COPYING FILE: " +  os.path.join(source,item) + " -> " + os.path.join(target,item))
+
+def move_only_files(source, target):
+    source_files = os.listdir(source)
+    for file_name in source_files:
+        full_file_name = os.path.join(source, file_name)
+        if (os.path.isfile(full_file_name)):
+            shutil.move(full_file_name, target)
 
 
 ###################################################################################
@@ -195,23 +229,143 @@ class TestcaseWrapper:
 
     # Run compile.out using some sane arguments.
     def run_compile(self):
+        config_path = os.path.join(self.testcase_path, 'assignment_config', 'config_no_comments.json')
+        with open(config_path, 'r') as infile:
+            config = json.load(infile)
+            my_testcases = config['testcases']
+
+        data_folder = os.path.join(self.testcase_path, 'data')
+
+        #We create a temporary data folder, so that we don't tarnish the original.
+        tmp_data_folder = os.path.join(self.testcase_path, 'tmp_data')
+        if os.path.isdir(tmp_data_folder):
+            shutil.rmtree(tmp_data_folder)
+        os.makedirs(tmp_data_folder)
+
+        #will hold the compiled files and their STDOUT/STDERRs
+        tmp_comp_folder = os.path.join(self.testcase_path, 'tmp_comp')
+
+        #make the work folder used by run_run.
+        if os.path.isdir(tmp_comp_folder):
+            shutil.rmtree(tmp_comp_folder)
+        os.makedirs(tmp_comp_folder)
+
+        #copy the data folder to the temp_data folder, then pull that into the tmp_comp_folder
+        copy_contents_into(data_folder, tmp_data_folder)
+        copy_contents_into(tmp_data_folder,tmp_comp_folder)
+
+        executable_path_list = list()
         with open (os.path.join(self.testcase_path, "log", "compile_output.txt"), "w") as log:
-            return_code = subprocess.call([os.path.join(self.testcase_path, "bin", "compile.out"),
-                "testassignment", "testuser", "1", "0"], \
-                        cwd=os.path.join(self.testcase_path, "data"), stdout=log, stderr=log)
-            if return_code != 0:
-                raise RuntimeError("Compile exited with exit code " + str(return_code))
+            # we start counting from one.
+            for testcase_num in range(1, len(my_testcases)+1):
+                testcase_folder = os.path.join(tmp_comp_folder, "test{:02}".format(testcase_num))
+
+                if 'type' in my_testcases[testcase_num-1]:
+                    if my_testcases[testcase_num-1]['type'] != 'FileCheck' and my_testcases[testcase_num-1]['type'] != 'Compilation':
+                        continue
+
+                    if my_testcases[testcase_num-1]['type'] == 'Compilation':
+                        if 'executable_name' in my_testcases[testcase_num-1]:
+                            provided_executable_list = my_testcases[testcase_num-1]['executable_name']
+                            if not isinstance(provided_executable_list, (list,)):
+                                provided_executable_list = list([provided_executable_list])
+                            for exe in provided_executable_list:
+                                if exe.strip() == '':
+                                    continue
+                                executable_path = os.path.join(testcase_folder, exe)
+                                executable_path_list.append((executable_path, exe))
+                else:
+                    continue
+
+                #make the tmp folder for this testcase.
+                if os.path.isdir(testcase_folder):
+                    shutil.rmtree(testcase_folder)
+                os.makedirs(testcase_folder)
+
+                copy_contents_into(tmp_data_folder, testcase_folder)
+
+                return_code = subprocess.call([os.path.join(self.testcase_path, "bin", "compile.out"),
+                    "testassignment", "testuser", "1", "0", str(testcase_num)], \
+                            cwd=testcase_folder, stdout=log, stderr=log)
+                
+                if return_code != 0:
+                    raise RuntimeError("Compile exited with exit code " + str(return_code))
+
+        compiled_files_directory = os.path.join(self.testcase_path, 'compiled_files')
+
+        #don't trust that the developer properly cleaned up after themselves.
+        if os.path.isdir(compiled_files_directory):
+            shutil.rmtree(compiled_files_directory)
+        os.makedirs(compiled_files_directory)
+
+        # move the compiled files into the compiled_files_directory
+        for path, name in executable_path_list:
+            if not os.path.isfile(path):
+                continue
+            target_path = os.path.join(compiled_files_directory, name)
+            if not os.path.exists(target_path):
+                os.makedirs(os.path.dirname(target_path), exist_ok=True)
+            shutil.copy(path, target_path)
+
+        #create the work folder, which will be used by run_run.
+        work_folder = os.path.join(self.testcase_path, 'work')
+        if os.path.isdir(work_folder):
+            shutil.rmtree(work_folder)
+        os.makedirs(work_folder)
+
+        # move the test##/ files generated by compoliation into the work directory
+        copy_contents_into(tmp_comp_folder,work_folder)
+        shutil.rmtree(tmp_comp_folder)
 
 
     # Run run.out using some sane arguments.
     def run_run(self):
-        with open (os.path.join(self.testcase_path, "log", "run_output.txt"), "w") as log:
-            return_code = subprocess.call([os.path.join(self.testcase_path, "bin", "run.out"),
-                "testassignment", "testuser", "1", "0"], \
-                        cwd=os.path.join(self.testcase_path, "data"), stdout=log, stderr=log)
-            if return_code != 0:
-                raise RuntimeError("run.out exited with exit code " + str(return_code))
+        config_path = os.path.join(self.testcase_path, 'assignment_config', 'config_no_comments.json')
 
+        with open(config_path, 'r') as infile:
+            config = json.load(infile)
+        my_testcases = config['testcases']
+
+        data_folder = os.path.join(self.testcase_path, 'data')
+        tmp_data_folder = os.path.join(self.testcase_path, 'tmp_data')
+        work_folder = os.path.join(self.testcase_path, 'work')
+        compiled_files_directory = os.path.join(self.testcase_path, 'compiled_files')
+
+        if os.path.isdir(tmp_data_folder):
+            shutil.rmtree(tmp_data_folder)
+        os.makedirs(tmp_data_folder)
+
+        copy_contents_into(data_folder, tmp_data_folder)
+
+        with open (os.path.join(self.testcase_path, "log", "run_output.txt"), "w") as log:
+            # we start counting from one.
+            for testcase_num in range(1, len(my_testcases)+1):
+                if 'type' in my_testcases[testcase_num-1]:
+                    if my_testcases[testcase_num-1]['type'] == 'FileCheck' or my_testcases[testcase_num-1]['type'] == 'Compilation':
+                        continue
+                #make the tmp folder for this testcase.
+                testcase_folder = os.path.join(work_folder, "test{:02}".format(testcase_num))
+
+                #don't trust that the developer properly cleaned up after themselves.
+                if os.path.isdir(testcase_folder):
+                    shutil.rmtree(testcase_folder)
+                os.makedirs(testcase_folder)
+                copy_contents_into(tmp_data_folder, testcase_folder)
+                copy_contents_into(compiled_files_directory, testcase_folder)
+
+                return_code = subprocess.call([os.path.join(self.testcase_path, "bin", "run.out"),
+                                            "testassignment", "testuser", "1", "0",str(testcase_num)], \
+                                             cwd=testcase_folder, stdout=log, stderr=log)
+                if return_code != 0:
+                    raise RuntimeError("run.out exited with exit code " + str(return_code))
+
+            #copy the results to the data folder.
+            copy_contents_into(work_folder,data_folder)
+            copy_contents_into(compiled_files_directory, data_folder)
+            shutil.rmtree(work_folder)
+            shutil.rmtree(tmp_data_folder)
+            # if os.path.isdir(compiled_files_directory):
+            #     shutil.rmtree(compiled_files_directory)
 
     # Run the validator using some sane arguments. Likely wants to be made much more
     # customizable (different submission numbers, multiple users, etc.)
@@ -239,10 +393,9 @@ class TestcaseWrapper:
         # if only 1 filename provided...
         if not f2:
             f2 = f1
-        # if no directory provided...
-        if not os.path.dirname(f1):
-            f1 = os.path.join("data", f1)
-        if not os.path.dirname(f2):
+
+        f1 = os.path.join("data", f1)
+        if not 'data' in os.path.split(f2):
             f2 = os.path.join("validation", f2)
 
         filename1 = os.path.join(self.testcase_path, f1)
@@ -284,10 +437,9 @@ class TestcaseWrapper:
         # if only 1 filename provided...
         if not f2:
             f2 = f1
-        # if no directory provided...
-        if not os.path.dirname(f1):
-            f1 = os.path.join("data", f1)
-        if not os.path.dirname(f2):
+
+        f1 = os.path.join("data", f1)
+        if not 'data' in os.path.split(f2):
             f2 = os.path.join("validation", f2)
 
         filename1 = os.path.join(self.testcase_path, f1)
@@ -314,13 +466,13 @@ class TestcaseWrapper:
     ###################################################################################
     def empty_file(self, f):
         # if no directory provided...
-        if not os.path.dirname(f):
-            f = os.path.join("data", f)
+        # if not os.path.dirname(f):
+        f = os.path.join("data", f)
         filename = os.path.join(self.testcase_path, f)
         if not os.path.isfile(filename):
-            raise RuntimeError("File " + f + " should exist")
+            raise RuntimeError("File " + filename + " should exist")
         if os.stat(filename).st_size != 0:
-            raise RuntimeError("File " + f + " should be empty")
+            raise RuntimeError("File " + filename + " should be empty")
 
 
     ###################################################################################
@@ -342,10 +494,9 @@ class TestcaseWrapper:
         # if only 1 filename provided...
         if not f2:
             f2 = f1
-        # if no directory provided...
-        if not os.path.dirname(f1):
-            f1 = os.path.join("data", f1)
-        if not os.path.dirname(f2):
+
+        f1 = os.path.join("data", f1)
+        if not 'data' in os.path.split(f2):
             f2 = os.path.join("validation", f2)
 
         filename1 = os.path.join(self.testcase_path, f1)
@@ -375,9 +526,8 @@ class TestcaseWrapper:
             raise RuntimeError("JSON files are different:  " + filename1 + " " + filename2)
 
     def empty_json_diff(self, f):
-        # if no directory provided...
-        if not os.path.dirname(f):
-            f = os.path.join("data", f)
+
+        f = os.path.join("data", f)
         filename1 = os.path.join(self.testcase_path, f)
         filename2 = os.path.join(SUBMITTY_INSTALL_DIR,"test_suite/integrationTests/data/empty_json_diff_file.json")
         return self.json_diff(filename1,filename2)
@@ -414,10 +564,9 @@ class TestcaseWrapper:
         # if only 1 filename provided...
         if not f2:
             f2 = f1
-        # if no directory provided...
-        if not os.path.dirname(f1):
-            f1 = os.path.join("data", f1)
-        if not os.path.dirname(f2):
+
+        f1 = os.path.join("data", f1)
+        if not 'data' in os.path.split(f2):
             f2 = os.path.join("validation", f2)
 
         filename1 = os.path.join(self.testcase_path, f1)
