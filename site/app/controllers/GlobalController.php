@@ -5,6 +5,7 @@ namespace app\controllers;
 
 
 use app\libraries\FileUtils;
+use app\libraries\Utils;
 use app\models\Button;
 
 class GlobalController extends AbstractController {
@@ -116,6 +117,32 @@ class GlobalController extends AbstractController {
             $sidebar_buttons[] = new Button($this->core, [
                 "class" => "nav-row short-line"
             ]);
+
+            $sidebar_links = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'config', 'sidebar.json');
+            if (file_exists($sidebar_links)) {
+                $links = json_decode(file_get_contents($sidebar_links), true);
+                if (is_array($links)) {
+                    foreach ($links as $link) {
+                        if (empty($link['title'])) {
+                            continue;
+                        }
+                        if (empty($link['icon'])) {
+                            $link['icon'] = "fa-question";
+                        }
+                        if (!Utils::startsWith($link['icon'], "fa-")) {
+                            $link['icon'] = "fa-".$link['icon'];
+                        }
+                        $sidebar_buttons[] = new Button($this->core, [
+                            "href" => $link['link'] ?? null,
+                            "title" => $link['title'],
+                            "class" => "nav-row",
+                            "id" => "nav-sidebar-".strtolower(str_replace(" ", "_", $link['title'])),
+                            "icon" => $link['icon']
+                        ]);
+                    }
+                    $sidebar_buttons[] = new Button($this->core, ["class" => "nav-row short-line"]);
+                }
+            }
 
             if ($this->core->getUser()->accessAdmin()) {
                 $sidebar_buttons[] = new Button($this->core, [

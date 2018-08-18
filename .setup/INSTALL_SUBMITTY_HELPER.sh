@@ -113,7 +113,7 @@ PHP_UID=$(jq -r '.php_uid' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 PHP_GID=$(jq -r '.php_gid' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 CGI_USER=$(jq -r '.cgi_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 DAEMONPHP_GROUP=$(jq -r '.daemonphp_group' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
-
+DAEMONCGI_GROUP=$(jq -r '.daemoncgi_group' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 
 ########################################################################################################################
 ########################################################################################################################
@@ -241,9 +241,9 @@ chmod  751                                        ${SUBMITTY_DATA_DIR}
 if [ "${WORKER}" == 0 ]; then
     chown  root:${COURSE_BUILDERS_GROUP}              ${SUBMITTY_DATA_DIR}/courses
     chmod  751                                        ${SUBMITTY_DATA_DIR}/courses
-    chown  root:www-data                              ${SUBMITTY_DATA_DIR}/vcs
+    chown  root:${DAEMONCGI_GROUP}                    ${SUBMITTY_DATA_DIR}/vcs
     chmod  770                                        ${SUBMITTY_DATA_DIR}/vcs
-    chown  root:www-data                              ${SUBMITTY_DATA_DIR}/vcs/git
+    chown  root:${DAEMONCGI_GROUP}                    ${SUBMITTY_DATA_DIR}/vcs/git
     chmod  770                                        ${SUBMITTY_DATA_DIR}/vcs/git
 fi
 
@@ -691,13 +691,11 @@ chmod o+r ${SUBMITTY_INSTALL_DIR}/config/version.json
 REBUILD_ALL_FILENAME=${SUBMITTY_INSTALL_DIR}/REBUILD_ALL_FLAG.txt
 
 if [ -f $REBUILD_ALL_FILENAME ]; then
-    echo -e "\n\nMigration has indicated that the code includes a breaking change for autograding\n\n"
+    echo -e "\n\nMigration has indicated that the code includes a breaking change for autograding"
     echo -e "\n\nMust rebuild ALL GRADEABLES\n\n"
     for s in /var/local/submitty/courses/*/*; do c=`basename $s`; ${s}/BUILD_${c}.sh --clean; done
     echo -e "\n\nDone rebuilding ALL GRADEABLES for ALL COURSES\n\n"
     rm $REBUILD_ALL_FILENAME
-else
-    echo "File $REBUILD_ALL_FILENAME does not exist."
 fi
 
 

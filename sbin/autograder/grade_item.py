@@ -27,10 +27,6 @@ with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
     OPEN_JSON = json.load(open_file)
 DAEMON_UID = OPEN_JSON['daemon_uid']
 
-
-# NOTE: DOCKER SUPPORT PRELIMINARY -- NEEDS MORE SECURITY BEFORE DEPLOYED ON LIVE SERVER
-USE_DOCKER = False
-
 def add_permissions(item,perms):
     if os.getuid() == os.stat(item).st_uid:
         os.chmod(item,os.stat(item).st_mode | perms)
@@ -180,6 +176,7 @@ def clean_parts(path, log_path=os.devnull):
 # ==================================================================================
 
 def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untrusted):
+
     os.chdir(SUBMITTY_DATA_DIR)
     tmp = os.path.join("/var/local/submitty/autograding_tmp/",which_untrusted,"tmp")
 
@@ -248,11 +245,21 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     # --------------------------------------------------------------------
     # START DOCKER
 
+    # NOTE: DOCKER SUPPORT PRELIMINARY -- NEEDS MORE SECURITY BEFORE DEPLOYED ON LIVE SERVER
+    complete_config = os.path.join(tmp_autograding,"complete_config.json")
+    with open(complete_config, 'r') as infile:
+        complete_config_obj = json.load(infile)
+
+    # intentionally fragile to avoid redundancy
+    USE_DOCKER = complete_config_obj['docker_enabled']
+
+
+
     # WIP: This option file facilitated testing...
     #USE_DOCKER = os.path.isfile("/tmp/use_docker")
     #use_docker_string="grading begins, using DOCKER" if USE_DOCKER else "grading begins (not using docker)"
     #grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,submission_path,message=use_docker_string)
-    
+
     container = None
     if USE_DOCKER:
         container = subprocess.check_output(['docker', 'run', '-t', '-d',
@@ -273,6 +280,21 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     os.mkdir(tmp_compilation)
     os.chdir(tmp_compilation)
 
+    submission_path = os.path.join(tmp_submission,"submission")
+    checkout_path = os.path.join(tmp_submission,"checkout")
+
+    provided_code_path = os.path.join(tmp_autograding,"provided_code")
+    test_input_path = os.path.join(tmp_autograding,"test_input")
+    test_output_path = os.path.join(tmp_autograding,"test_output")
+    custom_validation_code_path = os.path.join(tmp_autograding,"custom_validation_code")
+    bin_path = os.path.join(tmp_autograding,"bin")
+    form_json_config = os.path.join(tmp_autograding,"form.json")
+
+
+    with open(form_json_config, 'r') as infile:
+        gradeable_config_obj = json.load(infile)
+    gradeable_deadline_string = gradeable_config_obj["date_due"]
+    
     patterns_submission_to_compilation = complete_config_obj["autograding"]["submission_to_compilation"]
 
     # give the untrusted user read/write/execute permissions on the tmp directory & files
@@ -500,8 +522,6 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                               stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
     add_permissions(os.path.join(tmp_work,"my_validator.out"), stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
-
-
 
     #todo remove prints.
     print("VALIDATING")

@@ -226,8 +226,6 @@ class Config extends AbstractModel {
         $this->log_exceptions = true;
 
         $this->base_url = $submitty_json['submission_url'];
-        $this->vcs_url = $submitty_json['vcs_url'];
-        $this->cgi_url = $submitty_json['cgi_url'];
         $this->submitty_path = $submitty_json['submitty_data_dir'];
 
         if (isset($submitty_json['timezone'])) {
@@ -252,7 +250,14 @@ class Config extends AbstractModel {
         $this->timezone = new \DateTimeZone($this->timezone);
 
         $this->base_url = rtrim($this->base_url, "/")."/";
-        $this->cgi_url = rtrim($this->cgi_url, "/")."/";
+        $this->cgi_url = $this->base_url."cgi-bin/";
+
+        if (empty($submitty_json['vcs_url'])) {
+            $this->vcs_url = $this->base_url . '{$vcs_type}/';
+        }
+        else {
+            $this->vcs_url = rtrim($submitty_json['vcs_url'], '/').'/';
+        }
 
         // Check that the paths from the config file are valid
         foreach(array('submitty_path', 'submitty_log_path') as $path) {
@@ -292,10 +297,16 @@ class Config extends AbstractModel {
             'display_custom_message', 'room_seating_gradeable_id', 'course_email', 'vcs_base_url', 'vcs_type', 'private_repository', 'forum_enabled', 'regrade_enabled', 'regrade_message');
         $this->setConfigValues($this->course_ini, 'course_details', $array);
 
+        if (empty($this->vcs_base_url)) {
+            $this->vcs_base_url = $this->vcs_url . $this->semester . '/' . $this->course;
+        }
+
+        $this->vcs_base_url = rtrim($this->vcs_base_url, "/")."/";
+
         if (isset($this->course_ini['hidden_details'])) {
             $this->hidden_details = $this->course_ini['hidden_details'];
             if (isset($this->course_ini['hidden_details']['course_url'])) {
-                $this->base_url = rtrim($this->course_ini['hidden_details']['course_url'], "/")."/";;
+                $this->base_url = rtrim($this->course_ini['hidden_details']['course_url'], "/")."/";
             }
         }
 
