@@ -99,6 +99,10 @@ function prepGradedComponent(component, graded_component) {
 function renderGradingGradeable(gradeable, graded_gradeable) {
     return loadTemplates()
         .then(function () {
+            if(graded_gradeable.graded_components === undefined) {
+                graded_gradeable.graded_components = {};
+            }
+
             // Calculate the total scores
             gradeable.components.forEach(function (component) {
                 graded_gradeable.graded_components[component.id]
