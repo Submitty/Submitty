@@ -77,7 +77,9 @@
         <span class="grading_label" style="padding-bottom: 0px">Submissions and Results Browser ></span>
         <span class="grading_label" style="padding-top: 5px; margin-left: -15px" id="grading_file_name"></span>
         <a onclick='collapseFile()'><i class="fa fa-mail-reply" style="font-size:24px" aria-hidden="true" title="Back"></i></a>
+        {% include "grading/electronic/PDFAnnotationBar.twig" %}
         <div id="file_content" style="overflow: auto; height:90%;position: absolute;width: 100%;"></div>
+
     </div>
 </div>
 
@@ -99,16 +101,15 @@
             }
             // handle pdf
             if (url_file.substring(url_file.length - 3) === "pdf") {
-                alert("Please use the pdf viewer by clicking on the right arrow");
-                {#iframe.html("<iframe id='" + iframeId + "' src='{{ site_url|escape("js") }}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' height='1200px' style='border: 0'></iframe>");#}
+                expandFile(html_file, url_file);
             }
             else {
                 iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{{ core.getConfig().getSiteUrl() }}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' style='border: 0'></iframe>");
                 if(iframe.hasClass("full_panel")){
                     $('#'+iframeId).attr("height", "1200px");
                 }
+                iframe.addClass('open');
             }
-            iframe.addClass('open');
         }
         if(!iframe.hasClass("full_panel")){
             if (!iframe.hasClass('shown')) {
@@ -158,7 +159,7 @@
     function loadFile(dir, path){
         let extension = dir.split('.').pop();
         if(extension == "pdf"){
-            $('#pdf_annotation_bar').css('visibility', 'visible');
+            $('#pdf_annotation_bar').show();
             $('#save_status').show();
             return $.ajax({
                 type: 'POST',
@@ -188,10 +189,12 @@
         //Removing these two to reset the full panel viewer.
         $("#file_viewer_full_panel").remove();
         $("#content-wrapper").remove();
+        if($("#pdf_annotation_bar").is(":visible")){
+            $('#pdf_annotation_bar').hide();
+        }
         $("#directory_view").show();
         var offset1 = $("#directory_view").css('left');
         var offset2 = $("#directory_view").width();
-
         $("#directory_view").animate({'left': '-=' + offset1}, 200);
         $("#file_view").animate({'left': '+=' + offset2 + 'px'}, 200, function(){
             $('#file_view').css('left', "");

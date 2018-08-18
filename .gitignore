@@ -31,3 +31,6 @@ db_update.php
 .vscode
 *.egg-info/
 composer.phar
+
+Pipfile
+Pipfile.lock

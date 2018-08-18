@@ -90,7 +90,7 @@ class Team extends AbstractModel {
 
     /**
      * Get user ids of team members
-     * @return array(string)
+     * @return string[]
     */
     public function getMembers() {
         return $this->member_user_ids;
@@ -98,7 +98,7 @@ class Team extends AbstractModel {
 
     /**
      * Get user ids of those invited to the team
-     * @return array(string)
+     * @return string[]
     */
     public function getInvitations() {
         return $this->invited_user_ids;
