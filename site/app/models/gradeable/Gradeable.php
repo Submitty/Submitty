@@ -1491,4 +1491,25 @@ class Gradeable extends AbstractModel {
             throw new \Exception("Failed to write to team history to settings file");
         }
     }
+
+    public function getRepositoryPath(User $user, Team $team = null) {
+        if (strpos($this->getVcsSubdirectory(), '://') !== false || substr($this->getVcsSubdirectory(), 0, 1) === '/') {
+            $vcs_path = $this->getVcsSubdirectory();
+        } else {
+            if (strpos($this->core->getConfig()->getVcsBaseUrl(), '://')) {
+                $vcs_path = rtrim($this->core->getConfig()->getVcsBaseUrl(), '/') . '/' . $this->getVcsSubdirectory();
+            } else {
+                $vcs_path = FileUtils::joinPaths($this->core->getConfig()->getVcsBaseUrl(), $this->getVcsSubdirectory());
+            }
+        }
+        $repo = $vcs_path;
+
+        $repo = str_replace('{$vcs_type}', $this->core->getConfig()->getVcsType(), $repo);
+        $repo = str_replace('{$gradeable_id}', $this->getId(), $repo);
+        $repo = str_replace('{$user_id}', $user->getId(), $repo);
+        if ($this->isTeamAssignment() && $team !== null) {
+            $repo = str_replace('{$team_id}', $team->getId(), $repo);
+        }
+        return $repo;
+    }
 }

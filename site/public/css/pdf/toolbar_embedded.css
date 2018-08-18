@@ -5,108 +5,70 @@
 
 .toolbar-action, .toolbar-item {
     text-align: center;
-    margin-left: 8px;
-    font-size: 25px;
-    margin-bottom: 8px;
-}
-
-.toolbar-item[value^="pen"] {
-    padding-bottom: 6px;
-    margin-left: 3px;
-    padding-right: 5px;
-    padding-left: 4px;
-}
-
-.toolbar-item[value^="eraser"] {
-    padding-left: 2px;
-    padding-right: 3px;
-    padding-bottom: 5px;
-    margin-left: 3px;
-    margin-top: -2px;
-    margin-bottom: 4px;
-}
-
-.toolbar-item[value^="cursor"] {
-    padding-right: 5px;
-    margin-left: 4px;
-    padding-left: 7px;
-    padding-bottom: 9px;
-}
-
-.toolbar-item[value^="rect"] {
-    margin-left: 3px;
-    padding-left: 2px;
-    padding-right: 1px;
-    padding-bottom: 4px;
-    padding-top: 2px;
-}
-
-.toolbar-item[value^="text"] {
-    padding-left: 4px;
-    padding-right: 4px;
-    margin-left: 3px;
-    padding-bottom: 5px;
-}
-
-.toolbar-action[value^='zoomcustom'] {
-    font-weight: bold;
-    font-size: 13px;
-    margin-left: 4px;
+    margin-left: 6px;
+    font-size: 19px;
 }
 
 #pdf_annotation_icons {
     position:relative;
     display: block;
-    float: left;
-    padding-top:3px;
-    padding-bottom:3px;
-    background-color: #edf6f6;
-    width: 37px;
-    border: 5px solid #0088bf;
+    width: fit-content;
 }
 
 #pdf_annotation_bar {
-    position: absolute;
-    height: 284px;
-    width: 52px;
-    bottom: 30px;
-    left: 50%;
+    display: none;
+    position:relative;
+    left: 1%;
     z-index:41;
     box-sizing: content-box;
+    margin-bottom: 6px;
 }
 
-.selection_panel {
+.toolbar-action[value^='color'] {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 1px solid #000;
+    vertical-align: middle;
+    margin-top: -5px;
+}
+
+.toolbar-action[value^='save']{
+    font-family: 'Source Sans Pro', sans-serif;
+    font-size: 16px;
+}
+
+.selection-menu {
     display: none;
-    left: 58px;
     position: absolute;
-    background: #edf6f6;
-    border: 3px solid #0088bf;
-    border-radius: .2em;
-    width: 130px;
-    height:100px;
-}
-.selection_panel:after {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 25%;
-    width: 0;
-    height: 0;
-    border: 0.563em solid transparent;
-    border-right-color: #0088bf;
-    border-left: 0;
-    margin-top: -0.562em;
-    margin-left:-0.562em;
+    width: 150px;
+    height: 80px;
+    border: 1px solid #7dfa78;
+    background: #a4dad573;
+    top: auto;
 }
 
-#zoom_selection {
-    top: 182px;
+#text_size_selector {
+    padding: initial;
+    font-size: initial;
+    border: initial;
+    height: initial;
+    background-size: initial;
 }
 
-#pen_selection {
-    top: 30px;
+#color_selector_menu {
+    left: 295px;
 }
 
-#text_selection {
-    top: 115px;
+#size_selector_menu {
+    left: 327px;
+}
+
+.color {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 1px solid #000;
+    vertical-align: middle;
+    margin: 2px;
 }
