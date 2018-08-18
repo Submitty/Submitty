@@ -458,25 +458,27 @@ registerKeyHandler({name: "Open Next Component", code: 'ArrowDown'}, function(e)
     let openComponentId = getFirstOpenComponentId();
     let numComponents = getComponentCount();
 
-    if(isOverallCommentOpen()) {
+    // Note: we use the 'toggle' functions instead of the 'open' functions
+    //  Since the 'open' functions don't close any components
+    if (isOverallCommentOpen()) {
         // Overall comment is open, so just close it
         closeOverallComment(true);
     } else if (openComponentId === NO_COMPONENT_ID) {
         // No component is open, so open the first one
         let componentId = getComponentIdByOrder(0);
-        openComponent(componentId).then(function () {
-            getComponentDOMElement(componentId).scrollIntoView();
+        toggleComponent(componentId, true).then(function () {
+            getComponentDOMElement(componentId)[0].scrollIntoView();
         });
-    } else if (openComponentId === numComponents) {
+    } else if (openComponentId === getComponentIdByOrder(numComponents - 1)) {
         // Last component is open, so open the general comment
-        openOverallComment().then(function () {
-            getOverallCommentDOMElement().scrollIntoView();
+        toggleOverallComment(true).then(function () {
+            getOverallCommentDOMElement()[0].scrollIntoView();
         });
     } else {
         // Any other case, open the next one
         let nextComponentId = getNextComponentId(openComponentId);
-        openComponent(nextComponentId).then(function () {
-            getComponentDOMElement(nextComponentId).scrollIntoView();
+        toggleComponent(nextComponentId, true).then(function () {
+            getComponentDOMElement(nextComponentId)[0].scrollIntoView();
         });
     }
     e.preventDefault();
@@ -486,16 +488,19 @@ registerKeyHandler({name: "Open Previous Component", code: 'ArrowUp'}, function(
     let openComponentId = getFirstOpenComponentId();
     let numComponents = getComponentCount();
 
-    if(isOverallCommentOpen()) {
+    // Note: we use the 'toggle' functions instead of the 'open' functions
+    //  Since the 'open' functions don't close any components
+    if (isOverallCommentOpen()) {
         // Overall comment open, so open the last component
-        openComponent(getComponentIdByOrder(numComponents-1)).then(function () {
-            getComponentDOMElement(numComponents-1).scrollIntoView();
+        let componentId = getComponentIdByOrder(numComponents - 1);
+        toggleComponent(componentId, true).then(function () {
+            getComponentDOMElement(componentId)[0].scrollIntoView();
         });
     }
     else if (openComponentId === NO_COMPONENT_ID) {
         // No Component is open, so open the overall comment
-        openOverallComment().then(function () {
-            getOverallCommentDOMElement().scrollIntoView();
+        toggleOverallComment(true).then(function () {
+            getOverallCommentDOMElement()[0].scrollIntoView();
         });
     } else if (openComponentId === getComponentIdByOrder(0)) {
         // First component is open, so close it
@@ -503,8 +508,8 @@ registerKeyHandler({name: "Open Previous Component", code: 'ArrowUp'}, function(
     } else {
         // Any other case, open the previous one
         let prevComponentId = getPrevComponentId(openComponentId);
-        openComponent(prevComponentId).then(function () {
-            getComponentDOMElement(prevComponentId).scrollIntoView();
+        toggleComponent(prevComponentId, true).then(function () {
+            getComponentDOMElement(prevComponentId)[0].scrollIntoView();
         });
     }
     e.preventDefault();

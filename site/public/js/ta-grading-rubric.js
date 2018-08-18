@@ -936,7 +936,7 @@ function getOpenComponentIds() {
  * @return {int}
  */
 function getComponentIdByOrder(order) {
-    return $('.component-container')[order].find('.component').attr('data-component_id');
+    return $('.component-container').eq(order).find('.component').attr('data-component_id');
 }
 
 /**
@@ -962,7 +962,7 @@ function getComponentOrderById(component_id) {
  * @return {int}
  */
 function getNextComponentId(component_id) {
-    return $('#component-' + component_id).parent().next().child().attr('data-component_id');
+    return getComponentDOMElement(component_id).parent('.component-container').next().children('.component').attr('data-component_id');
 }
 
 /**
@@ -971,7 +971,7 @@ function getNextComponentId(component_id) {
  * @return {int}
  */
 function getPrevComponentId(component_id) {
-    return $('#component-' + component_id).parent().prev().child().attr('data-component_id');
+    return getComponentDOMElement(component_id).parent('.component-container').prev().children('.component').attr('data-component_id');
 }
 
 /**
