@@ -3266,7 +3266,7 @@ AND gc_id IN (
      * @param int[] $mark_ids
      */
     private function deleteGradedComponentMarks(GradedComponent $graded_component, $mark_ids) {
-        if (count($mark_ids) === 0) {
+        if ($mark_ids === null || count($mark_ids) === 0) {
             return;
         }
 
