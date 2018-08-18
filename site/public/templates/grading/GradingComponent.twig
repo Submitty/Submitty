@@ -93,10 +93,13 @@ Required inputs:
 {% block extra_mark_rows %}
     {# Custom mark (only display in non-edit mode #}
     {% if not edit_marks_enabled %}
-        <div class="custom-mark-container mark-container row">
-            <span class="{{ graded_component.custom_mark_selected ? "mark-selected" : "" }} mark-selector col-no-gutters"
-                  data-mark_id="0"
-                  onclick="onToggleCustomMark(this)">
+        <div class="custom-mark-container mark-container row"
+             data-mark_id="0">
+            <span class="mark-selector-container">
+                <span class="{{ graded_component.custom_mark_selected ? "mark-selected" : "" }} mark-selector col-no-gutters"
+                      data-mark_id="0"
+                      onclick="onToggleCustomMark(this)">
+                </span>
             </span>
             <span class="col-no-gutters mark-points">
                 <input type="number"

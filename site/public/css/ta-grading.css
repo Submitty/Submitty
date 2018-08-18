@@ -518,7 +518,8 @@ tr.is_publish {
 }
 
 .gradeable .mark-selector {
-    min-width: 20px;
+    width: 20px;
+    height: 20px;
     margin: 2px;
     border: 2px solid #000;
     border-radius: 4px;
