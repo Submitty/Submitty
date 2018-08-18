@@ -789,7 +789,7 @@ function getMarkFromDOM(mark_id) {
             deleted: domElement.hasClass('mark-deleted')
         };
     } else {
-        if (domElement.hasClass('custom-mark-container')) {
+        if (mark_id === 0) {
             return null;
         }
         return {
