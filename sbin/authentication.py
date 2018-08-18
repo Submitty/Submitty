@@ -2,27 +2,15 @@
 
 import json
 import os
-import subprocess
-import uuid
 
 import requests
-from sqlalchemy import create_engine, MetaData, Table, bindparam
-from submitty_utils.user import get_php_db_password
+from requests.exceptions import RequestException
 
 CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
 
 with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
     OPEN_JSON = json.load(open_file)
-DATA_DIR = OPEN_JSON['submitty_data_dir']
-CGI_URL = OPEN_JSON['cgi_url']
-
-with open(os.path.join(CONFIG_PATH, 'database.json')) as open_file:
-    OPEN_JSON = json.load(open_file)
-DATABASE_HOST = OPEN_JSON['database_host']
-DATABASE_USER = OPEN_JSON['database_user']
-DATABASE_PASS = OPEN_JSON['database_password']
-
-AUTHENTICATION_METHOD = OPEN_JSON['authentication_method']
+SUBMISSION_URL = OPEN_JSON['submission_url']
 
 
 def check_password(environ, user, password):
@@ -49,141 +37,27 @@ def check_password(environ, user, password):
 
     params = list(filter(lambda x: x not in vcs_paths, params))
     if len(params) == 5:
-        semester, course, gradeable = params[1:4]
-
-        # check if this is a team or individual gradeable
-        course_db = "submitty_{}_{}".format(semester, course)
-        if os.path.isdir(DATABASE_HOST):
-            course_conn_string = "postgresql://{}:{}@/{}?host={}".format(DATABASE_USER, DATABASE_PASS, course_db, DATABASE_HOST)
-        else:
-            course_conn_string = "postgresql://{}:{}@{}/{}".format(DATABASE_USER, DATABASE_PASS, DATABASE_HOST, course_db)
-
-        course_engine = create_engine(course_conn_string)
-        course_connection = course_engine.connect()
-        course_metadata = MetaData(bind=course_engine)
-
-        eg_table = Table('electronic_gradeable', course_metadata, autoload=True)
-        select = eg_table.select().where(eg_table.c.g_id == bindparam('gradeable_id'))
-        eg = course_connection.execute(select, gradeable_id=gradeable).fetchone()
-
-        if eg is None:
-            is_team = False
-        else:
-            is_team = eg.eg_team_assignment
-
-        if is_team:
-            user_id = None
-            team_id = params[4]
-        else:
-            user_id = params[4]
-            team_id = None
+        semester, course, gradeable, unknown_id = params[1:]
     else:
         return None
 
-    engine = connection = metadata = None
-    authenticated = False
+    data = {
+        'user_id': user,
+        'password': password,
+        'gradeable_id': gradeable,
+        'id': unknown_id,
+    }
 
-    if AUTHENTICATION_METHOD == 'PamAuthentication':
-        authenticated = check_pam(user, password)
-        # print(authenticated)
-    elif AUTHENTICATION_METHOD == 'DatabaseAuthentication':
-        engine, connection, metadata = open_database()
-        authenticated = check_database(user, password, connection, metadata)
-
-    if authenticated is not True or user == user_id:
-        close_database(engine, connection)
-        close_database(course_engine, course_connection)
-        return authenticated
-
-    if is_team:
-        teams_table = Table('teams', course_metadata, autoload=True)
-        select = teams_table.select().where(teams_table.c.team_id == bindparam('team_id')).where(teams_table.c.user_id == bindparam('user_id'))
-        team_user = course_connection.execute(select, team_id=team_id, user_id=user).fetchone()
-        if team_user is not None:
-            close_database(engine, connection)
-            close_database(course_engine, course_connection)
-            return authenticated
-
-    if engine is None:
-        engine, connection, metadata = open_database()
-
-    users_table = Table('courses_users', metadata, autoload=True)
-    select = users_table.select().where(users_table.c.user_id == bindparam('user_id'))\
-        .where(users_table.c.semester == bindparam('semester')).where(users_table.c.course == bindparam('course'))
-    course_user = connection.execute(select, user_id=user, semester=semester, course=course).fetchone()
-    if course_user is None:
-        authenticated = None
-    else:
-        if course_user['user_group'] <= 2:
-            authenticated = True
-        else:
-            authenticated = False
-
-    close_database(engine, connection)
-    close_database(course_engine, course_connection)
-
-    return authenticated
-
-
-def check_pam(username, password):
-    """
-
-    :param username:
-    :param password:
-    :return: boolean if PAM succeeded (True) or failed (False) to authenticate the username/password
-    """
-    authenticated = False
-    filename = uuid.uuid4().hex
-    filepath = os.path.join('/tmp', filename)
-    with os.fdopen(os.open(filepath, os.O_CREAT | os.O_RDWR, 0o640), 'w') as fd:
-        json.dump({'username': username, 'password': password}, fd)
-
-    # noinspection PyBroadException
     try:
-        r = requests.get(CGI_URL.rstrip('/') + '/pam_check.cgi?file=' + filename)
-        response = r.json()
-        authenticated = response['authenticated']
-    except:
+        req = requests.post(SUBMISSION_URL + '/index.php?semester={}&course={}&component=authentication&page=vcs_login'.format(semester, course), data=data)
+        response = req.json()
+        if response['status'] == 'error':
+            return None
+        else:
+            return response['status'] == 'success'
+    except RequestException:
         pass
-    finally:
-        # print(filepath)
-        os.remove(filepath)
-        pass
-    return authenticated
-
-
-def open_database():
-    db = 'submitty'
-    if os.path.isdir(DATABASE_HOST):
-        conn_string = "postgresql://{}:{}@/{}?host={}".format(DATABASE_USER, DATABASE_PASS, db, DATABASE_HOST)
-    else:
-        conn_string = "postgresql://{}:{}@{}/{}".format(DATABASE_USER, DATABASE_PASS, DATABASE_HOST, db)
-
-    engine = create_engine(conn_string)
-    connection = engine.connect()
-    metadata = MetaData(bind=engine)
-    return engine, connection, metadata
-
-
-def close_database(engine, connection):
-    if engine is not None:
-        connection.close()
-        engine.dispose()
-
-
-def check_database(username, password, connection, metadata):
-    password = get_php_db_password(password)
-
-    users_table = Table('users', metadata, autoload=True)
-    select = users_table.select().where(users_table.c.user_id == bindparam('user_id'))
-    user = connection.execute(select, user_id=username).fetchone()
-    if user is None:
-        authenticated = None
-    else:
-        php = "print(password_verify('{}', '{}') == true ? 'true' : 'false');".format(password, user['password'])
-        authenticated = subprocess.check_output(['php', '-r', php]) == 'true'
-
-    return authenticated
+    return False
 
 
 if __name__ == "__main__":
