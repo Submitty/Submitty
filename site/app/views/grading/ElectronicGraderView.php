@@ -442,14 +442,16 @@ class ElectronicGraderView extends AbstractView {
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
     public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, string $prev_id, string $next_id, $not_in_my_section=false, $show_hidden_cases=false, $can_verify) {
+        $new_gradeable = $graded_gradeable->getGradeable();
+
         $peer = false;
         if($this->core->getUser()->getGroup()==User::GROUP_STUDENT && $gradeable->getPeerGrading()) {
             $peer = true;
         }
 
         $return = "";
-        //$return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderPDFBar');
-        //$return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderNavigationBar', $gradeable, $progress, $prev_id, $next_id, $not_in_my_section, $peer);
+        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderPDFBar');
+        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderNavigationBar', $new_gradeable, $progress, $prev_id, $next_id, $not_in_my_section, $peer);
         //$return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderAutogradingPanel', $gradeable, $show_hidden_cases);
         //$return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderSubmissionPanel', $gradeable);
         $user = $gradeable->getUser();
@@ -494,7 +496,7 @@ class ElectronicGraderView extends AbstractView {
     }
 
     /**
-     * @param Gradeable $gradeable
+     * @param \app\models\gradeable\Gradeable $gradeable
      * @param float $progress
      * @param string $prev_id
      * @param string $next_id
@@ -502,14 +504,14 @@ class ElectronicGraderView extends AbstractView {
      * @param bool $peer
      * @return string
      */
-    public function renderNavigationBar(Gradeable $gradeable, float $progress, string $prev_id, string $next_id, bool $not_in_my_section, bool $peer) {
+    public function renderNavigationBar(\app\models\gradeable\Gradeable $gradeable, float $progress, string $prev_id, string $next_id, bool $not_in_my_section, bool $peer) {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/NavigationBar.twig", [
             "studentNotInSection" => $not_in_my_section,
-            "prev_id" => $prev_id,
-            "next_id" => $next_id,
             "progress" => $progress,
-            "gradeable" => $gradeable,
-            "peer" => $peer
+            "peer" => $peer,
+            "prev_student_url" => $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id' => $prev_id]),
+            "next_student_url" => $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id' => $next_id]),
+            "home_url" => $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'details', 'gradeable_id' => $gradeable->getId()]),
         ]);
     }
 
