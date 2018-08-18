@@ -24,11 +24,14 @@
     function unloadSave() {
         if (!__unloadRequestSent) {
             __unloadRequestSent = true;
-            saveLastOpenedComponent(false, function () {
-            }, function () {
-                // Unable to save so try saving at a different time
-                __unloadRequestSent = false;
-            });
+            closeAllComponents(true)
+                .then(function() {
+                    __unloadRequestSent = true;
+                })
+                .catch(function () {
+                    // Unable to save so try saving at a different time
+                    __unloadRequestSent = false;
+                });
         }
     }
     // Will work for Chrome
