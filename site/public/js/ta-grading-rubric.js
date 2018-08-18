@@ -996,6 +996,20 @@ function getComponentCount() {
 }
 
 /**
+ * Gets the mark id for a component and order
+ * @param {int} component_id
+ * @param {int} mark_order
+ * @returns {int} Mark id or 0 if out of bounds
+ */
+function getMarkIdFromOrder(component_id, mark_order) {
+    let jquery = getComponentDOMElement(component_id).find('.mark-container')
+    if(mark_order < jquery.length) {
+        return parseInt(jquery.eq(mark_order).attr('data-mark_id'));
+    }
+    return 0;
+}
+
+/**
  * Gets the id of the open component from the cookie
  * @return {int} Returns zero of no open component exists
  */
@@ -1048,6 +1062,15 @@ function isOverallCommentOpen() {
  */
 function isMarkChecked(mark_id) {
     return getMarkDOMElement(mark_id).find('span.mark-selected').length > 0;
+}
+
+/**
+ * Gets if a mark is disabled (shouldn't be checked
+ * @param {int} mark_id
+ * @returns {boolean}
+ */
+function isMarkDisabled(mark_id) {
+    return getMarkDOMElement(mark_id).hasClass('mark-disabled');
 }
 
 /**
@@ -1768,6 +1791,11 @@ function closeOverallComment(saveChanges = true) {
  * @return {Promise}
  */
 function checkMark(component_id, mark_id) {
+    // Don't let them check a disabled mark
+    if (isMarkDisabled(mark_id)) {
+        return Promise.resolve();
+    }
+
     // First fetch the necessary information from the DOM
     let gradedComponent = getGradedComponentFromDOM(component_id);
 

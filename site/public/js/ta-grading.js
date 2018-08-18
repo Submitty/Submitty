@@ -514,38 +514,42 @@ registerKeyHandler({name: "Open Previous Component", code: 'ArrowUp'}, function(
 // Selecting marks
 
 registerKeyHandler({name: "Select Mark 1", code: 'Digit1', locked: true}, function() {
-    selectCurrentMarkCheck(0);
+    checkOpenComponentMark(0);
 });
 registerKeyHandler({name: "Select Mark 2", code: 'Digit2', locked: true}, function() {
-    selectCurrentMarkCheck(1);
+    checkOpenComponentMark(1);
 });
 registerKeyHandler({name: "Select Mark 3", code: 'Digit3', locked: true}, function() {
-    selectCurrentMarkCheck(2);
+    checkOpenComponentMark(2);
 });
 registerKeyHandler({name: "Select Mark 4", code: 'Digit4', locked: true}, function() {
-    selectCurrentMarkCheck(3);
+    checkOpenComponentMark(3);
 });
 registerKeyHandler({name: "Select Mark 5", code: 'Digit5', locked: true}, function() {
-    selectCurrentMarkCheck(4);
+    checkOpenComponentMark(4);
 });
 registerKeyHandler({name: "Select Mark 6", code: 'Digit6', locked: true}, function() {
-    selectCurrentMarkCheck(5);
+    checkOpenComponentMark(5);
 });
 registerKeyHandler({name: "Select Mark 7", code: 'Digit7', locked: true}, function() {
-    selectCurrentMarkCheck(6);
+    checkOpenComponentMark(6);
 });
 registerKeyHandler({name: "Select Mark 8", code: 'Digit8', locked: true}, function() {
-    selectCurrentMarkCheck(7);
+    checkOpenComponentMark(7);
 });
 registerKeyHandler({name: "Select Mark 9", code: 'Digit9', locked: true}, function() {
-    selectCurrentMarkCheck(8);
+    checkOpenComponentMark(8);
 });
 
-function selectCurrentMarkCheck(index) {
-    var opened = findCurrentOpenedMark();
-    if (opened > 0 && index < getComponent(opened).marks.length) {
-        var mark = getComponent(opened).marks[index];
-        selectMark(opened, mark.id);
+function checkOpenComponentMark(index) {
+    let component_id = getFirstOpenComponentId();
+    if (component_id !== NO_COMPONENT_ID) {
+        let mark_id = getMarkIdFromOrder(component_id, index);
+        toggleCommonMark(component_id, mark_id)
+            .catch(function (err) {
+                console.error(err);
+                alert('Error toggling mark! ' + err.message);
+            });
     }
 }
 
