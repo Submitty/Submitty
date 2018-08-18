@@ -616,9 +616,19 @@ tr.is_publish {
     outline: none;
     background-color: initial;
 }
+
 .mark-container .col-sm input {
     width: 100%;
     margin: 2px;
+}
+
+.gradeable .edit-component-container .box-title textarea {
+    width: 100%;
+    resize: vertical;
+}
+
+.gradeable .edit-component-container .box-title input {
+    width: 100%
 }
 
 #mark-conflict-popup .legend {

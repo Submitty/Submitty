@@ -1,26 +1,40 @@
 {% extends "Component.twig" %}
 
+{% block component_click %}
+    onClickComponent(this)
+{% endblock %}
+
 {% block left_block %}
 {% endblock %}
 
 {% block title_block %}
     {% if show_mark_list %}
-        <input class="component-title" type="text" value="{{ component.title }}" />
-        <i>Page #:</i>
-        <input class="page-number" type="number" step="1" min="1" value="{{ component.page }}" {{ component.page < 1 ? 'hidden' : '' }}/>
+        <input class="component-title" type="text" value="{{ component.title }}" onclick="event.stopPropagation()"/>
+        {% if component.page > 0 %}
+            <i>Page #:</i>
+            <input class="page-number" type="number" step="1" min="1" value="{{ component.page }}" onclick="event.stopPropagation()"/>
+        {% endif %}
     {% else %}
         <b>{{ component.title }}</b>
 
-        {% if component.page != 0 %}
+        {% if component.page > 0 %}
             <i>Page #: {{ component.page }}</i>
         {% endif %}
     {% endif %}
 {% endblock %}
 
 {% block ta_comment_block %}
-    <textarea id="ta-comment-{{ component.id }}" placeholder="Note to TAs">{{ component.ta_comment }}</textarea>
+    <textarea id="ta-comment-{{ component.id }}" placeholder="Note to TAs" onclick="event.stopPropagation()">{{ component.ta_comment }}</textarea>
 {% endblock %}
 
 {% block student_comment_block %}
-    <textarea id="student-comment-{{ component.id }}" placeholder="Note to Student">{{ component.student_comment }}</textarea>
+    <textarea id="student-comment-{{ component.id }}" placeholder="Note to Student" onclick="event.stopPropagation()">{{ component.student_comment }}</textarea>
+{% endblock %}
+
+{% block marks_block %}
+    {% for mark in component.marks %}
+        {% set first_mark = loop.index0 == 0 %}
+        {% set mark_disabled = false %}
+        {% include "Mark.twig" %}
+    {% endfor %}
 {% endblock %}

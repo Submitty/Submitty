@@ -1,0 +1,20 @@
+{% extends "Gradeable.twig" %}
+
+{% block header_content %}
+{% endblock %}
+
+{% block components_block %}
+    {% for component in gradeable.components %}
+        <div class="component-container edit-component-container">
+            {% include "EditComponent.twig" with {
+                'precision': gradeable.precision,
+                'show_mark_list': false
+            } %}
+        </div>
+    {% endfor %}
+{% endblock %}
+
+{% block footer_content %}
+    {# Total Box #}
+    {# /Total Box #}
+{% endblock %}

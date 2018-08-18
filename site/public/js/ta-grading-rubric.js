@@ -556,7 +556,7 @@ function getAnonId() {
  *  @return {boolean}
  */
 function isInstructorEditEnabled() {
-    return false; // TODO
+    return true; // TODO
 }
 
 /**
@@ -2086,7 +2086,10 @@ function refreshTotalScoreBox() {
  * @return {Promise}
  */
 function injectInstructorEditComponent(component, showMarkList) {
-
+    return renderEditComponent(component, showMarkList)
+        .then(function (elements) {
+            setComponentContents(component.id, elements);
+        });
 }
 
 /**

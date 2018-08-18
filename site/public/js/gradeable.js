@@ -5,8 +5,10 @@
 function loadTemplates() {
     let templates = [
         {id: 'GradingGradeable', href: 'templates/grading/GradingGradeable.twig'},
+        {id: 'EditGradeable', href: 'templates/grading/EditGradeable.twig'},
         {id: 'Gradeable', href: "templates/grading/Gradeable.twig"},
         {id: 'GradingComponent', href: "templates/grading/GradingComponent.twig"},
+        {id: 'EditComponent', href: 'templates/grading/EditComponent.twig'},
         {id: 'Component', href: "templates/grading/Component.twig"},
         {id: 'Mark', href: "templates/grading/Mark.twig"},
         {id: 'OverallComment', href: "templates/grading/OverallComment.twig"},
@@ -144,7 +146,24 @@ function renderGradingComponent(component, graded_component, editable, showMarkL
 }
 
 function renderInstructorEditGradeable(gradeable) {
+    return loadTemplates()
+        .then(function() {
+            return Twig.twig({ref: "EditGradeable"}).render({
+                'gradeable': gradeable,
+                'edit_marks_enabled': true
+            })
+        })
+}
 
+function renderEditComponent(component, showMarkList) {
+    return new Promise(function (resolve, reject) {
+        // TODO: i don't think this is async
+        resolve(Twig.twig({ref: "EditComponent"}).render({
+            'component': component,
+            'show_mark_list': showMarkList,
+            'edit_marks_enabled': true
+        }));
+    });
 }
 
 /**
