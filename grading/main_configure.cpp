@@ -95,7 +95,10 @@ int main(int argc, char *argv[]) {
       if (!hidden)
         visible += points;
     }
-    TestCase tc(config_json,which_testcase);
+    //container name only matters if we try to get the commands for this testcase.
+    //TODO: IN THIS CASE, THIS IS A HACK THAT MUST BE FIXED.
+    std::string container_name = "";
+    TestCase tc(config_json,which_testcase, container_name);
     if (tc.isSubmissionLimit()) {
       max_submissions = tc.getMaxSubmissions();
     }

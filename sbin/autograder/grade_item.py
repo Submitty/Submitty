@@ -354,6 +354,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     # Note: Must preserve the directory structure of compiled files (esp for Java)
 
     patterns_submission_to_runner = complete_config_obj["autograding"]["submission_to_runner"]
+
     pattern_copy("submission_to_runner",patterns_submission_to_runner,submission_path,tmp_work_submission,tmp_logs)
     if is_vcs:
         pattern_copy("checkout_to_runner",patterns_submission_to_runner,checkout_subdir_path,tmp_work_checkout,tmp_logs)
@@ -399,9 +400,9 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     #                           stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
     #                           stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
     #                           stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+
     ##################################################################################################
     #call grade_item_main_runner.py
-
     runner_success = grade_item_main_runner.executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submission_string, 
                                                                                     item_name, USE_DOCKER, container, which_untrusted,
                                                                                     job_id, grading_began)
@@ -456,8 +457,6 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                               stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
     add_permissions(os.path.join(tmp_work,"my_validator.out"), stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
-
-
 
     #todo remove prints.
     print("VALIDATING")

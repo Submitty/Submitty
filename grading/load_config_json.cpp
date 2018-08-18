@@ -43,6 +43,78 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
   }
 }
 
+void AddDockerConfiguration(nlohmann::json &whole_config) {
+  // int a = 42;
+  // assert(a == 2);
+
+  if (!whole_config["docker_enabled"].is_boolean()){
+    whole_config["docker_enabled"] = false;
+  }
+  
+  nlohmann::json::iterator tc = whole_config.find("testcases");
+  assert (tc != whole_config.end());
+  
+  int testcase_num = 0;
+  for (typename nlohmann::json::iterator itr = tc->begin(); itr != tc->end(); itr++,testcase_num++){
+    std::string title = whole_config["testcases"][testcase_num].value("title","BAD_TITLE");
+    nlohmann::json this_testcase = whole_config["testcases"][testcase_num];
+    nlohmann::json commands = nlohmann::json::array();
+
+    // if "command" exists in whole_config, we must wrap it in a container.
+    bool found_commands = false;
+    if(this_testcase.find("command") != this_testcase.end()){
+      found_commands = true;
+      if (this_testcase["command"].is_array()){
+        commands = this_testcase["command"];
+      }
+      else{
+        commands.push_back(this_testcase["command"]);
+      }
+
+      this_testcase.erase("command");
+    }
+
+    assert (this_testcase["containers"].is_null() || !found_commands);
+
+    if(!this_testcase["containers"].is_null()){
+      assert(this_testcase["containers"].is_array());
+    }
+
+    if(this_testcase["containers"].is_null()){
+      this_testcase["containers"] = nlohmann::json::array();
+      //commands may have to be a json::array();
+      this_testcase["containers"][0] = nlohmann::json::object();
+      this_testcase["containers"][0]["commands"] = commands;
+    }
+
+    for (int container_num = 0; container_num < this_testcase["containers"].size(); container_num++){
+      if(this_testcase["containers"][container_num]["commands"].is_string()){
+        std::string this_command = this_testcase["containers"][container_num].value("commands", "");
+        this_testcase["containers"][container_num].erase("commands");
+        this_testcase["containers"][container_num]["commands"] = nlohmann::json::array();
+        this_testcase["containers"][container_num]["commands"].push_back(this_command);
+      }
+
+      if(this_testcase["containers"][container_num]["container_name"].is_null()){
+        //pad this out correctly?
+        this_testcase["containers"][container_num]["container_name"] = "container" + std::to_string(container_num); 
+      }
+
+      if(this_testcase["containers"][container_num]["outgoing_connections"].is_null()){
+        this_testcase["containers"][container_num]["outgoing_connections"] = nlohmann::json::array();
+      }
+
+      if(this_testcase["containers"][container_num]["container_image"].is_null()){
+        //TODO: store the default system image somewhere and fill it in here.
+        this_testcase["containers"][container_num]["container_image"] = "ubuntu:custom";
+      }    
+    }
+    whole_config["testcases"][testcase_num] = this_testcase;
+    assert(!whole_config["testcases"][testcase_num]["title"].is_null());
+    assert(!whole_config["testcases"][testcase_num]["containers"].is_null());
+  }
+  
+}
 
 void RewriteDeprecatedMyersDiff(nlohmann::json &whole_config) {
 
@@ -96,13 +168,14 @@ void RewriteDeprecatedMyersDiff(nlohmann::json &whole_config) {
 // =====================================================================
 
 nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid) {
-
   nlohmann::json answer;
   std::stringstream sstr(GLOBAL_config_json_string);
   sstr >> answer;
-
+  
+  AddDockerConfiguration(answer);
   AddSubmissionLimitTestCase(answer);
   AddAutogradingConfiguration(answer);
+
   if (rcsid != "") {
     CustomizeAutoGrading(rcsid,answer);
   }

@@ -38,7 +38,7 @@ public:
 
   // -------------------------------
   // CONSTRUCTOR
-  TestCase (nlohmann::json &whole_config, int which_testcase);
+  TestCase (nlohmann::json &whole_config, int which_testcase, std::string container_name);
 
   void General_Helper();
   void FileCheck_Helper();
@@ -81,11 +81,7 @@ public:
 
   // -------------------------------
   // COMMANDS
-  std::vector<std::string> getCommands() const {
-    std::vector<std::string> commands = stringOrArrayOfStrings(_json,"command");
-    //assert (commands.size() > 0);
-    return commands;
-  }
+  std::vector<std::string> getCommands() const;
 
 
   // -------------------------------
@@ -133,6 +129,7 @@ private:
 
   // -------------------------------
   // REPRESENTATION
+  std::string CONTAINER_NAME;
   int test_case_id;
   static int next_test_case_id;
   nlohmann::json& _json;
