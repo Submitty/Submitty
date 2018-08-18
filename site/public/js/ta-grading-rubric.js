@@ -1847,9 +1847,9 @@ function saveMarkList(component_id) {
                     .then(function () {
                         return tryResolveMarkSave(gradeable_id, component_id, domMark, serverMark, oldServerMark);
                     })
-                    .then(function (success) {
-                        // Success of false counts as a conflict
-                        if (success !== true) {
+                    .then(function (mark_id) {
+                        // mark_id of 0 counts as conflict
+                        if (mark_id === 0) {
                             conflictMarks[domMark.id] = {
                                 domMark: domMark,
                                 serverMark: serverMark,
@@ -1857,6 +1857,9 @@ function saveMarkList(component_id) {
                                 localDeleted: isMarkDeleted(domMark.id)
                             };
                             conflictMarksArr.push(conflictMarks[domMark.id]);
+                        } else if (mark_id !== domMark.id) {
+                            // Mark id from new mark
+                            domMark.id = mark_id;
                         }
                     });
             });
@@ -1864,21 +1867,21 @@ function saveMarkList(component_id) {
             return sequence
                 .then(function () {
                     // No conflicts, so don't open the popup
-                    if(conflictMarksArr.length === 0) {
+                    if (conflictMarksArr.length === 0) {
                         return {};
                     }
 
                     // Prompt the user with any conflicts
                     return openMarkConflictPopup(component_id, conflictMarksArr);
                 })
-                .then(function (marks) {
+                .then(function (resolvedMarks) {
                     // Get the resolution of those conflicts and save each
                     let sequence1 = Promise.resolve();
                     let gradeable_id = getGradeableId();
 
-                    for (let id in marks) {
-                        if (marks.hasOwnProperty(id)) {
-                            let mark = marks[id];
+                    for (let id in resolvedMarks) {
+                        if (resolvedMarks.hasOwnProperty(id)) {
+                            let mark = resolvedMarks[id];
                             // Null marks count as 'for deletion'
                             if (mark === null) {
                                 // This should be a pretty rare case
@@ -1902,11 +1905,11 @@ function saveMarkList(component_id) {
                     return sequence1;
                 })
                 .then(function () {
-                    // Finally, save the order
                     let markOrder = {};
-                    getMarkListFromDOM(component_id).forEach(function (mark) {
+                    domMarkList.forEach(function(mark) {
                         markOrder[mark.id] = mark.order;
                     });
+                    // Finally, save the order
                     return ajaxSaveMarkOrder(gradeable_id, component_id, markOrder);
                 });
         });
@@ -1925,7 +1928,7 @@ function marksEqual(mark0, mark1) {
 /**
  * Determines what to do when trying to save a mark provided the mark
  *  before edits, the DOM mark, and the server's up-to-date mark
- *  @return {Promise<boolean>}
+ *  @return {Promise<int>} Resolves with the mark id on success, or 0 on conflict
  */
 function tryResolveMarkSave(gradeable_id, component_id, domMark, serverMark, oldServerMark) {
     let markDeleted = isMarkDeleted(domMark.id);
@@ -1934,11 +1937,11 @@ function tryResolveMarkSave(gradeable_id, component_id, domMark, serverMark, old
             // Mark edited under normal conditions
             if ((marksEqual(domMark, serverMark) || marksEqual(domMark, oldServerMark)) && !markDeleted) {
                 // If the domMark is not unique, then we don't need to do anything
-                return Promise.resolve(true);
+                return Promise.resolve(domMark.id);
             } else if (!marksEqual(serverMark, oldServerMark)) {
                 // The domMark is unique, and the serverMark is also unique,
                 // which means all 3 versions are different, which is a conflict state
-                return Promise.resolve(false);
+                return Promise.resolve(0);
             } else if (markDeleted) {
                 // domMark was deleted and serverMark hasn't changed from oldServerMark,
                 //  so try to delete the mark
@@ -1948,39 +1951,39 @@ function tryResolveMarkSave(gradeable_id, component_id, domMark, serverMark, old
                         throw err;
                     })
                     .then(function () {
-                        // Success, then return true
-                        return Promise.resolve(true);
+                        // Success, then resolve success
+                        return Promise.resolve(domMark.id);
                     });
             } else {
                 // The domMark is unique and the serverMark is the same as the oldServerMark
                 //  so we should save the domMark to the server
                 return ajaxSaveMark(gradeable_id, component_id, domMark.id, domMark.points, domMark.title)
                     .then(function () {
-                        // Success, then return true
-                        return Promise.resolve(true);
+                        // Success, then resolve success
+                        return Promise.resolve(domMark.id);
                     });
             }
         } else {
             // This means it was deleted from the server.
             if (!marksEqual(domMark, oldServerMark) && !markDeleted) {
                 // And the mark changed and wasn't deleted, which is a conflict state
-                return Promise.resolve(false);
+                return Promise.resolve(0);
             } else {
                 // And the mark didn't change or it was deleted, so don't do anything
-                return Promise.resolve(true);
+                return Promise.resolve(domMark.id);
             }
         }
     } else {
         // This means it didn't exist when we started editing, so serverMark must also be null
         if (markDeleted) {
             // The mark was marked for deletion, but never existed... so do nothing
-            return Promise.resolve(true);
+            return Promise.resolve(domMark.id);
         } else {
             // The mark never existed and isn't deleted, so its new
             return ajaxAddNewMark(gradeable_id, component_id, domMark.title, domMark.points)
-                .then(function () {
-                    // Success, then return true
-                    return Promise.resolve(true);
+                .then(function (data) {
+                    // Success, then return the mark id
+                    return Promise.resolve(data.mark_id);
                 })
                 .catch(function(err) {
                     // This means the user's mark was invalid
