@@ -14,6 +14,11 @@ Required Parameters:
         </strong>
         <strong>Auto-Grading Total</strong>
     </div>
+{% else %}
+    {% set auto_grading_total = 0 %}
+    {% set auto_grading_earned = 0 %}
+{% endif %}
+{% if ta_grading_total is defined %}
     <div class="box-title badge-container">
         <strong id="grading_total" class="badge {{ functions.getBadgeStyle(ta_grading_earned, ta_grading_total) }}">
             {{ ta_grading_earned | default('-') }} / {{ ta_grading_total }}
@@ -21,12 +26,12 @@ Required Parameters:
         <strong>Grading Total</strong>
     </div>
 {% else %}
-    {% set auto_grading_total = 0 %}
-    {% set auto_grading_earned = 0 %}
+    {% set ta_grading_total = 0 %}
+    {% set ta_grading_earned = 0 %}
 {% endif %}
-<div class="box-title badge-container">
+{# <div class="box-title badge-container">
     <strong id="score_total" class="badge {{ functions.getBadgeStyle((ta_grading_earned + auto_grading_earned), (ta_grading_total + auto_grading_total)) }}">
         {{ (ta_grading_earned + auto_grading_earned) | default('-') }} / {{ ta_grading_total + auto_grading_total }}
     </strong>
     <strong>Total</strong>
-</div>
+</div> #}
