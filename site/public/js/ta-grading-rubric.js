@@ -873,14 +873,29 @@ function setTotalScoreBoxContents(contents) {
  */
 function getCountDirection(component_id) {
     let domElement = getComponentDOMElement(component_id);
-    if (domElement.find('span.count-type-selected').length === 0) {
+    if (domElement.find('.count-type-selected').length === 0) {
         return COUNT_DIRECTION_NONE;
     }
 
-    if (domElement.find('span.count-up-selector').hasClass('count-type-selected')) {
+    if (domElement.find('.count-up-selector').hasClass('count-type-selected')) {
         return COUNT_DIRECTION_UP;
     } else {
         return COUNT_DIRECTION_DOWN;
+    }
+}
+
+/**
+ * Sets the count direction for a component in instructor edit mode
+ * @param {int} component_id
+ * @param {int} direction COUNT_DIRECTION_UP, otherwise COUNT_DIRECTION_DOWN
+ */
+function setCountDirection(component_id, direction) {
+    let domElement = getComponentDOMElement(component_id);
+    domElement.find('.count-type-selector').removeClass('count-type-selected');
+    if (direction === COUNT_DIRECTION_UP) {
+        domElement.find('.count-up-selector').addClass('count-type-selected');
+    } else {
+        domElement.find('.count-down-selector').addClass('count-type-selected');
     }
 }
 
@@ -1572,6 +1587,22 @@ function onToggleEditMode(me) {
             console.error(err);
             alert('Error re-opening component! ' + err.message);
         });
+}
+
+/**
+ * Callback for the 'count up' option of a component in instructor edit mode
+ * @param me DOM element of the 'count up' div
+ */
+function onClickCountUp(me) {
+    setCountDirection(getComponentIdFromDOMElement(me), COUNT_DIRECTION_UP);
+}
+
+/**
+ * Callback for the 'count down' option of a component in instructor edit mode
+ * @param me DOM element of the 'count down' div
+ */
+function onClickCountDown(me) {
+    setCountDirection(getComponentIdFromDOMElement(me), COUNT_DIRECTION_DOWN);
 }
 
 /**
