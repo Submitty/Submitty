@@ -352,7 +352,12 @@ function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, active_ver
                 successCallback(response);
             }
         },
-        error: errorCallback
+        error: function(response){
+            if(response.message == undefined){
+                //TODO:: Figure out why an error is thrown if mark is saved on page refresh (saves properly)
+                successCallback(response);
+            }
+        }
     })
 }
 
@@ -434,6 +439,7 @@ function compareOrder(mark1, mark2){
  * @param {int} c_index 1-indexed component index
  */
 function updateMarksOnPage(c_index) {
+    var custom_has = getComponent(c_index).custom_mark_checked;
     var gradeable = getGradeable();
     var component = getComponent(c_index);
     var parent = $('#marks-parent-'+c_index);
@@ -669,17 +675,9 @@ function checkMarks(c_index) {
     });
     var current_row = $('#mark_custom_id-'+c_index);
     var custom_has = getComponent(c_index).custom_mark_checked;
-    console.log(custom_has);
     if(custom_has){
         counter++;
     }
-    console.log(counter);
-    /*if(custom_has){
-        all_false = false;
-        first_mark.toggleClass("mark-has", false);
-        getMark(c_index, targetId).has = false;
-        return false;
-    }*/
     if(counter > 1) {
         first_mark.toggleClass("mark-has", false);
         getMark(c_index, targetId).has = false;
@@ -714,7 +712,6 @@ function calculateMarksPoints(c_index) {
 
     var custom_points = component.score;
     var custom_has = getComponent(c_index).custom_mark_checked;
-  //  console.log(custom_has);
     if (custom_has) {
         if (isNaN(custom_points)) {
             current_points += 0;
@@ -771,7 +768,7 @@ function updateProgressPoints(c_index) {
                 summary_text += "* " + points + escapeHTML(mark.name);
             }
         }
-        if (component.comment !== "") {
+        if (component.custom_mark_checked) {
             var custom_message = escapeHTML(component.comment);
             if (summary_text.length > 0) {
                 summary_text += "<br>";
@@ -1121,7 +1118,6 @@ function saveMark(c_index, sync, override, successCallback, errorCallback) {
             custom_message = escapeHTML(custom_message);
         }
         var overwrite = ($('#overwrite-id').is(':checked')) ? ("true") : ("false");
-        console.log(custom_has);
         ajaxSaveGradedComponent(gradeable.id, gradeable.components[c_index-1].id, gradeable.user_id, gradeable.active_version, custom_points, custom_message, custom_has, overwrite, mark_ids, true, function(response) {
             var hasGrade = false;
             for (var m_index = 0; m_index < arr_length; m_index++) {
@@ -1341,7 +1337,6 @@ function verifyMark(gradeable_id, component_id, user_id, verifyAll){
         },
         success: function(data) {
             window.location.reload();
-            console.log("verified user");
             if(action === 'verify_all')
                 document.getElementById("verifyAllButton").style.display = "none";
         },

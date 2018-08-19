@@ -16,10 +16,10 @@ use app\models\User;
  * @method float getScore()
  * @method string getComment()
  * @method void setComment($comment)
- * @method bool setCustomMarkChecked($checked)
  * @method string getGraderId()
  * @method int getGradedVersion()
  * @method void setGradedVersion($graded_version)
+ * @method bool setCustomMarkChecked($isChecked)
  * @method \DateTime getGradeTime()
  * @method int[] getMarkIds()
  * @method int[]|null getDbMarkIds()
@@ -51,7 +51,7 @@ class GradedComponent extends AbstractModel {
     /** @property @var string The comment on this mark / custom mark description */
     protected $comment = "";
     /** @property @var bool Is the custom mark selected */
-    protected $custom_mark_checked = true;
+    protected $custom_mark_checked = false;
     /** @property @var string The Id of the grader who most recently updated the component's grade */
     protected $grader_id = "";
     /** @property @var int The submission version this grade is for */
@@ -74,6 +74,7 @@ class GradedComponent extends AbstractModel {
         if($ta_graded_gradeable === null) {
             throw new \InvalidArgumentException('Cannot create GradedComponent with null TaGradedGradeable');
         }
+        $this->custom_mark_checked = ($details['custom_mark'] ?? false);
         $this->ta_graded_gradeable = $ta_graded_gradeable;
 
         $this->setComponent($component);
@@ -82,8 +83,6 @@ class GradedComponent extends AbstractModel {
         $this->setComment($details['comment'] ?? '');
         $this->setGradedVersion($details['graded_version'] ?? 0);
         $this->setGradeTime($details['grade_time'] ?? new \DateTime());
-        $this->setCustomMarkChecked($details['custom_mark'] ?? false);
-        $custom_mark_checked = $details['custom_mark'] ?? false;
         // assign the default score if its not electronic (or rather not a custom mark)
         if ($component->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {
             $score = $details['score'] ?? 0;
@@ -283,13 +282,6 @@ class GradedComponent extends AbstractModel {
         }
         $this->score = $this->getComponent()->getGradeable()->roundPointValue($this->score);
         $this->modified = true;
-    }
-    /**
-     * Sets whether the custom mark is checked
-     * @param bool $checked
-     */
-    public function setCustomMarkChecked(bool $checked){
-        $custom_mark_checked=$checked;
     }
 
     /* Intentionally Unimplemented accessor methods */

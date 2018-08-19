@@ -1090,7 +1090,6 @@ class ElectronicGraderController extends GradingController {
         $custom_points = $_POST['custom_points'] ?? null;
         $custom_has = $_POST['custom_has'] ?? null;
         $component_version = $_POST['active_version'] ?? null;
-
         // Optional marks parameter
         $marks = $_POST['mark_ids'] ?? [];
 
@@ -1126,7 +1125,9 @@ class ElectronicGraderController extends GradingController {
             $numeric_mark_ids[] = intval($mark);
         }
         $marks = $numeric_mark_ids;
-
+        if($custom_has == 'false'){
+            $custom_has = '';
+        }
         // Parse the strings into ints/floats
         $component_version = intval($component_version);
         $custom_points = floatval($custom_points);
@@ -1198,7 +1199,7 @@ class ElectronicGraderController extends GradingController {
             $graded_component->setGradedVersion($component_version);
         }
         $graded_component->setComment($custom_message);
-        $graded_component->setScore($custom_points);
+      //  $graded_component->setScore($custom_points);
         $graded_component->setCustomMarkChecked($custom_has);
         $graded_component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
 
@@ -1219,6 +1220,7 @@ class ElectronicGraderController extends GradingController {
 
         // Finally, save the changes to the database
         $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
+       // $this->core->getQueries()->updateGradedComponent($graded_component);
 
         // Response 'data'
         return [

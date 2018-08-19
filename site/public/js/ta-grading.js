@@ -325,9 +325,9 @@ function gotoPrevStudent() {
         saveLastOpenedMark(true, function () {
             window.location = $("#prev-student")[0].dataset.href;
         }, function () {
-        //    if (confirm("Could not save last mark, change student anyway?")) {
+            if (confirm("Could not save last mark, change student anyway?")) {
                 window.location = $("#prev-student")[0].dataset.href;
-       //     }
+            }
         });
     }
     else{
@@ -340,9 +340,9 @@ function gotoNextStudent() {
         saveLastOpenedMark(true, function () {
             window.location = $("#next-student")[0].dataset.href;
         }, function () {
-         //   if (confirm("Could not save last mark, change student anyway?")) {
+            if (confirm("Could not save last mark, change student anyway?")) {
                 window.location = $("#next-student")[0].dataset.href;
-         //   }
+            }
         });
     }
     else{

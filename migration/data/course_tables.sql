@@ -100,7 +100,7 @@ CREATE FUNCTION csv_to_numeric_gradeable(vcode text[], gradeable_id text, grader
         LOOP
           IF istext[j] THEN
           --COME BACK AND FIX: need to put in gcd_grade_time...double check to see that CSV upload still works for numeric/text
-            INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_component_comment, gcd_grader_id, gcd_graded_version, gcd_grade_time) VALUES (gcids[j], gdid, line[j+1], grader_id, NULL);
+            INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_component_comment, gcd_has_custom, gcd_grader_id, gcd_graded_version, gcd_grade_time) VALUES (gcids[j], gdid, line[j+1], false, grader_id, NULL);
           ELSE
             score := CAST(line[j+1] AS NUMERIC);
             INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_score, gcd_grader_id, gcd_graded_version, gcd_grade_time) VALUES (gcids[j], gdid, score, grader_id, NULL);

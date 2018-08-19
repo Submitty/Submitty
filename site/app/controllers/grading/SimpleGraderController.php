@@ -245,14 +245,20 @@ class SimpleGraderController extends GradingController  {
 
                 if ($component->isText()) {
                     $component_grade->setComment($data);
-                } else {
-                    if ($component->getUpperClamp() < $data ||
+                } else if(!($component->getUpperClamp() < $data) ||
+                        is_numeric($data)){
+                    $component_grade->setScore($data);
+                }
+                    /*if ($component->getUpperClamp() < $data ||
                         !is_numeric($data)) {
                         $response = array('status' => 'fail', 'message' => "Save error: score must be a number less than the upper clamp");
                         $this->core->getOutput()->renderJson($response);
                         return $response;
-                    }
-                    $component_grade->setScore($data);
+                    }*/
+                $component_grade->setCustomMarkChecked(true);
+                }
+                else{
+                    $component_grade->setCustomMarkChecked(false);
                 }
                 $component_grade->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
             }
