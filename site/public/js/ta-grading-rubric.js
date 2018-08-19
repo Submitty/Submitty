@@ -18,6 +18,14 @@ MARK_ID_COUNTER = 0;
 
 EDIT_MODE_ENABLED = false;
 
+COUNT_DIRECTION_UP = 1;
+COUNT_DIRECTION_NONE = 0;
+COUNT_DIRECTION_DOWN = -1;
+
+PDF_PAGE_NONE = 0;
+PDF_PAGE_STUDENT = -1;
+PDF_PAGE_INSTRUCTOR = -2;
+
 /**
  * Keep All of the ajax functions at the top of this file
  *
@@ -51,6 +59,57 @@ function ajaxGetGradeableRubric(gradeable_id) {
             success: function (response) {
                 if (response.status !== 'success') {
                     console.error('Something went wrong fetching the gradeable rubric: ' + response.message);
+                    reject(new Error(response.message));
+                } else {
+                    resolve(response.data)
+                }
+            },
+            error: function (err) {
+                displayAjaxError(err);
+                reject(err);
+            }
+        });
+    });
+}
+
+/**
+ * ajax call to save the component
+ * @param {string} gradeable_id
+ * @param {int} component_id
+ * @param {string} title
+ * @param {string} ta_comment
+ * @param {string} student_comment
+ * @param {int} page
+ * @param {number} lower_clamp
+ * @param {number} default_value
+ * @param {number} max_value
+ * @param {number} upper_clamp
+ * @returns {Promise}
+ */
+function ajaxSaveComponent(gradeable_id, component_id, title, ta_comment, student_comment, page, lower_clamp, default_value, max_value, upper_clamp) {
+    return new Promise(function (resolve, reject) {
+        $.getJSON({
+            type: "POST",
+            url: buildUrl({
+                'component': 'grading',
+                'page': 'electronic',
+                'action': 'save_component'
+            }),
+            data: {
+                'gradeable_id': gradeable_id,
+                'component_id': component_id,
+                'title': title,
+                'ta_comment': ta_comment,
+                'student_comment': student_comment,
+                'page_number': page,
+                'lower_clamp': lower_clamp,
+                'default': default_value,
+                'max_value': max_value,
+                'upper_clamp': upper_clamp
+            },
+            success: function (response) {
+                if (response.status !== 'success') {
+                    console.error('Something went wrong saving the component: ' + response.message);
                     reject(new Error(response.message));
                 } else {
                     resolve(response.data)
@@ -630,6 +689,15 @@ function isInstructorEditEnabled() {
 }
 
 /**
+ * Gets the pdf page setting (for instructor edit mode only)
+ * @returns {int} PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, or PDF_PAGE_NONE
+ */
+function getPdfPageAssignment() {
+    //TODO:
+    return PDF_PAGE_INSTRUCTOR;
+}
+
+/**
  * Used to determine if the mark list should be displayed
  *  in 'edit' mode for grading
  *  @return {boolean}
@@ -799,13 +867,69 @@ function setTotalScoreBoxContents(contents) {
 }
 
 /**
+ * Gets the count direction for a component in instructor edit mode
+ * @param {int} component_id
+ * @returns {int} COUNT_DIRECTION_UP, COUNT_DIRECTION_DOWN, or COUNT_DIRECTION_NONE
+ */
+function getCountDirection(component_id) {
+    let domElement = getComponentDOMElement(component_id);
+    if (domElement.find('span.count-type-selected').length === 0) {
+        return COUNT_DIRECTION_NONE;
+    }
+
+    if (domElement.find('span.count-up-selector').hasClass('count-type-selected')) {
+        return COUNT_DIRECTION_UP;
+    } else {
+        return COUNT_DIRECTION_DOWN;
+    }
+}
+
+/**
+ * Gets the page number assigned to a component
+ * @param component_id
+ * @returns {int}
+ */
+function getComponentPageNumber(component_id) {
+    let domElement = getComponentDOMElement(component_id);
+    if (isInstructorEditEnabled()) {
+        let page = getPdfPageAssignment();
+        if (page > 0) {
+            return parseInt(domElement.find('.page-number').val());
+        } else {
+            return page;
+        }
+    } else {
+        return parseInt(domElement.attr('data-page'));
+    }
+}
+
+/**
  * Extracts a component object from the DOM
- * TODO: support instructor edit mode
  * @param {int} component_id
  * @return {Object}
  */
 function getComponentFromDOM(component_id) {
     let domElement = getComponentDOMElement(component_id);
+
+    if (isInstructorEditEnabled()) {
+        let penaltyPoints = Math.abs(parseFloat(domElement.find('input.penalty-points').val()));
+        let maxValue = Math.abs(parseFloat(domElement.find('input.max-points').val()));
+        let extraCreditPoints = Math.abs(parseFloat(domElement.find('input.extra-credit-points').val()));
+        let countUp = getCountDirection(component_id) !== COUNT_DIRECTION_DOWN;
+
+        return {
+            id: component_id,
+            title: domElement.find('input.component-title').val(),
+            ta_comment: domElement.find('textarea.ta-comment').val(),
+            student_comment: domElement.find('textarea.student-comment').val(),
+            page: getComponentPageNumber(component_id),
+            lower_clamp: -penaltyPoints,
+            default: countUp ? 0.0 : maxValue,
+            max_value: maxValue,
+            upper_clamp: maxValue + extraCreditPoints,
+            marks: getMarkListFromDOM(component_id)
+        };
+    }
     return {
         id: component_id,
         title: domElement.attr('data-title'),
@@ -1742,7 +1866,9 @@ function closeComponentInstructorEdit(component_id, saveChanges) {
         .then(function() {
             // Save the component title and comments
             let component = getComponentFromDOM(component_id);
-            return ajaxSaveComponent(gradeable_id, component_id, component.title, component.ta_comment, component.student_comment, component.page);
+            return ajaxSaveComponent(getGradeableId(), component_id, component.title, component.ta_comment,
+                component.student_comment, component.page, component.lower_clamp,
+                component.default, component.max_value, component.upper_clamp);
         })
         .then(function () {
             return ajaxGetComponentRubric(getGradeableId(), component_id);

@@ -4,16 +4,59 @@
     onClickComponent(this)
 {% endblock %}
 
+{% set extra_credit_points = component.upper_clamp - component.max_value %}
+{% set penalty_points = 0-component.lower_clamp %}
 {% block left_block %}
-    {# TODO: badge #}
+    {# TODO: badge and point value assignments (peer too?) #}
+    {% if show_mark_list %}
+        <div class="container point-values">
+            <div class="row">
+                <div class="col">Normal Points</div>
+                <div class="col point-input-container">
+                    <input class="max-points step="{{ precision }}" type="number" min="0" value="{{ component.max_value }}" onclick="event.stopPropagation()"/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">Extra Credit Points</div>
+                <div class="col point-input-container">
+                    <input class="extra-credit-points" step="{{ precision }}" type="number" min="0" value="{{ extra_credit_points }}" onclick="event.stopPropagation()"/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">Penalty Points</div>
+                <div class="col point-input-container">
+                    <input class="penalty-points" step="{{ precision }}" type="number" min="0" value="{{ component.lower_clamp|abs }}" onclick="event.stopPropagation()"/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col count-up-selector count-type-selector {{ component.default == 0 ? 'count-type-selected' : ''}}">
+                    <span>Count Up</span>
+                </div>
+                <div class="col count-down-selector count-type-selector {{ component.default != 0 and component.default == component.max_value ? 'count-type-selected' : ''}}">
+                    <span>Count Down</span>
+                </div>
+            </div>
+            <div class="row">
+            </div>
+        </div>
+    {% else %}
+        <strong id="grading_total"
+                class="badge">
+            {{ component.max_value }} {{ extra_credit_points > 0 ? '(+' ~ extra_credit_points ~ ')' }} {{ penalty_points > 0 ? '(-' ~ penalty_points ~ ')' : '' }}
+        </strong>
+    {% endif %}
 {% endblock %}
 
 {% block title_block %}
     {% if show_mark_list %}
-        <input class="component-title" type="text" value="{{ component.title }}" onclick="event.stopPropagation()"/>
+        <div class="col">
+            <input class="component-title" type="text" value="{{ component.title }}" onclick="event.stopPropagation()"/>
+        </div>
         {% if component.page > 0 %}
-            <i>Page #:</i>
-            <input class="page-number" type="number" step="1" min="1" value="{{ component.page }}" onclick="event.stopPropagation()"/>
+            <div class="col-no-gutters">
+                <i>Page #:</i>
+                <input class="page-number" type="number" step="1" min="1" value="{{ component.page }}" onclick="event.stopPropagation()"/>
+            </div>
         {% endif %}
     {% else %}
         <b>{{ component.title }}</b>
@@ -25,11 +68,11 @@
 {% endblock %}
 
 {% block ta_comment_block %}
-    <textarea id="ta-comment-{{ component.id }}" placeholder="Note to TAs" onclick="event.stopPropagation()">{{ component.ta_comment }}</textarea>
+    <textarea class="ta-comment" placeholder="Note to TAs" onclick="event.stopPropagation()">{{ component.ta_comment }}</textarea>
 {% endblock %}
 
 {% block student_comment_block %}
-    <textarea id="student-comment-{{ component.id }}" placeholder="Note to Student" onclick="event.stopPropagation()">{{ component.student_comment }}</textarea>
+    <textarea class="student-comment" placeholder="Note to Student" onclick="event.stopPropagation()">{{ component.student_comment }}</textarea>
 {% endblock %}
 
 {% block marks_block %}

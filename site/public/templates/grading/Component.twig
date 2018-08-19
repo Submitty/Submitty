@@ -21,8 +21,8 @@ Required Input:
     {# Title bar (only part that triggers collapse on click) #}
     <div class="box-title container" onclick="{% block component_click %}{% endblock %}">
         <div class="row">
-            <span class="col-no-gutters">
-                <div>
+            <div class="col-no-gutters">
+                <div class="left-block">
                     {% block left_block %}
                     {% endblock %}
                 </div>
@@ -32,9 +32,9 @@ Required Input:
                     'show_save_tools': show_mark_list,
                     'cancel_on_click': 'onCancelComponent(this)'
                 } only %}
-            </span>
+            </div>
 
-            <div class="col-sm container">
+            <div class="col-sm container title-block">
                 <div class="row">
                     {% block title_block %}
                     {% endblock %}
