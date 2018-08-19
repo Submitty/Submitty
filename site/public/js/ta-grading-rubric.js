@@ -698,12 +698,11 @@ function getPdfPageAssignment() {
 }
 
 /**
- * Used to determine if the mark list should be displayed
- *  in 'edit' mode for grading
+ * Used to determine if the mark list should be displayed in 'edit' mode
  *  @return {boolean}
  */
 function isEditModeEnabled() {
-    return EDIT_MODE_ENABLED;
+    return EDIT_MODE_ENABLED || isInstructorEditEnabled();
 }
 
 /**
