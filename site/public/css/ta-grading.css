@@ -710,3 +710,11 @@ tr.is_publish {
 #mark-conflict-popup .color-swatch {
     width: 50px;
 }
+
+.save-tools-cancel:hover {
+    background-color: #FCC;
+}
+
+.save-tools-save:hover {
+    background-color: #CFC;
+}
