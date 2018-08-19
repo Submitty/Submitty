@@ -167,10 +167,8 @@ class Component extends AbstractModel {
      * @param int $page
      */
     public function setPage(int $page) {
-        if ($page < 0) {
-            $page = -1; // student-assigned
-        }
-        $this->page = $page;
+        $this->page = max($page, -1);
+        $this->modified = true;
     }
 
     const point_properties = [

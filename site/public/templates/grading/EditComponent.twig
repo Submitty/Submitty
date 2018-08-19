@@ -5,6 +5,7 @@
 {% endblock %}
 
 {% block left_block %}
+    {# TODO: badge #}
 {% endblock %}
 
 {% block title_block %}
@@ -34,7 +35,6 @@
 {% block marks_block %}
     {% for mark in component.marks %}
         {% set first_mark = loop.index0 == 0 %}
-        {% set mark_disabled = false %}
         {% include "Mark.twig" %}
     {% endfor %}
 {% endblock %}

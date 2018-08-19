@@ -484,6 +484,76 @@ function ajaxSaveMarkOrder(gradeable_id, component_id, order) {
 }
 
 /**
+ * ajax call to update the pages of components in the gradeable
+ * @param {string} gradeable_id
+ * @param {*} pages format: { <component0-id> : <page0>, <component1-id> : <page1>, ... }
+ * @return {Promise} Rejects except when the response returns status 'success'
+ */
+function ajaxSaveComponentPages(gradeable_id, pages) {
+    return new Promise(function (resolve, reject) {
+        $.getJSON({
+            type: "POST",
+            url: buildUrl({
+                'component': 'grading',
+                'page': 'electronic',
+                'action': 'save_component_pages'
+            }),
+            data: {
+                'gradeable_id': gradeable_id,
+                'pages': JSON.stringify(pages)
+            },
+            success: function (response) {
+                if (response.status !== 'success') {
+                    console.error('Something went wrong saving the component pages: ' + response.message);
+                    reject(new Error(response.message));
+                } else {
+                    resolve(response.data)
+                }
+            },
+            error: function (err) {
+                displayAjaxError(err);
+                reject(err);
+            }
+        });
+    });
+}
+
+/**
+ * ajax call to update the order of components in the gradeable
+ * @param {string} gradeable_id
+ * @param {*} order format: { <component0-id> : <order0>, <component1-id> : <order1>, ... }
+ * @return {Promise} Rejects except when the response returns status 'success'
+ */
+function ajaxSaveComponentOrder(gradeable_id, order) {
+    return new Promise(function (resolve, reject) {
+        $.getJSON({
+            type: "POST",
+            url: buildUrl({
+                'component': 'grading',
+                'page': 'electronic',
+                'action': 'save_component_order'
+            }),
+            data: {
+                'gradeable_id': gradeable_id,
+                'order': JSON.stringify(order)
+            },
+            success: function (response) {
+                if (response.status !== 'success') {
+                    console.error('Something went wrong saving the component order: ' + response.message);
+                    reject(new Error(response.message));
+                } else {
+                    resolve(response.data)
+                }
+            },
+            error: function (err) {
+                displayAjaxError(err);
+                reject(err);
+            }
+        });
+    });
+}
+
+/**
  * ajax call to verify the grader of a component
  * @param {string} gradeable_id
  * @param {int} component_id
@@ -1669,6 +1739,11 @@ function closeComponentInstructorEdit(component_id, saveChanges) {
         });
     }
     return sequence
+        .then(function() {
+            // Save the component title and comments
+            let component = getComponentFromDOM(component_id);
+            return ajaxSaveComponent(gradeable_id, component_id, component.title, component.ta_comment, component.student_comment, component.page);
+        })
         .then(function () {
             return ajaxGetComponentRubric(getGradeableId(), component_id);
         })

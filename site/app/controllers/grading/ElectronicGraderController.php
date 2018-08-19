@@ -46,6 +46,15 @@ class ElectronicGraderController extends GradingController {
             case 'save_overall_comment':
                 $this->ajaxSaveOverallComment();
                 break;
+            case 'save_component':
+                $this->ajaxSaveComponent();
+                break;
+            case 'save_component_order':
+                $this->ajaxSaveComponentOrder();
+                break;
+            case 'save_component_pages':
+                $this->ajaxSaveComponentPages();
+                break;
             case 'get_graded_component':
                 $this->ajaxGetGradedComponent();
                 break;
@@ -1515,7 +1524,7 @@ class ElectronicGraderController extends GradingController {
         }
 
         // checks if user has permission
-        if (!$this->core->getAccess()->canI("grading.electronic.save_component", ["gradeable" => $gradeable])) {
+        if (!$this->core->getAccess()->canI("grading.electronic.save_rubric", ["gradeable" => $gradeable])) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to save marks');
             return;
         }
@@ -1541,6 +1550,57 @@ class ElectronicGraderController extends GradingController {
                 throw new \InvalidArgumentException('All order values must be non-negative integers');
             }
             $component->setOrder(intval($order));
+        }
+        $this->core->getQueries()->updateGradeable($gradeable);
+    }
+
+    /**
+     * Route for saving the page numbers of the components
+     */
+    public function ajaxSaveComponentPages() {
+        // Required parameters
+        $gradeable_id = $_POST['gradeable_id'] ?? '';
+        $pages = json_decode($_POST['pages'] ?? '[]', true);
+
+        // Validate required parameters
+        if (count($pages) === 0) {
+            $this->core->getOutput()->renderJsonFail('Missing pages parameter');
+            return;
+        }
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+
+        // checks if user has permission
+        if (!$this->core->getAccess()->canI("grading.electronic.save_rubric", ["gradeable" => $gradeable])) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to save marks');
+            return;
+        }
+
+        try {
+            // Once we've parsed the inputs and checked permissions, perform the operation
+            $this->saveComponentPages($gradeable, $pages);
+            $this->core->getOutput()->renderJsonSuccess();
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
+        }
+    }
+
+    public function saveComponentPages(Gradeable $gradeable, array $pages) {
+        foreach ($gradeable->getComponents() as $component) {
+            if (!isset($orders[$component->getId()])) {
+                throw new \InvalidArgumentException('Missing component id in pages array');
+            }
+            $page = $pages[$component->getId()];
+            if (!is_int($page)) {
+                throw new \InvalidArgumentException('All page values must be integers');
+            }
+            $component->setPage(max(intval($page), -1));
         }
         $this->core->getQueries()->updateGradeable($gradeable);
     }
