@@ -646,6 +646,19 @@ tr.is_publish {
     background-color: #60B3FF;
 }
 
+.gradeable .component div.point-values {
+    padding: 2px;
+}
+
+.gradeable .component .point-values div.point-input-container {
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+.gradeable .component .point-values div.point-label {
+    padding-right: 4px;
+}
+
 .gradeable .component .point-values .count-type-selector {
     justify-content: center;
 }
