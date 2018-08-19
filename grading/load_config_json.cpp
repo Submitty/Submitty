@@ -45,8 +45,8 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
 }
 
 void AddDockerConfiguration(nlohmann::json &whole_config) {
-  // int a = 42;
-  // assert(a == 2);
+
+  assert (whole_config["docker_enabled"].is_boolean());
 
   if (!whole_config["docker_enabled"].is_boolean()){
     whole_config["docker_enabled"] = false;
@@ -127,7 +127,6 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
     assert(!whole_config["testcases"][testcase_num]["title"].is_null());
     assert(!whole_config["testcases"][testcase_num]["containers"].is_null());
   }
-  
 }
 
 void RewriteDeprecatedMyersDiff(nlohmann::json &whole_config) {

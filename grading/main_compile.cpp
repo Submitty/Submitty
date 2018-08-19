@@ -20,65 +20,6 @@
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 
-// =====================================================================
-// =====================================================================
-
-void CleanUpMultipleParts() {
-
-  std::cout << "Clean up multiple parts" << std::endl;
-  boost::filesystem::path top( boost::filesystem::current_path() );
-
-  // collect the part directories that have files
-  std::set<boost::filesystem::path> non_empty_parts;
-
-  // loop over all of the part directories 
-  // NOTE: not necessarily sorted.  OS dependent.  Put in std::set to sort!
-  boost::filesystem::directory_iterator end_iter;
-  for (boost::filesystem::directory_iterator top_itr( top ); top_itr != end_iter; ++top_itr) {
-    boost::filesystem::path part_path = top_itr->path();
-    if (!is_directory(part_path)) {
-      continue;
-    }
-    std::string path_name = part_path.string();
-    if (path_name.find("part") == std::string::npos) {
-      continue;
-    }
-
-    int count = 0;
-    for (boost::filesystem::directory_iterator part_itr( part_path ); part_itr != end_iter; ++part_itr) {
-      count++;
-    }
-    std::cout << "part: " << part_path.string() << " " << count << std::endl;
-    if (count > 0) {
-      non_empty_parts.insert(part_path);
-    }
-  }
-
-  if (non_empty_parts.size() > 1) {
-
-    std::cout << "ERROR!  Student submitted to multiple parts in violation of instructions.\nRemoving files from all but first non empty part." << std::endl;
-
-    // collect files to remove
-    std::vector<boost::filesystem::path> remove_this;
-
-    std::set<boost::filesystem::path>::iterator itr = non_empty_parts.begin();
-    // skip (keep contents of) first part directory
-    itr++;
-    while (itr != non_empty_parts.end()) {
-      for (boost::filesystem::directory_iterator part_itr( *itr ); part_itr != end_iter; ++part_itr) {
-        remove_this.push_back(part_itr->path());
-      }
-      itr++;
-    }
-
-    // remove those files
-    for (int i = 0; i < remove_this.size(); i++) {
-      std::cout << "REMOVE: " << remove_this[i].string() << std::endl;
-      boost::filesystem::remove(remove_this[i]);
-    }
-  }
-}
-
 
 // =====================================================================
 // =====================================================================
@@ -119,14 +60,6 @@ int main(int argc, char *argv[]) {
   std::cout << "Compiling User Code..." << std::endl;
 
   system("find . -type f -exec ls -sh {} +");
-
-  // if it's a "one part only" assignment, check if student
-  // submitted to multiple parts
-  bool one_part_only = config_json.value("one_part_only",false);
-  if (one_part_only) {
-    CleanUpMultipleParts();
-  }
-  
 
   // Run each COMPILATION TEST
   nlohmann::json::iterator tc = config_json.find("testcases");

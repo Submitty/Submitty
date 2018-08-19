@@ -908,6 +908,7 @@ class AdminGradeableController extends AbstractController {
             'student_download',
             'student_download_any_version',
             'peer_grading',
+            'late_submission_allowed',
             'regrade_allowed'
         ];
 

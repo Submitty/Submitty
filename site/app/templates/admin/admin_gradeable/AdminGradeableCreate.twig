@@ -189,6 +189,7 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_grades">sylla
             elecDateBoxes.prop('disabled', false);
             $('.manual_grading_dates input').prop('disabled', $('#no_ta_grade').is(':checked'));
             $('#date_team_lock').prop('disabled', {{ gradeable.isTeamAssignment() ? 'false' : 'true' }});
+            $('#late_days').prop('disabled', $('#no_late_submission').is(':checked'));
 
             {# Use this 'each' trick since 'no_regrade_allowed' may not be defined if regrade requests not enabled #}
             let regradeReqDate = $('#date_regrade_request');
@@ -271,14 +272,24 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_grades">sylla
         setVcsUrl($('#subdirectory').val());
     }
 
-    function onIsRegradeAllowedChange(){
-        if($('#yes_regrade_allowed').is(':checked')){
-         //   $('.regrade_request_date').hide();
+    function onIsRegradeAllowedChange() {
+        if ($('#yes_regrade_allowed').is(':checked')) {
+            //   $('.regrade_request_date').hide();
             disableElementChildren('.regrade_request_date', false);
         }
-        else{
-         //   $('.regrade_request_date').show();
+        else {
+            //   $('.regrade_request_date').show();
             disableElementChildren('.regrade_request_date', true);
+        }
+        updateDateDisplay();
+    }
+
+    function onLateSubmissionAllowedChanged() {
+        let lateSubmissionParts = $('.yes-late-submission');
+        if($('#yes_late_submission').is(':checked')) {
+            lateSubmissionParts.show();
+        } else {
+            lateSubmissionParts.hide();
         }
         updateDateDisplay();
     }
@@ -360,6 +371,9 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_grades">sylla
         //Hide Regrade Request Date if Regrade Requests are not enabled
         onIsRegradeAllowedChange();
         $('[name="regrade_allowed"]').change(onIsRegradeAllowedChange);
+
+        onLateSubmissionAllowedChanged();
+        $('input[name=late_submission_allowed]').change(onLateSubmissionAllowedChanged);
     });
 
     function checkForm() {

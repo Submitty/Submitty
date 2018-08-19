@@ -691,13 +691,11 @@ chmod o+r ${SUBMITTY_INSTALL_DIR}/config/version.json
 REBUILD_ALL_FILENAME=${SUBMITTY_INSTALL_DIR}/REBUILD_ALL_FLAG.txt
 
 if [ -f $REBUILD_ALL_FILENAME ]; then
-    echo -e "\n\nMigration has indicated that the code includes a breaking change for autograding\n\n"
+    echo -e "\n\nMigration has indicated that the code includes a breaking change for autograding"
     echo -e "\n\nMust rebuild ALL GRADEABLES\n\n"
     for s in /var/local/submitty/courses/*/*; do c=`basename $s`; ${s}/BUILD_${c}.sh --clean; done
     echo -e "\n\nDone rebuilding ALL GRADEABLES for ALL COURSES\n\n"
     rm $REBUILD_ALL_FILENAME
-else
-    echo "File $REBUILD_ALL_FILENAME does not exist."
 fi
 
 
