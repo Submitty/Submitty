@@ -11,22 +11,22 @@
     {% if show_mark_list %}
         <div class="container point-values">
             <div class="row">
-                <div class="col point-label">Normal Points</div>
                 <div class="col point-input-container">
                     <input class="max-points step="{{ precision }}" type="number" min="0" value="{{ component.max_value }}" onclick="event.stopPropagation()"/>
                 </div>
+                <div class="col point-label">Normal Points</div>
             </div>
             <div class="row">
-                <div class="col point-label">Extra Credit Points</div>
                 <div class="col point-input-container">
                     <input class="extra-credit-points" step="{{ precision }}" type="number" min="0" value="{{ extra_credit_points }}" onclick="event.stopPropagation()"/>
                 </div>
+                <div class="col point-label">Extra Credit Points</div>
             </div>
             <div class="row">
-                <div class="col point-label">Penalty Points</div>
                 <div class="col point-input-container">
                     <input class="penalty-points" step="{{ precision }}" type="number" min="0" value="{{ component.lower_clamp|abs }}" onclick="event.stopPropagation()"/>
                 </div>
+                <div class="col point-label">Penalty Points</div>
             </div>
             <div class="row">
                 <div class="col count-up-selector count-type-selector {{ component.default == 0 ? 'count-type-selected' : ''}}" onclick="onClickCountUp(this); event.stopPropagation()">
@@ -52,8 +52,10 @@
             <input class="component-title" type="text" value="{{ component.title }}" onclick="event.stopPropagation()"/>
         </div>
         {% if component.page > 0 %}
+            <div class="col-no-gutters page-label">
+                <span><i>Page #:</i></span>
+            </div>
             <div class="col-no-gutters">
-                <i>Page #:</i>
                 <input class="page-number" type="number" step="1" min="1" value="{{ component.page }}" onclick="event.stopPropagation()"/>
             </div>
         {% endif %}

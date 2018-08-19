@@ -635,6 +635,12 @@ tr.is_publish {
     padding: 0;
 }
 
+.gradeable .edit-component-container .title-block div.page-label {
+    display: inline-flex;
+    align-items: center;
+    padding-left: 20px;
+}
+
 .gradeable .count-type-selector {
     border-radius: 6px;
     border: 2px solid #3093FC;
@@ -651,12 +657,7 @@ tr.is_publish {
 }
 
 .gradeable .component .point-values div.point-input-container {
-    padding-left: 2px;
     padding-right: 2px;
-}
-
-.gradeable .component .point-values div.point-label {
-    padding-right: 4px;
 }
 
 .gradeable .component .point-values .count-type-selector {
@@ -675,6 +676,14 @@ tr.is_publish {
 
 .gradeable .component .point-values .point-input-container input {
     width: 100%;
+}
+
+.gradeable .component input.page-number {
+    width: 50px;
+}
+
+.gradeable .component .box-title input[type=number] {
+    text-align: right;
 }
 
 .gradeable .component .badge {
