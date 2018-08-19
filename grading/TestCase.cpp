@@ -25,8 +25,6 @@
 #define SHM_MODE (SHM_W | SHM_R | IPC_CREAT)
 
 
-int TestCase::next_test_case_id = 1;
-
 std::string rlimit_name_decoder(int i);
 
 void TerminateProcess(float &elapsed, int childPID);
@@ -258,8 +256,7 @@ TestResults* TestCase::dispatch(const nlohmann::json& grader, int autocheck_numb
 TestCase::TestCase(nlohmann::json &whole_config, int which_testcase, std::string docker_name) :
   _json((*whole_config.find("testcases"))[which_testcase]), CONTAINER_NAME(docker_name) {
 
-  test_case_id = next_test_case_id;
-  next_test_case_id++;
+  test_case_id = which_testcase + 1;
 }
 
 std::vector<std::string> TestCase::getCommands() const {

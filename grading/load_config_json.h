@@ -9,9 +9,9 @@ void AddDockerConfiguration(nlohmann::json &whole_config);
 
 void RewriteDeprecatedMyersDiff(nlohmann::json &whole_config);
 
-void InflateTestcases(nlohmann::json &whole_config);
+void InflateTestcases(nlohmann::json &single_testcase);
 
-void InflateTestcase(nlohmann::json &single_testcase);
+void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_config);
 
 nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid);
 

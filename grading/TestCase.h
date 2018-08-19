@@ -111,8 +111,6 @@ public:
   }
   const nlohmann::json get_test_case_limits() const;
 
-  static void reset_next_test_case_id() { next_test_case_id = 1; }
-
   bool ShowExecuteLogfile(const std::string &execute_logfile) const;
 
 private:
@@ -126,7 +124,6 @@ private:
   // REPRESENTATION
   std::string CONTAINER_NAME;
   int test_case_id;
-  static int next_test_case_id;
   nlohmann::json& _json;
 };
 

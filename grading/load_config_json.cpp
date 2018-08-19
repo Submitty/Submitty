@@ -51,6 +51,8 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
   if (!whole_config["docker_enabled"].is_boolean()){
     whole_config["docker_enabled"] = false;
   }
+
+  bool docker_enabled = whole_config["docker_enabled"];
   
   nlohmann::json::iterator tc = whole_config.find("testcases");
   assert (tc != whole_config.end());
@@ -93,6 +95,10 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
     std::string testcase_type = this_testcase.value("type","Execution");
     if (testcase_type == "Compilation"){
       assert(this_testcase["containers"].size() == 1);
+    }
+
+    if(this_testcase["containers"] > 1){
+      assert(this_testcase["containers"] == 1 || docker_enabled == true);
     }
 
     for (int container_num = 0; container_num < this_testcase["containers"].size(); container_num++){
@@ -178,7 +184,7 @@ void InflateTestcases(nlohmann::json &whole_config){
   int testcase_num = 0;
   for (typename nlohmann::json::iterator itr = tc->begin(); itr != tc->end(); itr++,testcase_num++){
       nlohmann::json this_testcase = whole_config["testcases"][testcase_num];
-      InflateTestcase(this_testcase);
+      InflateTestcase(this_testcase, whole_config);
       whole_config["testcases"][testcase_num] = this_testcase;
   }
 }
@@ -191,7 +197,7 @@ bool validShowValue(const nlohmann::json& v) {
            v == "on_success"));
 }
 
-void InflateTestcase(nlohmann::json &single_testcase) {
+void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_config) {
   //move to load_json
   General_Helper(single_testcase);
   if (single_testcase.value("type","Execution") == "FileCheck") {
@@ -208,7 +214,7 @@ void InflateTestcase(nlohmann::json &single_testcase) {
     assert (itr->is_array());
     VerifyGraderDeductions(*itr);
     std::vector<nlohmann::json> containers = mapOrArrayOfMaps(single_testcase, "containers");
-    AddDefaultGraders(containers,*itr,single_testcase);
+    AddDefaultGraders(containers,*itr,whole_config);
 
      for (int i = 0; i < (*itr).size(); i++) {
       nlohmann::json& grader = (*itr)[i];
@@ -274,8 +280,6 @@ nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid) {
   RewriteDeprecatedMyersDiff(answer);
 
   InflateTestcases(answer);
-
-  std::cout << "JSON PARSED" << std::endl;
   
   return answer;
 }
@@ -331,11 +335,11 @@ void AddDefaultGraders(const std::vector<nlohmann::json> &containers,
 
       //If this container contains multiple commands, we need to append a number to its STDOUT/ERR
       if (commands.size() > 1){
-        suffix = "_"+std::to_string(i)+".txt";
+        suffix = "_"+std::to_string(j)+".txt";
       }
     
-      AddDefaultGrader(containers[0],files_covered,json_graders,prefix+"STDOUT"+suffix,whole_config);
-      AddDefaultGrader(containers[0],files_covered,json_graders,prefix+"STDERR"+suffix,whole_config);
+      AddDefaultGrader(containers[i]["commands"][j],files_covered,json_graders,prefix+"STDOUT"+suffix,whole_config);
+      AddDefaultGrader(containers[i]["commands"][j],files_covered,json_graders,prefix+"STDERR"+suffix,whole_config);
     } 
   }
 }
@@ -478,8 +482,8 @@ void Compilation_Helper(nlohmann::json &single_testcase) {
     //assert that there is exactly 1 container
     assert(!single_testcase["containers"].is_null());
     //assert that the container has commands
-    assert(!single_testcase["containers"]["commands"].is_null());
-    nlohmann::json commands = single_testcase["containers"]["commands"];
+    assert(!single_testcase["containers"][0]["commands"].is_null());
+    nlohmann::json commands = single_testcase["containers"][0]["commands"];
     //grab the container's commands.
     assert (commands.size() > 0);
     for (int i = 0; i < commands.size(); i++) {
