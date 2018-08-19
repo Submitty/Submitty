@@ -128,7 +128,7 @@ def unzip_this_file(zipfilename,path):
     zip_ref.close()
 
 
-def clean_parts(path, log_path=os.devnull):
+def allow_only_one_part(path, log_path=os.devnull):
     """
     Given a path to a directory, iterate through the directory and detect folders that start with
     "part". If there is more than one and they have files, then delete all of the part folders except
@@ -238,9 +238,11 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     checkout_subdir_path = os.path.join(checkout_path, checkout_subdirectory)
 
     if complete_config_obj.get('one_part_only', False):
-        clean_parts(submission_path, os.path.join(tmp_logs, "overall.txt"))
+        allow_only_one_part(submission_path, os.path.join(tmp_logs, "overall.txt"))
         if is_vcs:
-            clean_parts(checkout_subdir_path, os.path.join(tmp_logs, "overall.txt"))
+            with open(os.path.join(tmp_logs, "overall.txt"), 'a') as f:
+                print("WARNING:  ONE_PART_ONLY OPTION DOES NOT MAKE SENSE WITH VCS SUBMISSION", file=f)
+
 
     # --------------------------------------------------------------------
     # START DOCKER
