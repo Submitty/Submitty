@@ -47,14 +47,35 @@
             Regrade Request Due Date (Regrade Requests must be sent by this date)
         </div>
 
-        How many late days may students use on this assignment?
-        <input style="width: 50px" id="late_days" name="late_days" class="int_val" type="text" value="{{ gradeable.getLateDays() }}"/>
-
         <br />
+
+        Should submissions be accepted after the due date?
+        <br />
+        <input type="radio" id = "yes_late_submission" name="late_submission_allowed" value="true"
+                {{ action != 'new' and gradeable.isLateSubmissionAllowed() ? 'checked' : '' }}> Yes
+
+        <input type="radio" id = "no_late_submission" name="late_submission_allowed" value ="false"
+                {{ not (action != 'new' and gradeable.isLateSubmissionAllowed()) ? 'checked' :  '' }}> No
+        <br />
+        <div class="yes-late-submission">
+            How many late days may students use on this assignment?
+            <input style="width: 50px" id="late_days" name="late_days" class="int_val" type="text" value="{{ gradeable.getLateDays() }}"/>
+
+            <br />
+
+            <span id="late-days-message">Note: Submissions received after the deadline will be automatically recorded as a zero if late days are not allowed
+                for this assignment (or the student does not have sufficient late days to cover the submission) and no excused
+                absence extension is entered for this student for this gradeable.  See <a href="http://submitty.org/student/late_days">Late Days & Extensions</a>.
+            </span>
+        </div>
     </div>
+
+    <br />
 
     <input type="button" class="btn btn-default" value="Show All Dates" id="show_all_dates" onclick="showAllDates()" />
     <input type="button" class="btn btn-primary" value="Hide Irrelevant Dates" id="hide_dates" onclick="hideDates()" hidden/>
+
+    <br />
     <span id="gray_date_warning" hidden>Note: grayed-out dates are for debugging & consistency checks.  These dates are not relevant with your current assignment configuration.</span>
 </div>
 
@@ -73,6 +94,7 @@
         onTeamAssignmentChange();
         onManualGradingChange();
         onIsRegradeAllowedChange();
+        onLateSubmissionAllowedChanged();
     }
 
     $(document).ready(function() {

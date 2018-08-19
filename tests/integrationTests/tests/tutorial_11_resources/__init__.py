@@ -4,6 +4,7 @@ from lib import prebuild, testcase, SUBMITTY_TUTORIAL_DIR
 import subprocess
 import os
 import glob
+import shutil
 
 
 ############################################################################
@@ -19,7 +20,10 @@ def initialize(test):
     except OSError:
         pass
     try:
-        os.mkdir(os.path.join(test.testcase_path, "data"))
+        data_path = os.path.join(test.testcase_path, "data")
+        if os.path.isdir(data_path):
+            shutil.rmtree(data_path)
+        os.mkdir(data_path)
     except OSError:
         pass
 
@@ -33,11 +37,10 @@ def initialize(test):
 
 ############################################################################
 
-
 def cleanup(test):
     subprocess.call(["rm"] + ["-f"] +
                     glob.glob(os.path.join(test.testcase_path, "data", "*cpp")))
-    subprocess.call(["rm"] + ["-f"] +
+    subprocess.call(["rm"] + ["-rf"] +
                     glob.glob(os.path.join(test.testcase_path, "data", "test*")))
     subprocess.call(["rm"] + ["-f"] +
                     glob.glob(os.path.join(test.testcase_path, "data", "results*")))
@@ -53,9 +56,9 @@ def solution(test):
     test.run_validator()
     test.diff("grade.txt","solution_grade.txt","-b")
     test.json_diff("results.json","solution_results.json")
-    test.diff("test02_STDOUT.txt","data/simple_out.txt")
-    test.empty_file("test02_STDERR.txt")
-    test.empty_file("test02_execute_logfile.txt")
+    test.diff("test02/STDOUT.txt","data/simple_out.txt")
+    test.empty_file("test02/STDERR.txt")
+    test.empty_file("test02/execute_logfile.txt")
 
 
 @testcase
@@ -68,7 +71,7 @@ def buggy(test):
     test.run_validator()
     test.diff("grade.txt","buggy_grade.txt","-b")
     test.json_diff("results.json","buggy_results.json")
-    test.empty_file("test02_STDOUT.txt")
-    test.empty_file("test02_STDERR.txt")
-    test.diff("test02_execute_logfile.txt","buggy_test02_execute_logfile.txt")
+    test.empty_file("test02/STDOUT.txt")
+    test.empty_file("test02/STDERR.txt")
+    test.diff("test02/execute_logfile.txt","buggy_test02_execute_logfile.txt")
 

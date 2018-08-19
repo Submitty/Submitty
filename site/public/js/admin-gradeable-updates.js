@@ -64,6 +64,9 @@ $(document).ready(function () {
             if (val.type === 'radio' && !$(val).is(':checked')) {
                 return;
             }
+            if($('#no_late_submission').is(':checked') && $(val).attr('name') === 'late_days') {
+                $(val).val('0');
+            }
             data[val.name] = $(val).val();
         };
 

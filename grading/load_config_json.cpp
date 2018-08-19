@@ -24,22 +24,31 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
   whole_config["autograding"]["compilation_to_runner"].push_back("**/*.out");
   whole_config["autograding"]["compilation_to_runner"].push_back("**/*.class");
 
-  whole_config["autograding"]["compilation_to_validation"].push_back("test*.txt");
+  whole_config["autograding"]["compilation_to_validation"].push_back("test*/STDOUT*.txt");
+  whole_config["autograding"]["compilation_to_validation"].push_back("test*/STDERR*.txt");
 
   whole_config["autograding"]["submission_to_validation"].push_back("**/README.txt");
   whole_config["autograding"]["submission_to_validation"].push_back("textbox_*.txt");
   whole_config["autograding"]["submission_to_validation"].push_back("**/*.pdf");
 
-  whole_config["autograding"]["work_to_details"].push_back("test*.txt");
-  whole_config["autograding"]["work_to_details"].push_back("test*_diff.json");
+  whole_config["autograding"]["work_to_details"].push_back("test*/*.txt");
+  whole_config["autograding"]["work_to_details"].push_back("test*/*_diff.json");
   whole_config["autograding"]["work_to_details"].push_back("**/README.txt");
   whole_config["autograding"]["work_to_details"].push_back("textbox_*.txt");
+  //todo check up on how this works.
+  whole_config["autograding"]["work_to_details"].push_back("test*/textbox_*.txt");
 
   if (whole_config["autograding"].find("use_checkout_subdirectory") == whole_config["autograding"].end()) {
     whole_config["autograding"]["use_checkout_subdirectory"] = "";
   }
 }
 
+void AddDockerConfiguration(nlohmann::json &whole_config) {
+  if (whole_config.find("docker_enabled") == whole_config.end()) {
+    whole_config["docker_enabled"] = false;
+  }
+  assert (whole_config["docker_enabled"].is_boolean());
+}
 
 void RewriteDeprecatedMyersDiff(nlohmann::json &whole_config) {
 
@@ -99,6 +108,7 @@ nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid) {
   sstr >> answer;
 
   AddSubmissionLimitTestCase(answer);
+  AddDockerConfiguration(answer);
   AddAutogradingConfiguration(answer);
   if (rcsid != "") {
     CustomizeAutoGrading(rcsid,answer);
