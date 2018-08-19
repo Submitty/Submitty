@@ -40,11 +40,6 @@ public:
   // CONSTRUCTOR
   TestCase (nlohmann::json &whole_config, int which_testcase, std::string container_name);
 
-  void General_Helper();
-  void FileCheck_Helper();
-  void Compilation_Helper();
-  void Execution_Helper();
-
   // -------------------------------
   // ACCESSORS
 
@@ -144,9 +139,6 @@ private:
 // NON MEMBER  HELPER FUNCTIONS
 
 void adjust_test_case_limits(nlohmann::json &modified_test_case_limits, int rlimit_name, rlim_t value);
-
-void AddSubmissionLimitTestCase(nlohmann::json &config_json);
-
 
 std::string getAssignmentIdFromCurrentDirectory(std::string);
 

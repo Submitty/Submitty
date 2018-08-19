@@ -250,61 +250,9 @@ TestResults* TestCase::dispatch(const nlohmann::json& grader, int autocheck_numb
   else                                             { return custom_dispatch(grader);                        }
 }
 
-
-
-
-// Make sure the sum of deductions across graders adds to at least 1.0.
-// If a grader does not have a deduction setting, set it to 1/# of (non default) graders.
-void VerifyGraderDeductions(nlohmann::json &json_graders) {
-  assert (json_graders.is_array());
-  assert (json_graders.size() > 0);
-
-  int json_grader_count = 0;
-  for (int i = 0; i < json_graders.size(); i++) {
-    nlohmann::json::const_iterator itr = json_graders[i].find("method");
-    if (itr != json_graders[i].end()) {
-      json_grader_count++;
-    }
-  }
-
-  assert (json_grader_count > 0);
-
-  float default_deduction = 1.0 / float(json_grader_count);
-  float sum = 0.0;
-  for (int i = 0; i < json_graders.size(); i++) {
-    nlohmann::json::const_iterator itr = json_graders[i].find("method");
-    if (itr == json_graders[i].end()) {
-      json_graders[i]["deduction"] = 0;
-      continue;
-    }
-    itr = json_graders[i].find("deduction");
-    float deduction;
-    if (itr == json_graders[i].end()) {
-      json_graders[i]["deduction"] = default_deduction;
-      deduction = default_deduction;
-    } else {
-      assert (itr->is_number());
-      deduction = (*itr);
-    }
-    sum += deduction;
-  }
-
-  if (sum < 0.99) {
-    std::cout << "ERROR! DEDUCTION SUM < 1.0: " << sum << std::endl;
-  }
-}
-
 // =================================================================================
 // =================================================================================
 // CONSTRUCTOR
-
-bool validShowValue(const nlohmann::json& v) {
-  return (v.is_string() &&
-          (v == "always" ||
-           v == "never" ||
-           v == "on_failure" ||
-           v == "on_success"));
-}
 
 
 TestCase::TestCase(nlohmann::json &whole_config, int which_testcase, std::string docker_name) :
@@ -312,68 +260,6 @@ TestCase::TestCase(nlohmann::json &whole_config, int which_testcase, std::string
 
   test_case_id = next_test_case_id;
   next_test_case_id++;
-
-  //move to load_json
-  General_Helper();
-  if (isFileCheck()) {
-    FileCheck_Helper();
-  } else if (isCompilation()) {
-    Compilation_Helper();
-  } else {
-    assert (isExecution());
-    Execution_Helper();
-  }
-
-  nlohmann::json::iterator itr = _json.find("validation");
-  if (itr != _json.end()) {
-    assert (itr->is_array());
-    VerifyGraderDeductions(*itr);
-    std::vector<std::string> commands = this->getCommands();
-    AddDefaultGraders(commands,*itr,whole_config);
-
-     for (int i = 0; i < (*itr).size(); i++) {
-      nlohmann::json& grader = (*itr)[i];
-      nlohmann::json::iterator itr2;
-      std::string method = grader.value("method","MISSING METHOD");
-      itr2 = grader.find("show_message");
-      if (itr2 == grader.end()) {
-        if (method == "warnIfNotEmpty" || method == "warnIfEmpty") {
-          grader["show_message"] = "on_failure";
-        } else {
-          if (grader.find("actual_file") != grader.end() &&
-              *(grader.find("actual_file")) == "execute_logfile.txt" &&
-              grader.find("show_actual") != grader.end() &&
-              *(grader.find("show_actual")) == "never") {
-            grader["show_message"] = "never";
-          } else {
-            grader["show_message"] = "always";
-          }
-        }
-      } else {
-        assert (validShowValue(*itr2));
-      }
-      if (grader.find("actual_file") != grader.end()) {
-        itr2 = grader.find("show_actual");
-        if (itr2 == grader.end()) {
-          if (method == "warnIfNotEmpty" || method == "warnIfEmpty") {
-            grader["show_actual"] = "on_failure";
-          } else {
-            grader["show_actual"] = "always";
-          }
-        } else {
-          assert (validShowValue(*itr2));
-        }
-      }
-      if (grader.find("expected_file") != grader.end()) {
-        itr2 = grader.find("show_expected");
-        if (itr2 == grader.end()) {
-          grader["show_expected"] = "always";
-        } else {
-          assert (validShowValue(*itr2));
-        }
-      }
-    }
-  }
 }
 
 std::vector<std::string> TestCase::getCommands() const {
