@@ -3215,7 +3215,7 @@ AND gc_id IN (
      * Updates an existing graded component in the database
      * @param GradedComponent $graded_component
      */
-    public function updateGradedComponent(GradedComponent $graded_component) {
+    private function updateGradedComponent(GradedComponent $graded_component) {
         if ($graded_component->isModified()) {
             if(!$graded_component->getComponent()->isPeer()) {
                 $params = [

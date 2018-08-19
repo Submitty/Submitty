@@ -1199,7 +1199,7 @@ class ElectronicGraderController extends GradingController {
             $graded_component->setGradedVersion($component_version);
         }
         $graded_component->setComment($custom_message);
-      //  $graded_component->setScore($custom_points);
+        $graded_component->setScore($custom_points);
         $graded_component->setCustomMarkChecked($custom_has);
         $graded_component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
 
@@ -1220,7 +1220,6 @@ class ElectronicGraderController extends GradingController {
 
         // Finally, save the changes to the database
         $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
-       // $this->core->getQueries()->updateGradedComponent($graded_component);
 
         // Response 'data'
         return [

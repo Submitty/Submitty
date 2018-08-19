@@ -19,7 +19,7 @@ use app\models\User;
  * @method string getGraderId()
  * @method int getGradedVersion()
  * @method void setGradedVersion($graded_version)
- * @method bool setCustomMarkChecked($isChecked)
+ * @method void setCustomMarkChecked($isChecked)
  * @method \DateTime getGradeTime()
  * @method int[] getMarkIds()
  * @method int[]|null getDbMarkIds()
@@ -79,7 +79,6 @@ class GradedComponent extends AbstractModel {
 
         $this->setComponent($component);
         $this->setGrader($grader);
-        //print_r($details);
         $this->setComment($details['comment'] ?? '');
         $this->setGradedVersion($details['graded_version'] ?? 0);
         $this->setGradeTime($details['grade_time'] ?? new \DateTime());

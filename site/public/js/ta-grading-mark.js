@@ -86,9 +86,6 @@ function updateCustomMarkText(me) {
 
     updateProgressPoints(me.dataset.component_index);
 }
-function updateCustomMarkHas(me){
-    
-}
 
 //if type == 0 number input, type == 1 textarea
 function checkIfSelected(me) {
@@ -498,8 +495,8 @@ function updateMarksOnPage(c_index) {
             var note_el = $('textarea[name=mark_text_custom_'+c_index+']');
             score_el.val(score);
             note_el.val(note);
-          //  var icon = $('i[name=mark_icon_'+c_index+'_custom]');
-          //  icon.toggleClass("mark-has", (note !== "" && note !== undefined));
+            var icon = $('i[name=mark_icon_'+c_index+'_custom]');
+            icon.toggleClass("mark-has", (note !== "" && note !== undefined));
 
             getComponent(c_index).score = score;
             getComponent(c_index).comment = note;
