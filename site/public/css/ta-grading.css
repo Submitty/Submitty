@@ -664,6 +664,10 @@ tr.is_publish {
     width: 100%;
 }
 
+.gradeable .component .badge {
+    width: 80px;
+}
+
 #mark-conflict-popup .legend {
     /* max-width: 80px; */
 }

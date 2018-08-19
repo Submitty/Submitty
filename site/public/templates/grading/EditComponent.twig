@@ -40,8 +40,7 @@
             </div>
         </div>
     {% else %}
-        <strong id="grading_total"
-                class="badge">
+        <strong class="badge green-background">
             {{ component.max_value }} {{ extra_credit_points > 0 ? '(+' ~ extra_credit_points ~ ')' }} {{ penalty_points > 0 ? '(-' ~ penalty_points ~ ')' : '' }}
         </strong>
     {% endif %}
