@@ -1135,8 +1135,7 @@ class ElectronicGraderController extends GradingController {
         $custom_points = floatval($custom_points);
 
         // Optional Parameters
-        $overwrite = ($_POST['overwrite'] ?? true) === true;
-
+        $overwrite = $_POST['overwrite'] ?? true;
         $grader = $this->core->getUser();
 
         // Get the gradeable
