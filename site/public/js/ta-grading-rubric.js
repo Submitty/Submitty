@@ -907,8 +907,8 @@ function getComponentPageNumber(component_id) {
     let domElement = getComponentDOMElement(component_id);
     if (isInstructorEditEnabled()) {
         let page = getPdfPageAssignment();
-        if (page > 0) {
-            return parseInt(domElement.find('.page-number').val());
+        if (page === PDF_PAGE_INSTRUCTOR) {
+            return parseInt(domElement.find('input.page-number').val());
         } else {
             return page;
         }
