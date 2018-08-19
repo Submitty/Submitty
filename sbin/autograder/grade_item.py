@@ -128,6 +128,47 @@ def unzip_this_file(zipfilename,path):
     zip_ref.close()
 
 
+def allow_only_one_part(path, log_path=os.devnull):
+    """
+    Given a path to a directory, iterate through the directory and detect folders that start with
+    "part". If there is more than one and they have files, then delete all of the part folders except
+    for the first one that has files.
+
+    An example would be if you had the folder structure:
+    part1/
+        test.py
+    part2/
+        test.cpp
+
+    Then the part2 folder would be deleted, leaving just the part1 folder.
+
+    :param path: string filepath to directory to scan for parts in
+    :param log_path: string filepath to file to write print statements to
+    """
+    if not os.path.isdir(path):
+        return
+    with open(log_path, 'a') as log:
+        clean_directories = []
+        print('Clean up multiple parts', file=log)
+        for entry in sorted(os.listdir(path)):
+            full_path = os.path.join(path, entry)
+            if not os.path.isdir(full_path) or not entry.startswith('part'):
+                continue
+            count = len(os.listdir(full_path))
+            print('{}: {}'.format(entry, count), file=log)
+            if count > 0:
+                clean_directories.append(full_path)
+
+        if len(clean_directories) > 1:
+            print("ERROR!  Student submitted to multiple parts in violation of instructions.\n"
+                  "Removing files from all but first non empty part.", file=log)
+
+            for i in range(1, len(clean_directories)):
+                print("REMOVE: {}".format(clean_directories[i]), file=log)
+                for entry in os.listdir(clean_directories[i]):
+                    print("  -> {}".format(entry), file=log)
+                shutil.rmtree(clean_directories[i])
+
 
 # ==================================================================================
 # ==================================================================================
@@ -173,6 +214,35 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     with open(os.path.join(tmp_submission,".grading_began"), 'r') as f:
         grading_began_longstring = f.read()
     grading_began = dateutils.read_submitty_date(grading_began_longstring)
+
+    submission_path = os.path.join(tmp_submission, "submission")
+    checkout_path = os.path.join(tmp_submission, "checkout")
+
+    provided_code_path = os.path.join(tmp_autograding, "provided_code")
+    test_input_path = os.path.join(tmp_autograding, "test_input")
+    test_output_path = os.path.join(tmp_autograding, "test_output")
+    custom_validation_code_path = os.path.join(tmp_autograding, "custom_validation_code")
+    bin_path = os.path.join(tmp_autograding, "bin")
+    form_json_config = os.path.join(tmp_autograding, "form.json")
+    complete_config = os.path.join(tmp_autograding, "complete_config.json")
+
+    with open(form_json_config, 'r') as infile:
+        gradeable_config_obj = json.load(infile)
+    gradeable_deadline_string = gradeable_config_obj["date_due"]
+
+    with open(complete_config, 'r') as infile:
+        complete_config_obj = json.load(infile)
+
+    is_vcs = gradeable_config_obj["upload_type"] == "repository"
+    checkout_subdirectory = complete_config_obj["autograding"].get("use_checkout_subdirectory","")
+    checkout_subdir_path = os.path.join(checkout_path, checkout_subdirectory)
+
+    if complete_config_obj.get('one_part_only', False):
+        allow_only_one_part(submission_path, os.path.join(tmp_logs, "overall.txt"))
+        if is_vcs:
+            with open(os.path.join(tmp_logs, "overall.txt"), 'a') as f:
+                print("WARNING:  ONE_PART_ONLY OPTION DOES NOT MAKE SENSE WITH VCS SUBMISSION", file=f)
+
 
     # --------------------------------------------------------------------
     # START DOCKER
@@ -229,20 +299,14 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     
     patterns_submission_to_compilation = complete_config_obj["autograding"]["submission_to_compilation"]
 
-    is_vcs = gradeable_config_obj["upload_type"]=="repository"
-    checkout_subdirectory = complete_config_obj["autograding"].get("use_checkout_subdirectory","")
-    checkout_subdir_path = os.path.join(checkout_path,checkout_subdirectory)
-
     # give the untrusted user read/write/execute permissions on the tmp directory & files
     # add_permissions_recursive(tmp_compilation,
     #                           stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP,
     #                           stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP,
     #                           stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP)
 
-
     # add_permissions(tmp,stat.S_IROTH | stat.S_IXOTH) #stat.S_ISGID
     add_permissions(tmp_logs,stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
-   
 
     if USE_DOCKER:
         print("!!!!!!!!!!!!!!!!!!USING DOCKER!!!!!!!!!!!!!!!!!!!!!!!!")
