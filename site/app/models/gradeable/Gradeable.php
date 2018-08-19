@@ -473,18 +473,6 @@ class Gradeable extends AbstractModel {
 
         // Put any special exceptions to the normal validation rules here...
 
-        // Check that the grades released date isn't before the 'max due date' (submission due date + late days)
-        $submission_due_date = $dates['submission_due_date'];
-        if ($this->type === GradeableType::ELECTRONIC_FILE && $this->isStudentSubmit() && $submission_due_date !== null) {
-            $late_days = intval($dates['late_days'] ?? 0);
-            /** @noinspection PhpUnhandledExceptionInspection */
-            $max_due_date = (clone $submission_due_date)->add(new \DateInterval('P' . strval($late_days) . 'D'));
-            if ($max_due_date > $dates['grade_released_date']) {
-                $errors['grade_released_date'] = self::date_display_names['grade_released_date'] . ' Date must be later than the ' .
-                    self::date_display_names['submission_due_date'] . ' + ' . self::date_display_names['late_days'];
-            }
-        }
-
         if (count($errors) > 0) {
             throw new ValidationException('Date validation failed', $errors);
         }
@@ -581,27 +569,30 @@ class Gradeable extends AbstractModel {
     }
 
     /**
-     * Gets all of the gradeable's date values indexed by property name
-     * @return \DateTime[]
+     * Gets all of the gradeable's date values indexed by property name (including late_days)
+     * @return mixed[]
      */
     public function getDates() {
         $dates = [];
-        foreach(self::date_properties as $property) {
+        foreach (self::date_properties as $property) {
             $dates[$property] = $this->$property;
         }
+        $dates['late_days'] = $this->late_days;
         return $dates;
     }
 
     /**
-     * Gets all of the gradeable's date values as strings indexed by property name
+     * Gets all of the gradeable's date values as strings indexed by property name (including late_days)
      * @return string[]
      */
     public function getDateStrings() {
-        $dates = [];
+        $date_strings = [];
+        $now = new \DateTime('now', $this->core->getConfig()->getTimezone());
         foreach (self::date_properties as $property) {
-            $dates[$property] = DateUtils::dateTimeToString($this->$property);
+            $date_strings[$property] = DateUtils::dateTimeToString($this->$property ?? $now);
         }
-        return $dates;
+        $date_strings['late_days'] = strval($this->late_days);
+        return $date_strings;
     }
 
     /**
@@ -1499,5 +1490,26 @@ class Gradeable extends AbstractModel {
         if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
             throw new \Exception("Failed to write to team history to settings file");
         }
+    }
+
+    public function getRepositoryPath(User $user, Team $team = null) {
+        if (strpos($this->getVcsSubdirectory(), '://') !== false || substr($this->getVcsSubdirectory(), 0, 1) === '/') {
+            $vcs_path = $this->getVcsSubdirectory();
+        } else {
+            if (strpos($this->core->getConfig()->getVcsBaseUrl(), '://')) {
+                $vcs_path = rtrim($this->core->getConfig()->getVcsBaseUrl(), '/') . '/' . $this->getVcsSubdirectory();
+            } else {
+                $vcs_path = FileUtils::joinPaths($this->core->getConfig()->getVcsBaseUrl(), $this->getVcsSubdirectory());
+            }
+        }
+        $repo = $vcs_path;
+
+        $repo = str_replace('{$vcs_type}', $this->core->getConfig()->getVcsType(), $repo);
+        $repo = str_replace('{$gradeable_id}', $this->getId(), $repo);
+        $repo = str_replace('{$user_id}', $user->getId(), $repo);
+        if ($this->isTeamAssignment() && $team !== null) {
+            $repo = str_replace('{$team_id}', $team->getId(), $repo);
+        }
+        return $repo;
     }
 }

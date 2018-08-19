@@ -32,6 +32,9 @@ function getComponent(c_index) {
  * @returns Object Mark data
  */
 function getMark(c_index, m_id){
+    //FIXME: This hurts me deep inside
+    c_index = parseInt(c_index);
+    m_id = parseInt(m_id);
     var marks = grading_data.gradeable.components[c_index-1].marks;
     for(var i=0; i<marks.length; i++){
         if(marks[i].id == m_id){
