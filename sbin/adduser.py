@@ -52,7 +52,7 @@ def parse_args():
                                                  'database and add them to the course if specified')
 
     parser.add_argument('user_id', help='user_id of the user to create')
-    parser.add_argument('--course', metavar='help', action='append', nargs=3, help='[SEMESTER] [COURSE] [REGISTRATION_SECTION]')
+    parser.add_argument('--course', metavar='arg', action='append', nargs=3, help='[SEMESTER] [COURSE] [REGISTRATION_SECTION]')
 
     return parser.parse_args()
 
@@ -61,7 +61,12 @@ def main():
     args = parse_args()
     user_id = args.user_id
 
-    engine = create_engine("postgresql://{}:{}@{}/submitty".format(DATABASE_USER, DATABASE_PASS, DATABASE_HOST))
+    if path.isdir(DATABASE_HOST):
+        engine_str = "postgresql://{}:{}@/submitty?host={}".format(DATABASE_USER, DATABASE_PASS, DATABASE_HOST)
+    else:
+        engine_str = "postgresql://{}:{}@{}/submitty".format(DATABASE_USER, DATABASE_PASS, DATABASE_HOST)
+
+    engine = create_engine(engine_str)
     connection = engine.connect()
     metadata = MetaData(bind=engine)
     users_table = Table('users', metadata, autoload=True)

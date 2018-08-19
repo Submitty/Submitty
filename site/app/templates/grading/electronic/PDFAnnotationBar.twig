@@ -1,6 +1,6 @@
 <link rel="stylesheet" type="text/css" href="css/pdf/toolbar_embedded.css"/>
 
-<div id="pdf_annotation_bar" class="draggable" style="visibility: hidden;">
+<div id="pdf_annotation_bar">
     <div id="pdf_annotation_icons">
         <a value="cursor" class="fa fa-mouse-pointer toolbar-item"></a>
         <a value="pen" class="fa fa-pencil toolbar-item"></a>
@@ -13,37 +13,64 @@
         <a value="zoomin" class="fa fa-plus toolbar-action"></a>
         <a value="zoomcustom" class="toolbar-action">100%</a>
         <a value="zoomout" class="fa fa-minus toolbar-action"></a>
-        <a value="save" class="fa fa-file toolbar-action"></a>
-        <a value="download" class="fa fa-download toolbar-action"></a>
+        <a value="save" class="toolbar-action">Save</a>
+        {#<a value="download" class="fa fa-download toolbar-action"></a>#}
+        <a value="color" id="color_selector" class="toolbar-action"></a>
+        <a value="size" id="size_selector" class="fa fa-arrows-alt toolbar-action"></a>
     </div>
-    <div id="pen_selection" class="selection_panel">
-        Size:
+    <div id="size_selector_menu" class="selection-menu">
+        Pen size:
+        <br>
         <input id="pen_size_selector" type="range" min="1" max="10" step="0.1" style="width:70%" oninput="pen_size_value.value=value">
         <output id="pen_size_value"></output>
         <br>
-        Color:
-        <input id="pen_color_selector" type="color" value="#ff0000" style="width:30px">
+        Text size:
         <br>
-        Scroll lock:
-        <input id="scroll_lock_mode" type="checkbox">
-    </div>
-    <div id="text_selection" class="selection_panel">
-        Size:
         <select id="text_size_selector">
             {% set vals = [8, 9, 10, 11, 12, 14, 18, 24, 30, 36, 48, 60, 72, 96] %}
             {% for val in vals %}
                 <option value="{{ val }}">{{ val }}</option>
             {% endfor %}
         </select>
-        <br>
-        <br>
-        Color:
-        <input id="text_color_selector" type="color" value="#000001" style="width:30px">
     </div>
-    <div id="zoom_selection" class="selection_panel">
-        Zoom %
-        <input id="zoom_percent_selector" style="width: 50px;" type="number">
-        <input id="reset_zoom" value="Reset" class="btn btn-primary" style="margin: 30px;" type="button">
+    <div id="color_selector_menu" class="selection-menu">
+        {% set colors = ['#000000',
+                         '#EF4437',
+                         '#E71F63',
+                         '#8F3E97',
+                         '#65499D',
+                         '#4554A4',
+                         '#2083C5',
+                         '#35A4DC',
+                         '#09BCD3',
+                         '#8BC34A',
+                         '#FDC010',
+                         '#F8971C',
+                         '#F0592B',
+                         '#F06291',
+                         '#FF0000'] %}
+        {% for color in colors %}
+            <a class="color" value="{{ color }}" style="background: {{ color }}" onclick="emitEvent(this)"></a>
+        {% endfor %}
     </div>
 </div>
 
+<script>
+    //TODO: move to js file
+    let colorEvent;
+    if(document.createEvent){
+        colorEvent = document.createEvent("HTMLEvents");
+        colorEvent.initEvent('colorchange', true, true);
+    } else {
+        colorEvent = document.createEventObject();
+        colorEvent.eventType = "colorchange";
+    }
+
+    colorEvent.eventName = "colorchange";
+
+    function emitEvent(elem){
+        if(document.createEvent){
+            elem.dispatchEvent(colorEvent);
+        }
+    }
+</script>

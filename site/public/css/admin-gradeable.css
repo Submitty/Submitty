@@ -98,3 +98,7 @@ table#grader-history th, table#grader-history td {
     border: 3px solid black;
     text-align: center;
 }
+
+#late-days-message {
+    font-style: italic;
+}
