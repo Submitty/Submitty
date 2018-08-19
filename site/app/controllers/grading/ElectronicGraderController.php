@@ -1420,7 +1420,8 @@ class ElectronicGraderController extends GradingController {
         $max_value = $_POST['max_value'] ?? null;
         $upper_clamp = $_POST['upper_clamp'] ?? null;
         $peer = $_POST['peer'] ?? 'false';
-        $page = $_POST['page'] ?? '';
+        // Use 'page_number' since 'page' is used in the router
+        $page = $_POST['page_number'] ?? '';
 
         // Validate required parameters
         if ($lower_clamp === null) {
