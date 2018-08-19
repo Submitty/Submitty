@@ -779,13 +779,16 @@ function updateProgressPoints(c_index) {
 
     var custom_message = $('textarea[name=mark_text_custom_'+c_index+']').val();
     $('#mark_text_custom-'+c_index)[0].disabled=false;
+    $('#mark_points_custom-'+c_index)[0].disabled=false;
     $('#mark_points_custom-' + c_index)[0].style.cursor="default";
     $('#mark_text_custom-' + c_index)[0].style.cursor="text";
-   // $('#mark_icon_custom-' + c_index)[0].style.cursor="pointer";
+    $('#mark_icon_custom-' + c_index)[0].style.display="block";
     if(editModeEnabled){
         $('#mark_text_custom-'+c_index)[0].disabled=true;
+        $('#mark_points_custom-'+c_index)[0].disabled=true;
         $('#mark_points_custom-' + c_index)[0].style.cursor="not-allowed";
         $('#mark_text_custom-' + c_index)[0].style.cursor="not-allowed";
+        $('#mark_icon_custom-' + c_index)[0].style.display="none";
      //   $('#mark_icon_custom-' + c_index)[0].style.cursor="not-allowed";
     }
     calculatePercentageTotal();

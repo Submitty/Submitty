@@ -741,3 +741,6 @@ function toggleEditMode(){
         }
     }
 }
+function getEditModeEnabled(){
+    return editModeEnabled;
+}
