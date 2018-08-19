@@ -1525,7 +1525,7 @@ class ElectronicGraderController extends GradingController {
         }
 
         // checks if user has permission
-        if (!$this->core->getAccess()->canI("grading.electronic.save_rubric", ["gradeable" => $gradeable])) {
+        if (!$this->core->getAccess()->canI("grading.electronic.save_component", ["gradeable" => $gradeable])) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to save marks');
             return;
         }
@@ -1576,7 +1576,7 @@ class ElectronicGraderController extends GradingController {
         }
 
         // checks if user has permission
-        if (!$this->core->getAccess()->canI("grading.electronic.save_rubric", ["gradeable" => $gradeable])) {
+        if (!$this->core->getAccess()->canI("grading.electronic.save_component", ["gradeable" => $gradeable])) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to save marks');
             return;
         }
