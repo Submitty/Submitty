@@ -46,8 +46,6 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
 
 void AddDockerConfiguration(nlohmann::json &whole_config) {
 
-  assert (whole_config["docker_enabled"].is_boolean());
-
   if (!whole_config["docker_enabled"].is_boolean()){
     whole_config["docker_enabled"] = false;
   }
@@ -97,8 +95,8 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
       assert(this_testcase["containers"].size() == 1);
     }
 
-    if(this_testcase["containers"] > 1){
-      assert(this_testcase["containers"] == 1 || docker_enabled == true);
+    if(this_testcase["containers"].size() > 1){
+      assert(this_testcase["containers"].size() == 1 || docker_enabled == true);
     }
 
     for (int container_num = 0; container_num < this_testcase["containers"].size(); container_num++){

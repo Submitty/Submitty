@@ -61,25 +61,18 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                 try:
                     # returns a dictionary where container_name maps to outgoing connections and container image
                     container_info = find_container_information(testcases[testcase_num -1], testcase_num)
-                    #print('GOT CONTAINER INFO')
-                    #print(json.dumps(container_info, sort_keys=True, indent=4))
                     # Creates folders for each docker container if there are more than one. Otherwise, we grade in testcase_folder.
                     # Updates container_info so that each docker has a 'mounted_directory' element
                     create_container_subfolders(container_info, testcase_folder, which_untrusted)
-                    #print('CREATED CONTAINER SUBFOLDERS')
-                    #print(json.dumps(container_info, sort_keys=True, indent=4))
                     # Launches containers with the -d option. Gives them the names specified in container_info. Updates container info
                     #    to store container_ids.
                     launch_containers(container_info, testcase_folder, job_id,is_batch_job,which_untrusted,
                                                       item_name,grading_began)
-                    #print('LAUNCHED CONTAINERS')
-                    #print(json.dumps(container_info, sort_keys=True, indent=4))
                     # Networks containers together if there are more than one of them. Modifies container_info to store 'network'
                     #   The name of the docker network it is connected to.
                     network_containers(container_info,testcase_folder,os.path.join(tmp_work, "test_input"),job_id,is_batch_job,
                                         which_untrusted,item_name,grading_began)
                     print('NETWORKED CONTAINERS')
-                    print(json.dumps(container_info, sort_keys=True, indent=4))
                     #The containers are now ready to execute.
 
                     processes = list()
@@ -115,7 +108,6 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                     for name, info in container_info.items():
                         # if name == 'router':
                         #   continue
-                        print('TESTCASE {0} DOING WORK ON AND PASSING IN {1}'.format(testcase_num, name))
                         c_id = info['container_id']
                         mounted_directory = info['mounted_directory']
                         full_name = '{0}_{1}'.format(which_untrusted, name)
@@ -137,7 +129,6 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                     for process in processes:
                         process.wait()
                         rc = process.returncode
-                        print('max of {0} {1} = '.format(runner_success, rc), end='')
                         runner_success = rc if first_testcase else max(runner_success, rc)
                         first_testcase = False
 
@@ -171,11 +162,6 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
         print ("LOGGING END my_runner.out",file=logfile)
         logfile.flush()
 
-
-        # os.system('ls -al {0}'.format(tmp_work))
-        # print('checkpoint (system exit)')
-        # sys.exit(1)
-
         killall_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                                            which_untrusted,
                                            os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "killall.py")],
@@ -188,7 +174,6 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
             msg='RUNNER ERROR: had to kill {} process(es)'.format(killall_success)
             print ("pid",os.getpid(),msg)
             grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,"","",msg)
-    print('returning {0}'.format(runner_success))
     return runner_success
 
 def setup_folder_for_grading(target_folder, tmp_work, job_id, tmp_logs):
@@ -301,7 +286,6 @@ def launch_container(container_name, container_image, mounted_directory,job_id,i
   this_container = subprocess.check_output(['docker', 'run', '-t', '-d','-v', mounted_directory + ':' + mounted_directory,
                                            '--name', container_name,
                                            container_image]).decode('utf8').strip()
-  print("started {0}".format(this_container))
   dockerlaunch_done =dateutils.get_current_time()
   dockerlaunch_time = (dockerlaunch_done-grading_began).total_seconds()
   grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,submission_path,"dcct:",dockerlaunch_time,
@@ -369,15 +353,10 @@ def network_containers(container_info,target_folder,test_input_folder,job_id,is_
 
 
   #writing complete knownhosts csv to input directory
-  print('connections list looks like this (This will be turned into the known hosts csv):')
-  print(connection_list)
   knownhosts_location = os.path.join(test_input_folder, 'knownhosts.csv')
   with open(knownhosts_location, 'w') as csvfile:
     csvwriter = csv.writer(csvfile)
-    print()
-    print('csv:')
     for tup in connection_list:
-      print(tup)
       csvwriter.writerow(tup)
 
 
