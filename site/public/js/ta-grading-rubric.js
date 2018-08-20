@@ -545,7 +545,7 @@ function ajaxSaveMarkOrder(gradeable_id, component_id, order) {
 /**
  * ajax call to update the pages of components in the gradeable
  * @param {string} gradeable_id
- * @param {*} pages format: { <component0-id> : <page0>, <component1-id> : <page1>, ... }
+ * @param {*} pages format: { <component0-id> : <page0>, <component1-id> : <page1>, ... } OR { page } to set all
  * @return {Promise} Rejects except when the response returns status 'success'
  */
 function ajaxSaveComponentPages(gradeable_id, pages) {
@@ -1610,6 +1610,26 @@ function onClickCountDown(me) {
  * Put all of the primary logic of the TA grading rubric here
  *
  */
+
+/**
+ * Sets the gradeable-wide page setting
+ * @param {int} page PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, or PDF_PAGE_NONE
+ * @return {Promise}
+ */
+function setPdfPageAssignment(page) {
+    if (page === PDF_PAGE_INSTRUCTOR) {
+        page = 1;
+    }
+
+    return closeAllComponents(true)
+        .then(function () {
+            return ajaxSaveComponentPages(getGradeableId(), page);
+        })
+        .then(function () {
+            // Reload the gradeable to refresh all the component's display
+            return initializeInstructorEditRubric(getGradeableId());
+        });
+}
 
 /**
  * Searches a array of marks for a mark with an id

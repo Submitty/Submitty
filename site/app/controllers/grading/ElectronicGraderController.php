@@ -1557,6 +1557,8 @@ class ElectronicGraderController extends GradingController {
 
     /**
      * Route for saving the page numbers of the components
+     * NOTE: the 'pages' parameter can be an associate array to set the page numbers of each component,
+     *  or a single-element array of the page number to set all components' page to
      */
     public function ajaxSaveComponentPages() {
         // Required parameters
@@ -1583,7 +1585,13 @@ class ElectronicGraderController extends GradingController {
 
         try {
             // Once we've parsed the inputs and checked permissions, perform the operation
-            $this->saveComponentPages($gradeable, $pages);
+            if(isset($pages[0]) && count($pages) === 1) {
+                // if one page is sent, set all to that page.  This is useful
+                //  for setting the page settings to 'none' or 'student-assign'
+                $this->saveComponentsPage($gradeable, $pages[0]);
+            } else {
+                $this->saveComponentPages($gradeable, $pages);
+            }
             $this->core->getOutput()->renderJsonSuccess();
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
@@ -1604,6 +1612,12 @@ class ElectronicGraderController extends GradingController {
             $component->setPage(max(intval($page), -1));
         }
         $this->core->getQueries()->updateGradeable($gradeable);
+    }
+
+    public function saveComponentsPage(Gradeable $gradeable, int $page) {
+        foreach ($gradeable->getComponents() as $component) {
+            $component->setPage(max($page, -1));
+        }
     }
 
     /**
