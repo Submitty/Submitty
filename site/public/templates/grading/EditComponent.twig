@@ -48,7 +48,7 @@
 
 {% block title_block %}
     {% if show_mark_list %}
-        <div class="col">
+        <div class="col component-title-container">
             <input class="component-title" type="text" value="{{ component.title }}" onclick="event.stopPropagation()"/>
         </div>
         {% if component.page > 0 %}
@@ -60,10 +60,15 @@
             </div>
         {% endif %}
     {% else %}
-        <b>{{ component.title }}</b>
+
+        <span class="component-title col-no-gutters">
+            <b>{{ component.title }}</b>
+        </span>
 
         {% if component.page > 0 %}
-            <i>Page #: {{ component.page }}</i>
+            <span class="page-number-view col">
+                <i>Page #: {{ component.page }}</i>
+            </span>
         {% endif %}
     {% endif %}
 {% endblock %}

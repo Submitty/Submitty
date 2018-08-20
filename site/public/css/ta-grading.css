@@ -631,14 +631,14 @@ tr.is_publish {
     width: 100%;
 }
 
-.gradeable .edit-component-container .title-block .col {
-    padding: 0;
-}
-
 .gradeable .edit-component-container .title-block div.page-label {
     display: inline-flex;
     align-items: center;
     padding-left: 20px;
+}
+
+.gradeable .edit-component-container .component-title-container {
+    padding: 0;
 }
 
 .gradeable .count-type-selector {
