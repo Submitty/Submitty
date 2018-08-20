@@ -298,13 +298,8 @@ progress::-webkit-progress-value {
     text-align: left;
 }
 
-.rubric-textarea {
-    width:95%;
-    min-height:20px;
-    float:left;
-    word-break: break-word;
-    white-space: pre-line;
-    cursor: pointer;
+#overall-comment-collapsed {
+    padding: 0 0 0 20px;
 }
 
 .ta-rubric-table {
@@ -368,10 +363,9 @@ tr.is_publish {
 }
 
 .gradeable .general-comment-entry {
-    width:98%;
+    width: 100%;
     min-height:100px;
-    resize:none;
-    float:left;
+    resize: vertical;
 }
 
 #rubric-container {
