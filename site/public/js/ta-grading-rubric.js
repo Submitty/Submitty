@@ -1013,6 +1013,16 @@ function setCountDirection(component_id, direction) {
 }
 
 /**
+ * Sets the title of a mark
+ * Note: This only changes the text in the DOM, so it should be only called on open components
+ * @param {int} mark_id
+ * @param {string} title
+ */
+function setMarkTitle(mark_id, title) {
+    getMarkDOMElement(mark_id).find('.mark-title input').val(title);
+}
+
+/**
  * Gets the page number assigned to a component
  * @param component_id
  * @returns {int}
@@ -1773,7 +1783,10 @@ function onToggleEditMode(me) {
  * @param me DOM element of the 'count up' div
  */
 function onClickCountUp(me) {
+    let component_id = getComponentIdFromDOMElement(me);
+    let mark_id = getComponentFirstMarkId(component_id);
     setCountDirection(getComponentIdFromDOMElement(me), COUNT_DIRECTION_UP);
+    setMarkTitle(mark_id, 'No Credit');
 }
 
 /**
@@ -1781,7 +1794,10 @@ function onClickCountUp(me) {
  * @param me DOM element of the 'count down' div
  */
 function onClickCountDown(me) {
+    let component_id = getComponentIdFromDOMElement(me);
+    let mark_id = getComponentFirstMarkId(component_id);
     setCountDirection(getComponentIdFromDOMElement(me), COUNT_DIRECTION_DOWN);
+    setMarkTitle(mark_id, 'Full Credit');
 }
 
 /**
