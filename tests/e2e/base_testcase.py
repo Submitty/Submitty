@@ -110,8 +110,15 @@ class BaseTestCase(unittest.TestCase):
         self.driver.find_element_by_name('user_id').send_keys(user_id)
         self.driver.find_element_by_name('password').send_keys(user_password)
         self.driver.find_element_by_name('login').click()
+        
         #OLD self.assertEqual(user_name, self.driver.find_element_by_id("login-id").get_attribute('innerText').strip(' \t\r\n'))
+
+        #FIXME: WANT SOMETHING LIKE THIS...  WHEN WE HAVE JUST ONE ELEMENT WITH THIS ID
         #self.assertEqual("Logout "+user_name, self.driver.find_element_by_id("logout").get_attribute('innerText').strip(' \t\r\n'))
+
+        #instead, just make sure this element exists
+        self.driver.find_element_by_id("logout"))
+                    
         self.logged_in = True
 
     def log_out(self):
