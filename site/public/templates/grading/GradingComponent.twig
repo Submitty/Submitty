@@ -53,7 +53,7 @@ Required inputs:
 
     {% if show_verify_grader %}
         <span class="verify-container col-no-gutters">
-            <input type="button" class="btn btn-default" onclick="onVerifyComponent(this)" value="Verify Grader"/>
+            <input type="button" class="btn btn-default" onclick="onVerifyComponent(this); event.stopPropagation()" value="Verify Grader"/>
         </span>
     {% endif %}
 
