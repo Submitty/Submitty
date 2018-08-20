@@ -58,7 +58,7 @@ Point precision:
 
     $(document).ready(function() {
         loadTemplates().then(function() {
-            reloadInstructorEditRubric(getGradeableId());
+            reloadInstructorEditRubric($('#g_id').val());
         });
 
         $('input:radio[name="pdf_page"]').change(updatePdfPageSettings);
