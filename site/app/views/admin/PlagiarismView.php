@@ -241,7 +241,7 @@ HTML;
             <div class="popup-box">
                 <div class="popup-window ui-draggable ui-draggable-handle" style="position: relative;">
                     <div class="form-title">
-                        <h2>Delete Plagiarism Results</h2>
+                        <h1>Delete Plagiarism Results</h1>
                     </div>
                     <div class="form-body">
                         <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />

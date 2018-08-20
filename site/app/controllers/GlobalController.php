@@ -56,7 +56,7 @@ class GlobalController extends AbstractController {
                 }
                 $sidebar_buttons[] = new Button($this->core, [
                     "href" => $this->core->buildUrl(array('component' => 'navigation')),
-                    "title" => "Submitty Home",
+                    "title" => "Gradeables",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-submitty",
                     "icon" => "fa-scribd"
@@ -238,7 +238,7 @@ class GlobalController extends AbstractController {
             if ($display_rainbow_grades_summary) {
                 $sidebar_buttons[] = new Button($this->core, [
                     "href" => $this->core->buildUrl(array('component' => 'student', 'page' => 'rainbow')),
-                    "title" => "My Grades",
+                    "title" => "Rainbow Grades",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-grades",
                     "icon" => "fa-line-chart"
