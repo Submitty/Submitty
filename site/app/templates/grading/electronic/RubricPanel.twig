@@ -4,8 +4,8 @@
         {% if is_ta_grading %}
             <div style="float: right; position: relative; top: 10px; right: 1%;">
                 {# Verify all button #}
-                {% if display_verify_all %}
-                    <input id=verify-all" type="button" class="btn btn-default" value="Verify All" onclick="onVerifyAll(this)"/>
+                {% if show_verify_all %}
+                    <input id="verify-all" type="button" class="btn btn-default" value="Verify All" onclick="onVerifyAll(this)"/>
                 {% endif %}
                 {# Silent Edit Checkbox #}
                 {% if show_silent_edit %}
@@ -30,6 +30,7 @@
             {% endif %}
 
             <div class="inner-container" id="grading-box">
+                <div id="grader-id" data-grader_id="{{ grader_id }}" hidden></div>
                 {% if has_active_version %}
                     <script type="application/javascript">
                         $(document).ready(function () {

@@ -640,12 +640,13 @@ class ElectronicGraderView extends AbstractView {
             "gradeable_id" => $gradeable->getId(),
             "is_ta_grading" => $gradeable->isTaGrading(),
             "anon_id" => $graded_gradeable->getSubmitter()->getAnonId(),
-            "display_verify_all" => $can_verify,
+            "show_verify_all" => $can_verify,
             "grading_disabled" => $grading_disabled,
             "has_submission" => $has_submission,
             "has_active_version" => $has_active_version,
             "version_conflict" => $version_conflict,
-            "show_silent_edit" => $this->core->getAccess()->canI('grading.electronic.silent_edit')
+            "show_silent_edit" => $this->core->getAccess()->canI('grading.electronic.silent_edit'),
+            "grader_id" => $this->core->getUser()->getId(),
         ]);
         return $return;
     }

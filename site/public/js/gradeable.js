@@ -97,15 +97,17 @@ function prepGradedComponent(component, graded_component) {
 
     return graded_component;
 }
-
 /**
  * Asynchronously render a gradeable using the passed data
  * Note: Call 'loadTemplates' first
+ * @param {string} grader_id
  * @param {Object} gradeable
  * @param {Object} graded_gradeable
+ * @param {boolean} canVerifyGraders
  * @returns {Promise<string>} the html for the graded gradeable
  */
-function renderGradingGradeable(gradeable, graded_gradeable) {
+
+function renderGradingGradeable(grader_id, gradeable, graded_gradeable, canVerifyGraders) {
     if (graded_gradeable.graded_components === undefined) {
         graded_gradeable.graded_components = {};
     }
@@ -122,20 +124,24 @@ function renderGradingGradeable(gradeable, graded_gradeable) {
         'graded_gradeable': graded_gradeable,
         'edit_marks_enabled': false,
         'grading_disabled': false, // TODO:
-        'decimal_precision': DECIMAL_PRECISION
+        'decimal_precision': DECIMAL_PRECISION,
+        'can_verify_graders': canVerifyGraders,
+        'grader_id': grader_id,
     });
 }
 
 /**
  * Asynchronously render a component using the passed data
+ * @param {string} grader_id
  * @param {Object} component
  * @param {Object} graded_component
+ * @param {boolean} canVerifyGraders
  * @param {number} precision
  * @param {boolean} editable True to render with edit mode enabled
  * @param {boolean} showMarkList True to display the mark list unhidden
  * @returns {Promise<string>} the html for the graded component
  */
-function renderGradingComponent(component, graded_component, precision, editable, showMarkList) {
+function renderGradingComponent(grader_id, component, graded_component, canVerifyGraders, precision, editable, showMarkList) {
     return new Promise(function (resolve, reject) {
         // Make sure we prep the graded component before rendering
         graded_component = prepGradedComponent(component, graded_component);
@@ -148,7 +154,9 @@ function renderGradingComponent(component, graded_component, precision, editable
             'edit_marks_enabled': editable,
             'show_mark_list': showMarkList,
             'grading_disabled': false, // TODO:
-            'decimal_precision': DECIMAL_PRECISION
+            'decimal_precision': DECIMAL_PRECISION,
+            'can_verify_graders': canVerifyGraders,
+            'grader_id': grader_id,
         }));
     });
 }

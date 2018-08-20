@@ -680,12 +680,28 @@ function getAnonId() {
 }
 
 /**
+ * Gets the id of the grader
+ * @returns {*|void|jQuery}
+ */
+function getGraderId() {
+    return $('#grader-id').attr('data-grader_id');
+}
+
+/**
  * Used to determine if the interface displayed is for
  *  instructor edit mode (i.e. in the Edit Gradeable page)
  *  @return {boolean}
  */
 function isInstructorEditEnabled() {
     return $('#edit-gradeable-instructor-flag').length > 0;
+}
+
+/**
+ * Used to determine if the 'verify grader' button should be displayed
+ * @returns {boolean}
+ */
+function canVerifyGraders() {
+    return $('#verify-all').length > 0;
 }
 
 /**
@@ -1709,7 +1725,7 @@ function reloadGradingRubric(gradeable_id, anon_id) {
             alert('Could not fetch graded gradeable: ' + err.message);
         })
         .then(function (graded_gradeable) {
-            return renderGradingGradeable(gradeable_tmp, graded_gradeable);
+            return renderGradingGradeable(getGraderId(), gradeable_tmp, graded_gradeable, canVerifyGraders());
         })
         .then(function (elements) {
             setRubricDOMElements(elements);
@@ -2398,7 +2414,7 @@ function injectInstructorEditComponent(component, showMarkList) {
  * @return {Promise}
  */
 function injectGradingComponent(component, graded_component, editable, showMarkList) {
-    return renderGradingComponent(component, graded_component, getPointPrecision(), editable, showMarkList)
+    return renderGradingComponent(getGraderId(), component, graded_component, canVerifyGraders(), getPointPrecision(), editable, showMarkList)
         .then(function (elements) {
             setComponentContents(component.id, elements);
         })
