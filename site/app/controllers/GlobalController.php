@@ -59,7 +59,7 @@ class GlobalController extends AbstractController {
                     "title" => "Gradeables",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-submitty",
-                    "icon" => "fa-scribd"
+                    "icon" => "fa-star"
                 ]);
             }
 
