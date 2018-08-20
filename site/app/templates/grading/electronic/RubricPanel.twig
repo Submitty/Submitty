@@ -35,7 +35,7 @@
                         <div class="red-message" style="text-align: center">Select the correct submission version to grade</div>
                     {% endif %}
                 </div>
-                <div id="grader-id" data-grader_id="{{ grader_id }}" hidden></div>
+                <div id="grader-info" data-grader_id="{{ grader_id }}" data-can_verify="{{ can_verify }}" hidden></div>
                 <div class="inner-container" id="grading-box">
                     {% if has_active_version %}
                         <script type="application/javascript">

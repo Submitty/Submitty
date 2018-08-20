@@ -441,7 +441,7 @@ class ElectronicGraderView extends AbstractView {
 
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
-    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, string $prev_id, string $next_id, $not_in_my_section=false, $show_hidden_cases=false, $can_verify) {
+    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, string $prev_id, string $next_id, bool $not_in_my_section, bool $show_hidden_cases, bool $can_verify, bool $show_verify_all, bool $show_silent_edit) {
         $new_gradeable = $graded_gradeable->getGradeable();
 
         $peer = false;
@@ -456,7 +456,7 @@ class ElectronicGraderView extends AbstractView {
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderSubmissionPanel', $gradeable);
         $user = $gradeable->getUser();
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
-        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify);
+        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit);
         if(!$peer) {
             $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderInformationPanel', $gradeable, $user);
         }
@@ -617,7 +617,7 @@ class ElectronicGraderView extends AbstractView {
      * @param GradedGradeable $graded_gradeable
      * @return string
      */
-    public function renderRubricPanel(GradedGradeable $graded_gradeable, int $display_version, bool $can_verify) {
+    public function renderRubricPanel(GradedGradeable $graded_gradeable, int $display_version, bool $can_verify, bool $show_verify_all, bool $show_silent_edit) {
         $return = "";
         $gradeable = $graded_gradeable->getGradeable();
 
@@ -640,12 +640,13 @@ class ElectronicGraderView extends AbstractView {
             "gradeable_id" => $gradeable->getId(),
             "is_ta_grading" => $gradeable->isTaGrading(),
             "anon_id" => $graded_gradeable->getSubmitter()->getAnonId(),
-            "show_verify_all" => $can_verify,
+            "show_verify_all" => $show_verify_all,
+            "can_verify" => $can_verify,
             "grading_disabled" => $grading_disabled,
             "has_submission" => $has_submission,
             "has_active_version" => $has_active_version,
             "version_conflict" => $version_conflict,
-            "show_silent_edit" => $this->core->getAccess()->canI('grading.electronic.silent_edit'),
+            "show_silent_edit" => $show_silent_edit,
             "grader_id" => $this->core->getUser()->getId(),
         ]);
         return $return;

@@ -684,7 +684,7 @@ function getAnonId() {
  * @returns {*|void|jQuery}
  */
 function getGraderId() {
-    return $('#grader-id').attr('data-grader_id');
+    return $('#grader-info').attr('data-grader_id');
 }
 
 /**
@@ -701,7 +701,7 @@ function isInstructorEditEnabled() {
  * @returns {boolean}
  */
 function canVerifyGraders() {
-    return $('#verify-all').length > 0;
+    return $('#grader-info').attr('data-can_verify');
 }
 
 /**

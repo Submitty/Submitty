@@ -1081,18 +1081,21 @@ class ElectronicGraderController extends GradingController {
 
         $gradeable->loadResultDetails();
 
-        $can_verify = false;
+        $show_verify_all = false;
         //check if verify all button should be shown or not
         foreach ($gradeable->getComponents() as $component) {
             if (!$component->getGrader()) {
                 continue;
             }
             if ($component->getGrader()->getId() !== $this->core->getUser()->getId()) {
-                $can_verify = true;
+                $show_verify_all = true;
                 break;
             }
         }
-        $can_verify = $can_verify && $this->core->getAccess()->canI("grading.electronic.verify_grader");
+        $can_verify = $this->core->getAccess()->canI("grading.electronic.verify_grader");
+        $show_verify_all = $show_verify_all && $can_verify;
+
+        $show_silent_edit = $this->core->getAccess()->canI("grading.electronic.silent_edit");
 
         // Get the new model instance
         $display_version = intval($_REQUEST['gradeable_version'] ?? '0');
@@ -1104,7 +1107,7 @@ class ElectronicGraderController extends GradingController {
 
         $this->core->getOutput()->addInternalCss('ta-grading.css');
         $show_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $gradeable]);
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $prev_id, $next_id, $not_in_my_section, $show_hidden, $can_verify);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $prev_id, $next_id, $not_in_my_section, $show_hidden, $can_verify, $show_verify_all, $show_silent_edit);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupMarkConflicts');
         //$this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupSettings');
