@@ -718,18 +718,23 @@ tr.is_publish {
 }
 
 #mark-conflict-popup .mark-resolve-dom span {
-    border-color: red;
-    background-color: red;
+    border-color: #F00;
+    background-color: #FAA;
 }
 
 #mark-conflict-popup .mark-resolve-old-server span{
-    border-color: blue;
-    background-color: blue;
+    border-color: #00F;
+    background-color: #AAF;
 }
 
 #mark-conflict-popup .mark-resolve-server span {
-    border-color: orange;
-    background-color: orange;
+    border-color: #FFA500;
+    background-color: #FFCC66;
+}
+
+#mark-conflict-popup div.mark-conflict-row {
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
 
 #mark-conflict-popup .mark-conflict-row span {
