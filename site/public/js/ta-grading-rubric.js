@@ -830,21 +830,31 @@ function getOverallCommentDOMElement() {
 
 /**
  * Shows the 'in progress' indicator for a component
- * @param component_id
+ * @param {int} component_id
+ * @param {boolean} show
  */
-function setComponentInProgress(component_id) {
+function setComponentInProgress(component_id, show = true) {
     let domElement = getComponentDOMElement(component_id);
     domElement.find('.save-tools div').hide();
-    domElement.find('.save-tools-in-progress').show();
+    if (show) {
+        domElement.find('.save-tools-in-progress').show();
+    } else {
+        domElement.find('.save-tools :not(.save-tools-in-progress)').show();
+    }
 }
 
 /**
  * Shows the 'in progress' indicator for the overall comment
+ * @param {boolean} show
  */
-function setOverallCommentInProgress() {
+function setOverallCommentInProgress(show = true) {
     let domElement = getOverallCommentDOMElement();
     domElement.find('.save-tools div').hide();
-    domElement.find('.save-tools-in-progress').show();
+    if (show) {
+        domElement.find('.save-tools-in-progress').show();
+    } else {
+        domElement.find('.save-tools :not(.save-tools-in-progress)').show();
+    }
 }
 
 /**
@@ -1509,9 +1519,11 @@ function onGetMarkStats(me) {
  * @param me DOM Element of the component header div
  */
 function onClickComponent(me) {
-    toggleComponent(getComponentIdFromDOMElement(me), true)
+    let component_id = getComponentIdFromDOMElement(me);
+    toggleComponent(component_id, true)
         .catch(function (err) {
             console.error(err);
+            setComponentInProgress(component_id, false);
             alert('Error opening/closing component! ' + err.message);
         });
 }
