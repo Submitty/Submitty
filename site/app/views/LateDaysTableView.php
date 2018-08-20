@@ -31,7 +31,7 @@ class LateDaysTableView extends AbstractView {
         }
         $preferred_name = $this->core->getQueries()->getUserById($user_id)->getDisplayedFirstName() . " " . $this->core->getQueries()->getUserById($user_id)->getLastName();
         if($full_page){
-            $this->core->getOutput()->addBreadcrumb("Late Days Summary", $this->core->buildUrl(array('component' => 'student', 'page' => 'view_late_table')));
+            $this->core->getOutput()->addBreadcrumb("My Late Days");
             $template = "/LateDaysTable.twig";
         } else {
             $template = "/LateDaysTablePlugin.twig";

@@ -44,20 +44,22 @@ class GlobalController extends AbstractController {
         $sidebar_buttons = [];
         if ($this->core->userLoaded()) {
 
-            $sidebar_buttons[] = new Button($this->core, [
-                "href" => null,
-                "title" => $this->core->getUser()->getDisplayedFirstName(),
-                "id" => "login-id",
-                "class" => "nav-row",
-            ]);
-
             if ($this->core->getConfig()->isCourseLoaded()) {
+                if ($this->core->getConfig()->getCourseHomeUrl() != "") {
+                    $sidebar_buttons[] = new Button($this->core, [
+                        "href" => $this->core->getConfig()->getCourseHomeUrl(),
+                        "title" => "Course Home",
+                        "class" => "nav-row",
+                        "id" => "nav-sidebar-course-home",
+                        "icon" => "fa-home"
+                    ]);
+                }
                 $sidebar_buttons[] = new Button($this->core, [
                     "href" => $this->core->buildUrl(array('component' => 'navigation')),
-                    "title" => "Home",
+                    "title" => "Submitty Home",
                     "class" => "nav-row",
-                    "id" => "nav-sidebar-home",
-                    "icon" => "fa-home"
+                    "id" => "nav-sidebar-submitty",
+                    "icon" => "fa-scribd"
                 ]);
             }
 
@@ -147,21 +149,21 @@ class GlobalController extends AbstractController {
             if ($this->core->getUser()->accessAdmin()) {
                 $sidebar_buttons[] = new Button($this->core, [
                     "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users')),
-                    "title" => "Students",
+                    "title" => "Manage Students",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-students",
                     "icon" => "fa-graduation-cap"
                 ]);
                 $sidebar_buttons[] = new Button($this->core, [
                     "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'graders')),
-                    "title" => "Graders",
+                    "title" => "Manage Graders",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-graders",
                     "icon" => "fa-address-book"
                 ]);
                 $sidebar_buttons[] = new Button($this->core, [
                     "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'rotating_sections')),
-                    "title" => "Setup Sections",
+                    "title" => "Manage Sections",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-sections",
                     "icon" => "fa-users"
@@ -175,7 +177,7 @@ class GlobalController extends AbstractController {
                 if ($this->core->getUser()->getGroup() === 1 && count($any_images_files) === 0) {
                     $sidebar_buttons[] = new Button($this->core, [
                         "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page')),
-                        "title" => "Upload Student Photos",
+                        "title" => "Student Photos",
                         "class" => "nav-row",
                         "id" => "nav-sidebar-photos",
                         "icon" => "fa-id-card"
@@ -269,7 +271,7 @@ class GlobalController extends AbstractController {
 
             $sidebar_buttons[] = new Button($this->core, [
                 "href" => $this->core->buildUrl(array('component' => 'authentication', 'page' => 'logout')),
-                "title" => "Logout",
+                "title" => "Logout ".$this->core->getUser()->getDisplayedFirstName(),
                 "id" => "logout",
                 "class" => "nav-row",
                 "icon" => "fa-sign-out"
