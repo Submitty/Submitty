@@ -1,6 +1,8 @@
 {% extends "Gradeable.twig" %}
 
 {% block header_content %}
+    {# This div acts as a flag to signal the js to use instructor edit mode #}
+    <div id="edit-gradeable-instructor-flag" hidden></div>
 {% endblock %}
 
 {% block components_block %}

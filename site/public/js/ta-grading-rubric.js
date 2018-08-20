@@ -685,7 +685,7 @@ function getAnonId() {
  *  @return {boolean}
  */
 function isInstructorEditEnabled() {
-    return true; // TODO
+    return $('#edit-gradeable-instructor-flag').length > 0;
 }
 
 /**
@@ -919,12 +919,14 @@ function getComponentPageNumber(component_id) {
 
 /**
  * Extracts a component object from the DOM
+ * Note: if the component is closed, this will not return
  * @param {int} component_id
  * @return {Object}
  */
 function getComponentFromDOM(component_id) {
     let domElement = getComponentDOMElement(component_id);
 
+    // TODO: make this work in instructor edit mode with closed component
     if (isInstructorEditEnabled()) {
         let penaltyPoints = Math.abs(parseFloat(domElement.find('input.penalty-points').val()));
         let maxValue = Math.abs(parseFloat(domElement.find('input.max-points').val()));
