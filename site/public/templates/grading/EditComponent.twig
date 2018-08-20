@@ -58,6 +58,8 @@
             <div class="col-no-gutters">
                 <input class="page-number" type="number" step="1" min="1" value="{{ component.page }}" onclick="event.stopPropagation()"/>
             </div>
+        {% else %}
+            <input class="page-number" value="{{ component.page }}" hidden/>
         {% endif %}
     {% else %}
 
