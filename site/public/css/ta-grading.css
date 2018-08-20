@@ -504,6 +504,17 @@ tr.is_publish {
 
 /* Marks */
 
+.gradeable .edit-component-container .right-block {
+    align-items: center;
+    display: inline-flex;
+}
+
+.gradeable .edit-component-container .reorder-component-container {
+    display: inline-flex;
+    justify-content: center;
+    width: 30px;
+}
+
 .gradeable span.col-no-gutters {
     padding-left: 1px;
     padding-right: 1px;
@@ -658,6 +669,7 @@ tr.is_publish {
 
 .gradeable .component div.point-values {
     padding: 2px;
+    margin-right: 10px;
 }
 
 .gradeable .component .point-values div.point-input-container {
@@ -692,6 +704,13 @@ tr.is_publish {
 
 .gradeable .component .badge {
     min-width: 80px;
+}
+
+.gradeable .ta-rubric-table {
+    border: solid #BBB;
+    border-width: 2px 0 0 0;
+    padding: 8px;
+    border-radius: 0px;
 }
 
 #mark-conflict-popup .legend {
