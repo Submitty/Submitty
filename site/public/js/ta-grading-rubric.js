@@ -233,14 +233,14 @@ function ajaxGetGradedComponent(gradeable_id, component_id, anon_id) {
  * @param {int} component_id
  * @param {string} anon_id
  * @param {int} graded_version
- * @param {float} custom_points
+ * @param {number} custom_points
  * @param {string} custom_message
- * @param {boolean} overwrite True to overwrite the component's grader
+ * @param {boolean} silent_edit True to edit marks assigned without changing the grader
  * @param {int[]} mark_ids
  * @param {boolean} async
  * @return {Promise} Rejects except when the response returns status 'success'
  */
-function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, graded_version, custom_points, custom_message, overwrite, mark_ids, async) {
+function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, graded_version, custom_points, custom_message, silent_edit, mark_ids, async) {
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "POST",
@@ -257,7 +257,7 @@ function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, graded_ver
                 'graded_version': graded_version,
                 'custom_points': custom_points,
                 'custom_message': custom_message,
-                'overwrite': overwrite,
+                'silent_edit': silent_edit,
                 'mark_ids': mark_ids
             },
             success: function (response) {
@@ -723,12 +723,12 @@ function updateEditModeEnabled() {
 }
 
 /**
- * Gets if grader overwrite mode is enabled
+ * Gets if silent edit mode is enabled
  * @return {boolean}
  */
-function isOverwriteGraderEnabled() {
+function isSilentEditModeEnabled() {
     // noinspection JSValidateTypes
-    return $('#overwrite-id').is(':checked');
+    return $('#silent-edit-id').is(':checked');
 }
 
 /**
@@ -2331,7 +2331,7 @@ function saveGradedComponent(component_id) {
         gradedComponent.graded_version,
         gradedComponent.custom_mark_selected ? gradedComponent.score : 0.0,
         gradedComponent.custom_mark_selected ? gradedComponent.comment : '',
-        isOverwriteGraderEnabled(),
+        isSilentEditModeEnabled(),
         gradedComponent.mark_ids, true);
 }
 

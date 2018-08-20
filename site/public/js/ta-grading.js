@@ -1,7 +1,6 @@
 //Used to reset users cookies
 var cookie_version = 1;
 
-var editModeEnabled = false;
 //Check if cookie version is/is not the same as the current version
 var versionMatch = false;
 //Set positions and visibility of configurable ui elements
@@ -124,8 +123,6 @@ function readCookies(){
     var pdf_annotation_bar_top = document.cookie.replace(/(?:(?:^|.*;\s*)pdf_annotation_bar_top\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var pdf_annotation_bar_left = document.cookie.replace(/(?:(?:^|.*;\s*)pdf_annotation_bar_left\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
-    var overwrite = document.cookie.replace(/(?:(?:^|.*;\s*)overwrite\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-
     var autoscroll = document.cookie.replace(/(?:(?:^|.*;\s*)autoscroll\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var opened_mark = document.cookie.replace(/(?:(?:^|.*;\s*)opened_mark\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var scroll_pixel = document.cookie.replace(/(?:(?:^|.*;\s*)scroll_pixel\s*\=\s*([^;]*).*$)|^.*$/, "$1");
@@ -175,8 +172,7 @@ function readCookies(){
     (rubric_visible) ? ((rubric_visible) == "none" ? $(".fa-pencil-square-o").removeClass("icon-selected") : $(".fa-pencil-square-o").addClass("icon-selected")) : {};
     (status_visible) ? ((status_visible) == "none" ? $(".fa-user").removeClass("icon-selected") : $(".fa-user").addClass("icon-selected")) : {};
     (regrade_visible) ? ((regrade_visible) == "none" ? $(".fa-hand-paper-o").removeClass("icon-selected") : $(".fa-hand-paper-o").addClass("icon-selected")) : {};
-   
-    (overwrite) ? ((overwrite) == "on" ? $('#overwrite-id').prop('checked', true) : $('#overwrite-id').prop('checked', false)) : {};
+
     (autoscroll) ? ((autoscroll) == "on" ? $('#autoscroll_id').prop('checked', true) : $('#autoscroll_id').prop('checked', false)) : {};
 
     onAjaxInit = function() {
@@ -256,17 +252,9 @@ function updateCookies(){
     document.cookie = "bar_wrapper_top=" + $("#bar_wrapper").css("top") + "; path=/;";
     document.cookie = "bar_wrapper_left=" + $("#bar_wrapper").css("left") + "; path=/;";
     document.cookie = "bar_wrapper_visible=" + $("#bar_wrapper").css("display") + "; path=/;";
-    document.cookie = "editMode=" + editModeEnabled + "; path=/;";
 
     document.cookie = "pdf_annotation_bar_top=" + $("#pdf_annotation_bar").css("top") + "; path=/;";
     document.cookie = "pdf_annotation_bar_left=" + $("#pdf_annotation_bar").css("left") + "; path=/;";
-    var overwrite = "on";
-    if ($('#overwrite-id').is(":checked")) {
-        overwrite = "on";
-    } else {
-        overwrite = "off";
-    }
-    document.cookie = "overwrite=" + overwrite + "; path=/;";
 
     var autoscroll = "on";
     if ($('#autoscroll_id').is(":checked")) {

@@ -1148,7 +1148,7 @@ class ElectronicGraderController extends GradingController {
         ];
 
         // Filter out the components that we shouldn't see
-        //  Note: instructors see all components, some may not be visible in non-super-edit-mode
+        //  TODO: instructors see all components, some may not be visible in non-super-edit-mode
         $return['components'] = array_map(function (Component $component) {
             return $component->toArray();
         }, array_filter($gradeable->getComponents(), function (Component $component) use ($grader, $gradeable) {
@@ -1321,7 +1321,7 @@ class ElectronicGraderController extends GradingController {
         $custom_points = floatval($custom_points);
 
         // Optional Parameters
-        $overwrite = ($_POST['overwrite'] ?? true) === true;
+        $silent_edit = ($_POST['silent_edit'] ?? 'false') === 'true';
 
         $grader = $this->core->getUser();
 
@@ -1355,6 +1355,11 @@ class ElectronicGraderController extends GradingController {
             return;
         }
 
+        // Check if the user can silently edit assigned marks
+        if (!$this->core->getAccess()->canI('grading.electronic.silent_edit')) {
+            $silent_edit = false;
+        }
+
         // Get / create the TA grade
         $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
 
@@ -1364,7 +1369,7 @@ class ElectronicGraderController extends GradingController {
         try {
             // Once we've parsed the inputs and checked permissions, perform the operation
             $this->saveGradedComponent($ta_graded_gradeable, $graded_component, $grader, $custom_points,
-                $custom_message, $marks, $component_version, $overwrite);
+                $custom_message, $marks, $component_version, !$silent_edit);
             $this->core->getOutput()->renderJsonSuccess();
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
@@ -2323,6 +2328,3 @@ class ElectronicGraderController extends GradingController {
         }
     }
 }
-
-
-
