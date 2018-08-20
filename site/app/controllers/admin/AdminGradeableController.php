@@ -109,6 +109,7 @@ class AdminGradeableController extends AbstractController {
             'page' => 'admin_gradeable',
             'action' => 'upload_new_gradeable'
         ]);
+        $vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
 
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
@@ -117,6 +118,7 @@ class AdminGradeableController extends AbstractController {
             'action' => $gradeable !== null ? 'template' : 'new',
             'template_list' => $template_list,
             'syllabus_buckets' => self::syllabus_buckets,
+            'vcs_base_url' => $vcs_base_url,
             'regrade_enabled' => $this->core->getConfig()->isRegradeEnabled()
         ]);
     }
@@ -780,6 +782,7 @@ class AdminGradeableController extends AbstractController {
             'student_download',
             'student_download_any_version',
             'peer_grading',
+            'late_submission_allowed',
             'regrade_allowed'
         ];
 
@@ -892,7 +895,8 @@ class AdminGradeableController extends AbstractController {
             'gradeable_id' => $gradeable->getId(),
             'config_path' => $gradeable->getAutogradingConfigPath(),
             'date_due' => DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()),
-            'upload_type' => $gradeable->isVcs() ? "repository" : "upload file"
+            'upload_type' => $gradeable->isVcs() ? "repository" : "upload file",
+            'subdirectory' => $gradeable->getVcsSubdirectory(),
         ];
 
         $fp = $this->core->getConfig()->getCoursePath() . '/config/form/form_' . $gradeable->getId() . '.json';
