@@ -5,7 +5,7 @@ from pathlib import Path
 
 def up(config, conn, semester, course):
     course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
-    course_customization_dir = Path(course_dir, 'uploads', 'customization')
+    course_customization_dir = Path(course_dir, 'uploads', 'rainbow_grades')
 
     # create the directories
     os.makedirs(str(course_customization_dir), exist_ok=True)
