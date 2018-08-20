@@ -52,12 +52,15 @@
             <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
         </span>
     {% endif %}
+    <span class="col-no-gutters" onclick="onDeleteComponent(this); event.stopPropagation()">
+        <i class="fa fa-trash"></i>
+    </span>
 {% endblock %}
 
 {% block title_block %}
     {% if show_mark_list %}
         <div class="col component-title-container">
-            <input class="component-title" type="text" value="{{ component.title }}" onclick="event.stopPropagation()"/>
+            <input class="component-title" type="text" value="{{ component.title }}" placeholder="Component Title" onclick="event.stopPropagation()"/>
         </div>
         {% if component.page > 0 %}
             <div class="col-no-gutters page-label">

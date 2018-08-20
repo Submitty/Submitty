@@ -34,6 +34,12 @@ class ElectronicGraderController extends GradingController {
             case 'grade':
                 $this->showGrading();
                 break;
+            case 'delete_component':
+                $this->ajaxDeleteComponent();
+                break;
+            case 'add_component':
+                $this->ajaxAddComponent();
+                break;
             case 'save_graded_component':
                 $this->ajaxSaveGradedComponent();
                 break;
@@ -1635,59 +1641,9 @@ class ElectronicGraderController extends GradingController {
     /**
      * Route for adding a new component to a gradeable
      */
-    public function ajaxAddNewComponent() {
+    public function ajaxAddComponent() {
         // Required parameters
         $gradeable_id = $_POST['gradeable_id'] ?? '';
-        $title = $_POST['title'] ?? '';
-        $ta_comment = $_POST['ta_comment'] ?? '';
-        $student_comment = $_POST['student_comment'] ?? '';
-        $lower_clamp = $_POST['lower_clamp'] ?? null;
-        $default = $_POST['default'] ?? null;
-        $max_value = $_POST['max_value'] ?? null;
-        $upper_clamp = $_POST['upper_clamp'] ?? null;
-        $peer = $_POST['peer'] ?? 'false';
-        $page = $_POST['page'] ?? '';
-
-        // Validate required parameters
-        if ($lower_clamp === null) {
-            $this->core->getOutput()->renderJsonFail('Missing lower_clamp parameter');
-            return;
-        }
-        if ($default === null) {
-            $this->core->getOutput()->renderJsonFail('Missing default parameter');
-            return;
-        }
-        if ($max_value === null) {
-            $this->core->getOutput()->renderJsonFail('Missing max_value parameter');
-            return;
-        }
-        if ($upper_clamp === null) {
-            $this->core->getOutput()->renderJsonFail('Missing upper_clamp parameter');
-            return;
-        }
-        if ($page === '') {
-            $this->core->getOutput()->renderJsonFail('Missing page parameter');
-        }
-        if (!is_numeric($lower_clamp)) {
-            $this->core->getOutput()->renderJsonFail('Invalid lower_clamp parameter');
-            return;
-        }
-        if (!is_numeric($default)) {
-            $this->core->getOutput()->renderJsonFail('Invalid default parameter');
-            return;
-        }
-        if (!is_numeric($max_value)) {
-            $this->core->getOutput()->renderJsonFail('Invalid max_value parameter');
-            return;
-        }
-        if (!is_numeric($upper_clamp)) {
-            $this->core->getOutput()->renderJsonFail('Invalid upper_clamp parameter');
-            return;
-        }
-        if (strval(intval($page)) !== $page) {
-            $this->core->getOutput()->renderJsonFail('Invalid page parameter');
-        }
-        $peer = $peer === 'true';
 
         // Get the gradeable
         $gradeable = $this->tryGetGradeable($gradeable_id);
@@ -1696,15 +1652,18 @@ class ElectronicGraderController extends GradingController {
         }
 
         // checks if user has permission
-        if (!$this->core->getAccess()->canI("grading.electronic.add_new_component", ["gradeable" => $gradeable])) {
+        if (!$this->core->getAccess()->canI("grading.electronic.add_component", ["gradeable" => $gradeable])) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to add components');
             return;
         }
 
         try {
+            $page = $gradeable->isPdfUpload() ? ($gradeable->isStudentPdfUpload() ? Component::PDF_PAGE_STUDENT : 1) : Component::PDF_PAGE_NONE;
+
             // Once we've parsed the inputs and checked permissions, perform the operation
-            $component = $gradeable->addComponent($title, $ta_comment, $student_comment, $lower_clamp, $default,
-                $max_value, $upper_clamp, false, $peer, $page);
+            $component = $gradeable->addComponent('Component Title', '', '', 0, 0,
+                0, 0, false, false, $page);
+            $component->addMark('No Credit', 0.0, false);
             $this->core->getQueries()->updateGradeable($gradeable);
             $this->core->getOutput()->renderJsonSuccess(['component_id' => $component->getId()]);
         } catch (\InvalidArgumentException $e) {

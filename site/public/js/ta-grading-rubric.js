@@ -613,6 +613,74 @@ function ajaxSaveComponentOrder(gradeable_id, order) {
 }
 
 /**
+ * ajax call to add a generate component on the server
+ * @param {string} gradeable_id
+ * @return {Promise} Rejects except when the response returns status 'success'
+ */
+function ajaxAddComponent(gradeable_id) {
+    return new Promise(function (resolve, reject) {
+        $.getJSON({
+            type: "POST",
+            url: buildUrl({
+                'component': 'grading',
+                'page': 'electronic',
+                'action': 'add_component'
+            }),
+            data: {
+                'gradeable_id': gradeable_id,
+            },
+            success: function (response) {
+                if (response.status !== 'success') {
+                    console.error('Something went wrong adding the component: ' + response.message);
+                    reject(new Error(response.message));
+                } else {
+                    resolve(response.data)
+                }
+            },
+            error: function (err) {
+                displayAjaxError(err);
+                reject(err);
+            }
+        });
+    });
+}
+
+/**
+ * ajax call to delete a component from the server
+ * @param {string} gradeable_id
+ * @param {int} component_id
+ * @return {Promise} Rejects except when the response returns status 'success'
+ */
+function ajaxDeleteComponent(gradeable_id, component_id) {
+    return new Promise(function (resolve, reject) {
+        $.getJSON({
+            type: "POST",
+            url: buildUrl({
+                'component': 'grading',
+                'page': 'electronic',
+                'action': 'delete_component'
+            }),
+            data: {
+                'gradeable_id': gradeable_id,
+                'component_id': component_id
+            },
+            success: function (response) {
+                if (response.status !== 'success') {
+                    console.error('Something went wrong deleting the component: ' + response.message);
+                    reject(new Error(response.message));
+                } else {
+                    resolve(response.data)
+                }
+            },
+            error: function (err) {
+                displayAjaxError(err);
+                reject(err);
+            }
+        });
+    });
+}
+
+/**
  * ajax call to verify the grader of a component
  * @param {string} gradeable_id
  * @param {int} component_id
@@ -1475,13 +1543,51 @@ function onRestoreMark(me) {
 }
 
 /**
+ * Called when a component is deleted
+ * @param me DOM Element of the delete button
+ */
+function onDeleteComponent(me) {
+    if (!confirm('Are you sure you want to delete this component?')) {
+        return;
+    }
+    deleteComponent(getComponentIdFromDOMElement(me))
+        .catch(function (err) {
+            console.error(err);
+            alert('Failed to delete component! ' + err.message);
+        })
+        .then(function () {
+            return reloadInstructorEditRubric(getGradeableId());
+        })
+        .catch(function (err) {
+            alert('Failed to reload rubric! ' + err.message);
+        });
+}
+
+/**
+ * Called when the 'add new component' button is pressed
+ */
+function onAddComponent() {
+    addComponent()
+        .catch(function(err) {
+            console.error(err);
+            alert('Failed to add component! ' + err.message);
+        })
+        .then(function () {
+            return reloadInstructorEditRubric(getGradeableId());
+        })
+        .catch(function (err) {
+            alert('Failed to reload rubric! ' + err.message);
+        });
+}
+
+/**
  * Called when the point value of a common mark changes
  * @param me DOM Element of the mark point entry
  */
 function onMarkPointsChange(me) {
-    refreshGradedComponent(getComponentIdFromDOMElement(me), true)
+    refreshComponent(getComponentIdFromDOMElement(me), true)
         .catch(function (err) {
-            console.err(err);
+            console.error(err);
             alert('Error updating component! ' + err.message);
         });
 }
@@ -1558,7 +1664,7 @@ function onClickOverallComment(me) {
 function onComponentOrderChange() {
     ajaxSaveComponentOrder(getGradeableId(), getComponentOrders())
         .catch(function (err) {
-            console.err(err);
+            console.error(err);
             alert('Error reordering components! ' + err.message);
         });
 }
@@ -1682,6 +1788,24 @@ function onClickCountDown(me) {
  * Put all of the primary logic of the TA grading rubric here
  *
  */
+
+
+/**
+ * Adds a blank component to the gradeable
+ * @return {Promise}
+ */
+function addComponent() {
+    return ajaxAddComponent(getGradeableId());
+}
+
+/**
+ * Deletes a component from the server
+ * @param {int} component_id
+ * @returns {Promise}
+ */
+function deleteComponent(component_id) {
+    return ajaxDeleteComponent(getGradeableId(), component_id);
+}
 
 /**
  * Sets the gradeable-wide page setting
@@ -2385,6 +2509,16 @@ function refreshGradedComponent(component_id, showMarkList) {
  */
 function refreshInstructorEditComponent(component_id, showMarkList) {
     return injectInstructorEditComponent(getComponentFromDOM(component_id), showMarkList);
+}
+
+/**
+ * Re-renders the component with the data in the DOM
+ * @param {int} component_id
+ * @param {boolean} showMarkList Whether the mark list should be visible
+ * @return {Promise}
+ */
+function refreshComponent(component_id, showMarkList) {
+    return isInstructorEditEnabled() ? refreshInstructorEditComponent(component_id, showMarkList) : refreshGradedComponent(component_id, showMarkList);
 }
 
 /**
