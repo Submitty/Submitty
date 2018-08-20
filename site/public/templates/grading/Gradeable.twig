@@ -3,8 +3,10 @@
     {% endblock %}
 {# Components #}
     {# twig.js doens't support blocks inside of for loops ... ANNOYING #}
-    {% block components_block %}
-    {% endblock %}
+    <div id="component-list">
+        {% block components_block %}
+        {% endblock %}
+    </div>
 {# /Components #}
 
     {% block footer_content %}

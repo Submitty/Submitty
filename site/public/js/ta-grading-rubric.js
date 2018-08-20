@@ -746,6 +746,10 @@ function getNewMarkId() {
 function setRubricDOMElements(elements) {
     let gradingBox = $("#grading-box");
     gradingBox.html(elements);
+
+    if (isInstructorEditEnabled()) {
+        setupSortableComponents();
+    }
 }
 
 /**
@@ -839,8 +843,16 @@ function setupSortableMarks(component_id) {
     markList.disableSelection();
 }
 
+/**
+ * Enables reordering on components for instructor edit mode
+ */
 function setupSortableComponents() {
-    //TODO:
+    let componentList = $('#component-list');
+    componentList.sortable({
+        update: onComponentOrderChange,
+        handle: '.reorder-component-container'
+    });
+    componentList.disableSelection();
 }
 
 /**
@@ -1175,6 +1187,19 @@ function getComponentOrderById(component_id) {
 }
 
 /**
+ * Gets the orders of the components indexed by component id
+ * @return {Object}
+ */
+function getComponentOrders() {
+    let orders = {};
+    $('.component').each(function(order) {
+        let id = getComponentIdFromDOMElement(this);
+        orders[id] = order;
+    });
+    return orders;
+}
+
+/**
  * Gets the id of the next component in the list
  * @param {int} component_id
  * @return {int}
@@ -1496,6 +1521,17 @@ function onClickOverallComment(me) {
         .catch(function (err) {
             console.error(err);
             alert('Error opening/closing overall comment! ' + err.message);
+        });
+}
+
+/**
+ * When the component order changes, update the server
+ */
+function onComponentOrderChange() {
+    ajaxSaveComponentOrder(getGradeableId(), getComponentOrders())
+        .catch(function (err) {
+            console.err(err);
+            alert('Error reordering components! ' + err.message);
         });
 }
 

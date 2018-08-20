@@ -46,6 +46,14 @@
     {% endif %}
 {% endblock %}
 
+{% block right_block %}
+    {% if not show_mark_list %}
+        <span class="reorder-component-container" onclick="event.stopPropagation()">
+            <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+        </span>
+    {% endif %}
+{% endblock %}
+
 {% block title_block %}
     {% if show_mark_list %}
         <div class="col component-title-container">
