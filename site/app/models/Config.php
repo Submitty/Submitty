@@ -177,6 +177,8 @@ class Config extends AbstractModel {
     protected $regrade_message;
     /** @property @var string|null */
     protected $room_seating_gradeable_id;
+    /** @property @var bool */
+    protected $auto_rainbow_grades;
 
     /**
      * Config constructor.
