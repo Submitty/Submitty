@@ -106,8 +106,8 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                       processes.append(p)
                     time.sleep(1)
                     for name, info in container_info.items():
-                        # if name == 'router':
-                        #   continue
+                        if name == 'router':
+                          continue
                         c_id = info['container_id']
                         mounted_directory = info['mounted_directory']
                         full_name = '{0}_{1}'.format(which_untrusted, name)
