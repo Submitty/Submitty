@@ -645,7 +645,7 @@ class ElectronicGraderView extends AbstractView {
             "has_submission" => $has_submission,
             "has_active_version" => $has_active_version,
             "version_conflict" => $version_conflict,
-            "show_instructor_tools" => $this->core->getAccess()->canI('grading.electronic.silent_edit')
+            "show_silent_edit" => $this->core->getAccess()->canI('grading.electronic.silent_edit')
         ]);
         return $return;
     }

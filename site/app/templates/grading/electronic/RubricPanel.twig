@@ -5,15 +5,14 @@
             <div style="float: right; position: relative; top: 10px; right: 1%;">
                 {# Verify all button #}
                 {% if display_verify_all %}
-                    <input id='verifyAllButton' type='button' style="display: inline;" class="btn btn-default" value='Verify All' onclick='verifyMark("{{ gradeable_id }}",-1,"{{ submitter_id }}",true);'/>
+                    <input id=verify-all" type="button" class="btn btn-default" value="Verify All" onclick="onVerifyAll(this)"/>
                 {% endif %}
-                {# /Edit Mode Button #}
-                <span> <input id='edit-mode-enabled' type='checkbox' value='Enable Editing Mode' title="Allows editing of mark point values, descriptions, and order" onclick='onToggleEditMode()'/>Enable Editing Mode</span>
-                {# Checkboxes #}
-                {% if show_instructor_tools %}
-                    <span><input type="checkbox" id="silent-edit-id" title="Edit assigned marks without changing 'Graded By'"/>Silent Edit</span>
+                {# Silent Edit Checkbox #}
+                {% if show_silent_edit %}
+                    <span><input id="silent-edit-id" type="checkbox" title="Edit assigned marks without changing Graded By'"/>Silent Edit</span>
                 {% endif %}
-                {# /Checkboxes #}
+                {# Edit Mode Checkbox #}
+                <span><input id="edit-mode-enabled" type="checkbox" title="Allows editing of mark point values, descriptions, and order" onclick="onToggleEditMode()"/>Edit Marks</span>
             </div>
 
             {# Wrong version warnings #}
@@ -35,7 +34,7 @@
                     <script type="application/javascript">
                         $(document).ready(function () {
                             loadTemplates().then(function() {
-                                return reloadGradingRubric('{{ gradeable_id }}', '{{ anon_id }}');
+                                return reloadGradingRubric("{{ gradeable_id }}', '{{ anon_id }}');
                             });
                         });
                     </script>
