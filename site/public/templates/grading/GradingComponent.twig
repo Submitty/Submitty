@@ -38,24 +38,26 @@ Required inputs:
     </span>
 
     {% if component.page > 0 %}
-        <span class="page-number-view col">
-            <i>Page #: {{ component.page }}</i>
+        <span class="page-number-view col-no-gutters">
+            <i>(Page #: {{ component.page }})</i>
         </span>
     {% endif %}
 
+    <span class="divider col"> </span>
+
     {% if disabled %}
-        <span class="version-warning col">
+        <span class="version-warning col-no-gutters">
             Please edit or ensure that comments from version {{ graded_component.graded_version }} still apply.
         </span>
     {% endif %}
 
     {% if show_verify_grader %}
-        <span class="verify-container col">
+        <span class="verify-container col-no-gutters">
             <input type="button" class="btn btn-default" onclick="onVerifyComponent(this)" value="Verify Grader"/>
         </span>
     {% endif %}
 
-    <span class="graded-by col">
+    <span class="graded-by col-no-gutters">
         {% if graded_component.grader_id is defined %}
             Graded by {{ graded_component.grader_id }}
             {% if graded_component.verifier_id is defined %}

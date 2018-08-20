@@ -1,47 +1,54 @@
 <div id="grading_rubric" class="draggable rubric_panel {{ is_ta_grading ? "" : "empty" }}" style="right:15px; top:140px; width:48%; height:42%;">
     <div class="draggable_content">
-        <span class="grading_label">Grading Rubric</span>
         {% if is_ta_grading %}
-            <div style="float: right; position: relative; top: 10px; right: 1%;">
-                {# Verify all button #}
-                {% if show_verify_all %}
-                    <input id="verify-all" type="button" class="btn btn-default" value="Verify All" onclick="onVerifyAll(this)"/>
-                {% endif %}
-                {# Silent Edit Checkbox #}
-                {% if show_silent_edit %}
-                    <span><input id="silent-edit-id" type="checkbox" title="Edit assigned marks without changing Graded By'"/>Silent Edit</span>
-                {% endif %}
-                {# Edit Mode Checkbox #}
-                <span><input id="edit-mode-enabled" type="checkbox" title="Allows editing of mark point values, descriptions, and order" onclick="onToggleEditMode()"/>Edit Marks</span>
-            </div>
+            <div id="rubric-container" class="container">
+                <div class="row row-wrap vertical-center">
+                    <span class="col grading_label">Grading Rubric</span>
+                    {# Verify all button #}
+                    {% if show_verify_all %}
+                        <div class="col-no-gutters">
+                            <input id="verify-all" type="button" class="btn btn-default" value="Verify All" onclick="onVerifyAll(this)"/>
+                        </div>
+                    {% endif %}
+                    {# Silent Edit Checkbox #}
+                    {% if show_silent_edit %}
+                        <div class="col-no-gutters">
+                            <input id="silent-edit-id" type="checkbox" title="Edit assigned marks without changing Graded By'"/>Silent Edit
+                        </div>
+                    {% endif %}
+                    {# Edit Mode Checkbox #}
+                    <div class="col-no-gutters">
+                        <input id="edit-mode-enabled" type="checkbox" title="Allows editing of mark point values, descriptions, and order" onclick="onToggleEditMode()"/>Edit Marks
+                    </div>
 
-            {# Wrong version warnings #}
-            {% if not has_active_version %}
-                {% if has_submission %}
-                    {# Cancelled submission #}
-                    <div class="red-message" style="text-align: center">Cancelled Submission</div>
-                {% else %}
-                    {# No submission #}
-                    <div class="red-message" style="text-align: center">No Submission</div>
-                {% endif %}
-            {% elseif version_conflict %}
-                {# Opened a different version #}
-                <div class="red-message" style="text-align: center">Select the correct submission version to grade</div>
-            {% endif %}
-
-            <div id="grader-id" data-grader_id="{{ grader_id }}" hidden></div>
-            <div class="inner-container" id="grading-box">
-                {% if has_active_version %}
-                    <script type="application/javascript">
-                        $(document).ready(function () {
-                            loadTemplates().then(function() {
-                                return reloadGradingRubric('{{ gradeable_id }}', '{{ anon_id }}');
+                    {# Wrong version warnings #}
+                    {% if not has_active_version %}
+                        {% if has_submission %}
+                            {# Cancelled submission #}
+                            <div class="red-message" style="text-align: center">Cancelled Submission</div>
+                        {% else %}
+                            {# No submission #}
+                            <div class="red-message" style="text-align: center">No Submission</div>
+                        {% endif %}
+                    {% elseif version_conflict %}
+                        {# Opened a different version #}
+                        <div class="red-message" style="text-align: center">Select the correct submission version to grade</div>
+                    {% endif %}
+                </div>
+                <div id="grader-id" data-grader_id="{{ grader_id }}" hidden></div>
+                <div class="inner-container" id="grading-box">
+                    {% if has_active_version %}
+                        <script type="application/javascript">
+                            $(document).ready(function () {
+                                loadTemplates().then(function() {
+                                    return reloadGradingRubric('{{ gradeable_id }}', '{{ anon_id }}');
+                                });
                             });
-                        });
-                    </script>
-                {% else %}
-                    <h4>No Submission</h4>
-                {% endif %}
+                        </script>
+                    {% else %}
+                        <h4>No Submission</h4>
+                    {% endif %}
+                </div>
             </div>
         {% else %}
             <div style="right:15px; top:140px; width:48%; padding: 10px;">

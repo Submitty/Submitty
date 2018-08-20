@@ -204,13 +204,6 @@ progress::-webkit-progress-value {
     font-size: 16pt;
 }
 
-.inner-container {
-    margin-top: 0px;
-    margin-right: 20px;
-    margin-bottom: 20px;
-    margin-left: 10px;
-}
-
 .file-viewer{
     margin-right: 10px;
     cursor: pointer;
@@ -305,46 +298,6 @@ progress::-webkit-progress-value {
     text-align: left;
 }
 
-.rubric-table {
-    border: 1px solid #dddddd;
-    border-collapse: collapse;
-    -webkit-border-radius: 4px;
-        -moz-border-radius: 4px;
-            border-radius: 4px;
-}
-
-.rubric-table th, 
-.rubric-table td {
-    padding: 8px;
-    line-height: 20px;
-    text-align: left;
-    vertical-align: top;
-    border-top: 1px solid #dddddd;
-    border-left: 1px solid #dddddd;
-}
-
-.rubric-table th {
-  font-weight: bold;
-}
-
-.rubric-table thead th {
-  vertical-align: bottom;
-}
-
-.rubric-table caption + thead tr:first-child th,
-.rubric-table caption + thead tr:first-child td,
-.rubric-table colgroup + thead tr:first-child th,
-.rubric-table colgroup + thead tr:first-child td,
-.rubric-table thead:first-child tr:first-child th,
-.rubric-table thead:first-child tr:first-child td {
-  border-top: 0;
-}
-
-.rubric-table tbody > tr:nth-child(odd) > td,
-.rubric-table tbody > tr:nth-child(odd) > th {
-  background-color: #f9f9f9;
-}
-
 .rubric-textarea {
     width:95%;
     min-height:20px;
@@ -357,19 +310,6 @@ progress::-webkit-progress-value {
 .ta-rubric-table {
     border-collapse: collapse;
     border-radius: 4px;
-}
-
-.ta-rubric-table caption + thead tr:first-child th,
-.ta-rubric-table caption + thead tr:first-child td,
-.ta-rubric-table colgroup + thead tr:first-child th,
-.ta-rubric-table colgroup + thead tr:first-child td,
-.ta-rubric-table thead:first-child tr:first-child th,
-.ta-rubric-table thead:first-child tr:first-child td {
-  border-top: 0;
-}
-
-.ta-rubric-table-background {
-    background-color: #b3b3b3;
 }
 
 tr.is_publish {
@@ -434,6 +374,22 @@ tr.is_publish {
     float:left;
 }
 
+#rubric-container {
+    padding: 0px 10px 0px 10px;
+}
+
+.gradeable .row-wrap {
+    flex-wrap: wrap-reverse;
+}
+
+.vertical-center{
+    align-items: center;
+}
+
+.gradeable .hidden {
+    display: none;
+}
+
 /* Components */
 
 .gradeable .component {
@@ -459,10 +415,6 @@ tr.is_publish {
     justify-content: flex-end;
 }
 
-.gradeable .hidden {
-    display: none;
-}
-
 .gradeable .ta-student-comment {
     margin-bottom: 5px;
     color: #777;
@@ -471,6 +423,110 @@ tr.is_publish {
 .gradeable .verify-container {
     display: inline;
     color: red;
+}
+
+.gradeable .add-common-mark {
+    cursor: pointer;
+}
+.gradeable div.component-container {
+    display: flex;
+}
+
+.gradeable .edit-component-container .title-block textarea {
+    width: 100%;
+    resize: vertical;
+}
+
+.gradeable .edit-component-container .title-block input {
+    width: 100%;
+}
+
+.gradeable .edit-component-container .title-block div.page-label {
+    display: inline-flex;
+    align-items: center;
+    padding-left: 20px;
+}
+
+.gradeable .edit-component-container .component-title-container {
+    padding: 0;
+}
+
+.gradeable .count-type-selector {
+    border-radius: 6px;
+    border: 2px solid #3093FC;
+    background-color: transparent;
+    margin: 2px;
+}
+
+.gradeable .count-type-selected {
+    background-color: #60B3FF;
+}
+
+.gradeable .component div.point-values {
+    padding: 2px;
+    margin-right: 10px;
+}
+
+.gradeable .component .point-values div.point-input-container {
+    padding-right: 2px;
+}
+
+.gradeable .component .point-values .count-type-selector {
+    justify-content: center;
+}
+
+.gradeable .component .point-values .col {
+    padding: 0;
+    align-items: center;
+    display: inline-flex;
+}
+
+.gradeable .component .point-values .point-input-container {
+    max-width: 55px;
+}
+
+.gradeable .component .point-values .point-input-container input {
+    width: 100%;
+}
+
+.gradeable .component input.page-number {
+    width: 50px;
+}
+
+.gradeable .component .box-title input[type=number] {
+    text-align: right;
+}
+
+.gradeable .component .badge {
+    min-width: 80px;
+}
+
+.gradeable .edit-component-container .right-block {
+    align-items: center;
+    display: inline-flex;
+}
+
+.gradeable .edit-component-container .reorder-component-container {
+    display: inline-flex;
+    justify-content: center;
+    width: 30px;
+}
+
+/* Save tools */
+
+.save-tools-cancel:hover {
+    background-color: #FCC;
+}
+
+.save-tools-save:hover {
+    background-color: #CFC;
+}
+
+.gradeable .ta-rubric-table {
+    border: solid #BBB;
+    border-width: 2px 0 0 0;
+    padding: 8px;
+    border-radius: 0px;
 }
 
 .gradeable .done-container {
@@ -489,35 +545,12 @@ tr.is_publish {
     color: red;
 }
 
-.gradeable .summary-text {
-    word-wrap: break-word;
-    width:95%;
-    min-height:20px;
-    font-family: 'Source Sans Pro', sans-serif;
-    float:left;
-    cursor: pointer;
-}
-
-.gradeable .add-common-mark {
-    cursor: pointer;
-}
-
 /* Marks */
-
-.gradeable .edit-component-container .right-block {
-    align-items: center;
-    display: inline-flex;
-}
-
-.gradeable .edit-component-container .reorder-component-container {
-    display: inline-flex;
-    justify-content: center;
-    width: 30px;
-}
 
 .gradeable span.col-no-gutters {
     padding-left: 1px;
     padding-right: 1px;
+    align-items: center;
 }
 
 .gradeable .mark-container {
@@ -633,88 +666,10 @@ tr.is_publish {
     margin: 2px;
 }
 
-.gradeable div.component-container {
-    display: flex;
-}
-
-.gradeable .edit-component-container .title-block textarea {
-    width: 100%;
-    resize: vertical;
-}
-
-.gradeable .edit-component-container .title-block input {
-    width: 100%;
-}
-
-.gradeable .edit-component-container .title-block div.page-label {
-    display: inline-flex;
-    align-items: center;
-    padding-left: 20px;
-}
-
-.gradeable .edit-component-container .component-title-container {
-    padding: 0;
-}
-
-.gradeable .count-type-selector {
-    border-radius: 6px;
-    border: 2px solid #3093FC;
-    background-color: transparent;
-    margin: 2px;
-}
-
-.gradeable .count-type-selected {
-    background-color: #60B3FF;
-}
-
-.gradeable .component div.point-values {
-    padding: 2px;
-    margin-right: 10px;
-}
-
-.gradeable .component .point-values div.point-input-container {
-    padding-right: 2px;
-}
-
-.gradeable .component .point-values .count-type-selector {
-    justify-content: center;
-}
-
-.gradeable .component .point-values .col {
-    padding: 0;
-    align-items: center;
-    display: inline-flex;
-}
-
-.gradeable .component .point-values .point-input-container {
-    max-width: 55px;
-}
-
-.gradeable .component .point-values .point-input-container input {
-    width: 100%;
-}
-
-.gradeable .component input.page-number {
-    width: 50px;
-}
-
-.gradeable .component .box-title input[type=number] {
-    text-align: right;
-}
-
-.gradeable .component .badge {
-    min-width: 80px;
-}
-
-.gradeable .ta-rubric-table {
-    border: solid #BBB;
-    border-width: 2px 0 0 0;
-    padding: 8px;
-    border-radius: 0px;
-}
+/* Mark conflict popup */
 
 #mark-conflict-popup .legend {
-    /* max-width: 80px; */
+
 }
 
 #mark-conflict-popup .mark-resolve-dom span {
@@ -759,12 +714,4 @@ tr.is_publish {
 
 #mark-conflict-popup .color-swatch {
     width: 50px;
-}
-
-.save-tools-cancel:hover {
-    background-color: #FCC;
-}
-
-.save-tools-save:hover {
-    background-color: #CFC;
 }
