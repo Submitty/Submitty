@@ -194,10 +194,19 @@ class GlobalController extends AbstractController {
                         ]);
                     }
                 }
+                //$sidebar_buttons[] = new Button($this->core, [
+                //    "class" => "nav-row short-line"
+                //]);
+            }
+
+            if ($this->core->getUser()->accessGrading()) {
                 $sidebar_buttons[] = new Button($this->core, [
                     "class" => "nav-row short-line"
                 ]);
             }
+            //$sidebar_buttons[] = new Button($this->core, [
+            //    "class" => "nav-row short-line"
+            //]);
 
             if ($this->core->getUser()->accessAdmin()) {
                 $sidebar_buttons[] = new Button($this->core, [

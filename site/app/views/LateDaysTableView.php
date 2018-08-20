@@ -38,7 +38,7 @@ class LateDaysTableView extends AbstractView {
         }
 
         $table_data =
-          return $this->core->getOutput()->renderTwigTemplate($template, [
+          $this->core->getOutput()->renderTwigTemplate($template, [
             "user_id" => $user_id,
             "student_gradeables" => $student_gradeables,
             "status_array" => $status_array,
