@@ -1623,11 +1623,11 @@ function setPdfPageAssignment(page) {
 
     return closeAllComponents(true)
         .then(function () {
-            return ajaxSaveComponentPages(getGradeableId(), page);
+            return ajaxSaveComponentPages(getGradeableId(), {'page': page});
         })
         .then(function () {
             // Reload the gradeable to refresh all the component's display
-            return initializeInstructorEditRubric(getGradeableId());
+            return reloadInstructorEditRubric(getGradeableId());
         });
 }
 
@@ -1651,7 +1651,7 @@ function getMarkFromMarkArray(marks, mark_id) {
  * @param {string} gradeable_id
  * @param {string} anon_id
  */
-function initializeGradingRubric(gradeable_id, anon_id) {
+function reloadGradingRubric(gradeable_id, anon_id) {
     let gradeable_tmp = null;
     ajaxGetGradeableRubric(gradeable_id)
         .catch(function (err) {
@@ -1681,7 +1681,7 @@ function initializeGradingRubric(gradeable_id, anon_id) {
  * Call this once on page load to load the rubric instructor editing
  * @param {string} gradeable_id
  */
-function initializeInstructorEditRubric(gradeable_id) {
+function reloadInstructorEditRubric(gradeable_id) {
     ajaxGetGradeableRubric(gradeable_id)
         .catch(function (err) {
             alert('Could not fetch gradeable rubric: ' + err.message);
