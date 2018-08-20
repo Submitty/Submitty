@@ -1104,7 +1104,7 @@ function saveMark(c_index, sync, override, successCallback, errorCallback) {
         if(custom_message != "") {
             custom_message = escapeHTML(custom_message);
         }
-        var overwrite = ($('#overwrite-id').is(':checked')) ? ("true") : ("false");
+        var overwrite = (!($('#overwrite-id').is(':checked')) ? ("true") : ("false"));
         ajaxSaveGradedComponent(gradeable.id, gradeable.components[c_index-1].id, gradeable.user_id, gradeable.active_version, custom_points, custom_message, overwrite, mark_ids, true, function(response) {
             var hasGrade = false;
             for (var m_index = 0; m_index < arr_length; m_index++) {
@@ -1117,8 +1117,8 @@ function saveMark(c_index, sync, override, successCallback, errorCallback) {
             if (hasGrade === false && (custom_message === "" || custom_message == undefined)) {
                 gradedByElement.text("Ungraded!");
                 component.grader = null;
-            } 
-            else {
+            }
+            else if(overwrite == "true"){
                 component.grader = grading_data.you;
                 component.grader.id = grading_data.your_user_id;
                 gradedByElement.text("Graded by " + component.grader.id + "!");
