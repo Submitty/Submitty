@@ -781,6 +781,10 @@ class AdminGradeableController extends AbstractController {
             'regrade_allowed'
         ];
 
+        $numeric_properties = [
+            'precision'
+        ];
+
         // Date properties all need to be set at once
         $dates = $gradeable->getDates();
         $date_set = false;
@@ -799,6 +803,11 @@ class AdminGradeableController extends AbstractController {
             // Convert boolean values into booleans
             if (in_array($prop, $boolean_properties)) {
                 $post_val = $post_val === 'true';
+            }
+
+            if (in_array($prop, $numeric_properties) && !is_numeric($post_val)) {
+                $errors[$prop] = "{$prop} must be a number";
+                continue;
             }
 
             // Try to set the property

@@ -689,6 +689,14 @@ function isInstructorEditEnabled() {
 }
 
 /**
+ * Gets the precision for component/mark point values
+ * @returns {number}
+ */
+function getPointPrecision() {
+    return parseFloat($('#point_precision_id').val());
+}
+
+/**
  * Gets the pdf page setting (for instructor edit mode only)
  * @returns {int} PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, or PDF_PAGE_NONE
  */
@@ -2339,7 +2347,7 @@ function refreshTotalScoreBox() {
  * @return {Promise}
  */
 function injectInstructorEditComponent(component, showMarkList) {
-    return renderEditComponent(component, showMarkList)
+    return renderEditComponent(component, getPointPrecision(), showMarkList)
         .then(function (elements) {
             setComponentContents(component.id, elements);
         });
@@ -2354,7 +2362,7 @@ function injectInstructorEditComponent(component, showMarkList) {
  * @return {Promise}
  */
 function injectGradingComponent(component, graded_component, editable, showMarkList) {
-    return renderGradingComponent(component, graded_component, editable, showMarkList)
+    return renderGradingComponent(component, graded_component, getPointPrecision(), editable, showMarkList)
         .then(function (elements) {
             setComponentContents(component.id, elements);
         })

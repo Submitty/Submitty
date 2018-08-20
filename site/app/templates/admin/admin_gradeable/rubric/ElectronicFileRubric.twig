@@ -7,9 +7,9 @@ Point precision:
     And do you expect each specific problem/item/component to appear on a specific page number of the PDF document?
 
     <fieldset>
-        <input type="radio" id="yes_pdf_page" name="pdf_page" value="true"
+        <input type="radio" id="yes_pdf_page" name="pdf_page" value="true" onchange="updatePdfPageSettings()"
                 {{ is_pdf_page ? 'checked' : '' }} /> Yes
-        <input type="radio" id="no_pdf_page" name="pdf_page" value="false"
+        <input type="radio" id="no_pdf_page" name="pdf_page" value="false" onchange="updatePdfPageSettings()"
                 {{ not is_pdf_page ? 'checked' : '' }} /> No
 
         <br />
@@ -17,9 +17,9 @@ Point precision:
         <div id="pdf_page">
             <br />
             Who will assign page numbers to problems/item/components?<br>
-            <input type="radio" id="no_pdf_page_student" name="pdf_page_student" value="false"
+            <input type="radio" id="no_pdf_page_student" name="pdf_page_student" value="false" onchange="updatePdfPageSettings()"
                     {{ not is_pdf_page_student ? 'checked' : '' }} /> Instructor (specify the starting page number for each problem/item/component below)<br>
-            <input type="radio" id="yes_pdf_page_student" name="pdf_page_student" value="true"
+            <input type="radio" id="yes_pdf_page_student" name="pdf_page_student" value="true" onchange="updatePdfPageSettings()"
                     {{ is_pdf_page_student ? 'checked' : '' }} /> Student (student will be asked for page numbers at submission time)
         </div>
     </fieldset>
@@ -30,38 +30,9 @@ Point precision:
 </div>
 
 <script type="text/javascript">
-    function updatePdfPageSettings() {
-        let pdf_page = $('#yes_pdf_page').is(':checked');
-        let pdf_page_student = $('#yes_pdf_page_student').is(':checked');
-        if (pdf_page === false) {
-            $('#no_pdf_page_student').prop('checked', true);
-        }
-        setPdfPageAssignment(pdf_page === false ? PDF_PAGE_NONE : (pdf_page_student === true ? PDF_PAGE_STUDENT : PDF_PAGE_INSTRUCTOR))
-            .catch(function (err) {
-                alert('Failed to update pdf page setting! ' + err.message);
-            });
-    }
-
-    function onPrecisionChange() {
-        ajaxUpdateGradeableProperty(getGradeableId(), {
-            'precision': $('#point_precision_id').val()
-        }, function () {
-            closeAllComponents(true)
-                .then(function () {
-                    return reloadInstructorEditRubric(getGradeableId());
-                })
-                .catch(function (err) {
-                    alert('Failed to reload the gradeable rubric! ' + err.message);
-                });
-        });
-    }
-
     $(document).ready(function() {
         loadTemplates().then(function() {
             reloadInstructorEditRubric($('#g_id').val());
         });
-
-        $('input:radio[name="pdf_page"]').change(updatePdfPageSettings);
-        $('input:radio[name="pdf_page_student"]').change(updatePdfPageSettings);
     });
 </script>

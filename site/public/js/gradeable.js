@@ -123,11 +123,12 @@ function renderGradingGradeable(gradeable, graded_gradeable) {
  * Asynchronously render a component using the passed data
  * @param {Object} component
  * @param {Object} graded_component
+ * @param {number} precision
  * @param {boolean} editable True to render with edit mode enabled
  * @param {boolean} showMarkList True to display the mark list unhidden
  * @returns {Promise<string>} the html for the graded component
  */
-function renderGradingComponent(component, graded_component, editable, showMarkList) {
+function renderGradingComponent(component, graded_component, precision, editable, showMarkList) {
     return new Promise(function (resolve, reject) {
         // Make sure we prep the graded component before rendering
         graded_component = prepGradedComponent(component, graded_component);
@@ -136,6 +137,7 @@ function renderGradingComponent(component, graded_component, editable, showMarkL
         resolve(Twig.twig({ref: "GradingComponent"}).render({
             'component': component,
             'graded_component': graded_component,
+            'precision': precision,
             'edit_marks_enabled': editable,
             'show_mark_list': showMarkList,
             'grading_disabled': false // TODO:
@@ -159,14 +161,16 @@ function renderInstructorEditGradeable(gradeable) {
 /**
  * Asynchronously render a component using the passed data
  * @param {Object} component
+ * @param {number} precision
  * @param {boolean} showMarkList True to display the mark list unhidden
  * @returns {Promise} the html for the component
  */
-function renderEditComponent(component, showMarkList) {
+function renderEditComponent(component, precision, showMarkList) {
     return new Promise(function (resolve, reject) {
         // TODO: i don't think this is async
         resolve(Twig.twig({ref: "EditComponent"}).render({
             'component': component,
+            'precision': precision,
             'show_mark_list': showMarkList,
             'edit_marks_enabled': true
         }));

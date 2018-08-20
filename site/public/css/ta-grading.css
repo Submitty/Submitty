@@ -691,7 +691,7 @@ tr.is_publish {
 }
 
 .gradeable .component .badge {
-    width: 80px;
+    min-width: 80px;
 }
 
 #mark-conflict-popup .legend {

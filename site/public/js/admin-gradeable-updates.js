@@ -31,6 +31,45 @@ function clearError(name, update) {
     delete errors[name];
 }
 
+function updatePdfPageSettings() {
+    let pdf_page = $('#yes_pdf_page').is(':checked');
+    let pdf_page_student = $('#yes_pdf_page_student').is(':checked');
+    if (pdf_page === false) {
+        $('#no_pdf_page_student').prop('checked', true);
+    }
+    setPdfPageAssignment(pdf_page === false ? PDF_PAGE_NONE : (pdf_page_student === true ? PDF_PAGE_STUDENT : PDF_PAGE_INSTRUCTOR))
+        .catch(function (err) {
+            alert('Failed to update pdf page setting! ' + err.message);
+        });
+}
+
+function onPrecisionChange() {
+    ajaxUpdateGradeableProperty(getGradeableId(), {
+        'precision': $('#point_precision_id').val()
+    }, function () {
+        // Clear errors by just removing red background
+        clearError('precision');
+        updateErrorMessage();
+
+        closeAllComponents(true)
+            .then(function () {
+                return reloadInstructorEditRubric(getGradeableId());
+            })
+            .catch(function (err) {
+                alert('Failed to reload the gradeable rubric! ' + err.message);
+            });
+    }, updateGradeableErrorCallback);
+}
+
+function updateGradeableErrorCallback(message, response_data) {
+    for (let key in response_data) {
+        if (response_data.hasOwnProperty(key)) {
+            setError(key, response_data[key]);
+        }
+    }
+    updateErrorMessage();
+}
+
 $(document).ready(function () {
     window.onbeforeunload = function (event) {
         if (Object.keys(errors).length !== 0) {
@@ -87,15 +126,7 @@ $(document).ready(function () {
                     }
                 }
                 updateErrorMessage();
-            },
-            function (message, response_data) {
-                for (let key in response_data) {
-                    if (response_data.hasOwnProperty(key)) {
-                        setError(key, response_data[key]);
-                    }
-                }
-                updateErrorMessage();
-            });
+            }, updateGradeableErrorCallback);
     });
 });
 
