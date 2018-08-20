@@ -9,7 +9,7 @@ def up(config, conn, semester, course):
 
     if config_file.is_file():
         config = configparser.ConfigParser()
-        config.read(config_file)
+        config.read(str(config_file))
         if not config.has_option('course_details','auto_rainbow_grades'):
             config.set('course_details','auto_rainbow_grades','false')
 
