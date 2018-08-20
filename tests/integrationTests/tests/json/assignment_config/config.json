@@ -22,7 +22,7 @@
                 {
                     "method" : "diff",
                     "actual_file" : "STDOUT.txt",
-                    "description" : "Standard OUTPUT (STDOUT)",
+                    "description" : "Standard OUTPUT (STDOUT.txt)",
 		            "expected_file" : "test2_output.txt"
                 }
             ]
