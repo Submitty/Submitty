@@ -10,7 +10,7 @@ class PlagiarismController extends AbstractController {
     public function run() {
         switch ($_REQUEST['action']) {
             case 'configure_new_gradeable_for_plagiarism_form':
-                $this->core->getOutput()->addBreadcrumb('Lichen Plagiarism Detection', $this->core->buildUrl(array('component' => 'admin', 'semester' => $_REQUEST['semester'] , 'course'=> $_REQUEST['course'],'page' => 'plagiarism')));
+                $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildUrl(array('component' => 'admin', 'semester' => $_REQUEST['semester'] , 'course'=> $_REQUEST['course'],'page' => 'plagiarism')));
                 $this->core->getOutput()->addBreadcrumb('Configure New Gradeable');
                 $this->configureNewGradeableForPlagiarismForm();
                 break;    
@@ -27,7 +27,7 @@ class PlagiarismController extends AbstractController {
                 $this->ajaxGetMatchesForClickedMatch();
                 break;
             case 'edit_plagiarism_saved_config':
-                $this->core->getOutput()->addBreadcrumb('Lichen Plagiarism Detection', $this->core->buildUrl(array('component' => 'admin', 'semester' => $_REQUEST['semester'] , 'course'=> $_REQUEST['course'],'page' => 'plagiarism')));
+                $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildUrl(array('component' => 'admin', 'semester' => $_REQUEST['semester'] , 'course'=> $_REQUEST['course'],'page' => 'plagiarism')));
                 $this->core->getOutput()->addBreadcrumb('Configure '.($this->core->getQueries()->getGradeable($_REQUEST['gradeable_id']))->getName());
                 $this->editPlagiarismSavedConfig();
                 break;    
@@ -44,12 +44,12 @@ class PlagiarismController extends AbstractController {
                 $this->toggleNightlyRerun();
                 break;             
             case 'show_plagiarism_result':
-                $this->core->getOutput()->addBreadcrumb('Lichen Plagiarism Detection', $this->core->buildUrl(array('component' => 'admin', 'semester' => $_REQUEST['semester'] , 'course'=> $_REQUEST['course'],'page' => 'plagiarism')));
+                $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildUrl(array('component' => 'admin', 'semester' => $_REQUEST['semester'] , 'course'=> $_REQUEST['course'],'page' => 'plagiarism')));
                 $this->core->getOutput()->addBreadcrumb(($this->core->getQueries()->getGradeable($_REQUEST['gradeable_id']))->getName().' Results');
                 $this->showPlagiarismResult(); 
                 break;            
             default:
-                $this->core->getOutput()->addBreadcrumb('Lichen Plagiarism Detection');
+                $this->core->getOutput()->addBreadcrumb('Plagiarism Detection');
                 $this->plagiarismMainPage();
                 break;
         }
@@ -132,7 +132,7 @@ class PlagiarismController extends AbstractController {
 
         $file_path= "/var/local/submitty/courses/".$semester."/".$course."/lichen/ranking/".$gradeable_id.".txt";
         if(!file_exists($file_path)) {
-            $this->core->addErrorMessage("Lichen Plagiarism Detection job is running for this gradeable.");
+            $this->core->addErrorMessage("Plagiarism Detection job is running for this gradeable.");
             $this->core->redirect($return_url);
         }
         if(file_get_contents($file_path) == "") {
