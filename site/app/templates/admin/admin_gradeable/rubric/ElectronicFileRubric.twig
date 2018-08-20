@@ -43,12 +43,12 @@ Point precision:
     }
 
     function onPrecisionChange() {
-        ajaxUpdateGradeableProperty($('#g_id').val(), {
+        ajaxUpdateGradeableProperty(getGradeableId(), {
             'precision': $('#point_precision_id').val()
         }, function () {
             closeAllComponents(true)
                 .then(function () {
-                    return initializeInstructorEditRubric($('#g_id').val());
+                    return reloadInstructorEditRubric(getGradeableId());
                 })
                 .catch(function (err) {
                     alert('Failed to reload the gradeable rubric! ' + err.message);
@@ -57,7 +57,9 @@ Point precision:
     }
 
     $(document).ready(function() {
-        initializeInstructorEditRubric('{{ gradeable.getId() }}');
+        loadTemplates().then(function() {
+            reloadInstructorEditRubric(getGradeableId());
+        });
 
         $('input:radio[name="pdf_page"]').change(updatePdfPageSettings);
         $('input:radio[name="pdf_page_student"]').change(updatePdfPageSettings);

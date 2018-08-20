@@ -36,7 +36,9 @@
                 {% if has_active_version %}
                     <script type="application/javascript">
                         $(document).ready(function () {
-                            initializeGradingRubric('{{ gradeable_id }}', '{{ anon_id }}');
+                            loadTemplates().then(function() {
+                                return reloadGradingRubric('{{ gradeable_id }}', '{{ anon_id }}');
+                            });
                         });
                     </script>
                 {% else %}

@@ -94,31 +94,29 @@ function prepGradedComponent(component, graded_component) {
 
 /**
  * Asynchronously render a gradeable using the passed data
+ * Note: Call 'loadTemplates' first
  * @param {Object} gradeable
  * @param {Object} graded_gradeable
- * @returns {Promise}
+ * @returns {Promise<string>} the html for the graded gradeable
  */
 function renderGradingGradeable(gradeable, graded_gradeable) {
-    return loadTemplates()
-        .then(function () {
-            if(graded_gradeable.graded_components === undefined) {
-                graded_gradeable.graded_components = {};
-            }
+    if (graded_gradeable.graded_components === undefined) {
+        graded_gradeable.graded_components = {};
+    }
 
-            // Calculate the total scores
-            gradeable.components.forEach(function (component) {
-                graded_gradeable.graded_components[component.id]
-                    = prepGradedComponent(component, graded_gradeable.graded_components[component.id]);
-            });
+    // Calculate the total scores
+    gradeable.components.forEach(function (component) {
+        graded_gradeable.graded_components[component.id]
+            = prepGradedComponent(component, graded_gradeable.graded_components[component.id]);
+    });
 
-            // TODO: i don't think this is async
-            return Twig.twig({ref: "GradingGradeable"}).render({
-                'gradeable': gradeable,
-                'graded_gradeable': graded_gradeable,
-                'edit_marks_enabled': false,
-                'grading_disabled': false // TODO:
-            });
-        });
+    // TODO: i don't think this is async
+    return Twig.twig({ref: "GradingGradeable"}).render({
+        'gradeable': gradeable,
+        'graded_gradeable': graded_gradeable,
+        'edit_marks_enabled': false,
+        'grading_disabled': false // TODO:
+    });
 }
 
 /**
@@ -145,16 +143,25 @@ function renderGradingComponent(component, graded_component, editable, showMarkL
     });
 }
 
+/**
+ * Asynchronously renders a gradeable using the passed data
+ * Note: Call 'loadTemplates' first
+ * @param gradeable
+ * @returns {Promise<string>} the html for the gradeable
+ */
 function renderInstructorEditGradeable(gradeable) {
-    return loadTemplates()
-        .then(function() {
-            return Twig.twig({ref: "EditGradeable"}).render({
-                'gradeable': gradeable,
-                'edit_marks_enabled': true
-            })
-        })
+    return Twig.twig({ref: "EditGradeable"}).render({
+        'gradeable': gradeable,
+        'edit_marks_enabled': true
+    });
 }
 
+/**
+ * Asynchronously render a component using the passed data
+ * @param {Object} component
+ * @param {boolean} showMarkList True to display the mark list unhidden
+ * @returns {Promise} the html for the component
+ */
 function renderEditComponent(component, showMarkList) {
     return new Promise(function (resolve, reject) {
         // TODO: i don't think this is async
