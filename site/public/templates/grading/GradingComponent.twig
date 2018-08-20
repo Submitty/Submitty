@@ -19,7 +19,7 @@ Required inputs:
 {% block left_block %}
     <strong id="grading_total"
             class="badge">
-        {{ graded_component.total_score | default('-') }} / {{ component.max_value }}
+        {{ graded_component.total_score|round(decimal_precision) | default('-') }} / {{ component.max_value|round(decimal_precision) }}
     </strong>
 {% endblock %}
 

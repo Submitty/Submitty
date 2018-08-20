@@ -1,4 +1,10 @@
 /**
+ * The number of decimal places to show to the user
+ * @type {int}
+ */
+DECIMAL_PRECISION = 2;
+
+/**
  * Asynchronously load all of the templates
  * @return {Promise}
  */
@@ -115,7 +121,8 @@ function renderGradingGradeable(gradeable, graded_gradeable) {
         'gradeable': gradeable,
         'graded_gradeable': graded_gradeable,
         'edit_marks_enabled': false,
-        'grading_disabled': false // TODO:
+        'grading_disabled': false, // TODO:
+        'decimal_precision': DECIMAL_PRECISION
     });
 }
 
@@ -140,7 +147,8 @@ function renderGradingComponent(component, graded_component, precision, editable
             'precision': precision,
             'edit_marks_enabled': editable,
             'show_mark_list': showMarkList,
-            'grading_disabled': false // TODO:
+            'grading_disabled': false, // TODO:
+            'decimal_precision': DECIMAL_PRECISION
         }));
     });
 }
@@ -154,7 +162,8 @@ function renderGradingComponent(component, graded_component, precision, editable
 function renderInstructorEditGradeable(gradeable) {
     return Twig.twig({ref: "EditGradeable"}).render({
         'gradeable': gradeable,
-        'edit_marks_enabled': true
+        'edit_marks_enabled': true,
+        'decimal_precision': DECIMAL_PRECISION
     });
 }
 
@@ -172,7 +181,8 @@ function renderEditComponent(component, precision, showMarkList) {
             'component': component,
             'precision': precision,
             'show_mark_list': showMarkList,
-            'edit_marks_enabled': true
+            'edit_marks_enabled': true,
+            'decimal_precision': DECIMAL_PRECISION
         }));
     });
 }
@@ -201,6 +211,7 @@ function renderOverallComment(comment, editable) {
  */
 function renderTotalScoreBox(scores) {
     return new Promise(function (resolve, reject) {
+        scores.decimal_precision = DECIMAL_PRECISION;
         // TODO: i don't think this is async
         resolve(Twig.twig({ref: "TotalScoreBox"}).render(scores));
     });
@@ -214,6 +225,9 @@ function renderTotalScoreBox(scores) {
 function renderConflictMarks(conflict_marks) {
     return new Promise(function (resolve, reject) {
         // TODO: i don't think this is async
-        resolve(Twig.twig({ref: "ConflictMarks"}).render({conflict_marks: conflict_marks}));
+        resolve(Twig.twig({ref: "ConflictMarks"}).render({
+            conflict_marks: conflict_marks,
+            decimal_precision: DECIMAL_PRECISION
+        }));
     })
 }

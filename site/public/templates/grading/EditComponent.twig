@@ -12,19 +12,19 @@
         <div class="container point-values">
             <div class="row">
                 <div class="col point-input-container">
-                    <input class="max-points" step="{{ precision }}" type="number" min="0" value="{{ component.max_value }}" onclick="event.stopPropagation()"/>
+                    <input class="max-points" step="{{ precision }}" type="number" min="0" value="{{ component.max_value|round(decimal_precision) }}" onclick="event.stopPropagation()"/>
                 </div>
                 <div class="col point-label">Normal Points</div>
             </div>
             <div class="row">
                 <div class="col point-input-container">
-                    <input class="extra-credit-points" step="{{ precision }}" type="number" min="0" value="{{ extra_credit_points }}" onclick="event.stopPropagation()"/>
+                    <input class="extra-credit-points" step="{{ precision }}" type="number" min="0" value="{{ extra_credit_points|round(decimal_precision) }}" onclick="event.stopPropagation()"/>
                 </div>
                 <div class="col point-label">Extra Credit Points</div>
             </div>
             <div class="row">
                 <div class="col point-input-container">
-                    <input class="penalty-points" step="{{ precision }}" type="number" min="0" value="{{ component.lower_clamp|abs }}" onclick="event.stopPropagation()"/>
+                    <input class="penalty-points" step="{{ precision }}" type="number" min="0" value="{{ component.lower_clamp|abs|round(decimal_precision) }}" onclick="event.stopPropagation()"/>
                 </div>
                 <div class="col point-label">Penalty Points</div>
             </div>
@@ -41,7 +41,7 @@
         </div>
     {% else %}
         <strong class="badge green-background">
-            {{ component.max_value }} {{ extra_credit_points > 0 ? '(+' ~ extra_credit_points ~ ')' }} {{ penalty_points > 0 ? '(-' ~ penalty_points ~ ')' : '' }}
+            {{ component.max_value|round(decimal_precision) }} {{ extra_credit_points > 0 ? '(+' ~ extra_credit_points|round(decimal_precision) ~ ')' }} {{ penalty_points > 0 ? '(-' ~ penalty_points|round(decimal_precision) ~ ')' : '' }}
         </strong>
     {% endif %}
 {% endblock %}

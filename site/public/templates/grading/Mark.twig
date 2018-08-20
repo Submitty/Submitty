@@ -32,7 +32,7 @@ TODO: add 'publish' support
             <input type="number"
                    onchange="onMarkPointsChange(this)"
                    step="{{ component.precision }}"
-                   value="{{ mark.points }}"
+                   value="{{ mark.points|round(decimal_precision) }}"
                     {{ first_mark ? 'disabled' : '' }}/>
         {% else %}
             {{ mark.points }}
