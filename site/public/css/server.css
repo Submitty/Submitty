@@ -373,6 +373,10 @@ table tr.table-header {
     margin: 15px;
 }
 
+.content h1 {
+    margin-bottom: 20px;
+}
+
 .content h2 {
     margin-bottom: 20px;
 }
