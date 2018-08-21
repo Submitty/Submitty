@@ -1,6 +1,6 @@
 {% extends 'generic/Popup.twig' %}
 {% block popup_id %}admin-team-form{% endblock %}
-{% block title_tag %}<h2 id="admin-team-title"></h2>{% endblock %}
+{% block title_tag %}<h1 id="admin-team-title"></h1>{% endblock %}
 {% block body %}
     <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
     <input type="hidden" name="new_team" />
