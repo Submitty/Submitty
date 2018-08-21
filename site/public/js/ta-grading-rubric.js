@@ -976,6 +976,7 @@ function setupSortableMarks(component_id) {
     markList.sortable({
         items: 'div:not(.mark-first,.add-new-mark-container)'
     });
+    markList.keydown(keyPressHandler);
     markList.disableSelection();
 }
 
@@ -988,7 +989,19 @@ function setupSortableComponents() {
         update: onComponentOrderChange,
         handle: '.reorder-component-container'
     });
+    componentList.keydown(keyPressHandler);
     componentList.disableSelection();
+}
+
+/**
+ * Key press handler for jquery sortable elements
+ * @param e
+ */
+function keyPressHandler(e) {
+    // Enable ctrl-a to select all
+    if (e.keyCode === 65 && e.ctrlKey) {
+        e.target.select()
+    }
 }
 
 /**
