@@ -119,6 +119,8 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "mpirun",                  "/usr/local/mpich-3.2/bin/mpirun"},
     { "mpicc",                   "/usr/local/mpich-3.2/bin/mpicc"},
     { "expect",                  "/usr/bin/expect" },
+    { "sleep",                   "/bin/sleep" },
+
 
     // for LLVM / Compiler class
     { "lex",                     "/usr/bin/lex" },

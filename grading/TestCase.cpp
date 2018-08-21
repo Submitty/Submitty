@@ -25,8 +25,6 @@
 #define SHM_MODE (SHM_W | SHM_R | IPC_CREAT)
 
 
-int TestCase::next_test_case_id = 1;
-
 std::string rlimit_name_decoder(int i);
 
 void TerminateProcess(float &elapsed, int childPID);
@@ -250,381 +248,51 @@ TestResults* TestCase::dispatch(const nlohmann::json& grader, int autocheck_numb
   else                                             { return custom_dispatch(grader);                        }
 }
 
-
-
-
-// Make sure the sum of deductions across graders adds to at least 1.0.
-// If a grader does not have a deduction setting, set it to 1/# of (non default) graders.
-void VerifyGraderDeductions(nlohmann::json &json_graders) {
-  assert (json_graders.is_array());
-  assert (json_graders.size() > 0);
-
-  int json_grader_count = 0;
-  for (int i = 0; i < json_graders.size(); i++) {
-    nlohmann::json::const_iterator itr = json_graders[i].find("method");
-    if (itr != json_graders[i].end()) {
-      json_grader_count++;
-    }
-  }
-
-  assert (json_grader_count > 0);
-
-  float default_deduction = 1.0 / float(json_grader_count);
-  float sum = 0.0;
-  for (int i = 0; i < json_graders.size(); i++) {
-    nlohmann::json::const_iterator itr = json_graders[i].find("method");
-    if (itr == json_graders[i].end()) {
-      json_graders[i]["deduction"] = 0;
-      continue;
-    }
-    itr = json_graders[i].find("deduction");
-    float deduction;
-    if (itr == json_graders[i].end()) {
-      json_graders[i]["deduction"] = default_deduction;
-      deduction = default_deduction;
-    } else {
-      assert (itr->is_number());
-      deduction = (*itr);
-    }
-    sum += deduction;
-  }
-
-  if (sum < 0.99) {
-    std::cout << "ERROR! DEDUCTION SUM < 1.0: " << sum << std::endl;
-  }
-}
-
-
-
-// If we don't already have a grader for the indicated file, add a
-// simple "WarnIfNotEmpty" check, that will print the contents of the
-// file to help the student debug if their output has gone to the
-// wrong place or if there was an execution error
-void AddDefaultGrader(const std::string &command,
-                      const std::set<std::string> &files_covered,
-                      nlohmann::json& json_graders,
-                      const std::string &filename,
-                      const nlohmann::json &whole_config) {
-  if (files_covered.find(filename) != files_covered.end())
-    return;
-  //std::cout << "ADD GRADER WarnIfNotEmpty test for " << filename << std::endl;
-  nlohmann::json j;
-  j["method"] = "warnIfNotEmpty";
-  j["actual_file"] = filename;
-  if (filename.find("STDOUT") != std::string::npos) {
-    j["description"] = "Standard Output (STDOUT)";
-  } else if (filename.find("STDERR") != std::string::npos) {
-    std::string program_name = get_program_name(command,whole_config);
-    if (program_name == "/usr/bin/python") {
-      j["description"] = "syntax error output from running python";
-    } else if (program_name == "/usr/bin/java") {
-      j["description"] = "syntax error output from running java";
-    } else if (program_name == "/usr/bin/javac") {
-      j["description"] = "syntax error output from running javac";
-    } else {
-      j["description"] = "Standard Error (STDERR)";
-    }
-  } else {
-    j["description"] = "DEFAULTING TO "+filename;
-  }
-  j["deduction"] = 0.0;
-  j["show_message"] = "on_failure";
-  j["show_actual"] = "on_failure";
-  json_graders.push_back(j);
-}
-
-
-// Every command sends standard output and standard error to two
-// files.  Make sure those files are sent to a grader.
-void AddDefaultGraders(const std::vector<std::string> &commands,
-                       nlohmann::json &json_graders,
-                       const nlohmann::json &whole_config) {
-  std::set<std::string> files_covered;
-  assert (json_graders.is_array());
-  for (int i = 0; i < json_graders.size(); i++) {
-    std::vector<std::string> filenames = stringOrArrayOfStrings(json_graders[i],"actual_file");
-    for (int j = 0; j < filenames.size(); j++) {
-      files_covered.insert(filenames[j]);
-    }
-  }
-  if (commands.size() == 1) {
-    AddDefaultGrader(commands[0],files_covered,json_graders,"STDOUT.txt",whole_config);
-    AddDefaultGrader(commands[0],files_covered,json_graders,"STDERR.txt",whole_config);
-  } else {
-    for (int i = 0; i < commands.size(); i++) {
-      AddDefaultGrader(commands[i],files_covered,json_graders,"STDOUT_"+std::to_string(i)+".txt",whole_config);
-      AddDefaultGrader(commands[i],files_covered,json_graders,"STDERR_"+std::to_string(i)+".txt",whole_config);
-    }
-  }
-}
-
 // =================================================================================
 // =================================================================================
 // CONSTRUCTOR
 
-bool validShowValue(const nlohmann::json& v) {
-  return (v.is_string() &&
-          (v == "always" ||
-           v == "never" ||
-           v == "on_failure" ||
-           v == "on_success"));
+
+TestCase::TestCase(nlohmann::json &whole_config, int which_testcase, std::string docker_name) :
+  _json((*whole_config.find("testcases"))[which_testcase]), CONTAINER_NAME(docker_name) {
+
+  test_case_id = which_testcase + 1;
 }
 
+std::vector<std::string> TestCase::getCommands() const {
 
-TestCase::TestCase (nlohmann::json &whole_config, int which_testcase) :
-  _json((*whole_config.find("testcases"))[which_testcase]) {
+  //TODO potential point of failure
+  std::vector<nlohmann::json> containers = mapOrArrayOfMaps(this->_json, "containers");
 
-  test_case_id = next_test_case_id;
-  next_test_case_id++;
-  General_Helper();
+  assert(containers.size() > 0);
 
-  if (isFileCheck()) {
-    FileCheck_Helper();
-  } else if (isCompilation()) {
-    Compilation_Helper();
-  } else {
-    assert (isExecution());
-    Execution_Helper();
+  if (this->CONTAINER_NAME == ""){
+    //TODO add back in if possible.
+    //assert(containers.size() == 1);
+    return stringOrArrayOfStrings(containers[0], "commands");
   }
 
-  nlohmann::json::iterator itr = _json.find("validation");
-  if (itr != _json.end()) {
-    assert (itr->is_array());
-    VerifyGraderDeductions(*itr);
-    std::vector<std::string> commands = stringOrArrayOfStrings(_json,"command");
-    AddDefaultGraders(commands,*itr,whole_config);
-
-     for (int i = 0; i < (*itr).size(); i++) {
-      nlohmann::json& grader = (*itr)[i];
-      nlohmann::json::iterator itr2;
-      std::string method = grader.value("method","MISSING METHOD");
-      itr2 = grader.find("show_message");
-      if (itr2 == grader.end()) {
-        if (method == "warnIfNotEmpty" || method == "warnIfEmpty") {
-          grader["show_message"] = "on_failure";
-        } else {
-          if (grader.find("actual_file") != grader.end() &&
-              *(grader.find("actual_file")) == "execute_logfile.txt" &&
-              grader.find("show_actual") != grader.end() &&
-              *(grader.find("show_actual")) == "never") {
-            grader["show_message"] = "never";
-          } else {
-            grader["show_message"] = "always";
-          }
-        }
-      } else {
-        assert (validShowValue(*itr2));
-      }
-      if (grader.find("actual_file") != grader.end()) {
-        itr2 = grader.find("show_actual");
-        if (itr2 == grader.end()) {
-          if (method == "warnIfNotEmpty" || method == "warnIfEmpty") {
-            grader["show_actual"] = "on_failure";
-          } else {
-            grader["show_actual"] = "always";
-          }
-        } else {
-          assert (validShowValue(*itr2));
-        }
-      }
-      if (grader.find("expected_file") != grader.end()) {
-        itr2 = grader.find("show_expected");
-        if (itr2 == grader.end()) {
-          grader["show_expected"] = "always";
-        } else {
-          assert (validShowValue(*itr2));
-        }
-      }
+  bool found = false;
+  nlohmann::json command_map;
+  //If we ARE running in a docker container, we must find the commands that are bound for us.
+  for(std::vector<nlohmann::json>::const_iterator it = containers.begin(); it != containers.end(); ++it) {
+    nlohmann::json::const_iterator val = it->find("container_name");
+    std::string curr_target = *val;
+    if(curr_target == this->CONTAINER_NAME){
+      found = true;
+      command_map = *it;
+      break;
     }
   }
+
+  if(!found){
+    std::cout << "ERROR: Could not find " << this->CONTAINER_NAME << " in the command map." << std::endl;
+    std::vector<std::string> empty;
+    return empty;
+  }
+
+  return stringOrArrayOfStrings(command_map, "commands");
 }
-
-
-void TestCase::General_Helper() {
-  nlohmann::json::iterator itr;
-
-  // Check the required fields for all test types
-  itr = _json.find("title");
-  assert (itr != _json.end() && itr->is_string());
-
-  // Check the type of the optional fields
-  itr = _json.find("description");
-  if (itr != _json.end()) { assert (itr->is_string()); }
-  itr = _json.find("points");
-  if (itr != _json.end()) { assert (itr->is_number()); }
-}
-
-void TestCase::FileCheck_Helper() {
-  nlohmann::json::iterator f_itr,v_itr,m_itr,itr;
-
-  // Check the required fields for all test types
-  f_itr = _json.find("actual_file");
-  v_itr = _json.find("validation");
-  m_itr = _json.find("max_submissions");
-  
-  if (f_itr != _json.end()) {
-    // need to rewrite to use a validation
-    assert (m_itr == _json.end());
-    assert (v_itr == _json.end());
-    nlohmann::json v;
-    v["method"] = "fileExists";
-    v["actual_file"] = (*f_itr);
-    std::vector<std::string> filenames = stringOrArrayOfStrings(_json,"actual_file");
-    std::string desc;
-    for (int i = 0; i < filenames.size(); i++) {
-      if (i != 0) desc += " ";
-      desc += filenames[i];
-    }
-    v["description"] = desc;
-    if (filenames.size() != 1) {
-      v["show_actual"] = "never";
-    }
-    if (_json.value("one_of",false)) {
-      v["one_of"] = true;
-    }
-    _json["validation"].push_back(v);
-    _json.erase(f_itr);
-  } else if (v_itr != _json.end()) {
-    // already has a validation
-  } else {
-    assert (m_itr != _json.end());
-    assert (m_itr->is_number_integer());
-    assert ((int)(*m_itr) >= 1);
-
-    itr = _json.find("points");
-    if (itr == _json.end()) {
-      _json["points"] = -5;
-    } else {
-      assert (itr->is_number_integer());
-      assert ((int)(*itr) <= 0);
-    }
-    itr = _json.find("penalty");
-    if (itr == _json.end()) {
-      _json["penalty"] = -0.1;
-    } else {
-      assert (itr->is_number());
-      assert ((*itr) <= 0);
-    }
-    itr = _json.find("title");
-    if (itr == _json.end()) {
-      _json["title"] = "Submission Limit";
-    } else {
-      assert (itr->is_string());
-    }
-  }
-}
-
-bool HasActualFileCheck(const nlohmann::json &v_itr, const std::string &actual_file) {
-  assert (actual_file != "");
-  const std::vector<nlohmann::json> tmp = v_itr.get<std::vector<nlohmann::json> >();
-  for (int i = 0; i < tmp.size(); i++) {
-    if (tmp[i].value("actual_file","") == actual_file) {
-      return true;
-    }
-  }
-  return false;
-}
-
-void TestCase::Compilation_Helper() {
-  nlohmann::json::iterator f_itr,v_itr,w_itr;
-
-  // Check the required fields for all test types
-  f_itr = _json.find("executable_name");
-  v_itr = _json.find("validation");
-
-  if (v_itr != _json.end()) {
-    assert (v_itr->is_array());
-    std::vector<nlohmann::json> tmp = v_itr->get<std::vector<nlohmann::json> >();
-  }
-
-  if (f_itr != _json.end()) {
-
-    std::vector<std::string> commands = stringOrArrayOfStrings(_json,"command");
-    assert (commands.size() > 0);
-    for (int i = 0; i < commands.size(); i++) {
-      w_itr = _json.find("warning_deduction");
-      float warning_fraction = 0.0;
-      if (w_itr != _json.end()) {
-        assert (w_itr->is_number());
-        warning_fraction = (*w_itr);
-        _json.erase(w_itr);
-      }
-      assert (warning_fraction >= 0.0 && warning_fraction <= 1.0);
-      nlohmann::json v2;
-      v2["method"] = "errorIfNotEmpty";
-      if (commands.size() == 1) {
-        v2["actual_file"] = "STDERR.txt";
-      } else {
-        v2["actual_file"] = "STDERR_" + std::to_string(i) + ".txt";
-      }
-      v2["description"] = "Compilation Errors and/or Warnings";
-      v2["show_actual"] = "on_failure";
-      v2["show_message"] = "on_failure";
-      v2["deduction"] = warning_fraction;
-
-      v_itr = _json.find("validation");
-      if (v_itr == _json.end() ||
-          !HasActualFileCheck(*v_itr,v2["actual_file"])) {
-        _json["validation"].push_back(v2);
-      }
-    }
-
-
-    std::vector<std::string> executable_names = stringOrArrayOfStrings(_json,"executable_name");
-    assert (executable_names.size() > 0);
-    for (int i = 0; i < executable_names.size(); i++) {
-      nlohmann::json v;
-      v["method"] = "fileExists";
-      v["actual_file"] = executable_names[i];
-      v["description"] = "Create Executable";
-      v["show_actual"] = "on_failure";
-      v["show_message"] = "on_failure";
-      v["deduction"] = 1.0/executable_names.size();
-
-      v_itr = _json.find("validation");
-      if (v_itr == _json.end() ||
-          !HasActualFileCheck(*v_itr,v["actual_file"])) {
-        _json["validation"].push_back(v);
-      }
-    }
-  }
-
-  v_itr = _json.find("validation");
-
-  if (v_itr != _json.end()) {
-    assert (v_itr->is_array());
-    std::vector<nlohmann::json> tmp = v_itr->get<std::vector<nlohmann::json> >();
-  }
-
-  assert (v_itr != _json.end());
-}
-
-void TestCase::Execution_Helper() {
-  nlohmann::json::iterator itr = _json.find("validation");
-  assert (itr != _json.end());
-  for (nlohmann::json::iterator itr2 = (itr)->begin(); itr2 != (itr)->end(); itr2++) {
-    nlohmann::json& j = *itr2;
-    std::string method = j.value("method","");
-    std::string description = j.value("description","");
-    if (description=="") {
-      if (method == "EmmaInstrumentationGrader") {
-        j["description"] = "EMMA instrumentation output";
-      } else if (method =="JUnitTestGrader") {
-        j["description"] = "JUnit output";
-      } else if (method =="EmmaCoverageReportGrader") {
-        j["description"] = "EMMA coverage report";
-      } else if (method =="JaCoCoCoverageReportGrader") {
-        j["description"] = "JaCoCo coverage report";
-      } else if (method =="MultipleJUnitTestGrader") {
-        j["description"] = "TestRunner output";
-      }
-    }
-  }
-
-  //assert (commands.size() > 0);
-
-}
-
 
 // =================================================================================
 // =================================================================================
@@ -847,105 +515,4 @@ std::string getAssignmentIdFromCurrentDirectory(std::string dir) {
   }
   assert (tmp.size() >= 1);
   return tmp;
-}
-
-
-// Go through the instructor-written test cases.
-//   If the autograding points are non zero, and
-//   if the instructor didn't add a penalty for excessive submissions, then
-//   add a standard small penalty for > 20 submissions.
-//
-void AddSubmissionLimitTestCase(nlohmann::json &config_json) {
-  int total_points = 0;
-  bool has_limit_test = false;
-
-  // count total points and search for submission limit testcase
-  nlohmann::json::iterator tc = config_json.find("testcases");
-  assert (tc != config_json.end());
-  for (unsigned int i = 0; i < tc->size(); i++) {
-    TestCase my_testcase(config_json,i);
-    int points = (*tc)[i].value("points",0);
-    if (points > 0) {
-      total_points += points;
-    }
-    if (my_testcase.isSubmissionLimit()) {
-      has_limit_test = true;
-    }
-  }
-
-  // add submission limit test case
-  if (!has_limit_test) {
-    nlohmann::json limit_test;
-    limit_test["type"] = "FileCheck";
-    limit_test["title"] = "Submission Limit";
-    limit_test["max_submissions"] = MAX_NUM_SUBMISSIONS;
-    if (total_points > 0) {
-      limit_test["points"] = -5;
-      limit_test["penalty"] = -0.1;
-    } else {
-      limit_test["points"] = 0;
-      limit_test["penalty"] = 0;
-    }
-    config_json["testcases"].push_back(limit_test);
-  }
-
-
-  // FIXME:  ugly...  need to reset the id...
-  TestCase::reset_next_test_case_id();
-}
-
-
-
-
-void RecursiveReplace(nlohmann::json& j, const std::string& placeholder, const std::string& replacement) {
-  if (j.is_string()) {
-    std::string str = j.get<std::string>();
-    int pos = str.find(placeholder);
-    if (pos != std::string::npos) {
-      std::cout << "REPLACING '" << str << "' with '";
-      str.replace(pos,placeholder.length(),replacement);
-      std::cout << str << "'" << std::endl;
-      j = str;
-    }
-  } else if (j.is_array() || j.is_object()) {
-    for (nlohmann::json::iterator itr = j.begin(); itr != j.end(); itr++) {
-      RecursiveReplace(*itr,placeholder,replacement);
-    }
-  }
-}
-
-
-void CustomizeAutoGrading(const std::string& username, nlohmann::json& j) {
-  if (j.find("string_replacement") != j.end()) {
-    // Read and check string replacement variables
-    nlohmann::json j2 = j["string_replacement"];
-    std::string placeholder = j2.value("placeholder","");
-    assert (placeholder != "");
-    std::string replacement = j2.value("replacement","");
-    assert (replacement != "");
-    assert (replacement == "hashed_username");
-    int mod_value = j2.value("mod",-1);
-    assert (mod_value > 0);
-    
-    int A = 54059; /* a prime */
-    int B = 76963; /* another prime */
-    int FIRSTH = 37; /* also prime */
-    unsigned int sum = FIRSTH;
-    for (int i = 0; i < username.size(); i++) {
-      sum = (sum * A) ^ (username[i] * B);
-    }
-    int assigned = (sum % mod_value)+1; 
-  
-    std::string repl = std::to_string(assigned);
-
-    nlohmann::json::iterator association = j2.find("association");
-    if (association != j2.end()) {
-      repl = (*association)[repl];
-    }
-
-    nlohmann::json::iterator itr = j.find("testcases");
-    if (itr != j.end()) {
-      RecursiveReplace(*itr,placeholder,repl);
-    }
-  }
 }
