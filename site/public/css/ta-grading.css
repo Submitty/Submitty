@@ -675,18 +675,18 @@ tr.is_publish {
 }
 
 #mark-conflict-popup .mark-resolve-dom span {
-    border-color: #F00;
-    background-color: #FAA;
+    border-color: #3093FC;
+    background-color: #60B3FF;
 }
 
 #mark-conflict-popup .mark-resolve-old-server span{
-    border-color: #00F;
-    background-color: #AAF;
+    border-color: #757575;
+    background-color: #c3c3c3;
 }
 
 #mark-conflict-popup .mark-resolve-server span {
-    border-color: #FFA500;
-    background-color: #FFCC66;
+    border-color: #86a6b9;
+    background-color: #a2cce4;
 }
 
 #mark-conflict-popup div.mark-conflict-row {
