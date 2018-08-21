@@ -21,7 +21,7 @@ Required inputs:
 {% block left_block %}
     <strong id="grading_total"
             class="badge">
-        {{ graded_component.total_score|round(decimal_precision) | default('-') }} / {{ component.max_value|round(decimal_precision) }}
+        {{ graded_component.total_score is defined ? graded_component.total_score|round(decimal_precision) : '-' }} / {{ component.max_value|round(decimal_precision) }}
     </strong>
 {% endblock %}
 
