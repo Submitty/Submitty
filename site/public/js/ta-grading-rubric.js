@@ -720,7 +720,7 @@ function ajaxDeleteComponent(gradeable_id, component_id) {
                     console.error('Something went wrong deleting the component: ' + response.message);
                     reject(new Error(response.message));
                 } else {
-                    resolve(response.data)
+                    resolve(response.data);
                 }
             },
             error: function (err) {
@@ -738,24 +738,35 @@ function ajaxDeleteComponent(gradeable_id, component_id) {
  * @param {string} anon_id
  * @return {Promise} Rejects except when the response returns status 'success'
  */
-function ajaxVerifyComponent(gradeable_id, component_id, anon_id) {
+ 
+function ajaxVerifyComponent(gradeable_id, component_id, anon_id, verifyAll) {
     return new Promise(function (resolve, reject) {
         var action = (verifyAll) ? 'verify_all' : 'verify_grader';
-        $.ajax({
+        $.getJSON({
             type: "POST",
-            url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': action}),
             async: true,
+            url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': action}),
             data: {
                 'gradeable_id': gradeable_id,
                 'component_id': component_id,
                 'anon_id': anon_id,
             },
             success: function (response) {
-                if (response.status !== 'success') {
+                if (response.status !== "success") {
                     console.error('Something went wrong verifying the component: ' + response.message);
                     reject(new Error(response.message));
-                } else {
-                    resolve(response.data)
+                }
+                else {
+                    resolve(response.data);
+                    if(isInstructorEditEnabled()){
+                        reloadInstructorEditRubric(gradeable_id);
+                    }
+                    else{
+                        reloadGradingRubric(gradeable_id, anon_id);
+                    }
+                    if(response.data['unverified_components'] == 0){
+                        document.getElementById('verify-all').style.display = 'none';
+                    }
                 }
             },
             error: function (err) {
@@ -764,17 +775,6 @@ function ajaxVerifyComponent(gradeable_id, component_id, anon_id) {
             }
         });
     });
-}
-
-/**
- * ajax call to verify all graders of a component
- * @param {string} gradeable_id
- * @param {int} component_id
- * @param {string} anon_id
- * @return {Promise} Rejects except when the response returns status 'success'
- */
-function ajaxAllVerifyComponents() {
-    // TODO:
 }
 
 /**
@@ -1782,17 +1782,24 @@ function onToggleCustomMark(me) {
 /**
  * Callback for the 'verify' buttons
  * @param me DOM Element of the verify button
+ * @return {Promise}
  */
 function onVerifyComponent(me) {
-    // TODO:
+    let component_id = getComponentIdFromDOMElement(me);
+    let gradeable_id = getGradeableId();
+    let anon_id = getAnonId();
+    return ajaxVerifyComponent(gradeable_id, component_id, anon_id, false);
 }
-
 /**
  * Callback for the 'verify all' button
  * @param me DOM Element of the verify all button
+ * @return {Promise}
  */
 function onVerifyAll(me) {
-    // TODO:
+    let component_id = getComponentIdFromDOMElement(me);
+    let gradeable_id = getGradeableId();
+    let anon_id = getAnonId();
+    return ajaxVerifyComponent(gradeable_id, component_id, anon_id, true);
 }
 
 /**
@@ -2118,7 +2125,6 @@ function toggleCustomMark(component_id) {
         return refreshGradedComponent(component_id, true);
     }
 }
-
 /**
  * Opens a component for instructor edit mode
  * NOTE: don't call this function on its own.  Call 'openComponent' Instead

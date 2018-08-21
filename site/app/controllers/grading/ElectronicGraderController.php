@@ -284,13 +284,11 @@ class ElectronicGraderController extends GradingController {
         //check that I am able to verify.
         if ($verifyAll) {
             if (!$this->core->getAccess()->canI("grading.electronic.verify_all")) {
-                $this->core->addErrorMessage("You do not have the proper privileges to verify this grade.");
-                return;
+                return $this->core->getOutput()->renderJsonFail("You do not have the proper privileges to verify this grade.");
             }
         } else {
             if (!$this->core->getAccess()->canI("grading.electronic.verify_grader")) {
-                $this->core->addErrorMessage("You do not have the proper privileges to verify this grade.");
-                return;
+                return $this->core->getOutput()->renderJsonFail("You do not have the proper privileges to verify this grade.");
             }
         }
 
@@ -321,11 +319,16 @@ class ElectronicGraderController extends GradingController {
                 }
             }
         }
-
+        $unverifiedComponents=0;
+        foreach ($gradeable->getComponents() as $component) {
+            if($component->getGrader() && $component->getGrader()->getId() !== $this->core->getUser()->getId()){
+                $unverifiedComponents++;
+            }
+        }
         if($verified){
-            return;
+            return $this->core->getOutput()->renderJsonSuccess(['unverified_components' => $unverifiedComponents]);
         }else{
-            $this->core->addErrorMessage("Gradeable component does not exist or was previously verified by you.");
+            return $this->core->getOutput()->renderJsonFail("Gradeable component does not exist or was previously verified by you.");
         }
     }
     /**
