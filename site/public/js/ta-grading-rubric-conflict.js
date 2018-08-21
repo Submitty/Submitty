@@ -38,7 +38,7 @@ function getResolvedMarksFromDOM() {
  * @param me
  * @return {jQuery}
  */
-function getConflictMarkDOMElement(me) {
+function getConflictMarkJQuery(me) {
     return $(me).parents('.mark-conflict-row');
 }
 
@@ -47,7 +47,7 @@ function getConflictMarkDOMElement(me) {
  * @param me
  */
 function unSelectDeleteResolve(me) {
-    let deleteItem = getConflictMarkDOMElement(me).find('mark-deleted-message');
+    let deleteItem = getConflictMarkJQuery(me).find('mark-deleted-message');
     deleteItem.removeClass('points-selected');
     deleteItem.removeClass('title-selected');
 }
@@ -58,7 +58,7 @@ function unSelectDeleteResolve(me) {
  */
 function onConflictPointsClick(me) {
     unSelectDeleteResolve(me);
-    getConflictMarkDOMElement(me).find('.points').removeClass('points-selected');
+    getConflictMarkJQuery(me).find('.points').removeClass('points-selected');
     $(me).addClass('points-selected');
 }
 
@@ -68,7 +68,7 @@ function onConflictPointsClick(me) {
  */
 function onConflictTitleClick(me) {
     unSelectDeleteResolve(me);
-    getConflictMarkDOMElement(me).find('.title').removeClass('title-selected');
+    getConflictMarkJQuery(me).find('.title').removeClass('title-selected');
     $(me).addClass('title-selected');
 }
 
@@ -77,7 +77,7 @@ function onConflictTitleClick(me) {
  * @param me
  */
 function onConflictDeleteClick(me) {
-    let container = getConflictMarkDOMElement(me);
+    let container = getConflictMarkJQuery(me);
     container.find('.title').removeClass('title-selected');
     container.find('.points').removeClass('points-selected');
     $(me).addClass('title-selected');
@@ -95,7 +95,7 @@ function openMarkConflictPopup(component_id, conflictMarks) {
     let popup = $('#mark-conflict-popup');
 
     // Set the component title
-    popup.find('.component-title').html(getComponentDOMElement(component_id).attr('data-title'));
+    popup.find('.component-title').html(getComponentJQuery(component_id).attr('data-title'));
 
     // Generate the list of marks
     return renderConflictMarks(conflictMarks)
