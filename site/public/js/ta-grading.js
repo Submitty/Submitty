@@ -253,6 +253,8 @@ function updateCookies(){
     document.cookie = "bar_wrapper_left=" + $("#bar_wrapper").css("left") + "; path=/;";
     document.cookie = "bar_wrapper_visible=" + $("#bar_wrapper").css("display") + "; path=/;";
 
+    document.cookie = "open_component_id=" + getFirstOpenComponentId() + "; path=/;";
+
     // document.cookie = "pdf_annotation_bar_top=" + $("#pdf_annotation_bar").css("top") + "; path=/;";
     // document.cookie = "pdf_annotation_bar_left=" + $("#pdf_annotation_bar").css("left") + "; path=/;";
 

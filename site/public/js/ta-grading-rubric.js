@@ -10,18 +10,43 @@
  */
 OLD_MARK_LIST = {};
 
+/**
+ * A number ot represent the id of no component
+ * @type {int}
+ */
 NO_COMPONENT_ID = -1;
 
+/**
+ * The id of the custom mark for a component
+ * @type {int}
+ */
 CUSTOM_MARK_ID = 0;
 
+/**
+ * A counter to given unique, negative ids to new marks that haven't been
+ *  added to the server yet
+ * @type {int}
+ */
 MARK_ID_COUNTER = 0;
 
+/**
+ * True if components should open in edit mode
+ * @type {boolean}
+ */
 EDIT_MODE_ENABLED = false;
 
+/**
+ * Count directions for components
+ * @type {int}
+ */
 COUNT_DIRECTION_UP = 1;
 COUNT_DIRECTION_NONE = 0;
 COUNT_DIRECTION_DOWN = -1;
 
+/**
+ * Pdf Page settings for components
+ * @type {int}
+ */
 PDF_PAGE_NONE = 0;
 PDF_PAGE_STUDENT = -1;
 PDF_PAGE_INSTRUCTOR = -2;
@@ -1326,6 +1351,12 @@ function getPrevComponentId(component_id) {
  * @return {int}
  */
 function getFirstOpenComponentId() {
+    // If the components haven't loaded yet, then we don't have a
+    //  "First Open Component", so give the open component in the cookie instead
+    if(getComponentCount() === 0) {
+        return getOpenComponentIdFromCookie();
+    }
+
     let component_ids = getOpenComponentIds();
     if (component_ids.length === 0) {
         return NO_COMPONENT_ID;
@@ -1361,7 +1392,8 @@ function getMarkIdFromOrder(component_id, mark_order) {
  * @return {int} Returns zero of no open component exists
  */
 function getOpenComponentIdFromCookie() {
-    return 0; //TODO:
+    let component_id = document.cookie.replace(/(?:(?:^|.*;\s*)open_component_id\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    return parseInt(component_id);
 }
 
 /**
@@ -1637,6 +1669,7 @@ function onGetMarkStats(me) {
 function onClickComponent(me) {
     let component_id = getComponentIdFromDOMElement(me);
     toggleComponent(component_id, true)
+        .then(updateCookies)
         .catch(function (err) {
             console.error(err);
             setComponentInProgress(component_id, false);
@@ -1650,6 +1683,7 @@ function onClickComponent(me) {
  */
 function onCancelComponent(me) {
     toggleComponent(getComponentIdFromDOMElement(me), false)
+        .then(updateCookies)
         .catch(function (err) {
             console.error(err);
             alert('Error closing component! ' + err.message);
@@ -1662,6 +1696,7 @@ function onCancelComponent(me) {
  */
 function onClickOverallComment(me) {
     toggleOverallComment(true)
+        .then(updateCookies)
         .catch(function (err) {
             console.error(err);
             alert('Error opening/closing overall comment! ' + err.message);
@@ -1685,6 +1720,7 @@ function onComponentOrderChange() {
  */
 function onCancelOverallComment(me) {
     toggleOverallComment(false)
+        .then(updateCookies)
         .catch(function (err) {
             console.error(err);
             alert('Error closing overall comment! ' + err.message);
