@@ -1351,12 +1351,6 @@ function getPrevComponentId(component_id) {
  * @return {int}
  */
 function getFirstOpenComponentId() {
-    // If the components haven't loaded yet, then we don't have a
-    //  "First Open Component", so give the open component in the cookie instead
-    if(getComponentCount() === 0) {
-        return getOpenComponentIdFromCookie();
-    }
-
     let component_ids = getOpenComponentIds();
     if (component_ids.length === 0) {
         return NO_COMPONENT_ID;
@@ -1397,6 +1391,13 @@ function getOpenComponentIdFromCookie() {
 }
 
 /**
+ * Updates the open component in the cookie
+ */
+function updateCookieComponent() {
+    document.cookie = "open_component_id=" + getFirstOpenComponentId() + "; path=/;";
+}
+
+/**
  * Gets the id of the no credit / full credit mark of a component
  * @param {int} component_id
  * @return {int}
@@ -1404,16 +1405,6 @@ function getOpenComponentIdFromCookie() {
  */
 function getComponentFirstMarkId(component_id) {
     return parseInt(getComponentDOMElement(component_id).find('.mark-container').first().attr('data-mark_id'));
-}
-
-/**
- * Shows the mark list for a provided component
- *  Note: this is NOT the same as openComponent.
- * @param {int} component_id
- * @throws Error if the component id doesn't exist
- */
-function showMarkList(component_id) {
-    getComponentDOMElement(component_id).find('.ta-rubric-table').show();
 }
 
 /**
@@ -1669,7 +1660,6 @@ function onGetMarkStats(me) {
 function onClickComponent(me) {
     let component_id = getComponentIdFromDOMElement(me);
     toggleComponent(component_id, true)
-        .then(updateCookies)
         .catch(function (err) {
             console.error(err);
             setComponentInProgress(component_id, false);
@@ -1683,7 +1673,6 @@ function onClickComponent(me) {
  */
 function onCancelComponent(me) {
     toggleComponent(getComponentIdFromDOMElement(me), false)
-        .then(updateCookies)
         .catch(function (err) {
             console.error(err);
             alert('Error closing component! ' + err.message);
@@ -1696,7 +1685,6 @@ function onCancelComponent(me) {
  */
 function onClickOverallComment(me) {
     toggleOverallComment(true)
-        .then(updateCookies)
         .catch(function (err) {
             console.error(err);
             alert('Error opening/closing overall comment! ' + err.message);
@@ -1720,7 +1708,6 @@ function onComponentOrderChange() {
  */
 function onCancelOverallComment(me) {
     toggleOverallComment(false)
-        .then(updateCookies)
         .catch(function (err) {
             console.error(err);
             alert('Error closing overall comment! ' + err.message);
@@ -1917,7 +1904,7 @@ function reloadGradingRubric(gradeable_id, anon_id) {
         })
         .then(function (elements) {
             setRubricDOMElements(elements);
-            openCookieComponent();
+            return openCookieComponent();
         })
         .catch(function (err) {
             alert("Could not render gradeable: " + err.message);
@@ -1939,7 +1926,7 @@ function reloadInstructorEditRubric(gradeable_id) {
         })
         .then(function (elements) {
             setRubricDOMElements(elements);
-            openCookieComponent();
+            return openCookieComponent();
         })
         .catch(function (err) {
             alert("Could not render gradeable: " + err.message);
@@ -1948,10 +1935,15 @@ function reloadInstructorEditRubric(gradeable_id) {
 }
 
 /**
- * Opens the component that was stored in a cookie
+ * Opens the component in the cookie
+ * @returns {Promise}
  */
 function openCookieComponent() {
-    showMarkList(getOpenComponentIdFromCookie());
+    let cookieComponent = getOpenComponentIdFromCookie();
+    if (cookieComponent === NO_COMPONENT_ID) {
+        return Promise.resolve();
+    }
+    return toggleComponent(cookieComponent, false);
 }
 
 /**
@@ -1986,15 +1978,25 @@ function closeAllComponents(save_changes) {
  * @return {Promise}
  */
 function toggleComponent(component_id, saveChanges) {
+    let action = Promise.resolve();
     // Component is open, so close it
     if (isComponentOpen(component_id)) {
-        return closeComponent(component_id, saveChanges);
+        action = action.then(function() {
+            return closeComponent(component_id, saveChanges);
+        });
+    } else {
+        action = action.then(function () {
+            return closeAllComponents(saveChanges)
+                .then(function () {
+                    return openComponent(component_id);
+                });
+        });
     }
 
-    return closeAllComponents(saveChanges)
-        .then(function () {
-            return openComponent(component_id);
-        });
+    // Save the open component in the cookie
+    return action.then(function() {
+        updateCookieComponent();
+    });
 }
 
 /**
