@@ -305,7 +305,7 @@ def network_containers(container_info,target_folder,test_input_folder,job_id,is_
   current_port = 9000
   connection_list = []
   router_connections = {}
-  for name, info in container_info.items():
+  for name, info in sorted(container_info.items()):
       my_name = "{0}_{1}".format(which_untrusted, name)
       network_name = "{0}_network".format(my_name)
       #pass in docker names by environment variables -e DOCKER_NAME={0}

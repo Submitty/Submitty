@@ -10,7 +10,7 @@
                 },
                 {
                     "actual_file": "test01/STDERR.txt",
-                    "description": "Standard Error (STDERR)",
+                    "description": "Standard Error (STDERR.txt)",
                     "messages": [
                         {
                             "message": "WARNING: This file should be empty",
@@ -36,7 +36,7 @@
                 },
                 {
                     "actual_file": "test02/STDERR.txt",
-                    "description": "Standard Error (STDERR)",
+                    "description": "Standard Error (STDERR.txt)",
                     "messages": [
                         {
                             "message": "WARNING: This file should be empty",
@@ -94,7 +94,7 @@
                     ]
                 },
                 {
-                    "description": "Standard Error (STDERR)",
+                    "description": "Standard Error (STDERR.txt)",
                     "messages": [
                         {
                             "message": "ERROR!  Could not open student file: 'test04/STDERR.txt'",

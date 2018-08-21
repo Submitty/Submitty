@@ -82,7 +82,7 @@
                     ]
                 },
                 {
-                    "description": "Standard Error (STDERR)",
+                    "description": "Standard Error (STDERR.txt)",
                     "messages": [
                         {
                             "message": "ERROR!  Could not open student file: 'test04/STDERR.txt'",
@@ -110,7 +110,7 @@
                     ]
                 },
                 {
-                    "description": "Standard Error (STDERR)",
+                    "description": "Standard Error (STDERR.txt)",
                     "messages": [
                         {
                             "message": "ERROR!  Could not open student file: 'test05/STDERR.txt'",
@@ -138,7 +138,7 @@
                     ]
                 },
                 {
-                    "description": "Standard Error (STDERR)",
+                    "description": "Standard Error (STDERR.txt)",
                     "messages": [
                         {
                             "message": "ERROR!  Could not open student file: 'test06/STDERR.txt'",
@@ -166,7 +166,7 @@
                     ]
                 },
                 {
-                    "description": "Standard Error (STDERR)",
+                    "description": "Standard Error (STDERR.txt)",
                     "messages": [
                         {
                             "message": "ERROR!  Could not open student file: 'test07/STDERR.txt'",
@@ -194,7 +194,7 @@
                     ]
                 },
                 {
-                    "description": "Standard Error (STDERR)",
+                    "description": "Standard Error (STDERR.txt)",
                     "messages": [
                         {
                             "message": "ERROR!  Could not open student file: 'test08/STDERR.txt'",

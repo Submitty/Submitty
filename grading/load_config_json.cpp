@@ -357,7 +357,7 @@ void AddDefaultGrader(const std::string &command,
   j["method"] = "warnIfNotEmpty";
   j["actual_file"] = filename;
   if (filename.find("STDOUT") != std::string::npos) {
-    j["description"] = "Standard Output (STDOUT)";
+    j["description"] = "Standard Output ("+filename+")";
   } else if (filename.find("STDERR") != std::string::npos) {
     std::string program_name = get_program_name(command,whole_config);
     if (program_name == "/usr/bin/python") {
@@ -367,7 +367,7 @@ void AddDefaultGrader(const std::string &command,
     } else if (program_name == "/usr/bin/javac") {
       j["description"] = "syntax error output from running javac";
     } else {
-      j["description"] = "Standard Error (STDERR)";
+      j["description"] = "Standard Error ("+filename+")";
     }
   } else {
     j["description"] = "DEFAULTING TO "+filename;
