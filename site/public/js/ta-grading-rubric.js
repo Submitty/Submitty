@@ -1,4 +1,8 @@
 /**
+ *  Notes: Some variables have 'domElement' in their name, but they may be jquery objects
+ */
+
+/**
  * Global variables.  Add these very sparingly
  */
 
@@ -901,19 +905,19 @@ function getMarkIdFromDOMElement(me) {
 /**
  * Gets the JQuery selector for the component id
  * Note: This is not the component container
- * @param component_id
+ * @param {int} component_id
  * @return {jQuery}
  */
-function getComponentDOMElement(component_id) {
+function getComponentJQuery(component_id) {
     return $('#component-' + component_id);
 }
 
 /**
  * Gets the JQuery selector for the mark id
- * @param mark_id
+ * @param {int} mark_id
  * @return {jQuery}
  */
-function getMarkDOMElement(mark_id) {
+function getMarkJQuery(mark_id) {
     return $('#mark-' + mark_id);
 }
 
@@ -922,15 +926,15 @@ function getMarkDOMElement(mark_id) {
  * @param {int} component_id
  * @return {jQuery}
  */
-function getCustomMarkDOMElement(component_id) {
-    return getComponentDOMElement(component_id).find('.custom-mark-container');
+function getCustomMarkJQuery(component_id) {
+    return getComponentJQuery(component_id).find('.custom-mark-container');
 }
 
 /**
  * Gets the JQuery selector for the overall comment container
  * @return {jQuery}
  */
-function getOverallCommentDOMElement() {
+function getOverallCommentJQuery() {
     return $('#overall-comment-container');
 }
 
@@ -940,7 +944,7 @@ function getOverallCommentDOMElement() {
  * @param {boolean} show
  */
 function setComponentInProgress(component_id, show = true) {
-    let domElement = getComponentDOMElement(component_id);
+    let domElement = getComponentJQuery(component_id);
     domElement.find('.save-tools div').hide();
     if (show) {
         domElement.find('.save-tools-in-progress').show();
@@ -954,7 +958,7 @@ function setComponentInProgress(component_id, show = true) {
  * @param {boolean} show
  */
 function setOverallCommentInProgress(show = true) {
-    let domElement = getOverallCommentDOMElement();
+    let domElement = getOverallCommentJQuery();
     domElement.find('.save-tools div').hide();
     if (show) {
         domElement.find('.save-tools-in-progress').show();
@@ -965,10 +969,10 @@ function setOverallCommentInProgress(show = true) {
 
 /**
  * Enables reordering on marks in an edit-mode component
- * @param component_id
+ * @param {int} component_id
  */
 function setupSortableMarks(component_id) {
-    let markList = getComponentDOMElement(component_id).find('.ta-rubric-table');
+    let markList = getComponentJQuery(component_id).find('.ta-rubric-table');
     markList.sortable({
         items: 'div:not(.mark-first,.add-new-mark-container)'
     });
@@ -992,7 +996,7 @@ function setupSortableComponents() {
  * @param {string} contents
  */
 function setOverallCommentContents(contents) {
-    getOverallCommentDOMElement().html(contents);
+    getOverallCommentJQuery().html(contents);
 }
 
 /**
@@ -1001,7 +1005,7 @@ function setOverallCommentContents(contents) {
  * @param {string} contents
  */
 function setComponentContents(component_id, contents) {
-    getComponentDOMElement(component_id).parent('.component-container').html(contents);
+    getComponentJQuery(component_id).parent('.component-container').html(contents);
 
     // Enable sorting for this component if in edit mode
     if(isEditModeEnabled()) {
@@ -1023,7 +1027,7 @@ function setTotalScoreBoxContents(contents) {
  * @returns {int} COUNT_DIRECTION_UP, COUNT_DIRECTION_DOWN, or COUNT_DIRECTION_NONE
  */
 function getCountDirection(component_id) {
-    let domElement = getComponentDOMElement(component_id);
+    let domElement = getComponentJQuery(component_id);
     if (domElement.find('.count-type-selected').length === 0) {
         return COUNT_DIRECTION_NONE;
     }
@@ -1041,7 +1045,7 @@ function getCountDirection(component_id) {
  * @param {int} direction COUNT_DIRECTION_UP, otherwise COUNT_DIRECTION_DOWN
  */
 function setCountDirection(component_id, direction) {
-    let domElement = getComponentDOMElement(component_id);
+    let domElement = getComponentJQuery(component_id);
     domElement.find('.count-type-selector').removeClass('count-type-selected');
     if (direction === COUNT_DIRECTION_UP) {
         domElement.find('.count-up-selector').addClass('count-type-selected');
@@ -1057,16 +1061,16 @@ function setCountDirection(component_id, direction) {
  * @param {string} title
  */
 function setMarkTitle(mark_id, title) {
-    getMarkDOMElement(mark_id).find('.mark-title input').val(title);
+    getMarkJQuery(mark_id).find('.mark-title input').val(title);
 }
 
 /**
  * Gets the page number assigned to a component
- * @param component_id
+ * @param {int} component_id
  * @returns {int}
  */
 function getComponentPageNumber(component_id) {
-    let domElement = getComponentDOMElement(component_id);
+    let domElement = getComponentJQuery(component_id);
     if (isInstructorEditEnabled()) {
         return parseInt(domElement.find('input.page-number').val());
     } else {
@@ -1081,7 +1085,7 @@ function getComponentPageNumber(component_id) {
  * @return {Object}
  */
 function getComponentFromDOM(component_id) {
-    let domElement = getComponentDOMElement(component_id);
+    let domElement = getComponentJQuery(component_id);
 
     // TODO: make this work in instructor edit mode with closed component
     if (isInstructorEditEnabled()) {
@@ -1119,11 +1123,11 @@ function getComponentFromDOM(component_id) {
 
 /**
  * Extracts an array of marks from the DOM
- * @param component_id
+ * @param {int} component_id
  * @return {Array}
  */
 function getMarkListFromDOM(component_id) {
-    let domElement = getComponentDOMElement(component_id);
+    let domElement = getComponentJQuery(component_id);
     let markList = [];
     let i = 0;
     domElement.find('.ta-rubric-table .mark-container').each(function () {
@@ -1146,7 +1150,7 @@ function getMarkListFromDOM(component_id) {
  * @return {Object}
  */
 function getMarkFromDOM(mark_id) {
-    let domElement = getMarkDOMElement(mark_id);
+    let domElement = getMarkJQuery(mark_id);
     if (isEditModeEnabled()) {
         return {
             id: parseInt(domElement.attr('data-mark_id')),
@@ -1174,7 +1178,7 @@ function getMarkFromDOM(mark_id) {
  * @return {Object}
  */
 function getGradedComponentFromDOM(component_id) {
-    let domElement = getComponentDOMElement(component_id);
+    let domElement = getComponentJQuery(component_id);
     let customMarkContainer = domElement.find('.custom-mark-container');
 
     // Get all of the marks that are 'selected'
@@ -1300,7 +1304,7 @@ function getOpenComponentIds() {
 
 /**
  * Gets the component id from its order on the page
- * @param order
+ * @param {int} order
  * @return {int}
  */
 function getComponentIdByOrder(order) {
@@ -1343,7 +1347,7 @@ function getComponentOrders() {
  * @return {int}
  */
 function getNextComponentId(component_id) {
-    return getComponentDOMElement(component_id).parent('.component-container').next().children('.component').attr('data-component_id');
+    return getComponentJQuery(component_id).parent('.component-container').next().children('.component').attr('data-component_id');
 }
 
 /**
@@ -1352,7 +1356,7 @@ function getNextComponentId(component_id) {
  * @return {int}
  */
 function getPrevComponentId(component_id) {
-    return getComponentDOMElement(component_id).parent('.component-container').prev().children('.component').attr('data-component_id');
+    return getComponentJQuery(component_id).parent('.component-container').prev().children('.component').attr('data-component_id');
 }
 
 /**
@@ -1383,7 +1387,7 @@ function getComponentCount() {
  * @returns {int} Mark id or 0 if out of bounds
  */
 function getMarkIdFromOrder(component_id, mark_order) {
-    let jquery = getComponentDOMElement(component_id).find('.mark-container');
+    let jquery = getComponentJQuery(component_id).find('.mark-container');
     if(mark_order < jquery.length) {
         return parseInt(jquery.eq(mark_order).attr('data-mark_id'));
     }
@@ -1410,20 +1414,18 @@ function updateCookieComponent() {
  * Gets the id of the no credit / full credit mark of a component
  * @param {int} component_id
  * @return {int}
- * @throws Error if the component id doesn't exist
  */
 function getComponentFirstMarkId(component_id) {
-    return parseInt(getComponentDOMElement(component_id).find('.mark-container').first().attr('data-mark_id'));
+    return parseInt(getComponentJQuery(component_id).find('.mark-container').first().attr('data-mark_id'));
 }
 
 /**
  * Gets if a component is open
- * @param component_id
+ * @param {int} component_id
  * @return {boolean}
- * @throws Error if the component id doesn't exist
  */
 function isComponentOpen(component_id) {
-    return !getComponentDOMElement(component_id).find('.ta-rubric-table').is(':hidden');
+    return !getComponentJQuery(component_id).find('.ta-rubric-table').is(':hidden');
 }
 
 /**
@@ -1440,7 +1442,7 @@ function isOverallCommentOpen() {
  * @return {boolean}
  */
 function isMarkChecked(mark_id) {
-    return getMarkDOMElement(mark_id).find('span.mark-selected').length > 0;
+    return getMarkJQuery(mark_id).find('span.mark-selected').length > 0;
 }
 
 /**
@@ -1449,7 +1451,7 @@ function isMarkChecked(mark_id) {
  * @returns {boolean}
  */
 function isMarkDisabled(mark_id) {
-    return getMarkDOMElement(mark_id).hasClass('mark-disabled');
+    return getMarkJQuery(mark_id).hasClass('mark-disabled');
 }
 
 /**
@@ -1460,7 +1462,7 @@ function toggleMarkChecked(mark_id) {
     if (isEditModeEnabled()) {
         return;
     }
-    getMarkDOMElement(mark_id).find('.mark-selector').toggleClass('mark-selected');
+    getMarkJQuery(mark_id).find('.mark-selector').toggleClass('mark-selected');
 }
 
 /**
@@ -1469,7 +1471,7 @@ function toggleMarkChecked(mark_id) {
  * @return {boolean}
  */
 function isMarkDeleted(mark_id) {
-    return getMarkDOMElement(mark_id).hasClass('mark-deleted');
+    return getMarkJQuery(mark_id).hasClass('mark-deleted');
 }
 
 /**
@@ -1492,7 +1494,7 @@ function hasCustomMark(component_id) {
  * @return {boolean}
  */
 function isCustomMarkChecked(component_id) {
-    return getCustomMarkDOMElement(component_id).find('.mark-selected').length > 0;
+    return getCustomMarkJQuery(component_id).find('.mark-selected').length > 0;
 }
 
 /**
@@ -1500,7 +1502,7 @@ function isCustomMarkChecked(component_id) {
  * @param {int} component_id
  */
 function checkDOMCustomMark(component_id) {
-    getCustomMarkDOMElement(component_id).find('.mark-selector').addClass('mark-selected');
+    getCustomMarkJQuery(component_id).find('.mark-selector').addClass('mark-selected');
 }
 
 /**
@@ -1508,7 +1510,7 @@ function checkDOMCustomMark(component_id) {
  * @param {int} component_id
  */
 function unCheckDOMCustomMark(component_id) {
-    getCustomMarkDOMElement(component_id).find('.mark-selector').removeClass('mark-selected');
+    getCustomMarkJQuery(component_id).find('.mark-selector').removeClass('mark-selected');
 }
 
 /**
@@ -1516,7 +1518,7 @@ function unCheckDOMCustomMark(component_id) {
  * @param {int} component_id
  */
 function toggleDOMCustomMark(component_id) {
-    getCustomMarkDOMElement(component_id).find('.mark-selector').toggleClass('mark-selected');
+    getCustomMarkJQuery(component_id).find('.mark-selector').toggleClass('mark-selected');
 }
 
 /**
@@ -2252,7 +2254,7 @@ function closeComponentGrading(component_id, saveChanges) {
 
 /**
  * Closes the requested component and saves any changes if requested
- * @param component_id
+ * @param {int} component_id
  * @param {boolean} saveChanges If the changes to the (graded) component should be saved or discarded
  * @return {Promise}
  */
@@ -2535,7 +2537,7 @@ function tryResolveMarkSave(gradeable_id, component_id, domMark, serverMark, old
 
 /**
  * Saves the component grade information to the server
- * @param component_id
+ * @param {int} component_id
  * @return {Promise}
  */
 function saveGradedComponent(component_id) {
@@ -2565,7 +2567,7 @@ function refreshGradedComponent(component_id, showMarkList) {
 
 /**
  * Re-renders the component with the data in the DOM
- * @param component_id
+ * @param {int} component_id
  * @param {boolean} showMarkList Whether the mark list should be visible
  * @return {Promise}
  */
