@@ -453,15 +453,15 @@ function ajaxDeleteMark(gradeable_id, component_id, mark_id) {
 
 /**
  * ajax call to save mark point value / title
- * TODO: support setting 'isPublish' through here too
  * @param {string} gradeable_id
  * @param {int} component_id
  * @param {int} mark_id
  * @param {float} points
  * @param {string} title
+ * @param {boolean} publish
  * @return {Promise} Rejects except when the response returns status 'success'
  */
-function ajaxSaveMark(gradeable_id, component_id, mark_id, points, title) {
+function ajaxSaveMark(gradeable_id, component_id, mark_id, points, title, publish) {
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "POST",
@@ -476,6 +476,7 @@ function ajaxSaveMark(gradeable_id, component_id, mark_id, points, title) {
                 'mark_id': mark_id,
                 'points': points,
                 'title': title,
+                'publish': publish
             },
             success: function (response) {
                 if (response.status !== 'success') {
@@ -1145,7 +1146,8 @@ function getMarkFromDOM(mark_id) {
             id: parseInt(domElement.attr('data-mark_id')),
             points: parseFloat(domElement.find('input[type=number]').val()),
             title: domElement.find('input[type=text]').val(),
-            deleted: domElement.hasClass('mark-deleted')
+            deleted: domElement.hasClass('mark-deleted'),
+            publish: domElement.find('.mark-publish input[type=checkbox]').is(':checked')
         };
     } else {
         if (mark_id === 0) {
@@ -1155,6 +1157,7 @@ function getMarkFromDOM(mark_id) {
             id: parseInt(domElement.attr('data-mark_id')),
             points: parseFloat(domElement.find('.mark-points').attr('data-points')),
             title: domElement.find('.mark-title').attr('data-title'),
+            publish: domElement.attr('data-publish')
         };
     }
 }
@@ -2306,7 +2309,6 @@ function checkMark(component_id, mark_id) {
     let firstMarkId = getComponentFirstMarkId(component_id);
     if (isMarkChecked(firstMarkId)) {
         // If first mark is checked, it will be the first element in the array
-        // TODO: probably
         gradedComponent.mark_ids.splice(0, 1);
     }
 
@@ -2418,14 +2420,13 @@ function saveMarkList(component_id) {
                                         return ajaxDeleteMark(gradeable_id, component_id, mark.id);
                                     })
                                     .catch(function (err) {
-                                        // TODO: is this what we want to do?
                                         // Don't let this error hold up the whole operation
                                         alert('Could not delete mark: ' + err.message);
                                     });
                             } else {
                                 // If not marked for deletion, save normally
                                 sequence1 = sequence1.then(function () {
-                                    return ajaxSaveMark(gradeable_id, component_id, mark.id, mark.points, mark.title);
+                                    return ajaxSaveMark(gradeable_id, component_id, mark.id, mark.points, mark.title, mark.publish);
                                 });
                             }
                         }
@@ -2450,7 +2451,10 @@ function saveMarkList(component_id) {
  * @return {boolean}
  */
 function marksEqual(mark0, mark1) {
-    return mark0.points === mark1.points && mark0.title === mark1.title;
+    // publish settings only applies in instructor edit mode.  If a non-instructor
+    //  edits a mark, it doesn't overwrite the publish setting anyway.
+    return mark0.points === mark1.points && mark0.title === mark1.title
+        && (!isInstructorEditEnabled() || mark0.publish === mark1.publish);
 }
 
 /**
@@ -2485,7 +2489,7 @@ function tryResolveMarkSave(gradeable_id, component_id, domMark, serverMark, old
             } else {
                 // The domMark is unique and the serverMark is the same as the oldServerMark
                 //  so we should save the domMark to the server
-                return ajaxSaveMark(gradeable_id, component_id, domMark.id, domMark.points, domMark.title)
+                return ajaxSaveMark(gradeable_id, component_id, domMark.id, domMark.points, domMark.title, domMark.publish)
                     .then(function () {
                         // Success, then resolve success
                         return Promise.resolve(true);

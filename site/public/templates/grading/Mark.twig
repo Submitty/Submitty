@@ -6,12 +6,13 @@ Required Input:
     edit_marks_enabled: True if marks should appear editable
     edit_component_enabled: True if 'instructor' edit mode is enabled
     mark_disabled: True if the mark should appear uneditable in 'edit' mode
-TODO: add 'publish' support
+    show_publish: True to show the 'publish' option
 #}
 <div id="mark-{{ mark.id }}"
      class="mark-container row {{ first_mark ? 'mark-first' : '' }} {{ not edit_marks_enabled and mark_disabled ? 'mark-disabled' : '' }} {{ mark.deleted ? 'mark-deleted' : '' }}"
      data-component_id="{{ component.id }}"
      data-mark_id="{{ mark.id }}"
+     data-publish="{{ mark.publish }}"
      onclick="{{ edit_marks_enabled or mark_disabled ? '' : 'onToggleMark(this)' }}"
 >
     {% if edit_marks_enabled %}
@@ -48,6 +49,11 @@ TODO: add 'publish' support
             {{ mark.title|escape }}
         {% endif %}
     </span>
+    {% if show_publish %}
+        <span class="col-no-gutters mark-publish">
+            Publish: <input type="checkbox" title="Should all students see this mark, even if they didn't get it?" {{ mark.publish ? 'checked' : '' }}/>
+        </span>
+    {% endif %}
     <span class="col-no-gutters mark-tools" onclick="onGetMarkStats(this);event.stopPropagation()">
         <i class="fa fa-users icon-mark-stats"></i>
     </span>

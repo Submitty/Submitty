@@ -1721,6 +1721,7 @@ class ElectronicGraderController extends GradingController {
         $mark_id = $_POST['mark_id'] ?? '';
         $points = $_POST['points'] ?? '';
         $title = $_POST['title'] ?? null;
+        $publish = ($_POST['publish'] ?? 'false') === 'true';
 
         // Validate required parameters
         if ($title === null) {
@@ -1762,9 +1763,14 @@ class ElectronicGraderController extends GradingController {
             return;
         }
 
+        // Restrict who can change the 'publish' property
+        if (!$this->core->getAccess()->canI('grading.electronic.save_mark_publish')) {
+            $publish = $mark->isPublish();
+        }
+
         try {
             // Once we've parsed the inputs and checked permissions, perform the operation
-            $this->saveMark($mark, $points, $title);
+            $this->saveMark($mark, $points, $title, $publish);
             $this->core->getOutput()->renderJsonSuccess();
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
@@ -1773,12 +1779,15 @@ class ElectronicGraderController extends GradingController {
         }
     }
 
-    public function saveMark(Mark $mark, float $points, string $title) {
-        if($mark->getPoints() !== $points) {
+    public function saveMark(Mark $mark, float $points, string $title, bool $publish) {
+        if ($mark->getPoints() !== $points) {
             $mark->setPoints($points);
         }
-        if($mark->getTitle() !== $title) {
+        if ($mark->getTitle() !== $title) {
             $mark->setTitle($title);
+        }
+        if ($mark->isPublish() !== $publish) {
+            $mark->setPublish($publish);
         }
         $this->core->getQueries()->updateGradeable($mark->getComponent()->getGradeable());
     }

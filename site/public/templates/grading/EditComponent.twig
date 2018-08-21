@@ -53,7 +53,7 @@
         </span>
     {% endif %}
     <span class="col-no-gutters" onclick="onDeleteComponent(this); event.stopPropagation()">
-        <i class="fa fa-trash"></i>
+        <i class="fa fa-trash" title="Delete this component"></i>
     </span>
 {% endblock %}
 
@@ -95,6 +95,7 @@
 {% endblock %}
 
 {% block marks_block %}
+    {% set show_publish = true %}
     {% for mark in component.marks %}
         {% set first_mark = loop.index0 == 0 %}
         {% include "Mark.twig" %}
