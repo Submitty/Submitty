@@ -807,15 +807,6 @@ function getPointPrecision() {
 }
 
 /**
- * Gets the pdf page setting (for instructor edit mode only)
- * @returns {int} PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, or PDF_PAGE_NONE
- */
-function getPdfPageAssignment() {
-    //TODO:
-    return PDF_PAGE_INSTRUCTOR;
-}
-
-/**
  * Used to determine if the mark list should be displayed in 'edit' mode
  *  @return {boolean}
  */
@@ -1056,12 +1047,7 @@ function setMarkTitle(mark_id, title) {
 function getComponentPageNumber(component_id) {
     let domElement = getComponentDOMElement(component_id);
     if (isInstructorEditEnabled()) {
-        let page = getPdfPageAssignment();
-        if (page === PDF_PAGE_INSTRUCTOR) {
-            return parseInt(domElement.find('input.page-number').val());
-        } else {
-            return page;
-        }
+        return parseInt(domElement.find('input.page-number').val());
     } else {
         return parseInt(domElement.attr('data-page'));
     }
@@ -1112,7 +1098,6 @@ function getComponentFromDOM(component_id) {
 
 /**
  * Extracts an array of marks from the DOM
- * TODO: support publish
  * @param component_id
  * @return {Array}
  */
