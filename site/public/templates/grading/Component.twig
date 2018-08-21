@@ -63,9 +63,9 @@ Required Input:
         {% block marks_block %}
         {% endblock %}
         {% if edit_marks_enabled %}
-            <div class="add-new-mark">
-                <span onclick="onAddNewMark(this);">
-                    <i class="fa fa-plus-square" aria-hidden="true">Add new mark</i>
+            <div class="add-new-mark-container">
+                <span class="add-new-mark" onclick="onAddNewMark(this);">
+                    <i class="fa fa-plus-square add-new-mark-icon" aria-hidden="true"></i>Add new mark
                 </span>
             </div>
         {% endif %}

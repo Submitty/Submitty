@@ -418,9 +418,6 @@ tr.is_publish {
     color: red;
 }
 
-.gradeable .add-common-mark {
-    cursor: pointer;
-}
 .gradeable div.component-container {
     display: flex;
 }
@@ -657,6 +654,18 @@ tr.is_publish {
 .mark-container .col-sm input {
     width: 100%;
     margin: 2px;
+}
+
+.gradeable .add-new-mark-container {
+    cursor: pointer;
+}
+
+.gradeable .add-new-mark {
+    padding-left: 25px;
+}
+
+.gradeable .add-new-mark .add-new-mark-icon {
+    padding-right: 5px;
 }
 
 /* Mark conflict popup */
