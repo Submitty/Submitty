@@ -932,7 +932,7 @@ function setOverallCommentInProgress(show = true) {
 function setupSortableMarks(component_id) {
     let markList = getComponentDOMElement(component_id).find('.ta-rubric-table');
     markList.sortable({
-        items: 'div:not(.mark-first)'
+        items: 'div:not(.mark-first,.add-new-mark)'
     });
     markList.disableSelection();
 }
