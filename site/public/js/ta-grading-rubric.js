@@ -52,6 +52,13 @@ PDF_PAGE_STUDENT = -1;
 PDF_PAGE_INSTRUCTOR = -2;
 
 /**
+ * Whether ajax requests will be asynchronous or synchronous.  This
+ *  is used instead of passing an 'async' parameter to every function.
+ * @type {boolean}
+ */
+AJAX_USE_ASYNC = true;
+
+/**
  * Keep All of the ajax functions at the top of this file
  *
  */
@@ -75,6 +82,7 @@ function ajaxGetGradeableRubric(gradeable_id) {
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "GET",
+            async: AJAX_USE_ASYNC,
             url: buildUrl({
                 'component': 'grading',
                 'page': 'electronic',
@@ -115,6 +123,7 @@ function ajaxSaveComponent(gradeable_id, component_id, title, ta_comment, studen
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "POST",
+            async: AJAX_USE_ASYNC,
             url: buildUrl({
                 'component': 'grading',
                 'page': 'electronic',
@@ -158,6 +167,7 @@ function ajaxGetComponentRubric(gradeable_id, component_id) {
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "GET",
+            async: AJAX_USE_ASYNC,
             url: buildUrl({
                 'component': 'grading',
                 'page': 'electronic',
@@ -191,6 +201,7 @@ function ajaxGetGradedGradeable(gradeable_id, anon_id) {
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "GET",
+            async: AJAX_USE_ASYNC,
             url: buildUrl({
                 'component': 'grading',
                 'page': 'electronic',
@@ -224,6 +235,8 @@ function ajaxGetGradedGradeable(gradeable_id, anon_id) {
 function ajaxGetGradedComponent(gradeable_id, component_id, anon_id) {
     return new Promise(function (resolve, reject) {
         $.getJSON({
+            type: "GET",
+            async: AJAX_USE_ASYNC,
             url: buildUrl({
                 'component': 'grading',
                 'page': 'electronic',
@@ -262,19 +275,18 @@ function ajaxGetGradedComponent(gradeable_id, component_id, anon_id) {
  * @param {string} custom_message
  * @param {boolean} silent_edit True to edit marks assigned without changing the grader
  * @param {int[]} mark_ids
- * @param {boolean} async
  * @return {Promise} Rejects except when the response returns status 'success'
  */
-function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, graded_version, custom_points, custom_message, silent_edit, mark_ids, async) {
+function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, graded_version, custom_points, custom_message, silent_edit, mark_ids) {
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "POST",
+            async: AJAX_USE_ASYNC,
             url: buildUrl({
                 'component': 'grading',
                 'page': 'electronic',
                 'action': 'save_graded_component'
             }),
-            async: async,
             data: {
                 'gradeable_id': gradeable_id,
                 'component_id': component_id,
@@ -311,6 +323,7 @@ function ajaxGetOverallComment(gradeable_id, anon_id) {
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "POST",
+            async: AJAX_USE_ASYNC,
             url: buildUrl({
                 'component': 'grading',
                 'page': 'electronic',
@@ -341,19 +354,18 @@ function ajaxGetOverallComment(gradeable_id, anon_id) {
  * @param {string} gradeable_id
  * @param {string} anon_id
  * @param {string} overall_comment
- * @param {boolean} async
  * @return {Promise} Rejects except when the response returns status 'success'
  */
-function ajaxSaveOverallComment(gradeable_id, anon_id, overall_comment, async = true) {
+function ajaxSaveOverallComment(gradeable_id, anon_id, overall_comment) {
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "POST",
+            async: AJAX_USE_ASYNC,
             url: buildUrl({
                 'component': 'grading',
                 'page': 'electronic',
                 'action': 'save_overall_comment'
             }),
-            async: async,
             data: {
                 'gradeable_id': gradeable_id,
                 'anon_id': anon_id,
@@ -387,6 +399,7 @@ function ajaxAddNewMark(gradeable_id, component_id, title, points) {
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "POST",
+            async: AJAX_USE_ASYNC,
             url: buildUrl({
                 'component': 'grading',
                 'page': 'electronic',
@@ -425,6 +438,7 @@ function ajaxDeleteMark(gradeable_id, component_id, mark_id) {
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "POST",
+            async: AJAX_USE_ASYNC,
             url: buildUrl({
                 'component': 'grading',
                 'page': 'electronic',
@@ -465,6 +479,7 @@ function ajaxSaveMark(gradeable_id, component_id, mark_id, points, title, publis
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "POST",
+            async: AJAX_USE_ASYNC,
             url: buildUrl({
                 'component': 'grading',
                 'page': 'electronic',
@@ -505,6 +520,7 @@ function ajaxGetMarkStats(gradeable_id, component_id, mark_id) {
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "POST",
+            async: AJAX_USE_ASYNC,
             url: buildUrl({
                 'component': 'grading',
                 'page': 'electronic',
@@ -542,6 +558,7 @@ function ajaxSaveMarkOrder(gradeable_id, component_id, order) {
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "POST",
+            async: AJAX_USE_ASYNC,
             url: buildUrl({
                 'component': 'grading',
                 'page': 'electronic',
@@ -578,6 +595,7 @@ function ajaxSaveComponentPages(gradeable_id, pages) {
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "POST",
+            async: AJAX_USE_ASYNC,
             url: buildUrl({
                 'component': 'grading',
                 'page': 'electronic',
@@ -613,6 +631,7 @@ function ajaxSaveComponentOrder(gradeable_id, order) {
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "POST",
+            async: AJAX_USE_ASYNC,
             url: buildUrl({
                 'component': 'grading',
                 'page': 'electronic',
@@ -647,6 +666,7 @@ function ajaxAddComponent(gradeable_id) {
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "POST",
+            async: AJAX_USE_ASYNC,
             url: buildUrl({
                 'component': 'grading',
                 'page': 'electronic',
@@ -681,6 +701,7 @@ function ajaxDeleteComponent(gradeable_id, component_id) {
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "POST",
+            async: AJAX_USE_ASYNC,
             url: buildUrl({
                 'component': 'grading',
                 'page': 'electronic',
@@ -1362,7 +1383,7 @@ function getComponentCount() {
  * @returns {int} Mark id or 0 if out of bounds
  */
 function getMarkIdFromOrder(component_id, mark_order) {
-    let jquery = getComponentDOMElement(component_id).find('.mark-container')
+    let jquery = getComponentDOMElement(component_id).find('.mark-container');
     if(mark_order < jquery.length) {
         return parseInt(jquery.eq(mark_order).attr('data-mark_id'));
     }
@@ -1936,7 +1957,7 @@ function openCookieComponent() {
 
 /**
  * Closes all open components and the overall comment
- * @param save_changes
+ * @param {boolean} save_changes
  * @return {Promise<void>}
  */
 function closeAllComponents(save_changes) {
@@ -2525,7 +2546,7 @@ function saveGradedComponent(component_id) {
         gradedComponent.custom_mark_selected ? gradedComponent.score : 0.0,
         gradedComponent.custom_mark_selected ? gradedComponent.comment : '',
         isSilentEditModeEnabled(),
-        gradedComponent.mark_ids, true);
+        gradedComponent.mark_ids);
 }
 
 /**
