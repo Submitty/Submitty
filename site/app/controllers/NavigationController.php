@@ -148,7 +148,7 @@ class NavigationController extends AbstractController {
             $show_all = (!empty($_GET['show_all']) && $_GET['show_all'])?true:false;
             $notifications = $this->core->getQueries()->getUserNotifications($user_id, $show_all);
             $currentCourse = $this->core->getConfig()->getCourse();
-            $this->core->getOutput()->addBreadcrumb("Notifications", $this->core->buildUrl(array('component' => 'navigation', 'page' => 'notifications')));
+            $this->core->getOutput()->addBreadcrumb("Notifications");
             return $this->core->getOutput()->renderTwigOutput("Notifications.twig", [
                 'course' => $currentCourse,
                 'show_all' => $show_all,
