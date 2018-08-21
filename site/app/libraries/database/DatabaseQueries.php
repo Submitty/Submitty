@@ -117,18 +117,16 @@ class DatabaseQueries {
     }
 
     /**
-     * Returns thread list along with their category information
-     * Filter based on categories, thread status and deleted status
-     * Order: Favourite and Announcements => Announcements only => Favourite only => Others
-     *
-     * @return ordered threads after filter
+     * Helper function for generating sql query according to the given requirements
      */
-    public function loadThreadBlock($categories_ids, $thread_status, $show_deleted, $show_merged_thread, $current_user, $blockSize, $blockNumber){
-        // $blockNumber is 1 based index
-        if($blockNumber < 1) {
-            return array();
-        }
-        $query_offset = ($blockNumber-1) * $blockSize;
+    public function buildLoadThreadQuery($categories_ids, $thread_status, $show_deleted, $show_merged_thread, $current_user,
+                                        &$query_select, &$query_join, &$query_where, &$query_order, &$query_parameters,
+                                        $want_categories, $want_order) {
+        $query_raw_select = array();
+        $query_raw_join   = array();
+        $query_raw_where  = array("true");
+        $query_raw_order  = array();
+        $query_parameters = array();
 
         // Query Generation
         if(count($categories_ids) == 0) {
@@ -141,26 +139,114 @@ class DatabaseQueries {
         } else {
             $query_status = "status in (?".str_repeat(",?", count($thread_status)-1).")";
         }
+        $query_favorite = "case when sf.user_id is NULL then false else true end";
 
-        $query_delete = $show_deleted?"true":"deleted = false";
-        $query_merge_thread = $show_merged_thread?"true":"merged_thread_id = -1";
-        $query_select_categories = "SELECT thread_id, array_to_string(array_agg(w.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc, array_to_string(array_agg(w.color),'|') as categories_color FROM categories_list w JOIN thread_categories e ON e.category_id = w.category_id GROUP BY e.thread_id";
+        // General
+        {
+            if($want_order){
+                $query_raw_select[]     = "row_number() over(ORDER BY pinned DESC, ({$query_favorite}) DESC, t.id DESC) AS row_number";
+            }
+            $query_raw_select[]     = "t.*";
+            $query_raw_select[]     = "({$query_favorite}) as favorite";
+            $query_raw_select[]     = "(case when exists(select 1 from posts p where p.author_user_id = sf.user_id and p.thread_id = t.id) then true else false end) as current_user_posted";
+        
+            $query_raw_join[]       = "LEFT JOIN student_favorites sf ON sf.thread_id = t.id and sf.user_id = ?";
+            $query_parameters[]     = $current_user;
+           
+            if(!$show_deleted) {
+                $query_raw_where[]  = "deleted = false";
+            }
+            if(!$show_merged_thread) {
+                $query_raw_where[]  = "merged_thread_id = -1";
+            }
 
-        $query = "SELECT t.*, categories_ids, categories_desc, categories_color, (case when sf.user_id is NULL then false else true end) as favorite, (case when exists(select 1 from posts p where p.author_user_id = ? and p.thread_id = t.id) then true else false end) as current_user_posted FROM threads t JOIN ({$query_select_categories}) AS QSC ON QSC.thread_id = t.id LEFT JOIN student_favorites sf ON sf.thread_id = t.id and sf.user_id = ? WHERE {$query_delete} and {$query_merge_thread} and ? = (SELECT count(*) FROM thread_categories tc WHERE tc.thread_id = t.id and category_id IN ({$query_multiple_qmarks})) and {$query_status} ORDER BY pinned DESC, favorite DESC, t.id DESC LIMIT ? OFFSET ?";
+            $query_raw_where[]  = "? = (SELECT count(*) FROM thread_categories tc WHERE tc.thread_id = t.id and category_id IN ({$query_multiple_qmarks}))";
+            $query_parameters[] = count($categories_ids);
+            $query_parameters   = array_merge($query_parameters, $categories_ids);
+            $query_raw_where[]  = "{$query_status}";
+            $query_parameters   = array_merge($query_parameters, $thread_status);
+        
+            if($want_order){
+                $query_raw_order[]  = "row_number";
+            } else {
+                $query_raw_order[]  = "true";
+            }
+        }
+        // Categories
+        if($want_categories) {
+            $query_select_categories = "SELECT thread_id, array_to_string(array_agg(w.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc, array_to_string(array_agg(w.color),'|') as categories_color FROM categories_list w JOIN thread_categories e ON e.category_id = w.category_id GROUP BY e.thread_id";
 
-        // Parameters
-        $query_parameters   = array();
-        $query_parameters[] = $current_user;
-        $query_parameters[] = $current_user;
-        $query_parameters[] = count($categories_ids);
-        $query_parameters   = array_merge($query_parameters, $categories_ids);
-        $query_parameters   = array_merge($query_parameters, $thread_status);
+            $query_raw_select[] = "categories_ids";
+            $query_raw_select[] = "categories_desc";
+            $query_raw_select[] = "categories_color";
+
+            $query_raw_join[] = "JOIN ({$query_select_categories}) AS QSC ON QSC.thread_id = t.id";
+        }
+
+        $query_select   = implode(", ", $query_raw_select);
+        $query_join     = implode(" ", $query_raw_join);
+        $query_where    = implode(" and ", $query_raw_where);
+        $query_order    = implode(", ", $query_raw_order);
+    }
+
+    /**
+     * Order: Favourite and Announcements => Announcements only => Favourite only => Others
+     *
+     * @param  array(int)    categories_ids     Filter threads having atleast provided categories
+     * @param  array(int)    thread_status      Filter threads having thread status among $thread_status
+     * @param  bool          show_deleted       Consider deleted threads
+     * @param  bool          show_merged_thread Consider merged threads
+     * @param  string        current_user       user_id of currrent user
+     * @param  int           blockNumber        Index of window of thread list(-1 for last)
+     * @param  int           thread_id          If blockNumber is not known, find it using thread_id
+     * @return array('block_number' => int, 'threads' => array(threads))    Ordered filtered threads
+     */
+    public function loadThreadBlock($categories_ids, $thread_status, $show_deleted, $show_merged_thread, $current_user, $blockNumber, $thread_id){
+        $blockSize = 10;
+        $loadLastPage = false;
+
+        $query_raw_select = null;
+        $query_raw_join   = null;
+        $query_raw_where  = null;
+        $query_raw_order  = null;
+        $query_parameters = null;
+        // $blockNumber is 1 based index
+        if($blockNumber <= -1) {
+            // Find the last block
+            $this->buildLoadThreadQuery($categories_ids, $thread_status, $show_deleted, $show_merged_thread, $current_user, $query_select, $query_join, $query_where, $query_order, $query_parameters, false, false);
+            $query = "SELECT count(*) FROM (SELECT {$query_select} FROM threads t {$query_join} WHERE {$query_where}) AS SUBQUERY";
+            $this->course_db->query($query, $query_parameters);
+            $results = $this->course_db->rows();
+            $row_count = $results[0]['count'];
+            $blockNumber = 1 + floor(($row_count-1)/$blockSize);
+        } else if($blockNumber == 0) {
+            // Load first block as default
+            $blockNumber = 1;
+            if($thread_id >= 1)
+            {
+                // Find $blockNumber
+                $this->buildLoadThreadQuery($categories_ids, $thread_status, $show_deleted, $show_merged_thread, $current_user, $query_select, $query_join, $query_where, $query_order, $query_parameters, false, true);
+                $query = "SELECT SUBQUERY.row_number as row_number FROM (SELECT {$query_select} FROM threads t {$query_join} WHERE {$query_where} ORDER BY {$query_order}) AS SUBQUERY WHERE SUBQUERY.id = ?";
+                $query_parameters[] = $thread_id;
+                $this->course_db->query($query, $query_parameters);
+                $results = $this->course_db->rows();
+                if(count($results) > 0) {
+                    $row_number = $results[0]['row_number'];
+                    $blockNumber = 1 + floor(($row_number-1)/$blockSize);
+                }
+            }
+        }
+        $query_offset = ($blockNumber-1) * $blockSize;
+        $this->buildLoadThreadQuery($categories_ids, $thread_status, $show_deleted, $show_merged_thread, $current_user, $query_select, $query_join, $query_where, $query_order, $query_parameters, true, true);
+        $query = "SELECT {$query_select} FROM threads t {$query_join} WHERE {$query_where} ORDER BY {$query_order} LIMIT ? OFFSET ?";
         $query_parameters[] = $blockSize;
         $query_parameters[] = $query_offset;
-
         // Execute
         $this->course_db->query($query, $query_parameters);
-        return $this->course_db->rows();
+        $results = array();
+        $results['block_number'] = $blockNumber;
+        $results['threads'] = $this->course_db->rows();
+        return $results;
     }
 
     public function getCategoriesIdForThread($thread_id) {
@@ -306,7 +392,7 @@ class DatabaseQueries {
     }
 
     public function searchThreads($searchQuery){
-    	$this->course_db->query("SELECT post_content, p_id, p_author, thread_id, thread_title, author, pin, anonymous, timestamp_post FROM (SELECT t.id as thread_id, t.title as thread_title, p.id as p_id, t.created_by as author, t.pinned as pin, p.timestamp as timestamp_post, p.content as post_content, p.anonymous, p.author_user_id as p_author, to_tsvector(p.content) || to_tsvector(p.author_user_id) || to_tsvector(t.title) as document from posts p, threads t JOIN (SELECT thread_id, timestamp from posts where parent_id = -1) p2 ON p2.thread_id = t.id where t.id = p.thread_id and p.deleted=false and t.deleted=false) p_doc JOIN (SELECT thread_id as t_id, timestamp from posts where parent_id = -1) p2 ON p2.t_id = p_doc.thread_id  where p_doc.document @@ plainto_tsquery(:q)", array(':q' => $searchQuery));
+    	$this->course_db->query("SELECT post_content, p_id, p_author, thread_id, thread_title, author, pin, anonymous, timestamp_post FROM (SELECT t.id as thread_id, t.title as thread_title, p.id as p_id, t.created_by as author, t.pinned as pin, p.timestamp as timestamp_post, p.content as post_content, p.anonymous, p.author_user_id as p_author, to_tsvector(p.content) || to_tsvector(t.title) as document from posts p, threads t JOIN (SELECT thread_id, timestamp from posts where parent_id = -1) p2 ON p2.thread_id = t.id where t.id = p.thread_id and p.deleted=false and t.deleted=false) p_doc where p_doc.document @@ plainto_tsquery(:q) ORDER BY timestamp_post DESC", array(':q' => $searchQuery));
     	return $this->course_db->rows();
     }
 
@@ -1182,6 +1268,46 @@ ORDER BY user_id ASC");
         return array_map(function($elem) { return $elem['user_id']; }, $this->course_db->rows());
     }
 
+    /**
+     * Get all team ids for all gradeables
+     * @return string[][] Map of gradeable_id => [ team ids ]
+     */
+    public function getTeamIdsAllGradeables() {
+        $this->course_db->query("SELECT team_id, g_id FROM gradeable_teams");
+
+        $gradeable_ids = [];
+        $rows = $this->course_db->rows();
+        foreach ($rows as $row) {
+            $g_id = $row['g_id'];
+            $team_id = $row['team_id'];
+            if (!array_key_exists($g_id, $gradeable_ids)) {
+                $gradeable_ids[$g_id] = [];
+            }
+            $gradeable_ids[$g_id][] = $team_id;
+        }
+        return $gradeable_ids;
+    }
+
+    /**
+     * Get all team ids for all gradeables where the teams are in rotating section NULL
+     * @return string[][] Map of gradeable_id => [ team ids ]
+     */
+    public function getTeamIdsWithNullRotating() {
+        $this->course_db->query("SELECT team_id, g_id FROM gradeable_teams WHERE rotating_section IS NULL");
+
+        $gradeable_ids = [];
+        $rows = $this->course_db->rows();
+        foreach ($rows as $row) {
+            $g_id = $row['g_id'];
+            $team_id = $row['team_id'];
+            if (!array_key_exists($g_id, $gradeable_ids)) {
+                $gradeable_ids[$g_id] = [];
+            }
+            $gradeable_ids[$g_id][] = $team_id;
+        }
+        return $gradeable_ids;
+    }
+
     public function setAllUsersRotatingSectionNull() {
         $this->course_db->query("UPDATE users SET rotating_section=NULL");
     }
@@ -1192,6 +1318,10 @@ ORDER BY user_id ASC");
 
     public function deleteAllRotatingSections() {
         $this->course_db->query("DELETE FROM sections_rotating");
+    }
+
+    public function setAllTeamsRotatingSectionNull() {
+        $this->course_db->query("UPDATE gradeable_teams SET rotating_section=NULL");
     }
 
     public function getMaxRotatingSection() {
@@ -2964,6 +3094,7 @@ AND gc_id IN (
                 $this->course_db->convertBoolean($gradeable->isStudentDownloadAnyVersion()),
                 $gradeable->getAutogradingConfigPath(),
                 $gradeable->getLateDays(),
+                $this->course_db->convertBoolean($gradeable->isLateSubmissionAllowed()),
                 $gradeable->getPrecision(),
                 $this->course_db->convertBoolean($gradeable->isPeerGrading()),
                 $gradeable->getPeerGradeSet(),
@@ -2987,12 +3118,13 @@ AND gc_id IN (
                   eg_student_any_version,
                   eg_config_path,
                   eg_late_days,
+                  eg_allow_late_submission,
                   eg_precision,
                   eg_peer_grading,
                   eg_peer_grade_set,
                   eg_regrade_request_date,
                   eg_regrade_allowed)
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
         }
 
         // Make sure to create the rotating sections
@@ -3088,6 +3220,7 @@ AND gc_id IN (
                     $this->course_db->convertBoolean($gradeable->isStudentDownloadAnyVersion()),
                     $gradeable->getAutogradingConfigPath(),
                     $gradeable->getLateDays(),
+                    $this->course_db->convertBoolean($gradeable->isLateSubmissionAllowed()),
                     $gradeable->getPrecision(),
                     $this->course_db->convertBoolean($gradeable->isPeerGrading()),
                     $gradeable->getPeerGradeSet(),
@@ -3111,6 +3244,7 @@ AND gc_id IN (
                       eg_student_any_version=?,
                       eg_config_path=?,
                       eg_late_days=?,
+                      eg_allow_late_submission=?,
                       eg_precision=?,
                       eg_peer_grading=?,
                       eg_peer_grade_set=?,

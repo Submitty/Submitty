@@ -1,169 +1,199 @@
 <div class="content">
+    <span class="pull-right">
+        <a href="{{ theme_url }}" class="btn btn-default">Site Theme</a>
+    </span>
     <h2>Course Settings</h2>
     <div id="config">
         <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
-        <div class="panel">
-            <div class="option">
-                <div class="option-input"><input type="text" name="course_name" value="{{ fields['course_name']|raw }}" /></div>
-                <div class="option-desc">
-                    <div class="option-title">Full Course Name</div>
-                    <div class="option-alt">Input the course name that should appear in the header of the site (your course code is {{ core.getConfig().getCourse() }})</div>
-                </div>
-            </div>
 
-            <div class="option">
-                <div class="option-input"><input type="text" name="course_home_url" value="{{ fields['course_home_url'] }}" /></div>
-                <div class="option-desc">
-                    <div class="option-title">Course Home URL</div>
-                    <div class="option-alt">Input the url that will link to your course page from the Course Name</div>
-                </div>
-            </div>
+        <div class="heading">
+            <h3>Course Info</h3>
+            <hr>
+        </div>
 
-            <div class="option">
-                <div class="option-input"><input type="text" name="default_student_late_days" value="{{ fields['default_student_late_days'] }}" /></div>
-                <div class="option-desc">
-                    <div class="option-title">Initial Allowed Late Days (Per Student, Per Semester)</div>
-                    <div class="option-alt">Number of allowed late days given to each student when they are added to
-                        the course.  Additional late days can be granted (e.g., as incentives)
-                        using the "Late Days Allowed" form.</div>
-                </div>
+        <div class="option row">
+            <div class="option-desc col-md-8">
+                <div class="option-title">Full Course Name</div>
+                <div class="option-alt">Input the course name that should appear in the header of the site (your course code is {{ core.getConfig().getCourse() }})</div>
             </div>
+            <div class="option-input col-md-4"><input type="text" name="course_name" value="{{ fields['course_name']|raw }}" /></div>
+        </div>
 
-            <div class="option">
-                <div class="option-input"><input type="text" name="default_hw_late_days" value="{{ fields['default_hw_late_days'] }}" /></div>
-                <div class="option-desc">
-                    <div class="option-title">Default Maximum Late Days Per Assignment</div>
-                    <div class="option-alt">Specify the default number of late days that may be used on a single homework.  This can be adjusted
-                        per assignment on the "Create/Edit Gradeable" form.</div>
-                </div>
+        <div class="option row">
+            <div class="option-desc col-md-8">
+                <div class="option-title">Course Home URL</div>
+                <div class="option-alt">Input the url that will link to your course page from the Course Name</div>
             </div>
+            <div class="option-input col-md-4"><input type="text" name="course_home_url" value="{{ fields['course_home_url'] }}" /></div>
+        </div>
 
-            {#
-                <div class="option">
-                    <div class="option-input"><input type="checkbox" name="zero_rubric_grades" value="true" {{ fields['zero_rubric_grades'] ? 'checked' : '' }} /></div>
-                    <div class="option-desc">
-                        <div class="option-title">Zero Rubric Grading</div>
-                        <div class="option-alt">Should each rubric item score default to zero?  If disabled, the grading rubric will
-                          default at full credit.   Note: Assignments that are not submitted/submitted too late always be set to zero.</div>
-                    </div>
-                </div>
-            #}
-
-            <div class="option">
-                <div class="option-input"><textarea style="height: 50px" name="upload_message">{{ fields['upload_message']|raw }}</textarea></div>
-                <div class="option-desc">
-                    <div class="option-title">Upload Message</div>
-                    <div class="option-alt">What is the message that should be shown to students above the upload area
-                        on the submission page.</div>
-                </div>
+        <div class="option row">
+            <div class="option-desc col-md-8">
+                <div class="option-title">Enable Discussion Forum</div>
+                <div class="option-alt">Choose whether to enable a forum for this course.</div>
             </div>
-            <div class="option">
-                <div class="option-input"><input type="checkbox" name="keep_previous_files" value="true" {{ fields['keep_previous_files'] ? 'checked' : '' }} /></div>
-                <div class="option-desc">
-                    <div class="option-title">Keep previous files uploaded</div>
-                    <div class="option-alt">Should the files from previous submission be in the upload box by default.</div>
-                </div>
-            </div>
+            <div class="option-input col-md-4"><input type="checkbox" name="forum_enabled" value="true" {{ fields['forum_enabled'] ? 'checked': '' }} /></div>
+        </div>
 
-            <div class="option">
-                <div class="option-input"><input type="checkbox" name="display_rainbow_grades_summary" value="true" {{ fields['display_rainbow_grades_summary'] ? 'checked' : '' }} /></div>
-                <div class="option-desc">
-                    <div class="option-title">Display Rainbow Grades Summary</div>
-                    <div class="option-alt">Should Rainbow Grades Summary be displayed to students.</div>
-                </div>
-            </div>
+        <div class="heading">
+            <h3>Submissions</h3>
+            <hr>
+        </div>
 
-            <div class="option">
-                <div class="option-input"><input type="checkbox" name="display_custom_message" value="true" {{ fields['display_custom_message'] ? 'checked' : '' }} /></div>
-                <div class="option-desc">
-                    <div class="option-title">Display Custom Message</div>
-                    <div class="option-alt">Should custom message be displayed to students.</div>
-                </div>
+        <div class="option row">
+            <div class="option-desc col-md-8">
+                <div class="option-title">Upload Message</div>
+                <div class="option-alt">What is the message that should be shown to students above the upload area
+                    on the submission page.</div>
             </div>
+            <div class="option-input col-md-4"><textarea style="height: 50px" name="upload_message">{{ fields['upload_message']|raw }}</textarea></div>
+        </div>
 
-            <div class="option">
-                <div class="option-input"><input type="text" name="course_email" value="{{ fields['course_email'] }}" /></div>
-                <div class="option-desc">
-                    <div class="option-title">Course Regrade</div>
-                    <div class="option-alt">Input the message used for regrades or the course's email.</div>
-                </div>
+        <div class="option row">
+            <div class="option-desc col-md-8">
+                <div class="option-title">Course Autograding Config Directory</div>
+                <div class="option-alt">Use your own directory for storing gradeable configs. Will appear in the create/edit gradeable page.<br>Leave blank if you do not have a private repository for gradeable configurations.</div>
             </div>
-
-            <div class="option">
-                <div class="option-input"><input type="text" name="vcs_base_url" value="{{ fields['vcs_base_url'] }}" /></div>
-                <div class="option-desc">
-                    <div class="option-title">Version Control System (VCS) Base URL</div>
-                    <div class="option-alt">
-                        Base URL if students are submitting via VCS repository.<br />
-                        external ex. <kbd>https://github.com/test-course</kbd><br />
-                        internal ex. <kbd>ssh+svn://192.168.56.101/test-course</kbd>
-                    </div>
-                </div>
-            </div>
-
-            <div class="option">
-                <div class="option-input">
-                    <input type="radio" name="vcs_type" id="vcs_type_git" value="git" {{ (fields['vcs_type'] == 'git') ? 'checked' : '' }}/> Git
-                    {#
-                    <input type="radio" name="vcs_type" id="vcs_type_svn" value="svn" {{ (fields['vcs_type'] == 'svn') ? 'checked' : '' }}/> SVN
-                    <input type="radio" name="vcs_type" id="vcs_type_mer" value="mer" {{ (fields['vcs_type'] == 'mer') ? 'checked' : '' }}/> Mercurial
-                    #}
-                </div>
-                <div class="option-desc">
-                    <div class="option-title">Version Control System (VCS) Type</div>
-                    <div class="option-alt">Choose the type of VCS if students are submitting via VCS repository.</div>
-                </div>
-            </div>
-
-            <div class="option">
-                <div class="option-input">
-                    <input type="text" placeholder="Leave blank if you do not have a private repository for gradeable configurations" name="private_repository" value="{{ fields['private_repository'] }}" />
-                </div>
-                <div class="option-desc">
-                    <div class="option-title">Private repository directory</div>
-                    <div class="option-alt">Use your own repository for storing gradeable configs. Will appear in the create/edit gradeable page</div>
-                </div>
-            </div>
-
-            <div class="option">
-                <div class="option-input"><input type="checkbox" name="forum_enabled" value="true" {{ fields['forum_enabled'] ? 'checked': '' }} /></div>
-                <div class="option-desc">
-                    <div class="option-title">Discussion Forum</div>
-                    <div class="option-alt">Choose whether to enable a forum for this course.</div>
-                </div>
-            </div>
-
-            <div class="option">
-                <div class="option-input"><input type="checkbox" name="regrade_enabled" value="true" {{ fields['regrade_enabled'] ? 'checked': '' }} /></div>
-                <div class="option-desc">
-                    <div class="option-title">Regrade Requests</div>
-                    <div class="option-alt">Choose whether students can submit regrade requests for assignments.</div>
-                </div>
-            </div>
-
-            <div class="option">
-                <div class="option-input"><input type="text" name="regrade_message" value="{{ fields['regrade_message'] }}" /></div>
-                <div class="option-desc">
-                    <div class="option-title">Regrade Warning Message</div>
-                    <div class="option-alt">Input the warning message show to students while submitting a regrade request.</div>
-                </div>
-            </div>
-
-            <div class="option">
-                <div class="option-input">
-                    <select name="room_seating_gradeable_id">
-                        {% for seating_option in gradeable_seating_options %}
-                            <option value="{{ seating_option['g_id'] }}"{{ fields['room_seating_gradeable_id'] == seating_option['g_id'] ? ' selected' : ''}}>
-                                {{ seating_option['g_title'] }} {{ seating_option['g_id'] != "" ? "<" ~ seating_option['g_id'] ~ ">" : "" }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="option-desc">
-                    <div class="option-title">Room Seating Gradeable</div>
-                    <div class="option-alt">The gradeable for which seating will be shown to students. (select --None-- to not display)</div>
-                </div>
+            <div class="option-input col-md-4">
+                <input type="text" name="private_repository" value="{{ fields['private_repository'] }}" />
             </div>
         </div>
+
+        <div class="option row">
+            <div class="option-desc col-md-8">
+                <div class="option-title">Keep previous files uploaded</div>
+                <div class="option-alt">Should the files from previous submission be in the upload box by default.</div>
+            </div>
+            <div class="option-input col-md-4"><input type="checkbox" name="keep_previous_files" value="true" {{ fields['keep_previous_files'] ? 'checked' : '' }} /></div>
+        </div>
+
+        <div class="option row">
+            <div class="option-desc col-md-8">
+                <div class="option-title">Version Control System (VCS) Type</div>
+                <div class="option-alt">Choose the type of VCS if students are submitting via VCS repository.</div>
+            </div>
+            <div class="option-input col-md-4">
+                <input type="radio" name="vcs_type" id="vcs_type_git" value="git" {{ (fields['vcs_type'] == 'git') ? 'checked' : '' }}/> Git
+                {#
+                <input type="radio" name="vcs_type" id="vcs_type_svn" value="svn" {{ (fields['vcs_type'] == 'svn') ? 'checked' : '' }}/> SVN
+                <input type="radio" name="vcs_type" id="vcs_type_mer" value="mer" {{ (fields['vcs_type'] == 'mer') ? 'checked' : '' }}/> Mercurial
+                #}
+            </div>
+        </div>
+
+        <div class="option row">
+            <div class="option-desc col-md-8">
+                <div class="option-title">Version Control System (VCS) Base URL</div>
+                <div class="option-alt">
+                    Base URL if students are submitting via VCS repository.<br />
+                    external ex. <kbd>https://github.com/test-course</kbd><br />
+                    internal ex. <kbd>ssh+svn://192.168.56.101/test-course</kbd>
+                </div>
+            </div>
+            <div class="option-input col-md-4"><input type="text" name="vcs_base_url" value="{{ fields['vcs_base_url'] }}" /></div>
+        </div>
+
+        <div class="heading">
+            <h3>Late Days</h3>
+            <hr>
+        </div>
+
+        <div class="option row">
+            <div class="option-desc col-md-8">
+                <div class="option-title">Initial Allowed Late Days (Per Student, Per Semester)</div>
+                <div class="option-alt">Number of allowed late days given to each student when they are added to
+                    the course.  Additional late days can be granted (e.g., as incentives)
+                    using the "Late Days Allowed" form.</div>
+            </div>
+            <div class="option-input col-md-4"><input type="text" name="default_student_late_days" value="{{ fields['default_student_late_days'] }}" /></div>
+        </div>
+
+        <div class="option row">
+            <div class="option-desc col-md-8">
+                <div class="option-title">Default Maximum Late Days Per Assignment</div>
+                <div class="option-alt">Specify the default number of late days that may be used on a single homework.  This can be adjusted
+                    per assignment on the "Create/Edit Gradeable" form.</div>
+            </div>
+            <div class="option-input col-md-4"><input type="text" name="default_hw_late_days" value="{{ fields['default_hw_late_days'] }}" /></div>
+        </div>
+
+        <div class="heading">
+            <h3>Grading</h3>
+            <hr>
+        </div>
+
+        <div class="option row">
+            <div class="option-desc col-md-8">
+                <div class="option-title">Grades Returned Message</div>
+                <div class="option-alt">Input the message shown on grades returned to students. Recommended to include directions for regrade requests or the course's email.</div>
+            </div>
+            <div class="option-input col-md-4"><input type="text" name="course_email" value="{{ fields['course_email'] }}" /></div>
+        </div>
+
+        <div class="option row">
+            <div class="option-desc col-md-8">
+                <div class="option-title">Regrade Requests Allowed</div>
+                <div class="option-alt">Allow students to submit regrade requests for assignments.</div>
+            </div>
+            <div class="option-input col-md-4"><input type="checkbox" name="regrade_enabled" value="true" {{ fields['regrade_enabled'] ?
+                'checked': '' }} /></div>
+        </div>
+
+        <div class="option row">
+            <div class="option-desc col-md-8">
+                <div class="option-title">Regrade Request Warning Message</div>
+                <div class="option-alt">Input the warning message show to students while submitting a regrade request.</div>
+            </div>
+            <div class="option-input col-md-4"><input type="text" name="regrade_message" value="{{ fields['regrade_message'] }}" /></div>
+        </div>
+
+        {# TODO: Not sure what this is
+            <div class="option row">
+                <div class="option-desc col-md-8">
+                    <div class="option-title">Zero Rubric Grading</div>
+                    <div class="option-alt">Should each rubric item score default to zero?  If disabled, the grading rubric will
+                      default at full credit.   Note: Assignments that are not submitted/submitted too late always be set to zero.</div>
+                </div>
+                <div class="option-input col-md-4"><input type="checkbox" name="zero_rubric_grades" value="true" {{ fields['zero_rubric_grades'] ? 'checked' : '' }} /></div>
+            </div>
+        #}
+
+        <div class="heading">
+            <h3>Student Features</h3>
+            <hr>
+        </div>
+
+        <div class="option row">
+            <div class="option-desc col-md-8">
+                <div class="option-title">Display Rainbow Grades Summary</div>
+                <div class="option-alt">Show Rainbow Grades summaries to students. <strong>Note:</strong> You must manually run rainbow grades, <a href="http://submitty.org/instructor/rainbow_grades">see here for instructions.</a></div>
+            </div>
+            <div class="option-input col-md-4"><input type="checkbox" name="display_rainbow_grades_summary" value="true" {{ fields['display_rainbow_grades_summary'] ? 'checked' : '' }} /></div>
+        </div>
+
+        <div class="option row">
+            <div class="option-desc col-md-8">
+                <div class="option-title">Display Room Seating Guide</div>
+                <div class="option-alt">Pick a gradeable for which seating will be shown to students. Select --None-- to hide seating guide.</div>
+            </div>
+            <div class="option-input col-md-4">
+                <select name="room_seating_gradeable_id">
+                    {% for seating_option in gradeable_seating_options %}
+                        <option value="{{ seating_option['g_id'] }}"{{ fields['room_seating_gradeable_id'] == seating_option['g_id'] ? ' selected' : ''}}>
+                            {{ seating_option['g_title'] }} {{ seating_option['g_id'] != "" ? "<" ~ seating_option['g_id'] ~ ">" : "" }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="option row">
+            <div class="option-desc col-md-8">
+                <div class="option-title">Display Custom Message</div>
+                <div class="option-alt">Show a custom message to students at the top of the navigation page.</div>
+            </div>
+            <div class="option-input col-md-4"><input type="checkbox" name="display_custom_message" value="true" {{ fields['display_custom_message'] ? 'checked' : '' }} /></div>
+        </div>
+
     </div>
 </div>

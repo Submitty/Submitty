@@ -12,12 +12,9 @@
     </div>
 {% endif %}
 
+
 <div class="content">
-    <div class="nav-buttons">
-        {% for button in top_buttons %}
-            {{ self.renderButton(button) }}
-        {% endfor %}
-    </div>
+    <h2>Home</h2>
 
     <table class="gradeable_list" style="width:100%;">
         {% if sections|length > 0 %}
@@ -32,6 +29,9 @@
                             &nbsp;&nbsp; <em>{{ info.subtitle }}</em>
                         {% endif %}
                     </td>
+                </tr>
+                <tr class="colspan">
+                    <td colspan="10" class="hr">{# hr #}</td>
                 </tr>
                 <tbody id="{{ info.section_id }}_tbody">
                     {% for g_info in info.gradeables %}
@@ -53,9 +53,6 @@
                     </tr>
                     {% endfor %}
                 </tbody>
-                <tr class="colspan">
-                    <td colspan="10" style="border-bottom:2px black solid;">{# hr #}</td>
-                </tr>
             {% endfor %}
         {% else %}
             <div class="container">
@@ -83,8 +80,8 @@
                 aria-label="{{ button.getAriaLabel() }}"
             {% endif %}
         >
-            {% if button.getNotificationsCount() > 0 %}
-                <span class="notification_badge">{{  button.getNotificationsCount() }} </span>
+            {% if button.getBadge() > 0 %}
+                <span class="notification_badge">{{  button.getBadge() }} </span>
             {% endif %}
 
             {% if not button.isTitleOnHover() and button.getTitle() != null %}
@@ -94,7 +91,7 @@
                 {% if button.getTitle() != null %}
                     <br>
                 {% endif %}
-                <span style="font-size: smaller;">{{ button.getSubtitle()|nl2br }}</span>
+                <span class="subtitle">{{ button.getSubtitle()|nl2br }}</span>
             {% endif %}
         </a>
         {% if button.getProgress() != null %}

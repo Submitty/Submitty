@@ -14,18 +14,20 @@
         dis ? $(c).hide() : $(c).show();
     }
 </script>
-<div id="container-rubric" style="display:none;">
+<div id="container-rubric" class="content" style="display:none;">
     <div id="ajax_debug" style="display: none;"></div>
     <div id="ajax_raw" style="display: none;"></div>
     <form id="gradeable-form" class="form-signin" action="{{ submit_url }}"
         method="post" enctype="multipart/form-data" onsubmit="return checkForm();"> 
 
         <div class="modal-header" style="overflow: auto;">
-            <h2 id="myModalLabel" style="float: left;">{{ action == 'edit' ? 'Editing Gradeable' : 'Create Gradeable' }}<span id="modal_label_title"></span></h2>
-            <br />
-            <br />
-            <b>For Help, Read: <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable">Submitty Instructions on "Create or Edit a Gradeable"</a></b>
-            <div style="float: right" id="save_status"></div>
+            <div>
+                <h2 id="myModalLabel">{{ action == 'edit' ? 'Editing Gradeable' : 'Create Gradeable' }}<span id="modal_label_title"></span></h2>
+            </div>
+            <div>
+                <b>For Help, Read: <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable">Submitty Instructions on "Create or Edit a Gradeable"</a></b>
+                <div style="float: right" id="save_status"></div>
+            </div>
         </div>
         <br/>
         <div id="nav-bar">

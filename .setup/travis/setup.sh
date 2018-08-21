@@ -37,6 +37,7 @@ cp -R ${TRAVIS_BUILD_DIR} ${SUBMITTY_REPOSITORY}
 python3 ${DIR}/../bin/create_untrusted_users.py
 
 addgroup submitty_daemonphp
+addgroup submitty_daemoncgi
 addgroup submitty_course_builders
 adduser ${PHP_USER} --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 adduser ${CGI_USER} --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
@@ -46,6 +47,8 @@ adduser ${CGI_USER} shadow
 adduser submitty_daemon --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 adduser ${PHP_USER} submitty_daemonphp
 adduser submitty_daemon submitty_daemonphp
+adduser ${CGI_USER} submitty_daemoncgi
+adduser submitty_daemon submitty_daemoncgi
 useradd -p $(openssl passwd -1 submitty_dbuser) submitty_dbuser
 
 chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}
@@ -58,7 +61,7 @@ submitty_dbuser
 submitty_dbpass
 America/New_York
 http://localhost
-http://localhost/git
+
 
 ${AUTH_METHOD}" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
 

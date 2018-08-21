@@ -37,8 +37,8 @@
                             </tr>
                             {% for course in rank.courses %}
                                 <tr>
-                                    <td style="width:85%" colspan="30">
-                                        <a id="{{ course.getSemester() }}_{{ course.getTitle() }}" class="btn btn-primary btn-block" style=" white-space: normal;" href="{{ core.buildUrl({'component': 'navigation', 'course': course.getTitle(), 'semester': course.getSemester()}) }}">
+                                    <td>
+                                        <a id="{{ course.getSemester() }}_{{ course.getTitle() }}" class="btn btn-primary btn-block" href="{{ core.buildUrl({'component': 'navigation', 'course': course.getTitle(), 'semester': course.getSemester()}) }}">
                                             {{ course.getSemester() }} {{ course.getTitle() }}
                                             {% if course.getDisplayName() != "" %}
                                                 {{ course.getDisplayName() }}

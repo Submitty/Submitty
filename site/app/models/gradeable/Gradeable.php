@@ -473,18 +473,6 @@ class Gradeable extends AbstractModel {
 
         // Put any special exceptions to the normal validation rules here...
 
-        // Check that the grades released date isn't before the 'max due date' (submission due date + late days)
-        $submission_due_date = $dates['submission_due_date'];
-        if ($this->type === GradeableType::ELECTRONIC_FILE && $submission_due_date !== null) {
-            $late_days = intval($dates['late_days'] ?? 0);
-            /** @noinspection PhpUnhandledExceptionInspection */
-            $max_due_date = (clone $submission_due_date)->add(new \DateInterval('P' . strval($late_days) . 'D'));
-            if ($max_due_date > $dates['grade_released_date']) {
-                $errors['grade_released_date'] = self::date_display_names['grade_released_date'] . ' Date must be later than the ' .
-                    self::date_display_names['submission_due_date'] . ' Date + ' . self::date_display_names['late_days'];
-            }
-        }
-
         if (count($errors) > 0) {
             throw new ValidationException('Date validation failed', $errors);
         }
@@ -1502,5 +1490,26 @@ class Gradeable extends AbstractModel {
         if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
             throw new \Exception("Failed to write to team history to settings file");
         }
+    }
+
+    public function getRepositoryPath(User $user, Team $team = null) {
+        if (strpos($this->getVcsSubdirectory(), '://') !== false || substr($this->getVcsSubdirectory(), 0, 1) === '/') {
+            $vcs_path = $this->getVcsSubdirectory();
+        } else {
+            if (strpos($this->core->getConfig()->getVcsBaseUrl(), '://')) {
+                $vcs_path = rtrim($this->core->getConfig()->getVcsBaseUrl(), '/') . '/' . $this->getVcsSubdirectory();
+            } else {
+                $vcs_path = FileUtils::joinPaths($this->core->getConfig()->getVcsBaseUrl(), $this->getVcsSubdirectory());
+            }
+        }
+        $repo = $vcs_path;
+
+        $repo = str_replace('{$vcs_type}', $this->core->getConfig()->getVcsType(), $repo);
+        $repo = str_replace('{$gradeable_id}', $this->getId(), $repo);
+        $repo = str_replace('{$user_id}', $user->getId(), $repo);
+        if ($this->isTeamAssignment() && $team !== null) {
+            $repo = str_replace('{$team_id}', $team->getId(), $repo);
+        }
+        return $repo;
     }
 }

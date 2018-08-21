@@ -3573,6 +3573,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Handle document.touchdown or document.pointerdown event
 	 */
 	function handleDocumentPointerdown(e) {
+	  e.preventDefault();
 	  path = null;
 	  lines = [];
 	  _candraw = true;
@@ -3583,7 +3584,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *
 	 * @param {Event} e The DOM event to be handled
 	 */
-	function handleDocumentKeyupChrome(e) {
+	function handleDocumentPointerupChrome(e) {
 	  saveToStorage(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
 	}
 	
@@ -3620,12 +3621,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Event} e The DOM event to be handled
 	 */
 	function handleDocumentPointermove(e) {
+	  if (!e.srcElement.classList.contains('annotationLayer')) {
+	    return;
+	  }
 	  if (_candraw) {
 	    savePoint(e.clientX, e.clientY);
 	  }
 	}
 	
 	function handleDocumentPointermoveChrome(e) {
+	  if (!e.srcElement.classList.contains('annotationLayer')) {
+	    return;
+	  }
 	  if (_candraw) {
 	    savePoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
 	  }
@@ -3707,7 +3714,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (!isFirefox) {
 	    document.addEventListener('touchstart', handleDocumentPointerdown);
 	    document.addEventListener('touchmove', handleDocumentPointermoveChrome);
-	    document.addEventListener('touchend', handleDocumentKeyupChrome);
+	    document.addEventListener('touchend', handleDocumentPointerupChrome);
 	    document.addEventListener('mousedown', handleDocumentPointerdown);
 	    document.addEventListener('mousemove', handleDocumentPointermove);
 	    document.addEventListener('mouseup', handleDocumentPointerup);
@@ -3732,7 +3739,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (!isFirefox) {
 	    document.removeEventListener('touchstart', handleDocumentPointerdown);
 	    document.removeEventListener('touchmove', handleDocumentPointermoveChrome);
-	    document.removeEventListener('touchend', handleDocumentKeyupChrome);
+	    document.removeEventListener('touchend', handleDocumentPointerupChrome);
 	    document.removeEventListener('mousedown', handleDocumentPointerdown);
 	    document.removeEventListener('mousemove', handleDocumentPointermove);
 	    document.removeEventListener('mouseup', handleDocumentPointerup);
@@ -3774,17 +3781,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _canerase = false;
 	var userId = "user";
 	
-	function handleDocumentMouseDown(e) {
+	function handleDocumentDown(e) {
 	  _canerase = true;
 	}
 	
-	function handleDocumentMouseUp(e) {
+	function handleDocumentUp(e) {
 	  _canerase = false;
 	}
 	
+	function handleDocumentTouchMove(e) {
+	  erase((0, _utils.findAnnotationAtPoint)(e.changedTouches[0].clientX, e.changedTouches[0].clientY));
+	}
+	
 	function handleDocumentMouseMove(e) {
+	  erase((0, _utils.findAnnotationAtPoint)(e.clientX, e.clientY));
+	}
+	
+	function erase(target) {
 	  if (_canerase) {
-	    var target = (0, _utils.findAnnotationAtPoint)(e.clientX, e.clientY);
 	    if (target && target.getAttribute('data-pdf-annotate-userId') == userId) {
 	      var _getMetadata = (0, _utils.getMetadata)(target.parentElement),
 	          documentId = _getMetadata.documentId;
@@ -3803,14 +3817,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	function enableEraser() {
 	  userId = _PDFJSAnnotate2.default.getStoreAdapter().userId;
 	  document.addEventListener('mousemove', handleDocumentMouseMove);
-	  document.addEventListener('mousedown', handleDocumentMouseDown);
-	  document.addEventListener('mouseup', handleDocumentMouseUp);
+	  document.addEventListener('mousedown', handleDocumentDown);
+	  document.addEventListener('mouseup', handleDocumentUp);
+	  document.addEventListener('touchstart', handleDocumentDown);
+	  document.addEventListener('touchmove', handleDocumentTouchMove);
+	  document.addEventListener('touchend', handleDocumentUp);
 	}
 	
 	function disableEraser() {
 	  document.removeEventListener('mousemove', handleDocumentMouseMove);
-	  document.removeEventListener('mousedown', handleDocumentMouseDown);
-	  document.removeEventListener('mouseup', handleDocumentMouseUp);
+	  document.removeEventListener('mousedown', handleDocumentDown);
+	  document.removeEventListener('mouseup', handleDocumentUp);
+	  document.removeEventListener('touchstart', handleDocumentDown);
+	  document.removeEventListener('touchmove', handleDocumentTouchMove);
+	  document.removeEventListener('touchend', handleDocumentUp);
 	}
 
 /***/ },
@@ -4575,7 +4595,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (input || !(0, _utils.findSVGAtPoint)(e.clientX, e.clientY)) {
 	    return;
 	  }
-	
+	  if (!e.srcElement.classList.contains('annotationLayer')) {
+	    return;
+	  }
 	  input = document.createElement('input');
 	  input.setAttribute('id', 'pdf-annotate-text-input');
 	  input.setAttribute('placeholder', 'Enter text');

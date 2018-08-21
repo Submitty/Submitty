@@ -1186,6 +1186,10 @@ class SubmissionController extends AbstractController {
             "is_team" => $gradeable->isTeamAssignment(),
             "version" => $new_version);
 
+        if ($gradeable->isTeamAssignment()) {
+            $queue_data['team_members'] = $team->getMemberUserIds();
+        }
+
 
         if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
             return $this->uploadResult("Failed to create file for grading queue.", false);
@@ -1198,10 +1202,12 @@ class SubmissionController extends AbstractController {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, null, $new_version, $current_time);
         }
 
-        if ($user_id == $original_user_id)
+        if ($user_id == $original_user_id) {
             $this->core->addSuccessMessage("Successfully uploaded version {$new_version} for {$gradeable->getTitle()}");
-        else
+        }
+        else {
             $this->core->addSuccessMessage("Successfully uploaded version {$new_version} for {$gradeable->getTitle()} for {$who_id}");
+        }
 
 
         return $this->uploadResult("Successfully uploaded files");
