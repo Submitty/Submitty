@@ -41,14 +41,14 @@ class AdminController extends AbstractController {
                 $controller = new AdminGradeableController($this->core);
                 break;
             case 'reports':
-                $this->core->getOutput()->addBreadcrumb('Report');
+                $this->core->getOutput()->addBreadcrumb('Grade Reports');
                 $controller = new ReportController($this->core);
                 break;
             case 'plagiarism':
                 $controller = new PlagiarismController($this->core);
                 break;
             case 'wrapper':
-                $this->core->getOutput()->addBreadcrumb("Site Theme");
+                $this->core->getOutput()->addBreadcrumb("Customize Website Theme");
                 $controller = new WrapperController($this->core);
                 break;
             default:

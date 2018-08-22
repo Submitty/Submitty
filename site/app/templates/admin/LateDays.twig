@@ -1,6 +1,6 @@
 <div type="hidden" id="message"></div>
 <div class="content">
-    <h2>Late Days Allowed</h2>
+    <h1>Late Days Allowed</h1>
     <form id="lateDayForm" method="post" enctype="multipart/form-data" onsubmit="return updateLateDays($(this));">
         <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
         <p> Use this form to grant students additional late days (beyond the initial number specified in the course configuration).<br>
