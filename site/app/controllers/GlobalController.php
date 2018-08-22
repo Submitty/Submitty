@@ -120,7 +120,7 @@ class GlobalController extends AbstractController {
                 "class" => "nav-row short-line"
             ]);
 
-            $sidebar_links = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'config', 'sidebar.json');
+            $sidebar_links = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site', 'sidebar.json');
             if (file_exists($sidebar_links)) {
                 $links = json_decode(file_get_contents($sidebar_links), true);
                 if (is_array($links)) {
