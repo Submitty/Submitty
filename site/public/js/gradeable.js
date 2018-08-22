@@ -19,7 +19,8 @@ function loadTemplates() {
         {id: 'Mark', href: "templates/grading/Mark.twig"},
         {id: 'OverallComment', href: "templates/grading/OverallComment.twig"},
         {id: 'TotalScoreBox', href: "templates/grading/TotalScoreBox.twig"},
-        {id: 'ConflictMarks', href: "templates/grading/ConflictMarks.twig"}
+        {id: 'ConflictMarks', href: "templates/grading/ConflictMarks.twig"},
+        {id: 'RubricTotalBox', href: "templates/grading/RubricTotalBox.twig"},
     ];
     let promises = [];
     templates.forEach(function (template) {
@@ -224,6 +225,19 @@ function renderTotalScoreBox(scores) {
         scores.decimal_precision = DECIMAL_PRECISION;
         // TODO: i don't think this is async
         resolve(Twig.twig({ref: "TotalScoreBox"}).render(scores));
+    });
+}
+
+/**
+ * Asynchronously renders the rubric total box
+ * @param {Object} scores
+ * @returns {Promise<string>}
+ */
+function renderRubricTotalBox(scores) {
+    return new Promise(function (resolve, reject) {
+        scores.decimal_precision = DECIMAL_PRECISION;
+        // TODO: i don't think this is async
+        resolve(Twig.twig({ref: "RubricTotalBox"}).render(scores));
     });
 }
 

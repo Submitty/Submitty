@@ -12,27 +12,41 @@
         <div class="container point-values">
             <div class="row">
                 <div class="col point-input-container">
-                    <input class="max-points" step="{{ precision }}" type="number" min="0" value="{{ component.max_value|round(decimal_precision) }}" onclick="event.stopPropagation()"/>
+                    <input class="max-points"
+                           step="{{ precision }}"
+                           type="number" min="0"
+                           value="{{ component.max_value|round(decimal_precision) }}"
+                           onchange="refreshRubricTotalBox()" onclick="event.stopPropagation()"/>
                 </div>
                 <div class="col point-label">Normal Points</div>
             </div>
             <div class="row">
                 <div class="col point-input-container">
-                    <input class="extra-credit-points" step="{{ precision }}" type="number" min="0" value="{{ extra_credit_points|round(decimal_precision) }}" onclick="event.stopPropagation()"/>
+                    <input class="extra-credit-points"
+                           step="{{ precision }}"
+                           type="number" min="0"
+                           value="{{ extra_credit_points|round(decimal_precision) }}"
+                           onchange="refreshRubricTotalBox()" onclick="event.stopPropagation()"/>
                 </div>
                 <div class="col point-label">Extra Credit Points</div>
             </div>
             <div class="row">
                 <div class="col point-input-container">
-                    <input class="penalty-points" step="{{ precision }}" type="number" min="0" value="{{ component.lower_clamp|abs|round(decimal_precision) }}" onclick="event.stopPropagation()"/>
+                    <input class="penalty-points"
+                           step="{{ precision }}"
+                           type="number" min="0"
+                           value="{{ component.lower_clamp|abs|round(decimal_precision) }}"
+                           onclick="event.stopPropagation()"/>
                 </div>
                 <div class="col point-label">Penalty Points</div>
             </div>
             <div class="row">
-                <div class="col count-up-selector count-type-selector {{ component.default == 0 ? 'count-type-selected' : ''}}" onclick="onClickCountUp(this); event.stopPropagation()">
+                <div class="col count-up-selector count-type-selector {{ component.default == 0 ? 'count-type-selected' : ''}}"
+                     onclick="onClickCountUp(this); event.stopPropagation()">
                     <span>Count Up</span>
                 </div>
-                <div class="col count-down-selector count-type-selector {{ component.default != 0 and component.default == component.max_value ? 'count-type-selected' : ''}}" onclick="onClickCountDown(this); event.stopPropagation()">
+                <div class="col count-down-selector count-type-selector {{ component.default != 0 and component.default == component.max_value ? 'count-type-selected' : ''}}"
+                     onclick="onClickCountDown(this); event.stopPropagation()">
                     <span>Count Down</span>
                 </div>
             </div>

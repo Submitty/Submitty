@@ -1065,11 +1065,19 @@ function setComponentContents(component_id, contents) {
 }
 
 /**
- * Sets the HTMl contents of the total scores box
+ * Sets the HTML contents of the total scores box
  * @param {string} contents
  */
 function setTotalScoreBoxContents(contents) {
     $('#total-score-container').html(contents);
+}
+
+/**
+ * Sets the HTML contents of the rubric total box (instructor edit mode)
+ * @param contents
+ */
+function setRubricTotalBoxContents(contents) {
+    $('#rubric-total-container').html(contents);
 }
 
 /**
@@ -1116,6 +1124,18 @@ function setMarkTitle(mark_id, title) {
 }
 
 /**
+ * Loads all components from the DOM
+ * @returns {Array}
+ */
+function getAllComponentsFromDOM() {
+    let components = [];
+    $('.component').each(function () {
+        components.push(getComponentFromDOM(getComponentIdFromDOMElement(this)));
+    });
+    return components;
+}
+
+/**
  * Gets the page number assigned to a component
  * @param {int} component_id
  * @returns {int}
@@ -1133,12 +1153,11 @@ function getComponentPageNumber(component_id) {
  * Extracts a component object from the DOM
  * @param {int} component_id
  * @return {Object}
- * @throws Error if instructor edit mode is enabled and the component isn't open
  */
 function getComponentFromDOM(component_id) {
     let domElement = getComponentJQuery(component_id);
 
-    if (isInstructorEditEnabled()) {
+    if (isInstructorEditEnabled() && isComponentOpen(component_id)) {
         let penaltyPoints = Math.abs(parseFloat(domElement.find('input.penalty-points').val()));
         let maxValue = Math.abs(parseFloat(domElement.find('input.max-points').val()));
         let extraCreditPoints = Math.abs(parseFloat(domElement.find('input.extra-credit-points').val()));
@@ -1298,6 +1317,23 @@ function getScoresFromDOM() {
     }
 
     return scores;
+}
+
+/**
+ * Gets the rubric total / extra credit from the DOM
+ * @return {Object}
+ */
+function getRubricTotalFromDOM() {
+    let total = 0;
+    let extra_credit = 0;
+    getAllComponentsFromDOM().forEach(function (component) {
+        total += component.max_value;
+        extra_credit += component.upper_clamp - component.max_value;
+    });
+    return {
+        total: total,
+        extra_credit: extra_credit
+    };
 }
 
 /**
@@ -2036,6 +2072,9 @@ function reloadInstructorEditRubric(gradeable_id) {
         })
         .then(function (elements) {
             setRubricDOMElements(elements);
+            return refreshRubricTotalBox();
+        })
+        .then(function () {
             return openCookieComponent();
         })
         .catch(function (err) {
@@ -2723,6 +2762,14 @@ function refreshTotalScoreBox() {
 }
 
 /**
+ * Refreshes the 'rubric total' box at the top of the rubric editor
+ * @returns {Promise}
+ */
+function refreshRubricTotalBox() {
+    return injectRubricTotalBox(getRubricTotalFromDOM());
+}
+
+/**
  * Renders the provided component object for instructor edit mode
  * @param {Object} component
  * @param {boolean} showMarkList Whether the mark list should be visible
@@ -2732,6 +2779,9 @@ function injectInstructorEditComponent(component, showMarkList) {
     return renderEditComponent(component, getPointPrecision(), showMarkList)
         .then(function (elements) {
             setComponentContents(component.id, elements);
+        })
+        .then(function () {
+            return refreshRubricTotalBox();
         });
 }
 
@@ -2775,5 +2825,17 @@ function injectTotalScoreBox(scores) {
     return renderTotalScoreBox(scores)
         .then(function (elements) {
             setTotalScoreBoxContents(elements);
+        });
+}
+
+/**
+ * Renders the rubric total box (instructor edit mode)
+ * @param {Object} scores
+ * @returns {Promise<string>}
+ */
+function injectRubricTotalBox(scores) {
+    return renderRubricTotalBox(scores)
+        .then(function(elements) {
+            setRubricTotalBoxContents(elements);
         });
 }
