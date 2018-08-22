@@ -783,7 +783,7 @@ function ajaxVerifyAllComponents(gradeable_id, anon_id) {
             url: buildUrl({
                 'component': 'grading',
                 'page': 'electronic',
-                'action': 'verify_component'
+                'action': 'verify_all_components'
             }),
             data: {
                 'gradeable_id': gradeable_id,
@@ -1846,7 +1846,11 @@ function onToggleCustomMark(me) {
  * @return {Promise}
  */
 function onVerifyComponent(me) {
-    return verifyComponent(getComponentIdFromDOMElement(me));
+    return verifyComponent(getComponentIdFromDOMElement(me))
+        .catch(function (err) {
+            console.error(err);
+            alert('Error verifying component! ' + err.message);
+        });
 }
 
 /**
@@ -1855,7 +1859,11 @@ function onVerifyComponent(me) {
  * @return {Promise}
  */
 function onVerifyAll(me) {
-    return verifyAllComponents();
+    return verifyAllComponents()
+        .catch(function (err) {
+            console.error(err);
+            alert('Error verifying all components! ' + err.message);
+        });
 }
 
 /**
@@ -1925,18 +1933,10 @@ function verifyComponent(component_id) {
     let gradeable_id = getGradeableId();
     return ajaxVerifyComponent(gradeable_id, component_id, getAnonId())
         .then(function () {
-            return reloadGradingComponent(component_id)
-                .then(function () {
-                    updateVerifyAllButton();
-                })
-                .catch(function (err) {
-                    console.err(err);
-                    alert('Error reloading component! ' + err.message);
-                });
+            return reloadGradingComponent(component_id);
         })
-        .catch(function (err) {
-            console.error(err);
-            alert('Error verifying component! ' + err.message);
+        .then(function () {
+            updateVerifyAllButton();
         });
 }
 
@@ -1949,15 +1949,10 @@ function verifyAllComponents() {
     let anon_id = getAnonId();
     return ajaxVerifyAllComponents(gradeable_id, anon_id)
         .then(function () {
-            return reloadGradingRubric(gradeable_id, anon_id)
-                .catch(function (err) {
-                    console.err(err);
-                    alert('Error reloading rubric! ' + err.message);
-                });
+            return reloadGradingRubric(gradeable_id, anon_id);
         })
-        .catch(function (err) {
-            console.error(err);
-            alert('Error verifying all components! ' + err.message);
+        .then(function () {
+            updateVerifyAllButton();
         });
 }
 
@@ -2019,10 +2014,11 @@ function getMarkFromMarkArray(marks, mark_id) {
  *  in the 'RubricPanel.twig' server template
  * @param {string} gradeable_id
  * @param {string} anon_id
+ * @return {Promise}
  */
 function reloadGradingRubric(gradeable_id, anon_id) {
     let gradeable_tmp = null;
-    ajaxGetGradeableRubric(gradeable_id)
+    return ajaxGetGradeableRubric(gradeable_id)
         .catch(function (err) {
             alert('Could not fetch gradeable rubric: ' + err.message);
         })
@@ -2049,9 +2045,10 @@ function reloadGradingRubric(gradeable_id, anon_id) {
 /**
  * Call this once on page load to load the rubric instructor editing
  * @param {string} gradeable_id
+ * @return {Promise}
  */
 function reloadInstructorEditRubric(gradeable_id) {
-    ajaxGetGradeableRubric(gradeable_id)
+    return ajaxGetGradeableRubric(gradeable_id)
         .catch(function (err) {
             alert('Could not fetch gradeable rubric: ' + err.message);
         })
@@ -2079,7 +2076,7 @@ function reloadGradingComponent(component_id) {
     return ajaxGetComponentRubric(gradeable_id, component_id)
         .then(function (component) {
             component_tmp = component;
-            return ajaxGetGradedComponent(gradeable_id, component_id, anon_id);
+            return ajaxGetGradedComponent(gradeable_id, component_id, getAnonId());
         })
         .then(function (graded_component) {
             return injectGradingComponent(component_tmp, graded_component, false, false);

@@ -352,7 +352,6 @@ class ElectronicGraderController extends GradingController {
      */
     private function ajaxVerifyAllComponents() {
         $gradeable_id = $_POST['gradeable_id'] ?? '';
-        $component_id = $_POST['component_id'] ?? '';
         $anon_id = $_POST['anon_id'] ?? '';
 
         $grader = $this->core->getUser();
@@ -360,12 +359,6 @@ class ElectronicGraderController extends GradingController {
         // Get the gradeable
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
-            return;
-        }
-
-        // get the component
-        $component = $this->tryGetComponent($gradeable, $component_id);
-        if ($component === false) {
             return;
         }
 
