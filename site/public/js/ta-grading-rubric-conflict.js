@@ -44,7 +44,7 @@ function getResolvedMarksFromDOM() {
                 id: id,
                 points: parseFloat(chosenPointsElement.attr('data-points')),
                 title: chosenTitleElement.attr('data-title'),
-                resolution: 'save'
+                resolution: isMarkServerDeleted(this) ? 'add' : 'save'
             });
         }
     });
