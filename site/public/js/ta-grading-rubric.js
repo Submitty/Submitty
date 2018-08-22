@@ -1186,6 +1186,15 @@ function getMarkFromDOM(mark_id) {
 }
 
 /**
+ * Gets if a component exists for this gradeable
+ * @param {int} component_id
+ * @return {boolean}
+ */
+function componentExists(component_id) {
+    return getComponentJQuery(component_id).length > 0;
+}
+
+/**
  * Extracts a graded component object from the DOM
  * @param {int} component_id
  * @return {Object}
@@ -1413,7 +1422,11 @@ function getMarkIdFromOrder(component_id, mark_order) {
  */
 function getOpenComponentIdFromCookie() {
     let component_id = document.cookie.replace(/(?:(?:^|.*;\s*)open_component_id\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-    return parseInt(component_id);
+    component_id = parseInt(component_id);
+    if(isNaN(component_id)) {
+        return NO_COMPONENT_ID;
+    }
+    return component_id;
 }
 
 /**
@@ -1971,7 +1984,7 @@ function reloadInstructorEditRubric(gradeable_id) {
  */
 function openCookieComponent() {
     let cookieComponent = getOpenComponentIdFromCookie();
-    if (cookieComponent === NO_COMPONENT_ID) {
+    if (!componentExists(cookieComponent)) {
         return Promise.resolve();
     }
     return toggleComponent(cookieComponent, false);
