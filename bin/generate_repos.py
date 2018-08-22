@@ -66,7 +66,7 @@ if course is None:
 vcs_semester = os.path.join(VCS_FOLDER, args.semester)
 if not os.path.isdir(vcs_semester):
     os.makedirs(vcs_semester, mode=0o770, exist_ok=True)
-    shutil.chown(vcs_course, group=DAEMONCGI_GROUP)
+    shutil.chown(vcs_semester, group=DAEMONCGI_GROUP)
 
 vcs_course = os.path.join(vcs_semester, args.course)
 if not os.path.isdir(vcs_course):
