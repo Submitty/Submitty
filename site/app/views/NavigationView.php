@@ -155,6 +155,7 @@ class NavigationView extends AbstractView {
                     "name" => $gradeable->getTitle(),
                     "url" => $gradeable->getInstructionsUrl(),
                     "can_delete" => $this->core->getUser()->accessAdmin() && $gradeable->canDelete(),
+                    "buttons_justedit" => $this->getButtonsJustEdit($gradeable),
                     "buttons" => $this->getButtons($gradeable, $graded_gradeable, $list_section, $submit_everyone[$gradeable->getId()]),
                     "has_build_error" => $gradeable->anyBuildErrors()
                 ];
@@ -199,6 +200,21 @@ class NavigationView extends AbstractView {
         //Admin buttons
         if ($this->core->getUser()->accessAdmin()) {
             $buttons[] = $this->hasQuickLinkButton() ? $this->getQuickLinkButton($gradeable, $list_section) : null;
+        }
+
+        return $buttons;
+    }
+
+    /**
+     * Get a list with the edit buttons (if applicable) to display to the user for a Gradeable
+     * @param Gradeable $gradeable
+     * @return array
+     */
+    private function getButtonsJustEdit(Gradeable $gradeable): array {
+        $buttons = [];
+
+        //Admin buttons
+        if ($this->core->getUser()->accessAdmin()) {
             $buttons[] = $this->hasEditButton() ? $this->getEditButton($gradeable) : null;
         }
 
