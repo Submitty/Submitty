@@ -738,14 +738,16 @@ function ajaxDeleteComponent(gradeable_id, component_id) {
  * @param {string} anon_id
  * @return {Promise} Rejects except when the response returns status 'success'
  */
- 
-function ajaxVerifyComponent(gradeable_id, component_id, anon_id, verifyAll) {
+function ajaxVerifyComponent(gradeable_id, component_id, anon_id) {
     return new Promise(function (resolve, reject) {
-        var action = (verifyAll) ? 'verify_all' : 'verify_grader';
         $.getJSON({
             type: "POST",
             async: true,
-            url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': action}),
+            url: buildUrl({
+                'component': 'grading',
+                'page': 'electronic',
+                'action': 'verify_component'
+            }),
             data: {
                 'gradeable_id': gradeable_id,
                 'component_id': component_id,
@@ -755,18 +757,44 @@ function ajaxVerifyComponent(gradeable_id, component_id, anon_id, verifyAll) {
                 if (response.status !== "success") {
                     console.error('Something went wrong verifying the component: ' + response.message);
                     reject(new Error(response.message));
-                }
-                else {
+                } else {
                     resolve(response.data);
-                    if(isInstructorEditEnabled()){
-                        reloadInstructorEditRubric(gradeable_id);
-                    }
-                    else{
-                        reloadGradingRubric(gradeable_id, anon_id);
-                    }
-                    if(response.data['unverified_components'] == 0){
-                        document.getElementById('verify-all').style.display = 'none';
-                    }
+                }
+            },
+            error: function (err) {
+                displayAjaxError(err);
+                reject(err);
+            }
+        });
+    });
+}
+
+/**
+ * ajax call to verify the grader of a component
+ * @param {string} gradeable_id
+ * @param {string} anon_id
+ * @return {Promise} Rejects except when the response returns status 'success'
+ */
+function ajaxVerifyAllComponents(gradeable_id, anon_id) {
+    return new Promise(function (resolve, reject) {
+        $.getJSON({
+            type: "POST",
+            async: true,
+            url: buildUrl({
+                'component': 'grading',
+                'page': 'electronic',
+                'action': 'verify_component'
+            }),
+            data: {
+                'gradeable_id': gradeable_id,
+                'anon_id': anon_id,
+            },
+            success: function (response) {
+                if (response.status !== "success") {
+                    console.error('Something went wrong verifying the all components: ' + response.message);
+                    reject(new Error(response.message));
+                } else {
+                    resolve(response.data);
                 }
             },
             error: function (err) {
@@ -1580,6 +1608,26 @@ function openMarkStatsPopup(component_title, mark_title, gradedComponentCount, t
 }
 
 /**
+ * Gets if there are any loaded unverified components
+ * @returns {boolean}
+ */
+function anyUnverifiedComponents() {
+    return $('.verify-container').length > 0;
+}
+
+/**
+ * Hides the verify all button if there are no components to verify
+ */
+function updateVerifyAllButton() {
+    if (!anyUnverifiedComponents()) {
+        $('#verify-all').hide();
+    } else {
+        $('#verify-all').show();
+    }
+}
+
+
+/**
  * DOM Callback methods
  *
  */
@@ -1798,21 +1846,16 @@ function onToggleCustomMark(me) {
  * @return {Promise}
  */
 function onVerifyComponent(me) {
-    let component_id = getComponentIdFromDOMElement(me);
-    let gradeable_id = getGradeableId();
-    let anon_id = getAnonId();
-    return ajaxVerifyComponent(gradeable_id, component_id, anon_id, false);
+    return verifyComponent(getComponentIdFromDOMElement(me));
 }
+
 /**
  * Callback for the 'verify all' button
  * @param me DOM Element of the verify all button
  * @return {Promise}
  */
 function onVerifyAll(me) {
-    let component_id = getComponentIdFromDOMElement(me);
-    let gradeable_id = getGradeableId();
-    let anon_id = getAnonId();
-    return ajaxVerifyComponent(gradeable_id, component_id, anon_id, true);
+    return verifyAllComponents();
 }
 
 /**
@@ -1874,6 +1917,51 @@ function onClickCountDown(me) {
 
 
 /**
+ * Verifies a component with the grader and reloads the component
+ * @param {int} component_id
+ * @returns {Promise}
+ */
+function verifyComponent(component_id) {
+    let gradeable_id = getGradeableId();
+    return ajaxVerifyComponent(gradeable_id, component_id, getAnonId())
+        .then(function () {
+            return reloadGradingComponent(component_id)
+                .then(function () {
+                    updateVerifyAllButton();
+                })
+                .catch(function (err) {
+                    console.err(err);
+                    alert('Error reloading component! ' + err.message);
+                });
+        })
+        .catch(function (err) {
+            console.error(err);
+            alert('Error verifying component! ' + err.message);
+        });
+}
+
+/**
+ * Verifies all graded components and reloads the rubric
+ * @returns {Promise}
+ */
+function verifyAllComponents() {
+    let gradeable_id = getGradeableId();
+    let anon_id = getAnonId();
+    return ajaxVerifyAllComponents(gradeable_id, anon_id)
+        .then(function () {
+            return reloadGradingRubric(gradeable_id, anon_id)
+                .catch(function (err) {
+                    console.err(err);
+                    alert('Error reloading rubric! ' + err.message);
+                });
+        })
+        .catch(function (err) {
+            console.error(err);
+            alert('Error verifying all components! ' + err.message);
+        });
+}
+
+/**
  * Adds a blank component to the gradeable
  * @return {Promise}
  */
@@ -1927,6 +2015,8 @@ function getMarkFromMarkArray(marks, mark_id) {
 
 /**
  * Call this once on page load to load the rubric for grading a submitter
+ * Note: This takes 'gradeable_id' and 'anon_id' parameters since it gets called
+ *  in the 'RubricPanel.twig' server template
  * @param {string} gradeable_id
  * @param {string} anon_id
  */
@@ -1976,6 +2066,24 @@ function reloadInstructorEditRubric(gradeable_id) {
             alert("Could not render gradeable: " + err.message);
             console.error(err);
         });
+}
+
+/**
+ * Reloads the provided component in grade mode
+ * @param {int} component_id
+ * @returns {Promise}
+ */
+function reloadGradingComponent(component_id) {
+    let component_tmp = null;
+    let gradeable_id = getGradeableId();
+    return ajaxGetComponentRubric(gradeable_id, component_id)
+        .then(function (component) {
+            component_tmp = component;
+            return ajaxGetGradedComponent(gradeable_id, component_id, anon_id);
+        })
+        .then(function (graded_component) {
+            return injectGradingComponent(component_tmp, graded_component, false, false);
+        })
 }
 
 /**

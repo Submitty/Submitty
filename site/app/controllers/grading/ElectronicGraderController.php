@@ -30,7 +30,7 @@ class ElectronicGraderController extends GradingController {
                 break;
             case 'import_teams':
                 $this->importTeams();
-                break;    
+                break;
             case 'grade':
                 $this->showGrading();
                 break;
@@ -88,11 +88,11 @@ class ElectronicGraderController extends GradingController {
             case 'load_student_file':
                 $this->ajaxGetStudentOutput();
                 break;
-            case 'verify_grader':
-                $this->verifyGrader();
+            case 'verify_component':
+                $this->ajaxVerifyComponent();
                 break;
-            case 'verify_all':
-                $this->verifyGrader(true);
+            case 'verify_all_components':
+                $this->ajaxVerifyAllComponents();
                 break;
             case 'remove_empty':
                 $this->ajaxRemoveEmpty();
@@ -280,57 +280,145 @@ class ElectronicGraderController extends GradingController {
         return ['html' => $html, 'whitespaces' => $white_spaces];
     }
 
-    private function verifyGrader($verifyAll = false){
-        //check that I am able to verify.
-        if ($verifyAll) {
-            if (!$this->core->getAccess()->canI("grading.electronic.verify_all")) {
-                return $this->core->getOutput()->renderJsonFail("You do not have the proper privileges to verify this grade.");
-            }
-        } else {
-            if (!$this->core->getAccess()->canI("grading.electronic.verify_grader")) {
-                return $this->core->getOutput()->renderJsonFail("You do not have the proper privileges to verify this grade.");
-            }
+    /**
+     * Route for verifying the grader of a graded component
+     * Note: Until verify graders migration gets added, this just overwrites the grader
+     */
+    private function ajaxVerifyComponent() {
+        $gradeable_id = $_POST['gradeable_id'] ?? '';
+        $component_id = $_POST['component_id'] ?? '';
+        $anon_id = $_POST['anon_id'] ?? '';
+
+        $grader = $this->core->getUser();
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
         }
 
-        $gradeable_id = $_POST['gradeable_id'];
-        $component_id = $_POST['component_id'];
-        $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
-        //stores whether or not we verified at least one gradeable. Should never be false at the end of an execution.
-        $verified = false;
-        //Search across all components for components to verify
-        foreach ($gradeable->getComponents() as $component) {
-            //If this component hasn't been graded, we can't verify it.
-            if(!$component->getGrader()) {
-                continue;
-            }
-            //If we are either verifying all components or this is the component we were asked to verify,
-            //verify the component.
-            if($verifyAll || $component->getId() == $component_id){
-                //Only verify the component if we weren't already the grader.
-                if($component->getGrader()->getId() !== $this->core->getUser()->getId()){
-                    $component->setGrader($this->core->getUser());
-                    $component->saveGradeableComponentData($gradeable->getGdId());
-                    $verified = true;
-                }
-                //If we aren't verifying all, we have verified the only component we need to.
-                if(!$verifyAll && $component->getId() == $component_id) {
-                    break;
-                }
-            }
+        // get the component
+        $component = $this->tryGetComponent($gradeable, $component_id);
+        if ($component === false) {
+            return;
         }
-        $unverifiedComponents=0;
-        foreach ($gradeable->getComponents() as $component) {
-            if($component->getGrader() && $component->getGrader()->getId() !== $this->core->getUser()->getId()){
-                $unverifiedComponents++;
-            }
+
+        // Get user id from the anon id
+        $user_id = $this->tryGetUserIdFromAnonId($anon_id);
+        if ($user_id === false) {
+            return;
         }
-        if($verified){
-            return $this->core->getOutput()->renderJsonSuccess(['unverified_components' => $unverifiedComponents]);
-        }else{
-            return $this->core->getOutput()->renderJsonFail("Gradeable component does not exist or was previously verified by you.");
+
+        // Get the graded gradeable
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id);
+        if ($graded_gradeable === false) {
+            return;
+        }
+
+        // checks if user has permission TODO: make these permissions should be more refined
+        if (!$this->core->getAccess()->canI("grading.electronic.verify_grader")) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to verify component');
+            return;
+        }
+
+        // Get / create the TA grade
+        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+
+        // Get / create the graded component
+        $graded_component = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, false);
+
+        // Verifying individual component should fail if its ungraded
+        if ($graded_component === null) {
+            $this->core->getOutput()->renderJsonFail('Cannot verify ungraded component');
+            return;
+        }
+
+        try {
+            // Once we've parsed the inputs and checked permissions, perform the operation
+            $this->verifyComponent($graded_component, $grader);
+            $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
+
+            $this->core->getOutput()->renderJsonSuccess();
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
+
+    /**
+     * Route for verifying all components of a graded gradeable
+     * Note: Until verify graders migration gets added, this just overwrites the graders
+     */
+    private function ajaxVerifyAllComponents() {
+        $gradeable_id = $_POST['gradeable_id'] ?? '';
+        $component_id = $_POST['component_id'] ?? '';
+        $anon_id = $_POST['anon_id'] ?? '';
+
+        $grader = $this->core->getUser();
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+
+        // get the component
+        $component = $this->tryGetComponent($gradeable, $component_id);
+        if ($component === false) {
+            return;
+        }
+
+        // Get user id from the anon id
+        $user_id = $this->tryGetUserIdFromAnonId($anon_id);
+        if ($user_id === false) {
+            return;
+        }
+
+        // Get the graded gradeable
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id);
+        if ($graded_gradeable === false) {
+            return;
+        }
+
+        // checks if user has permission TODO: make these permissions should be more refined
+        if (!$this->core->getAccess()->canI("grading.electronic.verify_all")) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to verify component');
+            return;
+        }
+
+        // Verifying all components should not fail because there are no components to verify,
+        //  but it should only verify components with a grader
+        if ($graded_gradeable->hasTaGradingInfo()) {
+            $this->core->getOutput()->renderJsonSuccess();
+        }
+
+        // Get / create the TA grade
+        $ta_graded_gradeable = $graded_gradeable->getTaGradedGradeable();
+
+        try {
+            // Once we've parsed the inputs and checked permissions, perform the operation
+            foreach ($gradeable->getComponents() as $component) {
+                $graded_component = $ta_graded_gradeable->getGradedComponent($component);
+                if ($graded_component !== null) {
+                    $this->verifyComponent($graded_component, $grader);
+                }
+            }
+            $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
+
+            $this->core->getOutput()->renderJsonSuccess();
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
+        }
+    }
+
+    private function verifyComponent(GradedComponent $graded_component, User $verifier) {
+        // TODO: swap out body of this function with verifying logic
+        $graded_component->setGrader($verifier);
+    }
+
     /**
      * Shows statistics for the grading status of a given electronic submission. This is shown to all full access
      * graders. Limited access graders will only see statistics for the sections they are assigned to.
