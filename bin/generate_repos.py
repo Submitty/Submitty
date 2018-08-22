@@ -63,14 +63,15 @@ course = connection.execute(select, semester=args.semester, course=args.course).
 if course is None:
     raise SystemExit("Semester '{}' and Course '{}' not found".format(args.semester, args.course))
 
-vcs_course = os.path.join(VCS_FOLDER, args.semester, args.course)
+vcs_semester = os.path.join(VCS_FOLDER, args.semester)
+if not os.path.isdir(vcs_semester):
+    os.makedirs(vcs_semester, mode=0o770, exist_ok=True)
+    shutil.chown(vcs_semester, group=DAEMONCGI_GROUP)
 
+vcs_course = os.path.join(vcs_semester, args.course)
 if not os.path.isdir(vcs_course):
     os.makedirs(vcs_course, mode=0o770, exist_ok=True)
-    shutil.chown(VCS_FOLDER, group=DAEMONCGI_GROUP)
-    for root, dirs, files in os.walk(VCS_FOLDER):
-        for entry in dirs:
-            shutil.chown(os.path.join(root, entry), group=DAEMONCGI_GROUP)
+    shutil.chown(vcs_course, group=DAEMONCGI_GROUP)
 
 is_team = False
 
