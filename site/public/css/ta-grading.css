@@ -357,6 +357,10 @@ tr.is_publish {
 
 /* Gradeable */
 
+#no-manual-grading-container {
+    margin: 15px;
+}
+
 .gradeable .general-comment {
     background-color:#E9EFEF;
     cursor: pointer;
@@ -369,7 +373,7 @@ tr.is_publish {
 }
 
 #rubric-container {
-    padding: 0px 10px 0px 10px;
+    padding: 0 10px 0 10px;
 }
 
 .gradeable .row-wrap {
@@ -516,7 +520,7 @@ tr.is_publish {
     border: solid #BBB;
     border-width: 2px 0 0 0;
     padding: 8px;
-    border-radius: 0px;
+    border-radius: 0;
 }
 
 .gradeable .done-container {
@@ -678,7 +682,7 @@ tr.is_publish {
 #mark-conflict-popup .mark-conflict-row span {
     padding: 3px;
     border-width: 2px;
-    margin: 0px;
+    margin: 0;
     display: inline-flex;
     align-items: center;
 }

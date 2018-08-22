@@ -28,10 +28,12 @@ Required Input:
                 </div>
 
                 {# Saving status #}
-                {% include "SavingTools.twig" with {
-                    'show_save_tools': show_mark_list,
-                    'cancel_on_click': 'onCancelComponent(this)'
-                } only %}
+                {% if not grading_disabled %}
+                    {% include "SavingTools.twig" with {
+                        'show_save_tools': show_mark_list,
+                        'cancel_on_click': 'onCancelComponent(this)'
+                    } only %}
+                {% endif %}
             </div>
 
             <div class="col-sm container title-block">

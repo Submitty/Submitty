@@ -143,7 +143,8 @@ function ajaxSaveComponent(gradeable_id, component_id, title, ta_comment, studen
                 'lower_clamp': lower_clamp,
                 'default': default_value,
                 'max_value': max_value,
-                'upper_clamp': upper_clamp
+                'upper_clamp': upper_clamp,
+                'peer': false
             },
             success: function (response) {
                 if (response.status !== 'success') {
@@ -852,6 +853,15 @@ function canVerifyGraders() {
 }
 
 /**
+ * Gets if grading is disabled since the selected version isn't the same
+ *  as the one chosen for grading
+ * @return {boolean}
+ */
+function isGradingDisabled() {
+    return $('#version-conflict-indicator').length > 0;
+}
+
+/**
  * Gets the precision for component/mark point values
  * @returns {number}
  */
@@ -1121,14 +1131,13 @@ function getComponentPageNumber(component_id) {
 
 /**
  * Extracts a component object from the DOM
- * Note: if the component is closed, this will not return
  * @param {int} component_id
  * @return {Object}
+ * @throws Error if instructor edit mode is enabled and the component isn't open
  */
 function getComponentFromDOM(component_id) {
     let domElement = getComponentJQuery(component_id);
 
-    // TODO: make this work in instructor edit mode with closed component
     if (isInstructorEditEnabled()) {
         let penaltyPoints = Math.abs(parseFloat(domElement.find('input.penalty-points').val()));
         let maxValue = Math.abs(parseFloat(domElement.find('input.max-points').val()));
@@ -1362,23 +1371,6 @@ function getComponentIdByOrder(order) {
 }
 
 /**
- * Gets the order of a component in the list
- * @param {int} component_id
- * @return {int}
- */
-function getComponentOrderById(component_id) {
-    let i = 0;
-    let order = 0;
-    $('.component-container').each(function () {
-        if ($(this).find('#component-' + component_id)) {
-            order = i;
-        }
-        i++;
-    });
-    return order;
-}
-
-/**
  * Gets the orders of the components indexed by component id
  * @return {Object}
  */
@@ -1506,17 +1498,6 @@ function isMarkChecked(mark_id) {
  */
 function isMarkDisabled(mark_id) {
     return getMarkJQuery(mark_id).hasClass('mark-disabled');
-}
-
-/**
- * Toggles the state of a mark
- * @param {int} mark_id
- */
-function toggleMarkChecked(mark_id) {
-    if (isEditModeEnabled()) {
-        return;
-    }
-    getMarkJQuery(mark_id).find('.mark-selector').toggleClass('mark-selected');
 }
 
 /**
@@ -1843,10 +1824,9 @@ function onToggleCustomMark(me) {
 /**
  * Callback for the 'verify' buttons
  * @param me DOM Element of the verify button
- * @return {Promise}
  */
 function onVerifyComponent(me) {
-    return verifyComponent(getComponentIdFromDOMElement(me))
+    verifyComponent(getComponentIdFromDOMElement(me))
         .catch(function (err) {
             console.error(err);
             alert('Error verifying component! ' + err.message);
@@ -1856,10 +1836,9 @@ function onVerifyComponent(me) {
 /**
  * Callback for the 'verify all' button
  * @param me DOM Element of the verify all button
- * @return {Promise}
  */
 function onVerifyAll(me) {
-    return verifyAllComponents()
+    verifyAllComponents()
         .catch(function (err) {
             console.error(err);
             alert('Error verifying all components! ' + err.message);
@@ -2030,7 +2009,7 @@ function reloadGradingRubric(gradeable_id, anon_id) {
             alert('Could not fetch graded gradeable: ' + err.message);
         })
         .then(function (graded_gradeable) {
-            return renderGradingGradeable(getGraderId(), gradeable_tmp, graded_gradeable, canVerifyGraders());
+            return renderGradingGradeable(getGraderId(), gradeable_tmp, graded_gradeable, isGradingDisabled(), canVerifyGraders());
         })
         .then(function (elements) {
             setRubricDOMElements(elements);
@@ -2765,7 +2744,7 @@ function injectInstructorEditComponent(component, showMarkList) {
  * @return {Promise}
  */
 function injectGradingComponent(component, graded_component, editable, showMarkList) {
-    return renderGradingComponent(getGraderId(), component, graded_component, canVerifyGraders(), getPointPrecision(), editable, showMarkList)
+    return renderGradingComponent(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), getPointPrecision(), editable, showMarkList)
         .then(function (elements) {
             setComponentContents(component.id, elements);
         })

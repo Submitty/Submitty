@@ -103,11 +103,12 @@ function prepGradedComponent(component, graded_component) {
  * @param {string} grader_id
  * @param {Object} gradeable
  * @param {Object} graded_gradeable
+ * @param {boolean} grading_disabled
  * @param {boolean} canVerifyGraders
  * @returns {Promise<string>} the html for the graded gradeable
  */
 
-function renderGradingGradeable(grader_id, gradeable, graded_gradeable, canVerifyGraders) {
+function renderGradingGradeable(grader_id, gradeable, graded_gradeable, grading_disabled, canVerifyGraders) {
     if (graded_gradeable.graded_components === undefined) {
         graded_gradeable.graded_components = {};
     }
@@ -123,7 +124,7 @@ function renderGradingGradeable(grader_id, gradeable, graded_gradeable, canVerif
         'gradeable': gradeable,
         'graded_gradeable': graded_gradeable,
         'edit_marks_enabled': false,
-        'grading_disabled': false, // TODO:
+        'grading_disabled': grading_disabled,
         'decimal_precision': DECIMAL_PRECISION,
         'can_verify_graders': canVerifyGraders,
         'grader_id': grader_id,
@@ -135,13 +136,14 @@ function renderGradingGradeable(grader_id, gradeable, graded_gradeable, canVerif
  * @param {string} grader_id
  * @param {Object} component
  * @param {Object} graded_component
+ * @param {boolean} grading_disabled
  * @param {boolean} canVerifyGraders
  * @param {number} precision
  * @param {boolean} editable True to render with edit mode enabled
  * @param {boolean} showMarkList True to display the mark list unhidden
  * @returns {Promise<string>} the html for the graded component
  */
-function renderGradingComponent(grader_id, component, graded_component, canVerifyGraders, precision, editable, showMarkList) {
+function renderGradingComponent(grader_id, component, graded_component, grading_disabled, canVerifyGraders, precision, editable, showMarkList) {
     return new Promise(function (resolve, reject) {
         // Make sure we prep the graded component before rendering
         graded_component = prepGradedComponent(component, graded_component);
@@ -153,7 +155,7 @@ function renderGradingComponent(grader_id, component, graded_component, canVerif
             'precision': precision,
             'edit_marks_enabled': editable,
             'show_mark_list': showMarkList,
-            'grading_disabled': false, // TODO:
+            'grading_disabled': grading_disabled,
             'decimal_precision': DECIMAL_PRECISION,
             'can_verify_graders': canVerifyGraders,
             'grader_id': grader_id,
@@ -207,7 +209,7 @@ function renderOverallComment(comment, editable) {
         resolve(Twig.twig({ref: "OverallComment"}).render({
             'overall_comment': comment,
             'editable': editable,
-            'disabled': false
+            'grading_disabled': false
         }));
     });
 }

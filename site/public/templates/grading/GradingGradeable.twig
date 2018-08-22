@@ -24,7 +24,7 @@
 {# General Comment #}
     <div id="overall-comment-container">
         {% include "OverallComment.twig" with {
-                'disabled': grading_disabled,
+                'grading_disabled': grading_disabled,
                 'editable': false,
                 'overall_comment': graded_gradeable.overall_comment
         } only %}
