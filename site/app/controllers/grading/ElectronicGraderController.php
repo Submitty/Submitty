@@ -304,13 +304,13 @@ class ElectronicGraderController extends GradingController {
         }
 
         // Get user id from the anon id
-        $user_id = $this->tryGetUserIdFromAnonId($anon_id);
-        if ($user_id === false) {
+        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id);
+        if ($submitter_id === false) {
             return;
         }
 
         // Get the graded gradeable
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id);
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
         if ($graded_gradeable === false) {
             return;
         }
@@ -363,13 +363,13 @@ class ElectronicGraderController extends GradingController {
         }
 
         // Get user id from the anon id
-        $user_id = $this->tryGetUserIdFromAnonId($anon_id);
-        if ($user_id === false) {
+        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id);
+        if ($submitter_id === false) {
             return;
         }
 
         // Get the graded gradeable
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id);
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
         if ($graded_gradeable === false) {
             return;
         }
@@ -1306,13 +1306,13 @@ class ElectronicGraderController extends GradingController {
         }
 
         // Get user id from the anon id
-        $user_id = $this->tryGetUserIdFromAnonId($anon_id);
-        if ($user_id === false) {
+        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id);
+        if ($submitter_id === false) {
             return;
         }
 
         // Get the graded gradeable
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id);
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
         if ($graded_gradeable === false) {
             return;
         }
@@ -1435,13 +1435,13 @@ class ElectronicGraderController extends GradingController {
         }
 
         // Get user id from the anon id
-        $user_id = $this->tryGetUserIdFromAnonId($anon_id);
-        if ($user_id === false) {
+        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id);
+        if ($submitter_id === false) {
             return;
         }
 
         // Get the graded gradeable
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id);
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
         if ($graded_gradeable === false) {
             return;
         }
@@ -2109,13 +2109,13 @@ class ElectronicGraderController extends GradingController {
         }
 
         // Get user id from the anon id
-        $user_id = $this->tryGetUserIdFromAnonId($anon_id);
-        if ($user_id === false) {
+        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id);
+        if ($submitter_id === false) {
             return;
         }
 
         // Get the graded gradeable
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id);
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
         if ($graded_gradeable === false) {
             return;
         }
@@ -2174,13 +2174,13 @@ class ElectronicGraderController extends GradingController {
         }
 
         // Get user id from the anon id
-        $user_id = $this->tryGetUserIdFromAnonId($anon_id);
-        if ($user_id === false) {
+        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id);
+        if ($submitter_id === false) {
             return;
         }
 
         // Get the graded gradeable
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id);
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
         if ($graded_gradeable === false) {
             return;
         }
@@ -2224,13 +2224,13 @@ class ElectronicGraderController extends GradingController {
             return;
         }
         // Get user id from the anon id
-        $user_id = $this->tryGetUserIdFromAnonId($anon_id);
-        if ($user_id === false) {
+        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id);
+        if ($submitter_id === false) {
             return;
         }
 
         // Get the graded gradeable
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id);
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
         if ($graded_gradeable === false) {
             return;
         }

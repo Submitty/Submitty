@@ -2534,7 +2534,7 @@ AND gc_id IN (
         return $team_ids;
         */
         // TODO: team ids are the same as their anonymous ids for now
-        return $anon_ids;
+        return array_combine($anon_ids, $anon_ids);
     }
 
     public function getTeamIdFromAnonId(string $anon_id) {
