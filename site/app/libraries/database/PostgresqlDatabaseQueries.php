@@ -320,36 +320,36 @@ LEFT JOIN electronic_gradeable AS eg ON eg.g_id=g.g_id
 LEFT JOIN (
   SELECT
     g_id,
-    array_agg(gc_is_peer) as array_gc_is_peer,
-    array_agg(gc_id) as array_gc_id,
-    array_agg(gc_title) AS array_gc_title,
-    array_agg(gc_ta_comment) AS array_gc_ta_comment,
-    array_agg(gc_student_comment) AS array_gc_student_comment,
-    array_agg(gc_lower_clamp) AS array_gc_lower_clamp,
-    array_agg(gc_default) AS array_gc_default,
-    array_agg(gc_max_value) AS array_gc_max_value,
-    array_agg(gc_upper_clamp) AS array_gc_upper_clamp,
-    array_agg(gc_is_text) AS array_gc_is_text,
-    array_agg(gc_order) AS array_gc_order,
-    array_agg(gc_page) AS array_gc_page,
-    array_agg(array_gcm_id) AS array_array_gcm_id,
-    array_agg(array_gc_id) AS array_array_gc_id,
-    array_agg(array_gcm_points) AS array_array_gcm_points,
-    array_agg(array_gcm_note) AS array_array_gcm_note,
-    array_agg(array_gcm_publish) AS array_array_gcm_publish,
-    array_agg(array_gcm_order) AS array_array_gcm_order
+    json_agg(gc_is_peer) as array_gc_is_peer,
+    json_agg(gc_id) as array_gc_id,
+    json_agg(gc_title) AS array_gc_title,
+    json_agg(gc_ta_comment) AS array_gc_ta_comment,
+    json_agg(gc_student_comment) AS array_gc_student_comment,
+    json_agg(gc_lower_clamp) AS array_gc_lower_clamp,
+    json_agg(gc_default) AS array_gc_default,
+    json_agg(gc_max_value) AS array_gc_max_value,
+    json_agg(gc_upper_clamp) AS array_gc_upper_clamp,
+    json_agg(gc_is_text) AS array_gc_is_text,
+    json_agg(gc_order) AS array_gc_order,
+    json_agg(gc_page) AS array_gc_page,
+    json_agg(array_gcm_id) AS array_array_gcm_id,
+    json_agg(array_gc_id) AS array_array_gc_id,
+    json_agg(array_gcm_points) AS array_array_gcm_points,
+    json_agg(array_gcm_note) AS array_array_gcm_note,
+    json_agg(array_gcm_publish) AS array_array_gcm_publish,
+    json_agg(array_gcm_order) AS array_array_gcm_order
   FROM
   (SELECT gc.*, gcm.array_gcm_id, gcm.array_gc_id, gcm.array_gcm_points, array_gcm_note, array_gcm_publish, array_gcm_order
   FROM gradeable_component AS gc
   LEFT JOIN(
     SELECT
       gc_id,
-      array_to_string(array_agg(gcm_id), ',') as array_gcm_id,
-      array_to_string(array_agg(gc_id), ',') as array_gc_id,
-      array_to_string(array_agg(gcm_points), ',') as array_gcm_points,
-      array_to_string(array_agg(gcm_note), ',') as array_gcm_note,
-      array_to_string(array_agg(gcm_publish), ',') as array_gcm_publish,
-      array_to_string(array_agg(gcm_order), ',') as array_gcm_order
+      json_agg(gcm_id) as array_gcm_id,
+      json_agg(gc_id) as array_gc_id,
+      json_agg(gcm_points) as array_gcm_points,
+      json_agg(gcm_note) as array_gcm_note,
+      json_agg(gcm_publish) as array_gcm_publish,
+      json_agg(gcm_order) as array_gcm_order
     FROM gradeable_component_mark
     GROUP BY gc_id
   ) AS gcm
@@ -379,25 +379,25 @@ LEFT JOIN (
   LEFT JOIN (
     SELECT
       gcd.gd_id,
-      array_agg(gc_id) AS array_gcd_gc_id,
-      array_agg(gcd_score) AS array_gcd_score,
-      array_agg(gcd_component_comment) AS array_gcd_component_comment,
-      array_agg(gcd_grader_id) AS array_gcd_grader_id,
-      array_agg(gcd_graded_version) AS array_gcd_graded_version,
-      array_agg(gcd_grade_time) AS array_gcd_grade_time,
-      array_agg(array_gcm_mark) AS array_array_gcm_mark,
-      array_agg(u.user_id) AS array_gcd_user_id,
-      array_agg(u.anon_id) AS array_gcd_anon_id,
-      array_agg(u.user_firstname) AS array_gcd_user_firstname,
-      array_agg(u.user_preferred_firstname) AS array_gcd_user_preferred_firstname,
-      array_agg(u.user_lastname) AS array_gcd_user_lastname,
-      array_agg(u.user_email) AS array_gcd_user_email,
-      array_agg(u.user_group) AS array_gcd_user_group
+      json_agg(gc_id) AS array_gcd_gc_id,
+      json_agg(gcd_score) AS array_gcd_score,
+      json_agg(gcd_component_comment) AS array_gcd_component_comment,
+      json_agg(gcd_grader_id) AS array_gcd_grader_id,
+      json_agg(gcd_graded_version) AS array_gcd_graded_version,
+      json_agg(gcd_grade_time) AS array_gcd_grade_time,
+      json_agg(array_gcm_mark) AS array_array_gcm_mark,
+      json_agg(u.user_id) AS array_gcd_user_id,
+      json_agg(u.anon_id) AS array_gcd_anon_id,
+      json_agg(u.user_firstname) AS array_gcd_user_firstname,
+      json_agg(u.user_preferred_firstname) AS array_gcd_user_preferred_firstname,
+      json_agg(u.user_lastname) AS array_gcd_user_lastname,
+      json_agg(u.user_email) AS array_gcd_user_email,
+      json_agg(u.user_group) AS array_gcd_user_group
     FROM(
         SELECT gcd.* , gcmd.array_gcm_mark
         FROM gradeable_component_data AS gcd
         LEFT JOIN (
-          SELECT gc_id, gd_id, gcd_grader_id, array_to_string(array_agg(gcm_id), ',') as array_gcm_mark
+          SELECT gc_id, gd_id, gcd_grader_id, json_agg(gcm_id) as array_gcm_mark
           FROM gradeable_component_mark_data AS gcmd
           GROUP BY gc_id, gd_id, gd_id, gcd_grader_id
         ) as gcmd
@@ -484,7 +484,7 @@ ORDER BY ".implode(", ", $order_by);
                 $bools = array('gc_is_text', 'gc_is_peer');
                 foreach ($fields as $key) {
                     if (isset($row['array_' . $key])) {
-                        $row['array_' . $key] = $this->core->getCourseDB()->fromDatabaseToPHPArray($row['array_' . $key], in_array($key, $bools));
+                        $row['array_' . $key] = json_decode($row['array_' . $key], true);
                     }
                 }
             }

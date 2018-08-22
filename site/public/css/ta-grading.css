@@ -1,5 +1,5 @@
 #bar_wrapper {
-     position:relative;
+     position: absolute;
      height: 41px;
      width: 600px;
      top: -90px;

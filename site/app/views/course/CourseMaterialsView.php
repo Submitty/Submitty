@@ -14,7 +14,7 @@ class CourseMaterialsView extends AbstractView {
      * @return string
      */
     public function listCourseMaterials($user_group) {
-        $this->core->getOutput()->addBreadcrumb("Course Materials", $this->core->buildUrl(array('component' => 'grading', 'page' => 'course_materials', 'action' => 'view_course_materials_page')));
+        $this->core->getOutput()->addBreadcrumb("Course Materials");
         function add_files($core, &$files, &$file_datas, &$file_release_dates, $expected_path, $json, $course_materials_array, $start_dir_name, $user_group) {
             $files[$start_dir_name] = array();
             $working_dirRoot = &$files[$start_dir_name];

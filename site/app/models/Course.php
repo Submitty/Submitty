@@ -42,4 +42,22 @@ class Course extends AbstractModel {
             }
         }
     }
+
+    public function getLongSemester() {
+        if (strlen($this->semester) == 3) {
+            if (strtolower($this->semester[0]) == 'f') {
+                return "Fall 20".substr($this->semester,1,2);
+            } else if (strtolower($this->semester[0]) == 's') {
+                return "Spring 20".substr($this->semester,1,2);
+            } else if (strtolower($this->semester[0]) == 'u') {
+                return "Summer 20".substr($this->semester,1,2);
+            }
+        }
+        return $this->semester;
+    }
+
+    public function getCapitalizedTitle() {
+        return strtoupper($this->title);
+    }
+
 }
