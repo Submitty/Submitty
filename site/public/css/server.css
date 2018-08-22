@@ -942,7 +942,7 @@ table .instructor .two-options{
     justify-items: center;
     padding: 20px;
     margin-left: -5px;
-    padding-top: 50px;
+    padding-top: 30px;
 }
 
 #sidebar.collapsed #nav-buttons {
@@ -1061,7 +1061,7 @@ table .instructor .two-options{
 }
 
 #nav-buttons ul li.short-line {
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid #aaaaaa;
     margin-left: 6px;
     margin-right: 10px;
     padding-bottom: 0;

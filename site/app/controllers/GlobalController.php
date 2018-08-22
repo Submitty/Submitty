@@ -120,7 +120,7 @@ class GlobalController extends AbstractController {
                 "class" => "nav-row short-line"
             ]);
 
-            $sidebar_links = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'config', 'sidebar.json');
+            $sidebar_links = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site', 'sidebar.json');
             if (file_exists($sidebar_links)) {
                 $links = json_decode(file_get_contents($sidebar_links), true);
                 if (is_array($links)) {
@@ -142,11 +142,16 @@ class GlobalController extends AbstractController {
                             "icon" => $link['icon']
                         ]);
                     }
-                    $sidebar_buttons[] = new Button($this->core, ["class" => "nav-row short-line"]);
+                    $sidebar_buttons[] = new Button($this->core, [
+                        "class" => "nav-row short-line"
+                    ]);
                 }
             }
 
+            $at_least_one_grader_link = false;
+
             if ($this->core->getUser()->accessAdmin()) {
+                $at_least_one_grader_link = true;
                 $sidebar_buttons[] = new Button($this->core, [
                     "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users')),
                     "title" => "Manage Students",
@@ -175,6 +180,7 @@ class GlobalController extends AbstractController {
                 $images_path = Fileutils::joinPaths($images_course_path, "uploads/student_images");
                 $any_images_files = FileUtils::getAllFiles($images_path, array(), true);
                 if ($this->core->getUser()->getGroup() === 1 && count($any_images_files) === 0) {
+                    $at_least_one_grader_link = true;
                     $sidebar_buttons[] = new Button($this->core, [
                         "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page')),
                         "title" => "Student Photos",
@@ -185,6 +191,7 @@ class GlobalController extends AbstractController {
                 } else if (count($any_images_files) !== 0 && $this->core->getUser()->accessGrading()) {
                     $sections = $this->core->getUser()->getGradingRegistrationSections();
                     if (!empty($sections) || $this->core->getUser()->getGroup() !== 3) {
+                        $at_least_one_grader_link = true;
                         $sidebar_buttons[] = new Button($this->core, [
                             "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page')),
                             "title" => "Student Photos",
@@ -194,19 +201,13 @@ class GlobalController extends AbstractController {
                         ]);
                     }
                 }
-                //$sidebar_buttons[] = new Button($this->core, [
-                //    "class" => "nav-row short-line"
-                //]);
             }
 
-            if ($this->core->getUser()->accessGrading()) {
+            if ($this->core->getUser()->accessGrading() && $at_least_one_grader_link === true ) {
                 $sidebar_buttons[] = new Button($this->core, [
                     "class" => "nav-row short-line"
                 ]);
             }
-            //$sidebar_buttons[] = new Button($this->core, [
-            //    "class" => "nav-row short-line"
-            //]);
 
             if ($this->core->getUser()->accessAdmin()) {
                 $sidebar_buttons[] = new Button($this->core, [
