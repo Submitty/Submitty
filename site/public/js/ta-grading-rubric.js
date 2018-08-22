@@ -2557,22 +2557,26 @@ function saveMarkList(component_id) {
                     for (let id in resolvedMarks) {
                         if (resolvedMarks.hasOwnProperty(id)) {
                             let mark = resolvedMarks[id];
-                            // Null marks count as 'for deletion'
-                            if (mark === null) {
-                                // This should be a pretty rare case
+                            if (mark.resolution === 'delete') {
                                 sequence1 = sequence1
                                     .then(function () {
-                                        return ajaxDeleteMark(gradeable_id, component_id, mark.id);
+                                        return ajaxDeleteMark(gradeable_id, component_id, parseInt(id));
                                     })
                                     .catch(function (err) {
                                         // Don't let this error hold up the whole operation
                                         alert('Could not delete mark: ' + err.message);
                                     });
-                            } else {
-                                // If not marked for deletion, save normally
-                                sequence1 = sequence1.then(function () {
-                                    return ajaxSaveMark(gradeable_id, component_id, mark.id, mark.points, mark.title, mark.publish);
-                                });
+                            } else if (mark.resolution === 'save') {
+                                sequence1 = sequence1
+                                    .then(function () {
+                                        return ajaxSaveMark(gradeable_id, component_id, mark.id, mark.points, mark.title, mark.publish);
+                                    });
+                            } else if (mark.resolution === 'add') {
+                                sequence1 = sequence1
+                                    .then(function () {
+                                        // NOTE: the 'publish' setting will not be saved, but that's not a big deal
+                                        return ajaxAddNewMark(gradeable_id, component_id, mark.points, mark.title);
+                                    });
                             }
                         }
                     }

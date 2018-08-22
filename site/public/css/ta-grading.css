@@ -670,25 +670,6 @@ tr.is_publish {
 
 /* Mark conflict popup */
 
-#mark-conflict-popup .legend {
-
-}
-
-#mark-conflict-popup .mark-resolve-dom span {
-    border-color: #3093FC;
-    background-color: #60B3FF;
-}
-
-#mark-conflict-popup .mark-resolve-old-server span{
-    border-color: #757575;
-    background-color: #c3c3c3;
-}
-
-#mark-conflict-popup .mark-resolve-server span {
-    border-color: #86a6b9;
-    background-color: #a2cce4;
-}
-
 #mark-conflict-popup div.mark-conflict-row {
     margin-top: 5px;
     margin-bottom: 5px;
@@ -697,21 +678,25 @@ tr.is_publish {
 #mark-conflict-popup .mark-conflict-row span {
     padding: 3px;
     border-width: 2px;
-    border-radius: 8px;
-    border-style: solid;
-    margin: 2px;
+    margin: 0px;
+    display: inline-flex;
+    align-items: center;
 }
 
-#mark-conflict-popup .mark-conflict-row .title:hover, .points:hover {
-    opacity: 0.9;
+#mark-conflict-popup .mark-conflict-row .button-container {
+    width: 150px;
 }
 
-#mark-conflict-popup .mark-conflict-row .title:not(.title-selected) {
-    background-color: transparent;
+#mark-conflict-popup .mark-conflict-row .button-container input {
+    width: 100%;
 }
 
-#mark-conflict-popup .mark-conflict-row .points:not(.points-selected) {
-    background-color: transparent;
+#mark-conflict-popup .mark-conflict-row .title.title-selected {
+    background-color: #c3c3c3;
+}
+
+#mark-conflict-popup .mark-conflict-row .points.points-selected {
+    background-color: #c3c3c3;
 }
 
 #mark-conflict-popup .color-swatch {
