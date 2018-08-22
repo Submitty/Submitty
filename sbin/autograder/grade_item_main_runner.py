@@ -302,8 +302,11 @@ def network_containers(container_info,target_folder,test_input_folder,job_id,is_
   router_name = "{0}_router".format(which_untrusted)
 
   #TODO this is where we create the connections text file.
-  current_port = 9000
-  connection_list = []
+  current_tcp_port = 9000
+  current_udp_port = 15000
+
+  tcp_connection_list = []
+  udp_connection_list = []
   router_connections = {}
   for name, info in sorted(container_info.items()):
       my_name = "{0}_{1}".format(which_untrusted, name)
@@ -333,8 +336,10 @@ def network_containers(container_info,target_folder,test_input_folder,job_id,is_
           #  so we group together all connections here, and then connect later.
           router_connections[name].append(connected_machine)
           router_connections[connected_machine].append(name)
-          connection_list.append([name, connected_machine, str(current_port)])
-          current_port +=1
+          tcp_connection_list.append([name, connected_machine, str(current_tcp_port)])
+          udp_connection_list.append([name, connected_machine, str(current_udp_port)])
+          current_tcp_port +=1
+          current_udp_port +=1
   
   # Connect the router to all networks.
   for startpoint, endpoints in router_connections.items():
@@ -352,11 +357,16 @@ def network_containers(container_info,target_folder,test_input_folder,job_id,is_
       subprocess.check_output(['docker', 'network', 'connect'] + aliases + [network_name, router_name]).decode('utf8').strip()
 
 
-  #writing complete knownhosts csv to input directory
-  knownhosts_location = os.path.join(test_input_folder, 'knownhosts.csv')
+  #writing complete knownhosts csvs to input directory
+  knownhosts_location = os.path.join(test_input_folder, 'knownhosts_tcp.csv')
   with open(knownhosts_location, 'w') as csvfile:
     csvwriter = csv.writer(csvfile)
-    for tup in connection_list:
+    for tup in tcp_connection_list:
+      csvwriter.writerow(tup)
+  knownhosts_location = os.path.join(test_input_folder, 'knownhosts_udp.csv')
+  with open(knownhosts_location, 'w') as csvfile:
+    csvwriter = csv.writer(csvfile)
+    for tup in udp_connection_list:
       csvwriter.writerow(tup)
 
 
