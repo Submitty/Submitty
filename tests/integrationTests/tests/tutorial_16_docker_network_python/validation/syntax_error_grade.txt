@@ -1,0 +1,8 @@
+Testcase  1: Ping Pong                                            5 /  5  
+Testcase  2: Ping Pong, Ping Pong                                 5 /  5  
+Testcase  3: Not Ping                                             2 /  5  
+Testcase  4: Not Ping, Ping, Ping                                 1 /  5  
+Testcase  5: UDP Test                                            +2 points
+Testcase  6: Submission Limit                                             
+Automatic grading total:                                         15 / 20
+Non-hidden automatic grading total:                              15 / 20
