@@ -21,6 +21,7 @@ int main(int argc, char *argv[]) {
   std::string rcsid = "";
   int subnum = -1;
   std::string time_of_submission = "";
+  std::string docker_name = "";
   //If test_case_to_run isn't passed in as a parameter, all testcases are run.
   int test_case_to_run = -1;
   // Check command line arguments
@@ -29,8 +30,12 @@ int main(int argc, char *argv[]) {
     rcsid = argv[2];
     subnum = atoi(argv[3]);
     time_of_submission = argv[4];
-    if (argc == 6){
+    if (argc >= 6){
       test_case_to_run = atoi(argv[5]);
+    }
+    if(argc >= 7){
+      docker_name = argv[6];
+      std::cout << "TESTCASE: " << test_case_to_run << "! THE DOCKER NAME THAT WAS PASSED IN: " << docker_name << std::endl;
     }
   }
   else if (argc != 1) {
@@ -72,7 +77,7 @@ int main(int argc, char *argv[]) {
 
   for (unsigned int i = 1; i <= tc->size(); i++) {
 
-    TestCase my_testcase(config_json,i-1);
+    TestCase my_testcase(config_json,i-1,docker_name);
 
     if (my_testcase.isFileCheck() || my_testcase.isCompilation()){
       continue;
@@ -85,8 +90,8 @@ int main(int argc, char *argv[]) {
     std::cout << "========================================================" << std::endl;
     std::cout << "TEST #" << i << std::endl;
 
+    std::vector<std::string> commands = my_testcase.getCommands();
 
-    std::vector<std::string> commands = stringOrArrayOfStrings((*tc)[i-1],"command");
     std::vector<nlohmann::json> actions  = mapOrArrayOfMaps((*tc)[i-1],"actions");
     assert (commands.size() > 0);
 
@@ -117,32 +122,6 @@ int main(int argc, char *argv[]) {
                             config_json,
                             windowed); 
     }
-
-    //TODO this should no longer be necessary.
-    // std::vector<std::vector<std::string>> filenames = my_testcase.getFilenames();
-    // assert (filenames.size() > 0);
-    // assert (filenames.size() == my_testcase.numFileGraders());
-    // // rename any key files created by this test case to prepend the test number
-    // for (int v = 0; v < filenames.size(); v++) {
-    //   assert (filenames[0].size() > 0);
-    //   for (int i = 0; i < filenames[v].size(); i++) {
-    //     std::cout << "main runner " << v << " " << i << std::endl;
-    //     std::string raw_filename = my_testcase.getMyFilename(v,i);
-    //     std::string filename     = my_testcase.getMyPrefixFilename(v,i);
-    //     assert (raw_filename != "");
-    //     if (access( raw_filename.c_str(), F_OK|R_OK|W_OK ) != -1) { // file exists
-    //       std::vector<nlohmann::json> actions;
-    //       execute("/bin/mv "+raw_filename+" "+filename,
-    //               actions,
-    //               "/dev/null",
-    //               my_testcase.get_test_case_limits(),
-    //               config_json.value("resource_limits",nlohmann::json()),
-    //               config_json,
-    //               false);
-    //       std::cout << "RUNNER!  /bin/mv "+raw_filename+" "+filename << std::endl;
-    //     }
-    //   }
-    // }
     std::cout << "========================================================" << std::endl;
     std::cout << "FINISHED TEST #" << i << std::endl;
   }
