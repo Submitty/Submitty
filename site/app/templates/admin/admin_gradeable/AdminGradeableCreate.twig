@@ -160,10 +160,11 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
         <b>Or if the entire URL will be provided by the student</b>, then leave this input blank.
         <br /><br />
 
-        <em>Note: The following string replacement variables ($&#123;&hellip;&#125;) will be substituted:</em><br />
+        <em>Note: The following string variables will be replaced:</em><br />
         <ul style="list-style-position: inside;">
-            <li>gradeable_id</li>
-            <li>user_id OR team_id OR repo_id (only use one)</li>
+           <li><kbd>&#123;&#36;vcs_type&#125;</kbd></li>
+           <li><kbd>&#123;&#36;gradeable_id&#125;</kbd></li>
+           <li><kbd>&#123;&#36;user_id&#125;</kbd> OR <kbd>&#123;&#36;team_id&#125;</kbd> OR <kbd>&#123;&#36;repo_id&#125;</kbd> (use only one)</li>
         </ul>
         <br />
 
