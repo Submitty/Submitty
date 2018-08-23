@@ -684,7 +684,7 @@ cp -R ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools /tmp/docker/
 chown ${DAEMON_USER}:${DAEMON_GROUP} -R /tmp/docker
 
 pushd /tmp/docker
-su -c 'docker build -t ubuntu:custom -f Dockerfile .' ${DAEMON_USER}
+su -c 'docker build --network=host -t ubuntu:custom -f Dockerfile .' ${DAEMON_USER}
 popd > /dev/null
 
 
