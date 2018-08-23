@@ -174,7 +174,7 @@ class DatabaseQueries {
         }
         // Categories
         if($want_categories) {
-            $query_select_categories = "SELECT thread_id, array_to_string(array_agg(w.category_id),'|')  as categories_ids, array_to_string(array_agg(w.category_desc),'|') as categories_desc, array_to_string(array_agg(w.color),'|') as categories_color FROM categories_list w JOIN thread_categories e ON e.category_id = w.category_id GROUP BY e.thread_id";
+            $query_select_categories = "SELECT thread_id, array_to_string(array_agg(cl.category_id order by cl.rank nulls last, cl.category_id),'|')  as categories_ids, array_to_string(array_agg(cl.category_desc order by cl.rank nulls last, cl.category_id),'|') as categories_desc, array_to_string(array_agg(cl.color order by cl.rank nulls last, cl.category_id),'|') as categories_color FROM categories_list cl JOIN thread_categories e ON e.category_id = cl.category_id GROUP BY thread_id";
 
             $query_raw_select[] = "categories_ids";
             $query_raw_select[] = "categories_desc";
@@ -2406,7 +2406,7 @@ AND gc_id IN (
     }
 
     public function getCategories(){
-        $this->course_db->query("SELECT * from categories_list ORDER BY rank ASC NULLS LAST");
+        $this->course_db->query("SELECT * from categories_list ORDER BY rank ASC NULLS LAST, category_id");
         return $this->course_db->rows();
     }
 
