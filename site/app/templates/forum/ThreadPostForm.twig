@@ -3,7 +3,7 @@
         post_box_id="{{ post_box_id }}"
     {% endif %}
 >
-<div class="form-group row">
+<div class="form-group row" style="position: relative;">
     {% if show_title %}
     <span class="edit_thread">
         Title: <input type="text" size="45" placeholder="Title" name="title" id="title" required/>
@@ -11,18 +11,18 @@
     {% endif %}
 
     {% if show_editcat and core.getUser().getGroup() <= 2 %}
-        <span style="float:right;display:inline-block;">
-        <a class="btn btn-primary btn-sm" style="position:relative;float:right;display:inline-block;margin-right:10px;" title="Edit Categories" onclick="$('#category-list').css('display', 'block');">Edit Categories</a>
+        <span style="position:absolute;right: 0px;display:inline-block;">
+        <a class="btn btn-primary btn-sm" style="margin-right:10px;" title="Edit Categories" onclick="$('#category-list').css('display', 'block');">Edit Categories</a>
         </span>
     {% endif %}
 </div>
 <br/>
 {% if show_post %}
-    <div style="margin-bottom:10px;" class="form-group row">
+    <div style="margin-bottom:10px;position: relative;" class="form-group row">
         <button type="button" title="Insert a link" onclick="addBBCode(1, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" style="margin-right:10px;" class="btn btn-default">Link <i class="fa fa-link fa-1x"></i></button>
         <button title="Insert a code segment" type="button" onclick="addBBCode(0, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default">Code <i class="fa fa-code fa-1x"></i></button>
     {% if show_merge_thread_button and core.getUser().getGroup() <= 2 %}
-        <a class="btn btn-primary" style="position:relative;float:right;top:3px;display:inline-block;" title="Merge Threads" onclick="$('#merge-threads').css('display', 'block');loadMergeableThreads();">Merge Threads</a>
+        <a class="btn btn-primary" style="position:absolute;right: 0px;top:3px;display:inline-block;" title="Merge Threads" onclick="$('#merge-threads').css('display', 'block');loadMergeableThreads();">Merge Threads</a>
     {% endif %}
     </div>
     <div class="form-group row">
@@ -33,7 +33,7 @@
 {% endif %}
 {% if show_categories %}
     {% set categories = core.getQueries().getCategories() %}
-    <div id="category-selection-container" style="margin-bottom:10px;" class="form-group row">
+    <div id="category-selection-container" style="margin-bottom:10px;display: inline-block;" class="form-group row">
         <label for="cat" id="cat_label">Categories</label> <br>
         {% if categories | length == 0 %}
             <span class='category-list-no-element' style="margin-left: 1em;" >
@@ -54,7 +54,7 @@
     </script>
     </div>
 {% endif %}
-<div style="margin-bottom:10px;" class="form-group row">
+<div style="margin-bottom:10px;position: relative;" class="form-group row">
     {% if post_box_id %}
         <span style="display:inline-block;">
             <div class="upload_attachment_box" id="upload{{ post_box_id }}" style="cursor: pointer;">
@@ -99,7 +99,7 @@
             </script>
         {% endif %}
     {% endif %}
-    <span style="display:inline-block;float:right;">
+    <span style="display:inline-block;right: 0px;position: absolute;">
         {% if show_anon %}
             <label for="Anon">Anonymous (to class)?</label> <input type="checkbox" id="thread_post_anon" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" data-ays-ignore="true"/>
         {% endif %}
