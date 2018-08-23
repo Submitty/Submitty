@@ -147,31 +147,31 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
 
         VCS base URL (from Course Settings): <kbd>{{ vcs_base_url }}</kbd><br /><br />
 
-        <b>Specify the remainder of the VCS URL</b>, for example:<br />
-        <kbd>&#123;&#36;gradeable_id&#125;/&#123;&#36;user_id&#125;</kbd>
-        <kbd>&#123;&#36;gradeable_id&#125;/&#123;&#36;team_id&#125;</kbd>
-        <kbd>final_project/&#123;&#36;user_id&#125;</kbd>
-        <kbd>final_project/&#123;&#36;team_id&#125;</kbd>
-        <br /><br />
+        <b>Specify the remainder of the VCS URL</b>, for example one of the following:<br />
+        <kbd>&#123;&#36;gradeable_id&#125;/&#123;&#36;user_id&#125;</kbd><br />
+        <kbd>&#123;&#36;gradeable_id&#125;/&#123;&#36;team_id&#125;</kbd><br />
+        <kbd>final_project/&#123;&#36;user_id&#125;</kbd><br />
+        <br />
 
         <b>Or specify the complete url/path</b>, for example:<br />
         <kbd>https://github.com/test-course/&#123;&#36;gradeable_id&#125;/&#123;&#36;repo_id&#125;</kbd>
         <br /><br />
 
-        <b>Or if the entire URL will be provided by the student</b>, leave this input blank
+        <b>Or if the entire URL will be provided by the student</b>, then leave this input blank.
         <br /><br />
 
-        <em>Note: You are allowed to use the following string replacement variables with the format:</em> $&#123;&hellip;&#125;<br />
+        <em>Note: The following string replacement variables ($&#123;&hellip;&#125;) will be substituted:</em><br />
         <ul style="list-style-position: inside;">
             <li>gradeable_id</li>
             <li>user_id OR team_id OR repo_id (only use one)</li>
         </ul>
-        <br /><br />
+        <br />
 
         <input style='width: 83%' type='text' id="subdirectory" name='vcs_subdirectory' class="auto_save"
                value="{{ action != 'new' ? gradeable.getVcsSubdirectory() : '' }}" placeholder="(Optional)"/><br />
-
-        VCS URL: <kbd id="vcs_url"></kbd>
+        <br />
+        
+        FULL VCS URL: <kbd id="vcs_url"></kbd>
         <br />
     </div>
 
