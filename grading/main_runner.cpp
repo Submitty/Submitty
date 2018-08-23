@@ -8,7 +8,7 @@
 #include "default_config.h"
 #include "execute.h"
 
-
+#include <limits>
 
 // =====================================================================
 // =====================================================================
@@ -16,6 +16,17 @@
 
 int main(int argc, char *argv[]) {
   std::cout << "Running User Code..." << std::endl;
+  std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+  usleep(3000000);
+  std::string mystring;
+  std::cout << "waiting for a value." << std::endl;
+  while(std::cin >> mystring){
+    std::cout << "inner mystring was '" << mystring << "'" << std::endl;
+  }
+  std::cout << "mystring was '" << mystring << "'" << std::endl;
+
+  std::getline (std::cin,mystring);
+  std::cout << "mystring was '" << mystring << "'" << std::endl;
 
   std::string hw_id = "";
   std::string rcsid = "";

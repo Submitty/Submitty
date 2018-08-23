@@ -67,7 +67,7 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                     # Launches containers with the -d option. Gives them the names specified in container_info. Updates container info
                     #    to store container_ids.
                     launch_containers(container_info, testcase_folder, job_id,is_batch_job,which_untrusted,
-                                                      item_name,grading_began)
+                                         item_name,grading_began, queue_obj,submission_string,testcase_num)
                     # Networks containers together if there are more than one of them. Modifies container_info to store 'network'
                     #   The name of the docker network it is connected to.
                     network_containers(container_info,testcase_folder,os.path.join(tmp_work, "test_input"),job_id,is_batch_job,
@@ -87,22 +87,12 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
 
                     #TODO: START THE ROUTER FIRST, THEN GIVE IT A SECOND
                     if 'router' in container_info:
-                      name = 'router'
                       info = container_info['router']
                       c_id = info['container_id']
                       mounted_directory = info['mounted_directory']
                       full_name = '{0}_{1}'.format(which_untrusted, 'router')
-                      print('spinning up docker {0} with root directory {1} and c_id {2}'.format(full_name, mounted_directory, c_id))
-                      p = subprocess.Popen(['docker', 'exec', '-w', mounted_directory,
-                                                        c_id,
-                                                        os.path.join(mounted_directory, 'my_runner.out'),
-                                                        queue_obj['gradeable'],
-                                                        queue_obj['who'],
-                                                        str(queue_obj['version']),
-                                                        submission_string,
-                                                        str(testcase_num),
-                                                        name],
-                                                        stdout=logfile)
+                      print('spinning up docker {0} with c_id {2}'.format(full_name, c_id))
+                      p = subprocess.Popen(['docker', 'start', '-i',c_id], stdout=logfile,stdin=subprocess.PIPE)
                       processes.append(p)
                     time.sleep(1)
                     for name, info in container_info.items():
@@ -112,17 +102,12 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                         mounted_directory = info['mounted_directory']
                         full_name = '{0}_{1}'.format(which_untrusted, name)
                         print('spinning up docker {0} with root directory {1} and c_id {2}'.format(full_name, mounted_directory, c_id))
-                        #TODO: is it possible to synchronize execution to a greater extent?
-                        p = subprocess.Popen(['docker', 'exec', '-w', mounted_directory,
-                                                          c_id,
-                                                          os.path.join(mounted_directory, 'my_runner.out'),
-                                                          queue_obj['gradeable'],
-                                                          queue_obj['who'],
-                                                          str(queue_obj['version']),
-                                                          submission_string,
-                                                          str(testcase_num),
-                                                          name],
-                                                          stdout=logfile)
+                        p = subprocess.Popen(['docker', 'start', '-i', '--attach', c_id], stdout=logfile,stdin=subprocess.PIPE)
+                        time.sleep(1)
+                        print('communicating')
+                        p.stdin.write(b"INPUT\n")
+                        p.stdin.close()
+                        print('communicated')
                         processes.append(p)
                     #Now that all dockers are running, wait on their return code for success or failure. If any fail, we count it
                     #   as a total failure.
@@ -262,7 +247,8 @@ def create_container_subfolders(container_info, target_folder, which_untrusted):
 #dockers will either be a list of docker names or None.
 #If dockers is a list of docker names, spin up a docker for each name.
 #If dockers is none, create default docker names.
-def launch_containers(container_info, target_folder, job_id,is_batch_job,which_untrusted,submission_path,grading_began):
+def launch_containers(container_info, target_folder, job_id,is_batch_job,which_untrusted,submission_path,grading_began,
+                                                                                queue_obj,submission_string,testcase_num):
   #We must construct every container requested in container_info.
   for name in container_info:
     #Grading happens in target_folder if there is only one docker. Otherwise, it happens in target_docker/container_name
@@ -276,16 +262,27 @@ def launch_containers(container_info, target_folder, job_id,is_batch_job,which_u
     container_image = container_info[name]['container_image']
     # Launch the requeseted container
     container_id = launch_container(container_name, container_image, mounted_directory, job_id, is_batch_job, which_untrusted,
-                                    submission_path,grading_began)
+                                    submission_path,grading_began,queue_obj,submission_string,testcase_num,name)
     #add the container_id to the container info for use later.
     container_info[name]['container_id'] = container_id
 
 #Launch a single docker.
-def launch_container(container_name, container_image, mounted_directory,job_id,is_batch_job,which_untrusted,submission_path,grading_began):
+def launch_container(container_name, container_image, mounted_directory,job_id,is_batch_job,which_untrusted,submission_path,
+                                                                  grading_began,queue_obj,submission_string,testcase_num,name):
   #TODO error handling.
-  this_container = subprocess.check_output(['docker', 'run', '-t', '-d','-v', mounted_directory + ':' + mounted_directory,
+  this_container = subprocess.check_output(['docker', 'create','-v', mounted_directory + ':' + mounted_directory, 
+                                           '-w', mounted_directory,
                                            '--name', container_name,
-                                           container_image]).decode('utf8').strip()
+                                           container_image,
+                                           #The command to be run.
+                                           os.path.join(mounted_directory, 'my_runner.out'),
+                                             queue_obj['gradeable'],
+                                             queue_obj['who'],
+                                             str(queue_obj['version']),
+                                             submission_string,
+                                             str(testcase_num),
+                                             name
+                                           ]).decode('utf8').strip()
   dockerlaunch_done =dateutils.get_current_time()
   dockerlaunch_time = (dockerlaunch_done-grading_began).total_seconds()
   grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,submission_path,"dcct:",dockerlaunch_time,
