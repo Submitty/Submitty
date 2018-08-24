@@ -94,11 +94,21 @@
     {% else %}
         <pre>{{ build_script_output|raw }}</pre>
     {% endif %}
+    <br />
+    
     <h3>CMake output:</h3>
-    {% if cmake_output is null or cmkae_output is empty %}
+    {% if cmake_output is null or cmake_output is empty %}
         <pre>There is currently no cmake output.</pre>
     {% else %}
         <pre>{{ cmake_output|raw }}</pre>
+    {% endif %}
+    <br />
+    
+    <h3>Make output:</h3>
+    {% if make_output is null or make_output is empty %}
+        <pre>There is currently no make output.</pre>
+    {% else %}
+        <pre>{{ make_output|raw }}</pre>
     {% endif %}
 
 </div>
