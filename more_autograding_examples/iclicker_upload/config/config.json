@@ -12,7 +12,6 @@
             "type" : "FileCheck",
             "title" : "iClicker ID",
             "actual_file" : "textbox_0.txt",
-            "description" : "my iclicker",
             "points" : 0
         }
     ]

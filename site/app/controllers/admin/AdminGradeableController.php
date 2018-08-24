@@ -200,7 +200,11 @@ class AdminGradeableController extends AbstractController {
             }
         }
 
-        // Load output from cmake build of config file
+        // Load output from build of config file
+        $build_script_output_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build_script_output.txt');
+        $build_script_output = is_file($build_script_output_file) ? file_get_contents($build_script_output_file) : null;
+        $make_out_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $gradeable->getId(), 'log_make_output.txt');
+        $make_output = is_file($make_out_dir) ? file_get_contents($make_out_dir) : null;
         $cmake_out_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $gradeable->getId(), 'log_cmake_output.txt');
         $cmake_output = is_file($cmake_out_dir) ? file_get_contents($cmake_out_dir) : null;
 
@@ -249,7 +253,9 @@ class AdminGradeableController extends AbstractController {
             'config_select_mode' => $config_select_mode,
 
             //build outputs
+            'build_script_output' => htmlentities($build_script_output),
             'cmake_output' => htmlentities($cmake_output),
+            'make_output' => htmlentities($make_output),
 
             // rebuild queue information
             'is_in_rebuild_queue' => $is_in_rebuild_queue,

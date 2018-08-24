@@ -89,10 +89,26 @@
     <a class="btn btn-primary" href="{{ core.buildUrl({ 'component': 'admin', 'page': 'admin_gradeable', 'action': 'rebuild_assignment', 'id': gradeable.getId() }) }}">Rebuild Gradeable (only necessary if you have modified your custom configuration files)</a>
     <br /> <br />
     <h3>Build log:</h3>
-    {% if cmake_output is null %}
+    {% if build_script_output is null or build_script_output is empty %}
         <pre>There is currently no build output.</pre>
     {% else %}
+        <pre>{{ build_script_output|raw }}</pre>
+    {% endif %}
+    <br />
+    
+    <h3>CMake output:</h3>
+    {% if cmake_output is null or cmake_output is empty %}
+        <pre>There is currently no cmake output.</pre>
+    {% else %}
         <pre>{{ cmake_output|raw }}</pre>
+    {% endif %}
+    <br />
+    
+    <h3>Make output:</h3>
+    {% if make_output is null or make_output is empty %}
+        <pre>There is currently no make output.</pre>
+    {% else %}
+        <pre>{{ make_output|raw }}</pre>
     {% endif %}
 
 </div>
