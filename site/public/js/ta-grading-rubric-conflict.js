@@ -4,148 +4,77 @@
  */
 
 /**
- * Gets the minimal mark information for a resolved mark (id, title, points)
- * @return {Object[]} points, id and title
+ * Gets the JQuery selector for the conflict mark
+ * @param {int} mark_id
+ * @returns {jQuery}
  */
-function getResolvedMarksFromDOM() {
-    let markList = [];
-    $('#mark-conflict-popup .mark-conflict-row').each(function () {
-        let id = parseInt($(this).attr('data-mark_id'));
-
-        let chosenPointsElement = $(this).find('.points-selected');
-        if (chosenPointsElement.length === 0) {
-            throw new Error('Resolution must be selected for ' + id);
-        }
-
-        let chosenTitleElement = $(this).find('.title-selected');
-        if (chosenTitleElement.length === 0) {
-            throw new Error('Resolution must be selected for ' + id);
-        }
-
-        // Is the mark tagged to be deleted?
-        if (isMarkResolutionDelete(this)) {
-            // Mark is tagged to be deleted, but was it deleted from the server?
-            if (isMarkServerDeleted(this)) {
-                // Deleted from the server already, so we need not do anything
-                markList.push({
-                    id: id,
-                    resolution: 'nothing'
-                });
-            } else {
-                // Not deleted from the server, so we should delete it
-                markList.push({
-                    id: id,
-                    resolution: 'delete'
-                });
-            }
-        } else {
-            // Normal operation, so save
-            markList.push({
-                id: id,
-                points: parseFloat(chosenPointsElement.attr('data-points')),
-                title: chosenTitleElement.attr('data-title'),
-                resolution: isMarkServerDeleted(this) ? 'add' : 'save'
-            });
-        }
-    });
-    return markList;
+function getConflictMarkJQuery(mark_id) {
+    return $('#mark-conflict-' + mark_id);
 }
 
 /**
- * Gets if the mark is tagged for deletion
- * @param me DOM element of the mark-conflict-row
- * @returns {boolean}
+ * Gets the mark id from its dom element or a child dom element
+ * @param me
+ * @return {int}
  */
-function isMarkResolutionDelete(me) {
-    return $(me).find('.title-selected').hasClass('mark-deleted-message');
+function getConflictMarkIdFromDOMElement(me) {
+    return $(me).hasClass('mark-conflict-row')
+        ? parseInt($(me).attr('data-mark_id'))
+        : parseInt($(me).parents('.mark-conflict-row').attr('data-mark_id'));
 }
 
 /**
  * Gets if the mark is deleted from the server
- * @param me DOM element of the mark-conflict-row
+ * @param {int} mark_id
  * @return {boolean}
  */
-function isMarkServerDeleted(me) {
-    return $(me).find('.mark-resolve-server').find('.title-selected').length > 0
+function isMarkServerDeleted(mark_id) {
+    return getConflictMarkJQuery(mark_id).find('.mark-resolve-server').find('.mark-deleted-message').length > 0;
 }
 
 /**
- * Gets the JQuery selector for the mark 'me' belongs to
- * @param me
- * @return {jQuery}
+ * Gets if any marks are unresolved
+ * @returns {boolean}
  */
-function getConflictMarkJQuery(me) {
-    return $(me).parents('.mark-conflict-row');
+function anyUnresolvedConflicts() {
+    return $('#mark-conflict-popup').find('.mark-conflict-row:not(.mark-resolved)').length > 0;
 }
 
 /**
- * Gets the JQuery selector for the mark resolution 'me' belongs to
- * @param me
- * @returns {jQuery}
+ * Gets the number of mark conflicts that have been resolved
+ * @returns {int}
  */
-function getConflictMarkResolutionJQuery(me) {
-    return $(me).parents('.mark-resolve');
+function getNumResolvedConflicts() {
+    return $('#mark-conflict-popup').find('.mark-conflict-row.mark-resolved').length;
 }
 
 /**
- * DOM Callback for the resolve buttons
- * @param me
+ * Tags a mark as resolved
+ * @param {int} mark_id
  */
-function onResolutionClick(me) {
-    onConflictPointsClick(me);
-    onConflictTitleClick(me);
+function tagMarkConflictResolved(mark_id) {
+    getConflictMarkJQuery(mark_id).addClass('mark-resolved');
 }
 
 /**
- * Un-selects the 'delete' row for the resolution
- * @param me
+ * Shows the next unresolved mark conflict
  */
-function unSelectDeleteResolve(me) {
-    let deleteItem = getConflictMarkJQuery(me).find('mark-deleted-message');
-    deleteItem.removeClass('points-selected');
-    deleteItem.removeClass('title-selected');
-}
-
-/**
- * DOM Callback for clicking one of the 'points' values
- * @param me
- */
-function onConflictPointsClick(me) {
-    unSelectDeleteResolve(me);
-    getConflictMarkJQuery(me).find('.points').removeClass('points-selected');
-    getConflictMarkResolutionJQuery(me).find('.points').addClass('points-selected');
-}
-
-/**
- * DOM Callback for clicking one of the 'title' values
- * @param me
- */
-function onConflictTitleClick(me) {
-    unSelectDeleteResolve(me);
-    getConflictMarkJQuery(me).find('.title').removeClass('title-selected');
-    getConflictMarkResolutionJQuery(me).find('.title').addClass('title-selected');
-}
-
-/**
- * DOM Callback for clicking on the mark deleted row
- * @param me
- */
-function onConflictDeleteClick(me) {
-    let container = getConflictMarkJQuery(me);
-    container.find('.title').removeClass('title-selected');
-    container.find('.points').removeClass('points-selected');
-    $(me).addClass('title-selected');
-    $(me).addClass('points-selected');
+function showNextConflict() {
+    $('.mark-conflict-row').hide();
+    $('.mark-conflict-row:not(.mark-resolved)').first().show();
+    $('.conflict-resolve-progress-indicator').text(getNumResolvedConflicts() + 1);
 }
 
 /**
  * Prepares the conflict marks to be rendered
- * @param {Object[]} conflictMarks
+ * @param {Object} conflictMarks
  */
 function prepConflictMarks(conflictMarks) {
-    conflictMarks.forEach(function(mark) {
-        mark.local_deleted = isMarkDeleted(mark.domMark.id);
-    });
+    for (let id in conflictMarks) {
+        if (conflictMarks.hasOwnProperty(id)) {
+            conflictMarks[id].local_deleted = isMarkDeleted(parseInt(id));
+        }
+    }
 }
 
 /**
@@ -156,6 +85,7 @@ function prepConflictMarks(conflictMarks) {
  *                              The mark will be null if it should be deleted
  */
 function openMarkConflictPopup(component_id, conflictMarks) {
+    let gradeable_id = getGradeableId();
     let popup = $('#mark-conflict-popup');
 
     // Set the component title
@@ -173,40 +103,70 @@ function openMarkConflictPopup(component_id, conflictMarks) {
             // Open the popup
             popup.show();
 
-            // Setup the 'submit' button to resolve the promise
-            //  and the 'cancel' button to reject the promise
+            // Setup the promise so that resolving the last mark will resolve the promise
             return new Promise(function (resolve, reject) {
-                popup.find('.resolve-button').click(function () {
-                    // Use the dom marks as the starting point
-                    let resolvedMarks = {};
-                    conflictMarks.forEach(function (conflictMark) {
-                        resolvedMarks[conflictMark.domMark.id] = conflictMark.domMark;
-                    });
-
-                    try {
-                        // For each mark in the resolution, update points and title
-                        getResolvedMarksFromDOM().forEach(function (mark) {
-                            resolvedMarks[mark.id].resolution = mark.resolution;
-                            resolvedMarks[mark.id].title = mark.title;
-                            resolvedMarks[mark.id].points = mark.points;
-                        });
-                    } catch (err) {
-                        console.error(err);
-                        alert('Failed to get resolutions! ' + err.message);
-
-                        // We don't reject the promise, we just force the user to fix the problem
-                        return;
+                // Function to tag a mark as resolved and move to the next mark
+                let resolveMark = function(mark_id) {
+                    tagMarkConflictResolved(mark_id);
+                    if(!anyUnresolvedConflicts()) {
+                        popup.hide();
+                        resolve();
+                    } else {
+                        showNextConflict();
                     }
-                    popup.hide();
+                };
 
-                    // Finally, resolve the promise
-                    resolve(resolvedMarks);
+                // In order for the event handlers to have the power to resolve the promise,
+                //  they need to be established within the promise
+                popup.find('.mark-resolve-dom .btn').click(function() {
+                    let id = getConflictMarkIdFromDOMElement(this);
+                    let mark = conflictMarks[id].domMark;
+
+                    Promise.resolve()
+                        .then(function() {
+                            if (conflictMarks[id].local_deleted) {
+                                return ajaxDeleteMark(gradeable_id, component_id ,id)
+                                    .catch(function (err) {
+                                        // Don't let this error hold up the whole operation
+                                        alert('Could not delete mark: ' + err.message);
+                                    });
+                            } else {
+                                // If the mark was deleted from the server, but we want to keep our changes,
+                                //  we need to re-add the mark, then save it to preserve the 'publish' setting
+                                if (isMarkServerDeleted(id)) {
+                                    return ajaxAddNewMark(gradeable_id, component_id, mark.title, mark.points)
+                                        .then(function (data) {
+                                            mark.id = data.mark_id;
+                                            return ajaxSaveMark(gradeable_id, component_id, data.mark_id, mark.title, mark.points, mark.publish);
+                                        });
+                                } else {
+                                    return ajaxSaveMark(gradeable_id, component_id, id, mark.title, mark.points, mark.publish);
+                                }
+                            }
+                        })
+                        .then(function() {
+                            resolveMark(id);
+                        })
+                        .catch(function(err) {
+                            console.error(err);
+                            alert('Failed to resolve conflict! ' + err.message);
+                        });
                 });
-                popup.find('.close-button').click(function () {
-                    popup.hide();
-
-                    // If the user cancels, don't reject, just resolve a blank array of resolutions
-                    resolve([]);
+                popup.find('.mark-resolve-old-server .btn').click(function() {
+                    let id = getConflictMarkIdFromDOMElement(this);
+                    let mark = conflictMarks[id].oldServerMark;
+                    ajaxSaveMark(gradeable_id, component_id, id, mark.title, mark.points, mark.publish)
+                        .then(function() {
+                            resolveMark(id);
+                        })
+                        .catch(function(err) {
+                            console.error(err);
+                            alert('Failed to resolve conflict! ' + err.message);
+                        });
+                });
+                popup.find('.mark-resolve-server .btn').click(function() {
+                    // If we choose the server mark, we don't do anything
+                    resolveMark(getMarkIdFromDOMElement(this));
                 });
             })
         });

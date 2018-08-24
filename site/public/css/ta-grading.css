@@ -695,14 +695,12 @@ tr.is_publish {
     width: 100%;
 }
 
-#mark-conflict-popup .mark-conflict-row .title.title-selected {
-    background-color: #c3c3c3;
+#mark-conflict-popup .mark-conflict-row.mark-resolved,
+#mark-conflict-popup .mark-conflict-row.hidden {
+    display: none;
 }
 
-#mark-conflict-popup .mark-conflict-row .points.points-selected {
-    background-color: #c3c3c3;
-}
-
-#mark-conflict-popup .color-swatch {
-    width: 50px;
+#mark-conflict-popup .conflict-resolve-progress {
+    width: fit-content;
+    margin: 0 auto;
 }

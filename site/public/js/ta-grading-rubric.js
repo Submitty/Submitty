@@ -475,12 +475,12 @@ function ajaxDeleteMark(gradeable_id, component_id, mark_id) {
  * @param {string} gradeable_id
  * @param {int} component_id
  * @param {int} mark_id
- * @param {float} points
  * @param {string} title
+ * @param {number} points
  * @param {boolean} publish
  * @return {Promise} Rejects except when the response returns status 'success'
  */
-function ajaxSaveMark(gradeable_id, component_id, mark_id, points, title, publish) {
+function ajaxSaveMark(gradeable_id, component_id, mark_id, title, points, publish) {
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "POST",
@@ -2530,9 +2530,6 @@ function saveMarkList(component_id) {
             // associative array of associative arrays of marks with conflicts {<mark_id>: {domMark, serverMark, oldServerMark}, ...}
             let conflictMarks = {};
 
-            // Also generate a normal array to pass to the conflict popup
-            let conflictMarksArr = [];
-
             let sequence = Promise.resolve();
 
             // For each DOM mark, try to save it
@@ -2552,7 +2549,6 @@ function saveMarkList(component_id) {
                                 oldServerMark: oldServerMark,
                                 localDeleted: isMarkDeleted(domMark.id)
                             };
-                            conflictMarksArr.push(conflictMarks[domMark.id]);
                         }
                     });
             });
@@ -2560,45 +2556,12 @@ function saveMarkList(component_id) {
             return sequence
                 .then(function () {
                     // No conflicts, so don't open the popup
-                    if (conflictMarksArr.length === 0) {
-                        return {};
+                    if (Object.keys(conflictMarks).length === 0) {
+                        return;
                     }
 
                     // Prompt the user with any conflicts
-                    return openMarkConflictPopup(component_id, conflictMarksArr);
-                })
-                .then(function (resolvedMarks) {
-                    // Get the resolution of those conflicts and save each
-                    let sequence1 = Promise.resolve();
-                    let gradeable_id = getGradeableId();
-
-                    for (let id in resolvedMarks) {
-                        if (resolvedMarks.hasOwnProperty(id)) {
-                            let mark = resolvedMarks[id];
-                            if (mark.resolution === 'delete') {
-                                sequence1 = sequence1
-                                    .then(function () {
-                                        return ajaxDeleteMark(gradeable_id, component_id, parseInt(id));
-                                    })
-                                    .catch(function (err) {
-                                        // Don't let this error hold up the whole operation
-                                        alert('Could not delete mark: ' + err.message);
-                                    });
-                            } else if (mark.resolution === 'save') {
-                                sequence1 = sequence1
-                                    .then(function () {
-                                        return ajaxSaveMark(gradeable_id, component_id, mark.id, mark.points, mark.title, mark.publish);
-                                    });
-                            } else if (mark.resolution === 'add') {
-                                sequence1 = sequence1
-                                    .then(function () {
-                                        // NOTE: the 'publish' setting will not be saved, but that's not a big deal
-                                        return ajaxAddNewMark(gradeable_id, component_id, mark.points, mark.title);
-                                    });
-                            }
-                        }
-                    }
-                    return sequence1;
+                    return openMarkConflictPopup(component_id, conflictMarks);
                 })
                 .then(function () {
                     let markOrder = {};
@@ -2656,7 +2619,7 @@ function tryResolveMarkSave(gradeable_id, component_id, domMark, serverMark, old
             } else {
                 // The domMark is unique and the serverMark is the same as the oldServerMark
                 //  so we should save the domMark to the server
-                return ajaxSaveMark(gradeable_id, component_id, domMark.id, domMark.points, domMark.title, domMark.publish)
+                return ajaxSaveMark(gradeable_id, component_id, domMark.id, domMark.title, domMark.points, domMark.publish)
                     .then(function () {
                         // Success, then resolve success
                         return Promise.resolve(true);

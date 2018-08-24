@@ -1,8 +1,7 @@
 {% extends 'generic/Popup.twig' %}
 {% block popup_id %}mark-conflict-popup{% endblock %}
-{% block title %}Mark Conflicts{% endblock %}
+{% block title %}Mark Conflicts: <span class="component-title"></span>{% endblock %}
 {% block body %}
-    <h3 class="component-title"></h3>
     <h4>
         It looks like someone else also edited the rubric.  Choose the changes you want to keep.
     </h4>
@@ -10,6 +9,4 @@
     </div>
 {% endblock %}
 {% block buttons %}
-    <a class="btn btn-primary resolve-button">Submit</a>
-    <a class="btn btn-default close-button">Cancel (Keep Server Data)</a>
 {% endblock %}
