@@ -100,6 +100,8 @@ class DateUtils {
 
     /**
      * Parses a date string into a \DateTime object using regex.  This allows dates to be year >9999
+     * Format YYYYY-MM-DD HH:mm:ssZ
+     * 
      * @param string $date_time
      * @param \DateTimeZone|null $default_date_time The default timezone to use if none provided
      * @return DateTime
