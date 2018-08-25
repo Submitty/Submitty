@@ -83,15 +83,19 @@ class DateUtils {
      * Parses a date string into a \DateTime object, or does nothing if $date is already a \DateTime object
      *
      * @param \DateTime|string $date The date to parse
-     * @param \DateTimeZone|null $default_time_zone The time zone to use if none specified in $date
+     * @param \DateTimeZone $time_zone
      * @return \DateTime The parsed date
-     * @throws \InvalidArgumentException If $date is not a string or a \DateTime, or not a valid \DateTime
+     * @throws \InvalidArgumentException If $date is not a string or a \DateTime, or not a valid \DateTime string
      */
-    public static function parseDateTime($date, $default_time_zone = null) {
+    public static function parseDateTime($date, \DateTimeZone $time_zone) {
         if ($date instanceof \DateTime) {
             return $date;
         } else if (gettype($date) === 'string') {
-            return new \DateTime($date, $default_time_zone);
+            try {
+                return new \DateTime($date, $time_zone);
+            } catch (\Exception) {
+                throw new \InvalidArgumentException('Invalid DateTime Format');
+            }
         } else {
             throw new \InvalidArgumentException('Passed object was not a DateTime object or a date string');
         }
@@ -101,7 +105,7 @@ class DateUtils {
      * Parses a date string into a \DateTime object using regex.  This allows dates to be year >9999
      * Note: This is designed so that dates larger than year 9999 can be loaded from the db without exception.
      * Format YYYYY-MM-DD HH:mm:ssZ
-     * 
+     *
      * @param string $date_time
      * @param \DateTimeZone|null $default_time_zone The default timezone to use if none provided
      * @return DateTime
