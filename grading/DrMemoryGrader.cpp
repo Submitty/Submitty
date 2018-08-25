@@ -9,7 +9,7 @@ TestResults* DrMemoryGrader_doit (const TestCase &tc, const nlohmann::json& j) {
 
   // open the specified runtime DrMemory output/log file
   std::string filename = j.value("actual_file","");
-  std::ifstream drmemory_output((tc.getPrefix()+"_"+filename).c_str());
+  std::ifstream drmemory_output((tc.getPrefix()+filename).c_str());
 
   // check to see if the file was opened successfully
   if (!drmemory_output.good()) {

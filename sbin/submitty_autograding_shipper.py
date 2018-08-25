@@ -336,7 +336,7 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
             shipper_counter = 0
             time.sleep(1)
             if shipper_counter >= 10:
-                prints(my_name, which_untrusted, "shipper prep loop: ",queue_file)
+                print(my_name, which_untrusted, "shipper prep loop: ",queue_file)
                 shipper_counter=0
         # then wait for grading to be completed
         shipper_counter=0
@@ -429,7 +429,8 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
     if not my_job == "":
         grading_file = os.path.join(folder, "GRADING_" + my_job)
         # create the grading file
-        open(os.path.join(grading_file), "w").close()
+        with open(os.path.join(grading_file), "w") as queue_file:
+            json.dump({"untrusted": which_untrusted}, queue_file)
 
     overall_lock.release()
 
@@ -551,12 +552,12 @@ def launch_shippers(worker_status_map):
                 full_address = "{0}@{1}".format(machine["username"], machine["address"])
             else:
                 if not machine["username"] == "":
-                    Raise('ERROR: username for primary (localhost) must be ""')
+                    raise SystemExit('ERROR: username for primary (localhost) must be ""')
                 full_address = machine['address']
 
             num_workers_on_machine = machine["num_autograding_workers"]
             if num_workers_on_machine < 0:
-                raise SystemExit("ERROR: num_workers_on_machine for '{0}' must be non-negative.".format(which_machine))
+                raise SystemExit("ERROR: num_workers_on_machine for '{0}' must be non-negative.".format(machine))
 
             single_machine_data = {name : machine}
             single_machine_data = add_fields_to_autograding_worker_json(single_machine_data, name)

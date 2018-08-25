@@ -1,7 +1,7 @@
 <tr
     id="mark_id-{{ c_index }}-{{ m_id }}"
     name="mark_{{ c_index }}"
-    class="{{ mark.publish ? "is_publish" : "" }}"
+    class="mark-container {{ mark.publish ? "is_publish" : "" }}"
     data-component_index="{{ c_index }}"
     data-mark_index="{{ m_id }}"
     {% if editable %}
@@ -14,82 +14,96 @@
         colspan="1"
         class="mark-score-container"
     >
-        {% if not editEnabled %}
-            <span
-                id="mark_id-{{ c_index }}-{{ m_id }}-check"
-                onclick="selectMark('{{ c_index }}', '{{ m_id }}'); event.stopPropagation();"
-                data-component_index="{{ c_index }}"
-                data-mark_index="{{ m_id }}"
-                class="{{ mark.has ? "mark-has" : "" }} mark mark-selector"
-                name="mark_icon_{{ c_index }}_{{ m_id }}"
-            >
+        <div class="mark-cell-box">
+            {% if not editEnabled %}
+                <span
+                    id="mark_id-{{ c_index }}-{{ m_id }}-check"
+                    onclick="selectMark('{{ c_index }}', '{{ m_id }}'); event.stopPropagation();"
+                    data-component_index="{{ c_index }}"
+                    data-mark_index="{{ m_id }}"
+                    class="{{ mark.has ? "mark-has" : "" }} mark mark-selector"
+                    name="mark_icon_{{ c_index }}_{{ m_id }}"
+                >
 
-            {{ m_index + 1 }}
-            </span>
-        {% endif %}
-        <input
-            name="mark_points_{{ c_index }}_{{ m_id }}"
-            type="number" onchange="updateMarkPoints(this);"
-            step="{{ gradeable.precision }}"
-            {% if editable %}
-                onclick="event.stopPropagation();"
-            {% else %}
-                readonly
-                onmouseup="$(this).blur();"
+                {{ m_index + 1 }}
+                </span>
             {% endif %}
-            value="{{ mark.points }}"
-            data-component_index="{{ c_index }}"
-            data-mark_index="{{ m_id }}"
-            class="mark-score {% if not editable %} mark-uneditable {% endif %}"
-        >
-    </td>
-    {% if editable %}
-        <td colspan="3">
-            <textarea
-                {% if not editable %}
-                    readonly
-                    onmouseup="$(this).blur();"
-                {% endif %}
-                name="mark_text_{{ c_index }}_{{ m_id }}"
-                onchange="updateMarkText(this);"
-                onkeyup="autoResizeComment(event);"
-                onclick="event.stopPropagation();"
-                rows="1"
-                cols="120"
-                data-component_index="{{ c_index }}"
-                data-mark_index="{{ m_id }}"
-                class="mark-note {% if not editable %} mark-uneditable {% endif %}"
-            >{{ mark.name|escape }}</textarea>
-            <span id="mark_info_id-{{ c_index }}-{{ m_id }}" onclick="saveMark('{{ c_index }}' ); showMarklist(this); event.stopPropagation();">
-                <i class="fa fa-users icon-got-this-mark"></i>
-            </span>
-        </td>
-        <td colspan="1">    
-            <span id="mark_delete_id-{{ c_index }}-{{ m_id }}" onclick="deleteMark({{ c_index }}, {{ m_id }}); event.stopPropagation();">
-                <i class="fa fa-trash"></i>
-            </span>
-        </td>
-    {% else %}
-        <td colspan="4">
-            <textarea
-                name="mark_text_{{ c_index }}_{{ m_id }}"
-                onchange="updateMarkText(this);"
-                onkeyup="autoResizeComment(event);"
+            <input
+                name="mark_points_{{ c_index }}_{{ m_id }}"
+                type="number" onchange="updateMarkPoints(this);"
+                step="{{ gradeable.precision }}"
                 {% if editable %}
                     onclick="event.stopPropagation();"
                 {% else %}
                     readonly
                     onmouseup="$(this).blur();"
                 {% endif %}
-                rows="1"
-                cols="120"
+                value="{{ mark.points }}"
                 data-component_index="{{ c_index }}"
                 data-mark_index="{{ m_id }}"
-                class="mark-note {% if not editable %} mark-uneditable {% endif %}"
-            >{{ mark.name|escape }}</textarea>
-            <span id="mark_info_id-{{ c_index }}-{{ m_id }}" onclick="saveMark('{{ c_index }}' ); showMarklist(this); event.stopPropagation();">
-                <i class="fa fa-users icon-got-this-mark"></i>
+                class="mark-score {% if not editable %} mark-uneditable {% endif %}"
+            >
+        </div>
+    </td>
+    {% if editable %}
+        <td colspan="3">
+            <div class="mark-cell-box">
+                <textarea
+                    {% if not editable %}
+                        readonly
+                        onmouseup="$(this).blur();"
+                    {% endif %}
+                    name="mark_text_{{ c_index }}_{{ m_id }}"
+                    onchange="updateMarkText(this);"
+                    onkeyup="autoResizeComment(event);"
+                    onclick="event.stopPropagation();"
+                    rows="1"
+                    cols="120"
+                    data-component_index="{{ c_index }}"
+                    data-mark_index="{{ m_id }}"
+                    class="mark-note {% if not editable %} mark-uneditable {% endif %}"
+                >{{ mark.name|escape }}</textarea>
+            </div>
+        </td>
+        <td colspan="1">
+            <span id="mark_delete_id-{{ c_index }}-{{ m_id }}" onclick="deleteMark({{ c_index }}, {{ m_id }}); event.stopPropagation();">
+                <i class="fa fa-trash"></i>
             </span>
+        </td>
+        <td colspan="1">
+            <div class="mark-cell-box">
+                <span id="mark_info_id-{{ c_index }}-{{ m_id }}" onclick="saveMark('{{ c_index }}' ); showMarklist(this); event.stopPropagation();">
+                    <i class="fa fa-users icon-got-this-mark"></i>
+                </span>
+            </div>
+        </td>
+    {% else %}
+        <td colspan="4">
+            <div class="mark-cell-box">
+                <textarea
+                    name="mark_text_{{ c_index }}_{{ m_id }}"
+                    onchange="updateMarkText(this);"
+                    onkeyup="autoResizeComment(event);"
+                    {% if editable %}
+                        onclick="event.stopPropagation();"
+                    {% else %}
+                        readonly
+                        onmouseup="$(this).blur();"
+                    {% endif %}
+                    rows="1"
+                    cols="120"
+                    data-component_index="{{ c_index }}"
+                    data-mark_index="{{ m_id }}"
+                    class="mark-note {% if not editable %} mark-uneditable {% endif %}"
+                >{{ mark.name|escape }}</textarea>
+            </div>
+        </td>
+        <td colspan="1">
+            <div class="mark-cell-box">
+                <span id="mark_info_id-{{ c_index }}-{{ m_id }}" onclick="saveMark('{{ c_index }}' ); showMarklist(this); event.stopPropagation();">
+                    <i class="fa fa-users icon-got-this-mark"></i>
+                </span>
+            </div>
         </td>
     {% endif %}
 </tr>

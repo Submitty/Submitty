@@ -6,7 +6,7 @@
 
 echo -e "Copy the submission website"
 
-if [ -z ${SUBMITTY_INSTALL_DIR+x} ]; then
+if [ -z ${PHP_USER+x} ]; then
     # constants are not initialized,
     CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../config
     SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
@@ -63,6 +63,8 @@ done
 # "other" can read & execute these files
 find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.js -exec chmod o+rx {} \;
 find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -type f -name \*.cgi -exec chmod u+x {} \;
+
+chmod 550 ${SUBMITTY_INSTALL_DIR}/site/cgi-bin/git-http-backend
 
 # cache needs to be writable
 find ${SUBMITTY_INSTALL_DIR}/site/cache -type d -exec chmod u+w {} \;

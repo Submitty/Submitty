@@ -1,22 +1,23 @@
 const { UI } = PDFAnnotate;
+
+let currentTool;
+
 let documentId = '';
 let PAGE_HEIGHT;
 let RENDER_OPTIONS = {
     documentId,
-    //User id in this case is the grader
-    userId: null,
     pdfDocument: null,
     scale: parseFloat(localStorage.getItem('scale')) || 1,
     rotate: parseInt(localStorage.getItem('rotate')) || 0
 };
 let GENERAL_INFORMATION = {
+    grader_id: "",
     user_id: "",
     gradeable_id: "",
     file_name: "",
 }
 
-PDFAnnotate.setStoreAdapter(new PDFAnnotate.LocalStoreAdapter());
-PDFJS.workerSrc = 'js/pdf/pdf.worker.js';
+PDFJS.workerSrc = 'js/pdf/pdf.worker.min.js';
 
 /*
  * This chunk renders the page when scrolling. It also makes sure that no page is rendered more than once.
@@ -55,17 +56,31 @@ function render(gradeable_id, user_id, grader_id, file_name) {
             filename: file_name
         },
         success: function(data){
+            GENERAL_INFORMATION.grader_id = grader_id;
             GENERAL_INFORMATION.user_id = user_id;
             GENERAL_INFORMATION.gradeable_id = gradeable_id;
             GENERAL_INFORMATION.file_name = file_name;
             RENDER_OPTIONS.documentId = file_name;
-            RENDER_OPTIONS.userId = grader_id;
+            PDFAnnotate.setStoreAdapter(new PDFAnnotate.LocalStoreAdapter(grader_id));
             // documentId = file_name;
-            var pdfData = JSON.parse(data);
-            pdfData = atob(pdfData);
+
+            let pdfData;
+            try {
+                pdfData = JSON.parse(data);
+                pdfData = atob(pdfData);
+            } catch (err){
+                alert("Please select 'Grade this version' in Student Information panel. If it is already selected, " +
+                    "then the PDF is either corrupt or broken");
+            }
             PDFJS.getDocument({data:pdfData}).then((pdf) => {
                 RENDER_OPTIONS.pdfDocument = pdf;
                 let viewer = document.getElementById('viewer');
+                $(viewer).on('touchstart touchmove', function(e){
+                    //Let touchscreen work
+                    if(currentTool == "pen" || currentTool == "text"){
+                        e.preventDefault();
+                    }
+                });
                 viewer.innerHTML = '';
                 NUM_PAGES = pdf.pdfInfo.numPages;
                 for (let i=0; i<NUM_PAGES; i++) {
@@ -122,6 +137,9 @@ function render(gradeable_id, user_id, grader_id, file_name) {
                         $('#scroll_lock_mode').removeAttr('checked');
                         UI.disablePen();
                         break;
+                    case 'eraser':
+                        UI.disableEraser();
+                        break;
                     case 'cursor':
                         UI.disableEdit();
                         break;
@@ -133,7 +151,12 @@ function render(gradeable_id, user_id, grader_id, file_name) {
             }
             switch(option){
                 case 'pen':
+                    currentTool = 'pen';
                     UI.enablePen();
+                    break;
+                case 'eraser':
+                    currentTool = 'eraser';
+                    UI.enableEraser();
                     break;
                 case 'cursor':
                     UI.enableEdit();
@@ -157,6 +180,7 @@ function render(gradeable_id, user_id, grader_id, file_name) {
                     debounce(rotate, 500);
                     break;
                 case 'text':
+                    currentTool = 'text';
                     UI.enableText();
                     break;
             }
@@ -218,7 +242,7 @@ function render(gradeable_id, user_id, grader_id, file_name) {
 
     function saveFile(){
         let url = buildUrl({'component': 'grading','page': 'electronic', 'action': 'save_pdf_annotation'});
-        let annotation_layer = localStorage.getItem(`${RENDER_OPTIONS.documentId}/${RENDER_OPTIONS.userId}/annotations`);
+        let annotation_layer = localStorage.getItem(`${RENDER_OPTIONS.documentId}/${GENERAL_INFORMATION.grader_id}/annotations`);
         $.ajax({
             type: 'POST',
             url: url,
@@ -237,13 +261,44 @@ function render(gradeable_id, user_id, grader_id, file_name) {
         setActiveToolbarItem(e.target.getAttribute('value'));
     }
     document.getElementById('pdf_annotation_icons').addEventListener('click', handleToolbarClick);
-    //TODO: Find a better home for this, shouldn't be here.
-    document.getElementById('reset_zoom').addEventListener('click', function(){
-        zoom('custom', 100);
-    });
-    document.getElementById('zoom_percent_selector').addEventListener('change', function(e){
-        zoom('custom', e.target.value);
-    });
+})();
+
+// Color/size selection
+(function () {
+    let main_color;
+    function initColors(){
+        let init_color = localStorage.getItem('main_color') || '#ff0000';
+        document.getElementById('color_selector').style.backgroundColor = init_color;
+        setColor(init_color);
+    }
+
+    function colorMenuToggle(e){
+        let shouldShow = !$('#color_selector_menu').is(':visible');
+        $('.selection-menu').hide();
+        shouldShow && $('#color_selector_menu').toggle();
+    }
+
+    function sizeMenuToggle(){
+        let shouldShow = !$('#size_selector_menu').is(':visible');
+        $('.selection-menu').hide();
+        shouldShow && $('#size_selector_menu').toggle();
+    }
+
+    function changeColor(e){
+        setColor(e.srcElement.getAttribute('value'))
+    }
+
+    function setColor(color){
+        if(main_color != color){
+            main_color = color;
+            localStorage.setItem('main_color', color);
+            document.getElementById('color_selector').style.backgroundColor = color;
+        }
+    }
+    document.getElementById("color_selector").addEventListener('click', colorMenuToggle);
+    document.getElementById("size_selector").addEventListener('click', sizeMenuToggle);
+    document.addEventListener('colorchange', changeColor);
+    initColors();
 })();
 
 // Pen stuff
@@ -253,10 +308,9 @@ function render(gradeable_id, user_id, grader_id, file_name) {
     let scrollLock;
     function initPen() {
         let init_size = localStorage.getItem('pen/size') || 3;
-        let init_color = localStorage.getItem('pen/color') || '#ff0000';
+        let init_color = localStorage.getItem('main_color') || '#FF0000';
         document.getElementById('pen_size_selector').value = init_size;
         document.getElementById('pen_size_value').value = init_size;
-        document.getElementById('pen_color_selector').value = init_color;
         if($('#scroll_lock_mode').is(':checked')) {
             scrollLock = true;
         }
@@ -275,7 +329,6 @@ function render(gradeable_id, user_id, grader_id, file_name) {
         if (penColor !== color) {
             modified = true;
             penColor = color;
-            localStorage.setItem('pen/color', penColor);
         }
 
         if (modified && scrollLock) {
@@ -287,22 +340,12 @@ function render(gradeable_id, user_id, grader_id, file_name) {
         }
     }
 
-    document.getElementById('pen_color_selector').addEventListener('change', function(e){
-        let value = e.target.value ? e.target.value : e.srcElement.value;
-        setPen(penSize, value);
-    });
     document.getElementById('pen_size_selector').addEventListener('change', function(e){
         let value = e.target.value ? e.target.value : e.srcElement.value;
         setPen(value, penColor);
     });
-    document.getElementById('scroll_lock_mode').addEventListener('change', function(e){
-        if(!$('#scroll_lock_mode').is(':checked')){
-            $('#file_content').css('overflow', 'auto');
-            scrollLock = false;
-        } else {
-            $('#file_content').css('overflow', 'hidden');
-            scrollLock = true;
-        }
+    document.addEventListener('colorchange', function(e){
+        setPen(penSize, e.srcElement.getAttribute('value'));
     });
     initPen();
 })();
@@ -314,9 +357,8 @@ function render(gradeable_id, user_id, grader_id, file_name) {
 
     function initText() {
         let init_size = localStorage.getItem('text/size') || 12;
-        let init_color = localStorage.getItem('text/color') || '#000000';
+        let init_color = localStorage.getItem('main_color') || '#FF0000';
         document.getElementById('text_size_selector').value = init_size;
-        document.getElementById('text_color_selector').value = init_color;
         setText(init_size, init_color);
     }
 
@@ -331,18 +373,16 @@ function render(gradeable_id, user_id, grader_id, file_name) {
         if (textColor !== color) {
             modified = true;
             textColor = color;
-            localStorage.setItem('text/color', textColor);
         }
 
         if (modified) {
             UI.setText(textSize, textColor);
         }
     }
-    document.getElementById('text_color_selector').addEventListener('change', function(e){
-        let value = e.target.value ? e.target.value : e.srcElement.value;
-        setText(textSize, value);
+    document.addEventListener('colorchange', function(e){
+        setText(textSize, e.srcElement.getAttribute('value'));
     });
-    document.getElementById('text_size_selector').addEventListener('change', function(e){
+    document.getElementById('text_size_selector').addEventListener('change', function(e) {
         let value = e.target.value ? e.target.value : e.srcElement.value;
         setText(value, textColor);
     });

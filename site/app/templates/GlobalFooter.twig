@@ -1,8 +1,10 @@
 {% import _self as self %}
 {# Looks mismatched because this is a continuation of GlobalHeader.twig #}
-            <div id="push"></div>
+                    </div> {# /#nav-positioner #}
+                </div> {# /.col-md#nav-body #}
+            </div> {# /.row #}
             <div id="footer">
-                <span id="copyright">&copy; 2017 RPI | An <a href="https://rcos.io" target="_blank">RCOS project</a></span>|
+                <span id="copyright">&copy; 2018 RPI | An <a href="https://rcos.io" target="_blank">RCOS project</a></span>|
                 <span id="github">
                     <a href="https://github.com/Submitty/Submitty" target="_blank" title="Fork us on GitHub" aria-label="Visit our GitHub">
                         <i class="fa fa-github fa-lg"></i>
@@ -42,12 +44,12 @@
 {% macro query_list(queries) %}
     <table>
         <tr>
-            <th style="width: 2em"></th>
+            <th class="query-list"></th>
             <th></th>
         </tr>
         {% for query in queries %}
             <tr>
-                <td style="text-align: right;">
+                <td class="index">
                     {{ loop.index }}&nbsp;&nbsp;
                 </td>
                 <td>

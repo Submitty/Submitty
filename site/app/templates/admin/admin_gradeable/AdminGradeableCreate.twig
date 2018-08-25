@@ -65,10 +65,19 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
 <fieldset class="gradeable_type_options electronic_file" id="electronic_file">
     Will any or all of this assignment be manually graded (e.g., by the TAs or the instructor)?
     <br />
-    <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val auto_save"
+    <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val auto_save date-related"
             {{ action != 'new' and gradeable.getTaGrading() ? 'checked' : '' }} /> Yes
-    <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val auto_save"
+    <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val auto_save date-related"
             {{ not (action != 'new' and gradeable.getTaGrading()) ? 'checked' : '' }} /> No
+    {% if regrade_enabled %}
+    <br /><br /><br />
+        Will regrade requests be enabled for this assignment?
+        <br />
+        <input type="radio" id="yes_regrade_allowed" name="regrade_allowed" value="true" class="bool_val auto_save date-related"
+                {{ action != 'new' and gradeable.isRegradeAllowed() ? 'checked' : '' }} /> Yes
+        <input type="radio" id="no_regrade_allowed" name="regrade_allowed" value="false" class="bool_val auto_save date-related"
+                {{ not (action != 'new' and gradeable.isRegradeAllowed()) ? 'checked' : '' }} /> No
+    {% endif %}
     <br /><br />
 
     {% if action == 'new' or action == 'template' %}
@@ -120,6 +129,7 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
         Are students uploading files or submitting to a Version Control System (VCS) repository?
     {% else %}
         Student Submission Format: {{ gradeable.isVcs() ? 'VCS Repository' : 'Upload File(s)' }}
+        <br />
     {% endif %}
 
     <div style="{{ action == 'edit' ? 'display:none' : '' }}">
@@ -133,18 +143,36 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
     <br />
 
     <div id="repository">
-        <b>Path for the Version Control System (VCS) repository:</b><br />
-        VCS base URL: <kbd>{{ vcs_base_url }}</kbd><br />
-        The VCS base URL is configured in Course Settings. If there is a base URL, you can define the rest of the path below. If there is no base URL because the entire path changes for each assignment, you can input the full path below. If the entire URL is decided by the student, you can leave this input blank.<br />
-        You are allowed to use the following string replacement variables in format $&#123;&hellip;&#125;<br />
+        <h3>Path for the Version Control System (VCS) repository:</h3>
+
+        VCS base URL (from Course Settings): <kbd>{{ vcs_base_url }}</kbd><br /><br />
+
+        <b>Specify the remainder of the VCS URL</b>, for example one of the following:<br />
+        <kbd>&#123;&#36;gradeable_id&#125;/&#123;&#36;user_id&#125;</kbd><br />
+        <kbd>&#123;&#36;gradeable_id&#125;/&#123;&#36;team_id&#125;</kbd><br />
+        <kbd>final_project/&#123;&#36;user_id&#125;</kbd><br />
+        <br />
+
+        <b>Or specify the complete url/path</b>, for example:<br />
+        <kbd>https://github.com/test-course/&#123;&#36;gradeable_id&#125;/&#123;&#36;repo_id&#125;</kbd>
+        <br /><br />
+
+        <b>Or if the entire URL will be provided by the student</b>, then leave this input blank.
+        <br /><br />
+
+        <em>Note: The following string variables will be replaced:</em><br />
         <ul style="list-style-position: inside;">
-            <li>gradeable_id</li>
-            <li>user_id OR team_id OR repo_id (only use one)</li>
+           <li><kbd>&#123;&#36;vcs_type&#125;</kbd></li>
+           <li><kbd>&#123;&#36;gradeable_id&#125;</kbd></li>
+           <li><kbd>&#123;&#36;user_id&#125;</kbd> OR <kbd>&#123;&#36;team_id&#125;</kbd> OR <kbd>&#123;&#36;repo_id&#125;</kbd> (use only one)</li>
         </ul>
-        ex. <kbd>/&#123;&#36;gradeable_id&#125;/&#123;&#36;user_id&#125;</kbd> or <kbd>https://github.com/test-course/&#123;&#36;gradeable_id&#125;/&#123;&#36;repo_id&#125;</kbd><br />
+        <br />
+
         <input style='width: 83%' type='text' id="subdirectory" name='vcs_subdirectory' class="auto_save"
                value="{{ action != 'new' ? gradeable.getVcsSubdirectory() : '' }}" placeholder="(Optional)"/><br />
-        VCS URL: <kbd id="vcs_url"></kbd>
+        <br />
+        
+        FULL VCS URL: <kbd id="vcs_url"></kbd>
         <br />
     </div>
 
@@ -164,7 +192,7 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_grades">sylla
 
 <br />
 {% if action == 'new' or action == 'template' %}
-    <button class="btn btn-primary" type="submit" style="margin-left:10px;">Create Gradeable</button>
+    <button class="btn btn-primary" type="submit" style="margin-left:10px;">New Gradeable</button>
 {% endif %}
 
 
@@ -173,6 +201,26 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_grades">sylla
 </div>
 
 <script type="text/javascript">
+    function updateDateDisplay() {
+        let elecDateBoxes = $('.electronic_file_dates input');
+        elecDateBoxes.prop('disabled', true);
+        if ($('#radio_electronic_file').is(':checked')) {
+            elecDateBoxes.prop('disabled', false);
+            $('.manual_grading_dates input').prop('disabled', $('#no_ta_grade').is(':checked'));
+            $('#date_team_lock').prop('disabled', {{ gradeable.isTeamAssignment() ? 'false' : 'true' }});
+            $('#late_days').prop('disabled', $('#no_late_submission').is(':checked'));
+
+            {# Use this 'each' trick since 'no_regrade_allowed' may not be defined if regrade requests not enabled #}
+            let regradeReqDate = $('#date_regrade_request');
+            regradeReqDate.prop('disabled', true);
+            $('#no_regrade_allowed').each(function () {
+                regradeReqDate.prop('disabled', $(this).is(':checked'));
+            });
+        }
+        $('#hide_dates').hide();
+        $('#show_all_dates').show();
+    }
+
     //
     // Event Handlers
     //
@@ -225,6 +273,7 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_grades">sylla
             disableElementChildren('.manual_grading', true);
             disableElementChildren('.no_manual_grading', false);
         }
+        updateDateDisplay();
     }
 
     function onUploadTypeChange() {
@@ -240,6 +289,28 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_grades">sylla
 
     function onVcsSubdirChange() {
         setVcsUrl($('#subdirectory').val());
+    }
+
+    function onIsRegradeAllowedChange() {
+        if ($('#yes_regrade_allowed').is(':checked')) {
+            //   $('.regrade_request_date').hide();
+            disableElementChildren('.regrade_request_date', false);
+        }
+        else {
+            //   $('.regrade_request_date').show();
+            disableElementChildren('.regrade_request_date', true);
+        }
+        updateDateDisplay();
+    }
+
+    function onLateSubmissionAllowedChanged() {
+        let lateSubmissionParts = $('.yes-late-submission');
+        if($('#yes_late_submission').is(':checked')) {
+            lateSubmissionParts.show();
+        } else {
+            lateSubmissionParts.hide();
+        }
+        updateDateDisplay();
     }
 
     var vcs_base_url = "{{ vcs_base_url }}";
@@ -316,6 +387,12 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_grades">sylla
         $('#subdirectory').keypress(onVcsSubdirChange);
         $('#subdirectory').keyup(onVcsSubdirChange);
 
+        //Hide Regrade Request Date if Regrade Requests are not enabled
+        onIsRegradeAllowedChange();
+        $('[name="regrade_allowed"]').change(onIsRegradeAllowedChange);
+
+        onLateSubmissionAllowedChanged();
+        $('input[name=late_submission_allowed]').change(onLateSubmissionAllowedChanged);
     });
 
     function checkForm() {

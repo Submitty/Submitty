@@ -28,7 +28,7 @@
     });
 </script>
 <div class="content">
-    <h2>Setup Registration Sections</h2>
+    <h1>Manage Registration Sections</h1>
     <p>
         Large courses are often split into multiple <em>registrations sections</em> for laboratory or recitation class time.<br>
         Courses that are cross-listed in different departments may have multiple course codes/prefixes.<br>
@@ -42,39 +42,37 @@
     <br />
     <form action="{{ core.buildUrl({'component': 'admin', 'page': 'users', 'action': 'update_registration_sections'}) }}" method="POST">
         <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
-        <div class="sub">
-            <div class="box half">
+        <div class="row">
+            <div class="box col-md-6">
                 <h2>Current Registration Section Counts</h2>
-                <div class="half">
-                    <table class="table table-bordered table-striped">
-                        {% for section in reg_sections %}
-                            {% if reg_sections_count[section['sections_registration_id']] %}
-                            <tr>
-                                <td>Section {{ section['sections_registration_id'] }}</td>
-                                <td>{{ reg_sections_count[section['sections_registration_id']] }}</td>
-                            </tr>
-                            {% else %}
-                            <tr>
-                                <td>Section {{ section['sections_registration_id'] }}</td>
-                                <td>0</td>
-                            </tr>
-                            {% endif %}
-                        {% endfor %}
-                        {% if reg_sections_count['NULL'] %}
+                <table class="table table-bordered table-striped">
+                    {% for section in reg_sections %}
+                        {% if reg_sections_count[section['sections_registration_id']] %}
                         <tr>
-                            <td>Section NULL</td>
-                            <td>{{ reg_sections_count['NULL'] }}</td>
+                            <td>Section {{ section['sections_registration_id'] }}</td>
+                            <td>{{ reg_sections_count[section['sections_registration_id']] }}</td>
                         </tr>
                         {% else %}
                         <tr>
-                            <td>Section NULL</td>
+                            <td>Section {{ section['sections_registration_id'] }}</td>
                             <td>0</td>
                         </tr>
                         {% endif %}
-                    </table>
-                </div>
+                    {% endfor %}
+                    {% if reg_sections_count['NULL'] %}
+                    <tr>
+                        <td>Section NULL</td>
+                        <td>{{ reg_sections_count['NULL'] }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td>Section NULL</td>
+                        <td>0</td>
+                    </tr>
+                    {% endif %}
+                </table>
             </div>
-            <div class="box half">
+            <div class="box col-md-6">
                 <br /><br />
                 <div class="option">
                     <div class="option-input"><input type="text" name="add_reg_section" value="" placeholder="Eg: 3" /></div>
@@ -100,7 +98,7 @@
     </form>
 </div>
 <div class="content">
-    <h2>Setup Rotating Sections</h2>
+    <h1>Manage Rotating Sections</h1>
     <p>
         Rotating sections are an alternate way to divide the task of grading a large course enrollment among multiple graders.<br>
         If the registration sections are of significantly different size, rotating sections will allow a more equitable assignment of grading tasks.<br>
@@ -114,33 +112,35 @@
     <br />
     <form action="{{ core.buildUrl({'component': 'admin', 'page': 'users', 'action': 'update_rotating_sections'}) }}" method="POST">
         <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
-        <div class="sub">
-            <div class="box half">
+        <div class="row">
+            <div class="box col-md-6">
                 <h2>Current Rotating Section Counts</h2>
-                <div class="half">
-                    <h3>Registered Students<br>(non NULL registration section)</h3>
-                    <table class="table table-bordered table-striped">
-                        {% for row in not_null_counts %}
-                        <tr>
-                            <td>Section {{ row['rotating_section'] ?? "NULL" }}</td>
-                            <td>{{ row['count'] }}</td>
-                        </tr>
-                        {% endfor %}
-                    </table>
-                </div>
-                <div class="half">
-                    <h3>Users with<br>Registration Section=NULL</h3>
-                    <table class="table table-bordered table-striped">
-                        {% for row in null_counts %}
-                        <tr>
-                            <td>Section {{ row['rotating_section'] ?? "NULL" }}</td>
-                            <td>{{ row['count'] }}</td>
-                        </tr>
-                        {% endfor %}
-                    </table>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h3>Registered Students<br>(non NULL registration section)</h3>
+                        <table class="table table-bordered table-striped">
+                            {% for row in not_null_counts %}
+                            <tr>
+                                <td>Section {{ row['rotating_section'] ?? "NULL" }}</td>
+                                <td>{{ row['count'] }}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h3>Users with<br>Registration Section=NULL</h3>
+                        <table class="table table-bordered table-striped">
+                            {% for row in null_counts %}
+                            <tr>
+                                <td>Section {{ row['rotating_section'] ?? "NULL" }}</td>
+                                <td>{{ row['count'] }}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
                 </div>
             </div>
-            <div class="box half">
+            <div class="box col-md-6">
                 Place students in <input type="text" name="sections" placeholder="#" style="width: 25px" /> rotating sections
                 <select name="rotating_type">
                     <option value="random">randomly</option>
