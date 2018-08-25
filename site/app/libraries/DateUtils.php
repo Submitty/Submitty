@@ -5,6 +5,7 @@ namespace app\libraries;
 use \DateTime;
 use \DateTimeZone;
 use \DateInterval;
+use http\Exception\InvalidArgumentException;
 
 /**
  * Class DateUtils
@@ -82,21 +83,45 @@ class DateUtils {
     /**
      * Parses a date string into a \DateTime object, or does nothing if $date is already a \DateTime object
      *
-     * @param $date \DateTime|string The date to parse
-     * @param $time_zone \DateTimeZone The timezone to parse with
+     * @param \DateTime|string $date The date to parse
+     * @param \DateTimeZone|null $default_time_zone The time zone to use if none specified in $date
      * @return \DateTime The parsed date
-     * @throws \InvalidArgumentException If $date is not a string or a \DateTime
-     * @throws \Exception If $date is a string, but not a valid date string
+     * @throws \InvalidArgumentException If $date is not a string or a \DateTime, or not a valid \DateTime
      */
-    public static function parseDateTime($date, \DateTimeZone $time_zone) {
+    public static function parseDateTime($date, $default_time_zone = null) {
         if ($date instanceof \DateTime) {
             return $date;
         } else if (gettype($date) === 'string') {
-            return new \DateTime($date, $time_zone);
+            return self::parseDateTimeCustom($date, $default_time_zone);
         } else {
             throw new \InvalidArgumentException('Passed object was not a DateTime object or a date string');
         }
     }
+
+    /**
+     * Parses a date string into a \DateTime object using regex.  This allows dates to be year >9999
+     * @param string $date_time
+     * @param \DateTimeZone|null $default_date_time The default timezone to use if none provided
+     * @return DateTime
+     */
+    private static function parseDateTimeCustom(string $date_time, $default_date_time) {
+        $matches = [];
+        if (!preg_match('/^([0-9]{4,5})-([0-9]{2})-([0-9]{2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})(\.[0-9]+)?([-|+]?[0-9]{2,4})?$/', $date_time, $matches)) {
+            throw new InvalidArgumentException('Invalid DateTime Format');
+        }
+
+        $ms = $matches[7] ?? '';
+        $timezone = $matches[8] ?? '';
+        if ($ms === '') {
+            $ms = 0;
+        }
+
+        $date = new \DateTime('now', ($timezone !== '') ? new DateTimeZone($timezone) : $default_date_time);
+        $date->setDate($matches[1], $matches[2], $matches[3]);
+        $date->setTime($matches[4], $matches[5], $matches[6], $ms);
+        return $date;
+    }
+
     /**
      * Converts a \DateTime object to a string in one place so if we change the format
      *  here, it changes everywhere
