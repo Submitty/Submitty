@@ -166,7 +166,7 @@ function openMarkConflictPopup(component_id, conflictMarks) {
                 });
                 popup.find('.mark-resolve-server .btn').click(function() {
                     // If we choose the server mark, we don't do anything
-                    resolveMark(getMarkIdFromDOMElement(this));
+                    resolveMark(getConflictMarkIdFromDOMElement(this));
                 });
             })
         });
