@@ -2659,18 +2659,52 @@ function tryResolveMarkSave(gradeable_id, component_id, domMark, serverMark, old
 
 /**
  * Saves the component grade information to the server
+ * Note: if the mark was deleted remotely, but the submitter was assigned it locally, the mark
+ *  will be resurrected with a new id
  * @param {int} component_id
  * @return {Promise}
  */
 function saveGradedComponent(component_id) {
+    let gradeable_id = getGradeableId();
     let gradedComponent = getGradedComponentFromDOM(component_id);
-    return ajaxSaveGradedComponent(
-        getGradeableId(), component_id, getAnonId(),
-        gradedComponent.graded_version,
-        gradedComponent.custom_mark_selected ? gradedComponent.score : 0.0,
-        gradedComponent.custom_mark_selected ? gradedComponent.comment : '',
-        isSilentEditModeEnabled(),
-        gradedComponent.mark_ids);
+    return ajaxGetComponentRubric(getGradeableId(), component_id)
+        .then(function (component) {
+            let missingMarks = [];
+            let domComponent = getComponentFromDOM(component_id);
+
+            // Check each mark the submitter was assigned
+            gradedComponent.mark_ids.forEach(function (mark_id) {
+                // Mark exists remotely, so no action required
+                if (getMarkFromMarkArray(component.marks, mark_id) !== null) {
+                    return;
+                }
+                missingMarks.push(getMarkFromMarkArray(domComponent.marks, mark_id))
+            });
+
+            // For each mark missing from the server, add it
+            let sequence = Promise.resolve();
+            missingMarks.forEach(function (mark) {
+                sequence = sequence
+                    .then(function () {
+                        return ajaxAddNewMark(gradeable_id, component_id, mark.title, mark.points);
+                    })
+                    .then(function (data) {
+                        // Make sure to add it to the grade.  We don't bother removing the deleted mark ids
+                        //  however, because the server filters out non-existent mark ids
+                        gradedComponent.mark_ids.push(data.mark_id);
+                    });
+            });
+            return sequence;
+        })
+        .then(function () {
+            return ajaxSaveGradedComponent(
+                getGradeableId(), component_id, getAnonId(),
+                gradedComponent.graded_version,
+                gradedComponent.custom_mark_selected ? gradedComponent.score : 0.0,
+                gradedComponent.custom_mark_selected ? gradedComponent.comment : '',
+                isSilentEditModeEnabled(),
+                gradedComponent.mark_ids);
+        });
 }
 
 /**
