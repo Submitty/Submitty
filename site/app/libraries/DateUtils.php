@@ -5,7 +5,6 @@ namespace app\libraries;
 use \DateTime;
 use \DateTimeZone;
 use \DateInterval;
-use http\Exception\InvalidArgumentException;
 
 /**
  * Class DateUtils
@@ -108,8 +107,8 @@ class DateUtils {
      */
     private static function parseDateTimeCustom(string $date_time, $default_date_time) {
         $matches = [];
-        if (!preg_match('/^([0-9]{4,5})-([0-9]{2})-([0-9]{2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})(\.[0-9]+)?([-|+]?[0-9]{2,4})?$/', $date_time, $matches)) {
-            throw new InvalidArgumentException('Invalid DateTime Format');
+        if (!preg_match('/^([0-9]{4,5})-([0-9]{2})-([0-9]{2})[ |T]([0-9]{2}):([0-9]{2}):([0-9]{2})(\.[0-9]+)?([-|+]?[0-9]{2})?/', $date_time, $matches)) {
+            throw new \InvalidArgumentException('Invalid DateTime Format');
         }
 
         $ms = $matches[7] ?? '';
