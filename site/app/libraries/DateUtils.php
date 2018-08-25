@@ -91,7 +91,7 @@ class DateUtils {
         if ($date instanceof \DateTime) {
             return $date;
         } else if (gettype($date) === 'string') {
-            return self::parseDateTimeCustom($date, $default_time_zone);
+            return new \DateTime($date, $default_time_zone);
         } else {
             throw new \InvalidArgumentException('Passed object was not a DateTime object or a date string');
         }
@@ -99,15 +99,16 @@ class DateUtils {
 
     /**
      * Parses a date string into a \DateTime object using regex.  This allows dates to be year >9999
+     * Note: This is designed so that dates larger than year 9999 can be loaded from the db without exception.
      * Format YYYYY-MM-DD HH:mm:ssZ
      * 
      * @param string $date_time
-     * @param \DateTimeZone|null $default_date_time The default timezone to use if none provided
+     * @param \DateTimeZone|null $default_time_zone The default timezone to use if none provided
      * @return DateTime
      */
-    private static function parseDateTimeCustom(string $date_time, $default_date_time) {
+    public static function parseDateTimeLong(string $date_time, $default_time_zone = null) {
         $matches = [];
-        if (!preg_match('/^([0-9]{4,5})-([0-9]{2})-([0-9]{2})[ |T]([0-9]{2}):([0-9]{2}):([0-9]{2})(\.[0-9]+)?([-|+]?[0-9]{2})?/', $date_time, $matches)) {
+        if (!preg_match('/^([0-9]{4,5})-([0-9]{2})-([0-9]{2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})(\.[0-9]+)?([-|+]?[0-9]{2})?/', $date_time, $matches)) {
             throw new \InvalidArgumentException('Invalid DateTime Format');
         }
 
@@ -117,7 +118,7 @@ class DateUtils {
             $ms = 0;
         }
 
-        $date = new \DateTime('now', ($timezone !== '') ? new DateTimeZone($timezone) : $default_date_time);
+        $date = new \DateTime('now', ($timezone !== '') ? new DateTimeZone($timezone) : $default_time_zone);
         $date->setDate($matches[1], $matches[2], $matches[3]);
         $date->setTime($matches[4], $matches[5], $matches[6], $ms);
         return $date;
