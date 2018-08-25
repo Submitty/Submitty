@@ -704,3 +704,7 @@ tr.is_publish {
     width: fit-content;
     margin: 0 auto;
 }
+
+#mark-conflict-popup .mark-conflict-container {
+    margin-top: 25px;
+}
