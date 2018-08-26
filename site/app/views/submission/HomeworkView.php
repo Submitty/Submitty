@@ -318,8 +318,9 @@ class HomeworkView extends AbstractView {
 
         $highest_version = $graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : 0;
 
-        $my_team =  $graded_gradeable->getSubmitter()->getTeam();
-        $my_repository = $gradeable->getRepositoryPath($this->core->getUser(),$my_team);
+        // instructors can access this page even if they aren't on a team => don't create errors
+        $my_team = $graded_gradeable !== null ? $graded_gradeable->getSubmitter()->getTeam() : "";
+        $my_repository = $graded_gradeable !== null ? $gradeable->getRepositoryPath($this->core->getUser(),$my_team) : "";
 
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
             'gradeable_id' => $gradeable->getId(),
