@@ -29,7 +29,6 @@ min_AnalysisTools_version=v.18.06.00
 min_Lichen_version=v.18.07.04
 min_RainbowGrades_version=v.18.07.00
 min_Tutorial_version=v.18.08.00
-min_Tutorial_version=v.18.08.00
 min_pdf_annotate_js_version=v.18.07.00
 
 ########################################################################
