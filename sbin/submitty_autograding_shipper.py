@@ -159,6 +159,7 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
         address = which_machine
     else:
         address = which_machine.split('@')[1]
+
     # prepare the zip files
     try:
         autograding_zip_tmp,submission_zip_tmp = packer_unpacker.prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_directory,next_to_grade)
@@ -332,20 +333,21 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
     try:
         # prepare the job
         shipper_counter=0
-        while not prepare_job(my_name,which_machine, which_untrusted, my_dir, queue_file):
-            shipper_counter = 0
-            time.sleep(1)
-            if shipper_counter >= 10:
-                print(my_name, which_untrusted, "shipper prep loop: ",queue_file)
-                shipper_counter=0
-        # then wait for grading to be completed
-        shipper_counter=0
-        while not unpack_job(which_machine, which_untrusted, my_dir, queue_file):
-            shipper_counter+=1
-            time.sleep(1)
-            if shipper_counter >= 10:
-                print (my_name,which_untrusted,"shipper wait for grade: ",queue_file)
-                shipper_counter=0
+
+        prep_job_success = prepare_job(my_name,which_machine, which_untrusted, my_dir, queue_file)
+        if not prep_job_success:
+            print (my_name, " ERROR unable to prepare job: ", queue_file)
+            grade_items_logging.log_message(JOB_ID, message=str(my_name)+" ERROR unable to prepare job: " + queue_file)
+
+        else:
+            # then wait for grading to be completed
+            shipper_counter=0
+            while not unpack_job(which_machine, which_untrusted, my_dir, queue_file):
+                shipper_counter+=1
+                time.sleep(1)
+                if shipper_counter >= 10:
+                    print (my_name,which_untrusted,"shipper wait for grade: ",queue_file)
+                    shipper_counter=0
 
     except Exception as e:
         print (my_name, " ERROR attempting to grade item: ", queue_file, " exception=",str(e))
