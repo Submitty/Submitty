@@ -37,7 +37,7 @@ set(THREADS_PREFER_PTHREAD_FLAG ON) # Without this flag CMake may resort to just
 find_package(Threads)
 target_link_libraries(submitty_grading Threads::Threads)
 
-target_link_libraries(submitty_grading seccomp boost_system boost_filesystem)
+target_link_libraries(submitty_grading seccomp)
 
 set_property(TARGET submitty_grading APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
 

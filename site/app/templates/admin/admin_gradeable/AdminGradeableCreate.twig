@@ -129,6 +129,7 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
         Are students uploading files or submitting to a Version Control System (VCS) repository?
     {% else %}
         Student Submission Format: {{ gradeable.isVcs() ? 'VCS Repository' : 'Upload File(s)' }}
+        <br />
     {% endif %}
 
     <div style="{{ action == 'edit' ? 'display:none' : '' }}">
@@ -142,18 +143,36 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
     <br />
 
     <div id="repository">
-        <b>Path for the Version Control System (VCS) repository:</b><br />
-        VCS base URL: <kbd>{{ vcs_base_url }}</kbd><br />
-        The VCS base URL is configured in Course Settings. If there is a base URL, you can define the rest of the path below. If there is no base URL because the entire path changes for each assignment, you can input the full path below. If the entire URL is decided by the student, you can leave this input blank.<br />
-        You are allowed to use the following string replacement variables in format $&#123;&hellip;&#125;<br />
+        <h3>Path for the Version Control System (VCS) repository:</h3>
+
+        VCS base URL (from Course Settings): <kbd>{{ vcs_base_url }}</kbd><br /><br />
+
+        <b>Specify the remainder of the VCS URL</b>, for example one of the following:<br />
+        <kbd>&#123;&#36;gradeable_id&#125;/&#123;&#36;user_id&#125;</kbd><br />
+        <kbd>&#123;&#36;gradeable_id&#125;/&#123;&#36;team_id&#125;</kbd><br />
+        <kbd>final_project/&#123;&#36;user_id&#125;</kbd><br />
+        <br />
+
+        <b>Or specify the complete url/path</b>, for example:<br />
+        <kbd>https://github.com/test-course/&#123;&#36;gradeable_id&#125;/&#123;&#36;repo_id&#125;</kbd>
+        <br /><br />
+
+        <b>Or if the entire URL will be provided by the student</b>, then leave this input blank.
+        <br /><br />
+
+        <em>Note: The following string variables will be replaced:</em><br />
         <ul style="list-style-position: inside;">
-            <li>gradeable_id</li>
-            <li>user_id OR team_id OR repo_id (only use one)</li>
+           <li><kbd>&#123;&#36;vcs_type&#125;</kbd></li>
+           <li><kbd>&#123;&#36;gradeable_id&#125;</kbd></li>
+           <li><kbd>&#123;&#36;user_id&#125;</kbd> OR <kbd>&#123;&#36;team_id&#125;</kbd> OR <kbd>&#123;&#36;repo_id&#125;</kbd> (use only one)</li>
         </ul>
-        ex. <kbd>/&#123;&#36;gradeable_id&#125;/&#123;&#36;user_id&#125;</kbd> or <kbd>https://github.com/test-course/&#123;&#36;gradeable_id&#125;/&#123;&#36;repo_id&#125;</kbd><br />
+        <br />
+
         <input style='width: 83%' type='text' id="subdirectory" name='vcs_subdirectory' class="auto_save"
                value="{{ action != 'new' ? gradeable.getVcsSubdirectory() : '' }}" placeholder="(Optional)"/><br />
-        VCS URL: <kbd id="vcs_url"></kbd>
+        <br />
+        
+        FULL VCS URL: <kbd id="vcs_url"></kbd>
         <br />
     </div>
 

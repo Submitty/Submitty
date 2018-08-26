@@ -17,10 +17,6 @@
 
 #define DIR_PATH_MAX 1000
 
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
-
-
 // =====================================================================
 // =====================================================================
 

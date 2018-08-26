@@ -4,7 +4,7 @@ RUN apt-get update
 RUN apt-get install -qqy python python-dev python3 python3-dev libpython3.5
 RUN apt-get install -qqy clang autoconf automake autotools-dev diffstat finger gdb git git-man \
 hardening-includes p7zip-full patchutils \
-libpq-dev unzip valgrind zip libmagic-ocaml-dev common-lisp-controller libboost-all-dev \
+libpq-dev unzip valgrind zip libmagic-ocaml-dev common-lisp-controller \
 javascript-common  \
 libfile-mmagic-perl libgnupg-interface-perl libbsd-resource-perl libarchive-zip-perl gcc g++ \
 g++-multilib jq libseccomp-dev libseccomp2 seccomp junit flex bison spim poppler-utils

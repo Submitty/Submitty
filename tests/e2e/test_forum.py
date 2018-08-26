@@ -145,7 +145,7 @@ class TestForum(BaseTestCase):
     def delete_thread(self, title):
         self.view_thread(title)
         self.driver.find_elements_by_xpath("//a[@title='Remove post']")[0].click()
-        self.driver.switch_to.alert.accept();
+        self.driver.switch_to.alert.accept()
         # Workaround, not working without force redirection
         self.driver.get(self.forum_page_url)
 
