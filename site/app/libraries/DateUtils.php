@@ -116,15 +116,10 @@ class DateUtils {
             throw new \InvalidArgumentException('Invalid DateTime Format');
         }
 
-        $ms = $matches[7] ?? '';
         $timezone = $matches[8] ?? '';
-        if ($ms === '') {
-            $ms = 0;
-        }
-
         $date = new \DateTime('now', ($timezone !== '') ? new DateTimeZone($timezone) : $default_time_zone);
         $date->setDate($matches[1], $matches[2], $matches[3]);
-        $date->setTime($matches[4], $matches[5], $matches[6], $ms);
+        $date->setTime($matches[4], $matches[5], $matches[6]);
         return $date;
     }
 
