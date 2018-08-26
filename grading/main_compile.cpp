@@ -50,6 +50,7 @@ int main(int argc, char *argv[]) {
 
   std::cout << "MAIN COMPILE" << std::endl;
   std::vector<nlohmann::json> actions;
+  std::vector<nlohmann::json> dispatcher_actions;
 
   nlohmann::json grading_parameters = config_json.value("grading_parameters",nlohmann::json::object());
   int AUTO_POINTS         = grading_parameters.value("AUTO_POINTS",0);
@@ -111,6 +112,7 @@ int main(int argc, char *argv[]) {
               }
               execute("/bin/cp "+old_filename+" "+new_filename,
                       actions,
+                      dispatcher_actions,
                       "/dev/null",
                       my_testcase.get_test_case_limits(),
                       config_json.value("resource_limits",nlohmann::json()),
@@ -145,6 +147,7 @@ int main(int argc, char *argv[]) {
                               " 1> STDOUT" + which + ".txt" +
                               " 2> STDERR" + which + ".txt",
                               actions,
+                              dispatcher_actions,
                               "execute_logfile.txt",
                               my_testcase.get_test_case_limits(),
                               config_json.value("resource_limits",nlohmann::json()),

@@ -75,7 +75,7 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                     print('NETWORKED CONTAINERS')
                     #The containers are now ready to execute.
 
-                    processes = list()
+                    processes = dict()
 
                     #Set up the mounted folders before any dockers start running in case large file transfer sizes cause delay.
                     for name, info in container_info.items():
@@ -85,33 +85,66 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                         setup_folder_for_grading(mounted_directory, tmp_work, job_id, tmp_logs)
 
 
-                    #TODO: START THE ROUTER FIRST, THEN GIVE IT A SECOND
+                    #Start the docker containers.
                     if 'router' in container_info:
                       info = container_info['router']
                       c_id = info['container_id']
                       mounted_directory = info['mounted_directory']
                       full_name = '{0}_{1}'.format(which_untrusted, 'router')
-                      print('spinning up docker {0} with c_id {2}'.format(full_name, c_id))
+                      print('spinning up docker {0} with c_id {1}'.format(full_name, c_id))
+                      p = subprocess.Popen(['docker', 'start', '-i', '--attach', c_id], stdout=logfile,stdin=subprocess.PIPE)
                       p = subprocess.Popen(['docker', 'start', '-i',c_id], stdout=logfile,stdin=subprocess.PIPE)
-                      processes.append(p)
-                    time.sleep(1)
+                      processes['router'] = p
+                      time.sleep(1)
                     for name, info in container_info.items():
                         if name == 'router':
                           continue
                         c_id = info['container_id']
                         mounted_directory = info['mounted_directory']
                         full_name = '{0}_{1}'.format(which_untrusted, name)
-                        print('spinning up docker {0} with root directory {1} and c_id {2}'.format(full_name, mounted_directory, c_id))
+                        print('spinning up docker {0} with c_id {1}'.format(full_name, c_id))
                         p = subprocess.Popen(['docker', 'start', '-i', '--attach', c_id], stdout=logfile,stdin=subprocess.PIPE)
-                        time.sleep(1)
-                        print('communicating')
-                        p.stdin.write(b"INPUT\n")
-                        p.stdin.close()
-                        print('communicated')
-                        processes.append(p)
+                        processes[name] = p
+                    # Handle the dispatcher actions
+                    dispatcher_actions = testcases[testcase_num -1]["dispatcher_actions"]
+
+                    #if there are dispatcher actions, give the student code a second to start up.
+                    if len(dispatcher_actions) > 0:
+                      time.sleep(1)
+
+                    #TODO add error handling once we've encountered some errors.
+                    for action_obj in dispatcher_actions:
+                      action_type  = action_obj["action"]
+
+                      if action_type == "delay":
+                          #todo add some protections here.
+                          time_in_seconds = float(action_obj["seconds"])
+                          while time_in_seconds > 0 and at_least_one_alive(processes):
+                            if time_in_seconds >= .1:
+                              time.sleep(.1)
+                            else:
+                              time.sleep(time_in_seconds)
+                            #can go negative (subtracts .1 even in the else case) but that's fine.
+                            time_in_seconds -= .1
+                      elif action_type == "stdin":
+                          string = action_obj["string"]
+                          targets = action_obj["containers"]
+                          for target in targets:
+                              p = processes[target]
+                              # poll returns None if the process is still running.
+                              if p.poll() == None:
+                                  p.stdin.write(string.encode('utf-8'))
+                                  p.stdin.flush()
+                              else:
+                                  pass
+
+
+
+
+
                     #Now that all dockers are running, wait on their return code for success or failure. If any fail, we count it
                     #   as a total failure.
-                    for process in processes:
+                    for name, process in processes.items():
                         process.wait()
                         rc = process.returncode
                         runner_success = rc if first_testcase else max(runner_success, rc)
@@ -160,6 +193,14 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
             print ("pid",os.getpid(),msg)
             grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,"","",msg)
     return runner_success
+
+
+def at_least_one_alive(processes):
+  for name, process in processes.items():
+    if process.poll() == None:
+      return True
+  return False
+
 
 def setup_folder_for_grading(target_folder, tmp_work, job_id, tmp_logs):
     #The paths to the important folders.
@@ -270,7 +311,7 @@ def launch_containers(container_info, target_folder, job_id,is_batch_job,which_u
 def launch_container(container_name, container_image, mounted_directory,job_id,is_batch_job,which_untrusted,submission_path,
                                                                   grading_began,queue_obj,submission_string,testcase_num,name):
   #TODO error handling.
-  this_container = subprocess.check_output(['docker', 'create','-v', mounted_directory + ':' + mounted_directory, 
+  this_container = subprocess.check_output(['docker', 'create','-i', '-v', mounted_directory + ':' + mounted_directory,
                                            '-w', mounted_directory,
                                            '--name', container_name,
                                            container_image,

@@ -1,11 +1,15 @@
 #include <string>
 #include <vector>
 #include "json.hpp"
+#include <queue>
+#include <mutex>
+#include <thread>
 
 
 // implemented in execute.cpp
 int execute(const std::string &cmd, 
       const std::vector<nlohmann::json> actions,
+      const std::vector<nlohmann::json> dispatcher_actions,
       const std::string &execute_logfile,
       const nlohmann::json &test_case_limits,
       const nlohmann::json &assignment_limits,
@@ -41,3 +45,5 @@ bool delay_and_mem_check(float sleep_time_in_microseconds, int childPID, float& 
   float seconds_to_run, int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill);
 
 std::string output_of_system_command(const char* cmd);
+
+void cin_reader(std::mutex* lock, std::queue<std::string>* input_queue);

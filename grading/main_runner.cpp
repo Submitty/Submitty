@@ -16,17 +16,6 @@
 
 int main(int argc, char *argv[]) {
   std::cout << "Running User Code..." << std::endl;
-  std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-  usleep(3000000);
-  std::string mystring;
-  std::cout << "waiting for a value." << std::endl;
-  while(std::cin >> mystring){
-    std::cout << "inner mystring was '" << mystring << "'" << std::endl;
-  }
-  std::cout << "mystring was '" << mystring << "'" << std::endl;
-
-  std::getline (std::cin,mystring);
-  std::cout << "mystring was '" << mystring << "'" << std::endl;
 
   std::string hw_id = "";
   std::string rcsid = "";
@@ -104,6 +93,8 @@ int main(int argc, char *argv[]) {
     std::vector<std::string> commands = my_testcase.getCommands();
 
     std::vector<nlohmann::json> actions  = mapOrArrayOfMaps((*tc)[i-1],"actions");
+    std::vector<nlohmann::json> dispatcher_actions = mapOrArrayOfMaps((*tc)[i-1],"dispatcher_actions");
+
     assert (commands.size() > 0);
 
     std::cout << "TITLE " << my_testcase.getTitle() << std::endl;
@@ -127,6 +118,7 @@ int main(int argc, char *argv[]) {
                             " 1>" + "STDOUT" + which + ".txt" +
                             " 2>" + "STDERR" + which + ".txt",
                             actions,
+                            dispatcher_actions,
                             logfile,
                             my_testcase.get_test_case_limits(),
                             config_json.value("resource_limits",nlohmann::json()),
