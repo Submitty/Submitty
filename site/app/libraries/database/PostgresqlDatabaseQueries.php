@@ -4,6 +4,7 @@ namespace app\libraries\database;
 
 use app\exceptions\DatabaseException;
 use app\exceptions\ValidationException;
+use app\libraries\DateUtils;
 use app\libraries\Utils;
 use \app\libraries\GradeableType;
 use app\models\Gradeable;
@@ -1676,6 +1677,12 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         $gradeable_constructor = function($row) {
             if (!isset($row['eg_g_id']) && $row['type'] === GradeableType::ELECTRONIC_FILE) {
                 throw new DatabaseException("Electronic gradeable didn't have an entry in the electronic_gradeable table!");
+            }
+
+            // TODO: remove this once there are db constraints preventing dates this large in the db
+            // Parse the date properties using a method that will accept dates larger than year 9999 (since the DB may be in that state)
+            foreach(\app\models\gradeable\Gradeable::date_properties as $property) {
+                $row[$property] = $row[$property] !== null ? DateUtils::parseDateTimeLong($row[$property]) : null;
             }
 
             // Finally, create the gradeable
