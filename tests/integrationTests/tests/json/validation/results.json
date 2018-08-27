@@ -21,7 +21,7 @@
                     ]
                 },
                 {
-                    "description": "Standard Output (STDOUT)",
+                    "description": "Standard Output (STDOUT.txt)",
                     "messages": [
                         {
                             "message": "ERROR!  Could not open student file: 'test01/STDOUT.txt'",
@@ -38,7 +38,7 @@
             "autochecks": [
                 {
                     "actual_file": "test02/STDOUT.txt",
-                    "description": "Standard OUTPUT (STDOUT)",
+                    "description": "Standard OUTPUT (STDOUT.txt)",
                     "difference_file": "test02/0_diff.json",
                     "expected_file": "test_output/testassignment/test2_output.txt"
                 }

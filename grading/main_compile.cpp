@@ -17,10 +17,6 @@
 
 #define DIR_PATH_MAX 1000
 
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
-
-
 // =====================================================================
 // =====================================================================
 
@@ -66,8 +62,9 @@ int main(int argc, char *argv[]) {
   assert (tc != config_json.end());
   for (unsigned int i = 1; i <= tc->size(); i++) {
 
-
-    TestCase my_testcase(config_json,i-1);
+    //Compilation steps must not have a docker name.
+    std::string container_name = "";
+    TestCase my_testcase(config_json,i-1,container_name);
 
     if(testcase_to_compile != i){
       continue;

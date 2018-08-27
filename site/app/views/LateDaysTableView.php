@@ -31,13 +31,14 @@ class LateDaysTableView extends AbstractView {
         }
         $preferred_name = $this->core->getQueries()->getUserById($user_id)->getDisplayedFirstName() . " " . $this->core->getQueries()->getUserById($user_id)->getLastName();
         if($full_page){
-            $this->core->getOutput()->addBreadcrumb("Late Days Summary", $this->core->buildUrl(array('component' => 'student', 'page' => 'view_late_table')));
+            $this->core->getOutput()->addBreadcrumb("My Late Days");
             $template = "/LateDaysTable.twig";
         } else {
             $template = "/LateDaysTablePlugin.twig";
         }
 
-        return $this->core->getOutput()->renderTwigTemplate($template, [
+        $table_data =
+          $this->core->getOutput()->renderTwigTemplate($template, [
             "user_id" => $user_id,
             "student_gradeables" => $student_gradeables,
             "status_array" => $status_array,
@@ -47,6 +48,10 @@ class LateDaysTableView extends AbstractView {
             "late_update" => $late_update,
             "preferred_name" => $preferred_name
         ]);
+        if (!$full_page) {
+          $table_data = "<hr><h2>Late Day Usage by ".$preferred_name." (".$user_id.")</h2><br>".$table_data;
+        }
+        return $table_data;
     }
 
 

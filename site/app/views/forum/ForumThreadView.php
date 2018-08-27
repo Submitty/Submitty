@@ -949,7 +949,7 @@ HTML;
 			</form>
 		</div>
 
-		<div style="padding-left:20px;padding-top:1vh; padding-bottom: 10px;height:69vh;border-radius:3px;box-shadow: 0 2px 15px -5px #888888;padding-right:20px;background-color: #E9EFEF;" id="forum_wrapper">
+		<div style="padding-left:20px;padding-top:1vh; padding-bottom: 10px;height:70vh;border-radius:3px;box-shadow: 0 2px 15px -5px #888888;padding-right:20px;background-color: #E9EFEF;" id="forum_wrapper">
 
 		<h3> Create Thread </h3>
 

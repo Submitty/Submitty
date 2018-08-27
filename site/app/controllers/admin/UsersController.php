@@ -23,11 +23,11 @@ class UsersController extends AbstractController {
                 $this->updateUser('graders');
                 break;
             case 'graders':
-                $this->core->getOutput()->addBreadcrumb('View Graders');
+                $this->core->getOutput()->addBreadcrumb('Manage Graders');
                 $this->listGraders();
                 break;
             case 'rotating_sections':
-                $this->core->getOutput()->addBreadcrumb('Setup Sections');
+                $this->core->getOutput()->addBreadcrumb('Manage Sections');
                 $this->rotatingSectionsForm();
                 break;
             case 'update_registration_sections':
@@ -44,7 +44,7 @@ class UsersController extends AbstractController {
                 break;
             case 'students':
             default:
-                $this->core->getOutput()->addBreadcrumb('View Students');
+                $this->core->getOutput()->addBreadcrumb('Manage Students');
                 $this->listStudents();
                 break;
         }

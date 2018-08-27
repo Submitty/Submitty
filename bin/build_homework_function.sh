@@ -153,6 +153,12 @@ function build_homework {
     find $course_dir/custom_validation_code/  -type d -exec chmod -f ug+rwx,g+s,o= {} \;
     find $course_dir/custom_validation_code/  -type f -exec chmod -f ug+rw,o= {} \;
     find $course_dir/custom_validation_code/          -exec chgrp -f ${course_group} {} \;
+    find $course_dir/config/build/            -type d -exec chmod -f ug+rwx,g+s,o= {} \;
+    find $course_dir/config/build/            -type f -exec chmod -f ug+rw,o= {} \;
+    find $course_dir/config/build/            -exec chgrp -f ${course_group} {} \;
+    find $course_dir/config/complete_config/  -type d -exec chmod -f ug+rwx,g+s,o= {} \;
+    find $course_dir/config/complete_config/  -type f -exec chmod -f ug+rw,o= {} \;
+    find $course_dir/config/complete_config/  -exec chgrp -f ${course_group} {} \;
 
     popd > /dev/null
 }

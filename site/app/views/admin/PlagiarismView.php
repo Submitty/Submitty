@@ -10,7 +10,7 @@ class PlagiarismView extends AbstractView {
         $return = "";
         $return .= <<<HTML
 <div class="content">
-    <h1 style="text-align: center">Lichen Plagiarism Detection -- WORK IN PROGRESS</h1><br>
+    <h1>Plagiarism Detection -- WORK IN PROGRESS</h1><br>
     <div class="nav-buttons">
         <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'semester' => $semester, 'course'=> $course, 'action' => 'configure_new_gradeable_for_plagiarism_form'))}">+ Configure New Gradeable for Plagiarism Detection</a>
     </div><br /><br />
@@ -164,7 +164,7 @@ HTML;
         $return = "";
         $return .= <<<HTML
 <div class="content">
-<h1 style="text-align: center">Lichen Plagiarism Detection -- WORK IN PROGRESS</h1>
+<h1>Plagiarism Detection -- WORK IN PROGRESS</h1>
 <br>
 HTML;
 
@@ -241,7 +241,7 @@ HTML;
             <div class="popup-box">
                 <div class="popup-window ui-draggable ui-draggable-handle" style="position: relative;">
                     <div class="form-title">
-                        <h2>Delete Plagiarism Results</h2>
+                        <h1>Delete Plagiarism Results</h1>
                     </div>
                     <div class="form-body">
                         <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
@@ -331,7 +331,7 @@ HTML;
         $return = "";
         $return .= <<<HTML
 <div class="content">
-<h1 style="text-align: center">Lichen Plagiarism Detection Configuration -- WORK IN PROGRESS</h1>
+<h1>Plagiarism Detection Configuration -- WORK IN PROGRESS</h1>
 <br>
 HTML;
         $return .= <<<HTML

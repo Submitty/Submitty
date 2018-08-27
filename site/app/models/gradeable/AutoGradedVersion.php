@@ -459,11 +459,7 @@ class AutoGradedVersion extends AbstractModel {
      */
     private function setSubmissionTimeInternal($submission_time) {
         if ($submission_time !== null) {
-            try {
-                $this->submission_time = DateUtils::parseDateTime($submission_time, $this->core->getConfig()->getTimezone());
-            } catch(\Exception $e) {
-                throw new \InvalidArgumentException('Graded version submission time format invalid');
-            }
+            $this->submission_time = DateUtils::parseDateTime($submission_time, $this->core->getConfig()->getTimezone());
         } else {
             throw new \InvalidArgumentException('Graded version submission time must not be null');
         }

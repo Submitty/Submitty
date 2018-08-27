@@ -7,7 +7,7 @@
             <a onclick="newUploadCourseMaterialsForm()" class="btn btn-primary">Upload Course Materials</a>
         </div>
     {% endif %}
-    <h2>View Course Materials</h2>
+    <h1>Course Materials</h1>
     <div class="inner-container" id="file-container">
         {{ self.display_files(self, submissions, fileShares, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath) }}
     </div>
