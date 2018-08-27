@@ -583,13 +583,14 @@ class Gradeable extends AbstractModel {
 
     /**
      * Gets all of the gradeable's date values as strings indexed by property name (including late_days)
+     * @param bool $add_utc_offset True to add the UTC offset to the output strings
      * @return string[]
      */
-    public function getDateStrings() {
+    public function getDateStrings(bool $add_utc_offset = true) {
         $date_strings = [];
         $now = new \DateTime('now', $this->core->getConfig()->getTimezone());
         foreach (self::date_properties as $property) {
-            $date_strings[$property] = DateUtils::dateTimeToString($this->$property ?? $now);
+            $date_strings[$property] = DateUtils::dateTimeToString($this->$property ?? $now, $add_utc_offset);
         }
         $date_strings['late_days'] = strval($this->late_days);
         return $date_strings;
