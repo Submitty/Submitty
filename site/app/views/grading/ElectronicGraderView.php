@@ -619,7 +619,7 @@ class ElectronicGraderView extends AbstractView {
         $return = "";
 
         $disabled = $gradeable->getActiveVersion() == 0 || $gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion();
-
+        
         $grading_data = [
             "gradeable" => $gradeable->getGradedData(),
             "you" => $this->core->getUser(),
@@ -646,6 +646,7 @@ class ElectronicGraderView extends AbstractView {
             "gradeable" => $gradeable,
             "display_verify_all" => $can_verify,
             "user" => $user,
+            "your_group" => $this->core->getUser()->getGroup(),
             "grading_data" => $grading_data
         ]);
         return $return;
