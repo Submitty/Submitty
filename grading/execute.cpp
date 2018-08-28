@@ -670,7 +670,6 @@ void parse_command_line(const std::string &cmd,
     } else if (my_args.size() > 1) {
       // a common student error is to submit multiple .py files where
       // only one is expected and we want to run 'python *.py'
-      bool multiple_py_files = false;
       int python_file_count = 0;
       for (int i = 0; i < my_args.size(); i++) {
         unsigned int pos = my_args[i].find(".py");
