@@ -390,10 +390,6 @@ tr.is_publish {
 
 /* Components */
 
-.gradeable .component {
-    cursor: pointer;
-}
-
 .gradeable .component .gradebar {
     white-space: nowrap;
     vertical-align: middle;
@@ -516,11 +512,13 @@ tr.is_publish {
     background-color: #CFC;
 }
 
-.gradeable .ta-rubric-table {
+.gradeable .ta-rubric-table,
+.gradeable .received-marks-list {
     border: solid #BBB;
     border-width: 2px 0 0 0;
     padding: 8px;
     border-radius: 0;
+    cursor: default;
 }
 
 .gradeable .done-container {
@@ -551,8 +549,10 @@ tr.is_publish {
     min-height: 28px;
 }
 
-.gradeable .container {
+.gradeable .container.box-title {
     padding-left: 5px;
+    padding-bottom: 8px;
+    cursor: pointer;
 }
 
 .gradeable .mark-selector {
@@ -649,7 +649,7 @@ tr.is_publish {
 }
 
 .gradeable .mark-uneditable {
-    cursor: pointer;
+    cursor: default;
     border: none;
     outline: none;
     background-color: initial;
