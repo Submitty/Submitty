@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.2)
+cmake_minimum_required (VERSION 2.8)
 project (sample_assignment)
 
 ###################################################################################
@@ -33,9 +33,7 @@ add_library(submitty_grading
 
 ###################################################################################
 
-set(THREADS_PREFER_PTHREAD_FLAG ON) # Without this flag CMake may resort to just '-lpthread'
-find_package(Threads)
-target_link_libraries(submitty_grading Threads::Threads)
+SET(CMAKE_CXX_FLAGS "-lpthread")
 
 target_link_libraries(submitty_grading seccomp)
 

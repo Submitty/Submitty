@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.2)
+cmake_minimum_required (VERSION 2.8)
 project (sample_assignment)
 
 ###################################################################################
@@ -155,26 +155,19 @@ add_executable(validate.out
 
 ###################################################################################
 
-set_property(TARGET custom_functions APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
+SET(CMAKE_CXX_FLAGS "-lpthread")
 
-set(THREADS_PREFER_PTHREAD_FLAG ON) # Without this flag CMake may resort to just '-lpthread'
-find_package(Threads)
-
-target_link_libraries(custom_functions seccomp Threads::Threads)
-target_link_libraries(configure.out Threads::Threads)
-target_link_libraries(compile.out Threads::Threads)
-target_link_libraries(run.out Threads::Threads)
-target_link_libraries(validate.out Threads::Threads)
+set_property(TARGET custom_functions APPEND_STRING PROPERTY COMPILE_FLAGS "-std=c++11 -g")
 
 target_link_libraries(configure.out  ${GRADINGLIB}  seccomp  custom_functions)
 target_link_libraries(compile.out    ${GRADINGLIB}  seccomp  custom_functions)
 target_link_libraries(run.out        ${GRADINGLIB}  seccomp  custom_functions)
 target_link_libraries(validate.out   ${GRADINGLIB}  seccomp  custom_functions)
 
-set_property(TARGET configure.out APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
-set_property(TARGET compile.out   APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
-set_property(TARGET run.out       APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
-set_property(TARGET validate.out  APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
+set_property(TARGET configure.out APPEND_STRING PROPERTY COMPILE_FLAGS "-std=c++11 -g")
+set_property(TARGET compile.out   APPEND_STRING PROPERTY COMPILE_FLAGS "-std=c++11 -g")
+set_property(TARGET run.out       APPEND_STRING PROPERTY COMPILE_FLAGS "-std=c++11 -g")
+set_property(TARGET validate.out  APPEND_STRING PROPERTY COMPILE_FLAGS "-std=c++11 -g")
 
 include_directories(${MY_DIR})
 include_directories(${GRADINGCODE})
