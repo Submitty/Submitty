@@ -776,17 +776,29 @@ function updateProgressPoints(c_index) {
     $('#mark_points_custom-' + c_index)[0].style.cursor="not-allowed";
     $('#mark_text_custom-' + c_index)[0].style.cursor="not-allowed";
     $('#mark_icon_custom-' + c_index)[0].style.cursor="not-allowed";
+    $('#mark_icon_custom-' + c_index)[0].style.display="none";
     if(!editModeEnabled){
+        $('#mark_icon_custom-' + c_index)[0].style.display="block";
         $('#mark_text_custom-'+c_index)[0].disabled=false;
         $('#mark_text_custom-' + c_index)[0].style.cursor="text";
+       // $('#mark_text_custom-' + c_index)[0].style.background="#FFF";
+        //$('#mark_points_custom-' + c_index)[0].style.background="#FFF";
+        $('#mark_text_custom-' + c_index)[0].classList.remove('mark-note-custom-uneditable');
+        $('#mark_points_custom-' + c_index)[0].classList.remove('mark-score-uneditable');
+        $('#mark_points_custom-' + c_index)[0].classList.add('mark-score');
+        $('#mark_text_custom-' + c_index)[0].classList.add('mark-note-custom');
         if(!custom_message == ""){
             $('#mark_points_custom-' + c_index)[0].disabled=false;
             $('#mark_points_custom-' + c_index)[0].style.cursor="default";
             $('#mark_icon_custom-' + c_index)[0].style.cursor="pointer";
-        }  
+        } 
     }
     else{
         $('#mark_text_custom-'+c_index)[0].disabled=true;
+        $('#mark_text_custom-' + c_index)[0].classList.add('mark-note-custom-uneditable');
+        $('#mark_points_custom-' + c_index)[0].classList.add('mark-score-uneditable');
+        $('#mark_points_custom-' + c_index)[0].classList.remove('mark-score');
+        $('#mark_text_custom-' + c_index)[0].classList.remove('mark-note-custom');
     }
     if(custom_message == ""){
         $('#mark_points_custom-' + c_index)[0].value="0";

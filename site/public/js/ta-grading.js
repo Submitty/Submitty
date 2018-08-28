@@ -728,13 +728,13 @@ function adjustSize(name) {
 // Edit Mode
 //TODO save properly so that the mark can be reopened automatically
 function toggleEditMode(){
+    saveLastOpenedMark(true);
     var id=findCurrentOpenedMark();
     var temp=editModeEnabled;
     editModeEnabled=true;
     if(findCurrentOpenedMark()>0){
         toggleMark(id, true);        
     }
-    openMark(id, true);
     if(temp==null){
         editModeEnabled=false;
     }
@@ -749,4 +749,5 @@ function toggleEditMode(){
             $('#marks-extra-'+findCurrentOpenedMark())[0].style.display="block";
         }
     }
+    openMark(id, true);
 }
