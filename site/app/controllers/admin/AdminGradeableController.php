@@ -225,7 +225,7 @@ class AdminGradeableController extends AbstractController {
             'nav_tab' => $nav_tab,
             'semester' => $semester,
             'course' => $course,
-            'date_format' => 'Y-m-d H:i:sO',
+            'date_format' => 'Y-m-d H:i:s',
             'syllabus_buckets' => self::syllabus_buckets,
             'gradeable_components_enc' => json_encode($gradeable_components_enc),
             'regrade_allowed' => $gradeable->isRegradeAllowed(),
@@ -957,7 +957,7 @@ class AdminGradeableController extends AbstractController {
         if ($date_set) {
             try {
                 $gradeable->setDates($dates);
-                $updated_properties = $gradeable->getDateStrings();
+                $updated_properties = $gradeable->getDateStrings(false);
             } catch (ValidationException $e) {
                 $errors = array_merge($errors, $e->getDetails());
             }
