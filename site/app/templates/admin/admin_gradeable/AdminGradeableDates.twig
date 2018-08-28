@@ -97,33 +97,4 @@
         onLateSubmissionAllowedChanged();
     }
 
-    $(document).ready(function() {
-        $(function() {
-            $( ".date_picker" ).datetimepicker({
-                dateFormat: 'yy-mm-dd',
-                timeFormat: "HH:mm:ssz",
-                showButtonPanel: true,
-                showTimezone: false,
-                showMillisec: false,
-                showMicrosec: false,
-                beforeShow: function( input ) {
-                    setTimeout(function() {
-                        var buttonPane = $( input )
-                            .datepicker( "widget" )
-                            .find( ".ui-datepicker-buttonpane" );
-
-                        $( "<button>", {
-                            text: "Infinity",
-                            click: function() {
-                                $.datepicker._curInst.input.datepicker('setDate', "9999-1-1 23:59:59").datepicker('hide');
-                            }
-                        }).appendTo( buttonPane ).addClass("ui-datepicker-clear ui-state-default ui-priority-primary ui-corner-all");
-                    }, 1 );
-                }
-            });
-        });
-
-        updateDateDisplay();
-    });
-
 </script>
