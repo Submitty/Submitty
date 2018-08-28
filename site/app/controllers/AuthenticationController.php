@@ -178,10 +178,10 @@ class AuthenticationController extends AbstractController {
             $this->core->getOutput()->renderJsonFail($msg);
             return false;
         }
-        else if (!$user->accessFullGrading()) {
-            $msg = "This user cannot check out that repo.";
-            $this->core->getOutput()->renderJsonFail($msg);
-            return false;
+        else if ($user->accessFullGrading()) {
+            $msg = "Successfully logged in as {$_POST['user_id']}";
+            $this->core->getOutput()->renderJsonSuccess(['message' => $msg, 'authenticated' => true]);
+            return true;
         }
 
         $gradeable = $this->core->getQueries()->getGradeableConfig($_POST['gradeable_id']);
@@ -193,7 +193,9 @@ class AuthenticationController extends AbstractController {
             }
         }
         elseif ($_POST['user_id'] !== $_POST['id']) {
-            return true;
+            $msg = "This user cannot check out that repo.";
+            $this->core->getOutput()->renderJsonFail($msg);
+            return false;
         }
 
         $msg = "Successfully logged in as {$_POST['user_id']}";
