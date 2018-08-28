@@ -673,9 +673,9 @@ void parse_command_line(const std::string &cmd,
       bool multiple_py_files = false;
       int python_file_count = 0;
       for (int i = 0; i < my_args.size(); i++) {
-        std::string iterator itr = my_args[i].find(".py");
-        if (itr != std::string::npos &&
-            itr = my_args[i].end()-3) {
+        unsigned int pos = my_args[i].find(".py");
+        if (pos != std::string::npos &&
+            pos == (my_args[i].size())-3) {
           python_file_count++;
         }
       }
