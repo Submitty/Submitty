@@ -472,6 +472,11 @@ registerKeyHandler({name: "Toggle Regrade Requests Panel", code: "KeyX"}, functi
     toggleRegrade();
     updateCookies();
 });
+registerKeyHandler({name: "Toggle Edit Rubric", code: "KeyE"}, function() {
+    toggleEditMode();
+    document.getElementById("EditModeButton").checked = !(document.getElementById("EditModeButton").checked); 
+    updateCookies();
+});
 //-----------------------------------------------------------------------------
 // Show/hide components
 
@@ -729,6 +734,7 @@ function toggleEditMode(){
     if(findCurrentOpenedMark()>0){
         toggleMark(id, true);        
     }
+    openMark(id, true);
     if(temp==null){
         editModeEnabled=false;
     }
