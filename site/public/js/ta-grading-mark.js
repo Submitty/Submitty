@@ -791,7 +791,7 @@ function updateProgressPoints(c_index) {
             $('#mark_points_custom-' + c_index)[0].disabled=false;
             $('#mark_points_custom-' + c_index)[0].style.cursor="default";
             $('#mark_icon_custom-' + c_index)[0].style.cursor="pointer";
-        } 
+        }
     }
     else{
         $('#mark_text_custom-'+c_index)[0].disabled=true;
