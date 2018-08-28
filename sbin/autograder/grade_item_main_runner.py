@@ -93,7 +93,6 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                       full_name = '{0}_{1}'.format(which_untrusted, 'router')
                       print('spinning up docker {0} with c_id {1}'.format(full_name, c_id))
                       p = subprocess.Popen(['docker', 'start', '-i', '--attach', c_id], stdout=logfile,stdin=subprocess.PIPE)
-                      p = subprocess.Popen(['docker', 'start', '-i',c_id], stdout=logfile,stdin=subprocess.PIPE)
                       processes['router'] = p
                       time.sleep(1)
                     for name, info in container_info.items():
