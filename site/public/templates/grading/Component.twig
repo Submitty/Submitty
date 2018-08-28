@@ -20,38 +20,32 @@ Required Input:
 
     {# Title bar (only part that triggers collapse on click) #}
     <div class="box-title container" onclick="{% block component_click %}{% endblock %}">
-        <div class="row">
-            <div class="col-no-gutters">
-                <div class="left-block">
-                    {% block left_block %}
-                    {% endblock %}
-                </div>
+        <div class="row header-block">
+            {% block header_block %}
+            {% endblock %}
+        </div>
+        <div class="row content-block {{ mark_list_visibility }}">
+            <div class="col-no-gutters left-block container">
+                {% block left_block %}
+                {% endblock %}
+            </div>
 
-                {# Saving status #}
+            <div class="col-sm container center-block container">
+                {% block center_block %}
+                {% endblock %}
+            </div>
+
+            <div class="col-no-gutters right-block container">
                 {% if not grading_disabled %}
-                    {% include "SavingTools.twig" with {
-                        'show_save_tools': show_mark_list,
-                        'cancel_on_click': 'onCancelComponent(this)'
-                    } only %}
+                    <div class="row">
+                        {# Saving status #}
+                        {% include "SavingTools.twig" with {
+                            'show_save_tools': show_mark_list,
+                            'cancel_on_click': 'onCancelComponent(this)'
+                        } only %}
+                    </div>
                 {% endif %}
-            </div>
 
-            <div class="col-sm container title-block">
-                <div class="row">
-                    {% block title_block %}
-                    {% endblock %}
-                </div>
-                <div class="row {{ mark_list_visibility }}">
-                    {% block ta_comment_block %}
-                    {% endblock %}
-                </div>
-
-                <div class="row {{ mark_list_visibility }}">
-                    {% block student_comment_block %}
-                    {% endblock %}
-                </div>
-            </div>
-            <div class="col-no-gutters right-block">
                 {% block right_block %}
                 {% endblock %}
             </div>

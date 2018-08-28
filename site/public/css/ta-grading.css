@@ -422,16 +422,16 @@ tr.is_publish {
     display: flex;
 }
 
-.gradeable .edit-component-container .title-block textarea {
+.gradeable .edit-component-container .center-block textarea {
     width: 100%;
     resize: vertical;
 }
 
-.gradeable .edit-component-container .title-block input {
+.gradeable .edit-component-container .center-block input {
     width: 100%;
 }
 
-.gradeable .edit-component-container .title-block div.page-label {
+.gradeable .edit-component-container .center-block div.page-label {
     display: inline-flex;
     align-items: center;
     padding-left: 20px;

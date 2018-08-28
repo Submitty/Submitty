@@ -4,75 +4,39 @@
     onClickComponent(this)
 {% endblock %}
 
-{% set extra_credit_points = component.upper_clamp - component.max_value %}
-{% set penalty_points = 0-component.lower_clamp %}
-{% block left_block %}
-    {# TODO: badge and point value assignments (peer too?) #}
-    {% if show_mark_list %}
-        <div class="container point-values">
-            <div class="row">
-                <div class="col point-input-container">
-                    <input class="max-points"
-                           step="{{ precision }}"
-                           type="number" min="0"
-                           value="{{ component.max_value|round(decimal_precision) }}"
-                           onchange="refreshRubricTotalBox()" onclick="event.stopPropagation()"/>
-                </div>
-                <div class="col point-label">Normal Points</div>
-            </div>
-            <div class="row">
-                <div class="col point-input-container">
-                    <input class="extra-credit-points"
-                           step="{{ precision }}"
-                           type="number" min="0"
-                           value="{{ extra_credit_points|round(decimal_precision) }}"
-                           onchange="refreshRubricTotalBox()" onclick="event.stopPropagation()"/>
-                </div>
-                <div class="col point-label">Extra Credit Points</div>
-            </div>
-            <div class="row">
-                <div class="col point-input-container">
-                    <input class="penalty-points"
-                           step="{{ precision }}"
-                           type="number" min="0"
-                           value="{{ component.lower_clamp|abs|round(decimal_precision) }}"
-                           onclick="event.stopPropagation()"/>
-                </div>
-                <div class="col point-label">Penalty Points</div>
-            </div>
-            <div class="row">
-                <div class="col count-up-selector count-type-selector {{ component.default == 0 ? 'count-type-selected' : ''}}"
-                     onclick="onClickCountUp(this); event.stopPropagation()">
-                    <span>Count Up</span>
-                </div>
-                <div class="col count-down-selector count-type-selector {{ component.default != 0 and component.default == component.max_value ? 'count-type-selected' : ''}}"
-                     onclick="onClickCountDown(this); event.stopPropagation()">
-                    <span>Count Down</span>
-                </div>
-            </div>
-            <div class="row">
-            </div>
-        </div>
-    {% else %}
+{% block header_block %}
+    <div class="col badge-container">
         <strong class="badge green-background">
             {{ component.max_value|round(decimal_precision) }} {{ extra_credit_points > 0 ? '(+' ~ extra_credit_points|round(decimal_precision) ~ ')' }} {{ penalty_points > 0 ? '(-' ~ penalty_points|round(decimal_precision) ~ ')' : '' }}
         </strong>
-    {% endif %}
-{% endblock %}
+    </div>
 
-{% block right_block %}
-    {% if not show_mark_list %}
-        <span class="reorder-component-container" onclick="event.stopPropagation()">
-            <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+    <div class="col">
+        <span class="component-title col-no-gutters">
+            <b>{{ component.title }}</b>
         </span>
-    {% endif %}
-    <span class="col-no-gutters" onclick="onDeleteComponent(this); event.stopPropagation()">
-        <i class="fa fa-trash" title="Delete this component"></i>
-    </span>
+
+        {% if component.page > 0 %}
+            <span class="page-number-view col">
+                <i>Page #: {{ component.page }}</i>
+            </span>
+        {% endif %}
+    </div>
+
+    <div class="col-no-gutters">
+        {% if not show_mark_list %}
+            <span class="reorder-component-container" onclick="event.stopPropagation()">
+                <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+            </span>
+        {% endif %}
+        <span class="col-no-gutters" onclick="onDeleteComponent(this); event.stopPropagation()">
+            <i class="fa fa-trash" title="Delete this component"></i>
+        </span>
+    </div>
 {% endblock %}
 
-{% block title_block %}
-    {% if show_mark_list %}
+{% block center_block %}
+    <div class="row">
         <div class="col component-title-container">
             <input class="component-title" type="text" value="{{ component.title }}" placeholder="Component Title" onclick="event.stopPropagation()"/>
         </div>
@@ -86,26 +50,58 @@
         {% else %}
             <input class="page-number" value="{{ component.page }}" hidden/>
         {% endif %}
-    {% else %}
-
-        <span class="component-title col-no-gutters">
-            <b>{{ component.title }}</b>
-        </span>
-
-        {% if component.page > 0 %}
-            <span class="page-number-view col">
-                <i>Page #: {{ component.page }}</i>
-            </span>
-        {% endif %}
-    {% endif %}
+    </div>
+    <div class="row">
+        <textarea class="ta-comment" placeholder="Note to TAs" onclick="event.stopPropagation()">{{ component.ta_comment }}</textarea>
+    </div>
+    <div class="row">
+        <textarea class="student-comment" placeholder="Note to Student" onclick="event.stopPropagation()">{{ component.student_comment }}</textarea>
+    </div>
 {% endblock %}
 
-{% block ta_comment_block %}
-    <textarea class="ta-comment" placeholder="Note to TAs" onclick="event.stopPropagation()">{{ component.ta_comment }}</textarea>
-{% endblock %}
-
-{% block student_comment_block %}
-    <textarea class="student-comment" placeholder="Note to Student" onclick="event.stopPropagation()">{{ component.student_comment }}</textarea>
+{% set extra_credit_points = component.upper_clamp - component.max_value %}
+{% set penalty_points = 0-component.lower_clamp %}
+{% block right_block %}
+    <div class="row">
+        <div class="col point-input-container">
+            <input class="max-points"
+                   step="{{ precision }}"
+                   type="number" min="0"
+                   value="{{ component.max_value|round(decimal_precision) }}"
+                   onchange="refreshRubricTotalBox()" onclick="event.stopPropagation()"/>
+        </div>
+        <div class="col point-label">Normal Points</div>
+    </div>
+    <div class="row">
+        <div class="col point-input-container">
+            <input class="extra-credit-points"
+                   step="{{ precision }}"
+                   type="number" min="0"
+                   value="{{ extra_credit_points|round(decimal_precision) }}"
+                   onchange="refreshRubricTotalBox()" onclick="event.stopPropagation()"/>
+        </div>
+        <div class="col point-label">Extra Credit Points</div>
+    </div>
+    <div class="row">
+        <div class="col point-input-container">
+            <input class="penalty-points"
+                   step="{{ precision }}"
+                   type="number" min="0"
+                   value="{{ component.lower_clamp|abs|round(decimal_precision) }}"
+                   onclick="event.stopPropagation()"/>
+        </div>
+        <div class="col point-label">Penalty Points</div>
+    </div>
+    <div class="row">
+        <div class="col count-up-selector count-type-selector {{ component.default == 0 ? 'count-type-selected' : ''}}"
+             onclick="onClickCountUp(this); event.stopPropagation()">
+            <span>Count Up</span>
+        </div>
+        <div class="col count-down-selector count-type-selector {{ component.default != 0 and component.default == component.max_value ? 'count-type-selected' : ''}}"
+             onclick="onClickCountDown(this); event.stopPropagation()">
+            <span>Count Down</span>
+        </div>
+    </div>
 {% endblock %}
 
 {% block marks_block %}
