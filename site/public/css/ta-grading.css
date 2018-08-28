@@ -585,6 +585,7 @@ tr.is_publish {
     box-sizing: content-box;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
 }
 
 .gradeable .mark-container span.mark-points {
