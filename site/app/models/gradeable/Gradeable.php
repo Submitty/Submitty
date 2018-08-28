@@ -254,6 +254,20 @@ class Gradeable extends AbstractModel {
     ];
 
     /**
+     * All \DateTime properties that should be validated
+     */
+    const date_validated_properties = [
+        'ta_view_start_date',
+        'submission_open_date',
+        'submission_due_date',
+        'grade_start_date',
+        'grade_due_date',
+        'grade_released_date',
+        'grade_locked_date',
+        'regrade_request_date'
+    ];
+
+    /**
      * All \DateTime properties for NUMERIC_TEXT and CHECKPOINT gradeables
      * Note: this is in validation order
      */
@@ -521,8 +535,8 @@ class Gradeable extends AbstractModel {
         $black_list = $this->getDateValidationSet();
 
 		// First coerce in the forward direction, then in the reverse direction
-		return $coerce_dates(array_reverse(self::date_properties), $black_list,
-            $coerce_dates(self::date_properties, $black_list, $dates,
+		return $coerce_dates(array_reverse(self::date_validated_properties), $black_list,
+            $coerce_dates(self::date_validated_properties, $black_list, $dates,
                 function (\DateTime $val, \DateTime $cmp) {
                     return $val < $cmp;
                 }),
