@@ -18,7 +18,7 @@ class HomeworkView extends AbstractView {
 
     public function unbuiltGradeable(Gradeable $gradeable) {
         return $this->core->getOutput()->renderTwigTemplate('error/UnbuiltGradeable.twig', [
-            'gradeable' => $gradeable
+            'title' => $gradeable->getTitle()
         ]);
     }
 

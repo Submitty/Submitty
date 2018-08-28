@@ -254,6 +254,20 @@ class Gradeable extends AbstractModel {
     ];
 
     /**
+     * All \DateTime properties that should be validated
+     */
+    const date_validated_properties = [
+        'ta_view_start_date',
+        'submission_open_date',
+        'submission_due_date',
+        'grade_start_date',
+        'grade_due_date',
+        'grade_released_date',
+        'grade_locked_date',
+        'regrade_request_date'
+    ];
+
+    /**
      * All \DateTime properties for NUMERIC_TEXT and CHECKPOINT gradeables
      * Note: this is in validation order
      */
@@ -521,8 +535,8 @@ class Gradeable extends AbstractModel {
         $black_list = $this->getDateValidationSet();
 
 		// First coerce in the forward direction, then in the reverse direction
-		return $coerce_dates(array_reverse(self::date_properties), $black_list,
-            $coerce_dates(self::date_properties, $black_list, $dates,
+		return $coerce_dates(array_reverse(self::date_validated_properties), $black_list,
+            $coerce_dates(self::date_validated_properties, $black_list, $dates,
                 function (\DateTime $val, \DateTime $cmp) {
                     return $val < $cmp;
                 }),
@@ -583,13 +597,14 @@ class Gradeable extends AbstractModel {
 
     /**
      * Gets all of the gradeable's date values as strings indexed by property name (including late_days)
+     * @param bool $add_utc_offset True to add the UTC offset to the output strings
      * @return string[]
      */
-    public function getDateStrings() {
+    public function getDateStrings(bool $add_utc_offset = true) {
         $date_strings = [];
         $now = new \DateTime('now', $this->core->getConfig()->getTimezone());
         foreach (self::date_properties as $property) {
-            $date_strings[$property] = DateUtils::dateTimeToString($this->$property ?? $now);
+            $date_strings[$property] = DateUtils::dateTimeToString($this->$property ?? $now, $add_utc_offset);
         }
         $date_strings['late_days'] = strval($this->late_days);
         return $date_strings;

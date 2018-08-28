@@ -6,7 +6,13 @@ if [[ "$UID" -ne "0" ]] ; then
     exit
 fi
 
-SUBMITTY_INSTALL_DIR=/usr/local/submitty
+
+# We assume a relative path from this repository to the installation
+# directory and configuration directory.
+CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../../../../config
+SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
+
+CGI_USER=$(jq -r '.cgi_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 
 
 ##################################################
@@ -38,28 +44,32 @@ sudo apt-get -qqy update
 
 sudo apt-get -qqy install mono-devel
 
-echo "Getting dafny..."
-# "Dafny is a verification-aware programming language"
+# If Dafny hasn't already been installed
+if [ ! -d "${SUBMITTY_INSTALL_DIR}/Dafny" ]; then
 
-mkdir -p ${SUBMITTY_INSTALL_DIR}/Dafny
-chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/Dafny
-chmod 751 ${SUBMITTY_INSTALL_DIR}/Dafny
-pushd ${SUBMITTY_INSTALL_DIR}/Dafny > /dev/null
+    # "Dafny is a verification-aware programming language"
+    echo "Getting dafny..."
 
-DAFNY_VER=v2.1.0
-DAFNY_FILE=dafny-2.1.0.10108-x64-ubuntu-14.04.zip
+    mkdir -p ${SUBMITTY_INSTALL_DIR}/Dafny
+    chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/Dafny
+    chmod 751 ${SUBMITTY_INSTALL_DIR}/Dafny
+    pushd ${SUBMITTY_INSTALL_DIR}/Dafny > /dev/null
 
-wget https://github.com/Microsoft/dafny/releases/download/${DAFNY_VER}/${DAFNY_FILE} -o /dev/null > /dev/null 2>&1
-unzip ${DAFNY_FILE} > /dev/null
-rm -f ${DAFNY_FILE} > /dev/null
+    DAFNY_VER=v2.1.0
+    DAFNY_FILE=dafny-2.1.0.10108-x64-ubuntu-14.04.zip
 
-# fix permissions
-chmod -R o+rx dafny
+    wget https://github.com/Microsoft/dafny/releases/download/${DAFNY_VER}/${DAFNY_FILE} -o /dev/null > /dev/null 2>&1
+    unzip ${DAFNY_FILE} > /dev/null
+    rm -f ${DAFNY_FILE} > /dev/null
 
-popd > /dev/null
+    # fix permissions
+    chmod -R o+rx dafny
 
-# then dafny can be run (using mono):
-#    /usr/bin/mono /usr/local/submitty/Dafny/dafny/Dafny.exe /help
+    popd > /dev/null
+
+    # then dafny can be run (using mono):
+    #    /usr/bin/mono /usr/local/submitty/Dafny/dafny/Dafny.exe /help
+fi
 
 
 ##################################################
@@ -133,7 +143,7 @@ rm glfw-3.2.1.zip
 
 ##################################################
 # Used by Computational Vision course
-apt-get install python3-tk
+apt-get install -qqy python3-tk
 
 pip3 install -U pip numpy
 pip3 install matplotlib
@@ -147,7 +157,14 @@ chmod 555 /usr/lib/python*/dist-packages
 sudo chmod 500   /usr/local/lib/python*/dist-packages/pam.py*
 sudo chown ${CGI_USER} /usr/local/lib/python*/dist-packages/pam.py*
 
-
 ##################################################
 #install some pdflatex packages
 apt-get install -qqy  texlive-latex-base texlive-extra-utils texlive-latex-recommended
+
+
+# dictionary of words in /usr/share/dict/words
+apt-get install -qqy wamerican
+
+
+# attempt to correct a system with broken dependencies in place
+apt-get -f -qqy install
