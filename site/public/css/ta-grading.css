@@ -672,6 +672,27 @@ tr.is_publish {
     padding-right: 5px;
 }
 
+.gradeable .received-marks-list.container {
+    padding-left: 15px;
+}
+
+.gradeable .received-marks-list.container .row .col-no-gutters.point-value,
+.gradeable .received-marks-list.container .row .col-no-gutters.indicator {
+    display: inline-flex;
+    align-items: center;
+    padding-left: 5px;
+    padding-right: 5px;
+    width: 30px;
+}
+
+.gradeable .received-marks-list.container .row .col-no-gutters.point-value {
+    justify-content: flex-end;
+}
+
+.gradeable .received-marks-list.container .row .col-no-gutters.indicator {
+    justify-content: center;
+}
+
 /* Mark conflict popup */
 
 #mark-conflict-popup div.mark-conflict-row {
