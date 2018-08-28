@@ -92,7 +92,9 @@ class DateUtils {
             return $date;
         } else if (gettype($date) === 'string') {
             try {
-                return new \DateTime($date, $time_zone);
+                $date_time = new \DateTime($date, $time_zone);
+                $date_time->setTimezone($time_zone);
+                return $date_time;
             } catch (\Exception $e) {
                 throw new \InvalidArgumentException('Invalid DateTime Format');
             }
@@ -127,10 +129,11 @@ class DateUtils {
      * Converts a \DateTime object to a string in one place so if we change the format
      *  here, it changes everywhere
      *
-     * @param $date \DateTime The date to format
+     * @param \DateTime  $date The date to format
+     * @param bool $add_utc_offset If the UTC offset should be part of the output
      * @return string The formatted date
      */
-    public static function dateTimeToString(DateTime $date) {
-        return $date->format('Y-m-d H:i:sO');
+    public static function dateTimeToString(DateTime $date, bool $add_utc_offset = true) {
+        return $date->format('Y-m-d H:i:s' . ($add_utc_offset ? 'O' : ''));
     }
 }
