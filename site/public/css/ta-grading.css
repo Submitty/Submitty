@@ -503,7 +503,7 @@ tr.is_publish {
 }
 
 .gradeable .component .row.divider {
-    background: #AAA;
+    background: #DDD;
     height: 2px;
     width: 100%;
     padding-left: 10px;
