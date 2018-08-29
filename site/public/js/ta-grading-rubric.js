@@ -1923,6 +1923,14 @@ function onComponentPointsChange(me) {
 }
 
 /**
+ * Callback for changign the title for a component
+ * @param me DOM element of the input box
+ */
+function onComponentTitleChange(me) {
+    getComponentJQuery(getComponentIdFromDOMElement(me)).find('.component-title-text').text($(me).val());
+}
+
+/**
  * Put all of the primary logic of the TA grading rubric here
  *
  */
