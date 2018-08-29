@@ -8,14 +8,22 @@
         <iframe src="{{ core.buildUrl({"component": "misc", "page": "display_file", "dir": "results", "file": check.name, "path": check.path}) }}" width="95%" height="1200px" style="border: 0"></iframe>
     {% else %}
         <br>
+        {% if check.actual %}
         <div style="height:23px; float:right;">
             <a id="show_char_{{ index }}_{{ loop.index0 }}" class="btn btn-default" style="float:right;" onclick="changeDiffView('container_{{ index }}_{{ loop.index0 }}', '{{ gradeable_id }}', '{{ who }}', '{{ display_version }}', '{{ index }}', '{{ loop.index0 }}', 'white_space_helper_{{ index }}')">Visualize whitespace characters</a>
         </div>
         <div><span style="margin-left: 20px" class="line_code" id='white_space_helper_{{ index }}'></span></div>
+        {% endif %}
+
         <div class="box-block">
 
-            {% if check.actual %}
-                {{ self.render_diff_element(check, check.actual, 0, popup_css_file, index, loop.index0) }}
+            {% if not check.actual %}
+               <h4 style="margin-bottom: 0">{{ check.description }}</h4>
+               <div>
+               {{ self.render_messages(check.messages) }}
+               </div>
+            {% else %}
+               {{ self.render_diff_element(check, check.actual, 0, popup_css_file, index, loop.index0) }}
             {% endif %}
             {% if check.expected %}
                 {{ self.render_diff_element(check, check.expected, 1, popup_css_file, index, loop.index0) }}
@@ -31,6 +39,7 @@
 
 {% macro render_diff_element(check, element, side, popup_css_file, index, check_index) %}
     <!-- Readded css here so the popups have the css -->
+
     <div class='diff-element'>
         <h4>
             {{ element.title }}
@@ -41,20 +50,21 @@
             {% endif %}
         </h4>
 
+        {% for message in check.messages %}
+              {% set type_class = "black-message" %}
+              {% if message['type'] == "information" %}
+                 {% set type_class = "blue-message" %}
+              {% elseif message['type'] == "success" %}
+                 {% set type_class = "green-message" %}
+              {% elseif message['type'] == "failure" %}
+                 {% set type_class = "red-message" %}
+              {% elseif message['type'] == "warning" %}
+                 {% set type_class = "yellow-message" %}
+              {% endif %}
+              <span class="{{ type_class }}">{{ message['message'] }}</span><br />
+        {% endfor %}
+
         <div id="container_{{ index }}_{{ check_index }}_{{ side }}">
-            {% for message in check.messages %}
-                {% set type_class = "black-message" %}
-                {% if message['type'] == "information" %}
-                    {% set type_class = "blue-message" %}
-                {% elseif message['type'] == "success" %}
-                    {% set type_class = "green-message" %}
-                {% elseif message['type'] == "failure" %}
-                    {% set type_class = "red-message" %}
-                {% elseif message['type'] == "warning" %}
-                    {% set type_class = "yellow-message" %}
-                {% endif %}
-                <span class="{{ type_class }}">{{ message['message'] }}</span><br />
-            {% endfor %}
             {% if element.type == "image" %}
                 <img src="{{ element.src }}" style="border:2px solid black">
             {% elseif element.type == "text" %}
@@ -65,3 +75,21 @@
         </div>
     </div>
 {% endmacro %}
+
+
+{% macro render_messages(messages) %}
+   {% for message in messages %}
+      {% set type_class = "black-message" %}
+      {% if message['type'] == "information" %}
+         {% set type_class = "blue-message" %}
+      {% elseif message['type'] == "success" %}
+         {% set type_class = "green-message" %}
+      {% elseif message['type'] == "failure" %}
+         {% set type_class = "red-message" %}
+      {% elseif message['type'] == "warning" %}
+         {% set type_class = "yellow-message" %}
+      {% endif %}
+      <span class="{{ type_class }}">{{ message['message'] }}</span><br />
+   {% endfor %}
+{% endmacro %}
+
