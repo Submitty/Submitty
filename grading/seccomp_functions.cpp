@@ -175,6 +175,7 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
     categories.insert("PROCESS_CONTROL_ADVANCED");
     categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
     categories.insert("TGKILL");
+    categories.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
   }
 
   // ---------------------------------------------------------------
