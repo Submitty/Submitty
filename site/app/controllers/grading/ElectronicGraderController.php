@@ -1745,7 +1745,7 @@ class ElectronicGraderController extends GradingController {
             $page = $gradeable->isPdfUpload() ? ($gradeable->isStudentPdfUpload() ? Component::PDF_PAGE_STUDENT : 1) : Component::PDF_PAGE_NONE;
 
             // Once we've parsed the inputs and checked permissions, perform the operation
-            $component = $gradeable->addComponent('Component Title', '', '', 0, 0,
+            $component = $gradeable->addComponent('Problem ' . strval(count($gradeable->getComponents()) + 1), '', '', 0, 0,
                 0, 0, false, false, $page);
             $component->addMark('No Credit', 0.0, false);
             $this->core->getQueries()->updateGradeable($gradeable);
