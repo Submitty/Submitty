@@ -50,9 +50,15 @@ Required Input:
         {% endif %}
     </span>
     {% if show_publish %}
-        <span class="col-no-gutters mark-publish">
-            Publish: <input type="checkbox" title="Should all students see this mark, even if they didn't get it?" {{ mark.publish ? 'checked' : '' }}/>
-        </span>
+        {% if not first_mark %}
+            <span class="col-no-gutters mark-publish">
+                Show mark to all students: <input type="checkbox" {{ mark.publish ? 'checked' : '' }}/>
+            </span>
+        {% else %}
+            <span class="mark-publish">
+                <input type="checkbox" {{ mark.publish ? 'checked' : '' }} hidden/>
+            </span>
+        {% endif %}
     {% endif %}
     <span class="col-no-gutters mark-tools" onclick="onGetMarkStats(this);event.stopPropagation()">
         <i class="fa fa-users icon-mark-stats" title="See who got this mark"></i>
