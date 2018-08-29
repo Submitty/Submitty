@@ -1923,11 +1923,19 @@ function onComponentPointsChange(me) {
 }
 
 /**
- * Callback for changign the title for a component
+ * Callback for changing the title for a component
  * @param me DOM element of the input box
  */
 function onComponentTitleChange(me) {
     getComponentJQuery(getComponentIdFromDOMElement(me)).find('.component-title-text').text($(me).val());
+}
+
+/**
+ * Callback for changing the page number for a component
+ * @param me DOM element of the input box
+ */
+function onComponentPageNumberChange(me) {
+    getComponentJQuery(getComponentIdFromDOMElement(me)).find('.component-page-number-text').text($(me).val());
 }
 
 /**

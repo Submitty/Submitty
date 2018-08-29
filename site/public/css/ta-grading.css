@@ -460,6 +460,10 @@ tr.is_publish {
     width: 50px;
 }
 
+.gradeable .component .page-number-view {
+    padding-left: 10px;
+}
+
 .gradeable .component .box-title input[type=number] {
     text-align: right;
 }

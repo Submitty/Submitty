@@ -17,7 +17,7 @@
 
     {% if component.page > 0 %}
         <span class="page-number-view col-no-gutters">
-            <i>Page # {{ component.page }}</i>
+            <i>(Page # <span class="component-page-number-text">{{ component.page }}</span>)</i>
         </span>
     {% endif %}
 
@@ -55,7 +55,7 @@
                     <span>Page #</span>
                 </div>
                 <div class="col-no-gutters">
-                    <input class="page-number" type="number" step="1" min="1" value="{{ component.page }}">
+                    <input class="page-number" type="number" step="1" min="1" value="{{ component.page }}" onchange="onComponentPageNumberChange(this)">
                 </div>
             {% else %}
                 <input class="page-number" value="{{ component.page }}" hidden/>
