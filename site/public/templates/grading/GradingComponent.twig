@@ -45,15 +45,13 @@ Required inputs:
 
     <span class="divider col"> </span>
 
-    {% if not grading_disabled %}
-        <span class="col-no-gutters">
-            {# Saving status #}
-            {% include "SavingTools.twig" with {
-                'show_save_tools': show_mark_list,
-                'cancel_on_click': 'onCancelComponent(this)'
-            } only %}
-        </span>
-    {% endif %}
+    <span class="col-no-gutters">
+        {# Saving status #}
+        {% include "SavingTools.twig" with {
+            'show_save_tools': show_mark_list,
+            'cancel_on_click': 'onCancelComponent(this)'
+        } only %}
+    </span>
 
     {% if disabled %}
         <span class="version-warning col-no-gutters">

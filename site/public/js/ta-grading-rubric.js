@@ -1911,6 +1911,18 @@ function onClickCountDown(me) {
 }
 
 /**
+ * Callback for changing on the point values for a component
+ * @param me DOM element of the input box
+ */
+function onComponentPointsChange(me) {
+    refreshComponent(getComponentIdFromDOMElement(me), true)
+        .catch(function (err) {
+            console.error(err);
+            alert('Failed to refresh component! ' + err.message);
+        });
+}
+
+/**
  * Put all of the primary logic of the TA grading rubric here
  *
  */
@@ -2303,18 +2315,19 @@ function openComponent(component_id) {
 function closeComponentInstructorEdit(component_id, saveChanges) {
     let sequence = Promise.resolve();
     if (saveChanges) {
-        sequence = sequence.then(function () {
-            return saveMarkList(component_id);
-        });
+        sequence = sequence
+            .then(function () {
+                return saveMarkList(component_id);
+            })
+            .then(function () {
+                // Save the component title and comments
+                let component = getComponentFromDOM(component_id);
+                return ajaxSaveComponent(getGradeableId(), component_id, component.title, component.ta_comment,
+                    component.student_comment, component.page, component.lower_clamp,
+                    component.default, component.max_value, component.upper_clamp);
+            });
     }
     return sequence
-        .then(function() {
-            // Save the component title and comments
-            let component = getComponentFromDOM(component_id);
-            return ajaxSaveComponent(getGradeableId(), component_id, component.title, component.ta_comment,
-                component.student_comment, component.page, component.lower_clamp,
-                component.default, component.max_value, component.upper_clamp);
-        })
         .then(function () {
             return ajaxGetComponentRubric(getGradeableId(), component_id);
         })

@@ -23,15 +23,13 @@
 
     <span class="divider col"> </span>
 
-    {% if not grading_disabled %}
-        <span class="col-no-gutters">
-            {# Saving status #}
-            {% include "SavingTools.twig" with {
-                'show_save_tools': show_mark_list,
-                'cancel_on_click': 'onCancelComponent(this)'
-            } only %}
-        </span>
-    {% endif %}
+    <span class="col-no-gutters">
+        {# Saving status #}
+        {% include "SavingTools.twig" with {
+            'show_save_tools': show_mark_list,
+            'cancel_on_click': 'onCancelComponent(this)'
+        } only %}
+    </span>
 
     <span class="col-no-gutters reorder-component-container" onclick="event.stopPropagation()">
         <i class="fa fa-ellipsis-v" aria-hidden="true" title="Click and drag to reorder components"></i>
@@ -50,14 +48,14 @@
                 <span>Title</span>
             </div>
             <div class="col component-title-container">
-                <input class="component-title" type="text" value="{{ component.title }}" placeholder="Component Title" onclick="event.stopPropagation()"/>
+                <input class="component-title" type="text" value="{{ component.title }}" placeholder="Component Title"/>
             </div>
             {% if component.page > 0 %}
                 <div class="col-no-gutters page-label">
                     <span>Page #</span>
                 </div>
                 <div class="col-no-gutters">
-                    <input class="page-number" type="number" step="1" min="1" value="{{ component.page }}" onclick="event.stopPropagation()"/>
+                    <input class="page-number" type="number" step="1" min="1" value="{{ component.page }}">
                 </div>
             {% else %}
                 <input class="page-number" value="{{ component.page }}" hidden/>
@@ -70,7 +68,7 @@
                 <span>Note to TAs</span>
             </div>
             <div class="col tight-right">
-                <textarea class="ta-comment" placeholder="Note to TAs" onclick="event.stopPropagation()">{{ component.ta_comment }}</textarea>
+                <textarea class="ta-comment" placeholder="Note to TAs">{{ component.ta_comment }}</textarea>
             </div>
         </div>
 
@@ -80,7 +78,7 @@
                 <span>Note to Students</span>
             </div>
             <div class="col tight-right">
-                <textarea class="student-comment" placeholder="Note to Students" onclick="event.stopPropagation()">{{ component.student_comment }}</textarea>
+                <textarea class="student-comment" placeholder="Note to Students">{{ component.student_comment }}</textarea>
             </div>
         </div>
 
@@ -94,7 +92,7 @@
                        step="{{ precision }}"
                        type="number" min="0"
                        value="{{ component.max_value|round(decimal_precision) }}"
-                       onchange="refreshRubricTotalBox()" onclick="event.stopPropagation()"/>
+                       onchange="onComponentPointsChange(this)"/>
             </div>
         </div>
         <div class="row point-input-row">
@@ -104,7 +102,7 @@
                        step="{{ precision }}"
                        type="number" min="0"
                        value="{{ extra_credit_points|round(decimal_precision) }}"
-                       onchange="refreshRubricTotalBox()" onclick="event.stopPropagation()"/>
+                       onchange="onComponentPointsChange(this)"/>
             </div>
             <div class="col"><i>Student scores will be clamped from above to Points + Additional Extra Credit Points</i></div>
         </div>
@@ -115,7 +113,7 @@
                        step="{{ precision }}"
                        type="number" min="0"
                        value="{{ component.lower_clamp|abs|round(decimal_precision) }}"
-                       onclick="event.stopPropagation()"/>
+                       onchange="onComponentPointsChange(this)"/>
             </div>
             <div class="col"><i>Student scores will be clamped from below to min(0,Negative Penalty Points)</i></div>
         </div>
@@ -127,14 +125,14 @@
                 <span class="radio-input">
                     <input type="radio" class="count-up-selector count-type-selector"
                            name="count-type-{{ component.id }}" {{ component.default == 0 ? 'checked' : '' }}
-                           onclick="onClickCountUp(this); event.stopPropagation()">Grade by Count Up (from zero)
+                           onclick="onClickCountUp(this)">Grade by Count Up (from zero)
                 </span>
             </div>
             <div class="col">
                 <span class="radio-input">
                     <input type="radio" class="count-down-selector count-type-selector"
                            name="count-type-{{ component.id }}" {{ component.default != 0 ? 'checked' : '' }}
-                           onclick="onClickCountDown(this); event.stopPropagation()">Grade by Count Down (from "Points")
+                           onclick="onClickCountDown(this)">Grade by Count Down (from "Points")
                 </span>
             </div>
         </div>
