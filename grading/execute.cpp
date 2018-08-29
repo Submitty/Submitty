@@ -906,6 +906,7 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   // FIXME: if we want to assert or print stuff afterward, we should save
   // the originals and restore after the exec fails.
   if (my_stdin != "") {
+    std::cout << "PIPED STDIN FILE DETECTED. DISPATCHER ACTIONS WILL BE IGNORED." << std::endl;
     int new_stdinfd  = open(my_stdin.c_str()  , O_RDONLY );
     int stdinfd = fileno(stdin);
     close(stdinfd);
@@ -996,10 +997,38 @@ void TerminateProcess(float &elapsed, int childPID) {
   elapsed+=0.001;
 }
 
+//Thread function for dispatcher actions
+void cin_reader(std::mutex* lock, std::queue<std::string>* input_queue){
+  std::cout << "thread function " << getpid() << std::endl;
+  std::string my_string;
+
+  try
+  {
+    do {
+      std::getline (std::cin,my_string);
+      std::cout << "Cin recieved: " << my_string << std::endl;
+      std::cout << "Appending a newline" << std::endl;
+      my_string += "\n";
+
+      lock->lock();
+      input_queue->push(my_string);
+      lock->unlock();
+    } while(true);
+  }
+  catch (const std::exception &exc)
+  {
+      // catch anything thrown within try block that derives from std::exception
+      std::cout << exc.what();
+  }
+
+  std::cout << "exiting thread function" << std::endl;
+}
+
 
 // Executes command (from shell) and returns error code (0 = success)
 int execute(const std::string &cmd, 
       const std::vector<nlohmann::json> actions,
+      const std::vector<nlohmann::json> dispatcher_actions,
       const std::string &execute_logfile,
       const nlohmann::json &test_case_limits,
       const nlohmann::json &assignment_limits,
@@ -1009,6 +1038,12 @@ int execute(const std::string &cmd,
   std::set<std::string> invalid_windows;
   bool window_mode = windowed; //Tells us if the process is expected to spawn a window. (additional support later) 
   
+
+  int d_size = dispatcher_actions.size();
+
+  //Dispatcher actions variables
+  std::mutex lock;
+  std::queue<std::string> input_queue;
 
   //check if there are any actions present which require a window.
   if(actions.size() > 0){ 
@@ -1035,6 +1070,7 @@ int execute(const std::string &cmd,
 
 
   std::cout << "IN EXECUTE:  '" << cmd << "'" << std::endl;
+  std::cout << "identified " << dispatcher_actions.size() << " dispatcher actions" << std::endl;
 
   std::ofstream logfile(execute_logfile.c_str(), std::ofstream::out | std::ofstream::app);
 
@@ -1042,6 +1078,13 @@ int execute(const std::string &cmd,
   int result = -1;
   int time_kill=0;
   int memory_kill=0;
+
+  //used to pipe cin to the running student process (dispatcher_actions)
+  int dispatcherpipe[2];
+  pipe(dispatcherpipe);
+
+  //used to synchronize pipe setup.
+  lock.lock();
   pid_t childPID = fork();
   // ensure fork was successful
   assert (childPID >= 0);
@@ -1060,6 +1103,12 @@ int execute(const std::string &cmd,
     int pgrp = setpgid(getpid(), 0);
     assert(pgrp == 0);
 
+    if(d_size > 0){
+      close(dispatcherpipe[1]); //close write end of the pipe
+      close(0); //close stdin
+      dup2(dispatcherpipe[0], 0); //copy read end of the pipe onto stdin.
+      close(dispatcherpipe[0]); // close read end of the pipe
+    }
     int child_result;
     child_result = exec_this_command(cmd,logfile,whole_config);
 
@@ -1069,8 +1118,17 @@ int execute(const std::string &cmd,
     }
     else {
       // PARENT PROCESS
+      std::thread cin_thread;
+
+      if(d_size > 0){
+        close(dispatcherpipe[0]); // close the read end of the pipe
+        cin_thread = std::thread(cin_reader, &lock, &input_queue);
+      }
+
       std::cout << "childPID = " << childPID << std::endl;
       std::cout << "PARENT PROCESS START: " << std::endl;
+      //allow the cin thread to begin reading.
+      lock.unlock();
       int parent_result = system("date");
       assert (parent_result == 0);
       //std::cout << "  parent_result = " << parent_result << std::endl;
@@ -1084,6 +1142,20 @@ int execute(const std::string &cmd,
       int number_of_screenshots = 0;
 
       do {
+          //dispatcher actions
+          if(!input_queue.empty()){
+            lock.lock();
+            std::string popped = input_queue.front();
+            input_queue.pop();
+            lock.unlock();
+
+            char piped_message[popped.length()];
+            strncpy(piped_message, popped.c_str(),popped.length()); //ignore the null byte
+
+            write(dispatcherpipe[1], piped_message, strlen(popped.c_str()));
+            std::cout << "Writing to student stdin: " << popped;
+          }
+
           if(window_mode && windowName == ""){ //if we are expecting a window, but know nothing about it
             initializeWindow(windowName, childPID, invalid_windows, elapsed); //attempt to get information about the window
             if(windowName != ""){ //if we found information about the window
@@ -1121,6 +1193,8 @@ int execute(const std::string &cmd,
             }
          }
       } while (wpid == 0);
+
+
       if (WIFEXITED(status)) {
         std::cout << "Child exited, status=" << WEXITSTATUS(status) << std::endl;
         if (WEXITSTATUS(status) == 0){

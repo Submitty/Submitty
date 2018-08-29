@@ -7,6 +7,8 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config);
 
 void AddDockerConfiguration(nlohmann::json &whole_config);
 
+void FormatDispatcherActions(nlohmann::json &whole_config);
+
 void RewriteDeprecatedMyersDiff(nlohmann::json &whole_config);
 
 void InflateTestcases(nlohmann::json &single_testcase);
