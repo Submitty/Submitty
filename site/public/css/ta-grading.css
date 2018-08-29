@@ -394,6 +394,10 @@ tr.is_publish {
     cursor: default;
 }
 
+.gradeable .component .badge-container {
+    min-width: 170px;
+}
+
 .gradeable .version-warning {
     color:rgb(200, 0, 0);
     font-weight: bold;
