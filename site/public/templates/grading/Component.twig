@@ -25,29 +25,25 @@ Required Input:
             {% endblock %}
         </div>
         <div class="row content-block {{ mark_list_visibility }}">
-            <div class="col-no-gutters left-block container">
-                {% block left_block %}
-                {% endblock %}
+            <div class="col-no-gutters left-block">
+                <div class="container">
+                    {% block left_block %}
+                    {% endblock %}
+                </div>
             </div>
 
             <div class="col-sm container center-block container">
-                {% block center_block %}
-                {% endblock %}
+                <div class="container">
+                    {% block center_block %}
+                    {% endblock %}
+                </div>
             </div>
 
             <div class="col-no-gutters right-block container">
-                {% if not grading_disabled %}
-                    <div class="row">
-                        {# Saving status #}
-                        {% include "SavingTools.twig" with {
-                            'show_save_tools': show_mark_list,
-                            'cancel_on_click': 'onCancelComponent(this)'
-                        } only %}
-                    </div>
-                {% endif %}
-
-                {% block right_block %}
-                {% endblock %}
+                <div class="container">
+                    {% block right_block %}
+                    {% endblock %}
+                </div>
             </div>
         </div>
     </div>

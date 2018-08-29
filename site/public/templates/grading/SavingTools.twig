@@ -6,16 +6,13 @@ Required Parameters:
 -show_save_tools: true to show the 'save/cancel' text, otherwise show 'done' text
 -cancel_on_click: callback for the cancel button's on-click event
 #}
-<div class="save-tools">
+<span class="save-tools">
     {% if show_save_tools %}
-        <div class="save-tools-cancel" onclick="{{ cancel_on_click }} ;event.stopPropagation()">
+        <span class="save-tools-cancel" onclick="{{ cancel_on_click }} ;event.stopPropagation()">
             <i class="fa fa-times cancel-button" aria-hidden="true">Cancel</i>
-        </div>
-        <div class="save-tools-save">
-            <i class="fa fa-check save-button" aria-hidden="true">Save</i>
-        </div>
+        </span>
     {% endif %}
-    <div class="save-tools-in-progress" hidden>
+    <span class="save-tools-in-progress" hidden>
         <i class="fa fa-check save-button" aria-hidden="true">Loading...</i>
-    </div>
-</div>
+    </span>
+</span>

@@ -983,7 +983,7 @@ function getOverallCommentJQuery() {
  */
 function setComponentInProgress(component_id, show = true) {
     let domElement = getComponentJQuery(component_id);
-    domElement.find('.save-tools div').hide();
+    domElement.find('.save-tools span').hide();
     if (show) {
         domElement.find('.save-tools-in-progress').show();
     } else {
@@ -997,7 +997,7 @@ function setComponentInProgress(component_id, show = true) {
  */
 function setOverallCommentInProgress(show = true) {
     let domElement = getOverallCommentJQuery();
-    domElement.find('.save-tools div').hide();
+    domElement.find('.save-tools span').hide();
     if (show) {
         domElement.find('.save-tools-in-progress').show();
     } else {
