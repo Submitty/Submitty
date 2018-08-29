@@ -28,7 +28,7 @@ SUBMITTY_INSTALL_DIR=/usr/local/submitty
 min_AnalysisTools_version=v.18.06.00
 min_Lichen_version=v.18.07.04
 min_RainbowGrades_version=v.18.07.00
-min_Tutorial_version=v.18.08.00
+min_Tutorial_version=v.18.08.01
 
 ########################################################################
 # Helper function requires 2 args, the short name of the repository,

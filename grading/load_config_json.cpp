@@ -127,6 +127,66 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
   }
 }
 
+void FormatDispatcherActions(nlohmann::json &whole_config) {
+
+  bool docker_enabled = whole_config["docker_enabled"];
+
+  nlohmann::json::iterator tc = whole_config.find("testcases");
+  assert (tc != whole_config.end());
+
+  int testcase_num = 0;
+  for (typename nlohmann::json::iterator itr = tc->begin(); itr != tc->end(); itr++,testcase_num++){
+
+    nlohmann::json this_testcase = whole_config["testcases"][testcase_num];
+
+    if(this_testcase["dispatcher_actions"].is_null()){
+      whole_config["testcases"][testcase_num]["dispatcher_actions"] = nlohmann::json::array();
+      continue;
+    }
+
+    std::vector<nlohmann::json> dispatcher_actions = mapOrArrayOfMaps(this_testcase, "dispatcher_actions");
+
+    if(dispatcher_actions.size() > 0){
+      assert(docker_enabled);
+    }
+
+    for (int i = 0; i < dispatcher_actions.size(); i++){
+      nlohmann::json dispatcher_action = dispatcher_actions[i];
+
+      std::string action = dispatcher_action.value("action","");
+      std::cout << "we just got action " << action << std::endl;
+      assert(action != "");
+
+      if(action == "delay"){
+        assert(!dispatcher_action["seconds"].is_null());
+        assert(!dispatcher_action["delay"].is_string());
+
+        float delay_time_in_seconds = 1.0;
+        delay_time_in_seconds = float(dispatcher_action.value("seconds",1.0));
+        dispatcher_action["seconds"] = delay_time_in_seconds;
+      }else if(action == "stdin"){
+        assert(!dispatcher_action["string"].is_null());
+        assert(!dispatcher_action["containers"].is_null());
+
+        nlohmann::json containers = nlohmann::json::array();
+
+        if (dispatcher_action["containers"].is_array()){
+          containers = dispatcher_action["containers"];
+        }
+        else{
+          containers.push_back(dispatcher_action["containers"]);
+        }
+
+        dispatcher_action.erase("containers");
+        dispatcher_action["containers"] = containers;
+
+        whole_config["testcases"][testcase_num]["dispatcher_actions"][i] = dispatcher_action;
+      }
+    }
+  }
+}
+
+
 void RewriteDeprecatedMyersDiff(nlohmann::json &whole_config) {
 
   nlohmann::json::iterator tc = whole_config.find("testcases");
@@ -267,6 +327,7 @@ nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid) {
   sstr >> answer;
   
   AddDockerConfiguration(answer);
+  FormatDispatcherActions(answer);
   AddSubmissionLimitTestCase(answer);
   AddAutogradingConfiguration(answer);
 
