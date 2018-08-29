@@ -1,5 +1,8 @@
 {% extends "Component.twig" %}
 
+{% set extra_credit_points = component.upper_clamp - component.max_value %}
+{% set penalty_points = 0-component.lower_clamp %}
+
 {% block component_click %}
     onClickComponent(this)
 {% endblock %}
@@ -84,8 +87,6 @@
         </div>
 
         {# Point Inputs #}
-        {% set extra_credit_points = component.upper_clamp - component.max_value %}
-        {% set penalty_points = 0-component.lower_clamp %}
         <div class="row point-input-row">
             <div class="col-label-fixed">Points</div>
             <div class="col point-input-container">
