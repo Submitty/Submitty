@@ -51,6 +51,12 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
   }
 
   bool docker_enabled = whole_config["docker_enabled"];
+
+  if (!whole_config["use_router"].is_boolean()){
+    whole_config["use_router"] = true;
+  }
+
+  bool use_router = whole_config["use_router"];
   
   nlohmann::json::iterator tc = whole_config.find("testcases");
   assert (tc != whole_config.end());
@@ -60,6 +66,11 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
     std::string title = whole_config["testcases"][testcase_num].value("title","BAD_TITLE");
 
     nlohmann::json this_testcase = whole_config["testcases"][testcase_num];
+
+    if (!this_testcase["use_router"].is_boolean()){
+      this_testcase["use_router"] = use_router;
+    }
+
 
     nlohmann::json commands = nlohmann::json::array();
     // if "command" exists in whole_config, we must wrap it in a container.
