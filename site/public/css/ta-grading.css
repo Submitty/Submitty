@@ -390,10 +390,8 @@ tr.is_publish {
 
 /* Components */
 
-.gradeable .component .gradebar {
-    white-space: nowrap;
-    vertical-align: middle;
-    text-align: center;
+.gradeable .component {
+    cursor: default;
 }
 
 .gradeable .version-warning {
@@ -422,16 +420,16 @@ tr.is_publish {
     display: flex;
 }
 
-.gradeable .edit-component-container .center-block textarea {
+.gradeable .edit-component-container .content-block textarea {
     width: 100%;
     resize: vertical;
 }
 
-.gradeable .edit-component-container .center-block input[type=text] {
+.gradeable .edit-component-container .content-block input[type=text] {
     width: 100%;
 }
 
-.gradeable .edit-component-container .center-block div.page-label {
+.gradeable .edit-component-container .content-block div.page-label {
     display: inline-flex;
     align-items: center;
 }
@@ -504,12 +502,17 @@ tr.is_publish {
     cursor: pointer;
 }
 
-.gradeable .component .center-block {
-    cursor: default;
-    border: 0 solid #BBB;
-    border-top-width: 2px;
-    padding-top: 8px;
-    padding-bottom: 8px;
+.gradeable .component .row.divider {
+    background: #AAA;
+    height: 2px;
+    width: 100%;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.gradeable .component .content-block {
 }
 
 /* Save tools */
@@ -524,11 +527,7 @@ tr.is_publish {
 
 .gradeable .ta-rubric-table,
 .gradeable .received-marks-list {
-    border: solid #BBB;
-    border-width: 2px 0 0 0;
     padding: 8px;
-    border-radius: 0;
-    cursor: default;
 }
 
 .gradeable .done-container {
@@ -686,6 +685,7 @@ tr.is_publish {
 
 .gradeable .received-marks-list.container {
     padding-left: 15px;
+    padding-top: 0;
 }
 
 .gradeable .received-marks-list.container .row .col-no-gutters.point-value,

@@ -43,6 +43,8 @@ Required inputs:
         </span>
     {% endif %}
 
+    <span class="divider col"> </span>
+
     {% if not grading_disabled %}
         <span class="col-no-gutters">
             {# Saving status #}
@@ -52,8 +54,6 @@ Required inputs:
             } only %}
         </span>
     {% endif %}
-
-    <span class="divider col"> </span>
 
     {% if disabled %}
         <span class="version-warning col-no-gutters">
@@ -79,14 +79,23 @@ Required inputs:
     </span>
 {% endblock %}
 
+{% block divider_block %}
+    <div class="row divider"></div>
+{% endblock %}
+
 {% block content_block %}
     <div class="container">
-        {% if component.ta_comment != "" %}
+        {% set show_ta_comment = component.ta_comment != "" %}
+        {% set show_student_comment = component.student_comment != "" %}
+        {% if show_ta_comment or show_student_comment %}
+            <div class="row divider"></div>
+        {% endif %}
+        {% if show_ta_comment %}
             <span class="row ta-student-comment">
                 <i><b>Note to TA: </b>{{ component.ta_comment }}</i>
             </span>
         {% endif %}
-        {% if component.student_comment != "" %}
+        {% if show_student_comment %}
             <span class="row ta-student-comment">
                 <i><b>Note to Student: </b>{{ component.student_comment }}</i>
             </span>
