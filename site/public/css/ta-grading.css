@@ -671,16 +671,8 @@ tr.is_publish {
     margin: 2px;
 }
 
-.gradeable .add-new-mark-container {
-    cursor: pointer;
-}
-
 .gradeable .add-new-mark {
-    padding-left: 25px;
-}
-
-.gradeable .add-new-mark .add-new-mark-icon {
-    padding-right: 5px;
+    margin-left: 25px;
 }
 
 .gradeable .received-marks-list.container {

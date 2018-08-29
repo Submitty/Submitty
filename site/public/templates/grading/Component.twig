@@ -41,9 +41,7 @@ Required Input:
         {% endblock %}
         {% if edit_marks_enabled %}
             <div class="add-new-mark-container">
-                <span class="add-new-mark" onclick="onAddNewMark(this);">
-                    <i class="fa fa-plus-square add-new-mark-icon" aria-hidden="true"></i>Add new mark
-                </span>
+                <input type="button" class="btn btn-primary add-new-mark" value="Add New Mark" onclick="onAddNewMark(this)"/>
             </div>
         {% endif %}
         {% block extra_mark_rows %}
