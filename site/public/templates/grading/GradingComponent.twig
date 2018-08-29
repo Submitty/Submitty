@@ -77,10 +77,6 @@ Required inputs:
     </span>
 {% endblock %}
 
-{% block divider_block %}
-    <div class="row divider"></div>
-{% endblock %}
-
 {% block content_block %}
     <div class="container">
         {% set show_ta_comment = component.ta_comment != "" %}
@@ -99,6 +95,7 @@ Required inputs:
             </span>
         {% endif %}
     </div>
+    <div class="row divider"></div>
 {% endblock %}
 
 {% block marks_block %}
@@ -149,6 +146,9 @@ Required inputs:
 {% block mark_list_footer %}
     {# Component is closed, so show just the received marks #}
     {% if not show_mark_list %}
+        <div class="container">
+            <div class="row divider"></div>
+        </div>
         <div class="received-marks-list container">
             {% for mark in component.marks %}
                 {% if mark.id in graded_component.mark_ids %}
