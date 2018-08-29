@@ -427,29 +427,13 @@ tr.is_publish {
     resize: vertical;
 }
 
-.gradeable .edit-component-container .center-block input {
+.gradeable .edit-component-container .center-block input[type=text] {
     width: 100%;
 }
 
 .gradeable .edit-component-container .center-block div.page-label {
     display: inline-flex;
     align-items: center;
-    padding-left: 20px;
-}
-
-.gradeable .edit-component-container .component-title-container {
-    padding: 0;
-}
-
-.gradeable .count-type-selector {
-    border-radius: 6px;
-    border: 2px solid #3093FC;
-    background-color: transparent;
-    margin: 2px;
-}
-
-.gradeable .count-type-selected {
-    background-color: #60B3FF;
 }
 
 .gradeable .component div.point-values {
@@ -457,25 +441,20 @@ tr.is_publish {
     margin-right: 10px;
 }
 
-.gradeable .component .point-values div.point-input-container {
+.gradeable .component div.point-input-container {
     padding-right: 2px;
 }
 
-.gradeable .component .point-values .count-type-selector {
-    justify-content: center;
-}
-
-.gradeable .component .point-values .col {
-    padding: 0;
+.gradeable .component .col {
     align-items: center;
     display: inline-flex;
 }
 
-.gradeable .component .point-values .point-input-container {
-    max-width: 55px;
+.gradeable .component .point-input-container {
+    max-width: 90px;
 }
 
-.gradeable .component .point-values .point-input-container input {
+.gradeable .component .point-input-container input {
     width: 100%;
 }
 
@@ -500,6 +479,37 @@ tr.is_publish {
     display: inline-flex;
     justify-content: center;
     width: 30px;
+}
+
+.gradeable .col-label-fixed {
+    flex-grow: 0;
+    display: inline-flex;
+    align-items: center;
+    width: 120px;
+}
+
+.gradeable .point-input-row .col-label-fixed {
+    width: 220px;
+}
+
+.gradeable .tight-right {
+    padding-right: 0;
+}
+
+.gradeable .count-type-row {
+    min-height: 30px;
+}
+
+.gradeable .component .header-block {
+    cursor: pointer;
+}
+
+.gradeable .component .center-block {
+    cursor: default;
+    border: 0 solid #BBB;
+    border-top-width: 2px;
+    padding-top: 8px;
+    padding-bottom: 8px;
 }
 
 /* Save tools */
@@ -542,6 +552,7 @@ tr.is_publish {
 .gradeable span.col-no-gutters {
     padding-left: 1px;
     padding-right: 1px;
+    display: inline-flex;
     align-items: center;
 }
 
@@ -551,7 +562,7 @@ tr.is_publish {
 
 .gradeable .container.box-title {
     padding-left: 5px;
-    padding-bottom: 8px;
+    /* padding-bottom: 8px; */
     cursor: pointer;
 }
 

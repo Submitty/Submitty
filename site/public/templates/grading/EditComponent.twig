@@ -5,101 +5,138 @@
 {% endblock %}
 
 {% block header_block %}
-    <div class="col badge-container">
+    <span class="col-no-gutters badge-container">
         <strong class="badge green-background">
             {{ component.max_value|round(decimal_precision) }} {{ extra_credit_points > 0 ? '(+' ~ extra_credit_points|round(decimal_precision) ~ ')' }} {{ penalty_points > 0 ? '(-' ~ penalty_points|round(decimal_precision) ~ ')' : '' }}
         </strong>
-    </div>
+    </span>
 
-    <div class="col">
-        <span class="component-title col-no-gutters">
-            <b>{{ component.title }}</b>
+    <span class="component-title col-no-gutters">
+        <b>{{ component.title }}</b>
+    </span>
+
+    {% if component.page > 0 %}
+        <span class="page-number-view col-no-gutters">
+            <i>Page # {{ component.page }}</i>
         </span>
+    {% endif %}
 
-        {% if component.page > 0 %}
-            <span class="page-number-view col">
-                <i>Page #: {{ component.page }}</i>
-            </span>
-        {% endif %}
-    </div>
+    <span class="divider col"> </span>
 
-    <div class="col-no-gutters">
-        {% if not show_mark_list %}
-            <span class="reorder-component-container" onclick="event.stopPropagation()">
-                <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
-            </span>
-        {% endif %}
-        <span class="col-no-gutters" onclick="onDeleteComponent(this); event.stopPropagation()">
-            <i class="fa fa-trash" title="Delete this component"></i>
+    {% if not grading_disabled %}
+        <span class="col-no-gutters">
+            {# Saving status #}
+            {% include "SavingTools.twig" with {
+                'show_save_tools': show_mark_list,
+                'cancel_on_click': 'onCancelComponent(this)'
+            } only %}
         </span>
-    </div>
+    {% endif %}
+
+    <span class="col-no-gutters reorder-component-container" onclick="event.stopPropagation()">
+        <i class="fa fa-ellipsis-v" aria-hidden="true" title="Click and drag to reorder components"></i>
+    </span>
+    <span class="col-no-gutters" onclick="onDeleteComponent(this); event.stopPropagation()">
+        <i class="fa fa-trash" title="Delete this component"></i>
+    </span>
 {% endblock %}
 
-{% block center_block %}
-    <div class="row">
-        <div class="col component-title-container">
-            <input class="component-title" type="text" value="{{ component.title }}" placeholder="Component Title" onclick="event.stopPropagation()"/>
-        </div>
-        {% if component.page > 0 %}
-            <div class="col-no-gutters page-label">
-                <span><i>Page #:</i></span>
-            </div>
-            <div class="col-no-gutters">
-                <input class="page-number" type="number" step="1" min="1" value="{{ component.page }}" onclick="event.stopPropagation()"/>
-            </div>
-        {% else %}
-            <input class="page-number" value="{{ component.page }}" hidden/>
-        {% endif %}
-    </div>
-    <div class="row">
-        <textarea class="ta-comment" placeholder="Note to TAs" onclick="event.stopPropagation()">{{ component.ta_comment }}</textarea>
-    </div>
-    <div class="row">
-        <textarea class="student-comment" placeholder="Note to Student" onclick="event.stopPropagation()">{{ component.student_comment }}</textarea>
-    </div>
-{% endblock %}
+{% block content_block %}
+    <div class="col-sm center-block container">
 
-{% set extra_credit_points = component.upper_clamp - component.max_value %}
-{% set penalty_points = 0-component.lower_clamp %}
-{% block right_block %}
-    <div class="row">
-        <div class="col point-input-container">
-            <input class="max-points"
-                   step="{{ precision }}"
-                   type="number" min="0"
-                   value="{{ component.max_value|round(decimal_precision) }}"
-                   onchange="refreshRubricTotalBox()" onclick="event.stopPropagation()"/>
+        {# Title / Page Number #}
+        <div class="row">
+            <div class="col-label-fixed">
+                <span>Title</span>
+            </div>
+            <div class="col component-title-container">
+                <input class="component-title" type="text" value="{{ component.title }}" placeholder="Component Title" onclick="event.stopPropagation()"/>
+            </div>
+            {% if component.page > 0 %}
+                <div class="col-no-gutters page-label">
+                    <span>Page #</span>
+                </div>
+                <div class="col-no-gutters">
+                    <input class="page-number" type="number" step="1" min="1" value="{{ component.page }}" onclick="event.stopPropagation()"/>
+                </div>
+            {% else %}
+                <input class="page-number" value="{{ component.page }}" hidden/>
+            {% endif %}
         </div>
-        <div class="col point-label">Normal Points</div>
-    </div>
-    <div class="row">
-        <div class="col point-input-container">
-            <input class="extra-credit-points"
-                   step="{{ precision }}"
-                   type="number" min="0"
-                   value="{{ extra_credit_points|round(decimal_precision) }}"
-                   onchange="refreshRubricTotalBox()" onclick="event.stopPropagation()"/>
+
+        {# TA Note #}
+        <div class="row">
+            <div class="col-label-fixed">
+                <span>Note to TAs</span>
+            </div>
+            <div class="col tight-right">
+                <textarea class="ta-comment" placeholder="Note to TAs" onclick="event.stopPropagation()">{{ component.ta_comment }}</textarea>
+            </div>
         </div>
-        <div class="col point-label">Extra Credit Points</div>
-    </div>
-    <div class="row">
-        <div class="col point-input-container">
-            <input class="penalty-points"
-                   step="{{ precision }}"
-                   type="number" min="0"
-                   value="{{ component.lower_clamp|abs|round(decimal_precision) }}"
-                   onclick="event.stopPropagation()"/>
+
+        {# Student note #}
+        <div class="row">
+            <div class="col-label-fixed">
+                <span>Note to Students</span>
+            </div>
+            <div class="col tight-right">
+                <textarea class="student-comment" placeholder="Note to Students" onclick="event.stopPropagation()">{{ component.student_comment }}</textarea>
+            </div>
         </div>
-        <div class="col point-label">Penalty Points</div>
-    </div>
-    <div class="row">
-        <div class="col count-up-selector count-type-selector {{ component.default == 0 ? 'count-type-selected' : ''}}"
-             onclick="onClickCountUp(this); event.stopPropagation()">
-            <span>Count Up</span>
+
+        {# Point Inputs #}
+        {% set extra_credit_points = component.upper_clamp - component.max_value %}
+        {% set penalty_points = 0-component.lower_clamp %}
+        <div class="row point-input-row">
+            <div class="col-label-fixed">Points</div>
+            <div class="col point-input-container">
+                <input class="max-points"
+                       step="{{ precision }}"
+                       type="number" min="0"
+                       value="{{ component.max_value|round(decimal_precision) }}"
+                       onchange="refreshRubricTotalBox()" onclick="event.stopPropagation()"/>
+            </div>
         </div>
-        <div class="col count-down-selector count-type-selector {{ component.default != 0 and component.default == component.max_value ? 'count-type-selected' : ''}}"
-             onclick="onClickCountDown(this); event.stopPropagation()">
-            <span>Count Down</span>
+        <div class="row point-input-row">
+            <div class="col-label-fixed">Additional Extra Credit Points</div>
+            <div class="col point-input-container">
+                <input class="extra-credit-points"
+                       step="{{ precision }}"
+                       type="number" min="0"
+                       value="{{ extra_credit_points|round(decimal_precision) }}"
+                       onchange="refreshRubricTotalBox()" onclick="event.stopPropagation()"/>
+            </div>
+            <div class="col"><i>Student scores will be clamped from above to Points + Additional Extra Credit Points</i></div>
+        </div>
+        <div class="row point-input-row">
+            <div class="col-label-fixed">Negative Penalty Points</div>
+            <div class="col point-input-container">
+                <input class="penalty-points"
+                       step="{{ precision }}"
+                       type="number" min="0"
+                       value="{{ component.lower_clamp|abs|round(decimal_precision) }}"
+                       onclick="event.stopPropagation()"/>
+            </div>
+            <div class="col"><i>Student scores will be clamped from below to min(0,Negative Penalty Points)</i></div>
+        </div>
+
+        {# Count up / down #}
+        <div class="row point-input-row count-type-row">
+            <div class="col-label-fixed">How should points be assigned?</div>
+            <div class="col">
+                <span class="radio-input">
+                    <input type="radio" class="count-up-selector count-type-selector"
+                           name="count-type-{{ component.id }}" {{ component.default == 0 ? 'checked' : '' }}
+                           onclick="onClickCountUp(this); event.stopPropagation()">Grade by Count Up (from zero)
+                </span>
+            </div>
+            <div class="col">
+                <span class="radio-input">
+                    <input type="radio" class="count-down-selector count-type-selector"
+                           name="count-type-{{ component.id }}" {{ component.default != 0 ? 'checked' : '' }}
+                           onclick="onClickCountDown(this); event.stopPropagation()">Grade by Count Down (from "Points")
+                </span>
+            </div>
         </div>
     </div>
 {% endblock %}

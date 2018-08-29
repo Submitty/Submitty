@@ -44,7 +44,6 @@ EDIT_MODE_ENABLED = false;
  * @type {int}
  */
 COUNT_DIRECTION_UP = 1;
-COUNT_DIRECTION_NONE = 0;
 COUNT_DIRECTION_DOWN = -1;
 
 /**
@@ -1083,33 +1082,13 @@ function setRubricTotalBoxContents(contents) {
 /**
  * Gets the count direction for a component in instructor edit mode
  * @param {int} component_id
- * @returns {int} COUNT_DIRECTION_UP, COUNT_DIRECTION_DOWN, or COUNT_DIRECTION_NONE
+ * @returns {int} COUNT_DIRECTION_UP or COUNT_DIRECTION_DOWN
  */
 function getCountDirection(component_id) {
-    let domElement = getComponentJQuery(component_id);
-    if (domElement.find('.count-type-selected').length === 0) {
-        return COUNT_DIRECTION_NONE;
-    }
-
-    if (domElement.find('.count-up-selector').hasClass('count-type-selected')) {
+    if (getComponentJQuery(component_id).find('input.count-up-selector').is(':checked')) {
         return COUNT_DIRECTION_UP;
     } else {
         return COUNT_DIRECTION_DOWN;
-    }
-}
-
-/**
- * Sets the count direction for a component in instructor edit mode
- * @param {int} component_id
- * @param {int} direction COUNT_DIRECTION_UP, otherwise COUNT_DIRECTION_DOWN
- */
-function setCountDirection(component_id, direction) {
-    let domElement = getComponentJQuery(component_id);
-    domElement.find('.count-type-selector').removeClass('count-type-selected');
-    if (direction === COUNT_DIRECTION_UP) {
-        domElement.find('.count-up-selector').addClass('count-type-selected');
-    } else {
-        domElement.find('.count-down-selector').addClass('count-type-selected');
     }
 }
 
@@ -1913,23 +1892,21 @@ function onToggleEditMode(me) {
 
 /**
  * Callback for the 'count up' option of a component in instructor edit mode
- * @param me DOM element of the 'count up' div
+ * @param me DOM element of the 'count up' radio button
  */
 function onClickCountUp(me) {
     let component_id = getComponentIdFromDOMElement(me);
     let mark_id = getComponentFirstMarkId(component_id);
-    setCountDirection(getComponentIdFromDOMElement(me), COUNT_DIRECTION_UP);
     setMarkTitle(mark_id, 'No Credit');
 }
 
 /**
  * Callback for the 'count down' option of a component in instructor edit mode
- * @param me DOM element of the 'count down' div
+ * @param me DOM element of the 'count down' radio button
  */
 function onClickCountDown(me) {
     let component_id = getComponentIdFromDOMElement(me);
     let mark_id = getComponentFirstMarkId(component_id);
-    setCountDirection(getComponentIdFromDOMElement(me), COUNT_DIRECTION_DOWN);
     setMarkTitle(mark_id, 'Full Credit');
 }
 

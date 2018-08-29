@@ -19,32 +19,14 @@ Required Input:
      data-upper_clamp="{{ component.upper_clamp }}">
 
     {# Title bar (only part that triggers collapse on click) #}
-    <div class="box-title container" onclick="{% block component_click %}{% endblock %}">
-        <div class="row header-block">
+    <div class="box-title container">
+        <div class="row header-block" onclick="{% block component_click %}{% endblock %}">
             {% block header_block %}
             {% endblock %}
         </div>
         <div class="row content-block {{ mark_list_visibility }}">
-            <div class="col-no-gutters left-block">
-                <div class="container">
-                    {% block left_block %}
-                    {% endblock %}
-                </div>
-            </div>
-
-            <div class="col-sm container center-block container">
-                <div class="container">
-                    {% block center_block %}
-                    {% endblock %}
-                </div>
-            </div>
-
-            <div class="col-no-gutters right-block container">
-                <div class="container">
-                    {% block right_block %}
-                    {% endblock %}
-                </div>
-            </div>
+            {% block content_block %}
+            {% endblock %}
         </div>
     </div>
     {# /Title bar #}

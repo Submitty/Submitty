@@ -79,20 +79,19 @@ Required inputs:
     </span>
 {% endblock %}
 
-{% block center_block %}
-    {% if component.ta_comment != "" %}
-        <span class="ta-student-comment">
-            <i><b>Note to TA: </b>{{ component.ta_comment }}</i>
-        </span>
-    {% endif %}
-    {% if component.student_comment != "" %}
-        <span class="ta-student-comment">
-            <i><b>Note to Student: </b>{{ component.student_comment }}</i>
-        </span>
-    {% endif %}
-{% endblock %}
-
-{% block right_block %}
+{% block content_block %}
+    <div class="container">
+        {% if component.ta_comment != "" %}
+            <span class="row ta-student-comment">
+                <i><b>Note to TA: </b>{{ component.ta_comment }}</i>
+            </span>
+        {% endif %}
+        {% if component.student_comment != "" %}
+            <span class="row ta-student-comment">
+                <i><b>Note to Student: </b>{{ component.student_comment }}</i>
+            </span>
+        {% endif %}
+    </div>
 {% endblock %}
 
 {% block marks_block %}
