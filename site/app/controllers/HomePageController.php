@@ -96,7 +96,9 @@ class HomePageController extends AbstractController {
             return $this->core->getQueries()->checkStudentActiveInCourse($user->getId(), $course->getTitle(), $course->getSemester());
         });
 
+        $logout_url = $this->core->buildUrl(array('component' => 'authentication', 'page' => 'logout'));
+
         $changeNameText = $this->core->getConfig()->getUsernameChangeText();
-        $this->core->getOutput()->renderOutput('HomePage', 'showHomePage', $user, $unarchived_courses, $archived_courses, $changeNameText);
+        $this->core->getOutput()->renderOutput('HomePage', 'showHomePage', $user, $unarchived_courses, $archived_courses, $changeNameText, $logout_url);
     }
 }
