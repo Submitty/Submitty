@@ -25,7 +25,7 @@
             ],
             "points_awarded": 3,
             "test_name": "Test 2 Compilation",
-            "testcase_message": "Compilation Error(s)."
+            "testcase_message": "Compilation Errors and/or Warnings."
         },
         {
             "autochecks": [
@@ -42,7 +42,7 @@
             ],
             "points_awarded": 2,
             "test_name": "Test 3 Dummy Compilation testing view_testcase_message",
-            "testcase_message": "Compilation Error(s)."
+            "testcase_message": "Compilation Errors and/or Warnings."
         },
         {
             "autochecks": [
