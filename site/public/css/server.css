@@ -999,9 +999,8 @@ table .instructor .two-options{
 
 #sidebar.collapsed #nav-buttons ul li .collapse-icon {
     display: inline-block;
-    font-size: 24px;
     width: 60px;
-    padding: 6px;
+    padding: 8px 6px;
     text-align: center;
 }
 
