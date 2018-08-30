@@ -9,7 +9,10 @@
     <link rel='stylesheet' type='text/css' href='{{ css_ref }}' />
     {% endfor %}
 
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    {#
+        TODO: When we are mobile-friendly
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    #}
 
     {% for js_ref in js %}
     <script type='text/javascript' src='{{ js_ref }}'></script>
