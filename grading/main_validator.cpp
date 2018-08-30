@@ -204,13 +204,7 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
       if (my_testcase.isFileCheck() && num_messages > 0 && messages.size() > 0 && messages[0].second.find("README") != std::string::npos) {
         testcase_message = "README missing.";
       } else if (my_testcase.isCompilation() && num_messages > 0) {
-        if (result.hasError()) {
-          testcase_message = "Compilation Error(s).";
-        } else if (result.hasWarning() && testcase_message.find("ERROR") == std::string::npos) {
-          testcase_message = "Compilation Warning(s).";
-        } else {
-          testcase_message = "Compilation Error(s).";
-        }
+        testcase_message = "Compilation Errors and/or Warnings.";
       }
     }
   }
