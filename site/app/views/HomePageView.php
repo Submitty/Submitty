@@ -13,7 +13,7 @@ class HomePageView extends AbstractView {
     /*
     *@param List of courses the student is in.
     */
-    public function showHomePage($user, $unarchived_courses, $archived_courses, $changeNameText, $logout_url) {
+    public function showHomePage($user, $unarchived_courses = array(), $archived_courses = array(), $changeNameText) {
         $statuses = array();
         $course_types = [$unarchived_courses, $archived_courses];
         $rankTitles = [
@@ -52,8 +52,7 @@ class HomePageView extends AbstractView {
             "user" => $user,
             "statuses" => $statuses,
             "change_name_text" => $changeNameText,
-            "show_change_password" => $this->core->getAuthentication() instanceof DatabaseAuthentication,
-            "logout_url" => $logout_url,
+            "show_change_password" => $this->core->getAuthentication() instanceof DatabaseAuthentication
         ]);
     }
 }

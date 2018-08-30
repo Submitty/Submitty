@@ -262,7 +262,9 @@ class GlobalController extends AbstractController {
                 "id" => "nav-sidebar-late-days",
                 "icon" => "fa-calendar-o"
             ]);
+        }
 
+        if ($this->core->userLoaded()) {
             if ($this->core->getConfig()->isCourseLoaded()) {
                 $sidebar_buttons[] = new Button($this->core, [
                     "class" => "nav-row short-line",
