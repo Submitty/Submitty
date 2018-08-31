@@ -106,21 +106,24 @@
             </tr>
             {# /Add new mark #}
             {# Custom mark #}
-            <tr id="mark_custom_id-{{ c_index }}" style="display: none;" data-changedisplay1="true">
+            <tr id="mark_custom_id-{{ c_index }}" style="display: none;" data-changedisplay1="true" >
                 <td colspan="1" class="mark-score-container">
                     <div class="mark-cell-box">
-                        <span
-                                onclick="event.stopPropagation();"
-                                class="{{ component.score == 0 and component.comment == "" ? "" : "mark-has" }} mark"
+                            <span
+                                onclick="selectCustomMark({{ c_index }}); event.stopPropagation();"
+                                data-component_index="{{ c_index }}"                                
                                 name="mark_icon_{{ c_index }}_custom"
                                 id="mark_icon_custom-{{ c_index }}"
-                        ></span>
+                                value="{{ component.custom_mark_checked }}"
+                                class="{{ component.custom_mark_checked ? "mark-has" : "" }} mark mark-selector"
+                            >
+                            </span>
                         <input
                                 name="mark_points_custom_{{ c_index }}"
                                 id="mark_points_custom-{{ c_index }}"
                                 type="number"
                                 step="{{ gradeable.precision }}"
-                                onchange="updateCustomMarkPoints(this); checkIfSelected(this); updateProgressPoints({{ c_index }});"
+                                onchange="updateCustomMarkPoints(this); updateProgressPoints({{ c_index }});"
                                 onclick="event.stopPropagation();"
                                 data-component_index="{{ c_index }}"
                                 value="{{ component.score }}" class="mark-score"
@@ -135,8 +138,8 @@
                         <textarea
                                 name="mark_text_custom_{{ c_index }}"
                                 id="mark_text_custom-{{ c_index }}"
-                                onkeyup="updateCustomMarkText(this); autoResizeComment(event); checkIfSelected(this);"
-                                onchange="updateCustomMarkText(this); checkIfSelected(this); updateProgressPoints({{ c_index }});"
+                                onkeyup="updateCustomMarkText(this); autoResizeComment(event);"
+                                onchange="updateCustomMarkText(this); updateProgressPoints({{ c_index }});"
                                 onclick="event.stopPropagation();"
                                 data-component_index="{{ c_index }}"
                                 cols="120"

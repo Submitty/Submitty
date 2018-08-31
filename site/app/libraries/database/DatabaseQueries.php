@@ -1458,10 +1458,10 @@ VALUES (?, ?, ?)", $params);
      * @param GradeableComponent $component
      */
     public function insertGradeableComponentData($gd_id, GradeableComponent $component) {
-        $params = array($component->getId(), $gd_id, $component->getScore(), $component->getComment(), $component->getGrader()->getId(), $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"));
+        $params = array($component->getId(), $gd_id, $component->getScore(), $component->getComment(), $component->isCustomMarkChecked(), $component->getGrader()->getId(), $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"));
         $this->course_db->query("
-INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment, gcd_grader_id, gcd_graded_version, gcd_grade_time)
-VALUES (?, ?, ?, ?, ?, ?, ?)", $params);
+INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment, gcd_has_custom, gcd_grader_id, gcd_graded_version, gcd_grade_time)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?)", $params);
     }
 
     // FIXME
@@ -1478,12 +1478,12 @@ VALUES (?, ?, ?, ?, ?, ?, ?)", $params);
      * @param GradeableComponent $component
      */
     public function updateGradeableComponentData($gd_id, $grader_id, GradeableComponent $component) {
-        $params = array($component->getScore(), $component->getComment(), $component->getGradedVersion(),
+        $params = array($component->getScore(), $component->getComment(), $component->isCustomMarkChecked(), $component->getGradedVersion(),
                         $component->getGradeTime()->format("Y-m-d H:i:s"), $grader_id, $component->getId(), $gd_id);
         $this->course_db->query("
 UPDATE gradeable_component_data
 SET
-  gcd_score=?, gcd_component_comment=?, gcd_graded_version=?, gcd_grade_time=?,
+  gcd_score=?, gcd_component_comment=?, gcd_has_custom=?, gcd_graded_version=?, gcd_grade_time=?,
   gcd_grader_id=?
 WHERE gc_id=? AND gd_id=?", $params);
     }
@@ -3326,6 +3326,7 @@ AND gc_id IN (
             $graded_component->getTaGradedGradeable()->getId(),
             $graded_component->getScore(),
             $graded_component->getComment(),
+            $graded_component->isCustomMarkChecked(),
             $graded_component->getGraderId(),
             $graded_component->getGradedVersion(),
             DateUtils::dateTimeToString($graded_component->getGradeTime())
@@ -3336,10 +3337,11 @@ AND gc_id IN (
               gd_id,
               gcd_score,
               gcd_component_comment,
+              gcd_has_custom,
               gcd_grader_id,
               gcd_graded_version,
               gcd_grade_time)
-            VALUES(?, ?, ?, ?, ?, ?, ?)";
+            VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
         $this->course_db->query($query, $param);
     }
 
@@ -3353,6 +3355,7 @@ AND gc_id IN (
                 $params = [
                     $graded_component->getScore(),
                     $graded_component->getComment(),
+                    $graded_component->isCustomMarkChecked(),
                     $graded_component->getGradedVersion(),
                     DateUtils::dateTimeToString($graded_component->getGradeTime()),
                     $graded_component->getGraderId(),
@@ -3363,6 +3366,7 @@ AND gc_id IN (
                     UPDATE gradeable_component_data SET 
                       gcd_score=?,
                       gcd_component_comment=?,
+                      gcd_has_custom=?,
                       gcd_graded_version=?,
                       gcd_grade_time=?,
                       gcd_grader_id=?
@@ -3372,6 +3376,7 @@ AND gc_id IN (
                 $params = [
                   $graded_component->getScore(),
                   $graded_component->getComment(),
+                  $graded_component->isCustomMarkChecked(),
                   $graded_component->getGradedVersion(),
                   DateUtils::dateTimeToString($graded_component->getGradeTime()),
                   $graded_component->getTaGradedGradeable()->getId(),
@@ -3382,6 +3387,7 @@ AND gc_id IN (
                     UPDATE gradeable_component_data SET 
                       gcd_score=?,
                       gcd_component_comment=?,
+                      gcd_has_custom=?,
                       gcd_graded_version=?,
                       gcd_grade_time=?,
                     WHERE gd_id=? AND gc_id=? AND gcd_grader_id=?";
