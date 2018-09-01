@@ -1064,6 +1064,15 @@ function setComponentContents(component_id, contents) {
 }
 
 /**
+ * Sets the HTML contents of the specified component's header
+ * @param {int} component_id
+ * @param {string} contents
+ */
+function setComponentHeaderContents(component_id, contents) {
+    getComponentJQuery(component_id).find('.header-block').html(contents);
+}
+
+/**
  * Sets the HTML contents of the total scores box
  * @param {string} contents
  */
@@ -1699,7 +1708,7 @@ function onAddComponent() {
  * @param me DOM Element of the mark point entry
  */
 function onMarkPointsChange(me) {
-    refreshComponent(getComponentIdFromDOMElement(me), true)
+    refreshComponentHeader(getComponentIdFromDOMElement(me), true)
         .catch(function (err) {
             console.error(err);
             alert('Error updating component! ' + err.message);
@@ -1915,7 +1924,7 @@ function onClickCountDown(me) {
  * @param me DOM element of the input box
  */
 function onComponentPointsChange(me) {
-    refreshComponent(getComponentIdFromDOMElement(me), true)
+    refreshInstructorEditComponentHeader(getComponentIdFromDOMElement(me), true)
         .catch(function (err) {
             console.error(err);
             alert('Failed to refresh component! ' + err.message);
@@ -2714,6 +2723,20 @@ function saveGradedComponent(component_id) {
 }
 
 /**
+ * Re-renders the graded component header with the data in the DOM
+ *  and preserves the edit/grade mode display
+ * @param {int} component_id
+ * @param {boolean} showMarkList Whether the header should be styled like the component is open
+ * @return {Promise}
+ */
+function refreshGradedComponentHeader(component_id, showMarkList) {
+    return injectGradingComponentHeader(
+        getComponentFromDOM(component_id),
+        getGradedComponentFromDOM(component_id), showMarkList);
+}
+
+
+/**
  * Re-renders the graded component with the data in the DOM
  *  and preserves the edit/grade mode display
  * @param {int} component_id
@@ -2728,6 +2751,16 @@ function refreshGradedComponent(component_id, showMarkList) {
 }
 
 /**
+ * Re-renders the component header with the data in the DOM
+ * @param {int} component_id
+ * @param {boolean} showMarkList Whether the header should be styled like the component is open
+ * @return {Promise}
+ */
+function refreshInstructorEditComponentHeader(component_id, showMarkList) {
+    return injectInstructorEditComponentHeader(getComponentFromDOM(component_id), showMarkList);
+}
+
+/**
  * Re-renders the component with the data in the DOM
  * @param {int} component_id
  * @param {boolean} showMarkList Whether the mark list should be visible
@@ -2735,6 +2768,16 @@ function refreshGradedComponent(component_id, showMarkList) {
  */
 function refreshInstructorEditComponent(component_id, showMarkList) {
     return injectInstructorEditComponent(getComponentFromDOM(component_id), showMarkList);
+}
+
+/**
+ * Re-renders the component's header block with the data in the DOM
+ * @param {int} component_id
+ * @param {boolean} showMarkList Whether the header should be styled like the component is open
+ * @return {Promise}
+ */
+function refreshComponentHeader(component_id, showMarkList) {
+    return isInstructorEditEnabled() ? refreshInstructorEditComponentHeader(component_id, showMarkList) : refreshGradedComponentHeader(component_id, showMarkList);
 }
 
 /**
@@ -2749,7 +2792,7 @@ function refreshComponent(component_id, showMarkList) {
 
 /**
  * Re-renders the overall comment with the data in the DOM
- * @param {boolean} showEditable Whether the mark list should be visible
+ * @param {boolean} showEditable Whether comment should be open for editing
  * @return {Promise}
  */
 function refreshOverallComment(showEditable) {
@@ -2789,6 +2832,22 @@ function injectInstructorEditComponent(component, showMarkList) {
 }
 
 /**
+ * Renders the provided component object for instructor edit mode header
+ * @param {Object} component
+ * @param {boolean} showMarkList Whether to style the header like the mark list is open
+ * @return {Promise}
+ */
+function injectInstructorEditComponentHeader(component, showMarkList) {
+    return renderEditComponentHeader(component, getPointPrecision(), showMarkList)
+        .then(function (elements) {
+            setComponentHeaderContents(component.id, elements);
+        })
+        .then(function () {
+            return refreshRubricTotalBox();
+        });
+}
+
+/**
  * Renders the provided component/graded_component object for grading/editing
  * @param {Object} component
  * @param {Object} graded_component
@@ -2800,6 +2859,23 @@ function injectGradingComponent(component, graded_component, editable, showMarkL
     return renderGradingComponent(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), getPointPrecision(), editable, showMarkList)
         .then(function (elements) {
             setComponentContents(component.id, elements);
+        })
+        .then(function () {
+            return refreshTotalScoreBox();
+        });
+}
+
+/**
+ * Renders the provided component/graded_component header
+ * @param {Object} component
+ * @param {Object} graded_component
+ * @param {boolean} showMarkList Whether to style the header like the mark list is open
+ * @return {Promise}
+ */
+function injectGradingComponentHeader(component, graded_component, showMarkList) {
+    return renderGradingComponentHeader(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), showMarkList)
+        .then(function (elements) {
+            setComponentHeaderContents(component.id, elements);
         })
         .then(function () {
             return refreshTotalScoreBox();

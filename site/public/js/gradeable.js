@@ -14,7 +14,9 @@ function loadTemplates() {
         {id: 'EditGradeable', href: 'templates/grading/EditGradeable.twig'},
         {id: 'Gradeable', href: "templates/grading/Gradeable.twig"},
         {id: 'GradingComponent', href: "templates/grading/GradingComponent.twig"},
+        {id: 'GradingComponentHeader', href: "templates/grading/GradingComponentHeader.twig"},
         {id: 'EditComponent', href: 'templates/grading/EditComponent.twig'},
+        {id: 'EditComponentHeader', href: 'templates/grading/EditComponentHeader.twig'},
         {id: 'Component', href: "templates/grading/Component.twig"},
         {id: 'Mark', href: "templates/grading/Mark.twig"},
         {id: 'OverallComment', href: "templates/grading/OverallComment.twig"},
@@ -164,6 +166,34 @@ function renderGradingComponent(grader_id, component, graded_component, grading_
     });
 }
 
+
+/**
+ * Asynchronously render a component header using the passed data
+ * @param {string} grader_id
+ * @param {Object} component
+ * @param {Object} graded_component
+ * @param {boolean} grading_disabled
+ * @param {boolean} canVerifyGraders
+ * @param {boolean} showMarkList True to style the header like the component is open
+ * @returns {Promise<string>} the html for the graded component
+ */
+function renderGradingComponentHeader(grader_id, component, graded_component, grading_disabled, canVerifyGraders, showMarkList) {
+    return new Promise(function (resolve, reject) {
+        // Make sure we prep the graded component before rendering
+        graded_component = prepGradedComponent(component, graded_component);
+
+        // TODO: i don't think this is async
+        resolve(Twig.twig({ref: "GradingComponentHeader"}).render({
+            'component': component,
+            'graded_component': graded_component,
+            'show_verify_grader': canVerifyGraders && graded_component !== undefined && grader_id !== graded_component.grader_id,
+            'show_mark_list': showMarkList,
+            'grading_disabled': grading_disabled,
+            'decimal_precision': DECIMAL_PRECISION,
+        }));
+    });
+}
+
 /**
  * Asynchronously renders a gradeable using the passed data
  * Note: Call 'loadTemplates' first
@@ -193,6 +223,26 @@ function renderEditComponent(component, precision, showMarkList) {
             'precision': precision,
             'show_mark_list': showMarkList,
             'edit_marks_enabled': true,
+            'decimal_precision': DECIMAL_PRECISION
+        }));
+    });
+}
+
+
+/**
+ * Asynchronously render a component header using the passed data
+ * @param {Object} component
+ * @param {boolean} showMarkList True to style the header like the component is open
+ * @returns {Promise} the html for the component
+ */
+function renderEditComponentHeader(component, showMarkList) {
+    return new Promise(function (resolve, reject) {
+        // TODO: i don't think this is async
+        resolve(Twig.twig({ref: "EditComponentHeader"}).render({
+            'component': component,
+            'extra_credit_points': component.upper_clamp - component.max_value,
+            'penalty_points': 0 - component.lower_clamp,
+            'show_mark_list': showMarkList,
             'decimal_precision': DECIMAL_PRECISION
         }));
     });

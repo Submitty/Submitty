@@ -8,38 +8,7 @@
 {% endblock %}
 
 {% block header_block %}
-    <span class="col-no-gutters badge-container">
-        <strong class="badge green-background">
-            {{ component.max_value|round(decimal_precision) }} {{ extra_credit_points > 0 ? '(+' ~ extra_credit_points|round(decimal_precision) ~ ')' }} {{ penalty_points > 0 ? '(-' ~ penalty_points|round(decimal_precision) ~ ')' : '' }}
-        </strong>
-    </span>
-
-    <span class="component-title col-no-gutters">
-        <b><span class="component-title-text">{{ component.title }}</span></b>
-    </span>
-
-    {% if component.page > 0 %}
-        <span class="page-number-view col-no-gutters">
-            <i>(Page # <span class="component-page-number-text">{{ component.page }}</span>)</i>
-        </span>
-    {% endif %}
-
-    <span class="divider col"> </span>
-
-    <span class="col-no-gutters">
-        {# Saving status #}
-        {% include "SavingTools.twig" with {
-            'show_save_tools': show_mark_list,
-            'cancel_on_click': 'onCancelComponent(this)'
-        } only %}
-    </span>
-
-    <span class="col-no-gutters reorder-component-container" onclick="event.stopPropagation()">
-        <i class="fa fa-ellipsis-v" aria-hidden="true" title="Click and drag to reorder components"></i>
-    </span>
-    <span class="col-no-gutters" onclick="onDeleteComponent(this); event.stopPropagation()">
-        <i class="fa fa-trash" title="Delete this component"></i>
-    </span>
+    {% include 'EditComponentHeader.twig' %}
 {% endblock %}
 
 {% block content_block %}
@@ -59,7 +28,7 @@
                     <span>Page #</span>
                 </div>
                 <div class="col-no-gutters">
-                    <input class="page-number" type="number" step="1" min="1" value="{{ component.page }}" onchange="onComponentPageNumberChange(this)">
+                    <input class="page-number" type="number" step="1" min="1" value="{{ component.page }}" onchange="onComponentPageNumberChange(this)" onmouseup="onComponentPageNumberChange(this)">
                 </div>
             {% else %}
                 <input class="page-number" value="{{ component.page }}" hidden/>
@@ -94,7 +63,8 @@
                        step="{{ precision }}"
                        type="number" min="0"
                        value="{{ component.max_value|round(decimal_precision) }}"
-                       onchange="onComponentPointsChange(this)"/>
+                       onchange="onComponentPointsChange(this)"
+                       onmouseup="onComponentPointsChange(this)"/>
             </div>
         </div>
         <div class="row point-input-row">
@@ -104,7 +74,8 @@
                        step="{{ precision }}"
                        type="number" min="0"
                        value="{{ extra_credit_points|round(decimal_precision) }}"
-                       onchange="onComponentPointsChange(this)"/>
+                       onchange="onComponentPointsChange(this)"
+                       onmouseup="onComponentPointsChange(this)"/>
             </div>
             <div class="col"><i>Student scores will be clamped from above to Points + Additional Extra Credit Points</i></div>
         </div>
@@ -115,7 +86,8 @@
                        step="{{ precision }}"
                        type="number" min="0"
                        value="{{ component.lower_clamp|abs|round(decimal_precision) }}"
-                       onchange="onComponentPointsChange(this)"/>
+                       onchange="onComponentPointsChange(this)"
+                       onmouseup="onComponentPointsChange(this)"/>
             </div>
             <div class="col"><i>Student scores will be clamped from below to min(0,Negative Penalty Points)</i></div>
         </div>

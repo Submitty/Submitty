@@ -394,7 +394,7 @@ tr.is_publish {
     cursor: default;
 }
 
-.gradeable .component .badge-container {
+.gradeable .component .badge-container.edit-mode {
     min-width: 170px;
 }
 
