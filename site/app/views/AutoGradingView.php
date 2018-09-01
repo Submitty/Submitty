@@ -189,9 +189,9 @@ class AutoGradingView extends AbstractView {
                 ];
             } else {
                 $check = [
-                    "messages" => $autocheck->getMessages()
+                    "messages" => $autocheck->getMessages(),
+                    "description" => $description
                 ];
-
                 $actual_title = "";
                 if ($diff_viewer->hasDisplayExpected() || $diff_viewer->getActualFilename() != "") {
                     $actual_title = "Student ";

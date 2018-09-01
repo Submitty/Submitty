@@ -8,7 +8,7 @@
 #include "default_config.h"
 #include "execute.h"
 
-
+#include <limits>
 
 // =====================================================================
 // =====================================================================
@@ -93,6 +93,8 @@ int main(int argc, char *argv[]) {
     std::vector<std::string> commands = my_testcase.getCommands();
 
     std::vector<nlohmann::json> actions  = mapOrArrayOfMaps((*tc)[i-1],"actions");
+    std::vector<nlohmann::json> dispatcher_actions = mapOrArrayOfMaps((*tc)[i-1],"dispatcher_actions");
+
     assert (commands.size() > 0);
 
     std::cout << "TITLE " << my_testcase.getTitle() << std::endl;
@@ -116,6 +118,7 @@ int main(int argc, char *argv[]) {
                             " 1>" + "STDOUT" + which + ".txt" +
                             " 2>" + "STDERR" + which + ".txt",
                             actions,
+                            dispatcher_actions,
                             logfile,
                             my_testcase.get_test_case_limits(),
                             config_json.value("resource_limits",nlohmann::json()),

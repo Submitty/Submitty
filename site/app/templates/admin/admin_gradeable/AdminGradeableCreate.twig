@@ -50,7 +50,7 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
 {% endif %}
 <div style="{{ action == 'edit' ? 'display:none' : '' }}">
     <input type='radio' id="radio_electronic_file" name="type" value="Electronic File"
-            {{ action != 'new' and gradeable.getType() == 0 ? 'checked' : '' }}> Electronic File
+            {{ action != 'new' and gradeable.getType() == 0 ? 'checked' : '' }}> Electronic File Upload
 
     <input type='radio' id="radio_checkpoints" name="type" value="Checkpoints"
             {{ action != 'new' and gradeable.getType() == 1 ? 'checked' : '' }}> Checkpoints
@@ -139,10 +139,10 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
         <input type="radio" id="repository_radio" name="vcs" value="true"
                 {{ action != 'new' and gradeable.isVcs() ? 'checked ' : '' }}/> Version Control System (VCS) Repository
     </div>
-
-    <br />
-
     <div id="repository">
+
+        <br />
+
         <h3>Path for the Version Control System (VCS) repository:</h3>
 
         VCS base URL (from Course Settings): <kbd>{{ vcs_base_url }}</kbd><br /><br />
@@ -192,7 +192,17 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_grades">sylla
 
 <br />
 {% if action == 'new' or action == 'template' %}
-    <button class="btn btn-primary" type="submit" style="margin-left:10px;">New Gradeable</button>
+   <br />
+   <em>Note: After pressing the "Create New Gradeable" button you may not change: <br />
+   <ul style="margin-left:10px">
+   <li style="margin-left:15px"> the unique id,</li>
+   <li style="margin-left:15px"> gradeable type (electronic file upload, checkpoints, or text), </li>
+   <li style="margin-left:15px"> whether the students will submit as individuals or team, and </li>
+   <li style="margin-left:15px"> whether the students will submit by directly uploading files or by version control. </li>
+   </ul>
+   All other settings for this gradeable may be edited.</em>
+   <br /><br />
+   <button class="btn btn-primary" type="submit" style="margin-left:10px;">Create New Gradeable</button>
 {% endif %}
 
 
