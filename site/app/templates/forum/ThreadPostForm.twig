@@ -101,7 +101,7 @@
     {% endif %}
     <span style="display:inline-block;right: 0px;position: absolute;">
         {% if show_anon %}
-            <label for="Anon">Anonymous (to class)?</label> <input type="checkbox" id="thread_post_anon" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" data-ays-ignore="true"/>
+            <label for="Anon">Anonymous (to class)?</label> <input type="checkbox" id="{{ anon_edit_post_id | default('thread_post_anon') }}" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" data-ays-ignore="true"/>
         {% endif %}
         {% if show_thread_status %}
         <select id="thread_status" name="thread_status" style="margin-right:15px;display:inline-block;" data-ays-ignore="true">
