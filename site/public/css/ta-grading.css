@@ -556,6 +556,15 @@ tr.is_publish {
     text-align: right;
 }
 
+.gradeable input.mark-score-uneditable {
+    resize:none;
+    width: 100%;
+    text-align: right;
+    border: none;
+    outline: none;
+    background-color: initial;
+}
+
 .gradeable .mark-score-container {
     flex-direction: row;
     align-items: center;
@@ -573,6 +582,14 @@ tr.is_publish {
 .gradeable .mark-note-custom {
     width: 100%;
     resize:none;
+}
+
+.gradeable .mark-note-custom-uneditable {
+    width: 100%;
+    resize: none;
+    border: none;
+    outline: none;
+    background-color: initial;
 }
 
 .gradeable .mark-uneditable {

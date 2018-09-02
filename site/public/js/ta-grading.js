@@ -472,6 +472,11 @@ registerKeyHandler({name: "Toggle Regrade Requests Panel", code: "KeyX"}, functi
     toggleRegrade();
     updateCookies();
 });
+registerKeyHandler({name: "Toggle Edit Rubric", code: "KeyE"}, function() {
+    toggleEditMode();
+    document.getElementById("EditModeButton").checked = !(document.getElementById("EditModeButton").checked); 
+    updateCookies();
+});
 //-----------------------------------------------------------------------------
 // Show/hide components
 
@@ -723,6 +728,7 @@ function adjustSize(name) {
 // Edit Mode
 //TODO save properly so that the mark can be reopened automatically
 function toggleEditMode(){
+    saveLastOpenedMark(true);
     var id=findCurrentOpenedMark();
     var temp=editModeEnabled;
     editModeEnabled=true;
@@ -743,4 +749,5 @@ function toggleEditMode(){
             $('#marks-extra-'+findCurrentOpenedMark())[0].style.display="block";
         }
     }
+    openMark(id, true);
 }
