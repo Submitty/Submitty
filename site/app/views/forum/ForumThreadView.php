@@ -259,8 +259,8 @@ HTML;
 		<a class="btn btn-primary" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="Filter Threads based on Categories" onclick="$('#category_wrapper').css('display', 'block');"><i class="fa fa-filter"></i> Filter</a>
 HTML;
 
-	$cookieSelectedCategories = '';
-	$cookieSelectedThreadStatus = '';
+	$cookieSelectedCategories = array();
+	$cookieSelectedThreadStatus = array();
 	$category_ids_array = array_column($categories, 'category_id');
 	if(!empty($_COOKIE[$currentCourse . '_forum_categories'])) {
 		foreach(explode('|', $_COOKIE[$currentCourse . '_forum_categories']) as $selectedId) {
