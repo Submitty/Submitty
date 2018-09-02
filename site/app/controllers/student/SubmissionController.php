@@ -99,27 +99,34 @@ class SubmissionController extends AbstractController {
                 break;
         }
     }
-    private function requestRegrade(){
-        $content = $_POST['replyTextArea'];
-        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
-        $student_id = (isset($_REQUEST['student_id'])) ? $_REQUEST['student_id'] : null;
-        if($this->core->getUser()->getId() !== $student_id && !$this->core->getUser()->accessFullGrading()){
-            $this->core->getOutput()->renderJson(["status" => "failure"]);
+    private function requestRegrade() {
+        $content = $_POST['replyTextArea'] ?? '';
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? null;
+        $submitter_id = $_REQUEST['submitter_id'] ?? null;
+
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
             return;
         }
-        if($this->core->getQueries()->insertNewRegradeRequest($gradeable_id, $student_id, $content)){
-            $this->core->getOutput()->renderJson(["status" => "success"]);
-        }else{
-            $this->core->getOutput()->renderJson(["status" => "failure"]);
+
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        if ($graded_gradeable === false) {
+            return;
+        }
+
+        if ($graded_gradeable->getSubmitter()->hasUser($this->core->getUser()) || $this->core->getUser()->accessFullGrading()) {
+            if ($this->core->getQueries()->insertNewRegradeRequest($gradeable_id, $student_id, $content)) {
+                $this->core->getOutput()->renderJson(["status" => "success"]);
+            } else {
+                $this->core->getOutput()->renderJson(["status" => "failure"]);
+            }
         }
     }
 
     private function makeRequestPost(){
         $regrade_id = $_REQUEST['regrade_id'];
         $content = str_replace("\r", "", $_POST['replyTextArea']);
-        $user_id = (isset($_REQUEST['user_id'])) ? $_REQUEST['user_id'] : null;
-        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
-        $gradeable=$this->core->getQueries()->getGradeable($gradeable_id);
+
         //Prevent students making post requests for other studnets
         if($this->core->getUser()->getId() !== $user_id && !$this->core->getUser()->accessFullGrading()){
             $this->core->getOutput()->renderJson(["status" => "failure"]);
