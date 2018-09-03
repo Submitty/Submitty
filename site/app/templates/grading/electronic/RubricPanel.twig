@@ -28,12 +28,12 @@
                     {# Silent Edit Checkbox #}
                     {% if show_silent_edit %}
                         <div class="col-no-gutters">
-                            <input id="silent-edit-id" type="checkbox" title="Edit assigned marks without changing 'Graded By'" onclick="updateCookies()"/>Silent Edit
+                            <input id="silent-edit-id" type="checkbox" title="Edit assigned marks without changing 'Graded By'" onclick="updateCookies()"/>Silent Regrade (don't change who graded)
                         </div>
                     {% endif %}
                     {# Edit Mode Checkbox #}
                     <div class="col-no-gutters">
-                        <input id="edit-mode-enabled" type="checkbox" title="Allows editing of mark point values, descriptions, and order" onclick="onToggleEditMode()"/>Edit Marks
+                        <input id="edit-mode-enabled" type="checkbox" title="Allows editing of mark point values, descriptions, and order" onclick="onToggleEditMode()"/>Edit Rubric
                     </div>
                 </div>
                 <div id="grader-info" data-grader_id="{{ grader_id }}" data-can_verify="{{ can_verify }}" hidden></div>
