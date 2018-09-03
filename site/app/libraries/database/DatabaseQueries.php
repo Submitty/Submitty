@@ -2681,17 +2681,16 @@ AND gc_id IN (
         return $result;
     }
 
-    public function insertNewRegradeRequest(GradedGradeable $graded_gradeable, $initial_message) {
+    public function insertNewRegradeRequest(GradedGradeable $graded_gradeable, User $sender, string $initial_message) {
         $params = array($graded_gradeable->getGradeableId(), $graded_gradeable->getSubmitter()->getId(), RegradeRequest::STATUS_ACTIVE);
         $submitter_col = $graded_gradeable->getSubmitter()->isTeam() ? 'team_id' : 'user_id';
         try {
             $this->course_db->query("INSERT INTO regrade_requests(g_id, timestamp, $submitter_col, status) VALUES (?, current_timestamp, ?, ?)", $params);
             $regrade_id = $this->course_db->getLastInsertId();
-            $this->insertNewRegradePost($regrade_id, $this->core->getUser()->getId(), $initial_message);
-            return true;
+            $this->insertNewRegradePost($regrade_id, $sender->getId(), $initial_message);
         } catch (DatabaseException $dbException) {
             if ($this->course_db->inTransaction()) $this->course_db->rollback();
-            return false;
+            throw $dbException;
         }
     }
     public function getNumberRegradeRequests($gradeable_id) {

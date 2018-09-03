@@ -615,7 +615,8 @@ class HomeworkView extends AbstractView {
             if ($graded_gradeable->hasActiveRegradeRequest()) {
                 $btn_type = 'admin_open';
                 $url = $this->core->buildUrl(array('component' => 'student',
-                    'request_id' => $graded_gradeable->getRegradeRequest()->getId(),
+                    'gradeable_id' => $graded_gradeable->getGradeable()->getId(),
+                    'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
                     'action' => 'make_request_post',
                     'resolved' => false
                 ));
@@ -647,7 +648,6 @@ class HomeworkView extends AbstractView {
             ));
             $action = 'request_regrade';
         }
-
 
         $posts = [];
 
