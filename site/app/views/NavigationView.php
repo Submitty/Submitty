@@ -333,13 +333,13 @@ class NavigationView extends AbstractView {
     private function getSubmitButton(Gradeable $gradeable, $graded_gradeable, int $list_section, bool $submit_everyone) {
         $class = self::gradeableSections[$list_section]["button_type_submission"];
         $title = self::gradeableSections[$list_section]["prefix"];
- 	const DF = "m/d/Y @ H:i";
+ 	$DF = "m/d/Y @ H:i";
 	//$display_date = ($list_section == GradeableList::FUTURE || $list_section == GradeableList::BETA) ?
         //    "(opens " . $gradeable->getSubmissionOpenDate()->format(self::DATE_FORMAT) . ")" :
         //    "(due " . $gradeable->getSubmissionDueDate()->format(self::DATE_FORMAT) . ")";
     	$display_date = ($list_section == GradeableList::FUTURE || $list_section == GradeableList::BETA) ?
-            "(opens " . $gradeable->getSubmissionOpenDate()->format(DF) . ")" :
-            "(due " . $gradeable->getSubmissionDueDate()->format(DF) . ")";
+            "(opens XX" . $gradeable->getSubmissionOpenDate()->format($DF) . ")" :
+            "(due " . $gradeable->getSubmissionDueDate()->format($DF) . ")";
         $points_percent = NAN;
 
         $href = $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId()));
