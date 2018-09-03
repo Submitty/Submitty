@@ -338,7 +338,7 @@ class NavigationView extends AbstractView {
         //    "(opens " . $gradeable->getSubmissionOpenDate()->format(self::DATE_FORMAT) . ")" :
         //    "(due " . $gradeable->getSubmissionDueDate()->format(self::DATE_FORMAT) . ")";
     	$display_date = ($list_section == GradeableList::FUTURE || $list_section == GradeableList::BETA) ?
-            "(opens XX" . $gradeable->getSubmissionOpenDate()->format($DF) . ")" :
+            "(opens " . $gradeable->getSubmissionOpenDate()->format($DF) . ")" :
             "(due " . $gradeable->getSubmissionDueDate()->format($DF) . ")";
         $points_percent = NAN;
 
