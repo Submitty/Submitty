@@ -736,7 +736,8 @@ class ForumController extends AbstractController {
             foreach ($older_posts as $post) {
                 $_post['user'] = $post["edit_author"];
                 $_post['content'] = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'filter_post_content',  $post["content"]);
-                $_post['post_time'] = date_format(date_create($post['edit_timestamp']),"n/j g:i A");
+                $my_timezone = $this->core->getConfig()->getTimezone();
+                $_post['post_time'] = date_format(date_create($post['edit_timestamp'])->setTimezone($my_timezone),"n/j g:i A");
                 $output[] = $_post;
             }
             if(count($output) == 0) {
@@ -744,7 +745,8 @@ class ForumController extends AbstractController {
                 // Current post
                 $_post['user'] = $current_post["author_user_id"];
                 $_post['content'] = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'filter_post_content',  $current_post["content"]);
-                $_post['post_time'] = date_format(date_create($current_post['timestamp']),"n/j g:i A");
+                $my_timezone = $this->core->getConfig()->getTimezone();
+                $_post['post_time'] = date_format(date_create($current_post['timestamp'])->setTimezone($my_timezone),"n/j g:i A");
                 $output[] = $_post;
             }
             // Fetch additional information

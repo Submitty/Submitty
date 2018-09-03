@@ -101,9 +101,9 @@ HTML;
                 if(!empty($pre_post)){
                     $post_content = $pre_post;
 				}
-			
 				$post_content = htmlentities($post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-				$posted_on = date_format(date_create($post['timestamp_post']), "n/j g:i A");
+				$my_timezone = $this->core->getConfig()->getTimezone();
+				$posted_on = date_format(date_create($post['timestamp_post'])->setTimezone($my_timezone), "n/j g:i A");
 				$return .= <<<HTML
 
 				<tr title="Go to post" style="cursor: pointer;" onclick="window.location = '{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id))}#{$post['p_id']}';" id="search-row-{$count}" class="hoverable">
