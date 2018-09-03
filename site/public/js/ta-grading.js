@@ -1,7 +1,6 @@
 //Used to reset users cookies
 var cookie_version = 1;
 
-var editModeEnabled = false;
 //Check if cookie version is/is not the same as the current version
 var versionMatch = false;
 //Set positions and visibility of configurable ui elements
@@ -36,9 +35,7 @@ $(function() {
     }
 
     $('body').css({'position':'fixed', 'width':'100%'});
-    if(getGradeable()!=null){
-        calculatePercentageTotal();
-    }
+
     var progressbar = $(".progressbar"),
         value = progressbar.val();
     $(".progress-value").html("<b>" + value + '%</b>');
@@ -123,10 +120,10 @@ function readCookies(){
     var bar_wrapper_left = document.cookie.replace(/(?:(?:^|.*;\s*)bar_wrapper_left\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var bar_wrapper_visible = document.cookie.replace(/(?:(?:^|.*;\s*)bar_wrapper_visible\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
+    var silent_edit_enabled = document.cookie.replace(/(?:(?:^|.*;\s*)silent_edit_enabled\s*\=\s*([^;]*).*$)|^.*$/, "$1") === 'true';
+
     // var pdf_annotation_bar_top = document.cookie.replace(/(?:(?:^|.*;\s*)pdf_annotation_bar_top\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     // var pdf_annotation_bar_left = document.cookie.replace(/(?:(?:^|.*;\s*)pdf_annotation_bar_left\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-
-    var overwrite = document.cookie.replace(/(?:(?:^|.*;\s*)overwrite\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
     var autoscroll = document.cookie.replace(/(?:(?:^|.*;\s*)autoscroll\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var opened_mark = document.cookie.replace(/(?:(?:^|.*;\s*)opened_mark\s*\=\s*([^;]*).*$)|^.*$/, "$1");
@@ -169,6 +166,8 @@ function readCookies(){
     (bar_wrapper_left) ? $("#bar_wrapper").css("left", bar_wrapper_left):{};
     (bar_wrapper_visible) ? $("#bar_wrapper").css("display", bar_wrapper_visible):{};
 
+    $('#silent-edit-id').prop('checked', silent_edit_enabled);
+
     // (pdf_annotation_bar_top) ? $("#pdf_annotation_bar").css("top", pdf_annotation_bar_top):{};
     // (pdf_annotation_bar_left) ? $("#pdf_annotation_bar").css("left", pdf_annotation_bar_left):{};
 
@@ -177,8 +176,7 @@ function readCookies(){
     (rubric_visible) ? ((rubric_visible) == "none" ? $(".fa-pencil-square-o").removeClass("icon-selected") : $(".fa-pencil-square-o").addClass("icon-selected")) : {};
     (status_visible) ? ((status_visible) == "none" ? $(".fa-user").removeClass("icon-selected") : $(".fa-user").addClass("icon-selected")) : {};
     (regrade_visible) ? ((regrade_visible) == "none" ? $(".fa-hand-paper-o").removeClass("icon-selected") : $(".fa-hand-paper-o").addClass("icon-selected")) : {};
-   
-    (overwrite) ? ((overwrite) == "on" ? $('#overwrite-id').prop('checked', true) : $('#overwrite-id').prop('checked', false)) : {};
+
     (autoscroll) ? ((autoscroll) == "on" ? $('#autoscroll_id').prop('checked', true) : $('#autoscroll_id').prop('checked', false)) : {};
 
     onAjaxInit = function() {
@@ -258,17 +256,11 @@ function updateCookies(){
     document.cookie = "bar_wrapper_top=" + $("#bar_wrapper").css("top") + "; path=/;";
     document.cookie = "bar_wrapper_left=" + $("#bar_wrapper").css("left") + "; path=/;";
     document.cookie = "bar_wrapper_visible=" + $("#bar_wrapper").css("display") + "; path=/;";
-    document.cookie = "editMode=" + editModeEnabled + "; path=/;";
+
+    document.cookie = "silent_edit_enabled=" + isSilentEditModeEnabled() + "; path=/;";
 
     // document.cookie = "pdf_annotation_bar_top=" + $("#pdf_annotation_bar").css("top") + "; path=/;";
     // document.cookie = "pdf_annotation_bar_left=" + $("#pdf_annotation_bar").css("left") + "; path=/;";
-    var overwrite = "on";
-    if ($('#overwrite-id').is(":checked")) {
-        overwrite = "on";
-    } else {
-        overwrite = "off";
-    }
-    document.cookie = "overwrite=" + overwrite + "; path=/;";
 
     var autoscroll = "on";
     if ($('#autoscroll_id').is(":checked")) {
@@ -277,25 +269,7 @@ function updateCookies(){
         autoscroll = "off";
     }
     document.cookie = "autoscroll=" + autoscroll + "; path=/;";
-    if(getGradeable()!=null){
-        document.cookie = "opened_mark=" + findCurrentOpenedMark() + "; path=/;";
-        var testcases = findOpenTestcases();
-        testcases = JSON.stringify(testcases);
-        document.cookie = "testcases=" + testcases + "; path=/;";
-    }
-    if (findCurrentOpenedMark() > 0 || findCurrentOpenedMark() === GENERAL_MESSAGE_ID) {
-        if (findCurrentOpenedMark() === GENERAL_MESSAGE_ID) {
-            var current_mark = document.getElementById('title-general');
-        } else {
-            var current_mark = document.getElementById('title-' + findCurrentOpenedMark());
-        }
-        var top_pos = current_mark.offsetTop;
-        var rubric_box = document.getElementById('grading-box');
-        top_pos += rubric_box.offsetTop;
-        document.cookie = "scroll_pixel=" + top_pos + "; path=/;";
-    } else {
-        document.cookie = "scroll_pixel=" + 0 + "; path=/;";
-    }
+
     var files = [];
     $('#file-container').children().each(function() {
         $(this).children('div[id^=div_viewer_]').each(function() {
@@ -319,34 +293,33 @@ function changeEditorStyle(newStyle){
 
 //-----------------------------------------------------------------------------
 // Student navigation
-//TODO figure out why the confirms below are happening
 function gotoPrevStudent() {
-    if(getGradeable()!=null){
-        saveLastOpenedMark(true, function () {
+    if (getGradeableId() !== '') {
+        closeAllComponents(true).then(function () {
             window.location = $("#prev-student")[0].dataset.href;
-        }, function () {
-        //    if (confirm("Could not save last mark, change student anyway?")) {
+        }).catch(function () {
+            if (confirm("Could not save open component, change student anyway?")) {
                 window.location = $("#prev-student")[0].dataset.href;
-       //     }
+            }
         });
     }
-    else{
-        window.location = $("#prev-student")[0].dataset.href; 
+    else {
+        window.location = $("#prev-student")[0].dataset.href;
     }
 }
 
 function gotoNextStudent() {
-    if(getGradeable()!=null){
-        saveLastOpenedMark(true, function () {
+    if (getGradeableId() !== '') {
+        closeAllComponents(true).then(function () {
             window.location = $("#next-student")[0].dataset.href;
-        }, function () {
-         //   if (confirm("Could not save last mark, change student anyway?")) {
+        }).catch(function () {
+            if (confirm("Could not save open component, change student anyway?")) {
                 window.location = $("#next-student")[0].dataset.href;
-         //   }
+            }
         });
     }
-    else{
-       window.location = $("#next-student")[0].dataset.href; 
+    else {
+        window.location = $("#next-student")[0].dataset.href;
     }
 }
 //Navigate to the prev / next student buttons
@@ -476,37 +449,62 @@ registerKeyHandler({name: "Toggle Regrade Requests Panel", code: "KeyX"}, functi
 // Show/hide components
 
 registerKeyHandler({name: "Open Next Component", code: 'ArrowDown'}, function(e) {
-    var current = findCurrentOpenedMark();
-    var numQuestions = getGradeable().components.length;
-    if (current === NO_COMPONENT_ID) {
-        openMark(1);
-        $('#title-' + 1)[0].scrollIntoView();
-    } else if (current === numQuestions) {
-        openGeneralMessage();
-        $('#title-general')[0].scrollIntoView();
-    } else if (current === GENERAL_MESSAGE_ID) {
-        closeGeneralMessage(true);
+    let openComponentId = getFirstOpenComponentId();
+    let numComponents = getComponentCount();
+
+    // Note: we use the 'toggle' functions instead of the 'open' functions
+    //  Since the 'open' functions don't close any components
+    if (isOverallCommentOpen()) {
+        // Overall comment is open, so just close it
+        closeOverallComment(true);
+    } else if (openComponentId === NO_COMPONENT_ID) {
+        // No component is open, so open the first one
+        let componentId = getComponentIdByOrder(0);
+        toggleComponent(componentId, true).then(function () {
+            getComponentJQuery(componentId)[0].scrollIntoView();
+        });
+    } else if (openComponentId === getComponentIdByOrder(numComponents - 1)) {
+        // Last component is open, so open the general comment
+        toggleOverallComment(true).then(function () {
+            getOverallCommentJQuery()[0].scrollIntoView();
+        });
     } else {
-        openMark(current + 1);
-        $('#title-' + (current + 1))[0].scrollIntoView();
+        // Any other case, open the next one
+        let nextComponentId = getNextComponentId(openComponentId);
+        toggleComponent(nextComponentId, true).then(function () {
+            getComponentJQuery(nextComponentId)[0].scrollIntoView();
+        });
     }
     e.preventDefault();
 });
 
 registerKeyHandler({name: "Open Previous Component", code: 'ArrowUp'}, function(e) {
-    var current = findCurrentOpenedMark();
-    var numQuestions = getGradeable().components.length;
-    if (current === NO_COMPONENT_ID) {
-        openGeneralMessage();
-        $('#title-general')[0].scrollIntoView();
-    } else if (current === 1) {
-        closeMark(1, true);
-    } else if (current === GENERAL_MESSAGE_ID) {
-        openMark(numQuestions);
-        $('#title-' + numQuestions)[0].scrollIntoView();
+    let openComponentId = getFirstOpenComponentId();
+    let numComponents = getComponentCount();
+
+    // Note: we use the 'toggle' functions instead of the 'open' functions
+    //  Since the 'open' functions don't close any components
+    if (isOverallCommentOpen()) {
+        // Overall comment open, so open the last component
+        let componentId = getComponentIdByOrder(numComponents - 1);
+        toggleComponent(componentId, true).then(function () {
+            getComponentJQuery(componentId)[0].scrollIntoView();
+        });
+    }
+    else if (openComponentId === NO_COMPONENT_ID) {
+        // No Component is open, so open the overall comment
+        toggleOverallComment(true).then(function () {
+            getOverallCommentJQuery()[0].scrollIntoView();
+        });
+    } else if (openComponentId === getComponentIdByOrder(0)) {
+        // First component is open, so close it
+        closeAllComponents(true);
     } else {
-        openMark(current - 1);
-        $('#title-' + (current - 1))[0].scrollIntoView();
+        // Any other case, open the previous one
+        let prevComponentId = getPrevComponentId(openComponentId);
+        toggleComponent(prevComponentId, true).then(function () {
+            getComponentJQuery(prevComponentId)[0].scrollIntoView();
+        });
     }
     e.preventDefault();
 });
@@ -515,38 +513,42 @@ registerKeyHandler({name: "Open Previous Component", code: 'ArrowUp'}, function(
 // Selecting marks
 
 registerKeyHandler({name: "Select Mark 1", code: 'Digit1', locked: true}, function() {
-    selectCurrentMarkCheck(0);
+    checkOpenComponentMark(0);
 });
 registerKeyHandler({name: "Select Mark 2", code: 'Digit2', locked: true}, function() {
-    selectCurrentMarkCheck(1);
+    checkOpenComponentMark(1);
 });
 registerKeyHandler({name: "Select Mark 3", code: 'Digit3', locked: true}, function() {
-    selectCurrentMarkCheck(2);
+    checkOpenComponentMark(2);
 });
 registerKeyHandler({name: "Select Mark 4", code: 'Digit4', locked: true}, function() {
-    selectCurrentMarkCheck(3);
+    checkOpenComponentMark(3);
 });
 registerKeyHandler({name: "Select Mark 5", code: 'Digit5', locked: true}, function() {
-    selectCurrentMarkCheck(4);
+    checkOpenComponentMark(4);
 });
 registerKeyHandler({name: "Select Mark 6", code: 'Digit6', locked: true}, function() {
-    selectCurrentMarkCheck(5);
+    checkOpenComponentMark(5);
 });
 registerKeyHandler({name: "Select Mark 7", code: 'Digit7', locked: true}, function() {
-    selectCurrentMarkCheck(6);
+    checkOpenComponentMark(6);
 });
 registerKeyHandler({name: "Select Mark 8", code: 'Digit8', locked: true}, function() {
-    selectCurrentMarkCheck(7);
+    checkOpenComponentMark(7);
 });
 registerKeyHandler({name: "Select Mark 9", code: 'Digit9', locked: true}, function() {
-    selectCurrentMarkCheck(8);
+    checkOpenComponentMark(8);
 });
 
-function selectCurrentMarkCheck(index) {
-    var opened = findCurrentOpenedMark();
-    if (opened > 0 && index < getComponent(opened).marks.length) {
-        var mark = getComponent(opened).marks[index];
-        selectMark(opened, mark.id);
+function checkOpenComponentMark(index) {
+    let component_id = getFirstOpenComponentId();
+    if (component_id !== NO_COMPONENT_ID) {
+        let mark_id = getMarkIdFromOrder(component_id, index);
+        toggleCommonMark(component_id, mark_id)
+            .catch(function (err) {
+                console.error(err);
+                alert('Error toggling mark! ' + err.message);
+            });
     }
 }
 
@@ -718,29 +720,4 @@ function adjustSize(name) {
     var textarea = document.getElementById(name);
     textarea.style.height = "";
     textarea.style.height = Math.min(textarea.scrollHeight, 300) + "px";
-}
-//-----------------------------------------------------------------------------
-// Edit Mode
-//TODO save properly so that the mark can be reopened automatically
-function toggleEditMode(){
-    var id=findCurrentOpenedMark();
-    var temp=editModeEnabled;
-    editModeEnabled=true;
-    if(findCurrentOpenedMark()>0){
-        toggleMark(id, true);        
-    }
-    if(temp==null){
-        editModeEnabled=false;
-    }
-    else{
-        editModeEnabled=!temp;
-    }
-    if(findCurrentOpenedMark()>0){
-        if(editModeEnabled==false){
-            $('#marks-extra-'+findCurrentOpenedMark())[0].style.display="none";
-        }
-        if(editModeEnabled==true){
-            $('#marks-extra-'+findCurrentOpenedMark())[0].style.display="block";
-        }
-    }
 }

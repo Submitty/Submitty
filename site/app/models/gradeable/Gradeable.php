@@ -67,7 +67,6 @@ use app\models\User;
  * @method bool isLateSubmissionAllowed()
  * @method void setLateSubmissionAllowed($allow_late_submission)
  * @method float getPrecision()
- * @method void setPrecision($grading_precision)
  * @method Component[] getComponents()
  * @method bool isRegradeAllowed()
  */
@@ -624,7 +623,7 @@ class Gradeable extends AbstractModel {
 
     /**
      * Gets the autograding configuration object
-     * @return AutogradingConfig
+     * @return AutogradingConfig|null returns null if loading from the disk fails
      */
     public function getAutogradingConfig() {
         if($this->autograding_config === null) {
@@ -734,9 +733,9 @@ class Gradeable extends AbstractModel {
      * Sets the minimum user level that can grade an assignment.
      * @param int $group Must be at least 1 and no more than 4
      */
-    public function setMinGradingGroup($group) {
+    public function setMinGradingGroup(int $group) {
         // Disallow the 0 group (this may catch some potential bugs with instructors not being able to edit gradeables)
-        if ((is_int($group) || ctype_digit($group)) && intval($group) > 0 && intval($group) <= 4) {
+        if ($group > 0 && $group <= 4) {
             $this->min_grading_group = $group;
         } else {
             throw new \InvalidArgumentException('Grading group must be an integer larger than 0');
@@ -748,8 +747,8 @@ class Gradeable extends AbstractModel {
      * Sets the maximum team size
      * @param int $max_team_size Must be at least 0
      */
-    public function setTeamSizeMax($max_team_size) {
-        if ((is_int($max_team_size) || ctype_digit($max_team_size)) && intval($max_team_size) >= 0) {
+    public function setTeamSizeMax(int $max_team_size) {
+        if ($max_team_size >= 0) {
             $this->team_size_max = intval($max_team_size);
         } else {
             throw new \InvalidArgumentException('Max team size must be a non-negative integer!');
@@ -758,11 +757,20 @@ class Gradeable extends AbstractModel {
     }
 
     /**
+     * Sets the precision for grading
+     * @param float $precision
+     */
+    public function setPrecision(float $precision) {
+        $this->precision = $precision;
+        $this->modified = true;
+    }
+
+    /**
      * Sets the peer grading set
      * @param int $peer_grading_set Must be at least 0
      */
-    public function setPeerGradingSet($peer_grading_set) {
-        if ((is_int($peer_grading_set) || ctype_digit($peer_grading_set)) && intval($peer_grading_set) >= 0) {
+    public function setPeerGradingSet(int $peer_grading_set) {
+        if ($peer_grading_set >= 0) {
             $this->peer_grade_set = intval($peer_grading_set);
         } else {
             throw new \InvalidArgumentException('Peer grade set must be a non-negative integer!');

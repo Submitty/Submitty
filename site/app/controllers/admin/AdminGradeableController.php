@@ -10,6 +10,7 @@ use app\models\gradeable\Gradeable;
 use app\models\gradeable\Component;
 use app\models\gradeable\Mark;
 use app\libraries\FileUtils;
+use http\Exception\InvalidArgumentException;
 
 class AdminGradeableController extends AbstractController {
     public function run() {
@@ -108,9 +109,9 @@ class AdminGradeableController extends AbstractController {
             'page' => 'admin_gradeable',
             'action' => 'upload_new_gradeable'
         ]);
-
         $vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
 
+        $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'submit_url' => $submit_url,
             'gradeable' => $gradeable,
@@ -219,6 +220,15 @@ class AdminGradeableController extends AbstractController {
 
         // $this->inherit_teams_list = $this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams();
 
+        if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
+            $this->core->getOutput()->addInternalJs('twig.min.js');
+            $this->core->getOutput()->addInternalJs('ta-grading-rubric-conflict.js');
+            $this->core->getOutput()->addInternalJs('ta-grading-rubric.js');
+            $this->core->getOutput()->addInternalJs('gradeable.js');
+            $this->core->getOutput()->addInternalCss('ta-grading.css');
+        }
+        $this->core->getOutput()->addInternalJs('admin-gradeable-updates.js');
+        $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'gradeable' => $gradeable,
             'action' => 'edit',
@@ -267,9 +277,51 @@ class AdminGradeableController extends AbstractController {
                 'action' => 'upload_config'
             ])
         ]);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupMarkConflicts');
     }
 
     /* Http request methods (i.e. ajax) */
+
+    /**
+     * TODO: This was extracted from the rubric saving code for electronic files
+     */
+    private function shufflePeerGrading(Gradeable $gradeable) {
+        if ($gradeable->isPeerGrading()) {
+            $old_peer_grading_assignments = $this->core->getQueries()->getPeerGradingAssignNumber($gradeable->getId());
+            $make_peer_assignments = ($old_peer_grading_assignments !== $gradeable->getPeerGradeSet());
+            if ($make_peer_assignments) {
+                $this->core->getQueries()->clearPeerGradingAssignments($gradeable->getId());
+
+                $users = $this->core->getQueries()->getAllUsers();
+                $user_ids = array();
+                $grading = array();
+                $peer_grade_set = $gradeable->getPeerGradeSet();
+                foreach ($users as $key => $user) {
+                    // Need to remove non-student users, or users in the NULL section
+                    if ($user->getRegistrationSection() == null) {
+                        unset($users[$key]);
+                    } else {
+                        $user_ids[] = $user->getId();
+                        $grading[$user->getId()] = array();
+                    }
+                }
+                $user_number = count($user_ids);
+                shuffle($user_ids);
+                for ($i = 0; $i < $user_number; $i++) {
+                    for ($j = 1; $j <= $peer_grade_set; $j++) {
+                        $grading[$user_ids[$i]][] = $user_ids[($i + $j) % $user_number];
+                    }
+                }
+
+                foreach ($grading as $grader => $assignment) {
+                    foreach ($assignment as $student) {
+                        $this->core->getQueries()->insertPeerGradingAssignment($grader, $student, $gradeable->getId());
+                    }
+                }
+            }
+        }
+    }
 
     private function newComponent(Gradeable $gradeable) {
         return new Component($this->core, $gradeable, [
@@ -320,11 +372,6 @@ class AdminGradeableController extends AbstractController {
 
         // Add it to the gradeable
         $gradeable->setComponents([$component]);
-    }
-
-    // check whether radio button's value is 'true'
-    private static function isRadioButtonTrue($name) {
-        return isset($_POST[$name]) && $_POST[$name] === 'true';
     }
 
     private function updateRubricRequest() {
@@ -410,45 +457,7 @@ class AdminGradeableController extends AbstractController {
         $component->setPage(Component::PDF_PAGE_NONE);
     }
 
-    private static function parseEgComponent(Component $component, $details, $x) {
-        $component->setTitle($details['comment_title_' . strval($x + 1)]);
-        $component->setTaComment($details['ta_comment_' . strval($x + 1)]);
-        $component->setStudentComment($details['student_comment_' . strval($x + 1)]);
-
-        $is_penalty = (isset($details['rad_penalty-' . strval($x + 1)]) && $details['rad_penalty-' . strval($x + 1)] == 'yes') ? true : false;
-        $lower_clamp = ($is_penalty === true) ? floatval($details['lower_' . strval($x + 1)]) : 0;
-        $is_deduction = (isset($details['grade_by-' . strval($x + 1)]) && $details['grade_by-' . strval($x + 1)] == 'count_down') ? true : false;
-        $default = ($is_deduction === true) ? floatval($details['points_' . strval($x + 1)]) : 0;
-        $max_value = $details['points_' . strval($x + 1)];
-        $is_extra = (isset($details['rad_extra_credit-' . strval($x + 1)]) && $details['rad_extra_credit-' . strval($x + 1)] == 'yes') ? true : false;
-        $upper_clamp = ($is_extra === true) ? (floatval($details['points_' . strval($x + 1)]) + floatval($details['upper_' . strval($x + 1)])) : floatval($details['points_' . strval($x + 1)]);
-
-        $component->setPoints([
-            'lower_clamp' => $lower_clamp,
-            'default' => $default,
-            'max_value' => $max_value,
-            'upper_clamp' => $upper_clamp
-        ]);
-        $component->setText(false);
-        $peer_grading_component = (isset($details['peer_component_' . strval($x + 1)]) && $details['peer_component_' . strval($x + 1)] == 'on') ? true : false;
-        $component->setPeer($peer_grading_component);
-
-        if (self::isRadioButtonTrue('pdf_page')) {
-            if (self::isRadioButtonTrue('pdf_page_student')) {
-                $page_component = -1;
-            } else {
-                $page_component = ($details['page_component_' . strval($x + 1)]);
-            }
-        } else {
-            $page_component = 0;
-        }
-        $component->setPage($page_component);
-    }
-
     private function updateRubric(Gradeable $gradeable, $details) {
-        // Add the rubric information using the old method for now.
-        $peer_grading_complete_score = 0;
-
         $old_components = $gradeable->getComponents();
         $num_old_components = count($old_components);
         $start_index = $num_old_components;
@@ -456,145 +465,10 @@ class AdminGradeableController extends AbstractController {
         /** @var Component[] $new_components */
         $new_components = [];
 
-        $update_component_peer = function (Component $component, $peer_grading_complete_score) {
-            $component->setPoints([
-                'lower_clamp' => $component->getLowerClamp(),
-                'default' => $component->getDefault(),
-                'max_value' => $peer_grading_complete_score,
-                'upper_clamp' => $peer_grading_complete_score
-            ]);
-        };
-
         // The electronic file mode is the least touched of them all since it will be replaced
         //  with a unified interface with TA grading and share a separate "rubric" controller for it.
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
-            $make_peer_assignments = false;
-            if ($gradeable->isPeerGrading()) {
-                $old_peer_grading_assignments = $this->core->getQueries()->getPeerGradingAssignNumber($gradeable->getId());
-                $make_peer_assignments = ($old_peer_grading_assignments !== $gradeable->getPeerGradeSet());
-                if ($make_peer_assignments) {
-                    $this->core->getQueries()->clearPeerGradingAssignments($gradeable->getId());
-                }
-            }
-            if ($make_peer_assignments && $gradeable->isPeerGrading()) {
-                $users = $this->core->getQueries()->getAllUsers();
-                $user_ids = array();
-                $grading = array();
-                $peer_grade_set = $gradeable->getPeerGradeSet();
-                foreach ($users as $key => $user) {
-                    // Need to remove non-student users, or users in the NULL section
-                    if ($user->getRegistrationSection() == null) {
-                        unset($users[$key]);
-                    } else {
-                        $user_ids[] = $user->getId();
-                        $grading[$user->getId()] = array();
-                    }
-                }
-                $user_number = count($user_ids);
-                shuffle($user_ids);
-                for ($i = 0; $i < $user_number; $i++) {
-                    for ($j = 1; $j <= $peer_grade_set; $j++) {
-                        $grading[$user_ids[$i]][] = $user_ids[($i + $j) % $user_number];
-                    }
-                }
-
-                foreach ($grading as $grader => $assignment) {
-                    foreach ($assignment as $student) {
-                        $this->core->getQueries()->insertPeerGradingAssignment($grader, $student, $gradeable->getId());
-                    }
-                }
-            }
-
-            // Count the number of components (questions)
-            $num_questions = 0;
-            foreach ($details as $k => $v) {
-                if (strpos($k, 'comment_title_') !== false) {
-                    ++$num_questions;
-                }
-            }
-
-            $x = 0;
-            // Iterate through each existing component and update them in the database,
-            //  removing any extras
-            foreach ($old_components as $old_component) {
-                if (is_array($old_component)) {
-                    $old_component = $old_component[0];
-                }
-                if ($x < $num_questions && $x < $num_old_components) {
-                    if ($old_component->getTitle() === "Grading Complete" || $old_component->getOrder() == -1) {
-                        if ($peer_grading_complete_score == 0) {
-                            $this->core->getQueries()->deleteGradeableComponent($old_component);
-                        } else if ($old_component->getMaxValue() != $peer_grading_complete_score) {
-                            $update_component_peer($old_component, $peer_grading_complete_score);
-                            $new_components[] = $old_component;
-                        }
-                        continue;
-                    }
-                    self::parseEgComponent($old_component, $details, $x);
-                    $old_component->setOrder($x);
-                    $new_components[] = $old_component;
-                }
-                $x++;
-            }
-
-            for ($x = $start_index; $x < $num_questions; $x++) {
-                if ($x == 0 && $peer_grading_complete_score != 0) {
-                    $component = $this->newComponent($gradeable);
-                    $update_component_peer($component, $peer_grading_complete_score);
-                    $component->setOrder($x - 1);
-                    $component->setTitle("Grading Complete");
-                    $new_components[] = $component;
-                }
-                $component = $this->newComponent($gradeable);
-                self::parseEgComponent($component, $details, $x);
-                $component->setOrder($x);
-                $new_components[] = $component;
-            }
-
-            //Adds/Edits/Deletes the Marks
-            $index = 1;
-            foreach ($new_components as $comp) {
-                $marks = $comp->getMarks();
-                $new_marks = [];
-
-                if ($comp->getOrder() == -1) {
-                    continue;
-                }
-
-                $num_marks = 0;
-                foreach ($details as $k => $v) {
-                    if (strpos($k, 'mark_points_' . $index) !== false) {
-                        $num_marks++;
-                    }
-                }
-
-                $update_mark = function (Mark $mark, $index, $y) use ($details) {
-                    $mark->setPoints(floatval($details['mark_points_' . $index . '_' . $y]));
-                    $mark->setTitle($details['mark_text_' . $index . '_' . $y]);
-                    $mark->setOrder($y);
-                    $mark->setPublish(isset($details['mark_publish_' . $index . '_' . $y]));
-                };
-
-                for ($y = 0; $y < $num_marks; $y++) {
-                    //adds the mark if it is new
-                    if ($details['mark_gcmid_' . $index . '_' . $y] == "NEW") {
-                        $mark = $this->newMark($comp);
-                        $update_mark($mark, $index, $y);
-                        $new_marks[] = $mark;
-                    } else { //edits existing marks
-                        foreach ($marks as $mark) {
-                            if ($details['mark_gcmid_' . $index . '_' . $y] == $mark->getId()) {
-                                $update_mark($mark, $index, $y);
-                                $new_marks[] = $mark;
-                            }
-                        }
-                    }
-                }
-                $index++;
-
-                // Finally, set the new marks ...
-                $comp->setMarks($new_marks);
-            }
+            throw new InvalidArgumentException('Attempt to update rubric using outdated method!');
         } else if ($gradeable->getType() === GradeableType::CHECKPOINTS) {
             if (!isset($details['checkpoints'])) {
                 $details['checkpoints'] = [];
@@ -691,7 +565,7 @@ class AdminGradeableController extends AbstractController {
                 $new_components[] = $component;
             }
         } else {
-            throw new \InvalidArgumentException("Error.");
+            throw new \InvalidArgumentException("Invalid gradeable type");
         }
 
         // Finally, Set the components and update the gradeable
@@ -918,6 +792,10 @@ class AdminGradeableController extends AbstractController {
             'regrade_allowed'
         ];
 
+        $numeric_properties = [
+            'precision'
+        ];
+
         // Date properties all need to be set at once
         $dates = $gradeable->getDates();
         $date_set = false;
@@ -936,6 +814,11 @@ class AdminGradeableController extends AbstractController {
             // Convert boolean values into booleans
             if (in_array($prop, $boolean_properties)) {
                 $post_val = $post_val === 'true';
+            }
+
+            if (in_array($prop, $numeric_properties) && !is_numeric($post_val)) {
+                $errors[$prop] = "{$prop} must be a number";
+                continue;
             }
 
             // Try to set the property

@@ -21,7 +21,6 @@ use app\models\User;
  * @method void setGradedVersion($graded_version)
  * @method \DateTime getGradeTime()
  * @method int[] getMarkIds()
- * @method int[]|null getDbMarkIds()
  * @method bool isMarksModified()
  */
 class GradedComponent extends AbstractModel {
@@ -41,7 +40,7 @@ class GradedComponent extends AbstractModel {
     /** @property @var int[] The mark ids the submitter received for this component */
     protected $mark_ids = array();
     /** @property @var int[]|null The mark ids the submitter received for this component as reflected in the db */
-    protected $db_mark_ids = null;
+    private $db_mark_ids = null;
 
     /** @property @var bool True if the marks array was modified after construction */
     protected $marks_modified = false;
@@ -226,6 +225,15 @@ class GradedComponent extends AbstractModel {
         $this->setMarkIds($db_mark_ids);
         $this->db_mark_ids = $db_mark_ids;
         $this->marks_modified = false;
+    }
+
+    /**
+     * Gets the mark ids loaded from the database
+     * @return int[]|null
+     * @internal
+     */
+    public function getDbMarkIds() {
+        return $this->db_mark_ids;
     }
 
     /**

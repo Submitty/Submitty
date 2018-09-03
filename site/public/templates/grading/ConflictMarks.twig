@@ -1,0 +1,57 @@
+<div class="container mark-conflict-container">
+    {% for conflict in conflict_marks %}
+        <div id="mark-conflict-{{ conflict.domMark.id }}"
+             class="row mark-conflict-row {{ loop.index0 > 0 ? 'hidden' : '' }}"
+             data-mark_id="{{ conflict.domMark.id }}">
+            <div class="col container">
+                <div class="row mark-resolve mark-resolve-old-server">
+                    <span class="col">
+                        ({{ conflict.oldServerMark.points }}) {{ conflict.oldServerMark.title }}
+                    </span>
+                    <span class="col-no-gutters button-container">
+                        <input type="button" class="btn btn-default" value="Revert to Original"/>
+                    </span>
+                </div>
+                <div class="row mark-resolve mark-resolve-server">
+                    {% if conflict.serverMark != null %}
+                        <span class="col">
+                            ({{ conflict.serverMark.points }}) {{ conflict.serverMark.title }}
+                        </span>
+                        <span class="col-no-gutters button-container">
+                            <input type="button" class="btn btn-primary" value="Ignore My Edits"/>
+                        </span>
+                    {% else %}
+                        <span class="col mark-deleted-message">
+                            Mark Deleted From Server
+                        </span>
+                        <span class="col-no-gutters button-container">
+                            <input type="button" class="btn btn-primary" value="Delete Mark"/>
+                        </span>
+                    {% endif %}
+                </div>
+                <div class="row mark-resolve mark-resolve-dom">
+                    {% if not conflict.local_deleted %}
+                        <span class="col">
+                            ({{ conflict.domMark.points }}) {{ conflict.domMark.title }}
+                        </span>
+                        <span class="col-no-gutters button-container">
+                            <input type="button" class="btn btn-primary" value="Use My Edits"/>
+                        </span>
+                    {% else %}
+                        <span class="col mark-deleted-message">
+                            You Deleted the Mark
+                        </span>
+                        <span class="col-no-gutters button-container">
+                            <input type="button" class="btn btn-primary" value="Delete Mark"/>
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    {% if conflict_marks|length > 1 %}
+        <div class="conflict-resolve-progress">
+            <i><span class="conflict-resolve-progress-indicator">1</span> out of {{ conflict_marks|length }}</i>
+        </div>
+    {% endif %}
+</div>

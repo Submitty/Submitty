@@ -1,0 +1,128 @@
+{% extends "Component.twig" %}
+{#
+Required inputs:
+    precision
+    component: {id, title, ta_comment, student_comment, page, max_value}
+    graded_component: {grader_id, verifier_id, submitter_id, comment, score, mark_ids, graded_version, total_score}
+
+    show_verify_grader = can_verify and grader_id is defined and grader_id != your_user_id
+    grading_disabled = version_conflict = graded_component.graded_version != -1 and graded_gradeable.auto_graded_gradeable.active_version != graded_component.graded_version
+
+     {{ functions.getBadgeStyle(graded_component.total_score, component.max_value) }}
+#}
+
+{% set show_verify_grader = can_verify_graders and graded_component is defined and grader_id != graded_component.grader_id %}
+
+{% block component_click %}
+    {{ grading_disabled ? '' : 'onClickComponent(this)' }}
+{% endblock %}
+
+{% block header_block %}
+    {% include 'GradingComponentHeader.twig' %}
+{% endblock %}
+
+{% block content_block %}
+    <div class="container">
+        {% set show_ta_comment = component.ta_comment != "" %}
+        {% set show_student_comment = component.student_comment != "" %}
+        {% if show_ta_comment or show_student_comment %}
+            <div class="row divider"></div>
+        {% endif %}
+        {% if show_ta_comment %}
+            <span class="row ta-student-comment">
+                <i><b>Note to TA: </b>{{ component.ta_comment }}</i>
+            </span>
+        {% endif %}
+        {% if show_student_comment %}
+            <span class="row ta-student-comment">
+                <i><b>Note to Student: </b>{{ component.student_comment }}</i>
+            </span>
+        {% endif %}
+        <div class="row divider"></div>
+    </div>
+{% endblock %}
+
+{% block marks_block %}
+    {% for mark in component.marks %}
+        {% set first_mark = loop.index0 == 0 %}
+        {% set is_checked = mark.id in graded_component.mark_ids %}
+        {% set mark_disabled = first_mark and not is_checked and (graded_component.mark_ids|length > 0 or graded_component.custom_mark_selected) %}
+        {% include "Mark.twig" %}
+    {% endfor %}
+{% endblock %}
+
+{% block extra_mark_rows %}
+    {# Custom mark (only display in non-edit mode #}
+    {% if not edit_marks_enabled %}
+        <div class="custom-mark-container mark-container row"
+             data-mark_id="0">
+            <span class="mark-selector-container">
+                <span class="{{ graded_component.custom_mark_selected ? "mark-selected" : "" }} mark-selector col-no-gutters"
+                      data-mark_id="0"
+                      onclick="onToggleCustomMark(this)">
+                </span>
+            </span>
+            <span class="col-no-gutters mark-points">
+                <input type="number"
+                       step="{{ precision }}"
+                       onchange="onCustomMarkChange(this)"
+                       value="{{ graded_component.score | default('0')}}">
+            </span>
+            <span class="col-sm mark-title">
+                Custom:
+                <textarea onchange="onCustomMarkChange(this)"
+                          rows="1"
+                          placeholder="Custom message for student..."
+                          class="mark-note-custom"
+                >{{ graded_component.comment }}</textarea>
+            </span>
+        </div>
+    {% else %}
+        <div class="custom-mark-data"
+             data-selected="{{ graded_component.custom_mark_selected }}"
+             data-score="{{ graded_component.score }}"
+             data-comment="{{ graded_component.comment }}"
+             hidden></div>
+    {% endif %}
+    {# /Custom mark #}
+{% endblock %}
+
+{% block mark_list_footer %}
+    {# Component is closed, so show just the received marks #}
+    {% if not show_mark_list %}
+        <div class="container">
+            <div class="row divider"></div>
+        </div>
+        <div class="received-marks-list container">
+            {% for mark in component.marks %}
+                {% if mark.id in graded_component.mark_ids %}
+                    <div class="row">
+                        <div class="col-no-gutters indicator">
+                            <i class="fa fa-check-square-o fa-1g"></i>
+                        </div>
+                        <div class="col-no-gutters point-value">
+                            <span>{{ mark.points }}</span>
+                        </div>
+                        <div class="col">
+                            <span>{{ mark.title }}</span>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+            {# Show the custom mark if it exists #}
+            {% if graded_component.comment|length > 0 %}
+                <div class="row">
+                    <div class="col-no-gutters indicator">
+                        <i class="fa fa-check-square-o fa-1g"></i>
+                    </div>
+                    <div class="col-no-gutters point-value">
+                        <span>{{ graded_component.score }}</span>
+                    </div>
+                    <div class="col">
+                        <span>{{ graded_component.comment }}</span>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+{% endblock %}

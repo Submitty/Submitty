@@ -3,6 +3,7 @@
 namespace app\views\grading;
 
 use app\models\Gradeable;
+use app\models\gradeable\GradedGradeable;
 use app\models\SimpleStat;
 use app\models\Team;
 use app\models\User;
@@ -440,7 +441,9 @@ class ElectronicGraderView extends AbstractView {
 
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
-    public function hwGradingPage(Gradeable $gradeable, float $progress, string $prev_id, string $next_id, $not_in_my_section=false, $show_hidden_cases=false, $can_verify) {
+    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, string $prev_id, string $next_id, bool $not_in_my_section, bool $show_hidden_cases, bool $can_verify, bool $show_verify_all, bool $show_silent_edit) {
+        $new_gradeable = $graded_gradeable->getGradeable();
+
         $peer = false;
         if($this->core->getUser()->getGroup()==User::GROUP_STUDENT && $gradeable->getPeerGrading()) {
             $peer = true;
@@ -448,12 +451,12 @@ class ElectronicGraderView extends AbstractView {
 
         $return = "";
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderPDFBar');
-        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderNavigationBar', $gradeable, $progress, $prev_id, $next_id, $not_in_my_section, $peer);
+        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderNavigationBar', $new_gradeable, $progress, $prev_id, $next_id, $not_in_my_section, $peer);
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderAutogradingPanel', $gradeable, $show_hidden_cases);
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderSubmissionPanel', $gradeable);
         $user = $gradeable->getUser();
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
-        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRubricPanel', $gradeable, $user, $can_verify);
+        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit);
         if(!$peer) {
             $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderInformationPanel', $gradeable, $user);
         }
@@ -493,7 +496,7 @@ class ElectronicGraderView extends AbstractView {
     }
 
     /**
-     * @param Gradeable $gradeable
+     * @param \app\models\gradeable\Gradeable $gradeable
      * @param float $progress
      * @param string $prev_id
      * @param string $next_id
@@ -501,14 +504,14 @@ class ElectronicGraderView extends AbstractView {
      * @param bool $peer
      * @return string
      */
-    public function renderNavigationBar(Gradeable $gradeable, float $progress, string $prev_id, string $next_id, bool $not_in_my_section, bool $peer) {
+    public function renderNavigationBar(\app\models\gradeable\Gradeable $gradeable, float $progress, string $prev_id, string $next_id, bool $not_in_my_section, bool $peer) {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/NavigationBar.twig", [
             "studentNotInSection" => $not_in_my_section,
-            "prev_id" => $prev_id,
-            "next_id" => $next_id,
             "progress" => $progress,
-            "gradeable" => $gradeable,
-            "peer" => $peer
+            "peer" => $peer,
+            "prev_student_url" => $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id' => $prev_id]),
+            "next_student_url" => $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id' => $next_id]),
+            "home_url" => $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'details', 'gradeable_id' => $gradeable->getId()]),
         ]);
     }
 
@@ -611,42 +614,40 @@ class ElectronicGraderView extends AbstractView {
 
     /**
      * Render the Grading Rubric panel
-     * @param Gradeable $gradeable
-     * @param User $user
+     * @param GradedGradeable $graded_gradeable
      * @return string
      */
-    public function renderRubricPanel(Gradeable $gradeable, User $user, bool $can_verify) {
+    public function renderRubricPanel(GradedGradeable $graded_gradeable, int $display_version, bool $can_verify, bool $show_verify_all, bool $show_silent_edit) {
         $return = "";
+        $gradeable = $graded_gradeable->getGradeable();
 
-        $disabled = $gradeable->getActiveVersion() == 0 || $gradeable->getCurrentVersionNumber() != $gradeable->getActiveVersion();
+        // Disable grading if the requested version isn't the active one
+        $grading_disabled = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() == 0
+            || $display_version != $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
 
-        $grading_data = [
-            "gradeable" => $gradeable->getGradedData(),
-            "you" => $this->core->getUser(),
-            "your_user_id" => $this->core->getUser()->getId(),
-            "disabled" => $disabled,
-            "can_verify" => $can_verify // If any can be then this is set
-        ];
-
-        //Assign correct page numbers
-        $pages = $gradeable->getComponentPages();
-        foreach ($pages as $i => $page) {
-            $grading_data["gradeable"]["components"][$i]["page"] = $page;
-        }
-
-        $grading_data = json_encode($grading_data, JSON_PRETTY_PRINT);
+        $version_conflict = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() !== $display_version;
+        $has_active_version = $graded_gradeable->getAutoGradedGradeable()->hasActiveVersion();
+        $has_submission = $graded_gradeable->getAutoGradedGradeable()->hasSubmission();
 
         $this->core->getOutput()->addInternalJs('twig.min.js');
         $this->core->getOutput()->addInternalJs('ta-grading-keymap.js');
         $this->core->getOutput()->addInternalJs('ta-grading.js');
-        $this->core->getOutput()->addInternalJs('ta-grading-mark.js');
+        $this->core->getOutput()->addInternalJs('ta-grading-rubric-conflict.js');
+        $this->core->getOutput()->addInternalJs('ta-grading-rubric.js');
         $this->core->getOutput()->addInternalJs('gradeable.js');
 
         $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/RubricPanel.twig", [
-            "gradeable" => $gradeable,
-            "display_verify_all" => $can_verify,
-            "user" => $user,
-            "grading_data" => $grading_data
+            "gradeable_id" => $gradeable->getId(),
+            "is_ta_grading" => $gradeable->isTaGrading(),
+            "anon_id" => $graded_gradeable->getSubmitter()->getAnonId(),
+            "show_verify_all" => $show_verify_all,
+            "can_verify" => $can_verify,
+            "grading_disabled" => $grading_disabled,
+            "has_submission" => $has_submission,
+            "has_active_version" => $has_active_version,
+            "version_conflict" => $version_conflict,
+            "show_silent_edit" => $show_silent_edit,
+            "grader_id" => $this->core->getUser()->getId(),
         ]);
         return $return;
     }
@@ -666,8 +667,8 @@ class ElectronicGraderView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/ReceivedMarkForm.twig");
     }
 
-    public function popupNewMark() {
-        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/NewMarkForm.twig");
+    public function popupMarkConflicts() {
+        return $this->core->getOutput()->renderTwigTemplate('grading/electronic/MarkConflictPopup.twig');
     }
 
     public function popupSettings() {
