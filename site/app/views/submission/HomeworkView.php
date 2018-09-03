@@ -88,7 +88,7 @@ class HomeworkView extends AbstractView {
             $return .= $this->renderTAResultsBox($graded_gradeable, $regrade_available);
         }
         if ($regrade_available) {
-            $return .= $this->renderRegradeBox($old_gradeable);
+            $return .= $this->renderRegradeBox($graded_gradeable);
         }
         return $return;
     }
@@ -652,7 +652,7 @@ class HomeworkView extends AbstractView {
         $posts = [];
 
         if ($graded_gradeable->hasRegradeRequest()) {
-            $threads = $this->core->getQueries()->getRegradeDiscussion($graded_gradeable->getRegradeRequest()->getId());
+            $threads = $this->core->getQueries()->getRegradeDiscussion($graded_gradeable->getRegradeRequest());
             foreach ($threads as $thread) {
                 if (empty($threads)) break;
                 $is_staff = $this->core->getQueries()->isStaffPost($thread['user_id']);

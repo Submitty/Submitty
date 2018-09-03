@@ -1235,7 +1235,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               
               /* Regrade request data */
               rr.id AS regrade_request_id,
-              rr.status AS regrade_requets_status,
+              rr.status AS regrade_request_status,
               rr.timestamp AS regrade_request_timestamp,
 
               /* Aggregate Team User Data */
@@ -1393,7 +1393,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               ) AS ldet ON g.g_id=ldet.g_id AND ldet.team_id=team.team_id
               
               /* Join regrade request */
-              LEFT JOIN regrade_requests AS rr ON rr.user_id=gd.user_id OR rr.team_id=gd.team_id
+              LEFT JOIN regrade_requests AS rr ON rr.user_id=gd.gd_user_id OR rr.team_id=gd.gd_team_id
             WHERE $selector
             $order";
 
@@ -1459,9 +1459,9 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                     'status',
                     'timestamp'
                 ];
-                $regrade_request_arr = array_map(function($prop) {
+                $regrade_request_arr = array_combine($regrade_request_properties, array_map(function($prop) use($row) {
                     return $row['regrade_request_'.$prop];
-                }, $regrade_request_properties);
+                }, $regrade_request_properties));
 
                 $graded_gradeable->setRegradeRequest(new RegradeRequest($this->core, $regrade_request_arr));
             }

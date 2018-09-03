@@ -2697,8 +2697,8 @@ AND gc_id IN (
         $this->course_db->query("SELECT COUNT(*) AS cnt FROM regrade_requests WHERE g_id = ? AND status = -1", array($gradeable_id));
         return ($this->course_db->row()['cnt']);
     }
-    public function getRegradeDiscussion($regrade_id) {
-        $this->course_db->query("SELECT * FROM regrade_discussion WHERE regrade_id=? AND deleted=false ORDER BY timestamp ASC", array($regrade_id));
+    public function getRegradeDiscussion(RegradeRequest $regrade_request) {
+        $this->course_db->query("SELECT * FROM regrade_discussion WHERE regrade_id=? AND deleted=false ORDER BY timestamp ASC", array($regrade_request->getId()));
         $result = array();
         foreach ($this->course_db->rows() as $row => $val) {
             $result[] = $val;
@@ -2710,8 +2710,9 @@ AND gc_id IN (
         $params = array($regrade_id, $user_id, $content);
         $this->course_db->query("INSERT INTO regrade_discussion(regrade_id, timestamp, user_id, content) VALUES (?, current_timestamp, ?, ?)", $params);
     }
-    public function modifyRegradeStatus($regrade_id, $status){
-        $this->course_db->query("UPDATE regrade_requests SET timestamp = current_timestamp, status = ? WHERE id = ?", array($status,$regrade_id) );
+
+    public function saveRegradeRequest(RegradeRequest $regrade_request) {
+        $this->course_db->query("UPDATE regrade_requests SET timestamp = current_timestamp, status = ? WHERE id = ?", array($regrade_request->getStatus(), $regrade_request->getId()));
     }
 
     public function deleteRegradeRequest(RegradeRequest $regrade_request) {

@@ -111,6 +111,11 @@ class SubmissionController extends AbstractController {
             return;
         }
 
+        if(!$gradeable->isRegradeAllowed()) {
+            $this->core->getOutput()->renderJsonFail('Regrade requests not enabled for this gradeable');
+            return;
+        }
+
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
         if ($graded_gradeable === false) {
             return;
@@ -136,6 +141,7 @@ class SubmissionController extends AbstractController {
         $content = str_replace("\r", "", $_POST['replyTextArea']);
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         $submitter_id = $_REQUEST['submitter_id'] ?? '';
+        $status = $_REQUEST['status'] ?? -1;
 
         $user = $this->core->getUser();
 
@@ -150,6 +156,7 @@ class SubmissionController extends AbstractController {
         }
 
         if (!$graded_gradeable->hasRegradeRequest()) {
+            $this->core->getOutput()->renderJsonFail('Submitter has no regrade request');
             return;
         }
 
@@ -161,6 +168,8 @@ class SubmissionController extends AbstractController {
 
         try {
             $this->core->getQueries()->insertNewRegradePost($graded_gradeable->getRegradeRequest()->getId(), $user->getId(), $content);
+            $graded_gradeable->getRegradeRequest()->setStatus($status);
+            $this->core->getQueries()->saveRegradeRequest($graded_gradeable->getRegradeRequest());
             $this->core->getOutput()->renderJsonSuccess();
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
@@ -186,11 +195,12 @@ class SubmissionController extends AbstractController {
         }
 
         if (!$graded_gradeable->hasRegradeRequest()) {
+            $this->core->getOutput()->renderJsonFail('Submitter has no regrade request');
             return;
         }
 
         // TODO: add to access control method
-        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$user->accessFullGrading()) {
+        if (!$user->accessFullGrading()) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to delete regrade request');
             return;
         }
@@ -228,6 +238,7 @@ class SubmissionController extends AbstractController {
         }
 
         if (!$graded_gradeable->hasRegradeRequest()) {
+            $this->core->getOutput()->renderJsonFail('Submitter has no regrade request');
             return;
         }
 
@@ -238,7 +249,8 @@ class SubmissionController extends AbstractController {
         }
 
         try {
-            $this->core->getQueries()->modifyRegradeStatus($graded_gradeable->getRegradeRequest(), $status);
+            $graded_gradeable->getRegradeRequest()->setStatus($status);
+            $this->core->getQueries()->saveRegradeRequest($graded_gradeable->getRegradeRequest());
             $this->core->getOutput()->renderJsonSuccess();
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
