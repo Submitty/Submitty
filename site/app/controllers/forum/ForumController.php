@@ -677,20 +677,23 @@ class ForumController extends AbstractController {
         $option = ($this->core->getUser()->getGroup() <= 2 || $option != 'alpha') ? $option : 'tree';
         if(!empty($_REQUEST["thread_id"])){
             $thread_id = (int)$_REQUEST["thread_id"];
-            $thread = $this->core->getQueries()->getThread($thread_id)[0];
-            if($thread['merged_thread_id'] != -1){
-                // Redirect merged thread to parent
-                $this->core->addSuccessMessage("Requested thread is merged into current thread.");
-                $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread['merged_thread_id'])));
-                return;
-            }
-            if($option == "alpha"){
-                $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, $show_deleted, 'alpha');
-            } else {
-                $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, $show_deleted, 'tree');
-            }
-            if(empty($posts)){
-                $this->core->addErrorMessage("No posts found for selected thread.");
+            $thread = $this->core->getQueries()->getThread($thread_id);
+            if(!empty($thread)) {
+                $thread = $thread[0];
+                if($thread['merged_thread_id'] != -1){
+                    // Redirect merged thread to parent
+                    $this->core->addSuccessMessage("Requested thread is merged into current thread.");
+                    $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread['merged_thread_id'])));
+                    return;
+                }
+                if($option == "alpha"){
+                    $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, $show_deleted, 'alpha');
+                } else {
+                    $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, $show_deleted, 'tree');
+                }
+                if(empty($posts)){
+                    $this->core->addErrorMessage("No posts found for selected thread.");
+                }
             }
             
         } 
