@@ -2214,7 +2214,7 @@ function addNewMark(component_id) {
     component.marks.push({
         id: getNewMarkId(),
         title: '',
-        score: 0.0,
+        points: 0.0,
         publish: false,
         order: component.marks.length
     });
