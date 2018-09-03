@@ -283,7 +283,8 @@ class NavigationView extends AbstractView {
         $past_lock_date = $date < $gradeable->getTeamLockDate();
 
         if ($past_lock_date) {
-            $team_display_date = "(teams lock {$gradeable->getTeamLockDate()->format(self::DATE_FORMAT)})";
+            $my_timezone = $this->core->getConfig()->getTimezone();
+            $team_display_date = "(teams lock {$gradeable->getTeamLockDate()->setTimezone($my_timezone)->format(self::DATE_FORMAT)})";
         } else {
             $team_display_date = '';
         }
@@ -512,7 +513,8 @@ class NavigationView extends AbstractView {
         if ($list_section === GradeableList::GRADING || $list_section === GradeableList::GRADED) {
             if ($list_section === GradeableList::GRADING) {
                 $title = 'GRADE';
-                $date_text = '(grades due ' . $gradeable->getGradeReleasedDate()->format(self::DATE_FORMAT) . ')';
+                $my_timezone = $this->core->getConfig()->getTimezone();
+                $date_text = '(grades due ' . $gradeable->getGradeReleasedDate()->setTimezone($my_timezone)->format(self::DATE_FORMAT) . ')';
             } else {
                 $title = 'REGRADE';
             }
@@ -551,7 +553,8 @@ class NavigationView extends AbstractView {
             } else {
                 //Before grading has opened, only thing we can do is preview
                 $title = 'PREVIEW GRADING';
-                $date_text = '(grading starts ' . $gradeable->getGradeStartDate()->format(self::DATE_FORMAT) . ")";
+                $my_timezone = $this->core->getConfig()->getTimezone();
+                $date_text = '(grading starts ' . $gradeable->getGradeStartDate()->setTimezone($my_timezone)->format(self::DATE_FORMAT) . ")";
             }
         }
 
