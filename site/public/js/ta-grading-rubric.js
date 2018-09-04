@@ -1701,6 +1701,9 @@ function onAddComponent() {
         .then(function () {
             return reloadInstructorEditRubric(getGradeableId());
         })
+        .then(function () {
+            return openComponent(getComponentIdByOrder(getComponentCount() - 1));
+        })
         .catch(function (err) {
             alert('Failed to reload rubric! ' + err.message);
         });
