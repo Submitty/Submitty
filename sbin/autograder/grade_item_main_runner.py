@@ -311,9 +311,6 @@ def launch_container(container_name, container_image, mounted_directory,job_id,i
                                              name
                                            ]).decode('utf8').strip()
 
-
-
-
   dockerlaunch_done =dateutils.get_current_time()
   dockerlaunch_time = (dockerlaunch_done-grading_began).total_seconds()
   grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,submission_path,"dcct:",dockerlaunch_time,
