@@ -814,7 +814,8 @@ class ForumController extends AbstractController {
             $users[$user]["posts"][] = $content;
             $users[$user]["id"][] = $posts[$i]["id"];
             $date = date_create($posts[$i]["timestamp"]);
-            $users[$user]["timestamps"][] = $function_date($date,"n/j g:i A");
+            $my_timezone = $this->core->getConfig()->getTimezone();
+            $users[$user]["timestamps"][] = $function_date($date->setTimezone($my_timezone),"n/j g:i A");
             $users[$user]["thread_id"][] = $posts[$i]["thread_id"];
             $users[$user]["thread_title"][] = $this->core->getQueries()->getThreadTitle($posts[$i]["thread_id"]);
 
