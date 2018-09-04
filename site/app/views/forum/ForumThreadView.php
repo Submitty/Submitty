@@ -101,9 +101,9 @@ HTML;
                 if(!empty($pre_post)){
                     $post_content = $pre_post;
 				}
-			
 				$post_content = htmlentities($post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-				$posted_on = date_format(date_create($post['timestamp_post']), "n/j g:i A");
+				$my_timezone = $this->core->getConfig()->getTimezone();
+				$posted_on = date_format(date_create($post['timestamp_post'])->setTimezone($my_timezone), "n/j g:i A");
 				$return .= <<<HTML
 
 				<tr title="Go to post" style="cursor: pointer;" onclick="window.location = '{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id))}#{$post['p_id']}';" id="search-row-{$count}" class="hoverable">
@@ -651,8 +651,9 @@ HTML;
 HTML;
 						}
 						if(!is_null($date)) {
+				                        $my_timezone = $this->core->getConfig()->getTimezone();
 							$return .= <<<HTML
-							<h5 style="float:right; font-weight:normal;margin-top:5px">{$function_date($date,"n/j g:i A")}</h5>
+							<h5 style="float:right; font-weight:normal;margin-top:5px">{$function_date($date->setTimezone($my_timezone),"n/j g:i A")}</h5>
 HTML;
 						}
 						$return .= <<<HTML
@@ -719,7 +720,8 @@ HTML;
 
 		$date = date_create($post["timestamp"]);
 		if(!is_null($post["edit_timestamp"])) {
-			$edit_date = $function_date(date_create($post["edit_timestamp"]),"n/j g:i A");
+                        $my_timezone = $this->core->getConfig()->getTimezone();
+			$edit_date = $function_date(date_create($post["edit_timestamp"])->setTimezone($my_timezone),"n/j g:i A");
 		} else {
 			$edit_date = null;
 		}
@@ -823,8 +825,9 @@ HTML;
 				$ud_button_title = "Remove post";
 				$ud_button_icon = "fa-trash";
 			}
+                        $my_timezone = $this->core->getConfig()->getTimezone();
 			$return .= <<<HTML
-			<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; float:right;" onClick="deletePostToggle({$ud_toggle_status}, {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'n/j g:i A')}' )" title="{$ud_button_title}"><i class="fa {$ud_button_icon}" aria-hidden="true"></i></a>
+			<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; float:right;" onClick="deletePostToggle({$ud_toggle_status}, {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date->setTimezone($my_timezone),'n/j g:i A')}' )" title="{$ud_button_title}"><i class="fa {$ud_button_icon}" aria-hidden="true"></i></a>
 HTML;
 		}
 		if($this->core->getUser()->getGroup() <= 2 || $post['author_user_id'] === $this->core->getUser()->getId()) {
@@ -842,10 +845,11 @@ HTML;
 HTML;
 		} 
 
+                $my_timezone = $this->core->getConfig()->getTimezone();
 		$return .= <<<HTML
 		<h7 style="position:relative; right:5px;">
 			<strong id="post_user_id">{$visible_username}</strong>
-			{$function_date($date,"n/j g:i A")}
+			{$function_date($date->setTimezone($my_timezone),"n/j g:i A")}
 HTML;
 		if(!is_null($edit_date)) {
 			$return .= <<<HTML

@@ -736,7 +736,8 @@ class ForumController extends AbstractController {
             foreach ($older_posts as $post) {
                 $_post['user'] = $post["edit_author"];
                 $_post['content'] = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'filter_post_content',  $post["content"]);
-                $_post['post_time'] = date_format(date_create($post['edit_timestamp']),"n/j g:i A");
+                $my_timezone = $this->core->getConfig()->getTimezone();
+                $_post['post_time'] = date_format(date_create($post['edit_timestamp'])->setTimezone($my_timezone),"n/j g:i A");
                 $output[] = $_post;
             }
             if(count($output) == 0) {
@@ -744,7 +745,8 @@ class ForumController extends AbstractController {
                 // Current post
                 $_post['user'] = $current_post["author_user_id"];
                 $_post['content'] = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'filter_post_content',  $current_post["content"]);
-                $_post['post_time'] = date_format(date_create($current_post['timestamp']),"n/j g:i A");
+                $my_timezone = $this->core->getConfig()->getTimezone();
+                $_post['post_time'] = date_format(date_create($current_post['timestamp'])->setTimezone($my_timezone),"n/j g:i A");
                 $output[] = $_post;
             }
             // Fetch additional information
@@ -812,7 +814,8 @@ class ForumController extends AbstractController {
             $users[$user]["posts"][] = $content;
             $users[$user]["id"][] = $posts[$i]["id"];
             $date = date_create($posts[$i]["timestamp"]);
-            $users[$user]["timestamps"][] = $function_date($date,"n/j g:i A");
+            $my_timezone = $this->core->getConfig()->getTimezone();
+            $users[$user]["timestamps"][] = $function_date($date->setTimezone($my_timezone),"n/j g:i A");
             $users[$user]["thread_id"][] = $posts[$i]["thread_id"];
             $users[$user]["thread_title"][] = $this->core->getQueries()->getThreadTitle($posts[$i]["thread_id"]);
 

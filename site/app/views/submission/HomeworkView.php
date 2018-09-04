@@ -322,10 +322,12 @@ class HomeworkView extends AbstractView {
         $my_team = $graded_gradeable !== null ? $graded_gradeable->getSubmitter()->getTeam() : "";
         $my_repository = $graded_gradeable !== null ? $gradeable->getRepositoryPath($this->core->getUser(),$my_team) : "";
 
+        $DATE_FORMAT = "m/d/Y @ H:i";
+
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
             'gradeable_id' => $gradeable->getId(),
             'gradeable_name' => $gradeable->getTitle(),
-            'due_date' => $gradeable->getSubmissionDueDate(),
+            'formatted_due_date' => $gradeable->getSubmissionDueDate()->setTimezone($this->core->getConfig()->getTimezone())->format($DATE_FORMAT),
             'part_names' => $gradeable->getAutogradingConfig()->getPartNames(),
             'is_vcs' => $gradeable->isVcs(),
             'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
