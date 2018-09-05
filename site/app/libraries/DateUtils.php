@@ -78,10 +78,12 @@ class DateUtils {
         return true;
     }
 
+    /** @var string The php-limit for dates.  Note that the database limit is later */
     const MAX_TIME = '9999-02-01 00:00:00.000000';
 
     /**
      * Parses a date string into a \DateTime object, or does nothing if $date is already a \DateTime object
+     * Note: This will clamp the date to be earlier than MAX_TIME
      *
      * @param \DateTime|string $date The date to parse
      * @param \DateTimeZone $time_zone
