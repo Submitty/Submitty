@@ -78,6 +78,7 @@ class DateUtils {
         return true;
     }
 
+    const MAX_TIME = '9999-02-01 00:00:00.000000';
 
     /**
      * Parses a date string into a \DateTime object, or does nothing if $date is already a \DateTime object
@@ -88,19 +89,19 @@ class DateUtils {
      * @throws \InvalidArgumentException If $date is not a string or a \DateTime, or not a valid \DateTime string
      */
     public static function parseDateTime($date, \DateTimeZone $time_zone) {
-        if ($date instanceof \DateTime) {
-            return $date;
-        } else if (gettype($date) === 'string') {
+        if (gettype($date) === 'string') {
             try {
-                $date_time = new \DateTime($date, $time_zone);
-                $date_time->setTimezone($time_zone);
-                return $date_time;
+                $date = new \DateTime($date, $time_zone);
+                $date->setTimezone($time_zone);
             } catch (\Exception $e) {
                 throw new \InvalidArgumentException('Invalid DateTime Format');
             }
         } else {
             throw new \InvalidArgumentException('Passed object was not a DateTime object or a date string');
         }
+
+        // Make sure we don't go above our range
+        return min($date, new \DateTime(self::MAX_TIME, $time_zone));
     }
 
     /**
