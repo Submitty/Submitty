@@ -85,5 +85,9 @@ function render(gradeable_id, user_id, file_name, url) {
 
 //TODO: Stretch goal, find a better solution to load/unload annotation. Maybe use session storage?
 $(window).unload(function() {
-    localStorage.removeItem(`${RENDER_OPTIONS.documentId}/annotations`);
+    for(let i = 0; i < localStorage.length; i++){
+        if(localStorage.key(i).includes('annotations')){
+            localStorage.removeItem(localStorage.key(i));
+        }
+    }
 });
