@@ -1204,7 +1204,7 @@ class ElectronicGraderController extends GradingController {
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $prev_id, $next_id, $not_in_my_section, $show_hidden, $can_verify, $show_verify_all, $show_silent_edit);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupMarkConflicts');
-        //$this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupSettings');
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupSettings');
     }
 
     /**
