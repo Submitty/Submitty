@@ -78,9 +78,12 @@ class DateUtils {
         return true;
     }
 
+    /** @var string The php-limit for dates.  Note that the database limit is later */
+    const MAX_TIME = '9999-02-01 00:00:00';
 
     /**
      * Parses a date string into a \DateTime object, or does nothing if $date is already a \DateTime object
+     * Note: This will clamp the date to be earlier than MAX_TIME
      *
      * @param \DateTime|string $date The date to parse
      * @param \DateTimeZone $time_zone
@@ -88,19 +91,19 @@ class DateUtils {
      * @throws \InvalidArgumentException If $date is not a string or a \DateTime, or not a valid \DateTime string
      */
     public static function parseDateTime($date, \DateTimeZone $time_zone) {
-        if ($date instanceof \DateTime) {
-            return $date;
-        } else if (gettype($date) === 'string') {
+        if (gettype($date) === 'string') {
             try {
-                $date_time = new \DateTime($date, $time_zone);
-                $date_time->setTimezone($time_zone);
-                return $date_time;
+                $date = new \DateTime($date, $time_zone);
+                $date->setTimezone($time_zone);
             } catch (\Exception $e) {
                 throw new \InvalidArgumentException('Invalid DateTime Format');
             }
-        } else {
+        } else if (!($date instanceof \DateTime)) {
             throw new \InvalidArgumentException('Passed object was not a DateTime object or a date string');
         }
+
+        // Make sure we don't go above our range
+        return min($date, new \DateTime(self::MAX_TIME, $time_zone));
     }
 
     /**
