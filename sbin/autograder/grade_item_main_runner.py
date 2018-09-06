@@ -16,6 +16,7 @@ import zipfile
 import traceback
 import csv
 import json
+from pwd import getpwnam
 
 from submitty_utils import dateutils, glob
 from . import grade_item, grade_items_logging, write_grade_history, CONFIG_PATH
@@ -294,7 +295,9 @@ def launch_containers(container_info, target_folder, job_id,is_batch_job,which_u
 def launch_container(container_name, container_image, mounted_directory,job_id,is_batch_job,which_untrusted,submission_path,
                                                                   grading_began,queue_obj,submission_string,testcase_num,name):
   #TODO error handling.
-  this_container = subprocess.check_output(['docker', 'create','-i', '-v', mounted_directory + ':' + mounted_directory,
+  untrusted_uid = str(getpwnam(which_untrusted).pw_uid)
+  this_container = subprocess.check_output(['docker', 'create','-i', '-u', untrusted_uid, '--network', 'none',
+                                           '-v', mounted_directory + ':' + mounted_directory,
                                            '-w', mounted_directory,
                                            '--name', container_name,
                                            container_image,
@@ -307,6 +310,7 @@ def launch_container(container_name, container_image, mounted_directory,job_id,i
                                              str(testcase_num),
                                              name
                                            ]).decode('utf8').strip()
+
   dockerlaunch_done =dateutils.get_current_time()
   dockerlaunch_time = (dockerlaunch_done-grading_began).total_seconds()
   grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,submission_path,"dcct:",dockerlaunch_time,
@@ -319,6 +323,12 @@ def network_containers(container_info,test_input_folder,which_untrusted, use_rou
   if len(container_info) <= 1:
     return
 
+  #remove all containers from the none network
+  for name, info in sorted(container_info.items()):
+    container_id = info['container_id']
+    subprocess.check_output(['docker', 'network','disconnect', 'none', container_id]).decode('utf8').strip()
+
+
   if use_router:
     network_containers_with_router(container_info,which_untrusted)
   else:
@@ -330,7 +340,7 @@ def network_containers_routerless(container_info,which_untrusted):
   network_name = '{0}_routerless_network'.format(which_untrusted)
 
   #create the global network
-  subprocess.check_output(['docker', 'network', 'create', '--driver', 'bridge', network_name]).decode('utf8').strip()
+  subprocess.check_output(['docker', 'network', 'create', '--internal', '--driver', 'bridge', network_name]).decode('utf8').strip()
 
   for name, info in sorted(container_info.items()):
       my_full_name = "{0}_{1}".format(which_untrusted, name)
@@ -354,7 +364,7 @@ def network_containers_with_router(container_info,which_untrusted):
       container_info[name]['network'] = network_name
       actual_name  = '{0}_Actual'.format(name)
       print('adding {0} to network {1} with actual name {2}'.format(name,network_name, actual_name))
-      subprocess.check_output(['docker', 'network', 'create', '--driver', 'bridge', network_name]).decode('utf8').strip()
+      subprocess.check_output(['docker', 'network', 'create', '--internal', '--driver', 'bridge', network_name]).decode('utf8').strip()
       subprocess.check_output(['docker', 'network', 'connect', '--alias', actual_name, network_name, my_name]).decode('utf8').strip()
 
       #The router pretends to be all dockers on this network.

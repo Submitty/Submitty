@@ -142,7 +142,10 @@ CREATE TABLE electronic_gradeable (
     eg_precision numeric NOT NULL,
     eg_regrade_allowed boolean DEFAULT true NOT NULL,
     eg_regrade_request_date timestamp(6) with time zone NOT NULL,
-    CONSTRAINT eg_submission_date CHECK ((eg_submission_open_date <= eg_submission_due_date))
+    CONSTRAINT eg_submission_date CHECK ((eg_submission_open_date <= eg_submission_due_date)),
+    CONSTRAINT eg_team_lock_date_max CHECK ((eg_team_lock_date <= '9999-03-01 00:00:00.000000')),
+    CONSTRAINT eg_submission_due_date_max CHECK ((eg_submission_due_date <= '9999-03-01 00:00:00.000000')),
+    CONSTRAINT eg_regrade_request_date_max CHECK ((eg_regrade_request_date <= '9999-03-01 00:00:00.000000'))
 );
 
 
@@ -201,7 +204,8 @@ CREATE TABLE gradeable (
     CONSTRAINT g_ta_view_start_date CHECK ((g_ta_view_start_date <= g_grade_start_date)),
     CONSTRAINT g_grade_start_date CHECK ((g_grade_start_date <= g_grade_due_date)),
     CONSTRAINT g_grade_due_date CHECK ((g_grade_due_date <= g_grade_released_date)),
-    CONSTRAINT g_grade_released_date CHECK ((g_grade_released_date <= g_grade_locked_date))
+    CONSTRAINT g_grade_released_date CHECK ((g_grade_released_date <= g_grade_locked_date)),
+    CONSTRAINT g_grade_locked_date_max CHECK ((g_grade_locked_date <= '9999-03-01 00:00:00.000000'))
 );
 
 

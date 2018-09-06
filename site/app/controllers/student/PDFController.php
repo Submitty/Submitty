@@ -30,7 +30,6 @@ class PDFController extends AbstractController {
         $filename = $_GET['file_name'] ?? NULL;
         $active_version = $this->core->getQueries()->getGradeable($gradeable_id, $user_id)->getActiveVersion();
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $user_id, $active_version);
-        $first_file = scandir($annotation_path)[2];
         $annotation_jsons = [];
         if(is_dir($annotation_path)){
             $first_file = scandir($annotation_path)[2];
