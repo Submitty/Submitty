@@ -82,6 +82,26 @@ class DiffViewer {
     const SPECIAL_CHARS_ESCAPE = 'escape';
     const SPECIAL_CHARS_UNICODE = 'unicode';
 
+    const SPECIAL_CHARS_LIST = array(
+                                "space" => [" ", "&nbsp;"],
+                                "tabs" => ["\t", "↹"],
+                                "carriage return" => ["\r", "↵<br>"],
+                                "null characters" => ["\0", "^@"],
+                                "smart quote1" => ["\xC2\xAB", "\""],
+                                "smart quote2" => ["\xE2\x80\x98", "\""],
+                                "smart quote3" => ["\xE2\x80\x99", "'"]
+                               );
+    //TODO: How to escape from the escape codes above?
+    const SPECIAL_CHARS_DISPLAYED_ESCAPE_CODES = array(
+                                        "space" => " ",
+                                        "tabs" => "\\t",
+                                        "carriage return" => "\\r",
+                                        "null characters" => "\\0",
+                                        "smart quote1" => "\\xC2\\xAB",
+                                        "smart quote2" => "\\xE2\\x80\\x98",
+                                        "smart quote3" => "\\xE2\\x80\\x99"
+                                       );
+
     static function isValidSpecialCharsOption($option) {
         return in_array($option, [
             self::SPECIAL_CHARS_ORIGINAL,
@@ -456,18 +476,20 @@ class DiffViewer {
                 // character highlighting
                 foreach ($this->diff[$type][$i] as $diff) {
                     $html_orig = htmlentities(substr($lines[$i], $current, ($diff[0] - $current)));
+                    $test = str_replace("\0", "null", $html_orig);
                     $html_orig_error = htmlentities(substr($lines[$i], $diff[0], ($diff[1] - $diff[0] + 1)));
+                    $test2 = str_replace("\0", "null", $html_orig_error);
                     if($option == self::SPECIAL_CHARS_ORIGINAL){
                         $html .= $html_orig;
                         $html .= "<span class='highlight-char'>".$html_orig_error."</span>";
                     } else if($option == self::SPECIAL_CHARS_UNICODE) {
-                        $html_no_empty = $this->replaceEmptyChar($html_orig);
-                        $html_no_empty_error = $this->replaceEmptyChar($html_orig_error);
+                        $html_no_empty = $this->replaceEmptyChar($html_orig, false);
+                        $html_no_empty_error = $this->replaceEmptyChar($html_orig_error, false);
                         $html .= $html_no_empty;
                         $html .= "<span class='highlight-char'>".$html_no_empty_error."</span>";
                     } else if($option == self::SPECIAL_CHARS_ESCAPE) {
-                        $html_no_empty = $this->replaceEmptyCharWithEscape($html_orig);
-                        $html_no_empty_error = $this->replaceEmptyCharWithEscape($html_orig_error);
+                        $html_no_empty = $this->replaceEmptyChar($html_orig, true);
+                        $html_no_empty_error = $this->replaceEmptyChar($html_orig_error, true);
                         $html .= $html_no_empty;
                         $html .= "<span class='highlight-char'>".$html_no_empty_error."</span>";
                     }
@@ -476,10 +498,10 @@ class DiffViewer {
                 $html .= "<span class='line_code_inner'>";
                 $inner = htmlentities(substr($lines[$i], $current));
                 if ($option === self::SPECIAL_CHARS_UNICODE) {
-                    $inner = $this->replaceEmptyChar($inner);
+                    $inner = $this->replaceEmptyChar($inner, false);
                 }
                 elseif ($option === self::SPECIAL_CHARS_ESCAPE) {
-                    $inner = $this->replaceEmptyCharWithEscape($inner);
+                    $inner = $this->replaceEmptyChar($inner, true);
                 }
                 $html .= "{$inner}</span>";
             }
@@ -488,9 +510,9 @@ class DiffViewer {
                     if($option == self::SPECIAL_CHARS_ORIGINAL){
                         $html .= htmlentities($lines[$i]);
                     } else if($option == self::SPECIAL_CHARS_UNICODE){
-                        $html .= $this->replaceEmptyChar(htmlentities($lines[$i]));
+                        $html .= $this->replaceEmptyChar(htmlentities($lines[$i]), false);
                     } else if($option == self::SPECIAL_CHARS_ESCAPE){
-                        $html .= $this->replaceEmptyCharWithEscape(htmlentities($lines[$i]));
+                        $html .= $this->replaceEmptyChar(htmlentities($lines[$i]), true);
                     }
                 }
             }
@@ -532,24 +554,28 @@ class DiffViewer {
 
     /**
      * @param $html the original HTML before any text transformation
+     * @param $with_escape Show escape characters instead of character representations
      *
      * Add to this function (Or the one below it) in the future for any other special characters that needs to be replaced.
      *
      * @return HTML after white spaces replaced with visuals
      */
-    private function replaceEmptyChar($html){
+    private function replaceEmptyChar($html, $with_escape){
         $return = $html;
-        $this->replaceUTF(' ', '&nbsp;', $return, 'space');
-        $this->replaceUTF("\r", '↵<br>', $return, 'carriage return');
-        $this->replaceUTF('\t', '↹', $return, 'tab');
-        return $return;
-    }
+        if($with_escape){
+            foreach(self::SPECIAL_CHARS_LIST as $name => $representations){
+                $html_chars = " ";
+                if($name !== "space"){
+                    $html_chars = self::SPECIAL_CHARS_DISPLAYED_ESCAPE_CODES[$name];
+                }
 
-    private function replaceEmptyCharWithEscape($html){
-        $return = $html;
-        $this->replaceUTF(' ', '&nbsp;', $return, 'space');
-        $this->replaceUTF("\r", '\\r<br>', $return, 'carriage return');
-        $this->replaceUTF('\t', '\\t', $return, 'tab');
+                $this->replaceUTF($representations[0], $html_chars, $return, $name);
+            }
+        } else {
+            foreach(self::SPECIAL_CHARS_LIST as $name => $representations){
+                $this->replaceUTF($representations[0], $representations[1], $return, $name);
+            }
+        }
         return $return;
     }
 
