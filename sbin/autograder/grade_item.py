@@ -436,7 +436,8 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
             os.makedirs(os.path.dirname(target_path), exist_ok=True)
         shutil.copy(path, target_path)
         print('copied over {0}'.format(target_path))
-
+        with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
+            print('grade_item: copied over {0}'.format(target_path), file=f)
 
     patterns_compilation_to_runner = complete_config_obj["autograding"]["compilation_to_runner"]
     #copy into the actual tmp_work directory for archiving/validating
