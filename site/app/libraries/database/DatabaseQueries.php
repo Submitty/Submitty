@@ -2517,6 +2517,36 @@ AND gc_id IN (
     }
 
     /**
+     * Gets the team ids from the provided anonymous ids
+     * TODO: This function is in place for when teams get anonymous ids
+     * @param array $anon_ids
+     * @return array
+     */
+    public function getTeamIdsFromAnonIds(array $anon_ids) {
+        /*
+        $placeholders = implode(",", array_fill(0, count($anon_ids), "?"));
+        $this->course_db->query("SELECT anon_id, team_id FROM gradeable_teams WHERE anon_id IN ({$placeholders})", $anon_ids);
+
+        $team_ids = [];
+        foreach ($this->course_db->row() as $row) {
+            $team_ids[$row['anon_id']] = $row['team_id'];
+        }
+        return $team_ids;
+        */
+        // TODO: team ids are the same as their anonymous ids for now
+        return array_combine($anon_ids, $anon_ids);
+    }
+
+    public function getTeamIdFromAnonId(string $anon_id) {
+        return $this->getTeamIdsFromAnonIds([$anon_id])[$anon_id] ?? null;
+    }
+
+    public function getSubmitterIdFromAnonId(string $anon_id) {
+        return $this->getUserFromAnon($anon_id)[$anon_id] ??
+            $this->getTeamIdFromAnonId($anon_id);
+    }
+
+    /**
      * Generate notifcation rows
      *
      * @param Notification $notification
@@ -3270,7 +3300,7 @@ AND gc_id IN (
      * @param int[] $mark_ids
      */
     private function deleteGradedComponentMarks(GradedComponent $graded_component, $mark_ids) {
-        if (count($mark_ids) === 0) {
+        if ($mark_ids === null || count($mark_ids) === 0) {
             return;
         }
 

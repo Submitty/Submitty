@@ -1469,7 +1469,7 @@ function editPost(post_id, thread_id, shouldEditThread) {
                 contentBox.value = post_content;
                 document.getElementById('edit_post_id').value = post_id;
                 document.getElementById('edit_thread_id').value = thread_id;
-                $('#thread_post_anon').prop('checked', anon);
+                $('#thread_post_anon_edit').prop('checked', anon);
                 $('#edit-user-post').css('display', 'block');
 
                 $(".cat-buttons input").prop('checked', false);
@@ -2527,6 +2527,7 @@ $(document).ready(function() {
     $('[data-toggle="tooltip"]').tooltip({
         position: { my: "right+0 bottom+0" }
     });
+    $("#nav-sidebar-collapse.collapse-icon").attr("title", "Expand Sidebar");
 
     //Remember sidebar preference
     if (localStorage.sidebar !== "") {

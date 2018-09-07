@@ -53,28 +53,37 @@ def main():
 
         # count the processes
         pid_list = psutil.pids()
-        num_procs=0
+        num_shippers=0
+        num_workers=0
         for pid in pid_list:
             try:
                 proc = psutil.Process(pid)
                 if DAEMON_USER == proc.username():
                     if (len(proc.cmdline()) >= 2 and
                         proc.cmdline()[1] == os.path.join(SUBMITTY_INSTALL_DIR,"sbin","submitty_autograding_shipper.py")):
-                        num_procs+=1
+                        num_shippers+=1
+                    if (len(proc.cmdline()) >= 2 and
+                        proc.cmdline()[1] == os.path.join(SUBMITTY_INSTALL_DIR,"sbin","submitty_autograding_worker.py")):
+                        num_workers+=1
             except psutil.NoSuchProcess:
                 pass
 
         # remove 1 from the count...  each worker is forked from the
         # initial process
-        num_procs-=1
+        num_shippers-=1
+        num_workers-=1
 
-        if num_procs <= 0:
+        if num_shippers <= 0:
             print ("WARNING: No matching submitty_autograding_shipper.py processes!")
-            num_procs = 0
+            num_shippers = 0
+        if num_workers <= 0:
+            print ("WARNING: No matching (local machine) submitty_autograding_worker.py processes!")
+            num_workers = 0
 
         done = True
 
-        print("GRADING PROCESSES:{:3d}       ".format(num_procs), end="")
+        print("SHIPPERS:{:3d}  ".format(num_shippers), end="")
+        print("WORKERS:{:3d}       ".format(num_workers), end="")
 
         if os.access(GRADING_QUEUE, os.R_OK):
             # most instructors do not have read access to the interactive queue

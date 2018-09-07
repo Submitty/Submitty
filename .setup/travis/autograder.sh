@@ -22,8 +22,8 @@ cp -r grading/ ${SUBMITTY_INSTALL_DIR}/src/
 echo "Getting DrMemory..."
 mkdir -p ${SUBMITTY_INSTALL_DIR}/DrMemory
 pushd /tmp
-DRMEM_TAG=release_1.10.1
-DRMEM_VER=1.10.1-3
+DRMEM_TAG=release_2.0.1
+DRMEM_VER=2.0.1-2
 wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEM_TAG}/DrMemory-Linux-${DRMEM_VER}.tar.gz -o /dev/null > /dev/null 2>&1
 tar -xpzf DrMemory-Linux-${DRMEM_VER}.tar.gz -C ${SUBMITTY_INSTALL_DIR}/DrMemory
 ln -s ${SUBMITTY_INSTALL_DIR}/DrMemory/DrMemory-Linux-${DRMEM_VER} ${SUBMITTY_INSTALL_DIR}/drmemory

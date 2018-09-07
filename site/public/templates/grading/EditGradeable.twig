@@ -1,0 +1,21 @@
+{% extends "Gradeable.twig" %}
+
+{% block header_content %}
+    {# This div acts as a flag to signal the js to use instructor edit mode #}
+    <div id="edit-gradeable-instructor-flag" hidden></div>
+{% endblock %}
+
+{% block components_block %}
+    {% for component in gradeable.components %}
+        <div class="component-container edit-component-container">
+            {% include "EditComponent.twig" with {
+                'precision': gradeable.precision,
+                'show_mark_list': false
+            } %}
+        </div>
+    {% endfor %}
+{% endblock %}
+
+{% block footer_content %}
+    <input type="button" class="btn btn-primary" value="Add New Component" onclick="onAddComponent()" />
+{% endblock %}

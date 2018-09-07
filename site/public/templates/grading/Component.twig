@@ -1,155 +1,51 @@
-{% set display_verify_user = can_verify and component.grader != null and component.grader.id != your_user_id %}
+{#
+Required Input:
+    component: {id, title, ta_comment, student_comment, page, lower_clamp, default, max_value, upper_clamp}
+    edit_marks_enabled: If the marks table should be in edit mode
+    show_mark_list: If the marks table should be started hidden or not
+#}
 
-<div id="title-{{ c_index }}" class="box component" onclick="{{ break_onlcick }}; toggleMark({{ c_index }}, true);">
+{% set mark_list_visibility = show_mark_list ? '' : 'hidden' %}
+<div id="component-{{ component.id }}"
+     class="box component"
+     data-component_id="{{ component.id }}"
+     data-title="{{ component.title }}"
+     data-ta_comment="{{ component.ta_comment }}"
+     data-student_comment="{{ component.student_comment }}"
+     data-page="{{ component.page }}"
+     data-lower_clamp="{{ component.lower_clamp }}"
+     data-default="{{ component.default }}"
+     data-max_value="{{ component.max_value }}"
+     data-upper_clamp="{{ component.upper_clamp }}">
 
-    {# Title bar #}
-    <div class="box-title">
-
-        <span id="gradebar-{{ c_index }}" class="badge gradebar">
-            ? / ?
-        </span>
-
-        <span data-changebg="true">
-            <b><span id="progress_points-{{ c_index }}" style="display: none;" data-changedisplay1="true"></span></b>
-            <b><span id="component_name-{{ c_index }}">{{ component.name }}</span></b>
-
-            {% if component.graded_version != -1 and gradeable.active_version != component.graded_version %}
-                <span id='wrong_version_{{ c_index }}' class="version-warning">
-                    Please edit or ensure that comments from version {{ component.graded_version }} still apply.
-                </span>
-            {% endif %}
-
-            <span class="grader-container">
-                {% if display_verify_user %}
-                    <span class="verify-container">
-                        <input type="button" class = "btn btn-default" onclick="verifyMark('{{ gradeable.id }}','{{ component.id }}','{{ gradeable.user_id }}'); event.stopPropagation();" value = "Verify Grader"/>
-                    </span>
-                {% endif %}
-                <span id="graded-by-{{ c_index }}" class="graded-by">
-                    {% if component.grader == null %}
-                        Ungraded!
-                    {% else %}
-                        Graded by {{ component.grader.id }}
-                    {% endif %}
-                </span>
-                <span id="graded-saving-{{ c_index }}" style="display: none;" class="graded-by">Saving...</span>
-            </span>
-        </span>
-
-        {# Notes to TA/Student #}
-        <span id="ta_note-{{ c_index }}" style="display: none;" data-changedisplay1="true">
-            {% if component.ta_comment != "" %}
-                <br/>
-                <div class="ta-student-note">
-                    <i><b>Note to TA: </b>{{ component.ta_comment }}</i>
-                </div>
-            {% endif %}
-        </span>
-        <span id="page-{{ c_index }}" style="display: none;">
-            {% if component.page != 0 %}
-                <i>Page #: {{ component.page }}</i>
-            {% endif %}
-        </span>
-        <span class="done-container">
-            <span id="save-mark-{{ c_index }}" style="display: none;" data-changedisplay1="true">
-                <i class="fa fa-check done-button" aria-hidden="true">Done</i>
-            </span>
-        </span>
-
-        <span id="student_note-{{ c_index }}" style="display: none;" data-changedisplay1="true">
-            {% if component.student_comment != "" %}
-                <div class="ta-student-note">
-                    <i><b>Note to Student: </b>{{ component.student_comment }}</i>
-                </div>
-            {% endif %}
-        </span>
-        {# /Notes to TA/Student #}
-
-        {# Todo: reimplement cancel button #}
-        {#
-        <span id="title-cancel-{{ c_index }}" style="font-size: 12px; display: none; width: 5%;" colspan="0" data-changebg="true" data-changedisplay1="true">
-            <span id="cancel-mark-{{ c_index }}" onclick="{{ break_onclick }}; closeMark(${c}, true);" style="cursor: pointer; float: right;"> <i class="fa fa-times" style="color: red;" aria-hidden="true">Cancel</i></span>
-        </span>
-        #}
-
-        {# Summary text #}
-        <div id="summary-{{ c_index }}" data-changedisplay2="true" data-question_id="{{ component.id }}">
-            <div id="rubric-{{ c_index }}">
-                <span id="rubric-textarea-{{ c_index }}" class="summary-text">...</span>
-            </div>
+    {# Title bar (only part that triggers collapse on click) #}
+    <div class="box-title container">
+        <div class="row header-block" onclick="{% block component_click %}{% endblock %}">
+            {% block header_block %}
+            {% endblock %}
         </div>
-        {# /Summary text #}
+        <div class="row content-block {{ mark_list_visibility }}">
+            {% block content_block %}
+            {% endblock %}
+        </div>
     </div>
     {# /Title bar #}
 
     {# Marks table #}
-    <table class="ta-rubric-table" id="mark-table-{{ c_index }}" style="display: none;" data-changedisplay1="true">
-        <tbody id="marks-parent-{{ c_index }}" data-question_id="{{ component.id }}">
-            {# This is currently all handled by JS, but here is how you'd render these from Twig: #}
-            {#
-                {% for mark in component.marks %}
-                    {% set m_index = loop.index0 %}
-                    {% include "Mark.twig" %}
-                {% endfor %}
-            #}
-        </tbody>
-        <tbody>
-            {# Add new mark #}
-            <tr id="marks-extra-{{ c_index }}" style="display: none;" data-question_id="{{ component.id }}" data-changedisplay1="true">
-                <td colspan="6">
-                    {# todo: peer grading #}
-                    <span>
-                        <span class="add-common-mark" onclick="{{ break_onclick }} addMark(this,'{{ c_index }}'); event.stopPropagation(); return false;"><i class="fa fa-plus-square " aria-hidden="true"></i>
-                        Add New Common Mark</span>
-                    </span>
-                </td>
-            </tr>
-            {# /Add new mark #}
-            {# Custom mark #}
-            <tr id="mark_custom_id-{{ c_index }}" style="display: none;" data-changedisplay1="true">
-                <td colspan="1" class="mark-score-container">
-                    <div class="mark-cell-box">
-                        <span
-                                onclick="event.stopPropagation();"
-                                class="{{ component.score == 0 and component.comment == "" ? "" : "mark-has" }} mark"
-                                name="mark_icon_{{ c_index }}_custom"
-                                id="mark_icon_custom-{{ c_index }}"
-                        ></span>
-                        <input
-                                name="mark_points_custom_{{ c_index }}"
-                                id="mark_points_custom-{{ c_index }}"
-                                type="number"
-                                step="{{ gradeable.precision }}"
-                                onchange="updateCustomMarkPoints(this); checkIfSelected(this); updateProgressPoints({{ c_index }});"
-                                onclick="event.stopPropagation();"
-                                data-component_index="{{ c_index }}"
-                                value="{{ component.score }}" class="mark-score"
-                        >
-                    </div>
-                </td>
-                <td colspan="5">
-                    <div class="mark-cell-box">
-                        <span class="mark-custom-label">
-                            Custom:
-                        </span>
-                        <textarea
-                                name="mark_text_custom_{{ c_index }}"
-                                id="mark_text_custom-{{ c_index }}"
-                                onkeyup="updateCustomMarkText(this); autoResizeComment(event); checkIfSelected(this);"
-                                onchange="updateCustomMarkText(this); checkIfSelected(this); updateProgressPoints({{ c_index }});"
-                                onclick="event.stopPropagation();"
-                                data-component_index="{{ c_index }}"
-                                cols="120"
-                                rows="1"
-                                placeholder="Custom message for student..."
-                                class="mark-note-custom"
-                        >{{ component.comment }}</textarea>
-                    </div>
-                </td>
-            </tr>
-            {# /Custom mark #}
-        </tbody>
-    </table>
+    <div class="ta-rubric-table container" data-component_id="{{ component.id }}" {{ mark_list_visibility }}>
+        {# twig.js doens't support blocks inside of for loops ... ANNOYING #}
+        {% block marks_block %}
+        {% endblock %}
+        {% if edit_marks_enabled %}
+            <div class="add-new-mark-container">
+                <input type="button" class="btn btn-primary add-new-mark" value="Add New Mark" onclick="onAddNewMark(this)"/>
+            </div>
+        {% endif %}
+        {% block extra_mark_rows %}
+        {% endblock %}
+    </div>
     {# /Marks table #}
 
+    {% block mark_list_footer %}
+    {% endblock %}
 </div>

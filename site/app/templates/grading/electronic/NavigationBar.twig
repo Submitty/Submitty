@@ -7,17 +7,17 @@
         {% if studentNotInSection %}
             <i title="Go to the previous student" class="fa fa-chevron-left icon-header" style="color:grey"></i>
         {% else %}
-            <a href="javascript:void(0);" onclick="gotoPrevStudent();" data-href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'grade', 'gradeable_id': gradeable.getId(), 'who_id': prev_id}) }}" id="prev-student"><i title="Go to the previous student" class="fa fa-chevron-left icon-header"></i></a>
+            <a href="javascript:void(0);" onclick="gotoPrevStudent();" data-href="{{ prev_student_url }}" id="prev-student"><i title="Go to the previous student" class="fa fa-chevron-left icon-header"></i></a>
         {% endif %}
 
         {# Back to list button #}
-        <a href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'details', 'gradeable_id': gradeable.getId()}) }}"><i title="Go to the main page" class="fa fa-home icon-header" ></i></a>
+        <a href="{{ home_url }}"><i title="Go to the main page" class="fa fa-home icon-header" ></i></a>
 
         {# If the student is in our section, add a clickable next arrow, else add a grayed out one. #}
         {% if studentNotInSection %}
             <i title="Go to the next student" class="fa fa-chevron-right icon-header" style="color:grey"></i>
         {% else %}
-            <a href="javascript:void(0);" onclick="gotoNextStudent();" data-href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'grade', 'gradeable_id': gradeable.getId(), 'who_id': next_id}) }}" id="next-student"><i title="Go to the next student" class="fa fa-chevron-right icon-header"></i></a>
+            <a href="javascript:void(0);" onclick="gotoNextStudent();" data-href="{{ next_student_url }}" id="next-student"><i title="Go to the next student" class="fa fa-chevron-right icon-header"></i></a>
         {% endif %}
 
         {# /Nav buttons #}
@@ -30,7 +30,7 @@
         {% if not peer %}
             <i title="Show/Hide Student Information (Press S)" class="fa fa-user icon-header" onclick="toggleInfo(); updateCookies();"></i>
         {% endif %}
-        {% if gradeable.getRegradeStatus() != 0 %}
+        {% if regrade_panel_available %}
             <i title="Show/Hide Regrade Information (Press X)" class="fa fa-hand-paper-o icon-header" onclick="toggleRegrade(); updateCookies();"></i>
         {% endif %}
         <i title="Show Grading Settings" class="fa fa-wrench icon-header" onclick="showSettings();"></i>

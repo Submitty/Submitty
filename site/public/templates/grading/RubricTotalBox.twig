@@ -1,0 +1,13 @@
+{#
+Required Parameters:
+-total
+-extra_credit
+-decimal_precision
+
+#}
+<div class="box-title badge-container">
+    <strong id="score_total" class="badge green-background">
+        {{ total|round(decimal_precision) }} ({{ extra_credit|round(decimal_precision) }})
+    </strong>
+    <strong>Total Points (Extra Credit Points)</strong>
+</div>

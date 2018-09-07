@@ -332,8 +332,8 @@ pushd /tmp > /dev/null
 
 echo "Getting DrMemory..."
 
-DRMEM_TAG=release_2.0.0_rc2
-DRMEM_VER=2.0.0-RC2
+DRMEM_TAG=release_2.0.1
+DRMEM_VER=2.0.1-2
 wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEM_TAG}/DrMemory-Linux-${DRMEM_VER}.tar.gz -o /dev/null > /dev/null 2>&1
 tar -xpzf DrMemory-Linux-${DRMEM_VER}.tar.gz
 rsync --delete -a /tmp/DrMemory-Linux-${DRMEM_VER}/ ${SUBMITTY_INSTALL_DIR}/drmemory
@@ -684,7 +684,7 @@ cp -R ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools /tmp/docker/
 chown ${DAEMON_USER}:${DAEMON_GROUP} -R /tmp/docker
 
 pushd /tmp/docker
-su -c 'docker build -t ubuntu:custom -f Dockerfile .' ${DAEMON_USER}
+su -c 'docker build --network=host -t ubuntu:custom -f Dockerfile .' ${DAEMON_USER}
 popd > /dev/null
 
 
