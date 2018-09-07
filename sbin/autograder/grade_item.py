@@ -361,11 +361,16 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                       stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
             if USE_DOCKER:
-                compile_success = subprocess.call(['docker', 'exec', '-w', testcase_folder, container,
-                                                   os.path.join(testcase_folder, 'my_compile.out'), queue_obj['gradeable'],
-                                                   queue_obj['who'], str(queue_obj['version']), submission_string, str(testcase_num)],
-                                                   stdout=logfile,
-                                                   cwd=testcase_folder)
+                compilation_container = subprocess.check_output(['docker', 'run','-i', '-v', testcase_folder + ':' + testcase_folder,
+                                           '-w', testcase_folder,
+                                           container_image,
+                                           #The command to be run.
+                                           os.path.join(testcase_folder, 'my_compile.out'), queue_obj['gradeable'],
+                                           queue_obj['who'], str(queue_obj['version']), submission_string, str(testcase_num)],
+                                           stdout=logfile,
+                                           cwd=testcase_folder)
+                subprocess.call(['docker', 'rm', '-f', compilation_container])
+
             else:
                 compile_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                                                    which_untrusted,
