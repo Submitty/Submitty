@@ -80,6 +80,8 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
       this_testcase["single_port_per_container"] = single_port_per_container;
     }
 
+    assert(!(single_port_per_container && use_router));
+
     nlohmann::json commands = nlohmann::json::array();
     // if "command" exists in whole_config, we must wrap it in a container.
     bool found_commands = false;
