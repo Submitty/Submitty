@@ -49,6 +49,8 @@ use app\models\User;
  * @method int getTeamSizeMax()
  * @method \DateTime getTeamLockDate()
  * @method bool isTaGrading()
+ * @method bool isScannedExam()
+ * @method void setScannedExam($scanned_exam)
  * @method bool isStudentView()
  * @method void setStudentView($can_student_view)
  * @method bool isStudentSubmit()
@@ -133,6 +135,8 @@ class Gradeable extends AbstractModel {
     protected $team_size_max = 0;
     /** @property @var bool If the gradeable is using any manual grading */
     protected $ta_grading = false;
+    /** @property @var bool If the gradeable is a 'scanned exam' */
+    protected $scanned_exam = false;
     /** @property @var bool If students can view submissions */
     protected $student_view = false;
     /** @property @var bool If students can make submissions */
@@ -205,6 +209,7 @@ class Gradeable extends AbstractModel {
             $this->setTeamAssignmentInternal($details['team_assignment']);
             $this->setTeamSizeMax($details['team_size_max']);
             $this->setTaGradingInternal($details['ta_grading']);
+            $this->setScannedExam($details['scanned_exam']);
             $this->setStudentView($details['student_view']);
             $this->setStudentSubmit($details['student_submit']);
             $this->setStudentDownload($details['student_download']);
