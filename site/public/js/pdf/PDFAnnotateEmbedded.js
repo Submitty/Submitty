@@ -241,7 +241,7 @@ function render(gradeable_id, user_id, grader_id, file_name) {
     }
 
     function saveFile(){
-        let url = buildUrl({'component': 'grading','page': 'electronic', 'action': 'save_pdf_annotation'});
+        let url = buildUrl({'component': 'PDF','page': 'save_pdf_annotation'});
         let annotation_layer = localStorage.getItem(`${RENDER_OPTIONS.documentId}/${GENERAL_INFORMATION.grader_id}/annotations`);
         $.ajax({
             type: 'POST',
