@@ -129,6 +129,7 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
   // HELPER UTILTIY PROGRAMS
   if (my_program == "/bin/cp") {
     categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
+    categories.insert("PROCESS_CONTROL_ADVANCED");
   }
   else if (my_program == "/bin/mv") {
     categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
