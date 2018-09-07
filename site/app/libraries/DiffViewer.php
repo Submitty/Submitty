@@ -82,25 +82,19 @@ class DiffViewer {
     const SPECIAL_CHARS_ESCAPE = 'escape';
     const SPECIAL_CHARS_UNICODE = 'unicode';
 
+    //The first element of array is used to find the special char, the second is the visual representation, the third is
+    // the escape code
     const SPECIAL_CHARS_LIST = array(
-                                "space" => [" ", "&nbsp;"],
-                                "tabs" => ["\t", "↹"],
-                                "carriage return" => ["\r", "↵<br>"],
-                                "null characters" => ["\0", "^@"],
-                                "smart quote1" => ["\xC2\xAB", "\""],
-                                "smart quote2" => ["\xE2\x80\x98", "\""],
-                                "smart quote3" => ["\xE2\x80\x99", "'"]
+                                "space" => [" ", "&nbsp;", " "],
+                                "tabs" => ["\t", "↹", "\\t"],
+                                "carriage return" => ["\r", "↵<br>", "\\r<br>"],
+                                "null characters" => ["\0", "^@", "\\0"],
+                                "smart quote1" => ["\xC2\xAB", "\"", "\\xC2\\xAB"],
+                                "smart quote2" => ["\xE2\x80\x98", "\"", "\\xE2\\x80\\x98"],
+                                "smart quote3" => ["\xE2\x80\x99", "'", "\\xE2\\x80\\x99"],
+                                "em dash" => ["\xE2\x80\x94", "—", "\\xE2\\x80\\x94"],
+                                "en dash" => ["\xE2\x80\x93", "–", "\\xE2\\x80\\x93"]
                                );
-    //TODO: How to escape from the escape codes above?
-    const SPECIAL_CHARS_DISPLAYED_ESCAPE_CODES = array(
-                                        "space" => " ",
-                                        "tabs" => "\\t",
-                                        "carriage return" => "\\r",
-                                        "null characters" => "\\0",
-                                        "smart quote1" => "\\xC2\\xAB",
-                                        "smart quote2" => "\\xE2\\x80\\x98",
-                                        "smart quote3" => "\\xE2\\x80\\x99"
-                                       );
 
     static function isValidSpecialCharsOption($option) {
         return in_array($option, [
@@ -564,12 +558,7 @@ class DiffViewer {
         $return = $html;
         if($with_escape){
             foreach(self::SPECIAL_CHARS_LIST as $name => $representations){
-                $html_chars = " ";
-                if($name !== "space"){
-                    $html_chars = self::SPECIAL_CHARS_DISPLAYED_ESCAPE_CODES[$name];
-                }
-
-                $this->replaceUTF($representations[0], $html_chars, $return, $name);
+                $this->replaceUTF($representations[0], $representations[2], $return, $name);
             }
         } else {
             foreach(self::SPECIAL_CHARS_LIST as $name => $representations){
