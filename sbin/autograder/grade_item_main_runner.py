@@ -412,6 +412,7 @@ def create_knownhosts_csv(container_info,test_input_folder,single_port_per_conta
               continue
           if single_port_per_container:
             if not connected_machine in host_to_port:
+              host_to_port[connected_machine] = dict()
               host_to_port[connected_machine]['tcp_port'] = str(current_tcp_port)
               host_to_port[connected_machine]['udp_port'] = str(current_udp_port)
               current_tcp_port += 1
