@@ -489,12 +489,6 @@ class ElectronicGraderView extends AbstractView {
         return $return;
     }
 
-    public function renderPDFBar(){
-//        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/PDFAnnotationBar.twig", [
-//
-//        ]);
-    }
-
     /**
      * @param \app\models\gradeable\Gradeable $gradeable
      * @param float $progress
