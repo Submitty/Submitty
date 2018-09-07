@@ -803,6 +803,10 @@ class AdminGradeableController extends AbstractController {
             if (isset($details[$date_property])) {
                 $dates[$date_property] = $details[$date_property];
 
+                if ($dates[$date_property] > DateUtils::MAX_TIME) {
+                    $errors[$date_property] = Gradeable::date_display_names[$date_property] . ' Date is higher than the max allowed date! (' . DateUtils::MAX_TIME . ')';
+                }
+
                 // Unset dates so we don't try and use it in the other loop
                 unset($details[$date_property]);
                 $date_set = true;
