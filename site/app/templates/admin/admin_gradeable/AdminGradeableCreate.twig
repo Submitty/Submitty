@@ -44,21 +44,37 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
 {% if action == 'new' or action == 'template' %}
     <!-- Gradeable Type radio buttons (readonly in edit mode) -->
     What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">type of the gradeable</a>?:
+
+    <span id="required_type" style="color:red; display:inline;">(Required)</span>
 {% else %}
     Gradeable type: {{ type_string }}
     <br />
 {% endif %}
 <div style="{{ action == 'edit' ? 'display:none' : '' }}">
-    <input type='radio' id="radio_electronic_file" name="type" value="Electronic File"
-            {{ action != 'new' and gradeable.getType() == 0 ? 'checked' : '' }}> Electronic File Upload
+    <div>
+        <input type='radio' id="radio_electronic_file" name="type" value="Electronic File"
+            {{ action != 'new' and gradeable.getType() == 0 ? 'checked' : '' }} hidden>
+    </div>
 
-    <input type='radio' id="radio_checkpoints" name="type" value="Checkpoints"
+    <div>
+        <input type="radio" id="radio_ef_student_upload" name="scanned_exam" value="false"
+           {{ action != 'new' and not gradeable.isScannedExam() ? 'checked' : ''}}> Students will Upload Files
+    </div>
+
+    <div>
+        <input type="radio" id="radio_ef_scanned_exam" name="scanned_exam" value="true"
+           {{ action != 'new' and gradeable.isScannedExam() ? 'checked' : '' }}> TA/Instructor will bulk upload scanned .pdf files
+    </div>
+
+    <div>
+        <input type='radio' id="radio_checkpoints" name="type" value="Checkpoints"
             {{ action != 'new' and gradeable.getType() == 1 ? 'checked' : '' }}> Checkpoints
+    </div>
 
-    <input type='radio' id="radio_numeric" name="type" value="Numeric"
+    <div>
+        <input type='radio' id="radio_numeric" name="type" value="Numeric"
             {{ action != 'new' and gradeable.getType() == 2 ? 'checked' : '' }}> Numeric/Text
-
-    <span id="required_type" style="color:red; display:inline;">(Required)</span>
+    </div>
 </div>
 
 <!-- This is only relevant to Electronic Files -->
@@ -242,6 +258,10 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_grades">sylla
                $('#required_type').hide();
         }
 
+        if(!$('#radio_electronic_file').is(':checked')) {
+            $('input[name=scanned_exam').prop('checked', false);
+        }
+
         disableElementChildren('.electronic_file');
         disableElementChildren('.checkpoints');
         disableElementChildren('.numeric');
@@ -391,6 +411,12 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_grades">sylla
         // Only show repo settings if the gradeable is using repo upload
         onUploadTypeChange();
         $('[name="vcs"]').change(onUploadTypeChange);
+
+        // Update the electronic file subtype
+        $('input[name=scanned_exam]').change(function() {
+            $('#radio_electronic_file').prop('checked', true);
+            onGradeableTypeChange();
+        });
 
         // Upload the vcs url in real time
         onVcsSubdirChange();

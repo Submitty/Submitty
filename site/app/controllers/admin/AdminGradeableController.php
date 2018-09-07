@@ -218,6 +218,15 @@ class AdminGradeableController extends AbstractController {
             'id' => $gradeable->getId()
         ]);
 
+        $type_string = GradeableType::typeToString($gradeable->getType());
+        if($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
+            if($gradeable->isScannedExam()){
+                $type_string = "TA/Instructor will Upload Scanned Exam";
+            } else {
+                $type_string = "Students will Upload File";
+            }
+        }
+
         // $this->inherit_teams_list = $this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams();
 
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -252,7 +261,7 @@ class AdminGradeableController extends AbstractController {
             'is_pdf_page_student' => $gradeable->isStudentPdfUpload(),
             'num_numeric' => $gradeable->getNumNumeric(),
             'num_text' => $gradeable->getNumText(),
-            'type_string' => GradeableType::typeToString($gradeable->getType()),
+            'type_string' => $type_string,
             'show_edit_warning' => $gradeable->anyManualGrades(),
 
             // Config selection data
@@ -682,11 +691,12 @@ class AdminGradeableController extends AbstractController {
         $front_page_property_names = [
             'id',
             'title',
+            'scanned_exam',
             'instructions_url',
             'syllabus_bucket'
         ];
         foreach ($front_page_property_names as $prop) {
-            $gradeable_create_data[$prop] = $details[$prop];
+            $gradeable_create_data[$prop] = $details[$prop] ?? '';
         }
 
         // Electronic-only values
@@ -699,6 +709,7 @@ class AdminGradeableController extends AbstractController {
                 'vcs_subdirectory' => $details['vcs_subdirectory'],
                 'regrade_allowed' => $details['regrade_allowed'] === 'true',
                 'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/upload_only/config',
+                'scanned_exam' => $details['scanned_exam'] === 'true',
 
                 // TODO: properties that aren't supported yet
                 'peer_grading' => false,
