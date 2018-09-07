@@ -14,7 +14,7 @@ class PDFView extends AbstractView {
     public function showPDFEmbedded($gradeable_id, $user_id, $filename, $annotation_jsons, $is_student){
         $this->core->getOutput()->useFooter(false);
         $this->core->getOutput()->useHeader(false);
-        $pdf_url = $this->core->buildUrl(array('component' => 'misc', 'page' => 'encodePDF'));
+        $pdf_url = $this->core->buildUrl(array('component' => 'misc', 'page' => 'base64_encode_pdf'));
         return $this->core->getOutput()->renderTwigOutput('grading/electronic/PDFAnnotationEmbedded.twig', [
             'gradeable_id' => $gradeable_id,
             'user_id' => $user_id,

@@ -52,7 +52,7 @@
         alert("Can't fetch annotations");
     }
     {% if student_popup is defined and student_popup == true %}
-    render("{{ gradeable_id }}", "{{ user_id }}", '{{ filename }}', '{{ pdf_url_base }}');
+    render("{{ gradeable_id }}", "{{ user_id }}", '{{ filename }}', '{{ pdf_url_base | raw}}');
     {% else %}
     render("{{ gradeable_id }}", "{{ user_id }}", "{{ grader_id }}", '{{ filename }}');
     {% endif %}

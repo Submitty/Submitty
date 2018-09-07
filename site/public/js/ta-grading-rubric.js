@@ -1691,12 +1691,18 @@ function onDeleteComponent(me) {
  */
 function onAddComponent() {
     addComponent()
-        .catch(function(err) {
+        .catch(function (err) {
             console.error(err);
             alert('Failed to add component! ' + err.message);
         })
         .then(function () {
+            return closeAllComponents(true);
+        })
+        .then(function () {
             return reloadInstructorEditRubric(getGradeableId());
+        })
+        .then(function () {
+            return openComponent(getComponentIdByOrder(getComponentCount() - 1));
         })
         .catch(function (err) {
             alert('Failed to reload rubric! ' + err.message);
