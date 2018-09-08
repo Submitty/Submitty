@@ -677,8 +677,8 @@ class AdminGradeableController extends AbstractController {
                 'grade_by_registration' => true,
                 'ta_instructions' => '',
                 'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/upload_only/config',
-                'student_view' => false,
-                'student_submit' => false,
+                'student_view' => true,
+                'student_submit' => true,
                 'student_download' => false,
                 'student_download_any_version' => false,
                 'late_days' => 0,
@@ -691,7 +691,6 @@ class AdminGradeableController extends AbstractController {
         $front_page_property_names = [
             'id',
             'title',
-            'scanned_exam',
             'instructions_url',
             'syllabus_bucket'
         ];
@@ -746,6 +745,14 @@ class AdminGradeableController extends AbstractController {
 
         // Finally, construct the gradeable
         $gradeable = new Gradeable($this->core, $gradeable_create_data);
+
+        // Setup student permissions specially for scanned exams
+        if ($gradeable->isScannedExam()) {
+            $gradeable->setStudentView(false);
+            $gradeable->setStudentSubmit(false);
+            $gradeable->setStudentDownload(false);
+            $gradeable->setStudentDownloadAnyVersion(false);
+        }
 
         // Generate a blank component to make the rubric UI work properly
         $this->genBlankComponent($gradeable);
