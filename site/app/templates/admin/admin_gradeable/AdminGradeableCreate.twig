@@ -47,7 +47,7 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
 
     <span id="required_type" style="color:red; display:inline;">(Required)</span>
 {% else %}
-    Gradeable type: {{ type_string }}
+    Gradeable type: <span id="gradeable-type-string">{{ type_string }}</span>
     <br />
 {% endif %}
 <div style="{{ action == 'edit' ? 'display:none' : '' }}">

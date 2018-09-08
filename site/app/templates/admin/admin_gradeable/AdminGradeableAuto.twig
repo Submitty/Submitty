@@ -242,6 +242,7 @@
                 $('#no_student_download').prop('checked', true);
                 $('#no_student_download').change();
                 $('input[name=student_download_any_version]').prop('checked', false);
+                $('#gradeable-type-string').text('TA/Instructor will Upload Scanned Exam');
             } else {
                 $('#yes_student_view').prop('checked', true);
                 $('#yes_student_view').change();
@@ -250,6 +251,7 @@
                 $('#no_student_download').prop('checked', true);
                 $('#no_student_download').change();
                 $('input[name=student_download_any_version]').prop('checked', false);
+                $('#gradeable-type-string').text('Students will Upload File');
             }
         });
 
