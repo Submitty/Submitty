@@ -58,7 +58,8 @@
             {{ not gradeable.isScannedExam() ? 'checked' : ''}}> No
 
     <input type="button" class="btn btn-default" id="show-advanced-student-permissions" value="Show Advanced Settings" onclick="showAdvancedStudentPermissions()">
-    <div id="student_permissions" hidden>
+    <span id="hide-advanced-student-permissions-container" hidden><input type="button" class="btn btn-primary student_permissions" value="Hide Advanced Settings" onclick="hideAdvancedStudentPermissions()"></span>
+    <div class="student_permissions" hidden>
         <fieldset>
             <div>
                 What are students allowed to do?
@@ -94,7 +95,6 @@
                             {{ gradeable.isStudentDownload() ? 'checked' : '' }} hidden/>
                 </div>
             </div>
-            <input type="button" class="btn btn-primary" id="hide-advanced-student-permissions" value="Hide" onclick="hideAdvancedStudentPermissions()">
         </fieldset>
     </div>
     <br />
@@ -200,12 +200,14 @@
     }
 
     function showAdvancedStudentPermissions() {
-        $('#student_permissions').show();
+        $('.student_permissions').show();
+        $('#hide-advanced-student-permissions-container').show();
         $('#show-advanced-student-permissions').hide();
     }
 
     function hideAdvancedStudentPermissions() {
-        $('#student_permissions').hide();
+        $('.student_permissions').hide();
+        $('#hide-advanced-student-permissions-container').hide();
         $('#show-advanced-student-permissions').show();
     }
 
