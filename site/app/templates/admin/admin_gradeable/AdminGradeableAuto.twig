@@ -49,7 +49,6 @@
         <input style='width: 83%' type='text' id='input_provide_full_path' name='autograding_config_path' value="{{ gradeable.getAutogradingConfigPath() }}" class="required" placeholder="(Required)"
                 {{ config_select_mode != 'manual' ? 'disabled' : '' }}/>
     </fieldset>
-    <br />
 
     Will this gradeable be scanned and uploaded as bulk pdfs by the TA/Instructor?
     <input type="radio" name="scanned_exam" value="true"
@@ -97,6 +96,7 @@
             </div>
         </fieldset>
     </div>
+    <br />
     <br />
     <a class="btn btn-primary" href="{{ core.buildUrl({ 'component': 'admin', 'page': 'admin_gradeable', 'action': 'rebuild_assignment', 'id': gradeable.getId() }) }}">Rebuild Gradeable (only necessary if you have modified your custom configuration files)</a>
     <br /> <br />
