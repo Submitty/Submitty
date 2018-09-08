@@ -88,7 +88,7 @@ class HomeworkView extends AbstractView {
             $return .= $this->renderTAResultsBox($graded_gradeable, $regrade_available);
         }
         if ($regrade_available) {
-            $return .= $this->renderRegradeBox($old_gradeable);
+            $return .= $this->renderRegradeBox($graded_gradeable);
         }
         return $return;
     }
@@ -590,103 +590,95 @@ class HomeworkView extends AbstractView {
     }
 
     /**
-     * TODO: waiting on new model support for regrade requests / team regrade requests
-     * @param \app\models\Gradeable $gradeable
+     * @param GradedGradeable $graded_gradeable
      * @return string
      */
-    private function renderRegradeBox(\app\models\Gradeable $gradeable): string {
+    private function renderRegradeBox(GradedGradeable $graded_gradeable): string {
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/RegradeBox.twig', [
-            'gradeable' => $gradeable
+            'graded_gradeable' => $graded_gradeable
         ]);
     }
     
     /**
-     * TODO: waiting on new model support for regrade requests / team regrade requests
-     * @param \app\models\Gradeable $gradeable
+     * @param GradedGradeable $graded_gradeable
      * @return string
      */
-    public function showRegradeDiscussion(\app\models\Gradeable $gradeable): string {
-        $regradeMessage = $this->core->getConfig()->getRegradeMessage();
-        if ($gradeable->getRegradeStatus() === 0) {
+    public function showRegradeDiscussion(GradedGradeable $graded_gradeable): string {
+        $regrade_message = $this->core->getConfig()->getRegradeMessage();
+        if (!$graded_gradeable->hasRegradeRequest()) {
             $btn_type = 'request';
             $url = $this->core->buildUrl(array('component' => 'student',
+                'gradeable_id' => $graded_gradeable->getGradeable()->getId(),
+                'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
                 'action' => 'request_regrade',
-                'gradeable_id' => $gradeable->getId(),
-                'student_id' => $gradeable->getUser()->getId(),
-                'regrade_id' => $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId())
             ));
             $action = 'request_regrade';
-        } 
-        else if($this->core->getUser()->accessGrading()){
-            if($gradeable->getRegradeStatus() === -1){
+        } else if ($this->core->getUser()->accessGrading()) {
+            if ($graded_gradeable->hasActiveRegradeRequest()) {
                 $btn_type = 'admin_open';
-                    $url = $this->core->buildUrl(array('component' => 'student',
-                        'action' => 'make_request_post',
-                        'gradeable_id' => $gradeable->getId(),
-                        'user_id' => $this->core->getUser()->getId(),
-                        'regrade_id' => $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId()),
-                        'resolved' => false
-                    ));
+                $url = $this->core->buildUrl(array('component' => 'student',
+                    'gradeable_id' => $graded_gradeable->getGradeable()->getId(),
+                    'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
+                    'action' => 'make_request_post',
+                    'resolved' => false
+                ));
                 $action = 'make_request_post_admin';
-            }
-            else{
+            } else {
                 $btn_type = 'admin_closed';
-                    $url = $this->core->buildUrl(array('component' => 'student',
-                        'action' => 'make_request_post',
-                        'gradeable_id' => $gradeable->getId(),
-                        'user_id' => $this->core->getUser()->getId(),
-                        'regrade_id' => $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId()),
-                        'resolved' => true
-                    ));
+                $url = $this->core->buildUrl(array('component' => 'student',
+                    'gradeable_id' => $graded_gradeable->getGradeable()->getId(),
+                    'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
+                    'action' => 'make_request_post',
+                    'resolved' => true
+                ));
                 $action = 'make_request_post_admin';
             }
-        }
-        else if ($gradeable->getRegradeStatus() === -1) {
+        } else if ($graded_gradeable->hasActiveRegradeRequest()) {
             $btn_type = 'pending';
             $url = $this->core->buildUrl(array('component' => 'student',
+                'gradeable_id' => $graded_gradeable->getGradeable()->getId(),
+                'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
                 'action' => 'make_request_post',
-                'gradeable_id' => $gradeable->getId(),
-                'user_id' => $gradeable->getUser()->getId(),
-                'regrade_id' => $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId())
             ));
             $action = 'make_request_post';
         } else {
             $btn_type = 'completed';
             $url = $this->core->buildUrl(array('component' => 'student',
-                'gradeable_id' => $gradeable->getId(),
-                'user_id' => $gradeable->getUser()->getId(),
+                'gradeable_id' => $graded_gradeable->getGradeable()->getId(),
+                'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
                 'action' => 'make_request_post',
-                'regrade_id' => $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId())
             ));
             $action = 'request_regrade';
         }
-        $thread_id = $this->core->getQueries()->getRegradeRequestID($gradeable->getId(), $gradeable->getUser()->getId());
-        $threads = $this->core->getQueries()->getRegradeDiscussion($thread_id);
 
         $posts = [];
 
-        foreach ($threads as $thread) {
-            if (empty($threads)) break;
-            $is_staff = $this->core->getQueries()->isStaffPost($thread['user_id']);
-            $name = $this->core->getQueries()->getUserById($thread['user_id'])->getDisplayedFirstName();
-            $date = date_create($thread['timestamp']);
-            $content = $thread['content'];
-            $posts[] = [
-                'is_staff' => $is_staff,
-                'date' => date_format($date, 'm/d/Y g:i A'),
-                'name' => $name,
-                'content' => $content
-            ];
+        if ($graded_gradeable->hasRegradeRequest()) {
+            $threads = $this->core->getQueries()->getRegradeDiscussion($graded_gradeable->getRegradeRequest());
+            foreach ($threads as $thread) {
+                if (empty($threads)) break;
+                $is_staff = $this->core->getQueries()->isStaffPost($thread['user_id']);
+                $name = $this->core->getQueries()->getUserById($thread['user_id'])->getDisplayedFirstName();
+                $date = date_create($thread['timestamp']);
+                $content = $thread['content'];
+                $posts[] = [
+                    'is_staff' => $is_staff,
+                    'date' => date_format($date, 'm/d/Y g:i A'),
+                    'name' => $name,
+                    'content' => $content
+                ];
 
+            }
         }
         return $this->core->getOutput()->renderTwigTemplate('submission/regrade/Discussion.twig', [
             'btn_type' => $btn_type,
             'url' => $url,
             'action' => $action,
             'posts' => $posts,
-            'gradeable' => $gradeable,
-            'thread_id' => $thread_id,
-            'regradeMessage' => $regradeMessage
+            'gradeable_id' => $graded_gradeable->getGradeableId(),
+            'thread_id' => $graded_gradeable->hasRegradeRequest() ? $graded_gradeable->getRegradeRequest()->getId() : 0,
+            'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
+            'regrade_message' => $regrade_message
         ]);
     }
 }
