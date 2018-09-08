@@ -14,6 +14,8 @@ import random
 import socket
 import zipfile
 import sys
+import traceback
+from pwd import getpwnam
 
 from submitty_utils import dateutils, glob
 from . import grade_items_logging, grade_item_main_runner, write_grade_history, CONFIG_PATH
@@ -361,11 +363,39 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                       stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
             if USE_DOCKER:
-                compile_success = subprocess.call(['docker', 'exec', '-w', testcase_folder, container,
-                                                   os.path.join(testcase_folder, 'my_compile.out'), queue_obj['gradeable'],
-                                                   queue_obj['who'], str(queue_obj['version']), submission_string, str(testcase_num)],
+                try:
+                    #There can be only one container for a compilation step, so grab its container image
+                    #TODO: set default in load_config_json.cpp
+                    if my_testcases[testcase_num-1]['type'] == 'FileCheck':
+                        print("performing filecheck in default ubuntu:custom container")
+                        container_image = "ubuntu:custom"
+                    else:
+                        container_image = my_testcases[testcase_num-1]["containers"][0]["container_image"]
+                        print('creating a compilation container with image {0}'.format(container_image))
+                    untrusted_uid = str(getpwnam(which_untrusted).pw_uid)
+                    compilation_container = None
+                    compilation_container = subprocess.check_output(['docker', 'create','-i', 
+                                               '-v', tmp + ':' + tmp,
+                                               '-w', testcase_folder,
+                                               # '-u', untrusted_uid, 
+                                               '--network', 'none',
+                                               container_image,
+                                               #The command to be run.
+                                               os.path.join(testcase_folder, 'my_compile.out'), queue_obj['gradeable'],
+                                               queue_obj['who'], str(queue_obj['version']), submission_string, str(testcase_num)
+                                               ]).decode('utf8').strip()
+                    print("started container")
+                    compile_success = subprocess.call(['docker', 'start', '-i', compilation_container],
                                                    stdout=logfile,
                                                    cwd=testcase_folder)
+                except Exception as e:
+                    print('An error occurred when compiling with docker.')
+                    traceback.print_exc()
+                finally:
+                    if compilation_container != None:
+                        subprocess.call(['docker', 'rm', '-f', compilation_container])
+                        print("cleaned up compilation container.")
+
             else:
                 compile_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                                                    which_untrusted,

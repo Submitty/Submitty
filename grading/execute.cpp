@@ -19,6 +19,8 @@
 // for system call filtering
 #include <seccomp.h>
 #include <elf.h>
+#include <sys/poll.h>
+
 
 #include "TestCase.h"
 #include "execute.h"
@@ -998,22 +1000,31 @@ void TerminateProcess(float &elapsed, int childPID) {
 }
 
 //Thread function for dispatcher actions
-void cin_reader(std::mutex* lock, std::queue<std::string>* input_queue){
+void cin_reader(std::mutex* lock, std::queue<std::string>* input_queue, bool* CHILD_NOT_TERMINATED){
   std::cout << "thread function " << getpid() << std::endl;
   std::string my_string;
 
   try
   {
-    do {
-      std::getline (std::cin,my_string);
-      std::cout << "Cin recieved: " << my_string << std::endl;
-      std::cout << "Appending a newline" << std::endl;
-      my_string += "\n";
+    struct pollfd fds;
+    int ret;
+    fds.fd = 0; /* this is STDIN */
+    fds.events = POLLIN;
 
-      lock->lock();
-      input_queue->push(my_string);
-      lock->unlock();
-    } while(true);
+    while(*CHILD_NOT_TERMINATED) {
+      ret = poll(&fds, 1, 100); //.1 second timeout
+
+      if (ret > 0){
+        std::getline (std::cin,my_string);
+        std::cout << "Cin recieved: " << my_string << std::endl;
+        std::cout << "Appending a newline" << std::endl;
+        my_string += "\n";
+
+        lock->lock();
+        input_queue->push(my_string);
+        lock->unlock();
+      }
+    }
   }
   catch (const std::exception &exc)
   {
@@ -1039,7 +1050,7 @@ int execute(const std::string &cmd,
   bool window_mode = windowed; //Tells us if the process is expected to spawn a window. (additional support later) 
   
 
-  int d_size = dispatcher_actions.size();
+  int num_dispatched_actions = dispatcher_actions.size();
 
   //Dispatcher actions variables
   std::mutex lock;
@@ -1103,7 +1114,7 @@ int execute(const std::string &cmd,
     int pgrp = setpgid(getpid(), 0);
     assert(pgrp == 0);
 
-    if(d_size > 0){
+    if(num_dispatched_actions > 0){
       close(dispatcherpipe[1]); //close write end of the pipe
       close(0); //close stdin
       dup2(dispatcherpipe[0], 0); //copy read end of the pipe onto stdin.
@@ -1119,10 +1130,10 @@ int execute(const std::string &cmd,
     else {
       // PARENT PROCESS
       std::thread cin_thread;
-
-      if(d_size > 0){
+      bool CHILD_NOT_TERMINATED = true;
+      if(num_dispatched_actions > 0){
         close(dispatcherpipe[0]); // close the read end of the pipe
-        cin_thread = std::thread(cin_reader, &lock, &input_queue);
+        cin_thread = std::thread(cin_reader, &lock, &input_queue, &CHILD_NOT_TERMINATED);
       }
 
       std::cout << "childPID = " << childPID << std::endl;
@@ -1213,15 +1224,15 @@ int execute(const std::string &cmd,
         }
       }
       else if (WIFSIGNALED(status)) {
-        int what_signal =  WTERMSIG(status);
-        OutputSignalErrorMessageToExecuteLogfile(what_signal,logfile);
-        std::cout << "Child " << childPID << " was terminated with a status of: " << what_signal << std::endl;
-        if (WTERMSIG(status) == 0){
-          result=0;
-        }
-        else{
-          result=2;
-        }
+          int what_signal =  WTERMSIG(status);
+          OutputSignalErrorMessageToExecuteLogfile(what_signal,logfile);
+          std::cout << "Child " << childPID << " was terminated with a status of: " << what_signal << std::endl;
+          if (WTERMSIG(status) == 0){
+            result=0;
+          }
+          else{
+            result=2;
+          }
       }
       if (time_kill){
        logfile << "ERROR: Maximum run time exceeded" << std::endl;
@@ -1236,6 +1247,12 @@ int execute(const std::string &cmd,
       std::cout << "PARENT PROCESS COMPLETE: " << std::endl;
       parent_result = system("date");
       assert (parent_result == 0);
+
+      CHILD_NOT_TERMINATED = false;
+      if(num_dispatched_actions > 0){
+         std::cout <<"Terminating Thread"<<std::endl;
+        cin_thread.join();
+      }
     }
     std::cout <<"Result: "<<result<<std::endl;
     return result;

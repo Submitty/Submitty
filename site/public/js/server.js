@@ -2434,8 +2434,8 @@ function toggleRegradeRequests(){
     }
 
 }
-function changeRegradeStatus(regradeId, gradeable_id, student_id, status) {
-    var url = buildUrl({'component': 'student', 'gradeable_id': gradeable_id ,'student_id': student_id ,'regrade_id': regradeId, 'status': status, 'action': 'change_request_status'});
+function changeRegradeStatus(regradeId, gradeable_id, submitter_id, status) {
+    var url = buildUrl({'component': 'student', 'gradeable_id': gradeable_id ,'submitter_id': submitter_id ,'regrade_id': regradeId, 'status': status, 'action': 'change_request_status'});
     $.ajax({
         url: url,
         success: function(data) {
