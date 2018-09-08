@@ -450,6 +450,9 @@ class HomeworkView extends AbstractView {
             ];
         }, $auto_graded_gradeable->getAutoGradedVersions());
 
+        //sort array by version number after values have been mapped
+        ksort($version_data);
+
         $param = [];
         $show_testcases = false;
         $show_incentive_message = false;
