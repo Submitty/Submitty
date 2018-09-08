@@ -51,40 +51,49 @@
     </fieldset>
     <br />
 
-    Should students be able to view submissions?
-    <fieldset>
-        <input type="radio" id="yes_student_view" name="student_view" value="true"
-                {{ gradeable.isStudentView() ? 'checked' : '' }}/> Yes
-        <input type="radio" id="no_student_view" name="student_view" value="false"
-                {{ not gradeable.isStudentView() ? 'checked' : '' }}/> No  &nbsp;&nbsp;&nbsp;
-        (Select 'No' during grading of a bulk upload pdf quiz/exam.)
+    Will this gradeable be scanned and uploaded as bulk pdfs by the TA/Instructor?
+    <input type="radio" name="scanned_exam" value="true"
+            {{ gradeable.isScannedExam() ? 'checked' : '' }}> Yes
+    <input type="radio" name="scanned_exam" value="false"
+            {{ not gradeable.isScannedExam() ? 'checked' : ''}}> No
 
-        <div id="student_submit_download_view">
+    <input type="button" class="btn btn-default" id="show-advanced-student-permissions" value="Show Advanced Settings" onclick="showAdvancedStudentPermissions()">
+    <div id="student_permissions" hidden>
+        <fieldset>
+            Should students be able to view submissions?
+            <input type="radio" id="yes_student_view" name="student_view" value="true"
+                    {{ gradeable.isStudentView() ? 'checked' : '' }}/> Yes
+            <input type="radio" id="no_student_view" name="student_view" value="false"
+                    {{ not gradeable.isStudentView() ? 'checked' : '' }}/> No  &nbsp;&nbsp;&nbsp;
+            (Select 'No' during grading of a bulk upload pdf quiz/exam.)
 
-            <br />
-            Should students be able to make submissions? (Select 'No' if this is a bulk upload pdf quiz/exam.)
-            <input type="radio" id="yes_student_submit" name="student_submit" value="true"
-                    {{ gradeable.isStudentSubmit() ? 'checked' : '' }}/> Yes
-            <input type="radio" id="no_student_submit" name="student_submit" value="false"
-                    {{ not gradeable.isStudentSubmit() ? 'checked' : '' }}/> No
-            <br /> <br />
+            <div id="student_submit_download_view">
 
-            Should students be able to download submitted files? (Select 'Yes' to allow download of uploaded pdf quiz/exam.)
-            <input type="radio" id="yes_student_download" name="student_download" value="true"
-                    {{ gradeable.isStudentDownload() ? 'checked' : '' }}/> Yes
-            <input type="radio" id="no_student_download" name="student_download" value="false"
-                    {{ not gradeable.isStudentDownload() ? 'checked' : '' }}/> No
-            <br /> <br />
+                <br />
+                Should students be able to make submissions? (Select 'No' if this is a bulk upload pdf quiz/exam.)
+                <input type="radio" id="yes_student_submit" name="student_submit" value="true"
+                        {{ gradeable.isStudentSubmit() ? 'checked' : '' }}/> Yes
+                <input type="radio" id="no_student_submit" name="student_submit" value="false"
+                        {{ not gradeable.isStudentSubmit() ? 'checked' : '' }}/> No
+                <br /> <br />
 
-            Should students be able to view/download any version or just the active version ? (Select 'Active version only' if this is an uploaded pdf quiz/exam.)
-            <input type="radio" id="yes_student_any_version" name="student_download_any_version" value="true"
-                    {{ gradeable.isStudentDownloadAnyVersion() ? 'checked' : '' }}/> Any version
-            <input type="radio" id="no_student_any_version" name="student_download_any_version" value="false"
-                    {{ not gradeable.isStudentDownloadAnyVersion() ? 'checked' : '' }}/> Active version only
+                Should students be able to download submitted files? (Select 'Yes' to allow download of uploaded pdf quiz/exam.)
+                <input type="radio" id="yes_student_download" name="student_download" value="true"
+                        {{ gradeable.isStudentDownload() ? 'checked' : '' }}/> Yes
+                <input type="radio" id="no_student_download" name="student_download" value="false"
+                        {{ not gradeable.isStudentDownload() ? 'checked' : '' }}/> No
+                <br /> <br />
 
-        </div>
-        <br />
-    </fieldset>
+                Should students be able to view/download any version or just the active version ? (Select 'Active version only' if this is an uploaded pdf quiz/exam.)
+                <input type="radio" id="yes_student_any_version" name="student_download_any_version" value="true"
+                        {{ gradeable.isStudentDownloadAnyVersion() ? 'checked' : '' }}/> Any version
+                <input type="radio" id="no_student_any_version" name="student_download_any_version" value="false"
+                        {{ not gradeable.isStudentDownloadAnyVersion() ? 'checked' : '' }}/> Active version only
+
+            </div>
+            <input type="button" class="btn btn-primary" id="hide-advanced-student-permissions" value="Hide" onclick="hideAdvancedStudentPermissions()">
+        </fieldset>
+    </div>
     <br />
     <a class="btn btn-primary" href="{{ core.buildUrl({ 'component': 'admin', 'page': 'admin_gradeable', 'action': 'rebuild_assignment', 'id': gradeable.getId() }) }}">Rebuild Gradeable (only necessary if you have modified your custom configuration files)</a>
     <br /> <br />
@@ -114,14 +123,6 @@
 </div>
 
 <script type="text/javascript">
-    var blankQuestion =
-        {
-            'id': 'NEW',
-            'title': '',
-            'ta_comment': '',
-            'student_comment': ''
-        };
-
     function onPdfChange() {
         if($('#yes_pdf_page').is(':checked')) {
             // $('#pdf_page').show();
@@ -193,6 +194,16 @@
             $('#yes_student_any_version').prop('checked',true);
             $('#student_submit_download_view').hide();
         }
+    }
+
+    function showAdvancedStudentPermissions() {
+        $('#student_permissions').show();
+        $('#show-advanced-student-permissions').hide();
+    }
+
+    function hideAdvancedStudentPermissions() {
+        $('#student_permissions').hide();
+        $('#show-advanced-student-permissions').show();
     }
 
     $(document).ready(function() {

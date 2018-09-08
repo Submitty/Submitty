@@ -794,6 +794,7 @@ class AdminGradeableController extends AbstractController {
         $boolean_properties = [
             'grade_by_registration',
             'ta_grading',
+            'scanned_exam',
             'student_view',
             'student_submit',
             'student_download',
