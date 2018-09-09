@@ -34,5 +34,3 @@ composer.phar
 
 Pipfile
 Pipfile.lock
-
-site/public/js/pdf/pdf-annotate\.js
