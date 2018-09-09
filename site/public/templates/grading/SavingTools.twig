@@ -1,0 +1,18 @@
+{#
+Renders the 'Save' 'Cancel' 'Saving...' and 'Done' bits that are on the right side
+    of components and the overall comment
+
+Required Parameters:
+-show_save_tools: true to show the 'save/cancel' text, otherwise show 'done' text
+-cancel_on_click: callback for the cancel button's on-click event
+#}
+<span class="save-tools">
+    {% if show_save_tools %}
+        <span class="save-tools-cancel" onclick="{{ cancel_on_click }} ;event.stopPropagation()">
+            <i class="fa fa-times cancel-button" aria-hidden="true">Cancel</i>
+        </span>
+    {% endif %}
+    <span class="save-tools-in-progress" hidden>
+        <i class="fa fa-circle-o-notch fa-spin save-button" aria-hidden="true"></i>Loading...
+    </span>
+</span>

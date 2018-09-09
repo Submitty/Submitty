@@ -16,6 +16,7 @@ import zipfile
 import traceback
 import csv
 import json
+from pwd import getpwnam
 
 from submitty_utils import dateutils, glob
 from . import grade_item, grade_items_logging, write_grade_history, CONFIG_PATH
@@ -59,23 +60,24 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
 
             if USE_DOCKER:
                 try:
+                    use_router = testcases[testcase_num-1]['use_router']
+                    single_port_per_container = testcases[testcase_num-1]['single_port_per_container']
                     # returns a dictionary where container_name maps to outgoing connections and container image
-                    container_info = find_container_information(testcases[testcase_num -1], testcase_num)
+                    container_info = find_container_information(testcases[testcase_num -1], testcase_num, use_router)
                     # Creates folders for each docker container if there are more than one. Otherwise, we grade in testcase_folder.
                     # Updates container_info so that each docker has a 'mounted_directory' element
                     create_container_subfolders(container_info, testcase_folder, which_untrusted)
                     # Launches containers with the -d option. Gives them the names specified in container_info. Updates container info
                     #    to store container_ids.
                     launch_containers(container_info, testcase_folder, job_id,is_batch_job,which_untrusted,
-                                                      item_name,grading_began)
+                                         item_name,grading_began, queue_obj,submission_string,testcase_num)
                     # Networks containers together if there are more than one of them. Modifies container_info to store 'network'
                     #   The name of the docker network it is connected to.
-                    network_containers(container_info,testcase_folder,os.path.join(tmp_work, "test_input"),job_id,is_batch_job,
-                                        which_untrusted,item_name,grading_began)
+                    network_containers(container_info,os.path.join(tmp_work, "test_input"),which_untrusted,use_router,single_port_per_container)
                     print('NETWORKED CONTAINERS')
                     #The containers are now ready to execute.
 
-                    processes = list()
+                    processes = dict()
 
                     #Set up the mounted folders before any dockers start running in case large file transfer sizes cause delay.
                     for name, info in container_info.items():
@@ -85,48 +87,63 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                         setup_folder_for_grading(mounted_directory, tmp_work, job_id, tmp_logs)
 
 
-                    #TODO: START THE ROUTER FIRST, THEN GIVE IT A SECOND
-                    if 'router' in container_info:
-                      name = 'router'
+                    # Start the docker containers.
+                    # Start the router first if in router mode
+                    if 'router' in container_info and use_router:
                       info = container_info['router']
                       c_id = info['container_id']
                       mounted_directory = info['mounted_directory']
                       full_name = '{0}_{1}'.format(which_untrusted, 'router')
-                      print('spinning up docker {0} with root directory {1} and c_id {2}'.format(full_name, mounted_directory, c_id))
-                      p = subprocess.Popen(['docker', 'exec', '-w', mounted_directory,
-                                                        c_id,
-                                                        os.path.join(mounted_directory, 'my_runner.out'),
-                                                        queue_obj['gradeable'],
-                                                        queue_obj['who'],
-                                                        str(queue_obj['version']),
-                                                        submission_string,
-                                                        str(testcase_num),
-                                                        name],
-                                                        stdout=logfile)
-                      processes.append(p)
-                    time.sleep(1)
+                      print('spinning up docker {0} with c_id {1}'.format(full_name, c_id))
+                      p = subprocess.Popen(['docker', 'start', '-i', '--attach', c_id], stdout=logfile,stdin=subprocess.PIPE)
+                      processes['router'] = p
+                      time.sleep(1)
+
                     for name, info in container_info.items():
-                        if name == 'router':
+                        if name == 'router' and use_router:
                           continue
                         c_id = info['container_id']
                         mounted_directory = info['mounted_directory']
                         full_name = '{0}_{1}'.format(which_untrusted, name)
-                        print('spinning up docker {0} with root directory {1} and c_id {2}'.format(full_name, mounted_directory, c_id))
-                        #TODO: is it possible to synchronize execution to a greater extent?
-                        p = subprocess.Popen(['docker', 'exec', '-w', mounted_directory,
-                                                          c_id,
-                                                          os.path.join(mounted_directory, 'my_runner.out'),
-                                                          queue_obj['gradeable'],
-                                                          queue_obj['who'],
-                                                          str(queue_obj['version']),
-                                                          submission_string,
-                                                          str(testcase_num),
-                                                          name],
-                                                          stdout=logfile)
-                        processes.append(p)
+                        print('spinning up docker {0} with c_id {1}'.format(full_name, c_id))
+                        p = subprocess.Popen(['docker', 'start', '-i', '--attach', c_id], stdout=logfile,stdin=subprocess.PIPE)
+                        processes[name] = p
+                    # Handle the dispatcher actions
+                    dispatcher_actions = testcases[testcase_num -1]["dispatcher_actions"]
+
+                    #if there are dispatcher actions, give the student code a second to start up.
+                    if len(dispatcher_actions) > 0:
+                      time.sleep(1)
+
+                    #TODO add error handling once we've encountered some errors.
+                    for action_obj in dispatcher_actions:
+                      action_type  = action_obj["action"]
+
+                      if action_type == "delay":
+                          #todo add some protections here.
+                          time_in_seconds = float(action_obj["seconds"])
+                          while time_in_seconds > 0 and at_least_one_alive(processes):
+                            if time_in_seconds >= .1:
+                              time.sleep(.1)
+                            else:
+                              time.sleep(time_in_seconds)
+                            #can go negative (subtracts .1 even in the else case) but that's fine.
+                            time_in_seconds -= .1
+                      elif action_type == "stdin":
+                          string = action_obj["string"]
+                          targets = action_obj["containers"]
+                          for target in targets:
+                              p = processes[target]
+                              # poll returns None if the process is still running.
+                              if p.poll() == None:
+                                  p.stdin.write(string.encode('utf-8'))
+                                  p.stdin.flush()
+                              else:
+                                  pass
+
                     #Now that all dockers are running, wait on their return code for success or failure. If any fail, we count it
                     #   as a total failure.
-                    for process in processes:
+                    for name, process in processes.items():
                         process.wait()
                         rc = process.returncode
                         runner_success = rc if first_testcase else max(runner_success, rc)
@@ -136,7 +153,7 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                     print('An error occurred when grading by docker.')
                     traceback.print_exc()
                 finally:
-                    clean_up_containers(container_info,job_id,is_batch_job,which_untrusted,item_name,grading_began)
+                    clean_up_containers(container_info,job_id,is_batch_job,which_untrusted,item_name,grading_began,use_router)
                     print("CLEANED UP CONTAINERS")
             else:
                 try:
@@ -176,6 +193,14 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
             grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,"","",msg)
     return runner_success
 
+
+def at_least_one_alive(processes):
+  for name, process in processes.items():
+    if process.poll() == None:
+      return True
+  return False
+
+
 def setup_folder_for_grading(target_folder, tmp_work, job_id, tmp_logs):
     #The paths to the important folders.
     tmp_work_test_input = os.path.join(tmp_work, "test_input")
@@ -204,7 +229,7 @@ def setup_folder_for_grading(target_folder, tmp_work, job_id, tmp_logs):
 #     'outgoing_connections' : [OTHER DOCKER NAMES],
 #   }
 # }
-def find_container_information(testcase, testcase_num):
+def find_container_information(testcase, testcase_num, use_router):
   if not 'containers' in testcase:
     raise SystemExit("Error, this container's testcase {0} is missing the 'containers' field".format(testcase_num))
 
@@ -216,27 +241,16 @@ def find_container_information(testcase, testcase_num):
     # Get the name, image, and outgoing_connections out of the instructor specification, filling in defaults if necessary.
     # Container name will always be set, and is populated by the complete config if not specified by the instructor
     container_name  = container_spec['container_name']
-    #TODO the default container image should eventually be stored somewhere rather than hardcoded.
-    #container_image = container_spec['container_image'] if container_spec['container_image'] != '' else "ubuntu:custom"
-    #outgoing_conns  = container_spec['outgoing_connections']
 
-    #TODO temp version until auto-population is implemented
-    if 'container_image' in container_spec and container_spec['container_image'] != '':
-      container_image = container_spec['container_image']
-    else:
-      container_image = 'ubuntu:custom'
-
-    if 'outgoing_connections' in container_spec:
-      outgoing_conns = container_spec['outgoing_connections']
-    else:
-      outgoing_conns = []
-
+    container_image = container_spec['container_image']
+    outgoing_conns  = container_spec['outgoing_connections']
 
     container_info_element = create_container_info_element(container_image, outgoing_conns)
     container_info[container_name] = container_info_element
     num += 1
 
-  if len(container_info) > 1 and 'router' not in container_info:
+  #TODO: Remove this eventually.
+  if len(container_info) > 1 and 'router' not in container_info and use_router:
     container_info['router'] = container_info_element("ubuntu:custom", [])
 
   return container_info
@@ -259,10 +273,8 @@ def create_container_subfolders(container_info, target_folder, which_untrusted):
       grade_item.untrusted_grant_rwx_access(which_untrusted, mounted_directory)
       container_info[name]['mounted_directory'] = mounted_directory
 
-#dockers will either be a list of docker names or None.
-#If dockers is a list of docker names, spin up a docker for each name.
-#If dockers is none, create default docker names.
-def launch_containers(container_info, target_folder, job_id,is_batch_job,which_untrusted,submission_path,grading_began):
+def launch_containers(container_info, target_folder, job_id,is_batch_job,which_untrusted,submission_path,grading_began,
+                                                                                queue_obj,submission_string,testcase_num):
   #We must construct every container requested in container_info.
   for name in container_info:
     #Grading happens in target_folder if there is only one docker. Otherwise, it happens in target_docker/container_name
@@ -276,16 +288,30 @@ def launch_containers(container_info, target_folder, job_id,is_batch_job,which_u
     container_image = container_info[name]['container_image']
     # Launch the requeseted container
     container_id = launch_container(container_name, container_image, mounted_directory, job_id, is_batch_job, which_untrusted,
-                                    submission_path,grading_began)
+                                    submission_path,grading_began,queue_obj,submission_string,testcase_num,name)
     #add the container_id to the container info for use later.
     container_info[name]['container_id'] = container_id
 
 #Launch a single docker.
-def launch_container(container_name, container_image, mounted_directory,job_id,is_batch_job,which_untrusted,submission_path,grading_began):
+def launch_container(container_name, container_image, mounted_directory,job_id,is_batch_job,which_untrusted,submission_path,
+                                                                  grading_began,queue_obj,submission_string,testcase_num,name):
   #TODO error handling.
-  this_container = subprocess.check_output(['docker', 'run', '-t', '-d','-v', mounted_directory + ':' + mounted_directory,
+  untrusted_uid = str(getpwnam(which_untrusted).pw_uid)
+  this_container = subprocess.check_output(['docker', 'create','-i', '-u', untrusted_uid, '--network', 'none',
+                                           '-v', mounted_directory + ':' + mounted_directory,
+                                           '-w', mounted_directory,
                                            '--name', container_name,
-                                           container_image]).decode('utf8').strip()
+                                           container_image,
+                                           #The command to be run.
+                                           os.path.join(mounted_directory, 'my_runner.out'),
+                                             queue_obj['gradeable'],
+                                             queue_obj['who'],
+                                             str(queue_obj['version']),
+                                             submission_string,
+                                             str(testcase_num),
+                                             name
+                                           ]).decode('utf8').strip()
+
   dockerlaunch_done =dateutils.get_current_time()
   dockerlaunch_time = (dockerlaunch_done-grading_began).total_seconds()
   grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,submission_path,"dcct:",dockerlaunch_time,
@@ -293,34 +319,53 @@ def launch_container(container_name, container_image, mounted_directory,job_id,i
   return this_container
 
 
-#Connect dockers in a network, updates the container_info with network names, and creates knownhosts.csv
-def network_containers(container_info,target_folder,test_input_folder,job_id,is_batch_job,which_untrusted,submission_path,grading_began):
-  #if there are multiple containers, create a router and a network. Otherwise, return. 
+
+def network_containers(container_info,test_input_folder,which_untrusted, use_router,single_port_per_container):
   if len(container_info) <= 1:
     return
 
+  #remove all containers from the none network
+  for name, info in sorted(container_info.items()):
+    container_id = info['container_id']
+    subprocess.check_output(['docker', 'network','disconnect', 'none', container_id]).decode('utf8').strip()
+
+
+  if use_router:
+    network_containers_with_router(container_info,which_untrusted)
+  else:
+    network_containers_routerless(container_info,which_untrusted)
+
+  create_knownhosts_csv(container_info,test_input_folder,single_port_per_container)
+
+def network_containers_routerless(container_info,which_untrusted):
+  network_name = '{0}_routerless_network'.format(which_untrusted)
+
+  #create the global network
+  subprocess.check_output(['docker', 'network', 'create', '--internal', '--driver', 'bridge', network_name]).decode('utf8').strip()
+
+  for name, info in sorted(container_info.items()):
+      my_full_name = "{0}_{1}".format(which_untrusted, name)
+      #container_info[name]['network'] = network_name
+      print('adding {0} to network {1}'.format(name,network_name))
+      subprocess.check_output(['docker', 'network', 'connect', '--alias', name, network_name, my_full_name]).decode('utf8').strip()
+
+#Connect dockers in a network, updates the container_info with network names, and creates knownhosts.csv
+def network_containers_with_router(container_info,which_untrusted):
+  #if there are multiple containers, create a router and a network. Otherwise, return.
   router_name = "{0}_router".format(which_untrusted)
-
-  #TODO this is where we create the connections text file.
-  current_tcp_port = 9000
-  current_udp_port = 15000
-
-  tcp_connection_list = []
-  udp_connection_list = []
   router_connections = {}
+
   for name, info in sorted(container_info.items()):
       my_name = "{0}_{1}".format(which_untrusted, name)
       network_name = "{0}_network".format(my_name)
-      #pass in docker names by environment variables -e DOCKER_NAME={0}
+
       if name == 'router':
-        continue
-      if len('outgoing_connections') == 0:
         continue
 
       container_info[name]['network'] = network_name
       actual_name  = '{0}_Actual'.format(name)
       print('adding {0} to network {1} with actual name {2}'.format(name,network_name, actual_name))
-      subprocess.check_output(['docker', 'network', 'create', '--driver', 'bridge', network_name]).decode('utf8').strip()
+      subprocess.check_output(['docker', 'network', 'create', '--internal', '--driver', 'bridge', network_name]).decode('utf8').strip()
       subprocess.check_output(['docker', 'network', 'connect', '--alias', actual_name, network_name, my_name]).decode('utf8').strip()
 
       #The router pretends to be all dockers on this network.
@@ -336,10 +381,6 @@ def network_containers(container_info,target_folder,test_input_folder,job_id,is_
           #  so we group together all connections here, and then connect later.
           router_connections[name].append(connected_machine)
           router_connections[connected_machine].append(name)
-          tcp_connection_list.append([name, connected_machine, str(current_tcp_port)])
-          udp_connection_list.append([name, connected_machine, str(current_udp_port)])
-          current_tcp_port +=1
-          current_udp_port +=1
   
   # Connect the router to all networks.
   for startpoint, endpoints in router_connections.items():
@@ -357,12 +398,43 @@ def network_containers(container_info,target_folder,test_input_folder,job_id,is_
       subprocess.check_output(['docker', 'network', 'connect'] + aliases + [network_name, router_name]).decode('utf8').strip()
 
 
+
+def create_knownhosts_csv(container_info,test_input_folder,single_port_per_container):
+  tcp_connection_list = list()
+  udp_connection_list = list()
+  current_tcp_port = 9000
+  current_udp_port = 15000
+
+  host_to_port = dict()
+  for name, info in sorted(container_info.items()):
+      for connected_machine in info['outgoing_connections']:
+          if connected_machine == name:
+              continue
+          if single_port_per_container:
+            if not connected_machine in host_to_port:
+              host_to_port[connected_machine] = dict()
+              host_to_port[connected_machine]['tcp_port'] = str(current_tcp_port)
+              host_to_port[connected_machine]['udp_port'] = str(current_udp_port)
+              current_tcp_port += 1
+              current_udp_port += 1
+            my_tcp_port = host_to_port[connected_machine]['tcp_port']
+            my_udp_port = host_to_port[connected_machine]['udp_port']
+          else:
+            my_tcp_port = current_tcp_port
+            my_udp_port = current_udp_port
+            current_tcp_port += 1
+            current_udp_port += 1
+          
+          tcp_connection_list.append([name, connected_machine,  my_tcp_port])
+          udp_connection_list.append([name, connected_machine,  my_udp_port])
+
   #writing complete knownhosts csvs to input directory
   knownhosts_location = os.path.join(test_input_folder, 'knownhosts_tcp.csv')
   with open(knownhosts_location, 'w') as csvfile:
     csvwriter = csv.writer(csvfile)
     for tup in tcp_connection_list:
       csvwriter.writerow(tup)
+
   knownhosts_location = os.path.join(test_input_folder, 'knownhosts_udp.csv')
   with open(knownhosts_location, 'w') as csvfile:
     csvwriter = csv.writer(csvfile)
@@ -371,7 +443,7 @@ def network_containers(container_info,target_folder,test_input_folder,job_id,is_
 
 
 
-def clean_up_containers(container_info,job_id,is_batch_job,which_untrusted,submission_path,grading_began):
+def clean_up_containers(container_info,job_id,is_batch_job,which_untrusted,submission_path,grading_began,use_router):
     # First, clean up the dockers.
     for name, info in container_info.items():
         c_id = info['container_id']
@@ -381,13 +453,22 @@ def clean_up_containers(container_info,job_id,is_batch_job,which_untrusted,submi
         dockerdestroy_time = (dockerdestroy_done-grading_began).total_seconds()
         grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,submission_path,"ddt:",
                                         dockerdestroy_time, "docker container {0} destroyed".format(name))
-    #Networks must be removed AFTER all docker endpoints have been shut down.
-    for name, info in container_info.items():
-        if 'network' in info:
-            network_name = info['network']
-            subprocess.call(['docker', 'network', 'rm', network_name])
-            network_destroy_done=dateutils.get_current_time()
-            network_destroy_time = (network_destroy_done-grading_began).total_seconds()
-            grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,submission_path,"ddt:",
-                                            network_destroy_time,"docker network {0} destroyed".format(network_name))
+
+    if not use_router:
+      network_name = '{0}_routerless_network'.format(which_untrusted)
+      subprocess.call(['docker', 'network', 'rm', network_name])
+      network_destroy_done=dateutils.get_current_time()
+      network_destroy_time = (network_destroy_done-grading_began).total_seconds()
+      grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,submission_path,"ddt:",
+                                      network_destroy_time,"docker network {0} destroyed".format(network_name))
+    else:
+      #Networks must be removed AFTER all docker endpoints have been shut down.
+      for name, info in container_info.items():
+          if 'network' in info:
+              network_name = info['network']
+              subprocess.call(['docker', 'network', 'rm', network_name])
+              network_destroy_done=dateutils.get_current_time()
+              network_destroy_time = (network_destroy_done-grading_began).total_seconds()
+              grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,submission_path,"ddt:",
+                                              network_destroy_time,"docker network {0} destroyed".format(network_name))
 

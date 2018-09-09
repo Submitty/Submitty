@@ -974,6 +974,7 @@ table .instructor .two-options{
     margin-bottom: -2px;
     margin-left: -30px;
     margin-right: -30px;
+    height: 32px;
 }
 
 #nav-buttons ul li a.nav-row.selected {
@@ -999,9 +1000,8 @@ table .instructor .two-options{
 
 #sidebar.collapsed #nav-buttons ul li .collapse-icon {
     display: inline-block;
-    font-size: 24px;
     width: 60px;
-    padding: 6px;
+    padding: 8px 6px;
     text-align: center;
 }
 
@@ -1067,6 +1067,7 @@ table .instructor .two-options{
     padding-bottom: 0;
     margin-top: 6px;
     margin-bottom: 4px;
+    height: initial;
 }
 
 #sidebar.collapsed #nav-buttons ul li.short-line {

@@ -1,60 +1,58 @@
-<div id="grading_rubric" class="draggable rubric_panel {{ gradeable.useTAGrading() ? "" : "empty" }}" style="right:15px; top:140px; width:48%; height:42%;">
+<div id="grading_rubric" class="draggable rubric_panel {{ is_ta_grading ? "" : "empty" }}" style="right:15px; top:140px; width:48%; height:42%;">
     <div class="draggable_content">
-        <span class="grading_label">Grading Rubric</span>
-        {% if gradeable.useTAGrading() %}
-            <div style="float: right; position: relative; top: 10px; right: 1%;">
-                {# Verify all button #}
-                {% if display_verify_all %}
-                    <input id='verifyAllButton' type='button' style="display: inline;" class="btn btn-default" value='Verify All' onclick='verifyMark("{{ gradeable.getId() }}",-1,"{{ user.getAnonId() }}",true);'/>
-                {% endif %}
-                {# /Edit Mode Button #}
-                <span> <input id='EditModeButton' type='checkbox' value='Enable Editing Mode' onclick='toggleEditMode(); updateCookies();'/> Enable Editing Mode</span>
-                {# Checkboxes #}
-                {% if peer %}
-                    <span> <input type='hidden' id="overwrite-id" name='overwrite' value='1' onclick="updateCookies();"/></span>
-                {% else %}
-                    <span> <input type='checkbox' id="overwrite-id" name='overwrite' value='1' onclick="updateCookies();" checked/> Overwrite Grader </span>
-                {% endif %}
-                {# /Checkboxes #}
-            </div>
+        {% if is_ta_grading %}
+            <div id="rubric-container" class="container">
+                <div class="row row-wrap vertical-center">
+                    <span class="col grading_label">Grading Rubric</span>
+                    {# Wrong version warnings #}
+                    {% if not has_active_version %}
+                        {% if has_submission %}
+                            {# Cancelled submission #}
+                            <div class="red-message">Cancelled Submission</div>
+                        {% else %}
+                            {# No submission #}
+                            <div class="red-message">No Submission</div>
+                        {% endif %}
+                    {% elseif version_conflict %}
+                        {# Opened a different version #}
+                        <div class="red-message">Select the correct submission version to grade</div>
+                        <div id="version-conflict-indicator"></div>
+                    {% endif %}
 
-            {# Wrong version warnings #}
-            {% if gradeable.getActiveVersion() == 0 %}
-                {% if gradeable.hasSubmitted() %}
-                    {# Cancelled submission #}
-                    <div class="red-message" style="text-align: center">Cancelled Submission</div>
-                {% else %}
-                    {# No submission #}
-                    <div class="red-message" style="text-align: center">No Submission</div>
-                {% endif %}
-            {% elseif gradeable.getCurrentVersionNumber() != gradeable.getActiveVersion() %}
-                {# Opened a different version #}
-                <div class="red-message" style="text-align: center">Select the correct submission version to grade</div>
-            {% endif %}
-
-            <div class="inner-container" id="grading-box">
-                {% if gradeable.getActiveVersion() == 0 %}
-                    <h4>No Submission</h4>
-                    <script type="application/javascript">
-                        var grading_data = null;
-                    </script>
-                {% else %}
-                    <script type="application/javascript">
-                        var grading_data = {{ grading_data|raw }};
-                        renderGradeable(grading_data)
-                            .then(function(elements) {
-                                $("#grading-box").append(elements);
-                                updateAllProgressPoints();
-                            })
-                            .catch(function(err) {
-                                alert("Could not render gradeable: " + err.message);
-                                console.error(err);
+                    {# Verify all button #}
+                    {% if show_verify_all %}
+                        <div class="col-no-gutters">
+                            <input id="verify-all" type="button" class="btn btn-default" value="Verify All" onclick="onVerifyAll(this)"/>
+                        </div>
+                    {% endif %}
+                    {# Silent Edit Checkbox #}
+                    {% if show_silent_edit %}
+                        <div class="col-no-gutters">
+                            <input id="silent-edit-id" type="checkbox" title="Edit assigned marks without changing 'Graded By'" onclick="updateCookies()"/>Silent Regrade (don't change who graded)
+                        </div>
+                    {% endif %}
+                    {# Edit Mode Checkbox #}
+                    <div class="col-no-gutters">
+                        <input id="edit-mode-enabled" type="checkbox" title="Allows editing of mark point values, descriptions, and order" onclick="onToggleEditMode()"/>Edit Rubric
+                    </div>
+                </div>
+                <div id="grader-info" data-grader_id="{{ grader_id }}" data-can_verify="{{ can_verify }}" hidden></div>
+                <div class="inner-container" id="grading-box">
+                    {% if has_active_version %}
+                        <script type="application/javascript">
+                            $(document).ready(function () {
+                                loadTemplates().then(function() {
+                                    return reloadGradingRubric('{{ gradeable_id }}', '{{ anon_id }}');
+                                });
                             });
-                    </script>
-                {% endif %}
+                        </script>
+                    {% else %}
+                        <h4>No Submission</h4>
+                    {% endif %}
+                </div>
             </div>
         {% else %}
-            <div style="right:15px; top:140px; width:48%; padding: 10px;">
+            <div id="no-manual-grading-container">
                 <h3> No Manual Grading For This Assignment </h3>
             </div>
         {% endif %}

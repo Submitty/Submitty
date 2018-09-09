@@ -33,9 +33,12 @@ add_library(submitty_grading
 
 ###################################################################################
 
+SET(CMAKE_CXX_FLAGS "-lpthread")
+
 target_link_libraries(submitty_grading seccomp)
 
 set_property(TARGET submitty_grading APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
+
 
 include_directories(${GRADINGCODE})
 

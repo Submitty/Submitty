@@ -123,12 +123,12 @@ abstract class AbstractController {
     }
 
     /**
-     * Gets a user id from an anon id
+     * Gets a submitter id from an anon id
      * @param string $anon_id
      * @param $render_json true to render a JSEND response to the output in the failure/error case
      * @return string|bool false in the fail/error case
      */
-    protected function tryGetUserIdFromAnonId(string $anon_id, bool $render_json = true) {
+    protected function tryGetSubmitterIdFromAnonId(string $anon_id, bool $render_json = true) {
         if ($anon_id === '') {
             if ($render_json) {
                 $this->core->getOutput()->renderJsonFail('Missing anon_id parameter');
@@ -137,14 +137,14 @@ abstract class AbstractController {
         }
 
         try {
-            $user_id = $this->core->getQueries()->getUserFromAnon($anon_id)[$anon_id] ?? null;
-            if ($user_id === null) {
+            $submitter_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id);
+            if ($submitter_id === null) {
                 if ($render_json) {
                     $this->core->getOutput()->renderJsonFail('Invalid anon_id parameter');
                 }
                 return false;
             }
-            return $user_id;
+            return $submitter_id;
         } catch (\Exception $e) {
             if ($render_json) {
                 $this->core->getOutput()->renderJsonError('Error getting user id from anon_id parameter');

@@ -1,68 +1,16 @@
-{% set break_onclick = disabled ? "return false;" : "" %}
-<div class="gradeable">
+<div id="gradeable-rubric" class="gradeable" data-gradeable_id="{{ gradeable.id }}">
+    {% block header_content %}
+    {% endblock %}
 {# Components #}
-    {% for component in gradeable.components %}
-        {% if component.order != -1 %}
-            {% set c_index = loop.index %}
-            {% include "Component.twig" %}
-        {% endif %}
-    {% endfor %}
+    {# twig.js doens't support blocks inside of for loops ... ANNOYING #}
+    <div id="component-list">
+        {% block components_block %}
+        {% endblock %}
+    </div>
 {# /Components #}
 
-{# General Comment #}
-    <div class="box general-comment">
-        <div class="box-title" onclick="{{ break_onclick }}; toggleGeneralMessage(true);">
-            <span id="title-general" onclick="{{ break_onclick }}; toggleGeneralMessage(true);" data-changebg="true">
-                <b>General Comment</b>
-                <span class="done-container">
-                    <span id="save-mark-general" style="display: none;" data-changedisplay1="true">
-                        <i class="fa fa-check done-button" aria-hidden="true">Done</i>
-                    </span>
-                </span>
-            </span>
-            <span id="title-cancel-general" class="cancel-container" data-changebg="true" data-changedisplay1="true">
-                <span id="cancel-mark-general" onclick="{{ break_onclick }}; closeGeneralMessage(false);" data-changedisplay1="true">
-                    <i class="fa fa-times cancel-button" aria-hidden="true">Cancel</i>
-                </span>
-            </span>
-        </div>
-        <div>
-            <div class="box" id="summary-general" onclick="{{ break_onclick }}; openGeneralMessage();" data-changedisplay2="true">
-                <div class="box-title">
-                    <span id="rubric-custom">
-                        <span id="rubric-textarea-custom" name="comment-custom" class="rubric-textarea">{{ gradeable.overall_comment }}</span>
-                    </span>
-                </div>
-            </div>
-            <span id="extra-general" style="display: none" data-changebg="true" data-changedisplay1="true">
-                <div class="box">
-                    <div class="box-title">
-                        <span>
-                            <textarea id="comment-id-general" name="comment-general" rows="5" class="general-comment-entry" onkeyup="autoResizeComment(event);" placeholder="Overall message for student about the gradeable..." comment-position="0" {{ gradeable.disabled ? "disabled" : "" }}>{{ gradeable.overall_comment }}</textarea>
-                        </span>
-                    </div>
-                </div>
-            </span>
-        </div>
-    </div>
-{# /General Comment #}
-
-{# Total Box #}
-    <div class="box">
-        <div class="box-title badge-container">
-            <strong id="grading_total" class="badge">? / ?</strong>
-            <strong>Grading Total</strong>
-        </div>
-        <div class="box-title badge-container">
-            <strong id="autograding_total" class="badge">? / ?</strong>
-            <strong>Auto-Grading Total</strong>
-        </div>
-        <div class="box-title badge-container">
-            <strong id="score_total" class="badge">? / ?</strong>
-            <strong>Total</strong>
-        </div>
-    </div>
-{# /Total Box #}
+    {% block footer_content %}
+    {% endblock %}
 </div>
 
 <script type="text/javascript">
@@ -78,11 +26,12 @@
     function unloadSave() {
         if (!__unloadRequestSent) {
             __unloadRequestSent = true;
-            saveLastOpenedMark(false, function () {
-            }, function () {
-                // Unable to save so try saving at a different time
-                __unloadRequestSent = false;
-            });
+            AJAX_USE_ASYNC = false;
+            closeAllComponents(true)
+                .catch(function () {
+                    // Unable to save so try saving at a different time
+                    __unloadRequestSent = false;
+                });
         }
     }
     // Will work for Chrome

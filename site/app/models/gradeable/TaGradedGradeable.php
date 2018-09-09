@@ -17,7 +17,6 @@ use app\models\User;
  * @method void setOverallComment($comment)
  * @method int getId()
  * @method \DateTime|null getUserViewedDate()
- * @method GradedComponentContainer[] getGradedComponentContainers()
  */
 class TaGradedGradeable extends AbstractModel {
     /** @property @var GradedGradeable A reference to the graded gradeable this Ta grade belongs to */
@@ -29,7 +28,7 @@ class TaGradedGradeable extends AbstractModel {
     /** @property @var \DateTime|null The date the user viewed their grade */
     protected $user_viewed_date = null;
     /** @property @var GradedComponentContainer[] The GradedComponentContainers, indexed by component id */
-    protected $graded_component_containers = [];
+    private $graded_component_containers = [];
     /** @property @var GradedComponent[] The components that have been marked for deletion */
     private $deleted_graded_components = [];
 
@@ -61,25 +60,39 @@ class TaGradedGradeable extends AbstractModel {
         $this->modified = false;
     }
 
-    public function toArray() {
+    /**
+     * Gets the array representation of the submitter's TA grade.
+     *  Note: if a specific grader is provided, the 'graded_components' will be an array of GradedComponent's
+     *      indexed by component id, but if no grader is provided, 'graded_components' will be an array of GradedComponent[]'s
+     *      indexed by component id (for all graders).
+     * @param User|null $grader If provided, only the grades relevant to this grader will be fetched
+     * @return array
+     */
+    public function toArray($grader = null) {
         $details = parent::toArray();
 
         // Make sure to convert the date into a string
         $details['user_viewed_date'] = $this->user_viewed_date !== null ? DateUtils::dateTimeToString($this->user_viewed_date) : null;
 
-        // When serializing a graded gradeable, put the grader information into
-        //  the graded gradeable instead of each component so if one grader  grades
-        //  multiple components, their information only gets sent once
-        $details['graders'] = [];
-        /** @var GradedComponentContainer $container */
-        foreach ($this->graded_component_containers as $container) {
-            foreach ($container->getGradedComponents() as $graded_component) {
-                if ($graded_component->getGrader() !== null) {
-                    // Only set once if multiple components have the same grader
-                    if (!isset($details['graders'][$graded_component->getGrader()->getId()])) {
-                        $details['graders'][$graded_component->getGrader()->getId()] = $graded_component->getGrader()->toArray();
-                    }
+        /** @var GradedComponent[] $graded_components */
+        $graded_components = [];
+
+        // Get the graded components for the provided grader (or all for null)
+        if ($grader !== null) {
+            /** @var GradedComponentContainer $container */
+            foreach ($this->graded_component_containers as $container) {
+                $graded_component = $container->getGradedComponent($grader);
+                if ($graded_component !== null) {
+                    $graded_components[] = $graded_component;
+                    $details['graded_components'][$container->getComponent()->getId()] = $graded_component->toArray();
+                    $graders[$graded_component->getGrader()->getId()] = $graded_component->getGrader();
                 }
+            }
+        } else {
+            /** @var GradedComponentContainer $container */
+            foreach ($this->graded_component_containers as $container) {
+                $details['graded_components'][$container->getComponent()->getId()] = $container->toArray();
+                $graded_components = array_merge($graded_components, $container->getGradedComponents());
             }
         }
 
@@ -93,6 +106,14 @@ class TaGradedGradeable extends AbstractModel {
 //        $details['graded_percent'] = $graded_percent;
 
         return $details;
+    }
+
+    /**
+     * Gets all component containers
+     * @return GradedComponentContainer[]
+     */
+    public function getGradedComponentContainers() {
+        return $this->graded_component_containers;
     }
 
     /**
@@ -150,7 +171,7 @@ class TaGradedGradeable extends AbstractModel {
      * Gets the version number for the submission associated with this grade
      * @param bool $strict if true, all grades for this gradeable must have a consistent version
      *                      otherwise, return the first valid version number found
-     * @return bool|int
+     * @return bool|int returns false if $strict is true and the versions aren't consistent
      */
     public function getGradedVersion($strict = true) {
         $version = false;
@@ -182,7 +203,7 @@ class TaGradedGradeable extends AbstractModel {
 
     /**
      * Gets the manual grading points the student earned
-     * @return int
+     * @return float
      */
     public function getTotalScore() {
         $points_earned = 0.0;

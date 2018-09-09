@@ -73,6 +73,15 @@ class Team extends AbstractModel {
     }
 
     /**
+     * Gets the anonymous id of this team
+     * TODO: this is to create symmetry with the User class, teams' anon ids are just their ids for now
+     * @return string
+     */
+    public function getAnonId() {
+        return $this->id;
+    }
+
+    /**
      * Get registration section
      * @return integer
     */

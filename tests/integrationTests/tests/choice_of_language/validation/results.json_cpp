@@ -80,7 +80,7 @@
             ],
             "points_awarded": 0,
             "test_name": "Test 3 C Compilation",
-            "testcase_message": "Compilation Error(s)."
+            "testcase_message": "Compilation Errors and/or Warnings."
         },
         {
             "autochecks": [

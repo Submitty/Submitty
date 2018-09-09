@@ -215,7 +215,8 @@ class GradedComponentContainer extends AbstractModel {
         foreach ($this->graded_components as $graded_component) {
             $points_earned += $graded_component->getTotalScore();
         }
-        $points_earned /= count($this->graded_components);
+        // Note: this is called 'safeCalcPercent', but it does not clamp the output to 1.0
+        $points_earned = Utils::safeCalcPercent($points_earned, count($this->graded_components));
         return $this->ta_graded_gradeable->getGradedGradeable()->getGradeable()->roundPointValue($points_earned);
     }
 

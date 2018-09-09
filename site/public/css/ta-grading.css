@@ -204,13 +204,6 @@ progress::-webkit-progress-value {
     font-size: 16pt;
 }
 
-.inner-container {
-    margin-top: 0px;
-    margin-right: 20px;
-    margin-bottom: 20px;
-    margin-left: 10px;
-}
-
 .file-viewer{
     margin-right: 10px;
     cursor: pointer;
@@ -289,7 +282,7 @@ progress::-webkit-progress-value {
     width: 14px;
 }
 
-.icon-got-this-mark {
+.icon-mark-stats {
     visibility: visible; 
     cursor: pointer; 
     position: relative; 
@@ -305,87 +298,13 @@ progress::-webkit-progress-value {
     text-align: left;
 }
 
-.rubric-table {
-    border: 1px solid #dddddd;
-    border-collapse: collapse;
-    -webkit-border-radius: 4px;
-        -moz-border-radius: 4px;
-            border-radius: 4px;
-}
-
-.rubric-table th, 
-.rubric-table td {
-    padding: 8px;
-    line-height: 20px;
-    text-align: left;
-    vertical-align: top;
-    border-top: 1px solid #dddddd;
-    border-left: 1px solid #dddddd;
-}
-
-.rubric-table th {
-  font-weight: bold;
-}
-
-.rubric-table thead th {
-  vertical-align: bottom;
-}
-
-.rubric-table caption + thead tr:first-child th,
-.rubric-table caption + thead tr:first-child td,
-.rubric-table colgroup + thead tr:first-child th,
-.rubric-table colgroup + thead tr:first-child td,
-.rubric-table thead:first-child tr:first-child th,
-.rubric-table thead:first-child tr:first-child td {
-  border-top: 0;
-}
-
-.rubric-table tbody > tr:nth-child(odd) > td,
-.rubric-table tbody > tr:nth-child(odd) > th {
-  background-color: #f9f9f9;
-}
-
-.rubric-textarea {
-    width:95%;
-    min-height:20px;
-    float:left;
-    word-break: break-word;
-    white-space: pre-line;
-    cursor: pointer;
+#overall-comment-collapsed {
+    padding: 0 0 0 20px;
 }
 
 .ta-rubric-table {
-    width: 100%;
     border-collapse: collapse;
     border-radius: 4px;
-}
-
-.ta-rubric-table th, 
-.ta-rubric-table td {
-    padding: 5px;
-    vertical-align: top;
-    border: 1px solid #dddddd;
-}
-
-.ta-rubric-table th {
-  font-weight: bold;
-}
-
-.ta-rubric-table thead th {
-  vertical-align: bottom;
-}
-
-.ta-rubric-table caption + thead tr:first-child th,
-.ta-rubric-table caption + thead tr:first-child td,
-.ta-rubric-table colgroup + thead tr:first-child th,
-.ta-rubric-table colgroup + thead tr:first-child td,
-.ta-rubric-table thead:first-child tr:first-child th,
-.ta-rubric-table thead:first-child tr:first-child td {
-  border-top: 0;
-}
-
-.ta-rubric-table-background {
-    background-color: #b3b3b3;
 }
 
 tr.is_publish {
@@ -438,28 +357,45 @@ tr.is_publish {
 
 /* Gradeable */
 
+#no-manual-grading-container {
+    margin: 15px;
+}
+
 .gradeable .general-comment {
     background-color:#E9EFEF;
     cursor: pointer;
 }
 
 .gradeable .general-comment-entry {
-    width:98%;
+    width: 100%;
     min-height:100px;
-    resize:none;
-    float:left;
+    resize: vertical;
+}
+
+#rubric-container {
+    padding: 0 10px 0 10px;
+}
+
+.gradeable .row-wrap {
+    flex-wrap: wrap-reverse;
+}
+
+.vertical-center {
+    align-items: center;
+}
+
+.gradeable .hidden {
+    display: none;
 }
 
 /* Components */
 
 .gradeable .component {
-    cursor: pointer;
+    cursor: default;
 }
 
-.gradeable .component .gradebar {
-    white-space: nowrap;
-    vertical-align: middle;
-    text-align: center;
+.gradeable .component .badge-container.edit-mode {
+    min-width: 170px;
 }
 
 .gradeable .version-warning {
@@ -471,20 +407,135 @@ tr.is_publish {
 .gradeable .graded-by {
     font-style: italic;
     padding-right: 10px;
+    display: inline-flex;
+    justify-content: flex-end;
 }
 
-.gradeable .ta-student-note {
-    margin-bottom: 5px;
+.gradeable .ta-student-comment {
     color: #777;
-}
-
-.gradeable .grader-container {
-    float: right;
 }
 
 .gradeable .verify-container {
     display: inline;
     color: red;
+}
+
+.gradeable div.component-container {
+    display: flex;
+}
+
+.gradeable .edit-component-container .content-block textarea {
+    width: 100%;
+    resize: vertical;
+}
+
+.gradeable .edit-component-container .content-block input[type=text] {
+    width: 100%;
+}
+
+.gradeable .edit-component-container .content-block div.page-label {
+    display: inline-flex;
+    align-items: center;
+}
+
+.gradeable .component div.point-values {
+    padding: 2px;
+    margin-right: 10px;
+}
+
+.gradeable .component div.point-input-container {
+    padding-right: 2px;
+}
+
+.gradeable .component .col {
+    align-items: center;
+    display: inline-flex;
+}
+
+.gradeable .component .point-input-container {
+    max-width: 90px;
+}
+
+.gradeable .component .point-input-container input {
+    width: 100%;
+}
+
+.gradeable .component input.page-number {
+    width: 50px;
+}
+
+.gradeable .component .page-number-view {
+    padding-left: 10px;
+}
+
+.gradeable .component .box-title input[type=number] {
+    text-align: right;
+}
+
+.gradeable .component .badge {
+    min-width: 80px;
+}
+
+.gradeable .edit-component-container .right-block {
+    align-items: center;
+    display: inline-flex;
+}
+
+.gradeable .edit-component-container .reorder-component-container {
+    display: inline-flex;
+    justify-content: center;
+    width: 30px;
+}
+
+.gradeable .col-label-fixed {
+    flex-grow: 0;
+    display: inline-flex;
+    align-items: center;
+    width: 120px;
+}
+
+.gradeable .point-input-row .col-label-fixed {
+    width: 220px;
+}
+
+.gradeable .tight-right {
+    padding-right: 0;
+}
+
+.gradeable .count-type-row {
+    min-height: 30px;
+}
+
+.gradeable .component .header-block {
+    cursor: pointer;
+}
+
+.gradeable .component .row.divider {
+    background: #DDD;
+    height: 2px;
+    width: 100%;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.gradeable .component .content-block {
+}
+
+/* Save tools */
+
+.save-tools-cancel:hover {
+    background-color: #FCC;
+}
+
+.save-tools-save:hover {
+    background-color: #CFC;
+}
+
+.gradeable .ta-rubric-table,
+.gradeable .received-marks-list {
+    padding: 8px;
 }
 
 .gradeable .done-container {
@@ -503,81 +554,188 @@ tr.is_publish {
     color: red;
 }
 
-.gradeable .summary-text {
-    word-wrap: break-word;
-    width:95%;
-    min-height:20px;
-    font-family: 'Source Sans Pro', sans-serif;
-    float:left;
-    cursor: pointer;
-}
-
-.gradeable .add-common-mark {
-    cursor: pointer;
-}
-
 /* Marks */
 
-.gradeable .mark-container {}
-
-.gradeable .mark-cell-box {
-    display: flex;
-    flex-direction: row;
+.gradeable span.col-no-gutters {
+    padding-left: 1px;
+    padding-right: 1px;
+    display: inline-flex;
     align-items: center;
 }
 
-.gradeable .mark {
-    visibility: visible;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 1.5em;
-    min-height: 1.5em;
-    box-sizing: content-box;
+.gradeable .mark-container {
+    min-height: 28px;
+}
+
+.gradeable .container.box-title {
+    padding-left: 5px;
+}
+
+.gradeable .mark-selector {
+    width: 20px;
+    height: 20px;
+    margin: 2px;
     border: 2px solid #000;
     border-radius: 4px;
     color: #888;
     font-size: 10px;
     font-family: 'Source Sans Pro', sans-serif;
     text-align: center;
-    vertical-align: middle;
 }
 
-.gradeable .mark.mark-has {
+.gradeable .mark-selector.mark-selected {
     color: #ccc;
     background-color: #000;
 }
 
-
-.gradeable input.mark-score {
-    resize:none;
-    width: 100%;
-    text-align: right;
+.gradeable .mark-selector.hidden {
+    display: none;
 }
 
-.gradeable .mark-score-container {
-    flex-direction: row;
+.gradeable .reorder-mark-container.hidden {
+    visibility: hidden;
+}
+
+.gradeable .mark-container span {
+    display: inline-flex;
+    box-sizing: content-box;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.gradeable .mark-container span.mark-points {
+    width: 60px;
+    justify-content: flex-end;
+}
+
+.gradeable .mark-container span.mark-title {
+    justify-content: flex-start;
+}
+
+.gradeable .mark-container span.mark-title textarea {
+    width: 100%;
+    resize: vertical;
+    min-height: 20px;
+}
+
+.gradeable .mark-container .mark-points input {
+    text-align: right;
+    width: 100%;
+    margin: 2px;
+}
+
+.gradeable .mark-container input:disabled {
+    background-color: transparent;
+    border: none;
+}
+
+.gradeable .mark-disabled span {
+    cursor: not-allowed;
+    opacity: 0.3;
+}
+
+.gradeable .mark-deleted {
+    background: #FFAAAA
+}
+
+.gradeable .mark-deleted span.delete-mark-container {
+    display: none;
+}
+
+.gradeable span.restore-mark-container {
+    display: none;
+}
+
+.gradeable .mark-deleted span.restore-mark-container {
+    display: inherit;
+}
+
+.gradeable span.reorder-mark-container {
+    min-width: 20px;
+    display: inline-flex;
+    justify-content: center;
     align-items: center;
 }
 
-.gradeable .mark-note {
-    width: 100%;
-    resize:none;
-}
-
-.gradeable .mark-custom-label {
-    margin-right: 0.5em;
-}
-
-.gradeable .mark-note-custom {
-    width: 100%;
-    resize:none;
+.gradeable span.mark-tools {
+    min-width: 20px;
+    width: 20px;
+    text-align: right;
+    opacity: 1.0;
 }
 
 .gradeable .mark-uneditable {
-    cursor: pointer;
+    cursor: default;
     border: none;
     outline: none;
     background-color: initial;
+}
+
+.mark-container .col-sm input {
+    width: 100%;
+    margin: 2px;
+}
+
+.gradeable .add-new-mark {
+    margin-left: 25px;
+}
+
+.gradeable .received-marks-list.container {
+    padding-left: 15px;
+    padding-top: 0;
+}
+
+.gradeable .received-marks-list.container .row .col-no-gutters.point-value,
+.gradeable .received-marks-list.container .row .col-no-gutters.indicator {
+    display: inline-flex;
+    align-items: center;
+    padding-left: 5px;
+    padding-right: 5px;
+    width: 30px;
+}
+
+.gradeable .received-marks-list.container .row .col-no-gutters.point-value {
+    justify-content: flex-end;
+}
+
+.gradeable .received-marks-list.container .row .col-no-gutters.indicator {
+    justify-content: center;
+}
+
+/* Mark conflict popup */
+
+#mark-conflict-popup div.mark-conflict-row {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+#mark-conflict-popup .mark-conflict-row span {
+    padding: 3px;
+    border-width: 2px;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+}
+
+#mark-conflict-popup .mark-conflict-row .button-container {
+    width: 150px;
+}
+
+#mark-conflict-popup .mark-conflict-row .button-container input {
+    width: 100%;
+}
+
+#mark-conflict-popup .mark-conflict-row.mark-resolved,
+#mark-conflict-popup .mark-conflict-row.hidden {
+    display: none;
+}
+
+#mark-conflict-popup .conflict-resolve-progress {
+    width: fit-content;
+    margin: 0 auto;
+}
+
+#mark-conflict-popup .mark-conflict-container {
+    margin-top: 25px;
 }
