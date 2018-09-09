@@ -168,8 +168,7 @@ class ElectronicGraderController extends GradingController {
             }
         }
 
-        $debug = $this->core->getConfig()->isDebug();
-        $this->core->getOutput()->renderOutput(array('PDF'), 'showPDFEmbedded', $gradeable_id, $user_id, $filename, $annotation_jsons, false, $debug);
+        $this->core->getOutput()->renderOutput(array('PDF'), 'showPDFEmbedded', $gradeable_id, $user_id, $filename, $annotation_jsons, false);
     }
 
     public function showPDFAnnotationFullPage(){
