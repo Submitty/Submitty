@@ -11,7 +11,7 @@ class PDFView extends AbstractView {
      *
      * @return a twig output of either student view or grader view.
      */
-    public function showPDFEmbedded($gradeable_id, $user_id, $filename, $annotation_jsons, $is_student, $is_debug = false){
+    public function showPDFEmbedded($gradeable_id, $user_id, $filename, $annotation_jsons, $is_student){
         $this->core->getOutput()->useFooter(false);
         $this->core->getOutput()->useHeader(false);
         $pdf_url = $this->core->buildUrl(array('component' => 'misc', 'page' => 'encodePDF'));
@@ -22,8 +22,7 @@ class PDFView extends AbstractView {
             'filename' => $filename,
             'annotation_jsons' => json_encode($annotation_jsons),
             'student_popup' => $is_student,
-            'pdf_url_base' => $pdf_url,
-            'is_debug' => $is_debug
+            'pdf_url_base' => $pdf_url
         ]);
     }
 }
