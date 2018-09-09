@@ -412,14 +412,6 @@ EOF
     cp ${SUBMITTY_REPOSITORY}/.setup/apache/www-data /etc/apache2/suexec/www-data
     chmod 0640 /etc/apache2/suexec/www-data
 
-
-    #############
-    #NPM install
-    #############
-
-    curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
-    apt-get install -y nodejs
-
     #################################################################
     # PHP SETUP
     #################
