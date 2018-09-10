@@ -61,6 +61,7 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
             if USE_DOCKER:
                 try:
                     use_router = testcases[testcase_num-1]['use_router']
+                    single_port_per_container = testcases[testcase_num-1]['single_port_per_container']
                     # returns a dictionary where container_name maps to outgoing connections and container image
                     container_info = find_container_information(testcases[testcase_num -1], testcase_num, use_router)
                     # Creates folders for each docker container if there are more than one. Otherwise, we grade in testcase_folder.
@@ -72,7 +73,7 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                                          item_name,grading_began, queue_obj,submission_string,testcase_num)
                     # Networks containers together if there are more than one of them. Modifies container_info to store 'network'
                     #   The name of the docker network it is connected to.
-                    network_containers(container_info,os.path.join(tmp_work, "test_input"),which_untrusted,use_router)
+                    network_containers(container_info,os.path.join(tmp_work, "test_input"),which_untrusted,use_router,single_port_per_container)
                     print('NETWORKED CONTAINERS')
                     #The containers are now ready to execute.
 
@@ -319,7 +320,7 @@ def launch_container(container_name, container_image, mounted_directory,job_id,i
 
 
 
-def network_containers(container_info,test_input_folder,which_untrusted, use_router):
+def network_containers(container_info,test_input_folder,which_untrusted, use_router,single_port_per_container):
   if len(container_info) <= 1:
     return
 
@@ -334,7 +335,7 @@ def network_containers(container_info,test_input_folder,which_untrusted, use_rou
   else:
     network_containers_routerless(container_info,which_untrusted)
 
-  create_knownhosts_csv(container_info,test_input_folder)
+  create_knownhosts_csv(container_info,test_input_folder,single_port_per_container)
 
 def network_containers_routerless(container_info,which_untrusted):
   network_name = '{0}_routerless_network'.format(which_untrusted)
@@ -398,20 +399,34 @@ def network_containers_with_router(container_info,which_untrusted):
 
 
 
-def create_knownhosts_csv(container_info,test_input_folder):
+def create_knownhosts_csv(container_info,test_input_folder,single_port_per_container):
   tcp_connection_list = list()
   udp_connection_list = list()
   current_tcp_port = 9000
   current_udp_port = 15000
 
+  host_to_port = dict()
   for name, info in sorted(container_info.items()):
       for connected_machine in info['outgoing_connections']:
           if connected_machine == name:
               continue
-          tcp_connection_list.append([name, connected_machine, str(current_tcp_port)])
-          udp_connection_list.append([name, connected_machine, str(current_udp_port)])
-          current_tcp_port +=1
-          current_udp_port +=1
+          if single_port_per_container:
+            if not connected_machine in host_to_port:
+              host_to_port[connected_machine] = dict()
+              host_to_port[connected_machine]['tcp_port'] = str(current_tcp_port)
+              host_to_port[connected_machine]['udp_port'] = str(current_udp_port)
+              current_tcp_port += 1
+              current_udp_port += 1
+            my_tcp_port = host_to_port[connected_machine]['tcp_port']
+            my_udp_port = host_to_port[connected_machine]['udp_port']
+          else:
+            my_tcp_port = current_tcp_port
+            my_udp_port = current_udp_port
+            current_tcp_port += 1
+            current_udp_port += 1
+          
+          tcp_connection_list.append([name, connected_machine,  my_tcp_port])
+          udp_connection_list.append([name, connected_machine,  my_udp_port])
 
   #writing complete knownhosts csvs to input directory
   knownhosts_location = os.path.join(test_input_folder, 'knownhosts_tcp.csv')
