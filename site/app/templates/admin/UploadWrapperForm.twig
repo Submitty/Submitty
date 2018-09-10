@@ -1,16 +1,16 @@
 {% import _self as self %}
 <div class="content">
 	<h1>Customize Website Theme</h1>
-	<p>
+	<div>
         Instructors can upload simple html files to use as a wrapper around the Submitty website.<br>
         They can be placed in any of the locations shown in the below diagram.<br>
         Note that they are loaded in frames and will not be able to run scripts or affect the rest of Submitty.<br>
         <br>
         You can also upload a CSS file to override the default styles from Submitty.<br>
         Check out <a href="http://submitty.org/instructor/website_customization">Website Customization</a> for more information.
-    </p>
+    </div>
     <br>
-    <p>
+    <div>
         Here is how the site will be laid out:
         <div class="wrapper-example">
             <div class="wrapper-top">Top Bar</div>
@@ -21,119 +21,45 @@
             </div>
             <div class="wrapper-bottom">Bottom Bar</div>
         </div>
-    </p>
+    </div>
 	<br>
     <table class="wrapper-upload">
         <tr>
             <th>Panel</th>
+            <th>File Type</th>
             <th>Upload</th>
             <th>Current File</th>
         </tr>
-        <tr class="wrapper-top">
-            <td>Top Bar</td>
-            <td>
-                <form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_html'}) }}" method="POST" enctype="multipart/form-data">
-                    <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
-                    <input type="hidden" name="location" value="top_bar.html">
-                    <input type="file" name="wrapper_upload">
-                    <input type="submit" class="btn btn-default" value="Upload" />
-                </form>
-            </td>
-            <td>
-                {% if wrapper_files['top_bar.html'] != null %}
-                    <form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'delete_uploaded_html'}) }}" method="post">
-                        <input type="hidden" name="location" value="top_bar.html">
-                        <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}">
-                        <input type="submit" class="btn btn-danger" value="Delete">&nbsp;
-                        {{ wrapper_files['top_bar.html'] }}
-                    </form>
-                {% endif %}
-            </td>
-        </tr>
-        <tr class="wrapper-left">
-            <td>Left Sidebar</td>
-            <td>
-                <form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_html'}) }}" method="POST" enctype="multipart/form-data">
-                    <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
-                    <input type="hidden" name="location" value="left_sidebar.html">
-                    <input type="file" name="wrapper_upload">
-                    <input type="submit" class="btn btn-default" value="Upload" />
-                </form>
-            </td>
-            <td>
-                {% if wrapper_files['left_sidebar.html'] != null %}
-                    <form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'delete_uploaded_html'}) }}" method="post">
-                        <input type="hidden" name="location" value="left_sidebar.html">
-                        <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}">
-                        <input type="submit" class="btn btn-danger" value="Delete">&nbsp;
-                        {{ wrapper_files['left_sidebar.html'] }}
-                    </form>
-                {% endif %}
-            </td>
-        </tr>
-        <tr class="wrapper-right">
-            <td>Right Sidebar</td>
-            <td>
-                <form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_html'}) }}" method="POST" enctype="multipart/form-data">
-                    <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
-                    <input type="hidden" name="location" value="right_sidebar.html">
-                    <input type="file" name="wrapper_upload">
-                    <input type="submit" class="btn btn-default" value="Upload" />
-                </form>
-            </td>
-            <td>
-                {% if wrapper_files['right_sidebar.html'] != null %}
-                    <form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'delete_uploaded_html'}) }}" method="post">
-                        <input type="hidden" name="location" value="right_sidebar.html">
-                        <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}">
-                        <input type="submit" class="btn btn-danger" value="Delete">&nbsp;
-                        {{ wrapper_files['right_sidebar.html'] }}
-                    </form>
-                {% endif %}
-            </td>
-        </tr>
-        <tr class="wrapper-bottom">
-            <td>Bottom Bar</td>
-            <td>
-                <form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_html'}) }}" method="POST" enctype="multipart/form-data">
-                    <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
-                    <input type="hidden" name="location" value="bottom_bar.html">
-                    <input type="file" name="wrapper_upload">
-                    <input type="submit" class="btn btn-default" value="Upload" />
-                </form>
-            </td>
-            <td>
-                {% if wrapper_files['bottom_bar.html'] != null %}
-                    <form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'delete_uploaded_html'}) }}" method="post">
-                        <input type="hidden" name="location" value="bottom_bar.html">
-                        <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}">
-                        <input type="submit" class="btn btn-danger" value="Delete">&nbsp;
-                        {{ wrapper_files['bottom_bar.html'] }}
-                    </form>
-                {% endif %}
-            </td>
-        </tr>
-        <tr class="wrapper-css">
-            <td>Custom CSS</td>
-            <td>
-                <form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_html'}) }}" method="POST" enctype="multipart/form-data">
-                    <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
-                    <input type="hidden" name="location" value="override.css">
-                    <input type="file" name="wrapper_upload">
-                    <input type="submit" class="btn btn-default" value="Upload" />
-                </form>
-            </td>
-            <td>
-                {% if wrapper_files['override.css'] != null %}
-                    <form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'delete_uploaded_html'}) }}" method="post">
-                        <input type="hidden" name="location" value="override.css">
-                        <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}">
-                        <input type="submit" class="btn btn-danger" value="Delete">&nbsp;
-                        {{ wrapper_files['override.css'] }}
-                    </form>
-                {% endif %}
-            </td>
-        </tr>
+        {{ self.table_file(wrapper_files, "top_bar.html", "Top Bar", "HTML", "wrapper-top") }}
+        {{ self.table_file(wrapper_files, "left_sidebar.html", "Left Sidebar", "HTML", "wrapper-left") }}
+        {{ self.table_file(wrapper_files, "right_sidebar.html", "Right Sidebar", "HTML", "wrapper-right") }}
+        {{ self.table_file(wrapper_files, "bottom_bar.html", "Bottom Bar", "HTML", "wrapper-bottom") }}
+        {{ self.table_file(wrapper_files, "override.css", "Custom Style", "CSS", "wrapper-css") }}
+        {{ self.table_file(wrapper_files, "sidebar.json", "Sidebar Links", "JSON", "wrapper-css") }}
     </table>
-
 </div>
+
+{% macro table_file(wrapper_files, file, name, type, class) %}
+    <tr class="{{ class }}">
+        <td>{{ name }}</td>
+        <td>{{ type }}</td>
+        <td>
+            <form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_html'}) }}" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+                <input type="hidden" name="location" value="{{ file }}">
+                <input type="file" name="wrapper_upload">
+                <input type="submit" class="btn btn-default" value="Upload" />
+            </form>
+        </td>
+        <td>
+            {% if wrapper_files[file] != null %}
+                <form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'delete_uploaded_html'}) }}" method="post">
+                    <input type="hidden" name="location" value="{{ file }}">
+                    <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}">
+                    <input type="submit" class="btn btn-danger" value="Delete">&nbsp;
+                    {{ wrapper_files[file] }}
+                </form>
+            {% endif %}
+        </td>
+    </tr>
+{% endmacro %}
