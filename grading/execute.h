@@ -46,4 +46,4 @@ bool delay_and_mem_check(float sleep_time_in_microseconds, int childPID, float& 
 
 std::string output_of_system_command(const char* cmd);
 
-void cin_reader(std::mutex* lock, std::queue<std::string>* input_queue);
+void cin_reader(std::mutex* lock, std::queue<std::string>* input_queue, bool* CHILD_NOT_TERMINATED);

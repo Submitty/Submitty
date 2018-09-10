@@ -190,14 +190,16 @@ class AdminGradeableController extends AbstractController {
 
         // Configs stored in a private repository (specified in course config)
         $config_repo_name = $this->core->getConfig()->getPrivateRepository();
-        $repository_config_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), $config_repo_name);
-        $all_repository_configs = FileUtils::getAllFiles($repository_config_dir);
         $all_repository_config_paths = array();
-        foreach ($all_repository_configs as $file) {
-            $all_repository_config_paths[] = $file['path'];
-            // If this happens then select the third radio button 'Use Private Repository'
-            if ($file['path'] === $saved_config_path) {
-                $config_select_mode = 'repo';
+        if ($config_repo_name !== '') {
+            $repository_config_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), $config_repo_name);
+            $all_repository_configs = FileUtils::getAllFiles($repository_config_dir);
+            foreach ($all_repository_configs as $file) {
+                $all_repository_config_paths[] = $file['path'];
+                // If this happens then select the third radio button 'Use Private Repository'
+                if ($file['path'] === $saved_config_path) {
+                    $config_select_mode = 'repo';
+                }
             }
         }
 
