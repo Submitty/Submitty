@@ -4,13 +4,13 @@ let currentTool;
 
 let documentId = '';
 let PAGE_HEIGHT;
-let RENDER_OPTIONS = {
+window.RENDER_OPTIONS = {
     documentId,
     pdfDocument: null,
     scale: parseFloat(localStorage.getItem('scale')) || 1,
     rotate: parseInt(localStorage.getItem('rotate')) || 0
 };
-let GENERAL_INFORMATION = {
+window.GENERAL_INFORMATION = {
     grader_id: "",
     user_id: "",
     gradeable_id: "",
@@ -19,34 +19,18 @@ let GENERAL_INFORMATION = {
 
 PDFJS.workerSrc = 'js/pdf/pdf.worker.min.js';
 
-/*
- * This chunk renders the page when scrolling. It also makes sure that no page is rendered more than once.
- * NOTE: Currently this is disabled because it causes too many bugs. Will re-enable if performance becomes a
- * big issue.
- */
 let NUM_PAGES = 0;
-// let renderedPages = [];
-// let okToRender = false;
-// document.getElementById('file_content').addEventListener('scroll', function (e) {
-//     let visiblePageNum = Math.round(e.target.scrollTop / PAGE_HEIGHT) + 1;
-//     let visiblePage = document.querySelector(`.page[data-page-number="${visiblePageNum}"][data-loaded="false"]`);
-//
-//     if (renderedPages.indexOf(visiblePageNum) == -1){
-//         okToRender = true;
-//         renderedPages.push(visiblePageNum);
-//     } else {
-//         okToRender = false;
-//     }
-//
-//     if (visiblePage && okToRender) {
-//         setTimeout(function () {
-//             UI.renderPage(visiblePageNum, RENDER_OPTIONS);
-//         });
-//     }
-// });
 
-function render(gradeable_id, user_id, grader_id, file_name) {
-    let url = buildUrl({'component': 'misc', 'page': 'base64_encode_pdf'});
+//For the student popup window, buildURL doesn't work because the context switched. Therefore, we need to pass in the url
+//as a parameter.
+function render_student(gradeable_id, user_id, file_name, pdf_url){
+    render(gradeable_id, user_id, "", file_name, pdf_url)
+}
+
+function render(gradeable_id, user_id, grader_id, file_name, url = "") {
+    if(url === ""){
+        url = buildUrl({'component': 'misc', 'page': 'base64_encode_pdf'});
+    }
     $.ajax({
         type: 'POST',
         url: url,

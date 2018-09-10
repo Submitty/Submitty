@@ -1,3 +1,6 @@
+const { UI } = PDFAnnotate;
+let RENDER_OPTIONS = window.RENDER_OPTIONS;
+let GENERAL_INFORMATION = window.GENERAL_INFORMATION;
 //Toolbar stuff
 (function (){
     let active_toolbar = true;
