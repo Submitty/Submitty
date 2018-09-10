@@ -2690,16 +2690,16 @@ function tryResolveMarkSave(gradeable_id, component_id, domMark, serverMark, old
 
 /**
  * Checks if two graded components are equal
- * @param {Object} gc1
- * @param {Object} gc2
+ * @param {Object} gcDOM
+ * @param {Object} gcOLD
  * @returns {boolean}
  */
-function gradedComponentsEqual(gc1, gc2) {
-    if (gc1.mark_ids.length !== gc1.mark_ids.length) return false;
-    for (let i = 0; i < gc1.mark_ids.length; i++) {
+function gradedComponentsEqual(gcDOM, gcOLD) {
+    if (gcDOM.mark_ids.length !== gcDOM.mark_ids.length) return false;
+    for (let i = 0; i < gcDOM.mark_ids.length; i++) {
         let found = false;
-        for (let j = 0; j < gc2.mark_ids.length; j++) {
-            if (gc2.mark_ids[j] === gc1.mark_ids[i]) {
+        for (let j = 0; j < gcOLD.mark_ids.length; j++) {
+            if (gcOLD.mark_ids[j] === gcDOM.mark_ids[i]) {
                 found = true;
             }
         }
@@ -2708,7 +2708,11 @@ function gradedComponentsEqual(gc1, gc2) {
         }
     }
 
-    return gc1.score === gc2.score && gc1.comment === gc2.comment;
+    if (gcDOM.custom_mark_selected) {
+        return gcDOM.score === gcOLD.score && gcDOM.comment === gcOLD.comment;
+    } else {
+        return gcOLD.score === 0.0 && gcOLD.comment === '';
+    }
 }
 
 /**
