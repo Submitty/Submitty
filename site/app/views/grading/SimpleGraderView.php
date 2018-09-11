@@ -24,11 +24,7 @@ class SimpleGraderView extends AbstractView {
         // Default is viewing your sections sorted by id
         // Limited grader does not have "View All"
         // If nothing to grade, Instructor will see all sections
-        if (!isset($_GET['view']) || $_GET['view'] !== 'all') {
-            $view = 'all';
-        } else {
-            $view = null;
-        }
+        $view_all = isset($_GET['view']) && $_GET['view'] === 'all';
         $components_numeric = [];
         $components_text = [];
 
@@ -83,7 +79,7 @@ class SimpleGraderView extends AbstractView {
             "action" => $action,
             "section_type" => $section_type,
             "show_all_sections_button" => $show_all_sections_button,
-            "view_all" => $view,
+            "view_all" => $view_all,
             "student_full" => $student_full,
             "components_numeric" => $components_numeric,
             "components_text" => $components_text,
