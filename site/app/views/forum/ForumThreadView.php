@@ -443,6 +443,7 @@ HTML;
 							if($thread_id == -1) {
 								$thread_id = $post["thread_id"];
 							}
+                            $first_post_id = $this->core->getQueries()->getFirstPostForThread($thread_id)['id'];
 							$return .= $this->createPost($thread_id, $post, $function_date, $title_html, $first, 1, $display_option);		
 							if($first){
 								$first= false;

@@ -449,7 +449,7 @@ class AutoGradingView extends AbstractView {
         $precision_parts = explode('.', strval($gradeable->getPrecision()));
         if (count($precision_parts) > 1) {
             // TODO: this hardcoded value will mean a weird precision value (like 1/3) won't appear ridiculous
-            $num_decimals = min(3, count($precision_parts[1]));
+            $num_decimals = min(3, count($precision_parts));
         }
 
         $component_data = array_map(function (Component $component) use ($ta_graded_gradeable) {
