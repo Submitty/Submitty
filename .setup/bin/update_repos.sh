@@ -29,6 +29,7 @@ min_AnalysisTools_version=v.18.06.00
 min_Lichen_version=v.18.07.04
 min_RainbowGrades_version=v.18.07.00
 min_Tutorial_version=v.18.09.00
+min_pdf_annotate_js_version=v.18.09.00
 
 ########################################################################
 # Helper function requires 2 args, the short name of the repository,
@@ -100,3 +101,4 @@ clone_or_update_repo  AnalysisTools  ${min_AnalysisTools_version}
 clone_or_update_repo  Lichen  ${min_Lichen_version}
 clone_or_update_repo  RainbowGrades  ${min_RainbowGrades_version}
 clone_or_update_repo  Tutorial  ${min_Tutorial_version}
+clone_or_update_repo  pdf-annotate.js  ${min_pdf_annotate_js_version}
