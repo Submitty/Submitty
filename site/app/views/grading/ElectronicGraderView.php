@@ -453,7 +453,7 @@ class ElectronicGraderView extends AbstractView {
 
         $return = "";
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderNavigationBar', $graded_gradeable, $progress, $prev_id, $next_id, $not_in_my_section, $peer);
-        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderAutogradingPanel', $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($display_version), count($new_gradeable->getAutogradingConfig()->getTestcases()) > 0, $show_hidden_cases);
+        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderAutogradingPanel', $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($display_version), $show_hidden_cases);
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderSubmissionPanel', $gradeable);
         $user = $gradeable->getUser();
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
@@ -514,13 +514,11 @@ class ElectronicGraderView extends AbstractView {
     /**
      * Render the Auto-Grading Testcases panel
      * @param AutoGradedVersion $version_instance
-     * @param bool $any_autograding
      * @param bool $show_hidden_cases
      * @return string
      */
-    public function renderAutogradingPanel($version_instance, bool $any_autograding, bool $show_hidden_cases) {
+    public function renderAutogradingPanel($version_instance, bool $show_hidden_cases) {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/AutogradingPanel.twig", [
-            "any_autograding" => $any_autograding,
             "version_instance" => $version_instance,
             "show_hidden_cases" => $show_hidden_cases,
         ]);
