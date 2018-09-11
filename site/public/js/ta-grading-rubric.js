@@ -15,6 +15,13 @@
 OLD_MARK_LIST = {};
 
 /**
+ * An associative object of <component-id> : <graded_component[]>
+ * Each 'graded_component' has at least properties 'score', 'mark_ids', 'comment'
+ * @type {{Object}}
+ */
+OLD_GRADED_COMPONENT_LIST = {};
+
+/**
  * A number ot represent the id of no component
  * @type {int}
  */
@@ -2318,6 +2325,9 @@ function openComponentGrading(component_id) {
             return ajaxGetGradedComponent(gradeable_id, component_id, getAnonId());
         })
         .then(function (graded_component) {
+            // Set the global graded component list data for this component to detect changes
+            OLD_GRADED_COMPONENT_LIST[component_id] = graded_component;
+
             // Render the grading component with edit mode if enabled,
             //  and 'true' to show the mark list
             return injectGradingComponent(component_tmp, graded_component, isEditModeEnabled(), true);
@@ -2679,6 +2689,33 @@ function tryResolveMarkSave(gradeable_id, component_id, domMark, serverMark, old
 }
 
 /**
+ * Checks if two graded components are equal
+ * @param {Object} gcDOM
+ * @param {Object} gcOLD
+ * @returns {boolean}
+ */
+function gradedComponentsEqual(gcDOM, gcOLD) {
+    if (gcDOM.mark_ids.length !== gcDOM.mark_ids.length) return false;
+    for (let i = 0; i < gcDOM.mark_ids.length; i++) {
+        let found = false;
+        for (let j = 0; j < gcOLD.mark_ids.length; j++) {
+            if (gcOLD.mark_ids[j] === gcDOM.mark_ids[i]) {
+                found = true;
+            }
+        }
+        if (!found) {
+            return false;
+        }
+    }
+
+    if (gcDOM.custom_mark_selected) {
+        return gcDOM.score === gcOLD.score && gcDOM.comment === gcOLD.comment;
+    } else {
+        return gcOLD.score === 0.0 && gcOLD.comment === '';
+    }
+}
+
+/**
  * Saves the component grade information to the server
  * Note: if the mark was deleted remotely, but the submitter was assigned it locally, the mark
  *  will be resurrected with a new id
@@ -2688,6 +2725,11 @@ function tryResolveMarkSave(gradeable_id, component_id, domMark, serverMark, old
 function saveGradedComponent(component_id) {
     let gradeable_id = getGradeableId();
     let gradedComponent = getGradedComponentFromDOM(component_id);
+
+    // The grader didn't change the grade at all, so don't save (don't put our name on a grade we didn't contribute to)
+    if (gradedComponentsEqual(gradedComponent, OLD_GRADED_COMPONENT_LIST[component_id])) {
+        return Promise.resolve();
+    }
     return ajaxGetComponentRubric(getGradeableId(), component_id)
         .then(function (component) {
             let missingMarks = [];

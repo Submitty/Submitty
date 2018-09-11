@@ -163,7 +163,7 @@
             $('#save_status').show();
             return $.ajax({
                 type: 'POST',
-                url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'pdf_annotation_embedded'}),
+                url: buildUrl({'component': 'pdf', 'page': 'grader_embedded'}),
                 data: {
                     'gradeable_id': '{{ gradeable.getId() }}',
                     'user_id': '{{ gradeable.getUser().getId() }}',

@@ -232,16 +232,37 @@ class MiscController extends AbstractController {
     }
 
     private function downloadZip() {
-        $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['gradeable_id'], $_REQUEST['user_id']);
+        $gradeable = $this->core->getQueries()->getGradeableConfig($_REQUEST['gradeable_id']);
+        if ($gradeable === null) {
+            $message = "You do not have access to that page.";
+            $this->core->addErrorMessage($message);
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        }
+
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $_REQUEST['user_id'], null);
+
+        if ($graded_gradeable === null) {
+            $message = "You do not have access to that page.";
+            $this->core->addErrorMessage($message);
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        }
+
+        $gradeable_version = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($_REQUEST["version"]);
+
+        if ($gradeable_version === null) {
+            $message = "You do not have access to that page.";
+            $this->core->addErrorMessage($message);
+            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        }
 
         $folder_names = array();
         //See which directories we are allowed to read.
-        if ($this->core->getAccess()->canI("path.read.submissions", ["gradeable" => $gradeable])) {
+        if ($this->core->getAccess()->canI("path.read.submissions", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "gradeable_version" => $gradeable_version])) {
             //These two have the same check
             $folder_names[] = "submissions";
             $folder_names[] = "checkout";
         }
-        if ($this->core->getAccess()->canI("path.read.results", ["gradeable" => $gradeable])) {
+        if ($this->core->getAccess()->canI("path.read.results", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "gradeable_version" => $gradeable_version])) {
             $folder_names[] = "results";
         }
         //No results, no download
@@ -259,12 +280,12 @@ class MiscController extends AbstractController {
         $temp_name = uniqid($this->core->getUser()->getId(), true);
         $zip_name = $temp_dir . "/" . $temp_name . ".zip";
         $gradeable_path = $this->core->getConfig()->getCoursePath();
-        $active_version = $gradeable->getActiveVersion();
+        $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $version = isset($_REQUEST['version']) ? $_REQUEST['version'] : $active_version;
 
         $paths = [];
         foreach ($folder_names as $folder_name) {
-            $paths[] = FileUtils::joinPaths($gradeable_path, $folder_name, $gradeable->getId(), $gradeable->getUser()->getId(), $version);
+            $paths[] = FileUtils::joinPaths($gradeable_path, $folder_name, $gradeable->getId(), $graded_gradeable->getSubmitter()->getId(), $version);
         }
         $zip = new \ZipArchive();
         $zip->open($zip_name, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);

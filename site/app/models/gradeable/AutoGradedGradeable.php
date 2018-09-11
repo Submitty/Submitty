@@ -64,6 +64,19 @@ class AutoGradedGradeable extends AbstractModel {
     }
 
     /**
+     * Gets the AutoGradedVersion instance for the specified version, or null
+     * if no such version exists
+     * @param int $version Version number
+     * @return AutoGradedVersion|null
+     */
+    public function getAutoGradedVersionInstance(int $version) {
+        if (array_key_exists($version, $this->auto_graded_versions)) {
+            return $this->auto_graded_versions[$version];
+        }
+        return null;
+    }
+
+    /**
      * Gets the AutoGradedVersion instance for the active version
      * @return AutoGradedVersion
      */
