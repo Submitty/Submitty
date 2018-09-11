@@ -2695,7 +2695,13 @@ function tryResolveMarkSave(gradeable_id, component_id, domMark, serverMark, old
  * @returns {boolean}
  */
 function gradedComponentsEqual(gcDOM, gcOLD) {
+    // If either are undefined, they are only equal if they are both undefined
+    if (gcDOM === undefined || gcOLD === undefined) return gcDOM === gcOLD;
+
+    // Simple check, if the mark list isn't the same length
     if (gcDOM.mark_ids.length !== gcDOM.mark_ids.length) return false;
+
+    // Check that they have the same marks assigned
     for (let i = 0; i < gcDOM.mark_ids.length; i++) {
         let found = false;
         for (let j = 0; j < gcOLD.mark_ids.length; j++) {
@@ -2708,6 +2714,7 @@ function gradedComponentsEqual(gcDOM, gcOLD) {
         }
     }
 
+    // Since the custom mark can be unchecked with text / point value, treat unchecked as blank score / point values
     if (gcDOM.custom_mark_selected) {
         return gcDOM.score === gcOLD.score && gcDOM.comment === gcOLD.comment;
     } else {
