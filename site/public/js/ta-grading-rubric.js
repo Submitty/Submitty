@@ -2690,13 +2690,15 @@ function tryResolveMarkSave(gradeable_id, component_id, domMark, serverMark, old
 
 /**
  * Checks if two graded components are equal
- * @param {Object} gcDOM
- * @param {Object} gcOLD
+ * @param {Object} gcDOM Must not be undefined
+ * @param {Object} gcOLD May be undefined
  * @returns {boolean}
  */
 function gradedComponentsEqual(gcDOM, gcOLD) {
-    // If either are undefined, they are only equal if they are both undefined
-    if (gcDOM === undefined || gcOLD === undefined) return gcDOM === gcOLD;
+    // If the OLD component is undefined, they are only equal if no marks have been assigned
+    if (gcOLD === undefined) {
+        return gcDOM.mark_ids.length === 0 && (!gcDOM.custom_mark_selected || (gcDOM.score === 0.0 && gcDOM.comment === ''));
+    }
 
     // Simple check, if the mark list isn't the same length
     if (gcDOM.mark_ids.length !== gcDOM.mark_ids.length) return false;
