@@ -436,7 +436,7 @@ fi
 
 echo -e "Compile and install analysis tools"
 
-ST_VERSION=v0.3.4
+ST_VERSION=v.18.06.00
 mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 #if [ "1" == "0" ]; then

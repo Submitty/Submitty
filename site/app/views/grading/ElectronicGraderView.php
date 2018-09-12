@@ -450,9 +450,7 @@ class ElectronicGraderView extends AbstractView {
         }
 
         $return = "";
-        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderPDFBar');
-        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderNavigationBar', $new_gradeable, $progress, $prev_id, $next_id, $not_in_my_section, $peer);
-        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderAutogradingPanel', $gradeable, $show_hidden_cases);
+        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderNavigationBar', $graded_gradeable, $progress, $prev_id, $next_id, $not_in_my_section, $peer);$return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderAutogradingPanel', $gradeable, $show_hidden_cases);
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderSubmissionPanel', $gradeable);
         $user = $gradeable->getUser();
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
@@ -460,8 +458,8 @@ class ElectronicGraderView extends AbstractView {
         if(!$peer) {
             $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderInformationPanel', $gradeable, $user);
         }
-        if($gradeable->getRegradeStatus() !== 0){
-            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRegradePanel', $gradeable);
+        if ($graded_gradeable->hasActiveRegradeRequest()) {
+            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRegradePanel', $graded_gradeable);
         }
         if ($gradeable->getActiveVersion() == 0) {
             if ($gradeable->hasSubmitted()) {
@@ -489,14 +487,8 @@ class ElectronicGraderView extends AbstractView {
         return $return;
     }
 
-    public function renderPDFBar(){
-//        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/PDFAnnotationBar.twig", [
-//
-//        ]);
-    }
-
     /**
-     * @param \app\models\gradeable\Gradeable $gradeable
+     * @param GradedGradeable $graded_gradeable
      * @param float $progress
      * @param string $prev_id
      * @param string $next_id
@@ -504,14 +496,15 @@ class ElectronicGraderView extends AbstractView {
      * @param bool $peer
      * @return string
      */
-    public function renderNavigationBar(\app\models\gradeable\Gradeable $gradeable, float $progress, string $prev_id, string $next_id, bool $not_in_my_section, bool $peer) {
+    public function renderNavigationBar(GradedGradeable $graded_gradeable, float $progress, string $prev_id, string $next_id, bool $not_in_my_section, bool $peer) {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/NavigationBar.twig", [
             "studentNotInSection" => $not_in_my_section,
             "progress" => $progress,
             "peer" => $peer,
-            "prev_student_url" => $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id' => $prev_id]),
-            "next_student_url" => $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id' => $next_id]),
-            "home_url" => $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'details', 'gradeable_id' => $gradeable->getId()]),
+            "prev_student_url" => $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $graded_gradeable->getGradeableId(), 'who_id' => $prev_id]),
+            "next_student_url" => $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $graded_gradeable->getGradeableId(), 'who_id' => $next_id]),
+            "home_url" => $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'details', 'gradeable_id' => $graded_gradeable->getGradeableId()]),
+            'regrade_panel_available' => $graded_gradeable->hasActiveRegradeRequest(),
         ]);
     }
 
@@ -648,18 +641,19 @@ class ElectronicGraderView extends AbstractView {
             "version_conflict" => $version_conflict,
             "show_silent_edit" => $show_silent_edit,
             "grader_id" => $this->core->getUser()->getId(),
+            "display_version" => $display_version,
         ]);
         return $return;
     }
 
     /**
      * Render the Regrade Requests panel
-     * @param Gradeable $gradeable
+     * @param GradedGradeable $graded_gradeable
      * @return string
      */
-    public function renderRegradePanel(Gradeable $gradeable) {
+    public function renderRegradePanel(GradedGradeable $graded_gradeable) {
         return  $this->core->getOutput()->renderTwigTemplate("grading/electronic/RegradePanel.twig", [
-            "gradeable" => $gradeable
+            "graded_gradeable" => $graded_gradeable
         ]);
     }
     

@@ -48,6 +48,22 @@ su - ${PHP_USER} -c "composer install -d \"${SUBMITTY_INSTALL_DIR}/site\" --no-d
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public/zone_images/
 cp ${SUBMITTY_INSTALL_DIR}/zone_images/* ${SUBMITTY_INSTALL_DIR}/site/public/zone_images/ 2>/dev/null
 
+#####################################
+# Installing PDF annotator
+
+VERSION=v.18.09.00
+
+mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public/js/pdf
+pushd ${SUBMITTY_INSTALL_DIR}/site/public/js/pdf
+if [[ ! -f VERSION || $(< VERSION) != "${VERSION}" ]]; then
+    for b in pdf-annotate.min.js pdf-annotate.min.js.map;
+        do wget -nv "https://github.com/Submitty/pdf-annotate.js/releases/download/${VERSION}/${b}" -O ${b}
+    done
+
+    echo ${VERSION} > VERSION
+fi
+popd > /dev/null
+
 # set the permissions of all files
 # $PHP_USER can read & execute all directories and read all files
 # "other" can cd into all subdirectories

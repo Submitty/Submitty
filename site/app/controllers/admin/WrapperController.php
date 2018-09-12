@@ -13,7 +13,8 @@ class WrapperController extends AbstractController {
         'left_sidebar.html',
         'right_sidebar.html',
         'bottom_bar.html',
-        'override.css'
+        'override.css',
+        'sidebar.json'
     ];
 
     public function run() {

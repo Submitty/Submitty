@@ -15,6 +15,7 @@ use app\models\gradeable\GradedComponentContainer;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\Mark;
+use app\models\gradeable\RegradeRequest;
 use app\models\gradeable\Submitter;
 use app\models\gradeable\TaGradedGradeable;
 use app\models\GradeableComponent;
@@ -1231,6 +1232,11 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               ldet.array_late_day_exceptions,
               ldet.array_late_day_user_ids,
               ldeu.late_day_exceptions,
+              
+              /* Regrade request data */
+              rr.id AS regrade_request_id,
+              rr.status AS regrade_request_status,
+              rr.timestamp AS regrade_request_timestamp,
 
               /* Aggregate Team User Data */
               team.team_id,
@@ -1385,6 +1391,9 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 LEFT JOIN teams t ON e.user_id=t.user_id AND t.state=1
                 GROUP BY team_id, g_id
               ) AS ldet ON g.g_id=ldet.g_id AND ldet.team_id=team.team_id
+              
+              /* Join regrade request */
+              LEFT JOIN regrade_requests AS rr ON rr.user_id=gd.gd_user_id OR rr.team_id=gd.gd_team_id
             WHERE $selector
             $order";
 
@@ -1443,6 +1452,19 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             // Always construct an instance even if there is no data
             $auto_graded_gradeable = new AutoGradedGradeable($this->core, $graded_gradeable, $row);
             $graded_gradeable->setAutoGradedGradeable($auto_graded_gradeable);
+
+            if (isset($row['regrade_request_id'])) {
+                $regrade_request_properties = [
+                    'id',
+                    'status',
+                    'timestamp'
+                ];
+                $regrade_request_arr = array_combine($regrade_request_properties, array_map(function($prop) use($row) {
+                    return $row['regrade_request_'.$prop];
+                }, $regrade_request_properties));
+
+                $graded_gradeable->setRegradeRequest(new RegradeRequest($this->core, $regrade_request_arr));
+            }
 
             $graded_components_by_id = [];
             /** @var AutoGradedVersion[] $graded_versions */
@@ -1601,7 +1623,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               g_min_grading_group AS min_grading_group,
               g_syllabus_bucket AS syllabus_bucket,
               eg.*,
-              gc.*
+              gc.*,
+              (SELECT COUNT(*) AS cnt FROM regrade_requests WHERE g_id=g.g_id AND status = -1) AS active_regrade_request_count              
             FROM gradeable g
               LEFT JOIN (
                 SELECT

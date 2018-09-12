@@ -125,26 +125,30 @@ class GlobalController extends AbstractController {
                 $links = json_decode(file_get_contents($sidebar_links), true);
                 if (is_array($links)) {
                     foreach ($links as $link) {
-                        if (empty($link['title'])) {
-                            continue;
+                        if (is_array($link)) {
+                            if (empty($link['title'])) {
+                                continue;
+                            }
+                            if (empty($link['icon'])) {
+                                $link['icon'] = "fa-question";
+                            }
+                            if (!Utils::startsWith($link['icon'], "fa-")) {
+                                $link['icon'] = "fa-" . $link['icon'];
+                            }
+                            $sidebar_buttons[] = new Button($this->core, [
+                                "href" => $link['link'] ?? null,
+                                "title" => $link['title'],
+                                "class" => "nav-row",
+                                "id" => "nav-sidebar-" . strtolower(str_replace(" ", "_", $link['title'])),
+                                "icon" => $link['icon']
+                            ]);
                         }
-                        if (empty($link['icon'])) {
-                            $link['icon'] = "fa-question";
-                        }
-                        if (!Utils::startsWith($link['icon'], "fa-")) {
-                            $link['icon'] = "fa-".$link['icon'];
-                        }
+                    }
+                    if (count($links) > 0) {
                         $sidebar_buttons[] = new Button($this->core, [
-                            "href" => $link['link'] ?? null,
-                            "title" => $link['title'],
-                            "class" => "nav-row",
-                            "id" => "nav-sidebar-".strtolower(str_replace(" ", "_", $link['title'])),
-                            "icon" => $link['icon']
+                            "class" => "nav-row short-line"
                         ]);
                     }
-                    $sidebar_buttons[] = new Button($this->core, [
-                        "class" => "nav-row short-line"
-                    ]);
                 }
             }
 

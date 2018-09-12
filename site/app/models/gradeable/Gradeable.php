@@ -69,6 +69,7 @@ use app\models\User;
  * @method float getPrecision()
  * @method Component[] getComponents()
  * @method bool isRegradeAllowed()
+ * @method int getActiveRegradeRequestCount()
  */
 class Gradeable extends AbstractModel {
     /* Properties for all types of gradeables */
@@ -91,6 +92,9 @@ class Gradeable extends AbstractModel {
     protected $components = [];
     /** @property @var Component[] An array of all gradeable components loaded from the database */
     private $db_components = [];
+
+    /** @property @var bool If any submitters have active regrade requests */
+    protected $active_regrade_request_count = 0;
 
     /* (private) Lazy-loaded Properties */
 
@@ -215,6 +219,8 @@ class Gradeable extends AbstractModel {
             $this->setPrecision($details['precision']);
             $this->setRegradeAllowedInternal($details['regrade_allowed']);
         }
+
+        $this->setActiveRegradeRequestCount($details['active_regrade_request_count'] ?? 0);
 
         // Set dates last
         $this->setDates($details);
@@ -686,6 +692,15 @@ class Gradeable extends AbstractModel {
     }
 
     /**
+     * Sets the number of active regrade requests
+     * @param int $count
+     * @internal
+     */
+    public function setActiveRegradeRequestCount(int $count) {
+        $this->active_regrade_request_count = $count;
+    }
+
+    /**
      * Sets the gradeable Id.  Must match the regular expression:  ^[a-zA-Z0-9_-]*$
      * @param string $id The gradeable id to set
      */
@@ -1043,6 +1058,14 @@ class Gradeable extends AbstractModel {
             $this->teams = $this->core->getQueries()->getTeamsByGradeableId($this->getId());
         }
         return $this->teams;
+    }
+
+    /**
+     * Gets if this gradeable has any regrade requests active
+     * @return bool
+     */
+    public function anyActiveRegradeRequests() {
+        return $this->active_regrade_request_count > 0;
     }
 
     /**

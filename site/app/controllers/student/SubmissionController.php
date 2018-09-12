@@ -99,57 +99,164 @@ class SubmissionController extends AbstractController {
                 break;
         }
     }
-    private function requestRegrade(){
-        $content = $_POST['replyTextArea'];
-        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
-        $student_id = (isset($_REQUEST['student_id'])) ? $_REQUEST['student_id'] : null;
-        if($this->core->getUser()->getId() !== $student_id && !$this->core->getUser()->accessFullGrading()){
-            $this->core->getOutput()->renderJson(["status" => "failure"]);
+    private function requestRegrade() {
+        $content = $_POST['replyTextArea'] ?? '';
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+        $submitter_id = $_REQUEST['submitter_id'] ?? '';
+
+        $user = $this->core->getUser();
+
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
             return;
         }
-        if($this->core->getQueries()->insertNewRegradeRequest($gradeable_id, $student_id, $content)){
-            $this->core->getOutput()->renderJson(["status" => "success"]);
-        }else{
-            $this->core->getOutput()->renderJson(["status" => "failure"]);
+
+        if(!$gradeable->isRegradeAllowed()) {
+            $this->core->getOutput()->renderJsonFail('Regrade requests not enabled for this gradeable');
+            return;
+        }
+
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        if ($graded_gradeable === false) {
+            return;
+        }
+
+        // TODO: add to access control method
+        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$user->accessFullGrading()) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to request regrade');
+            return;
+        }
+
+        try {
+            $this->core->getQueries()->insertNewRegradeRequest($graded_gradeable, $user, $content);
+            $this->core->getOutput()->renderJsonSuccess();
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
 
-    private function makeRequestPost(){
-        $regrade_id = $_REQUEST['regrade_id'];
+    private function makeRequestPost() {
         $content = str_replace("\r", "", $_POST['replyTextArea']);
-        $user_id = (isset($_REQUEST['user_id'])) ? $_REQUEST['user_id'] : null;
-        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
-        $gradeable=$this->core->getQueries()->getGradeable($gradeable_id);
-        //Prevent students making post requests for other studnets
-        if($this->core->getUser()->getId() !== $user_id && !$this->core->getUser()->accessFullGrading()){
-            $this->core->getOutput()->renderJson(["status" => "failure"]);
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+        $submitter_id = $_REQUEST['submitter_id'] ?? '';
+        $status = $_REQUEST['status'] ?? -1;
+
+        $user = $this->core->getUser();
+
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
             return;
         }
-        $this->core->getQueries()->insertNewRegradePost($regrade_id, $gradeable_id, $user_id, $content);
-        $this->core->getOutput()->renderJson(["status" => "success"]);
+
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        if ($graded_gradeable === false) {
+            return;
+        }
+
+        if (!$graded_gradeable->hasRegradeRequest()) {
+            $this->core->getOutput()->renderJsonFail('Submitter has no regrade request');
+            return;
+        }
+
+        // TODO: add to access control method
+        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$user->accessFullGrading()) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to make regrade post');
+            return;
+        }
+
+        try {
+            $this->core->getQueries()->insertNewRegradePost($graded_gradeable->getRegradeRequest()->getId(), $user->getId(), $content);
+            $graded_gradeable->getRegradeRequest()->setStatus($status);
+            $this->core->getQueries()->saveRegradeRequest($graded_gradeable->getRegradeRequest());
+            $this->core->getOutput()->renderJsonSuccess();
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
+        }
     }
 
-    private function deleteRequest(){
-        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
-        $student_id = (isset($_REQUEST['student_id'])) ? $_REQUEST['student_id'] : null;
-        if($this->core->getUser()->getId() !== $student_id && !$this->core->getUser()->accessFullGrading()){
-            $this->core->getOutput()->renderJson(["status" => "failure"]);
+    private function deleteRequest() {
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+        $submitter_id = $_REQUEST['submitter_id'] ?? '';
+
+        $user = $this->core->getUser();
+
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
             return;
         }
-        $this->core->getQueries()->deleteRegradeRequest($gradeable_id, $student_id);
-        $this->core->getOutput()->renderJson(["status" => "success"]);
+
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        if ($graded_gradeable === false) {
+            return;
+        }
+
+        if (!$graded_gradeable->hasRegradeRequest()) {
+            $this->core->getOutput()->renderJsonFail('Submitter has no regrade request');
+            return;
+        }
+
+        // TODO: add to access control method
+        if (!$user->accessFullGrading()) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to delete regrade request');
+            return;
+        }
+
+        try {
+            $this->core->getQueries()->deleteRegradeRequest($graded_gradeable->getRegradeRequest());
+            $this->core->getOutput()->renderJsonSuccess();
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
+        }
     }
-    private function changeRequestStatus(){
-        $regrade_id = $_REQUEST['regrade_id'];
-        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
-        $student_id = (isset($_REQUEST['student_id'])) ? $_REQUEST['student_id'] : null;
-        $status = $_REQUEST['status'];
-        if($this->core->getUser()->getId() !== $student_id && !$this->core->getUser()->accessFullGrading()){
-            $this->core->getOutput()->renderJson(["status" => "failure"]);
+
+    private function changeRequestStatus() {
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+        $submitter_id = $_REQUEST['submitter_id'] ?? '';
+        $status = $_REQUEST['status'] ?? null;
+
+        if ($status === null) {
+            $this->core->getOutput()->renderJsonFail('Missing status parameter');
             return;
         }
-        $this->core->getQueries()->modifyRegradeStatus($regrade_id, $status);
-        $this->core->getOutput()->renderJson(["status" => "success"]);
+
+        $user = $this->core->getUser();
+
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        if ($graded_gradeable === false) {
+            return;
+        }
+
+        if (!$graded_gradeable->hasRegradeRequest()) {
+            $this->core->getOutput()->renderJsonFail('Submitter has no regrade request');
+            return;
+        }
+
+        // TODO: add to access control method
+        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$user->accessFullGrading()) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to change regrade request status');
+            return;
+        }
+
+        try {
+            $graded_gradeable->getRegradeRequest()->setStatus($status);
+            $this->core->getQueries()->saveRegradeRequest($graded_gradeable->getRegradeRequest());
+            $this->core->getOutput()->renderJsonSuccess();
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
+        }
     }
 
     private function showHomeworkPage() {
