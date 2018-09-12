@@ -58,12 +58,17 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
 
     <div>
         <input type="radio" id="radio_ef_student_upload" name="scanned_exam" value="false"
-           {{ action != 'new' and not gradeable.isScannedExam() ? 'checked' : ''}}> Students will Upload Files
+           {{ action != 'new' and not gradeable.isScannedExam() and not gradeable.isVcs() ? 'checked' : ''}}> Students will submit one or more files by direct upload to the Submitty website
+    </div>
+
+    <div>
+        <input type="radio" id="radio_ef_student_upload" name="scanned_exam" value="false"
+           {{ action != 'new' and not gradeable.isScannedExam() and gradeable.isVcs() ? 'checked' : ''}}> Students will submit by committing files to a version control system (VCS) repository
     </div>
 
     <div>
         <input type="radio" id="radio_ef_scanned_exam" name="scanned_exam" value="true"
-           {{ action != 'new' and gradeable.isScannedExam() ? 'checked' : '' }}> TA/Instructor will bulk upload scanned .pdf files
+           {{ action != 'new' and gradeable.isScannedExam() ? 'checked' : '' }}> TA/Instructor will (bulk) upload scanned .pdf for grading
     </div>
 
     <div>

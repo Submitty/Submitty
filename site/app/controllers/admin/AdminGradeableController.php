@@ -223,9 +223,9 @@ class AdminGradeableController extends AbstractController {
         $type_string = GradeableType::typeToString($gradeable->getType());
         if($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             if($gradeable->isScannedExam()){
-                $type_string = "TA/Instructor will Upload Scanned Exam";
+                $type_string = "TA/Instructor will (bulk) upload scanned .pdf for grading";
             } else {
-                $type_string = "Students will Upload File";
+                $type_string = "Students will submit one or more files by direct upload or version control repository";
             }
         }
 
