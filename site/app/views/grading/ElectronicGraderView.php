@@ -641,6 +641,7 @@ class ElectronicGraderView extends AbstractView {
             "version_conflict" => $version_conflict,
             "show_silent_edit" => $show_silent_edit,
             "grader_id" => $this->core->getUser()->getId(),
+            "display_version" => $display_version,
         ]);
         return $return;
     }
