@@ -1,12 +1,12 @@
 <div class="electronic_file">
     <b>Choose from the simple, provided autograding configurations --OR--<br>Specify the full path to the directory containing your custom autograding config.json file:</b><br>
     <fieldset>
-        <input type="radio" class="config_option ignore" name="config_option" value="defaults"/> Provided autograding configurations
-        <input type="radio" class="config_option ignore" name="config_option" value="uploaded"/> Custom uploaded autograding configurations
+        <input type="radio" class="config_option ignore" name="config_option" id="config_option_provided" value="defaults"/> <label for="config_option_provided">Provided autograding configurations</label>
+        <input type="radio" class="config_option ignore" name="config_option" id="config_option_uploaded" value="uploaded"/> <label for="config_option_uploaded">Custom uploaded autograding configurations</label>
         {% if repo_name != "" %}
-            <input type="radio" class="config_option ignore" name="config_option" value="repo"/> Use Private repository ({{ config_repo_name }})
+            <input type="radio" class="config_option ignore" name="config_option" id="config_option_repository value="repo"/> <label for="config_option_repository">Use Private repository ({{ config_repo_name }})</label>
         {% endif %}
-        <input type="radio" class="config_option ignore" name="config_option" value="manual"/> Other full path
+        <input type="radio" class="config_option ignore" name="config_option" id="config_option_path" value="manual"/> <label for="config_option_path">Other full path</label>
         <div class="div_select_config" id="div_default_configs" style="display: {{ config_select_mode == 'defaults' ? 'block' : 'none' }}">
             <select class="select_config_path ignore" id="select_default_config" style="width: 700px;">
                 <option value=""></option>
@@ -45,18 +45,18 @@
             </select>
         </div>
         <br />
-        <p>Current selection for full path to autograding configuration:</p>
+        <p><label for="input_provide_full_path">Current selection for full path to autograding configuration:</label></p>
         <input style='width: 83%' type='text' id='input_provide_full_path' name='autograding_config_path' value="{{ gradeable.getAutogradingConfigPath() }}" class="required" placeholder="(Required)"
                 {{ config_select_mode != 'manual' ? 'disabled' : '' }}/>
     </fieldset>
     <br />
 
-    Should students be able to view submissions?
     <fieldset>
+	    <legend>Should students be able to view submissions?</legend>
         <input type="radio" id="yes_student_view" name="student_view" value="true"
-                {{ gradeable.isStudentView() ? 'checked' : '' }}/> Yes
+                {{ gradeable.isStudentView() ? 'checked' : '' }}/> <label for="yes_student_view">Yes</label>
         <input type="radio" id="no_student_view" name="student_view" value="false"
-                {{ not gradeable.isStudentView() ? 'checked' : '' }}/> No  &nbsp;&nbsp;&nbsp;
+                {{ not gradeable.isStudentView() ? 'checked' : '' }}/> <label for="no_student_view">No</label>  &nbsp;&nbsp;&nbsp;
         (Select 'No' during grading of a bulk upload pdf quiz/exam.)
 
         <div id="student_submit_download_view">
@@ -89,26 +89,10 @@
     <a class="btn btn-primary" href="{{ core.buildUrl({ 'component': 'admin', 'page': 'admin_gradeable', 'action': 'rebuild_assignment', 'id': gradeable.getId() }) }}">Rebuild Gradeable (only necessary if you have modified your custom configuration files)</a>
     <br /> <br />
     <h3>Build log:</h3>
-    {% if build_script_output is null or build_script_output is empty %}
+    {% if cmake_output is null %}
         <pre>There is currently no build output.</pre>
     {% else %}
-        <pre>{{ build_script_output|raw }}</pre>
-    {% endif %}
-    <br />
-    
-    <h3>CMake output:</h3>
-    {% if cmake_output is null or cmake_output is empty %}
-        <pre>There is currently no cmake output.</pre>
-    {% else %}
         <pre>{{ cmake_output|raw }}</pre>
-    {% endif %}
-    <br />
-    
-    <h3>Make output:</h3>
-    {% if make_output is null or make_output is empty %}
-        <pre>There is currently no make output.</pre>
-    {% else %}
-        <pre>{{ make_output|raw }}</pre>
     {% endif %}
 
 </div>
