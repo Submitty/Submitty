@@ -482,7 +482,7 @@ class HomeworkView extends AbstractView {
                 'num_autogrades' => $version_instance->getHistoryCount(),
                 'files' => $version_instance->getFiles(),
                 'display_version_days_late' => $version_instance->getDaysLate(),
-                'result_text' => $this->core->getOutput()->renderTemplate('AutoGrading', 'showResultsNew', $version_instance, $show_hidden)
+                'result_text' => $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $version_instance, $show_hidden)
             ]);
 
             if ($history !== null) {

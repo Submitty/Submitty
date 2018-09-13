@@ -3,6 +3,8 @@
 namespace app\views\grading;
 
 use app\models\Gradeable;
+use app\models\gradeable\AutoGradedGradeable;
+use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\GradedGradeable;
 use app\models\SimpleStat;
 use app\models\Team;
@@ -450,7 +452,8 @@ class ElectronicGraderView extends AbstractView {
         }
 
         $return = "";
-        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderNavigationBar', $graded_gradeable, $progress, $prev_id, $next_id, $not_in_my_section, $peer);$return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderAutogradingPanel', $gradeable, $show_hidden_cases);
+        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderNavigationBar', $graded_gradeable, $progress, $prev_id, $next_id, $not_in_my_section, $peer);
+        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderAutogradingPanel', $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($display_version), $show_hidden_cases);
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderSubmissionPanel', $gradeable);
         $user = $gradeable->getUser();
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
@@ -510,14 +513,14 @@ class ElectronicGraderView extends AbstractView {
 
     /**
      * Render the Auto-Grading Testcases panel
-     * @param Gradeable $gradeable
+     * @param AutoGradedVersion $version_instance
      * @param bool $show_hidden_cases
      * @return string
      */
-    public function renderAutogradingPanel(Gradeable $gradeable, bool $show_hidden_cases) {
+    public function renderAutogradingPanel($version_instance, bool $show_hidden_cases) {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/AutogradingPanel.twig", [
-            "gradeable" => $gradeable,
-            "canViewWholeGradeable" => $show_hidden_cases,
+            "version_instance" => $version_instance,
+            "show_hidden_cases" => $show_hidden_cases,
         ]);
     }
 
