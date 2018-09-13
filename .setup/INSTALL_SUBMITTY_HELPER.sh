@@ -376,10 +376,16 @@ source ${SUBMITTY_REPOSITORY}/.setup/INSTALL_SUBMITTY_HELPER_BIN.sh
 
 # build the helper program for strace output and restrictions by system call categories
 g++ ${SUBMITTY_INSTALL_DIR}/src/grading/system_call_check.cpp -o ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
-# set the permissions
 
+# build the helper program for calculating early submission incentive extensions
+g++ ${SUBMITTY_INSTALL_DIR}/bin/calculate_extensions.cpp -lboost_system -lboost_filesystem -std=c++11 -Wall -g -o ${SUBMITTY_INSTALL_DIR}/bin/calculate_extensions.out
+
+# set the permissions
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
+
+chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/calculate_extensions.out
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/calculate_extensions.out
 
 
 ###############################################

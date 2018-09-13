@@ -4,12 +4,10 @@
         <button class="btn btn-default" onclick="openAllAutoGrading()">Expand All</button>
         <button class="btn btn-default" onclick="closeAllAutoGrading()">Close All</button>
         <div class="inner-container">
-            {% if gradeable.getActiveVersion() == 0 %}
+            {% if version_instance is null %}
                 <h4>No Submission</h4>
-            {% elseif gradeable.getTestcases()|length == 0 %}
-                <h4>No Autograding For This Assignment</h4>
             {% else %}
-                {{ render_template('AutoGrading', 'showResults', gradeable, canViewWholeGradeable) }}
+                {{ render_template('AutoGrading', 'showResults', version_instance, show_hidden_cases) }}
             {% endif %}
         </div>
     </div>

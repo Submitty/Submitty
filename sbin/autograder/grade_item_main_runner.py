@@ -335,7 +335,7 @@ def network_containers(container_info,test_input_folder,which_untrusted, use_rou
   else:
     network_containers_routerless(container_info,which_untrusted)
 
-  create_knownhosts_csv(container_info,test_input_folder,single_port_per_container)
+  create_knownhosts_txt(container_info,test_input_folder,single_port_per_container)
 
 def network_containers_routerless(container_info,which_untrusted):
   network_name = '{0}_routerless_network'.format(which_untrusted)
@@ -399,48 +399,40 @@ def network_containers_with_router(container_info,which_untrusted):
 
 
 
-def create_knownhosts_csv(container_info,test_input_folder,single_port_per_container):
+def create_knownhosts_txt(container_info,test_input_folder,single_port_per_container):
   tcp_connection_list = list()
   udp_connection_list = list()
   current_tcp_port = 9000
   current_udp_port = 15000
 
-  host_to_port = dict()
   for name, info in sorted(container_info.items()):
-      for connected_machine in info['outgoing_connections']:
-          if connected_machine == name:
-              continue
-          if single_port_per_container:
-            if not connected_machine in host_to_port:
-              host_to_port[connected_machine] = dict()
-              host_to_port[connected_machine]['tcp_port'] = str(current_tcp_port)
-              host_to_port[connected_machine]['udp_port'] = str(current_udp_port)
+      if single_port_per_container:
+          tcp_connection_list.append([name, current_tcp_port])
+          udp_connection_list.append([name, current_udp_port])
+          current_tcp_port += 1
+          current_udp_port += 1  
+      else:
+          for connected_machine in info['outgoing_connections']:
+              if connected_machine == name:
+                  continue
+
+              tcp_connection_list.append([name, connected_machine,  current_tcp_port])
+              udp_connection_list.append([name, connected_machine,  current_udp_port])
               current_tcp_port += 1
               current_udp_port += 1
-            my_tcp_port = host_to_port[connected_machine]['tcp_port']
-            my_udp_port = host_to_port[connected_machine]['udp_port']
-          else:
-            my_tcp_port = current_tcp_port
-            my_udp_port = current_udp_port
-            current_tcp_port += 1
-            current_udp_port += 1
-          
-          tcp_connection_list.append([name, connected_machine,  my_tcp_port])
-          udp_connection_list.append([name, connected_machine,  my_udp_port])
 
   #writing complete knownhosts csvs to input directory
-  knownhosts_location = os.path.join(test_input_folder, 'knownhosts_tcp.csv')
-  with open(knownhosts_location, 'w') as csvfile:
-    csvwriter = csv.writer(csvfile)
+  knownhosts_location = os.path.join(test_input_folder, 'knownhosts_tcp.txt')
+  with open(knownhosts_location, 'w') as outfile:
     for tup in tcp_connection_list:
-      csvwriter.writerow(tup)
+      outfile.write(" ".join(map(str, tup)) + '\n')
+      outfile.flush()
 
-  knownhosts_location = os.path.join(test_input_folder, 'knownhosts_udp.csv')
-  with open(knownhosts_location, 'w') as csvfile:
-    csvwriter = csv.writer(csvfile)
+  knownhosts_location = os.path.join(test_input_folder, 'knownhosts_udp.txt')
+  with open(knownhosts_location, 'w') as outfile:
     for tup in udp_connection_list:
-      csvwriter.writerow(tup)
-
+      outfile.write(" ".join(map(str, tup)) + '\n')
+      outfile.flush()
 
 
 def clean_up_containers(container_info,job_id,is_batch_job,which_untrusted,submission_path,grading_began,use_router):
