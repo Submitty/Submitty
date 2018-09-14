@@ -14,6 +14,9 @@ use app\models\Breadcrumb;
  */
 
 class Output {
+    /** @var bool */
+    private $render = true;
+
     /** @var bool Should we  */
     private $buffer_output = true;
 
@@ -44,6 +47,15 @@ class Output {
         $this->core = $core;
         $this->start_time = microtime(true);
         $this->controller = new GlobalController($core);
+    }
+
+    /**
+     * Disables the render functions that call in a file/Twig, causing them to return null
+     * immediately. This allows us to not have to mock out this class when we're using
+     * it for the JSON response stuff.
+     */
+    public function disableRender() {
+        $this->render = false;
     }
 
     public function loadTwig() {
@@ -92,6 +104,10 @@ class Output {
      * rendering another View
      */
     public function renderOutput() {
+        if (!$this->render) {
+            return null;
+        }
+
         if ($this->buffer_output) {
             $this->output_buffer .= call_user_func_array('self::renderTemplate', func_get_args());
         }
@@ -117,6 +133,10 @@ class Output {
      * @return string
      */
     public function renderTemplate() {
+        if (!$this->render) {
+            return null;
+        }
+
         if (func_num_args() < 2) {
             throw new \InvalidArgumentException("Render requires at least two parameters (View, Function)");
         }
@@ -193,7 +213,6 @@ class Output {
         $response = [
             'status' => 'error',
             'message' => $message,
-            'data' => $data
         ];
 
         if ($data !== null) {
