@@ -69,7 +69,7 @@ jobs:
         - popd
       after_success:
         - pushd site
-        - travis_retry php vendor/bin/coveralls -v
+        - travis_retry php vendor/bin/php-coveralls -v -c tests/coveralls.yml
         - popd
     - <<: *02-php-unit
       php: 7.1
