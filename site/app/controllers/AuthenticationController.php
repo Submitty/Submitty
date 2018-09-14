@@ -26,7 +26,7 @@ class AuthenticationController extends AbstractController {
      * @param Core $core
      * @param bool $logged_in
      */
-    public function __construct(Core $core, $logged_in) {
+    public function __construct(Core $core, $logged_in=false) {
         parent::__construct($core);
         $this->logged_in = $logged_in;
     }
@@ -160,46 +160,38 @@ class AuthenticationController extends AbstractController {
         if (empty($_POST['user_id']) || empty($_POST['password']) || empty($_POST['gradeable_id'])
             || empty($_POST['id']) || !$this->core->getConfig()->isCourseLoaded()) {
             $msg = 'Missing value for one of the fields';
-
-            $this->core->getOutput()->renderJsonError($msg);
-            return false;
+            return $this->core->getOutput()->renderJsonError($msg);
         }
         $this->core->getAuthentication()->setUserId($_POST['user_id']);
         $this->core->getAuthentication()->setPassword($_POST['password']);
         if ($this->core->authenticate(false) !== true) {
             $msg = "Could not login using that user id or password";
-            $this->core->getOutput()->renderJsonFail($msg);
-            return false;
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
 
         $user = $this->core->getQueries()->getUserById($_POST['user_id']);
         if ($user === null) {
             $msg = "Could not find that user for that course";
-            $this->core->getOutput()->renderJsonFail($msg);
-            return false;
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
         else if ($user->accessFullGrading()) {
             $msg = "Successfully logged in as {$_POST['user_id']}";
-            $this->core->getOutput()->renderJsonSuccess(['message' => $msg, 'authenticated' => true]);
-            return true;
+            return $this->core->getOutput()->renderJsonSuccess(['message' => $msg, 'authenticated' => true]);
         }
 
         $gradeable = $this->core->getQueries()->getGradeableConfig($_POST['gradeable_id']);
         if ($gradeable !== null && $gradeable->isTeamAssignment()) {
             if (!$this->core->getQueries()->getTeamById($_POST['id'])->hasMember($_POST['user_id'])) {
                 $msg = "This user is not a member of that team.";
-                $this->core->getOutput()->renderJsonFail($msg);
-                return false;
+                return $this->core->getOutput()->renderJsonFail($msg);
             }
         }
         elseif ($_POST['user_id'] !== $_POST['id']) {
-            $msg = "This user cannot check out that repo.";
-            $this->core->getOutput()->renderJsonFail($msg);
-            return false;
+            $msg = "This user cannot check out that repository.";
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
 
         $msg = "Successfully logged in as {$_POST['user_id']}";
-        $this->core->getOutput()->renderJsonSuccess(['message' => $msg, 'authenticated' => true]);
-        return true;
+        return $this->core->getOutput()->renderJsonSuccess(['message' => $msg, 'authenticated' => true]);
     }
 }
