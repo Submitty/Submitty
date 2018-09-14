@@ -16,7 +16,7 @@ use app\libraries\Core;
  *
  * @method string getTitle()
  * @method string|null getUrl()
- * @method string|null getExternalLink()
+ * @method string|null getExternalUrl()
 */
 class Breadcrumb extends AbstractModel {
     /** @property string */
