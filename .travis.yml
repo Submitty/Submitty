@@ -23,7 +23,7 @@ jobs:
       php: 7.0
       script:
         - TITLE=$(curl -s https://api.github.com/repos/${TRAVIS_REPO_SLUG}/pulls/${TRAVIS_PULL_REQUEST} | jq -r '.title')
-        - if [ "${TITLE:0:3}" = "WIP" ]; then exit 1; fi
+        - if [ "${TITLE:0:3}" = "WIP" ] || [ "${TITLE:0:5}" = "[WIP]" ]; then exit 1; fi
 
     # Warm up the pip and composer caches to use it for the rest of the build stages
     - &00-cache
