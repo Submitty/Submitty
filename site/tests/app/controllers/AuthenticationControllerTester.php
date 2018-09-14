@@ -123,13 +123,34 @@ class AuthenticationControllerTester extends BaseUnitTest {
         $_POST['gradeable_id'] = 'test';
         $_POST['id'] = 'not_test';
         $user = $this->createMockModel(User::class);
-        $core = $this->getAuthenticationCore(true, ['getUserById' => $user]);
+        $core = $this->getAuthenticationCore(true, ['getUserById' => $user, 'getGradeableConfig' => null]);
         $controller = new AuthenticationController($core);
         $response = $controller->vcsLogin();
         $this->assertEquals(
             [
                 'status' => 'fail',
                 'message' => 'This user cannot check out that repository.'
+            ],
+            $response
+        );
+    }
+
+    public function testVcsLoginNullGradeableRightId() {
+        $_POST['user_id'] = 'test';
+        $_POST['password'] = 'test';
+        $_POST['gradeable_id'] = 'test';
+        $_POST['id'] = 'test';
+        $user = $this->createMockModel(User::class);
+        $core = $this->getAuthenticationCore(true, ['getUserById' => $user, 'getGradeableConfig' => null]);
+        $controller = new AuthenticationController($core);
+        $response = $controller->vcsLogin();
+        $this->assertEquals(
+            [
+                'status' => 'success',
+                'data' => [
+                    'message' => 'Successfully logged in as test',
+                    'authenticated' => true
+                ],
             ],
             $response
         );
