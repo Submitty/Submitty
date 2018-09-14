@@ -19,11 +19,11 @@ jobs:
   include:
     # Test if the name of the PR has WIP in the title, and if it does, fail the Travis build
     - if: type = pull_request
-      stage: 01 test wip
+      stage: pr test for wip
       php: 7.0
       script:
         - TITLE=$(curl -s https://api.github.com/repos/${TRAVIS_REPO_SLUG}/pulls/${TRAVIS_PULL_REQUEST} | jq -r '.title')
-        - if [ "${TITLE:0:5}" = "[WIP]" ]; then exit 1; fi
+        - if [ "${TITLE:0:5}" = "[WIP]" ]; then echo "[WIP] tag detected, build failed. Remove [WIP] tag and re-run build when ready for merging."; exit 1; fi
 
     # Warm up the pip and composer caches to use it for the rest of the build stages
     - &00-cache
