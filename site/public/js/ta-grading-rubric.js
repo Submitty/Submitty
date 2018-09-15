@@ -868,6 +868,14 @@ function isGradingDisabled() {
 }
 
 /**
+ * Gets the gradeable version being disaplyed
+ * @return {int}
+ */
+function getDisplayVersion() {
+    return parseInt($('#gradeable-version-container').attr('data-gradeable_version'));
+}
+
+/**
  * Gets the precision for component/mark point values
  * @returns {number}
  */
@@ -2690,12 +2698,23 @@ function tryResolveMarkSave(gradeable_id, component_id, domMark, serverMark, old
 
 /**
  * Checks if two graded components are equal
- * @param {Object} gcDOM
- * @param {Object} gcOLD
+ * @param {Object} gcDOM Must not be undefined
+ * @param {Object} gcOLD May be undefined
  * @returns {boolean}
  */
 function gradedComponentsEqual(gcDOM, gcOLD) {
-    if (gcDOM.mark_ids.length !== gcDOM.mark_ids.length) return false;
+    // If the OLD component is undefined, they are only equal if no marks have been assigned
+    if (gcOLD === undefined) {
+        return gcDOM.mark_ids.length === 0 && (!gcDOM.custom_mark_selected || (gcDOM.score === 0.0 && gcDOM.comment === ''));
+    }
+
+    // If its not the same version, then we want to save
+    if (gcDOM.graded_version !== gcOLD.graded_version) return false;
+
+    // Simple check, if the mark list isn't the same length
+    if (gcDOM.mark_ids.length !== gcOLD.mark_ids.length) return false;
+
+    // Check that they have the same marks assigned
     for (let i = 0; i < gcDOM.mark_ids.length; i++) {
         let found = false;
         for (let j = 0; j < gcOLD.mark_ids.length; j++) {
@@ -2708,6 +2727,7 @@ function gradedComponentsEqual(gcDOM, gcOLD) {
         }
     }
 
+    // Since the custom mark can be unchecked with text / point value, treat unchecked as blank score / point values
     if (gcDOM.custom_mark_selected) {
         return gcDOM.score === gcOLD.score && gcDOM.comment === gcOLD.comment;
     } else {
@@ -2725,6 +2745,7 @@ function gradedComponentsEqual(gcDOM, gcOLD) {
 function saveGradedComponent(component_id) {
     let gradeable_id = getGradeableId();
     let gradedComponent = getGradedComponentFromDOM(component_id);
+    gradedComponent.graded_version = getDisplayVersion();
 
     // The grader didn't change the grade at all, so don't save (don't put our name on a grade we didn't contribute to)
     if (gradedComponentsEqual(gradedComponent, OLD_GRADED_COMPONENT_LIST[component_id])) {

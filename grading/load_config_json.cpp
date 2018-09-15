@@ -3,6 +3,9 @@
 #include <string>
 #include <iostream>
 #include <cassert>
+#include <algorithm>
+#include <ctype.h>
+
 
 #include "TestCase.h"
 #include "load_config_json.h"
@@ -132,6 +135,10 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
         //pad this out correctly?
         this_testcase["containers"][container_num]["container_name"] = "container" + std::to_string(container_num); 
       }
+
+      std::string container_name = this_testcase["containers"][container_num]["container_name"];
+
+      assert(std::find_if(container_name.begin(), container_name.end(), isspace) == container_name.end());
 
       if(this_testcase["containers"][container_num]["outgoing_connections"].is_null()){
         this_testcase["containers"][container_num]["outgoing_connections"] = nlohmann::json::array();
