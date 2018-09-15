@@ -327,7 +327,7 @@ class HomeworkView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
             'gradeable_id' => $gradeable->getId(),
             'gradeable_name' => $gradeable->getTitle(),
-            'formatted_due_date' => $gradeable->getSubmissionDueDate()->setTimezone($this->core->getConfig()->getTimezone())->format($DATE_FORMAT),
+            'formatted_due_date' => $gradeable->getSubmissionDueDate()->format($DATE_FORMAT),
             'part_names' => $gradeable->getAutogradingConfig()->getPartNames(),
             'is_vcs' => $gradeable->isVcs(),
             'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
@@ -662,7 +662,7 @@ class HomeworkView extends AbstractView {
                 if (empty($threads)) break;
                 $is_staff = $this->core->getQueries()->isStaffPost($thread['user_id']);
                 $name = $this->core->getQueries()->getUserById($thread['user_id'])->getDisplayedFirstName();
-                $date = date_create($thread['timestamp']);
+                $date = DateUtils::parseDateTime($thread['timestamp'], $this->core->getConfig()->getTimezone());
                 $content = $thread['content'];
                 $posts[] = [
                     'is_staff' => $is_staff,
