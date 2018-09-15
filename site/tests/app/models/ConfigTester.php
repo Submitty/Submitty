@@ -132,6 +132,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals("http://example.com/", $config->getBaseUrl());
         $this->assertEquals("http://example.com/cgi-bin/", $config->getCgiUrl());
         $this->assertEquals("http://example.com/index.php?", $config->getSiteUrl());
+        $this->assertEquals("http://example.com/index.php?", $config->getHomepageUrl());
         $this->assertEquals($this->temp_dir, $config->getSubmittyPath());
         $this->assertEquals($this->temp_dir."/courses/s17/csci0000", $config->getCoursePath());
         $this->assertEquals($this->temp_dir."/logs", $config->getLogPath());
@@ -151,6 +152,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $config->loadCourseIni($this->course_ini_path);
         $this->assertEquals(array_merge($db_params, array('dbname' => 'submitty_s17_csci0000')), $config->getCourseDatabaseParams());
         $this->assertEquals("Test Course", $config->getCourseName());
+        $this->assertEquals("http://example.com/index.php?semester=s17&course=csci0000", $config->getSiteUrl());
         $this->assertEquals("", $config->getCourseHomeUrl());
         $this->assertEquals(2, $config->getDefaultHwLateDays());
         $this->assertEquals(3, $config->getDefaultStudentLateDays());
@@ -163,6 +165,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertFalse($config->displayRainbowGradesSummary());
         $this->assertEquals(FileUtils::joinPaths($this->temp_dir, "courses", "s17", "csci0000", "config", "config.ini"),
             $config->getCourseIniPath());
+        $this->assertEquals('', $config->getRoomSeatingGradeableId());
+        $this->assertFalse($config->displayRoomSeating());
 
         $expected = array(
             'debug' => false,
@@ -275,6 +279,86 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $config->loadMasterConfigs($this->config_path);
         $config->loadCourseIni($this->course_ini_path);
         $this->assertEquals("sqlite", $config->getDatabaseDriver());
+    }
+
+    public function testVcsUrl() {
+        $extra = ['vcs_url' => 'https://some.vcs.url.com'];
+        $this->createConfigFile($extra);
+
+        $config = new Config($this->core, "s17", "config");
+        $config->loadMasterConfigs($this->config_path);
+        $this->assertEquals("https://some.vcs.url.com/", $config->getVcsUrl());
+    }
+
+    public function testCourseSeating() {
+        $extra = ['course_details' => ['room_seating_gradeable_id' => 'test_id']];
+        $this->createConfigFile($extra);
+
+        $config = new Config($this->core, "s17", "config");
+        $config->loadMasterConfigs($this->config_path);
+        $config->loadCourseIni($this->course_ini_path);
+        $this->assertEquals("test_id", $config->getRoomSeatingGradeableId());
+        $this->assertTrue($config->displayRoomSeating());
+    }
+
+    /**
+     * @expectedException \app\exceptions\ConfigException
+     * @expectedExceptionMessage Could not find config directory: /invalid/path
+     */
+    public function testInvalidMasterConfigPath() {
+        $config = new Config($this->core, "s17", "csci1000");
+        $config->loadMasterConfigs('/invalid/path');
+    }
+
+    /**
+     * @expectedException \app\exceptions\ConfigException
+     * @expectedExceptionMessageRegExp /Could not find config directory: .*\/config\/database.json/
+     */
+    public function testConfigPathFile() {
+        $this->createConfigFile();
+        $config = new Config($this->core, "s17", "csci1000");
+        $config->loadMasterConfigs(FileUtils::joinPaths($this->temp_dir, 'config', 'database.json'));
+    }
+
+    /**
+     * @expectedException \app\exceptions\ConfigException
+     * @expectedExceptionMessageRegExp /Could not find database config: .*\/config\/database.json/
+     */
+    public function testMissingDatabaseJson() {
+        $this->createConfigFile();
+        unlink(FileUtils::joinPaths($this->temp_dir, 'config', 'database.json'));
+        $config = new Config($this->core, "s17", "csci1000");
+        $config->loadMasterConfigs($this->config_path);
+    }
+
+    /**
+     * @expectedException \app\exceptions\ConfigException
+     * @expectedExceptionMessageRegExp /Could not find submitty config: .*\/config\/submitty.json/
+     */
+    public function testMissingSubmittyJson() {
+        $this->createConfigFile();
+        unlink(FileUtils::joinPaths($this->temp_dir, 'config', 'submitty.json'));
+        $config = new Config($this->core, "s17", "csci1000");
+        $config->loadMasterConfigs($this->config_path);
+    }
+
+    /**
+     * @expectedException \app\exceptions\ConfigException
+     * @expectedExceptionMessage Could not find course config file: /invalid/path
+     */
+    public function testInvalidCourseConfigPath() {
+        $config = new Config($this->core, "s17", "csci1000");
+        $config->loadCourseIni("/invalid/path");
+    }
+
+    /**
+     * @expectedException \app\exceptions\IniException
+     * @expectedExceptionMessageRegExp /Error reading ini file 'database\.json': syntax error, unexpected '\{' in .*\/database\.json on line 1/
+     */
+    public function testInvalidCourseConfigIni() {
+        $this->createConfigFile();
+        $config = new Config($this->core, "s17", "csci1000");
+        $config->loadCourseIni(FileUtils::joinPaths($this->config_path, "database.json"));
     }
 
     public function getRequiredSections() {

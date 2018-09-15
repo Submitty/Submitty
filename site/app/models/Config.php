@@ -200,7 +200,7 @@ class Config extends AbstractModel {
         $database_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'database.json'));
 
         if (!$database_json) {
-            throw new ConfigException("Could not find {$this->config_path}/database.json");
+            throw new ConfigException("Could not find database config: {$this->config_path}/database.json");
         }
 
         $this->submitty_database_params = [
@@ -219,7 +219,7 @@ class Config extends AbstractModel {
 
         $submitty_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'submitty.json'));
         if (!$submitty_json) {
-            throw new ConfigException("Could not find {$this->config_path}/submitty.json");
+            throw new ConfigException("Could not find submitty config: {$this->config_path}/submitty.json");
         }
 
         $this->submitty_log_path = $submitty_json['site_log_path'];
