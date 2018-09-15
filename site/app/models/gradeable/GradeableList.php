@@ -73,7 +73,7 @@ class GradeableList extends AbstractModel {
             $this->gradeables[$gradeable->getId()] = $gradeable;
         }
 
-        $this->now = new \DateTime("now", $this->core->getConfig()->getTimezone());
+        $this->now = $this->core->getDateTimeNow();
 
         foreach ($this->gradeables as $gradeable) {
             if ($gradeable->getGradeReleasedDate() <= $this->now) {

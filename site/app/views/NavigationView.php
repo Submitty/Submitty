@@ -279,7 +279,7 @@ class NavigationView extends AbstractView {
      */
     private function getTeamButton(Gradeable $gradeable, $graded_gradeable) {
         // Team management button, only visible on team assignments
-        $date = new \DateTime("now", $this->core->getConfig()->getTimezone());
+        $date = $this->core->getDateTimeNow();
         $past_lock_date = $date < $gradeable->getTeamLockDate();
 
         if ($past_lock_date) {
