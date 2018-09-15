@@ -1,9 +1,13 @@
 {% import 'functions/Badge.twig' as Badge %}
 
+{% if num_visible_testcases == 0 %}
+    <h4>No Autograding for this Assignment</h4>
+{% endif %}
+
 {% if num_visible_testcases == 1 %}
     <script type="text/javascript">
         $(document).ready(function() {
-            loadTestcaseOutput('testcase_0', '{{ gradeable.getId() }}', '{{ gradeable.getUser().getId() }}', '0');
+            loadTestcaseOutput('testcase_0', '{{ gradeable_id }}', '{{ submitter_id }}', '0', '{{ display_version }}');
         });
     </script>
 {% endif %}
@@ -29,27 +33,29 @@
         <div class="box">
             <div class="box-title">
                 {{ Badge.render(nonhidden_earned, nonhidden_max, false) }}
-                <h4>{{ gradeable.beenTAGraded() ? "Autograding Subtotal" : "Total" }}</h4>
+                <h4>{{ is_ta_grading_complete ? "Autograding Subtotal" : "Total" }}</h4>
             </div>
         </div>
         {% if display_hidden %}
             <div class="box">
                 <div class="box-title">
                     {{ Badge.render(hidden_earned, hidden_max, false) }}
-                    <h4>{{ gradeable.beenTAGraded() ? "Autograding Subtotal" : "Total" }} <i>(With Hidden Points)</i></h4>
+                    <h4>{{ is_ta_grading_complete ? "Autograding Subtotal" : "Total" }} <i>(With Hidden Points)</i></h4>
                 </div>
             </div>
         {% endif %}
     {% endif %}
 {% endif %}
 
-{% for testcase in gradeable.getTestcases() if testcase.viewTestcase() %}
-    {% set can_view = (not testcase.isHidden() or show_hidden) %}
-    <div class="box" {{ testcase.isHidden() and show_hidden ? "style='background-color:#D3D3D3;'" : "" }}>
-        <div id='tc_{{ loop.index0 }}'class="box-title" {{ testcase.hasDetails() and can_view ? "style='cursor: pointer;'" : "" }} onclick="loadTestcaseOutput('testcase_{{ loop.index0 }}', '{{ gradeable.getId() }}', '{{ gradeable.getUser().getId() }}', '{{ loop.index0 }}');">
+{% for testcase in testcases if testcase.can_view %}
+    {% set can_view = (not testcase.hidden or show_hidden) %}
+    <div class="box" {{ testcase.hidden and show_hidden ? "style='background-color:#D3D3D3;'" : "" }}>
+        <div id='tc_{{ loop.index0 }}' class="box-title"
+                {{ testcase.has_extra_results and can_view ? "style='cursor: pointer;'" : "" }}
+             onclick="loadTestcaseOutput('testcase_{{ loop.index0 }}', '{{ gradeable_id }}', '{{ submitter_id }}', '{{ loop.index0 }}', {{ display_version }});">
 
             {# Details button #}
-            {% if testcase.hasDetails() and can_view %}
+            {% if testcase.has_extra_results and can_view %}
                 <div style="float:right; color: #0000EE; text-decoration: underline">
                     Details
                 </div>
@@ -57,15 +63,15 @@
             {# /Details button #}
 
             {# Badge #}
-            {% if testcase.hasPoints() %}
+            {% if testcase.has_points %}
                 {% if can_view %}
-                    {{ Badge.render(testcase.getPointsAwarded(), testcase.getPoints(), testcase.isExtraCredit()) }}
+                    {{ Badge.render(testcase.points, testcase.points_total, testcase.extra_credit) }}
                 {% else %}
                     <div class="badge">
                         Hidden
-                        {% if gradeable.taGradesReleased() %}
+                        {% if is_ta_grading_complete %}
                             <br>
-                            {{ Badge.format_value(testcase.getPointsAwarded(), testcase.getPoints(), testcase.isExtraCredit()) }}
+                            {{ Badge.format_value(testcase.points, testcase.points_total, testcase.extra_credit) }}
                         {% endif %}
                     </div>
                 {% endif %}
@@ -75,24 +81,24 @@
             {# /Badge #}
 
             <h4>
-                {% if testcase.isHidden() and show_hidden %}
+                {% if testcase.hidden and show_hidden %}
                     HIDDEN:
                 {% endif %}
-                {{ testcase.getName() }}
+                {{ testcase.name }}
                 &nbsp;&nbsp;&nbsp;
-                <code>{{ testcase.getDetails() }}</code>
+                <code>{{ testcase.details }}</code>
                 &nbsp;&nbsp;
-                {% if testcase.isExtraCredit() %}
+                {% if testcase.extra_credit %}
                     <span class='italics' style="color: #0a6495;">Extra Credit</span>
                 {% endif %}
                 &nbsp;&nbsp;
-                {% if can_view and testcase.viewTestcaseMessage() %}
-                    <span class='italics' style="color: #af0000;">{{ testcase.getTestcaseMessage() }}</span>
+                {% if can_view and testcase.view_testcase_message %}
+                    <span class='italics' style="color: #af0000;">{{ testcase.testcase_message }}</span>
                 {% endif %}
             </h4>
         </div>
 
-        {% if testcase.hasDetails() and can_view %}
+        {% if testcase.has_extra_results and can_view %}
             <div id="testcase_{{ loop.index0 }}" style="display:{{ num_visible_testcases == 0 ? "block" : "none" }};"></div>
         {% endif %}
     </div>

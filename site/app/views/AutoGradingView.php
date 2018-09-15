@@ -17,70 +17,11 @@ use app\libraries\DateUtils;
 class AutoGradingView extends AbstractView {
 
     /**
-     * @param Gradeable $gradeable
-     * @param bool $show_hidden
-     * @return string
-     */
-    public function showResults(Gradeable $gradeable, $show_hidden = false) {
-        $current_version = $gradeable->getCurrentVersion();
-        $has_badges = false;
-        $num_visible_testcases = 0;
-
-        $nonhidden_earned = 0;
-        $nonhidden_max = 0;
-        $hidden_earned = 0;
-        $hidden_max = 0;
-        $show_hidden_breakdown = false;
-        $display_hidden = false;
-
-        foreach ($gradeable->getTestcases() as $testcase) {
-            if ($testcase->viewTestcase()) {
-                $num_visible_testcases++;
-            }
-        }
-
-        if ($current_version->getNonHiddenTotal() >= 0) {
-            $has_badges = true;
-
-            $nonhidden_earned = $current_version->getNonHiddenTotal();
-            $nonhidden_max = $gradeable->getNormalPoints();
-            $hidden_earned = $current_version->getNonHiddenTotal() + $current_version->getHiddenTotal();
-            $hidden_max = $gradeable->getTotalAutograderNonExtraCreditPoints();
-
-            $show_hidden_breakdown = ($current_version->getNonHiddenNonExtraCredit() + $current_version->getHiddenNonExtraCredit() > $gradeable->getNormalPoints()) && $show_hidden;
-
-            $display_hidden = false;
-            if ($gradeable->taGradesReleased()) {
-                foreach ($gradeable->getTestcases() as $testcase) {
-                    if (!$testcase->viewTestcase()) continue;
-                    if ($testcase->isHidden()) {
-                        $display_hidden = true;
-                        break;
-                    }
-                }
-            }
-        }
-
-        return $this->core->getOutput()->renderTwigTemplate("autograding/AutoResults.twig", [
-            "gradeable" => $gradeable,
-            "show_hidden" => $show_hidden,
-            "num_visible_testcases" => $num_visible_testcases,
-            "show_hidden_breakdown" => $show_hidden_breakdown,
-            "display_hidden" => $display_hidden,
-            "nonhidden_earned" => $nonhidden_earned,
-            "nonhidden_max" => $nonhidden_max,
-            "hidden_earned" => $hidden_earned,
-            "hidden_max" => $hidden_max,
-            "has_badges" => $has_badges,
-        ]);
-    }
-
-    /**
      * @param AutoGradedVersion $version_instance
      * @param bool $show_hidden
      * @return string
      */
-    public function showResultsNew(AutoGradedVersion $version_instance, bool $show_hidden = false) {
+    public function showResults(AutoGradedVersion $version_instance, bool $show_hidden = false) {
         $graded_gradeable = $version_instance->getGradedGradeable();
         $gradeable = $graded_gradeable->getGradeable();
         $autograding_config = $gradeable->getAutogradingConfig();
@@ -139,7 +80,7 @@ class AutoGradingView extends AbstractView {
             }
         }
 
-        return $this->core->getOutput()->renderTwigTemplate("autograding/AutoResultsNew.twig", [
+        return $this->core->getOutput()->renderTwigTemplate("autograding/AutoResults.twig", [
             'gradeable_id' => $gradeable->getId(),
             'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
             "num_visible_testcases" => $num_visible_testcases,
