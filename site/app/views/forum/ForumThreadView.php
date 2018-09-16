@@ -792,7 +792,7 @@ HTML;
 HTML;
 			}
 		}
-		if(($this->core->getUser()->getGroup() <= 2 || $post['author_user_id'] === $current_user) && $first && $thread_resolve_state == -1) {
+		if(($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) && $first && $thread_resolve_state == -1) {
 			//resolve button
 			$return .= <<<HTML
 				<a class="btn btn-default btn-sm" style="text-decoration: none;" onClick="changeThreadStatus({$post['thread_id']})" title="Mark thread as resolved">Mark as resolved</a>

@@ -123,7 +123,7 @@ class ForumController extends AbstractController {
 	private function changeThreadStatus($status) {
 		$thread_id = $_POST['thread_id'];
 		$result = array();
-		if($this->core->getQueries()->getAuthorOfThread($thread_id) === $this->core->getUser()->getId() || $this->core->getUser()->getGroup() <= 2) {
+		if($this->core->getQueries()->getAuthorOfThread($thread_id) === $this->core->getUser()->getId() || $this->core->getUser()->getGroup() <= 3) {
 			if($this->core->getQueries()->updateResolveState($thread_id, $status)) {
 				$result['success'] = 'Thread resolve state has been changed.';
 			} else {
