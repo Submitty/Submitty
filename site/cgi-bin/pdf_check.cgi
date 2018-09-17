@@ -93,17 +93,17 @@ try:
         div = total_pages // num
         
         # pdf = PdfFileReader(path)
-        counter = 0
-        for i in range(0, total_pages, num):
+        i = 0
+        while i < total_pages:
             cover_writer = PdfFileWriter()
-            cover_writer.addPage(pdfReader.getPage(counter)) 
-            cover_filename = '{}_{}_cover.pdf'.format(filename[:-4], int(i/2))
-            output_filename = '{}_{}.pdf'.format(filename[:-4], int(i/2))
+            cover_writer.addPage(pdfReader.getPage(i)) 
+            cover_filename = '{}_{}_cover.pdf'.format(filename[:-4], i)
+            output_filename = '{}_{}.pdf'.format(filename[:-4], i)
             pdf_writer = PdfFileWriter()
-            start = counter
+            start = i
             for j in range(start, start+num):
                 pdf_writer.addPage(pdfReader.getPage(j)) 
-                counter+=1
+                i+=1
             with open(output_filename, 'wb') as out:
                 pdf_writer.write(out)
             with open(cover_filename, 'wb') as out:
