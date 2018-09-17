@@ -1427,6 +1427,37 @@ function publishPost() {
     return publishFormWithAttachments($(this), false, "Something went wrong while publishing post. Please try again.");
 }
 
+function changeThreadStatus(thread_id) {
+	var url = buildUrl({'component': 'forum', 'page': 'change_thread_status_resolve'});
+	$.ajax({
+			url: url,
+			type: "POST",
+			data: {
+				thread_id: thread_id
+			},
+			success: function(data) {
+				try {
+					var json = JSON.parse(data);
+				} catch(err) {
+					var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+					$('#messages').append(message);
+					return;
+				}
+				if(json['error']) {
+					var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+					$('#messages').append(message);
+					return;
+				}
+				window.location.reload();
+				var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Thread marked as resolved.</div>';
+					$('#messages').append(message);
+			},
+			error: function() {
+				window.alert('Something went wrong when trying to mark this thread as resolved. Please try again.');
+			}
+	});
+}
+
 function editPost(post_id, thread_id, shouldEditThread) {
     if(!checkAreYouSureForm()) return;
     var form = $("#thread_form");

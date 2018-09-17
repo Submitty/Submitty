@@ -726,7 +726,7 @@ HTML;
 		$first_name = htmlentities(trim($user_info["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 		$last_name = htmlentities(trim($user_info["last_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 		$visible_username = $first_name . " " . substr($last_name, 0 , 1) . ".";
-
+		$thread_resolve_state = $this->core->getQueries()->getResolveState($thread_id)[0]['status'];
 
 		if($display_option != 'tree'){
 			$reply_level = 1;
@@ -787,6 +787,12 @@ HTML;
 HTML;
 			}
 		}
+		if(($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) && $first && $thread_resolve_state == -1) {
+			//resolve button
+			$return .= <<<HTML
+				<a class="btn btn-default btn-sm" style="text-decoration: none;" onClick="changeThreadStatus({$post['thread_id']})" title="Mark thread as resolved">Mark as resolved</a>
+HTML;
+		}
 		$return .= <<<HTML
 			<span style="margin-top:8px;margin-left:10px;float:right;">							
 HTML;
@@ -826,7 +832,7 @@ HTML;
 			<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; float:right;" onClick="deletePostToggle({$ud_toggle_status}, {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date->setTimezone($my_timezone),'n/j g:i A')}' )" title="{$ud_button_title}"><i class="fa {$ud_button_icon}" aria-hidden="true"></i></a>
 HTML;
 		}
-		if($this->core->getUser()->getGroup() <= 2 || $post['author_user_id'] === $this->core->getUser()->getId()) {
+		if($this->core->getUser()->getGroup() <= 2 || $post['author_user_id'] === $current_user) {
 			$shouldEditThread = null;
 			$edit_button_title = "";
 			if($first) {
