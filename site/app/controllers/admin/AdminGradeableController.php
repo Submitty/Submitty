@@ -812,7 +812,8 @@ class AdminGradeableController extends AbstractController {
             'student_download_any_version',
             'peer_grading',
             'late_submission_allowed',
-            'regrade_allowed'
+            'regrade_allowed',
+            'vcs'
         ];
 
         $numeric_properties = [
