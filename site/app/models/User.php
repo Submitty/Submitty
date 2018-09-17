@@ -60,12 +60,16 @@ class User extends AbstractModel {
     protected $password = null;
     /** @property @var string The first name of the user */
     protected $first_name;
-    /** @property @var string The first name of the user */
+    /** @property @var string The preferred first name of the user */
     protected $preferred_first_name = "";
-    /** @property @var  string The name to be displayed by the system (either preferred name or first name) */
+    /** @property @var  string The first name to be displayed by the system (either first name or preferred first name) */
     protected $displayed_first_name;
     /** @property @var string The last name of the user */
     protected $last_name;
+    /** @property @var string The preferred last name of the user */
+    protected $preferred_last_name = "";
+    /** @property @var  string The last name to be displayed by the system (either last name or preferred last name) */
+    protected $displayed_last_name;
     /** @property @var string The email of the user */
     protected $email;
     /** @property @var int The group of the user, used for access controls (ex: student, instructor, etc.) */
@@ -130,7 +134,11 @@ class User extends AbstractModel {
             $this->setPreferredFirstName($details['user_preferred_firstname']);
         }
 
-        $this->last_name = $details['user_lastname'];
+        $this->setLastName($details['user_lastname']);
+        if (isset($details['user_preferred_lastname'])) {
+            $this->setPreferredLastName($details['user_preferred_lastname']);
+        }
+
         $this->email = $details['user_email'];
         $this->group = isset($details['user_group']) ? intval($details['user_group']) : 4;
         if ($this->group > 4 || $this->group < 0) {
@@ -189,6 +197,11 @@ class User extends AbstractModel {
         $this->setDisplayedFirstName();
     }
 
+    public function setLastName($name) {
+        $this->last_name = $name;
+        $this->setDisplayedLastName();
+    }
+
     /**
      * Set the preferred name of the loaded user (does not affect db. call updateUser.)
      * @param string $name
@@ -198,12 +211,26 @@ class User extends AbstractModel {
         $this->setDisplayedFirstName();
     }
 
+    public function setPreferredLastName($name( {
+        $this->preferred_last_name = $name;
+        $this->setDisplayedLastName();
+    }
+
     private function setDisplayedFirstName() {
         if ($this->preferred_first_name !== "" && $this->preferred_first_name !== null) {
             $this->displayed_first_name = $this->preferred_first_name;
         }
         else {
             $this->displayed_first_name = $this->first_name;
+        }
+    }
+
+    private function setDisplayedlastName() {
+        if ($this->preferred_last_name !== "" && $this->preferred_last_name !== null) {
+            $this->displayed_last_name = $this->preferred_last_name;
+        }
+        else {
+            $this->displayed_last_name = $this->last_name;
         }
     }
 
@@ -257,9 +284,12 @@ class User extends AbstractModel {
 			return preg_match("~^[a-z0-9_\-]+$~", $data) === 1;
 		case 'user_firstname':
 		case 'user_lastname':
-		case 'user_preferred_firstname':
-			//First, Last, Preferred name must be alpha characters, white-space, or certain punctuation.
+			//First and last name must be alpha characters, white-space, or certain punctuation.
         	return preg_match("~^[a-zA-Z'`\-\.\(\) ]+$~", $data) === 1;
+   		case 'user_preferred_firstname':
+   		case 'user_preferred_lastname':
+   		    //Preferred first and last name may be "", alpha chars, white-space, certain punctuation AND no longer than 30 chars.
+   		    return preg_match("~^[a-zA-Z'`\-\.\(\) ]*$~", $data) === 1 && strlen($data) <= 30;
 		case 'user_email':
 			//Check email address for appropriate format. e.g. "user@university.edu", "user@cs.university.edu", etc.
 			return preg_match("~^[^(),:;<>@\\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?<!\-)(\.[a-zA-Z0-9]+)+$~", $data) === 1;
@@ -268,7 +298,7 @@ class User extends AbstractModel {
 			return preg_match("~^[1-4]{1}$~", $data) === 1;
 		case 'registration_section':
 			//Registration section must contain only alpha, numbers, underscores, hyphens
-			return preg_match("~^[A-Za-z0-9_\-]+$~", $data) === 1;	
+			return preg_match("~^[A-Za-z0-9_\-]+$~", $data) === 1;
 		case 'user_password':
 	        //Database password cannot be blank, no check on format
 			return $data !== "";
