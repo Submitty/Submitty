@@ -1756,7 +1756,7 @@ function replyPost(post_id){
 }
 
 function generateCodeMirrorBlocks(container_element) {
-    var codeSegments = container_element.querySelectorAll("[id=code]");
+    var codeSegments = container_element.querySelectorAll(".code");
     for (let element of codeSegments){
         var editor0 = CodeMirror.fromTextArea(element, {
         lineNumbers: true,
