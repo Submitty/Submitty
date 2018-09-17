@@ -416,8 +416,8 @@ class Output {
         $this->use_footer = $bool;
     }
     
-    public function addBreadcrumb($string, $url=null, $top=false, $icon=false) {
-        $this->breadcrumbs[] = new Breadcrumb($this->core, $string, $url, $top, $icon);
+    public function addBreadcrumb($string, $url=null, $external_link=false) {
+        $this->breadcrumbs[] = new Breadcrumb($this->core, $string, $url, $external_link);
     }
 
     public function addRoomTemplatesTwigPath() {

@@ -703,13 +703,8 @@ HTML;
 		//end link handling
 
 		//handle converting code segments
+		$post_content = preg_replace('/&lbrack;code&rsqb;(.*?)&lbrack;&sol;code&rsqb;/', '<textarea class="code">$1</textarea>', $post_content);
 
-		$codeBracketString = "&lbrack;&sol;code&rsqb;";
-		if(strpos($post_content, "&NewLine;&lbrack;&sol;code&rsqb;") !== false){
-			$codeBracketString = "&NewLine;" . $codeBracketString;
-		}
-
-		$post_content = str_replace($codeBracketString, '</textarea>', str_replace('&lbrack;code&rsqb;', '<textarea id="code">', $post_content));
 		return $post_content;
 	}
 
