@@ -70,8 +70,8 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
 
     <div id="electronic_gradeable_preset_container">
         {# Real input fields to back the exposed configurations options #}
-        <input name="scanned_exam" value="{{ action != 'new' and gradeable.isScannedExam() ? 'true' : 'false' }}">
-        <input name="vcs" value="{{ action != 'new' and gradeable.isVcs() ? 'true' : 'false' }}">
+        <input name="scanned_exam" value="{{ action != 'new' and gradeable.isScannedExam() ? 'true' : 'false' }}" hidden>
+        <input name="vcs" value="{{ action != 'new' and gradeable.isVcs() ? 'true' : 'false' }}" hidden>
 
         <div>
             <input class="ignore" type="radio" id="radio_ef_student_upload" name="electronic_gradeable_presets" value="normal"
