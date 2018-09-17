@@ -44,21 +44,16 @@
                     <div>
                         <h2>
                             {% for b in breadcrumbs %}
-                                {% if loop.index0 > 0 and not b.getIcon() %}
+                                {% if loop.index0 > 0 %}
                                     &gt;
                                 {% endif %}
-                                {% if b.getUrl() != null and b.getUrl() != "" %}
-                                    {% if b.getIcon() %}
-                                            <a class="external" href="{{ b.getUrl() }}" target="_blank"><i class="fa fa-external-link"></i></a>
-                                    {% else %}
-                                        {% if b.getTop() %}
-                                            <a target="_top" href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
-                                        {% else %}
-                                            <a href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
-                                        {% endif %}
-                                    {% endif %}
+                                {% if b.getUrl() is not empty %}
+                                    <a href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
                                 {% else %}
                                     {{ b.getTitle() }}
+                                {% endif %}
+                                {% if b.getExternalUrl() is not empty %}
+                                    <a class="external" href="{{ b.getExternalUrl() }}" target="_blank"><i class="fa fa-external-link"></i></a>
                                 {% endif %}
                             {% endfor %}
                         </h2>
