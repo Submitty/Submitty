@@ -69,6 +69,8 @@
                         {{ gradeable.isStudentView() ? 'checked' : '' }}/> Yes
                 <input type="radio" id="no_student_view" name="student_view" value="false"
                         {{ not gradeable.isStudentView() ? 'checked' : '' }}/> No
+                <input type="radio" id="no_student_view" name="student_view" value="false"
+                        {{ not gradeable.isStudentView() ? 'checked' : '' }}/> When grades are released [FIXME: THIS IS NOT A VALID OPTION YET]
             </div>
 
             <div id="student_submit_download_view">

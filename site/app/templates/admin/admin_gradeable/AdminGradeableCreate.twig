@@ -68,17 +68,17 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
 
     <div>
         <input type="radio" id="radio_ef_scanned_exam" name="scanned_exam" value="true"
-           {{ action != 'new' and gradeable.isScannedExam() ? 'checked' : '' }}> TA/Instructor will (bulk) upload scanned .pdf for grading
+           {{ action != 'new' and gradeable.isScannedExam() ? 'checked' : '' }}> TA/Instructor will (bulk) upload scanned .pdf for online manual grading
     </div>
 
     <div>
         <input type='radio' id="radio_checkpoints" name="type" value="Checkpoints"
-            {{ action != 'new' and gradeable.getType() == 1 ? 'checked' : '' }}> Checkpoints
+            {{ action != 'new' and gradeable.getType() == 1 ? 'checked' : '' }}> Checkpoints (simple data entry: full/half/no credit)
     </div>
 
     <div>
         <input type='radio' id="radio_numeric" name="type" value="Numeric"
-            {{ action != 'new' and gradeable.getType() == 2 ? 'checked' : '' }}> Numeric/Text
+            {{ action != 'new' and gradeable.getType() == 2 ? 'checked' : '' }}> Numeric/Text (simple data entry: integer or floating point and/or short strings)
     </div>
 </div>
 
@@ -147,7 +147,7 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
     </div>
 
     {% if action == 'new' or action == 'template' %}
-        Are students uploading files or submitting to a Version Control System (VCS) repository?
+        Are students uploading files or submitting to a Version Control System (VCS) repository?  [ FIXME: SET THIS FROM TYPE OF GRADEABLE RADIO BUTTON ABOVE & REMOVE THIS QUESTION ]
     {% else %}
         Student Submission Format: {{ gradeable.isVcs() ? 'VCS Repository' : 'Upload File(s)' }}
         <br />
