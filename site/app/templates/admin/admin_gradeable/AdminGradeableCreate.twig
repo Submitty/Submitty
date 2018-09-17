@@ -50,35 +50,43 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
     Gradeable type: <span id="gradeable-type-string">{{ type_string }}</span>
     <br />
 {% endif %}
-<div style="{{ action == 'edit' ? 'display:none' : '' }}">
-    <div>
-        <input type='radio' id="radio_electronic_file" name="type" value="Electronic File"
-            {{ action != 'new' and gradeable.getType() == 0 ? 'checked' : '' }} hidden>
+<div>
+    <div id="gradeable_type_container" {{ action == 'edit' ? 'hidden' : '' }}>
+        <div>
+            <input type='radio' id="radio_checkpoints" name="type" value="Checkpoints"
+                {{ action != 'new' and gradeable.getType() == 1 ? 'checked' : '' }}> Checkpoints (simple data entry: full/half/no credit)
+        </div>
+
+        <div>
+            <input type='radio' id="radio_numeric" name="type" value="Numeric"
+                {{ action != 'new' and gradeable.getType() == 2 ? 'checked' : '' }}> Numeric/Text (simple data entry: integer or floating point and/or short strings)
+        </div>
+
+        <div>
+            <input type='radio' id="radio_electronic_file" name="type" value="Electronic File"
+                    {{ action != 'new' and gradeable.getType() == 0 ? 'checked' : '' }}> Electronic File (multiple types)
+        </div>
     </div>
 
-    <div>
-        <input type="radio" id="radio_ef_student_upload" name="scanned_exam" value="false"
-           {{ action != 'new' and not gradeable.isScannedExam() and not gradeable.isVcs() ? 'checked' : ''}}> Students will submit one or more files by direct upload to the Submitty website
-    </div>
+    <div id="electronic_gradeable_preset_container">
+        {# Real input fields to back the exposed configurations options #}
+        <input name="scanned_exam" value="{{ action != 'new' and gradeable.isScannedExam() ? 'true' : 'false' }}">
+        <input name="vcs" value="{{ action != 'new' and gradeable.isVcs() ? 'true' : 'false' }}">
 
-    <div>
-        <input type="radio" id="radio_ef_student_upload" name="scanned_exam" value="false"
-           {{ action != 'new' and not gradeable.isScannedExam() and gradeable.isVcs() ? 'checked' : ''}}> Students will submit by committing files to a version control system (VCS) repository
-    </div>
+        <div>
+            <input class="ignore" type="radio" id="radio_ef_student_upload" name="electronic_gradeable_presets" value="normal"
+                    {{ action != 'new' and not gradeable.isScannedExam() and not gradeable.isVcs() ? 'checked' : ''}}> Students will submit one or more files by direct upload to the Submitty website
+        </div>
 
-    <div>
-        <input type="radio" id="radio_ef_scanned_exam" name="scanned_exam" value="true"
-           {{ action != 'new' and gradeable.isScannedExam() ? 'checked' : '' }}> TA/Instructor will (bulk) upload scanned .pdf for online manual grading
-    </div>
+        <div>
+            <input class="ignore" type="radio" id="radio_ef_vcs_upload" name="electronic_gradeable_presets" value="vcs"
+                    {{ action != 'new' and not gradeable.isScannedExam() and gradeable.isVcs() ? 'checked' : ''}}> Students will submit by committing files to a version control system (VCS) repository
+        </div>
 
-    <div>
-        <input type='radio' id="radio_checkpoints" name="type" value="Checkpoints"
-            {{ action != 'new' and gradeable.getType() == 1 ? 'checked' : '' }}> Checkpoints (simple data entry: full/half/no credit)
-    </div>
-
-    <div>
-        <input type='radio' id="radio_numeric" name="type" value="Numeric"
-            {{ action != 'new' and gradeable.getType() == 2 ? 'checked' : '' }}> Numeric/Text (simple data entry: integer or floating point and/or short strings)
+        <div>
+            <input class="ignore" type="radio" id="radio_ef_scanned_exam" name="electronic_gradeable_presets" value="scanned_exam"
+                    {{ action != 'new' and gradeable.isScannedExam() ? 'checked' : '' }}> TA/Instructor will (bulk) upload scanned .pdf for online manual grading
+        </div>
     </div>
 </div>
 
@@ -91,15 +99,15 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
     <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val auto_save date-related"
             {{ not (action != 'new' and gradeable.getTaGrading()) ? 'checked' : '' }} /> No
     {% if regrade_enabled %}
-    <br /><br /><br />
-        Will regrade requests be enabled for this assignment?
-        <br />
-        <input type="radio" id="yes_regrade_allowed" name="regrade_allowed" value="true" class="bool_val auto_save date-related"
-                {{ action != 'new' and gradeable.isRegradeAllowed() ? 'checked' : '' }} /> Yes
-        <input type="radio" id="no_regrade_allowed" name="regrade_allowed" value="false" class="bool_val auto_save date-related"
-                {{ not (action != 'new' and gradeable.isRegradeAllowed()) ? 'checked' : '' }} /> No
+        <div id="regrade_request_enable_container">
+            Will regrade requests be enabled for this assignment?
+            <br />
+            <input type="radio" id="yes_regrade_allowed" name="regrade_allowed" value="true" class="bool_val auto_save date-related"
+                    {{ action != 'new' and gradeable.isRegradeAllowed() ? 'checked' : '' }} /> Yes
+            <input type="radio" id="no_regrade_allowed" name="regrade_allowed" value="false" class="bool_val auto_save date-related"
+                    {{ not (action != 'new' and gradeable.isRegradeAllowed()) ? 'checked' : '' }} /> No
+        </div>
     {% endif %}
-    <br /><br />
 
     {% if action == 'new' or action == 'template' %}
         Is this a team assignment?
@@ -113,7 +121,6 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
         <input type="radio" id = "team_no_radio" name="team_assignment" value ="false"
                 {{ not (action != 'new' and gradeable.isTeamAssignment()) ? 'checked' :  '' }}> No
     </div>
-    <br />
 
     <!-- Team settings (read only in edit mode) -->
     <div class="team_assignment team_yes" id="team_yes">
@@ -143,27 +150,9 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
                 value='{{ admin_gradeable.getEgInheritTeamsFrom() }}' readonly/>
         {% endif %}
         #}
-        <br /> <br />
     </div>
 
-    {% if action == 'new' or action == 'template' %}
-        Are students uploading files or submitting to a Version Control System (VCS) repository?  [ FIXME: SET THIS FROM TYPE OF GRADEABLE RADIO BUTTON ABOVE & REMOVE THIS QUESTION ]
-    {% else %}
-        Student Submission Format: {{ gradeable.isVcs() ? 'VCS Repository' : 'Upload File(s)' }}
-        <br />
-    {% endif %}
-
-    <div style="{{ action == 'edit' ? 'display:none' : '' }}">
-        <input type="radio" id="upload_file_radio" name="vcs" value="false"
-                {{ not(action != 'new' and gradeable.isVcs()) ? 'checked ' : '' }}/> Upload File(s)
-
-        <input type="radio" id="repository_radio" name="vcs" value="true"
-                {{ action != 'new' and gradeable.isVcs() ? 'checked ' : '' }}/> Version Control System (VCS) Repository
-    </div>
     <div id="repository">
-
-        <br />
-
         <h3>Path for the Version Control System (VCS) repository:</h3>
 
         VCS base URL (from Course Settings): <kbd>{{ vcs_base_url }}</kbd><br /><br />
@@ -194,10 +183,7 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
         <br />
         
         FULL VCS URL: <kbd id="vcs_url"></kbd>
-        <br />
     </div>
-
-    <br />
 </fieldset>
 
 <!-- Gradeable bucket (read/write in all modes) -->
@@ -277,12 +263,18 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_grades">sylla
             disableElementChildren('.electronic_file', false);
             $('#page_1_nav').show();
             onManualGradingChange();
+            if ($('input[name=electronic_gradeable_presets]:checked').length === 0) {
+                $('input[name=electronic_gradeable_presets][value=normal]').prop('checked', true);
+            }
         }
-        else if ($('#radio_checkpoints').is(':checked')) {
-            disableElementChildren('.checkpoints', false);
-        }
-        else if ($('#radio_numeric').is(':checked')) {
-            disableElementChildren('.numeric', false);
+        else {
+            $('input[name=electronic_gradeable_presets]').prop('checked', false);
+            if ($('#radio_checkpoints').is(':checked')) {
+                disableElementChildren('.checkpoints', false);
+            }
+            else if ($('#radio_numeric').is(':checked')) {
+                disableElementChildren('.numeric', false);
+            }
         }
     }
 
@@ -309,17 +301,6 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_grades">sylla
             disableElementChildren('.no_manual_grading', false);
         }
         updateDateDisplay();
-    }
-
-    function onUploadTypeChange() {
-        if($('#repository_radio').is(':checked')) {
-            // $('#repository').hide();
-            disableElementChildren('#repository', false);
-        }
-        else {
-            // $('#repository').show();
-            disableElementChildren('#repository', true);
-        }
     }
 
     function onVcsSubdirChange() {
@@ -377,6 +358,30 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_grades">sylla
         });
     });
 
+    function setStudentView(b) {
+        let elem = b ? $('#yes_student_view') : $('#no_student_view');
+        elem.prop('checked', true);
+        elem.change();
+    }
+
+    function setStudentSubmit(b) {
+        let elem = b ? $('#yes_student_submit') : $('#no_student_submit');
+        elem.prop('checked', true);
+        elem.change();
+    }
+
+    function setStudentDownload(b) {
+        let elem = b ? $('#yes_student_download') : $('#no_student_download');
+        elem.prop('checked', true);
+        elem.change();
+    }
+
+    function setStudentDownloadAny(b) {
+        let elem = b ? $('#yes_student_any_version') : $('#no_student_any_version');
+        elem.prop('checked', true);
+        elem.change();
+    }
+
     $(document).ready(function() {
 
         onManualGradingChange();
@@ -413,14 +418,37 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_grades">sylla
         onTeamAssignmentChange();
         $('[name="team_assignment"]').change(onTeamAssignmentChange);
 
-        // Only show repo settings if the gradeable is using repo upload
-        onUploadTypeChange();
-        $('[name="vcs"]').change(onUploadTypeChange);
+        disableElementChildren('#repository', $('input[name=vcs]').val() === 'false');
 
         // Update the electronic file subtype
-        $('input[name=scanned_exam]').change(function() {
+        $('input[name=electronic_gradeable_presets]').change(function() {
             $('#radio_electronic_file').prop('checked', true);
             onGradeableTypeChange();
+            let vcs = $('input[name=vcs]');
+            let scannedExam = $('input[name=scanned_exam]');
+
+            vcs.val('false');
+            $('#repository').hide();
+            if ($(this).val() === 'scanned_exam') {
+                scannedExam.val('true');
+                setStudentView(true);
+                setStudentSubmit(false);
+                setStudentDownload(false);
+                setStudentDownloadAny(false);
+            } else {
+                scannedExam.val('false');
+                setStudentView(true);
+                setStudentSubmit(true);
+                setStudentDownload(true);
+                setStudentDownloadAny(false);
+                if ($(this).val() === 'vcs') {
+                    vcs.val('true');
+                    $('#repository').show();
+                } else {
+                }
+            }
+            vcs.change();
+            scannedExam.change();
         });
 
         // Upload the vcs url in real time

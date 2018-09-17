@@ -50,18 +50,12 @@
                 {{ config_select_mode != 'manual' ? 'disabled' : '' }}/>
     </fieldset>
 
-    Will this gradeable be scanned and uploaded as bulk pdfs by the TA/Instructor?
-    <input type="radio" name="scanned_exam" value="true"
-            {{ gradeable.isScannedExam() ? 'checked' : '' }}> Yes
-    <input type="radio" name="scanned_exam" value="false"
-            {{ not gradeable.isScannedExam() ? 'checked' : ''}}> No
-
-    <input type="button" class="btn btn-default" id="show-advanced-student-permissions" value="Show Advanced Settings" onclick="showAdvancedStudentPermissions()">
-    <span id="hide-advanced-student-permissions-container" hidden><input type="button" class="btn btn-primary student_permissions" value="Hide Advanced Settings" onclick="hideAdvancedStudentPermissions()"></span>
+    <input type="button" class="btn btn-default" id="show-advanced-student-permissions" value="Show Student Permission Settings" onclick="showAdvancedStudentPermissions()">
+    <span id="hide-advanced-student-permissions-container" hidden><input type="button" class="btn btn-primary student_permissions" value="Hide Student Permission Settings" onclick="hideAdvancedStudentPermissions()"></span>
     <div class="student_permissions" hidden>
         <fieldset>
             <div>
-                What are students allowed to do?
+                What are students allowed to do? (Note: The presents on "General" configure these values)
             </div>
             <div>
                 View the gradeable on the course home page?
@@ -233,29 +227,6 @@
 
         // Update the text box when the path config changes
         $('.select_config_path').change(onConfigPathChange);
-
-        $('input[name=scanned_exam]').change(function() {
-            if($(this).val() === 'true') {
-                $('#no_student_view').prop('checked', true);
-                onStudentViewChange();
-                $('#no_student_view').change();
-                $('#no_student_submit').prop('checked', true);
-                $('#no_student_submit').change();
-                $('#no_student_download').prop('checked', true);
-                $('#no_student_download').change();
-                $('input[name=student_download_any_version]').prop('checked', false);
-                $('#gradeable-type-string').text('TA/Instructor will (bulk) upload scanned .pdf for grading');
-            } else {
-                $('#yes_student_view').prop('checked', true);
-                $('#yes_student_view').change();
-                $('#yes_student_submit').prop('checked', true);
-                $('#yes_student_submit').change();
-                $('#no_student_download').prop('checked', true);
-                $('#no_student_download').change();
-                $('input[name=student_download_any_version]').prop('checked', false);
-                $('#gradeable-type-string').text('Students will submit one or more files by direct upload or version control repository');
-            }
-        });
 
         $('#no_student_download').change(function() {
             if ($(this).is(':checked')) {
