@@ -431,10 +431,9 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_grades">sylla
             $('#repository').hide();
             if ($(this).val() === 'scanned_exam') {
                 scannedExam.val('true');
-                setStudentView(true);
+                setStudentView(false);
                 setStudentSubmit(false);
                 setStudentDownload(false);
-                setStudentDownloadAny(false);
             } else {
                 scannedExam.val('false');
                 setStudentView(true);
