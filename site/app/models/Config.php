@@ -200,7 +200,7 @@ class Config extends AbstractModel {
         $database_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'database.json'));
 
         if (!$database_json) {
-            throw new ConfigException("Could not find {$this->config_path}/database.json");
+            throw new ConfigException("Could not find database config: {$this->config_path}/database.json");
         }
 
         $this->submitty_database_params = [
@@ -219,7 +219,7 @@ class Config extends AbstractModel {
 
         $submitty_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'submitty.json'));
         if (!$submitty_json) {
-            throw new ConfigException("Could not find {$this->config_path}/submitty.json");
+            throw new ConfigException("Could not find submitty config: {$this->config_path}/submitty.json");
         }
 
         $this->submitty_log_path = $submitty_json['site_log_path'];
@@ -284,7 +284,7 @@ class Config extends AbstractModel {
             throw new ConfigException("Could not find course config file: ".$course_ini, true);
         }
         $this->course_ini_path = $course_ini;
-        $this->course_ini = $this->readCourseIni();
+        $this->course_ini = IniParser::readFile($this->course_ini_path);
 
         if (!isset($this->course_ini['database_details']) || !is_array($this->course_ini['database_details'])) {
             throw new ConfigException("Missing config section 'database_details' in ini file");
@@ -292,9 +292,12 @@ class Config extends AbstractModel {
 
         $this->course_database_params = array_merge($this->submitty_database_params, $this->course_ini['database_details']);
 
-        $array = array('course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
+        $array = [
+            'course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
             'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_rainbow_grades_summary',
-            'display_custom_message', 'room_seating_gradeable_id', 'course_email', 'vcs_base_url', 'vcs_type', 'private_repository', 'forum_enabled', 'regrade_enabled', 'regrade_message');
+            'display_custom_message', 'room_seating_gradeable_id', 'course_email', 'vcs_base_url', 'vcs_type',
+            'private_repository', 'forum_enabled', 'regrade_enabled', 'regrade_message'
+        ];
         $this->setConfigValues($this->course_ini, 'course_details', $array);
 
         if (empty($this->vcs_base_url)) {
@@ -338,12 +341,12 @@ class Config extends AbstractModel {
 
     private function setConfigValues($config, $section, $keys) {
         if (!isset($config[$section]) || !is_array($config[$section])) {
-            throw new ConfigException("Missing config section {$section} in ini file");
+            throw new ConfigException("Missing config section '{$section}' in ini file");
         }
 
         foreach ($keys as $key) {
             if (!isset($config[$section][$key])) {
-              throw new ConfigException("Missing config setting {$section}.{$key} in configuration ini file");
+              throw new ConfigException("Missing config setting '{$section}.{$key}' in configuration ini file");
             }
             $this->$key = $config[$section][$key];
         }
@@ -419,9 +422,5 @@ class Config extends AbstractModel {
     public function getWrapperFiles() {
         //Return empty if not logged in because we can't access them
         return ($this->core->getUser() === null ? [] : $this->wrapper_files);
-    }
-
-    public function readCourseIni() {
-        return IniParser::readFile($this->course_ini_path);
     }
 }
