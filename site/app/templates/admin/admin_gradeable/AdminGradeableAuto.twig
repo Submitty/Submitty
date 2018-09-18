@@ -196,8 +196,15 @@
         else {
             // $('#student_submit_download_view').hide();
             disableElementChildren('#student_submit_download_view', true);
-            $('#no_student_submit').prop('checked', true);
-            $('#no_student_download').prop('checked',true);
+            let studentSubmit = $('#no_student_submit');
+            let studentDownload =$('#no_student_download');
+
+            studentSubmit.prop('checked', true);
+            studentDownload.prop('checked',true);
+
+            studentDownload.change();
+            studentSubmit.change();
+
             $('input[name=student_download_any_version]').prop('checked', false);
             $('#student_submit_download_view').hide();
         }
@@ -252,7 +259,6 @@
             if ($(this).is(':checked')) {
                 $('input[name=student_view_after_grades]').prop('checked', false);
             } else {
-
             }
         });
 

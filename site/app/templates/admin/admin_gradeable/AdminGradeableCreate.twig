@@ -360,30 +360,6 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_grades">sylla
         });
     });
 
-    function setStudentView(b) {
-        let elem = b ? $('#yes_student_view') : $('#no_student_view');
-        elem.prop('checked', true);
-        elem.change();
-    }
-
-    function setStudentSubmit(b) {
-        let elem = b ? $('#yes_student_submit') : $('#no_student_submit');
-        elem.prop('checked', true);
-        elem.change();
-    }
-
-    function setStudentDownload(b) {
-        let elem = b ? $('#yes_student_download') : $('#no_student_download');
-        elem.prop('checked', true);
-        elem.change();
-    }
-
-    function setStudentDownloadAny(b) {
-        let elem = b ? $('#yes_student_any_version') : $('#no_student_any_version');
-        elem.prop('checked', true);
-        elem.change();
-    }
-
     $(document).ready(function() {
 
         onManualGradingChange();
@@ -433,15 +409,8 @@ What <a target=_blank href="http://submitty.org/instructor/rainbow_grades">sylla
             $('#repository').hide();
             if ($(this).val() === 'scanned_exam') {
                 scannedExam.val('true');
-                setStudentView(false);
-                setStudentSubmit(false);
-                setStudentDownload(false);
             } else {
                 scannedExam.val('false');
-                setStudentView(true);
-                setStudentSubmit(true);
-                setStudentDownload(true);
-                setStudentDownloadAny(false);
                 if ($(this).val() === 'vcs') {
                     vcs.val('true');
                     $('#repository').show();
