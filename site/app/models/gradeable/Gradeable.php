@@ -219,6 +219,7 @@ class Gradeable extends AbstractModel {
             $this->setTaGradingInternal($details['ta_grading']);
             $this->setScannedExam($details['scanned_exam']);
             $this->setStudentView($details['student_view']);
+            $this->setStudentViewAfterGrades($details['student_view_after_grades']);
             $this->setStudentSubmit($details['student_submit']);
             $this->setStudentDownload($details['student_download']);
             $this->setStudentDownloadAnyVersion($details['student_download_any_version']);
