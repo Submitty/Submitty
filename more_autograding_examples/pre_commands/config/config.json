@@ -33,7 +33,7 @@
       "pre_commands" : [
         {
           "command" : "cp",
-          "source" : "test01/",
+          "source" : "test01/dir",
           "destination" : "./"
         }
       ], 
