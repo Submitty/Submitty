@@ -59,12 +59,15 @@
             </div>
             <div>
                 View the gradeable on the course home page?
-                <input type="radio" id="yes_student_view" name="student_view" value="true"
-                        {{ gradeable.isStudentView() ? 'checked' : '' }}/> Yes
+                <input type="radio" id="no_student_view_after_grades" name="student_view_after_grades" value="false"
+                        {{ gradeable.isStudentView() and not gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}/> Yes
                 <input type="radio" id="no_student_view" name="student_view" value="false"
                         {{ not gradeable.isStudentView() ? 'checked' : '' }}/> No
-                <input type="radio" id="no_student_view" name="student_view" value="false"
-                        {{ not gradeable.isStudentView() ? 'checked' : '' }}/> When grades are released [FIXME: THIS IS NOT A VALID OPTION YET]
+                <input type="radio" id="yes_student_view_after_grades" name="student_view_after_grades" value="true"
+                        {{ gradeable.isStudentView() and gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}/> When grades are released
+
+                <input type="radio" id="yes_student_view" name="student_view" value="true"
+                        {{ gradeable.isStudentView() ? 'checked' : '' }} hidden/>
             </div>
 
             <div id="student_submit_download_view">
@@ -236,6 +239,20 @@
 
         $('input[name=student_download_any_version]').change(function() {
             let elem = $('#yes_student_download');
+            elem.prop('checked', true);
+            elem.change();
+        });
+
+        $('#no_student_view').change(function() {
+            if ($(this).is(':checked')) {
+                $('input[name=student_view_after_grades]').prop('checked', false);
+            } else {
+
+            }
+        });
+
+        $('input[name=student_view_after_grades]').change(function() {
+            let elem = $('#yes_student_view');
             elem.prop('checked', true);
             elem.change();
         });

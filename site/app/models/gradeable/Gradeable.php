@@ -53,6 +53,8 @@ use app\models\User;
  * @method void setScannedExam($scanned_exam)
  * @method bool isStudentView()
  * @method void setStudentView($can_student_view)
+ * @method bool isStudentViewAfterGrades()
+ * @method void setStudentViewAfterGrades($can_student_view_after_grades)
  * @method bool isStudentSubmit()
  * @method void setStudentSubmit($can_student_submit)
  * @method bool isStudentDownload()
@@ -143,6 +145,8 @@ class Gradeable extends AbstractModel {
     protected $scanned_exam = false;
     /** @property @var bool If students can view submissions */
     protected $student_view = false;
+    /** @property @var bool If students can only view submissions after grades released date */
+    protected $student_view_after_grades = false;
     /** @property @var bool If students can make submissions */
     protected $student_submit = false;
     /** @property @var bool If students can download submitted files */

@@ -647,6 +647,7 @@ class AdminGradeableController extends AbstractController {
             'ta_instructions',
             'autograding_config_path',
             'student_view',
+            'student_view_after_grades',
             'student_submit',
             'student_download',
             'student_download_any_version',
@@ -675,6 +676,7 @@ class AdminGradeableController extends AbstractController {
                 'ta_instructions' => '',
                 'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/upload_only/config',
                 'student_view' => true,
+                'student_view_after_grades' => false,
                 'student_submit' => true,
                 'student_download' => false,
                 'student_download_any_version' => false,
@@ -745,7 +747,8 @@ class AdminGradeableController extends AbstractController {
 
         // Setup student permissions specially for scanned exams
         if ($gradeable->isScannedExam()) {
-            $gradeable->setStudentView(false);
+            $gradeable->setStudentView(true);
+            $gradeable->setStudentViewAfterGrades(true);
             $gradeable->setStudentSubmit(false);
             $gradeable->setStudentDownload(false);
             $gradeable->setStudentDownloadAnyVersion(false);
@@ -800,6 +803,7 @@ class AdminGradeableController extends AbstractController {
             'ta_grading',
             'scanned_exam',
             'student_view',
+            'student_view_after_grades',
             'student_submit',
             'student_download',
             'student_download_any_version',
