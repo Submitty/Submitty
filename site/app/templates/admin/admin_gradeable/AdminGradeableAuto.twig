@@ -206,6 +206,7 @@
             studentSubmit.change();
 
             $('input[name=student_download_any_version]').prop('checked', false);
+            $('input[name=student_view_after_grades]').prop('checked', false);
             $('#student_submit_download_view').hide();
         }
     }
@@ -253,13 +254,6 @@
             let elem = $('#yes_student_download');
             elem.prop('checked', true);
             elem.change();
-        });
-
-        $('#no_student_view').change(function() {
-            if ($(this).is(':checked')) {
-                $('input[name=student_view_after_grades]').prop('checked', false);
-            } else {
-            }
         });
 
         $('input[name=student_view_after_grades]').change(function() {
