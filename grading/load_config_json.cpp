@@ -222,59 +222,67 @@ void formatPreActions(nlohmann::json &whole_config) {
   int which_testcase = 0;
   for (nlohmann::json::iterator my_testcase = tc->begin(); my_testcase != tc->end(); my_testcase++,which_testcase++) {
 
-    if(whole_config["testcases"][testcase_num]["pre_commands"].is_null()){
-      whole_config["testcases"][testcase_num]["pre_commands"] = nlohmann::json::array();
+    nlohmann::json this_testcase = whole_config["testcases"][testcase_num];
+
+    if(this_testcase["pre_commands"].is_null()){
+      this_testcase["pre_commands"] = nlohmann::json::array();
       continue;
     }
 
-    //right now we only support copy.
-    assert(whole_config["testcases"][testcase_num]["pre_commands"]["command"] == "copy");
+    std::vector<nlohmann::json> pre_commands = mapOrArrayOfMaps(this_testcase, "pre_commands");
 
-    if(whole_config["testcases"][testcase_num]["pre_commands"]["option"].is_null()){
-      whole_config["testcases"][testcase_num]["pre_commands"]["option"] = "recursive");
+    for (int i = 0; i < pre_commands.size(); i++){
+      nlohmann::json pre_command = pre_commands[i];
+      
+      //right now we only support copy.
+      assert(pre_command["command"] == "cp");
+
+      if(!pre_command["option"].is_string()){
+        pre_command["option"] = "-R";
+      }
+
+      //right now we only support recursive.
+      assert(pre_command["option"] == "-R");
+
+      //The source must be a string.
+      assert(pre_command["source"].is_string());
+
+      //the source must be of the form prefix = test, remainder is less than size 3 and is an int.
+      std::string target_name = pre_command["source"];
+      
+      std::string prefix = target_name.substr(0,4);
+      assert(prefix == "test");
+
+      std::string number = target_name.substr(4.6);
+      int remainder = std::stoi( number );
+
+      //we must be referencing a previous testcase.
+      assert(remainder < which_testcase);
+
+      //The command must not container .. or $.
+      assert(std::find(target_name.begin(), target_name.end(), "..") == target_name.end());
+      assert(std::find(target_name.begin(), target_name.end(), "$")  == target_name.end());
+
+      if(!this_testcase["pattern"].is_string()){
+        this_testcase["pattern"] = "";
+      }else{
+        std::string pattern = pre_command["pattern"];
+        //The pattern must not container .. or $ 
+        assert(std::find(pattern.begin(), pattern.end(), "..") == pattern.end());
+        assert(std::find(pattern.begin(), pattern.end(), "$")  == pattern.end());
+      }
+
+      //there must be a destination
+      assert(pre_command["destination"].is_string());
+
+      std::string destination = pre_command["destination"];
+
+      //The destination must not container .. or $ 
+      assert(std::find(destination.begin(), destination.end(), "..") == destination.end());
+      assert(std::find(destination.begin(), destination.end(), "$")  == destination.end());
+
+      whole_config["testcases"][testcase_num]["pre_commands"][i] = pre_command;
     }
-
-    //right now we only support recursive.
-    assert(whole_config["testcases"][testcase_num]["pre_commands"]["command"] == "recursive");
-
-
-    //the command must have a target.
-    assert(!whole_config["testcases"][testcase_num]["pre_commands"]["source"].is_null());
-
-    //The source must be a string.
-    assert(whole_config["testcases"][testcase_num]["pre_commands"]["source"].is_string());
-
-    //the source must be of the form prefix = test, remainder is less than size 3 and is an int.
-    std::string target_name = whole_config["testcases"][testcase_num]["pre_commands"]["source"];
-    
-    std::string prefix = target_name.substr(0,4);
-    assert(prefix == "test");
-
-    std::string remainder = target_name.substr(5);
-    assert(remainder.size() < 3);
-    std::stoi( remainder );
-
-    //recreate the valid prefix and set it as the source
-    std::testcase_name = prefix + std::tostring(remainder);
-    whole_config["testcases"][testcase_num]["pre_commands"]["source"] = remainder;
-
-    //Must have a pattern
-    assert(!whole_config["testcases"][testcase_num]["pre_commands"]["pattern"].is_null());
-
-    std::string pattern = whole_config["testcases"][testcase_num]["pre_commands"]["pattern"];
-    
-    //The pattern must not container .. or $ 
-    assert(std::find(pattern.begin(), pattern.end(), "..") == pattern.end());
-    assert(std::find(pattern.begin(), pattern.end(), "$")  == pattern.end());
-
-    //there must be a destination
-    assert(!whole_config["testcases"][testcase_num]["pre_commands"]["destination"].is_null());
-
-    std::string destination = whole_config["testcases"][testcase_num]["pre_commands"]["destination"];
-
-    //The destination must not container .. or $ 
-    assert(std::find(destination.begin(), destination.end(), "..") == destination.end());
-    assert(std::find(destination.begin(), destination.end(), "$")  == destination.end());
   }
 }
 
