@@ -775,6 +775,7 @@ class AdminGradeableController extends AbstractController {
             $gradeable->setStudentSubmit(false);
             $gradeable->setStudentDownload(false);
             $gradeable->setStudentDownloadAnyVersion(false);
+            $gradeable->setAutogradingConfigPath('/usr/local/submitty/more_autograding_examples/pdf_exam/config');
         }
 
         // Generate a blank component to make the rubric UI work properly
