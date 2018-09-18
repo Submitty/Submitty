@@ -117,6 +117,11 @@ class NavigationController extends AbstractController {
             return false;
         }
 
+        // if student view is true and they can only view after grades are released, filter appropriately
+        if ($gradeable->isStudentView() && $gradeable->isStudentViewAfterGrades() && !$user->accessGrading()) {
+            return $gradeable->isTaGradeReleased();
+        }
+
         //If we're not instructor and this is not open to TAs
         $date = new \DateTime("now", $this->core->getConfig()->getTimezone());
         if ($gradeable->getTaViewStartDate() > $date && !$user->accessAdmin()) {
