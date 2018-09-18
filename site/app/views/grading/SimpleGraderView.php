@@ -40,6 +40,8 @@ class SimpleGraderView extends AbstractView {
             }
         }
 
+        $sort = $_GET['sort'] ?? "id";
+
         $num_users = 0;
         $sections = array();
 
@@ -83,6 +85,7 @@ class SimpleGraderView extends AbstractView {
             "student_full" => $student_full,
             "components_numeric" => $components_numeric,
             "components_text" => $components_text,
+            "sort" => $sort,
             "sections" => $sections,
             "component_ids" => $component_ids,
         ]);
