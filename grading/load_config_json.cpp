@@ -214,6 +214,72 @@ void FormatDispatcherActions(nlohmann::json &whole_config) {
   }
 }
 
+void formatPreActions(nlohmann::json &whole_config) {
+  nlohmann::json::iterator tc = whole_config.find("testcases");
+  if (tc == whole_config.end()) { /* no testcases */ return; }
+
+  // loop over testcases
+  int which_testcase = 0;
+  for (nlohmann::json::iterator my_testcase = tc->begin(); my_testcase != tc->end(); my_testcase++,which_testcase++) {
+
+    if(whole_config["testcases"][testcase_num]["pre_commands"].is_null()){
+      whole_config["testcases"][testcase_num]["pre_commands"] = nlohmann::json::array();
+      continue;
+    }
+
+    //right now we only support copy.
+    assert(whole_config["testcases"][testcase_num]["pre_commands"]["command"] == "copy");
+
+    if(whole_config["testcases"][testcase_num]["pre_commands"]["option"].is_null()){
+      whole_config["testcases"][testcase_num]["pre_commands"]["option"] = "recursive");
+    }
+
+    //right now we only support recursive.
+    assert(whole_config["testcases"][testcase_num]["pre_commands"]["command"] == "recursive");
+
+
+    //the command must have a target.
+    assert(!whole_config["testcases"][testcase_num]["pre_commands"]["source"].is_null());
+
+    //The source must be a string.
+    assert(whole_config["testcases"][testcase_num]["pre_commands"]["source"].is_string());
+
+    //the source must be of the form prefix = test, remainder is less than size 3 and is an int.
+    std::string target_name = whole_config["testcases"][testcase_num]["pre_commands"]["source"];
+    
+    std::string prefix = target_name.substr(0,4);
+    assert(prefix == "test");
+
+    std::string remainder = target_name.substr(5);
+    assert(remainder.size() < 3);
+    std::stoi( remainder );
+
+    //recreate the valid prefix and set it as the source
+    std::testcase_name = prefix + std::tostring(remainder);
+    whole_config["testcases"][testcase_num]["pre_commands"]["source"] = remainder;
+
+    //Must have a pattern
+    assert(!whole_config["testcases"][testcase_num]["pre_commands"]["pattern"].is_null());
+
+    std::string pattern = whole_config["testcases"][testcase_num]["pre_commands"]["pattern"];
+    
+    //The pattern must not container .. or $ 
+    assert(std::find(pattern.begin(), pattern.end(), "..") == pattern.end());
+    assert(std::find(pattern.begin(), pattern.end(), "$")  == pattern.end());
+
+    //there must be a destination
+    assert(!whole_config["testcases"][testcase_num]["pre_commands"]["destination"].is_null());
+
+    std::string destination = whole_config["testcases"][testcase_num]["pre_commands"]["destination"];
+
+    //The destination must not container .. or $ 
+    assert(std::find(destination.begin(), destination.end(), "..") == destination.end());
+    assert(std::find(destination.begin(), destination.end(), "$")  == destination.end());
+  }
+}
+
+
+
 
 void RewriteDeprecatedMyersDiff(nlohmann::json &whole_config) {
 
@@ -356,6 +422,7 @@ nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid) {
   
   AddDockerConfiguration(answer);
   FormatDispatcherActions(answer);
+  formatPreActions(answer);
   AddSubmissionLimitTestCase(answer);
   AddAutogradingConfiguration(answer);
 
