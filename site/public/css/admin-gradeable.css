@@ -114,3 +114,12 @@ table#grader-history th, table#grader-history td {
 #repository {
     margin-top: 20px;
 }
+
+div.log-container {
+    margin-top: 20px;
+}
+
+div.btn-container {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}

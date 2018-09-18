@@ -50,12 +50,14 @@
                 {{ config_select_mode != 'manual' ? 'disabled' : '' }}/>
     </fieldset>
 
-    <input type="button" class="btn btn-default" id="show-advanced-student-permissions" value="Show Student Permission Settings" onclick="showAdvancedStudentPermissions()">
-    <span id="hide-advanced-student-permissions-container" hidden><input type="button" class="btn btn-primary student_permissions" value="Hide Student Permission Settings" onclick="hideAdvancedStudentPermissions()"></span>
+    <div class="btn-container">
+        <input type="button" class="btn btn-default" id="show-advanced-student-permissions" value="Show Student Permission Settings" onclick="showAdvancedStudentPermissions()">
+        <span id="hide-advanced-student-permissions-container" hidden><input type="button" class="btn btn-primary student_permissions" value="Hide Student Permission Settings" onclick="hideAdvancedStudentPermissions()"></span>
+    </div>
     <div class="student_permissions" hidden>
         <fieldset>
             <div>
-                What are students allowed to do? (Note: The presents on "General" configure these values)
+                What are students allowed to do? (Note: The presets on "General" configure these values)
             </div>
             <div>
                 View the gradeable on the course home page?
@@ -95,32 +97,35 @@
             </div>
         </fieldset>
     </div>
-    <br />
-    <br />
-    <a class="btn btn-primary" href="{{ core.buildUrl({ 'component': 'admin', 'page': 'admin_gradeable', 'action': 'rebuild_assignment', 'id': gradeable.getId() }) }}">Rebuild Gradeable (only necessary if you have modified your custom configuration files)</a>
-    <br /> <br />
-    <h3>Build log:</h3>
-    {% if build_script_output is null or build_script_output is empty %}
-        <pre>There is currently no build output.</pre>
-    {% else %}
-        <pre>{{ build_script_output|raw }}</pre>
-    {% endif %}
-    <br />
-    
-    <h3>CMake output:</h3>
-    {% if cmake_output is null or cmake_output is empty %}
-        <pre>There is currently no cmake output.</pre>
-    {% else %}
-        <pre>{{ cmake_output|raw }}</pre>
-    {% endif %}
-    <br />
-    
-    <h3>Make output:</h3>
-    {% if make_output is null or make_output is empty %}
-        <pre>There is currently no make output.</pre>
-    {% else %}
-        <pre>{{ make_output|raw }}</pre>
-    {% endif %}
+    <div class="btn-container">
+        <a class="btn btn-primary" href="{{ core.buildUrl({ 'component': 'admin', 'page': 'admin_gradeable', 'action': 'rebuild_assignment', 'id': gradeable.getId() }) }}">Rebuild Gradeable (only necessary if you have modified your custom configuration files)</a>
+    </div>
+    <div class="log-container">
+        <h3>Build log:</h3>
+        {% if build_script_output is null or build_script_output is empty %}
+            <pre>There is currently no build output.</pre>
+        {% else %}
+            <pre>{{ build_script_output|raw }}</pre>
+        {% endif %}
+    </div>
+
+    <div class="log-container">
+        <h3>CMake output:</h3>
+        {% if cmake_output is null or cmake_output is empty %}
+            <pre>There is currently no cmake output.</pre>
+        {% else %}
+            <pre>{{ cmake_output|raw }}</pre>
+        {% endif %}
+    </div>
+
+    <div class="log-container">
+        <h3>Make output:</h3>
+        {% if make_output is null or make_output is empty %}
+            <pre>There is currently no make output.</pre>
+        {% else %}
+            <pre>{{ make_output|raw }}</pre>
+        {% endif %}
+    </div>
 
 </div>
 
