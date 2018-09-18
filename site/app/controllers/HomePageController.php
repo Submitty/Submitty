@@ -52,27 +52,24 @@ class HomePageController extends AbstractController {
         }
     }
 
+	/**
+	 * Update/change first and last preferred name in $user model.
+	 */
     public function changeUserName(){
         $user = $this->core->getUser();
-        if(isset($_POST['user_name_change']))
-        {
-            $newName = trim($_POST['user_name_change']);
-            if ($user->validateUserData('user_preferred_firstname', $newName) === true) {
-                if(strlen($newName) <= 30)
-                {
-                    $user->setPreferredFirstName($newName);
-					//User updated flag tells auto feed to not clobber some of the users data.
-                    $user->setUserUpdated(true);
-                    $this->core->getQueries()->updateUser($user);
-                }
-                else
-                {
-                    $this->core->addErrorMessage("Invalid Username. Please use 30 characters or fewer.");
-                }
+        if(isset($_POST['user_firstname_change']) && isset($_POST['user_lastname_change'])) {
+            $newFirstName = trim($_POST['user_firstname_change']);
+            $newLastName = trim($_POST['user_lastname_change']);
+            // validateUserData() checks both for length (not to exceed 30) and for valid characters.
+            if ($user->validateUserData('user_preferred_firstname', $newFirstName) === true && $user->validateUserData('user_preferred_lastname', $newLastName) === true) {
+				$user->setPreferredFirstName($newFirstName);
+				$user->setPreferredLastName($newLastName);
+				//User updated flag tells auto feed to not clobber some of the user's data.
+				$user->setUserUpdated(true);
+				$this->core->getQueries()->updateUser($user);
             }
-            else
-            {
-                $this->core->addErrorMessage("Invalid Username.  Letters, spaces, hyphens, apostrophes, periods, parentheses, and backquotes permitted.");
+            else {
+                $this->core->addErrorMessage("Preferred names must not exceed 30 chars.  Letters, spaces, hyphens, apostrophes, periods, parentheses, and backquotes permitted.");
             }
         }
     }
