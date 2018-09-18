@@ -112,7 +112,8 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
         {% if action == 'new' or action == 'template' %}
             Is this a team assignment?
         {% else %}
-            {{ gradeable.isTeamAssignment() ? 'Team Settings:' : '' }}
+            Team Settings:
+            {{ gradeable.isTeamAssignment() ? '' : ' This is an individual assignment' }}
         {% endif %}
         <div style="{{ action == 'edit' ? 'display:none' : '' }}">
             <input type="radio" id = "team_yes_radio" name="team_assignment" value="true"
