@@ -107,10 +107,6 @@ table#grader-history th, table#grader-history td {
     float: right;
 }
 
-#electronic_gradeable_preset_container {
-    padding-left: 20px;
-}
-
 #repository {
     margin-top: 20px;
 }
@@ -122,4 +118,8 @@ div.log-container {
 div.btn-container {
     margin-top: 5px;
     margin-bottom: 5px;
+}
+
+#team-settings-container {
+    margin-top: 10px
 }

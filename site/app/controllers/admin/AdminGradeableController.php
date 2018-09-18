@@ -95,6 +95,14 @@ class AdminGradeableController extends AbstractController {
         'participation', 'note',
         'none (for practice only)'];
 
+    const gradeable_type_strings = [
+        'checkpoint' => 'Checkpoints (simple data entry: full/half/no credit)',
+        'numeric' => 'Numeric/Text (simple data entry: integer or floating point and/or short strings)',
+        'electronic_hw' => 'Students will submit one or more files by direct upload to the Submitty website',
+        'electronic_hw_vcs' => 'Students will submit by committing files to a version control system (VCS) repository',
+        'electronic_exam' => 'TA/Instructor will (bulk) upload scanned .pdf for online manual grading'
+    ];
+
     /**
      * Displays the 'new' page, populating the first-page properties with the
      *  provided gradeable's data
@@ -119,7 +127,8 @@ class AdminGradeableController extends AbstractController {
             'template_list' => $template_list,
             'syllabus_buckets' => self::syllabus_buckets,
             'vcs_base_url' => $vcs_base_url,
-            'regrade_enabled' => $this->core->getConfig()->isRegradeEnabled()
+            'regrade_enabled' => $this->core->getConfig()->isRegradeEnabled(),
+            'gradeable_type_strings' => self::gradeable_type_strings
         ]);
     }
 
@@ -220,7 +229,20 @@ class AdminGradeableController extends AbstractController {
             'id' => $gradeable->getId()
         ]);
 
-        $type_string = GradeableType::typeToString($gradeable->getType());
+        $type_string = 'UNKNOWN';
+        if($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
+            if($gradeable->isScannedExam()) {
+                $type_string = self::gradeable_type_strings['electronic_exam'];
+            } else if($gradeable->isVcs()) {
+                $type_string = self::gradeable_type_strings['electronic_hw_vcs'];
+            } else {
+                $type_string = self::gradeable_type_strings['electronic_hw'];
+            }
+        } else if($gradeable->getType() === GradeableType::NUMERIC_TEXT) {
+            $type_string = self::gradeable_type_strings['numeric'];
+        } else if($gradeable->getType() === GradeableType::CHECKPOINTS) {
+            $type_string = self::gradeable_type_strings['checkpoint'];
+        }
 
         // $this->inherit_teams_list = $this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams();
 
@@ -257,6 +279,7 @@ class AdminGradeableController extends AbstractController {
             'num_numeric' => $gradeable->getNumNumeric(),
             'num_text' => $gradeable->getNumText(),
             'type_string' => $type_string,
+            'gradeable_type_strings' => self::gradeable_type_strings,
             'show_edit_warning' => $gradeable->anyManualGrades(),
 
             // Config selection data

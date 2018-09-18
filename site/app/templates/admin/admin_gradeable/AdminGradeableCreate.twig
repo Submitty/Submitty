@@ -54,50 +54,49 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
     <div id="gradeable_type_container" {{ action == 'edit' ? 'hidden' : '' }}>
         <div>
             <input type='radio' id="radio_checkpoints" name="type" value="Checkpoints"
-                {{ action != 'new' and gradeable.getType() == 1 ? 'checked' : '' }}> Checkpoints (simple data entry: full/half/no credit)
+                {{ action != 'new' and gradeable.getType() == 1 ? 'checked' : '' }}> {{ gradeable_type_strings['checkpoint'] }}
         </div>
 
         <div>
             <input type='radio' id="radio_numeric" name="type" value="Numeric"
-                {{ action != 'new' and gradeable.getType() == 2 ? 'checked' : '' }}> Numeric/Text (simple data entry: integer or floating point and/or short strings)
+                {{ action != 'new' and gradeable.getType() == 2 ? 'checked' : '' }}> {{ gradeable_type_strings['numeric'] }}
         </div>
 
-        <div>
+        <div hidden>
             <input type='radio' id="radio_electronic_file" name="type" value="Electronic File"
                     {{ action != 'new' and gradeable.getType() == 0 ? 'checked' : '' }}> Electronic File (multiple types)
         </div>
-    </div>
 
-    <div id="electronic_gradeable_preset_container">
         {# Real input fields to back the exposed configurations options #}
         <input name="scanned_exam" value="{{ action != 'new' and gradeable.isScannedExam() ? 'true' : 'false' }}" hidden>
         <input name="vcs" value="{{ action != 'new' and gradeable.isVcs() ? 'true' : 'false' }}" hidden>
 
         <div>
             <input class="ignore" type="radio" id="radio_ef_student_upload" name="electronic_gradeable_presets" value="normal"
-                    {{ action != 'new' and not gradeable.isScannedExam() and not gradeable.isVcs() ? 'checked' : ''}}> Students will submit one or more files by direct upload to the Submitty website
+                    {{ action != 'new' and not gradeable.isScannedExam() and not gradeable.isVcs() ? 'checked' : ''}}> {{ gradeable_type_strings['electronic_hw'] }}
         </div>
 
         <div>
             <input class="ignore" type="radio" id="radio_ef_vcs_upload" name="electronic_gradeable_presets" value="vcs"
-                    {{ action != 'new' and not gradeable.isScannedExam() and gradeable.isVcs() ? 'checked' : ''}}> Students will submit by committing files to a version control system (VCS) repository
+                    {{ action != 'new' and not gradeable.isScannedExam() and gradeable.isVcs() ? 'checked' : ''}}> {{ gradeable_type_strings['electronic_hw_vcs'] }}
         </div>
 
         <div>
             <input class="ignore" type="radio" id="radio_ef_scanned_exam" name="electronic_gradeable_presets" value="scanned_exam"
-                    {{ action != 'new' and gradeable.isScannedExam() ? 'checked' : '' }}> TA/Instructor will (bulk) upload scanned .pdf for online manual grading
+                    {{ action != 'new' and gradeable.isScannedExam() ? 'checked' : '' }}> {{ gradeable_type_strings['electronic_exam'] }}
         </div>
     </div>
 </div>
 
 <!-- This is only relevant to Electronic Files -->
 <fieldset class="gradeable_type_options electronic_file" id="electronic_file">
-    Will any or all of this assignment be manually graded (e.g., by the TAs or the instructor)?
-    <br />
-    <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val auto_save date-related"
-            {{ action != 'new' and gradeable.getTaGrading() ? 'checked' : '' }} /> Yes
-    <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val auto_save date-related"
-            {{ not (action != 'new' and gradeable.getTaGrading()) ? 'checked' : '' }} /> No
+    <div>Will any or all of this assignment be manually graded (e.g., by the TAs or the instructor)?</div>
+    <div>
+        <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val auto_save date-related"
+                {{ action != 'new' and gradeable.getTaGrading() ? 'checked' : '' }} /> Yes
+        <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val auto_save date-related"
+                {{ not (action != 'new' and gradeable.getTaGrading()) ? 'checked' : '' }} /> No
+    </div>
     {% if regrade_enabled %}
         <div id="regrade_request_enable_container">
             Will regrade requests be enabled for this assignment?
@@ -109,17 +108,19 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
         </div>
     {% endif %}
 
-    {% if action == 'new' or action == 'template' %}
-        Is this a team assignment?
-    {% else %}
-        {{ gradeable.isTeamAssignment() ? 'Team Settings:' : '' }}
-    {% endif %}
-    <div style="{{ action == 'edit' ? 'display:none' : '' }}">
-        <input type="radio" id = "team_yes_radio" name="team_assignment" value="true"
-                {{ action != 'new' and gradeable.isTeamAssignment() ? 'checked' : '' }}> Yes
+    <div id="team-settings-container">
+        {% if action == 'new' or action == 'template' %}
+            Is this a team assignment?
+        {% else %}
+            {{ gradeable.isTeamAssignment() ? 'Team Settings:' : '' }}
+        {% endif %}
+        <div style="{{ action == 'edit' ? 'display:none' : '' }}">
+            <input type="radio" id = "team_yes_radio" name="team_assignment" value="true"
+                    {{ action != 'new' and gradeable.isTeamAssignment() ? 'checked' : '' }}> Yes
 
-        <input type="radio" id = "team_no_radio" name="team_assignment" value ="false"
-                {{ not (action != 'new' and gradeable.isTeamAssignment()) ? 'checked' :  '' }}> No
+            <input type="radio" id = "team_no_radio" name="team_assignment" value ="false"
+                    {{ not (action != 'new' and gradeable.isTeamAssignment()) ? 'checked' :  '' }}> No
+        </div>
     </div>
 
     <!-- Team settings (read only in edit mode) -->
