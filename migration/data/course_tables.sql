@@ -131,6 +131,7 @@ CREATE TABLE electronic_gradeable (
     eg_use_ta_grading boolean NOT NULL,
     eg_scanned_exam boolean DEFAULT (FALSE) NOT NULL,
     eg_student_view boolean NOT NULL,
+    student_view_after_grades boolean DEFAULT (FALSE) NOT NULL,
     eg_student_submit boolean NOT NULL,
     eg_student_download boolean NOT NULL,
     eg_student_any_version boolean NOT NULL,
