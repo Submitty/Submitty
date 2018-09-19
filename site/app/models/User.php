@@ -280,7 +280,7 @@ class User extends AbstractModel {
 
     	switch($field) {
 		case 'user_id':
-			//Username / useer_id must contain only lowercase alpha, numbers, underscores, hyphens
+			//Username / user_id must contain only lowercase alpha, numbers, underscores, hyphens
 			return preg_match("~^[a-z0-9_\-]+$~", $data) === 1;
 		case 'user_firstname':
 		case 'user_lastname':
