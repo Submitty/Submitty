@@ -22,7 +22,7 @@ class GradingSection extends AbstractModel {
      */
     protected $registration;
     /**
-     * @property @var string
+     * @property @var string|null
      */
     protected $name;
     /**
@@ -38,7 +38,7 @@ class GradingSection extends AbstractModel {
      */
     protected $teams;
 
-    public function __construct(Core $core, bool $registration, string $name, $graders, $users, $teams) {
+    public function __construct(Core $core, bool $registration, $name, $graders, $users, $teams) {
         parent::__construct($core);
         $this->registration = $registration;
         $this->name = $name;

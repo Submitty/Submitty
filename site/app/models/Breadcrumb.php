@@ -4,37 +4,40 @@ namespace app\models;
 use app\libraries\Core;
 
 /**
- * Breadcrumb header navigation item
+ * Breadcrumb navigation item
  *
- * @method string getString()
- * @method null getUrl()
- * @method bool isTop()
- * @method bool isIcon()
+ * These are used to give a user a sense of where they are in the hierarchy of
+ * the site. Each breadcrumb has a title, and then optionally a link and an
+ * external link. The links are used to provide an anchor tag on the title, while
+ * if there's an external link, then it shows a fa-external-link icon that has
+ * an anchor tag pointing to the external url.
+ *
+ * @link https://fontawesome.com/v4.7.0/icon/external-link
+ *
+ * @method string getTitle()
+ * @method string|null getUrl()
+ * @method string|null getExternalUrl()
 */
 class Breadcrumb extends AbstractModel {
-    /** @property string $title */
+    /** @property string */
     protected $title;
-    /** @property null $url */
+    /** @property string|null */
     protected $url = null;
-    /** @property bool $top */
-    protected $top = false;
-    /** @property bool $icon */
-    protected $icon = false;
+    /** @property string|null */
+    protected $external_url = false;
 
     /**
      * Breadcrumb constructor.
      * @param Core $core
      * @param string $title
-     * @param null $url
-     * @param bool $top
-     * @param bool $icon
+     * @param string|null $url
+     * @param string|null $external_url
      */
-    public function __construct(Core $core, string $title, $url = null, bool $top = false, bool $icon = false) {
+    public function __construct(Core $core, string $title, $url = null, $external_url = null) {
         parent::__construct($core);
         $this->title = $title;
         $this->url = $url;
-        $this->top = $top;
-        $this->icon = $icon;
+        $this->external_url = $external_url;
     }
 
 }

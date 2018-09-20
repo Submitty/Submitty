@@ -96,13 +96,11 @@ $core->getOutput()->loadTwig();
 $core->loadGradingQueue();
 
 if($core->getConfig()->getInstitutionName() !== ""){
-    $core->getOutput()->addBreadcrumb($core->getConfig()->getInstitutionName(), "");
-    $core->getOutput()->addBreadcrumb("", $core->getConfig()->getInstitutionHomepage(),false, true);
+    $core->getOutput()->addBreadcrumb($core->getConfig()->getInstitutionName(), null, $core->getConfig()->getInstitutionHomepage());
 }
 $core->getOutput()->addBreadcrumb("Submitty", $core->getConfig()->getHomepageUrl());
 if($core->getConfig()->isCourseLoaded()){
-    $core->getOutput()->addBreadcrumb($core->getDisplayedCourseName(), $core->buildUrl());
-    $core->getOutput()->addBreadcrumb("", $core->getConfig()->getCourseHomeUrl(),false, true);
+    $core->getOutput()->addBreadcrumb($core->getDisplayedCourseName(), $core->buildUrl(), $core->getConfig()->getCourseHomeUrl());
 }
 
 date_default_timezone_set($core->getConfig()->getTimezone()->getName());

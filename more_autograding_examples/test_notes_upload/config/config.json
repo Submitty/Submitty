@@ -3,7 +3,7 @@
     "max_submission_size" : 2000000,
 
     "resource_limits" : {
-	"RLIMIT_FSIZE" : 200000000
+	"RLIMIT_FSIZE" : 99000000
     },
 
     "autograding" : {
