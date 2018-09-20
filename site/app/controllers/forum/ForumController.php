@@ -91,6 +91,9 @@ class ForumController extends AbstractController {
             case 'unpin_thread':
                 $this->pinThread(0);
                 break;
+            case 'change_thread_status_resolve':
+                $this->changeThreadStatus(1);
+                break;
             case 'view_thread':
             default:
                 $this->showThreads();
@@ -117,6 +120,21 @@ class ForumController extends AbstractController {
             return array(-1, $url);
     }
 
+	private function changeThreadStatus($status) {
+		$thread_id = $_POST['thread_id'];
+		$result = array();
+		if($this->core->getQueries()->getAuthorOfThread($thread_id) === $this->core->getUser()->getId() || $this->core->getUser()->getGroup() <= 3) {
+			if($this->core->getQueries()->updateResolveState($thread_id, $status)) {
+				$result['success'] = 'Thread resolve state has been changed.';
+			} else {
+				$result['error'] = 'The thread resolve state could not be updated. Please try again.';
+			}
+		} else {
+            $result["error"] = "You do not have permissions to do that.";
+		}
+        $this->core->getOutput()->renderJson($result);
+		return $result;
+	}
 
     private function checkGoodAttachment($isThread, $thread_id, $file_post){
         if((!isset($_FILES[$file_post])) || $_FILES[$file_post]['error'][0] === UPLOAD_ERR_NO_FILE){

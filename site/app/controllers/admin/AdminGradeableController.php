@@ -264,6 +264,8 @@ class AdminGradeableController extends AbstractController {
             'default_config_paths' => $default_config_paths,
             'config_select_mode' => $config_select_mode,
 
+            'timezone_string' => $this->core->getConfig()->getTimezone()->getName(),
+
             //build outputs
             'build_script_output' => htmlentities($build_script_output),
             'cmake_output' => htmlentities($cmake_output),

@@ -102,3 +102,7 @@ table#grader-history th, table#grader-history td {
 #late-days-message {
     font-style: italic;
 }
+
+#timezone-container {
+    float: right;
+}
