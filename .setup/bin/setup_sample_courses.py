@@ -693,7 +693,7 @@ class Course(object):
         print("(tables loaded)...")
         for section in range(1, self.registration_sections+1):
             print("Create section {}".format(section))
-            submitty_conn.execute(table.insert(), semester={self.semester}, course={self.code}, registration_section_id=str(section))
+            submitty_conn.execute(table.insert(), semester=self.semester, course=self.code, registration_section_id=str(section))
 
         print("Creating rotating sections ", end="")
         table = Table("sections_rotating", self.metadata, autoload=True)
