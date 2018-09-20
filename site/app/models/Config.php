@@ -51,6 +51,7 @@ use app\libraries\Utils;
  * @method string getVcsType()
  * @method string getPrivateRepository()
  * @method string getRoomSeatingGradeableId()
+ * @method array getCourseIni()
  */
 
 class Config extends AbstractModel {
