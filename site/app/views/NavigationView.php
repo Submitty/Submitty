@@ -121,8 +121,11 @@ class NavigationView extends AbstractView {
 
                 $seating_config_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'uploads', 'seating',
                     $gradeable_id, $user_seating_details->building, $user_seating_details->room.'.json');
-                // if the report the instructor generated corresponds to a valid room config
-                if(is_file($seating_config_path)) {
+                // if the report the instructor generated corresponds to a valid room config and a valid room template
+                if(is_file($seating_config_path)
+                    && property_exists($user_seating_details, 'building')
+                    && property_exists($user_seating_details, 'room')
+                    && is_file(FileUtils::joinPaths(dirname(dirname(dirname(__DIR__))), 'room_templates', $user_seating_details->building, $user_seating_details->room.'.twig'))) {
                     $seating_config = file_get_contents($seating_config_path);
                 }
             }
