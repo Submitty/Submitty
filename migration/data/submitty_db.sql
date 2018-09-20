@@ -111,6 +111,7 @@ CREATE TABLE users (
     user_firstname character varying NOT NULL,
     user_preferred_firstname character varying,
     user_lastname character varying NOT NULL,
+    user_preferred_lastname character varying,
     user_email character varying NOT NULL,
     user_updated BOOLEAN NOT NULL DEFAULT FALSE,
     instructor_updated BOOLEAN NOT NULL DEFAULT FALSE,
