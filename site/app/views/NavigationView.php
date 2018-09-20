@@ -125,7 +125,7 @@ class NavigationView extends AbstractView {
                 if(is_file($seating_config_path)
                     && property_exists($user_seating_details, 'building')
                     && property_exists($user_seating_details, 'room')
-                    && is_file(FileUtils::joinPaths(dirname(dirname(dirname(__DIR__))), 'room_templates', $user_seating_details->building, $user_seating_details->room.'.twig'))) {
+                    && is_file(FileUtils::joinPaths(dirname(dirname(__DIR__)), 'room_templates', $user_seating_details->building, $user_seating_details->room.'.twig'))) {
                     $seating_config = file_get_contents($seating_config_path);
                 }
             }
