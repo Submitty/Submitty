@@ -41,7 +41,7 @@ BEGIN
   -- All done.
   RETURN NULL;
 END;
-$$ LANGUAGE plpgsql;"""
+$$ LANGUAGE plpgsql;""")
 
         # Add user_preferred_lastname to trigger function sync_users()
         cursor.execute("""
