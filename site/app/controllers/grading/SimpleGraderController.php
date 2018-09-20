@@ -136,13 +136,17 @@ class SimpleGraderController extends GradingController  {
 
         $this->core->getOutput()->addBreadcrumb("Grading {$gradeable->getTitle()}");
 
+        // sort makes sorting remain when clicking print lab or view all
         if(!isset($_GET['sort']) || $_GET['sort'] === "id"){
+            $sort = "id";
             $sort_key = "u.user_id";
         }
         else if($_GET['sort'] === "first"){
+            $sort = "first";
             $sort_key = "u.user_firstname";
         }
         else{
+            $sort = "last";
             $sort_key = "u.user_lastname";
         }
 
@@ -193,7 +197,7 @@ class SimpleGraderController extends GradingController  {
         }
 
         $rows = $this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids, null, [$section_key, $sort_key]);
-        $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'simpleDisplay', $gradeable, $rows, $student_full, $graders, $section_key, $show_all_sections_button);
+        $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'simpleDisplay', $gradeable, $rows, $student_full, $graders, $section_key, $show_all_sections_button, $sort);
     }
 
     public function save($action) {

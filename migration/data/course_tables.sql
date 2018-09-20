@@ -190,7 +190,7 @@ CREATE TABLE electronic_gradeable_version (
 CREATE TABLE gradeable (
     g_id character varying(255) NOT NULL,
     g_title character varying(255) NOT NULL,
-    g_instructions_url character varying(255) NOT NULL,
+    g_instructions_url character varying NOT NULL,
     g_overall_ta_instructions character varying NOT NULL,
     g_gradeable_type integer NOT NULL,
     g_grade_by_registration boolean NOT NULL,
