@@ -227,7 +227,7 @@ BEGIN
     SELECT * INTO user_row FROM users WHERE user_id=NEW.user_id;
     query_string := 'INSERT INTO users (user_id, user_firstname, user_preferred_firstname, user_lastname, user_preferred_lastname, user_email, user_group, registration_section, manual_registration) ' ||
                     'VALUES (' || quote_literal(user_row.user_id) || ', ' || quote_literal(user_row.user_firstname) || ', ' || quote_nullable(user_row.user_preferred_firstname) || ', ' ||
-                    '' || quote_literal(user_row.user_lastname) || quote_nullable(user_row.user_preferred_lastname) || ', ' || quote_literal(user_row.user_email) || ', ' || NEW.user_group || ', ' || quote_nullable(NEW.registration_section) || ', ' || NEW.manual_registration || ')';
+                    '' || quote_literal(user_row.user_lastname) || ', ' || quote_nullable(user_row.user_preferred_lastname) || ', ' || quote_literal(user_row.user_email) || ', ' || NEW.user_group || ', ' || quote_nullable(NEW.registration_section) || ', ' || NEW.manual_registration || ')';
     IF query_string IS NULL THEN
       RAISE EXCEPTION 'query_string error in trigger function sync_courses_user() when doing INSERT';
     END IF;
