@@ -1,7 +1,7 @@
 <script>
   var title = "Darrin 308"
-  note_left = "reserved for left-handed students"
-  note_right = "skip every other seat"
+  note_left = ""
+  note_right = "seat 1 is on the right, when facing the screen"
 
   var config = {{ seating_config|raw }};
 </script>
@@ -227,10 +227,10 @@
         }
 
         point = find_point(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_end);
-        ctx.beginPath();
-        ctx.arc(point[0], point[1], BASE_POINT_RADIUS, 0.0, 2.0 * Math.PI);
-        ctx.fillStyle = "#d000d0";
-        ctx.fill();
+        //ctx.beginPath();
+        //ctx.arc(point[0], point[1], BASE_POINT_RADIUS, 0.0, 2.0 * Math.PI);
+        //ctx.fillStyle = "#d000d0";
+        //ctx.fill();
       }
     }
 
@@ -323,7 +323,7 @@
     // Render right note
     ctx.font = "bold 12pt sans-serif";
     ctx.fillStyle = "#333333";
-    ctx.fillText(note_right, 850, 50);
+    ctx.fillText(note_right, 800, 20);
 
     // Render front of room legend
     ctx.font = "italic 10pt sans-serif";
