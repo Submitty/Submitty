@@ -2360,7 +2360,7 @@ function openComponentGrading(component_id) {
 function scrollToPage(page_num){
     let files = $('.openable-element-submissions');
     for(let i = 0; i < files.length; i++){
-        let zoom = localStorage.getItem('scale');
+        let zoom = localStorage.getItem('scale') || 1;
         if(files[i].innerText.trim() == "upload.pdf"){
             let scrollY = zoom*(page_num-1)*(PDF_PAGE_HEIGHT+PDF_OFFSET)+PDF_BORDER_HEIGHT;
             if($("#file_view").is(":visible")){
