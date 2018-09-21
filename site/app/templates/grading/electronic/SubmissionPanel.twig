@@ -141,13 +141,13 @@
         return false;
     }
     //TODO: Name better
-    function expandFile(dir, path) {
+    function expandFile(name, path) {
         if($('#viewer').length != 0){
             $('#viewer').remove();
         }
-        let promise = loadFile(dir, path);
+        let promise = loadFile(name, path);
         $('#file_view').show();
-        $("#grading_file_name").html(dir);
+        $("#grading_file_name").html(name);
         let precision = $("#submission_browser").width()-$("#directory_view").width();
         let offset = $("#submission_browser").width()-precision;
         $("#directory_view").animate({'left': '+=' + -offset + 'px'}, 200);
@@ -156,8 +156,8 @@
         return promise;
     }
 
-    function loadFile(dir, path){
-        let extension = dir.split('.').pop();
+    function loadFile(name, path){
+        let extension = name.split('.').pop();
         if(extension == "pdf"){
             $('#pdf_annotation_bar').show();
             $('#save_status').show();
@@ -167,7 +167,7 @@
                 data: {
                     'gradeable_id': '{{ gradeable.getId() }}',
                     'user_id': '{{ gradeable.getUser().getId() }}',
-                    'filename': dir
+                    'filename': name
                 },
                 success: function(data){
                     $('#file_content').append(data);
@@ -179,9 +179,9 @@
             $("#file_viewer_full_panel").empty();
             $("#file_viewer_full_panel").attr("data-file_name", "");
             $("#file_viewer_full_panel").attr("data-file_url", "");
-            $("#file_viewer_full_panel").attr("data-file_name", dir);
+            $("#file_viewer_full_panel").attr("data-file_name", name);
             $("#file_viewer_full_panel").attr("data-file_url", path);
-            openFrame(dir, path, "full_panel");
+            openFrame(name, path, "full_panel");
         }
     }
 
@@ -190,7 +190,7 @@
         $("#file_viewer_full_panel").remove();
         $("#content-wrapper").remove();
         if($("#pdf_annotation_bar").is(":visible")){
-            $('#pdf_annotation_bar').hide();
+            $("#pdf_annotation_bar").hide();
         }
         $("#directory_view").show();
         var offset1 = $("#directory_view").css('left');
