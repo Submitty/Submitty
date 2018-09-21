@@ -60,6 +60,9 @@ COUNT_DIRECTION_DOWN = -1;
 PDF_PAGE_NONE = 0;
 PDF_PAGE_STUDENT = -1;
 PDF_PAGE_INSTRUCTOR = -2;
+PDF_PAGE_HEIGHT = 841.89;
+PDF_BORDER_HEIGHT = 0;
+PDF_OFFSET = 0;
 
 /**
  * Whether ajax requests will be asynchronous or synchronous.  This
@@ -2335,11 +2338,40 @@ function openComponentGrading(component_id) {
         .then(function (graded_component) {
             // Set the global graded component list data for this component to detect changes
             OLD_GRADED_COMPONENT_LIST[component_id] = graded_component;
-
+            console.log()
             // Render the grading component with edit mode if enabled,
             //  and 'true' to show the mark list
             return injectGradingComponent(component_tmp, graded_component, isEditModeEnabled(), true);
+        })
+        .then(function () {
+            let page = getComponentPageNumber(component_id);
+            if(page){
+                scrollToPage(page);
+            }
         });
+}
+
+/**
+ * Scrolls the submission panel to the page number specified by the component
+ * TODO: This is currently very clunky, and only works with test files (aka upload.pdf).
+ * @param {int} page_num
+ * @return {void}
+ */
+function scrollToPage(page_num){
+    let files = $('.openable-element-submissions');
+    for(let i = 0; i < files.length; i++){
+        let zoom = localStorage.getItem('scale');
+        if(files[i].innerText.trim() == "upload.pdf"){
+            let scrollY = zoom*(page_num-1)*(PDF_PAGE_HEIGHT+PDF_OFFSET)+PDF_BORDER_HEIGHT;
+            if($("#file_view").is(":visible")){
+                $('#file_content').animate({scrollTop: scrollY}, 500);
+            } else {
+                expandFile("upload.pdf", files[i].getAttribute("file-url")).then(function(){
+                    $('#file_content').animate({scrollTop: scrollY}, 500);
+                });
+            }
+        }
+    }
 }
 
 /**
