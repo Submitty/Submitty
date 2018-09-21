@@ -1,7 +1,7 @@
 <script>
   var title = "Darrin 318"
-  note_left = "reserved for left-handed students"
-  note_right = "skip every other seat"
+  note_left = ""
+  note_right = "seat 1 is on the right, when facing the screen"
 
   var config = {{ seating_config|raw }};
 </script>
@@ -13,7 +13,7 @@
 </style>
 
 <div>
-  <canvas id="diagram" width="850" height="430">
+  <canvas id="diagram" width="900" height="460">
     Your browser does not support the HTML5 canvas tag.
   </canvas>
   {#<img id="image">#}
@@ -21,9 +21,9 @@
 
   <script>
     var seats = {
-      "left" : [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-      "middle" : [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
-      "right" : [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+      "left" :   [ 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0], 
+      "middle" : [13,13,13,13,13,13,13,13,13,13,13,13,13],
+      "right" :  [ 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0],
     }
     var used = {};
 
@@ -69,7 +69,7 @@
     }
 
     function render_arrow(section) {
-      row = 12
+      row = 14
 
       if(section == "left") {
         var center_x = BASE_ROW_CENTER + 320;
@@ -104,6 +104,8 @@
 
     function render_section_row(section, row) {
       var height = BASE_ROW_HEIGHT
+
+      if (seats[section][row - 1] == 0) return
 
       try {
         var empty = false;
@@ -207,10 +209,10 @@
           }
         }
 
-        ctx.beginPath();
-        ctx.arc(center_x - width_half, center_y, BASE_POINT_RADIUS, 0.0, 2.0 * Math.PI);
-        ctx.fillStyle = "#d000d0";
-        ctx.fill();
+        //ctx.beginPath();
+        //ctx.arc(center_x - width_half, center_y, BASE_POINT_RADIUS, 0.0, 2.0 * Math.PI);
+        //ctx.fillStyle = "#d000d0";
+        //ctx.fill();
       }
     }
 
@@ -278,7 +280,7 @@
     ctx.textAlign = "center";
 
     var EXPANDED = expand_config(config);
-    var BASE_NUM_ROWS = 11
+    var BASE_NUM_ROWS = 13
     var BASE_ROW_START = 140
     var BASE_ROW_CENTER = document.getElementById("diagram").offsetWidth / 2.0;
     var BASE_ROW_HEIGHT = 6
@@ -290,7 +292,7 @@
 
     // Render title
     ctx.font = "bold 20pt sans-serif";
-    ctx.fillText(title, BASE_ROW_CENTER, 50);
+    ctx.fillText(title, BASE_ROW_CENTER - 250, 50);
 
     // Render left note
     ctx.font = "bold 12pt sans-serif";
@@ -300,7 +302,7 @@
     // Render right note
     ctx.font = "bold 12pt sans-serif";
     ctx.fillStyle = "#333333";
-    ctx.fillText(note_right, 725, 50);
+    ctx.fillText(note_right, 625, 50);
 
     // Render front of room legend
     ctx.font = "italic 10pt sans-serif";
@@ -308,7 +310,7 @@
 
     // Render back of room legend
     ctx.font = "italic 10pt sans-serif";
-    ctx.fillText("Back of Room", BASE_ROW_CENTER, 400);
+    ctx.fillText("Back of Room", BASE_ROW_CENTER, 430);
 
     // Render arrows
     // render_arrow("left");
