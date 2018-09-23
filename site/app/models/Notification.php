@@ -12,7 +12,7 @@ use app\libraries\Core;
  * @method void     setComponent($component)
  * @method void     setSeen($isSeen)
  * @method void     setElapsedTime($duration)
- * @method void		setAnonymous($isAnon)
+ * @method void     setAnonymous($isAnon)
  * @method void     setCreatedAt($time)
  * @method void     setNotifyMetadata()
  * @method void     setNotifyContent()
@@ -24,7 +24,7 @@ use app\libraries\Core;
  * @method real     getElapsedTime()
  * @method string   getCreatedAt()
  * @method string   getCurrentUser()
- * @method bool		getAnonymous()
+ * @method bool     getAnonymous()
  *
  * @method string   getNotifySource()
  * @method string   getNotifyTarget()
