@@ -27,11 +27,17 @@
                                 {% endif %}
                             </td>
                             <td colspan="4">
-                                <a href="{{ core.buildUrl({"component": "navigation", "page": "notifications", "action": "open_notification", "nid": notification.getId(), "seen": notification.isSeen() }) }}">
+                                {% if notification.hasUrl() %}
+                                    <a href="{{ core.buildUrl({"component": "navigation", "page": "notifications", "action": "open_notification", "nid": notification.getId(), "seen": notification.isSeen() }) }}">
+                                        <div style="height: 100%; width: 100%;">
+                                            {{ notification.getNotifyContent() }}
+                                        </div>
+                                    </a>
+                                {% else %}
                                     <div style="height: 100%; width: 100%;">
                                         {{ notification.getNotifyContent() }}
                                     </div>
-                                </a>
+                                {% endif %}
                             </td>
                             <td colspan="2">
                                 {{ notification.getNotifyTime() }}

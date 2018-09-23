@@ -448,6 +448,7 @@ class DatabaseQueries {
         if($parent_id == -1){
             $this->course_db->query("UPDATE threads SET deleted = ? WHERE id = ?", array($newStatus, $thread_id));
             $this->course_db->query("UPDATE posts SET deleted = ? WHERE thread_id = ?", array($newStatus, $thread_id));
+            $this->markThreadNotificationInactive($thread_id);
             return true;
         } else {
             foreach($children as $post_id){
@@ -2497,7 +2498,7 @@ AND gc_id IN (
                 $this->course_db->query("UPDATE posts SET thread_id = ? WHERE id = ?", array($parent_thread_id,$post_id));
             }
             $this->course_db->query("UPDATE posts SET parent_id = ?, content = ? || content WHERE id = ?", array($parent_root_post, $child_thread_title, $child_root_post));
-
+            $this->markThreadNotificationInactive($child_thread_id);
             $this->course_db->commit();
             return true;
         } catch (DatabaseException $dbException){
@@ -2596,6 +2597,14 @@ AND gc_id IN (
         $this->course_db->query("INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id)
                     SELECT ?, ?, ?, current_timestamp, ?, user_id as to_user_id FROM ({$target_users_query}) as u {$ignore_self_query}",
                     $params);
+    }
+
+    /**
+     * Set metadata for inactive thread to be empty, can be called on thread merge/deletion
+     */
+    public function markThreadNotificationInactive($thread_id){
+        $metadata_empty = Notification::metadataNone();
+        $this->course_db->query("UPDATE notifications SET metadata = ? WHERE metadata::json->0->>'component'='forum' and metadata::json->0->>'thread_id' = ?", array($metadata_empty, $thread_id));
     }
 
     /**
