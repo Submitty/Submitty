@@ -2576,6 +2576,7 @@ AND gc_id IN (
         $params[] = $notification->getNotifyMetadata();
         $params[] = $notification->getNotifyContent();
         $params[] = $notification->getNotifySource();
+        $params[] = ($notification->getAnonymous()) ? 1 : 0;
 
         if(empty($notification->getNotifyTarget())) {
             // Notify all users
@@ -2585,7 +2586,6 @@ AND gc_id IN (
             $params[] = $notification->getNotifyTarget();
             $target_users_query = "SELECT ?::text as user_id";
         }
-
         if($notification->getNotifyNotToSource()){
             $ignore_self_query = "WHERE user_id <> ?";
             $params[] = $notification->getNotifySource();
@@ -2593,8 +2593,8 @@ AND gc_id IN (
         else {
             $ignore_self_query = "";
         }
-        $this->course_db->query("INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id)
-                    SELECT ?, ?, ?, current_timestamp, ?, user_id as to_user_id FROM ({$target_users_query}) as u {$ignore_self_query}",
+        $this->course_db->query("INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id, anonymous)
+                    SELECT ?, ?, ?, current_timestamp, ?, user_id as to_user_id, ? FROM ({$target_users_query}) as u {$ignore_self_query}",
                     $params);
     }
 
@@ -2613,7 +2613,7 @@ AND gc_id IN (
         }
         $this->course_db->query("SELECT id, component, metadata, content,
                 (case when seen_at is NULL then false else true end) as seen,
-                (extract(epoch from current_timestamp) - extract(epoch from created_at)) as elapsed_time, created_at
+                (extract(epoch from current_timestamp) - extract(epoch from created_at)) as elapsed_time, created_at, anonymous
                 FROM notifications WHERE to_user_id = ? and {$seen_status_query} ORDER BY created_at DESC", array($user_id));
         $rows = $this->course_db->rows();
         $results = array();
@@ -2626,7 +2626,8 @@ AND gc_id IN (
                     'content' => $row['content'],
                     'seen' => $row['seen'],
                     'elapsed_time' => $row['elapsed_time'],
-                    'created_at' => $row['created_at']
+                    'created_at' => $row['created_at'],
+                    'anonymous' => $row['anonymous']
                 ));
         }
         return $results;

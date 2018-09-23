@@ -522,6 +522,7 @@ CREATE TABLE notifications (
     content TEXT NOT NULL,
     from_user_id VARCHAR(255),
     to_user_id VARCHAR(255) NOT NULL,
+    anonymous BOOLEAN DEFAULT FALSE NOT NULL,
     created_at timestamp with time zone NOT NULL,
     seen_at timestamp with time zone
 );
