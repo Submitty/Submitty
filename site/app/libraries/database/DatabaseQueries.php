@@ -203,7 +203,7 @@ class DatabaseQueries {
      * @return array('block_number' => int, 'threads' => array(threads))    Ordered filtered threads
      */
     public function loadThreadBlock($categories_ids, $thread_status, $show_deleted, $show_merged_thread, $current_user, $blockNumber, $thread_id){
-        $blockSize = 10;
+        $blockSize = 30;
         $loadLastPage = false;
 
         $query_raw_select = null;
