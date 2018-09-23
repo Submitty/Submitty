@@ -159,7 +159,8 @@ sudo chown ${CGI_USER} /usr/local/lib/python*/dist-packages/pam.py*
 
 ##################################################
 #install some pdflatex packages
-apt-get install -qqy  texlive-latex-base texlive-extra-utils texlive-latex-recommended
+apt-get install -qqy texlive-latex-base texlive-extra-utils texlive-latex-recommended
+apt-get install -qqy texlive-generic-recommended
 
 
 # dictionary of words in /usr/share/dict/words

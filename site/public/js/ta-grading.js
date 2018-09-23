@@ -561,7 +561,6 @@ function openAll(click_class, class_modifier) {
 }
 function updateValue(obj, option1, option2) {
     // Switches the value of an element between option 1 and two
-    console.log('hi');
     obj.text(function(i, oldText){
         if(oldText.indexOf(option1) >= 0){
             newText = oldText.replace(option1, option2);

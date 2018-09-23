@@ -307,6 +307,14 @@ class FileUtils {
         return json_encode($string, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }
 
+    public static function writeJsonFile($filename, $data) {
+        $data = FileUtils::encodeJson($data);
+        if ($data === false) {
+            return false;
+        }
+        return file_put_contents($filename, $data);
+    }
+
     /**
      * Given a file, returns its mimetype based on the file's so-called maagic bytes.
      *

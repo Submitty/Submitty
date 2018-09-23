@@ -279,6 +279,24 @@ class DatabaseQueries {
         return $this->course_db->rows()[0]["max_id"];
     }
 
+	public function getResolveState($thread_id) {
+		$this->course_db->query("SELECT status from threads where id = ?", array($thread_id));
+		return $this->course_db->rows();
+	}
+
+	public function updateResolveState($thread_id, $state) {
+		if(in_array($state, array(-1, 0, 1))) {
+			$this->course_db->query("UPDATE threads set status = ? where id = ?", array($state, $thread_id));
+			return true;
+		}
+		return false;
+	}
+
+	public function getAuthorOfThread($thread_id) {
+		$this->course_db->query("SELECT created_by from threads where id = ?", array($thread_id));
+		return $this->course_db->rows()[0]['created_by'];
+	}
+
     public function getPosts(){
         $this->course_db->query("SELECT * FROM posts where deleted = false");
         return $this->course_db->rows();
