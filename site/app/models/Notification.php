@@ -58,8 +58,6 @@ class Notification extends AbstractModel {
     protected $elapsed_time;
     /** @property @var string Timestamp for creation of notification */
     protected $created_at;
-	/** @property @var bool Is the from user anonymous */
-	protected $anonymous;
 
     /**
      * Notifications constructor.

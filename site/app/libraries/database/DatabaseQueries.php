@@ -472,7 +472,6 @@ class DatabaseQueries {
             $this->course_db->query("UPDATE posts SET content =  ?, anonymous = ? where id = ?", array($content, $anon, $post_id));
             // Insert latest version of post into forum_posts_history
             $this->course_db->query("INSERT INTO forum_posts_history(post_id, edit_author, content, edit_timestamp) SELECT id, ?, content, current_timestamp FROM posts WHERE id = ?", array($user, $post_id));
-			//var_dump($this->getParentPostId($post_id));
 			$this->course_db->query("UPDATE notifications SET content = substring(content from '.+?(?=from)') || 'from ' || ? where metadata::json->>1 = ? and metadata::json->>2 = ?", array(Utils::getDisplayNameForum($anon, $this->getDisplayUserInfoFromUserId($original_creator)), $this->getParentPostId($post_id), $post_id));
             $this->course_db->query("DELETE FROM viewed_responses WHERE thread_id = (SELECT thread_id FROM posts WHERE id = ?)", array($post_id));
             $this->course_db->commit();
@@ -2619,7 +2618,7 @@ AND gc_id IN (
         }
         $this->course_db->query("SELECT id, component, metadata, content,
                 (case when seen_at is NULL then false else true end) as seen,
-                (extract(epoch from current_timestamp) - extract(epoch from created_at)) as elapsed_time, created_at, anonymous
+                (extract(epoch from current_timestamp) - extract(epoch from created_at)) as elapsed_time, created_at
                 FROM notifications WHERE to_user_id = ? and {$seen_status_query} ORDER BY created_at DESC", array($user_id));
         $rows = $this->course_db->rows();
         $results = array();
@@ -2632,8 +2631,7 @@ AND gc_id IN (
                     'content' => $row['content'],
                     'seen' => $row['seen'],
                     'elapsed_time' => $row['elapsed_time'],
-                    'created_at' => $row['created_at'],
-                    'anonymous' => $row['anonymous']
+                    'created_at' => $row['created_at']
                 ));
         }
         return $results;
