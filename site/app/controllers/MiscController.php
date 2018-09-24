@@ -5,6 +5,7 @@ namespace app\controllers;
 
 use app\libraries\FileUtils;
 use app\libraries\Utils;
+use app\libraries\Core;
 
 class MiscController extends AbstractController {
     public function run() {
@@ -55,8 +56,15 @@ class MiscController extends AbstractController {
         $gradeable_id = $_POST['gradeable_id'] ?? NULL;
         $user_id = $_POST['user_id'] ?? NULL;
         $file_name = $_POST['filename'] ?? NULL;
-        $active_version = $this->core->getQueries()->getGradeable($gradeable_id, $user_id)->getActiveVersion();
-        $pdf64 = base64_encode(file_get_contents(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'submissions', $gradeable_id, $user_id, $active_version, $file_name)));
+        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
+        $id = $user_id;
+        if($gradeable->isTeamAssignment()){
+            $first_member = $this->core->getQueries()->getTeamById($user_id)->getMemberUserIds()[0];
+            $active_version = $this->core->getQueries()->getGradeable($gradeable_id, $first_member)->getActiveVersion();
+        } else {
+            $active_version = $this->core->getQueries()->getGradeable($gradeable_id, $user_id)->getActiveVersion();
+        }
+        $pdf64 = base64_encode(file_get_contents(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'submissions', $gradeable_id, $id, $active_version, $file_name)));
         return $this->core->getOutput()->renderJson($pdf64);
     }
 
