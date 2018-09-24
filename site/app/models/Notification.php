@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\libraries\Core;
+use app\libraries\Utils;
 
 /**
  * Class Notification
@@ -58,6 +59,7 @@ class Notification extends AbstractModel {
     protected $elapsed_time;
     /** @property @var string Timestamp for creation of notification */
     protected $created_at;
+
 
     /**
      * Notifications constructor.
@@ -146,14 +148,6 @@ class Notification extends AbstractModel {
         }
     }
 
-    private function getDisplayUser($anonymous) {
-        if($anonymous) {
-            return "Anonymous";
-        }
-        $real_name = $this->core->getQueries()->getDisplayUserInfoFromUserId($this->getCurrentUser());
-        return $real_name['first_name'] . substr($real_name['last_name'], 0, 2) . '.';
-    }
-
     private function actAsNewAnnouncementNotification($thread_id, $thread_title) {
         $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id))));
         $this->setNotifyContent("New Announcement: ".$thread_title);
@@ -170,7 +164,7 @@ class Notification extends AbstractModel {
 
     private function actAsForumReplyNotification($thread_id, $post_id, $post_content, $target, $child_id, $anon) {
         $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id, (string)$child_id)));
-        $this->setNotifyContent("Reply: Your post '".$this->textShortner($post_content)."' got new a reply from ".$this->getDisplayUser($anon));
+        $this->setNotifyContent("Reply: Your post '".$this->textShortner($post_content)."' got new a reply from ".Utils::getDisplayNameForum($anon, $this->core->getQueries()->getDisplayUserInfoFromUserId($this->getCurrentUser())));
         $this->setNotifySource($this->getCurrentUser());
         $this->setNotifyTarget($target);
     }
@@ -184,21 +178,21 @@ class Notification extends AbstractModel {
 
     private function actAsForumEditedNotification($thread_id, $post_id, $post_content, $target){
         $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id)));
-        $this->setNotifyContent("Update: Your thread/post '".$this->textShortner($post_content)."' got an edit from ".$this->getDisplayUser(false));
+        $this->setNotifyContent("Update: Your thread/post '".$this->textShortner($post_content)."' got an edit from ".Utils::getDisplayNameForum(false, $this->core->getQueries()->getDisplayUserInfoFromUserId($this->getCurrentUser())));
         $this->setNotifySource($this->getCurrentUser());
         $this->setNotifyTarget($target);
     }
 
     private function actAsForumDeletedNotification($thread_id, $post_content, $target){
         $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id))));
-        $this->setNotifyContent("Deleted: Your thread/post '".$this->textShortner($post_content)."' was deleted by ".$this->getDisplayUser(false));
+        $this->setNotifyContent("Deleted: Your thread/post '".$this->textShortner($post_content)."' was deleted by ".Utils::getDisplayNameForum(false, $this->core->getQueries()->getDisplayUserInfoFromUserId($this->getCurrentUser())));
         $this->setNotifySource($this->getCurrentUser());
         $this->setNotifyTarget($target);
     }
 
     private function actAsForumUndeletedNotification($thread_id, $post_id, $post_content, $target){
         $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id)));
-        $this->setNotifyContent("Undeleted: Your thread/post '".$this->textShortner($post_content)."' has been undeleted by ".$this->getDisplayUser(false));
+        $this->setNotifyContent("Undeleted: Your thread/post '".$this->textShortner($post_content)."' has been undeleted by ".Utils::getDisplayNameForum(false, $this->core->getQueries()->getDisplayUserInfoFromUserId($this->getCurrentUser())));
         $this->setNotifySource($this->getCurrentUser());
         $this->setNotifyTarget($target);
     }
