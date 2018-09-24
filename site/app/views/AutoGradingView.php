@@ -355,7 +355,7 @@ class AutoGradingView extends AbstractView {
             $grader_names = ['Graded by Peer(s)'];
         } else if (count($grader_names) === 0) {
             // Non-peer assignment with only limited access graders
-            $grader_names = ['Graded by the ghosts among you'];
+            $grader_names = ['Course Staff'];
         }
 
         //get total score and max possible score
