@@ -128,12 +128,12 @@ class Utils {
         return substr($haystack, (-1*strlen($needle)), strlen($needle)) === $needle;
     }
 
-	public static function getDisplayNameForum($anonymous, $real_name) {
-		if($anonymous) {
-			return "Anonymous";
-		}
-		return $real_name['first_name'] . substr($real_name['last_name'], 0, 2) . '.';
-	}
+    public static function getDisplayNameForum($anonymous, $real_name) {
+        if($anonymous) {
+            return "Anonymous";
+        }
+        return $real_name['first_name'] . substr($real_name['last_name'], 0, 2) . '.';
+    }
 
 
     /**

@@ -596,10 +596,10 @@ class ForumController extends AbstractController {
         $new_post_content = $_POST["thread_post_content"];
         if(!empty($new_post_content)) {
             $post_id = $_POST["edit_post_id"];
-			$original_creator = $this->core->getQueries()->getPost($post_id);
-			if(!empty($original_creator)) {
-				$original_creator = $original_creator['author_user_id'];
-			}
+            $original_creator = $this->core->getQueries()->getPost($post_id);
+            if(!empty($original_creator)) {
+                $original_creator = $original_creator['author_user_id'];
+            }
             $anon = ($_POST["Anon"] == "Anon") ? 1 : 0;
             $current_user = $this->core->getUser()->getId();
             return $this->core->getQueries()->editPost($original_creator, $current_user, $post_id, $new_post_content, $anon);
