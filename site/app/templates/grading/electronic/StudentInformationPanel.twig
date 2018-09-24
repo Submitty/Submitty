@@ -16,7 +16,7 @@
                                   'gradeable_id': gradeable.getId(),
                                   'new_version': gradeable.getCurrentVersionNumber() == gradeable.getActiveVersion() ? 0 : gradeable.getCurrentVersionNumber(),
                                   'ta': true,
-                                  'who': who
+                                  'who': submitter_id
                               }) }}">
                             <input type='hidden' name="csrf_token" value="{{ core.getCsrfToken() }}" />
                             {% if gradeable.getCurrentVersionNumber() == gradeable.getActiveVersion() %}

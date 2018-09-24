@@ -951,18 +951,31 @@ class ElectronicGraderController extends GradingController {
 
     /**
      * Display the electronic grading page
-     * TODO: refactor for new model
      */
     public function showGrading() {
-        $gradeable_id = $_REQUEST['gradeable_id'];
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+        $submitter_id = $_REQUEST['who_id'] ?? '';
+
+        /** @var Gradeable $gradeable */
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
+            $this->core->addErrorMessage('Invalid Gradeable!');
+            $this->core->redirect($this->core->buildUrl());
+        }
+
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id, false);
+        if($graded_gradeable === false) {
+            $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'details',
+                'gradeable_id' => $gradeable_id)));
+        }
+
         $peer = false;
-        if($gradeable->getPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
+        if($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
             $peer = true;
         }
 
         $gradeableUrl = $this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable_id));
-        $this->core->getOutput()->addBreadcrumb("{$gradeable->getName()} Grading", $gradeableUrl);
+        $this->core->getOutput()->addBreadcrumb("{$gradeable->getTitle()} Grading", $gradeableUrl);
         $indexUrl = $this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'details', 'gradeable_id' => $gradeable_id));
         $this->core->getOutput()->addBreadcrumb('Student Index', $indexUrl);
 
@@ -973,7 +986,7 @@ class ElectronicGraderController extends GradingController {
             $section_key = 'registration_section';
             $user_ids_to_grade = $this->core->getQueries()->getPeerAssignment($gradeable->getId(), $this->core->getUser()->getId());
             $total = $gradeable->getPeerGradeSet();
-            $graded = $this->core->getQueries()->getNumGradedPeerComponents($gradeable->getId(), $this->core->getUser()->getId()) / $gradeable->getNumPeerComponents();
+            $graded = $this->core->getQueries()->getNumGradedPeerComponents($gradeable->getId(), $this->core->getUser()->getId()) / count($gradeable->getPeerComponents());
         }
         else if ($gradeable->isGradeByRegistration()) {
             $section_key = "registration_section";
@@ -1020,7 +1033,7 @@ class ElectronicGraderController extends GradingController {
             if ($team) {
                 $teams_to_grade = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
                 //order teams first by rotating section, then by leader id.
-                usort($teams_to_grade, function($a, $b) {
+                usort($teams_to_grade, function(Team $a, Team $b) {
                     if($a->getRotatingSection() == $b->getRotatingSection())
                         return $a->getMembers()[0] < $b->getMembers()[0] ? -1 : 1;
                     return $a->getRotatingSection() < $b->getRotatingSection() ? -1 : 1;
@@ -1064,18 +1077,10 @@ class ElectronicGraderController extends GradingController {
         
         //$gradeables_to_grade = $this->core->getQueries()->getGradeables($gradeable_id, $user_ids_to_grade, $section_key);
 
-        $who_id = isset($_REQUEST['who_id']) ? $_REQUEST['who_id'] : "";
-        //$who_id = isset($who_id[$_REQUEST['who_id']]) ? $who_id[$_REQUEST['who_id']] : "";
-
         $prev_id = "";
         $next_id = "";
-        $break_next = false;
-        if($who_id === ""){
-            $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'details', 
-                'gradeable_id' => $gradeable_id)));
-        }
         
-        $index = array_search($who_id, $user_ids_to_grade);
+        $index = array_search($submitter_id, $user_ids_to_grade);
         $not_in_my_section = false;
         //If the student isn't in our list of students to grade.
         if($index === false){
@@ -1095,21 +1100,19 @@ class ElectronicGraderController extends GradingController {
         }
 
         if ($team) {
-            if ($teams_assoc[$who_id] === NULL) {
+            if ($teams_assoc[$submitter_id] === NULL) {
                 $gradeable = NULL;
             } else {
-                $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $teams_assoc[$who_id]->getLeaderId());
+                $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $teams_assoc[$submitter_id]->getLeaderId());
             }
         } else {
-            $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $who_id);
+            $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $submitter_id);
         }
 
         if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable])) {
             $this->core->addErrorMessage("ERROR: You do not have access to grade the requested student.");
             $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
         }
-
-        $gradeable->loadResultDetails();
 
         $show_verify_all = false;
         //check if verify all button should be shown or not
@@ -1129,8 +1132,6 @@ class ElectronicGraderController extends GradingController {
 
         // Get the new model instance
         $display_version = intval($_REQUEST['gradeable_version'] ?? '0');
-        $new_gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($new_gradeable, $who_id, $who_id);
         if($display_version === 0) {
             $display_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         }

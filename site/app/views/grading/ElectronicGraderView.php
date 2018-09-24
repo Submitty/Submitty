@@ -423,29 +423,26 @@ class ElectronicGraderView extends AbstractView {
 
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
-    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, string $prev_id, string $next_id, bool $not_in_my_section, bool $show_hidden_cases, bool $can_verify, bool $show_verify_all, bool $show_silent_edit) {
-        $new_gradeable = $graded_gradeable->getGradeable();
-
+    public function hwGradingPage(\app\models\gradeable\Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, string $prev_id, string $next_id, bool $not_in_my_section, bool $show_hidden_cases, bool $can_verify, bool $show_verify_all, bool $show_silent_edit) {
         $peer = false;
-        if($this->core->getUser()->getGroup()==User::GROUP_STUDENT && $gradeable->getPeerGrading()) {
+        if($this->core->getUser()->getGroup()==User::GROUP_STUDENT && $gradeable->isPeerGrading()) {
             $peer = true;
         }
 
         $return = "";
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderNavigationBar', $graded_gradeable, $progress, $prev_id, $next_id, $not_in_my_section, $peer);
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderAutogradingPanel', $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($display_version), $show_hidden_cases);
-        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderSubmissionPanel', $gradeable);
-        $user = $gradeable->getUser();
+        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderSubmissionPanel', $graded_gradeable);
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit);
         if(!$peer) {
-            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderInformationPanel', $gradeable, $user);
+            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderInformationPanel', $graded_gradeable);
         }
         if ($graded_gradeable->hasActiveRegradeRequest()) {
             $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRegradePanel', $graded_gradeable);
         }
-        if ($gradeable->getActiveVersion() == 0) {
-            if ($gradeable->hasSubmitted()) {
+        if ($graded_gradeable->getAutoGradedGradeable()->getActiveVersion() === 0) {
+            if ($graded_gradeable->getAutoGradedGradeable()->hasSubmission()) {
                 $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
                     "color" => "#FF8040", // mango orange
                     "message" => "Cancelled Submission"
@@ -506,10 +503,11 @@ class ElectronicGraderView extends AbstractView {
 
     /**
      * Render the Submissions and Results Browser panel
-     * @param Gradeable $gradeable
+     * @param GradedGradeable $graded_gradeable
+     * @param int $display_version
      * @return string
      */
-    public function renderSubmissionPanel(Gradeable $gradeable) {
+    public function renderSubmissionPanel(GradedGradeable $graded_gradeable, int $display_version) {
         function add_files(&$files, $new_files, $start_dir_name) {
             $files[$start_dir_name] = array();
             foreach($new_files as $file) {
@@ -533,17 +531,18 @@ class ElectronicGraderView extends AbstractView {
         // if you change here, then change there as well
         // order of these statements matter I believe
 
-        add_files($submissions, array_merge($gradeable->getMetaFiles(), $gradeable->getSubmittedFiles()), 'submissions');
-
-        $vcsFiles = $gradeable->getVcsFiles();
-        if( count( $vcsFiles ) != 0 ) { //if there are checkout files, then display folder, otherwise don't
-            add_files($checkout, $vcsFiles, 'checkout');
+        $display_version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($display_version);
+        if ($display_version_instance !==  null) {
+            add_files($submissions, array_merge($display_version_instance->getMetaFiles(), $display_version_instance->getFiles()), 'submissions');
         }
 
-        add_files($results, $gradeable->getResultsFiles(), 'results');
+        // TODO: this function doesn't exist!! where did it go?
+//        add_files($results, $gradeable->getResultsFiles(), 'results');
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
-            "gradeable" => $gradeable,
+            "gradeable_id" => $graded_gradeable->getGradeableId(),
+            "submitter_id" => $graded_gradeable->getSubmitter()->getId(),
+            "has_vcs_files" => false, // TODO: add this to AutoGradedVersion
             "submissions" => $submissions,
             "checkout" => $checkout,
             "results" => $results,
@@ -552,17 +551,16 @@ class ElectronicGraderView extends AbstractView {
     }
 
     /**
-     * @param Gradeable $gradeable
-     * @param User $user
+     * @param GradedGradeable $graded_gradeable
      * @return string
      */
-    public function renderInformationPanel(Gradeable $gradeable, User $user) {
-        $who = ($gradeable->isTeamAssignment() ? $gradeable->getTeam()->getId() : $gradeable->getUser()->getId());
-        $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id'=>$who, 'gradeable_version' => ""))}', this)";
+    public function renderInformationPanel(GradedGradeable $graded_gradeable) {
+        $gradeable = $graded_gradeable->getGradeable();
+        $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id'=>$graded_gradeable->getSubmitter()->getId(), 'gradeable_version' => ""))}', this)";
 
         $team_members = [];
-        if ($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null) {
-            foreach ($gradeable->getTeam()->getMembers() as $team_member) {
+        if ($gradeable->isTeamAssignment()) {
+            foreach ($graded_gradeable->getSubmitter()->getTeam()->getMembers() as $team_member) {
                 $team_members[] = $this->core->getQueries()->getUserById($team_member);
             }
         }
@@ -570,18 +568,18 @@ class ElectronicGraderView extends AbstractView {
         $tables = [];
 
         //Late day calculation
-        if ($gradeable->isTeamAssignment() && $gradeable->getTeam() !== null) {
-            foreach ($gradeable->getTeam()->getMembers() as $team_member) {
+        if ($gradeable->isTeamAssignment()) {
+            foreach ($graded_gradeable->getSubmitter()->getTeam()->getMembers() as $team_member) {
                 $team_member = $this->core->getQueries()->getUserById($team_member);
                 $tables[] = $this->core->getOutput()->renderTemplate('LateDaysTable', 'showLateTable', $team_member->getId(), $gradeable->getId(), false);
             }
         } else {
-            $tables[] = $this->core->getOutput()->renderTemplate('LateDaysTable', 'showLateTable', $user->getId(), $gradeable->getId(), false);
+            $tables[] = $this->core->getOutput()->renderTemplate('LateDaysTable', 'showLateTable', $graded_gradeable->getSubmitter()->getId(), $gradeable->getId(), false);
         }
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/StudentInformationPanel.twig", [
             "gradeable" => $gradeable,
-            "who" => $who,
+            "submitter_id" => $graded_gradeable->getSubmitter()->getId(),
             "on_change" => $onChange,
             "team_members" => $team_members,
             "tables" => $tables,
