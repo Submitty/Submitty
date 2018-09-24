@@ -11,11 +11,11 @@ use app\libraries\Core;
  * @method void setId(string $id) Get the id of the loaded user
  * @method void setAnonId(string $anon_id)
  * @method string getPassword()
- * @method string getFirstName() Get the first name of the loaded user
+ * @method string getLegalFirstName() Get the first name of the loaded user
  * @method string getPreferredFirstName() Get the preferred name of the loaded user
  * @method string getDisplayedFirstName() Returns the preferred name if one exists and is not null or blank,
  *                                        otherwise return the first name field for the user.
- * @method string getLastName() Get the last name of the loaded user
+ * @method string getLegalLastName() Get the last name of the loaded user
  * @method void setLastName(string $last_name)
  * @method string getEmail()
  * @method void setEmail(string $email)
@@ -59,13 +59,13 @@ class User extends AbstractModel {
      */
     protected $password = null;
     /** @property @var string The first name of the user */
-    protected $first_name;
+    protected $legal_first_name;
     /** @property @var string The preferred first name of the user */
     protected $preferred_first_name = "";
     /** @property @var  string The first name to be displayed by the system (either first name or preferred first name) */
     protected $displayed_first_name;
     /** @property @var string The last name of the user */
-    protected $last_name;
+    protected $legal_last_name;
     /** @property @var string The preferred last name of the user */
     protected $preferred_last_name = "";
     /** @property @var  string The last name to be displayed by the system (either last name or preferred last name) */
@@ -129,12 +129,12 @@ class User extends AbstractModel {
             $this->anon_id = $details['anon_id'];
         }
 
-        $this->setFirstName($details['user_firstname']);
+        $this->setLegalFirstName($details['user_firstname']);
         if (isset($details['user_preferred_firstname'])) {
             $this->setPreferredFirstName($details['user_preferred_firstname']);
         }
 
-        $this->setLastName($details['user_lastname']);
+        $this->setLegalLastName($details['user_lastname']);
         if (isset($details['user_preferred_lastname'])) {
             $this->setPreferredLastName($details['user_preferred_lastname']);
         }
@@ -192,12 +192,12 @@ class User extends AbstractModel {
         }
     }
 
-    public function setFirstName($name) {
+    public function setLegalFirstName($name) {
         $this->first_name = $name;
         $this->setDisplayedFirstName();
     }
 
-    public function setLastName($name) {
+    public function setLegalLastName($name) {
         $this->last_name = $name;
         $this->setDisplayedLastName();
     }
