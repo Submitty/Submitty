@@ -12,7 +12,6 @@ use app\libraries\Core;
  * @method void     setComponent($component)
  * @method void     setSeen($isSeen)
  * @method void     setElapsedTime($duration)
- * @method void     setAnonymous($isAnon)
  * @method void     setCreatedAt($time)
  * @method void     setNotifyMetadata()
  * @method void     setNotifyContent()
@@ -24,7 +23,6 @@ use app\libraries\Core;
  * @method real     getElapsedTime()
  * @method string   getCreatedAt()
  * @method string   getCurrentUser()
- * @method bool     getAnonymous()
  *
  * @method string   getNotifySource()
  * @method string   getNotifyTarget()
@@ -81,7 +79,6 @@ class Notification extends AbstractModel {
             $this->setComponent($details['component']);
             $this->setElapsedTime($details['elapsed_time']);
             $this->setCreatedAt($details['created_at']);
-            $this->setAnonymous($details['anonymous']);
             $this->setNotifyMetadata($details['metadata']);
             $this->setNotifyContent($details['content']);
         } else {
@@ -132,7 +129,7 @@ class Notification extends AbstractModel {
                 $this->actAsUpdatedAnnouncementNotification($details['thread_id'], $details['thread_title']);
                 break;
             case 'reply':
-                $this->actAsForumReplyNotification($details['thread_id'], $details['post_id'], $details['post_content'], $details['reply_to'], $details['anonymous']);
+                $this->actAsForumReplyNotification($details['thread_id'], $details['post_id'], $details['post_content'], $details['reply_to'], $details['child_id'], $details['anonymous']);
                 break;
             case 'merge_thread':
                 $this->actAsForumMergeThreadNotification($details['parent_thread_id'],  $details['parent_thread_title'], $details['child_thread_title'], $details['child_root_post'], $details['reply_to']);
@@ -151,8 +148,8 @@ class Notification extends AbstractModel {
         }
     }
 
-    private function getDisplayUser() {
-        if($this->getAnonymous()) {
+    private function getDisplayUser($anonymous) {
+        if($anonymous) {
             return "Anonymous";
         }
         $real_name = $this->core->getQueries()->getDisplayUserInfoFromUserId($this->getCurrentUser());
@@ -160,7 +157,6 @@ class Notification extends AbstractModel {
     }
 
     private function actAsNewAnnouncementNotification($thread_id, $thread_title) {
-        $this->setAnonymous(false);
         $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id))));
         $this->setNotifyContent("New Announcement: ".$thread_title);
         $this->setNotifySource($this->getCurrentUser());
@@ -168,23 +164,20 @@ class Notification extends AbstractModel {
     }
 
     private function actAsUpdatedAnnouncementNotification($thread_id, $thread_title) {
-        $this->setAnonymous(false);
         $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id))));
         $this->setNotifyContent("Announcement: ".$thread_title);
         $this->setNotifySource($this->getCurrentUser());
         $this->setNotifyTarget(null);
     }
 
-    private function actAsForumReplyNotification($thread_id, $post_id, $post_content, $target, $anon) {
-        $this->setAnonymous($anon);
-        $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id)));
-        $this->setNotifyContent("Reply: Your post '".$this->textShortner($post_content)."' got new a reply from ".$this->getDisplayUser());
+    private function actAsForumReplyNotification($thread_id, $post_id, $post_content, $target, $child_id, $anon) {
+        $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id, (string)$child_id)));
+        $this->setNotifyContent("Reply: Your post '".$this->textShortner($post_content)."' got new a reply from ".$this->getDisplayUser($anon));
         $this->setNotifySource($this->getCurrentUser());
         $this->setNotifyTarget($target);
     }
 
     private function actAsForumMergeThreadNotification($parent_thread_id, $parent_thread_title, $child_thread_title, $child_root_post, $target){
-        $this->setAnonymous(false);
         $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $parent_thread_id), (string)$child_root_post)));
         $this->setNotifyContent("Thread Merged: '".$this->textShortner($child_thread_title)."' got merged into '".$this->textShortner($parent_thread_title)."'");
         $this->setNotifySource($this->getCurrentUser());
@@ -192,25 +185,22 @@ class Notification extends AbstractModel {
     }
 
     private function actAsForumEditedNotification($thread_id, $post_id, $post_content, $target){
-        $this->setAnonymous(false);
         $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id)));
-        $this->setNotifyContent("Update: Your thread/post '".$this->textShortner($post_content)."' got an edit from ".$this->getDisplayUser());
+        $this->setNotifyContent("Update: Your thread/post '".$this->textShortner($post_content)."' got an edit from ".$this->getDisplayUser(false));
         $this->setNotifySource($this->getCurrentUser());
         $this->setNotifyTarget($target);
     }
 
     private function actAsForumDeletedNotification($thread_id, $post_content, $target){
-        $this->setAnonymous(false);
         $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id))));
-        $this->setNotifyContent("Deleted: Your thread/post '".$this->textShortner($post_content)."' was deleted by ".$this->getDisplayUser());
+        $this->setNotifyContent("Deleted: Your thread/post '".$this->textShortner($post_content)."' was deleted by ".$this->getDisplayUser(false));
         $this->setNotifySource($this->getCurrentUser());
         $this->setNotifyTarget($target);
     }
 
     private function actAsForumUndeletedNotification($thread_id, $post_id, $post_content, $target){
-        $this->setAnonymous(false);
         $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id)));
-        $this->setNotifyContent("Undeleted: Your thread/post '".$this->textShortner($post_content)."' has been undeleted by ".$this->getDisplayUser());
+        $this->setNotifyContent("Undeleted: Your thread/post '".$this->textShortner($post_content)."' has been undeleted by ".$this->getDisplayUser(false));
         $this->setNotifySource($this->getCurrentUser());
         $this->setNotifyTarget($target);
     }
