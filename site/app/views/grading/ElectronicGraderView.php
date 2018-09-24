@@ -13,7 +13,7 @@ use app\views\AbstractView;
 
 class ElectronicGraderView extends AbstractView {
     /**
-     * @param Gradeable $gradeable
+     * @param \app\models\gradeable\Gradeable $gradeable
      * @param array[] $sections
      * @param SimpleStat[] $component_averages
      * @param SimpleStat|null $autograded_average
@@ -28,7 +28,7 @@ class ElectronicGraderView extends AbstractView {
      * @return string
      */
     public function statusPage(
-        Gradeable $gradeable,
+        \app\models\gradeable\Gradeable $gradeable,
         array $sections,
         array $component_averages,
         $autograded_average,
@@ -42,7 +42,7 @@ class ElectronicGraderView extends AbstractView {
         bool $show_warnings) {
 
         $peer = false;
-        if($gradeable->getPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
+        if($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
             $peer = true;
         }
         $graded = 0;
@@ -92,11 +92,11 @@ class ElectronicGraderView extends AbstractView {
             } else {
                 $total_students = $total_submissions;
             }
-            $num_components = $gradeable->getNumTAComponents();
+            $num_components = count($gradeable->getNonPeerComponents());
             $submitted_total = $total/$num_components;
             $graded_total = round($graded/$num_components, 2);
             if($peer) {
-                $num_components = $gradeable->getNumPeerComponents() * $gradeable->getPeerGradeSet();
+                $num_components = count($gradeable->getPeerComponents()) * $gradeable->getPeerGradeSet();
                 $graded_total = $graded/$num_components;
                 $submitted_total = $total/$num_components;
             }
@@ -118,8 +118,9 @@ class ElectronicGraderView extends AbstractView {
                 $team_percentage = round(($team_total/$total_students) * 100, 1);
             }
             if ($peer) {
-                $peer_total = floor($sections['stu_grad']['total_components']/$gradeable->getNumPeerComponents());
-                $peer_graded = floor($sections['stu_grad']['graded_components']/$gradeable->getNumPeerComponents());
+                $peer_count = count($gradeable->getPeerComponents());
+                $peer_total = floor($sections['stu_grad']['total_components']/$peer_count);
+                $peer_graded = floor($sections['stu_grad']['graded_components']/$peer_count);
                 $peer_percentage = number_format(($sections['stu_grad']['graded_components']/$sections['stu_grad']['total_components']) * 100, 1);
             } else {
                 foreach ($sections as $key => &$section) {
@@ -134,25 +135,21 @@ class ElectronicGraderView extends AbstractView {
                 }
                 unset($section); // Clean up reference
 
-                if ($gradeable->taGradesReleased()) {
+                if ($gradeable->isTaGradeReleased()) {
                     $viewed_total = $total/$num_components;
                     $viewed_percent = number_format(($viewed_grade / max($viewed_total, 1)) * 100, 1);
                 }
             }
             if(!$peer) {
                 if ($overall_average !== null) {
-                    if ($gradeable->getTotalAutograderNonExtraCreditPoints() == null) {
-                        $overall_total = $overall_average->getMaxValue();
-                    } else {
-                        $overall_total = $overall_average->getMaxValue() + $gradeable->getTotalAutograderNonExtraCreditPoints();
-                    }
+                    $overall_total = $overall_average->getMaxValue() + $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
                     if ($overall_total != 0) {
                         $overall_percentage = round($overall_average->getAverageScore() / $overall_total * 100);
                     }
                 }
                 if ($autograded_average !== null) {
-                    if ($gradeable->getTotalAutograderNonExtraCreditPoints() !== 0 && $autograded_average->getCount() !== 0) {
-                        $autograded_percentage = round($autograded_average->getAverageScore() / $gradeable->getTotalAutograderNonExtraCreditPoints() * 100);
+                    if ($gradeable->getAutogradingConfig()->getTotalNonExtraCredit() !== 0 && $autograded_average->getCount() !== 0) {
+                        $autograded_percentage = round($autograded_average->getAverageScore() / $gradeable->getAutogradingConfig()->getTotalNonExtraCredit() * 100);
                     }
                 }
                 if (count($component_averages) !== 0) {
@@ -176,7 +173,11 @@ class ElectronicGraderView extends AbstractView {
         }
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Status.twig", [
-            "gradeable" => $gradeable,
+            "gradeable_id" => $gradeable->getId(),
+            "gradeable_title" => $gradeable->getTitle(),
+            "team_assignment" => $gradeable->isTeamAssignment(),
+            "ta_grades_released" => $gradeable->isTaGradeReleased(),
+            "autograding_non_extra_credit" => $gradeable->getAutogradingConfig()->getTotalNonExtraCredit(),
             "peer" => $peer,
             "team_total" => $team_total,
             "team_percentage" => $team_percentage,

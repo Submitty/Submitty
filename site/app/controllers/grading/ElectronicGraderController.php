@@ -341,21 +341,26 @@ class ElectronicGraderController extends GradingController {
     /**
      * Shows statistics for the grading status of a given electronic submission. This is shown to all full access
      * graders. Limited access graders will only see statistics for the sections they are assigned to.
-     * TODO: refactor for new model
      */
     public function showStatus() {
-        $gradeable_id = $_REQUEST['gradeable_id'];
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
+            $this->core->addErrorMessage('Invalid gradeable id');
+            $this->core->redirect($this->core->buildUrl());
+        }
 
         if (!$this->core->getAccess()->canI("grading.electronic.status", ["gradeable" => $gradeable])) {
-            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
+            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getTitle()}");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
         $gradeableUrl = $this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable_id));
-        $this->core->getOutput()->addBreadcrumb("{$gradeable->getName()} Grading", $gradeableUrl);
+        $this->core->getOutput()->addBreadcrumb("{$gradeable->getTitle()} Grading", $gradeableUrl);
+
         $peer = false;
-        if ($gradeable->getPeerGrading() && ($this->core->getUser()->getGroup() == User::GROUP_STUDENT)) {
+        if ($gradeable->isPeerGrading() && ($this->core->getUser()->getGroup() == User::GROUP_STUDENT)) {
             $peer = true;
         }
 
@@ -380,9 +385,9 @@ class ElectronicGraderController extends GradingController {
         if ($peer) {
             $peer_grade_set = $gradeable->getPeerGradeSet();
             $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'registration_section');
-            $num_components = $gradeable->getNumPeerComponents();
+            $num_components = count($gradeable->getPeerComponents());
             $graded_components = $this->core->getQueries()->getGradedPeerComponentsByRegistrationSection($gradeable_id, $sections);
-            $my_grading = $this->core->getQueries()->getNumGradedPeerComponents($gradeable->getId(), $this->core->getUser()->getId());
+            $my_grading = $this->core->getQueries()->getNumGradedPeerComponents($gradeable_id, $this->core->getUser()->getId());
             $component_averages = array();
             $autograded_average = null;
             $overall_average = null;
@@ -402,7 +407,7 @@ class ElectronicGraderController extends GradingController {
             if (count($sections) > 0) {
                 $graders = $this->core->getQueries()->getGradersForRegistrationSections($sections);
             }
-            $num_components = $gradeable->getNumTAComponents();
+            $num_components = count($gradeable->getNonPeerComponents());
         }
         //grading by rotating section
         else {
@@ -442,7 +447,7 @@ class ElectronicGraderController extends GradingController {
             $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id, $section_key, $gradeable->isTeamAssignment());
             $autograded_average = $this->core->getQueries()->getAverageAutogradedScores($gradeable_id, $section_key, $gradeable->isTeamAssignment());
             $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id, $section_key, $gradeable->isTeamAssignment());
-            $num_components = $gradeable->getNumTAComponents();
+            $num_components = count($gradeable->getNonPeerComponents());
             $viewed_grade = $this->core->getQueries()->getNumUsersWhoViewedGrade($gradeable_id);
         }
         $sections = array();
@@ -520,6 +525,11 @@ class ElectronicGraderController extends GradingController {
 
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'statusPage', $gradeable, $sections, $component_averages, $autograded_average, $overall_average, $total_submissions, $registered_but_not_rotating, $rotating_but_not_registered, $viewed_grade, $section_key, $regrade_requests, $show_warnings);
     }
+
+    /**
+     * Shows the list of submitters
+     * TODO: refactor for new model
+     */
     public function showDetails() {
         $gradeable_id = $_REQUEST['gradeable_id'];
         $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
