@@ -2,8 +2,7 @@
 
 namespace app\views\grading;
 
-use app\models\Gradeable;
-use app\models\gradeable\AutoGradedGradeable;
+use app\models\gradeable\Gradeable;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\GradedGradeable;
 use app\models\SimpleStat;
@@ -13,7 +12,7 @@ use app\views\AbstractView;
 
 class ElectronicGraderView extends AbstractView {
     /**
-     * @param \app\models\gradeable\Gradeable $gradeable
+     * @param Gradeable $gradeable
      * @param array[] $sections
      * @param SimpleStat[] $component_averages
      * @param SimpleStat|null $autograded_average
@@ -28,7 +27,7 @@ class ElectronicGraderView extends AbstractView {
      * @return string
      */
     public function statusPage(
-        \app\models\gradeable\Gradeable $gradeable,
+        Gradeable $gradeable,
         array $sections,
         array $component_averages,
         $autograded_average,
@@ -209,7 +208,7 @@ class ElectronicGraderView extends AbstractView {
     }
 
     /**
-     * @param \app\models\gradeable\Gradeable $gradeable
+     * @param Gradeable $gradeable
      * @param GradedGradeable[] $rows
      * @param array $graders
      * @param Team[] $empty_teams
@@ -219,7 +218,7 @@ class ElectronicGraderView extends AbstractView {
      * @param bool $show_edit_teams
      * @return string
      */
-    public function detailsPage(\app\models\gradeable\Gradeable $gradeable, array $rows, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams) {
+    public function detailsPage(Gradeable $gradeable, array $rows, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams) {
         // Default is viewing your sections
         // Limited grader does not have "View All" option
         // If nothing to grade, Instructor will see all sections
@@ -396,7 +395,7 @@ class ElectronicGraderView extends AbstractView {
         ]);
     }
 
-    public function adminTeamForm(\app\models\gradeable\Gradeable $gradeable, $all_reg_sections, $all_rot_sections) {
+    public function adminTeamForm(Gradeable $gradeable, $all_reg_sections, $all_rot_sections) {
         $students = $this->core->getQueries()->getAllUsers();
         $student_full = array();
         foreach ($students as $student) {
@@ -414,7 +413,7 @@ class ElectronicGraderView extends AbstractView {
         ]);
     }
 
-    public function importTeamForm(\app\models\gradeable\Gradeable $gradeable) {
+    public function importTeamForm(Gradeable $gradeable) {
         return $this->core->getOutput()->renderTwigTemplate("grading/ImportTeamForm.twig", [
             "gradeable_id" => $gradeable->getId()
         ]);
@@ -423,20 +422,22 @@ class ElectronicGraderView extends AbstractView {
 
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
-    public function hwGradingPage(\app\models\gradeable\Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, string $prev_id, string $next_id, bool $not_in_my_section, bool $show_hidden_cases, bool $can_verify, bool $show_verify_all, bool $show_silent_edit) {
+    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, string $prev_id, string $next_id, bool $not_in_my_section, bool $show_hidden_cases, bool $can_verify, bool $show_verify_all, bool $show_silent_edit) {
         $peer = false;
         if($this->core->getUser()->getGroup()==User::GROUP_STUDENT && $gradeable->isPeerGrading()) {
             $peer = true;
         }
 
+        $display_version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($display_version);
+
         $return = "";
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderNavigationBar', $graded_gradeable, $progress, $prev_id, $next_id, $not_in_my_section, $peer);
-        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderAutogradingPanel', $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($display_version), $show_hidden_cases);
+        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderAutogradingPanel', $display_version_instance, $show_hidden_cases);
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderSubmissionPanel', $graded_gradeable);
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit);
         if(!$peer) {
-            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderInformationPanel', $graded_gradeable);
+            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderInformationPanel', $graded_gradeable, $display_version_instance);
         }
         if ($graded_gradeable->hasActiveRegradeRequest()) {
             $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRegradePanel', $graded_gradeable);
@@ -552,36 +553,41 @@ class ElectronicGraderView extends AbstractView {
 
     /**
      * @param GradedGradeable $graded_gradeable
+     * @param AutoGradedVersion|null $display_version_instance
      * @return string
      */
-    public function renderInformationPanel(GradedGradeable $graded_gradeable) {
+    public function renderInformationPanel(GradedGradeable $graded_gradeable, $display_version_instance) {
         $gradeable = $graded_gradeable->getGradeable();
         $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id'=>$graded_gradeable->getSubmitter()->getId(), 'gradeable_version' => ""))}', this)";
-
-        $team_members = [];
-        if ($gradeable->isTeamAssignment()) {
-            foreach ($graded_gradeable->getSubmitter()->getTeam()->getMembers() as $team_member) {
-                $team_members[] = $this->core->getQueries()->getUserById($team_member);
-            }
-        }
 
         $tables = [];
 
         //Late day calculation
         if ($gradeable->isTeamAssignment()) {
-            foreach ($graded_gradeable->getSubmitter()->getTeam()->getMembers() as $team_member) {
-                $team_member = $this->core->getQueries()->getUserById($team_member);
+            foreach ($graded_gradeable->getSubmitter()->getTeam()->getMemberUsers() as $team_member) {
                 $tables[] = $this->core->getOutput()->renderTemplate('LateDaysTable', 'showLateTable', $team_member->getId(), $gradeable->getId(), false);
             }
         } else {
             $tables[] = $this->core->getOutput()->renderTemplate('LateDaysTable', 'showLateTable', $graded_gradeable->getSubmitter()->getId(), $gradeable->getId(), false);
         }
 
+        if ($display_version_instance === null) {
+            $display_version = 0;
+            $submission_time = null;
+        } else {
+            $display_version = $display_version_instance->getVersion();
+            $submission_time = $display_version_instance->getSubmissionTime();
+        }
+
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/StudentInformationPanel.twig", [
-            "gradeable" => $gradeable,
+            "gradeable_id" => $gradeable->getId(),
+            "submission_time" => $submission_time,
             "submitter_id" => $graded_gradeable->getSubmitter()->getId(),
+            "team_assignment" => $gradeable->isTeamAssignment(),
+            "display_version" => $display_version,
+            "highest_version" => $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
+            "active_version" => $graded_gradeable->getAutoGradedGradeable()->getActiveVersion(),
             "on_change" => $onChange,
-            "team_members" => $team_members,
             "tables" => $tables,
         ]);
     }
