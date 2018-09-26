@@ -1,5 +1,5 @@
 <script>
-  var title = "Darrin 318"
+  var title = "Darrin 330"
   note_left = ""
   note_right = "seat 1 is on the right, when facing the screen"
 
@@ -21,10 +21,8 @@
 
   <script>
     var seats = {
-      // counting every chair (including ones that might be broken)
-	"left" : [ 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0],  // every row has a lefty desk
-      "middle" : [13,13,13,13,13,13,13,13,13,13,13,13,13],  // every row has a lefty desk
-      "right" :  [ 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0],  // these are all righty desks
+        // counting every chair (including ones that might be broken)
+	"middle" : [12,12,12,12,12,12,12,12,12,12,12,12,12],
     }
     var used = {};
 
@@ -72,17 +70,9 @@
     function render_arrow(section) {
       row = 14
 
-      if(section == "left") {
-        var center_x = BASE_ROW_CENTER + 320;
-        var width = 70;
-      }
-      else if(section == "middle") {
+      if(section == "middle") {
         var center_x = BASE_ROW_CENTER;
         var width = 450;
-      }
-      else if(section == "right") {
-        var center_x = BASE_ROW_CENTER - 320;
-        var width = 70;
       }
       else {
         console.log("Invalid section: " + section + " (skipping)");
@@ -119,17 +109,9 @@
         ctx.setLineDash([10, 10]);
       }
 
-      if(section == "left") {
-        var center_x = BASE_ROW_CENTER + 320;
-        var width = 70;
-      }
-      else if(section == "middle") {
+      if(section == "middle") {
         var center_x = BASE_ROW_CENTER;
         var width = 450;
-      }
-      else if(section == "right") {
-        var center_x = BASE_ROW_CENTER - 320;
-        var width = 70;
       }
       else {
         console.log("Invalid section: " + section + " (skipping)");
@@ -152,12 +134,7 @@
         ctx.fillText(row, point_avg[0], point_avg[1] - 10, 100);
       }
 
-      if(section == "left") {
-        ctx.font = "bold 7pt sans-serif";
-        ctx.fillStyle = "#333333";
-        ctx.fillText(row, center_x + width_half + 20, center_y, 100);
-      }
-      else if(section == "middle") {
+      if(section == "middle") {
         ctx.font = "bold 7pt sans-serif";
         ctx.fillStyle = "#333333";
         ctx.fillText(row, center_x - width_half - 30, center_y, 100);
@@ -165,11 +142,6 @@
         ctx.font = "bold 7pt sans-serif";
         ctx.fillStyle = "#333333";
         ctx.fillText(row, center_x + width_half + 30, center_y, 100);
-      }
-      else if(section == "right") {
-        ctx.font = "bold 7pt sans-serif";
-        ctx.fillStyle = "#333333";
-        ctx.fillText(row, center_x - width_half - 20, center_y, 100);
       }
       else {
         console.log("Invalid section: " + section + " (skipping)");
@@ -218,9 +190,7 @@
     }
 
     function render_row(row) {
-      render_section_row("left", row);
       render_section_row("middle", row);
-      render_section_row("right", row);
     }
 
     function render_section(section) {
@@ -313,11 +283,6 @@
     ctx.font = "italic 10pt sans-serif";
     ctx.fillText("Back of Room", BASE_ROW_CENTER, 430);
 
-    // Render arrows
-    // render_arrow("left");
-    // render_arrow("middle");
-    // render_arrow("right");
-
     // Render rows and points
     for(var row = 1; row <= BASE_NUM_ROWS; row++) {
       render_row(row);
@@ -326,19 +291,5 @@
     // Render zone labels
     render_zone_labels(config);
 
-    // Render to image
-    // document.getElementById("image").src = diagram.toDataURL();
-
-    // Print seats used
-    // var temp = [];
-    // for(var letter in used) {
-    //   temp.push(letter)
-    // }
-    // temp.sort();
-    // container = document.getElementById("seats")
-    // for(var index in temp) {
-    //   var letter = temp[index];
-    //   container.innerHTML += letter + " DARRIN 318 " + used[letter] + "\n";
-    // }
   </script>
 </div>
