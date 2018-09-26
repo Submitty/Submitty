@@ -21,7 +21,7 @@
     </p>
     <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
     <div>
-        <input type="file" name="upload" accept=".xlsx, .csv">
+        <input type="file" name="upload" accept=".xlsx, .csv" aria-label="Choose File">
     </div>
 {% endblock %}
 {% block form %}
