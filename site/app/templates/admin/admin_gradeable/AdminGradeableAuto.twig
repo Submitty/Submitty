@@ -1,14 +1,14 @@
 <div class="electronic_file">
     <b>Choose from the simple, provided autograding configurations --OR--<br>Specify the full path to the directory containing your custom autograding config.json file:</b><br>
     <fieldset>
-        <input type="radio" class="config_option ignore" name="config_option" value="defaults"/> Provided autograding configurations
-        <input type="radio" class="config_option ignore" name="config_option" value="uploaded"/> Custom uploaded autograding configurations
+        <input type="radio" class="config_option ignore" name="config_option" id="config_option_defaults" value="defaults"/> <label for="config_option_defaults">Provided autograding configurations</label>
+        <input type="radio" class="config_option ignore" name="config_option" id="config_option_uploaded" value="uploaded"/> <label for="config_option_uploaded">Custom uploaded autograding configurations</label>
         {% if repo_name != "" %}
-            <input type="radio" class="config_option ignore" name="config_option" value="repo"/> Use Private repository ({{ config_repo_name }})
+            <input type="radio" class="config_option ignore" name="config_option" id="config_option_repo" value="repo"/> <label for="config_option_repo">Use Private repository ({{ config_repo_name }})</label>
         {% endif %}
-        <input type="radio" class="config_option ignore" name="config_option" value="manual"/> Other full path
+        <input type="radio" class="config_option ignore" name="config_option" id="config_option_manual" value="manual"/> <label for="config_option_manual">Other full path</label>
         <div class="div_select_config" id="div_default_configs" style="display: {{ config_select_mode == 'defaults' ? 'block' : 'none' }}">
-            <select class="select_config_path ignore" id="select_default_config" style="width: 700px;">
+            <select class="select_config_path ignore" id="select_default_config" style="width: 700px;" aria-label="configuration selection">
                 <option value=""></option>
                 {% for path in default_config_paths %}
                     {% if config_select_mode == 'defaults' and path.1 == gradeable.getAutogradingConfigPath() %}
@@ -45,7 +45,7 @@
             </select>
         </div>
         <br />
-        <p>Current selection for full path to autograding configuration:</p>
+        <p><label for="input_provide_full_path">Current selection for full path to autograding configuration:</label></p>
         <input style='width: 83%' type='text' id='input_provide_full_path' name='autograding_config_path' value="{{ gradeable.getAutogradingConfigPath() }}" class="required" placeholder="(Required)"
                 {{ config_select_mode != 'manual' ? 'disabled' : '' }}/>
     </fieldset>
@@ -54,9 +54,9 @@
     Should students be able to view submissions?
     <fieldset>
         <input type="radio" id="yes_student_view" name="student_view" value="true"
-                {{ gradeable.isStudentView() ? 'checked' : '' }}/> Yes
+                {{ gradeable.isStudentView() ? 'checked' : '' }}/> <label for="yes_student_view">Yes</label>
         <input type="radio" id="no_student_view" name="student_view" value="false"
-                {{ not gradeable.isStudentView() ? 'checked' : '' }}/> No  &nbsp;&nbsp;&nbsp;
+                {{ not gradeable.isStudentView() ? 'checked' : '' }}/> <label for="no_student_view">No</label>  &nbsp;&nbsp;&nbsp;
         (Select 'No' during grading of a bulk upload pdf quiz/exam.)
 
         <div id="student_submit_download_view">
@@ -64,23 +64,23 @@
             <br />
             Should students be able to make submissions? (Select 'No' if this is a bulk upload pdf quiz/exam.)
             <input type="radio" id="yes_student_submit" name="student_submit" value="true"
-                    {{ gradeable.isStudentSubmit() ? 'checked' : '' }}/> Yes
+                    {{ gradeable.isStudentSubmit() ? 'checked' : '' }}/> <label for="yes_student_submit">Yes</label>
             <input type="radio" id="no_student_submit" name="student_submit" value="false"
-                    {{ not gradeable.isStudentSubmit() ? 'checked' : '' }}/> No
+                    {{ not gradeable.isStudentSubmit() ? 'checked' : '' }}/> <label for="no_student_submit">No</label>
             <br /> <br />
 
             Should students be able to download submitted files? (Select 'Yes' to allow download of uploaded pdf quiz/exam.)
             <input type="radio" id="yes_student_download" name="student_download" value="true"
-                    {{ gradeable.isStudentDownload() ? 'checked' : '' }}/> Yes
+                    {{ gradeable.isStudentDownload() ? 'checked' : '' }}/> <label for="yes_student_download">Yes</label>
             <input type="radio" id="no_student_download" name="student_download" value="false"
-                    {{ not gradeable.isStudentDownload() ? 'checked' : '' }}/> No
+                    {{ not gradeable.isStudentDownload() ? 'checked' : '' }}/> <label for="no_student_download">No</label>
             <br /> <br />
 
             Should students be able to view/download any version or just the active version ? (Select 'Active version only' if this is an uploaded pdf quiz/exam.)
             <input type="radio" id="yes_student_any_version" name="student_download_any_version" value="true"
-                    {{ gradeable.isStudentDownloadAnyVersion() ? 'checked' : '' }}/> Any version
+                    {{ gradeable.isStudentDownloadAnyVersion() ? 'checked' : '' }}/> <label for="yes_student_any_version">Any version</label>
             <input type="radio" id="no_student_any_version" name="student_download_any_version" value="false"
-                    {{ not gradeable.isStudentDownloadAnyVersion() ? 'checked' : '' }}/> Active version only
+                    {{ not gradeable.isStudentDownloadAnyVersion() ? 'checked' : '' }}/> <label for="no_student_any_version">Active version only</label>
 
         </div>
         <br />
@@ -95,7 +95,7 @@
         <pre>{{ build_script_output|raw }}</pre>
     {% endif %}
     <br />
-    
+
     <h3>CMake output:</h3>
     {% if cmake_output is null or cmake_output is empty %}
         <pre>There is currently no cmake output.</pre>
@@ -103,7 +103,7 @@
         <pre>{{ cmake_output|raw }}</pre>
     {% endif %}
     <br />
-    
+
     <h3>Make output:</h3>
     {% if make_output is null or make_output is empty %}
         <pre>There is currently no make output.</pre>
