@@ -218,11 +218,7 @@ class ElectronicGraderView extends AbstractView {
      * @param bool $show_edit_teams
      * @return string
      */
-    public function detailsPage(Gradeable $gradeable, array $rows, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams) {
-        // Default is viewing your sections
-        // Limited grader does not have "View All" option
-        // If nothing to grade, Instructor will see all sections
-        $view_all = isset($_GET['view']) && $_GET['view'] === 'all';
+    public function detailsPage(Gradeable $gradeable, array $rows, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $view_all) {
 
         $peer = false;
         if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
