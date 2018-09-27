@@ -1,66 +1,83 @@
 {
-"testcases": [
-		{
-			"test_name": "Test 1 README",
-			"points_awarded": 2,
-                        "autochecks": [
-                         {                               "description": "README.txt",
-                               "actual_file": "test01/README.txt"
-                         }
-                         ]
-		},
-		{
-			"test_name": "Test 2 Compilation",
-			"points_awarded": 3
-		},
-		{
-			"test_name": "Test 3 Regular char by char comparision",
-			"autochecks": [
-				{					"actual_file":"test03/output.txt",
-					"expected_file":"test_output/testassignment/inst_output.txt",
-					"difference_file":"test03/0_diff.json",
-					"description": "output.txt"
-				}
-			],
-			"points_awarded": 1
-		},
-		{
-			"test_name": "Test 4 Test of by word comparison",
-			"autochecks": [
-				{					"actual_file":"test04/output.txt",
-					"expected_file":"test_output/testassignment/inst_output.txt",
-					"difference_file":"test04/0_diff.json",
-					"description": "output.txt"
-				}
-			],
-			"points_awarded": 4
-		},
-		{
-			"test_name": "Test 5 Test of by line comparison",
-			"autochecks": [
-				{					"actual_file":"test05/output.txt",
-					"expected_file":"test_output/testassignment/inst_output.txt",
-					"difference_file":"test05/0_diff.json",
-					"description": "output.txt"
-				}
-			],
-			"points_awarded": 1
-		},
-		{
-			"test_name": "Test 6 Test of by line without whitespace comparison",
-			"autochecks": [
-				{					"actual_file":"test06/output.txt",
-					"expected_file":"test_output/testassignment/inst_output.txt",
-					"difference_file":"test06/0_diff.json",
-					"description": "output.txt"
-				}
-			],
-			"points_awarded": 4
-                 },       
-                 {
-                        "points_awarded": 0,       
-                        "test_name": "Test 7 Submission Limit",
-                        "view_testcase": false
- 		 }
-	]
+    "testcases": [
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test01/README.txt",
+                    "description": "README.txt"
+                }
+            ],
+            "points_awarded": 2,
+            "test_name": "Test 1 README"
+        },
+        {
+            "points_awarded": 3,
+            "test_name": "Test 2 Compilation"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test03/output.txt",
+                    "description": "output.txt",
+                    "difference_file": "test03/0_diff.json",
+                    "expected_file": "test_output/testassignment/inst_output.txt"
+                }
+            ],
+            "points_awarded": 1,
+            "test_name": "Test 3 Regular char by char comparision"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test04/output.txt",
+                    "description": "output.txt",
+                    "difference_file": "test04/0_diff.json",
+                    "expected_file": "test_output/testassignment/inst_output.txt"
+                }
+            ],
+            "points_awarded": 4,
+            "test_name": "Test 4 Test of by word comparison"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test05/output.txt",
+                    "description": "output.txt",
+                    "difference_file": "test05/0_diff.json",
+                    "expected_file": "test_output/testassignment/inst_output.txt"
+                }
+            ],
+            "points_awarded": 1,
+            "test_name": "Test 5 Test of by line comparison"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test06/output.txt",
+                    "description": "output.txt",
+                    "difference_file": "test06/0_diff.json",
+                    "expected_file": "test_output/testassignment/inst_output.txt"
+                }
+            ],
+            "points_awarded": 4,
+            "test_name": "Test 6 Test of by line without whitespace comparison"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test07/output.txt",
+                    "description": "output.txt",
+                    "difference_file": "test07/0_diff.json",
+                    "expected_file": "test_output/testassignment/inst_output.txt"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 7 Regular char by char comparision NO PARTIAL CREDIT"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Test 8 Submission Limit",
+            "view_testcase": false
+        }
+    ]
 }
