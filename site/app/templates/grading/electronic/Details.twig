@@ -67,7 +67,7 @@
                 {# Student list #}
                 <tbody>
                     {% for info in section.rows %}
-                        {{ self.render_student(self, section, info.gradeable, loop.index, info, columns) }}
+                        {{ self.render_student(self, section, info.graded_gradeable, loop.index, info, columns) }}
                     {% endfor %}
                 </tbody>
                 {# /Student list #}
@@ -106,7 +106,7 @@
     </table>
 </div>
 
-{% macro render_student(self, section, gradeable, index, info, columns) %}
+{% macro render_student(self, section, graded_gradeable, index, info, columns) %}
     <tr
         {% if student.accessGrading() %}
             style='background: #7bd0f7;'
@@ -118,41 +118,41 @@
                 the current column and that will give us the table cell.
             #}
             {% if column.function == "active_version" %}
-                {{ self.render_column_active_version(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_active_version(self, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "autograding" %}
-                {{ self.render_column_autograding(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_autograding(self, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "autograding_peer" %}
-                {{ self.render_column_autograding_peer(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_autograding_peer(self, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "graded_questions" %}
-                {{ self.render_column_graded_questions(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_graded_questions(self, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "grading" %}
-                {{ self.render_column_grading(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_grading(self, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "grading_peer" %}
-                {{ self.render_column_grading_peer(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_grading_peer(self, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "index" %}
-                {{ self.render_column_index(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_index(self, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "section" %}
-                {{ self.render_column_section(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_section(self, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "team_edit" %}
-                {{ self.render_column_team_edit(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_team_edit(self, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "team_id" %}
-                {{ self.render_column_team_id(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_team_id(self, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "team_members" %}
-                {{ self.render_column_team_members(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_team_members(self, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "total" %}
-                {{ self.render_column_total(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_total(self, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "total_peer" %}
-                {{ self.render_column_total_peer(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_total_peer(self, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "user_first" %}
-                {{ self.render_column_user_first(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_user_first(self, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "user_id" %}
-                {{ self.render_column_user_id(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_user_id(self, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "user_id_anon" %}
-                {{ self.render_column_user_id_anon(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_user_id_anon(self, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "user_last" %}
-                {{ self.render_column_user_last(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_user_last(self, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "viewed_grade" %}
-                {{ self.render_column_viewed_grade(self, section, gradeable, index, info, column) }}
+                {{ self.render_column_viewed_grade(self, section, graded_gradeable, index, info, column) }}
             {% endif %}
         {% endfor %}
     </tr>
@@ -161,7 +161,7 @@
 {# Column functions #}
 
 {# Active Version #}
-{% macro render_column_active_version(self, section, gradeable, index, info, column) %}
+{% macro render_column_active_version(self, section, graded_gradeable, index, info, column) %}
     {% if graded_gradeable.getAutoGradedGradeable().getHighestVersion() == 0 %}
         <td></td>
     {% elseif graded_gradeable.getAutoGradedGradeable().getActiveVersion() == graded_gradeable.getAutoGradedGradeable().getHighestVersion() %}
@@ -172,10 +172,10 @@
 {% endmacro %}
 
 {# Autograding #}
-{% macro render_column_autograding(self, section, gradeable, index, info, column) %}
+{% macro render_column_autograding(self, section, graded_gradeable, index, info, column) %}
     <td>
         {% if graded_gradeable.getAutoGradedGradeable().getHighestVersion() != 0 %}
-            {{ gradeable.getGradedAutograderPoints() }} / {{ gradeable.getTotalAutograderNonExtraCreditPoints() }}
+            {{ graded_gradeable.getAutoGradedGradeable().getTotalPoints() }} / {{ graded_gradeable.getGradeable().getAutogradingConfig().getTotalNonExtraCredit() }}
         {% endif %}
     </td>
 {% endmacro %}
@@ -184,13 +184,13 @@
 {% macro render_column_autograding_peer(self, section, gradeable, index, info, column) %}
     <td>
         {% if graded_gradeable.getAutoGradedGradeable().getHighestVersion() != 0 %}
-            {{ gradeable.getGradedNonHiddenPoints() }} / {{ gradeable.getTotalNonHiddenNonExtraCreditPoints() }}
+            {{ graded_gradeable.getAutoGradedGradeable().getActiveVersionInstance().getNonHiddenPoints() }} / {{ graded_gradeable.getGradeable.getAutogradingConfig().getTotalNonHiddenNonExtraCredit() }}
         {% endif %}
     </td>
 {% endmacro %}
 
 {# Graded Questions #}
-{% macro render_column_graded_questions(self, section, gradeable, index, info, column) %}
+{% macro render_column_graded_questions(self, section, graded_gradeable, index, info, column) %}
     <td class="td-graded-questions">
         {%- for group in info.graded_groups -%}
             {%- if loop.index0 != 0 %}&nbsp;{% endif -%}
@@ -200,14 +200,16 @@
 {% endmacro %}
 
 {# Grading Button #}
-{% macro render_column_grading(self, section, gradeable, index, info, column) %}
-    {% if not gradeable.hasSubmitted() %}
+{% macro render_column_grading(self, section, graded_gradeable, index, info, column) %}
+    {% if not graded_gradeable.getAutoGradedGradeable().hasSubmission() %}
         {% set contents = "No Submission" %}
         {% set btn_class = "btn-default" %}
-    {% elseif gradeable.getActiveVersion() == 0 %}
+    {% elseif graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0 %}
         {% set contents = "Cancelled Submission" %}
         {% set btn_class = "btn-default" %}
-    {% elseif gradeable.beenTAgraded() %}
+    {% elseif graded_gradeable.isTaGradingComplete() %}
+
+        {# TODO: ENDED HERE #}
         {% if gradeable.validateVersions() %}
             {% if gradeable.getRegradeStatus() == -1 %}
                 {% set contents = "Regrade Requested" %}
