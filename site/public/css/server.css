@@ -832,7 +832,6 @@ table tr.table-header {
     background-color:white;
     overflow-y: auto;
     overflow-x: hidden;
-    width: 100%;
 }
 
 .post_box a {
