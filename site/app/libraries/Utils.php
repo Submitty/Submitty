@@ -232,7 +232,7 @@ class Utils {
 
         if ($result > 1.0 && $clamp === true) {
             return 1.0;
-        } else if ($result < 0.0) {
+        } else if ($result < 0.0 && $clamp === true) {
             return 0.0;
         }
         return $result;

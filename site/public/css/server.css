@@ -830,7 +830,8 @@ table tr.table-header {
     word-wrap: break-word;
     border-radius: 3px;
     background-color:white;
-    overflow: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .post_box a {
