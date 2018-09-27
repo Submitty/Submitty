@@ -15,7 +15,7 @@
         </div>
     {% endif %}
 
-    <h1>Grade Details for {{ gradeable.getName() }}</h1>
+    <h1>Grade Details for {{ gradeable.getTitle() }}</h1>
 
     {# Import+Export teams buttons #}
     {% if show_import_teams_button %}
@@ -162,19 +162,19 @@
 
 {# Active Version #}
 {% macro render_column_active_version(self, section, gradeable, index, info, column) %}
-    {% if gradeable.getHighestVersion() == 0 %}
+    {% if graded_gradeable.getAutoGradedGradeable().getHighestVersion() == 0 %}
         <td></td>
-    {% elseif gradeable.getActiveVersion() == gradeable.getHighestVersion() %}
-        <td>{{ gradeable.getActiveVersion() }}</td>
+    {% elseif graded_gradeable.getAutoGradedGradeable().getActiveVersion() == graded_gradeable.getAutoGradedGradeable().getHighestVersion() %}
+        <td>{{ graded_gradeable.getAutoGradedGradeable().getActiveVersion() }}</td>
     {% else %}
-        <td>{{ gradeable.getActiveVersion() }} / {{ gradeable.getHighestVersion() }}</td>
+        <td>{{ graded_gradeable.getAutoGradedGradeable().getActiveVersion() }} / {{ graded_gradeable.getAutoGradedGradeable().getHighestVersion() }}</td>
     {% endif %}
 {% endmacro %}
 
 {# Autograding #}
 {% macro render_column_autograding(self, section, gradeable, index, info, column) %}
     <td>
-        {% if gradeable.getHighestVersion() != 0 %}
+        {% if graded_gradeable.getAutoGradedGradeable().getHighestVersion() != 0 %}
             {{ gradeable.getGradedAutograderPoints() }} / {{ gradeable.getTotalAutograderNonExtraCreditPoints() }}
         {% endif %}
     </td>
@@ -183,7 +183,7 @@
 {# Autograding (peer) #}
 {% macro render_column_autograding_peer(self, section, gradeable, index, info, column) %}
     <td>
-        {% if gradeable.getHighestVersion() != 0 %}
+        {% if graded_gradeable.getAutoGradedGradeable().getHighestVersion() != 0 %}
             {{ gradeable.getGradedNonHiddenPoints() }} / {{ gradeable.getTotalNonHiddenNonExtraCreditPoints() }}
         {% endif %}
     </td>

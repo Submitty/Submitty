@@ -7,6 +7,7 @@ use app\models\AbstractModel;
 use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
+use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Mark;
 use app\models\gradeable\TaGradedGradeable;
 use app\models\GradeableAutocheck;
@@ -531,6 +532,10 @@ class ElectronicGraderController extends GradingController {
      */
     public function showDetails() {
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+        // Default is viewing your sections
+        // Limited grader does not have "View All" option
+        // If nothing to grade, Instructor will see all sections
+        $view_all = isset($_GET['view']) && $_GET['view'] === 'all';
 
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
@@ -602,54 +607,55 @@ class ElectronicGraderController extends GradingController {
             }
         }
 
-        $rows = $this->core->getQueries()->getGradeables($gradeable_id, $student_ids, $section_key);
+        $graded_gradeables = $this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids, null, $section_key);
         if ($gradeable->isTeamAssignment()) {
             // Rearrange gradeables arrray into form (sec 1 teams, sec 1 individuals, sec 2 teams, sec 2 individuals, etc...)
             $sections = array();
             $individual_rows = array();
             $team_rows = array();
-            foreach($rows as $row) {
+            foreach($graded_gradeables as $graded_gradeable) {
+                /** @var GradedGradeable $graded_gradeable */
                 if ($gradeable->isGradeByRegistration()) {
-                    $section = $row->getTeam() === null ? strval($row->getUser()->getRegistrationSection()) : strval($row->getTeam()->getRegistrationSection());
+                    $section = $graded_gradeable->getSubmitter()->getRegistrationSection();
                 }
                 else {
-                    $section = $row->getTeam() === null ? strval($row->getUser()->getRotatingSection()) : strval($row->getTeam()->getRotatingSection());
+                    $section = $graded_gradeable->getSubmitter()->getRotatingSection();
                 }
 
                 if ($section != null && !in_array($section, $sections)) {
                     $sections[] = $section;
                 }
 
-                if ($row->getTeam() === null) {
+                if (!$gradeable->isTeamAssignment()) {
                     if (!isset($individual_rows[$section])) {
                         $individual_rows[$section] = array();
                     }
-                    $individual_rows[$section][] = $row;
+                    $individual_rows[$section][] = $graded_gradeable;
                 }
                 else {
                     if (!isset($team_rows[$section])) {
                         $team_rows[$section] = array();
                     }
-                    $team_rows[$section][] = $row;
+                    $team_rows[$section][] = $graded_gradeable;
                 }
             }
 
             asort($sections);
-            $rows = array();
+            $sorted_graded_gradeables = array();
             foreach($sections as $section) {
                 if (isset($team_rows[$section])) {
-                    $rows = array_merge($rows, $team_rows[$section]);
+                    $sorted_graded_gradeables = array_merge($sorted_graded_gradeables, $team_rows[$section]);
                 }
                 if (isset($individual_rows[$section])) {
-                    $rows = array_merge($rows, $individual_rows[$section]);
+                    $sorted_graded_gradeables = array_merge($sorted_graded_gradeables, $individual_rows[$section]);
                 }
             }
             // Put null section at end of array
             if (isset($team_rows[""])) {
-                $rows = array_merge($rows, $team_rows[""]);
+                $sorted_graded_gradeables = array_merge($sorted_graded_gradeables, $team_rows[""]);
             }
             if (isset($individual_rows[""])) {
-                $rows = array_merge($rows, $individual_rows[""]);
+                $sorted_graded_gradeables = array_merge($sorted_graded_gradeables, $individual_rows[""]);
             }
         }
 
@@ -666,7 +672,7 @@ class ElectronicGraderController extends GradingController {
         $show_import_teams_button = $show_edit_teams && (count($all_teams) > count($empty_teams));
         $show_export_teams_button = $show_edit_teams && (count($all_teams) == count($empty_teams));
 
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $rows, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $sorted_graded_gradeables, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $view_all);
 
         if ($show_edit_teams) {
             $all_reg_sections = $this->core->getQueries()->getRegistrationSections();
