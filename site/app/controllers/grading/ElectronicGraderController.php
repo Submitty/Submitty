@@ -1099,16 +1099,6 @@ class ElectronicGraderController extends GradingController {
             }
         }
 
-        if ($team) {
-            if ($teams_assoc[$submitter_id] === NULL) {
-                $gradeable = NULL;
-            } else {
-                $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $teams_assoc[$submitter_id]->getLeaderId());
-            }
-        } else {
-            $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $submitter_id);
-        }
-
         if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable])) {
             $this->core->addErrorMessage("ERROR: You do not have access to grade the requested student.");
             $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
@@ -1117,10 +1107,11 @@ class ElectronicGraderController extends GradingController {
         $show_verify_all = false;
         //check if verify all button should be shown or not
         foreach ($gradeable->getComponents() as $component) {
-            if (!$component->getGrader()) {
+            $graded_component = $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getUser());
+            if ($graded_component === null) {
                 continue;
             }
-            if ($component->getGrader()->getId() !== $this->core->getUser()->getId()) {
+            if ($graded_component->getGrader()->getId() !== $this->core->getUser()->getId()) {
                 $show_verify_all = true;
                 break;
             }
@@ -1132,13 +1123,23 @@ class ElectronicGraderController extends GradingController {
 
         // Get the new model instance
         $display_version = intval($_REQUEST['gradeable_version'] ?? '0');
-        if($display_version === 0) {
+        if($display_version <= 0) {
             $display_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         }
 
+        // TODO: delete this once late days are using new model
+        $old_gradeable = null;
+        if($graded_gradeable->getSubmitter()->isTeam()) {
+            $old_gradeable = $this->core->getQueries()->getGradeable($gradeable, $graded_gradeable->getSubmitter()->getTeam()->getLeaderId());
+        } else {
+            $old_gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $submitter_id);
+        }
+        $late_status = $old_gradeable->calculateLateStatus();
+        // TODO: End region
+
         $this->core->getOutput()->addInternalCss('ta-grading.css');
         $show_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $gradeable]);
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $prev_id, $next_id, $not_in_my_section, $show_hidden, $can_verify, $show_verify_all, $show_silent_edit);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $old_gradeable, $gradeable, $graded_gradeable, $display_version, $progress, $prev_id, $next_id, $not_in_my_section, $show_hidden, $can_verify, $show_verify_all, $show_silent_edit, $late_status);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupMarkConflicts');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupSettings');
