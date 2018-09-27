@@ -13,10 +13,10 @@
         Do not use a header row.<br>
     </p>
     <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
-    Move students missing from the classlist to NULL section?<input type="checkbox" name="move_missing" /><br>
+    <label for="move_missing">Move students missing from the classlist to NULL section?</label><input type="checkbox" name="move_missing" id="move_missing" /><br>
     <br />
     <div>
-        <input type="file" name="upload" accept=".xlsx, .csv">
+        <input type="file" name="upload" accept=".xlsx, .csv" aria-label="Choose File">
     </div>
 {% endblock %}
 {% block form %}
