@@ -278,6 +278,7 @@ void ValidateATestCase(nlohmann::json config_json, int which_testcase,
     TestCase my_testcase(config_json,which_testcase,container_name);
     std::string title = "Test " + std::to_string(which_testcase+1) + " " + my_testcase.getTitle();
     int possible_points = my_testcase.getPoints();
+    bool allow_partial_credit = my_testcase.allowPartialCredit();
     std::cout << title << " - points: " << possible_points << std::endl;
     std::string testcase_message = "";
     nlohmann::json autocheck_js;
@@ -320,6 +321,10 @@ void ValidateATestCase(nlohmann::json config_json, int which_testcase,
       assert (my_score <= 1.00002);
       my_score = std::max(0.0,std::min(1.0,my_score));
       std::cout << "[ FINISHED ] my_score = " << my_score << std::endl;
+      if (!allow_partial_credit && my_score < 0.99999) {
+        std::cout << "PARTIAL CREDIT NOT ALLOWED FOR THIS TEST CASE" << my_score << " -> 0.0" << std::endl;
+        my_score = 0;
+      }
       testcase_pts = my_score * possible_points;
       std::cout << "thing " << testcase_pts << " " << my_score * possible_points << std::endl;
       std::cout << "Grade: " << testcase_pts << std::endl;
