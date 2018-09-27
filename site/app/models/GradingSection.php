@@ -41,7 +41,7 @@ class GradingSection extends AbstractModel {
     public function __construct(Core $core, bool $registration, $name, $graders, $users, $teams) {
         parent::__construct($core);
         $this->registration = $registration;
-        $this->name = $name;
+        $this->name = $name !== null ? (string)$name : null;
         $this->graders = $graders;
         $this->users = $users;
         $this->teams = $teams;

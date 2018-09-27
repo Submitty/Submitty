@@ -5,28 +5,28 @@
     <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
     <input type="hidden" name="edit_user" value="false" />
     <div style="display: inline-block">
-        User ID:<br />
-        <input class="readonly" type="text" name="user_id" readonly="readonly" />
+        <label for="user_id">User ID:</label><br />
+        <input class="readonly" type="text" name="user_id" id="user_id" readonly="readonly" />
     </div>
     <div style="display: inline-block">
-        First Name:<br />
-        <input type="text" name="user_firstname" />
+        <label for="user_firstname">First Name:</label><br />
+        <input type="text" name="user_firstname" id="user_firstname" />
     </div>
     <div style="display: inline-block">
-        Preferred First Name:<br />
-        <input type="text" name="user_preferred_firstname" />
+        <label for="user_preferred_firstname">Preferred First Name:</label><br />
+        <input type="text" name="user_preferred_firstname" id="user_preferred_firstname" />
     </div>
     <div style="display: inline-block">
-        Last Name:<br />
-        <input type="text" name="user_lastname" />
+        <label for="user_lastname">Last Name:</label><br />
+        <input type="text" name="user_lastname" id="user_lastname" />
     </div>
     <div style="display: inline-block">
-        Email:<br />
-        <input type="text" name="user_email" />
+        <label for="user_email">Email:</label><br />
+        <input type="text" name="user_email" id="user_email" />
     </div>
     <div style="display: inline-block">
-        Registration Section:<br />
-        <select name="registered_section">
+        <label for="registered_section">Registration Section:</label><br />
+        <select name="registered_section" id="registered_section">
             <option value="null">Not Registered</option>
             {% for section in reg_sections %}
                 <option value='{{ section.sections_registration_id }}'>Section {{ section.sections_registration_id }}</option>
@@ -37,8 +37,8 @@
         Warning: Students with no registration section cannot login to the course
     </p>
     <div style="display: inline-block">
-        Group:<br />
-        <select name="user_group">
+        <label for="user_group">Group:</label><br />
+        <select name="user_group" id="user_group">
             <option value="1">Instructor</option>
             <option value="2">Full Access Grader (Grad TA)</option>
             <option value="3">Limited Access Grader (Mentor)</option>
@@ -46,8 +46,8 @@
         </select>
     </div>
     <div style="display: inline-block">
-        Rotating Section:<br />
-        <select name="rotating_section">
+        <label for="rotating_section">Rotating Section:</label><br />
+        <select name="rotating_section" id="rotating_section">
             <option value="null">No Section</option>
             {% for section in rot_sections %}
                 <option value='{{ section.sections_rotating_id }}'>Section {{ section.sections_rotating_id }}</option>
