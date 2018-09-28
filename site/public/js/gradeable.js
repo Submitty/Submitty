@@ -191,7 +191,7 @@ function renderGradingComponentHeader(grader_id, component, graded_component, gr
         resolve(Twig.twig({ref: "GradingComponentHeader"}).render({
             'component': component,
             'graded_component': graded_component,
-            'show_verify_grader': canVerifyGraders && graded_component !== undefined && grader_id !== graded_component.grader_id,
+            'show_verify_grader': canVerifyGraders && showVerifyComponent(graded_component, grader_id),
             'show_mark_list': showMarkList,
             'grading_disabled': grading_disabled,
             'decimal_precision': DECIMAL_PRECISION,
