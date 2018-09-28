@@ -108,10 +108,11 @@ function prepGradedComponent(component, graded_component) {
  * @param {Object} graded_gradeable
  * @param {boolean} grading_disabled
  * @param {boolean} canVerifyGraders
+ * @param {int} displayVersion
  * @returns {Promise<string>} the html for the graded gradeable
  */
 
-function renderGradingGradeable(grader_id, gradeable, graded_gradeable, grading_disabled, canVerifyGraders) {
+function renderGradingGradeable(grader_id, gradeable, graded_gradeable, grading_disabled, canVerifyGraders, displayVersion) {
     if (graded_gradeable.graded_components === undefined) {
         graded_gradeable.graded_components = {};
     }
@@ -131,6 +132,7 @@ function renderGradingGradeable(grader_id, gradeable, graded_gradeable, grading_
         'decimal_precision': DECIMAL_PRECISION,
         'can_verify_graders': canVerifyGraders,
         'grader_id': grader_id,
+        'display_version': displayVersion
     });
 }
 
@@ -144,9 +146,10 @@ function renderGradingGradeable(grader_id, gradeable, graded_gradeable, grading_
  * @param {number} precision
  * @param {boolean} editable True to render with edit mode enabled
  * @param {boolean} showMarkList True to display the mark list unhidden
+ * @param {boolean} componentVersionConflict
  * @returns {Promise<string>} the html for the graded component
  */
-function renderGradingComponent(grader_id, component, graded_component, grading_disabled, canVerifyGraders, precision, editable, showMarkList) {
+function renderGradingComponent(grader_id, component, graded_component, grading_disabled, canVerifyGraders, precision, editable, showMarkList, componentVersionConflict) {
     return new Promise(function (resolve, reject) {
         // Make sure we prep the graded component before rendering
         graded_component = prepGradedComponent(component, graded_component);
@@ -162,6 +165,7 @@ function renderGradingComponent(grader_id, component, graded_component, grading_
             'decimal_precision': DECIMAL_PRECISION,
             'can_verify_graders': canVerifyGraders,
             'grader_id': grader_id,
+            'component_version_conflict': componentVersionConflict,
         }));
     });
 }
@@ -175,9 +179,10 @@ function renderGradingComponent(grader_id, component, graded_component, grading_
  * @param {boolean} grading_disabled
  * @param {boolean} canVerifyGraders
  * @param {boolean} showMarkList True to style the header like the component is open
+ * @param {boolean} componentVersionConflict
  * @returns {Promise<string>} the html for the graded component
  */
-function renderGradingComponentHeader(grader_id, component, graded_component, grading_disabled, canVerifyGraders, showMarkList) {
+function renderGradingComponentHeader(grader_id, component, graded_component, grading_disabled, canVerifyGraders, showMarkList, componentVersionConflict) {
     return new Promise(function (resolve, reject) {
         // Make sure we prep the graded component before rendering
         graded_component = prepGradedComponent(component, graded_component);
@@ -190,6 +195,7 @@ function renderGradingComponentHeader(grader_id, component, graded_component, gr
             'show_mark_list': showMarkList,
             'grading_disabled': grading_disabled,
             'decimal_precision': DECIMAL_PRECISION,
+            'component_version_conflict' : componentVersionConflict,
         }));
     });
 }
