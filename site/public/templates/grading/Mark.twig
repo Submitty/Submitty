@@ -52,12 +52,8 @@ Required Input:
     </span>
     {% if show_publish %}
         {% if not first_mark %}
-            <span class="col-no-gutters mark-publish">
+            <span class="col-no-gutters mark-publish-container">
                 Show mark to all students: <input type="checkbox" {{ mark.publish ? 'checked' : '' }} onchange="onMarkPublishChange(this)"/>
-            </span>
-        {% else %}
-            <span class="mark-publish">
-                <input type="checkbox" {{ mark.publish ? 'checked' : '' }} hidden/>
             </span>
         {% endif %}
     {% endif %}
