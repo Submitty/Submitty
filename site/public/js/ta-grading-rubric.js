@@ -1649,6 +1649,15 @@ function updateVerifyAllButton() {
     }
 }
 
+/**
+ * Gets if the provided graded component is in conflict with the display version
+ * @param {Object} graded_component
+ * @returns {boolean}
+ */
+function getComponentVersionConflict(graded_component) {
+    return graded_component.graded_version !== getDisplayVersion();
+}
+
 
 /**
  * DOM Callback methods
@@ -2091,7 +2100,8 @@ function reloadGradingRubric(gradeable_id, anon_id) {
             alert('Could not fetch graded gradeable: ' + err.message);
         })
         .then(function (graded_gradeable) {
-            return renderGradingGradeable(getGraderId(), gradeable_tmp, graded_gradeable, isGradingDisabled(), canVerifyGraders());
+            return renderGradingGradeable(getGraderId(), gradeable_tmp, graded_gradeable,
+                isGradingDisabled(), canVerifyGraders(), getDisplayVersion());
         })
         .then(function (elements) {
             setRubricDOMElements(elements);
@@ -2660,10 +2670,8 @@ function saveMarkList(component_id) {
  * @return {boolean}
  */
 function marksEqual(mark0, mark1) {
-    // publish settings only applies in instructor edit mode.  If a non-instructor
-    //  edits a mark, it doesn't overwrite the publish setting anyway.
     return mark0.points === mark1.points && mark0.title === mark1.title
-        && (!isInstructorEditEnabled() || mark0.publish === mark1.publish);
+        && mark0.publish === mark1.publish;
 }
 
 /**
@@ -2965,7 +2973,7 @@ function injectInstructorEditComponentHeader(component, showMarkList) {
  * @return {Promise}
  */
 function injectGradingComponent(component, graded_component, editable, showMarkList) {
-    return renderGradingComponent(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), getPointPrecision(), editable, showMarkList)
+    return renderGradingComponent(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), getPointPrecision(), editable, showMarkList, getComponentVersionConflict(graded_component))
         .then(function (elements) {
             setComponentContents(component.id, elements);
         })
@@ -2982,7 +2990,7 @@ function injectGradingComponent(component, graded_component, editable, showMarkL
  * @return {Promise}
  */
 function injectGradingComponentHeader(component, graded_component, showMarkList) {
-    return renderGradingComponentHeader(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), showMarkList)
+    return renderGradingComponentHeader(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), showMarkList, getComponentVersionConflict(graded_component))
         .then(function (elements) {
             setComponentHeaderContents(component.id, elements);
         })

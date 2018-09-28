@@ -43,6 +43,7 @@ Required inputs:
 {% endblock %}
 
 {% block marks_block %}
+    {% set show_publish = edit_marks_enabled %}
     {% for mark in component.marks %}
         {% set first_mark = loop.index0 == 0 %}
         {% set is_checked = mark.id in graded_component.mark_ids %}
