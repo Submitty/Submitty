@@ -1290,12 +1290,16 @@ function getGradedComponentFromDOM(component_id) {
     }
 
     let dataDOMElement = domElement.find('.graded-component-data');
+    let gradedVersion = dataDOMElement.attr('data-graded_version');
+    if (gradedVersion === '') {
+        gradedVersion = getDisplayVersion();
+    }
     return {
         score: score,
         comment: comment,
         custom_mark_selected: customMarkSelected,
         mark_ids: mark_ids,
-        graded_version: parseInt(dataDOMElement.attr('data-graded_version')),
+        graded_version: parseInt(gradedVersion),
         grade_time: dataDOMElement.attr('data-grade_time'),
         grader_id: dataDOMElement.attr('data-grader_id'),
         verifier_id: dataDOMElement.attr('data-verifier_id')
@@ -1655,7 +1659,7 @@ function updateVerifyAllButton() {
  * @returns {boolean}
  */
 function getComponentVersionConflict(graded_component) {
-    return graded_component.graded_version !== getDisplayVersion();
+    return graded_component !== undefined && graded_component.graded_version !== getDisplayVersion();
 }
 
 
