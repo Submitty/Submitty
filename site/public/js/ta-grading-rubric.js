@@ -2652,10 +2652,8 @@ function saveMarkList(component_id) {
  * @return {boolean}
  */
 function marksEqual(mark0, mark1) {
-    // publish settings only applies in instructor edit mode.  If a non-instructor
-    //  edits a mark, it doesn't overwrite the publish setting anyway.
     return mark0.points === mark1.points && mark0.title === mark1.title
-        && (!isInstructorEditEnabled() || mark0.publish === mark1.publish);
+        && mark0.publish === mark1.publish;
 }
 
 /**
