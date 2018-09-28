@@ -1972,6 +1972,14 @@ function onComponentPageNumberChange(me) {
 }
 
 /**
+ * Callback for changing the 'publish' setting of a mark
+ * @param me DOM element of the check box
+ */
+function onMarkPublishChange(me) {
+    getMarkJQuery(getMarkIdFromDOMElement(me)).toggleClass('mark-publish');
+}
+
+/**
  * Put all of the primary logic of the TA grading rubric here
  *
  */
