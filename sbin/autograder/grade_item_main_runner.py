@@ -144,6 +144,7 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                     #Now that all dockers are running, wait on their return code for success or failure. If any fail, we count it
                     #   as a total failure.
                     for name, process in processes.items():
+                        print("{0}: I'm going to wait for {1} to finish up.".format(which_untrusted, name))
                         process.wait()
                         rc = process.returncode
                         runner_success = rc if first_testcase else max(runner_success, rc)
@@ -323,7 +324,7 @@ def launch_container(container_name, container_image, mounted_directory,job_id,i
                                                                   grading_began,queue_obj,submission_string,testcase_num,name):
   #TODO error handling.
   untrusted_uid = str(getpwnam(which_untrusted).pw_uid)
-  this_container = subprocess.check_output(['docker', 'create','-i', '-u', untrusted_uid, '--network', 'none',
+  this_container = subprocess.check_output(['docker', 'create', '-i', '-u', untrusted_uid, '--network', 'none',
                                            '-v', mounted_directory + ':' + mounted_directory,
                                            '-w', mounted_directory,
                                            '--name', container_name,
