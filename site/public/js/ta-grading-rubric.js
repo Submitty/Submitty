@@ -816,6 +816,16 @@ function ajaxVerifyAllComponents(gradeable_id, anon_id) {
 }
 
 /**
+ * Gets if the 'verify' button should show up for a component
+ * @param {Object} graded_component
+ * @param {string} grader_id
+ * @returns {boolean}
+ */
+function showVerifyComponent(graded_component, grader_id) {
+    return graded_component !== undefined && graded_component.grader_id !== '' && grader_id !== graded_component.grader_id
+}
+
+/**
  * Put all DOM accessing methods here to abstract the DOM from the other function
  *  of the interface
  */
@@ -1290,12 +1300,16 @@ function getGradedComponentFromDOM(component_id) {
     }
 
     let dataDOMElement = domElement.find('.graded-component-data');
+    let gradedVersion = dataDOMElement.attr('data-graded_version');
+    if (gradedVersion === '') {
+        gradedVersion = getDisplayVersion();
+    }
     return {
         score: score,
         comment: comment,
         custom_mark_selected: customMarkSelected,
         mark_ids: mark_ids,
-        graded_version: parseInt(dataDOMElement.attr('data-graded_version')),
+        graded_version: parseInt(gradedVersion),
         grade_time: dataDOMElement.attr('data-grade_time'),
         grader_id: dataDOMElement.attr('data-grader_id'),
         verifier_id: dataDOMElement.attr('data-verifier_id')
@@ -1655,7 +1669,7 @@ function updateVerifyAllButton() {
  * @returns {boolean}
  */
 function getComponentVersionConflict(graded_component) {
-    return graded_component.graded_version !== getDisplayVersion();
+    return graded_component !== undefined && graded_component.graded_version !== getDisplayVersion();
 }
 
 
