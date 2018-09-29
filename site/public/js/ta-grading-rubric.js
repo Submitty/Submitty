@@ -816,6 +816,16 @@ function ajaxVerifyAllComponents(gradeable_id, anon_id) {
 }
 
 /**
+ * Gets if the 'verify' button should show up for a component
+ * @param {Object} graded_component
+ * @param {string} grader_id
+ * @returns {boolean}
+ */
+function showVerifyComponent(graded_component, grader_id) {
+    return graded_component !== undefined && graded_component.grader_id !== '' && grader_id !== graded_component.grader_id
+}
+
+/**
  * Put all DOM accessing methods here to abstract the DOM from the other function
  *  of the interface
  */
