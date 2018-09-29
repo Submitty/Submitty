@@ -16,10 +16,10 @@ def parse_args():
     """
     parser = argparse.ArgumentParser(description="Reads in left right handedness from the submission "
                                                  "directory, and then writes it to the given "
-                                                 "remote file.")
+                                                 "output file.")
     parser.add_argument("submission_directory", type=str, help="Directory of submissions that "
                         "contain a 'textbox_0.txt' file that references left right handedness")
-    parser.add_argument("remote_id_file", type=str)
+    parser.add_argument("output_file", type=str)
     return parser.parse_args()
 
 
@@ -31,14 +31,14 @@ def main():
 
     if not os.path.isdir(args.submission_directory):
         raise SystemExit("Specified submission_directory does not exist or is not a directory")
-    if not os.path.isfile(args.remote_id_file):
-        raise SystemExit("Specified remote_id_file does not exist or is not a file")
+    #if not os.path.isfile(args.output_file):
+    #    raise SystemExit("Specified output_file does not exist or is not a file")
     indir = args.submission_directory
-    outfile = args.remote_id_file
+    outfile = args.output_file
 
     ############################
     # OPEN THE OUTPUT FILE
-    with open(outfile, 'w') as remote_ids:
+    with open(outfile, 'w') as out_left_right:
         # LOOP OVER ALL OF THE USERS
         for username in os.listdir(indir):
             userdir = indir + '/' + username
@@ -69,7 +69,7 @@ def main():
                         print ("UNKNOWN",handedness,username)
                     
                     # WRITE TO EXPECTED FORMAT
-                    remote_ids.write('{0} {1}\n'.format(username,handedness))
+                    out_left_right.write('{0} {1}\n'.format(username,handedness))
                     
 
 if __name__ == "__main__":

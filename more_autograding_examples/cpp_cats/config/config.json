@@ -1,7 +1,7 @@
 {
     "grading_parameters" : {
-        "TOTAL_POINTS" : 21,
-        "AUTO_POINTS" : 21,
+        "TOTAL_POINTS" : 25,
+        "AUTO_POINTS" : 25,
         "TA_POINTS" : 0,
         "EXTRA_CREDIT_POINTS" : 0
     },
@@ -78,6 +78,21 @@
                     "method" : "diff",
                     "comparison" : "byLine",
                     "ignoreWhitespace" : true,
+                    "actual_file" : "output.txt",
+                    "expected_file" : "inst_output.txt"
+                }
+            ]
+        },
+        {
+            "title" : "Regular char by char comparision NO PARTIAL CREDIT",
+            "details" : "./byChar.exe input.txt output.txt",
+            "command" : "./a.out CatBreeds.txt output.txt",
+            "partial_credit" : false,
+            "points" : 4,
+            "validation" : [
+                {
+                    "method" : "diff",
+                    "comparison" : "byLinebyChar",
                     "actual_file" : "output.txt",
                     "expected_file" : "inst_output.txt"
                 }

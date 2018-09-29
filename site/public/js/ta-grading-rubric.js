@@ -60,6 +60,9 @@ COUNT_DIRECTION_DOWN = -1;
 PDF_PAGE_NONE = 0;
 PDF_PAGE_STUDENT = -1;
 PDF_PAGE_INSTRUCTOR = -2;
+PDF_PAGE_HEIGHT = 841.89;
+PDF_BORDER_HEIGHT = 0;
+PDF_OFFSET = 0;
 
 /**
  * Whether ajax requests will be asynchronous or synchronous.  This
@@ -813,6 +816,16 @@ function ajaxVerifyAllComponents(gradeable_id, anon_id) {
 }
 
 /**
+ * Gets if the 'verify' button should show up for a component
+ * @param {Object} graded_component
+ * @param {string} grader_id
+ * @returns {boolean}
+ */
+function showVerifyComponent(graded_component, grader_id) {
+    return graded_component !== undefined && graded_component.grader_id !== '' && grader_id !== graded_component.grader_id
+}
+
+/**
  * Put all DOM accessing methods here to abstract the DOM from the other function
  *  of the interface
  */
@@ -1287,12 +1300,16 @@ function getGradedComponentFromDOM(component_id) {
     }
 
     let dataDOMElement = domElement.find('.graded-component-data');
+    let gradedVersion = dataDOMElement.attr('data-graded_version');
+    if (gradedVersion === '') {
+        gradedVersion = getDisplayVersion();
+    }
     return {
         score: score,
         comment: comment,
         custom_mark_selected: customMarkSelected,
         mark_ids: mark_ids,
-        graded_version: parseInt(dataDOMElement.attr('data-graded_version')),
+        graded_version: parseInt(gradedVersion),
         grade_time: dataDOMElement.attr('data-grade_time'),
         grader_id: dataDOMElement.attr('data-grader_id'),
         verifier_id: dataDOMElement.attr('data-verifier_id')
@@ -1644,6 +1661,15 @@ function updateVerifyAllButton() {
     } else {
         $('#verify-all').show();
     }
+}
+
+/**
+ * Gets if the provided graded component is in conflict with the display version
+ * @param {Object} graded_component
+ * @returns {boolean}
+ */
+function getComponentVersionConflict(graded_component) {
+    return graded_component !== undefined && graded_component.graded_version !== getDisplayVersion();
 }
 
 
@@ -2080,7 +2106,8 @@ function reloadGradingRubric(gradeable_id, anon_id) {
             alert('Could not fetch graded gradeable: ' + err.message);
         })
         .then(function (graded_gradeable) {
-            return renderGradingGradeable(getGraderId(), gradeable_tmp, graded_gradeable, isGradingDisabled(), canVerifyGraders());
+            return renderGradingGradeable(getGraderId(), gradeable_tmp, graded_gradeable,
+                isGradingDisabled(), canVerifyGraders(), getDisplayVersion());
         })
         .then(function (elements) {
             setRubricDOMElements(elements);
@@ -2335,11 +2362,40 @@ function openComponentGrading(component_id) {
         .then(function (graded_component) {
             // Set the global graded component list data for this component to detect changes
             OLD_GRADED_COMPONENT_LIST[component_id] = graded_component;
-
+            console.log()
             // Render the grading component with edit mode if enabled,
             //  and 'true' to show the mark list
             return injectGradingComponent(component_tmp, graded_component, isEditModeEnabled(), true);
+        })
+        .then(function () {
+            let page = getComponentPageNumber(component_id);
+            if(page){
+                scrollToPage(page);
+            }
         });
+}
+
+/**
+ * Scrolls the submission panel to the page number specified by the component
+ * TODO: This is currently very clunky, and only works with test files (aka upload.pdf).
+ * @param {int} page_num
+ * @return {void}
+ */
+function scrollToPage(page_num){
+    let files = $('.openable-element-submissions');
+    for(let i = 0; i < files.length; i++){
+        let zoom = localStorage.getItem('scale') || 1;
+        if(files[i].innerText.trim() == "upload.pdf"){
+            let scrollY = zoom*(page_num-1)*(PDF_PAGE_HEIGHT+PDF_OFFSET)+PDF_BORDER_HEIGHT;
+            if($("#file_view").is(":visible")){
+                $('#file_content').animate({scrollTop: scrollY}, 500);
+            } else {
+                expandFile("upload.pdf", files[i].getAttribute("file-url")).then(function(){
+                    $('#file_content').animate({scrollTop: scrollY}, 500);
+                });
+            }
+        }
+    }
 }
 
 /**
@@ -2620,10 +2676,8 @@ function saveMarkList(component_id) {
  * @return {boolean}
  */
 function marksEqual(mark0, mark1) {
-    // publish settings only applies in instructor edit mode.  If a non-instructor
-    //  edits a mark, it doesn't overwrite the publish setting anyway.
     return mark0.points === mark1.points && mark0.title === mark1.title
-        && (!isInstructorEditEnabled() || mark0.publish === mark1.publish);
+        && mark0.publish === mark1.publish;
 }
 
 /**
@@ -2925,7 +2979,7 @@ function injectInstructorEditComponentHeader(component, showMarkList) {
  * @return {Promise}
  */
 function injectGradingComponent(component, graded_component, editable, showMarkList) {
-    return renderGradingComponent(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), getPointPrecision(), editable, showMarkList)
+    return renderGradingComponent(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), getPointPrecision(), editable, showMarkList, getComponentVersionConflict(graded_component))
         .then(function (elements) {
             setComponentContents(component.id, elements);
         })
@@ -2942,7 +2996,7 @@ function injectGradingComponent(component, graded_component, editable, showMarkL
  * @return {Promise}
  */
 function injectGradingComponentHeader(component, graded_component, showMarkList) {
-    return renderGradingComponentHeader(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), showMarkList)
+    return renderGradingComponentHeader(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), showMarkList, getComponentVersionConflict(graded_component))
         .then(function (elements) {
             setComponentHeaderContents(component.id, elements);
         })

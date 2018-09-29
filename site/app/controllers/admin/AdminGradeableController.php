@@ -162,7 +162,7 @@ class AdminGradeableController extends AbstractController {
 
         // These are hard coded default config options.
         $default_config_paths = [ ['upload_only (1 mb maximum total student file submission)', '/usr/local/submitty/more_autograding_examples/upload_only/config'],
-                                  ['pdf_exam (10 mb maximum total student file submission)', '/usr/local/submitty/more_autograding_examples/pdf_exam/config'],
+                                  ['pdf_exam (100 mb maximum total student file submission)', '/usr/local/submitty/more_autograding_examples/pdf_exam/config'],
                                   ['iclicker_upload (for collecting student iclicker IDs)', '/usr/local/submitty/more_autograding_examples/iclicker_upload/config'],
                                   ['left_right_exam_seating (for collecting student handedness for exam seating assignment', '/usr/local/submitty/more_autograding_examples/left_right_exam_seating/config'],
                                   ['test_notes_upload (expects single file, 2 mb maximum, 2-page pdf student submission)', '/usr/local/submitty/more_autograding_examples/test_notes_upload/config'],
