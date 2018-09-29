@@ -1242,7 +1242,7 @@ function getMarkFromDOM(mark_id) {
             points: parseFloat(domElement.find('input[type=number]').val()),
             title: domElement.find('input[type=text]').val(),
             deleted: domElement.hasClass('mark-deleted'),
-            publish: domElement.find('.mark-publish input[type=checkbox]').is(':checked')
+            publish: domElement.find('.mark-publish-container input[type=checkbox]').is(':checked')
         };
     } else {
         if (mark_id === 0) {
@@ -1252,7 +1252,7 @@ function getMarkFromDOM(mark_id) {
             id: parseInt(domElement.attr('data-mark_id')),
             points: parseFloat(domElement.find('.mark-points').attr('data-points')),
             title: domElement.find('.mark-title').attr('data-title'),
-            publish: domElement.attr('data-publish')
+            publish: domElement.attr('data-publish') === 'true',
         };
     }
 }
@@ -1992,6 +1992,14 @@ function onComponentTitleChange(me) {
  */
 function onComponentPageNumberChange(me) {
     getComponentJQuery(getComponentIdFromDOMElement(me)).find('.component-page-number-text').text($(me).val());
+}
+
+/**
+ * Callback for changing the 'publish' setting of a mark
+ * @param me DOM element of the check box
+ */
+function onMarkPublishChange(me) {
+    getMarkJQuery(getMarkIdFromDOMElement(me)).toggleClass('mark-publish');
 }
 
 /**
