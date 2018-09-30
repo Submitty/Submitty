@@ -130,7 +130,6 @@ class Access {
         $this->permissions["grading.electronic.grade"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT;
         $this->permissions["grading.electronic.grade.if_no_sections_exist"] = self::ALLOW_MIN_INSTRUCTOR;
         $this->permissions["grading.electronic.save_mark"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_GRADEABLE_MIN_GROUP;
-        $this->permissions["grading.electronic.save_mark_publish"] = self::ALLOW_MIN_INSTRUCTOR;
         $this->permissions["grading.electronic.save_component"] = self::ALLOW_MIN_INSTRUCTOR;
         $this->permissions["grading.electronic.add_component"] = self::ALLOW_MIN_INSTRUCTOR;
         $this->permissions["grading.electronic.delete_component"] = self::ALLOW_MIN_INSTRUCTOR;

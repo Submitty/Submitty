@@ -1773,11 +1773,6 @@ class ElectronicGraderController extends GradingController {
             return;
         }
 
-        // Restrict who can change the 'publish' property
-        if (!$this->core->getAccess()->canI('grading.electronic.save_mark_publish')) {
-            $publish = $mark->isPublish();
-        }
-
         try {
             // Once we've parsed the inputs and checked permissions, perform the operation
             $this->saveMark($mark, $points, $title, $publish);

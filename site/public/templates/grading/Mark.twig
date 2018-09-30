@@ -9,7 +9,7 @@ Required Input:
     show_publish: True to show the 'publish' option
 #}
 <div id="mark-{{ mark.id }}"
-     class="mark-container row {{ first_mark ? 'mark-first' : '' }} {{ not edit_marks_enabled and mark_disabled ? 'mark-disabled' : '' }} {{ mark.deleted ? 'mark-deleted' : '' }}"
+     class="mark-container row {{ mark.publish ? 'mark-publish' : '' }} {{ first_mark ? 'mark-first' : '' }} {{ not edit_marks_enabled and mark_disabled ? 'mark-disabled' : '' }} {{ mark.deleted ? 'mark-deleted' : '' }}"
      data-component_id="{{ component.id }}"
      data-mark_id="{{ mark.id }}"
      data-publish="{{ mark.publish }}"
@@ -52,12 +52,8 @@ Required Input:
     </span>
     {% if show_publish %}
         {% if not first_mark %}
-            <span class="col-no-gutters mark-publish">
-                Show mark to all students: <input type="checkbox" {{ mark.publish ? 'checked' : '' }}/>
-            </span>
-        {% else %}
-            <span class="mark-publish">
-                <input type="checkbox" {{ mark.publish ? 'checked' : '' }} hidden/>
+            <span class="col-no-gutters mark-publish-container">
+                Show mark to all students: <input type="checkbox" {{ mark.publish ? 'checked' : '' }} onchange="onMarkPublishChange(this)"/>
             </span>
         {% endif %}
     {% endif %}

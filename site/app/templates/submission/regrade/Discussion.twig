@@ -34,7 +34,7 @@
         <h3>Regrade Request
             <script type="text/javascript">
                 toggleRegradeRequests();
-                document.getElementById("ShowRegradeRequestButton").style.display = 'none'
+                document.getElementById("ShowRegradeRequestButton").style.display = 'none';
             </script>
         <span>
             <span class="fa fa-hourglass" style="font-size: 16px; color: #af0000"></span> 
@@ -52,7 +52,7 @@
         <h3>Regrade Request
             <script type="text/javascript">
                 toggleRegradeRequests();
-                document.getElementById("ShowRegradeRequestButton").style.display = 'none'
+                document.getElementById("ShowRegradeRequestButton").style.display = 'none';
             </script>
         <span>
             <span class="fa fa-check" style="font-size: 16px; color: #008800"></span>  
@@ -69,7 +69,7 @@
 {% for post in posts %}
     <div style="margin-top: 20px;">
         <div class='{{ post.is_staff ? "post_box important" : "post_box" }} {{ loop.index0 == 0 ? "first_post" : "" }}' style="padding:20px;">
-            <p style='white-space:pre'>{{ post.content }}</p>
+            <p style='white-space:pre-wrap;'>{{ post.content }}</p>
             <hr>
             <div style="float:right">
                 <b>{{ post.name }}</b> &nbsp;
