@@ -345,7 +345,6 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                 continue
 
             os.makedirs(testcase_folder)
-            print('made {0}'.format(testcase_folder))
             
             pattern_copy("submission_to_compilation",patterns_submission_to_compilation,submission_path,testcase_folder,tmp_logs)
 
@@ -386,7 +385,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                                                os.path.join(testcase_folder, 'my_compile.out'), queue_obj['gradeable'],
                                                queue_obj['who'], str(queue_obj['version']), submission_string, str(testcase_num)
                                                ]).decode('utf8').strip()
-                    print("starting compilation")
+                    print("starting container")
                     compile_success = subprocess.call(['docker', 'start', compilation_container],
                                                    stdout=logfile,
                                                    cwd=testcase_folder)
@@ -397,8 +396,6 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                     if compilation_container != None:
                         subprocess.call(['docker', 'rm', '-f', compilation_container])
                         print("cleaned up compilation container.")
-                print('finished compilation')
-
             else:
                 compile_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                                                    which_untrusted,
@@ -538,7 +535,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     pattern_copy("compilation_to_validation",patterns_compilation_to_validation,tmp_compilation,tmp_work,tmp_logs)
 
     # remove the compilation directory
-    #shutil.rmtree(tmp_compilation)
+    shutil.rmtree(tmp_compilation)
 
     # copy output files to tmp_work directory
     copy_contents_into(job_id,test_output_path,tmp_work,tmp_logs)
