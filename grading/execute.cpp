@@ -939,10 +939,6 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   }
   // END SECCOMP
 
-  int close_this = open("/dev/null", O_WRONLY);
-  dup2(close_this, 0);
-  close(close_this);
-
   int child_result =  execv ( my_program.c_str(), my_char_args );
   
 
