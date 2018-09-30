@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\libraries\Core;
+use app\libraries\Utils;
 
 /**
  * Class Notification
@@ -128,7 +129,7 @@ class Notification extends AbstractModel {
                 $this->actAsUpdatedAnnouncementNotification($details['thread_id'], $details['thread_title']);
                 break;
             case 'reply':
-                $this->actAsForumReplyNotification($details['thread_id'], $details['post_id'], $details['post_content'], $details['reply_to']);
+                $this->actAsForumReplyNotification($details['thread_id'], $details['post_id'], $details['post_content'], $details['reply_to'], $details['child_id'], $details['anonymous']);
                 break;
             case 'merge_thread':
                 $this->actAsForumMergeThreadNotification($details['parent_thread_id'],  $details['parent_thread_title'], $details['child_thread_title'], $details['child_root_post'], $details['reply_to']);
@@ -161,9 +162,9 @@ class Notification extends AbstractModel {
         $this->setNotifyTarget(null);
     }
 
-    private function actAsForumReplyNotification($thread_id, $post_id, $post_content, $target) {
-        $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id)));
-        $this->setNotifyContent("Reply: Your post '".$this->textShortner($post_content)."' got new a reply from ".$this->getCurrentUser());
+    private function actAsForumReplyNotification($thread_id, $post_id, $post_content, $target, $child_id, $anon) {
+        $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id, (string)$child_id)));
+        $this->setNotifyContent("Reply: Your post '".$this->textShortner($post_content)."' got new a reply from ".Utils::getDisplayNameForum($anon, $this->core->getQueries()->getDisplayUserInfoFromUserId($this->getCurrentUser())));
         $this->setNotifySource($this->getCurrentUser());
         $this->setNotifyTarget($target);
     }
@@ -177,21 +178,21 @@ class Notification extends AbstractModel {
 
     private function actAsForumEditedNotification($thread_id, $post_id, $post_content, $target){
         $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id)));
-        $this->setNotifyContent("Update: Your thread/post '".$this->textShortner($post_content)."' got an edit from ".$this->getCurrentUser());
+        $this->setNotifyContent("Update: Your thread/post '".$this->textShortner($post_content)."' got an edit from ".Utils::getDisplayNameForum(false, $this->core->getQueries()->getDisplayUserInfoFromUserId($this->getCurrentUser())));
         $this->setNotifySource($this->getCurrentUser());
         $this->setNotifyTarget($target);
     }
 
     private function actAsForumDeletedNotification($thread_id, $post_content, $target){
         $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id))));
-        $this->setNotifyContent("Deleted: Your thread/post '".$this->textShortner($post_content)."' was deleted by ".$this->getCurrentUser());
+        $this->setNotifyContent("Deleted: Your thread/post '".$this->textShortner($post_content)."' was deleted by ".Utils::getDisplayNameForum(false, $this->core->getQueries()->getDisplayUserInfoFromUserId($this->getCurrentUser())));
         $this->setNotifySource($this->getCurrentUser());
         $this->setNotifyTarget($target);
     }
 
     private function actAsForumUndeletedNotification($thread_id, $post_id, $post_content, $target){
         $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id)));
-        $this->setNotifyContent("Undeleted: Your thread/post '".$this->textShortner($post_content)."' has been undeleted by ".$this->getCurrentUser());
+        $this->setNotifyContent("Undeleted: Your thread/post '".$this->textShortner($post_content)."' has been undeleted by ".Utils::getDisplayNameForum(false, $this->core->getQueries()->getDisplayUserInfoFromUserId($this->getCurrentUser())));
         $this->setNotifySource($this->getCurrentUser());
         $this->setNotifyTarget($target);
     }

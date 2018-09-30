@@ -6,6 +6,7 @@ let documentId = '';
 let PAGE_HEIGHT;
 window.RENDER_OPTIONS = {
     documentId,
+    userId: "",
     pdfDocument: null,
     scale: parseFloat(localStorage.getItem('scale')) || 1,
     rotate: parseInt(localStorage.getItem('rotate')) || 0
@@ -45,7 +46,9 @@ function render(gradeable_id, user_id, grader_id, file_name, url = "") {
             GENERAL_INFORMATION.gradeable_id = gradeable_id;
             GENERAL_INFORMATION.file_name = file_name;
             RENDER_OPTIONS.documentId = file_name;
-            PDFAnnotate.setStoreAdapter(new PDFAnnotate.LocalStoreAdapter(grader_id));
+            //TODO: Duplicate user_id in both RENDER_OPTIONS and GENERAL_INFORMATION, also grader_id = user_id in this context.
+            RENDER_OPTIONS.userId = grader_id;
+            PDFAnnotate.setStoreAdapter(new PDFAnnotate.LocalStoreAdapter(GENERAL_INFORMATION.grader_id));
             // documentId = file_name;
 
             let pdfData;
@@ -53,7 +56,7 @@ function render(gradeable_id, user_id, grader_id, file_name, url = "") {
                 pdfData = JSON.parse(data);
                 pdfData = atob(pdfData);
             } catch (err){
-                alert("Please select 'Grade this version' in Student Information panel. If it is already selected, " +
+                alert("Please make sure that this is the correct version. If it is, " +
                     "then the PDF is either corrupt or broken");
             }
             PDFJS.getDocument({data:pdfData}).then((pdf) => {

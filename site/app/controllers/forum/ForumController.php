@@ -409,7 +409,8 @@ class ForumController extends AbstractController {
                 // Notification to parent post author
                 $post = $this->core->getQueries()->getPost($parent_id);
                 $post_author = $post['author_user_id'];
-                $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'reply', 'thread_id' => $thread_id, 'post_id' => $parent_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
+                $notification_anonymous = ($anon == 1) ? true : false;
+                $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'reply', 'thread_id' => $thread_id, 'post_id' => $parent_id, 'post_content' => $post['content'], 'reply_to' => $post_author, 'child_id' => $post_id, 'anonymous' => $notification_anonymous));
                 $this->core->getQueries()->pushNotification($notification);
                 $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'option' => $display_option, 'thread_id' => $thread_id));
             }
@@ -595,9 +596,13 @@ class ForumController extends AbstractController {
         $new_post_content = $_POST["thread_post_content"];
         if(!empty($new_post_content)) {
             $post_id = $_POST["edit_post_id"];
+            $original_creator = $this->core->getQueries()->getPost($post_id);
+            if(!empty($original_creator)) {
+                $original_creator = $original_creator['author_user_id'];
+            }
             $anon = ($_POST["Anon"] == "Anon") ? 1 : 0;
             $current_user = $this->core->getUser()->getId();
-            return $this->core->getQueries()->editPost($current_user, $post_id, $new_post_content, $anon);
+            return $this->core->getQueries()->editPost($original_creator, $current_user, $post_id, $new_post_content, $anon);
         }
         return null;
     }

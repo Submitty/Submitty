@@ -128,6 +128,14 @@ class Utils {
         return substr($haystack, (-1*strlen($needle)), strlen($needle)) === $needle;
     }
 
+    public static function getDisplayNameForum($anonymous, $real_name) {
+        if($anonymous) {
+            return "Anonymous";
+        }
+        return $real_name['first_name'] . substr($real_name['last_name'], 0, 2) . '.';
+    }
+
+
     /**
      * Wrapper around the PHP function setcookie that deals with figuring out if we should be setting this cookie
      * such that it should only be accessed via HTTPS (secure) as well as allow easily passing an array to set as
