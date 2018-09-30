@@ -231,9 +231,21 @@ def setup_folder_for_grading(target_folder, tmp_work, job_id, tmp_logs, testcase
       if command == 'cp':
         #currently ignoring option
         if not os.path.isdir(os.path.join(tmp_work,source)):
-          shutil.copy(os.path.join(tmp_work,source),os.path.join(target_folder,destination))
+          try:
+            shutil.copy(os.path.join(tmp_work,source),os.path.join(target_folder,destination))
+          except Exception as e:
+            print("encountered a copy error")
+            traceback.print_exc()
+            #TODO: can we pass something useful to students?
+            pass
         else:
-          grade_item.copy_contents_into(job_id,os.path.join(tmp_work,source),os.path.join(target_folder,destination),tmp_logs)
+          try:
+            grade_item.copy_contents_into(job_id,os.path.join(tmp_work,source),os.path.join(target_folder,destination),tmp_logs)
+          except Exception as e:
+            print("encountered a copy error")
+            traceback.print_exc()
+            #TODO: can we pass something useful to students?
+            pass
       else:
         print("Invalid pre-command '{0}'".format(command))
 
