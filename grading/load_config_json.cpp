@@ -244,26 +244,43 @@ void formatPreActions(nlohmann::json &whole_config) {
       //right now we only support recursive.
       assert(pre_command["option"] == "-R");
 
+      assert(pre_command["testcase"].is_string());
+
+      std::string testcase = pre_command["testcase"];
+      
+      //remove trailing slash
+      if(testcase.length() == 7){
+        testcase = testcase.substr(0,6);
+      }
+
+      assert(testcase.length() == 6);
+
+      std::string prefix = testcase.substr(0,4);
+      assert(prefix == "test");
+
+      std::string number = testcase.substr(4,6);
+      int remainder = std::stoi( number );
+      //we must be referencing a previous testcase. (+1 because we start at 0)
+      assert(remainder > 0);
+      assert(remainder < which_testcase+1);
+
+      pre_command["testcase"] = testcase;
+
+
       //The source must be a string.
       assert(pre_command["source"].is_string());
 
       //the source must be of the form prefix = test, remainder is less than size 3 and is an int.
-      std::string target_name = pre_command["source"];
-      
-      std::string prefix = target_name.substr(0,4);
-      assert(prefix == "test");
+      std::string source_name = pre_command["source"];
 
-      std::string number = target_name.substr(4,6);
-      int remainder = std::stoi( number );
-      //we must be referencing a previous testcase. (+1 because we start at 0)
-      assert(remainder < which_testcase+1);
+      assert(source_name[0] != '/');
 
       //The command must not container .. or $.
-      assert(target_name.find("..") == std::string::npos);
-      assert(target_name.find("$") == std::string::npos);
-      assert(target_name.find("~") == std::string::npos);
-      assert(target_name.find("\"") == std::string::npos);
-      assert(target_name.find("\'") == std::string::npos);
+      assert(source_name.find("..") == std::string::npos);
+      assert(source_name.find("$")  == std::string::npos);
+      assert(source_name.find("~")  == std::string::npos);
+      assert(source_name.find("\"") == std::string::npos);
+      assert(source_name.find("\'") == std::string::npos);
 
       if(!pre_command["pattern"].is_string()){
          this_testcase["pattern"] = "";

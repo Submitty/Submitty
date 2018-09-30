@@ -221,7 +221,9 @@ def setup_folder_for_grading(target_folder, tmp_work, job_id, tmp_logs, testcase
     for pre_command in pre_commands:
       command = pre_command['command']
       option  = pre_command['option']
-      source  = pre_command['source']
+      source_testcase   = pre_command["testcase"]
+      source_directory  = pre_command['source']
+      source = os.path.join(source_testcase,source_directory)
       destination = pre_command['destination']
       # pattern is not currently in use.
       #pattern    = pre_command['pattern']
