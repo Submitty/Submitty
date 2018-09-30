@@ -170,6 +170,7 @@ class Access {
         // "can I access anything in this directory at all" checks. If you want to check if someone has access
         // to a specific file then use path.read or path.write
         $this->permissions["path.read.uploads"] = self::ALLOW_MIN_INSTRUCTOR;
+        $this->permissions["path.read.split_pdf"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
         $this->permissions["path.read.site"] = self::ALLOW_MIN_STUDENT;
         //TODO: Timed access control
         $this->permissions["path.read.course_materials"] = self::ALLOW_MIN_STUDENT;
@@ -180,6 +181,7 @@ class Access {
         $this->permissions["path.read.submissions"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_STUDENT_VIEW | self::CHECK_STUDENT_DOWNLOAD | self::CHECK_STUDENT_ANY_VERSION;
 
         $this->permissions["path.write.submissions"] = self::ALLOW_MIN_STUDENT | self::ALLOW_ONLY_SELF_GRADEABLE | self::CHECK_CSRF;
+        $this->permissions["path.write.split_pdf"] = self::ALLOW_MIN_FULL_ACCESS_GRADER | self::CHECK_CSRF;
         $this->permissions["path.write.uploads"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_CSRF;
         $this->permissions["path.write.site"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_CSRF;
         $this->permissions["path.write.checkout"] = self::DENY_ALL | self::CHECK_CSRF;
@@ -250,6 +252,14 @@ class Access {
             "permissions" => [
                 "path.read" => "path.read.uploads",
                 "path.write" => "path.write.uploads",
+            ]
+        ];
+        $this->directories["split_pdf"] = [
+            "base" => $this->core->getConfig()->getCoursePath() . "/uploads/split_pdf",
+            "subparts" => [],
+            "permissions" => [
+                "path.read" => "path.read.split_pdf",
+                "path.write" => "path.write.split_pdf",
             ]
         ];
         $this->directories["site"] = [
