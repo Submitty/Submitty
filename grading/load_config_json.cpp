@@ -220,12 +220,12 @@ void formatPreActions(nlohmann::json &whole_config) {
 
   // loop over testcases
   int which_testcase = 0;
-  for (nlohmann::json::iterator my_testcase = tc->begin(); my_testcase != tc->end(); my_testcase++,which_testcase++) {
+  for (nlohmann::json::iterator my_testcase = tc->begin(); my_testcase != tc->end(); my_testcase++, which_testcase++) {
 
-    nlohmann::json this_testcase = whole_config["testcases"][testcase_num];
+    nlohmann::json this_testcase = whole_config["testcases"][which_testcase];
 
     if(this_testcase["pre_commands"].is_null()){
-      this_testcase["pre_commands"] = nlohmann::json::array();
+      whole_config["testcases"][which_testcase]["pre_commands"] = nlohmann::json::array();
       continue;
     }
 
@@ -253,23 +253,29 @@ void formatPreActions(nlohmann::json &whole_config) {
       std::string prefix = target_name.substr(0,4);
       assert(prefix == "test");
 
-      std::string number = target_name.substr(4.6);
+      std::string number = target_name.substr(4,6);
       int remainder = std::stoi( number );
-
-      //we must be referencing a previous testcase.
-      assert(remainder < which_testcase);
+      std::cout << "remainder is " << remainder << std::endl;
+      //we must be referencing a previous testcase. (+1 because we start at 0)
+      assert(remainder < which_testcase+1);
 
       //The command must not container .. or $.
-      assert(std::find(target_name.begin(), target_name.end(), "..") == target_name.end());
-      assert(std::find(target_name.begin(), target_name.end(), "$")  == target_name.end());
+      assert(target_name.find("..") == std::string::npos);
+      assert(target_name.find("$") == std::string::npos);
+      assert(target_name.find("~") == std::string::npos);
+      assert(target_name.find("\"") == std::string::npos);
+      assert(target_name.find("\'") == std::string::npos);
 
       if(!this_testcase["pattern"].is_string()){
         this_testcase["pattern"] = "";
       }else{
         std::string pattern = pre_command["pattern"];
         //The pattern must not container .. or $ 
-        assert(std::find(pattern.begin(), pattern.end(), "..") == pattern.end());
-        assert(std::find(pattern.begin(), pattern.end(), "$")  == pattern.end());
+        assert(pattern.find("..") == std::string::npos);
+        assert(pattern.find("$") == std::string::npos);
+        assert(pattern.find("~") == std::string::npos);
+        assert(pattern.find("\"") == std::string::npos);
+        assert(pattern.find("\'") == std::string::npos);
       }
 
       //there must be a destination
@@ -278,10 +284,13 @@ void formatPreActions(nlohmann::json &whole_config) {
       std::string destination = pre_command["destination"];
 
       //The destination must not container .. or $ 
-      assert(std::find(destination.begin(), destination.end(), "..") == destination.end());
-      assert(std::find(destination.begin(), destination.end(), "$")  == destination.end());
+      assert(destination.find("..") == std::string::npos);
+      assert(destination.find("$") == std::string::npos);
+      assert(destination.find("~") == std::string::npos);
+      assert(destination.find("\"") == std::string::npos);
+      assert(destination.find("\'") == std::string::npos);
 
-      whole_config["testcases"][testcase_num]["pre_commands"][i] = pre_command;
+      whole_config["testcases"][which_testcase]["pre_commands"][i] = pre_command;
     }
   }
 }
