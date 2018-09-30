@@ -1,15 +1,19 @@
 {#
 Function for getting the badge style for a given set of total and earned points
 #}
-{% macro getBadgeStyle(earned, total) %}
+{% macro getBadgeStyle(earned, total, complete) %}
     {% if earned is defined and total is defined %}
-        {% set percent = earned / total %}
-        {% if percent < 0.5 %}
-            red-background
-        {% elseif percent < 0.8 %}
-            yellow-background
+        {% if complete is defined and not complete %}
+            {# Nothing #}
         {% else %}
-            green-background
+            {% set percent = earned / total %}
+            {% if percent < 0.5 %}
+                red-background
+            {% elseif earned != total %}
+                yellow-background
+            {% else %}
+                green-background
+            {% endif %}
         {% endif %}
     {% endif %}
 {% endmacro %}
