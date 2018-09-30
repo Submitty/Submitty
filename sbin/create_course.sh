@@ -226,7 +226,7 @@ create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/custo
 #               drwxr-s---       $PHP_USER        ta_www_group    uploads/student_images/
 #               drwxr-s---       $PHP_USER        ta_www_group    uploads/student_images/tmp
 #               drwxr-s---       $PHP_USER        ta_www_group    uploads/seating
-#               drwxr-s---       $DAEMON_USER     ta_www_group    lichen/
+#               drwxrws---       $DAEMON_USER     ta_www_group    lichen/
 #               drwxrws---       $PHP_USER        ta_www_group    lichen/config
 #               drwxrws---       $PHP_USER        ta_www_group    lichen/provided_code
 create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/submissions
@@ -243,7 +243,7 @@ create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/up
 create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/uploads/course_materials
 create_and_set  u=rwx,g=rxs,o=   $CGI_USER        $ta_www_group   $course_dir/uploads/split_pdf
 create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/uploads/seating
-create_and_set  u=rwx,g=rxs,o=   $DAEMON_USER     $ta_www_group   $course_dir/lichen
+create_and_set  u=rwx,g=rwxs,o=  $DAEMON_USER     $ta_www_group   $course_dir/lichen
 create_and_set  u=rwx,g=rwxs,o=  $PHP_USER        $ta_www_group   $course_dir/lichen/config
 create_and_set  u=rwx,g=rwxs,o=  $PHP_USER        $ta_www_group   $course_dir/lichen/provided_code
 
