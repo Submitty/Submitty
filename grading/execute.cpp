@@ -1216,7 +1216,7 @@ int execute(const std::string &cmd,
             result=0;
         }
         else{
-          std::cout << "Child exited with status = " << WEXITSTATUS(status) << std::endl;
+          logfile << "Child exited with status = " << WEXITSTATUS(status) << std::endl;
           result=1;
           //
           // NOTE: If wrapping /usr/bin/time around a program that exits with signal = 25
@@ -1273,7 +1273,6 @@ int execute(const std::string &cmd,
 * Tests to see if the student has used too much memory.
 */
 bool memory_ok(int rss_memory, int allowed_rss_memory, std::ostream &logfile){
-  std::cout << " I have used " << rss_memory << " of " << allowed_rss_memory << " allowed memory" << std::endl;
   if(rss_memory > allowed_rss_memory){
       return false;
   }
@@ -1288,7 +1287,6 @@ bool memory_ok(int rss_memory, int allowed_rss_memory, std::ostream &logfile){
 bool time_ok(float elapsed, float seconds_to_run, std::ostream &logfile){
   // allow 10 extra seconds for differences in wall clock
   // vs CPU time (imperfect solution)
-  std::cout << "I have run for " << elapsed << " of " << (seconds_to_run + CPU_TO_WALLCLOCK_TIME_BUFFER) << " seconds"<<std::endl;
   if(elapsed > seconds_to_run + CPU_TO_WALLCLOCK_TIME_BUFFER){
       return false;
   }
