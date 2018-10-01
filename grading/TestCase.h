@@ -48,6 +48,7 @@ public:
   std::string getDetails () const { return _json.value("details",""); }
 
   int getPoints() const { return _json.value("points", 0); }
+  bool allowPartialCredit() const { return _json.value("partial_credit", true); }
   bool getHidden() const { return _json.value("hidden", false); }
   bool getExtraCredit() const { return _json.value("extra_credit",false); }
   bool viewTestcaseMessage() const { return _json.value("view_testcase_message",true); }

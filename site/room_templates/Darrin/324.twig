@@ -1,5 +1,5 @@
 <script>
-  var title = "Darrin 318"
+  var title = "Darrin 324"
   note_left = ""
   note_right = "seat 1 is on the right, when facing the screen"
 
@@ -22,10 +22,10 @@
   <script>
     var seats = {
       // counting every chair (including ones that might be broken)
-	"left" : [ 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0],  // every row has a lefty desk
-      "middle" : [13,13,13,13,13,13,13,13,13,13,13,13,13],  // every row has a lefty desk
-      "right" :  [ 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0],  // these are all righty desks
-    }
+      "left" :   [3,3,3,3,3,3,3,3,3,3,3,0,0],  // every row has a lefty desk 
+      "middle" : [8,8,8,8,8,8,8,8,8,8,8,8,8],  // every row has a lefty desk 
+      "right" :  [3,3,3,3,3,3,3,3,3,3,3,0,0],  // these are all righty desks
+     }
     var used = {};
 
     function expand_config(config) {
@@ -326,19 +326,5 @@
     // Render zone labels
     render_zone_labels(config);
 
-    // Render to image
-    // document.getElementById("image").src = diagram.toDataURL();
-
-    // Print seats used
-    // var temp = [];
-    // for(var letter in used) {
-    //   temp.push(letter)
-    // }
-    // temp.sort();
-    // container = document.getElementById("seats")
-    // for(var index in temp) {
-    //   var letter = temp[index];
-    //   container.innerHTML += letter + " DARRIN 318 " + used[letter] + "\n";
-    // }
   </script>
 </div>
