@@ -9,7 +9,6 @@ import unittest
 from urllib.parse import urlencode
 
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -40,7 +39,7 @@ class BaseTestCase(unittest.TestCase):
             self.test_url = BaseTestCase.TEST_URL
         self.driver = None
         """ :type driver: webdriver.Chrome """
-        self.options = Options()
+        self.options = webdriver.ChromeOptions()
         self.options.add_argument('--headless')
         self.options.add_argument("--disable-extensions")
         self.options.add_argument('--hide-scrollbars')
