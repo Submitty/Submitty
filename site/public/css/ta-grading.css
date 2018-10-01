@@ -630,6 +630,11 @@ tr.is_publish {
     border: none;
 }
 
+.gradeable .mark-container.mark-publish {
+    background-color: #bde;
+    border-radius: 4px;
+}
+
 .gradeable .mark-disabled span {
     cursor: not-allowed;
     opacity: 0.3;

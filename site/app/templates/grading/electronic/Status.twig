@@ -140,17 +140,10 @@
     {# Bottom buttons #}
     <div style="margin-top: 20px; vertical-align:bottom;">
         {% if graded_percentage != -1 or core.getUser().accessFullGrading() or peer %}
-            {% if core.getUser().accessAdmin() %}
-             <a class="btn btn-primary"
-               href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action' :  'details', 'gradeable_id' :  gradeable.getId(), 'view' : 'all' }) }}">
-             Grading Details
-             </a>
-             {% else %}
             <a class="btn btn-primary"
-               href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action' :  'details', 'gradeable_id' :  gradeable.getId(), 'view' : percentage == -1 ? 'all' : null}) }}">
+               href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action' :  'details', 'gradeable_id' :  gradeable.getId(), 'view' : (core.getUser().getGradingRegistrationSections()|length == 0) ? 'all' : null}) }}">
             Grading Details
             </a>
-            {% endif %}
             {% if core.getUser().getGradingRegistrationSections()|length != 0 %}
                 <a class="btn btn-primary"
                    href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'grade', 'gradeable_id': gradeable.getId()}) }}">

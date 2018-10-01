@@ -203,7 +203,7 @@ class DatabaseQueries {
      * @return array('block_number' => int, 'threads' => array(threads))    Ordered filtered threads
      */
     public function loadThreadBlock($categories_ids, $thread_status, $show_deleted, $show_merged_thread, $current_user, $blockNumber, $thread_id){
-        $blockSize = 10;
+        $blockSize = 30;
         $loadLastPage = false;
 
         $query_raw_select = null;
@@ -456,7 +456,12 @@ class DatabaseQueries {
         } return false;
     }
 
-    public function editPost($user, $post_id, $content, $anon){
+    public function getParentPostId($child_id) {
+        $this->course_db->query("SELECT parent_id from posts where id = ?", array($child_id));
+        return $this->course_db->rows()[0]['parent_id'];
+    }
+
+    public function editPost($original_creator, $user, $post_id, $content, $anon){
         try {
             // Before making any edit to $post_id, forum_posts_history will not have any corresponding entry
             // forum_posts_history will store all history state of the post(if edited at any point of time)
@@ -467,6 +472,7 @@ class DatabaseQueries {
             $this->course_db->query("UPDATE posts SET content =  ?, anonymous = ? where id = ?", array($content, $anon, $post_id));
             // Insert latest version of post into forum_posts_history
             $this->course_db->query("INSERT INTO forum_posts_history(post_id, edit_author, content, edit_timestamp) SELECT id, ?, content, current_timestamp FROM posts WHERE id = ?", array($user, $post_id));
+            $this->course_db->query("UPDATE notifications SET content = substring(content from '.+?(?=from)') || 'from ' || ? where metadata::json->>1 = ? and metadata::json->>2 = ?", array(Utils::getDisplayNameForum($anon, $this->getDisplayUserInfoFromUserId($original_creator)), $this->getParentPostId($post_id), $post_id));
             $this->course_db->query("DELETE FROM viewed_responses WHERE thread_id = (SELECT thread_id FROM posts WHERE id = ?)", array($post_id));
             $this->course_db->commit();
         } catch(DatabaseException $dbException) {
