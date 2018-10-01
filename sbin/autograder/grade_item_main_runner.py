@@ -84,7 +84,7 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                         mounted_directory = info['mounted_directory']
                         #Copies the code needed to run into mounted_directory
                         #TODO this can eventually be extended so that only the needed code is copied in.
-                        setup_folder_for_grading(mounted_directory, tmp_work, job_id, tmp_logs)
+                        setup_folder_for_grading(mounted_directory, tmp_work, job_id, tmp_logs,testcases[testcase_num-1])
 
 
                     # Start the docker containers.
@@ -158,7 +158,7 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
             else:
                 try:
                     # Move the files necessary for grading (runner, inputs, etc.) into the testcase folder.
-                    setup_folder_for_grading(testcase_folder, tmp_work, job_id, tmp_logs)
+                    setup_folder_for_grading(testcase_folder, tmp_work, job_id, tmp_logs,testcases[testcase_num-1])
                     my_testcase_runner = os.path.join(testcase_folder, 'my_runner.out')
                     runner_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                                                       which_untrusted,
@@ -201,7 +201,7 @@ def at_least_one_alive(processes):
   return False
 
 
-def setup_folder_for_grading(target_folder, tmp_work, job_id, tmp_logs):
+def setup_folder_for_grading(target_folder, tmp_work, job_id, tmp_logs, testcase):
     #The paths to the important folders.
     tmp_work_test_input = os.path.join(tmp_work, "test_input")
     tmp_work_subission = os.path.join(tmp_work, "submitted_files")
@@ -209,6 +209,34 @@ def setup_folder_for_grading(target_folder, tmp_work, job_id, tmp_logs):
     tmp_work_checkout = os.path.join(tmp_work, "checkout")
     my_runner = os.path.join(tmp_work,"my_runner.out")
 
+    #######################################################################################
+    #
+    # PRE-COMMANDS
+    #
+    ######################################################################################
+
+    pre_commands = testcase.get('pre_commands', [])
+
+    for pre_command in pre_commands:
+      command = pre_command['command']
+      option  = pre_command['option']
+      source_testcase   = pre_command["testcase"]
+      source_directory  = pre_command['source']
+      source = os.path.join(source_testcase,source_directory)
+      destination = pre_command['destination']
+      # pattern is not currently in use.
+      #pattern    = pre_command['pattern']
+
+      if command == 'cp':
+        #currently ignoring option
+        if not os.path.isdir(os.path.join(tmp_work,source)):
+          shutil.copy(os.path.join(tmp_work,source),os.path.join(target_folder,destination))
+        else:
+          grade_item.copy_contents_into(job_id,os.path.join(tmp_work,source),os.path.join(target_folder,destination),tmp_logs)
+      else:
+        print("Invalid pre-command '{0}'".format(command))
+
+    #TODO: pre-commands may eventually wipe the following logic out.
     #copy the required files to the test directory
     grade_item.copy_contents_into(job_id,tmp_work_test_input,target_folder,tmp_logs)
     grade_item.copy_contents_into(job_id,tmp_work_subission ,target_folder,tmp_logs)

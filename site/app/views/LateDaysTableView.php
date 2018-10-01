@@ -82,7 +82,7 @@ class LateDaysTableView extends AbstractView {
         }
 
         //If we're not instructor and this is not open to TAs
-        $date = new \DateTime("now", $this->core->getConfig()->getTimezone());
+        $date = $this->core->getDateTimeNow();
         if ($gradeable->getTAViewDate() > $date && !$user->accessAdmin()) {
             return false;
         }

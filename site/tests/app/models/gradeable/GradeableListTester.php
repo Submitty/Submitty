@@ -246,9 +246,13 @@ class GradeableListTester extends BaseUnitTest {
     }
 
     private function mockCore($gradeables, $access_admin = true, $access_grading = true) {
+        // TODO: rewrite this to use BaseUnitTest::createMockCore
         $core = $this->createMock(Core::class);
         $config = $this->createMockModel(Config::class);
         $config->method('getTimezone')->willReturn(new \DateTimeZone('America/New_York'));
+        $core->method('getDateTimeNow')->willReturnCallback(function() use($config) {
+            return new \DateTime('now', $config->getTimezone());
+        });
         $core->method('getConfig')->willReturn($config);
 
         $queries = $this->createMock(DatabaseQueries::class);

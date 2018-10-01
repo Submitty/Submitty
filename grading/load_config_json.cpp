@@ -214,6 +214,105 @@ void FormatDispatcherActions(nlohmann::json &whole_config) {
   }
 }
 
+void formatPreActions(nlohmann::json &whole_config) {
+  nlohmann::json::iterator tc = whole_config.find("testcases");
+  if (tc == whole_config.end()) { /* no testcases */ return; }
+
+  // loop over testcases
+  int which_testcase = 0;
+  for (nlohmann::json::iterator my_testcase = tc->begin(); my_testcase != tc->end(); my_testcase++, which_testcase++) {
+
+    nlohmann::json this_testcase = whole_config["testcases"][which_testcase];
+
+    if(this_testcase["pre_commands"].is_null()){
+      whole_config["testcases"][which_testcase]["pre_commands"] = nlohmann::json::array();
+      continue;
+    }
+
+    std::vector<nlohmann::json> pre_commands = mapOrArrayOfMaps(this_testcase, "pre_commands");
+
+    for (int i = 0; i < pre_commands.size(); i++){
+      nlohmann::json pre_command = pre_commands[i];
+      
+      //right now we only support copy.
+      assert(pre_command["command"] == "cp");
+
+      if(!pre_command["option"].is_string()){
+        pre_command["option"] = "-R";
+      }
+
+      //right now we only support recursive.
+      assert(pre_command["option"] == "-R");
+
+      assert(pre_command["testcase"].is_string());
+
+      std::string testcase = pre_command["testcase"];
+      
+      //remove trailing slash
+      if(testcase.length() == 7){
+        testcase = testcase.substr(0,6);
+      }
+
+      assert(testcase.length() == 6);
+
+      std::string prefix = testcase.substr(0,4);
+      assert(prefix == "test");
+
+      std::string number = testcase.substr(4,6);
+      int remainder = std::stoi( number );
+
+      assert(remainder > 0);
+      assert(remainder < which_testcase+1);
+
+      pre_command["testcase"] = testcase;
+
+
+      //The source must be a string.
+      assert(pre_command["source"].is_string());
+
+      //the source must be of the form prefix = test, remainder is less than size 3 and is an int.
+      std::string source_name = pre_command["source"];
+
+      assert(source_name[0] != '/');
+
+      //The command must not container .. or $.
+      assert(source_name.find("..") == std::string::npos);
+      assert(source_name.find("$")  == std::string::npos);
+      assert(source_name.find("~")  == std::string::npos);
+      assert(source_name.find("\"") == std::string::npos);
+      assert(source_name.find("\'") == std::string::npos);
+
+      if(!this_testcase["pattern"].is_string()){
+        this_testcase["pattern"] = "";
+      }else{
+        std::string pattern = pre_command["pattern"];
+        //The pattern must not container .. or $ 
+        assert(pattern.find("..") == std::string::npos);
+        assert(pattern.find("$") == std::string::npos);
+        assert(pattern.find("~") == std::string::npos);
+        assert(pattern.find("\"") == std::string::npos);
+        assert(pattern.find("\'") == std::string::npos);
+      }
+
+      //there must be a destination
+      assert(pre_command["destination"].is_string());
+
+      std::string destination = pre_command["destination"];
+
+      //The destination must not container .. or $ 
+      assert(destination.find("..") == std::string::npos);
+      assert(destination.find("$") == std::string::npos);
+      assert(destination.find("~") == std::string::npos);
+      assert(destination.find("\"") == std::string::npos);
+      assert(destination.find("\'") == std::string::npos);
+
+      whole_config["testcases"][which_testcase]["pre_commands"][i] = pre_command;
+    }
+  }
+}
+
+
+
 
 void RewriteDeprecatedMyersDiff(nlohmann::json &whole_config) {
 
@@ -356,6 +455,7 @@ nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid) {
   
   AddDockerConfiguration(answer);
   FormatDispatcherActions(answer);
+  formatPreActions(answer);
   AddSubmissionLimitTestCase(answer);
   AddAutogradingConfiguration(answer);
 
