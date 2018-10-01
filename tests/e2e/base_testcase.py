@@ -131,7 +131,11 @@ class BaseTestCase(unittest.TestCase):
         if course_name is None:
             course_name = course.upper()
         self.driver.find_element_by_id(self.get_current_semester() + '_' + course).click()
-        WebDriverWait(self.driver, BaseTestCase.WAIT_TIME).until(EC.title_is(course_name))
+        try:
+            WebDriverWait(self.driver, BaseTestCase.WAIT_TIME).until(EC.title_is(course_name))
+        except:
+            print(self.driver.page_source)
+            raise
 
     # see Navigation.twig for html attributes to use as arguments
     # loaded_selector must recognize an element on the page being loaded (test_simple_grader.py has xpath example)
