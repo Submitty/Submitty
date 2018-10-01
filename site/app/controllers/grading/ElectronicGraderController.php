@@ -474,7 +474,7 @@ class ElectronicGraderController extends GradingController {
                 $sections['all']['graded_components'] -= $my_grading;
             }
             else {
-                foreach ($total_users as $key => $value) {                           
+                foreach ($total_users as $key => $value) {
                     if(array_key_exists($key, $num_submitted)){
                         $sections[$key] = array(
                             'total_components' => $num_submitted[$key] * $num_components,
@@ -667,7 +667,7 @@ class ElectronicGraderController extends GradingController {
 
             $all_rot_sections = $this->core->getQueries()->getRotatingSections();
             $key = 'sections_rotating_id';
-            
+
             foreach ($all_rot_sections as $i => $section) {
                 $all_rot_sections[$i] = $section[$key];
             }
@@ -798,7 +798,7 @@ class ElectronicGraderController extends GradingController {
                 foreach ($team->getMemberUsers() as $user) {
                     $csvdata .= implode(',', [
                         $user->getDisplayedFirstName(),
-                        $user->getLastName(),
+                        $user->getDisplayedLastName(),
                         $user->getId(),
                         $team->getId(),
                         $team->getRegistrationSection(),
@@ -1051,7 +1051,7 @@ class ElectronicGraderController extends GradingController {
                 $user_ids_to_grade[] = $team_id->getId();
             }
         }
-        
+
         //$gradeables_to_grade = $this->core->getQueries()->getGradeables($gradeable_id, $user_ids_to_grade, $section_key);
 
         $who_id = isset($_REQUEST['who_id']) ? $_REQUEST['who_id'] : "";
@@ -1061,10 +1061,10 @@ class ElectronicGraderController extends GradingController {
         $next_id = "";
         $break_next = false;
         if($who_id === ""){
-            $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'details', 
+            $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'details',
                 'gradeable_id' => $gradeable_id)));
         }
-        
+
         $index = array_search($who_id, $user_ids_to_grade);
         $not_in_my_section = false;
         //If the student isn't in our list of students to grade.
@@ -1959,7 +1959,7 @@ class ElectronicGraderController extends GradingController {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
-    
+
     public function addNewMark(Component $component, string $title, float $points) {
         $mark = $component->addMark($title, $points, false);
         $this->core->getQueries()->saveComponent($component);

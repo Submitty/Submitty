@@ -24,7 +24,7 @@
 
         {# List team members #}
         {% for teammate in members %}
-            <span>&emsp;{{ teammate.getDisplayedFirstName() }} {{ teammate.getLastName() }} ({{ teammate.getId() }}) - {{ teammate.getEmail() }}</span> <br />
+            <span>&emsp;{{ teammate.getDisplayedFirstName() }} {{ teammate.getDisplayedLastName() }} ({{ teammate.getId() }}) - {{ teammate.getEmail() }}</span> <br />
         {% endfor %}
 
         {# Team invitations status #}
@@ -129,7 +129,7 @@
                     <tr>
                         <td>{{ loop.index }}</td>
                         <td>{{ user_details.getDisplayedFirstName() }}</td>
-                        <td>{{ user_details.getLastName() }}</td>
+                        <td>{{ user_details.getDisplayedLastName() }}</td>
                         <td>{{ user_details.getId() }}</td>
                         <td>{{ user_details.getEmail() }}</td>
                     </tr>

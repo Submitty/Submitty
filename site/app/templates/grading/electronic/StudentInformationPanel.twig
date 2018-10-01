@@ -35,10 +35,10 @@
                             Team:<br/>
 
                             {% for team_member in team_members %}
-                                &emsp;{{ team_member.getDisplayedFirstName() }} {{ team_member.getLastName() }} ({{ team_member.getId() }})<br/>
+                                &emsp;{{ team_member.getDisplayedFirstName() }} {{ team_member.getDisplayedLastName() }} ({{ team_member.getId() }})<br/>
                             {% endfor %}
                         {% else %}
-                            {{ gradeable.getUser().getDisplayedFirstName() }} {{ gradeable.getUser().getLastName() }} ({{ gradeable.getUser().getId() }})
+                            {{ gradeable.getUser().getDisplayedFirstName() }} {{ gradeable.getUser().getDisplayedLastName() }} ({{ gradeable.getUser().getId() }})
                             <br/>
                         {% endif %}
 

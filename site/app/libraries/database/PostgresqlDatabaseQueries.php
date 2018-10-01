@@ -112,8 +112,8 @@ ORDER BY SUBSTRING(u.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(u.reg
 
 
     public function insertSubmittyUser(User $user) {
-        $array = array($user->getId(), $user->getPassword(), $user->getFirstName(), $user->getPreferredFirstName(),
-                       $user->getLastName(), $user->getPreferredLastName(), $user->getEmail(),
+        $array = array($user->getId(), $user->getPassword(), $user->getLegalFirstName(), $user->getPreferredFirstName(),
+                       $user->getLegalLastName(), $user->getPreferredLastName(), $user->getEmail(),
                        $this->submitty_db->convertBoolean($user->isUserUpdated()),
                        $this->submitty_db->convertBoolean($user->isInstructorUpdated()));
 
@@ -134,8 +134,8 @@ VALUES (?,?,?,?,?,?)", $params);
     }
 
     public function updateUser(User $user, $semester=null, $course=null) {
-        $params = array($user->getFirstName(), $user->getPreferredFirstName(),
-                       $user->getLastName(), $user->getPreferredLastName(), $user->getEmail(),
+        $params = array($user->getLegalFirstName(), $user->getPreferredFirstName(),
+                       $user->getLegalLastName(), $user->getPreferredLastName(), $user->getEmail(),
                        $this->submitty_db->convertBoolean($user->isUserUpdated()),
                        $this->submitty_db->convertBoolean($user->isInstructorUpdated()));
         $extra = "";

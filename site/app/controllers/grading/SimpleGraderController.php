@@ -181,7 +181,7 @@ class SimpleGraderController extends GradingController  {
         $student_full = json_encode(array_map(function(User $user) {
             return ['value' => $user->getId(),
                 'label' => $user->getDisplayedFirstName() . ' '
-                    . $user->getLastName()
+                    . $user->getDisplayedLastName()
                     . ' <' . $user->getId() . '>'];
         }, $students));
 
@@ -367,5 +367,5 @@ class SimpleGraderController extends GradingController  {
         return $response;
     }
 
-    
+
 }

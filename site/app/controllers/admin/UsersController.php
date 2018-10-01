@@ -32,7 +32,7 @@ class UsersController extends AbstractController {
                 break;
             case 'update_registration_sections':
                 $this->updateRegistrationSections();
-                break;    
+                break;
             case 'update_rotating_sections':
                 $this->updateRotatingSections();
                 break;
@@ -82,9 +82,10 @@ class UsersController extends AbstractController {
         $user = $this->core->getQueries()->getUserById($user_id);
         $this->core->getOutput()->renderJson(array(
             'user_id' => $user->getId(),
-            'user_firstname' => $user->getFirstName(),
-            'user_lastname' => $user->getLastName(),
+            'user_firstname' => $user->getLegalFirstName(),
+            'user_lastname' => $user->getLegalLastName(),
             'user_preferred_firstname' => $user->getPreferredFirstName(),
+            'user_preferred_lastname' => $user->getPreferredLastName(),
             'user_email' => $user->getEmail(),
             'user_group' => $user->getGroup(),
             'registration_section' => $user->getRegistrationSection(),
@@ -215,7 +216,7 @@ class UsersController extends AbstractController {
         $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'rotatingSectionsForm', $students, $reg_sections,
             $non_null_counts, $null_counts, $max_section);
     }
-    
+
     public function updateRegistrationSections() {
         $return_url = $this->core->buildUrl(
             array('component' => 'admin',
@@ -243,7 +244,7 @@ class UsersController extends AbstractController {
             if ($reg_section_exists == true) {
                 $this->core->addErrorMessage("Registration Section already present");
                 $_SESSION['request'] = $_POST;
-                $this->core->redirect($return_url);       
+                $this->core->redirect($return_url);
             }
             else {
                 #validation for registration section
@@ -254,7 +255,7 @@ class UsersController extends AbstractController {
                 else {
                     $this->core->addErrorMessage("Registration Section entered do not follow specified format");
                     $_SESSION['request'] = $_POST;
-                    $this->core->redirect($return_url);       
+                    $this->core->redirect($return_url);
                 }
             }
         }
@@ -271,7 +272,7 @@ class UsersController extends AbstractController {
             if ($valid_reg_section_flag == false) {
                 $this->core->addErrorMessage("Not a valid Registration Section");
                 $_SESSION['request'] = $_POST;
-                $this->core->redirect($return_url); 
+                $this->core->redirect($return_url);
             }
             else {
                 $no_user_flag=true;
@@ -281,7 +282,7 @@ class UsersController extends AbstractController {
                     if ($registration == $_POST['delete_reg_section']) {
                         $no_user_flag=false;
                         break;
-                    }    
+                    }
                 }
 
                 foreach ($graders as $grader) {
@@ -291,23 +292,23 @@ class UsersController extends AbstractController {
                             break;
                         }
                     }
-                }    
+                }
                 if (($no_user_flag != true) || ($no_grader_flag != true)) {
                     $this->core->addErrorMessage("Cannot delete registration section that has users and/or graders assigned to it");
                     $_SESSION['request'] = $_POST;
-                    $this->core->redirect($return_url);      
+                    $this->core->redirect($return_url);
                 }
                 else {
                     $this->core->getQueries()->deleteRegistrationSection($_POST['delete_reg_section']);
                     $this->core->addSuccessMessage("Registration section {$_POST['delete_reg_section']} deleted");
-                }    
+                }
             }
         }
 
         $this->core->addSuccessMessage("Registration sections setup");
         $this->core->redirect($return_url);
 
-    }        
+    }
 
     public function updateRotatingSections() {
         $return_url = $this->core->buildUrl(

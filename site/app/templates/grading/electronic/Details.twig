@@ -296,7 +296,7 @@
 {% macro render_column_team_id(self, section, gradeable, index, info, column) %}
     <td>
         {% if gradeable.getTeam() == null %}
-            
+
         {% else %}
             {{ gradeable.getTeam().getId() }}
         {% endif %}
@@ -308,12 +308,12 @@
     <td>
         {% if gradeable.getTeam() == null %}
             {{ gradeable.getUser().getDisplayedFirstName() }}
-            {{ gradeable.getUser().getLastName() }}
+            {{ gradeable.getUser().getDisplayedLastName() }}
         {% else %}
             {%- for member in gradeable.getTeam().getMemberUsers() -%}
                 {%- if loop.index != 1 -%}, {% endif -%}
                 {{- member.getDisplayedFirstName() }}
-                {{ member.getLastName() -}}
+                {{ member.getDisplayedLastName() -}}
             {%- endfor -%}
         {% endif %}
     </td>
@@ -383,7 +383,7 @@
 
 {# Last Name #}
 {% macro render_column_user_last(self, section, gradeable, index, info, column) %}
-    <td>{{ gradeable.getUser().getLastName() }}</td>
+    <td>{{ gradeable.getUser().getDisplayedLastName() }}</td>
 {% endmacro %}
 
 {# Viewed Grade #}
