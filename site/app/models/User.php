@@ -16,7 +16,8 @@ use app\libraries\Core;
  * @method string getDisplayedFirstName() Returns the preferred name if one exists and is not null or blank,
  *                                        otherwise return the first name field for the user.
  * @method string getLegalLastName() Get the last name of the loaded user
- * @method void setLastName(string $last_name)
+ * @method void setLegalFirstName(string $name)
+ * @method void setLegalLastName(string $name)
  * @method string getEmail()
  * @method void setEmail(string $email)
  * @method int getGroup()
@@ -193,12 +194,12 @@ class User extends AbstractModel {
     }
 
     public function setLegalFirstName($name) {
-        $this->first_name = $name;
+        $this->legal_first_name = $name;
         $this->setDisplayedFirstName();
     }
 
     public function setLegalLastName($name) {
-        $this->last_name = $name;
+        $this->legal_last_name = $name;
         $this->setDisplayedLastName();
     }
 
@@ -221,7 +222,7 @@ class User extends AbstractModel {
             $this->displayed_first_name = $this->preferred_first_name;
         }
         else {
-            $this->displayed_first_name = $this->first_name;
+            $this->displayed_first_name = $this->legal_first_name;
         }
     }
 
@@ -230,7 +231,7 @@ class User extends AbstractModel {
             $this->displayed_last_name = $this->preferred_last_name;
         }
         else {
-            $this->displayed_last_name = $this->last_name;
+            $this->displayed_last_name = $this->legal_last_name;
         }
     }
 
