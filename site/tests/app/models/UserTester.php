@@ -30,11 +30,11 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         $user = new User($this->core, $details);
         $this->assertEquals($details['user_id'], $user->getId());
         $this->assertEquals($details['anon_id'], $user->getAnonId());
-        $this->assertEquals($details['user_firstname'], $user->getFirstName());
+        $this->assertEquals($details['user_firstname'], $user->getLegalFirstName());
         $this->assertEquals($details['user_preferred_firstname'], $user->getPreferredFirstName());
         $this->assertEquals($details['user_firstname'], $user->getDisplayedFirstName());
         $this->assertEquals($details['user_preferred_lastname'], $user->getPreferredLastName());
-        $this->assertEquals($details['user_lastname'], $user->getLastName());
+        $this->assertEquals($details['user_lastname'], $user->getLegalLastName());
         $this->assertEquals($details['user_email'], $user->getEmail());
         $this->assertEquals($details['user_group'], $user->getGroup());
         $this->assertEquals($details['registration_section'], $user->getRegistrationSection());
@@ -65,10 +65,10 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         $user = new User($this->core, $details);
         $this->assertEquals($details['user_id'], $user->getId());
         $this->assertEquals($details['anon_id'], $user->getAnonId());
-        $this->assertEquals($details['user_firstname'], $user->getFirstName());
+        $this->assertEquals($details['user_firstname'], $user->getLegalFirstName());
         $this->assertEquals($details['user_preferred_firstname'], $user->getPreferredFirstName());
         $this->assertEquals($details['user_preferred_firstname'], $user->getDisplayedFirstName());
-        $this->assertEquals($details['user_lastname'], $user->getLastName());
+        $this->assertEquals($details['user_lastname'], $user->getLegalLastName());
         $this->assertEquals($details['user_preferred_lastname'], $user->getPreferredLastName());
         $this->assertEquals($details['user_preferred_lastname'], $user->getDisplayedLastName());
     }
@@ -122,11 +122,11 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'displayed_first_name' => 'User',
             'displayed_last_name' => 'Tester',
             'email' => 'test@example.com',
-            'first_name' => 'User',
+            'legal_first_name' => 'User',
             'grading_registration_sections' => array(1,2),
             'group' => 1,
             'id' => 'test',
-            'last_name' => 'Tester',
+            'legal_last_name' => 'Tester',
             'loaded' => true,
             'manual_registration' => false,
             'preferred_first_name' => "",
