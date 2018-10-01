@@ -56,7 +56,7 @@ function calculateGradedComponentTotalScore(component, graded_component) {
     // Calculate the total
     let total = component.default;
     if (graded_component.custom_mark_selected) {
-        total += graded_component.custom_mark_selected ? graded_component.score : 0.0;
+        total += graded_component.custom_mark_selected && !isNaN(graded_component.score) ? graded_component.score : 0.0;
         markCount++;
     }
     component.marks.forEach(function (mark) {
