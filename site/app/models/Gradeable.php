@@ -371,7 +371,9 @@ class Gradeable extends AbstractModel {
             if ($this->team_assignment) {
                 $this->team = $this->core->getQueries()->getTeamByGradeableAndUser($this->id, $this->user->getId());
             }
-            if (isset($details['active_version']) && $details['active_version'] !== null) {
+            $this->student_allowed_late_days = $details['student_allowed_late_days'] ?? $this->core->getConfig()->getDefaultStudentLateDays();
+
+            if (isset($details['g_version']) && $details['g_version'] !== null) {
                 $this->been_autograded = true;
                 $this->active_version = $details['active_version'];
                 $this->graded_auto_non_hidden_non_extra_credit = floatval($details['autograding_non_hidden_non_extra_credit']);
@@ -381,7 +383,6 @@ class Gradeable extends AbstractModel {
                 $this->submission_time = DateUtils::parseDateTime($details['submission_time'], $timezone);
                 $this->late_day_exceptions = $details['late_day_exceptions'];
                 $this->late_days = $details['days_late'];
-                $this->student_allowed_late_days = $details['student_allowed_late_days'] ?? $this->core->getConfig()->getDefaultStudentLateDays();
             }
             
             if (isset($details['highest_version']) && $details['highest_version']!== null) {
