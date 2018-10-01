@@ -406,7 +406,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                     version_user_1 = "max_matching";
                 }
 
-                var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatinated',
+                var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatenated',
                         'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1});
                 $.ajax({
                     url: url,
@@ -471,7 +471,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
             if (changed == 'user_id_2') {
                 if (($('[name="user_id_2"]', form).val()) == '') {
                     $('[name="code_box_2"]').empty();
-                    var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatinated',
+                    var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatenated',
                         'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'user_id_2':'', 'version_user_2': ''});
                     $.ajax({
                         url: url,
@@ -492,7 +492,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                 else {
                     var user_id_2 = JSON.parse($('[name="user_id_2"]', form).val())["user_id"];
                     var version_user_2 = JSON.parse($('[name="user_id_2"]', form).val())["version"];
-                    var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatinated',
+                    var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatenated',
                         'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'user_id_2':user_id_2, 'version_user_2': version_user_2});
                     $.ajax({
                         url: url,
