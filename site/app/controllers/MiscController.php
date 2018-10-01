@@ -471,7 +471,7 @@ class MiscController extends AbstractController {
 
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
 
-        $release_datetime = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO");
+        $release_datetime = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
         $json = FileUtils::readJsonFile($fp);
         if ($json != false) {
             $release_datetime  = $json[$file_name]['release_datetime'];
@@ -479,7 +479,7 @@ class MiscController extends AbstractController {
 
         if (!isset($release_datetime))
         {
-            $release_datetime = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO");
+            $release_datetime = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
         }
 
         $json[$file_name] = array('checked' => $checked, 'release_datetime' => $release_datetime);

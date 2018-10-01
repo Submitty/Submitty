@@ -512,38 +512,45 @@ registerKeyHandler({name: "Open Previous Component", code: 'ArrowUp'}, function(
 //-----------------------------------------------------------------------------
 // Selecting marks
 
-registerKeyHandler({name: "Select Mark 1", code: 'Digit1', locked: true}, function() {
+registerKeyHandler({name: "Select Full/No Credit Mark", code: 'Digit0', locked: true}, function() {
     checkOpenComponentMark(0);
 });
-registerKeyHandler({name: "Select Mark 2", code: 'Digit2', locked: true}, function() {
+registerKeyHandler({name: "Select Mark 1", code: 'Digit1', locked: true}, function() {
     checkOpenComponentMark(1);
 });
-registerKeyHandler({name: "Select Mark 3", code: 'Digit3', locked: true}, function() {
+registerKeyHandler({name: "Select Mark 2", code: 'Digit2', locked: true}, function() {
     checkOpenComponentMark(2);
 });
-registerKeyHandler({name: "Select Mark 4", code: 'Digit4', locked: true}, function() {
+registerKeyHandler({name: "Select Mark 3", code: 'Digit3', locked: true}, function() {
     checkOpenComponentMark(3);
 });
-registerKeyHandler({name: "Select Mark 5", code: 'Digit5', locked: true}, function() {
+registerKeyHandler({name: "Select Mark 4", code: 'Digit4', locked: true}, function() {
     checkOpenComponentMark(4);
 });
-registerKeyHandler({name: "Select Mark 6", code: 'Digit6', locked: true}, function() {
+registerKeyHandler({name: "Select Mark 5", code: 'Digit5', locked: true}, function() {
     checkOpenComponentMark(5);
 });
-registerKeyHandler({name: "Select Mark 7", code: 'Digit7', locked: true}, function() {
+registerKeyHandler({name: "Select Mark 6", code: 'Digit6', locked: true}, function() {
     checkOpenComponentMark(6);
 });
-registerKeyHandler({name: "Select Mark 8", code: 'Digit8', locked: true}, function() {
+registerKeyHandler({name: "Select Mark 7", code: 'Digit7', locked: true}, function() {
     checkOpenComponentMark(7);
 });
-registerKeyHandler({name: "Select Mark 9", code: 'Digit9', locked: true}, function() {
+registerKeyHandler({name: "Select Mark 8", code: 'Digit8', locked: true}, function() {
     checkOpenComponentMark(8);
+});
+registerKeyHandler({name: "Select Mark 9", code: 'Digit9', locked: true}, function() {
+    checkOpenComponentMark(9);
 });
 
 function checkOpenComponentMark(index) {
     let component_id = getFirstOpenComponentId();
     if (component_id !== NO_COMPONENT_ID) {
         let mark_id = getMarkIdFromOrder(component_id, index);
+        //TODO: Custom mark id is zero as well, should use something unique
+        if (mark_id === CUSTOM_MARK_ID || mark_id === 0) {
+            return;
+        }
         toggleCommonMark(component_id, mark_id)
             .catch(function (err) {
                 console.error(err);

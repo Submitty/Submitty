@@ -12,7 +12,7 @@
 <span class="col-no-gutters badge-container">
     <strong id="grading_total"
             class="badge {% if graded_component is defined %} {{ functions.getBadgeStyle(graded_component.total_score, component.max_value) }} {% endif %}">
-        {{ graded_component.total_score is defined ? graded_component.total_score|round(decimal_precision) : '-' }} / {{ component.max_value|round(decimal_precision) }}
+        {{ graded_component.total_score is defined ? graded_component.total_score|round(decimal_precision) : '&minus;' }} / {{ component.max_value|round(decimal_precision) }}
     </strong>
 </span>
 
