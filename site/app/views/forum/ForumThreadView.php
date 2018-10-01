@@ -625,15 +625,18 @@ HTML;
 						if($thread['status'] !=0) {
 							if($thread['status'] == 1) {
 								$fa_icon = "fa-check";
-								$fa_color = "palegreen";
+								$fa_color = "5cb85c";
 								$fa_margin_right = "0px";
+								$fa_font_size = "1.5em";
+
 							} else {
-								$fa_icon = "fa-exclamation";
-								$fa_color = "yellow";
+								$fa_icon = "fa-question";
+								$fa_color = "ff8000";
 								$fa_margin_right = "5px";
+								$fa_font_size = "1.8em";
 							}
 							$return .= <<<HTML
-							<i class="fa ${fa_icon}" style="margin-right:${fa_margin_right}; padding-left:3px;position:relative; float:right; display:inline-block; color:${fa_color}; -webkit-text-stroke-width: 1px;
+							<i class="fa ${fa_icon}" style="margin-right:${fa_margin_right}; padding-left:3px; position:relative; float:right; display:inline-block; color:${fa_color}; font-size:${fa_font_size}; -webkit-text-stroke-width: 0px;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i>
 HTML;
 						}
