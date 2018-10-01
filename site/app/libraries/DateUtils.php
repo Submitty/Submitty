@@ -94,13 +94,15 @@ class DateUtils {
         if (gettype($date) === 'string') {
             try {
                 $date = new \DateTime($date, $time_zone);
-                $date->setTimezone($time_zone);
             } catch (\Exception $e) {
                 throw new \InvalidArgumentException('Invalid DateTime Format');
             }
         } else if (!($date instanceof \DateTime)) {
             throw new \InvalidArgumentException('Passed object was not a DateTime object or a date string');
         }
+
+        // Make sure we always set the timezone
+        $date->setTimezone($time_zone);
 
         // Make sure we don't go above our range
         return min($date, new \DateTime(self::MAX_TIME, $time_zone));

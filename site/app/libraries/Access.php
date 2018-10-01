@@ -547,7 +547,7 @@ class Access {
      * @return bool If they are
      */
     public function isGradedGradeableInGradingSections($g, User $user) {
-        $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
+        $now = $this->core->getDateTimeNow();
 
         /* @var Gradeable|null $gradeable */
         /* @var Gradeable|null $graded_gradeable */

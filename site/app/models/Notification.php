@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\libraries\Core;
+use app\libraries\DateUtils;
 use app\libraries\Utils;
 
 /**
@@ -236,7 +237,7 @@ class Notification extends AbstractModel {
             else
                 return "{$hours} hours ago";
         } else {
-            return date_format(date_create($actual_time), "n/j g:i A");
+            return date_format(DateUtils::parseDateTime($actual_time, $this->core->getConfig()->getTimezone()), "n/j g:i A");
         }
     }
 }

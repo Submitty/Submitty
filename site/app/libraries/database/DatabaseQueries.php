@@ -698,7 +698,7 @@ ORDER BY egd.g_version", array($g_id, $user_id));
 
         $return = array();
         foreach ($this->course_db->rows() as $row) {
-            $row['submission_time'] = new \DateTime($row['submission_time'], $this->core->getConfig()->getTimezone());
+            $row['submission_time'] = DateUtils::parseDateTime($row['submission_time'], $this->core->getConfig()->getTimezone());
             $return[$row['g_version']] = new GradeableVersion($this->core, $row, $due_date);
         }
 

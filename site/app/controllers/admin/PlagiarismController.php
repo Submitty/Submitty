@@ -340,7 +340,7 @@ class PlagiarismController extends AbstractController {
 
         // if fails at following step, still provided code and cnfiguration get saved
 
-        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO");
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
         $current_time_string_tz = $current_time . " " . $this->core->getConfig()->getTimezone()->getName();
         $course_path = $this->core->getConfig()->getCoursePath();
         if (!@file_put_contents(FileUtils::joinPaths($course_path, "lichen", "config", ".".$gradeable_id.".lichenrun.timestamp"), $current_time_string_tz."\n")) {
@@ -399,7 +399,7 @@ class PlagiarismController extends AbstractController {
             $this->core->redirect($return_url);   
         }
 
-        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO");
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
         $current_time_string_tz = $current_time . " " . $this->core->getConfig()->getTimezone()->getName();
         $course_path = $this->core->getConfig()->getCoursePath();
         if (!@file_put_contents(FileUtils::joinPaths($course_path, "lichen", "config", ".".$gradeable_id.".lichenrun.timestamp"), $current_time_string_tz."\n")) {
