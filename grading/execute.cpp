@@ -1210,14 +1210,13 @@ int execute(const std::string &cmd,
          }
       } while (wpid == 0);
 
-      logfile << "Student process is finished." << std::endl;
       if (WIFEXITED(status)) {
-        logfile << "Child exited, status=" << WEXITSTATUS(status) << std::endl;
+        std::cout << "Child exited, status=" << WEXITSTATUS(status) << std::endl;
         if (WEXITSTATUS(status) == 0){
             result=0;
         }
         else{
-          logfile << "Child exited with status = " << WEXITSTATUS(status) << std::endl;
+          std::cout << "Child exited with status = " << WEXITSTATUS(status) << std::endl;
           result=1;
           //
           // NOTE: If wrapping /usr/bin/time around a program that exits with signal = 25
@@ -1231,7 +1230,6 @@ int execute(const std::string &cmd,
       else if (WIFSIGNALED(status)) {
           int what_signal =  WTERMSIG(status);
           OutputSignalErrorMessageToExecuteLogfile(what_signal,logfile);
-          logfile << "Child " << childPID << " was terminated with a status of: " << what_signal << std::endl;
           std::cout << "Child " << childPID << " was terminated with a status of: " << what_signal << std::endl;
           if (WTERMSIG(status) == 0){
             result=0;
@@ -1261,7 +1259,6 @@ int execute(const std::string &cmd,
       }
     }
 
-    logfile << "After error checking. Result was " << result << std::endl;
     logfile.close();
     std::cout <<"Result: "<<result<<std::endl;
     return result;
@@ -1276,7 +1273,7 @@ int execute(const std::string &cmd,
 * Tests to see if the student has used too much memory.
 */
 bool memory_ok(int rss_memory, int allowed_rss_memory, std::ostream &logfile){
-  logfile << " I have used " << rss_memory << " of " << allowed_rss_memory << " allowed memory" << std::endl;
+  std::cout << " I have used " << rss_memory << " of " << allowed_rss_memory << " allowed memory" << std::endl;
   if(rss_memory > allowed_rss_memory){
       return false;
   }
@@ -1291,7 +1288,7 @@ bool memory_ok(int rss_memory, int allowed_rss_memory, std::ostream &logfile){
 bool time_ok(float elapsed, float seconds_to_run, std::ostream &logfile){
   // allow 10 extra seconds for differences in wall clock
   // vs CPU time (imperfect solution)
-  logfile << "I have run for " << elapsed << " of " << (seconds_to_run + CPU_TO_WALLCLOCK_TIME_BUFFER) << " seconds"<<std::endl;
+  std::cout << "I have run for " << elapsed << " of " << (seconds_to_run + CPU_TO_WALLCLOCK_TIME_BUFFER) << " seconds"<<std::endl;
   if(elapsed > seconds_to_run + CPU_TO_WALLCLOCK_TIME_BUFFER){
       return false;
   }
@@ -1320,13 +1317,13 @@ bool delay_and_mem_check(float sleep_time_in_microseconds, int childPID, float &
     }
     if (elapsed >= next_checkpoint){ //if it is time to update our knowledge of the student's memory usage, do so.
       rss_memory = resident_set_size(childPID);
-      logfile << "time elapsed = " << elapsed << " seconds,  memory used = " << rss_memory << " kb" << std::endl;
+      std::cout << "time elapsed = " << elapsed << " seconds,  memory used = " << rss_memory << " kb" << std::endl;
       next_checkpoint = std::min(elapsed+5.0,elapsed*2.0);
     }
 
     if (!time_ok(elapsed, seconds_to_run,logfile)) { //If the student's program ran too long
       // terminate for excessive time
-      logfile << "Killing child process " << childPID << " after " << elapsed << " seconds elapsed." << std::endl;
+      std::cout << "Killing child process " << childPID << " after " << elapsed << " seconds elapsed." << std::endl;
       TerminateProcess(elapsed,childPID); //kill it.
       time_kill=1;
       return true;
@@ -1335,7 +1332,7 @@ bool delay_and_mem_check(float sleep_time_in_microseconds, int childPID, float &
       // terminate for excessive memory usage (RSS = resident set size = RAM)
       memory_kill=1;
       TerminateProcess(elapsed,childPID); //kill it.
-      logfile << "Killing child process " << childPID << " for using " << rss_memory << " kb RAM.  (limit is " << allowed_rss_memory << " kb)" << std::endl;
+      std::cout << "Killing child process " << childPID << " for using " << rss_memory << " kb RAM.  (limit is " << allowed_rss_memory << " kb)" << std::endl;
       return true;
     } 
   }

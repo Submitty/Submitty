@@ -963,7 +963,6 @@ void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken,
   int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill,
   std::ostream &logfile){
 
-  logfile << "woah" << std::endl;
   //We get the window data at every step in case it has changed size.
 
   //if we make it past this check, we'll assume an action has been taken.
@@ -985,7 +984,7 @@ void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken,
 
   std::string action_name = action.value("action", "ACTION_NOT_SPECIFIED");
 
-  //logfile<<"Taking action "<<actions_taken+1<<" of "<<actions.size() <<": "<< action_name<< std::endl;
+  std::cout <<"Taking action "<<actions_taken+1<<" of "<<actions.size() <<": "<< action_name<< std::endl;
 
   float delay_time = 0;
   //DELAY            
@@ -1017,7 +1016,7 @@ void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken,
       key(key_to_type, window_name);
     }
     else{
-      logfile << "ERROR: ill formatted key command. No key to type found." << std::endl;
+      std::cout << "ERROR: ill formatted key command. No key to type found." << std::endl;
     }
   }
   //CLICK AND DRAG    
@@ -1061,7 +1060,7 @@ void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken,
           mouse_move(window_name, moved_x, moved_y, x_start, x_end, y_start, y_end, no_clamp);
       }
       else{
-        logfile << "No mouse move due to unsuccessful data population." << std::endl;
+        std::cout << "No mouse move due to unsuccessful data population." << std::endl;
       }
     }
   }
@@ -1075,7 +1074,7 @@ void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken,
   }
    //BAD COMMAND
   else{
-    logfile << "ERROR: ill formatted action: " << actions[actions_taken] << std::endl;
+    std::cout << "ERROR: ill formatted action: " << actions[actions_taken] << std::endl;
   }
   actions_taken++;
   delay_and_mem_check(delay_time, childPID, elapsed, next_checkpoint, 
