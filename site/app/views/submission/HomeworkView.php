@@ -379,7 +379,7 @@ class HomeworkView extends AbstractView {
                 $url = $this->core->buildUrl([
                     'component' => 'misc',
                     'page' => 'display_file',
-                    'dir' => 'uploads',
+                    'dir' => 'split_pdf',
                     'file' => $filename,
                     'path' => $path,
                     'ta_grading' => 'false'

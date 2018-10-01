@@ -371,6 +371,7 @@ table tr.table-header {
     border-radius: 3px;
     padding: 30px;
     margin: 15px;
+    flex-grow: 1;
 }
 
 .content h1 {
@@ -388,8 +389,12 @@ table tr.table-header {
 }
 
 #footer {
-    margin-top: 15px;
+    margin-top: -10px;
     z-index: 20;
+    width: 100%;
+    padding: 5px 0 10px 0;
+    text-align: center;
+    clear: both;
 }
 
 #push {
@@ -402,13 +407,6 @@ table tr.table-header {
 
 #footer a:hover {
     color: #4078c0;
-}
-
-#footer {
-    width: 100%;
-    padding: 5px 0;
-    text-align: center;
-    clear: both;
 }
 
 #footer #copyright {
@@ -933,6 +931,8 @@ table .instructor .two-options{
 #nav-positioner {
     margin-left: -30px;
     flex-grow: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 #nav-buttons {
