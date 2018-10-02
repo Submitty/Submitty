@@ -159,12 +159,20 @@ class GradedComponent extends AbstractModel {
     }
 
     /**
+     * Gets if the graded component has any marks assigned to it
+     * @return bool
+     */
+    public function anyMarks() {
+        return count($this->marks) !== 0;
+    }
+
+    /**
      * Gets the total number of points earned for this component
      *  (including mark points)
      * @return float
      */
     public function getTotalScore() {
-        if (count($this->marks) === 0 && $this->getScore() == 0.0) {
+        if (!$this->anyMarks() && $this->getScore() == 0.0) {
             return 0.0; // Return no points if the user has no marks and no custom marks
         }
         // Be sure to add the default so count-down gradeables don't become negative
