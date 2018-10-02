@@ -1135,7 +1135,7 @@ class ElectronicGraderController extends GradingController {
         // TODO: delete this once late days are using new model
         $old_gradeable = null;
         if($graded_gradeable->getSubmitter()->isTeam()) {
-            $old_gradeable = $this->core->getQueries()->getGradeable($gradeable, $graded_gradeable->getSubmitter()->getTeam()->getLeaderId());
+            $old_gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $graded_gradeable->getSubmitter()->getTeam()->getLeaderId());
         } else {
             $old_gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $submitter_id);
         }
@@ -1144,7 +1144,7 @@ class ElectronicGraderController extends GradingController {
 
         $this->core->getOutput()->addInternalCss('ta-grading.css');
         $show_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $gradeable]);
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $old_gradeable, $gradeable, $graded_gradeable, $display_version, $progress, $prev_id, $next_id, $not_in_my_section, $show_hidden, $can_verify, $show_verify_all, $show_silent_edit, $late_status);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $prev_id, $next_id, $not_in_my_section, $show_hidden, $can_verify, $show_verify_all, $show_silent_edit, $late_status);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupMarkConflicts');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupSettings');
