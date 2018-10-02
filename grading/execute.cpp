@@ -43,9 +43,9 @@ extern const int CPU_TO_WALLCLOCK_TIME_BUFFER;  // defined in default_config.h
 // =====================================================================================
 
 
-bool system_program(const std::string &program, std::string &full_path_executable) {
+bool system_program(const std::string &program, std::string &full_path_executable, const bool running_in_docker) {
 
-  const std::map<std::string,std::string> allowed_system_programs = {
+  std::map<std::string,std::string> allowed_system_programs = {
 
     // Basic System Utilities (for debugging)
     { "ls",                      "/bin/ls", },
@@ -144,6 +144,9 @@ bool system_program(const std::string &program, std::string &full_path_executabl
 
   };
 
+  if(running_in_docker){
+    allowed_system_programs.insert({"bash", "/bin/bash"});
+  }
   // find full path name
   std::map<std::string,std::string>::const_iterator itr = allowed_system_programs.find(program);
   if (itr != allowed_system_programs.end()) {
@@ -218,7 +221,8 @@ std::string validate_program(const std::string &program, const nlohmann::json &w
     std::cerr << message << std::endl;
     exit(1);
   } else {
-    if (system_program(program,full_path_executable)) {
+    bool running_in_docker = whole_config.value("docker_enabled", false);
+    if (system_program(program,full_path_executable,running_in_docker)) {
       return full_path_executable;
     }
 
@@ -566,7 +570,7 @@ void parse_command_line(const std::string &cmd,
       std::string &my_stdout,
       std::string &my_stderr,
       std::ofstream &logfile, 
-                        const nlohmann::json &whole_config) {
+      const nlohmann::json &whole_config) {
 
   std::cout << "PARSE COMMAND LINE " << cmd << std::endl;
 
@@ -935,8 +939,9 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   }
   // END SECCOMP
 
-  
   int child_result =  execv ( my_program.c_str(), my_char_args );
+  
+
   // if exec does not fail, we'll never get here
 
   umask(prior_umask);  // reset to the prior umask
@@ -1188,23 +1193,22 @@ int execute(const std::string &cmd,
               if(window_mode && windowName != "" && windowExists(windowName) && actions_taken < actions.size()){ 
                 takeAction(actions, actions_taken, number_of_screenshots, windowName, 
                   childPID, elapsed, next_checkpoint, seconds_to_run, rss_memory, allowed_rss_memory, 
-                  memory_kill, time_kill); //Takes each action on the window. Requires delay parameters to do delays.
+                  memory_kill, time_kill, logfile); //Takes each action on the window. Requires delay parameters to do delays.
               }
               //If we do not expect a window and we still have actions to take
               else if(!window_mode && actions_taken < actions.size()){ 
                 takeAction(actions, actions_taken, number_of_screenshots, windowName, 
                   childPID, elapsed, next_checkpoint, seconds_to_run, rss_memory, allowed_rss_memory, 
-                  memory_kill, time_kill); //Takes each action on the window. Requires delay parameters to do delays.
+                  memory_kill, time_kill, logfile); //Takes each action on the window. Requires delay parameters to do delays.
               }
               //if we are out of actions or there were none, delay 1/10th second.
               else{ 
                 delay_and_mem_check(100000, childPID, elapsed, next_checkpoint, seconds_to_run, 
-                  rss_memory, allowed_rss_memory, memory_kill, time_kill);
+                  rss_memory, allowed_rss_memory, memory_kill, time_kill, logfile);
               }
             }
          }
       } while (wpid == 0);
-
 
       if (WIFEXITED(status)) {
         std::cout << "Child exited, status=" << WEXITSTATUS(status) << std::endl;
@@ -1254,6 +1258,8 @@ int execute(const std::string &cmd,
         cin_thread.join();
       }
     }
+
+    logfile.close();
     std::cout <<"Result: "<<result<<std::endl;
     return result;
 }
@@ -1266,7 +1272,7 @@ int execute(const std::string &cmd,
 /**
 * Tests to see if the student has used too much memory.
 */
-bool memory_ok(int rss_memory, int allowed_rss_memory){
+bool memory_ok(int rss_memory, int allowed_rss_memory, std::ostream &logfile){
   if(rss_memory > allowed_rss_memory){
       return false;
   }
@@ -1278,7 +1284,7 @@ bool memory_ok(int rss_memory, int allowed_rss_memory){
 /**
 * Tests to see if the student has used too much time.
 */
-bool time_ok(float elapsed, float seconds_to_run){
+bool time_ok(float elapsed, float seconds_to_run, std::ostream &logfile){
   // allow 10 extra seconds for differences in wall clock
   // vs CPU time (imperfect solution)
   if(elapsed > seconds_to_run + CPU_TO_WALLCLOCK_TIME_BUFFER){
@@ -1293,7 +1299,8 @@ bool time_ok(float elapsed, float seconds_to_run){
 * Delays for a number of microseconds, checking the student's memory and time consumption at intervals.
 */
 bool delay_and_mem_check(float sleep_time_in_microseconds, int childPID, float &elapsed, float& next_checkpoint, 
-                float seconds_to_run, int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill){
+                float seconds_to_run, int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill,
+                std::ostream &logfile){
   float time_left = sleep_time_in_microseconds;
   while(time_left > 0){
     if(time_left > 100000){ //while we have more than 1/10th second left. 
@@ -1312,14 +1319,14 @@ bool delay_and_mem_check(float sleep_time_in_microseconds, int childPID, float &
       next_checkpoint = std::min(elapsed+5.0,elapsed*2.0);
     }
 
-    if (!time_ok(elapsed, seconds_to_run)) { //If the student's program ran too long
+    if (!time_ok(elapsed, seconds_to_run,logfile)) { //If the student's program ran too long
       // terminate for excessive time
       std::cout << "Killing child process " << childPID << " after " << elapsed << " seconds elapsed." << std::endl;
       TerminateProcess(elapsed,childPID); //kill it.
       time_kill=1;
       return true;
     }
-    if (!memory_ok(rss_memory, allowed_rss_memory)){ //if the student's program used too much memory
+    if (!memory_ok(rss_memory, allowed_rss_memory,logfile)){ //if the student's program used too much memory
       // terminate for excessive memory usage (RSS = resident set size = RAM)
       memory_kill=1;
       TerminateProcess(elapsed,childPID); //kill it.
