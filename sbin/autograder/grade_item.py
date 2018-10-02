@@ -375,7 +375,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                         container_image = my_testcases[testcase_num-1]["containers"][0]["container_image"]
                         print('creating a compilation container with image {0}'.format(container_image))
                     untrusted_uid = str(getpwnam(which_untrusted).pw_uid)
-                    print("{0}'s uid is {1}".format(which_untrusted, untrusted_uid))
+
                     compilation_container = None
                     compilation_container = subprocess.check_output(['docker', 'create', '-i', '-u', untrusted_uid, '--network', 'none',
                                                '-v', testcase_folder + ':' + testcase_folder,

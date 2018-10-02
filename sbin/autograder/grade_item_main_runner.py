@@ -144,7 +144,6 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                     #Now that all dockers are running, wait on their return code for success or failure. If any fail, we count it
                     #   as a total failure.
                     for name, process in processes.items():
-                        print("{0}: I'm going to wait for {1} to finish up.".format(which_untrusted, name))
                         process.wait()
                         rc = process.returncode
                         runner_success = rc if first_testcase else max(runner_success, rc)
