@@ -607,7 +607,7 @@ class ElectronicGraderController extends GradingController {
             }
         }
 
-        $graded_gradeables = $this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids, null, $section_key);
+        $sorted_graded_gradeables = $graded_gradeables = $this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids, null, [$section_key, 'user_id']);
         if ($gradeable->isTeamAssignment()) {
             // Rearrange gradeables arrray into form (sec 1 teams, sec 1 individuals, sec 2 teams, sec 2 individuals, etc...)
             $sections = array();
@@ -641,7 +641,6 @@ class ElectronicGraderController extends GradingController {
             }
 
             asort($sections);
-            $sorted_graded_gradeables = array();
             foreach($sections as $section) {
                 if (isset($team_rows[$section])) {
                     $sorted_graded_gradeables = array_merge($sorted_graded_gradeables, $team_rows[$section]);
