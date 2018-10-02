@@ -73,7 +73,7 @@ class TeamController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
         $settings_file = FileUtils::joinPaths($user_path, "user_assignment_settings.json");
         $json = array("team_history" => array(array("action" => "create", "time" => $current_time, "user" => $user_id)));
 
@@ -103,7 +103,7 @@ class TeamController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        $date = new \DateTime("now", $this->core->getConfig()->getTimezone());
+        $date = $this->core->getDateTimeNow();
         if ($date->format('Y-m-d H:i:s') > $gradeable->getTeamLockDate()->format('Y-m-d H:i:s')) {
             $this->core->addErrorMessage("Teams are now locked. Contact your instructor to change your team.");
             $this->core->redirect($return_url);
@@ -112,7 +112,7 @@ class TeamController extends AbstractController {
         $this->core->getQueries()->leaveTeam($team->getId(), $user_id);
         $this->core->addSuccessMessage("Left team");
 
-        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
         $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id, $team->getId(), "user_assignment_settings.json");
         $json = FileUtils::readJsonFile($settings_file);
         if ($json === false) {
@@ -147,7 +147,7 @@ class TeamController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        $date = new \DateTime("now", $this->core->getConfig()->getTimezone());
+        $date = $this->core->getDateTimeNow();
         if ($date->format('Y-m-d H:i:s') > $gradeable->getTeamLockDate()->format('Y-m-d H:i:s')) {
             $this->core->addErrorMessage("Teams are now locked. Contact your instructor to change your team.");
             $this->core->redirect($return_url);
@@ -183,7 +183,7 @@ class TeamController extends AbstractController {
         $this->core->getQueries()->sendTeamInvitation($team->getId(), $invite_id);
         $this->core->addSuccessMessage("Invitation sent to {$invite_id}");
 
-        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
         $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id, $team->getId(), "user_assignment_settings.json");
         $json = FileUtils::readJsonFile($settings_file);
         if ($json === false) {
@@ -240,7 +240,7 @@ class TeamController extends AbstractController {
         $this->core->getQueries()->removeFromSeekingTeam($gradeable_id,$user_id);
         $this->core->addSuccessMessage("Accepted invitation from {$accept_team->getMemberList()}");
 
-        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
         $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id, $accept_team_id, "user_assignment_settings.json");
         $json = FileUtils::readJsonFile($settings_file);
         if ($json === false) {
@@ -275,7 +275,7 @@ class TeamController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        $date = new \DateTime("now", $this->core->getConfig()->getTimezone());
+        $date = $this->core->getDateTimeNow();
         if ($date->format('Y-m-d H:i:s') > $gradeable->getTeamLockDate()->format('Y-m-d H:i:s')) {
             $this->core->addErrorMessage("Teams are now locked. Contact your instructor to change your team.");
             $this->core->redirect($return_url);
@@ -290,7 +290,7 @@ class TeamController extends AbstractController {
         $this->core->getQueries()->cancelTeamInvitation($team->getId(), $cancel_id);
         $this->core->addSuccessMessage("Cancelled invitation to {$cancel_id}");
 
-        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
         $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id, $team->getId(), "user_assignment_settings.json");
         $json = FileUtils::readJsonFile($settings_file);
         if ($json === false) {
@@ -356,7 +356,7 @@ class TeamController extends AbstractController {
         }
 
         $teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
-        $date = new \DateTime("now", $this->core->getConfig()->getTimezone());
+        $date = $this->core->getDateTimeNow();
         $lock = $date->format('Y-m-d H:i:s') > $gradeable->getTeamLockDate()->format('Y-m-d H:i:s');
         $users_seeking_team = $this->core->getQueries()->getUsersSeekingTeamByGradeableId($gradeable_id);
         $this->core->getOutput()->renderOutput(array('submission', 'Team'), 'showTeamPage', $gradeable, $teams, $lock, $users_seeking_team);

@@ -724,7 +724,7 @@ class AdminGradeableController extends AbstractController {
         }
 
         // Setup good default dates
-        $tonight = new \DateTime();
+        $tonight = $this->core->getDateTimeNow();
         $tonight->setTime(23, 59, 59);
         $gradeable_create_data = array_merge($gradeable_create_data, [
             'ta_view_start_date' => (clone $tonight)->sub(new \DateInterval('P1D')),
@@ -972,7 +972,7 @@ class AdminGradeableController extends AbstractController {
 
         $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
         $dates = $gradeable->getDates();
-        $now = new \DateTime('now', $this->core->getConfig()->getTimezone());
+        $now = $this->core->getDateTimeNow();
         $message = "";
         $success = null;
         //what happens on the quick link depends on the action

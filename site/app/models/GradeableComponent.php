@@ -2,6 +2,7 @@
 
 namespace app\models;
 use app\libraries\Core;
+use app\libraries\DateUtils;
 
 /**
  * Class GradeableComponent
@@ -122,7 +123,7 @@ class GradeableComponent extends AbstractModel {
             $this->grader = $details['gcd_grader'];
             $this->graded_version = isset($details['gcd_graded_version']) ? $details['gcd_graded_version']: null;
             if (isset($details['gcd_grade_time'])) {
-                $this->grade_time = new \DateTime($details['gcd_grade_time'], $this->core->getConfig()->getTimezone());
+                $this->grade_time = DateUtils::parseDateTime($details['gcd_grade_time'], $this->core->getConfig()->getTimezone());
             }
             // will need to edit this to clarify this is only personalized score
             // will need to add a total score

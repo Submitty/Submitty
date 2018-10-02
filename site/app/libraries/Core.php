@@ -449,6 +449,14 @@ class Core {
     }
 
     /**
+     * Gets the current time in the config timezone
+     * @return \DateTime
+     */
+    public function getDateTimeNow() {
+        return new \DateTime('now', $this->getConfig()->getTimezone());
+    }
+
+    /**
      * Given a string URL, sets up a CURL request to that URL, wherein it'll either return the response
      * assuming that we
      *
