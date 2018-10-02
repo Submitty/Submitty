@@ -377,7 +377,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                     untrusted_uid = str(getpwnam(which_untrusted).pw_uid)
                     print("{0}'s uid is {1}".format(which_untrusted, untrusted_uid))
                     compilation_container = None
-                    compilation_container = subprocess.check_output(['docker', 'create', '-u', untrusted_uid, '--network', 'none',
+                    compilation_container = subprocess.check_output(['docker', 'create', '-i', '-u', untrusted_uid, '--network', 'none',
                                                '-v', testcase_folder + ':' + testcase_folder,
                                                '-w', testcase_folder,
                                                container_image,
@@ -386,7 +386,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                                                queue_obj['who'], str(queue_obj['version']), submission_string, str(testcase_num)
                                                ]).decode('utf8').strip()
                     print("starting container")
-                    compile_success = subprocess.call(['docker', 'start', compilation_container],
+                    compile_success = subprocess.call(['docker', 'start', '-i', compilation_container],
                                                    stdout=logfile,
                                                    cwd=testcase_folder)
                 except Exception as e:
