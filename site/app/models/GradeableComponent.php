@@ -162,7 +162,7 @@ class GradeableComponent extends AbstractModel {
     }
 
     public function getGradedTAPoints() {
-        if (!$this->getHasMarks() && $this->score == 0) {
+        if (!$this->getHasMarks() && $this->score == 0.0) {
             return 0.0; // No score if no points or marks are awarded.
         }
         $points = $this->default;
