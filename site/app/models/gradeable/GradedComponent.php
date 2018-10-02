@@ -46,7 +46,7 @@ class GradedComponent extends AbstractModel {
     protected $marks_modified = false;
 
     /** @property @var float The score for this component (or custom mark point value) */
-    protected $score = 0;
+    protected $score = 0.0;
     /** @property @var string The comment on this mark / custom mark description */
     protected $comment = "";
     /** @property @var string The Id of the grader who most recently updated the component's grade */
@@ -164,6 +164,9 @@ class GradedComponent extends AbstractModel {
      * @return float
      */
     public function getTotalScore() {
+        if (count($this->marks) === 0 || $this->getScore() === 0.0) {
+            return 0.0; // Return no points if the user has no marks and no custom marks
+        }
         // Be sure to add the default so count-down gradeables don't become negative
         $score = $this->component->getDefault();
         foreach($this->marks as $mark) {
