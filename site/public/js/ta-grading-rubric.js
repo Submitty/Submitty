@@ -816,6 +816,16 @@ function ajaxVerifyAllComponents(gradeable_id, anon_id) {
 }
 
 /**
+ * Gets if the 'verify' button should show up for a component
+ * @param {Object} graded_component
+ * @param {string} grader_id
+ * @returns {boolean}
+ */
+function showVerifyComponent(graded_component, grader_id) {
+    return graded_component !== undefined && graded_component.grader_id !== '' && grader_id !== graded_component.grader_id
+}
+
+/**
  * Put all DOM accessing methods here to abstract the DOM from the other function
  *  of the interface
  */
@@ -1232,7 +1242,7 @@ function getMarkFromDOM(mark_id) {
             points: parseFloat(domElement.find('input[type=number]').val()),
             title: domElement.find('input[type=text]').val(),
             deleted: domElement.hasClass('mark-deleted'),
-            publish: domElement.find('.mark-publish input[type=checkbox]').is(':checked')
+            publish: domElement.find('.mark-publish-container input[type=checkbox]').is(':checked')
         };
     } else {
         if (mark_id === 0) {
@@ -1242,7 +1252,7 @@ function getMarkFromDOM(mark_id) {
             id: parseInt(domElement.attr('data-mark_id')),
             points: parseFloat(domElement.find('.mark-points').attr('data-points')),
             title: domElement.find('.mark-title').attr('data-title'),
-            publish: domElement.attr('data-publish')
+            publish: domElement.attr('data-publish') === 'true',
         };
     }
 }
@@ -1290,12 +1300,16 @@ function getGradedComponentFromDOM(component_id) {
     }
 
     let dataDOMElement = domElement.find('.graded-component-data');
+    let gradedVersion = dataDOMElement.attr('data-graded_version');
+    if (gradedVersion === '') {
+        gradedVersion = getDisplayVersion();
+    }
     return {
         score: score,
         comment: comment,
         custom_mark_selected: customMarkSelected,
         mark_ids: mark_ids,
-        graded_version: parseInt(dataDOMElement.attr('data-graded_version')),
+        graded_version: parseInt(gradedVersion),
         grade_time: dataDOMElement.attr('data-grade_time'),
         grader_id: dataDOMElement.attr('data-grader_id'),
         verifier_id: dataDOMElement.attr('data-verifier_id')
@@ -1311,8 +1325,10 @@ function getScoresFromDOM() {
 
     // Get the TA grading scores
     let scores = {
+        ta_grading_complete: getTaGradingComplete(),
         ta_grading_earned: getTaGradingEarned(),
-        ta_grading_total: getTaGradingTotal()
+        ta_grading_total: getTaGradingTotal(),
+        auto_grading_complete: false
     };
 
     // Then check if auto grading scorse exist before adding them
@@ -1320,6 +1336,7 @@ function getScoresFromDOM() {
     if (autoGradingTotal !== '') {
         scores.auto_grading_earned = parseInt(dataDOMElement.attr('data-auto_grading_earned'));
         scores.auto_grading_total = parseInt(autoGradingTotal);
+        scores.auto_grading_complete = true;
     }
 
     return scores;
@@ -1362,6 +1379,22 @@ function getTaGradingEarned() {
     }
     return total;
 }
+
+/**
+ * Gets if all components have a grade assigned
+ * @return {boolean} If all components have at least one mark checked
+ */
+function getTaGradingComplete() {
+    let anyIncomplete = false;
+    $('.graded-component-data').each(function () {
+        let pointsEarned = $(this).attr('data-total_score');
+        if (pointsEarned === '') {
+            anyIncomplete = true;
+        }
+    });
+    return !anyIncomplete;
+}
+
 
 /**
  * Gets the number of ta grading points that can be earned
@@ -1647,6 +1680,15 @@ function updateVerifyAllButton() {
     } else {
         $('#verify-all').show();
     }
+}
+
+/**
+ * Gets if the provided graded component is in conflict with the display version
+ * @param {Object} graded_component
+ * @returns {boolean}
+ */
+function getComponentVersionConflict(graded_component) {
+    return graded_component !== undefined && graded_component.graded_version !== getDisplayVersion();
 }
 
 
@@ -1972,6 +2014,14 @@ function onComponentPageNumberChange(me) {
 }
 
 /**
+ * Callback for changing the 'publish' setting of a mark
+ * @param me DOM element of the check box
+ */
+function onMarkPublishChange(me) {
+    getMarkJQuery(getMarkIdFromDOMElement(me)).toggleClass('mark-publish');
+}
+
+/**
  * Put all of the primary logic of the TA grading rubric here
  *
  */
@@ -2083,7 +2133,8 @@ function reloadGradingRubric(gradeable_id, anon_id) {
             alert('Could not fetch graded gradeable: ' + err.message);
         })
         .then(function (graded_gradeable) {
-            return renderGradingGradeable(getGraderId(), gradeable_tmp, graded_gradeable, isGradingDisabled(), canVerifyGraders());
+            return renderGradingGradeable(getGraderId(), gradeable_tmp, graded_gradeable,
+                isGradingDisabled(), canVerifyGraders(), getDisplayVersion());
         })
         .then(function (elements) {
             setRubricDOMElements(elements);
@@ -2652,10 +2703,8 @@ function saveMarkList(component_id) {
  * @return {boolean}
  */
 function marksEqual(mark0, mark1) {
-    // publish settings only applies in instructor edit mode.  If a non-instructor
-    //  edits a mark, it doesn't overwrite the publish setting anyway.
     return mark0.points === mark1.points && mark0.title === mark1.title
-        && (!isInstructorEditEnabled() || mark0.publish === mark1.publish);
+        && mark0.publish === mark1.publish;
 }
 
 /**
@@ -2957,7 +3006,7 @@ function injectInstructorEditComponentHeader(component, showMarkList) {
  * @return {Promise}
  */
 function injectGradingComponent(component, graded_component, editable, showMarkList) {
-    return renderGradingComponent(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), getPointPrecision(), editable, showMarkList)
+    return renderGradingComponent(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), getPointPrecision(), editable, showMarkList, getComponentVersionConflict(graded_component))
         .then(function (elements) {
             setComponentContents(component.id, elements);
         })
@@ -2974,7 +3023,7 @@ function injectGradingComponent(component, graded_component, editable, showMarkL
  * @return {Promise}
  */
 function injectGradingComponentHeader(component, graded_component, showMarkList) {
-    return renderGradingComponentHeader(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), showMarkList)
+    return renderGradingComponentHeader(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), showMarkList, getComponentVersionConflict(graded_component))
         .then(function (elements) {
             setComponentHeaderContents(component.id, elements);
         })

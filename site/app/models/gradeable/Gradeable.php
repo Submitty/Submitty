@@ -607,7 +607,7 @@ class Gradeable extends AbstractModel {
      */
     public function getDateStrings(bool $add_utc_offset = true) {
         $date_strings = [];
-        $now = new \DateTime('now', $this->core->getConfig()->getTimezone());
+        $now = $this->core->getDateTimeNow();
         foreach (self::date_properties as $property) {
             $date_strings[$property] = DateUtils::dateTimeToString($this->$property ?? $now, $add_utc_offset);
         }
@@ -1299,7 +1299,7 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function isTaGradeReleased() {
-        return $this->grade_released_date < new \DateTime("now", $this->core->getConfig()->getTimezone());
+        return $this->grade_released_date < $this->core->getDateTimeNow();
     }
 
     /**
@@ -1307,7 +1307,7 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function isSubmissionOpen() {
-        return $this->submission_open_date < new \DateTime("now", $this->core->getConfig()->getTimezone());
+        return $this->submission_open_date < $this->core->getDateTimeNow();
     }
 
     /**
@@ -1461,7 +1461,7 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function isRegradeOpen() {
-        if ($this->core->getConfig()->isRegradeEnabled()==true && $this->isTaGradeReleased() && $this->regrade_allowed && ($this->regrade_request_date > new \DateTime('now', $this->core->getConfig()->getTimezone()))) {
+        if ($this->core->getConfig()->isRegradeEnabled()==true && $this->isTaGradeReleased() && $this->regrade_allowed && ($this->regrade_request_date > $this->core->getDateTimeNow())) {
             return true;
         }
         return false;
@@ -1525,7 +1525,7 @@ class Gradeable extends AbstractModel {
             throw new \Exception("Failed to make folder for this assignment for the team");
         }
 
-        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO")
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")
             . " " . $this->core->getConfig()->getTimezone()->getName();
         $settings_file = FileUtils::joinPaths($user_path, "user_assignment_settings.json");
 
