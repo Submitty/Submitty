@@ -327,7 +327,9 @@ class DatabaseQueries {
         return $this->course_db->rows()[0];
     }
 
-
+    public function removeNotificationsFromParent($post_id) {
+        $this->course_db->query("DELETE FROM notifications where metadata::json->>1 = ?", array($post_id));
+    }
 
     public function isStaffPost($author_id){
         $this->course_db->query("SELECT user_group FROM users WHERE user_id=?", array($author_id));
