@@ -172,8 +172,8 @@ class GradedComponent extends AbstractModel {
      * @return float
      */
     public function getTotalScore() {
-        if (!$this->anyMarks() && $this->getScore() == 0.0) {
-            return 0.0; // Return no points if the user has no marks and no custom marks
+        if (!$this->anyMarks() && $this->getComment() === '') {
+            return 0.0; // Return no points if the user has no marks and no custom mark
         }
         // Be sure to add the default so count-down gradeables don't become negative
         $score = $this->component->getDefault();
