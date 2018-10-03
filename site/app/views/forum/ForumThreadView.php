@@ -625,13 +625,13 @@ HTML;
 						if($thread['status'] !=0) {
 							if($thread['status'] == 1) {
 								$fa_icon = "fa-check";
-								$fa_color = "5cb85c";
+								$fa_color = "#5cb85c";
 								$fa_margin_right = "0px";
 								$fa_font_size = "1.5em";
 
 							} else {
 								$fa_icon = "fa-question";
-								$fa_color = "ff8000";
+								$fa_color = "#ff8000";
 								$fa_margin_right = "5px";
 								$fa_font_size = "1.8em";
 							}
