@@ -495,7 +495,7 @@ class ForumController extends AbstractController {
             $post_author = $post['author_user_id'];
             $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'deleted', 'thread_id' => $thread_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
             $this->core->getQueries()->pushNotification($notification);
-            $this->core->getQueries()->removeNotificationsFromParent($post_id);
+            $this->core->getQueries()->removeNotificationsPost($post_id);
             $this->core->getOutput()->renderJson($response = array('type' => $type));
             return $response;
         } else if($modifyType == 2) { //undelete post or thread
