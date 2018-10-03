@@ -171,7 +171,7 @@ class GradedComponent extends AbstractModel {
      * @return bool
      */
     public function hasCustomMark() {
-        return $this->getComment() !== '' && $this->getScore() != 0.0;
+        return $this->getComment() !== '' || $this->getScore() != 0.0;
     }
 
     /**
