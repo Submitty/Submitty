@@ -636,8 +636,7 @@ HTML;
 								$fa_font_size = "1.8em";
 							}
 							$return .= <<<HTML
-							<i class="fa ${fa_icon}" style="margin-right:${fa_margin_right}; padding-left:3px; position:relative; float:right; display:inline-block; color:${fa_color}; font-size:${fa_font_size}; -webkit-text-stroke-width: 0px;
-    -webkit-text-stroke-color: black;" aria-hidden="true"></i>
+							<i class="fa ${fa_icon}" style="margin-right:${fa_margin_right}; padding-left:3px; position:relative; float:right; display:inline-block; color:${fa_color}; font-size:${fa_font_size};" aria-hidden="true"></i>
 HTML;
 						}
 						$categories_content = array();
