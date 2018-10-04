@@ -67,7 +67,9 @@ class SimpleGraderController extends GradingController  {
             $sort_by = "coalesce(u.user_preferred_firstname, u.user_firstname)";
         }
         else if($sort_by === "last"){
-            $sort_by = "coalesce(u.user_preferred_lastname, u.user_lastname)";
+            // this will be done in a later update
+            //$sort_by = "coalesce(u.user_preferred_lastname, u.user_lastname)";
+            $sort_by = "u.user_lastname";
         }
 
         //Figure out what section we are supposed to print
@@ -147,7 +149,9 @@ class SimpleGraderController extends GradingController  {
         }
         else{
             $sort = "last";
-            $sort_key = "coalesce(u.user_preferred_lastname, u.user_lastname)";
+            // this will be done in a later update
+            //$sort_key = "coalesce(u.user_preferred_lastname, u.user_lastname)";
+            $sort_key = "u.user_lastname";
         }
 
         if ($gradeable->isGradeByRegistration()) {
