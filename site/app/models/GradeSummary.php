@@ -32,7 +32,7 @@ class GradeSummary extends AbstractModel {
 
                 // CREATE HEADER FOR JSON
                 $student_output_json[$student_id]["user_id"] = $student_id;
-                $student_output_json[$student_id]["legal_first_name"] = $gradeable->getUser()->getLegakFirstName();
+                $student_output_json[$student_id]["legal_first_name"] = $gradeable->getUser()->getLegalFirstName();
                 $student_output_json[$student_id]["preferred_first_name"] = $gradeable->getUser()->getPreferredFirstName();
                 $student_output_json[$student_id]["last_name"] = $gradeable->getUser()->getLegalLastName();
                 $student_output_json[$student_id]["preferred_last_name"] = $gradeable->getUser()->getPreferredLastName();
