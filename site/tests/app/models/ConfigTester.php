@@ -154,8 +154,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals("Test Course", $config->getCourseName());
         $this->assertEquals("http://example.com/index.php?semester=s17&course=csci0000", $config->getSiteUrl());
         $this->assertEquals("", $config->getCourseHomeUrl());
-        $this->assertEquals(2, $config->getDefaultHwLateDays());
-        $this->assertEquals(3, $config->getDefaultStudentLateDays());
+        $this->assertEquals(0, $config->getDefaultHwLateDays());
+        $this->assertEquals(0, $config->getDefaultStudentLateDays());
         $this->assertFalse($config->shouldZeroRubricGrades());
         $this->assertEquals(FileUtils::joinPaths($this->temp_dir, 'config'), $config->getConfigPath());
 
