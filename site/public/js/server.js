@@ -165,6 +165,10 @@ function editUserForm(user_id) {
             }
             $('[name="user_preferred_firstname"]', form).val(json['user_preferred_firstname']);
             $('[name="user_lastname"]', form).val(json['user_lastname']);
+            if (json['user_preferred_lastname'] === null) {
+                json['user_preferred_lastname'] = "";
+            }
+            $('[name="user_preferred_lastname"]', form).val(json['user_preferred_lastname']);
             $('[name="user_email"]', form).val(json['user_email']);
             var registration_section;
             if (json['registration_section'] === null) {
@@ -397,8 +401,8 @@ function setUserSubmittedCode(gradeable_id, changed) {
         var version_user_1 = $('[name="version_user_1"]', form).val();
         if(changed == 'version_user_1' && version_user_1 == '') {
             $('[name="user_id_2"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
-            $('[name="code_box_1"]').empty(); 
-            $('[name="code_box_2"]').empty(); 
+            $('[name="code_box_1"]').empty();
+            $('[name="code_box_2"]').empty();
         }
         else {
             if(changed == 'user_id_1' || changed =='version_user_1') {
@@ -581,7 +585,7 @@ function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user
             else if(where == 'code_box_1') {
                 var to_append='';
                 $.each(data, function(i,match){
-                    to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick=getMatchesForClickedMatch("'+gradeable_id+'",event,'+user_1_match_start+','+ user_1_match_end+',"popup","'+ color+ '","","'+match[0]+'",'+match[1]+');>'+ match[3]+' '+match[4]+' &lt;'+match[0]+'&gt; (version:'+match[1]+')</div></li>';                        
+                    to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick=getMatchesForClickedMatch("'+gradeable_id+'",event,'+user_1_match_start+','+ user_1_match_end+',"popup","'+ color+ '","","'+match[0]+'",'+match[1]+');>'+ match[3]+' '+match[4]+' &lt;'+match[0]+'&gt; (version:'+match[1]+')</div></li>';
                 });
                 to_append = $.parseHTML(to_append);
                 $("#popup_to_show_matches_id").empty().append(to_append);
@@ -662,7 +666,7 @@ function toggleUsersPlagiarism(gradeable_id) {
 function configureNewGradeableForPlagiarismFormOptionChanged(prior_term_gradeables, select_element_name) {
     var form = $("#save-configuration-form");
     if(select_element_name == "language") {
-        
+
         //
         // Following code is used to set default window size for different languages
         // that will appear in 'configureNewGradeableForPlagiarismForm'
@@ -1091,9 +1095,9 @@ function check_lichen_jobs(url, semester, course) {
             else if(data="NO_REFRESH" && last_data == "REFRESH_ME"){
                 last_data= "NO_REFRESH";
                 localStorage.setItem("last_data", last_data);
-                window.location.href = buildUrl({'component':'admin', 'page' :'plagiarism', 'course':course, 'semester': semester});   
+                window.location.href = buildUrl({'component':'admin', 'page' :'plagiarism', 'course':course, 'semester': semester});
             }
-            else {  
+            else {
                 checkRefreshLichenMainPage(url, semester, course);
             }
         }
@@ -1617,14 +1621,14 @@ function dynamicScrollLoadPage(element, atEnd) {
             spinner_up.hide();
         };
     }
-    
+
     var urlPattern = $(element).data("urlPattern");
     var currentThreadId = $(element).data("currentThreadId",);
     var currentCategoriesId = $(element).data("currentCategoriesId",);
     var course = $(element).data("course",);
 
     var next_url = urlPattern.replace("{{#}}", load_page);
-           
+
     var categories_value = $("#thread_category").val();
     var thread_status_value = $("#thread_status_select").val();
     categories_value = (categories_value == null)?"":categories_value.join("|");
@@ -1670,7 +1674,7 @@ function dynamicScrollContentOnDemand(jElement, urlPattern, currentThreadId, cur
     jElement.data("course", course);
 
     dynamicScrollLoadIfScrollVisible(jElement);
-    $(jElement).scroll(function(){ 
+    $(jElement).scroll(function(){
         var element = $(this)[0];
         var sensitivity = 3;
         var isTop = element.scrollTop < sensitivity;
