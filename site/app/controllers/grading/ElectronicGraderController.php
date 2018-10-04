@@ -561,10 +561,13 @@ class ElectronicGraderController extends GradingController {
         }
         else {
             $section_key = "rotating_section";
-            $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id,
-                $this->core->getUser()->getId());
             if (!$show_all) {
+                $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id,
+                    $this->core->getUser()->getId());
                 $students = $this->core->getQueries()->getUsersByRotatingSections($sections);
+            }
+            else {
+                $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id);
             }
             $graders = $this->core->getQueries()->getGradersForRotatingSections($gradeable->getId(), $sections);
         }

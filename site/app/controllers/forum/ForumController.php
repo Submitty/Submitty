@@ -478,14 +478,13 @@ class ForumController extends AbstractController {
      * @param integer(0/1/2) $modifyType - 0 => delete, 1 => edit content, 2 => undelete
      */
     public function alterPost($modifyType){
+        $post_id = $_POST["post_id"] ?? $_POST["edit_post_id"];
+        if(!($this->checkPostEditAccess($post_id))) {
+                $this->core->addErrorMessage("You do not have permissions to do that.");
+                return;
+        }
         if($modifyType == 0) { //delete post or thread
-            if(!($this->core->getUser()->getGroup() <= 2)) {
-                $error = "You do not have permissions to do that.";
-                $this->core->getOutput()->renderJson($response = array('error' => $error));
-                return $response;
-            }
             $thread_id = $_POST["thread_id"];
-            $post_id = $_POST["post_id"];
             $type = "";
             if($this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 1)){
                 $type = "thread";
@@ -496,16 +495,11 @@ class ForumController extends AbstractController {
             $post_author = $post['author_user_id'];
             $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'deleted', 'thread_id' => $thread_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
             $this->core->getQueries()->pushNotification($notification);
+            $this->core->getQueries()->removeNotificationsPost($post_id);
             $this->core->getOutput()->renderJson($response = array('type' => $type));
             return $response;
         } else if($modifyType == 2) { //undelete post or thread
-            if(!($this->core->getUser()->getGroup() <= 2)) {
-                $error = "You do not have permissions to do that.";
-                $this->core->getOutput()->renderJson($response = array('error' => $error));
-                return $response;
-            }
             $thread_id = $_POST["thread_id"];
-            $post_id = $_POST["post_id"];
             $type = "";
             $result = $this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 0);
             if(is_null($result)) {
@@ -523,11 +517,6 @@ class ForumController extends AbstractController {
             return $response;
         } else if($modifyType == 1) { //edit post or thread
             $thread_id = $_POST["edit_thread_id"];
-            $post_id = $_POST["edit_post_id"];
-            if(!($this->checkPostEditAccess($post_id))) {
-                $this->core->addErrorMessage("You do not have permissions to do that.");
-                return;
-            }
             $status_edit_thread = $this->editThread();
             $status_edit_post   = $this->editPost();
             $any_changes = false;

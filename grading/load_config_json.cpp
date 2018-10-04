@@ -260,7 +260,8 @@ void formatPreActions(nlohmann::json &whole_config) {
 
       std::string number = testcase.substr(4,6);
       int remainder = std::stoi( number );
-
+      
+      //we must be referencing a previous testcase. (+1 because we start at 0)
       assert(remainder > 0);
       assert(remainder < which_testcase+1);
 
@@ -282,8 +283,8 @@ void formatPreActions(nlohmann::json &whole_config) {
       assert(source_name.find("\"") == std::string::npos);
       assert(source_name.find("\'") == std::string::npos);
 
-      if(!this_testcase["pattern"].is_string()){
-        this_testcase["pattern"] = "";
+      if(!pre_command["pattern"].is_string()){
+         this_testcase["pattern"] = "";
       }else{
         std::string pattern = pre_command["pattern"];
         //The pattern must not container .. or $ 
