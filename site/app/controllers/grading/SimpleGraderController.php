@@ -77,7 +77,7 @@ class SimpleGraderController extends GradingController  {
         else{
             $this->core->addErrorMessage("ERROR: Section not set; You did not select a section to print.");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
-            return;    
+            return;
         }
 
         $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
@@ -258,7 +258,7 @@ class SimpleGraderController extends GradingController  {
                     }
                     $component_grade->setScore($data);
                 }
-                $component_grade->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+                $component_grade->setGradeTime($this->core->getDateTimeNow());
             }
         }
 
@@ -327,7 +327,7 @@ class SimpleGraderController extends GradingController  {
                     if (isset($data_array[$j][$index2])) {
                         if ($component->isText()){
                             $component_grade->setComment($data_array[$j][$index2]);
-                            $component_grade->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+                            $component_grade->setGradeTime($this->core->getDateTimeNow());
                             $temp_array[$value_temp_str] = $data_array[$j][$index2];
                             $temp_array[$status_temp_str] = "OK";
                         }
@@ -337,7 +337,7 @@ class SimpleGraderController extends GradingController  {
                                 $temp_array[$status_temp_str] = "ERROR";
                             } else {
                                 $component_grade->setScore($data_array[$j][$index2]);
-                                $component_grade->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+                                $component_grade->setGradeTime($this->core->getDateTimeNow());
                                 $temp_array[$value_temp_str] = $data_array[$j][$index2];
                                 $temp_array[$status_temp_str] = "OK";
                             }

@@ -37,7 +37,7 @@ class SubmissionController extends AbstractController {
 
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-            $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
+            $now = $this->core->getDateTimeNow();
 
             if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE
                 && ($this->core->getUser()->accessAdmin()
@@ -280,7 +280,7 @@ class SubmissionController extends AbstractController {
         }
 
         $error = false;
-        $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
+        $now = $this->core->getDateTimeNow();
 
         // ORIGINAL
         //if (!$gradeable->isSubmissionOpen() && !$this->core->getUser()->accessAdmin()) {
@@ -503,7 +503,7 @@ class SubmissionController extends AbstractController {
 
         // creating directory under gradeable_id with the timestamp
 
-        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("m-d-Y_H:i:sO");
+        $current_time = $this->core->getDateTimeNow()->format("m-d-Y_H:i:sO");
         $version_path = FileUtils::joinPaths($pdf_path, $current_time);
         if (!FileUtils::createDir($version_path)) {
             return $this->uploadResult("Failed to make gradeable path.", false);
@@ -678,7 +678,7 @@ class SubmissionController extends AbstractController {
         $this->upload_details['version_path'] = $version_path;
         $this->upload_details['version'] = $new_version;
 
-        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO");
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
         $current_time_string_tz = $current_time . " " . $this->core->getConfig()->getTimezone()->getName();
 
         $path = rawurldecode(htmlspecialchars_decode($path));
@@ -979,7 +979,7 @@ class SubmissionController extends AbstractController {
             $part_path[1] = $version_path;
         }
 
-        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO");
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
         $current_time_string_tz = $current_time . " " . $this->core->getConfig()->getTimezone()->getName();
 
         $max_size = $gradeable->getAutogradingConfig()->getMaxSubmissionSize();
@@ -1440,7 +1440,7 @@ class SubmissionController extends AbstractController {
             return array('error' => true, 'message' => $msg);
         }
         $json["active_version"] = $new_version;
-        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO");
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
         $current_time_string_tz = $current_time . " " . $this->core->getConfig()->getTimezone()->getName();
 
         $json["history"][] = array("version" => $new_version, "time" => $current_time_string_tz, "who" => $original_user_id, "type" => "select");

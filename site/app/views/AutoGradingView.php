@@ -92,7 +92,7 @@ class AutoGradingView extends AbstractView {
             "display_hidden" => $display_hidden,
             "has_badges" => $has_badges,
             'testcases' => $testcase_array,
-            'is_ta_grading_complete' => $graded_gradeable->isTaGradingComplete(),
+            'is_ta_grade_released' => $gradeable->isTaGradeReleased(),
             "show_hidden" => $show_hidden,
             'display_version' => $version_instance->getVersion()
         ]);
@@ -355,7 +355,7 @@ class AutoGradingView extends AbstractView {
             $grader_names = ['Graded by Peer(s)'];
         } else if (count($grader_names) === 0) {
             // Non-peer assignment with only limited access graders
-            $grader_names = ['Graded by the ghosts among you'];
+            $grader_names = ['Course Staff'];
         }
 
         //get total score and max possible score

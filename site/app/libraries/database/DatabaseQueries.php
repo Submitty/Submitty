@@ -203,7 +203,7 @@ class DatabaseQueries {
      * @return array('block_number' => int, 'threads' => array(threads))    Ordered filtered threads
      */
     public function loadThreadBlock($categories_ids, $thread_status, $show_deleted, $show_merged_thread, $current_user, $blockNumber, $thread_id){
-        $blockSize = 10;
+        $blockSize = 30;
         $loadLastPage = false;
 
         $query_raw_select = null;
@@ -327,7 +327,12 @@ class DatabaseQueries {
         return $this->course_db->rows()[0];
     }
 
-
+    public function removeNotificationsPost($post_id) {
+        //Deletes all children notifications i.e. this posts replies
+        $this->course_db->query("DELETE FROM notifications where metadata::json->>1 = ?", array($post_id));
+        //Deletes parent notification i.e. this post is a reply
+        $this->course_db->query("DELETE FROM notifications where metadata::json->>2 = ?", array($post_id));
+    }
 
     public function isStaffPost($author_id){
         $this->course_db->query("SELECT user_group FROM users WHERE user_id=?", array($author_id));
@@ -456,7 +461,12 @@ class DatabaseQueries {
         } return false;
     }
 
-    public function editPost($user, $post_id, $content, $anon){
+    public function getParentPostId($child_id) {
+        $this->course_db->query("SELECT parent_id from posts where id = ?", array($child_id));
+        return $this->course_db->rows()[0]['parent_id'];
+    }
+
+    public function editPost($original_creator, $user, $post_id, $content, $anon){
         try {
             // Before making any edit to $post_id, forum_posts_history will not have any corresponding entry
             // forum_posts_history will store all history state of the post(if edited at any point of time)
@@ -467,6 +477,7 @@ class DatabaseQueries {
             $this->course_db->query("UPDATE posts SET content =  ?, anonymous = ? where id = ?", array($content, $anon, $post_id));
             // Insert latest version of post into forum_posts_history
             $this->course_db->query("INSERT INTO forum_posts_history(post_id, edit_author, content, edit_timestamp) SELECT id, ?, content, current_timestamp FROM posts WHERE id = ?", array($user, $post_id));
+            $this->course_db->query("UPDATE notifications SET content = substring(content from '.+?(?=from)') || 'from ' || ? where metadata::json->>1 = ? and metadata::json->>2 = ?", array(Utils::getDisplayNameForum($anon, $this->getDisplayUserInfoFromUserId($original_creator)), $this->getParentPostId($post_id), $post_id));
             $this->course_db->query("DELETE FROM viewed_responses WHERE thread_id = (SELECT thread_id FROM posts WHERE id = ?)", array($post_id));
             $this->course_db->commit();
         } catch(DatabaseException $dbException) {
@@ -692,7 +703,7 @@ ORDER BY egd.g_version", array($g_id, $user_id));
 
         $return = array();
         foreach ($this->course_db->rows() as $row) {
-            $row['submission_time'] = new \DateTime($row['submission_time'], $this->core->getConfig()->getTimezone());
+            $row['submission_time'] = DateUtils::parseDateTime($row['submission_time'], $this->core->getConfig()->getTimezone());
             $return[$row['g_version']] = new GradeableVersion($this->core, $row, $due_date);
         }
 
@@ -1154,9 +1165,14 @@ ORDER BY g.sections_rotating_id, g.user_id", $params);
         return $return;
     }
 
-    public function getRotatingSectionsForGradeableAndUser($g_id, $user) {
-        $this->course_db->query(
-          "SELECT sections_rotating_id FROM grading_rotating WHERE g_id=? AND user_id=?", array($g_id, $user));
+    public function getRotatingSectionsForGradeableAndUser($g_id, $user_id = null) {
+        $params = [$g_id];
+        $query = "SELECT sections_rotating_id FROM grading_rotating WHERE g_id=?";
+        if($user_id !== null) {
+            $params[] = $user_id;
+            $query .= " AND user_id=?";
+        }
+        $this->course_db->query($query, $params);
         $return = array();
         foreach ($this->course_db->rows() as $row) {
             $return[] = $row['sections_rotating_id'];

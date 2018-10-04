@@ -561,10 +561,13 @@ class ElectronicGraderController extends GradingController {
         }
         else {
             $section_key = "rotating_section";
-            $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id,
-                $this->core->getUser()->getId());
             if (!$show_all) {
+                $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id,
+                    $this->core->getUser()->getId());
                 $students = $this->core->getQueries()->getUsersByRotatingSections($sections);
+            }
+            else {
+                $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id);
             }
             $graders = $this->core->getQueries()->getGradersForRotatingSections($gradeable->getId(), $sections);
         }
@@ -916,7 +919,7 @@ class ElectronicGraderController extends GradingController {
             }
             $this->core->addSuccessMessage("Updated Team {$team_id}");
 
-            $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO") . " " . $this->core->getConfig()->getTimezone()->getName();
+            $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO") . " " . $this->core->getConfig()->getTimezone()->getName();
             $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id, $team_id, "user_assignment_settings.json");
             $json = FileUtils::readJsonFile($settings_file);
             if ($json === false) {
@@ -1412,7 +1415,7 @@ class ElectronicGraderController extends GradingController {
         }
         $graded_component->setComment($custom_message);
         $graded_component->setScore($custom_points);
-        $graded_component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+        $graded_component->setGradeTime($this->core->getDateTimeNow());
 
         // Set the marks the submitter received
         $graded_component->setMarkIds($mark_ids);
@@ -1771,11 +1774,6 @@ class ElectronicGraderController extends GradingController {
         if (!$this->core->getAccess()->canI("grading.electronic.save_mark", ["gradeable" => $gradeable])) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to save marks');
             return;
-        }
-
-        // Restrict who can change the 'publish' property
-        if (!$this->core->getAccess()->canI('grading.electronic.save_mark_publish')) {
-            $publish = $mark->isPublish();
         }
 
         try {

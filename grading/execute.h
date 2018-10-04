@@ -36,13 +36,13 @@ void wildcard_expansion(std::vector<std::string> &my_args, const std::string &fu
 std::string replace_slash_with_double_underscore(const std::string& input);
 std::string escape_spaces(const std::string& input);
 
-bool memory_ok(int rss_memory, int allowed_rss_memory);
+bool memory_ok(int rss_memory, int allowed_rss_memory, std::ostream &logfile);
 
-bool time_ok(float elapsed, float seconds_to_run);
+bool time_ok(float elapsed, float seconds_to_run, std::ostream &logfile);
 
 //returns true on kill order. 
 bool delay_and_mem_check(float sleep_time_in_microseconds, int childPID, float& elapsed, float& next_checkpoint, 
-  float seconds_to_run, int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill);
+  float seconds_to_run, int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill,std::ostream &logfile);
 
 std::string output_of_system_command(const char* cmd);
 

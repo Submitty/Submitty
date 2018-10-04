@@ -92,7 +92,7 @@ let GENERAL_INFORMATION = window.GENERAL_INFORMATION;
     function rotate(){
         RENDER_OPTIONS.rotate += 90;
         localStorage.setItem('rotate', RENDER_OPTIONS.rotate);
-        render(GENERAL_INFORMATION.gradeable_id, GENERAL_INFORMATION.user_id, RENDER_OPTIONS.userId, GENERAL_INFORMATION.file_name);
+        render(GENERAL_INFORMATION.gradeable_id, GENERAL_INFORMATION.user_id, RENDER_OPTIONS.grader_id, GENERAL_INFORMATION.file_name);
     }
 
     function zoom(option, custom_val){
@@ -118,7 +118,7 @@ let GENERAL_INFORMATION = window.GENERAL_INFORMATION;
         $("a[value='zoomcustom']").text(parseInt(RENDER_OPTIONS.scale * 100) + "%");
         if(zoom_flag){
             localStorage.setItem('scale', RENDER_OPTIONS.scale);
-            render(GENERAL_INFORMATION.gradeable_id, GENERAL_INFORMATION.user_id, RENDER_OPTIONS.userId, GENERAL_INFORMATION.file_name);
+            render(GENERAL_INFORMATION.gradeable_id, GENERAL_INFORMATION.user_id, RENDER_OPTIONS.grader_id, GENERAL_INFORMATION.file_name);
         }
     }
 
