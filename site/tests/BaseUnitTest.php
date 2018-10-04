@@ -48,6 +48,10 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
 
         $config->method('getTimezone')->willReturn(new \DateTimeZone("America/New_York"));
 
+        $core->method('getDateTimeNow')->willReturnCallback(function() use($config) {
+            return new \DateTime('now', $config->getTimezone());
+        });
+
         $core->method('getConfig')->willReturn($config);
 
         if (isset($config_values['csrf_token'])) {

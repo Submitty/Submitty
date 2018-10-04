@@ -24,7 +24,7 @@ Required Input:
         {# Keep the mark checkbox so we can keep graded data when in edit mode to automatically update the component points #}
         <span class="{{ is_checked ? 'mark-selected' : '' }} {{ edit_marks_enabled ? 'hidden' : '' }} mark-selector col-no-gutters"
               data-mark_id="{{ mark.id }}">
-            {{ mark.order + 1 }}
+            {{ mark.order }}
         </span>
     </span>
     <span class="col-no-gutters mark-points"

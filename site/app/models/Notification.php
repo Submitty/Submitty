@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\libraries\Core;
+use app\libraries\DateUtils;
 use app\libraries\Utils;
 
 /**
@@ -184,7 +185,7 @@ class Notification extends AbstractModel {
     }
 
     private function actAsForumDeletedNotification($thread_id, $post_content, $target){
-        $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id))));
+        $this->setNotifyMetadata(json_encode(array()));
         $this->setNotifyContent("Deleted: Your thread/post '".$this->textShortner($post_content)."' was deleted by ".Utils::getDisplayNameForum(false, $this->core->getQueries()->getDisplayUserInfoFromUserId($this->getCurrentUser())));
         $this->setNotifySource($this->getCurrentUser());
         $this->setNotifyTarget($target);
@@ -212,6 +213,10 @@ class Notification extends AbstractModel {
         return $message;
     }
 
+    public function hasEmptyMetadata() {
+        return count(json_decode($this->getNotifyMetadata())) == 0;
+    }
+
     /**
      * Returns relative time if time is in last 24 hours
      * else returns absolute time
@@ -236,7 +241,7 @@ class Notification extends AbstractModel {
             else
                 return "{$hours} hours ago";
         } else {
-            return date_format(date_create($actual_time), "n/j g:i A");
+            return date_format(DateUtils::parseDateTime($actual_time, $this->core->getConfig()->getTimezone()), "n/j g:i A");
         }
     }
 }

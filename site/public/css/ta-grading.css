@@ -535,7 +535,8 @@ tr.is_publish {
 
 .gradeable .ta-rubric-table,
 .gradeable .received-marks-list {
-    padding: 8px;
+    padding: 8px 0px;
+    margin: 0 -5px;
 }
 
 .gradeable .done-container {
@@ -565,6 +566,12 @@ tr.is_publish {
 
 .gradeable .mark-container {
     min-height: 28px;
+    border-bottom: 1px solid #999;
+    padding: 3px;
+}
+
+.gradeable .mark-container:last-child {
+    border-bottom: none;
 }
 
 .gradeable .container.box-title {
@@ -578,7 +585,7 @@ tr.is_publish {
     border: 2px solid #000;
     border-radius: 4px;
     color: #888;
-    font-size: 10px;
+    font-size: 14px;
     font-family: 'Source Sans Pro', sans-serif;
     text-align: center;
 }
@@ -613,6 +620,10 @@ tr.is_publish {
     justify-content: flex-start;
 }
 
+.gradeable .mark-container input, .gradeable .mark-container textarea {
+    box-sizing: border-box;
+}
+
 .gradeable .mark-container span.mark-title textarea {
     width: 100%;
     resize: vertical;
@@ -632,7 +643,6 @@ tr.is_publish {
 
 .gradeable .mark-container.mark-publish {
     background-color: #bde;
-    border-radius: 4px;
 }
 
 .gradeable .mark-disabled span {

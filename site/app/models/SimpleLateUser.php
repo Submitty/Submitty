@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\libraries\Core;
+use app\libraries\DateUtils;
 
 class SimpleLateUser extends AbstractModel {
     
@@ -49,7 +50,7 @@ class SimpleLateUser extends AbstractModel {
         $this->last_name = $details['user_lastname'];
         if(isset($details['allowed_late_days']) && isset($details['since_timestamp'])){
             $this->allowed_late_days = $details['allowed_late_days'];
-            $this->since_timestamp = new \DateTime($details['since_timestamp']);
+            $this->since_timestamp = DateUtils::parseDateTime($details['since_timestamp'], $this->core->getConfig()->getTimezone());
 
         }
         if(isset($details['late_day_exceptions'])){

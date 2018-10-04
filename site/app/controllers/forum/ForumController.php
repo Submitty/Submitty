@@ -8,6 +8,7 @@ use app\controllers\AbstractController;
 use app\libraries\Output;
 use app\libraries\Utils;
 use app\libraries\FileUtils;
+use app\libraries\DateUtils;
 
 /**
  * Class ForumHomeController
@@ -477,14 +478,13 @@ class ForumController extends AbstractController {
      * @param integer(0/1/2) $modifyType - 0 => delete, 1 => edit content, 2 => undelete
      */
     public function alterPost($modifyType){
+        $post_id = $_POST["post_id"] ?? $_POST["edit_post_id"];
+        if(!($this->checkPostEditAccess($post_id))) {
+                $this->core->addErrorMessage("You do not have permissions to do that.");
+                return;
+        }
         if($modifyType == 0) { //delete post or thread
-            if(!($this->core->getUser()->getGroup() <= 2)) {
-                $error = "You do not have permissions to do that.";
-                $this->core->getOutput()->renderJson($response = array('error' => $error));
-                return $response;
-            }
             $thread_id = $_POST["thread_id"];
-            $post_id = $_POST["post_id"];
             $type = "";
             if($this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 1)){
                 $type = "thread";
@@ -495,16 +495,11 @@ class ForumController extends AbstractController {
             $post_author = $post['author_user_id'];
             $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'deleted', 'thread_id' => $thread_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
             $this->core->getQueries()->pushNotification($notification);
+            $this->core->getQueries()->removeNotificationsPost($post_id);
             $this->core->getOutput()->renderJson($response = array('type' => $type));
             return $response;
         } else if($modifyType == 2) { //undelete post or thread
-            if(!($this->core->getUser()->getGroup() <= 2)) {
-                $error = "You do not have permissions to do that.";
-                $this->core->getOutput()->renderJson($response = array('error' => $error));
-                return $response;
-            }
             $thread_id = $_POST["thread_id"];
-            $post_id = $_POST["post_id"];
             $type = "";
             $result = $this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 0);
             if(is_null($result)) {
@@ -522,11 +517,6 @@ class ForumController extends AbstractController {
             return $response;
         } else if($modifyType == 1) { //edit post or thread
             $thread_id = $_POST["edit_thread_id"];
-            $post_id = $_POST["edit_post_id"];
-            if(!($this->checkPostEditAccess($post_id))) {
-                $this->core->addErrorMessage("You do not have permissions to do that.");
-                return;
-            }
             $status_edit_thread = $this->editThread();
             $status_edit_post   = $this->editPost();
             $any_changes = false;
@@ -759,8 +749,7 @@ class ForumController extends AbstractController {
             foreach ($older_posts as $post) {
                 $_post['user'] = $post["edit_author"];
                 $_post['content'] = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'filter_post_content',  $post["content"]);
-                $my_timezone = $this->core->getConfig()->getTimezone();
-                $_post['post_time'] = date_format(date_create($post['edit_timestamp'])->setTimezone($my_timezone),"n/j g:i A");
+                $_post['post_time'] = DateUtils::parseDateTime($post['edit_timestamp'], $this->core->getConfig()->getTimezone())->format("n/j g:i A");
                 $output[] = $_post;
             }
             if(count($output) == 0) {
@@ -768,8 +757,7 @@ class ForumController extends AbstractController {
                 // Current post
                 $_post['user'] = $current_post["author_user_id"];
                 $_post['content'] = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'filter_post_content',  $current_post["content"]);
-                $my_timezone = $this->core->getConfig()->getTimezone();
-                $_post['post_time'] = date_format(date_create($current_post['timestamp'])->setTimezone($my_timezone),"n/j g:i A");
+                $_post['post_time'] = DateUtils::parseDateTime($current_post['timestamp'], $this->core->getConfig()->getTimezone())->format("n/j g:i A");
                 $output[] = $_post;
             }
             // Fetch additional information
@@ -814,7 +802,6 @@ class ForumController extends AbstractController {
         $posts = array();
         $posts = $this->core->getQueries()->getPosts();
         $num_posts = count($posts);
-        $function_date = 'date_format';
         $num_threads = 0;
         $users = array();
         for($i=0;$i<$num_posts;$i++){
@@ -836,9 +823,7 @@ class ForumController extends AbstractController {
             }
             $users[$user]["posts"][] = $content;
             $users[$user]["id"][] = $posts[$i]["id"];
-            $date = date_create($posts[$i]["timestamp"]);
-            $my_timezone = $this->core->getConfig()->getTimezone();
-            $users[$user]["timestamps"][] = $function_date($date->setTimezone($my_timezone),"n/j g:i A");
+            $users[$user]["timestamps"][] = DateUtils::parseDateTime($posts[$i]["timestamp"], $this->core->getConfig()->getTimezone())->format("n/j g:i A");
             $users[$user]["thread_id"][] = $posts[$i]["thread_id"];
             $users[$user]["thread_title"][] = $this->core->getQueries()->getThreadTitle($posts[$i]["thread_id"]);
 

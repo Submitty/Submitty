@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <dirent.h>
 #include <vector>
+#include <iostream>
 
 #include <set>
 #include <cstdlib>
@@ -878,7 +879,8 @@ void key(std::string toType, std::string window_name)
 */
 void type(std::string toType, float delay, int presses, std::string window_name, int childPID, 
   float &elapsed, float& next_checkpoint, float seconds_to_run, 
-  int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill){
+  int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill,
+  std::ostream &logfile){
 
   delay = delay * 1000000; 
   
@@ -899,7 +901,7 @@ void type(std::string toType, float delay, int presses, std::string window_name,
     //allow this to run so that delays occur as expected.
     if(i != presses-1){ 
       delay_and_mem_check(delay, childPID, elapsed, next_checkpoint, 
-        seconds_to_run, rss_memory, allowed_rss_memory, memory_kill,time_kill);
+        seconds_to_run, rss_memory, allowed_rss_memory, memory_kill,time_kill, logfile);
     }
   }
 }
@@ -958,7 +960,9 @@ bool isWindowedAction(const nlohmann::json action){
 void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken, 
   int& number_of_screenshots, std::string window_name, int childPID, 
   float &elapsed, float& next_checkpoint, float seconds_to_run, 
-  int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill){
+  int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill,
+  std::ostream &logfile){
+
   //We get the window data at every step in case it has changed size.
 
   //if we make it past this check, we'll assume an action has been taken.
@@ -980,7 +984,7 @@ void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken,
 
   std::string action_name = action.value("action", "ACTION_NOT_SPECIFIED");
 
-  std::cout<<"Taking action "<<actions_taken+1<<" of "<<actions.size() <<": "<< action_name<< std::endl;
+  std::cout <<"Taking action "<<actions_taken+1<<" of "<<actions.size() <<": "<< action_name<< std::endl;
 
   float delay_time = 0;
   //DELAY            
@@ -1000,7 +1004,7 @@ void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken,
     std::string string_to_type = action.value("string", "");
 
     type(string_to_type, delay_in_secs, presses, window_name,childPID,elapsed, next_checkpoint, 
-      seconds_to_run, rss_memory, allowed_rss_memory, memory_kill, time_kill);
+      seconds_to_run, rss_memory, allowed_rss_memory, memory_kill, time_kill, logfile);
 
 
   }
@@ -1074,110 +1078,5 @@ void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken,
   }
   actions_taken++;
   delay_and_mem_check(delay_time, childPID, elapsed, next_checkpoint, 
-    seconds_to_run, rss_memory, allowed_rss_memory, memory_kill, time_kill);   
+    seconds_to_run, rss_memory, allowed_rss_memory, memory_kill, time_kill,logfile);   
 }
-
-
-
-/**
-* The central routing function for for all actions. Takes in a vector of 
-* actions and the # of actions taken thus far. It then passes the current 
-* action to be taken through tests to see which function to route to.
-* This function requires all parameters to for execute.cpp's delayAndMemCheck
-* function. 
-*/
-// void takeAction(const std::vector<std::string>& actions, int& actions_taken, 
-//   int& number_of_screenshots, std::string window_name, int childPID, 
-//   float &elapsed, float& next_checkpoint, float seconds_to_run, 
-//   int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill){
-//   //We get the window data at every step in case it has changed size.
-
-//   //if we make it past this check, we'll assume an action has been taken.
-//   if(!windowExists(window_name)){ 
-//     return;
-//   }
-//   float delay_time = 0;  
-  
-//   std::cout<<"Taking action " << actions_taken+1 << " of " << actions.size() 
-//               << ": " << actions[actions_taken]<< std::endl;
-
-//   //DELAY            
-//   if(actions[actions_taken].find("delay") != std::string::npos){ 
-//     delay_time = delay(actions[actions_taken]);
-//   }
-//   //SCREENSHOT
-//   else if(actions[actions_taken].find("screenshot") != std::string::npos){ 
-//     screenshot(window_name, number_of_screenshots);
-//   }
-//   //TYPE
-//   else if(actions[actions_taken].find("type") != std::string::npos){ 
-//     type(actions[actions_taken],window_name,childPID,elapsed, next_checkpoint, 
-//        seconds_to_run, rss_memory, allowed_rss_memory, memory_kill, time_kill);
-//   }
-//   //KEY
-//   else if(actions[actions_taken].find("key") != std::string::npos)
-//   {
-//     key(actions[actions_taken], window_name);
-//   }
-//   //CLICK AND DRAG    
-//   else if(actions[actions_taken].find("click and drag") != std::string::npos){ 
-//     clickAndDrag(window_name,actions[actions_taken]);
-//   }
-//   //CLICK
-//   else if(actions[actions_taken].find("click") != std::string::npos){ 
-//     std::vector<int> button = extractIntsFromString(actions[actions_taken]);
-//     if(actions[actions_taken].find("left") != std::string::npos){
-//       click(window_name, 1);
-//     }
-//     else if(actions[actions_taken].find("middle") != std::string::npos){
-//       click(window_name, 2);
-//     }
-//     else if(actions[actions_taken].find("right") != std::string::npos){
-//       click(window_name, 3);
-//     }
-//     else{
-//       click(window_name, 1);
-//     }
-//   }
-//   //MOUSE MOVE
-//   else if(actions[actions_taken].find("move mouse") != std::string::npos || 
-//           actions[actions_taken].find("mouse move") != std::string::npos){
-//       bool no_clamp = false;
-//       if(actions[actions_taken].find("no clamp") != std::string::npos){
-//         no_clamp = true;
-//       }
-      
-//       std::vector<int> coordinates=extractIntsFromString(actions[actions_taken]);
-//       if(coordinates.size() >= 2){
-//       int height, width, x_start, x_end, y_start, y_end;
-//       bool success = populateWindowData(window_name, height, width, x_start, 
-//                                                         x_end, y_start, y_end);
-//       if(success){
-//           int moved_x = x_start + coordinates[0];
-//           int moved_y = y_start + coordinates[1];
-//           mouse_move(window_name, moved_x, moved_y, x_start, x_end, y_start, 
-//                                                             y_end, no_clamp);
-//       }
-//       else{
-//         std::cout << "No mouse move due to unsuccessful data population."
-//                     << std::endl;
-//       }
-//     }
-//   }
-//   //CENTER
-//   else if(actions[actions_taken].find("center") != std::string::npos){ 
-//     centerMouse(window_name);
-//   }
-//   //ORIGIN
-//   else if(actions[actions_taken].find("origin") != std::string::npos){ 
-//     moveMouseToOrigin(window_name);
-//   }
-//    //BAD COMMAND
-//   else{
-//     std::cout << "ERROR: ill formatted command: " << actions[actions_taken] 
-//                   << std::endl;    
-//   }
-//   actions_taken++;
-//   delay_and_mem_check(delay_time, childPID, elapsed, next_checkpoint, 
-//     seconds_to_run, rss_memory, allowed_rss_memory, memory_kill, time_kill);   
-// }

@@ -1325,8 +1325,10 @@ function getScoresFromDOM() {
 
     // Get the TA grading scores
     let scores = {
+        ta_grading_complete: getTaGradingComplete(),
         ta_grading_earned: getTaGradingEarned(),
-        ta_grading_total: getTaGradingTotal()
+        ta_grading_total: getTaGradingTotal(),
+        auto_grading_complete: false
     };
 
     // Then check if auto grading scorse exist before adding them
@@ -1334,6 +1336,7 @@ function getScoresFromDOM() {
     if (autoGradingTotal !== '') {
         scores.auto_grading_earned = parseInt(dataDOMElement.attr('data-auto_grading_earned'));
         scores.auto_grading_total = parseInt(autoGradingTotal);
+        scores.auto_grading_complete = true;
     }
 
     return scores;
@@ -1376,6 +1379,22 @@ function getTaGradingEarned() {
     }
     return total;
 }
+
+/**
+ * Gets if all components have a grade assigned
+ * @return {boolean} If all components have at least one mark checked
+ */
+function getTaGradingComplete() {
+    let anyIncomplete = false;
+    $('.graded-component-data').each(function () {
+        let pointsEarned = $(this).attr('data-total_score');
+        if (pointsEarned === '') {
+            anyIncomplete = true;
+        }
+    });
+    return !anyIncomplete;
+}
+
 
 /**
  * Gets the number of ta grading points that can be earned
