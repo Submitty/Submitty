@@ -261,44 +261,31 @@
     {% elseif graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0 %}
         {% set contents = "Cancelled Submission" %}
         {% set btn_class = "btn-default" %}
-    {% elseif graded_gradeable.isTaGradingComplete() %}
-        {% if not graded_gradeable.getOrCreateTaGradedGradeable().hasVersionConflict() %}
-            {% if graded_gradeable.hasActiveRegradeRequest() %}
-                {% set contents = "Regrade Requested" %}
-                {% set btn_class = "btn-danger" %}
-            {% else %}
-                {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore() ~ " / " ~ graded_gradeable.getGradeable().getTaPoints() %}
-                {% set btn_class = "btn-default" %}
-            {% endif %}
-        {% else %}
-            {% set btn_class = "btn-primary" %}
-            {% if not graded_gradeable.isTaGradingComplete() %}
-                {% set contents = "Grading Incomplete" %}
-            {% else %}
-                {% if graded_gradeable.hasActiveRegradeRequest() %}
-                    {% set contents = "Regrade Requested" %}
-                    {% set btn_class = "btn-danger" %}
-                {% else %}
-                    {% set contents = "Version Conflict" %}
-                {% endif %}
-            {% endif %}
-        {% endif %}
     {% elseif graded_gradeable.getGradeable().isTaGrading() %}
         {% set contents = "Grade" %}
         {% set btn_class = "btn-primary" %}
+        {% if graded_gradeable.getOrCreateTaGradedGradeable().anyGrades() %}
+            {% if graded_gradeable.hasActiveRegradeRequest() %}
+                {% set contents = "Regrade Requested" %}
+                {% set btn_class = "btn-danger" %}
+            {% elseif graded_gradeable.getTaGradedGradeable().hasVersionConflict() %}
+                {% set contents = "Version Conflict" %}
+                {% set btn_class = "btn-primary" %}
+            {% elseif not graded_gradeable.isTaGradingComplete() %}
+                {% set contents = "Grading Incomplete" %}
+            {% elseif graded_gradeable.isTaGradingComplete() %}
+                {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore() ~ " / " ~ graded_gradeable.getGradeable().getTaPoints() %}
+                {% set btn_class = "btn-default" %}
+            {% endif %}
+        {% endif %}
     {% else %}
         {% set contents = "View" %}
         {% set btn_class = "btn-primary" %}
     {% endif %}
     <td>
-        {#TODO: how should this be handled since graded gradeables don't exist for students not on teams#}
-        {% if false %}
-            <b><i>No Team</i></b>
-        {% else %}
-            <a class="btn {{ btn_class }}" href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'grade', 'gradeable_id': graded_gradeable.getGradeableId(), 'who_id': graded_gradeable.getSubmitter().getId()}) }}">
-                {{ contents }}
-            </a>
-        {% endif %}
+        <a class="btn {{ btn_class }}" href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'grade', 'gradeable_id': graded_gradeable.getGradeableId(), 'who_id': graded_gradeable.getSubmitter().getId()}) }}">
+            {{ contents }}
+        </a>
     </td>
 {% endmacro %}
 
@@ -391,7 +378,7 @@
 
     {% set total_possible = graded_gradeable.getGradeable().getAutoGradingConfig().getTotalNonExtraCredit() + graded_gradeable.getGradeable().getTaPoints() %}
     <td>
-        {% if not graded_gradeable.getOrCreateTaGradedGradeable().hasVersionConflict() %}
+        {% if not graded_gradeable.getOrCreateTaGradedGradeable().hasVersionConflict() and graded_gradeable.isTaGradingComplete() %}
             <div class="{{ box_background }}">{{ graded }} / {{ total_possible }}</div>
         {% endif %}
     </td>
