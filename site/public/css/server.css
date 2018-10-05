@@ -775,6 +775,13 @@ table tr.table-header {
 
 }
 
+#forum_bar {
+    margin-right: 10px;
+    margin-left: 10px;
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
 .thread_list {
     display:inline-block;
     width:25%;
@@ -839,8 +846,6 @@ table tr.table-header {
 .first_post{
     padding-left: 10px !important;
     margin-top: 0px !important;
-    margin-left: -20px !important;
-    margin-right: -20px !important;
     border-radius: 0 !important;
 }
 

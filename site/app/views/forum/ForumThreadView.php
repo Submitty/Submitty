@@ -32,9 +32,9 @@ class ForumThreadView extends AbstractView {
 			}
     	</style>
 
-    	<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0;padding-left:20px;padding-right:20px;box-shadow: none;" class="content">
+    	<div class="content">
 
-		<div style="background-color: #E9EFEF; box-shadow:0 2px 15px -5px #888888;margin-top:10px;border-radius:3px; height:40px; margin-bottom:10px;" id="forum_bar">
+		<div id="forum_bar">
 
 
 		<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Back to threads" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}"><i class="fa fa-arrow-left"></i> Back to Threads</a>
@@ -188,6 +188,7 @@ HTML;
 				$('#{$display_option}').attr('checked', 'checked'); //Saves the radiobutton state when refreshing the page
 				$(".post_reply_from").submit(publishPost);
 				$("form").areYouSure();
+				$("#container").css("max-height", "100%");
 			});
 
 		</script>
@@ -236,8 +237,8 @@ HTML;
 		$show_merged_thread_title = "Show Merged Threads";
 	}
 	$return .= <<<HTML
-		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
-		<div style="background-color: #E9EFEF; box-shadow:0 2px 15px -5px #888888;border-radius:3px;margin-left:20px;margin-top:10px; height:40px; margin-bottom:10px;margin-right:20px;" id="forum_bar">
+		<div style="padding: 0px;overflow:hidden;" class="content">
+		<div id="forum_bar">
 		<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Create thread" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}"><i class="fa fa-plus-circle"></i> Create Thread</a>
 		<a class="btn btn-primary {$show_merged_thread_class}" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="{$show_merged_thread_title}" onclick="{$show_merged_thread_action}">{$show_merged_thread_title}</a>
 HTML;
@@ -304,28 +305,31 @@ HTML;
 HTML;
         $return .= <<<HTML
 		</div>
-
+		<hr/>
 HTML;
 
         if(!$threadExists){
 		$return .= <<<HTML
-					<div style="margin-left:20px;margin-top:10px;margin-right:20px;padding:25px; text-align:center;" class="content">
+					<div class="content">
 						<h4>A thread hasn't been created yet. Be the first to do so!</h4>
 					</div>
 				</div>
 HTML;
 		} else {
-			$return .= <<<HTML
-				<div id="forum_wrapper">
-HTML;
 					$next_page = $initialPageNumber + 1;
 					$prev_page = ($initialPageNumber == 1)?0:($initialPageNumber - 1);
 					$arrowup_visibility = ($initialPageNumber == 1)?"display:none;":"";
 					$return .= <<<HTML
-					<div  style="position: relative;width: 25%;height: 100%;display: inline-block;" >
-						<a class="btn-sm btn-primary hover_glow" style="z-index: 1; position: absolute;right: 0px;top: 0px;" onclick="updateThreads(true, function(){ $('#thread_list').animate({ scrollTop: 0 }, 'fast');});"><i class="fa fa-2x fa-angle-double-up" style="position: relative;" title="Move to top"></i></a>
-						<a class="btn-sm btn-primary hover_glow" style=" z-index: 1; position: absolute;right: 0px;bottom: 0px;" onclick="updateThreads(false, function(){ $('#thread_list').animate({ scrollTop: $('#thread_list').prop('scrollHeight') }, 'fast');});"><i class="fa fa-2x fa-angle-double-down" style="position: relative;" title="Move to bottom"></i></a>
-					<div id="thread_list" style="width: 100%;" class="thread_list" prev_page='{$prev_page}' next_page='{$next_page}'>
+						
+					<div class="row">
+
+						<div id="thread_list_wrapper" style="display:flex;padding-right:0px;overflow-y:scroll;" class="col-3">
+  						<div id="thread_list" style="max-height:100%;" prev_page='{$prev_page}' next_page='{$next_page}'>
+
+					
+						<!--<a class="btn-sm btn-primary hover_glow" style="z-index: 1; position: absolute;right: 0px;top: 0px;" onclick="updateThreads(true, function(){ $('#thread_list').animate({ scrollTop: 0 }, 'fast');});"><i class="fa fa-2x fa-angle-double-up" style="position: relative;" title="Move to top"></i></a>
+						<a class="btn-sm btn-primary hover_glow" style=" z-index: 1; position: absolute;right: 0px;bottom: 0px;" onclick="updateThreads(false, function(){ $('#thread_list').animate({ scrollTop: $('#thread_list').prop('scrollHeight') }, 'fast');});"><i class="fa fa-2x fa-angle-double-down" style="position: relative;" title="Move to bottom"></i></a>-->
+					
 						<i class="fa fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
 						<i class="fa fa-caret-up fa-2x fa-fw fill-available" style="color:gray;{$arrowup_visibility}" aria-hidden="true"></i>
 HTML;
@@ -358,7 +362,7 @@ HTML;
 							}
 						});
 					</script>
-					<div style="display:inline-block;width:70%; float: right;" id="posts_list" class="posts_list">
+					<div id="posts_list" class="col-9">
 HTML;
 
             $title_html .= <<<HTML
@@ -474,7 +478,6 @@ HTML;
 	            	<br/>
 
 					</div>
-
 				</div>
 				</div>
 HTML;
@@ -929,8 +932,8 @@ HTML;
         }
 
 		$return .= <<<HTML
-		<div style="margin-top:5px;background-color:transparent; margin: !important auto;padding:0px;box-shadow: none;" class="content">
-		<div style="background-color: #E9EFEF; box-shadow:0 2px 15px -5px #888888;margin-top:10px;margin-left:20px;margin-right:20px;border-radius:3px; height:40px; margin-bottom:10px;" id="forum_bar">
+		<div class="content">
+		<div id="forum_bar">
 
 		<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Back to threads" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}"><i class="fa fa-arrow-left"></i> Back to Threads</a>
 HTML;
@@ -990,7 +993,7 @@ HTML;
 		}
 
 		$return = <<<HTML
-		<div style="margin-left:20px;margin-top:10px; height:50px;" id="forum_bar">
+		<div id="forum_bar">
 			<a class="btn btn-primary" style="border:3px solid #E9EFEF" title="Back to threads" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}"><i class="fa fa-arrow-left"></i> Back to Threads</a>
 		</div>
 			<div style="padding-left:20px;padding-top:1vh; padding-bottom: 10px;border-radius:3px;box-shadow: 0 2px 15px -5px #888888;padding-right:20px;background-color: #E9EFEF;">
