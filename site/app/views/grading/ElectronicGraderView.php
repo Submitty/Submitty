@@ -210,7 +210,7 @@ class ElectronicGraderView extends AbstractView {
     /**
      * @param Gradeable $gradeable
      * @param GradedGradeable[] $graded_gradeables,
-     * @param array $teamless_users_by_section
+     * @param User[] $teamless_users
      * @param array $graders
      * @param Team[] $empty_teams
      * @param bool $show_all_sections_button
@@ -219,7 +219,7 @@ class ElectronicGraderView extends AbstractView {
      * @param bool $show_edit_teams
      * @return string
      */
-    public function detailsPage(Gradeable $gradeable, $graded_gradeables, $teamless_users_by_section, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $view_all) {
+    public function detailsPage(Gradeable $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $view_all) {
 
         $peer = false;
         if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
@@ -361,6 +361,57 @@ class ElectronicGraderView extends AbstractView {
             }
         }
 
+        // TODO: this duplication is not ideal
+        foreach($teamless_users as $teamless_user) {
+            //Extra info for the template
+            $info = [
+                "user" => $teamless_user
+            ];
+
+            if ($peer) {
+                $section_title = "PEER STUDENT GRADER";
+            } else if ($gradeable->isGradeByRegistration()) {
+                $section_title = $teamless_user->getRegistrationSection();
+            } else {
+                $section_title = $teamless_user->getRotatingSection();
+            }
+            if ($section_title === null) {
+                $section_title = "NULL";
+            }
+
+            if (isset($graders[$section_title]) && count($graders[$section_title]) > 0) {
+                $section_graders = implode(", ", array_map(function (User $user) {
+                    return $user->getId();
+                }, $graders[$section_title]));
+            } else {
+                $section_graders = "Nobody";
+            }
+            if ($peer) {
+                $section_graders = $this->core->getUser()->getId();
+            }
+
+            //Team edit button, specifically the onclick event.
+            $reg_section = $teamless_user->getRegistrationSection() ?? 'NULL';
+            $rot_section = $teamless_user->getRotatingSection() ?? 'NULL';
+            $info['new_team_onclick'] = "adminTeamForm(true, '{$teamless_user->getId()}', '{$reg_section}', '{$rot_section}', [], [], {$gradeable->getTeamSizeMax()});";
+
+            //-----------------------------------------------------------------
+            // Now insert this student into the list of sections
+
+            $found = false;
+            for ($i = 0; $i < count($sections); $i++) {
+                if ($sections[$i]["title"] === $section_title) {
+                    $found = true;
+                    $sections[$i]["teamless_users"][] = $info;
+                    break;
+                }
+            }
+            //Not found? Create it
+            if (!$found) {
+                $sections[] = ["title" => $section_title, "teamless_users" => [$info], "graders" => $section_graders];
+            }
+        }
+
         $empty_team_info = [];
         foreach ($empty_teams as $team) {
             /* @var Team $team */
@@ -373,21 +424,9 @@ class ElectronicGraderView extends AbstractView {
             ];
         }
 
-        $user_new_team_onclick = [];
-        foreach($teamless_users_by_section as $section) {
-            /** @var User $user */
-            foreach ($section as $user) {
-                $reg_section = $user->getRegistrationSection() ?? 'NULL';
-                $rot_section = $user->getRotatingSection() ?? 'NULL';
-                $user_new_team_onclick[$user->getId()] = "adminTeamForm(true, '{$user->getId()}', '{$reg_section}', '{$rot_section}', [], [], {$gradeable->getTeamSizeMax()});";
-            }
-        }
-
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
             "gradeable" => $gradeable,
             "sections" => $sections,
-            "teamless_users" => $teamless_users_by_section,
-            "user_new_team_onclick" => $user_new_team_onclick,
             "graders" => $graders,
             "empty_teams" => $empty_teams,
             "empty_team_info" => $empty_team_info,

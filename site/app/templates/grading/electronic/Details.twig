@@ -69,8 +69,8 @@
                     {% for info in section.rows %}
                         {{ self.render_student(self, section, info.graded_gradeable, loop.index, info, columns) }}
                     {% endfor %}
-                    {% for u in teamless_users[section.title] %}
-                        {{ self.render_teamless_user(self, section, u, user_new_team_onclick[u.getId()], loop.index+section.rows|length, columns) }}
+                    {% for info in section.teamless_users %}
+                        {{ self.render_teamless_user(self, section, info.user, info.new_team_onclick, loop.index+section.rows|length, columns) }}
                     {% endfor %}
                 </tbody>
                 {# /Student list #}
