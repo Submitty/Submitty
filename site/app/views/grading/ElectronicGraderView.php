@@ -575,6 +575,16 @@ class ElectronicGraderView extends AbstractView {
             $submission_time = $display_version_instance->getSubmissionTime();
         }
 
+        $version_data = array_map(function(AutoGradedVersion $version) {
+            return [
+                'points' => $version->getNonHiddenPoints(),
+                'days_late' => $version->getDaysLate()
+            ];
+        }, $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions());
+
+        //sort array by version number after values have been mapped
+        ksort($version_data);
+
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/StudentInformationPanel.twig", [
             "gradeable_id" => $gradeable->getId(),
             "submission_time" => $submission_time,
@@ -585,6 +595,9 @@ class ElectronicGraderView extends AbstractView {
             "active_version" => $graded_gradeable->getAutoGradedGradeable()->getActiveVersion(),
             "on_change" => $onChange,
             "tables" => $tables,
+
+            "versions" => $version_data,
+            'total_points' => $gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit(),
         ]);
     }
 

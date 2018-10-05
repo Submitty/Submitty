@@ -5,7 +5,7 @@
             <h5 class='label' style="float:right; padding-right:15px;">Browse Student Submissions:</h5>
             <div class="rubric-title">
                 <div style="float:right;">
-                    {{ render_template('AutoGrading', 'showVersionChoice', gradeable, on_change, "font-size: 13px;") }}
+                    {% include 'grading/VersionChoiceNew.twig' with({formatting: "font-size: 13px;"}) %}
 
                     {# If viewing the active version, show cancel button, otherwise show button to switch active #}
                     {% if display_version > 0 %}
