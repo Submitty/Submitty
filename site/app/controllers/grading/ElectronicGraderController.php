@@ -607,55 +607,25 @@ class ElectronicGraderController extends GradingController {
             }
         }
 
-        $sorted_graded_gradeables = $graded_gradeables = $this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids, null, [$section_key, 'user_id']);
+        $graded_gradeables = [];
+        $user_ids = []; // Collect user ids so we know who isn't on a team
+        /** @var GradedGradeable $g */
+        foreach ($this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids, null, [$section_key, 'user_id', 'team_id']) as $g) {
+            $graded_gradeables[] = $g;
+            if($gradeable->isTeamAssignment()) {
+                $user_ids = array_merge($user_ids, $g->getSubmitter()->getTeam()->getMemberUserIds());
+            }
+        }
+        $non_team_users_by_section = [];
         if ($gradeable->isTeamAssignment()) {
-            // TODO: since you can't have user-type submitters on a team gradeable, how should we handle this?
-            // Rearrange gradeables arrray into form (sec 1 teams, sec 1 individuals, sec 2 teams, sec 2 individuals, etc...)
-            $sections = array();
-            $individual_rows = array();
-            $team_rows = array();
-            foreach($graded_gradeables as $graded_gradeable) {
-                /** @var GradedGradeable $graded_gradeable */
-                if ($gradeable->isGradeByRegistration()) {
-                    $section = $graded_gradeable->getSubmitter()->getRegistrationSection();
+            // Get al users and separate by section (registration or rotating)
+            $get_user_section = function (User $user) use ($gradeable) {
+                return $gradeable->isGradeByRegistration() ? $user->getRegistrationSection() ?? 'NULL' : $user->getRotatingSection();
+            };
+            foreach ($students as $user) {
+                if (!in_array($user->getId(), $user_ids)) {
+                    $non_team_users_by_section[$get_user_section($user)][] = $user;
                 }
-                else {
-                    $section = $graded_gradeable->getSubmitter()->getRotatingSection();
-                }
-
-                if ($section != null && !in_array($section, $sections)) {
-                    $sections[] = $section;
-                }
-
-                if (!$gradeable->isTeamAssignment()) {
-                    if (!isset($individual_rows[$section])) {
-                        $individual_rows[$section] = array();
-                    }
-                    $individual_rows[$section][] = $graded_gradeable;
-                }
-                else {
-                    if (!isset($team_rows[$section])) {
-                        $team_rows[$section] = array();
-                    }
-                    $team_rows[$section][] = $graded_gradeable;
-                }
-            }
-
-            asort($sections);
-            foreach($sections as $section) {
-                if (isset($team_rows[$section])) {
-                    $sorted_graded_gradeables = array_merge($sorted_graded_gradeables, $team_rows[$section]);
-                }
-                if (isset($individual_rows[$section])) {
-                    $sorted_graded_gradeables = array_merge($sorted_graded_gradeables, $individual_rows[$section]);
-                }
-            }
-            // Put null section at end of array
-            if (isset($team_rows[""])) {
-                $sorted_graded_gradeables = array_merge($sorted_graded_gradeables, $team_rows[""]);
-            }
-            if (isset($individual_rows[""])) {
-                $sorted_graded_gradeables = array_merge($sorted_graded_gradeables, $individual_rows[""]);
             }
         }
 
@@ -672,7 +642,7 @@ class ElectronicGraderController extends GradingController {
         $show_import_teams_button = $show_edit_teams && (count($all_teams) > count($empty_teams));
         $show_export_teams_button = $show_edit_teams && (count($all_teams) == count($empty_teams));
 
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $sorted_graded_gradeables, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $view_all);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $graded_gradeables, $non_team_users_by_section, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $view_all);
 
         if ($show_edit_teams) {
             $all_reg_sections = $this->core->getQueries()->getRegistrationSections();
