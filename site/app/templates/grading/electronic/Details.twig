@@ -177,7 +177,7 @@
             {% elseif column.function == "graded_questions" %}
                 <td></td>
             {% elseif column.function == "grading" %}
-                <td></td>
+                <td><b><i>No Team</i></b></td>
             {% elseif column.function == "grading_peer" %}
                 <td></td>
             {% elseif column.function == "index" %}
@@ -187,7 +187,7 @@
             {% elseif column.function == "team_edit" %}
                 {{ self.render_column_team_edit(self, section, null, index, new_team_onclick, column) }}
             {% elseif column.function == "team_id" %}
-                <td>{{ user.getId() }}</td>
+                <td></td>
             {% elseif column.function == "team_members" %}
                 <td>
                     {{ user.getDisplayedFirstName() }}
