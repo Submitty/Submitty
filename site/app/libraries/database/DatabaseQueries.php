@@ -327,7 +327,12 @@ class DatabaseQueries {
         return $this->course_db->rows()[0];
     }
 
-
+    public function removeNotificationsPost($post_id) {
+        //Deletes all children notifications i.e. this posts replies
+        $this->course_db->query("DELETE FROM notifications where metadata::json->>1 = ?", array($post_id));
+        //Deletes parent notification i.e. this post is a reply
+        $this->course_db->query("DELETE FROM notifications where metadata::json->>2 = ?", array($post_id));
+    }
 
     public function isStaffPost($author_id){
         $this->course_db->query("SELECT user_group FROM users WHERE user_id=?", array($author_id));
@@ -698,7 +703,7 @@ ORDER BY egd.g_version", array($g_id, $user_id));
 
         $return = array();
         foreach ($this->course_db->rows() as $row) {
-            $row['submission_time'] = new \DateTime($row['submission_time'], $this->core->getConfig()->getTimezone());
+            $row['submission_time'] = DateUtils::parseDateTime($row['submission_time'], $this->core->getConfig()->getTimezone());
             $return[$row['g_version']] = new GradeableVersion($this->core, $row, $due_date);
         }
 
@@ -1160,9 +1165,14 @@ ORDER BY g.sections_rotating_id, g.user_id", $params);
         return $return;
     }
 
-    public function getRotatingSectionsForGradeableAndUser($g_id, $user) {
-        $this->course_db->query(
-          "SELECT sections_rotating_id FROM grading_rotating WHERE g_id=? AND user_id=?", array($g_id, $user));
+    public function getRotatingSectionsForGradeableAndUser($g_id, $user_id = null) {
+        $params = [$g_id];
+        $query = "SELECT sections_rotating_id FROM grading_rotating WHERE g_id=?";
+        if($user_id !== null) {
+            $params[] = $user_id;
+            $query .= " AND user_id=?";
+        }
+        $this->course_db->query($query, $params);
         $return = array();
         foreach ($this->course_db->rows() as $row) {
             $return[] = $row['sections_rotating_id'];

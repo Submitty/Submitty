@@ -1393,7 +1393,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               ) AS ldet ON g.g_id=ldet.g_id AND ldet.team_id=team.team_id
               
               /* Join regrade request */
-              LEFT JOIN regrade_requests AS rr ON rr.user_id=gd.gd_user_id OR rr.team_id=gd.gd_team_id
+              LEFT JOIN regrade_requests AS rr ON (rr.user_id=gd.gd_user_id OR rr.team_id=gd.gd_team_id) AND rr.g_id=g.g_id
             WHERE $selector
             $order";
 

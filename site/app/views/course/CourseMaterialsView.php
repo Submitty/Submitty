@@ -2,6 +2,8 @@
 
 namespace app\views\course;
 
+use app\libraries\Core;
+use app\libraries\DateUtils;
 use app\models\User;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
@@ -15,7 +17,7 @@ class CourseMaterialsView extends AbstractView {
      */
     public function listCourseMaterials($user_group) {
         $this->core->getOutput()->addBreadcrumb("Course Materials");
-        function add_files($core, &$files, &$file_datas, &$file_release_dates, $expected_path, $json, $course_materials_array, $start_dir_name, $user_group) {
+        function add_files(Core $core, &$files, &$file_datas, &$file_release_dates, $expected_path, $json, $course_materials_array, $start_dir_name, $user_group) {
             $files[$start_dir_name] = array();
             $working_dirRoot = &$files[$start_dir_name];
 
@@ -23,7 +25,7 @@ class CourseMaterialsView extends AbstractView {
 
             $arrlength = count($course_materials_array);
 
-            $now_date_time = (new \DateTime('now', $core->getConfig()->getTimezone()));
+            $now_date_time = $core->getDateTimeNow();
 
             foreach($course_materials_array as $file) {
 
@@ -39,7 +41,7 @@ class CourseMaterialsView extends AbstractView {
                     {
                         $isShareToOther = $json[$expected_file_path]['checked'];
 
-                        $release_date = new \DateTime($json[$expected_file_path]['release_datetime'], $core->getConfig()->getTimezone());
+                        $release_date = DateUtils::parseDateTime($json[$expected_file_path]['release_datetime'], $core->getConfig()->getTimezone());
 
                         if ($isShareToOther == '1' && $release_date > $now_date_time)
                             $isShareToOther = '0';
