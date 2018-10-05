@@ -33,14 +33,14 @@
         <div class="box">
             <div class="box-title">
                 {{ Badge.render(nonhidden_earned, nonhidden_max, false) }}
-                <h4>{{ is_ta_grading_complete ? "Autograding Subtotal" : "Total" }}</h4>
+                <h4>{{ is_ta_grade_released ? "Autograding Subtotal" : "Total" }}</h4>
             </div>
         </div>
         {% if display_hidden %}
             <div class="box">
                 <div class="box-title">
                     {{ Badge.render(hidden_earned, hidden_max, false) }}
-                    <h4>{{ is_ta_grading_complete ? "Autograding Subtotal" : "Total" }} <i>(With Hidden Points)</i></h4>
+                    <h4>{{ is_ta_grade_released ? "Autograding Subtotal" : "Total" }} <i>(With Hidden Points)</i></h4>
                 </div>
             </div>
         {% endif %}
@@ -69,7 +69,7 @@
                 {% else %}
                     <div class="badge">
                         Hidden
-                        {% if is_ta_grading_complete %}
+                        {% if is_ta_grade_released %}
                             <br>
                             {{ Badge.format_value(testcase.points, testcase.points_total, testcase.extra_credit) }}
                         {% endif %}

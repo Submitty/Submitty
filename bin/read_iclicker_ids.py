@@ -30,46 +30,46 @@ def main():
     args = parse_args()
 
     if not os.path.isdir(args.submission_directory):
-        raise SystemExit("Specified submission_directory does not exist or is not a directory")
-    if not os.path.isfile(args.remote_id_file):
-        raise SystemExit("Specified remote_id_file does not exist or is not a file")
-    indir = args.submission_directory
-    outfile = args.remote_id_file
+        raise SystemExit("ERROR: Specified submission_directory is invalid: "+args.submission_directory)
 
-    ############################
-    # OPEN THE OUTPUT FILE
-    with open(outfile, 'w') as remote_ids:
-        # LOOP OVER ALL OF THE USERS
-        for username in os.listdir(indir):
-            userdir = indir + '/' + username
-            uas = userdir + '/user_assignment_settings.json'
-            with open(uas) as json_data:
-                d = json.load(json_data)
-                active = d['active_version']
+    try:
 
-                # SKIP CANCELLED SUBMISSION
-                if active < 1:
-                    continue
+        ############################
+        # OPEN THE OUTPUT FILE
+        with open(args.remote_id_file, 'w') as remote_ids:
+            # LOOP OVER ALL OF THE USERS
+            for username in os.listdir(args.submission_directory):
+                userdir = args.submission_directory + '/' + username
+                uas = userdir + '/user_assignment_settings.json'
+                with open(uas) as json_data:
+                    d = json.load(json_data)
+                    active = d['active_version']
 
-                # GRAB THE ICLICKER FROM THE SUBMISSION
-                clickerfile = userdir + '/'+str(active) + '/textbox_0.txt'
-                with open(clickerfile) as f:
-                    iclicker_string = f.read()
+                    # SKIP CANCELLED SUBMISSION
+                    if active < 1:
+                        continue
 
-                    iclicker_ids = iclicker_string.split(',')
+                    # GRAB THE ICLICKER FROM THE SUBMISSION
+                    clickerfile = userdir + '/'+str(active) + '/textbox_0.txt'
+                    with open(clickerfile) as f:
+                        iclicker_string = f.read()
+                        iclicker_ids = iclicker_string.split(',')
+                        if len(iclicker_ids) > 1:
+                            print ("NOTE: user '{0}' has entered '{1}' Remote IDs".format(username,len(iclicker_ids)))
+                        for iclicker in iclicker_ids:
+                            if len(iclicker) != 8:
+                                print ("WARNING! iclicker id '{0}' for user '{1}' is not 8 characters".format(iclicker,username))
+                            if 'T24' in iclicker or 't24' in iclicker:
+                                print ("WARNING! iclicker id '{0}' for user '{1}' is likely incorrect (model # not id #)".format(iclicker,username))
 
-                    if len(iclicker_ids) > 1:
-                        print ("NOTE: user '{0}' has entered '{1}' Remote IDs".format(username,len(iclicker_ids)))
+                            # WRITE TO EXPECTED FORMAT (matches iclicker.com format)
+                            remote_ids.write('#{0},"{1}"\n'.format(iclicker.upper(),username))
 
-                    for iclicker in iclicker_ids:
-                        if len(iclicker) != 8:
-                            print ("WARNING! iclicker id '{0}' for user '{1}' is not 8 characters".format(iclicker,username))
+    except IOError:
+        raise SystemExit("ERROR: Cannot write to specified remote_id_file: "+args.remote_id_file);
 
-                        if 'T24' in iclicker or 't24' in iclicker:
-                            print ("WARNING! iclicker id '{0}' for user '{1}' is likely incorrect (model # not id #)".format(iclicker,username))
 
-                        # WRITE TO EXPECTED FORMAT (matches iclicker.com format)
-                        remote_ids.write('#{0},"{1}"\n'.format(iclicker.upper(),username))
+
 
 if __name__ == "__main__":
     main()
