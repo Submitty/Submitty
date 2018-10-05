@@ -270,6 +270,20 @@ class TaGradedGradeable extends AbstractModel {
     }
 
     /**
+     * Gets if this graded gradeable has any grades
+     * @return bool
+     */
+    public function anyGrades() {
+        /** @var GradedComponentContainer $container */
+        foreach ($this->graded_component_containers as $container) {
+            if ($container->anyGradedComponents()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Sets the id of this grade data (used from database methods)
      * @param int $id
      * @internal
