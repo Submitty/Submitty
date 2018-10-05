@@ -616,7 +616,7 @@ class ElectronicGraderController extends GradingController {
                 $user_ids = array_merge($user_ids, $g->getSubmitter()->getTeam()->getMemberUserIds());
             }
         }
-        $non_team_users_by_section = [];
+        $teamless_users_by_section = [];
         if ($gradeable->isTeamAssignment()) {
             // Get al users and separate by section (registration or rotating)
             $get_user_section = function (User $user) use ($gradeable) {
@@ -624,7 +624,7 @@ class ElectronicGraderController extends GradingController {
             };
             foreach ($students as $user) {
                 if (!in_array($user->getId(), $user_ids)) {
-                    $non_team_users_by_section[$get_user_section($user)][] = $user;
+                    $teamless_users_by_section[$get_user_section($user)][] = $user;
                 }
             }
         }
@@ -642,7 +642,7 @@ class ElectronicGraderController extends GradingController {
         $show_import_teams_button = $show_edit_teams && (count($all_teams) > count($empty_teams));
         $show_export_teams_button = $show_edit_teams && (count($all_teams) == count($empty_teams));
 
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $graded_gradeables, $non_team_users_by_section, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $view_all);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $graded_gradeables, $teamless_users_by_section, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $view_all);
 
         if ($show_edit_teams) {
             $all_reg_sections = $this->core->getQueries()->getRegistrationSections();

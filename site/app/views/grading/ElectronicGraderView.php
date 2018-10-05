@@ -209,7 +209,8 @@ class ElectronicGraderView extends AbstractView {
 
     /**
      * @param Gradeable $gradeable
-     * @param GradedGradeable[] $graded_gradeables
+     * @param GradedGradeable[] $graded_gradeables,
+     * @param array $teamless_users_by_section
      * @param array $graders
      * @param Team[] $empty_teams
      * @param bool $show_all_sections_button
@@ -218,7 +219,7 @@ class ElectronicGraderView extends AbstractView {
      * @param bool $show_edit_teams
      * @return string
      */
-    public function detailsPage(Gradeable $gradeable, $graded_gradeables, $non_team_users_by_section, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $view_all) {
+    public function detailsPage(Gradeable $gradeable, $graded_gradeables, $teamless_users_by_section, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $view_all) {
 
         $peer = false;
         if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
@@ -379,7 +380,7 @@ class ElectronicGraderView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
             "gradeable" => $gradeable,
             "sections" => $sections,
-            "extra_users" => $non_team_users_by_section,
+            "teamless_users" => $teamless_users_by_section,
             "graders" => $graders,
             "empty_teams" => $empty_teams,
             "empty_team_info" => $empty_team_info,

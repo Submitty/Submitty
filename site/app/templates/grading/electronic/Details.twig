@@ -69,8 +69,8 @@
                     {% for info in section.rows %}
                         {{ self.render_student(self, section, info.graded_gradeable, loop.index, info, columns) }}
                     {% endfor %}
-                    {% for u in extra_users[section.title] %}
-                        {{ self.render_blank_user(self, section, u, loop.index+section.rows|length, columns) }}
+                    {% for u in teamless_users[section.title] %}
+                        {{ self.render_teamless_user(self, section, u, loop.index+section.rows|length, columns) }}
                     {% endfor %}
                 </tbody>
                 {# /Student list #}
@@ -161,7 +161,7 @@
     </tr>
 {% endmacro %}
 
-{% macro render_blank_user(self, section, user, index, columns) %}
+{% macro render_teamless_user(self, section, user, index, columns) %}
     <tr>
         {% for column in columns %}
             {#
