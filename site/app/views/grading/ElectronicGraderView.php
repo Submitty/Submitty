@@ -325,13 +325,9 @@ class ElectronicGraderView extends AbstractView {
             if ($gradeable->isTeamAssignment()) {
                 $reg_section = ($row->getSubmitter()->getRegistrationSection() === null) ? "NULL" : $row->getSubmitter()->getRegistrationSection();
                 $rot_section = ($row->getSubmitter()->getRotatingSection() === null) ? "NULL" : $row->getSubmitter()->getRotatingSection();
-                if ($row->getSubmitter()->isTeam()) {
-                    $user_assignment_setting_json = json_encode($row->getSubmitter()->getTeam()->getAssignmentSettings($gradeable));
-                    $members = json_encode($row->getSubmitter()->getTeam()->getMembers());
-                    $info["team_edit_onclick"] = "adminTeamForm(false, '{$row->getSubmitter()->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, {$members}, {$gradeable->getTeamSizeMax()});";
-                } else {
-                    $info["team_edit_onclick"] = "adminTeamForm(true, '{$row->getSubmitter()->getId()}', '{$reg_section}', '{$rot_section}', [], [], {$gradeable->getTeamSizeMax()});";
-                }
+                $user_assignment_setting_json = json_encode($row->getSubmitter()->getTeam()->getAssignmentSettings($gradeable));
+                $members = json_encode($row->getSubmitter()->getTeam()->getMembers());
+                $info["team_edit_onclick"] = "adminTeamForm(false, '{$row->getSubmitter()->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, {$members}, {$gradeable->getTeamSizeMax()});";
             }
 
             //List of graded components
@@ -377,10 +373,21 @@ class ElectronicGraderView extends AbstractView {
             ];
         }
 
+        $user_new_team_onclick = [];
+        foreach($teamless_users_by_section as $section) {
+            /** @var User $user */
+            foreach ($section as $user) {
+                $reg_section = $user->getRegistrationSection() ?? 'NULL';
+                $rot_section = $user->getRotatingSection() ?? 'NULL';
+                $user_new_team_onclick[$user->getId()] = "adminTeamForm(true, '{$user->getId()}', '{$reg_section}', '{$rot_section}', [], [], {$gradeable->getTeamSizeMax()});";
+            }
+        }
+
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
             "gradeable" => $gradeable,
             "sections" => $sections,
             "teamless_users" => $teamless_users_by_section,
+            "user_new_team_onclick" => $user_new_team_onclick,
             "graders" => $graders,
             "empty_teams" => $empty_teams,
             "empty_team_info" => $empty_team_info,

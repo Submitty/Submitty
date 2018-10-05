@@ -70,7 +70,7 @@
                         {{ self.render_student(self, section, info.graded_gradeable, loop.index, info, columns) }}
                     {% endfor %}
                     {% for u in teamless_users[section.title] %}
-                        {{ self.render_teamless_user(self, section, u, loop.index+section.rows|length, columns) }}
+                        {{ self.render_teamless_user(self, section, u, user_new_team_onclick[u.getId()], loop.index+section.rows|length, columns) }}
                     {% endfor %}
                 </tbody>
                 {# /Student list #}
@@ -137,7 +137,7 @@
             {% elseif column.function == "section" %}
                 {{ self.render_column_section(self, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "team_edit" %}
-                {{ self.render_column_team_edit(self, section, graded_gradeable, index, info, column) }}
+                {{ self.render_column_team_edit(self, section, graded_gradeable, index, info.team_edit_onclick, column) }}
             {% elseif column.function == "team_id" %}
                 {{ self.render_column_team_id(self, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "team_members" %}
@@ -161,7 +161,7 @@
     </tr>
 {% endmacro %}
 
-{% macro render_teamless_user(self, section, user, index, columns) %}
+{% macro render_teamless_user(self, section, user, new_team_onclick, index, columns) %}
     <tr>
         {% for column in columns %}
             {#
@@ -185,7 +185,7 @@
             {% elseif column.function == "section" %}
                 {{ self.render_column_section(self, section, null, index, null, column) }}
             {% elseif column.function == "team_edit" %}
-                <td>No Team</td>
+                {{ self.render_column_team_edit(self, section, null, index, new_team_onclick, column) }}
             {% elseif column.function == "team_id" %}
                 <td>{{ user.getId() }}</td>
             {% elseif column.function == "team_members" %}
@@ -328,9 +328,9 @@
 {% endmacro %}
 
 {# Edit Team #}
-{% macro render_column_team_edit(self, section, graded_gradeable, index, info, column) %}
+{% macro render_column_team_edit(self, section, graded_gradeable, index, team_edit_onclick, column) %}
     <td>
-        <a onclick="{{ info.team_edit_onclick }}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+        <a onclick="{{ team_edit_onclick }}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
     </td>
 {% endmacro %}
 
