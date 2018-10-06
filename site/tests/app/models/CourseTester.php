@@ -20,6 +20,14 @@ class CourseTester extends BaseUnitTest {
         $this->assertEquals('csci1000', $course->getTitle());
         $this->assertEquals('CSCI1000', $course->getCapitalizedTitle());
         $this->assertEquals('', $course->getDisplayName());
+
+        $array = [
+            'semester' => 's18',
+            'title' => 'csci1000',
+            'display_name' => '',
+            'modified' => false
+        ];
+        $this->assertEquals($array, $course->toArray());
     }
 
     public function longSemesterDataProvider() {
@@ -68,6 +76,13 @@ class CourseTester extends BaseUnitTest {
             $course = new Course($this->createMockCore(['tmp_path' => $temp_dir]), $details);
             $this->assertTrue($course->loadDisplayName());
             $this->assertEquals('Test Course', $course->getDisplayName());
+            $array = [
+                'semester' => 's18',
+                'title' => 'csci1000',
+                'display_name' => 'Test Course',
+                'modified' => false
+            ];
+            $this->assertEquals($array, $course->toArray());
         }
         finally {
             FileUtils::recursiveRmdir($temp_dir);
