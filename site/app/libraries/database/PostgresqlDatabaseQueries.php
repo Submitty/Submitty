@@ -1293,7 +1293,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                       t.state,
                       tu.*
                     FROM teams t
-                    JOIN users tu ON t.user_id = tu.user_id
+                    JOIN users tu ON t.user_id = tu.user_id ORDER BY t.user_id
                   ) AS tu ON gt.team_id = tu.team_id
                 GROUP BY gt.team_id
               ) AS team ON eg.team_assignment AND EXISTS (
