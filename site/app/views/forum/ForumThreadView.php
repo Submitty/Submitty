@@ -32,23 +32,25 @@ class ForumThreadView extends AbstractView {
 			}
     	</style>
 
-    	<div class="content">
+    	<div style="padding:0px;" class="content">
 
 		<div id="forum_bar">
 
 
-		<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Back to threads" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}"><i class="fa fa-arrow-left"></i> Back to Threads</a>
+		<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Back to threads" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}">Back to Threads</a>
 
-			<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Create thread" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}"><i class="fa fa-plus-circle"></i> Create Thread</a>
+			<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Create thread" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}"> Create Thread</a>
 
 			<form style="float:right;position:relative;top:3px;right:5px;display:inline-block;" method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'search_threads'))}">
 			<input type="text" size="35" placeholder="search" name="search_content" id="search_content" required/>
 			<button type="submit" name="search" title="Submit search" class="btn btn-primary">
-  				<i class="fa fa-search"></i> Search
+  				Search
 			</button>
 			</form>
 			
 		</div>
+
+		<hr/>
 
 		<div id="search_wrapper">
 
@@ -188,7 +190,9 @@ HTML;
 				$('#{$display_option}').attr('checked', 'checked'); //Saves the radiobutton state when refreshing the page
 				$(".post_reply_from").submit(publishPost);
 				$("form").areYouSure();
-				$("#container").css("max-height", "100%");
+				$("#push").css("max-height", "100%");
+				$(".content").css("display", "flex");
+				$(".content").css("flex-direction", "column");
 			});
 
 		</script>
@@ -239,8 +243,8 @@ HTML;
 	$return .= <<<HTML
 		<div style="padding: 0px;overflow:hidden;" class="content">
 		<div id="forum_bar">
-		<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Create thread" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}"><i class="fa fa-plus-circle"></i> Create Thread</a>
-		<a class="btn btn-primary {$show_merged_thread_class}" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="{$show_merged_thread_title}" onclick="{$show_merged_thread_action}">{$show_merged_thread_title}</a>
+		<a class="btn btn-primary" style="position:relative;top:3px;" title="Create thread" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}">Create Thread</a>
+		<a class="btn btn-primary {$show_merged_thread_class}" style="position:relative;top:3px;display:inline-block;" title="{$show_merged_thread_title}" onclick="{$show_merged_thread_action}">{$show_merged_thread_title}</a>
 HTML;
 	if($this->core->getUser()->getGroup() <= 2){
 		if($show_deleted) {
@@ -251,13 +255,13 @@ HTML;
 			$show_deleted_action = "alterShowDeletedStatus(1);";
 		}
 		$return .= <<<HTML
-			<a class="btn btn-primary {$show_deleted_class}" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="Show Deleted Threads" onclick="{$show_deleted_action}">Show Deleted Threads</a>
-			<a class="btn btn-primary" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="Show Stats" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))}">Stats</a>
+			<a class="btn btn-primary {$show_deleted_class}" style="position:relative;top:3px;display:inline-block;" title="Show Deleted Threads" onclick="{$show_deleted_action}">Show Deleted Threads</a>
+			<a class="btn btn-primary" style="position:relative;top:3px;display:inline-block;" title="Show Stats" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))}">Stats</a>
 HTML;
 	}
 	$categories = $this->core->getQueries()->getCategories();
 	$return .= <<<HTML
-		<a class="btn btn-primary" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="Filter Threads based on Categories" onclick="$('#category_wrapper').css('display', 'block');"><i class="fa fa-filter"></i> Filter</a>
+		<a class="btn btn-primary" style="position:relative;top:3px;display:inline-block;" title="Filter Threads based on Categories" onclick="$('#category_wrapper').css('display', 'block');">Filter</a>
 HTML;
 
 	$cookieSelectedCategories = array();
@@ -279,27 +283,33 @@ HTML;
 	}
 
 	$return .= <<<HTML
-			<button class="btn btn-primary" style="float:right;position:relative;top:3px;right:5px;display:inline-block;" title="Display search bar" onclick="this.style.display='none'; document.getElementById('search_block').style.display = 'inline-block'; document.getElementById('search_content').focus();"><i class="fa fa-search"></i> Search</button>
+			<button class="btn btn-primary" style="float:right;position:relative;top:3px;right:5px;display:inline-block;" title="Display search bar" onclick="this.style.display='none'; document.getElementById('search_block').style.display = 'inline-block'; document.getElementById('search_content').focus();">Search</button>
 HTML;
         $return .= <<<HTML
-			<input type="radio" name="selectOption" id="tree" onclick="changeDisplayOptions('tree', {$currentThread})" value="tree">  
-			<label for="radio">Hierarchical</label>  
 
-			<input type="radio" name="selectOption" id="time" onclick="changeDisplayOptions('time', {$currentThread})" value="time">  
-			<label for="radio2">Chronological</label>
+			<div style="display:inline-block;position:relative;top:3px;" class="btn-group btn-group-toggle" data-toggle="buttons">
+  				<label id="tree_label" for="radio" onclick="changeDisplayOptions('tree', {$currentThread})" class="btn btn-secondary">
+    				<input type="radio" name="selectOption" id="tree" value="tree"> Hierarchical
+  				</label>
+  				<label id="time_label" for="radio2" onclick="changeDisplayOptions('time', {$currentThread})" class="btn btn-secondary">
+    				<input type="radio" name="selectOption" id="time" value="time"> Chronological
+  				</label>
+
 HTML;
         if($this->core->getUser()->getGroup() <= 2){
             $return .= <<<HTML
-			<input type="radio" name="selectOption" id="alpha" onclick="changeDisplayOptions('alpha', {$currentThread})" value="alpha">  
-			<label for="radio3">Alphabetical</label>
+			<label id="alpha_label" for="radio3" onclick="changeDisplayOptions('alpha', {$currentThread})" class="btn btn-secondary">
+    				<input type="radio" name="selectOption" id="alpha" value="alpha"> Alphabetical
+  			</label>
 HTML;
         }
         $return .= <<<HTML
+        	</div>
 			<form id="search_block" style="float:right;position:relative;top:3px;right:5px;display:none;" method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'search_threads'))}">
 			<input type="text" size="35" placeholder="search" name="search_content" id="search_content"/>
 
 			<button type="submit" name="search" title="Submit search" class="btn btn-primary">
-  				<i class="fa fa-search"></i> Search
+  				Search
 			</button>
 			</form>
 HTML;
@@ -323,8 +333,7 @@ HTML;
 						
 					<div class="row">
 
-						<div id="thread_list_wrapper" style="display:flex;padding-right:0px;overflow-y:scroll;" class="col-3">
-  						<div id="thread_list" style="max-height:100%;" prev_page='{$prev_page}' next_page='{$next_page}'>
+  						<div id="thread_list" class="col-3" prev_page="{$prev_page}" next_page="{$next_page}">
 
 					
 						<!--<a class="btn-sm btn-primary hover_glow" style="z-index: 1; position: absolute;right: 0px;top: 0px;" onclick="updateThreads(true, function(){ $('#thread_list').animate({ scrollTop: 0 }, 'fast');});"><i class="fa fa-2x fa-angle-double-up" style="position: relative;" title="Move to top"></i></a>
@@ -352,10 +361,9 @@ HTML;
 						<i class="fa fa-caret-down fa-2x fa-fw fill-available" style="color:gray;" aria-hidden="true"></i>
 						<i class="fa fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
 					</div>
-					</div>
 					<script type="text/javascript">
 						$(function(){
-							dynamicScrollContentOnDemand($('.thread_list'), buildUrl({'component': 'forum', 'page': 'get_threads', 'page_number':'{{#}}'}), {$currentThread}, '', '{$currentCourse}');
+							dynamicScrollContentOnDemand($('#thread_list'), buildUrl({'component': 'forum', 'page': 'get_threads', 'page_number':'{{#}}'}), {$currentThread}, '', '{$currentCourse}');
 							var active_thread = $('#thread_list .active');
 							if(active_thread.length > 0) {
 								active_thread[0].scrollIntoView(true); 
@@ -464,6 +472,7 @@ HTML;
 						<input type="hidden" name="display_option" value="{$display_option}" />
 HTML;
 						$GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id'])?$GLOBALS['post_box_id']+1:1;
+
 						$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig", [
 							"show_post" => true,
 							"post_content_placeholder" => "Enter your reply to all here...",
@@ -779,7 +788,7 @@ HTML;
 HTML;
 			} else {
 				$return .= <<<HTML
-					<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="$('html, .posts_list').animate({ scrollTop: document.getElementById('posts_list').scrollHeight }, 'slow');"> Reply</a>
+					<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="$('html, #posts_list').animate({ scrollTop: document.getElementById('posts_list').scrollHeight }, 'slow');"> Reply</a>
 HTML;
 			}
 			if($this->core->getUser()->getGroup() <= 2) {
@@ -932,10 +941,10 @@ HTML;
         }
 
 		$return .= <<<HTML
-		<div class="content">
+		<div style="padding: 0px;" class="content">
 		<div id="forum_bar">
 
-		<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Back to threads" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}"><i class="fa fa-arrow-left"></i> Back to Threads</a>
+		<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Back to threads" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}">Back to Threads</a>
 HTML;
 
 		if($this->core->getUser()->getGroup() <= 2){
@@ -949,16 +958,14 @@ HTML;
 			<form style="float:right;position:relative;top:3px;right:5px;display:inline-block;" method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'search_threads'))}">
 			<input type="text" size="35" placeholder="search" name="search_content" id="search_content" required/>
 			<button type="submit" name="search" title="Submit search" class="btn btn-primary">
-  				<i class="fa fa-search"></i> Search
+  				Search
 			</button>
 			</form>
 		</div>
+		<hr/>
 
-		<div style="padding-left:20px;padding-top:1vh; padding-bottom: 10px;height:70vh;border-radius:3px;box-shadow: 0 2px 15px -5px #888888;padding-right:20px;background-color: #E9EFEF;" id="forum_wrapper">
-
-		<h3> Create Thread </h3>
-
-			<form id="thread_form" style="padding-right:15px;margin-top:15px;margin-left:10px;height:63vh;overflow-y: auto" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread'))}" enctype="multipart/form-data">
+			<form style="margin-right: 15px; margin-left:15px;" id="thread_form" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread'))}" enctype="multipart/form-data">
+			<h3 style="margin-bottom:10px;"> Create Thread </h3>
 HTML;
 				$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig", [
 					"show_title" => true,
@@ -977,7 +984,6 @@ HTML;
 			$return .= <<<HTML
 			</form>
 		</div>
-		</div>
 HTML;
 
 		return $return;
@@ -994,7 +1000,7 @@ HTML;
 
 		$return = <<<HTML
 		<div id="forum_bar">
-			<a class="btn btn-primary" style="border:3px solid #E9EFEF" title="Back to threads" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}"><i class="fa fa-arrow-left"></i> Back to Threads</a>
+			<a class="btn btn-primary" style="border:3px solid #E9EFEF" title="Back to threads" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}">Back to Threads</a>
 		</div>
 			<div style="padding-left:20px;padding-top:1vh; padding-bottom: 10px;border-radius:3px;box-shadow: 0 2px 15px -5px #888888;padding-right:20px;background-color: #E9EFEF;">
 				<table class="table table-striped table-bordered persist-area" id="forum_stats_table">

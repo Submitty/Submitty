@@ -1750,19 +1750,19 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
                var page_number = parseInt(x.page_number);
                x = x.html;
                x = `${x}`;
-               var jElement = $(".thread_list");
+               var jElement = $("#thread_list");
                jElement.children(":not(.fa)").remove();
-               $(".thread_list .fa-caret-up").after(x);
+               $("#thread_list .fa-caret-up").after(x);
                jElement.attr("prev_page", page_number - 1);
                jElement.attr("next_page", page_number + 1);
                jElement.data("dynamic_lock_load", false);
-               $(".thread_list .fa-spinner").hide();
+               $("#thread_list .fa-spinner").hide();
                if(loadFirstPage) {
-                   $(".thread_list .fa-caret-up").hide();
-                   $(".thread_list .fa-caret-down").show();
+                   $("#thread_list .fa-caret-up").hide();
+                   $("#thread_list .fa-caret-down").show();
                } else {
-                   $(".thread_list .fa-caret-up").show();
-                   $(".thread_list .fa-caret-down").hide();
+                   $("#thread_list .fa-caret-up").show();
+                   $("#thread_list .fa-caret-down").hide();
                }
                dynamicScrollLoadIfScrollVisible(jElement);
                if(success_callback != null) {

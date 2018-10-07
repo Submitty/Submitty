@@ -41,6 +41,7 @@
             $("#tree").prop("checked", true);
             {% if display_option in ['tree', 'time', 'alpha'] %}
             $("#{{ display_option }}").prop("checked", true);
+            $("#{{display_option }}_label").addClass('active');
             {% endif %}
         });
     </script>
