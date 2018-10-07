@@ -290,7 +290,6 @@ class Gradeable extends AbstractModel {
     const date_properties_elec_ta = [
         'ta_view_start_date',
         'submission_open_date',
-        'submission_due_date',
         'grade_start_date',
         'grade_due_date',
         'grade_released_date'
@@ -303,7 +302,6 @@ class Gradeable extends AbstractModel {
     const date_properties_elec_no_ta = [
         'ta_view_start_date',
         'submission_open_date',
-        'submission_due_date',
         'grade_released_date'
     ];
 
@@ -469,8 +467,13 @@ class Gradeable extends AbstractModel {
             }
 
             // Only add in regrade request date if its allowed & enabled
-            if($this->isTaGrading() && $this->core->getConfig()->isRegradeEnabled() && $this->isRegradeAllowed()) {
+            if ($this->isTaGrading() && $this->core->getConfig()->isRegradeEnabled() && $this->isRegradeAllowed()) {
                 $result[] = 'regrade_request_date';
+            }
+
+            // Only add in submission due date if student submission is enabled
+            if ($this->isStudentSubmit()) {
+                $result[] = 'submission_due_date';
             }
         } else {
             $result = self::date_properties_simple;
