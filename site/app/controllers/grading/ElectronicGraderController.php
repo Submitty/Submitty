@@ -1100,7 +1100,6 @@ class ElectronicGraderController extends GradingController {
 
         $show_silent_edit = $this->core->getAccess()->canI("grading.electronic.silent_edit");
 
-        // Get the new model instance
         $display_version = intval($_REQUEST['gradeable_version'] ?? '0');
         if($display_version <= 0) {
             $display_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
