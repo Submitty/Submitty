@@ -117,8 +117,8 @@ class HomeworkView extends AbstractView {
                 $total_late_used -= $g->getLateDayExceptions();
             }
         }
-        $late_days_remaining = $curr_late - $total_late_used;
         $active_days_late = $gradeable->getActiveVersion() == 0 ? 0 : $gradeable->getActiveDaysLate();
+        $late_days_remaining = $curr_late - $total_late_used -$active_days_late+$extensions;
         $would_be_days_late = $gradeable->getWouldBeDaysLate();
         $late_days_allowed = $gradeable->getAllowedLateDays();
         $active_version = $gradeable->getActiveVersion();
@@ -160,7 +160,7 @@ class HomeworkView extends AbstractView {
                 $messages[] = ['type' => 'late', 'info' => [
                     'late' => $active_days_late,
                     'charged' => $active_days_charged,
-                    'remaining' => $late_days_remaining-$active_days_late
+                    'remaining' => $late_days_remaining
                 ]];
             }
             if ($error) {
