@@ -34,7 +34,7 @@
                         {% if team_assignment %}
                             Team:<br/>
 
-                            {% for team_member in submitter.getMemberUsers() %}
+                            {% for team_member in submitter.getTeam().getMemberUsers() %}
                                 &emsp;{{ team_member.getDisplayedFirstName() }} {{ team_member.getLastName() }} ({{ team_member.getId() }})<br/>
                             {% endfor %}
                         {% else %}

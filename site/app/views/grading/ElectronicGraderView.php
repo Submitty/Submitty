@@ -635,6 +635,7 @@ class ElectronicGraderView extends AbstractView {
             "gradeable_id" => $gradeable->getId(),
             "submission_time" => $submission_time,
             "submitter_id" => $graded_gradeable->getSubmitter()->getId(),
+            "submitter" => $graded_gradeable->getSubmitter(),
             "team_assignment" => $gradeable->isTeamAssignment(),
             "display_version" => $display_version,
             "highest_version" => $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
