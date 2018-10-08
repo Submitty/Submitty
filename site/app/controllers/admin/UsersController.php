@@ -32,7 +32,7 @@ class UsersController extends AbstractController {
                 break;
             case 'update_registration_sections':
                 $this->updateRegistrationSections();
-                break;    
+                break;
             case 'update_rotating_sections':
                 $this->updateRotatingSections();
                 break;
@@ -215,7 +215,7 @@ class UsersController extends AbstractController {
         $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'rotatingSectionsForm', $students, $reg_sections,
             $non_null_counts, $null_counts, $max_section);
     }
-    
+
     public function updateRegistrationSections() {
         $return_url = $this->core->buildUrl(
             array('component' => 'admin',
@@ -231,34 +231,20 @@ class UsersController extends AbstractController {
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
         $students = $this->core->getQueries()->getAllUsers();
         $graders = $this->core->getQueries()->getAllGraders();
-        if (isset($_POST['add_reg_section']) && $_POST['add_reg_section'] != "") {
-            $reg_section_exists=false;
-            foreach ($reg_sections as $section) {
-                $section = $section['sections_registration_id'];
-                if ($section == ($_POST['add_reg_section'])){
-                    $reg_section_exists = true;
-                    break;
-                }
-            }
-            if ($reg_section_exists == true) {
-                $this->core->addErrorMessage("Registration Section already present");
-                $_SESSION['request'] = $_POST;
-                $this->core->redirect($return_url);       
+        if (isset($_POST['add_reg_section']) && $_POST['add_reg_section'] !== "") {
+            // SQL query's ON CONFLICT clause should resolve foreign key conflicts, so we are able to INSERT after successful validation
+            if (User::validateUserData('registration_section', $_POST['add_reg_section'])) {
+                $this->core->getQueries()->insertNewRegistrationSection($_POST['add_reg_section']);
+                $this->core->addSuccessMessage("Registration section {$_POST['add_reg_section']} added");
             }
             else {
-                #validation for registration section
-                if(preg_match("~^[A-Za-z0-9_\-]+$~", $_POST['add_reg_section']) === 1) {
-                    $this->core->getQueries()->insertNewRegistrationSection($_POST['add_reg_section']);
-                    $this->core->addSuccessMessage("Registration section {$_POST['add_reg_section']} added");
-                }
-                else {
-                    $this->core->addErrorMessage("Registration Section entered do not follow specified format");
-                    $_SESSION['request'] = $_POST;
-                    $this->core->redirect($return_url);       
-                }
+                $this->core->addErrorMessage("Registration Section entered do not follow specified format");
+                $_SESSION['request'] = $_POST;
+                $this->core->redirect($return_url);
             }
         }
 
+        // TO DO: delete trigger in submitty_db
         if (isset($_POST['delete_reg_section']) && $_POST['delete_reg_section'] != "") {
             $valid_reg_section_flag=false;
             foreach ($reg_sections as $section) {
@@ -271,7 +257,7 @@ class UsersController extends AbstractController {
             if ($valid_reg_section_flag == false) {
                 $this->core->addErrorMessage("Not a valid Registration Section");
                 $_SESSION['request'] = $_POST;
-                $this->core->redirect($return_url); 
+                $this->core->redirect($return_url);
             }
             else {
                 $no_user_flag=true;
@@ -281,7 +267,7 @@ class UsersController extends AbstractController {
                     if ($registration == $_POST['delete_reg_section']) {
                         $no_user_flag=false;
                         break;
-                    }    
+                    }
                 }
 
                 foreach ($graders as $grader) {
@@ -291,23 +277,23 @@ class UsersController extends AbstractController {
                             break;
                         }
                     }
-                }    
+                }
                 if (($no_user_flag != true) || ($no_grader_flag != true)) {
                     $this->core->addErrorMessage("Cannot delete registration section that has users and/or graders assigned to it");
                     $_SESSION['request'] = $_POST;
-                    $this->core->redirect($return_url);      
+                    $this->core->redirect($return_url);
                 }
                 else {
                     $this->core->getQueries()->deleteRegistrationSection($_POST['delete_reg_section']);
                     $this->core->addSuccessMessage("Registration section {$_POST['delete_reg_section']} deleted");
-                }    
+                }
             }
         }
+        //END DELETE CODE
 
         $this->core->addSuccessMessage("Registration sections setup");
         $this->core->redirect($return_url);
-
-    }        
+    }
 
     public function updateRotatingSections() {
         $return_url = $this->core->buildUrl(
