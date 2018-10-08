@@ -33,25 +33,36 @@ class ForumThreadView extends AbstractView {
     	</style>
 
     	<div style="padding:0px;" class="content">
+HTML;
 
-		<div id="forum_bar">
+		$buttons = array(
+			array(
+			"required_rank" => 4,
+			"display_text" => 'Create Thread',
+			"style" => 'position:relative;top:3px;',
+			"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))),
+			"optional_class" => '',
+			"title" => 'Create Thread',
+			"onclick" => array(false)
+			),
+			array(
+				"required_rank" => 4,
+				"display_text" => 'Back to Threads',
+				"style" => 'position:relative;top:3px;',
+				"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))),
+				"optional_class" => '',
+				"title" => 'Back to threads',
+				"onclick" => array(false)
+			)
 
+		);
 
-		<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Back to threads" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}">Back to Threads</a>
+		$return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", [
+									"forum_bar_buttons" => $buttons,
+									"show_threads" => false
+		]);
 
-			<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Create thread" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}"> Create Thread</a>
-
-			<form style="float:right;position:relative;top:3px;right:5px;display:inline-block;" method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'search_threads'))}">
-			<input type="text" size="35" placeholder="search" name="search_content" id="search_content" required/>
-			<button type="submit" name="search" title="Submit search" class="btn btn-primary">
-  				Search
-			</button>
-			</form>
-			
-		</div>
-
-		<hr/>
-
+		$return .= <<<HTML
 		<div id="search_wrapper">
 
     	<table style="" class="table table-striped table-bordered persist-area table-hover">
@@ -1022,10 +1033,30 @@ HTML;
 		}
 
 		$return = <<<HTML
-		<div id="forum_bar">
-			<a class="btn btn-primary" style="border:3px solid #E9EFEF" title="Back to threads" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}">Back to Threads</a>
-		</div>
-			<div style="padding-left:20px;padding-top:1vh; padding-bottom: 10px;border-radius:3px;box-shadow: 0 2px 15px -5px #888888;padding-right:20px;background-color: #E9EFEF;">
+
+		<div style="padding:0px;" class="content">
+
+HTML;
+
+		$buttons = array(
+			array(
+				"required_rank" => 4,
+				"display_text" => 'Back to Threads',
+				"style" => 'position:relative;top:3px;',
+				"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))),
+				"optional_class" => '',
+				"title" => 'Back to threads',
+				"onclick" => array(false)
+			)
+		);
+
+		$return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", [
+									"forum_bar_buttons" => $buttons,
+									"show_threads" => false
+		]);
+
+		$return .= <<<HTML
+			<div style="padding-left:20px;padding-bottom: 10px;border-radius:3px;padding-right:20px;">
 				<table class="table table-striped table-bordered persist-area" id="forum_stats_table">
 					<tr>			
 				        <td style = "cursor:pointer;" width="15%" id="user_down">User &darr;</td>
@@ -1061,6 +1092,7 @@ HTML;
 		
 		$return .= <<<HTML
 				</table>
+			</div>
 			</div>
 
 			<script>
