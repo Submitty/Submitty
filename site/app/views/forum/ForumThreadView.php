@@ -233,19 +233,18 @@ HTML;
 	}
 	if($show_merged_thread) {
 		$show_merged_thread_class = "active";
-		$show_merged_thread_action = "alterShowMergeThreadStatus(0, '{$currentCourse}');";
+		$show_merged_thread_action = "alterShowMergeThreadStatus(0,'" . $currentCourse . "');";
 		$show_merged_thread_title = "Hide Merged Threads";
 	} else {
 		$show_merged_thread_class = "";
-		$show_merged_thread_action = "alterShowMergeThreadStatus(1, '{$currentCourse}');";
+		$show_merged_thread_action = "alterShowMergeThreadStatus(1,'" . $currentCourse . "');";
 		$show_merged_thread_title = "Show Merged Threads";
 	}
 	$return .= <<<HTML
 		<div style="padding: 0px;overflow:hidden;" class="content">
-		<div id="forum_bar">
-		<a class="btn btn-primary" style="position:relative;top:3px;" title="Create thread" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))}">Create Thread</a>
-		<a class="btn btn-primary {$show_merged_thread_class}" style="position:relative;top:3px;display:inline-block;" title="{$show_merged_thread_title}" onclick="{$show_merged_thread_action}">{$show_merged_thread_title}</a>
 HTML;
+	$show_deleted_class = '';
+	$show_deleted_action = '';
 	if($this->core->getUser()->getGroup() <= 2){
 		if($show_deleted) {
 			$show_deleted_class = "active";
@@ -254,15 +253,8 @@ HTML;
 			$show_deleted_class = "";
 			$show_deleted_action = "alterShowDeletedStatus(1);";
 		}
-		$return .= <<<HTML
-			<a class="btn btn-primary {$show_deleted_class}" style="position:relative;top:3px;display:inline-block;" title="Show Deleted Threads" onclick="{$show_deleted_action}">Show Deleted Threads</a>
-			<a class="btn btn-primary" style="position:relative;top:3px;display:inline-block;" title="Show Stats" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))}">Stats</a>
-HTML;
 	}
 	$categories = $this->core->getQueries()->getCategories();
-	$return .= <<<HTML
-		<a class="btn btn-primary" style="position:relative;top:3px;display:inline-block;" title="Filter Threads based on Categories" onclick="$('#category_wrapper').css('display', 'block');">Filter</a>
-HTML;
 
 	$cookieSelectedCategories = array();
 	$cookieSelectedThreadStatus = array();
@@ -282,41 +274,61 @@ HTML;
 		}
 	}
 
-	$return .= <<<HTML
-			<button class="btn btn-primary" style="float:right;position:relative;top:3px;right:5px;display:inline-block;" title="Display search bar" onclick="this.style.display='none'; document.getElementById('search_block').style.display = 'inline-block'; document.getElementById('search_content').focus();">Search</button>
-HTML;
-        $return .= <<<HTML
+	$buttons = array(
+		array(
+			"required_rank" => 4,
+			"display_text" => 'Create Thread',
+			"style" => 'position:relative;top:3px;',
+			"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))),
+			"optional_class" => '',
+			"title" => 'Create Thread',
+			"onclick" => array(false)
+		),
+		array(
+			"required_rank" => 4,
+			"display_text" => $show_merged_thread_title,
+			"style" => 'position:relative;top:3px;display:inline-block;',
+			"link" => array(false),
+			"optional_class" => $show_merged_thread_class,
+			"title" => $show_merged_thread_title,
+			"onclick" => array(true, $show_merged_thread_action)
+		),
+		array(
+			"required_rank" => 2,
+			"display_text" => 'Show Deleted Threads',
+			"style" => 'position:relative;top:3px;display:inline-block;',
+			"link" => array(false),
+			"optional_class" => $show_deleted_class,
+			"title" => 'Show Deleted Threads',
+			"onclick" => array(true, $show_deleted_action)
+		),
+		array(
+			"required_rank" => 2,
+			"display_text" => 'Stats',
+			"style" => 'position:relative;top:3px;display:inline-block;',
+			"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))),
+			"optional_class" => '',
+			"title" => 'Show Stats',
+			"onclick" => array(true, 'resetScrollPosition();')
+		),
+		array(
+			"required_rank" => 4,
+			"display_text" => 'Filter',
+			"style" => 'position:relative;top:3px;display:inline-block;',
+			"link" => array(false),
+			"optional_class" => '',
+			"title" => 'Filter Threads based on Categories',
+			"onclick" => array(true, "$('#category_wrapper').css('display','block');")
+		)
 
-			<div style="display:inline-block;position:relative;top:3px;" class="btn-group btn-group-toggle" data-toggle="buttons">
-  				<label id="tree_label" for="radio" onclick="changeDisplayOptions('tree', {$currentThread})" class="btn btn-secondary">
-    				<input type="radio" name="selectOption" id="tree" value="tree"> Hierarchical
-  				</label>
-  				<label id="time_label" for="radio2" onclick="changeDisplayOptions('time', {$currentThread})" class="btn btn-secondary">
-    				<input type="radio" name="selectOption" id="time" value="time"> Chronological
-  				</label>
+	);
 
-HTML;
-        if($this->core->getUser()->getGroup() <= 2){
-            $return .= <<<HTML
-			<label id="alpha_label" for="radio3" onclick="changeDisplayOptions('alpha', {$currentThread})" class="btn btn-secondary">
-    				<input type="radio" name="selectOption" id="alpha" value="alpha"> Alphabetical
-  			</label>
-HTML;
-        }
-        $return .= <<<HTML
-        	</div>
-			<form id="search_block" style="float:right;position:relative;top:3px;right:5px;display:none;" method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'search_threads'))}">
-			<input type="text" size="35" placeholder="search" name="search_content" id="search_content"/>
-
-			<button type="submit" name="search" title="Submit search" class="btn btn-primary">
-  				Search
-			</button>
-			</form>
-HTML;
-        $return .= <<<HTML
-		</div>
-		<hr/>
-HTML;
+	$return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", [
+								"current_thread" => $currentThread,
+								"search_url" => $this->core->buildUrl(array('component' => 'forum', 'page' => 'search_threads')),
+								"forum_bar_buttons" => $buttons,
+								"show_threads" => true
+	]);
 
         if(!$threadExists){
 		$return .= <<<HTML
