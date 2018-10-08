@@ -562,6 +562,7 @@ HTML;
 					$return = "";
 					$used_active = false; //used for the first one if there is not thread_id set
 					$current_user = $this->core->getUser()->getId();
+					$display_thread_ids = $this->core->getUser()->getGroup() <= 2;
 					$start = 0;
 					$activeThreadAnnouncement = false;
 					$activeThreadTitle = "";
@@ -588,7 +589,7 @@ HTML;
 						if(((isset($_REQUEST["thread_id"]) && $_REQUEST["thread_id"] == $thread["id"]) || $thread_id_p == $thread["id"] || $thread_id_p == -1) && !$used_active && $issubset) {
 							$class .= " active";
 							$used_active = true;
-							$activeThreadTitle = $thread["title"];
+							$activeThreadTitle = ($display_thread_ids ? "({$thread['id']}) " : '') . $thread["title"];
 							$activeThread = $thread;
 							if($thread["pinned"])
 								$activeThreadAnnouncement = true;
@@ -629,6 +630,7 @@ HTML;
 								$titleDisplay .= substr($thread['title'], 0, 30);
 							$titleDisplay .= "...";
 						}
+						$titleDisplay = ($display_thread_ids ? "({$thread['id']}) " : '') . $titleDisplay;
 						$titleDisplay = htmlentities($titleDisplay, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 						if($thread["current_user_posted"]) {
 							$icon = '<i class="fa fa-comments"></i> ';
