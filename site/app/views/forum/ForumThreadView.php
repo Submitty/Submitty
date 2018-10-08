@@ -527,26 +527,33 @@ HTML;
 HTML;
 
         if($this->core->getUser()->getGroup() <= 2){
-            $current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
-            $current_thread_date = $current_thread_first_post["timestamp"];
-            $return .= $this->core->getOutput()->renderTwigTemplate("forum/MergeThreadsForm.twig", [
-                "current_thread_date" => $current_thread_date,
-                "current_thread" => $currentThread
-            ]);
-        }
-        $return .= $this->core->getOutput()->renderTwigTemplate("forum/EditPostForm.twig");
-        $return .= $this->core->getOutput()->renderTwigTemplate("forum/HistoryForm.twig");
+			$current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
+			$current_thread_date = $current_thread_first_post["timestamp"];
+			$merge_thread_list = $this->core->getQueries()->getThreadsBefore($current_thread_date, 1);
+			$possibleMerges = json_encode(array_map(function(array $row) {
+						$temp_title = htmlentities($row['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+						return ['value' => "({$row['id']}) {$temp_title}",
+								'label' => "({$row['id']}) {$temp_title}"];
+						}, $merge_thread_list));
+			$return .= $this->core->getOutput()->renderTwigTemplate("forum/MergeThreadsForm.twig", [
+				"current_thread_date" => $current_thread_date,
+				"current_thread" => $currentThread,
+				"possibleMerges" => $possibleMerges
+			]);
+		}
+		$return .= $this->core->getOutput()->renderTwigTemplate("forum/EditPostForm.twig");
+		$return .= $this->core->getOutput()->renderTwigTemplate("forum/HistoryForm.twig");
 
-        $return .= $this->core->getOutput()->renderTwigTemplate("forum/FilterForm.twig", [
-            "categories" => $categories,
-            "current_thread" => $currentThread,
-            "current_category_ids" => $currentCategoriesIds,
-            "current_course" => $currentCourse,
-            "cookie_selected_categories" => $cookieSelectedCategories,
-            "cookie_selected_thread_status" => $cookieSelectedThreadStatus,
-            "display_option" => $display_option,
-            "thread_exists" => $threadExists
-        ]);
+		$return .= $this->core->getOutput()->renderTwigTemplate("forum/FilterForm.twig", [
+			"categories" => $categories,
+			"current_thread" => $currentThread,
+			"current_category_ids" => $currentCategoriesIds,
+			"current_course" => $currentCourse,
+			"cookie_selected_categories" => $cookieSelectedCategories,
+			"cookie_selected_thread_status" => $cookieSelectedThreadStatus,
+			"display_option" => $display_option,
+			"thread_exists" => $threadExists
+		]);
 
 		return $return;
 	}
