@@ -10,7 +10,9 @@
 		{% endif %}
 	{% endfor %}
 
-	<button class="btn btn-primary" style="float:right;position:relative;top:3px;right:5px;display:inline-block;" title="Display search bar" onclick="this.style.display='none'; document.getElementById('search_block').style.display = 'inline-block'; document.getElementById('search_content').focus();">Search</button>
+	{% if thread_exists %}
+		<button class="btn btn-primary" style="float:right;position:relative;top:3px;right:5px;display:inline-block;" title="Display search bar" onclick="this.style.display='none'; document.getElementById('search_block').style.display = 'inline-block'; document.getElementById('search_content').focus();">Search</button>
+	{% endif %}
 
 	{% if show_threads %}
 		<div style="margin-left:10px;display:inline-block;position:relative;top:3px;" class="btn-group btn-group-toggle" data-toggle="buttons">
@@ -28,13 +30,15 @@
   		</div>
 	{% endif %}
 
-	<form id="search_block" style="float:right;position:relative;top:3px;right:5px;display:none;" method="post" action="{{ core.buildUrl({'component':'forum', 'page':'search_threads'}) }}">
-		<input type="text" size="35" placeholder="search" name="search_content" id="search_content"/>
+	{% if thread_exists %}
+		<form id="search_block" style="float:right;position:relative;top:3px;right:5px;display:none;" method="post" action="{{ core.buildUrl({'component':'forum', 'page':'search_threads'}) }}">
+			<input type="text" size="35" placeholder="search" name="search_content" id="search_content"/>
 
-		<button type="submit" name="search" title="Submit search" class="btn btn-primary">
-  			Search
-		</button>
-	</form>
+			<button type="submit" name="search" title="Submit search" class="btn btn-primary">
+	  			Search
+			</button>
+		</form>
+	{% endif %}
 
 </div>
 <hr/>

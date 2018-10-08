@@ -10,7 +10,6 @@ use app\libraries\FileUtils;
 
 class ForumThreadView extends AbstractView {
 
-
 	public function forumAccess(){
         return $this->core->getConfig()->isForumEnabled();
     }
@@ -59,7 +58,8 @@ HTML;
 
 		$return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", [
 									"forum_bar_buttons" => $buttons,
-									"show_threads" => false
+									"show_threads" => false,
+									"thread_exists" => true
 		]);
 
 		$return .= <<<HTML
@@ -202,8 +202,6 @@ HTML;
 				$(".post_reply_from").submit(publishPost);
 				$("form").areYouSure();
 				$("#push").css("max-height", "100%");
-				$(".content").css("display", "flex");
-				$(".content").css("flex-direction", "column");
 			});
 
 		</script>
@@ -252,7 +250,7 @@ HTML;
 		$show_merged_thread_title = "Show Merged Threads";
 	}
 	$return .= <<<HTML
-		<div style="overflow:hidden;" class="content forum_content">
+		<div class="content forum_content forum_show_threads">
 HTML;
 	$show_deleted_class = '';
 	$show_deleted_action = '';
@@ -285,7 +283,7 @@ HTML;
 		}
 	}
 
-	$buttons = array(
+	$default_button = array(
 		array(
 			"required_rank" => 4,
 			"display_text" => 'Create Thread',
@@ -294,60 +292,66 @@ HTML;
 			"optional_class" => '',
 			"title" => 'Create Thread',
 			"onclick" => array(false)
-		),
-		array(
-			"required_rank" => 4,
-			"display_text" => $show_merged_thread_title,
-			"style" => 'position:relative;top:3px;display:inline-block;',
-			"link" => array(false),
-			"optional_class" => $show_merged_thread_class,
-			"title" => $show_merged_thread_title,
-			"onclick" => array(true, $show_merged_thread_action)
-		),
-		array(
-			"required_rank" => 2,
-			"display_text" => 'Show Deleted Threads',
-			"style" => 'position:relative;top:3px;display:inline-block;',
-			"link" => array(false),
-			"optional_class" => $show_deleted_class,
-			"title" => 'Show Deleted Threads',
-			"onclick" => array(true, $show_deleted_action)
-		),
-		array(
-			"required_rank" => 2,
-			"display_text" => 'Stats',
-			"style" => 'position:relative;top:3px;display:inline-block;',
-			"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))),
-			"optional_class" => '',
-			"title" => 'Show Stats',
-			"onclick" => array(true, 'resetScrollPosition();')
-		),
-		array(
-			"required_rank" => 4,
-			"display_text" => 'Filter',
-			"style" => 'position:relative;top:3px;display:inline-block;',
-			"link" => array(false),
-			"optional_class" => '',
-			"title" => 'Filter Threads based on Categories',
-			"onclick" => array(true, "$('#category_wrapper').css('display','block');")
 		)
 
 	);
 
-	$return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", [
+	$button_params = [
 								"current_thread" => $currentThread,
-								"forum_bar_buttons" => $buttons,
-								"show_threads" => true
-	]);
+								"forum_bar_buttons" => $default_button,
+								"show_threads" => true,
+								"thread_exists" => true
+	];
 
         if(!$threadExists){
+        $button_params["show_threads"] = false;
+        $button_params["thread_exists"] = false;
+        $return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", $button_params);
 		$return .= <<<HTML
-					<div class="content forum_content">
-						<h4>A thread hasn't been created yet. Be the first to do so!</h4>
-					</div>
+						<h4 style="text-align:center;">A thread hasn't been created yet. Be the first to do so!</h4>
 				</div>
 HTML;
 		} else {
+			$other_buttons = array(
+						array(
+							"required_rank" => 4,
+							"display_text" => $show_merged_thread_title,
+							"style" => 'position:relative;top:3px;display:inline-block;',
+							"link" => array(false),
+							"optional_class" => $show_merged_thread_class,
+							"title" => $show_merged_thread_title,
+							"onclick" => array(true, $show_merged_thread_action)
+						),
+						array(
+							"required_rank" => 2,
+							"display_text" => 'Show Deleted Threads',
+							"style" => 'position:relative;top:3px;display:inline-block;',
+							"link" => array(false),
+							"optional_class" => $show_deleted_class,
+							"title" => 'Show Deleted Threads',
+							"onclick" => array(true, $show_deleted_action)
+						),
+						array(
+							"required_rank" => 2,
+							"display_text" => 'Stats',
+							"style" => 'position:relative;top:3px;display:inline-block;',
+							"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))),
+							"optional_class" => '',
+							"title" => 'Show Stats',
+							"onclick" => array(true, 'resetScrollPosition();')
+						),
+						array(
+							"required_rank" => 4,
+							"display_text" => 'Filter',
+							"style" => 'position:relative;top:3px;display:inline-block;',
+							"link" => array(false),
+							"optional_class" => '',
+							"title" => 'Filter Threads based on Categories',
+							"onclick" => array(true, "$('#category_wrapper').css('display','block');")
+						)
+			);
+					$button_params["forum_bar_buttons"] = array_merge($default_button, $other_buttons);
+					$return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", $button_params);
 					$next_page = $initialPageNumber + 1;
 					$prev_page = ($initialPageNumber == 1)?0:($initialPageNumber - 1);
 					$arrowup_visibility = ($initialPageNumber == 1)?"display:none;":"";
@@ -976,8 +980,13 @@ HTML;
 			"optional_class" => '',
 			"title" => 'Back to threads',
 			"onclick" => array(false)
-		),
-		array(
+		)
+	);
+
+	$thread_exists = $this->core->getQueries()->threadExists();
+
+	if($thread_exists) {
+		$buttons = array_merge($buttons, array(
 			"required_rank" => 2,
 			"display_text" => 'Stats',
 			"style" => 'position:relative;top:3px;display:inline-block;',
@@ -985,13 +994,13 @@ HTML;
 			"optional_class" => '',
 			"title" => 'Show Stats',
 			"onclick" => array(true, 'resetScrollPosition();')
-		)
-
-	);
+		));
+	}
 
 	$return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", [
 								"forum_bar_buttons" => $buttons,
-								"show_threads" => false
+								"show_threads" => false,
+								"thread_exists" => $thread_exists
 	]);
 
 
@@ -1050,9 +1059,12 @@ HTML;
 			)
 		);
 
+		$thread_exists = $this->core->getQueries()->threadExists();
+
 		$return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", [
 									"forum_bar_buttons" => $buttons,
-									"show_threads" => false
+									"show_threads" => false,
+									"thread_exists" => $thread_exists
 		]);
 
 		$return .= <<<HTML

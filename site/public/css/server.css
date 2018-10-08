@@ -378,6 +378,12 @@ table tr.table-header {
     padding: 0px;
 }
 
+.forum_show_threads {
+    overflow: hidden;
+    flex-direction: column;
+    display: flex;
+}
+
 .content h1 {
     margin-bottom: 20px;
 }
