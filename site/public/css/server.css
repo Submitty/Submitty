@@ -374,6 +374,10 @@ table tr.table-header {
     flex-grow: 1;
 }
 
+.forum_content {
+    padding: 0px;
+}
+
 .content h1 {
     margin-bottom: 20px;
 }

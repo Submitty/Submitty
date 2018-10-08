@@ -32,7 +32,7 @@ class ForumThreadView extends AbstractView {
 			}
     	</style>
 
-    	<div style="padding:0px;" class="content">
+    	<div class="content forum_content">
 HTML;
 
 		$buttons = array(
@@ -252,7 +252,7 @@ HTML;
 		$show_merged_thread_title = "Show Merged Threads";
 	}
 	$return .= <<<HTML
-		<div style="padding: 0px;overflow:hidden;" class="content">
+		<div style="overflow:hidden;" class="content forum_content">
 HTML;
 	$show_deleted_class = '';
 	$show_deleted_action = '';
@@ -342,7 +342,7 @@ HTML;
 
         if(!$threadExists){
 		$return .= <<<HTML
-					<div class="content">
+					<div class="content forum_content">
 						<h4>A thread hasn't been created yet. Be the first to do so!</h4>
 					</div>
 				</div>
@@ -963,7 +963,7 @@ HTML;
         }
 
 		$return .= <<<HTML
-		<div style="padding: 0px;" class="content">
+		<div class="content forum_content">
 		
 HTML;
 
@@ -1034,7 +1034,7 @@ HTML;
 
 		$return = <<<HTML
 
-		<div style="padding:0px;" class="content">
+		<div class="content forum_content">
 
 HTML;
 
