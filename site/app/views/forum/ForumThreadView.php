@@ -325,7 +325,6 @@ HTML;
 
 	$return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", [
 								"current_thread" => $currentThread,
-								"search_url" => $this->core->buildUrl(array('component' => 'forum', 'page' => 'search_threads')),
 								"forum_bar_buttons" => $buttons,
 								"show_threads" => true
 	]);
@@ -954,31 +953,43 @@ HTML;
 
 		$return .= <<<HTML
 		<div style="padding: 0px;" class="content">
-		<div id="forum_bar">
-
-		<a class="btn btn-primary" style="position:relative;top:3px;left:5px;" title="Back to threads" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))}">Back to Threads</a>
+		
 HTML;
 
-		if($this->core->getUser()->getGroup() <= 2){
-			$return .= <<<HTML
-			<a class="btn btn-primary" style="margin-left:10px;position:relative;top:3px;right:5px;display:inline-block;" title="Show Stats" onclick="resetScrollPosition();" href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))}">Stats</a>
-HTML;
-		}
+	$buttons = array(
+		array(
+			"required_rank" => 4,
+			"display_text" => 'Back to Threads',
+			"style" => 'position:relative;top:3px;',
+			"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))),
+			"optional_class" => '',
+			"title" => 'Back to threads',
+			"onclick" => array(false)
+		),
+		array(
+			"required_rank" => 2,
+			"display_text" => 'Stats',
+			"style" => 'position:relative;top:3px;display:inline-block;',
+			"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))),
+			"optional_class" => '',
+			"title" => 'Show Stats',
+			"onclick" => array(true, 'resetScrollPosition();')
+		)
+
+	);
+
+	$return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", [
+								"forum_bar_buttons" => $buttons,
+								"show_threads" => false
+	]);
+
 
 		$return .= <<<HTML
-
-			<form style="float:right;position:relative;top:3px;right:5px;display:inline-block;" method="post" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'search_threads'))}">
-			<input type="text" size="35" placeholder="search" name="search_content" id="search_content" required/>
-			<button type="submit" name="search" title="Submit search" class="btn btn-primary">
-  				Search
-			</button>
-			</form>
-		</div>
-		<hr/>
 
 			<form style="margin-right: 15px; margin-left:15px;" id="thread_form" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread'))}" enctype="multipart/form-data">
 			<h3 style="margin-bottom:10px;"> Create Thread </h3>
 HTML;
+
 				$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig", [
 					"show_title" => true,
 					"show_post" => true,
