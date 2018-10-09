@@ -232,9 +232,10 @@ class UsersController extends AbstractController {
         $students = $this->core->getQueries()->getAllUsers();
         $graders = $this->core->getQueries()->getAllGraders();
         if (isset($_POST['add_reg_section']) && $_POST['add_reg_section'] !== "") {
-            // SQL query's ON CONFLICT clause should resolve foreign key conflicts, so we are able to INSERT after successful validation
             if (User::validateUserData('registration_section', $_POST['add_reg_section'])) {
-                $num_new_sections = $this->core->getQueries()->insertNewRegistrationSection($_POST['add_reg_section'], $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
+                // SQL query's ON CONFLICT clause should resolve foreign key conflicts, so we are able to INSERT after successful validation
+                // Query function's return indicates how many new INSERTions were performed.  0 INSERTions means new reg section is a duplicate.
+                $num_new_sections = $this->core->getQueries()->insertNewRegistrationSection($_POST['add_reg_section']);
                 if ($num_new_sections === 0) {
                     $this->core->addErrorMessage("Registration Section already present");
                 }
