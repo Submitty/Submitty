@@ -234,8 +234,13 @@ class UsersController extends AbstractController {
         if (isset($_POST['add_reg_section']) && $_POST['add_reg_section'] !== "") {
             // SQL query's ON CONFLICT clause should resolve foreign key conflicts, so we are able to INSERT after successful validation
             if (User::validateUserData('registration_section', $_POST['add_reg_section'])) {
-                $this->core->getQueries()->insertNewRegistrationSection($_POST['add_reg_section']);
-                $this->core->addSuccessMessage("Registration section {$_POST['add_reg_section']} added");
+                $num_new_sections = $this->core->getQueries()->insertNewRegistrationSection($_POST['add_reg_section'], $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
+                if ($num_new_sections === 0) {
+                    $this->core->addErrorMessage("Registration Section already present");
+                }
+                else {
+                    $this->core->addSuccessMessage("Registration section {$_POST['add_reg_section']} added");
+                }
             }
             else {
                 $this->core->addErrorMessage("Registration Section entered do not follow specified format");

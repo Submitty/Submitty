@@ -1374,8 +1374,11 @@ ORDER BY user_id ASC");
         $this->course_db->query("INSERT INTO sections_rotating (sections_rotating_id) VALUES(?)", array($section));
     }
 
-    public function insertNewRegistrationSection($section, $semester, $course) {
+    public function insertNewRegistrationSection($section) {
+    	$semester = $this->core->getConfig()->getSemester();
+    	$course = $this->core->getConfig()->getCourse();
         $this->submitty_db->query("INSERT INTO courses_registration_sections (semester, course, registration_section_id) VALUES (?,?,?) ON CONFLICT DO NOTHING", array($semester, $course, $section));
+        return $this->submitty_db->getRowCount();
     }
 
     public function deleteRegistrationSection($section, $semester, $course) {
