@@ -581,8 +581,9 @@ function deleteSplitItem(csrf_token, gradeable_id, path, count) {
 /**
  * @param gradeable_id
  * @param num_pages
+ * @param use_qr_codes
  */
-function handleBulk(gradeable_id, num_pages) {
+function handleBulk(gradeable_id, num_pages, use_qr_codes = false) {
     $("#submit").prop("disabled", true);
 
     var formData = new FormData();
@@ -599,7 +600,8 @@ function handleBulk(gradeable_id, num_pages) {
     }
 
     formData.append('num_pages', num_pages);
-
+    formData.append('use_qr_codes', use_qr_codes);
+   
     for (var i = 0; i < file_array.length; i++) {
         for (var j = 0; j < file_array[i].length; j++) {
             if (file_array[i][j].name.indexOf("'") != -1 ||

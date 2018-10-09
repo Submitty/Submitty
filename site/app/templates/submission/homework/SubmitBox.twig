@@ -31,6 +31,7 @@
             <div class = "sub" id="pdf_submit_button" style="display: none">
                 <div class="sub">
                     # of page(s) per PDF: <input type="number" id= "num_pages" placeholder="required"/>
+                    Split by QR code? <input type="checkbox" id="use_qr">
                 </div>
             </div>
         </form>
@@ -276,7 +277,7 @@
             }
             // bulk upload
             if ($("#radio_bulk").is(":checked")) {
-                handleBulk("{{ gradeable_id }}", num_pages);
+                handleBulk("{{ gradeable_id }}", num_pages, $("#use_qr").is(":checked") );
             }
             // no user id entered, upload for whoever is logged in
             else if (user_id == ""){
