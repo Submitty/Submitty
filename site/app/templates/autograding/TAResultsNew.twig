@@ -53,9 +53,11 @@
 
         {# Component boxes #}
         {% for component in components %}
-            <div class="box">
-                <div class="box-title">
+            <div class="box grade-results">
+                <div class="box-badge">
                     {{ Badge.render(component.total_score, component.points_possible, component.extra_credit) }}
+                </div>
+                <div class="box-info">
                     <h4>{{ component.title }}
                         {% if not is_peer and component.graders|length != 0 %}
                             <i>(Graded by: {{ component.graders|join(' / ') }})</i>
@@ -74,7 +76,7 @@
                                             <i class="fa fa-square-o fa-1g"></i>
                                         {% endif %}
                                     </td>
-                                    <td style="text-align: right">
+                                    <td class="mark-score">
                                         {{ mark.points|number_format(num_decimals) }}
                                     </td>
                                     <td>
@@ -87,7 +89,7 @@
                                     <td>
                                         <i class="fa fa-check-square-o fa-1g"></i>
                                     </td>
-                                    <td style="text-align: right">
+                                    <td class="mark-score">
                                         {{ component.custom_mark_score|number_format(num_decimals) }}
                                     </td>
                                     <td>
