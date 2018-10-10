@@ -1378,11 +1378,14 @@ ORDER BY user_id ASC");
     	$semester = $this->core->getConfig()->getSemester();
     	$course = $this->core->getConfig()->getCourse();
         $this->submitty_db->query("INSERT INTO courses_registration_sections (semester, course, registration_section_id) VALUES (?,?,?) ON CONFLICT DO NOTHING", array($semester, $course, $section));
-        return $this->submitty_db->getRowCount();
+        return $this->submitty_db->getrowcount();
     }
 
-    public function deleteRegistrationSection($section, $semester, $course) {
-        $this->submitty_db->query("DELETE FROM courses_registration_sections WHERE semester=? AND course=? AND sections_registration_id=?", array($semester, $course, $section));
+    public function deleteRegistrationSection($section) {
+       	$semester = $this->core->getConfig()->getSemester();
+    	$course = $this->core->getConfig()->getCourse();
+        $this->submitty_db->query("DELETE FROM courses_registration_sections WHERE semester=? AND course=? AND registration_section_id=?", array($semester, $course, $section));
+        return $this->submitty_db->getRowCount();
     }
 
     public function setupRotatingSections($graders, $gradeable_id) {

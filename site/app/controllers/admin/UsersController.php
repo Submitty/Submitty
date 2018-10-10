@@ -233,71 +233,39 @@ class UsersController extends AbstractController {
         $graders = $this->core->getQueries()->getAllGraders();
         if (isset($_POST['add_reg_section']) && $_POST['add_reg_section'] !== "") {
             if (User::validateUserData('registration_section', $_POST['add_reg_section'])) {
-                // SQL query's ON CONFLICT clause should resolve foreign key conflicts, so we are able to INSERT after successful validation
-                // Query function's return indicates how many new INSERTions were performed.  0 INSERTions means new reg section is a duplicate.
+                // SQL query's ON CONFLICT clause should resolve foreign key conflicts, so we are able to INSERT after successful validation.
+                // $num_new_sections indicates how many new INSERTions were performed.  0 INSERTions means the reg section given on the form is a duplicate.
                 $num_new_sections = $this->core->getQueries()->insertNewRegistrationSection($_POST['add_reg_section']);
                 if ($num_new_sections === 0) {
-                    $this->core->addErrorMessage("Registration Section already present");
+                    $this->core->addErrorMessage("Registration Section {$_POST['add_reg_section']} already present");
                 }
                 else {
                     $this->core->addSuccessMessage("Registration section {$_POST['add_reg_section']} added");
                 }
             }
             else {
-                $this->core->addErrorMessage("Registration Section entered do not follow specified format");
+                $this->core->addErrorMessage("Registration Section entered does not follow the specified format");
                 $_SESSION['request'] = $_POST;
-                $this->core->redirect($return_url);
             }
         }
-
-        // TO DO: delete trigger in submitty_db
-        if (isset($_POST['delete_reg_section']) && $_POST['delete_reg_section'] != "") {
-            $valid_reg_section_flag=false;
-            foreach ($reg_sections as $section) {
-                $section = $section['sections_registration_id'];
-                if ($section == $_POST['delete_reg_section']){
-                    $valid_reg_section_flag = true;
-                    break;
-                }
-            }
-            if ($valid_reg_section_flag == false) {
-                $this->core->addErrorMessage("Not a valid Registration Section");
-                $_SESSION['request'] = $_POST;
-                $this->core->redirect($return_url);
-            }
-            else {
-                $no_user_flag=true;
-                $no_grader_flag=true;
-                foreach ($students as $student) {
-                    $registration = ($student->getRegistrationSection() === null) ? "NULL" : $student->getRegistrationSection();
-                    if ($registration == $_POST['delete_reg_section']) {
-                        $no_user_flag=false;
-                        break;
-                    }
-                }
-
-                foreach ($graders as $grader) {
-                    if(($grader->getGroup() == 2) || ($grader->getGroup() == 3)) {
-                        if(in_array(($_POST['delete_reg_section']), $grader->getGradingRegistrationSections() )) {
-                            $no_grader_flag=false;
-                            break;
-                        }
-                    }
-                }
-                if (($no_user_flag != true) || ($no_grader_flag != true)) {
-                    $this->core->addErrorMessage("Cannot delete registration section that has users and/or graders assigned to it");
-                    $_SESSION['request'] = $_POST;
-                    $this->core->redirect($return_url);
+        else if (isset($_POST['delete_reg_section']) && $_POST['delete_reg_section'] != "") {
+            if (User::validateUserData('registration_section', $_POST['delete_reg_section'])) {
+                // DELETE trigger function in master DB will catch integrity violation exceptions (such as FK violations when users/graders are still enrolled in section).
+                // $num_del_sections indicates how many DELETEs were performed.  0 DELETEs means either the section didn't exist or there are users still enrolled.
+                $num_del_sections = $this->core->getQueries()->deleteRegistrationSection($_POST['delete_reg_section']);
+                if ($num_del_sections === 0) {
+                    $this->core->addErrorMessage("Section {$_POST['delete_reg_section']} not removed.  Section must exist and be empty of all users/graders.");
                 }
                 else {
-                    $this->core->getQueries()->deleteRegistrationSection($_POST['delete_reg_section']);
-                    $this->core->addSuccessMessage("Registration section {$_POST['delete_reg_section']} deleted");
+                    $this->core->addSuccessMessage("Registration section {$_POST['delete_reg_section']} removed.");
                 }
             }
+            else {
+                $this->core->addErrorMessage("Registration Section entered does not follow the specified format");
+                $_SESSION['request'] = $_POST;
+            }
         }
-        //END DELETE CODE
 
-        $this->core->addSuccessMessage("Registration sections setup");
         $this->core->redirect($return_url);
     }
 
