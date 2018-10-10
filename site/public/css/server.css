@@ -698,9 +698,9 @@ table tr.table-header {
 }
 
 .no-badge {
-    width: 85px;
+    width: 70px;
     height: 10px;
-    margin-right: 20px;
+    margin-right: 10px;
     margin-left: 10px;
     float: left;
 }
