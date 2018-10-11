@@ -93,6 +93,10 @@ TestResults* warnIfNotEmpty_doit (const TestCase &tc, const nlohmann::json& j) {
     return new TestResults(1.0,messages);
   }
   if (student_file_contents != "") {
+    if (j.find("jvm_memory") != j.end() && j["jvm_memory"] == true &&
+        student_file_contents == "Picked up JAVA_TOOL_OPTIONS: -Xms128m -Xmx256m\n") {
+      return new TestResults(1.0);
+    }
     return new TestResults(1.0,{std::make_pair(MESSAGE_WARNING,"WARNING: This file should be empty")});
   }
   return new TestResults(1.0);
@@ -104,6 +108,10 @@ TestResults* errorIfNotEmpty_doit (const TestCase &tc, const nlohmann::json& j) 
   std::string student_file_contents;
   if (!openStudentFile(tc,j,student_file_contents,messages)) { 
     return new TestResults(0.0,messages);
+  }
+  if (j.find("jvm_memory") != j.end() && j["jvm_memory"] == true &&
+      student_file_contents == "Picked up JAVA_TOOL_OPTIONS: -Xms128m -Xmx256m\n") {
+    return new TestResults(1.0);
   }
   if (student_file_contents != "") {
     if (student_file_contents.find("error") != std::string::npos)
