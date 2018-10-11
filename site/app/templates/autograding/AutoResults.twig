@@ -1,8 +1,13 @@
 {% import 'functions/Badge.twig' as Badge %}
 
 {% if num_visible_testcases == 0 %}
-    <h4>No Autograding for this Assignment</h4>
+   {% if incomplete_autograding %}
+      <h4>Autograding Results Incomplete</h4>
+   {% else %}
+      <h4>No Autograding for this Gradeable</h4>
+   {% endif %}
 {% endif %}
+
 
 {% if num_visible_testcases == 1 %}
     <script type="text/javascript">

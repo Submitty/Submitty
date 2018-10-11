@@ -30,12 +30,12 @@ Required inputs:
         {% endif %}
         {% if show_ta_comment %}
             <span class="row ta-student-comment">
-                <i><b>Note to TA: </b>{{ component.ta_comment }}</i>
+                <i><b>Note to TA: </b>{{ component.ta_comment|nl2br }}</i>
             </span>
         {% endif %}
         {% if show_student_comment %}
             <span class="row ta-student-comment">
-                <i><b>Note to Student: </b>{{ component.student_comment }}</i>
+                <i><b>Note to Student: </b>{{ component.student_comment|nl2br }}</i>
             </span>
         {% endif %}
     </div>
