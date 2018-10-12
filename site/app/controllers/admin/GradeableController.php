@@ -36,7 +36,7 @@ class GradeableController extends AbstractController {
         $inuse_config = array();
         foreach($this->core->getQueries()->getGradeableConfigs(null) as $gradeable){
             foreach($all_paths as $path){
-                if(strpos($gradeable->getConfigPath(), $path) !== false){
+                if(strpos($gradeable->getAutogradingConfigPath(), $path) !== false){
                     $inuse_config[] = $path;
                 }
             }
@@ -128,7 +128,7 @@ class GradeableController extends AbstractController {
         $config_path = $_GET['config'] ?? null;
         $in_use = false;
         foreach($this->core->getQueries()->getGradeableConfigs(null) as $gradeable){
-            if(strpos($gradeable->getConfigPath(), $config_path) !== false){
+            if(strpos($gradeable->getAutogradingConfigPath(), $config_path) !== false){
                 $in_use = true;
                 break;
             }
@@ -156,7 +156,7 @@ class GradeableController extends AbstractController {
         if (!$config_path == null) {
             $inuse_config = array();
             foreach ($this->core->getQueries()->getGradeableConfigs(null) as $gradeable) {
-                if (strpos($gradeable->getConfigPath(), $config_path) !== false) {
+                if (strpos($gradeable->getAutogradingConfigPath(), $config_path) !== false) {
                     $inuse_config[] = $gradeable->getId();
                 }
             }
