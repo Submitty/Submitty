@@ -2219,12 +2219,12 @@ class ElectronicGraderController extends GradingController {
     }
 
     private function getMarkStats(Mark $mark, User $grader) {
-        // TODO: filter users based on who the grader is allowed to see
-        $submitter_ids = $this->core->getQueries()->getSubmittersWhoGotMark($mark);
+        $gradeable = $mark->getComponent()->getGradeable();
+        $submitter_ids = $this->core->getQueries()->getSubmittersWhoGotMark($mark, $grader, $gradeable);
 
         // TODO: this function should not return this data...
         $sections = array();
-        $this->getStats($mark->getComponent()->getGradeable(), $grader, $sections);
+        $this->getStats($gradeable, $grader, $sections);
 
         return [
             'submitter_ids' => $submitter_ids,

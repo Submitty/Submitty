@@ -1569,20 +1569,50 @@ DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=?
      * @param Mark $mark
      * @return string[]
      */
-    public function getSubmittersWhoGotMark(Mark $mark) {
-        // Switch the column based on gradeable team-ness
-        $submitter_type = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'gd_team_id' : 'gd_user_id';
-        $this->course_db->query("
-            SELECT gd.{$submitter_type}
-            FROM gradeable_component_mark_data gcmd
-              JOIN gradeable_data gd ON gd.gd_id=gcmd.gd_id
-            WHERE gcm_id = ?", [$mark->getId()]);
+    public function getSubmittersWhoGotMark($mark, $grader, $gradeable) {
+         // Switch the column based on gradeable team-ness
+         $type = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'team' : 'user'; 
+         $row_type = $type . "_id";
+         
+         
+         // If have access => get all students with this mark
+         if ($grader->accessFullGrading()) {
+             $row_type = "gd_" . $row_type;
+             $this->course_db->query("
+                 SELECT gd.gd_{$type}_id
+                 FROM gradeable_component_mark_data gcmd
+                   JOIN gradeable_data gd ON gd.gd_id=gcmd.gd_id
+                 WHERE gcm_id = ?", [$mark->getId()]);
+         } 
+         // else get the only the students in the sections assigned to this grader
+         else {
+             $params = array($grader->getId(), $mark->getId());
+             $table = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'gradeable_teams' : 'users';
+             $grade_type = $gradeable->isGradeByRegistration() ? 'registration' : 'rotating';
+             
+             $this->course_db->query("
+                 SELECT u.{$type}_id
+                 FROM {$table} u
+                     JOIN (
+                         SELECT gr.sections_registration_id
+                         FROM grading_registration AS gr
+                         WHERE gr.user_id = ?
+                     ) AS gr
+                     ON gr.sections_registration_id=u.registration_section
+                     JOIN (
+                         SELECT gd.gd_{$type}_id, gcmd.gcm_id
+                         FROM gradeable_component_mark_data AS gcmd
+                             JOIN gradeable_data gd ON gd.gd_id=gcmd.gd_id
+                     ) as gcmd
+                     ON gcmd.gd_{$type}_id=u.{$type}_id
+                 WHERE gcmd.gcm_id = ?", $params);
+         }
 
-        // Map the results into a non-associative array of team/user ids
-        return array_map(function ($row) use ($submitter_type) {
-            return $row[$submitter_type];
-        }, $this->course_db->rows());
-    }
+         // Map the results into a non-associative array of team/user ids
+         return array_map(function ($row) use ($row_type) {
+             return $row[$row_type];
+         }, $this->course_db->rows());
+     }
 
     public function insertGradeableComponentMarkData($gd_id, $gc_id, $gcd_grader_id, GradeableComponentMark $mark) {
         $params = array($gc_id, $gd_id, $gcd_grader_id, $mark->getId());
