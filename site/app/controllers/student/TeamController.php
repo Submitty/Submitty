@@ -136,24 +136,28 @@ class TeamController extends AbstractController {
     }
 
     public function sendInvitation() {
-        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         $user_id = $this->core->getUser()->getId();
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
-        if ($gradeable == null) {
-            $this->core->addErrorMessage("Failed to load gradeable: {$gradeable_id}");
+
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
+            $this->core->addErrorMessage('Invalid or missing gradeable id!');
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
+
         if (!$gradeable->isTeamAssignment()) {
-            $this->core->addErrorMessage("{$gradeable->getName()} is not a team assignment");
+            $this->core->addErrorMessage("{$gradeable->getTitle()} is not a team assignment");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
         $return_url = $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable_id, 'page' => 'team'));
-        $team = $gradeable->getTeam();
-        if ($team === null) {
+
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id, false);
+        if ($graded_gradeable === false) {
             $this->core->addErrorMessage("You are not on a team");
             $this->core->redirect($return_url);
         }
+        $team = $graded_gradeable->getSubmitter()->getTeam();
 
         $date = $this->core->getDateTimeNow();
         if ($date->format('Y-m-d H:i:s') > $gradeable->getTeamLockDate()->format('Y-m-d H:i:s')) {
@@ -161,8 +165,8 @@ class TeamController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        if (($team->getSize() + count($team->getInvitations())) >= $gradeable->getMaxTeamSize()) {
-            $this->core->addErrorMessage("Cannot send invitation. Max team size is {$gradeable->getMaxTeamSize()}");
+        if (($team->getSize() + count($team->getInvitations())) >= $gradeable->getTeamSizeMax()) {
+            $this->core->addErrorMessage("Cannot send invitation. Max team size is {$gradeable->getTeamSizeMax()}");
             $this->core->redirect($return_url);
         }
 
