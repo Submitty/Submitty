@@ -641,6 +641,11 @@ table tr.table-header {
     margin-left: 20px;
 }
 
+.grade-results {
+    display: flex;
+    flex-direction: row;
+}
+
 .box > h4 {
     margin-bottom: 10px;
     margin-left: 10px;
@@ -689,13 +694,13 @@ table tr.table-header {
     background-color: #999;
     border-radius: 10px;
     margin-left: 10px;
-    margin-right: 20px;
+    margin-right: 10px;
 }
 
 .no-badge {
-    width: 85px;
+    width: 70px;
     height: 10px;
-    margin-right: 20px;
+    margin-right: 10px;
     margin-left: 10px;
     float: left;
 }
@@ -746,6 +751,11 @@ table tr.table-header {
 
 .gradeable_comment td {
     padding: 0 4px;
+}
+
+.gradeable_comment td.mark-score {
+    text-align: right;
+    white-space: nowrap;
 }
 
 #search_wrapper{

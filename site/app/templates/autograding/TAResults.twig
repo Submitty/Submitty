@@ -45,9 +45,11 @@
             {# Todo: This is heinous #}
             {% set extra_credit = component.getTitle()|lower|trim == "extra credit" %}
 
-            <div class="box">
-                <div class="box-title">
+            <div class="box grade-results">
+                <div class="box-badge">
                     {{ Badge.render(component.getGradedTAPoints(), component.getMaxValue(), extra_credit) }}
+                </div>
+                <div class="box-info">
                     <h4>{{ component.getTitle() }}
                         {# Grader only shows up if they are not peer and full access #}
                         {% if not gradeable.getPeerGrading() and component.getGrader().accessFullGrading() %}
@@ -67,7 +69,7 @@
                                                 <i class="fa fa-square-o fa-1g"></i>
                                             {% endif %}
                                         </td>
-                                        <td style="text-align: right">
+                                        <td class="mark-score">
                                             {{ mark.getPoints()|number_format(num_decimals) }}
                                         </td>
                                         <td>
@@ -80,7 +82,7 @@
                                         <td>
                                             <i class="fa fa-check-square-o fa-1g"></i>
                                         </td>
-                                        <td style="text-align: right">
+                                        <td class="mark-score">
                                             {{ component.getScore()|number_format(num_decimals) }}
                                         </td>
                                         <td>
