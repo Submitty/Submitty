@@ -38,26 +38,30 @@ class TeamController extends AbstractController {
     }
 
     public function createNewTeam() {
-        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         $user_id = $this->core->getUser()->getId();
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
-        if ($gradeable == null) {
-            $this->core->addErrorMessage("Failed to load gradeable: {$gradeable_id}");
+
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
+            $this->core->addErrorMessage('Invalid or missing gradeable id!');
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
+
         if (!$gradeable->isTeamAssignment()) {
-            $this->core->addErrorMessage("{$gradeable->getName()} is not a team assignment");
+            $this->core->addErrorMessage("{$gradeable->getTitle()} is not a team assignment");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
         $return_url = $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable_id, 'page' => 'team'));
-        if ($gradeable->getTeam() !== null) {
+
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id, false);
+        if ($graded_gradeable !== false) {
             $this->core->addErrorMessage("You must leave your current team before you can create a new team");
             $this->core->redirect($return_url);
         }
 
         $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $user_id);
-        $this->core->getQueries()->removeFromSeekingTeam($gradeable_id,$user_id);
+        $this->core->getQueries()->removeFromSeekingTeam($gradeable_id, $user_id);
         $team_id = $this->core->getQueries()->createTeam($gradeable_id, $user_id, $this->core->getUser()->getRegistrationSection(), $this->core->getUser()->getRotatingSection());
         $this->core->addSuccessMessage("Created a new team");
 
@@ -73,7 +77,7 @@ class TeamController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO") . " " . $this->core->getConfig()->getTimezone()->getName();
         $settings_file = FileUtils::joinPaths($user_path, "user_assignment_settings.json");
         $json = array("team_history" => array(array("action" => "create", "time" => $current_time, "user" => $user_id)));
 
