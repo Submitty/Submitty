@@ -369,21 +369,30 @@ class TeamController extends AbstractController {
     }
 
     public function showPage() {
-        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $this->core->getUser()->getId());
-        if ($gradeable == null) {
-            $this->core->addErrorMessage("Failed to load gradeable: {$gradeable_id}");
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+        $user_id = $this->core->getUser()->getId();
+
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
+            $this->core->addErrorMessage('Invalid or missing gradeable id!');
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
+
         if (!$gradeable->isTeamAssignment()) {
-            $this->core->addErrorMessage("{$gradeable->getName()} is not a team assignment");
+            $this->core->addErrorMessage("{$gradeable->getTitle()} is not a team assignment");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        }
+
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id, false);
+        $team = null;
+        if ($graded_gradeable !== false) {
+            $team = $graded_gradeable->getSubmitter()->getTeam();
         }
 
         $teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
         $date = $this->core->getDateTimeNow();
         $lock = $date->format('Y-m-d H:i:s') > $gradeable->getTeamLockDate()->format('Y-m-d H:i:s');
         $users_seeking_team = $this->core->getQueries()->getUsersSeekingTeamByGradeableId($gradeable_id);
-        $this->core->getOutput()->renderOutput(array('submission', 'Team'), 'showTeamPage', $gradeable, $teams, $lock, $users_seeking_team);
+        $this->core->getOutput()->renderOutput(array('submission', 'Team'), 'showTeamPage', $gradeable, $team, $teams, $lock, $users_seeking_team);
     }
 }
