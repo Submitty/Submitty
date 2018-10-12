@@ -1248,6 +1248,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               u.user_firstname,
               u.user_preferred_firstname,
               u.user_lastname,
+              u.user_preferred_lastname,
               u.user_email,
               u.user_group,
               u.manual_registration,

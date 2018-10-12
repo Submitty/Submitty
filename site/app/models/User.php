@@ -12,10 +12,13 @@ use app\libraries\Core;
  * @method void setAnonId(string $anon_id)
  * @method string getPassword()
  * @method string getLegalFirstName() Get the first name of the loaded user
- * @method string getPreferredFirstName() Get the preferred name of the loaded user
- * @method string getDisplayedFirstName() Returns the preferred name if one exists and is not null or blank,
- *                                        otherwise return the first name field for the user.
+ * @method string getPreferredFirstName() Get the preferred first name of the loaded user
+ * @method string getDisplayedFirstName() Returns the preferred first name if one exists and is not null or blank,
+ *                                        otherwise return the legal first name field for the user.
  * @method string getLegalLastName() Get the last name of the loaded user
+ * @method string getPreferredLastName()  Get the preferred last name of the loaded user
+ * @method string getDisplayedLastName()  Returns the preferred last name if one exists and is not null or blank,
+ *                                        otherwise return the legal last name field for the user.
  * @method void setLegalFirstName(string $name)
  * @method void setLegalLastName(string $name)
  * @method string getEmail()
@@ -204,7 +207,7 @@ class User extends AbstractModel {
     }
 
     /**
-     * Set the preferred name of the loaded user (does not affect db. call updateUser.)
+     * Set the preferred first name of the loaded user (does not affect db. call updateUser.)
      * @param string $name
      */
     public function setPreferredFirstName($name) {
@@ -218,21 +221,11 @@ class User extends AbstractModel {
     }
 
     private function setDisplayedFirstName() {
-        if ($this->preferred_first_name !== "" && $this->preferred_first_name !== null) {
-            $this->displayed_first_name = $this->preferred_first_name;
-        }
-        else {
-            $this->displayed_first_name = $this->legal_first_name;
-        }
+        $this->displayed_first_name = (!empty($this->preferred_first_name)) ? $this->preferred_first_name : $this->legal_first_name;
     }
 
     private function setDisplayedlastName() {
-        if ($this->preferred_last_name !== "" && $this->preferred_last_name !== null) {
-            $this->displayed_last_name = $this->preferred_last_name;
-        }
-        else {
-            $this->displayed_last_name = $this->legal_last_name;
-        }
+        $this->displayed_last_name = (!empty($this->preferred_last_name)) ? $this->preferred_last_name : $this->legal_last_name;
     }
 
     public function setRegistrationSection($section) {
