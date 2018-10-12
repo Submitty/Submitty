@@ -44,8 +44,9 @@ class TestLogin(BaseTestCase):
         self.driver.find_element_by_name("password").send_keys("pearsr")
         self.driver.find_element_by_name("login").click()
         element = self.driver.find_element_by_class_name("content")
-        self.assertEqual("You don't have access to sample. If you think this is a mistake, please contact your instructor to gain access.", element.text)
 
+        self.assertEqual("You don't have access to this course. This is sample for Fall 2018. If you think this is a mistake, please contact your instructor to gain access. click here to back to homepage and see your courses list.", element.content);
+        # I don't know if I did it correctly as I include bold text, br and link in this line.
 
 if __name__ == "__main__":
     import unittest
