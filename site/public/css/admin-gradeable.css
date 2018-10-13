@@ -106,3 +106,20 @@ table#grader-history th, table#grader-history td {
 #timezone-container {
     float: right;
 }
+
+#repository {
+    margin-top: 20px;
+}
+
+div.log-container {
+    margin-top: 20px;
+}
+
+div.btn-container {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+#team-settings-container {
+    margin-top: 10px
+}

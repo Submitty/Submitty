@@ -95,6 +95,14 @@ class AdminGradeableController extends AbstractController {
         'participation', 'note',
         'none (for practice only)'];
 
+    const gradeable_type_strings = [
+        'checkpoint' => 'Checkpoints (simple data entry: full/half/no credit)',
+        'numeric' => 'Numeric/Text (simple data entry: integer or floating point and/or short strings)',
+        'electronic_hw' => 'Students will submit one or more files by direct upload to the Submitty website',
+        'electronic_hw_vcs' => 'Students will submit by committing files to a version control system (VCS) repository',
+        'electronic_exam' => 'TA/Instructor will (bulk) upload scanned .pdf for online manual grading'
+    ];
+
     /**
      * Displays the 'new' page, populating the first-page properties with the
      *  provided gradeable's data
@@ -119,7 +127,8 @@ class AdminGradeableController extends AbstractController {
             'template_list' => $template_list,
             'syllabus_buckets' => self::syllabus_buckets,
             'vcs_base_url' => $vcs_base_url,
-            'regrade_enabled' => $this->core->getConfig()->isRegradeEnabled()
+            'regrade_enabled' => $this->core->getConfig()->isRegradeEnabled(),
+            'gradeable_type_strings' => self::gradeable_type_strings
         ]);
     }
 
@@ -220,6 +229,21 @@ class AdminGradeableController extends AbstractController {
             'id' => $gradeable->getId()
         ]);
 
+        $type_string = 'UNKNOWN';
+        if($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
+            if($gradeable->isScannedExam()) {
+                $type_string = self::gradeable_type_strings['electronic_exam'];
+            } else if($gradeable->isVcs()) {
+                $type_string = self::gradeable_type_strings['electronic_hw_vcs'];
+            } else {
+                $type_string = self::gradeable_type_strings['electronic_hw'];
+            }
+        } else if($gradeable->getType() === GradeableType::NUMERIC_TEXT) {
+            $type_string = self::gradeable_type_strings['numeric'];
+        } else if($gradeable->getType() === GradeableType::CHECKPOINTS) {
+            $type_string = self::gradeable_type_strings['checkpoint'];
+        }
+
         // $this->inherit_teams_list = $this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams();
 
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -254,7 +278,8 @@ class AdminGradeableController extends AbstractController {
             'is_pdf_page_student' => $gradeable->isStudentPdfUpload(),
             'num_numeric' => $gradeable->getNumNumeric(),
             'num_text' => $gradeable->getNumText(),
-            'type_string' => GradeableType::typeToString($gradeable->getType()),
+            'type_string' => $type_string,
+            'gradeable_type_strings' => self::gradeable_type_strings,
             'show_edit_warning' => $gradeable->anyManualGrades(),
 
             // Config selection data
@@ -645,6 +670,7 @@ class AdminGradeableController extends AbstractController {
             'ta_instructions',
             'autograding_config_path',
             'student_view',
+            'student_view_after_grades',
             'student_submit',
             'student_download',
             'student_download_any_version',
@@ -672,8 +698,9 @@ class AdminGradeableController extends AbstractController {
                 'grade_by_registration' => true,
                 'ta_instructions' => '',
                 'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/upload_only/config',
-                'student_view' => false,
-                'student_submit' => false,
+                'student_view' => true,
+                'student_view_after_grades' => false,
+                'student_submit' => true,
                 'student_download' => false,
                 'student_download_any_version' => false,
                 'late_days' => 0,
@@ -690,7 +717,7 @@ class AdminGradeableController extends AbstractController {
             'syllabus_bucket'
         ];
         foreach ($front_page_property_names as $prop) {
-            $gradeable_create_data[$prop] = $details[$prop];
+            $gradeable_create_data[$prop] = $details[$prop] ?? '';
         }
 
         // Electronic-only values
@@ -703,6 +730,7 @@ class AdminGradeableController extends AbstractController {
                 'vcs_subdirectory' => $details['vcs_subdirectory'],
                 'regrade_allowed' => $details['regrade_allowed'] === 'true',
                 'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/upload_only/config',
+                'scanned_exam' => $details['scanned_exam'] === 'true',
 
                 // TODO: properties that aren't supported yet
                 'peer_grading' => false,
@@ -739,6 +767,16 @@ class AdminGradeableController extends AbstractController {
 
         // Finally, construct the gradeable
         $gradeable = new Gradeable($this->core, $gradeable_create_data);
+
+        // Setup student permissions specially for scanned exams
+        if ($gradeable->isScannedExam()) {
+            $gradeable->setStudentView(true);
+            $gradeable->setStudentViewAfterGrades(true);
+            $gradeable->setStudentSubmit(false);
+            $gradeable->setStudentDownload(true);
+            $gradeable->setStudentDownloadAnyVersion(false);
+            $gradeable->setAutogradingConfigPath('/usr/local/submitty/more_autograding_examples/pdf_exam/config');
+        }
 
         // Generate a blank component to make the rubric UI work properly
         $this->genBlankComponent($gradeable);
@@ -787,13 +825,16 @@ class AdminGradeableController extends AbstractController {
         $boolean_properties = [
             'grade_by_registration',
             'ta_grading',
+            'scanned_exam',
             'student_view',
+            'student_view_after_grades',
             'student_submit',
             'student_download',
             'student_download_any_version',
             'peer_grading',
             'late_submission_allowed',
-            'regrade_allowed'
+            'regrade_allowed',
+            'vcs'
         ];
 
         $numeric_properties = [
