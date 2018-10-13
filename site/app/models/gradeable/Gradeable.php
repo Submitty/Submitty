@@ -483,7 +483,7 @@ class Gradeable extends AbstractModel {
             // Only add in submission due date if student submission is enabled
             if ($this->isStudentSubmit() && $this->hasDueDate()) {
                 // Make sure we insert the due date into the correct location (after the open date)
-                $result = array_splice($result, array_search('submission_open_date', $result), 0, 'submission_due_date');
+                array_splice($result, array_search('submission_open_date', $result)+1, 0, 'submission_due_date');
             }
 
             // Only add in regrade request date if its allowed & enabled
