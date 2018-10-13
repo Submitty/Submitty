@@ -773,7 +773,7 @@ class AdminGradeableController extends AbstractController {
             $gradeable->setStudentView(true);
             $gradeable->setStudentViewAfterGrades(true);
             $gradeable->setStudentSubmit(false);
-            $gradeable->setStudentDownload(false);
+            $gradeable->setStudentDownload(true);
             $gradeable->setStudentDownloadAnyVersion(false);
             $gradeable->setAutogradingConfigPath('/usr/local/submitty/more_autograding_examples/pdf_exam/config');
         }
