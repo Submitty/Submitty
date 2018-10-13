@@ -76,7 +76,11 @@ class GradeableList extends AbstractModel {
         $this->now = $this->core->getDateTimeNow();
 
         foreach ($this->gradeables as $gradeable) {
-            if ($gradeable->getGradeReleasedDate() <= $this->now) {
+            if (!$gradeable->hasDueDate() && $gradeable->isStudentSubmit()) {
+                // Filter out gradeables with no due date first
+                $this->open_gradeables[$gradeable->getId()] = $gradeable;
+            }
+            else if ($gradeable->getGradeReleasedDate() <= $this->now) {
                 $this->graded_gradeables[$gradeable->getId()] = $gradeable;
             }
             else if ((($gradeable->getType() === GradeableType::ELECTRONIC_FILE && $gradeable->isTaGrading()) ||
@@ -89,8 +93,7 @@ class GradeableList extends AbstractModel {
                 $this->closed_gradeables[$gradeable->getId()] = $gradeable;
             }
             else if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE &&
-                (($gradeable->hasDueDate() && $gradeable->getSubmissionOpenDate() <= $this->now && $gradeable->getTaViewStartDate() <= $this->now) ||
-                !$gradeable->isStudentSubmit())) {
+                $gradeable->getSubmissionOpenDate() <= $this->now && $gradeable->getTaViewStartDate() <= $this->now) {
                 $this->open_gradeables[$gradeable->getId()] = $gradeable;
             }
             else if ($this->core->getUser()->accessGrading() && $gradeable->getTaViewStartDate() <= $this->now) {

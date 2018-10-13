@@ -213,15 +213,15 @@
 
     function onStudentSubmitChange() {
         let cont = $('#due_date_options_container');
-        let cont1 = $('#late_days_options_container');
 
+        let no_due_date = $('#has_due_date_no');
         if($('#yes_student_submit').is(':checked')) {
             cont.show();
-            cont1.show();
         } else {
+            no_due_date.prop('checked', true);
             cont.hide();
-            cont1.hide();
         }
+        no_due_date.change();
     }
 
     function showAdvancedStudentPermissions() {

@@ -18,7 +18,7 @@
 
         <br />
 
-        <div id="due_date_options_container" {{ gradeable.isStudentSubmit() ? '' : 'hidden' }}>
+        <div id="due_date_options_container">
             <div>Will this assignment have a due date?
                 <input id="has_due_date_yes" name="has_due_date" value="true" type="radio" {{ gradeable.hasDueDate() ? 'checked' : '' }}/>Yes
                 <input id="has_due_date_no" name="has_due_date" value="false" type="radio" {{ not gradeable.hasDueDate() ? 'checked' : '' }}/>No
@@ -54,7 +54,7 @@
             Regrade Request Due Date (Regrade Requests must be sent by this date)
         </div>
 
-        <div id="late_days_options_container" {{ gradeable.isStudentSubmit() ? '' : 'hidden' }}>
+        <div id="late_days_options_container" {{ gradeable.hasDueDate() and gradeable.isStudentSubmit() ? '' : 'hidden' }}>
             Should submissions be accepted after the due date?  [ FIXME: UI MODIFICATIONS REQUIRED]
             <br />
             <input type="radio" id = "yes_late_submission" name="late_submission_allowed" value="true"
@@ -111,15 +111,14 @@
     $(document).ready(function() {
         $('input[name=has_due_date]').change(function() {
             let cont = $('#due_date_container');
+            let cont1 = $('#late_days_options_container');
             if($('#has_due_date_no').is(':checked')) {
                 cont.hide();
+                cont1.hide();
             } else {
                 cont.show();
+                cont1.show();
             }
-        });
-
-        $('input[name=student_submit]').change(function() {
-
         });
     });
 
