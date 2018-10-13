@@ -211,6 +211,19 @@
         }
     }
 
+    function onStudentSubmitChange() {
+        let cont = $('#due_date_options_container');
+        let cont1 = $('#late_days_options_container');
+
+        if($('#yes_student_submit').is(':checked')) {
+            cont.show();
+            cont1.show();
+        } else {
+            cont.hide();
+            cont1.hide();
+        }
+    }
+
     function showAdvancedStudentPermissions() {
         $('.student_permissions').show();
         $('#hide-advanced-student-permissions-container').show();
@@ -235,6 +248,10 @@
         // Only show the settings if the setting is enabled
         onStudentViewChange();
         $('[name="student_view"]').change(onStudentViewChange);
+
+        // Only show the dates if the setting is enabled
+        onStudentSubmitChange();
+        $('[name=student_submit]').change(onStudentSubmitChange);
 
         // Update the page when the radio buttons change
         $('input:radio[name=config_option][value="{{ config_select_mode }}"]').prop('checked', true);
