@@ -1648,6 +1648,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   eg_peer_grade_set AS peer_grade_set,
                   eg_submission_open_date AS submission_open_date,
                   eg_submission_due_date AS submission_due_date,
+                  eg_has_due_date AS has_due_date,
                   eg_late_days AS late_days,
                   eg_allow_late_submission AS late_submission_allowed,
                   eg_precision AS precision

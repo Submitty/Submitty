@@ -89,7 +89,7 @@ class GradeableList extends AbstractModel {
                 $this->closed_gradeables[$gradeable->getId()] = $gradeable;
             }
             else if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE &&
-                (($gradeable->getSubmissionOpenDate() <= $this->now && $gradeable->getTaViewStartDate() <= $this->now) ||
+                (($gradeable->hasDueDate() && $gradeable->getSubmissionOpenDate() <= $this->now && $gradeable->getTaViewStartDate() <= $this->now) ||
                 !$gradeable->isStudentSubmit())) {
                 $this->open_gradeables[$gradeable->getId()] = $gradeable;
             }
