@@ -41,19 +41,22 @@ class LateDays extends AbstractModel {
         parent::__construct($core);
         $this->user = $user;
 
+        // TODO: filter out non-late-days gradeables here (i.e. no due date gradeables)
+
         // Sort by due date
         usort($graded_gradeables, function (GradedGradeable $gg1, GradedGradeable $gg2) {
             return $gg1->getGradeable()->getSubmissionDueDate() - $gg2->getGradeable()->getSubmissionDueDate();
         });
 
-        // Get the late days allowed data
+        // Get the late day updates that the instructor will enter
         $this->late_days_updates = $late_days_updates = $this->core->getQueries()->getLateDayUpdates($user->getId());
 
-        $charged_late_days = 0;
+        // Construct late days info for each gradeable
+        $cumulative_charged_late_days = 0;
         foreach ($graded_gradeables as $graded_gradeable) {
-            $info = new LateDayInfo($core, $user, $graded_gradeable, $charged_late_days,
-                $this->getLateDaysAvailableByContext($graded_gradeable->getGradeable()->getSubmissionDueDate()));
-            $charged_late_days += $info->getLateDaysCharged();
+            $info = new LateDayInfo($core, $user, $graded_gradeable, $cumulative_charged_late_days,
+                $this->getLateDaysRemainingByContext($graded_gradeable->getGradeable()->getSubmissionDueDate()));
+            $cumulative_charged_late_days += $info->getLateDaysCharged();
             $this->late_day_info[$graded_gradeable->getGradeableId()] = $info;
         }
     }
@@ -86,11 +89,21 @@ class LateDays extends AbstractModel {
         return $total;
     }
 
+    /**
+     * Gets the current number of late days remaining
+     * @return int
+     */
     public function getLateDaysRemaining() {
         // Use 'now' because it is possible that there are changes that occur in the future
         return $this->getLateDaysRemainingByContext(new \DateTime());
     }
 
+    /**
+     * Gets the number of late days remaining as of a certain date
+     * Note: This does not apply late day 'updates' retroactively
+     * @param \DateTime $context The date to calculate remaining late days for
+     * @return int
+     */
     public function getLateDaysRemainingByContext(\DateTime $context) {
         // make an array of 'due date events', which is an array of both the gradeables
         //  and the late day updates in the `late_days` table
@@ -115,7 +128,7 @@ class LateDays extends AbstractModel {
 
         // step through each event and keep a running count of the late days
         $prev_late_days_available = $this->core->getConfig()->getDefaultStudentLateDays();
-        $late_days_remaining = $this->core->getConfig()->getDefaultStudentLateDays();
+        $late_days_remaining = $prev_late_days_available;
         foreach ($late_day_events as $event) {
             if ($event['timestamp'] > $context) {
                 break;
@@ -136,6 +149,7 @@ class LateDays extends AbstractModel {
                 $new_late_days_available = $event['update']['allowed_late_days'];
                 $diff = $new_late_days_available - $prev_late_days_available;
                 $late_days_remaining = min(0, $late_days_remaining + $diff);
+                $prev_late_days_available = $new_late_days_available;
             }
             if ($late_days_remaining < 0) {
                 throw new \Error('Late days calculation failed due to logic error (LateDaysInfo::getLateDaysCharged)!');
@@ -146,50 +160,11 @@ class LateDays extends AbstractModel {
     }
 
     /**
-     * Gets the number of late days the user has available to them now
-     *  Note: This value will not be negative
-     */
-    public function getLateDaysAvailable() {
-        // Use 'now' because it is possible that there are changes that occur in the future
-        return $this->getLateDaysAvailableByContext(new \DateTime());
-    }
-
-    public function getLateDaysAvailableByContext(\DateTime $context) {
-        return $this->getLateDaysUpdateByContext($context)['allowed_late_days'];
-    }
-
-    /**
-     * Gets the number of late days available to a student at a given time context
-     *  Note: this is significant if a student has been penalized late days
-     * @param \DateTime $context
-     * @return array
-     */
-    public function getLateDaysUpdateByContext(\DateTime $context) {
-        if (count($this->late_days_updates) === 0) {
-            return [
-                'user_id' => $this->user->getId(),
-                'allowed_late_days' => $this->core->getConfig()->getDefaultStudentLateDays(),
-                'since_timestamp' => new DateTime('1899-12-31') // seems early enough
-            ];
-        }
-
-        $i = 0;
-        // While the submission due date is later than the current late day update, try the next one
-        while (isset($late_days_updates[$i + 1])) {
-            if ($context <= $this->late_days_updates[$i + 1]['since_timestamp']) {
-                break;
-            }
-            $this++;
-        }
-        return $this->late_days_updates[$i];
-    }
-
-    /**
      * Gets if the user has any late days to use
      * @return bool
      */
     public function hasLateDaysRemaining() {
-        return $this->getLateDaysAvailable() > 0;
+        return $this->getLateDaysRemaining() > 0;
     }
 
     /**

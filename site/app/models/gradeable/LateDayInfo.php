@@ -12,6 +12,8 @@ use app\models\User;
  * Class LateDayInfo
  * @package app\models\gradeable
  *
+ * Late day calculation per graded gradeable (per user)
+ *
  * @method int getLateDaysAvailable()
  */
 class LateDayInfo extends AbstractModel {
@@ -23,7 +25,9 @@ class LateDayInfo extends AbstractModel {
 
     /** @property @var int The number of unused late days the user has for this gradeable, not including exceptions */
     protected $late_days_available = null;
-    protected $cumulative_late_days_used = null;
+
+    /** @var int|null The number of late days used by previous gradeables */
+    private $cumulative_late_days_used = null;
 
     /**
      * LateDayInfo constructor.
@@ -79,6 +83,10 @@ class LateDayInfo extends AbstractModel {
         return min($this->graded_gradeable->getGradeable()->getLateDays(), $this->late_days_available);
     }
 
+    /**
+     * Gets the late status of the gradeable
+     * @return int One of LateDays::STATUS_NO_SUBMISSION, LateDays::STATUS_BAD, LateDays::STATUS_LATE, or LateDays::STATUS_GOOD
+     */
     public function getStatus() {
         // No late days info, so NO_SUBMISSION
         if(!$this->hasLateDaysInfo()) {
@@ -101,18 +109,35 @@ class LateDayInfo extends AbstractModel {
         return LateDays::STATUS_GOOD;
     }
 
+    /**
+     * Gets if this user has late days info available (if they have an active version)
+     * @return bool
+     */
     public function hasLateDaysInfo() {
         return $this->graded_gradeable->getAutoGradedGradeable()->hasActiveVersion();
     }
 
+    /**
+     * Gets the number of late days charged for this assignment
+     * @return int
+     */
     public function getLateDaysCharged() {
-        return min($this->getLateDayExceptions() - $this->getDaysLate(), $this->getLateDaysAllowed());
+        return min($this->getDaysLate() - $this->getLateDayExceptions(), $this->getLateDaysAllowed());
     }
 
+    /**
+     * Gets the number of days late for the active version
+     * Note: Check hasLateDaysInfo() before calling this
+     * @return int
+     */
     public function getDaysLate() {
         return $this->graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance()->getDaysLate();
     }
 
+    /**
+     * Gets the late day exception for this gradeable and user
+     * @return int
+     */
     public function getLateDayExceptions() {
         return $this->graded_gradeable->getLateDayException($this->user);
     }
