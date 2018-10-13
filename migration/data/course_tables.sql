@@ -129,7 +129,9 @@ CREATE TABLE electronic_gradeable (
     eg_max_team_size integer NOT NULL,
     eg_team_lock_date timestamp(6) with time zone NOT NULL,
     eg_use_ta_grading boolean NOT NULL,
+    eg_scanned_exam boolean DEFAULT (FALSE) NOT NULL,
     eg_student_view boolean NOT NULL,
+    eg_student_view_after_grades boolean DEFAULT (FALSE) NOT NULL,
     eg_student_submit boolean NOT NULL,
     eg_student_download boolean NOT NULL,
     eg_student_any_version boolean NOT NULL,
@@ -140,7 +142,12 @@ CREATE TABLE electronic_gradeable (
     eg_allow_late_submission boolean DEFAULT true NOT NULL,
     eg_peer_grade_set integer DEFAULT (0) NOT NULL,
     eg_precision numeric NOT NULL,
-    CONSTRAINT eg_submission_date CHECK ((eg_submission_open_date <= eg_submission_due_date))
+    eg_regrade_allowed boolean DEFAULT true NOT NULL,
+    eg_regrade_request_date timestamp(6) with time zone NOT NULL,
+    CONSTRAINT eg_submission_date CHECK ((eg_submission_open_date <= eg_submission_due_date)),
+    CONSTRAINT eg_team_lock_date_max CHECK ((eg_team_lock_date <= '9999-03-01 00:00:00.000000')),
+    CONSTRAINT eg_submission_due_date_max CHECK ((eg_submission_due_date <= '9999-03-01 00:00:00.000000')),
+    CONSTRAINT eg_regrade_request_date_max CHECK ((eg_regrade_request_date <= '9999-03-01 00:00:00.000000'))
 );
 
 
@@ -185,19 +192,22 @@ CREATE TABLE electronic_gradeable_version (
 CREATE TABLE gradeable (
     g_id character varying(255) NOT NULL,
     g_title character varying(255) NOT NULL,
-    g_instructions_url character varying(255) NOT NULL,
+    g_instructions_url character varying NOT NULL,
     g_overall_ta_instructions character varying NOT NULL,
     g_gradeable_type integer NOT NULL,
     g_grade_by_registration boolean NOT NULL,
     g_ta_view_start_date timestamp(6) with time zone NOT NULL,
     g_grade_start_date timestamp(6) with time zone NOT NULL,
+    g_grade_due_date timestamp(6) with time zone NOT NULL,
     g_grade_released_date timestamp(6) with time zone NOT NULL,
     g_grade_locked_date timestamp(6) with time zone,
     g_min_grading_group integer NOT NULL,
     g_syllabus_bucket character varying(255) NOT NULL,
     CONSTRAINT g_ta_view_start_date CHECK ((g_ta_view_start_date <= g_grade_start_date)),
-    CONSTRAINT g_grade_start_date CHECK ((g_grade_start_date <= g_grade_released_date)),
-    CONSTRAINT g_grade_released_date CHECK ((g_grade_released_date <= g_grade_locked_date))
+    CONSTRAINT g_grade_start_date CHECK ((g_grade_start_date <= g_grade_due_date)),
+    CONSTRAINT g_grade_due_date CHECK ((g_grade_due_date <= g_grade_released_date)),
+    CONSTRAINT g_grade_released_date CHECK ((g_grade_released_date <= g_grade_locked_date)),
+    CONSTRAINT g_grade_locked_date_max CHECK ((g_grade_locked_date <= '9999-03-01 00:00:00.000000'))
 );
 
 
@@ -479,9 +489,10 @@ CREATE TABLE teams (
 --
 CREATE TABLE regrade_requests (
     id serial NOT NULL PRIMARY KEY,
-    gradeable_id VARCHAR(255) NOT NULL,
+    g_id VARCHAR(255) NOT NULL,
     timestamp TIMESTAMP NOT NULL,
-    student_id VARCHAR(255) NOT NULL,
+    user_id VARCHAR(255),
+    team_id VARCHAR(255),
     status INTEGER DEFAULT 0 NOT NULL
 );
 
@@ -496,6 +507,25 @@ CREATE TABLE regrade_discussion (
     user_id VARCHAR(255) NOT NULL,
     content TEXT,
     deleted BOOLEAN DEFAULT FALSE NOT NULL
+);
+
+--
+-- Name: notifications_component_enum; Type: ENUM; Schema: public; Owner: -
+--
+CREATE TYPE notifications_component AS ENUM ('forum');
+
+--
+-- Name: notifications; Type: TABLE; Schema: public; Owner: -
+--
+CREATE TABLE notifications (
+    id serial NOT NULL PRIMARY KEY,
+    component notifications_component NOT NULL,
+    metadata TEXT NOT NULL,
+    content TEXT NOT NULL,
+    from_user_id VARCHAR(255),
+    to_user_id VARCHAR(255) NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    seen_at timestamp with time zone
 );
 
 
@@ -1037,12 +1067,28 @@ ALTER TABLE ONLY teams
 
 ALTER TABLE ONLY teams
     ADD CONSTRAINT teams_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
+
 --
 -- Name: regrade_discussion; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY regrade_discussion
     ADD CONSTRAINT regrade_discussion_regrade_requests_id_fk FOREIGN KEY (regrade_id) REFERENCES regrade_requests(id) ON UPDATE CASCADE;
+
+--
+-- Name: notifications_to_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY notifications
+    ADD CONSTRAINT notifications_to_user_id_fkey FOREIGN KEY (to_user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
+
+--
+-- Name: notifications_from_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY notifications
+    ADD CONSTRAINT notifications_from_user_id_fkey FOREIGN KEY (from_user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
+
 -- Forum Key relationships
 
 ALTER TABLE "posts" ADD CONSTRAINT "posts_fk0" FOREIGN KEY ("thread_id") REFERENCES "threads"("id");
@@ -1065,8 +1111,9 @@ ALTER TABLE "student_favorites" ADD CONSTRAINT "student_favorites_fk1" FOREIGN K
 ALTER TABLE "viewed_responses" ADD CONSTRAINT "viewed_responses_fk0" FOREIGN KEY ("thread_id") REFERENCES "threads"("id");
 ALTER TABLE "viewed_responses" ADD CONSTRAINT "viewed_responses_fk1" FOREIGN KEY ("user_id") REFERENCES "users"("user_id");
 
-ALTER TABLE "regrade_requests" ADD CONSTRAINT "regrade_requests_fk0" FOREIGN KEY ("gradeable_id") REFERENCES "gradeable"("g_id");
-ALTER TABLE "regrade_requests" ADD CONSTRAINT "regrade_requests_fk1" FOREIGN KEY ("student_id") REFERENCES "users"("user_id");
+ALTER TABLE "regrade_requests" ADD CONSTRAINT "regrade_requests_fk0" FOREIGN KEY ("g_id") REFERENCES "gradeable"("g_id");
+ALTER TABLE "regrade_requests" ADD CONSTRAINT "regrade_requests_fk1" FOREIGN KEY ("user_id") REFERENCES "users"("user_id");
+ALTER TABLE "regrade_requests" ADD CONSTRAINT "regrade_requests_fk2" FOREIGN KEY ("team_id") REFERENCES "gradeable_teams"("team_id");
 
 ALTER TABLE "regrade_discussion" ADD CONSTRAINT "regrade_discussion_fk0" FOREIGN KEY ("regrade_id") REFERENCES "regrade_requests"("id");
 ALTER TABLE "regrade_discussion" ADD CONSTRAINT "regrade_discussion_fk1" FOREIGN KEY ("user_id") REFERENCES "users"("user_id");
@@ -1079,6 +1126,12 @@ ALTER TABLE ONLY thread_categories
 
 ALTER TABLE ONLY student_favorites
     ADD CONSTRAINT user_and_thread_unique UNIQUE (user_id, thread_id);
+
+ALTER TABLE ONLY regrade_requests
+    ADD CONSTRAINT gradeable_user_unique UNIQUE(g_id, user_id);
+
+ALTER TABLE ONLY regrade_requests
+    ADD CONSTRAINT gradeable_team_unique UNIQUE(g_id, team_id);
 
 -- End Forum Key relationships
 

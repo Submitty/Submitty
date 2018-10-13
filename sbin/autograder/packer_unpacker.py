@@ -19,6 +19,10 @@ from . import grade_item, insert_database_version_data, grade_items_logging, wri
 
 with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
     OPEN_JSON = json.load(open_file)
+SUBMISSION_URL = OPEN_JSON['submission_url']
+VCS_URL = OPEN_JSON['vcs_url']
+if VCS_URL is None or len(VCS_URL) == 0:
+    VCS_URL = SUBMISSION_URL.rstrip('/') + '/{$vcs_type}'
 SUBMITTY_INSTALL_DIR = OPEN_JSON['submitty_install_dir']
 SUBMITTY_DATA_DIR = OPEN_JSON['submitty_data_dir']
 
@@ -44,6 +48,7 @@ def load_queue_file_obj(job_id,next_directory,next_to_grade):
         obj = json.load(infile)
     return obj
 
+
 def get_vcs_info(top_dir, semester, course, gradeable, userid,  teamid):
     form_json_file = os.path.join(top_dir, 'courses', semester, course, 'config', 'form', 'form_'+gradeable+'.json')
     with open(form_json_file, 'r') as fj:
@@ -57,11 +62,17 @@ def get_vcs_info(top_dir, semester, course, gradeable, userid,  teamid):
     # so we have to strip out the " in python
     vcs_type = course_ini['course_details']['vcs_type'].strip('"')
     vcs_base_url = course_ini['course_details']['vcs_base_url'].strip('"')
+    if len(vcs_base_url) == 0:
+        vcs_base_url = "/".join([VCS_URL, semester, course]).rstrip('/') + "/"
+    vcs_base_url = vcs_base_url.replace(SUBMISSION_URL, os.path.join(SUBMITTY_DATA_DIR, 'vcs'))
+    vcs_base_url = vcs_base_url.replace('{$vcs_type}', vcs_type)
     vcs_subdirectory = form_json["subdirectory"] if is_vcs else ''
+    vcs_subdirectory = vcs_subdirectory.replace("{$vcs_type}", vcs_type)
     vcs_subdirectory = vcs_subdirectory.replace("{$gradeable_id}", gradeable)
     vcs_subdirectory = vcs_subdirectory.replace("{$user_id}", userid)
     vcs_subdirectory = vcs_subdirectory.replace("{$team_id}", teamid)
     return is_vcs, vcs_type, vcs_base_url, vcs_subdirectory
+
 
 def copytree_if_exists(source,target):
     # target must not exist!
@@ -128,15 +139,6 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
     waittime = (grading_began-queue_time).total_seconds()
     grade_items_logging.log_message(job_id,is_batch_job,"zip",item_name,"wait:",waittime,"")
 
-    # --------------------------------------------------------------------
-    # MAKE TEMPORARY DIRECTORY & COPY THE NECESSARY FILES THERE
-
-    tmp = tempfile.mkdtemp()
-    tmp_autograding = os.path.join(tmp,"TMP_AUTOGRADING")
-    os.mkdir(tmp_autograding)
-    tmp_submission = os.path.join(tmp,"TMP_SUBMISSION")
-    os.mkdir(tmp_submission)
-
     # --------------------------------------------------------
     # various paths
     provided_code_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"provided_code",obj["gradeable"])
@@ -146,6 +148,21 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
     bin_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"bin",obj["gradeable"])
     form_json_config = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"config","form","form_"+obj["gradeable"]+".json")
     complete_config = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"config","complete_config","complete_config_"+obj["gradeable"]+".json")
+
+    if not os.path.exists(form_json_config):
+        grade_items_logging.log_message(job_id,message="ERROR: the form json file does not exist " + form_json_config)
+        raise RuntimeError("ERROR: the form json file does not exist ",form_json_config)
+    if not os.path.exists(complete_config):
+        grade_items_logging.log_message(job_id,message="ERROR: the complete config file does not exist " + complete_config)
+        raise RuntimeError("ERROR: the complete config file does not exist ",complete_config)
+
+    # --------------------------------------------------------------------
+    # MAKE TEMPORARY DIRECTORY & COPY THE NECESSARY FILES THERE
+    tmp = tempfile.mkdtemp()
+    tmp_autograding = os.path.join(tmp,"TMP_AUTOGRADING")
+    os.mkdir(tmp_autograding)
+    tmp_submission = os.path.join(tmp,"TMP_SUBMISSION")
+    os.mkdir(tmp_submission)
 
     copytree_if_exists(provided_code_path,os.path.join(tmp_autograding,"provided_code"))
     copytree_if_exists(test_input_path,os.path.join(tmp_autograding,"test_input"))
@@ -183,7 +200,6 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
     # grab the submission time
     with open (os.path.join(submission_path,".submit.timestamp")) as submission_time_file:
         submission_string = submission_time_file.read().rstrip()
-    
     submission_datetime = dateutils.read_submitty_date(submission_string)
 
     # --------------------------------------------------------------------
@@ -208,7 +224,7 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
         # cleanup the previous checkout (if it exists)
         shutil.rmtree(checkout_path,ignore_errors=True)
         os.makedirs(checkout_path, exist_ok=True)
-        subprocess.call(['/usr/bin/git', 'clone', vcs_path, checkout_path])
+        subprocess.check_call(['/usr/bin/git', 'clone', vcs_path, checkout_path])
         os.chdir(checkout_path)
 
         # determine which version we need to checkout

@@ -217,6 +217,7 @@ create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/custo
 # NOTE: on each student submission, files are written to these directories
 #               drwxr-s---       $PHP_USER        ta_www_group    submissions/
 #               drwxr-s---       $PHP_USER        ta_www_group    config_upload/
+#               drwxr-s---       $PHP_USER        ta_www_group    site/
 #               drwxr-s---       $DAEMON_USER     ta_www_group    results/
 #               drwxr-s---       $DAEMON_USER     ta_www_group    checkout/
 #               drwxr-s---       $DAEMON_USER     ta_www_group    uploads/
@@ -224,13 +225,15 @@ create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/custo
 #               drwxr-s---       $CGI_USER        ta_www_group    uploads/split_pdf/
 #               drwxr-s---       $PHP_USER        ta_www_group    uploads/student_images/
 #               drwxr-s---       $PHP_USER        ta_www_group    uploads/student_images/tmp
-#               drwxr-s---       $DAEMON_USER     ta_www_group    lichen/
+#               drwxr-s---       $PHP_USER        ta_www_group    uploads/seating
+#               drwxrws---       $DAEMON_USER     ta_www_group    lichen/
 #               drwxrws---       $PHP_USER        ta_www_group    lichen/config
 #               drwxrws---       $PHP_USER        ta_www_group    lichen/provided_code
 create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/submissions
 create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/forum_attachments
 create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/annotations
 create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/config_upload
+create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/site
 create_and_set  u=rwx,g=rxs,o=   $DAEMON_USER     $ta_www_group   $course_dir/results
 create_and_set  u=rwx,g=rxs,o=   $DAEMON_USER     $ta_www_group   $course_dir/checkout
 create_and_set  u=rwx,g=rxs,o=   $DAEMON_USER     $ta_www_group   $course_dir/uploads
@@ -239,16 +242,21 @@ create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/up
 create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/uploads/student_images/tmp
 create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/uploads/course_materials
 create_and_set  u=rwx,g=rxs,o=   $CGI_USER        $ta_www_group   $course_dir/uploads/split_pdf
-create_and_set  u=rwx,g=rxs,o=   $DAEMON_USER     $ta_www_group   $course_dir/lichen
+create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/uploads/seating
+create_and_set  u=rwx,g=rwxs,o=  $DAEMON_USER     $ta_www_group   $course_dir/lichen
 create_and_set  u=rwx,g=rwxs,o=  $PHP_USER        $ta_www_group   $course_dir/lichen/config
 create_and_set  u=rwx,g=rwxs,o=  $PHP_USER        $ta_www_group   $course_dir/lichen/provided_code
 
 
 # NOTE:    instructor uploads TA HW grade reports & overall grade scores here
-#               drwxr-s---       instructor   ta_www_group    reports/
-create_and_set  u=rwx,g=rwxs,o=   $instructor   $ta_www_group   $course_dir/reports
-create_and_set  u=rwx,g=rwxs,o=   $instructor   $ta_www_group   $course_dir/reports/summary_html
-create_and_set  u=rwx,g=rwxs,o=   $PHP_USER   $ta_www_group   $course_dir/reports/all_grades
+#               drwxrws---       instructor    ta_www_group    reports
+#               drwxrws---       instructor    ta_www_group    reports/summary_html
+#               drwxrws---       $PHP_USER     ta_www_group    reports/all_grades
+#               drwxrws---       $PHP_USER     ta_www_group    reports/seating
+create_and_set  u=rwx,g=rwxs,o=  $instructor   $ta_www_group   $course_dir/reports
+create_and_set  u=rwx,g=rwxs,o=  $instructor   $ta_www_group   $course_dir/reports/summary_html
+create_and_set  u=rwx,g=rwxs,o=  $PHP_USER     $ta_www_group   $course_dir/reports/all_grades
+create_and_set  u=rwx,g=rwxs,o=  $PHP_USER     $ta_www_group   $course_dir/reports/seating
 
 
 ########################################################################################################################

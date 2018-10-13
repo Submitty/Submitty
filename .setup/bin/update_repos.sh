@@ -26,9 +26,10 @@ SUBMITTY_INSTALL_DIR=/usr/local/submitty
 # dependencies between versions.
 
 min_AnalysisTools_version=v.18.06.00
-min_Lichen_version=v.18.07.04
+min_Lichen_version=v.18.09.00
 min_RainbowGrades_version=v.18.07.00
-min_Tutorial_version=v.18.06.00
+min_Tutorial_version=v.18.09.00
+min_pdf_annotate_js_version=v.18.09.00
 
 ########################################################################
 # Helper function requires 2 args, the short name of the repository,
@@ -51,7 +52,7 @@ function clone_or_update_repo {
         # CHECK TO SEE IF VERSION MATCHES OR IS ANCESTOR
         git merge-base --is-ancestor "${min_repo_version}" HEAD 2> /dev/null
         if [ $? -eq 0 ]; then
-            echo -e "    current version matches or exceeds minimum version ${min_repo_version}\n"
+            echo -e "    current version matches or exceeds minimum version ${min_repo_version}"
         else
             echo "    this repository is out of date..."
 
@@ -100,3 +101,4 @@ clone_or_update_repo  AnalysisTools  ${min_AnalysisTools_version}
 clone_or_update_repo  Lichen  ${min_Lichen_version}
 clone_or_update_repo  RainbowGrades  ${min_RainbowGrades_version}
 clone_or_update_repo  Tutorial  ${min_Tutorial_version}
+clone_or_update_repo  pdf-annotate.js  ${min_pdf_annotate_js_version}

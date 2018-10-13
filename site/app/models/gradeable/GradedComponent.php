@@ -21,7 +21,6 @@ use app\models\User;
  * @method void setGradedVersion($graded_version)
  * @method \DateTime getGradeTime()
  * @method int[] getMarkIds()
- * @method int[]|null getDbMarkIds()
  * @method bool isMarksModified()
  */
 class GradedComponent extends AbstractModel {
@@ -41,13 +40,13 @@ class GradedComponent extends AbstractModel {
     /** @property @var int[] The mark ids the submitter received for this component */
     protected $mark_ids = array();
     /** @property @var int[]|null The mark ids the submitter received for this component as reflected in the db */
-    protected $db_mark_ids = null;
+    private $db_mark_ids = null;
 
     /** @property @var bool True if the marks array was modified after construction */
     protected $marks_modified = false;
 
     /** @property @var float The score for this component (or custom mark point value) */
-    protected $score = 0;
+    protected $score = 0.0;
     /** @property @var string The comment on this mark / custom mark description */
     protected $comment = "";
     /** @property @var string The Id of the grader who most recently updated the component's grade */
@@ -79,7 +78,7 @@ class GradedComponent extends AbstractModel {
 
         $this->setComment($details['comment'] ?? '');
         $this->setGradedVersion($details['graded_version'] ?? 0);
-        $this->setGradeTime($details['grade_time'] ?? new \DateTime());
+        $this->setGradeTime($details['grade_time'] ?? $this->core->getDateTimeNow());
 
         // assign the default score if its not electronic (or rather not a custom mark)
         if ($component->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -160,11 +159,30 @@ class GradedComponent extends AbstractModel {
     }
 
     /**
+     * Gets if the graded component has any common marks assigned to it
+     * @return bool
+     */
+    public function anyMarks() {
+        return count($this->marks) !== 0;
+    }
+
+    /**
+     * Gets if the graded component has a custom mark
+     * @return bool
+     */
+    public function hasCustomMark() {
+        return $this->getComment() !== '' || $this->getScore() != 0.0;
+    }
+
+    /**
      * Gets the total number of points earned for this component
      *  (including mark points)
      * @return float
      */
     public function getTotalScore() {
+        if (!$this->anyMarks() && !$this->hasCustomMark()) {
+            return 0.0; // Return no points if the user has no marks and no custom mark
+        }
         // Be sure to add the default so count-down gradeables don't become negative
         $score = $this->component->getDefault();
         foreach($this->marks as $mark) {
@@ -226,6 +244,15 @@ class GradedComponent extends AbstractModel {
         $this->setMarkIds($db_mark_ids);
         $this->db_mark_ids = $db_mark_ids;
         $this->marks_modified = false;
+    }
+
+    /**
+     * Gets the mark ids loaded from the database
+     * @return int[]|null
+     * @internal
+     */
+    public function getDbMarkIds() {
+        return $this->db_mark_ids;
     }
 
     /**

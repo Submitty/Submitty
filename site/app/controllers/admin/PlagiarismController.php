@@ -10,15 +10,15 @@ class PlagiarismController extends AbstractController {
     public function run() {
         switch ($_REQUEST['action']) {
             case 'configure_new_gradeable_for_plagiarism_form':
-                $this->core->getOutput()->addBreadcrumb('Lichen Plagiarism Detection', $this->core->buildUrl(array('component' => 'admin', 'semester' => $_REQUEST['semester'] , 'course'=> $_REQUEST['course'],'page' => 'plagiarism')));
+                $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildUrl(array('component' => 'admin', 'semester' => $_REQUEST['semester'] , 'course'=> $_REQUEST['course'],'page' => 'plagiarism')));
                 $this->core->getOutput()->addBreadcrumb('Configure New Gradeable');
                 $this->configureNewGradeableForPlagiarismForm();
                 break;    
             case 'save_new_plagiarism_configuration':
                 $this->saveNewPlagiarismConfiguration();
                 break;
-            case 'get_submission_concatinated':
-            	$this->ajaxGetSubmissionConcatinated();
+            case 'get_submission_concatenated':
+            	$this->ajaxGetSubmissionConcatenated();
             	break;
             case 'get_matching_users':
             	$this->ajaxGetMatchingUsers();
@@ -27,7 +27,7 @@ class PlagiarismController extends AbstractController {
                 $this->ajaxGetMatchesForClickedMatch();
                 break;
             case 'edit_plagiarism_saved_config':
-                $this->core->getOutput()->addBreadcrumb('Lichen Plagiarism Detection', $this->core->buildUrl(array('component' => 'admin', 'semester' => $_REQUEST['semester'] , 'course'=> $_REQUEST['course'],'page' => 'plagiarism')));
+                $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildUrl(array('component' => 'admin', 'semester' => $_REQUEST['semester'] , 'course'=> $_REQUEST['course'],'page' => 'plagiarism')));
                 $this->core->getOutput()->addBreadcrumb('Configure '.($this->core->getQueries()->getGradeable($_REQUEST['gradeable_id']))->getName());
                 $this->editPlagiarismSavedConfig();
                 break;    
@@ -44,12 +44,12 @@ class PlagiarismController extends AbstractController {
                 $this->toggleNightlyRerun();
                 break;             
             case 'show_plagiarism_result':
-                $this->core->getOutput()->addBreadcrumb('Lichen Plagiarism Detection', $this->core->buildUrl(array('component' => 'admin', 'semester' => $_REQUEST['semester'] , 'course'=> $_REQUEST['course'],'page' => 'plagiarism')));
+                $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildUrl(array('component' => 'admin', 'semester' => $_REQUEST['semester'] , 'course'=> $_REQUEST['course'],'page' => 'plagiarism')));
                 $this->core->getOutput()->addBreadcrumb(($this->core->getQueries()->getGradeable($_REQUEST['gradeable_id']))->getName().' Results');
                 $this->showPlagiarismResult(); 
                 break;            
             default:
-                $this->core->getOutput()->addBreadcrumb('Lichen Plagiarism Detection');
+                $this->core->getOutput()->addBreadcrumb('Plagiarism Detection');
                 $this->plagiarismMainPage();
                 break;
         }
@@ -132,7 +132,7 @@ class PlagiarismController extends AbstractController {
 
         $file_path= "/var/local/submitty/courses/".$semester."/".$course."/lichen/ranking/".$gradeable_id.".txt";
         if(!file_exists($file_path)) {
-            $this->core->addErrorMessage("Lichen Plagiarism Detection job is running for this gradeable.");
+            $this->core->addErrorMessage("Plagiarism Detection job is running for this gradeable.");
             $this->core->redirect($return_url);
         }
         if(file_get_contents($file_path) == "") {
@@ -340,7 +340,7 @@ class PlagiarismController extends AbstractController {
 
         // if fails at following step, still provided code and cnfiguration get saved
 
-        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO");
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
         $current_time_string_tz = $current_time . " " . $this->core->getConfig()->getTimezone()->getName();
         $course_path = $this->core->getConfig()->getCoursePath();
         if (!@file_put_contents(FileUtils::joinPaths($course_path, "lichen", "config", ".".$gradeable_id.".lichenrun.timestamp"), $current_time_string_tz."\n")) {
@@ -399,7 +399,7 @@ class PlagiarismController extends AbstractController {
             $this->core->redirect($return_url);   
         }
 
-        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO");
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
         $current_time_string_tz = $current_time . " " . $this->core->getConfig()->getTimezone()->getName();
         $course_path = $this->core->getConfig()->getCoursePath();
         if (!@file_put_contents(FileUtils::joinPaths($course_path, "lichen", "config", ".".$gradeable_id.".lichenrun.timestamp"), $current_time_string_tz."\n")) {
@@ -485,7 +485,7 @@ class PlagiarismController extends AbstractController {
         $this->core->redirect($return_url);
     }
 
-    public function ajaxGetSubmissionConcatinated() {
+    public function ajaxGetSubmissionConcatenated() {
     	$gradeable_id = $_REQUEST['gradeable_id'];
     	$user_id_1 =$_REQUEST['user_id_1'];
     	$version_user_1 = $_REQUEST['version_user_1'];
@@ -529,7 +529,7 @@ class PlagiarismController extends AbstractController {
     		$data= array('display_code1'=> htmlentities($this->getDisplayForCode($file_name, $color_info)), 'code_version_user_1' => $version_user_1, 'max_matching_version' => $max_matching_version, 'active_version_user_1' => $active_version_user_1, 'all_versions_user_1' => $all_versions_user_1, 'ci'=> $color_info);
         }
         else {
-        	$return = array('error' => 'User 1 submission.concatinated for specified version not found.');
+        	$return = array('error' => 'User 1 submission.concatenated for specified version not found.');
         	$return = json_encode($return);
         	echo($return);
         	return;
@@ -542,7 +542,7 @@ class PlagiarismController extends AbstractController {
 	  			$data['display_code2'] = htmlentities($this->getDisplayForCode($file_name, $color_info));
 	        }   
 	        else {
-	        	$return = array('error' => 'User 2 submission.concatinated for matching version not found.');
+	        	$return = array('error' => 'User 2 submission.concatenated for matching version not found.');
 		    	$return = json_encode($return);
 		    	echo($return);
 		    	return;

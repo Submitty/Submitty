@@ -8,12 +8,20 @@
 #   or
 # EXTRA=rpi,matlab vagrant up
 
+extra_command = ''
+if ENV.has_key?('NO_SUBMISSIONS')
+    extra_command << '--no_submissions '
+end
+if ENV.has_key?('EXTRA')
+    extra_command << ENV['EXTRA']
+end
+
 $script = <<SCRIPT
 GIT_PATH=/usr/local/submitty/GIT_CHECKOUT/Submitty
 DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
 VERSION=$(lsb_release -sc | tr '[:upper:]' '[:lower:]')
 mkdir -p ${GIT_PATH}/.vagrant/${DISTRO}/${VERSION}/logs
-bash ${GIT_PATH}/.setup/vagrant/setup_vagrant.sh #{ENV['EXTRA']} 2>&1 | tee ${GIT_PATH}/.vagrant/${DISTRO}/${VERSION}/logs/vagrant.log
+bash ${GIT_PATH}/.setup/vagrant/setup_vagrant.sh #{extra_command} 2>&1 | tee ${GIT_PATH}/.vagrant/${DISTRO}/${VERSION}/logs/vagrant.log
 SCRIPT
 
 unless Vagrant.has_plugin?('vagrant-vbguest')
@@ -26,19 +34,19 @@ Vagrant.configure(2) do |config|
   # that one) as well as making sure all non-primary ones have "autostart: false" set
   # so that when we do "vagrant up", it doesn't spin up those machines.
 
-  # Our primary development target, this is what RPI runs Submitty on
-  config.vm.define 'ubuntu-16.04', primary: true do |ubuntu|
-    ubuntu.vm.box = 'bento/ubuntu-16.04'
-    ubuntu.vm.network 'forwarded_port', guest: 5432, host: 15432
-    ubuntu.vm.network 'private_network', ip: '192.168.56.101'
-    ubuntu.vm.network 'private_network', ip: '192.168.56.102'
-  end
-
-  config.vm.define 'ubuntu-18.04', autostart: false do |ubuntu|
+  # Our primary development target, this is what RPI uses as of Fall 2018
+  config.vm.define 'ubuntu-18.04', primary: true do |ubuntu|
     ubuntu.vm.box = 'bento/ubuntu-18.04'
     ubuntu.vm.network 'forwarded_port', guest: 5432, host: 16432
     ubuntu.vm.network 'private_network', ip: '192.168.56.111'
     ubuntu.vm.network 'private_network', ip: '192.168.56.112'
+  end
+
+  config.vm.define 'ubuntu-16.04', autostart: false do |ubuntu|
+    ubuntu.vm.box = 'bento/ubuntu-16.04'
+    ubuntu.vm.network 'forwarded_port', guest: 5432, host: 15432
+    ubuntu.vm.network 'private_network', ip: '192.168.56.101'
+    ubuntu.vm.network 'private_network', ip: '192.168.56.102'
   end
 
   config.vm.define 'debian', autostart: false do |debian|

@@ -3,7 +3,7 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test01_STDOUT.txt",
+                    "actual_file": "test01/STDOUT.txt",
                     "description": "Loop Depth",
                     "messages": [
                         {

@@ -13,6 +13,9 @@ import string
 import random
 import socket
 import zipfile
+import sys
+import traceback
+from pwd import getpwnam
 
 from submitty_utils import dateutils, glob
 from . import grade_items_logging, grade_item_main_runner, write_grade_history, CONFIG_PATH
@@ -25,10 +28,6 @@ SUBMITTY_DATA_DIR = OPEN_JSON['submitty_data_dir']
 with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
     OPEN_JSON = json.load(open_file)
 DAEMON_UID = OPEN_JSON['daemon_uid']
-
-
-# NOTE: DOCKER SUPPORT PRELIMINARY -- NEEDS MORE SECURITY BEFORE DEPLOYED ON LIVE SERVER
-USE_DOCKER = False
 
 def add_permissions(item,perms):
     if os.getuid() == os.stat(item).st_uid:
@@ -110,10 +109,9 @@ def untrusted_grant_rwx_access(which_untrusted,my_dir):
                      which_untrusted,
                      "-exec",
                      "/bin/chmod",
-                     "o+rwx",
+                     "ugo+rwx",
                      "{}",
                      ";"])
-
 
 def zip_my_directory(path,zipfilename):
     zipf = zipfile.ZipFile(zipfilename,'w',zipfile.ZIP_DEFLATED)
@@ -132,6 +130,47 @@ def unzip_this_file(zipfilename,path):
     zip_ref.close()
 
 
+def allow_only_one_part(path, log_path=os.devnull):
+    """
+    Given a path to a directory, iterate through the directory and detect folders that start with
+    "part". If there is more than one and they have files, then delete all of the part folders except
+    for the first one that has files.
+
+    An example would be if you had the folder structure:
+    part1/
+        test.py
+    part2/
+        test.cpp
+
+    Then the part2 folder would be deleted, leaving just the part1 folder.
+
+    :param path: string filepath to directory to scan for parts in
+    :param log_path: string filepath to file to write print statements to
+    """
+    if not os.path.isdir(path):
+        return
+    with open(log_path, 'a') as log:
+        clean_directories = []
+        print('Clean up multiple parts', file=log)
+        for entry in sorted(os.listdir(path)):
+            full_path = os.path.join(path, entry)
+            if not os.path.isdir(full_path) or not entry.startswith('part'):
+                continue
+            count = len(os.listdir(full_path))
+            print('{}: {}'.format(entry, count), file=log)
+            if count > 0:
+                clean_directories.append(full_path)
+
+        if len(clean_directories) > 1:
+            print("ERROR!  Student submitted to multiple parts in violation of instructions.\n"
+                  "Removing files from all but first non empty part.", file=log)
+
+            for i in range(1, len(clean_directories)):
+                print("REMOVE: {}".format(clean_directories[i]), file=log)
+                for entry in os.listdir(clean_directories[i]):
+                    print("  -> {}".format(entry), file=log)
+                shutil.rmtree(clean_directories[i])
+
 
 # ==================================================================================
 # ==================================================================================
@@ -139,12 +178,13 @@ def unzip_this_file(zipfilename,path):
 # ==================================================================================
 
 def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untrusted):
+
     os.chdir(SUBMITTY_DATA_DIR)
     tmp = os.path.join("/var/local/submitty/autograding_tmp/",which_untrusted,"tmp")
 
     # clean up old usage of this directory
     shutil.rmtree(tmp,ignore_errors=True)
-    os.makedirs(tmp)
+    os.mkdir(tmp)
 
     which_machine=socket.gethostname()
 
@@ -177,14 +217,53 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         grading_began_longstring = f.read()
     grading_began = dateutils.read_submitty_date(grading_began_longstring)
 
+    submission_path = os.path.join(tmp_submission, "submission")
+    checkout_path = os.path.join(tmp_submission, "checkout")
+
+    provided_code_path = os.path.join(tmp_autograding, "provided_code")
+    test_input_path = os.path.join(tmp_autograding, "test_input")
+    test_output_path = os.path.join(tmp_autograding, "test_output")
+    custom_validation_code_path = os.path.join(tmp_autograding, "custom_validation_code")
+    bin_path = os.path.join(tmp_autograding, "bin")
+    form_json_config = os.path.join(tmp_autograding, "form.json")
+    complete_config = os.path.join(tmp_autograding, "complete_config.json")
+
+    with open(form_json_config, 'r') as infile:
+        gradeable_config_obj = json.load(infile)
+    gradeable_deadline_string = gradeable_config_obj["date_due"]
+
+    with open(complete_config, 'r') as infile:
+        complete_config_obj = json.load(infile)
+
+    is_vcs = gradeable_config_obj["upload_type"] == "repository"
+    checkout_subdirectory = complete_config_obj["autograding"].get("use_checkout_subdirectory","")
+    checkout_subdir_path = os.path.join(checkout_path, checkout_subdirectory)
+
+    if complete_config_obj.get('one_part_only', False):
+        allow_only_one_part(submission_path, os.path.join(tmp_logs, "overall.txt"))
+        if is_vcs:
+            with open(os.path.join(tmp_logs, "overall.txt"), 'a') as f:
+                print("WARNING:  ONE_PART_ONLY OPTION DOES NOT MAKE SENSE WITH VCS SUBMISSION", file=f)
+
+
     # --------------------------------------------------------------------
     # START DOCKER
+
+    # NOTE: DOCKER SUPPORT PRELIMINARY -- NEEDS MORE SECURITY BEFORE DEPLOYED ON LIVE SERVER
+    complete_config = os.path.join(tmp_autograding,"complete_config.json")
+    with open(complete_config, 'r') as infile:
+        complete_config_obj = json.load(infile)
+
+    # intentionally fragile to avoid redundancy
+    USE_DOCKER = complete_config_obj['docker_enabled']
+
+
 
     # WIP: This option file facilitated testing...
     #USE_DOCKER = os.path.isfile("/tmp/use_docker")
     #use_docker_string="grading begins, using DOCKER" if USE_DOCKER else "grading begins (not using docker)"
     #grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,submission_path,message=use_docker_string)
-    
+
     container = None
     if USE_DOCKER:
         container = subprocess.check_output(['docker', 'run', '-t', '-d',
@@ -214,71 +293,134 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     custom_validation_code_path = os.path.join(tmp_autograding,"custom_validation_code")
     bin_path = os.path.join(tmp_autograding,"bin")
     form_json_config = os.path.join(tmp_autograding,"form.json")
-    complete_config = os.path.join(tmp_autograding,"complete_config.json")
 
 
     with open(form_json_config, 'r') as infile:
         gradeable_config_obj = json.load(infile)
     gradeable_deadline_string = gradeable_config_obj["date_due"]
     
-    with open(complete_config, 'r') as infile:
-        complete_config_obj = json.load(infile)
     patterns_submission_to_compilation = complete_config_obj["autograding"]["submission_to_compilation"]
-    pattern_copy("submission_to_compilation",patterns_submission_to_compilation,submission_path,tmp_compilation,tmp_logs)
-
-    is_vcs = gradeable_config_obj["upload_type"]=="repository"
-    checkout_subdirectory = complete_config_obj["autograding"].get("use_checkout_subdirectory","")
-    checkout_subdir_path = os.path.join(checkout_path,checkout_subdirectory)
-
-    if is_vcs:
-        pattern_copy("checkout_to_compilation",patterns_submission_to_compilation,checkout_subdir_path,tmp_compilation,tmp_logs)
-    
-    # copy any instructor provided code files to tmp compilation directory
-    copy_contents_into(job_id,provided_code_path,tmp_compilation,tmp_logs)
-
-    subprocess.call(['ls', '-lR', '.'], stdout=open(tmp_logs + "/overall.txt", 'a'))
-
-    # copy compile.out to the current directory
-    shutil.copy (os.path.join(bin_path,"compile.out"),os.path.join(tmp_compilation,"my_compile.out"))
 
     # give the untrusted user read/write/execute permissions on the tmp directory & files
-    add_permissions_recursive(tmp_compilation,
-                              stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP,
-                              stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP,
-                              stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP)
+    # add_permissions_recursive(tmp_compilation,
+    #                   stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+    #                   stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+    #                   stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
-    add_permissions(tmp,stat.S_IROTH | stat.S_IXOTH)
+    # add_permissions(tmp,stat.S_IROTH | stat.S_IXOTH) #stat.S_ISGID
     add_permissions(tmp_logs,stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
 
+    if USE_DOCKER:
+        print("!!!!!!!!!!!!!!!!!!USING DOCKER!!!!!!!!!!!!!!!!!!!!!!!!")
+
+    with open(complete_config, 'r') as infile:
+        config = json.load(infile)
+        my_testcases = config['testcases']
+
     # grab the submission time
-    with open (os.path.join(submission_path,".submit.timestamp"), 'r') as submission_time_file:
+    with open(os.path.join(submission_path,".submit.timestamp"), 'r') as submission_time_file:
         submission_string = submission_time_file.read().rstrip()
 
     with open(os.path.join(tmp_logs,"compilation_log.txt"), 'w') as logfile:
-        if USE_DOCKER:
-            compile_success = subprocess.call(['docker', 'exec', '-w', tmp_compilation, container,
-                                               os.path.join(tmp_compilation, 'my_compile.out'), queue_obj['gradeable'],
-                                               queue_obj['who'], str(queue_obj['version']), submission_string], stdout=logfile)
-        else:
-            compile_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
-                                               which_untrusted,
-                                               os.path.join(tmp_compilation,"my_compile.out"),
-                                               queue_obj["gradeable"],
-                                               queue_obj["who"],
-                                               str(queue_obj["version"]),
-                                               submission_string],
-                                              stdout=logfile)
+        # we start counting from one.
+        executable_path_list = list()
+        for testcase_num in range(1, len(my_testcases)+1):
+            testcase_folder = os.path.join(tmp_compilation, "test{:02}".format(testcase_num))
+
+            if 'type' in my_testcases[testcase_num-1]:
+                if my_testcases[testcase_num-1]['type'] != 'FileCheck' and my_testcases[testcase_num-1]['type'] != 'Compilation':
+                    continue
+
+                if my_testcases[testcase_num-1]['type'] == 'Compilation':
+                    if 'executable_name' in my_testcases[testcase_num-1]:
+                        provided_executable_list = my_testcases[testcase_num-1]['executable_name']
+                        if not isinstance(provided_executable_list, (list,)):
+                            provided_executable_list = list([provided_executable_list])
+                        for executable_name in provided_executable_list:
+                            if executable_name.strip() == '':
+                                continue
+                            executable_path = os.path.join(testcase_folder, executable_name)
+                            executable_path_list.append((executable_path, executable_name))
+            else:
+                continue
+
+            os.makedirs(testcase_folder)
+            
+            pattern_copy("submission_to_compilation",patterns_submission_to_compilation,submission_path,testcase_folder,tmp_logs)
+
+            if is_vcs:
+                pattern_copy("checkout_to_compilation",patterns_submission_to_compilation,checkout_subdir_path,testcase_folder,tmp_logs)
+
+            # copy any instructor provided code files to tmp compilation directory
+            copy_contents_into(job_id,provided_code_path,testcase_folder,tmp_logs)
+            
+            # copy compile.out to the current directory
+            shutil.copy (os.path.join(bin_path,"compile.out"),os.path.join(testcase_folder,"my_compile.out"))
+            add_permissions(os.path.join(testcase_folder,"my_compile.out"), stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+            #untrusted_grant_rwx_access(which_untrusted, tmp_compilation)          
+            untrusted_grant_rwx_access(which_untrusted, testcase_folder)
+            add_permissions_recursive(testcase_folder,
+                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+
+            if USE_DOCKER:
+                try:
+                    #There can be only one container for a compilation step, so grab its container image
+                    #TODO: set default in load_config_json.cpp
+                    if my_testcases[testcase_num-1]['type'] == 'FileCheck':
+                        print("performing filecheck in default ubuntu:custom container")
+                        container_image = "ubuntu:custom"
+                    else:
+                        container_image = my_testcases[testcase_num-1]["containers"][0]["container_image"]
+                        print('creating a compilation container with image {0}'.format(container_image))
+                    untrusted_uid = str(getpwnam(which_untrusted).pw_uid)
+
+                    compilation_container = None
+                    compilation_container = subprocess.check_output(['docker', 'create', '-i', '-u', untrusted_uid, '--network', 'none',
+                                               '-v', testcase_folder + ':' + testcase_folder,
+                                               '-w', testcase_folder,
+                                               container_image,
+                                               #The command to be run.
+                                               os.path.join(testcase_folder, 'my_compile.out'), queue_obj['gradeable'],
+                                               queue_obj['who'], str(queue_obj['version']), submission_string, str(testcase_num)
+                                               ]).decode('utf8').strip()
+                    print("starting container")
+                    compile_success = subprocess.call(['docker', 'start', '-i', compilation_container],
+                                                   stdout=logfile,
+                                                   cwd=testcase_folder)
+                except Exception as e:
+                    print('An error occurred when compiling with docker.')
+                    traceback.print_exc()
+                finally:
+                    if compilation_container != None:
+                        subprocess.call(['docker', 'rm', '-f', compilation_container])
+                        print("cleaned up compilation container.")
+            else:
+                compile_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
+                                                   which_untrusted,
+                                                   os.path.join(testcase_folder,"my_compile.out"),
+                                                   queue_obj["gradeable"],
+                                                   queue_obj["who"],
+                                                   str(queue_obj["version"]),
+                                                   submission_string,
+                                                   str(testcase_num)],
+                                                   stdout=logfile, 
+                                                   cwd=testcase_folder)
+            # remove the compilation program
+            untrusted_grant_rwx_access(which_untrusted, testcase_folder)
+            os.remove(os.path.join(testcase_folder,"my_compile.out"))
 
     if compile_success == 0:
         print (which_machine,which_untrusted,"COMPILATION OK")
     else:
         print (which_machine,which_untrusted,"COMPILATION FAILURE")
         grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,message="COMPILATION FAILURE")
+    add_permissions_recursive(tmp_compilation,
+                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
-    untrusted_grant_rwx_access(which_untrusted,tmp_compilation)
-        
-    # remove the compilation program
-    os.remove(os.path.join(tmp_compilation,"my_compile.out"))
 
     # return to the main tmp directory
     os.chdir(tmp)
@@ -291,51 +433,96 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         print ("====================================\nRUNNER STARTS", file=f)
         
     tmp_work = os.path.join(tmp,"TMP_WORK")
-    os.makedirs(tmp_work)
+    tmp_work_test_input = os.path.join(tmp_work, "test_input")
+    tmp_work_submission = os.path.join(tmp_work, "submitted_files")
+    tmp_work_compiled = os.path.join(tmp_work, "compiled_files")
+    tmp_work_checkout = os.path.join(tmp_work, "checkout")
+    
+    os.mkdir(tmp_work)
+
+    os.mkdir(tmp_work_test_input)
+    os.mkdir(tmp_work_submission)
+    os.mkdir(tmp_work_compiled)
+    os.mkdir(tmp_work_checkout)
+
     os.chdir(tmp_work)
 
     # move all executable files from the compilation directory to the main tmp directory
     # Note: Must preserve the directory structure of compiled files (esp for Java)
 
     patterns_submission_to_runner = complete_config_obj["autograding"]["submission_to_runner"]
-    pattern_copy("submission_to_runner",patterns_submission_to_runner,submission_path,tmp_work,tmp_logs)
+
+    pattern_copy("submission_to_runner",patterns_submission_to_runner,submission_path,tmp_work_submission,tmp_logs)
     if is_vcs:
-        pattern_copy("checkout_to_runner",patterns_submission_to_runner,checkout_subdir_path,tmp_work,tmp_logs)
+        pattern_copy("checkout_to_runner",patterns_submission_to_runner,checkout_subdir_path,tmp_work_checkout,tmp_logs)
+
+    # move the compiled files into the tmp_work_compiled directory
+    for path, name in executable_path_list:
+        if not os.path.isfile(path): 
+            continue
+        target_path = os.path.join(tmp_work_compiled, name)
+        if not os.path.exists(target_path):
+            os.makedirs(os.path.dirname(target_path), exist_ok=True)
+        shutil.copy(path, target_path)
+        print('copied over {0}'.format(target_path))
+        with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
+            print('grade_item: copied over {0}'.format(target_path), file=f)
 
     patterns_compilation_to_runner = complete_config_obj["autograding"]["compilation_to_runner"]
+    #copy into the actual tmp_work directory for archiving/validating
     pattern_copy("compilation_to_runner",patterns_compilation_to_runner,tmp_compilation,tmp_work,tmp_logs)
-        
+    #copy into tmp_work_compiled, which is provided to each testcase
+    # TODO change this as our methodology for declaring testcase dependencies becomes more robust
+    pattern_copy("compilation_to_runner",patterns_compilation_to_runner,tmp_compilation,tmp_work_compiled,tmp_logs)
+
     # copy input files to tmp_work directory
-    copy_contents_into(job_id,test_input_path,tmp_work,tmp_logs)
+    copy_contents_into(job_id,test_input_path,tmp_work_test_input,tmp_logs)
 
     subprocess.call(['ls', '-lR', '.'], stdout=open(tmp_logs + "/overall.txt", 'a'))
 
     # copy runner.out to the current directory
     shutil.copy (os.path.join(bin_path,"run.out"),os.path.join(tmp_work,"my_runner.out"))
 
-    # give the untrusted user read/write/execute permissions on the tmp directory & files
-    add_permissions_recursive(tmp_work,
-                              stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                              stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                              stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+    #set the appropriate permissions for the newly created directories 
+    #TODO replaces commented out code below
+
+    add_permissions(os.path.join(tmp_work,"my_runner.out"), stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+    add_permissions(tmp_work_submission, stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+    add_permissions(tmp_work_compiled, stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+    add_permissions(tmp_work_checkout, stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+
+    #TODO this is how permissions used to be set. It was removed because of the way it interacts with the sticky bit.
+    ## give the untrusted user read/write/execute permissions on the tmp directory & files
+    # os.system('ls -al {0}'.format(tmp_work))
+    # add_permissions_recursive(tmp_work,
+    #                           stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+    #                           stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+    #                           stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
     ##################################################################################################
     #call grade_item_main_runner.py
     runner_success = grade_item_main_runner.executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submission_string, 
-                                                                                    item_name, USE_DOCKER, container, which_untrusted)
+                                                                                    item_name, USE_DOCKER, container, which_untrusted,
+                                                                                    job_id, grading_began)
     ##################################################################################################
+
     if runner_success == 0:
         print (which_machine,which_untrusted, "RUNNER OK")
     else:
         print (which_machine,which_untrusted, "RUNNER FAILURE")
         grade_items_logging.log_message(job_id, is_batch_job, which_untrusted, item_name, message="RUNNER FAILURE")
 
-    untrusted_grant_rwx_access(which_untrusted, tmp_work)
-    untrusted_grant_rwx_access(which_untrusted, tmp_compilation)
+    add_permissions_recursive(tmp_work,
+                          stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                          stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                          stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH) 
+    add_permissions_recursive(tmp_compilation,
+                          stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                          stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                          stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH) 
 
     # --------------------------------------------------------------------
     # RUN VALIDATOR
-
     with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
         print ("====================================\nVALIDATION STARTS", file=f)
 
@@ -367,8 +554,10 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                               stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
                               stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
-    add_permissions(os.path.join(tmp_work,"my_validator.out"),stat.S_IROTH | stat.S_IXOTH)
+    add_permissions(os.path.join(tmp_work,"my_validator.out"), stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
+    #todo remove prints.
+    print("VALIDATING")
     # validator the validator.out as the untrusted user
     with open(os.path.join(tmp_logs,"validator_log.txt"), 'w') as logfile:
         if USE_DOCKER:
@@ -395,13 +584,17 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
 
     # grab the result of autograding
     grade_result = ""
-    with open(os.path.join(tmp_work,"grade.txt")) as f:
-        lines = f.readlines()
-        for line in lines:
-            line = line.rstrip('\n')
-            if line.startswith("Automatic grading total:"):
-                grade_result = line
-
+    try:
+        with open(os.path.join(tmp_work,"grade.txt")) as f:
+            lines = f.readlines()
+            for line in lines:
+                line = line.rstrip('\n')
+                if line.startswith("Automatic grading total:"):
+                    grade_result = line
+    except:
+        with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
+            print ("\n\nERROR: Grading incomplete -- Could not open ",os.path.join(tmp_work,"grade.txt"))
+            grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,message="ERROR: grade.txt does not exist")
 
     # --------------------------------------------------------------------
     # MAKE RESULTS DIRECTORY & COPY ALL THE FILES THERE
@@ -427,7 +620,12 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         add_permissions(history_file,stat.S_IRGRP)
     grading_finished = dateutils.get_current_time()
 
-    shutil.copy(os.path.join(tmp_work,"grade.txt"),tmp_results)
+    try:
+        shutil.copy(os.path.join(tmp_work,"grade.txt"),tmp_results)
+    except:
+        with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
+            print ("\n\nERROR: Grading incomplete -- Could not copy ",os.path.join(tmp_work,"grade.txt"))
+        grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,message="ERROR: grade.txt does not exist")
 
     # -------------------------------------------------------------
     # create/append to the results history
@@ -457,12 +655,17 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     with open(os.path.join(tmp_results,"queue_file.json"),'w') as outfile:
         json.dump(queue_obj,outfile,sort_keys=True,indent=4,separators=(',', ': '))
 
-    with open(os.path.join(tmp_work,"results.json"), 'r') as read_file:
-        results_obj = json.load(read_file)
-    if 'revision' in queue_obj.keys():
-        results_obj['revision'] = queue_obj['revision']
-    with open(os.path.join(tmp_results,"results.json"), 'w') as outfile:
-        json.dump(results_obj,outfile,sort_keys=True,indent=4,separators=(',', ': '))
+    try:
+        with open(os.path.join(tmp_work,"results.json"), 'r') as read_file:
+            results_obj = json.load(read_file)
+        if 'revision' in queue_obj.keys():
+            results_obj['revision'] = queue_obj['revision']
+        with open(os.path.join(tmp_results,"results.json"), 'w') as outfile:
+            json.dump(results_obj,outfile,sort_keys=True,indent=4,separators=(',', ': '))
+    except:
+        with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
+            print ("\n\nERROR: Grading incomplete -- Could not open/write ",os.path.join(tmp_work,"results.json"))
+            grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,message="ERROR: results.json read/write error")
 
     write_grade_history.just_write_grade_history(history_file,
                                                  gradeable_deadline_longstring,
@@ -481,7 +684,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     if USE_DOCKER:
         with open(os.path.join(tmp_logs,"overall_log.txt"), 'w') as logfile:
             chmod_success = subprocess.call(['docker', 'exec', '-w', tmp_work, container,
-                                             'chmod', '-R', 'o+rwx', '.'], stdout=logfile)
+                                             'chmod', '-R', 'ugo+rwx', '.'], stdout=logfile)
 
     with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
         f.write("FINISHED GRADING!\n")

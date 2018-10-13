@@ -3,7 +3,7 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "part1/README.txt",
+                    "actual_file": "test01/part1/README.txt",
                     "description": "part1/README.txt"
                 }
             ],
@@ -13,7 +13,7 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test02_STDERR.txt",
+                    "actual_file": "test02/STDERR.txt",
                     "description": "Compilation Errors and/or Warnings",
                     "messages": [
                         {
@@ -32,18 +32,18 @@
                     ]
                 },
                 {
-                    "actual_file": "test02_execute_logfile.txt",
+                    "actual_file": "test02/execute_logfile.txt",
                     "description": "Execution Logfile"
                 }
             ],
             "points_awarded": 0,
             "test_name": "Test 2 Compilation",
-            "testcase_message": "Compilation Error(s)."
+            "testcase_message": "Compilation Errors and/or Warnings."
         },
         {
             "autochecks": [
                 {
-                    "actual_file": "test03_STDERR.txt",
+                    "actual_file": "test03/STDERR.txt",
                     "description": "Compilation Errors and/or Warnings",
                     "messages": [
                         {
@@ -62,13 +62,13 @@
                     ]
                 },
                 {
-                    "actual_file": "test03_execute_logfile.txt",
+                    "actual_file": "test03/execute_logfile.txt",
                     "description": "Execution Logfile"
                 }
             ],
             "points_awarded": 0,
             "test_name": "Test 3 Dummy Compilation testing view_testcase_message",
-            "testcase_message": "Compilation Error(s)."
+            "testcase_message": "Compilation Errors and/or Warnings."
         },
         {
             "autochecks": [
@@ -76,22 +76,22 @@
                     "description": "STDOUT.txt",
                     "messages": [
                         {
-                            "message": "ERROR!  Could not open student file: 'STDOUT.txt'",
+                            "message": "ERROR!  Could not open student file: 'test04/STDOUT.txt'",
                             "type": "failure"
                         }
                     ]
                 },
                 {
-                    "description": "Standard Error (STDERR)",
+                    "description": "Standard Error (STDERR.txt)",
                     "messages": [
                         {
-                            "message": "ERROR!  Could not open student file: 'STDERR.txt'",
+                            "message": "ERROR!  Could not open student file: 'test04/STDERR.txt'",
                             "type": "failure"
                         }
                     ]
                 },
                 {
-                    "actual_file": "test04_execute_logfile.txt",
+                    "actual_file": "test04/execute_logfile.txt",
                     "description": "Execution Logfile"
                 }
             ],
@@ -104,22 +104,22 @@
                     "description": "STDOUT.txt",
                     "messages": [
                         {
-                            "message": "ERROR!  Could not open student file: 'STDOUT.txt'",
+                            "message": "ERROR!  Could not open student file: 'test05/STDOUT.txt'",
                             "type": "failure"
                         }
                     ]
                 },
                 {
-                    "description": "Standard Error (STDERR)",
+                    "description": "Standard Error (STDERR.txt)",
                     "messages": [
                         {
-                            "message": "ERROR!  Could not open student file: 'STDERR.txt'",
+                            "message": "ERROR!  Could not open student file: 'test05/STDERR.txt'",
                             "type": "failure"
                         }
                     ]
                 },
                 {
-                    "actual_file": "test05_execute_logfile.txt",
+                    "actual_file": "test05/execute_logfile.txt",
                     "description": "Execution Logfile"
                 }
             ],
@@ -132,22 +132,22 @@
                     "description": "STDOUT.txt",
                     "messages": [
                         {
-                            "message": "ERROR!  Could not open student file: 'STDOUT.txt'",
+                            "message": "ERROR!  Could not open student file: 'test06/STDOUT.txt'",
                             "type": "failure"
                         }
                     ]
                 },
                 {
-                    "description": "Standard Error (STDERR)",
+                    "description": "Standard Error (STDERR.txt)",
                     "messages": [
                         {
-                            "message": "ERROR!  Could not open student file: 'STDERR.txt'",
+                            "message": "ERROR!  Could not open student file: 'test06/STDERR.txt'",
                             "type": "failure"
                         }
                     ]
                 },
                 {
-                    "actual_file": "test06_execute_logfile.txt",
+                    "actual_file": "test06/execute_logfile.txt",
                     "description": "Execution Logfile"
                 }
             ],
@@ -160,22 +160,22 @@
                     "description": "STDOUT.txt",
                     "messages": [
                         {
-                            "message": "ERROR!  Could not open student file: 'STDOUT.txt'",
+                            "message": "ERROR!  Could not open student file: 'test07/STDOUT.txt'",
                             "type": "failure"
                         }
                     ]
                 },
                 {
-                    "description": "Standard Error (STDERR)",
+                    "description": "Standard Error (STDERR.txt)",
                     "messages": [
                         {
-                            "message": "ERROR!  Could not open student file: 'STDERR.txt'",
+                            "message": "ERROR!  Could not open student file: 'test07/STDERR.txt'",
                             "type": "failure"
                         }
                     ]
                 },
                 {
-                    "actual_file": "test07_execute_logfile.txt",
+                    "actual_file": "test07/execute_logfile.txt",
                     "description": "Execution Logfile"
                 }
             ],
@@ -188,22 +188,22 @@
                     "description": "STDOUT.txt",
                     "messages": [
                         {
-                            "message": "ERROR!  Could not open student file: 'STDOUT.txt'",
+                            "message": "ERROR!  Could not open student file: 'test08/STDOUT.txt'",
                             "type": "failure"
                         }
                     ]
                 },
                 {
-                    "description": "Standard Error (STDERR)",
+                    "description": "Standard Error (STDERR.txt)",
                     "messages": [
                         {
-                            "message": "ERROR!  Could not open student file: 'STDERR.txt'",
+                            "message": "ERROR!  Could not open student file: 'test08/STDERR.txt'",
                             "type": "failure"
                         }
                     ]
                 },
                 {
-                    "actual_file": "test08_execute_logfile.txt",
+                    "actual_file": "test08/execute_logfile.txt",
                     "description": "Execution Logfile"
                 }
             ],
@@ -216,7 +216,7 @@
                     "description": "STDOUT.txt",
                     "messages": [
                         {
-                            "message": "ERROR!  Could not open student file: 'STDOUT.txt'",
+                            "message": "ERROR!  Could not open student file: 'test09/STDOUT.txt'",
                             "type": "failure"
                         }
                     ]
@@ -225,13 +225,13 @@
                     "description": "STDERR.txt",
                     "messages": [
                         {
-                            "message": "ERROR!  Could not open student file: 'STDERR.txt'",
+                            "message": "ERROR!  Could not open student file: 'test09/STDERR.txt'",
                             "type": "failure"
                         }
                     ]
                 },
                 {
-                    "actual_file": "test09_execute_logfile.txt",
+                    "actual_file": "test09/execute_logfile.txt",
                     "description": "Execution Logfile"
                 }
             ],
@@ -244,7 +244,7 @@
                     "description": "STDOUT.txt",
                     "messages": [
                         {
-                            "message": "ERROR!  Could not open student file: 'STDOUT.txt'",
+                            "message": "ERROR!  Could not open student file: 'test10/STDOUT.txt'",
                             "type": "failure"
                         }
                     ]
@@ -253,7 +253,7 @@
                     "description": "STDERR.txt",
                     "messages": [
                         {
-                            "message": "ERROR!  Could not open student file: 'STDERR.txt'",
+                            "message": "ERROR!  Could not open student file: 'test10/STDERR.txt'",
                             "type": "failure"
                         }
                     ]

@@ -38,12 +38,7 @@ public:
 
   // -------------------------------
   // CONSTRUCTOR
-  TestCase (nlohmann::json &whole_config, int which_testcase);
-
-  void General_Helper();
-  void FileCheck_Helper();
-  void Compilation_Helper();
-  void Execution_Helper();
+  TestCase (nlohmann::json &whole_config, int which_testcase, std::string container_name);
 
   // -------------------------------
   // ACCESSORS
@@ -53,6 +48,7 @@ public:
   std::string getDetails () const { return _json.value("details",""); }
 
   int getPoints() const { return _json.value("points", 0); }
+  bool allowPartialCredit() const { return _json.value("partial_credit", true); }
   bool getHidden() const { return _json.value("hidden", false); }
   bool getExtraCredit() const { return _json.value("extra_credit",false); }
   bool viewTestcaseMessage() const { return _json.value("view_testcase_message",true); }
@@ -81,11 +77,7 @@ public:
 
   // -------------------------------
   // COMMANDS
-  std::vector<std::string> getCommands() const {
-    std::vector<std::string> commands = stringOrArrayOfStrings(_json,"command");
-    //assert (commands.size() > 0);
-    return commands;
-  }
+  std::vector<std::string> getCommands() const;
 
 
   // -------------------------------
@@ -97,7 +89,7 @@ public:
     assert (filenames[v].size() > 0);
     return filenames[v][i];
   }
-  std::string getMyPrefixFilename (int v, int i) const { return getPrefix()+"_"+getMyFilename(v,i); }
+  std::string getMyPrefixFilename (int v, int i) const { return getPrefix()+getMyFilename(v,i); }
   std::vector<std::vector<std::string>> getFilenames() const;
 
 
@@ -120,8 +112,6 @@ public:
   }
   const nlohmann::json get_test_case_limits() const;
 
-  static void reset_next_test_case_id() { next_test_case_id = 1; }
-
   bool ShowExecuteLogfile(const std::string &execute_logfile) const;
 
 private:
@@ -133,8 +123,8 @@ private:
 
   // -------------------------------
   // REPRESENTATION
+  std::string CONTAINER_NAME;
   int test_case_id;
-  static int next_test_case_id;
   nlohmann::json& _json;
 };
 
@@ -147,9 +137,6 @@ private:
 // NON MEMBER  HELPER FUNCTIONS
 
 void adjust_test_case_limits(nlohmann::json &modified_test_case_limits, int rlimit_name, rlim_t value);
-
-void AddSubmissionLimitTestCase(nlohmann::json &config_json);
-
 
 std::string getAssignmentIdFromCurrentDirectory(std::string);
 

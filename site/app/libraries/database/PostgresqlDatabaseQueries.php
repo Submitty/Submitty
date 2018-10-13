@@ -4,6 +4,7 @@ namespace app\libraries\database;
 
 use app\exceptions\DatabaseException;
 use app\exceptions\ValidationException;
+use app\libraries\DateUtils;
 use app\libraries\Utils;
 use \app\libraries\GradeableType;
 use app\models\Gradeable;
@@ -14,6 +15,7 @@ use app\models\gradeable\GradedComponentContainer;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\Mark;
+use app\models\gradeable\RegradeRequest;
 use app\models\gradeable\Submitter;
 use app\models\gradeable\TaGradedGradeable;
 use app\models\GradeableComponent;
@@ -243,6 +245,8 @@ SELECT";
   eg.eg_team_assignment,
   eg.eg_max_team_size,
   eg.eg_team_lock_date,
+  eg.eg_regrade_request_date,
+  eg.eg_regrade_allowed,
   eg.eg_use_ta_grading,
   eg.eg_student_view,
   eg.eg_student_submit,
@@ -318,36 +322,36 @@ LEFT JOIN electronic_gradeable AS eg ON eg.g_id=g.g_id
 LEFT JOIN (
   SELECT
     g_id,
-    array_agg(gc_is_peer) as array_gc_is_peer,
-    array_agg(gc_id) as array_gc_id,
-    array_agg(gc_title) AS array_gc_title,
-    array_agg(gc_ta_comment) AS array_gc_ta_comment,
-    array_agg(gc_student_comment) AS array_gc_student_comment,
-    array_agg(gc_lower_clamp) AS array_gc_lower_clamp,
-    array_agg(gc_default) AS array_gc_default,
-    array_agg(gc_max_value) AS array_gc_max_value,
-    array_agg(gc_upper_clamp) AS array_gc_upper_clamp,
-    array_agg(gc_is_text) AS array_gc_is_text,
-    array_agg(gc_order) AS array_gc_order,
-    array_agg(gc_page) AS array_gc_page,
-    array_agg(array_gcm_id) AS array_array_gcm_id,
-    array_agg(array_gc_id) AS array_array_gc_id,
-    array_agg(array_gcm_points) AS array_array_gcm_points,
-    array_agg(array_gcm_note) AS array_array_gcm_note,
-    array_agg(array_gcm_publish) AS array_array_gcm_publish,
-    array_agg(array_gcm_order) AS array_array_gcm_order
+    json_agg(gc_is_peer) as array_gc_is_peer,
+    json_agg(gc_id) as array_gc_id,
+    json_agg(gc_title) AS array_gc_title,
+    json_agg(gc_ta_comment) AS array_gc_ta_comment,
+    json_agg(gc_student_comment) AS array_gc_student_comment,
+    json_agg(gc_lower_clamp) AS array_gc_lower_clamp,
+    json_agg(gc_default) AS array_gc_default,
+    json_agg(gc_max_value) AS array_gc_max_value,
+    json_agg(gc_upper_clamp) AS array_gc_upper_clamp,
+    json_agg(gc_is_text) AS array_gc_is_text,
+    json_agg(gc_order) AS array_gc_order,
+    json_agg(gc_page) AS array_gc_page,
+    json_agg(array_gcm_id) AS array_array_gcm_id,
+    json_agg(array_gc_id) AS array_array_gc_id,
+    json_agg(array_gcm_points) AS array_array_gcm_points,
+    json_agg(array_gcm_note) AS array_array_gcm_note,
+    json_agg(array_gcm_publish) AS array_array_gcm_publish,
+    json_agg(array_gcm_order) AS array_array_gcm_order
   FROM
   (SELECT gc.*, gcm.array_gcm_id, gcm.array_gc_id, gcm.array_gcm_points, array_gcm_note, array_gcm_publish, array_gcm_order
   FROM gradeable_component AS gc
   LEFT JOIN(
     SELECT
       gc_id,
-      array_to_string(array_agg(gcm_id), ',') as array_gcm_id,
-      array_to_string(array_agg(gc_id), ',') as array_gc_id,
-      array_to_string(array_agg(gcm_points), ',') as array_gcm_points,
-      array_to_string(array_agg(gcm_note), ',') as array_gcm_note,
-      array_to_string(array_agg(gcm_publish), ',') as array_gcm_publish,
-      array_to_string(array_agg(gcm_order), ',') as array_gcm_order
+      json_agg(gcm_id) as array_gcm_id,
+      json_agg(gc_id) as array_gc_id,
+      json_agg(gcm_points) as array_gcm_points,
+      json_agg(gcm_note) as array_gcm_note,
+      json_agg(gcm_publish) as array_gcm_publish,
+      json_agg(gcm_order) as array_gcm_order
     FROM gradeable_component_mark
     GROUP BY gc_id
   ) AS gcm
@@ -377,25 +381,25 @@ LEFT JOIN (
   LEFT JOIN (
     SELECT
       gcd.gd_id,
-      array_agg(gc_id) AS array_gcd_gc_id,
-      array_agg(gcd_score) AS array_gcd_score,
-      array_agg(gcd_component_comment) AS array_gcd_component_comment,
-      array_agg(gcd_grader_id) AS array_gcd_grader_id,
-      array_agg(gcd_graded_version) AS array_gcd_graded_version,
-      array_agg(gcd_grade_time) AS array_gcd_grade_time,
-      array_agg(array_gcm_mark) AS array_array_gcm_mark,
-      array_agg(u.user_id) AS array_gcd_user_id,
-      array_agg(u.anon_id) AS array_gcd_anon_id,
-      array_agg(u.user_firstname) AS array_gcd_user_firstname,
-      array_agg(u.user_preferred_firstname) AS array_gcd_user_preferred_firstname,
-      array_agg(u.user_lastname) AS array_gcd_user_lastname,
-      array_agg(u.user_email) AS array_gcd_user_email,
-      array_agg(u.user_group) AS array_gcd_user_group
+      json_agg(gc_id) AS array_gcd_gc_id,
+      json_agg(gcd_score) AS array_gcd_score,
+      json_agg(gcd_component_comment) AS array_gcd_component_comment,
+      json_agg(gcd_grader_id) AS array_gcd_grader_id,
+      json_agg(gcd_graded_version) AS array_gcd_graded_version,
+      json_agg(gcd_grade_time) AS array_gcd_grade_time,
+      json_agg(array_gcm_mark) AS array_array_gcm_mark,
+      json_agg(u.user_id) AS array_gcd_user_id,
+      json_agg(u.anon_id) AS array_gcd_anon_id,
+      json_agg(u.user_firstname) AS array_gcd_user_firstname,
+      json_agg(u.user_preferred_firstname) AS array_gcd_user_preferred_firstname,
+      json_agg(u.user_lastname) AS array_gcd_user_lastname,
+      json_agg(u.user_email) AS array_gcd_user_email,
+      json_agg(u.user_group) AS array_gcd_user_group
     FROM(
         SELECT gcd.* , gcmd.array_gcm_mark
         FROM gradeable_component_data AS gcd
         LEFT JOIN (
-          SELECT gc_id, gd_id, gcd_grader_id, array_to_string(array_agg(gcm_id), ',') as array_gcm_mark
+          SELECT gc_id, gd_id, gcd_grader_id, json_agg(gcm_id) as array_gcm_mark
           FROM gradeable_component_mark_data AS gcmd
           GROUP BY gc_id, gd_id, gd_id, gcd_grader_id
         ) as gcmd
@@ -482,7 +486,7 @@ ORDER BY ".implode(", ", $order_by);
                 $bools = array('gc_is_text', 'gc_is_peer');
                 foreach ($fields as $key) {
                     if (isset($row['array_' . $key])) {
-                        $row['array_' . $key] = $this->core->getCourseDB()->fromDatabaseToPHPArray($row['array_' . $key], in_array($key, $bools));
+                        $row['array_' . $key] = json_decode($row['array_' . $key], true);
                     }
                 }
             }
@@ -976,7 +980,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
     public function getTeamsByGradeableAndRegistrationSections($g_id, $sections, $orderBy="registration_section") {
         $return = array();
         if (count($sections) > 0) {
-            $orderBy = str_replace("registration_section","SUBSTRING(registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(registration_section, '[0-9]+')::INT, -1), SUBSTRING(registration_section, '[^0-9]*$')",$orderBy);
+            $orderBy = str_replace("gt.registration_section","SUBSTRING(gt.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(gt.registration_section, '[0-9]+')::INT, -1), SUBSTRING(gt.registration_section, '[^0-9]*$')",$orderBy);
             $placeholders = implode(",", array_fill(0, count($sections), "?"));
             $params = [$g_id];
             $params = array_merge($params, $sections);
@@ -1228,6 +1232,11 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               ldet.array_late_day_exceptions,
               ldet.array_late_day_user_ids,
               ldeu.late_day_exceptions,
+              
+              /* Regrade request data */
+              rr.id AS regrade_request_id,
+              rr.status AS regrade_request_status,
+              rr.timestamp AS regrade_request_timestamp,
 
               /* Aggregate Team User Data */
               team.team_id,
@@ -1382,6 +1391,9 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 LEFT JOIN teams t ON e.user_id=t.user_id AND t.state=1
                 GROUP BY team_id, g_id
               ) AS ldet ON g.g_id=ldet.g_id AND ldet.team_id=team.team_id
+              
+              /* Join regrade request */
+              LEFT JOIN regrade_requests AS rr ON (rr.user_id=gd.gd_user_id OR rr.team_id=gd.gd_team_id) AND rr.g_id=g.g_id
             WHERE $selector
             $order";
 
@@ -1440,6 +1452,19 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             // Always construct an instance even if there is no data
             $auto_graded_gradeable = new AutoGradedGradeable($this->core, $graded_gradeable, $row);
             $graded_gradeable->setAutoGradedGradeable($auto_graded_gradeable);
+
+            if (isset($row['regrade_request_id'])) {
+                $regrade_request_properties = [
+                    'id',
+                    'status',
+                    'timestamp'
+                ];
+                $regrade_request_arr = array_combine($regrade_request_properties, array_map(function($prop) use($row) {
+                    return $row['regrade_request_'.$prop];
+                }, $regrade_request_properties));
+
+                $graded_gradeable->setRegradeRequest(new RegradeRequest($this->core, $regrade_request_arr));
+            }
 
             $graded_components_by_id = [];
             /** @var AutoGradedVersion[] $graded_versions */
@@ -1592,12 +1617,14 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               g_grade_by_registration AS grade_by_registration,
               g_ta_view_start_date AS ta_view_start_date,
               g_grade_start_date AS grade_start_date,
+              g_grade_due_date AS grade_due_date,
               g_grade_released_date AS grade_released_date,
               g_grade_locked_date AS grade_locked_date,
               g_min_grading_group AS min_grading_group,
               g_syllabus_bucket AS syllabus_bucket,
               eg.*,
-              gc.*
+              gc.*,
+              (SELECT COUNT(*) AS cnt FROM regrade_requests WHERE g_id=g.g_id AND status = -1) AS active_regrade_request_count              
             FROM gradeable g
               LEFT JOIN (
                 SELECT
@@ -1608,8 +1635,12 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   eg_team_assignment AS team_assignment,
                   eg_max_team_size AS team_size_max,
                   eg_team_lock_date AS team_lock_date,
+                  eg_regrade_request_date AS regrade_request_date,
+                  eg_regrade_allowed AS regrade_allowed,
                   eg_use_ta_grading AS ta_grading,
+                  eg_scanned_exam AS scanned_exam,
                   eg_student_view AS student_view,
+                  eg_student_view_after_grades as student_view_after_grades,
                   eg_student_submit AS student_submit,
                   eg_student_download AS student_download,
                   eg_student_any_version AS student_download_any_version,

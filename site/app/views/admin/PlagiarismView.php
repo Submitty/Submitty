@@ -10,7 +10,7 @@ class PlagiarismView extends AbstractView {
         $return = "";
         $return .= <<<HTML
 <div class="content">
-    <h1 style="text-align: center">Lichen Plagiarism Detection -- WORK IN PROGRESS</h1><br>
+    <h1>Plagiarism Detection -- WORK IN PROGRESS</h1><br>
     <div class="nav-buttons">
         <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'semester' => $semester, 'course'=> $course, 'action' => 'configure_new_gradeable_for_plagiarism_form'))}">+ Configure New Gradeable for Plagiarism Detection</a>
     </div><br /><br />
@@ -88,10 +88,31 @@ HTML;
 
             #no lichen job
             else {
-                $return .= <<<HTML
+                $ranking_file_path= "/var/local/submitty/courses/".$semester."/".$course."/lichen/ranking/".$id.".txt";
+                if(file_get_contents($ranking_file_path) == "") {
+                    $matches_and_topmatch= "0 students matched, N/A top match";
+                    
+                    $return .= <<<HTML
+        <tr>
+            <td>$title
+            </td>
+HTML;
+                }
+                else {
+                    $content =file_get_contents($ranking_file_path);
+                    $content = trim(str_replace(array("\r", "\n"), '', $content));
+                    $rankings = preg_split('/ +/', $content);
+                    $rankings = array_chunk($rankings,3);
+                    $matches_and_topmatch = count($rankings)." students matched, ".$rankings[0][0]." top match";
+                    
+                    $return .= <<<HTML
         <tr>
             <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 'show_plagiarism_result', 'gradeable_id' => $id))}">$title</a>
             </td>
+HTML;
+                }
+                
+                $return .= <<<HTML
             <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 'edit_plagiarism_saved_config', 'gradeable_id' => $id))}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
             </td>
             <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 're_run_plagiarism', 'gradeable_id' => $id))}"><i class="fa fa-refresh" aria-hidden="true"></i></a>
@@ -103,6 +124,9 @@ HTML;
             </td>
             <td>
                 $students students, $submissions submissions
+            </td>
+            <td>
+                $matches_and_topmatch
             </td>
             <td>
                 <label><input type="checkbox" onclick='window.location.href = buildUrl({"component":"admin", "page" :"plagiarism", "course":"{$course}", "semester": "{$semester}", "action": "toggle_nightly_rerun", "gradeable_id":"{$id}"});' {$night_rerun_status} >Nightly Re-run </label>
@@ -140,7 +164,7 @@ HTML;
         $return = "";
         $return .= <<<HTML
 <div class="content">
-<h1 style="text-align: center">Lichen Plagiarism Detection -- WORK IN PROGRESS</h1>
+<h1>Plagiarism Detection -- WORK IN PROGRESS</h1>
 <br>
 HTML;
 
@@ -217,7 +241,7 @@ HTML;
             <div class="popup-box">
                 <div class="popup-window ui-draggable ui-draggable-handle" style="position: relative;">
                     <div class="form-title">
-                        <h2>Delete Plagiarism Results</h2>
+                        <h1>Delete Plagiarism Results</h1>
                     </div>
                     <div class="form-body">
                         <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
@@ -307,7 +331,7 @@ HTML;
         $return = "";
         $return .= <<<HTML
 <div class="content">
-<h1 style="text-align: center">Lichen Plagiarism Detection Configuration -- WORK IN PROGRESS</h1>
+<h1>Plagiarism Detection Configuration -- WORK IN PROGRESS</h1>
 <br>
 HTML;
         $return .= <<<HTML

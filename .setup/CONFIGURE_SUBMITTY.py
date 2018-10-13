@@ -87,6 +87,11 @@ if not args.worker:
         grp.getgrnam(DAEMONPHP_GROUP)
     except KeyError:
         raise SystemExit("ERROR: Could not find group: " + DAEMONPHP_GROUP)
+    DAEMONCGI_GROUP = 'submitty_daemoncgi'
+    try:
+        grp.getgrnam(DAEMONCGI_GROUP)
+    except KeyError:
+        raise SystemExit("ERROR: Could not find group: " + DAEMONCGI_GROUP)
 
 DAEMON_UID, DAEMON_GID = get_ids(DAEMON_USER)
 
@@ -178,13 +183,13 @@ else:
     DATABASE_HOST = get_input('What is the database host?', defaults['database_host'])
     print()
 
-    DATABASE_USER = get_input('What is the database user?', defaults['database_user'])
+    DATABASE_USER = get_input('What is the database user/role?', defaults['database_user'])
     print()
 
     default = ''
     if 'database_password' in defaults and DATABASE_USER == defaults['database_user']:
         default = '(Leave blank to use same password)'
-    DATABASE_PASS = get_input('What is the database password for {}? {}'.format(DATABASE_USER, default))
+    DATABASE_PASS = get_input('What is the password for the database user/role {}? {}'.format(DATABASE_USER, default))
     if DATABASE_PASS == '' and DATABASE_USER == defaults['database_user'] and 'database_password' in defaults:
         DATABASE_PASS = defaults['database_password']
     print()
@@ -196,7 +201,7 @@ else:
                                'https://submitty.cs.rpi.edu)', defaults['submission_url']).rstrip('/')
     print()
 
-    VCS_URL = get_input('What is the url for VCS? (ex: http://192.168.56.102/git or https://submitty-vcs.cs.rpi.edu/git', defaults['vcs_url']).rstrip('/')
+    VCS_URL = get_input('What is the url for VCS? (Leave blank to default to submission url + {$vcs_type}) (ex: http://192.168.56.101/{$vcs_type} or https://submitty-vcs.cs.rpi.edu/{$vcs_type}', defaults['vcs_url']).rstrip('/')
     print()
 
     INSTITUTION_NAME = get_input('What is the name of your institution? (Leave blank/type "none" if not desired)',
@@ -269,6 +274,7 @@ else:
     config['php_user'] = PHP_USER
     config['cgi_user'] = CGI_USER
     config['daemonphp_group'] = DAEMONPHP_GROUP
+    config['daemoncgi_group'] = DAEMONCGI_GROUP
     config['php_uid'] = PHP_UID
     config['php_gid'] = PHP_GID
 
@@ -344,7 +350,7 @@ if not args.worker:
         #make a tmp folder and copy autograding workers to it
         tmp_folder = tempfile.mkdtemp()
         tmp_autograding_workers_file = os.path.join(tmp_folder, "autograding_workers.json")
-        os.rename(WORKERS_JSON, tmp_autograding_workers_file)
+        shutil.move(WORKERS_JSON, tmp_autograding_workers_file)
 
 if os.path.isdir(CONFIG_INSTALL_DIR):
     shutil.rmtree(CONFIG_INSTALL_DIR)
@@ -355,7 +361,7 @@ os.chmod(CONFIG_INSTALL_DIR, 0o755)
 #If the workers.json exists, finish rescuing it (copy it back).
 if not tmp_autograding_workers_file == "":
     #copy autograding workers back
-    os.rename(tmp_autograding_workers_file, WORKERS_JSON)
+    shutil.move(tmp_autograding_workers_file, WORKERS_JSON)
     #remove the tmp folder
     os.removedirs(tmp_folder)
     #make sure the permissions are correct.
@@ -395,7 +401,7 @@ if not args.worker:
 
     with open(DATABASE_JSON, 'w') as json_file:
         json.dump(config, json_file, indent=2)
-    shutil.chown(DATABASE_JSON, 'www-data', DAEMONPHP_GROUP)
+    shutil.chown(DATABASE_JSON, 'root', DAEMONPHP_GROUP)
     os.chmod(DATABASE_JSON, 0o440)
 
 ##############################################################################
@@ -440,6 +446,7 @@ if not args.worker:
     config['php_user'] = PHP_USER
     config['cgi_user'] = CGI_USER
     config['daemonphp_group'] = DAEMONPHP_GROUP
+    config['daemoncgi_group'] = DAEMONCGI_GROUP
 else:
     config['supervisor_user'] = SUPERVISOR_USER
 

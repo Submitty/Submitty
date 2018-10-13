@@ -14,6 +14,7 @@ use app\models\User;
  * @method string getGradeableId()
  * @method AutoGradedGradeable getAutoGradedGradeable()
  * @method TaGradedGradeable|null getTaGradedGradeable()
+ * @method RegradeRequest|null getRegradeRequest()
  * @method Submitter getSubmitter()
  * @method array getLateDayExceptions()
  */
@@ -29,6 +30,8 @@ class GradedGradeable extends AbstractModel {
     protected $ta_graded_gradeable = null;
     /** @property @var AutoGradedGradeable The Autograding info */
     protected $auto_graded_gradeable = null;
+    /** @property @var RegradeRequest|null The regrade request for this submitter/gradeable  */
+    protected $regrade_request = null;
 
     /** @property @var array The late day exceptions indexed by user id */
     protected $late_day_exceptions = [];
@@ -111,6 +114,30 @@ class GradedGradeable extends AbstractModel {
      */
     public function isTaGradingComplete() {
         return $this->hasTaGradingInfo() && $this->ta_graded_gradeable->isComplete();
+    }
+
+    /**
+     * Sets the regrade request for this graded gradeable
+     * @param RegradeRequest $regrade_request
+     */
+    public function setRegradeRequest(RegradeRequest $regrade_request) {
+        $this->regrade_request = $regrade_request;
+    }
+
+    /**
+     * Gets if the submitter has a regrade request
+     * @return bool
+     */
+    public function hasRegradeRequest() {
+        return $this->regrade_request !== null;
+    }
+
+    /**
+     * Gets if the submitter has an active regrade request
+     * @return bool
+     */
+    public function hasActiveRegradeRequest() {
+        return $this->hasRegradeRequest() && $this->regrade_request->getStatus();
     }
 
     /**

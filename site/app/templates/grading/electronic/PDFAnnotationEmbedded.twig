@@ -1,17 +1,13 @@
-<script src="js/pdf/pdf.js"></script>
+<script src="js/pdf/pdf.min.js"></script>
 <script src="js/pdf/pdf_viewer.js"></script>
-{#Somehow this is not working#}
-{#<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.0.550/pdf.js"></script>#}
-{#<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.0.550/pdf_viewer.js"></script>#}
-<script src="js/pdf/pdf-annotate.js"></script>
-<script src="js/pdf/initColorPicker.js" type="module"></script>
-{% if student_popup is defined %}
-    {#This is currently a hack to get the javascript working. There are
-      some duplicate codes in the JS but that's for later#}
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-    <script src="js/pdf/PDFStudentView.js"></script>
+<script src="js/pdf/pdf-annotate.min.js"></script>
+<script src="js/pdf/PDFAnnotateEmbedded.js"></script>
+{% if student_popup is not defined or student_popup == false %}
+    {#This initializes the toolbar and activates annotation mode#}
+    <script src="js/pdf/PDFInitToolbar.js"></script>
 {% else %}
-    <script src="js/pdf/PDFAnnotateEmbedded.js"></script>
+    {#Jquery is needed if a new window is popping up#}
+    <script src="js/jquery.min.js"></script>
 {% endif %}
 
 <link rel="stylesheet" type="text/css" href="css/pdf/pdf_viewer.css"/>
@@ -22,7 +18,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        cursor: url('https://www.bg-wiki.com/images/d/d3/Demon_Pen_icon.png'), auto;
+        cursor: url('https://www.bg-wiki.com/imagevags/d/d3/Demon_Pen_icon.png'), auto;
         cursor: default;
     }
 
@@ -39,8 +35,25 @@
 </div>
 
 <script>
-    if('{{ annotation_json | raw}}' != ""){
-        localStorage.setItem('{{ filename }}/annotations', '{{ annotation_json | raw}}');
+
+    try {
+        for(let i = 0 ; i < localStorage.length; i++){
+            if(localStorage.key(i).includes('annotations')){
+                localStorage.removeItem(localStorage.key(i));
+            }
+        }
+        let annotations = JSON.parse({{ annotation_jsons|json_encode|raw }});
+        for(let grader in annotations){
+            if(annotations[grader] !== ""){
+                localStorage.setItem('{{ filename }}/' + grader +'/annotations', annotations[grader]);
+            }
+        }
+    } catch {
+        alert("Can't fetch annotations");
     }
-    render("{{ gradeable_id }}", "{{ user_id }}", '{{ filename }}');
+    {% if student_popup is defined and student_popup == true %}
+    render_student("{{ gradeable_id }}", "{{ user_id }}", '{{ filename }}', '{{ pdf_url_base | raw}}');
+    {% else %}
+    render("{{ gradeable_id }}", "{{ user_id }}", "{{ grader_id }}", '{{ filename }}');
+    {% endif %}
 </script>

@@ -1,0 +1,35 @@
+{#
+Required Parameters:
+-grading_disabled: if the the element should be inactive
+-editable: if the element is in edit mode
+-overall_comment: the text to show in box
+
+#}
+<div class="box general-comment container"
+     onclick="{{ grading_disabled ? '' : 'onClickOverallComment(this)'}}">
+    <div class="row">
+        <div class="col">
+            <b>Overall Comment</b>
+        </div>
+        {% if not grading_disabled %}
+            <div class="col-no-gutters">
+                {% include "SavingTools.twig" with {
+                    'show_save_tools': editable,
+                    'cancel_on_click': 'onCancelOverallComment(this)'
+                } only %}
+            </div>
+        {% endif %}
+    </div>
+    <div class="row">
+        {% if editable %}
+            <textarea id="overall-comment"
+                      rows="5"
+                      class="general-comment-entry"
+                      onclick="event.stopPropagation()"
+                      placeholder="Overall message for student about the gradeable..."
+            >{{ overall_comment }}</textarea>
+        {% else %}
+            <span id="overall-comment-collapsed">{{ overall_comment }}</span>
+        {% endif %}
+    </div>
+</div>

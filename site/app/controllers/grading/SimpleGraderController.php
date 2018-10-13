@@ -64,10 +64,10 @@ class SimpleGraderController extends GradingController  {
             $sort_by = "u.user_id";
         }
         else if($sort_by === "first"){
-            $sort_by = "u.user_firstname";
+            $sort_by = "coalesce(u.user_preferred_firstname, u.user_firstname)";
         }
         else if($sort_by === "last"){
-            $sort_by = "u.user_lastname";
+            $sort_by = "coalesce(u.user_preferred_lastname, u.user_lastname)";
         }
 
         //Figure out what section we are supposed to print
@@ -77,7 +77,7 @@ class SimpleGraderController extends GradingController  {
         else{
             $this->core->addErrorMessage("ERROR: Section not set; You did not select a section to print.");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
-            return;    
+            return;
         }
 
         $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
@@ -136,14 +136,18 @@ class SimpleGraderController extends GradingController  {
 
         $this->core->getOutput()->addBreadcrumb("Grading {$gradeable->getTitle()}");
 
+        // sort makes sorting remain when clicking print lab or view all
         if(!isset($_GET['sort']) || $_GET['sort'] === "id"){
+            $sort = "id";
             $sort_key = "u.user_id";
         }
         else if($_GET['sort'] === "first"){
-            $sort_key = "u.user_firstname";
+            $sort = "first";
+            $sort_key = "coalesce(u.user_preferred_firstname, u.user_firstname)";
         }
         else{
-            $sort_key = "u.user_lastname";
+            $sort = "last";
+            $sort_key = "coalesce(u.user_preferred_lastname, u.user_lastname)";
         }
 
         if ($gradeable->isGradeByRegistration()) {
@@ -193,7 +197,7 @@ class SimpleGraderController extends GradingController  {
         }
 
         $rows = $this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids, null, [$section_key, $sort_key]);
-        $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'simpleDisplay', $gradeable, $rows, $student_full, $graders, $section_key, $show_all_sections_button);
+        $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'simpleDisplay', $gradeable, $rows, $student_full, $graders, $section_key, $show_all_sections_button, $sort);
     }
 
     public function save($action) {
@@ -240,8 +244,8 @@ class SimpleGraderController extends GradingController  {
             $data = $_POST['scores'][$component->getId()] ?? '';
             // This catches both the not-set and blank-data case
             if ($data !== '') {
-                // Note: This also sets the grader of the component to $grader
                 $component_grade = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
+                $component_grade->setGrader($grader);
 
                 if ($component->isText()) {
                     $component_grade->setComment($data);
@@ -254,7 +258,7 @@ class SimpleGraderController extends GradingController  {
                     }
                     $component_grade->setScore($data);
                 }
-                $component_grade->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+                $component_grade->setGradeTime($this->core->getDateTimeNow());
             }
         }
 
@@ -316,13 +320,14 @@ class SimpleGraderController extends GradingController  {
                 //Makes an array with all the values and their status.
                 foreach ($gradeable->getComponents() as $component) {
                     $component_grade = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
+                    $component_grade->setGrader($grader);
 
                     $value_temp_str = $value_str . $index1;
                     $status_temp_str = $status_str . $index1;
                     if (isset($data_array[$j][$index2])) {
                         if ($component->isText()){
                             $component_grade->setComment($data_array[$j][$index2]);
-                            $component_grade->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+                            $component_grade->setGradeTime($this->core->getDateTimeNow());
                             $temp_array[$value_temp_str] = $data_array[$j][$index2];
                             $temp_array[$status_temp_str] = "OK";
                         }
@@ -332,7 +337,7 @@ class SimpleGraderController extends GradingController  {
                                 $temp_array[$status_temp_str] = "ERROR";
                             } else {
                                 $component_grade->setScore($data_array[$j][$index2]);
-                                $component_grade->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+                                $component_grade->setGradeTime($this->core->getDateTimeNow());
                                 $temp_array[$value_temp_str] = $data_array[$j][$index2];
                                 $temp_array[$status_temp_str] = "OK";
                             }

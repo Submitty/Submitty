@@ -14,7 +14,7 @@ class ImagesView extends AbstractView {
      * @return string
      */
     public function listStudentImages($students, $grader_sections, $instructor_permission) {
-        $this->core->getOutput()->addBreadcrumb("Student Photos", $this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page')));
+        $this->core->getOutput()->addBreadcrumb("Student Photos");
         //Assemble students into sections if they are in grader_sections based on the registration section.
         $sections = [];
         foreach ($students as $student) {

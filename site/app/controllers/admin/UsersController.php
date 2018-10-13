@@ -23,11 +23,11 @@ class UsersController extends AbstractController {
                 $this->updateUser('graders');
                 break;
             case 'graders':
-                $this->core->getOutput()->addBreadcrumb('View Graders');
+                $this->core->getOutput()->addBreadcrumb('Manage Graders');
                 $this->listGraders();
                 break;
             case 'rotating_sections':
-                $this->core->getOutput()->addBreadcrumb('Setup Sections');
+                $this->core->getOutput()->addBreadcrumb('Manage Sections');
                 $this->rotatingSectionsForm();
                 break;
             case 'update_registration_sections':
@@ -44,7 +44,7 @@ class UsersController extends AbstractController {
                 break;
             case 'students':
             default:
-                $this->core->getOutput()->addBreadcrumb('View Students');
+                $this->core->getOutput()->addBreadcrumb('Manage Students');
                 $this->listStudents();
                 break;
         }
@@ -352,12 +352,18 @@ class UsersController extends AbstractController {
         }
 
         $section_counts = array_fill(0, $section_count, 0);
+        $team_section_counts = [];
         if ($sort === 'redo') {
             $users = $this->core->getQueries()->getRegisteredUserIds();
+            $teams = $this->core->getQueries()->getTeamIdsAllGradeables();
             if ($type === 'random') {
                 shuffle($users);
+                foreach ($teams as $g_id => $team_ids) {
+                    shuffle($teams[$g_id]);
+                }
             }
             $this->core->getQueries()->setAllUsersRotatingSectionNull();
+            $this->core->getQueries()->setAllTeamsRotatingSectionNull();
             $this->core->getQueries()->deleteAllRotatingSections();
             for ($i = 1; $i <= $section_count; $i++) {
                 $this->core->getQueries()->insertNewRotatingSection($i);
@@ -366,6 +372,17 @@ class UsersController extends AbstractController {
             for ($i = 0; $i < count($users); $i++) {
                 $section = $i % $section_count;
                 $section_counts[$section]++;
+            }
+            foreach ($teams as $g_id => $team_ids) {
+                for ($i = 0; $i < count($team_ids); $i ++) {
+                    $section = $i % $section_count;
+
+                    if (!array_key_exists($g_id, $team_section_counts)) {
+                        $team_section_counts[$g_id] = array_fill(0, $section_count, 0);
+                    }
+
+                    $team_section_counts[$g_id][$section]++;
+                }
             }
         }
         else {
@@ -379,8 +396,12 @@ class UsersController extends AbstractController {
                 $this->core->redirect($return_url);
             }
             $users = $this->core->getQueries()->getRegisteredUserIdsWithNullRotating();
+            $teams = $this->core->getQueries()->getTeamIdsWithNullRotating();
             // only random sort can use 'fewest' type
             shuffle($users);
+            foreach ($teams as $g_id => $team_ids) {
+                shuffle($teams[$g_id]);
+            }
             $sections = $this->core->getQueries()->getCountUsersRotatingSections();
             $use_section = 0;
             $max = $sections[0]['count'];
@@ -395,6 +416,17 @@ class UsersController extends AbstractController {
                 $section_counts[$use_section]++;
                 $use_section = ($use_section + 1) % $section_count;
             }
+            foreach ($teams as $g_id => $team_ids) {
+                for ($i = 0; $i < count($team_ids); $i ++) {
+                    $use_section = ($use_section + 1) % $section_count;
+
+                    if (!array_key_exists($g_id, $team_section_counts)) {
+                        $team_section_counts[$g_id] = array_fill(0, $section_count, 0);
+                    }
+
+                    $team_section_counts[$g_id][$use_section]++;
+                }
+            }
         }
 
         for ($i = 0; $i < $section_count; $i++) {
@@ -403,6 +435,16 @@ class UsersController extends AbstractController {
                 continue;
             }
             $this->core->getQueries()->updateUsersRotatingSection($i + 1, $update_users);
+        }
+
+        foreach ($team_section_counts as $g_id => $counts) {
+            for ($i = 0; $i < $section_count; $i ++) {
+                $update_teams = array_splice($teams[$g_id], 0, $team_section_counts[$g_id][$i]);
+
+                foreach ($update_teams as $team_id) {
+                    $this->core->getQueries()->updateTeamRotatingSection($team_id, $i + 1);
+                }
+            }
         }
 
         $this->core->addSuccessMessage("Rotating sections setup");

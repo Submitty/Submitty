@@ -1,0 +1,123 @@
+{% extends "Component.twig" %}
+
+{% set extra_credit_points = component.upper_clamp - component.max_value %}
+{% set penalty_points = 0-component.lower_clamp %}
+
+{% block component_click %}
+    onClickComponent(this)
+{% endblock %}
+
+{% block header_block %}
+    {% include 'EditComponentHeader.twig' %}
+{% endblock %}
+
+{% block content_block %}
+    <div class="col-sm container">
+        <div class="row divider"></div>
+
+        {# Title / Page Number #}
+        <div class="row">
+            <div class="col-label-fixed">
+                <span>Title</span>
+            </div>
+            <div class="col component-title-container">
+                <input class="component-title" type="text" value="{{ component.title }}" placeholder="Component Title" onkeyup="onComponentTitleChange(this)"/>
+            </div>
+            {% if component.page > 0 %}
+                <div class="col-no-gutters page-label">
+                    <span>Page #</span>
+                </div>
+                <div class="col-no-gutters">
+                    <input class="page-number" type="number" step="1" min="1" value="{{ component.page }}" onchange="onComponentPageNumberChange(this)" onmouseup="onComponentPageNumberChange(this)">
+                </div>
+            {% else %}
+                <input class="page-number" value="{{ component.page }}" hidden/>
+            {% endif %}
+        </div>
+
+        {# TA Note #}
+        <div class="row">
+            <div class="col-label-fixed">
+                <span>Note to TAs</span>
+            </div>
+            <div class="col tight-right">
+                <textarea class="ta-comment" placeholder="Note to TAs">{{ component.ta_comment }}</textarea>
+            </div>
+        </div>
+
+        {# Student note #}
+        <div class="row">
+            <div class="col-label-fixed">
+                <span>Note to Students</span>
+            </div>
+            <div class="col tight-right">
+                <textarea class="student-comment" placeholder="Note to Students">{{ component.student_comment }}</textarea>
+            </div>
+        </div>
+
+        {# Point Inputs #}
+        <div class="row point-input-row">
+            <div class="col-label-fixed">Points</div>
+            <div class="col point-input-container">
+                <input class="max-points"
+                       step="{{ precision }}"
+                       type="number" min="0"
+                       value="{{ component.max_value|round(decimal_precision) }}"
+                       onchange="onComponentPointsChange(this)"
+                       onmouseup="onComponentPointsChange(this)"/>
+            </div>
+        </div>
+        <div class="row point-input-row">
+            <div class="col-label-fixed">Additional Extra Credit Points</div>
+            <div class="col point-input-container">
+                <input class="extra-credit-points"
+                       step="{{ precision }}"
+                       type="number" min="0"
+                       value="{{ extra_credit_points|round(decimal_precision) }}"
+                       onchange="onComponentPointsChange(this)"
+                       onmouseup="onComponentPointsChange(this)"/>
+            </div>
+            <div class="col"><i>Student scores will be clamped from above to Points + Additional Extra Credit Points</i></div>
+        </div>
+        <div class="row point-input-row">
+            <div class="col-label-fixed">Negative Penalty Points</div>
+            <div class="col point-input-container">
+                <input class="penalty-points"
+                       step="{{ precision }}"
+                       type="number" min="0"
+                       value="{{ component.lower_clamp|abs|round(decimal_precision) }}"
+                       onchange="onComponentPointsChange(this)"
+                       onmouseup="onComponentPointsChange(this)"/>
+            </div>
+            <div class="col"><i>Student scores will be clamped from below to min(0,Negative Penalty Points)</i></div>
+        </div>
+
+        {# Count up / down #}
+        <div class="row point-input-row count-type-row">
+            <div class="col-label-fixed">How should points be assigned?</div>
+            <div class="col">
+                <span class="radio-input">
+                    <input type="radio" class="count-up-selector count-type-selector"
+                           name="count-type-{{ component.id }}" {{ component.default == 0 ? 'checked' : '' }}
+                           onclick="onClickCountUp(this)">Grade by Count Up (from zero)
+                </span>
+            </div>
+            <div class="col">
+                <span class="radio-input">
+                    <input type="radio" class="count-down-selector count-type-selector"
+                           name="count-type-{{ component.id }}" {{ component.default != 0 ? 'checked' : '' }}
+                           onclick="onClickCountDown(this)">Grade by Count Down (from "Points")
+                </span>
+            </div>
+        </div>
+        <div class="row divider"></div>
+    </div>
+{% endblock %}
+
+{% block marks_block %}
+    {% set show_publish = true %}
+    {% for mark in component.marks %}
+        {% set first_mark = loop.index0 == 0 %}
+        {% include "Mark.twig" %}
+    {% endfor %}
+{% endblock %}

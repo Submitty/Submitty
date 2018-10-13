@@ -6,7 +6,7 @@
 
 echo -e "Copy the submission website"
 
-if [ -z ${SUBMITTY_INSTALL_DIR+x} ]; then
+if [ -z ${PHP_USER+x} ]; then
     # constants are not initialized,
     CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../config
     SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
@@ -48,6 +48,22 @@ su - ${PHP_USER} -c "composer install -d \"${SUBMITTY_INSTALL_DIR}/site\" --no-d
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public/zone_images/
 cp ${SUBMITTY_INSTALL_DIR}/zone_images/* ${SUBMITTY_INSTALL_DIR}/site/public/zone_images/ 2>/dev/null
 
+#####################################
+# Installing PDF annotator
+
+VERSION=v.18.09.00
+
+mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public/js/pdf
+pushd ${SUBMITTY_INSTALL_DIR}/site/public/js/pdf
+if [[ ! -f VERSION || $(< VERSION) != "${VERSION}" ]]; then
+    for b in pdf-annotate.min.js pdf-annotate.min.js.map;
+        do wget -nv "https://github.com/Submitty/pdf-annotate.js/releases/download/${VERSION}/${b}" -O ${b}
+    done
+
+    echo ${VERSION} > VERSION
+fi
+popd > /dev/null
+
 # set the permissions of all files
 # $PHP_USER can read & execute all directories and read all files
 # "other" can cd into all subdirectories
@@ -63,6 +79,8 @@ done
 # "other" can read & execute these files
 find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.js -exec chmod o+rx {} \;
 find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -type f -name \*.cgi -exec chmod u+x {} \;
+
+chmod 550 ${SUBMITTY_INSTALL_DIR}/site/cgi-bin/git-http-backend
 
 # cache needs to be writable
 find ${SUBMITTY_INSTALL_DIR}/site/cache -type d -exec chmod u+w {} \;

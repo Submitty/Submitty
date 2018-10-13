@@ -74,7 +74,7 @@ class GradedComponentContainer extends AbstractModel {
      *   Component peer:                    => throw InvalidArgumentException
      * Grader Not Null:
      *   Component not peer:
-     *     Component has grades:            => return the one TA grade and set the grader
+     *     Component has grades:            => return the one
      *     Generate false:                  => return null
      *     Generate true:                   => return new component with provided user as grader (TA)
      *   Component peer:
@@ -139,7 +139,6 @@ class GradedComponentContainer extends AbstractModel {
         // Grades exist for component, so get the only one
         if ($grades_exist) {
             $graded_component = $this->graded_components[0];
-            $graded_component->setGrader($grader);
             return $graded_component;
         }
 
@@ -216,7 +215,8 @@ class GradedComponentContainer extends AbstractModel {
         foreach ($this->graded_components as $graded_component) {
             $points_earned += $graded_component->getTotalScore();
         }
-        $points_earned /= count($this->graded_components);
+        // Note: this is called 'safeCalcPercent', but it does not clamp the output to 1.0
+        $points_earned = Utils::safeCalcPercent($points_earned, count($this->graded_components));
         return $this->ta_graded_gradeable->getGradedGradeable()->getGradeable()->roundPointValue($points_earned);
     }
 

@@ -1,31 +1,27 @@
 <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
-<link type="text/css" rel="stylesheet" href="css/admin-gradeable.css"> <!-- Make sure this one is LAST -->
 <script type="text/javascript" language="javascript" src="js/jquery.min.js"></script>
 <script type="text/javascript" language="javascript" src="js/jquery-ui.min.js"></script>
 <script type="text/javascript" language="javascript" src="js/jquery-ui-timepicker-addon.js"></script>
-
-{# Only load the realtime-updates script if we're in edit mode#}
-{% if action == 'edit' %}
-<script type="text/javascript" language="javascript" src="js/admin-gradeable-updates.js"></script>
-{% endif %}
 
 <script type="text/javascript">
     function disableElementChildren(c, dis = true) {
         dis ? $(c).hide() : $(c).show();
     }
 </script>
-<div id="container-rubric" style="display:none;">
+<div id="container-rubric" class="content" style="display:none;">
     <div id="ajax_debug" style="display: none;"></div>
     <div id="ajax_raw" style="display: none;"></div>
     <form id="gradeable-form" class="form-signin" action="{{ submit_url }}"
         method="post" enctype="multipart/form-data" onsubmit="return checkForm();"> 
 
         <div class="modal-header" style="overflow: auto;">
-            <h2 id="myModalLabel" style="float: left;">{{ action == 'edit' ? 'Editing Gradeable' : 'Create Gradeable' }}<span id="modal_label_title"></span></h2>
-            <br />
-            <br />
-            <b>For Help, Read: <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable">Submitty Instructions on "Create or Edit a Gradeable"</a></b>
-            <div style="float: right" id="save_status"></div>
+            <div>
+                <h1 id="myModalLabel">{{ action == 'edit' ? 'Edit Gradeable' : 'New Gradeable' }}<span id="modal_label_title"></span></h1>
+            </div>
+            <div>
+                <b>For Help, Read: <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable">Submitty Instructions on "Create or Edit a Gradeable"</a></b>
+                <div style="float: right" id="save_status"></div>
+            </div>
         </div>
         <br/>
         <div id="nav-bar">
@@ -122,6 +118,7 @@
 
         updateNavItemsStatus();
         $('[name="type"]').change(updateNavItemsStatus);
+        $('[name="scanned_exam"]').change(updateNavItemsStatus);
         $('[name="ta_grading"]').change(updateNavItemsStatus);
 
         // Update navigation on load

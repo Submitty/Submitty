@@ -8,6 +8,10 @@ use app\libraries\FileUtils;
  * Class Team
  *
  * @method string getId()
+ * @method string[] getMemberUserIds()
+ * @method string[] getInvitedUserIds()
+ * @method User[] getMemberUsers()
+ * @method User[] getInvitedUsers()
  */
 class Team extends AbstractModel {
      
@@ -32,7 +36,7 @@ class Team extends AbstractModel {
 
     /**
      * Team constructor.
-     * @parma Core  $core
+     * @param Core  $core
      * @param array $details
      */
     public function __construct(Core $core, $details) {
@@ -69,6 +73,15 @@ class Team extends AbstractModel {
     }
 
     /**
+     * Gets the anonymous id of this team
+     * TODO: this is to create symmetry with the User class, teams' anon ids are just their ids for now
+     * @return string
+     */
+    public function getAnonId() {
+        return $this->id;
+    }
+
+    /**
      * Get registration section
      * @return integer
     */
@@ -86,7 +99,7 @@ class Team extends AbstractModel {
 
     /**
      * Get user ids of team members
-     * @return array(string)
+     * @return string[]
     */
     public function getMembers() {
         return $this->member_user_ids;
@@ -94,7 +107,7 @@ class Team extends AbstractModel {
 
     /**
      * Get user ids of those invited to the team
-     * @return array(string)
+     * @return string[]
     */
     public function getInvitations() {
         return $this->invited_user_ids;

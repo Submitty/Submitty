@@ -26,7 +26,7 @@ class AuthenticationController extends AbstractController {
      * @param Core $core
      * @param bool $logged_in
      */
-    public function __construct(Core $core, $logged_in) {
+    public function __construct(Core $core, $logged_in=false) {
         parent::__construct($core);
         $this->logged_in = $logged_in;
     }
@@ -39,6 +39,9 @@ class AuthenticationController extends AbstractController {
             case 'checklogin':
                 $this->isLoggedIn();
                 $this->checkLogin();
+                break;
+            case 'vcs_login':
+                $this->vcsLogin();
                 break;
             case 'login':
             default:
@@ -78,7 +81,14 @@ class AuthenticationController extends AbstractController {
      * Display the login form to the user
      */
     public function loginForm() {
-        $this->core->getOutput()->renderOutput('Authentication', 'loginForm');
+        $old = $_REQUEST['old'] ?? [];
+
+        //Don't log in to bring us back to login
+        if (array_key_exists("page", $old) && $old["page"] === "login") {
+            unset($old["page"]);
+        }
+
+        $this->core->getOutput()->renderOutput('Authentication', 'loginForm', $old);
     }
     
     /**
@@ -89,15 +99,24 @@ class AuthenticationController extends AbstractController {
      */
     public function checkLogin() {
         $redirect = array();
+        $no_redirect = !empty($_POST['no_redirect']) ? $_POST['no_redirect'] == 'true' : false;
         $_POST['stay_logged_in'] = (isset($_POST['stay_logged_in']));
         if (!isset($_POST['user_id']) || !isset($_POST['password'])) {
-            $this->core->addErrorMessage("Cannot leave user id or password blank");
+            $msg = 'Cannot leave user id or password blank';
+
             foreach ($_REQUEST as $key => $value) {
                 if (substr($key, 0, 4) == "old_") {
                     $redirect[$key] = $_REQUEST['old'][$value];
                 }
             }
-            $this->core->redirect($this->core->buildUrl($redirect));
+            if ($no_redirect) {
+                $this->core->getOutput()->renderJsonFail($msg);
+            }
+            else {
+                $this->core->addErrorMessage("Cannot leave user id or password blank");
+                $this->core->redirect($this->core->buildUrl($redirect));
+            }
+            return false;
         }
         $this->core->getAuthentication()->setUserId($_POST['user_id']);
         $this->core->getAuthentication()->setPassword($_POST['password']);
@@ -107,19 +126,72 @@ class AuthenticationController extends AbstractController {
                     $redirect[substr($key, 4)] = $value;
                 }
             }
-            $this->core->addSuccessMessage("Successfully logged in as ".htmlentities($_POST['user_id']));
+            $msg = "Successfully logged in as ".htmlentities($_POST['user_id']);
+            $this->core->addSuccessMessage($msg);
             $redirect['success_login'] = "true";
 
-            $this->core->redirect($this->core->buildUrl($redirect));
+            if ($no_redirect) {
+                $this->core->getOutput()->renderJsonSuccess(['message' => $msg, 'authenticated' => true]);
+            }
+            else {
+                $this->core->redirect($this->core->buildUrl($redirect));
+            }
+            return true;
         }
         else {
-            $this->core->addErrorMessage("Could not login using that user id or password");
+            $msg = "Could not login using that user id or password";
+            $this->core->addErrorMessage($msg);
             foreach ($_REQUEST as $key => $value) {
                 if (substr($key, 0, 4) == "old_") {
                     $redirect[substr($key, 4)] = $value;
                 }
             }
-            $this->core->redirect($this->core->buildUrl($redirect));
+            if ($no_redirect) {
+                $this->core->getOutput()->renderJsonFail($msg);
+            }
+            else {
+                $this->core->redirect($this->core->buildUrl($redirect));
+            }
+            return false;
         }
+    }
+
+    public function vcsLogin() {
+        if (empty($_POST['user_id']) || empty($_POST['password']) || empty($_POST['gradeable_id'])
+            || empty($_POST['id']) || !$this->core->getConfig()->isCourseLoaded()) {
+            $msg = 'Missing value for one of the fields';
+            return $this->core->getOutput()->renderJsonError($msg);
+        }
+        $this->core->getAuthentication()->setUserId($_POST['user_id']);
+        $this->core->getAuthentication()->setPassword($_POST['password']);
+        if ($this->core->authenticate(false) !== true) {
+            $msg = "Could not login using that user id or password";
+            return $this->core->getOutput()->renderJsonFail($msg);
+        }
+
+        $user = $this->core->getQueries()->getUserById($_POST['user_id']);
+        if ($user === null) {
+            $msg = "Could not find that user for that course";
+            return $this->core->getOutput()->renderJsonFail($msg);
+        }
+        else if ($user->accessFullGrading()) {
+            $msg = "Successfully logged in as {$_POST['user_id']}";
+            return $this->core->getOutput()->renderJsonSuccess(['message' => $msg, 'authenticated' => true]);
+        }
+
+        $gradeable = $this->core->getQueries()->getGradeableConfig($_POST['gradeable_id']);
+        if ($gradeable !== null && $gradeable->isTeamAssignment()) {
+            if (!$this->core->getQueries()->getTeamById($_POST['id'])->hasMember($_POST['user_id'])) {
+                $msg = "This user is not a member of that team.";
+                return $this->core->getOutput()->renderJsonFail($msg);
+            }
+        }
+        elseif ($_POST['user_id'] !== $_POST['id']) {
+            $msg = "This user cannot check out that repository.";
+            return $this->core->getOutput()->renderJsonFail($msg);
+        }
+
+        $msg = "Successfully logged in as {$_POST['user_id']}";
+        return $this->core->getOutput()->renderJsonSuccess(['message' => $msg, 'authenticated' => true]);
     }
 }

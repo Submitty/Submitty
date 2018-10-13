@@ -37,6 +37,7 @@ cp -R ${TRAVIS_BUILD_DIR} ${SUBMITTY_REPOSITORY}
 python3 ${DIR}/../bin/create_untrusted_users.py
 
 addgroup submitty_daemonphp
+addgroup submitty_daemoncgi
 addgroup submitty_course_builders
 adduser ${PHP_USER} --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 adduser ${CGI_USER} --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
@@ -46,6 +47,8 @@ adduser ${CGI_USER} shadow
 adduser submitty_daemon --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 adduser ${PHP_USER} submitty_daemonphp
 adduser submitty_daemon submitty_daemonphp
+adduser ${CGI_USER} submitty_daemoncgi
+adduser submitty_daemon submitty_daemoncgi
 useradd -p $(openssl passwd -1 submitty_dbuser) submitty_dbuser
 
 chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}
@@ -58,16 +61,28 @@ submitty_dbuser
 submitty_dbpass
 America/New_York
 http://localhost
-http://localhost/git
+
 
 ${AUTH_METHOD}" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
 
 bash -c "echo 'export PATH=${PATH}' >> /home/${PHP_USER}/.profile"
 bash -c "echo 'export PATH=${PATH}' >> /home/${PHP_USER}/.bashrc"
+bash -c "echo 'export PATH=${PATH}' >> /home/${DAEMON_USER}/.bashrc"
+bash -c "echo 'export PATH=${PATH}' >> /home/${DAEMON_USER}/.bashrc"
 # necessary so that PHP_USER has access to /home/travis/.phpenv/shims/composer
 usermod -a -G travis ${PHP_USER}
+usermod -a -G travis submitty_daemon
 
 # necessary to pass config path as submitty_repository is a symlink
 python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
 
 bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
+
+# TODO: get this to work properly and tests to pass
+#sudo -u submitty_daemon /usr/local/submitty/sbin/submitty_autograding_shipper.py > /dev/null &
+#sleep 1
+#sudo -u submitty_daemon /usr/local/submitty/sbin/submitty_autograding_worker.py > /dev/null &
+#sleep 1
+#/usr/local/submitty/bin/grading_done.py
+
+echo 'Finished setup.'

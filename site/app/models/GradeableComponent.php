@@ -2,6 +2,7 @@
 
 namespace app\models;
 use app\libraries\Core;
+use app\libraries\DateUtils;
 
 /**
  * Class GradeableComponent
@@ -122,7 +123,7 @@ class GradeableComponent extends AbstractModel {
             $this->grader = $details['gcd_grader'];
             $this->graded_version = isset($details['gcd_graded_version']) ? $details['gcd_graded_version']: null;
             if (isset($details['gcd_grade_time'])) {
-                $this->grade_time = new \DateTime($details['gcd_grade_time'], $this->core->getConfig()->getTimezone());
+                $this->grade_time = DateUtils::parseDateTime($details['gcd_grade_time'], $this->core->getConfig()->getTimezone());
             }
             // will need to edit this to clarify this is only personalized score
             // will need to add a total score
@@ -137,13 +138,6 @@ class GradeableComponent extends AbstractModel {
         if (isset($details['array_gcm_id'])) {
             $mark_fields = array('gcm_id', 'gc_id', 'gcm_points', 'gcm_publish',
                                     'gcm_note', 'gcm_order');
-            foreach ($mark_fields as $key) {
-                $details["array_{$key}"] = explode(',', $details["array_{$key}"]);
-            }
-
-            if (isset($details['array_gcm_mark'])) {
-                $details['array_gcm_mark'] = explode(',', $details['array_gcm_mark']);
-            }
             for ($i = 0; $i < count($details['array_gcm_id']); $i++) {
                 $mark_details = array();
                 foreach ($mark_fields as $key) {
@@ -168,6 +162,9 @@ class GradeableComponent extends AbstractModel {
     }
 
     public function getGradedTAPoints() {
+        if (!$this->getHasMarks() && $this->score == 0.0 && $this->comment === '') {
+            return 0.0; // Return no points if the user has no marks and no custom mark
+        }
         $points = $this->default;
         foreach ($this->marks as $mark) {
             if ($mark->getHasMark()) {

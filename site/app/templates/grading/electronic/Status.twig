@@ -1,14 +1,14 @@
 <div class="content">
-    <h2>Status of {{ gradeable.getName() }}</h2>
+    <h1>Status of {{ gradeable.getName() }}</h1>
 
     {% if graded_percentage == -1 %}
         <div class="sub">
             No Grading To Be Done! :)
         </div>
     {% else %}
-        <div class="sub">
+        <div class="row">
             {# Left panel #}
-            <div class="box half">
+            <div class="box col-md-6">
                 {% if warnings|length > 0 %}
                     <ul>
                         {% for warning in warnings %}
@@ -79,7 +79,7 @@
 
             {# Right panel #}
             {% if not peer %}
-                <div class="box half">
+                <div class="box col-md-6">
                     <b>Statistics for Completely Graded Assignments: </b>
                     <br/>
                     <div style="margin-left: 20px">
@@ -140,17 +140,10 @@
     {# Bottom buttons #}
     <div style="margin-top: 20px; vertical-align:bottom;">
         {% if graded_percentage != -1 or core.getUser().accessFullGrading() or peer %}
-            {% if core.getUser().accessAdmin() %}
-             <a class="btn btn-primary"
-               href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action' :  'details', 'gradeable_id' :  gradeable.getId(), 'view' : 'all' }) }}">
-             Grading Details
-             </a>
-             {% else %}
             <a class="btn btn-primary"
-               href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action' :  'details', 'gradeable_id' :  gradeable.getId(), 'view' : percentage == -1 ? 'all' : null}) }}">
+               href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action' :  'details', 'gradeable_id' :  gradeable.getId(), 'view' : (core.getUser().getGradingRegistrationSections()|length == 0) ? 'all' : null}) }}">
             Grading Details
             </a>
-            {% endif %}
             {% if core.getUser().getGradingRegistrationSections()|length != 0 %}
                 <a class="btn btn-primary"
                    href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'grade', 'gradeable_id': gradeable.getId()}) }}">

@@ -26,13 +26,13 @@ function buildUrl(parts) {
     return document.body.dataset.siteUrl + constructed;
 }
 
-function changeDiffView(div_name, gradeable_id, who_id, index, autocheck_cnt, helper_id){
+function changeDiffView(div_name, gradeable_id, who_id, version, index, autocheck_cnt, helper_id){
     var actual_div_name = "#" + div_name + "_0";
     var expected_div_name = "#" + div_name + "_1";
     var actual_div = $(actual_div_name).children()[0];
     var expected_div = $(expected_div_name).children()[0];
     var args = {'component': 'grading', 'page': 'electronic', 'action': 'remove_empty'
-        ,'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index, 'autocheck_cnt': autocheck_cnt};
+        ,'gradeable_id': gradeable_id, 'who_id' : who_id, 'version': version, 'index' : index, 'autocheck_cnt': autocheck_cnt};
     var list_white_spaces = {};
     $('#'+helper_id).empty();
     if($("#show_char_"+index+"_"+autocheck_cnt).text() == "Visualize whitespace characters"){
@@ -40,11 +40,11 @@ function changeDiffView(div_name, gradeable_id, who_id, index, autocheck_cnt, he
         $("#show_char_"+index+"_"+autocheck_cnt).addClass('btn-primary');
         $("#show_char_"+index+"_"+autocheck_cnt).html("Display whitespace/non-printing characters as escape sequences");
         list_white_spaces['newline'] = '&#9166;';
-        args['option'] = 'with_unicode'
+        args['option'] = 'unicode'
     } else if($("#show_char_"+index+"_"+autocheck_cnt).text() == "Display whitespace/non-printing characters as escape sequences") {
         $("#show_char_"+index+"_"+autocheck_cnt).html("Original View");
         list_white_spaces['newline'] = '\\n';
-        args['option'] = 'with_escape'
+        args['option'] = 'escape'
     } else {
         $("#show_char_"+index+"_"+autocheck_cnt).removeClass('btn-primary');
         $("#show_char_"+index+"_"+autocheck_cnt).addClass('btn-default');
@@ -55,39 +55,58 @@ function changeDiffView(div_name, gradeable_id, who_id, index, autocheck_cnt, he
     args['which'] = 'expected';
     var url = buildUrl(args);
 
+    let assertSuccess = function(data) {
+        if (data.status === 'fail') {
+            alert("Error loading diff: " + data.message);
+            return false;
+        } else if (data.status === 'error') {
+            alert("Internal server error: " + data.message);
+            return false;
+        }
+        return true;
+    }
+
     $.getJSON({
         url: url,
-        success: function(data) {
-            for(property in data.whitespaces){
-                list_white_spaces[property] = data.whitespaces[property];
+        success: function (response) {
+            if(!assertSuccess(response)) {
+                return;
+            }
+            for (property in response.data.whitespaces) {
+                list_white_spaces[property] = response.data.whitespaces[property];
             }
             $(expected_div).empty();
-            $(expected_div).html(data.html);
+            $(expected_div).html(response.data.html);
             args['which'] = 'actual';
             url = buildUrl(args);
             $.getJSON({
                 url: url,
-                success: function(data) {
-                    for(property in data.whitespaces){
-                        list_white_spaces[property] = data.whitespaces[property];
+                success: function (response) {
+                    if(!assertSuccess(response)) {
+                        return;
                     }
-                    for(property in list_white_spaces){
-                        $('#'+helper_id).append('<span style=\"outline:1px blue solid;\">'+list_white_spaces[property] + "</span> = " + property + " ");
+                    for (property in response.data.whitespaces) {
+                        list_white_spaces[property] = response.data.whitespaces[property];
+                    }
+                    for (property in list_white_spaces) {
+                        $('#' + helper_id).append('<span style=\"outline:1px blue solid;\">' + list_white_spaces[property] + "</span> = " + property + " ");
                     }
                     $(actual_div).empty();
-                    $(actual_div).html(data.html);
+                    $(actual_div).html(response.data.html);
                 },
-                error: function(e) {
-                    alert("Could not load diff, please refresh the page and try again.");}
+                error: function (e) {
+                    alert("Could not load diff, please refresh the page and try again.");
+                }
             });
         },
-        error: function(e) {
-            alert("Could not load diff, please refresh the page and try again.");}
+        error: function (e) {
+            alert("Could not load diff, please refresh the page and try again.");
+        }
     });
 
 }
 
-function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = -1){
+function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = ''){
     orig_div_name = div_name
     div_name = "#" + div_name;
     var isVisible = $( div_name ).is( " :visible" );
@@ -99,13 +118,17 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = -1)
     }else{
         $("#show_char_"+index).toggle();
         var url = buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'load_student_file',
-            'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index, 'gradeable_version' : version});
+            'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index, 'version' : version});
 
-        $.ajax({
+        $.getJSON({
             url: url,
-            success: function(data) {
+            success: function(response) {
+                if (response.status !== 'success') {
+                    alert('Error getting file diff: ' + response.message);
+                    return;
+                }
                 $(div_name).empty();
-                $(div_name).html(data);
+                $(div_name).html(response.data);
                 toggleDiv(orig_div_name);
             },
             error: function(e) {
@@ -383,7 +406,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                     version_user_1 = "max_matching";
                 }
 
-                var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatinated',
+                var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatenated',
                         'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1});
                 $.ajax({
                     url: url,
@@ -448,7 +471,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
             if (changed == 'user_id_2') {
                 if (($('[name="user_id_2"]', form).val()) == '') {
                     $('[name="code_box_2"]').empty();
-                    var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatinated',
+                    var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatenated',
                         'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'user_id_2':'', 'version_user_2': ''});
                     $.ajax({
                         url: url,
@@ -469,7 +492,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                 else {
                     var user_id_2 = JSON.parse($('[name="user_id_2"]', form).val())["user_id"];
                     var version_user_2 = JSON.parse($('[name="user_id_2"]', form).val())["version"];
-                    var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatinated',
+                    var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatenated',
                         'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'user_id_2':user_id_2, 'version_user_2': version_user_2});
                     $.ajax({
                         url: url,
@@ -1030,7 +1053,7 @@ function toggleDiv(id) {
 }
 
 
-function checkRefreshSubmissionPage(url) {
+function checkRefreshPage(url) {
     setTimeout(function() {
         check_server(url)
     }, 1000);
@@ -1042,7 +1065,7 @@ function check_server(url) {
             if (data.indexOf("REFRESH_ME") > -1) {
                 location.reload(true);
             } else {
-                checkRefreshSubmissionPage(url);
+                checkRefreshPage(url);
             }
         }
     );
@@ -1108,8 +1131,21 @@ function downloadFileWithAnyRole(file_name, path) {
     if (file.indexOf("/") != -1) {
         file = file.substring(file.lastIndexOf('/')+1);
     }
-    window.location = buildUrl({'component': 'misc', 'page': 'download_file_with_any_role', 'dir': 'uploads/course_materials', 'file': file, 'path': path});
+    window.location = buildUrl({'component': 'misc', 'page': 'download_file_with_any_role', 'dir': 'course_materials', 'file': file, 'path': path});
 }
+
+function checkColorActivated() {
+    var pos = 0;
+    var seq = "&&((%'%'BA\r";
+    $(document.body).keyup(function colorEvent(e) {
+        pos = seq.charCodeAt(pos) === e.keyCode ? pos + 1 : 0;
+        if (pos === seq.length) {
+            setInterval(function() { $("*").addClass("rainbow"); }, 100);
+            $(document.body).off('keyup', colorEvent);
+        }
+    });
+}
+$(checkColorActivated);
 
 function changeColor(div, hexColor){
     div.style.color = hexColor;
@@ -1391,7 +1427,39 @@ function publishPost() {
     return publishFormWithAttachments($(this), false, "Something went wrong while publishing post. Please try again.");
 }
 
+function changeThreadStatus(thread_id) {
+	var url = buildUrl({'component': 'forum', 'page': 'change_thread_status_resolve'});
+	$.ajax({
+			url: url,
+			type: "POST",
+			data: {
+				thread_id: thread_id
+			},
+			success: function(data) {
+				try {
+					var json = JSON.parse(data);
+				} catch(err) {
+					var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+					$('#messages').append(message);
+					return;
+				}
+				if(json['error']) {
+					var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+					$('#messages').append(message);
+					return;
+				}
+				window.location.reload();
+				var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Thread marked as resolved.</div>';
+					$('#messages').append(message);
+			},
+			error: function() {
+				window.alert('Something went wrong when trying to mark this thread as resolved. Please try again.');
+			}
+	});
+}
+
 function editPost(post_id, thread_id, shouldEditThread) {
+    if(!checkAreYouSureForm()) return;
     var form = $("#thread_form");
     var url = buildUrl({'component': 'forum', 'page': 'get_edit_post_content'});
     $.ajax({
@@ -1417,7 +1485,12 @@ function editPost(post_id, thread_id, shouldEditThread) {
                 var user_id = escape(json.user);
                 var post_content = json.post;
                 var anon = json.anon;
-                var time = (new Date(json.post_time));
+                var time = Date.parse(json.post_time);
+                if(!time) {
+                    // Timezone suffix ":00" might be missing
+                    time = Date.parse(json.post_time+":00");
+                }
+                time = new Date(time);
                 var categories_ids = json.categories_ids;
                 var date = time.toLocaleDateString();
                 time = time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
@@ -1427,7 +1500,7 @@ function editPost(post_id, thread_id, shouldEditThread) {
                 contentBox.value = post_content;
                 document.getElementById('edit_post_id').value = post_id;
                 document.getElementById('edit_thread_id').value = thread_id;
-                $('#thread_post_anon').prop('checked', anon);
+                $('#thread_post_anon_edit').prop('checked', anon);
                 $('#edit-user-post').css('display', 'block');
 
                 $(".cat-buttons input").prop('checked', false);
@@ -1488,23 +1561,69 @@ function changeDisplayOptions(option, thread_id){
     window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'option': option, 'thread_id': thread_id}));
 }
 
-function dynamicScrollNextPage(element) {
-    if($(element).data("dynamic_lock_full")) {
-        return;
+function dynamicScrollLoadPage(element, atEnd) {
+    var load_page = $(element).attr(atEnd?"next_page":"prev_page");
+    if(load_page == 0) {
+        return false;
     }
     if($(element).data("dynamic_lock_load")) {
-        return;
+        return null;
     }
-    $(".thread_list .fa-spinner").show();
+    var load_page_callback;
+    var load_page_fail_callback;
+    var arrow_up = $(element).find(".fa-caret-up");
+    var arrow_down = $(element).find(".fa-caret-down");
+    var spinner_up = arrow_up.prev();
+    var spinner_down = arrow_down.next();
     $(element).data("dynamic_lock_load", true);
+    if(atEnd){
+        arrow_down.hide();
+        spinner_down.show();
+        load_page_callback = function(content, count) {
+            spinner_down.hide();
+            arrow_down.before(content);
+            if(count == 0) {
+                // Stop further loads
+                $(element).attr("next_page", 0);
+            } else {
+                $(element).attr("next_page", parseInt(load_page) + 1);
+                arrow_down.show();
+            }
+            dynamicScrollLoadIfScrollVisible($(element));
+        };
+        load_page_fail_callback = function(content, count) {
+            spinner_down.hide();
+        };
+    }
+    else {
+        arrow_up.hide();
+        spinner_up.show();
+        load_page_callback = function(content, count) {
+            spinner_up.hide();
+            arrow_up.after(content);
+            if(count == 0) {
+                // Stop further loads
+                $(element).attr("prev_page", 0);
+            } else {
+                var prev_page = parseInt(load_page) - 1;
+                $(element).attr("prev_page", prev_page);
+                if(prev_page >= 1) {
+                    arrow_up.show();
+                }
+            }
+            dynamicScrollLoadIfScrollVisible($(element));
+        };
+        load_page_fail_callback = function(content, count) {
+            spinner_up.hide();
+        };
+    }
     
     var urlPattern = $(element).data("urlPattern");
     var currentThreadId = $(element).data("currentThreadId",);
     var currentCategoriesId = $(element).data("currentCategoriesId",);
     var course = $(element).data("course",);
 
-    var next_page = $(element).attr("next_page");  
-    var next_url = urlPattern.replace("{{#}}", next_page);
+    var next_url = urlPattern.replace("{{#}}", load_page);
            
     var categories_value = $("#thread_category").val();
     var thread_status_value = $("#thread_status_select").val();
@@ -1524,28 +1643,23 @@ function dynamicScrollNextPage(element) {
                 var content = x.html;
                 var count = x.count;
                 content = `${content}`;
-                $(element).find(".fa-spinner").before(content);
-                $(element).attr("next_page", parseInt(next_page) + 1);
                 $(element).data("dynamic_lock_load", false);
-                $(".thread_list .fa-spinner").hide();
-                if(count == 0) {
-                    // Don't load more
-                    $(element).data("dynamic_lock_full", true);
-                } else {
-                    dynamicScrollLoadIfScrollVisible($(element));
-                }
+                load_page_callback(content, count);
             },
             error: function(){
                 $(element).data("dynamic_lock_load", false);
-                $(".thread_list .fa-spinner").hide();
+                load_page_fail_callback();
                 window.alert("Something went wrong while trying to load more threads. Please try again.");
             }
     });
+    return true;
 }
 
 function dynamicScrollLoadIfScrollVisible(jElement) {
     if(jElement[0].scrollHeight <= jElement[0].clientHeight) {
-        dynamicScrollNextPage(jElement[0]);
+        if(dynamicScrollLoadPage(jElement[0], true) === false) {
+            dynamicScrollLoadPage(jElement[0], false);
+        }
     }
 }
 
@@ -1559,10 +1673,15 @@ function dynamicScrollContentOnDemand(jElement, urlPattern, currentThreadId, cur
     $(jElement).scroll(function(){ 
         var element = $(this)[0];
         var sensitivity = 3;
+        var isTop = element.scrollTop < sensitivity;
         var isBottom = (element.scrollHeight - element.offsetHeight - element.scrollTop) < sensitivity;
-        if(isBottom) {
-            dynamicScrollNextPage(element);
+        if(isTop) {
+            element.scrollTop = sensitivity;
+            dynamicScrollLoadPage(element,false);
+        } else if(isBottom) {
+            dynamicScrollLoadPage(element,true);
         }
+
     });
 }
 
@@ -1584,19 +1703,39 @@ function saveScrollLocationOnRefresh(id){
     });
 }
 
+function checkAreYouSureForm() {
+    var elements = $('form');
+    if(elements.hasClass('dirty')) {
+        if(confirm("You have unsaved changes! Do you want to continue?")) {
+            elements.trigger('reinitialize.areYouSure');
+            return true;
+        } else {
+            return false;
+        }
+    }
+    return true;
+}
+
 function alterShowDeletedStatus(newStatus) {
+    if(!checkAreYouSureForm()) return;
     document.cookie = "show_deleted=" + newStatus + "; path=/;";
     location.reload();
 }
 
-function modifyThreadList(currentThreadId, currentCategoriesId, course){
+function alterShowMergeThreadStatus(newStatus, course) {
+    if(!checkAreYouSureForm()) return;
+    document.cookie = course + "_show_merged_thread=" + newStatus + "; path=/;";
+    location.reload();
+}
+
+function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirstPage, success_callback){
     var categories_value = $("#thread_category").val();
     var thread_status_value = $("#thread_status_select").val();
     categories_value = (categories_value == null)?"":categories_value.join("|");
     thread_status_value = (thread_status_value == null)?"":thread_status_value.join("|");
     document.cookie = course + "_forum_categories=" + categories_value + ";";
     document.cookie = "forum_thread_status=" + thread_status_value + ";";
-    var url = buildUrl({'component': 'forum', 'page': 'get_threads', 'page_number': '1'});
+    var url = buildUrl({'component': 'forum', 'page': 'get_threads', 'page_number': (loadFirstPage?'1':'-1')});
     $.ajax({
             url: url,
             type: "POST",
@@ -1607,16 +1746,28 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course){
                 currentCategoriesId: currentCategoriesId,
             },
             success: function(r){
-               var x = JSON.parse(r).html;
+               var x = JSON.parse(r);
+               var page_number = parseInt(x.page_number);
+               x = x.html;
                x = `${x}`;
                var jElement = $(".thread_list");
-               jElement.children(":not(.fa-spinner)").remove();
-               jElement.prepend(x);
-               jElement.attr("next_page", '2');
+               jElement.children(":not(.fa)").remove();
+               $(".thread_list .fa-caret-up").after(x);
+               jElement.attr("prev_page", page_number - 1);
+               jElement.attr("next_page", page_number + 1);
                jElement.data("dynamic_lock_load", false);
-               jElement.data("dynamic_lock_full", false);
                $(".thread_list .fa-spinner").hide();
+               if(loadFirstPage) {
+                   $(".thread_list .fa-caret-up").hide();
+                   $(".thread_list .fa-caret-down").show();
+               } else {
+                   $(".thread_list .fa-caret-up").show();
+                   $(".thread_list .fa-caret-down").hide();
+               }
                dynamicScrollLoadIfScrollVisible(jElement);
+               if(success_callback != null) {
+                  success_callback();
+               }
             },
             error: function(){
                window.alert("Something went wrong when trying to filter. Please try again.");
@@ -1636,7 +1787,7 @@ function replyPost(post_id){
 }
 
 function generateCodeMirrorBlocks(container_element) {
-    var codeSegments = container_element.querySelectorAll("[id=code]");
+    var codeSegments = container_element.querySelectorAll(".code");
     for (let element of codeSegments){
         var editor0 = CodeMirror.fromTextArea(element, {
         lineNumbers: true,
@@ -2053,6 +2204,7 @@ function hidePosts(text, id) {
 }
 
 function deletePostToggle(isDeletion, thread_id, post_id, author, time){
+    if(!checkAreYouSureForm()) return;
     var page = (isDeletion?"delete_post":"undelete_post");
     var message = (isDeletion?"delete":"undelete");
 
@@ -2313,8 +2465,8 @@ function toggleRegradeRequests(){
     }
 
 }
-function changeRegradeStatus(regradeId, gradeable_id, student_id, status) {
-    var url = buildUrl({'component': 'student', 'gradeable_id': gradeable_id ,'student_id': student_id ,'regrade_id': regradeId, 'status': status, 'action': 'change_request_status'});
+function changeRegradeStatus(regradeId, gradeable_id, submitter_id, status) {
+    var url = buildUrl({'component': 'student', 'gradeable_id': gradeable_id ,'submitter_id': submitter_id ,'regrade_id': regradeId, 'status': status, 'action': 'change_request_status'});
     $.ajax({
         url: url,
         success: function(data) {
@@ -2382,3 +2534,41 @@ $.fn.isInViewport = function() {                                        // jQuer
 
     return elementTop > viewportTop && elementBottom < viewportBottom;
 };
+
+function checkSidebarCollapse() {
+    var size = $(document.body).width();
+    if (size < 1000) {
+        $("#sidebar").toggleClass("collapsed", true);
+    }
+}
+
+//Called from the DOM collapse button, toggle collapsed and save to localStorage
+function toggleSidebar() {
+    var sidebar = $("#sidebar");
+    var shown = sidebar.hasClass("collapsed");
+
+    sidebar.addClass("animate");
+
+    localStorage.sidebar = !shown;
+    sidebar.toggleClass("collapsed", !shown);
+}
+
+$(document).ready(function() {
+    //Collapsed sidebar tooltips
+    $('[data-toggle="tooltip"]').tooltip({
+        position: { my: "right+0 bottom+0" }
+    });
+    $("#nav-sidebar-collapse.collapse-icon").attr("title", "Expand Sidebar");
+
+    //Remember sidebar preference
+    if (localStorage.sidebar !== "") {
+        //Apparently !!"false" === true and if you don't cast this to bool then it will animate??
+        $("#sidebar").toggleClass("collapsed", localStorage.sidebar === "true");
+    }
+
+    //If they make their screen too small, collapse the sidebar to allow more horizontal space
+    $(document.body).resize(function() {
+        checkSidebarCollapse();
+    });
+    checkSidebarCollapse();
+});

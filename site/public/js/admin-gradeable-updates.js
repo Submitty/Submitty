@@ -1,100 +1,153 @@
 
+let updateInProgressCount = 0;
 let errors = {};
-function updateErrors(data) {
-    $('#ajax_raw').html(data);
-    if(Object.keys(errors).length !== 0) {
+function updateErrorMessage() {
+    if (Object.keys(errors).length !== 0) {
         $('#save_status').html('<span style="color: red">Some Changes Failed!</span>');
-        $('#ajax_debug').html(errors);
     }
     else {
-        $('#save_status').html('All Changes Saved');
-        $('#ajax_debug').html('');
+        if(updateInProgressCount === 0) {
+            $('#save_status').html('All Changes Saved');
+        }
     }
 }
 
 function setError(name, err) {
-    $('input[name="' + name + '"]').each(function (i, elem) {
+    $('[name="' + name + '"]').each(function (i, elem) {
         elem.title = err;
         elem.style.backgroundColor = '#FDD';
     });
-    errors[name] = err[1];
+    errors[name] = err;
 }
-function clearError(name) {
-    $('input[name="' + name + '"]').each(function (i, elem) {
+
+function clearError(name, update) {
+    $('[name="' + name + '"]').each(function (i, elem) {
         elem.title = '';
         elem.style.backgroundColor = '';
+
+        // Update the value if provided
+        if(update !== undefined) {
+            $(elem).val(update);
+        }
     });
     // remove the error for this property
     delete errors[name];
 }
-function getErrorCallback(props) {
-    return function(data) {
-        let arr = JSON.parse(data);
-        props.forEach(function (name) {
-            if(name in arr['errors']) {
-                setError(name, arr['errors'][name]);
-            }
-            else {
-                clearError(name);
-            }
-        });
-        updateErrors(data);
-    }
+
+function setGradeableUpdateInProgress() {
+    $('#save_status').html('Saving...');
+    updateInProgressCount++;
 }
-function getSuccessCallback(props) {
-    return function() {
-        props.forEach(clearError);
-        updateErrors();
+
+function setGradeableUpdateComplete() {
+    updateInProgressCount--;
+}
+
+function updatePdfPageSettings() {
+    let pdf_page = $('#yes_pdf_page').is(':checked');
+    let pdf_page_student = $('#yes_pdf_page_student').is(':checked');
+    if (pdf_page === false) {
+        $('#no_pdf_page_student').prop('checked', true);
     }
+    setPdfPageAssignment(pdf_page === false ? PDF_PAGE_NONE : (pdf_page_student === true ? PDF_PAGE_STUDENT : PDF_PAGE_INSTRUCTOR))
+        .catch(function (err) {
+            alert('Failed to update pdf page setting! ' + err.message);
+        });
+}
+
+function onPrecisionChange() {
+    ajaxUpdateGradeableProperty(getGradeableId(), {
+        'precision': $('#point_precision_id').val()
+    }, function () {
+        // Clear errors by just removing red background
+        clearError('precision');
+        updateErrorMessage();
+
+        closeAllComponents(true)
+            .then(function () {
+                return reloadInstructorEditRubric(getGradeableId());
+            })
+            .catch(function (err) {
+                alert('Failed to reload the gradeable rubric! ' + err.message);
+            });
+    }, updateGradeableErrorCallback);
+}
+
+function updateGradeableErrorCallback(message, response_data) {
+    for (let key in response_data) {
+        if (response_data.hasOwnProperty(key)) {
+            setError(key, response_data[key]);
+        }
+    }
+    updateErrorMessage();
 }
 
 $(document).ready(function () {
-    updateErrors();
-
-    window.onbeforeunload = function(event) {
-        if(Object.keys(errors).length !== 0) {
+    window.onbeforeunload = function (event) {
+        if (Object.keys(errors).length !== 0) {
             event.returnValue = 1;
         }
     };
     $('input,select,textarea').change(function () {
-        if($(this).hasClass('ignore')) {
+        if ($(this).hasClass('ignore')) {
             return;
         }
         // If its rubric-related, then make different request
-        if($('#gradeable_rubric').find('[name="' + this.name + '"]').length > 0) {
+        if ($('#gradeable_rubric').find('[name="' + this.name + '"]').length > 0) {
             // ... but don't automatically save electronic rubric data
-            if(!$('#radio_electronic_file').is(':checked')) {
+            if (!$('#radio_electronic_file').is(':checked')) {
                 saveRubric(false);
             }
             return;
         }
-        if($('#grader_assignment').find('[name="' + this.name + '"]').length > 0) {
+        if ($('#grader_assignment').find('[name="' + this.name + '"]').length > 0) {
             saveGraders();
             return;
         }
         // Don't save if it we're ignoring it
-        if($(this).hasClass('ignore')) {
+        if ($(this).hasClass('ignore')) {
             return;
         }
 
         let data = {};
         data[this.name] = $(this).val();
         let addDataToRequest = function (i, val) {
+            if (val.type === 'radio' && !$(val).is(':checked')) {
+                return;
+            }
+            if($('#no_late_submission').is(':checked') && $(val).attr('name') === 'late_days') {
+                $(val).val('0');
+            }
             data[val.name] = $(val).val();
         };
 
         // If its date-related, then submit all date data
-        if($('#gradeable-dates').find('input[name="' + this.name + '"]').length > 0) {
-            $('#gradeable-dates :input').each(addDataToRequest);
+        if ($('#gradeable-dates').find('input[name="' + this.name + '"]').length > 0
+            || $(this).hasClass('date-related')) {
+            $('#gradeable-dates :input,.date-related').each(addDataToRequest);
         }
         ajaxUpdateGradeableProperty($('#g_id').val(), data,
-            getSuccessCallback(Object.keys(data)), getErrorCallback(Object.keys(data)));
+            function (response_data) {
+                // Clear errors by setting new values
+                for (let key in response_data) {
+                    if (response_data.hasOwnProperty(key)) {
+                        clearError(key, response_data[key]);
+                    }
+                }
+                // Clear errors by just removing red background
+                for (let key in data) {
+                    if (data.hasOwnProperty(key)) {
+                        clearError(key);
+                    }
+                }
+                updateErrorMessage();
+            }, updateGradeableErrorCallback);
     });
 });
 
 function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, errorCallback) {
-    $('#save_status').html('Saving...');
-    $.ajax({
+    setGradeableUpdateInProgress();
+    $.getJSON({
         type: "POST",
         url: buildUrl({
             'component': 'admin',
@@ -103,42 +156,26 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
             'id': gradeable_id
         }),
         data: p_values,
-        success: function (data, textStatus, xhr) {
-            console.log('Request returned status code ' + xhr.status);
-            if (typeof(successCallback) === "function") {
-                successCallback();
+        success: function (response) {
+            setGradeableUpdateComplete();
+            if (response.status === 'success') {
+                successCallback(response.data);
+            } else if (response.status === 'fail') {
+                errorCallback(response.message, response.data);
+            } else {
+                alert('Internal server error');
+                console.error(response.message);
             }
         },
-        error: function (data) {
-            console.log('[Error]: Request returned status code ' + data.status);
-            if (typeof(errorCallback) === "function") {
-                errorCallback(data.responseText);
-            }
+        error: function (response) {
+            setGradeableUpdateComplete();
+            console.error('Failed to parse response from server: ' + response);
         }
     });
 }
 
 function serializeRubric() {
     return function () {
-
-        // make pdf pages reflect the pdf page setting
-        if ($('#yes_pdf_page').is(':checked')) {
-            if ($('#yes_pdf_page_student').is(':checked')) {
-                $("input[name^='page_component']").each(function () {
-                    this.value = -1;
-                });
-            } else {
-                $("input[name^='page_component']").each(function () {
-                    if (this.value < 1) {
-                        this.value = 1;
-                    }
-                });
-            }
-        } else {
-            $("input[name^='page_component']").each(function () {
-                this.value = 0;
-            });
-        }
 
         let o = {};
         let a = this.serializeArray();
@@ -264,7 +301,7 @@ function saveRubric(redirect = true) {
     let values = serializeRubric();
 
     $('#save_status').html('Saving Rubric...');
-    $.ajax({
+    $.getJSON({
         type: "POST",
         url: buildUrl({
             'component': 'admin',
@@ -273,25 +310,28 @@ function saveRubric(redirect = true) {
             'id': $('#g_id').val()
         }),
         data: values,
-        success: function (data, textStatus, xhr) {
-            console.log('Request returned status code ' + xhr.status);
-            delete errors['rubric'];
-            updateErrors();
-            if(redirect) {
-                window.location.replace(buildUrl({
-                    'component': 'admin',
-                    'page': 'admin_gradeable',
-                    'action': 'edit_gradeable_page',
-                    'id': $('#g_id').val(),
-                    'nav_tab': '2'
-                }));
+        success: function (response) {
+            if (response.status === 'success') {
+                delete errors['rubric'];
+                updateErrorMessage();
+                if (redirect) {
+                    window.location.replace(buildUrl({
+                        'component': 'admin',
+                        'page': 'admin_gradeable',
+                        'action': 'edit_gradeable_page',
+                        'id': $('#g_id').val(),
+                        'nav_tab': '2'
+                    }));
+                }
+            } else {
+                errors['rubric'] = response.message;
+                updateErrorMessage();
+                alert('Error saving rubric, you may have tried to delete a component with grades.  Refresh the page');
             }
         },
-        error: function (data) {
-            console.log('[Error]: Request returned status code ' + data.status);
-            errors['rubric'] = data;
-            updateErrors(data.responseText);
-            alert('Error saving rubric, you may have tried to delete a component with grades.  Refresh the page');
+        error: function (response) {
+            alert('Error saving rubric.  Refresh the page');
+            console.error('Failed to parse response from server: ' + response);
         }
     });
 }
@@ -326,7 +366,7 @@ function saveGraders() {
     let values = serializeGraders();
 
     $('#save_status').html('Saving Graders...');
-    $.ajax({
+    $.getJSON({
         type: "POST",
         url: buildUrl({
             'component': 'admin',
@@ -337,13 +377,19 @@ function saveGraders() {
         data: {
             graders: values
         },
-        success: function (data, textStatus, xhr) {
-            console.log('Request returned status code ' + xhr.status);
-            updateErrors();
+        success: function (response) {
+            if (response.status !== 'success') {
+                alert('Error saving graders!');
+                console.error(response.message);
+                errors['graders'] = '';
+            } else {
+                delete errors['graders'];
+            }
+            updateErrorMessage();
         },
-        error: function (data) {
-            console.log('[Error]: Request returned status code ' + data.status);
-            updateErrors(data.responseText);
+        error: function (response) {
+            alert('Error saving graders!');
+            console.error('Failed to parse response from server: ' + response);
         }
     });
 }

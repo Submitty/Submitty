@@ -1,48 +1,37 @@
 const { UI } = PDFAnnotate;
+
+let currentTool;
+
 let documentId = '';
 let PAGE_HEIGHT;
-let RENDER_OPTIONS = {
+window.RENDER_OPTIONS = {
     documentId,
+    userId: "",
     pdfDocument: null,
-    // scale: parseFloat(localStorage.getItem(`${documentId}/scale`), 10) || 0.5,
-    scale: 1,
-    rotate: parseInt(localStorage.getItem(`${documentId}/rotate`), 10) || 0
+    scale: parseFloat(localStorage.getItem('scale')) || 1,
+    rotate: parseInt(localStorage.getItem('rotate')) || 0
 };
-let GENERAL_INFORMATION = {
+window.GENERAL_INFORMATION = {
+    grader_id: "",
     user_id: "",
     gradeable_id: "",
     file_name: "",
 }
 
-PDFAnnotate.setStoreAdapter(new PDFAnnotate.LocalStoreAdapter());
-PDFJS.workerSrc = 'js/pdf/pdf.worker.js';
+PDFJS.workerSrc = 'js/pdf/pdf.worker.min.js';
 
-/*
-This chunk renders the page when scrolling. It also makes sure that no page is rendered more than once.
- */
 let NUM_PAGES = 0;
-let renderedPages = [];
-let okToRender = false;
-document.getElementById('submission_browser').addEventListener('scroll', function (e) {
-    let visiblePageNum = Math.round(e.target.scrollTop / PAGE_HEIGHT) + 1;
-    let visiblePage = document.querySelector(`.page[data-page-number="${visiblePageNum}"][data-loaded="false"]`);
 
-    if (renderedPages.indexOf(visiblePageNum) == -1){
-        okToRender = true;
-        renderedPages.push(visiblePageNum);
-    } else {
-        okToRender = false;
+//For the student popup window, buildURL doesn't work because the context switched. Therefore, we need to pass in the url
+//as a parameter.
+function render_student(gradeable_id, user_id, file_name, pdf_url){
+    render(gradeable_id, user_id, "", file_name, pdf_url)
+}
+
+function render(gradeable_id, user_id, grader_id, file_name, url = "") {
+    if(url === ""){
+        url = buildUrl({'component': 'misc', 'page': 'base64_encode_pdf'});
     }
-
-    if (visiblePage && okToRender) {
-        setTimeout(function () {
-            UI.renderPage(visiblePageNum, RENDER_OPTIONS);
-        });
-    }
-});
-
-function render(gradeable_id, user_id, file_name) {
-    let url = buildUrl({'component': 'misc', 'page': 'base64_encode_pdf'});
     $.ajax({
         type: 'POST',
         url: url,
@@ -52,16 +41,33 @@ function render(gradeable_id, user_id, file_name) {
             filename: file_name
         },
         success: function(data){
+            GENERAL_INFORMATION.grader_id = grader_id;
             GENERAL_INFORMATION.user_id = user_id;
             GENERAL_INFORMATION.gradeable_id = gradeable_id;
             GENERAL_INFORMATION.file_name = file_name;
             RENDER_OPTIONS.documentId = file_name;
-            documentId = file_name;
-            var pdfData = JSON.parse(data);
-            pdfData = atob(pdfData);
+            //TODO: Duplicate user_id in both RENDER_OPTIONS and GENERAL_INFORMATION, also grader_id = user_id in this context.
+            RENDER_OPTIONS.userId = grader_id;
+            PDFAnnotate.setStoreAdapter(new PDFAnnotate.LocalStoreAdapter(GENERAL_INFORMATION.grader_id));
+            // documentId = file_name;
+
+            let pdfData;
+            try {
+                pdfData = JSON.parse(data);
+                pdfData = atob(pdfData);
+            } catch (err){
+                alert("Please make sure that this is the correct version. If it is, " +
+                    "then the PDF is either corrupt or broken");
+            }
             PDFJS.getDocument({data:pdfData}).then((pdf) => {
                 RENDER_OPTIONS.pdfDocument = pdf;
                 let viewer = document.getElementById('viewer');
+                $(viewer).on('touchstart touchmove', function(e){
+                    //Let touchscreen work
+                    if(currentTool == "pen" || currentTool == "text"){
+                        e.preventDefault();
+                    }
+                });
                 viewer.innerHTML = '';
                 NUM_PAGES = pdf.pdfInfo.numPages;
                 for (let i=0; i<NUM_PAGES; i++) {
@@ -72,7 +78,6 @@ function render(gradeable_id, user_id, file_name) {
                         let viewport = pdfPage.getViewport(RENDER_OPTIONS.scale, RENDER_OPTIONS.rotate);
                         PAGE_HEIGHT = viewport.height;
                     }).then(function(){
-                        // console.log("hi");
                         document.getElementById('pageContainer'+page_id).addEventListener('mousedown', function(){
                             //Makes sure the panel don't move when writing on it.
                             $("#submission_browser").draggable('disable');
@@ -91,201 +96,13 @@ function render(gradeable_id, user_id, file_name) {
         }
     });
 }
-//Toolbar stuff
-(function (){
-    function setActiveToolbarItem(option){
-        let selected = $('.tool-selected');
-        if(option != selected.attr('value')){
-            //There are two classes for the icons; toolbar-action and toolbar-item.
-            //toolbar-action are single use buttons such as download and clear
-            //toolbar-item are continuous options such as pen, text, etc.
-            let clicked_button = $("a[value="+option+"]");
-            if(!clicked_button.hasClass('toolbar-action')){
-                $(selected[0]).removeClass('tool-selected');
-                clicked_button.addClass('tool-selected');
-                switch($(selected[0]).attr('value')){
-                    case 'pen':
-                        UI.disablePen();
-                        break;
-                    case 'cursor':
-                        UI.disableEdit();
-                        break;
-                    case 'text':
-                        UI.disableText();
-                        break;
-                }
-                $('.selection_panel').hide();
-            }
-            switch(option){
-                case 'pen':
-                    UI.enablePen();
-                    break;
-                case 'cursor':
-                    UI.enableEdit();
-                    break;
-                case 'clear':
-                    clearCanvas();
-                    break;
-                case 'save':
-                    saveFile();
-                    break;
-                case 'zoomin':
-                    zoom('in');
-                    break;
-                case 'zoomout':
-                    zoom('out');
-                    break;
-                case 'text':
-                    UI.enableText();
-                    break;
-            }
-        } else {
-            switch(option){
-                case 'pen':
-                    $("#pen_selection").toggle();
-                    break;
-                case 'text':
-                    $("#text_selection").toggle();
-                    break;
-            }
-        }
-    }
 
-    function zoom(option){
-        if(option == 'in'){
-            RENDER_OPTIONS.scale += 0.1;
-        } else {
-            RENDER_OPTIONS.scale -= 0.1;
-        }
-
-        UI.renderPage(1, RENDER_OPTIONS);
-    }
-
-    function clearCanvas(){
-        if (confirm('Are you sure you want to clear annotations?')) {
-            for (let i=0; i<NUM_PAGES; i++) {
-                document.querySelector(`div#pageContainer${i+1} svg.annotationLayer`).innerHTML = '';
-            }
-
-            localStorage.removeItem(`${RENDER_OPTIONS.documentId}/annotations`);
-        }
-    }
-
-    function saveFile(){
-        $('#save_status').text("Saved");
-        $('#save_status').css('color', 'black');
-        let url = buildUrl({'component': 'grading','page': 'electronic', 'action': 'save_pdf_annotation'});
-        let annotation_layer = localStorage.getItem(`${RENDER_OPTIONS.documentId}/annotations`);
-        // let count = 0;
-        // for (let i = 0; i < JSON.parse(annotation_layer).length; i++){
-        //     count+= JSON.parse(annotation_layer)[i]['lines'].length;
-        // }
-        // console.log(count);
-        $.ajax({
-            type: 'POST',
-            url: url,
-            data: {
-                annotation_layer,
-                GENERAL_INFORMATION
-            },
-            success: function(data){
-
-            }
-        });
-    }
-
-    function handleToolbarClick(e){
-        setActiveToolbarItem(e.target.getAttribute('value'));
-    }
-    document.getElementById('pdf_annotation_icons').addEventListener('click', handleToolbarClick);
-})();
-
-// Pen stuff
-(function () {
-    let penSize;
-    let penColor;
-
-    function initPen() {
-        let init_size = localStorage.getItem('pen/size') || 3;
-        let init_color = localStorage.getItem('pen/color') || '#ff0000';
-        document.getElementById('pen_size_selector').value = init_size;
-        document.getElementById('pen_size_value').value = init_size;
-        document.getElementById('pen_color_selector').value = init_color;
-        setPen(init_size, init_color);
-    }
-
-    function setPen(size, color) {
-        let modified = false;
-
-        if (penSize !== size) {
-            modified = true;
-            penSize = size;
-            localStorage.setItem('pen/size', penSize);
-        }
-
-        if (penColor !== color) {
-            modified = true;
-            penColor = color;
-            localStorage.setItem('pen/color', penColor);
-        }
-
-        if (modified) {
-            UI.setPen(penSize, penColor);
-        }
-    }
-
-    document.getElementById('pen_color_selector').addEventListener('change', function(e){
-        this.value = e.srcElement.value;
-        setPen(penSize, e.srcElement.value);
-    });
-    document.getElementById('pen_size_selector').addEventListener('change', function(e){
-        setPen(e.srcElement.value, penColor);
-    });
-    initPen();
-})();
-
-// Text stuff
-(function () {
-    let textSize;
-    let textColor;
-
-    function initText() {
-        let init_size = localStorage.getItem('text/size') || 12;
-        let init_color = localStorage.getItem('text/color') || '#000000';
-        document.getElementById('text_size_selector').value = init_size;
-        document.getElementById('text_color_selector').value = init_color;
-        setText(init_size, init_color);
-    }
-
-    function setText(size, color) {
-        let modified = false;
-        if (textSize !== size) {
-            modified = true;
-            textSize = size;
-            localStorage.setItem('text/size', textSize);
-        }
-
-        if (textColor !== color) {
-            modified = true;
-            textColor = color;
-            localStorage.setItem('text/color', textColor);
-        }
-
-        if (modified) {
-            UI.setText(textSize, textColor);
-        }
-    }
-    document.getElementById('text_color_selector').addEventListener('change', function(e){
-        setText(textSize, e.srcElement.value);
-    });
-    document.getElementById('text_size_selector').addEventListener('change', function(e){
-        setText(e.srcElement.value, textColor);
-    });
-    initText();
-})();
 
 //TODO: Stretch goal, find a better solution to load/unload annotation. Maybe use session storage?
 $(window).unload(function() {
-    localStorage.removeItem(`${RENDER_OPTIONS.documentId}/annotations`);
+    for(let i = 0; i < localStorage.length; i++){
+        if(localStorage.key(i).includes('annotations')){
+            localStorage.removeItem(localStorage.key(i));
+        }
+    }
 });
-

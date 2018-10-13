@@ -5,6 +5,7 @@ use app\libraries\Core;
 use app\libraries\ExceptionHandler;
 use app\libraries\Logger;
 use app\libraries\Utils;
+use app\libraries\Access;
 
 /*
  * The user's umask is ignored for the user running php, so we need
@@ -95,13 +96,11 @@ $core->getOutput()->loadTwig();
 $core->loadGradingQueue();
 
 if($core->getConfig()->getInstitutionName() !== ""){
-    $core->getOutput()->addBreadcrumb($core->getConfig()->getInstitutionName(), "");
-    $core->getOutput()->addBreadcrumb("", $core->getConfig()->getInstitutionHomepage(),false, true);
+    $core->getOutput()->addBreadcrumb($core->getConfig()->getInstitutionName(), null, $core->getConfig()->getInstitutionHomepage());
 }
 $core->getOutput()->addBreadcrumb("Submitty", $core->getConfig()->getHomepageUrl());
 if($core->getConfig()->isCourseLoaded()){
-    $core->getOutput()->addBreadcrumb($core->getDisplayedCourseName(), $core->buildUrl());
-    $core->getOutput()->addBreadcrumb("", $core->getConfig()->getCourseHomeUrl(),false, true);
+    $core->getOutput()->addBreadcrumb($core->getDisplayedCourseName(), $core->buildUrl(), $core->getConfig()->getCourseHomeUrl());
 }
 
 date_default_timezone_set($core->getConfig()->getTimezone()->getName());
@@ -171,6 +170,13 @@ elseif ($core->getUser() === null) {
         $_REQUEST['component'] = 'navigation';
         $_REQUEST['page'] = 'no_access';
     }
+}
+else if ($core->getConfig()->isCourseLoaded()
+         && !$core->getAccess()->canI("course.view", ["semester" => $core->getConfig()->getSemester(), "course" => $core->getConfig()->getCourse()])
+         && $_REQUEST['component'] !== 'authentication') {
+
+    $_REQUEST['component'] = 'navigation';
+    $_REQUEST['page'] = 'no_access';
 }
 // Log the user action if they were logging in, logging out, or uploading something
 if ($core->getUser() !== null) {
@@ -261,6 +267,10 @@ switch($_REQUEST['component']) {
         break;
     case 'forum':
         $control = new app\controllers\forum\ForumController($core);
+        $control->run();
+        break;
+    case 'pdf':
+        $control = new app\controllers\pdf\PDFController($core);
         $control->run();
         break;
     default:

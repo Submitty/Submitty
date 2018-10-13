@@ -81,13 +81,14 @@ use app\libraries\Utils;
  * @method int|null getGdId()
  * @method void setGdId(int $gd_id)
  * @method \DateTime getUserViewedDate()
- * @method float getTotalPeerGradingNonExtraCredit()
+ * @method float getTotalPeerGradingPoints()
  * @method int getLateDayExceptions()
  * @method int getAllowedLateDays()
  * @method int getLateDays()
  * @method int getStudentAllowedLateDays()
  * @method int getRegradeStatus()
- * @method int getJustRegraded()
+ * @method \DateTime getRegradeRequestDate()
+ * @method bool isRegradeAllowed()
  */
 class Gradeable extends AbstractModel {
     
@@ -138,6 +139,12 @@ class Gradeable extends AbstractModel {
 
     /** @property @var \DateTime|null Date for when the grade will be released to students */
     protected $grade_released_date = null;
+
+    /** @property @var \DateTime|null Date by when regrade requests can be submitted */
+    protected $regrade_request_date = null;
+
+    /** @property @var bool */
+    protected $regrade_allowed = true;
 
     /** @property @var bool */
     protected $ta_grades_released = false;
@@ -284,11 +291,9 @@ class Gradeable extends AbstractModel {
 
     protected $been_tagraded = false;
 
-    protected $total_tagrading_non_extra_credit = 0;
-    protected $total_tagrading_extra_credit = 0;
+    protected $total_ta_grading_points = 0;
     
-    protected $total_peer_grading_non_extra_credit = 0;
-    protected $total_peer_grading_extra_credit=0;
+    protected $total_peer_grading_points = 0;
 
     /** @property @var \app\models\User|null */
     protected $user = null;
@@ -319,8 +324,6 @@ class Gradeable extends AbstractModel {
     /** @property @var int */
     protected $curr_late_charged = 0;
 
-    /** @property @var boolean */
-    protected $just_regraded = false;
 
     public function __construct(Core $core, $details=array(), User $user = null) {
         parent::__construct($core);
@@ -344,8 +347,8 @@ class Gradeable extends AbstractModel {
 
         $this->type = $details['g_gradeable_type'];
         if ($this->type === GradeableType::ELECTRONIC_FILE) {
-            $this->open_date = new \DateTime($details['eg_submission_open_date'], $timezone);
-            $this->due_date = new \DateTime($details['eg_submission_due_date'], $timezone);
+            $this->open_date = DateUtils::parseDateTime($details['eg_submission_open_date'], $timezone);
+            $this->due_date = DateUtils::parseDateTime($details['eg_submission_due_date'], $timezone);
             $this->allowed_late_days = $details['eg_late_days'];
             $this->is_repository = $details['eg_is_repository'] === true;
             $this->subdirectory = $details['eg_subdirectory'];
@@ -361,22 +364,25 @@ class Gradeable extends AbstractModel {
             $this->team_assignment = isset($details['eg_team_assignment']) ? $details['eg_team_assignment'] === true : false;
             //$this->inherit_teams_from = $details['eg_inherit_teams_from'];
             $this->max_team_size = $details['eg_max_team_size'];
-            $this->team_lock_date = new \DateTime($details['eg_team_lock_date'], $timezone);
+            $this->team_lock_date = DateUtils::parseDateTime($details['eg_team_lock_date'], $timezone);
+            $this->regrade_request_date = DateUtils::parseDateTime($details['eg_regrade_request_date'], $timezone);
+            $this->regrade_allowed = $details['eg_regrade_allowed'];
             $this->regrade_status = $this->core->getQueries()->getRegradeRequestStatus($this->user->getId(), $this->id);
             if ($this->team_assignment) {
                 $this->team = $this->core->getQueries()->getTeamByGradeableAndUser($this->id, $this->user->getId());
             }
-            if (isset($details['active_version']) && $details['active_version'] !== null) {
+            $this->student_allowed_late_days = $details['student_allowed_late_days'] ?? $this->core->getConfig()->getDefaultStudentLateDays();
+
+            if (isset($details['g_version']) && $details['g_version'] !== null) {
                 $this->been_autograded = true;
                 $this->active_version = $details['active_version'];
                 $this->graded_auto_non_hidden_non_extra_credit = floatval($details['autograding_non_hidden_non_extra_credit']);
                 $this->graded_auto_non_hidden_extra_credit = floatval($details['autograding_non_hidden_extra_credit']);
                 $this->graded_auto_hidden_non_extra_credit = floatval($details['autograding_hidden_non_extra_credit']);
                 $this->graded_auto_hidden_extra_credit = floatval($details['autograding_hidden_extra_credit']);
-                $this->submission_time = new \DateTime($details['submission_time'], $timezone);
+                $this->submission_time = DateUtils::parseDateTime($details['submission_time'], $timezone);
                 $this->late_day_exceptions = $details['late_day_exceptions'];
                 $this->late_days = $details['days_late'];
-                $this->student_allowed_late_days = $details['student_allowed_late_days'] ?? $this->core->getConfig()->getDefaultStudentLateDays();
             }
             
             if (isset($details['highest_version']) && $details['highest_version']!== null) {
@@ -455,7 +461,7 @@ class Gradeable extends AbstractModel {
 
                 if (!$component_for_info->getIsText()) {
                     $max_value = $component_for_info->getMaxValue();
-                    $this->total_tagrading_non_extra_credit += $max_value;
+                    $this->total_ta_grading_points += $max_value;
                 }
             }
             // We don't sort by order within the DB as we're aggregating the component details into an array so we'd
@@ -467,11 +473,11 @@ class Gradeable extends AbstractModel {
 
         $this->minimum_grading_group = $details['g_min_grading_group'];
         $this->grade_by_registration = $details['g_grade_by_registration'] === true;
-        $this->grade_start_date = new \DateTime($details['g_grade_start_date'], $timezone);
-        $this->grade_released_date = new \DateTime($details['g_grade_released_date'], $timezone);
-        $this->ta_view_date = new \DateTime($details['g_ta_view_start_date'], $timezone);
+        $this->grade_start_date = DateUtils::parseDateTime($details['g_grade_start_date'], $timezone);
+        $this->grade_released_date = DateUtils::parseDateTime($details['g_grade_released_date'], $timezone);
+        $this->ta_view_date = DateUtils::parseDateTime($details['g_ta_view_start_date'], $timezone);
         // Is it past when the TA grades should be released
-        $this->ta_grades_released = $this->grade_released_date < new \DateTime("now", $timezone);
+        $this->ta_grades_released = $this->grade_released_date < $this->core->getDateTimeNow();
         $this->bucket = $details['g_syllabus_bucket'];
     }
 
@@ -924,8 +930,8 @@ class Gradeable extends AbstractModel {
         return $points;
     }
 
-    public function getTotalTANonExtraCreditPoints() {
-        return $this->total_tagrading_non_extra_credit;
+    public function getTotalTAPoints() {
+        return $this->total_ta_grading_points;
     }
 
     public function getTAViewDate(){
@@ -1238,7 +1244,7 @@ class Gradeable extends AbstractModel {
             "graded_autograder_points" => $this->getGradedAutograderPoints(),
             "total_autograder_non_extra_credit_points" => $this->getTotalAutograderNonExtraCreditPoints(),
             "graded_ta_points" => $this->getGradedTAPoints(),
-            "total_ta_non_extra_credit_points" => $this->getTotalTANonExtraCreditPoints(),
+            "total_ta_points" => $this->getTotalTAPoints(),
             "components" => []
         ];
 
@@ -1269,11 +1275,9 @@ class Gradeable extends AbstractModel {
             }
         }
         $repo = $vcs_path;
-
+        $repo = str_replace('{$vcs_type}', $this->core->getConfig()->getVcsType(), $repo);
         $repo = str_replace('{$gradeable_id}', $this->getId(), $repo);
         $repo = str_replace('{$user_id}', $this->getUser()->getId(), $repo);
-        $repo = str_replace(FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'vcs'),
-            $this->core->getConfig()->getVcsUrl(), $repo);
         if ($this->isTeamAssignment()) {
             if ($team === null) {
                 $team = $this->getTeam();
@@ -1417,66 +1421,6 @@ class Gradeable extends AbstractModel {
     }
 
     /**
-     * Get a list of all grading sections
-     * @return GradingSection[]
-     */
-    public function getAllGradingSections() {
-        if ($this->getPeerGrading()) {
-            //Todo: What are all sections when you have peer grading?
-        }
-
-        $users = [];
-        $teams = [];
-
-        if ($this->isGradeByRegistration()) {
-            if ($this->isTeamAssignment()) {
-                $all_teams = $this->core->getQueries()->getTeamsByGradeableId($this->getId());
-                foreach ($all_teams as $team) {
-                    /** @var Team $team */
-                    $teams[$team->getRegistrationSection()][] = $team;
-                }
-            } else {
-                $all_users = $this->core->getQueries()->getAllUsers();
-                foreach ($all_users as $user) {
-                    /** @var User $user */
-                    $users[$user->getRegistrationSection()][] = $user;
-                }
-            }
-            $section_names = $this->core->getQueries()->getRegistrationSections();
-            foreach ($section_names as $i => $section) {
-                $section_names[$i] = $section['sections_registration_id'];
-            }
-            $graders = $this->core->getQueries()->getGradersForRegistrationSections($section_names);
-        } else {
-            if ($this->isTeamAssignment()) {
-                $all_teams = $this->core->getQueries()->getTeamsByGradeableId($this->getId());
-                foreach ($all_teams as $team) {
-                    /** @var Team $team */
-                    $teams[$team->getRotatingSection()][] = $team;
-                }
-            } else {
-                $all_users = $this->core->getQueries()->getAllUsers();
-                foreach ($all_users as $user) {
-                    /** @var User $user */
-                    $users[$user->getRotatingSection()][] = $user;
-                }
-            }
-            $section_names = $this->core->getQueries()->getRotatingSections();
-            foreach ($section_names as $i => $section) {
-                $section_names[$i] = $section['sections_rotating_id'];
-            }
-            $graders = $this->core->getQueries()->getGradersForRotatingSections($this->getId(), $section_names);
-        }
-
-        $sections = [];
-        foreach ($section_names as $section_name) {
-            $sections[] = new GradingSection($this->core, $this->isGradeByRegistration(), $section_name, $graders[$section_name] ?? [], $users[$section_name] ?? null, $teams[$section_name] ?? null);
-        }
-
-        return $sections;
-    }
-
-    /**
      * Get the percent completed grading for the current user
      * @return array [total_components, percent]
      */
@@ -1586,5 +1530,11 @@ class Gradeable extends AbstractModel {
         }
         return $pages;
     }
-
+    //return true if students can currently submit regrades for this assignment, false otherwise
+    public function isRegradeOpen(){
+        if($this->core->getConfig()->isRegradeEnabled()==true && $this->isTaGradeReleased() && $this->regrade_allowed && ($this->regrade_request_date > $this->core->getDateTimeNow())){
+            return true;
+        }
+        return false;
+    }
 }

@@ -33,7 +33,6 @@ use app\models\AbstractModel;
  * @method int getOrder()
  * @method void setOrder($order)
  * @method int getPage()
- * @method void setPage($page)
  * @method Mark[] getMarks()
  */
 class Component extends AbstractModel {
@@ -163,6 +162,15 @@ class Component extends AbstractModel {
         $this->gradeable = $gradeable;
     }
 
+    /**
+     * Sets the page number for this component
+     * @param int $page
+     */
+    public function setPage(int $page) {
+        $this->page = max($page, -1);
+        $this->modified = true;
+    }
+
     const point_properties = [
         'lower_clamp',
         'default',
@@ -284,11 +292,37 @@ class Component extends AbstractModel {
     }
 
     /**
-     * Deletes a mark from this component without checking if a submitter has received it yet
-     * @param Mark $mark
-     * @throws \InvalidArgumentException If this component doesn't own the provided mark
+     * Adds a new mark to this component with the provided title and point value
+     * @param string $title
+     * @param float $points
+     * @return Mark the created mark
      */
-    public function forceDeleteMark(Mark $mark) {
+    public function addMark(string $title, float $points, bool $publish) {
+        $mark = new Mark($this->core, $this, [
+            'title' => $title,
+            'points' => $points,
+            'order' => count($this->marks),
+            'publish' => $publish,
+            'id' => 0
+        ]);
+        $this->marks[] = $mark;
+        return $mark;
+    }
+
+    /**
+     * Base method for deleting marks.  This isn't exposed as public so
+     *  its make very clear that a delete mark operation is being forceful.
+     * @param Mark $mark
+     * @param bool $force true to delete the mark if it has receivers
+     * @throws \InvalidArgumentException If this component doesn't own the provided mark or
+     *          $force is false and the mark has receivers
+     */
+    private function deleteMarkInner(Mark $mark, bool $force = false) {
+        // Don't delete if the mark has receivers (and we aren't forcing)
+        if($mark->anyReceivers() && !$force) {
+            throw new \InvalidArgumentException('Attempt to delete a mark with receivers!');
+        }
+
         // Calculate our marks array without the provided mark
         $new_marks = array_udiff($this->marks, [$mark], Utils::getCompareByReference());
 
@@ -299,6 +333,24 @@ class Component extends AbstractModel {
 
         // Finally, set our array to the new one
         $this->marks = $new_marks;
+    }
+
+    /**
+     * Deletes a mark from this component if it has no receivers
+     * @param Mark $mark
+     * @throws \InvalidArgumentException If this component doesn't own the provided mark or the mark has receivers
+     */
+    public function deleteMark(Mark $mark) {
+        $this->deleteMarkInner($mark, false);
+    }
+
+    /**
+     * Deletes a mark from this component without checking if a submitter has received it yet
+     * @param Mark $mark
+     * @throws \InvalidArgumentException If this component doesn't own the provided mark
+     */
+    public function forceDeleteMark(Mark $mark) {
+        $this->deleteMarkInner($mark, true);
     }
 
     /**

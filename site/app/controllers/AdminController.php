@@ -10,6 +10,7 @@ use app\controllers\admin\ConfigurationController;
 use app\controllers\admin\UsersController;
 use app\controllers\admin\LateController;
 use app\controllers\admin\PlagiarismController;
+use app\controllers\admin\WrapperController;
 use app\libraries\Core;
 use app\libraries\Output;
 use app\models\User;
@@ -40,11 +41,15 @@ class AdminController extends AbstractController {
                 $controller = new AdminGradeableController($this->core);
                 break;
             case 'reports':
-                $this->core->getOutput()->addBreadcrumb('Report');
+                $this->core->getOutput()->addBreadcrumb('Grade Reports');
                 $controller = new ReportController($this->core);
                 break;
             case 'plagiarism':
                 $controller = new PlagiarismController($this->core);
+                break;
+            case 'wrapper':
+                $this->core->getOutput()->addBreadcrumb("Customize Website Theme");
+                $controller = new WrapperController($this->core);
                 break;
             default:
                 $this->core->getOutput()->showError("Invalid page request for controller ".get_class($this));

@@ -215,6 +215,17 @@ class AutogradingConfig extends AbstractModel {
     }
 
     /**
+     * Gets if this autograding config has any points associated with it
+     * @return bool
+     */
+    public function anyPoints() {
+        return max($this->total_hidden_non_extra_credit,
+                $this->total_non_hidden_non_extra_credit,
+                $this->total_hidden_extra_credit,
+                $this->total_non_hidden_extra_credit) > 0;
+    }
+
+    /**
      * Gets if there are any user-viewable testcases
      * @return bool
      */

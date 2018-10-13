@@ -1,0 +1,207 @@
+{
+    "testcases": [
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test01/server/STDOUT.txt",
+                    "description": "server/STDOUT.txt",
+                    "difference_file": "test01/0_diff.json",
+                    "expected_file": "test_output/integration_test/expected_server_output_0.txt",
+                    "messages": [
+                        {
+                            "message": "ERROR: Your code did not match the expected output.",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "actual_file": "test01/client/STDOUT_1.txt",
+                    "description": "client/STDOUT_1.txt",
+                    "difference_file": "test01/1_diff.json",
+                    "expected_file": "test_output/integration_test/expected_client_output_0.txt",
+                    "messages": [
+                        {
+                            "message": "ERROR: Your code did not match the expected output.",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "actual_file": "test01/router/STDOUT.txt",
+                    "description": "Standard Output (router/STDOUT.txt)",
+                    "messages": [
+                        {
+                            "message": "WARNING: This file should be empty",
+                            "type": "warning"
+                        }
+                    ]
+                }
+            ],
+            "points_awarded": 3,
+            "test_name": "Test 1 Ping Pong"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test02/server/STDOUT.txt",
+                    "description": "server/STDOUT.txt",
+                    "difference_file": "test02/0_diff.json",
+                    "expected_file": "test_output/integration_test/expected_server_output_1.txt",
+                    "messages": [
+                        {
+                            "message": "ERROR: Your code did not match the expected output.",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "actual_file": "test02/client/STDOUT_1.txt",
+                    "description": "client/STDOUT_1.txt",
+                    "difference_file": "test02/1_diff.json",
+                    "expected_file": "test_output/integration_test/expected_client_output_1.txt",
+                    "messages": [
+                        {
+                            "message": "ERROR: Your code did not match the expected output.",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "actual_file": "test02/router/STDOUT.txt",
+                    "description": "Standard Output (router/STDOUT.txt)",
+                    "messages": [
+                        {
+                            "message": "WARNING: This file should be empty",
+                            "type": "warning"
+                        }
+                    ]
+                }
+            ],
+            "points_awarded": 3,
+            "test_name": "Test 2 Ping Pong, Ping Pong"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test03/server/STDOUT.txt",
+                    "description": "server/STDOUT.txt",
+                    "difference_file": "test03/0_diff.json",
+                    "expected_file": "test_output/integration_test/expected_server_output_2.txt",
+                    "messages": [
+                        {
+                            "message": "ERROR: Your code did not match the expected output.",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "actual_file": "test03/client/STDOUT_1.txt",
+                    "description": "client/STDOUT_1.txt",
+                    "difference_file": "test03/1_diff.json",
+                    "expected_file": "test_output/integration_test/expected_client_output_2.txt",
+                    "messages": [
+                        {
+                            "message": "ERROR: Your code did not match the expected output.",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "actual_file": "test03/router/STDOUT.txt",
+                    "description": "Standard Output (router/STDOUT.txt)",
+                    "messages": [
+                        {
+                            "message": "WARNING: This file should be empty",
+                            "type": "warning"
+                        }
+                    ]
+                }
+            ],
+            "points_awarded": 3,
+            "test_name": "Test 3 Not Ping"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test04/server/STDOUT.txt",
+                    "description": "server/STDOUT.txt",
+                    "difference_file": "test04/0_diff.json",
+                    "expected_file": "test_output/integration_test/expected_server_output_3.txt",
+                    "messages": [
+                        {
+                            "message": "ERROR: Your code did not match the expected output.",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "actual_file": "test04/client/STDOUT_1.txt",
+                    "description": "client/STDOUT_1.txt",
+                    "difference_file": "test04/1_diff.json",
+                    "expected_file": "test_output/integration_test/expected_client_output_3.txt",
+                    "messages": [
+                        {
+                            "message": "ERROR: Your code did not match the expected output.",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "actual_file": "test04/router/STDOUT.txt",
+                    "description": "Standard Output (router/STDOUT.txt)",
+                    "messages": [
+                        {
+                            "message": "WARNING: This file should be empty",
+                            "type": "warning"
+                        }
+                    ]
+                }
+            ],
+            "points_awarded": 3,
+            "test_name": "Test 4 Not Ping, Ping, Ping"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test05/client/STDOUT_1.txt",
+                    "description": "client/STDOUT_1.txt",
+                    "difference_file": "test05/0_diff.json",
+                    "expected_file": "test_output/integration_test/expected_client_output_4.txt",
+                    "messages": [
+                        {
+                            "message": "ERROR: Your code did not match the expected output.",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "actual_file": "test05/server/STDOUT.txt",
+                    "description": "Standard Output (server/STDOUT.txt)",
+                    "messages": [
+                        {
+                            "message": "WARNING: This file should be empty",
+                            "type": "warning"
+                        }
+                    ]
+                },
+                {
+                    "actual_file": "test05/router/STDOUT.txt",
+                    "description": "Standard Output (router/STDOUT.txt)",
+                    "messages": [
+                        {
+                            "message": "WARNING: This file should be empty",
+                            "type": "warning"
+                        }
+                    ]
+                }
+            ],
+            "points_awarded": 2,
+            "test_name": "Test 5 UDP Test"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Test 6 Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}

@@ -1,6 +1,5 @@
-<h3>{{ preferred_name }}'s late day usage</h3><br/>
-<p>Initial total late days allowed: {{ initial_late_days }}</p>
-{% if late_day_info.late_days_updates|length != 0 %}
+<p>Initial total late days allowed: {{ student_gradeables[0].getStudentAllowedLateDays() }}</p>
+{% if late_update|length != 0 %}
     <p>Late day history:</p>
     {% set cumulative_days = initial_late_days %}
     {% for late_days_update in late-day_info.late_days_updates %}

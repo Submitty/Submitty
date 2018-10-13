@@ -18,17 +18,13 @@ class SimpleGraderView extends AbstractView {
      * @param bool $show_all_sections_button
      * @return string
      */
-    public function simpleDisplay($gradeable, $graded_gradeables, $student_full, $graders, $section_type, $show_all_sections_button) {
+    public function simpleDisplay($gradeable, $graded_gradeables, $student_full, $graders, $section_type, $show_all_sections_button, $sort) {
         $action = ($gradeable->getType() === 1) ? 'lab' : 'numeric';
 
         // Default is viewing your sections sorted by id
         // Limited grader does not have "View All"
         // If nothing to grade, Instructor will see all sections
-        if (!isset($_GET['view']) || $_GET['view'] !== 'all') {
-            $view = 'all';
-        } else {
-            $view = null;
-        }
+        $view_all = isset($_GET['view']) && $_GET['view'] === 'all';
         $components_numeric = [];
         $components_text = [];
 
@@ -83,10 +79,11 @@ class SimpleGraderView extends AbstractView {
             "action" => $action,
             "section_type" => $section_type,
             "show_all_sections_button" => $show_all_sections_button,
-            "view_all" => $view,
+            "view_all" => $view_all,
             "student_full" => $student_full,
             "components_numeric" => $components_numeric,
             "components_text" => $components_text,
+            "sort" => $sort,
             "sections" => $sections,
             "component_ids" => $component_ids,
         ]);
