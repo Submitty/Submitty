@@ -552,10 +552,14 @@ void AddDefaultGrader(const std::string &command,
     std::string program_name = get_program_name(command,whole_config);
     if (program_name == "/usr/bin/python") {
       j["description"] = "syntax error output from running python";
-    } else if (program_name == "/usr/bin/java") {
+    } else if (program_name.find("java") != std::string::npos) {
       j["description"] = "syntax error output from running java";
-    } else if (program_name == "/usr/bin/javac") {
-      j["description"] = "syntax error output from running javac";
+      if (program_name.find("javac") != std::string::npos) {
+        j["description"] = "syntax error output from compiling java";
+      }
+      if (j["method"] == "warnIfNotEmpty" || j["method"] == "errorIfNotEmpty") {
+        j["jvm_memory"] = true;
+      }
     } else {
       j["description"] = "Standard Error ("+filename+")";
     }
@@ -690,6 +694,12 @@ void Compilation_Helper(nlohmann::json &single_testcase) {
         v2["actual_file"] = "STDERR_" + std::to_string(i) + ".txt";
       }
       v2["description"] = "Compilation Errors and/or Warnings";
+      nlohmann::json command_json = commands[i];
+      assert (command_json.is_string());
+      std::string command = command_json;
+      if (command.find("java") != std::string::npos) {
+        v2["jvm_memory"] = true;
+      }
       v2["show_actual"] = "on_failure";
       v2["show_message"] = "on_failure";
       v2["deduction"] = warning_fraction;

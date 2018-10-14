@@ -8,6 +8,7 @@
 
 #include <unistd.h>
 #include <algorithm>
+#include <sstream>
 
 #include "myersDiff.h"
 #include "json.hpp"
@@ -85,6 +86,39 @@ TestResults* fileExists_doit (const TestCase &tc, const nlohmann::json& j) {
 }
 
 
+bool JavaToolOptionsCheck(const std::string &student_file_contents) {
+  std::stringstream ss(student_file_contents);
+  std::string token;
+  // "Picked up JAVA_TOOL_OPTIONS: -Xms128m -Xmx256m\n"
+  if (!(ss >> token) || token != "Picked") return false;
+  if (!(ss >> token) || token != "up") return false;
+  if (!(ss >> token) || token != "JAVA_TOOL_OPTIONS:") return false;
+
+  char c;
+  if (!(ss >> c) || c != '-') return false;
+  if (!(ss >> c) || c != 'X') return false;
+  if (!(ss >> c) || c != 'm') return false;
+  if (!(ss >> c) || c != 's') return false;
+
+  int val;
+  if (!(ss >> val)) return false;
+  if (!(ss >> c) || c != 'm') return false;
+
+  if (!(ss >> c) || c != '-') return false;
+  if (!(ss >> c) || c != 'X') return false;
+  if (!(ss >> c) || c != 'm') return false;
+  if (!(ss >> c) || c != 'x') return false;
+
+  if (!(ss >> val)) return false;
+  if (!(ss >> c) || c != 'm') return false;
+
+  // should be nothing else in the file
+  if (ss >> token) return false;
+
+  return true;
+}
+
+
 TestResults* warnIfNotEmpty_doit (const TestCase &tc, const nlohmann::json& j) {
   std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > messages;
   std::cout << "WARNING IF NOT EMPTY DO IT" << std::endl;
@@ -93,6 +127,10 @@ TestResults* warnIfNotEmpty_doit (const TestCase &tc, const nlohmann::json& j) {
     return new TestResults(1.0,messages);
   }
   if (student_file_contents != "") {
+    if (j.find("jvm_memory") != j.end() && j["jvm_memory"] == true &&
+        JavaToolOptionsCheck(student_file_contents)) {
+      return new TestResults(1.0);
+    }
     return new TestResults(1.0,{std::make_pair(MESSAGE_WARNING,"WARNING: This file should be empty")});
   }
   return new TestResults(1.0);
@@ -104,6 +142,10 @@ TestResults* errorIfNotEmpty_doit (const TestCase &tc, const nlohmann::json& j) 
   std::string student_file_contents;
   if (!openStudentFile(tc,j,student_file_contents,messages)) { 
     return new TestResults(0.0,messages);
+  }
+  if (j.find("jvm_memory") != j.end() && j["jvm_memory"] == true &&
+      JavaToolOptionsCheck(student_file_contents)) {
+    return new TestResults(1.0);
   }
   if (student_file_contents != "") {
     if (student_file_contents.find("error") != std::string::npos)

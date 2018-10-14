@@ -38,26 +38,30 @@ class TeamController extends AbstractController {
     }
 
     public function createNewTeam() {
-        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         $user_id = $this->core->getUser()->getId();
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
-        if ($gradeable == null) {
-            $this->core->addErrorMessage("Failed to load gradeable: {$gradeable_id}");
+
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
+            $this->core->addErrorMessage('Invalid or missing gradeable id!');
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
+
         if (!$gradeable->isTeamAssignment()) {
-            $this->core->addErrorMessage("{$gradeable->getName()} is not a team assignment");
+            $this->core->addErrorMessage("{$gradeable->getTitle()} is not a team assignment");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
         $return_url = $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable_id, 'page' => 'team'));
-        if ($gradeable->getTeam() !== null) {
+
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id, false);
+        if ($graded_gradeable !== false) {
             $this->core->addErrorMessage("You must leave your current team before you can create a new team");
             $this->core->redirect($return_url);
         }
 
         $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $user_id);
-        $this->core->getQueries()->removeFromSeekingTeam($gradeable_id,$user_id);
+        $this->core->getQueries()->removeFromSeekingTeam($gradeable_id, $user_id);
         $team_id = $this->core->getQueries()->createTeam($gradeable_id, $user_id, $this->core->getUser()->getRegistrationSection(), $this->core->getUser()->getRotatingSection());
         $this->core->addSuccessMessage("Created a new team");
 
@@ -73,7 +77,7 @@ class TeamController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO") . " " . $this->core->getConfig()->getTimezone()->getName();
         $settings_file = FileUtils::joinPaths($user_path, "user_assignment_settings.json");
         $json = array("team_history" => array(array("action" => "create", "time" => $current_time, "user" => $user_id)));
 
@@ -84,24 +88,28 @@ class TeamController extends AbstractController {
     }
 
     public function leaveTeam() {
-        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         $user_id = $this->core->getUser()->getId();
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
-        if ($gradeable == null) {
-            $this->core->addErrorMessage("Failed to load gradeable: {$gradeable_id}");
+
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
+            $this->core->addErrorMessage('Invalid or missing gradeable id!');
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
+
         if (!$gradeable->isTeamAssignment()) {
-            $this->core->addErrorMessage("{$gradeable->getName()} is not a team assignment");
+            $this->core->addErrorMessage("{$gradeable->getTitle()} is not a team assignment");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
         $return_url = $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable_id, 'page' => 'team'));
-        $team = $gradeable->getTeam();
-        if ($team === null) {
+
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id, false);
+        if ($graded_gradeable === false) {
             $this->core->addErrorMessage("You are not on a team");
             $this->core->redirect($return_url);
         }
+        $team = $graded_gradeable->getSubmitter()->getTeam();
 
         $date = $this->core->getDateTimeNow();
         if ($date->format('Y-m-d H:i:s') > $gradeable->getTeamLockDate()->format('Y-m-d H:i:s')) {
@@ -112,7 +120,7 @@ class TeamController extends AbstractController {
         $this->core->getQueries()->leaveTeam($team->getId(), $user_id);
         $this->core->addSuccessMessage("Left team");
 
-        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO") . " " . $this->core->getConfig()->getTimezone()->getName();
         $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id, $team->getId(), "user_assignment_settings.json");
         $json = FileUtils::readJsonFile($settings_file);
         if ($json === false) {
@@ -128,24 +136,28 @@ class TeamController extends AbstractController {
     }
 
     public function sendInvitation() {
-        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         $user_id = $this->core->getUser()->getId();
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
-        if ($gradeable == null) {
-            $this->core->addErrorMessage("Failed to load gradeable: {$gradeable_id}");
+
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
+            $this->core->addErrorMessage('Invalid or missing gradeable id!');
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
+
         if (!$gradeable->isTeamAssignment()) {
-            $this->core->addErrorMessage("{$gradeable->getName()} is not a team assignment");
+            $this->core->addErrorMessage("{$gradeable->getTitle()} is not a team assignment");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
         $return_url = $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable_id, 'page' => 'team'));
-        $team = $gradeable->getTeam();
-        if ($team === null) {
+
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id, false);
+        if ($graded_gradeable === false) {
             $this->core->addErrorMessage("You are not on a team");
             $this->core->redirect($return_url);
         }
+        $team = $graded_gradeable->getSubmitter()->getTeam();
 
         $date = $this->core->getDateTimeNow();
         if ($date->format('Y-m-d H:i:s') > $gradeable->getTeamLockDate()->format('Y-m-d H:i:s')) {
@@ -153,8 +165,8 @@ class TeamController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        if (($team->getSize() + count($team->getInvitations())) >= $gradeable->getMaxTeamSize()) {
-            $this->core->addErrorMessage("Cannot send invitation. Max team size is {$gradeable->getMaxTeamSize()}");
+        if (($team->getSize() + count($team->getInvitations())) >= $gradeable->getTeamSizeMax()) {
+            $this->core->addErrorMessage("Cannot send invitation. Max team size is {$gradeable->getTeamSizeMax()}");
             $this->core->redirect($return_url);
         }
 
@@ -199,21 +211,24 @@ class TeamController extends AbstractController {
     }
 
     public function acceptInvitation() {
-        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         $user_id = $this->core->getUser()->getId();
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
-        if ($gradeable == null) {
-            $this->core->addErrorMessage("Failed to load gradeable: {$gradeable_id}");
+
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
+            $this->core->addErrorMessage('Invalid or missing gradeable id!');
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
+
         if (!$gradeable->isTeamAssignment()) {
-            $this->core->addErrorMessage("{$gradeable->getName()} is not a team assignment");
+            $this->core->addErrorMessage("{$gradeable->getTitle()} is not a team assignment");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
         $return_url = $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable_id, 'page' => 'team'));
-        $team = $gradeable->getTeam();
-        if ($team !== null) {
+
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id, false);
+        if ($graded_gradeable !== false) {
             $this->core->addErrorMessage("You must leave your current team before you can accept an invitation");
             $this->core->redirect($return_url);
         }
@@ -230,8 +245,8 @@ class TeamController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        if ($accept_team->getSize() >= $gradeable->getMaxTeamSize()) {
-            $this->core->addErrorMessage("Cannot accept invitation. Max team size is {$gradeable->getMaxTeamSize()}");
+        if ($accept_team->getSize() >= $gradeable->getTeamSizeMax()) {
+            $this->core->addErrorMessage("Cannot accept invitation. Max team size is {$gradeable->getTeamSizeMax()}");
             $this->core->redirect($return_url);
         }
 
@@ -256,24 +271,28 @@ class TeamController extends AbstractController {
     }
 
     public function cancelInvitation() {
-        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         $user_id = $this->core->getUser()->getId();
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
-        if ($gradeable == null) {
-            $this->core->addErrorMessage("Failed to load gradeable: {$gradeable_id}");
+
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
+            $this->core->addErrorMessage('Invalid or missing gradeable id!');
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
+
         if (!$gradeable->isTeamAssignment()) {
-            $this->core->addErrorMessage("{$gradeable->getName()} is not a team assignment");
+            $this->core->addErrorMessage("{$gradeable->getTitle()} is not a team assignment");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
         $return_url = $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable_id, 'page' => 'team'));
-        $team = $gradeable->getTeam();
-        if ($team === null) {
+
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id, false);
+        if ($graded_gradeable !== false) {
             $this->core->addErrorMessage("You are not on a team");
             $this->core->redirect($return_url);
         }
+        $team = $graded_gradeable->getSubmitter()->getTeam();
 
         $date = $this->core->getDateTimeNow();
         if ($date->format('Y-m-d H:i:s') > $gradeable->getTeamLockDate()->format('Y-m-d H:i:s')) {
@@ -306,59 +325,74 @@ class TeamController extends AbstractController {
     }
 
     public function seekTeam() {
-        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         $user_id = $this->core->getUser()->getId();
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
-        if ($gradeable == null) {
-            $this->core->addErrorMessage("Failed to load gradeable: {$gradeable_id}");
+
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
+            $this->core->addErrorMessage('Invalid or missing gradeable id!');
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
+
         if (!$gradeable->isTeamAssignment()) {
-            $this->core->addErrorMessage("{$gradeable->getName()} is not a team assignment");
+            $this->core->addErrorMessage("{$gradeable->getTitle()} is not a team assignment");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
+
         $return_url = $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable_id, 'page' => 'team'));
-        
+
         $this->core->getQueries()->addToSeekingTeam($gradeable_id,$user_id);
         $this->core->addSuccessMessage("Added to list of users seeking team/partner");
         $this->core->redirect($return_url);   
     }
 
     public function stopSeekTeam() {
-        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         $user_id = $this->core->getUser()->getId();
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
-        if ($gradeable == null) {
-            $this->core->addErrorMessage("Failed to load gradeable: {$gradeable_id}");
+
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
+            $this->core->addErrorMessage('Invalid or missing gradeable id!');
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
+
         if (!$gradeable->isTeamAssignment()) {
-            $this->core->addErrorMessage("{$gradeable->getName()} is not a team assignment");
+            $this->core->addErrorMessage("{$gradeable->getTitle()} is not a team assignment");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
+
         $return_url = $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable_id, 'page' => 'team'));
-        
+
         $this->core->getQueries()->removeFromSeekingTeam($gradeable_id,$user_id);
         $this->core->addSuccessMessage("Removed from list of users seeking team/partner");
         $this->core->redirect($return_url);   
     }
 
     public function showPage() {
-        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $this->core->getUser()->getId());
-        if ($gradeable == null) {
-            $this->core->addErrorMessage("Failed to load gradeable: {$gradeable_id}");
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+        $user_id = $this->core->getUser()->getId();
+
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
+            $this->core->addErrorMessage('Invalid or missing gradeable id!');
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
+
         if (!$gradeable->isTeamAssignment()) {
-            $this->core->addErrorMessage("{$gradeable->getName()} is not a team assignment");
+            $this->core->addErrorMessage("{$gradeable->getTitle()} is not a team assignment");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
+        }
+
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id, false);
+        $team = null;
+        if ($graded_gradeable !== false) {
+            $team = $graded_gradeable->getSubmitter()->getTeam();
         }
 
         $teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
         $date = $this->core->getDateTimeNow();
         $lock = $date->format('Y-m-d H:i:s') > $gradeable->getTeamLockDate()->format('Y-m-d H:i:s');
         $users_seeking_team = $this->core->getQueries()->getUsersSeekingTeamByGradeableId($gradeable_id);
-        $this->core->getOutput()->renderOutput(array('submission', 'Team'), 'showTeamPage', $gradeable, $teams, $lock, $users_seeking_team);
+        $this->core->getOutput()->renderOutput(array('submission', 'Team'), 'showTeamPage', $gradeable, $team, $teams, $lock, $users_seeking_team);
     }
 }

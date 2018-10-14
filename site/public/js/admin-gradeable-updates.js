@@ -1,11 +1,14 @@
 
+let updateInProgressCount = 0;
 let errors = {};
 function updateErrorMessage() {
     if (Object.keys(errors).length !== 0) {
         $('#save_status').html('<span style="color: red">Some Changes Failed!</span>');
     }
     else {
-        $('#save_status').html('All Changes Saved');
+        if(updateInProgressCount === 0) {
+            $('#save_status').html('All Changes Saved');
+        }
     }
 }
 
@@ -29,6 +32,15 @@ function clearError(name, update) {
     });
     // remove the error for this property
     delete errors[name];
+}
+
+function setGradeableUpdateInProgress() {
+    $('#save_status').html('Saving...');
+    updateInProgressCount++;
+}
+
+function setGradeableUpdateComplete() {
+    updateInProgressCount--;
 }
 
 function updatePdfPageSettings() {
@@ -134,7 +146,7 @@ $(document).ready(function () {
 });
 
 function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, errorCallback) {
-    $('#save_status').html('Saving...');
+    setGradeableUpdateInProgress();
     $.getJSON({
         type: "POST",
         url: buildUrl({
@@ -145,6 +157,7 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
         }),
         data: p_values,
         success: function (response) {
+            setGradeableUpdateComplete();
             if (response.status === 'success') {
                 successCallback(response.data);
             } else if (response.status === 'fail') {
@@ -155,6 +168,7 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
             }
         },
         error: function (response) {
+            setGradeableUpdateComplete();
             console.error('Failed to parse response from server: ' + response);
         }
     });

@@ -1259,11 +1259,11 @@ ORDER BY rotating_section");
 
     public function getGradersByUserType() {
         $this->course_db->query(
-            "SELECT user_id, user_group FROM users WHERE user_group < 4 ORDER BY user_group, user_id ASC");
+            "SELECT user_firstname, user_lastname, user_id, user_group FROM users WHERE user_group < 4 ORDER BY user_group, user_id ASC");
         $users = [];
 
         foreach ($this->course_db->rows() as $row) {
-            $users[$row['user_group']][] = $row['user_id'];
+            $users[$row['user_group']][] = [$row['user_id'], $row['user_firstname'], $row['user_lastname']];
         }
         return $users;
     }
@@ -2189,7 +2189,7 @@ ORDER BY gt.{$section_key}", $params);
 	 * @param string $submitty_path
 	 * @return array - unarchived courses (and their details) accessible by $user_id
 	 */
-    public function getUnarchivedCoursesById($user_id, $submitty_path) {
+    public function getUnarchivedCoursesById($user_id) {
         $this->submitty_db->query("
 SELECT u.semester, u.course
 FROM courses_users u
@@ -2208,7 +2208,7 @@ ORDER BY u.user_group ASC,
         $return = array();
         foreach ($this->submitty_db->rows() as $row) {
             $course = new Course($this->core, $row);
-            $course->loadDisplayName($submitty_path);
+            $course->loadDisplayName();
             $return[] = $course;
         }
         return $return;
@@ -2225,7 +2225,7 @@ ORDER BY u.user_group ASC,
      * @param string $submitty_path
      * @return array - archived courses (and their details) accessible by $user_id
      */
-    public function getArchivedCoursesById($user_id, $submitty_path) {
+    public function getArchivedCoursesById($user_id) {
         $this->submitty_db->query("
 SELECT u.semester, u.course
 FROM courses_users u
@@ -2244,7 +2244,7 @@ ORDER BY u.user_group ASC,
         $return = array();
         foreach ($this->submitty_db->rows() as $row) {
             $course = new Course($this->core, $row);
-            $course->loadDisplayName($submitty_path);
+            $course->loadDisplayName();
             $return[] = $course;
         }
         return $return;
@@ -3152,7 +3152,9 @@ AND gc_id IN (
                 $gradeable->getTeamSizeMax(),
                 DateUtils::dateTimeToString($gradeable->getTeamLockDate()),
                 $this->course_db->convertBoolean($gradeable->isTaGrading()),
+                $this->course_db->convertBoolean($gradeable->isScannedExam()),
                 $this->course_db->convertBoolean($gradeable->isStudentView()),
+                $this->course_db->convertBoolean($gradeable->isStudentViewAfterGrades()),
                 $this->course_db->convertBoolean($gradeable->isStudentSubmit()),
                 $this->course_db->convertBoolean($gradeable->isStudentDownload()),
                 $this->course_db->convertBoolean($gradeable->isStudentDownloadAnyVersion()),
@@ -3176,7 +3178,9 @@ AND gc_id IN (
                   eg_max_team_size,
                   eg_team_lock_date,
                   eg_use_ta_grading,
+                  eg_scanned_exam,
                   eg_student_view,
+                  eg_student_view_after_grades,
                   eg_student_submit,
                   eg_student_download,
                   eg_student_any_version,
@@ -3188,7 +3192,7 @@ AND gc_id IN (
                   eg_peer_grade_set,
                   eg_regrade_request_date,
                   eg_regrade_allowed)
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
         }
 
         // Make sure to create the rotating sections
@@ -3278,7 +3282,9 @@ AND gc_id IN (
                     $gradeable->getTeamSizeMax(),
                     DateUtils::dateTimeToString($gradeable->getTeamLockDate()),
                     $this->course_db->convertBoolean($gradeable->isTaGrading()),
+                    $this->course_db->convertBoolean($gradeable->isScannedExam()),
                     $this->course_db->convertBoolean($gradeable->isStudentView()),
+                    $this->course_db->convertBoolean($gradeable->isStudentViewAfterGrades()),
                     $this->course_db->convertBoolean($gradeable->isStudentSubmit()),
                     $this->course_db->convertBoolean($gradeable->isStudentDownload()),
                     $this->course_db->convertBoolean($gradeable->isStudentDownloadAnyVersion()),
@@ -3302,7 +3308,9 @@ AND gc_id IN (
                       eg_max_team_size=?,
                       eg_team_lock_date=?,
                       eg_use_ta_grading=?,
+                      eg_scanned_exam=?,
                       eg_student_view=?,
+                      eg_student_view_after_grades=?,
                       eg_student_submit=?,
                       eg_student_download=?,
                       eg_student_any_version=?,
