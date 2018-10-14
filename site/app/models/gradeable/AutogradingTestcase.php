@@ -27,7 +27,7 @@ class AutogradingTestcase extends AbstractModel {
     protected $name = "";
     /** @property @var string TODO: The command to run? */
     protected $details = "";
-    /** @property @var float Number of points this testcase is worth */
+    /** @property @var int Number of points this testcase is worth */
     protected $points = 0;
     /** @property @var bool If this testcase is extra credit */
     protected $extra_credit = false;
@@ -49,7 +49,7 @@ class AutogradingTestcase extends AbstractModel {
 
         $this->name = Utils::prepareHtmlString($testcase['title'] ?? '');
         $this->details = $testcase['details'] ?? '';
-        $this->points = floatval($testcase['points'] ?? 0);
+        $this->points = intval($testcase['points'] ?? 0);
         $this->extra_credit = ($testcase['extra_credit'] ?? false) === true;
         $this->hidden = ($testcase['hidden'] ?? false) === true;
         $this->view_testcase_message = ($testcase['view_testcase_message'] ?? true) === true;
@@ -57,7 +57,7 @@ class AutogradingTestcase extends AbstractModel {
 
     /**
      * Gets the number of points this testcase is worth if $this->hidden is false, otherwise 0
-     * @return float
+     * @return int
      */
     public function getNonHiddenPoints() {
         return (!$this->isHidden()) ? $this->points : 0;
@@ -66,7 +66,7 @@ class AutogradingTestcase extends AbstractModel {
     /**
      * Gets the number of points this testcase is worth if $this->hidden is false and $this->extra_credit is false,
      *  otherwise 0
-     * @return float
+     * @return int
      */
     public function getNonHiddenNonExtraCreditPoints() {
         return (!$this->isHidden() && !$this->isExtraCredit()) ? $this->points : 0;

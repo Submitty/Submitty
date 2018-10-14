@@ -5,21 +5,21 @@
             <h5 class='label' style="float:right; padding-right:15px;">Browse Student Submissions:</h5>
             <div class="rubric-title">
                 <div style="float:right;">
-                    {{ render_template('AutoGrading', 'showVersionChoice', gradeable, on_change, "font-size: 13px;") }}
+                    {% include 'grading/VersionChoice.twig' with({formatting: "font-size: 13px;"}) %}
 
                     {# If viewing the active version, show cancel button, otherwise show button to switch active #}
-                    {% if gradeable.getCurrentVersionNumber() > 0 %}
+                    {% if display_version > 0 %}
                         <form style="display: inline;" method="post" onsubmit='return checkTaVersionChange();'
                               action="{{ core.buildUrl({
                                   'component': 'student',
                                   'action': 'update',
-                                  'gradeable_id': gradeable.getId(),
-                                  'new_version': gradeable.getCurrentVersionNumber() == gradeable.getActiveVersion() ? 0 : gradeable.getCurrentVersionNumber(),
+                                  'gradeable_id': gradeable_id,
+                                  'new_version': display_version == active_version ? 0 : display_version,
                                   'ta': true,
-                                  'who': who
+                                  'who': submitter_id
                               }) }}">
                             <input type='hidden' name="csrf_token" value="{{ core.getCsrfToken() }}" />
-                            {% if gradeable.getCurrentVersionNumber() == gradeable.getActiveVersion() %}
+                            {% if display_version == active_version %}
                                 <input type="submit" class="btn btn-default btn-xs" style="float:right; margin: 0 10px;" value="Cancel Student Submission">
                             {% else %}
                                 <input type="submit" class="btn btn-default btn-xs" style="float:right; margin: 0 10px;" value="Grade This Version">
@@ -31,19 +31,19 @@
                 </div>
                 <div>
                     <b>
-                        {% if gradeable.isTeamAssignment() %}
+                        {% if team_assignment %}
                             Team:<br/>
 
-                            {% for team_member in team_members %}
+                            {% for team_member in submitter.getTeam().getMemberUsers() %}
                                 &emsp;{{ team_member.getDisplayedFirstName() }} {{ team_member.getLastName() }} ({{ team_member.getId() }})<br/>
                             {% endfor %}
                         {% else %}
-                            {{ gradeable.getUser().getDisplayedFirstName() }} {{ gradeable.getUser().getLastName() }} ({{ gradeable.getUser().getId() }})
+                            {{ submitter.getUser().getDisplayedFirstName() }} {{ submitter.getUser().getLastName() }} ({{ submitter.getId() }})
                             <br/>
                         {% endif %}
 
-                        Submission Number: {{ gradeable.getActiveVersion() }} / {{ gradeable.getHighestVersion() }}<br/>
-                        Submitted: {{ gradeable.getSubmissionTime()|date("m/d/Y H:i:s") }}<br/>
+                        Submission Number: {{ active_version }} / {{ highest_version }}<br/>
+                        Submitted: {{ submission_time|date("m/d/Y H:i:s") }}<br/>
                     </b>
                 </div>
                 {% for table in tables %}
