@@ -1216,6 +1216,26 @@ class Gradeable extends AbstractModel {
     }
 
     /**
+     * Gets the components that are not for peer grading
+     * @return Component[]
+     */
+    public function getNonPeerComponents() {
+        return array_filter($this->components, function (Component $component) {
+            return !$component->isPeer();
+        });
+    }
+
+    /**
+     * Gets the components that are for peer grading
+     * @return Component[]
+     */
+    public function getPeerComponents() {
+        return array_filter($this->components, function (Component $component) {
+            return $component->isPeer();
+        });
+    }
+
+    /**
      * Gets the percent of grading complete for the provided user for this gradeable
      * @param User $grader
      * @return float The percentage (0 to 1) of grading completed or NAN if none required

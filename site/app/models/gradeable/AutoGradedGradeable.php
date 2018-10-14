@@ -144,6 +144,18 @@ class AutoGradedGradeable extends AbstractModel {
     }
 
     /**
+     * Gets the points the submitter earned for the active version
+     * @return int
+     */
+    public function getTotalPoints() {
+        $instance = $this->getActiveVersionInstance();
+        if ($instance === null) {
+            return NAN;
+        }
+        return $instance->getTotalPoints();
+    }
+
+    /**
      * Gets the highest submitted version number
      * @return int
      */
