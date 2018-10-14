@@ -2189,7 +2189,7 @@ ORDER BY gt.{$section_key}", $params);
 	 * @param string $submitty_path
 	 * @return array - unarchived courses (and their details) accessible by $user_id
 	 */
-    public function getUnarchivedCoursesById($user_id, $submitty_path) {
+    public function getUnarchivedCoursesById($user_id) {
         $this->submitty_db->query("
 SELECT u.semester, u.course
 FROM courses_users u
@@ -2208,7 +2208,7 @@ ORDER BY u.user_group ASC,
         $return = array();
         foreach ($this->submitty_db->rows() as $row) {
             $course = new Course($this->core, $row);
-            $course->loadDisplayName($submitty_path);
+            $course->loadDisplayName();
             $return[] = $course;
         }
         return $return;
@@ -2225,7 +2225,7 @@ ORDER BY u.user_group ASC,
      * @param string $submitty_path
      * @return array - archived courses (and their details) accessible by $user_id
      */
-    public function getArchivedCoursesById($user_id, $submitty_path) {
+    public function getArchivedCoursesById($user_id) {
         $this->submitty_db->query("
 SELECT u.semester, u.course
 FROM courses_users u
@@ -2244,7 +2244,7 @@ ORDER BY u.user_group ASC,
         $return = array();
         foreach ($this->submitty_db->rows() as $row) {
             $course = new Course($this->core, $row);
-            $course->loadDisplayName($submitty_path);
+            $course->loadDisplayName();
             $return[] = $course;
         }
         return $return;
