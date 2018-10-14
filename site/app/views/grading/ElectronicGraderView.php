@@ -461,7 +461,7 @@ class ElectronicGraderView extends AbstractView {
         if(!$peer) {
             $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderInformationPanel', $gradeable, $user);
         }
-        if ($graded_gradeable->hasActiveRegradeRequest()) {
+        if ($this->core->getConfig()->isRegradeEnabled()) {
             $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRegradePanel', $graded_gradeable);
         }
         if ($gradeable->getActiveVersion() == 0) {
@@ -507,7 +507,7 @@ class ElectronicGraderView extends AbstractView {
             "prev_student_url" => $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $graded_gradeable->getGradeableId(), 'who_id' => $prev_id]),
             "next_student_url" => $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $graded_gradeable->getGradeableId(), 'who_id' => $next_id]),
             "home_url" => $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'details', 'gradeable_id' => $graded_gradeable->getGradeableId(), 'view' => (count($this->core->getUser()->getGradingRegistrationSections()) == 0) ? 'all' : null]),
-            'regrade_panel_available' => $graded_gradeable->hasActiveRegradeRequest(),
+            'regrade_panel_available' => $this->core->getConfig()->isRegradeEnabled(),
         ]);
     }
 
