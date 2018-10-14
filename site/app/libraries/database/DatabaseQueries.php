@@ -1259,11 +1259,11 @@ ORDER BY rotating_section");
 
     public function getGradersByUserType() {
         $this->course_db->query(
-            "SELECT user_id, user_group FROM users WHERE user_group < 4 ORDER BY user_group, user_id ASC");
+            "SELECT user_firstname, user_lastname, user_id, user_group FROM users WHERE user_group < 4 ORDER BY user_group, user_id ASC");
         $users = [];
 
         foreach ($this->course_db->rows() as $row) {
-            $users[$row['user_group']][] = $row['user_id'];
+            $users[$row['user_group']][] = [$row['user_id'], $row['user_firstname'], $row['user_lastname']];
         }
         return $users;
     }
