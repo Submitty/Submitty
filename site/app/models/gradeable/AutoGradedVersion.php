@@ -183,12 +183,15 @@ class AutoGradedVersion extends AbstractModel {
                 // TODO: Autograding results file was incomplete.  This is a big problem, but how should
                 // TODO:   we handle this error
             }
-            $graded_testcase = new AutoGradedTestcase(
-                $this->core, $testcase, $path, $result_details['testcases'][$testcase->getIndex()]);
-            $this->graded_testcases[$testcase->getIndex()] = $graded_testcase;
-
-            if (in_array($testcase, $config->getEarlySubmissionTestCases())) {
+            if ($result_details != null &&
+                count($result_details['testcases']) > $testcase->getIndex() &&
+                $result_details['testcases'][$testcase->getIndex()] != null) {
+              $graded_testcase = new AutoGradedTestcase
+                ($this->core, $testcase, $path, $result_details['testcases'][$testcase->getIndex()]);
+              $this->graded_testcases[$testcase->getIndex()] = $graded_testcase;
+              if (in_array($testcase, $config->getEarlySubmissionTestCases())) {
                 $this->early_incentive_points += $graded_testcase->getPoints();
+              }
             }
         }
     }
