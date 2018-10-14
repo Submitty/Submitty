@@ -324,7 +324,7 @@ HTML;
 					$return .= <<<HTML
 					<div  style="position: relative;width: 25%;height: 100%;display: inline-block;" >
 						<a class="btn-sm btn-primary hover_glow" style="z-index: 1; position: absolute;right: 0px;top: 0px;" onclick="updateThreads(true, function(){ $('#thread_list').animate({ scrollTop: 0 }, 'fast');});"><i class="fa fa-2x fa-angle-double-up" style="position: relative;" title="Move to top"></i></a>
-						<a class="btn-sm btn-primary hover_glow" style=" z-index: 1; position: absolute;right: 0px;bottom: 0px;" onclick="updateThreads(false, function(){ $('#thread_list').animate({ scrollTop: $('#thread_list').prop('scrollHeight') }, 'fast');});"><i class="fa fa-2x fa-angle-double-down" style="position: relative;" title="Move to bottom"></i></a>
+						<a class="btn-sm btn-primary hover_glow" style="z-index: 1; position: absolute;right: 0px;bottom: 0px;" onclick="updateThreads(false, function(){ $('#thread_list').animate({ scrollTop: $('#thread_list').prop('scrollHeight') }, 'fast');});"><i class="fa fa-2x fa-angle-double-down" style="position: relative;" title="Move to bottom"></i></a>
 					<div id="thread_list" style="width: 100%;" class="thread_list" prev_page='{$prev_page}' next_page='{$next_page}'>
 						<i class="fa fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
 						<i class="fa fa-caret-up fa-2x fa-fw fill-available" style="color:gray;{$arrowup_visibility}" aria-hidden="true"></i>
@@ -624,15 +624,19 @@ HTML;
                         }
 						if($thread['status'] !=0) {
 							if($thread['status'] == 1) {
-								$fa_icon = "fa-check-circle";
-								$fa_color = "palegreen";
+								$fa_icon = "fa-check";
+								$fa_color = "#5cb85c";
+								$fa_margin_right = "0px";
+								$fa_font_size = "1.5em";
+
 							} else {
-								$fa_icon = "fa-exclamation-circle";
-								$fa_color = "yellow";
+								$fa_icon = "fa-question";
+								$fa_color = "#ffcc00";
+								$fa_margin_right = "5px";
+								$fa_font_size = "1.8em";
 							}
 							$return .= <<<HTML
-							<i class="fa ${fa_icon}" style="padding-left:3px;position:relative; float:right; display:inline-block; color:${fa_color}; -webkit-text-stroke-width: 1px;
-    -webkit-text-stroke-color: black;" aria-hidden="true"></i>
+							<i class="fa ${fa_icon}" style="margin-right:${fa_margin_right}; padding-left:3px; position:relative; float:right; display:inline-block; color:${fa_color}; font-size:${fa_font_size};" aria-hidden="true"></i>
 HTML;
 						}
 						$categories_content = array();

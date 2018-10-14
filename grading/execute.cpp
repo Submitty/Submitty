@@ -899,6 +899,15 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   setenv("OMP_NUM_THREADS","4",1);
 
 
+  // Set an environment variable to override the defaults for the
+  // initial java virtual machine heap (xms) and maximum virtual
+  // machine heap.
+  setenv("JAVA_TOOL_OPTIONS","-Xms128m -Xmx256m",1);
+  // NOTE: Instructors can still override this setting with the
+  // command line.  E.g.,
+  //    java -Xms128m -Xmx256m -cp . MyProgram
+
+
   // Haskell compiler needs a home environment variable (but it can be anything)
   setenv("HOME","/tmp",1);
 

@@ -22,12 +22,12 @@ use app\models\GradeableTestcase;
  * @method string[] getPartNames()
  * @method string getEarlySubmissionMessage()
  * @method int getEarlySubmissionMinimumDaysEarly()
- * @method float getEarlySubmissionMinimumPoints()
+ * @method int getEarlySubmissionMinimumPoints()
  * @method GradeableTestcase[] getEarlySubmissionTestCases()
- * @method float getTotalNonHiddenNonExtraCredit()
- * @method float getTotalNonHiddenExtraCredit()
- * @method float getTotalHiddenNonExtraCredit()
- * @method float getTotalHiddenExtraCredit()
+ * @method int getTotalNonHiddenNonExtraCredit()
+ * @method int getTotalNonHiddenExtraCredit()
+ * @method int getTotalHiddenNonExtraCredit()
+ * @method int getTotalHiddenExtraCredit()
  */
 class AutogradingConfig extends AbstractModel {
 
@@ -40,7 +40,7 @@ class AutogradingConfig extends AbstractModel {
 
     /** @property @var string Any additional requirements for worker machine (i.e. "extra_ram")  */
     protected $required_capabilities;
-    /** @property @var float The number of seconds allowed for autograding */
+    /** @property @var int The number of seconds allowed for autograding */
     protected $max_possible_grading_time = -1;
 
     /** @property @var string[] The names of different upload bins on the submission page (1-indexed) */
@@ -66,13 +66,13 @@ class AutogradingConfig extends AbstractModel {
 
     /* Properties accumulated from GradeableTestcase's */
 
-    /** @property @var float Total number of non-hidden non-extra-credit ('normal') points for all test cases */
+    /** @property @var int Total number of non-hidden non-extra-credit ('normal') points for all test cases */
     protected $total_non_hidden_non_extra_credit = 0;
-    /** @property @var float Total number of non-hidden extra-credit points for all test cases */
+    /** @property @var int Total number of non-hidden extra-credit points for all test cases */
     protected $total_non_hidden_extra_credit = 0;
-    /** @property @var float Total number of hidden non-extra-credit points for all test cases */
+    /** @property @var int Total number of hidden non-extra-credit points for all test cases */
     protected $total_hidden_non_extra_credit = 0;
-    /** @property @var float Total number of hidden extra-credit points for all test cases */
+    /** @property @var int Total number of hidden extra-credit points for all test cases */
     protected $total_hidden_extra_credit = 0;
 
     public function __construct(Core $core, array $details) {

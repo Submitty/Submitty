@@ -101,4 +101,20 @@ class Submitter extends AbstractModel {
         return $this->getId() === $user->getId()
             || $this->isTeam() && in_array($user->getId(), $this->getTeam()->getMembers());
     }
+
+    /**
+     * Get the registration section for the submitter
+     * @return string
+     */
+    public function getRegistrationSection() {
+        return $this->team_or_user->getRegistrationSection();
+    }
+
+    /**
+     * Get the rotation section for the submitter
+     * @return int
+     */
+    public function getRotatingSection() {
+        return $this->team_or_user->getRotatingSection();
+    }
 }
