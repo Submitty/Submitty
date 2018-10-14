@@ -72,8 +72,6 @@ class HomeworkView extends AbstractView {
         }
 
         $regrade_available = $this->core->getConfig()->isRegradeEnabled()
-            // FIXME: remove this check once regrade requests support team assignments
-            && !$gradeable->isTeamAssignment()
             && $gradeable->isTaGradeReleased()
             && $gradeable->isTaGrading()
             && $graded_gradeable !== null
