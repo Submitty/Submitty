@@ -631,7 +631,7 @@ HTML;
 
 							} else {
 								$fa_icon = "fa-question";
-								$fa_color = "#ff8000";
+								$fa_color = "#ffcc00";
 								$fa_margin_right = "5px";
 								$fa_font_size = "1.8em";
 							}
