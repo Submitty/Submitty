@@ -194,6 +194,23 @@ class TaGradedGradeable extends AbstractModel {
     }
 
     /**
+     * Gets if any the graded components' versions are not the active version
+     * @return bool
+     */
+    public function hasVersionConflict() {
+        $active_version = $this->getGradedGradeable()->getAutoGradedGradeable()->getActiveVersion();
+        /** @var GradedComponentContainer $container */
+        foreach ($this->graded_component_containers as $container) {
+            foreach ($container->getGradedComponents() as $component) {
+                if ($component->getGradedVersion() !== $active_version) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * Gets the graded gradeable instance this Ta grade belongs to
      * @return GradedGradeable
      */
@@ -250,6 +267,20 @@ class TaGradedGradeable extends AbstractModel {
             }
         }
         return true;
+    }
+
+    /**
+     * Gets if this graded gradeable has any grades
+     * @return bool
+     */
+    public function anyGrades() {
+        /** @var GradedComponentContainer $container */
+        foreach ($this->graded_component_containers as $container) {
+            if ($container->anyGradedComponents()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

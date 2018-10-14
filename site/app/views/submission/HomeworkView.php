@@ -72,8 +72,6 @@ class HomeworkView extends AbstractView {
         }
 
         $regrade_available = $this->core->getConfig()->isRegradeEnabled()
-            // FIXME: remove this check once regrade requests support team assignments
-            && !$gradeable->isTeamAssignment()
             && $gradeable->isTaGradeReleased()
             && $gradeable->isTaGrading()
             && $graded_gradeable !== null
@@ -608,7 +606,7 @@ class HomeworkView extends AbstractView {
      */
     public function showRegradeDiscussion(GradedGradeable $graded_gradeable): string {
         $regrade_message = $this->core->getConfig()->getRegradeMessage();
-        if (!$graded_gradeable->hasRegradeRequest()) {
+        if (!$graded_gradeable->hasRegradeRequest() && !$this->core->getUser()->accessGrading()) {
             $btn_type = 'request';
             $url = $this->core->buildUrl(array('component' => 'student',
                 'gradeable_id' => $graded_gradeable->getGradeable()->getId(),
@@ -617,7 +615,17 @@ class HomeworkView extends AbstractView {
             ));
             $action = 'request_regrade';
         } else if ($this->core->getUser()->accessGrading()) {
-            if ($graded_gradeable->hasActiveRegradeRequest()) {
+            if(!$graded_gradeable->hasRegradeRequest()){
+                //incase a TA/instructor wants to open a regrade discussion with a student
+                $btn_type = 'request';
+                $url = $this->core->buildUrl(array('component' => 'student',
+                    'gradeable_id' => $graded_gradeable->getGradeable()->getId(),
+                    'submitter_id' => $this->core->getUser()->getId(),
+                    'action' => 'request_regrade',
+                 ));
+                $action = 'request_regrade';
+            }
+            else if ($graded_gradeable->hasActiveRegradeRequest()) {
                 $btn_type = 'admin_open';
                 $url = $this->core->buildUrl(array('component' => 'student',
                     'gradeable_id' => $graded_gradeable->getGradeable()->getId(),

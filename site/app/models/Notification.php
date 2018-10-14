@@ -185,7 +185,7 @@ class Notification extends AbstractModel {
     }
 
     private function actAsForumDeletedNotification($thread_id, $post_content, $target){
-        $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id))));
+        $this->setNotifyMetadata(json_encode(array()));
         $this->setNotifyContent("Deleted: Your thread/post '".$this->textShortner($post_content)."' was deleted by ".Utils::getDisplayNameForum(false, $this->core->getQueries()->getDisplayUserInfoFromUserId($this->getCurrentUser())));
         $this->setNotifySource($this->getCurrentUser());
         $this->setNotifyTarget($target);
@@ -211,6 +211,10 @@ class Notification extends AbstractModel {
             $message = substr($message, 0, $max_length - 3) . "...";
         }
         return $message;
+    }
+
+    public function hasEmptyMetadata() {
+        return count(json_decode($this->getNotifyMetadata())) == 0;
     }
 
     /**

@@ -9,7 +9,6 @@ import unittest
 from urllib.parse import urlencode
 
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -25,7 +24,7 @@ class BaseTestCase(unittest.TestCase):
     override user_id, user_name, and user_password as necessary for a
     particular testcase and this class will handle the rest to setup the test.
     """
-    TEST_URL = "http://192.168.56.101"
+    TEST_URL = "http://192.168.56.111"
     USER_ID = "student"
     USER_NAME = "Joe"
     USER_PASSWORD = "student"
@@ -40,7 +39,7 @@ class BaseTestCase(unittest.TestCase):
             self.test_url = BaseTestCase.TEST_URL
         self.driver = None
         """ :type driver: webdriver.Chrome """
-        self.options = Options()
+        self.options = webdriver.ChromeOptions()
         self.options.add_argument('--headless')
         self.options.add_argument("--disable-extensions")
         self.options.add_argument('--hide-scrollbars')

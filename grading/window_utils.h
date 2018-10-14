@@ -140,7 +140,8 @@ void moveMouseToOrigin(std::string window_name);
 * all parameters necessary for a call to execute.cpp's delayAndMemCheck.
 */
 void type(std::string command, std::string window_name, int childPID, float &elapsed, float& next_checkpoint, 
-                float seconds_to_run, int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill);
+                float seconds_to_run, int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill,
+                std::ostream &logfile);
 
 
 /**
@@ -160,4 +161,5 @@ bool isWindowedAction(const nlohmann::json action);
 */
 void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken, int& number_of_screenshots, 
                 std::string window_name, int childPID, float &elapsed, float& next_checkpoint, 
-                float seconds_to_run, int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill);
+                float seconds_to_run, int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill, 
+                std::ostream &logfile);

@@ -88,8 +88,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'course_details' => array(
                 'course_name' => 'Test Course',
                 'course_home_url' => '',
-                'default_hw_late_days' => 2,
-                'default_student_late_days' => 3,
+                'default_hw_late_days' => 0,
+                'default_student_late_days' => 0,
                 'zero_rubric_grades' => false,
                 'upload_message' => "",
                 'keep_previous_files' => false,
@@ -154,8 +154,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals("Test Course", $config->getCourseName());
         $this->assertEquals("http://example.com/index.php?semester=s17&course=csci0000", $config->getSiteUrl());
         $this->assertEquals("", $config->getCourseHomeUrl());
-        $this->assertEquals(2, $config->getDefaultHwLateDays());
-        $this->assertEquals(3, $config->getDefaultStudentLateDays());
+        $this->assertEquals(0, $config->getDefaultHwLateDays());
+        $this->assertEquals(0, $config->getDefaultStudentLateDays());
         $this->assertFalse($config->shouldZeroRubricGrades());
         $this->assertEquals(FileUtils::joinPaths($this->temp_dir, 'config'), $config->getConfigPath());
 
@@ -188,8 +188,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'authentication' => 'PamAuthentication',
             'timezone' => 'DateTimeZone',
             'course_home_url' => '',
-            'default_hw_late_days' => 2,
-            'default_student_late_days' => 3,
+            'default_hw_late_days' => 0,
+            'default_student_late_days' => 0,
             'zero_rubric_grades' => false,
             'upload_message' => '',
             'keep_previous_files' => false,
@@ -208,8 +208,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'course_details' => [
                     'course_name' => 'Test Course',
                     'course_home_url' => '',
-                    'default_hw_late_days' => 2,
-                    'default_student_late_days' => 3,
+                    'default_hw_late_days' => 0,
+                    'default_student_late_days' => 0,
                     'zero_rubric_grades' => false,
                     'upload_message' => "",
                     'keep_previous_files' => false,
