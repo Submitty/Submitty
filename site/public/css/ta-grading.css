@@ -654,6 +654,11 @@ tr.is_publish {
     background: #FFAAAA
 }
 
+.gradeable .custom-mark-error {
+    border-color: #F00;
+    background-color: #FEE;
+}
+
 .gradeable .mark-deleted span.delete-mark-container {
     display: none;
 }

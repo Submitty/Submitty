@@ -1691,6 +1691,23 @@ function getComponentVersionConflict(graded_component) {
     return graded_component !== undefined && graded_component.graded_version !== getDisplayVersion();
 }
 
+/**
+ * Sets the error state of the custom mark message
+ * @param {int} component_id
+ * @param {boolean} show_error
+ */
+function setCustomMarkError(component_id, show_error) {
+    let jquery = getComponentJQuery(component_id).find('textarea.mark-note-custom');
+    let c = 'custom-mark-error';
+    if (show_error) {
+        jquery.addClass(c);
+        jquery.prop('title', 'Custom mark cannot be blank!');
+    } else {
+        jquery.removeClass(c);
+        jquery.prop('title', '');
+    }
+}
+
 
 /**
  * DOM Callback methods
@@ -1903,6 +1920,11 @@ function onCustomMarkChange(me) {
  */
 function onToggleCustomMark(me) {
     let component_id = getComponentIdFromDOMElement(me);
+    let graded_component = getGradedComponentFromDOM(component_id);
+    if (graded_component.comment === '') {
+        setCustomMarkError(component_id, true);
+        return;
+    }
     toggleDOMCustomMark(component_id);
     toggleCustomMark(component_id)
         .catch(function (err) {
