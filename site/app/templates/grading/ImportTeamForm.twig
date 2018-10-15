@@ -12,7 +12,7 @@
     </div>
 {% endblock %}
 {% block form %}
-    <form method="post" action="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'import_teams', 'gradeable_id': gradeable.getId()}) }}" enctype="multipart/form-data">
+    <form method="post" action="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'import_teams', 'gradeable_id': gradeable_id}) }}" enctype="multipart/form-data">
         {{ parent() }}
         <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
     </form>

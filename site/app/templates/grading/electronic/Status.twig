@@ -1,5 +1,5 @@
 <div class="content">
-    <h1>Status of {{ gradeable.getName() }}</h1>
+    <h1>Status of {{ gradeable_title }}</h1>
 
     {% if graded_percentage == -1 %}
         <div class="sub">
@@ -18,7 +18,7 @@
                     <br/>
                 {% endif %}
 
-                {% if gradeable.isTeamAssignment() %}
+                {% if team_assignment %}
                     Students on a team: {{ team_total }}/{{ total_students }} ({{ team_percentage }}%)
                     <br />
                     <br />
@@ -59,8 +59,8 @@
                     </div>
                 {% endif %}
 
-                {% if gradeable.taGradesReleased() %}
-                    {% if gradeable.isTeamAssignment() %}
+                {% if ta_grades_released %}
+                    {% if team_assignment %}
                         <br />
                         Number of teams who have viewed their grade: {{ viewed_grade }} / {{ viewed_total }} ({{ viewed_percent }}%)
                     {% else %}
@@ -91,7 +91,7 @@
                             Count: {{ overall_average.getCount() }} <br/>
                         {% endif %}
                     </div>
-                    {% if gradeable.getTotalAutograderNonExtraCreditPoints() != 0 %}
+                    {% if autograding_non_extra_credit != 0 %}
                         {# Only show autograder if we have autograding points #}
                         <br/>
                         <b>Statistics for Auto-Grading: </b>
@@ -100,7 +100,7 @@
                             {% if autograded_average == null or autograded_average.getCount() == 0 %}
                                 No assignments have been submitted yet.
                             {% else %}
-                                Average: {{ autograded_average.getAverageScore() }} / {{ gradeable.getTotalAutograderNonExtraCreditPoints() }} ({{ autograded_percentage }}%)<br/>
+                                Average: {{ autograded_average.getAverageScore() }} / {{ autograding_non_extra_credit }} ({{ autograded_percentage }}%)<br/>
                                 Standard Deviation: {{ autograded_average.getStandardDeviation() }} <br/>
                                 Count: {{ autograded_average.getCount() }} <br/>
                             {% endif %}
@@ -141,22 +141,26 @@
     <div style="margin-top: 20px; vertical-align:bottom;">
         {% if graded_percentage != -1 or core.getUser().accessFullGrading() or peer %}
             <a class="btn btn-primary"
-               href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action' :  'details', 'gradeable_id' :  gradeable.getId(), 'view' : (core.getUser().getGradingRegistrationSections()|length == 0) ? 'all' : null}) }}">
+            {% if core.getUser().accessAdmin() %}
+               href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action' :  'details', 'gradeable_id' :  gradeable_id, 'view' : 'all' }) }}">
+            {% else %}
+               href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action' :  'details', 'gradeable_id' :  gradeable_id, 'view' : (core.getUser().getGradingRegistrationSections()|length == 0) ? 'all' : null}) }}">
+            {% endif %}
             Grading Details
             </a>
             {% if core.getUser().getGradingRegistrationSections()|length != 0 %}
                 <a class="btn btn-primary"
-                   href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'grade', 'gradeable_id': gradeable.getId()}) }}">
+                   href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'grade', 'gradeable_id': gradeable_id}) }}">
                     Grade Next Student
                 </a>
                 <a class="btn btn-primary"
-                   href="{{ core.buildUrl({'component': 'misc', 'page': 'download_all_assigned', 'dir': 'submissions', 'gradeable_id': gradeable.getId()}) }}">
+                   href="{{ core.buildUrl({'component': 'misc', 'page': 'download_all_assigned', 'dir': 'submissions', 'gradeable_id': gradeable_id}) }}">
                     Download Zip of All Assigned Students
                 </a>
             {% endif %}
             {% if core.getUser().accessFullGrading() %}
                 <a class="btn btn-primary"
-                   href="{{ core.buildUrl({'component': 'misc', 'page': 'download_all_assigned', 'dir': 'submissions', 'gradeable_id': gradeable.getId(), 'type': 'All'}) }}">
+                   href="{{ core.buildUrl({'component': 'misc', 'page': 'download_all_assigned', 'dir': 'submissions', 'gradeable_id': gradeable_id, 'type': 'All'}) }}">
                     Download Zip of All Students
                 </a>
             {% endif %}

@@ -7,17 +7,19 @@ Macros
 {% macro display_graders(graders, prefix, section_numbers, history, g_id) %}
     {% for grader in graders %}
         <tr class="{{ prefix }}">
-            <th>{{ grader }}</th>
-            <td><input type="checkbox" name="{{ prefix }}_all_{{ grader }}" id="{{ prefix }}_all_{{ grader }}"
-                       onclick='updateCheckBoxes("{{ prefix }}", "{{ grader }}", 0)'/></td>
+            <th>{{ grader[1] ~ " " ~ grader[2] ~ "(" ~ grader[0] ~ ")" }}</th>
+            <td><input type="checkbox" name="{{ prefix }}_all_{{ grader[0] }}" id="{{ prefix }}_all_{{ grader[0] }}"
+                       onclick='updateCheckBoxes("{{ prefix }}", "{{ grader[0] }}", 0)'/></td>
             {% for rs in section_numbers %}
-                <td><input type="checkbox" name="grader_{{ prefix }}_{{ rs }}_{{ grader }}"
-                        id="grader_{{ prefix }}_{{ rs }}_{{ grader }}"
-                        onclick='updateCheckBoxes("{{ prefix }}", "{{ grader }}", {{ rs }});'
-                        {{ (rs in history[grader][g_id]) ? 'checked' : '' }}/></td>
+                <td><input type="checkbox" name="grader_{{ prefix }}_{{ rs }}_{{ grader[0] }}"
+                        id="grader_{{ prefix }}_{{ rs }}_{{ grader[0] }}"
+                        onclick='updateCheckBoxes("{{ prefix }}", "{{ grader[0] }}", {{ rs }});'
+                        {{ (rs in history[grader[0]][g_id]) ? 'checked' : '' }}/></td>
             {% endfor %}
+
         </tr>
     {% endfor %}
+
 {% endmacro %}
 
 {#
@@ -63,11 +65,11 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
                         </tr>
                         <tr>
                             {% for user_group,users in graders_from_usertypes %}
-                                {% for user_id in users %}
+                                {% for user in users %}
                                     <tr class="g_history g{{ user_group }}">
-                                        <th>{{ user_id }}</th>
+                                        <th>{{ user[1] ~ " " ~ user[2] ~ "(" ~ user[0] ~ ")" }} </th>
                                         {% for g_id in rotating_gradeables if g_id != gradeable.getId() %}
-                                            <td>{{ gradeable_section_history[user_id][g_id]|join(',') }}</td>
+                                            <td>{{ gradeable_section_history[user[0]][g_id]|join(',') }}</td>
                                         {% endfor %}
                                     </tr>
                                 {% endfor %}
@@ -120,7 +122,6 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
         if(section === 0) {
             // ... so update all check boxes for that user with the "all" box state
             var check = $(base_all_cb_name + 'all_' + id).is(':checked');
-
             {% for rs in section_numbers %}
                 $(base_cb_name + {{ rs }} + '_' + id).prop('checked', check);
             {% endfor %}
@@ -171,7 +172,6 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
     }
 
     $(document).ready(function() {
-
         // Hide rotating sections settings if on registration sections
         onSectionTypeChange();
         $('[name="grade_by_registration"]').change(onSectionTypeChange);
@@ -182,13 +182,13 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
 
         // update "all" check boxes
         {% for grader in graders_from_usertypes[1] %}
-        updateCheckBoxes('g1', "{{ grader }}", 1);
+        updateCheckBoxes('g1', "{{ grader[0] }}", 1);
         {% endfor %}
         {% for grader in graders_from_usertypes[2] %}
-        updateCheckBoxes('g2', "{{ grader }}", 1);
+        updateCheckBoxes('g2', "{{ grader[0] }}", 1);
         {% endfor %}
         {% for grader in graders_from_usertypes[3] %}
-        updateCheckBoxes('g3', "{{ grader }}", 1);
+        updateCheckBoxes('g3', "{{ grader[0] }}", 1);
         {% endfor %}
 
     });
