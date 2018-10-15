@@ -2528,6 +2528,14 @@ function closeComponentGrading(component_id, saveChanges) {
                     component_tmp = component;
                 });
         } else {
+            // The grader unchecked the custom mark, but didn't delete the text.  This shouldn't happen too often,
+            //  so prompt the grader if this is what they really want since it will delete the text / score.
+            let gradedComponent = getGradedComponentFromDOM(component_id);
+            if (gradedComponent.comment !== '' && !gradedComponent.custom_mark_selected) {
+                if (!confirm("Are you sure you want to delete the custom mark?")) {
+                    return sequence;
+                }
+            }
             // We're in grade mode, so save the graded component
             sequence = sequence
                 .then(function () {
@@ -2560,9 +2568,12 @@ function closeComponentGrading(component_id, saveChanges) {
 function closeComponent(component_id, saveChanges = true) {
     setComponentInProgress(component_id);
     // Achieve polymorphism in the interface using this `isInstructorEditEnabled` flag
-    return isInstructorEditEnabled()
+    return (isInstructorEditEnabled()
         ? closeComponentInstructorEdit(component_id, saveChanges)
-        : closeComponentGrading(component_id, saveChanges)
+        : closeComponentGrading(component_id, saveChanges))
+        .then(function () {
+            setComponentInProgress(component_id, false);
+        });
 }
 
 /**
