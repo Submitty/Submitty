@@ -412,8 +412,12 @@ class NavigationView extends AbstractView {
                 ($list_section == GradeableList::GRADED || $list_section == GradeableList::GRADING)) {
                 $display_date = "";
             }
-
-            if ($graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() && $list_section == GradeableList::OPEN) {
+            if (!$gradeable->isStudentSubmit()) {
+                // Student isn't submitting
+                $title = "BULK UPLOAD";
+                $class = "btn-primary";
+                $display_date = "";
+            } else if ($graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() && $list_section == GradeableList::OPEN) {
                 //if the user submitted something on time
                 $title = "RESUBMIT";
             } else if ($graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() && $list_section == GradeableList::CLOSED) {
