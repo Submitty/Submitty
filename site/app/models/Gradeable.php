@@ -167,7 +167,7 @@ class Gradeable extends AbstractModel {
     protected $due_date = null;
 
     /** @property @var bool If this gradeable has a due date */
-    protected $has_due_date = true;
+    protected $has_due_date = false;
 
     /** @property @var bool Is the electronic submission via a VCS repository or by upload */
     protected $is_repository = false;
