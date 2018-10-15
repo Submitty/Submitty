@@ -489,8 +489,13 @@ class Gradeable extends AbstractModel {
     public function calculateLateDays(&$total_late_days = 0){
         $late_flag = false;
 
-        if ($this->student_submit && $this->getHasDueDate() &&
-            $this->late_days - $this->late_day_exceptions > 0) {
+        // If the student doesn't submit or the gradeable has no due date,
+        //  this gradeable shouldn't contribute to the late days
+        if (!$this->student_submit || !$this->getHasDueDate()) {
+            return;
+        }
+
+        if ($this->late_days - $this->late_day_exceptions > 0) {
             $this->late_status = "Late";
             $late_flag = true;
         }
