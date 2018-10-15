@@ -83,6 +83,11 @@ class GradeableList extends AbstractModel {
             else if ($gradeable->getGradeReleasedDate() <= $this->now) {
                 $this->graded_gradeables[$gradeable->getId()] = $gradeable;
             }
+            else if (!$gradeable->hasDueDate() && !$gradeable->isStudentSubmit()) {
+                // If there is no due date and no student submission, it should
+                //  automatically show up in the 'Grading' category
+                $this->grading_gradeables[$gradeable->getId()] = $gradeable;
+            }
             else if ((($gradeable->getType() === GradeableType::ELECTRONIC_FILE && $gradeable->isTaGrading()) ||
                     $gradeable->getType() !== GradeableType::ELECTRONIC_FILE) &&
                     $gradeable->getGradeStartDate() <= $this->now) {
