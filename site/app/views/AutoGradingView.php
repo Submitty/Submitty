@@ -251,14 +251,6 @@ class AutoGradingView extends AbstractView {
         return ''; // ?
     }
 
-    public function showVersionChoice($gradeable, $onChange, $formatting = "") {
-        return $this->core->getOutput()->renderTwigTemplate("grading/VersionChoice.twig", [
-            "gradeable" => $gradeable,
-            "onChange" => $onChange,
-            "formatting" => $formatting,
-        ]);
-    }
-
     /**
      * @param Gradeable $gradeable
      * @return string

@@ -1294,7 +1294,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                       t.state,
                       tu.*
                     FROM teams t
-                    JOIN users tu ON t.user_id = tu.user_id
+                    JOIN users tu ON t.user_id = tu.user_id ORDER BY t.user_id
                   ) AS tu ON gt.team_id = tu.team_id
                 GROUP BY gt.team_id
               ) AS team ON eg.team_assignment AND EXISTS (
@@ -1639,7 +1639,9 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   eg_regrade_request_date AS regrade_request_date,
                   eg_regrade_allowed AS regrade_allowed,
                   eg_use_ta_grading AS ta_grading,
+                  eg_scanned_exam AS scanned_exam,
                   eg_student_view AS student_view,
+                  eg_student_view_after_grades as student_view_after_grades,
                   eg_student_submit AS student_submit,
                   eg_student_download AS student_download,
                   eg_student_any_version AS student_download_any_version,

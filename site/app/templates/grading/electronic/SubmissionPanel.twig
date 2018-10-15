@@ -1,5 +1,4 @@
 {% import _self as self %}
-{% set has_vcs_files = gradeable.getVcsFiles() != 0 %}
 
 <div id="submission_browser" class="draggable rubric_panel" style="left:15px; bottom:40px; width:48%; height:30%;overflow: hidden;">
     <div id="directory_view" style="position:relative; float:left;">
@@ -36,7 +35,7 @@
             </script>
 
             {% if not peer %}
-                <button class="btn btn-default" onclick="downloadZip('{{  gradeable.getId() }}','{{ gradeable.getUser().getId() }}')">Download Zip File</button>
+                <button class="btn btn-default" onclick="downloadZip('{{  gradeable_id }}','{{ submitter_id }}')">Download Zip File</button>
             {% endif %}
 
             <div id="changeCodeStyle" class="btn-group btn-group-toggle" style="display:inline-block;" onchange="changeEditorStyle($('[name=codeStyle]:checked')[0].id);" data-toggle="buttons">
@@ -168,8 +167,8 @@
                 type: 'POST',
                 url: buildUrl({'component': 'pdf', 'page': 'grader_embedded'}),
                 data: {
-                    'gradeable_id': '{{ gradeable.getId() }}',
-                    'user_id': '{{ gradeable.getUser().getId() }}',
+                    'gradeable_id': '{{ gradeable_id }}',
+                    'user_id': '{{ submitter_id }}',
                     'filename': name
                 },
                 success: function(data){

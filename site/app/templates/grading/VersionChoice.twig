@@ -1,20 +1,21 @@
-<select style="margin: 0 10px;{{ formatting|raw }} " name="submission_version" onChange="{{ onChange|raw }}">
+<select style="margin: 0 10px;{{ formatting|default('')|raw }}"
+        name="submission_version" onChange="{{ on_change|default('')|raw }}">
 
-    {% if gradeable.getActiveVersion() == 0 %}
-        <option value="0" {{ gradeable.getCurrentVersionNumber() == gradeable.getActiveVersion() ? "selected" : "" }}></option>
+    {% if active_version == 0 %}
+        <option value="0" {{ display_version == active_version ? "selected" : "" }}></option>
     {% endif %}
 
-    {% for version in gradeable.getVersions() %}
-        <option value="{{ version.getVersion() }}" {{ version.getVersion() == gradeable.getCurrentVersionNumber() ? "selected" : "" }}>
-            Version #{{ version.getVersion() }}
+    {% for version in versions %}
+        <option value="{{ loop.index }}" {{ loop.index == display_version ? "selected" : "" }}>
+            Version #{{ loop.index }}
 
-            {%- if gradeable.getNormalPoints() > 0 -%}
-                &nbsp;&nbsp;&nbsp;Score: {{ version.getNonHiddenTotal() }} / {{ gradeable.getTotalNonHiddenNonExtraCreditPoints() }}
+            {%- if total_points > 0 -%}
+                &nbsp;&nbsp;&nbsp;Score: {{ version.points }} / {{ total_points }}
             {%- endif -%}
-            {%- if version.getDaysLate() > 0 -%}
-                &nbsp;&nbsp;&nbsp;Days Late: {{ version.getDaysLate() }}
+            {%- if version.days_late > 0 -%}
+                &nbsp;&nbsp;&nbsp;Days Late: {{ version.days_late }}
             {%- endif -%}
-            {%- if version.isActive() -%}
+            {%- if loop.index == active_version -%}
                 &nbsp;&nbsp;&nbsp;GRADE THIS VERSION
             {%- endif -%}
         </option>
