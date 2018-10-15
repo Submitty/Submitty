@@ -256,6 +256,7 @@ SELECT";
   eg.eg_peer_grade_set,
   eg.eg_submission_open_date,
   eg.eg_submission_due_date,
+  eg.eg_has_due_date,
   eg.eg_late_days,
   eg.eg_precision,
   gc.array_gc_id,
