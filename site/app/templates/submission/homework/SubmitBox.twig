@@ -66,6 +66,9 @@
                     $('#pdf_submit_button').show();
                     $('#user_id').val('');
                 });
+                $('#use_qr').click(function(){
+                    $('#num_pages').prop('disabled', !$('#num_pages').is(":disabled") );
+                });
                 $("#user_id").autocomplete({
                     source: students_full
                 });

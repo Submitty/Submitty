@@ -406,7 +406,12 @@ class HomeworkView extends AbstractView {
                 $count++;
             }
         }
-        var_dump($files);
+        $semester = $this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+         $current_time = $this->core->getDateTimeNow()->format("m-d-Y_H:i:sO");
+        $ch = curl_init();
+        var_dump($this->core->getConfig()->getCgiUrl()."pdf_check.cgi?&num=3&sem={$semester}&course={$course}&g_id={$gradeable_id}&ver={$current_time}");
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/BulkUploadBox.twig', [
             'gradeable_id' => $gradeable->getId(),
             'team_assignment' => $gradeable->isTeamAssignment(),

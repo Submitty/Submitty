@@ -588,17 +588,18 @@ function handleBulk(gradeable_id, num_pages, use_qr_codes = false) {
 
     var formData = new FormData();
 
-    if(num_pages == "") {
-        alert("You didn't enter the # of page(s)!");
-        $("#submit").prop("disabled", false);
-        return;
+    if(!use_qr_codes){
+        if(num_pages == "") {
+            alert("You didn't enter the # of page(s)!");
+            $("#submit").prop("disabled", false);
+            return;
+        }
+        else if(num_pages < 1 || num_pages % 1 != 0) {
+            alert(num_pages + " is not a valid # of page(s)!");
+            $("#submit").prop("disabled", false);
+            return;
+        }
     }
-    else if(num_pages < 1 || num_pages % 1 != 0) {
-        alert(num_pages + " is not a valid # of page(s)!");
-        $("#submit").prop("disabled", false);
-        return;
-    }
-
     formData.append('num_pages', num_pages);
     formData.append('use_qr_codes', use_qr_codes);
    
