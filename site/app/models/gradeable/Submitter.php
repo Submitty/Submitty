@@ -103,17 +103,6 @@ class Submitter extends AbstractModel {
     }
 
     /**
-     * Gets if the provided user is a part of this submitter:
-     *  either is the submitter, or on the team submitter
-     * @param User $user
-     * @return bool
-     */
-    public function hasUser($user) {
-        return $this->getId() === $user->getId()
-            || $this->isTeam() && in_array($user->getId(), $this->getTeam()->getMembers());
-    }
-
-    /**
      * Get the registration section for the submitter
      * @return string
      */
