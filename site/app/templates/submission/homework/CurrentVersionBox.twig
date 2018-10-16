@@ -4,7 +4,7 @@
     {% endif %}
 
     <h3 class='label' id="submission_header" style="float: left">Select Submission Version:</h3>
-    {% include 'grading/VersionChoiceNew.twig' with({
+    {% include 'grading/VersionChoice.twig' with({
         'on_change': "versionChange('" ~ view_version_url ~ "', this)"
     }) %}
 

@@ -1263,11 +1263,11 @@ ORDER BY rotating_section");
 
     public function getGradersByUserType() {
         $this->course_db->query(
-            "SELECT user_id, user_group FROM users WHERE user_group < 4 ORDER BY user_group, user_id ASC");
+            "SELECT user_firstname, user_lastname, user_id, user_group FROM users WHERE user_group < 4 ORDER BY user_group, user_id ASC");
         $users = [];
 
         foreach ($this->course_db->rows() as $row) {
-            $users[$row['user_group']][] = $row['user_id'];
+            $users[$row['user_group']][] = [$row['user_id'], $row['user_firstname'], $row['user_lastname']];
         }
         return $users;
     }
@@ -2193,7 +2193,7 @@ ORDER BY gt.{$section_key}", $params);
 	 * @param string $submitty_path
 	 * @return array - unarchived courses (and their details) accessible by $user_id
 	 */
-    public function getUnarchivedCoursesById($user_id, $submitty_path) {
+    public function getUnarchivedCoursesById($user_id) {
         $this->submitty_db->query("
 SELECT u.semester, u.course
 FROM courses_users u
@@ -2212,7 +2212,7 @@ ORDER BY u.user_group ASC,
         $return = array();
         foreach ($this->submitty_db->rows() as $row) {
             $course = new Course($this->core, $row);
-            $course->loadDisplayName($submitty_path);
+            $course->loadDisplayName();
             $return[] = $course;
         }
         return $return;
@@ -2229,7 +2229,7 @@ ORDER BY u.user_group ASC,
      * @param string $submitty_path
      * @return array - archived courses (and their details) accessible by $user_id
      */
-    public function getArchivedCoursesById($user_id, $submitty_path) {
+    public function getArchivedCoursesById($user_id) {
         $this->submitty_db->query("
 SELECT u.semester, u.course
 FROM courses_users u
@@ -2248,7 +2248,7 @@ ORDER BY u.user_group ASC,
         $return = array();
         foreach ($this->submitty_db->rows() as $row) {
             $course = new Course($this->core, $row);
-            $course->loadDisplayName($submitty_path);
+            $course->loadDisplayName();
             $return[] = $course;
         }
         return $return;

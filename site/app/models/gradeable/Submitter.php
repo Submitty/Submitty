@@ -101,4 +101,31 @@ class Submitter extends AbstractModel {
     public function getAnonId() {
         return $this->team_or_user->getAnonId();
     }
+
+    /**
+     * Gets if the provided user is a part of this submitter:
+     *  either is the submitter, or on the team submitter
+     * @param User $user
+     * @return bool
+     */
+    public function hasUser($user) {
+        return $this->getId() === $user->getId()
+            || $this->isTeam() && in_array($user->getId(), $this->getTeam()->getMembers());
+    }
+
+    /**
+     * Get the registration section for the submitter
+     * @return string
+     */
+    public function getRegistrationSection() {
+        return $this->team_or_user->getRegistrationSection();
+    }
+
+    /**
+     * Get the rotation section for the submitter
+     * @return int
+     */
+    public function getRotatingSection() {
+        return $this->team_or_user->getRotatingSection();
+    }
 }

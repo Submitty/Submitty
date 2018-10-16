@@ -10,6 +10,7 @@ use app\libraries\IniParser;
  * Holds basic information about courses. Used on homepage.
  * @method string getSemester()
  * @method string getTitle()
+ * @method string getDisplayName()
   */
 class Course extends AbstractModel {
      
@@ -33,23 +34,34 @@ class Course extends AbstractModel {
         $this->display_name = "";
     }
 
-    public function loadDisplayName($submitty_path){
-        $course_ini_path = FileUtils::joinPaths($submitty_path, "courses", $this->semester, $this->title, "config", "config.ini");
-        if (file_exists($course_ini_path) && is_readable ($course_ini_path)) {
+    public function loadDisplayName(){
+        $course_ini_path = FileUtils::joinPaths(
+            $this->core->getConfig()->getSubmittyPath(),
+            "courses",
+            $this->semester,
+            $this->title,
+            "config",
+            "config.ini"
+        );
+        if (file_exists($course_ini_path) && is_readable($course_ini_path)) {
             $config = IniParser::readFile($course_ini_path);
-            if (isset($config['course_details']['course_name'])) {
-                $this->display_name = $config['course_details']['course_name'];            
+            if (isset($config['course_details']) && isset($config['course_details']['course_name'])) {
+                $this->display_name = $config['course_details']['course_name'];
+                return true;
             }
         }
+        return false;
     }
 
     public function getLongSemester() {
         if (strlen($this->semester) == 3) {
-            if (strtolower($this->semester[0]) == 'f') {
+            if (strtolower($this->semester[0]) === 'f') {
                 return "Fall 20".substr($this->semester,1,2);
-            } else if (strtolower($this->semester[0]) == 's') {
+            }
+            elseif (strtolower($this->semester[0]) === 's') {
                 return "Spring 20".substr($this->semester,1,2);
-            } else if (strtolower($this->semester[0]) == 'u') {
+            }
+            elseif (strtolower($this->semester[0]) === 'u') {
                 return "Summer 20".substr($this->semester,1,2);
             }
         }

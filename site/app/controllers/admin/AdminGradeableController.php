@@ -144,7 +144,7 @@ class AdminGradeableController extends AbstractController {
         $graders_from_usertypes = $this->core->getQueries()->getGradersByUserType();
         foreach ($graders_from_usertypes as $usertype) {
             foreach ($usertype as $grader) {
-                $gradeable_section_history[$grader] = [];
+                $gradeable_section_history[$grader[0]] = [];
             }
         }
 

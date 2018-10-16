@@ -1113,13 +1113,13 @@ table .instructor .two-options{
 }
 
 .hover_glow {
-    opacity: 0.8;
+    opacity: 0.08;
     filter: alpha(opacity=80);
     z-index: 1;
 }
 
 .hover_glow:hover {
-    opacity: 1.0;
+    opacity: 0.8;
     filter: alpha(opacity=100);
 }
 
