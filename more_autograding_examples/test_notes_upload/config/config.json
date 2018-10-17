@@ -42,8 +42,7 @@
 		    "destination" : "."
 		}
 	    ],
-	    "command" : [ //"mv *.pdf student_file.pdf",
-			  "pdflatex test_template.tex" ],
+	    "command" : [ "pdflatex test_template.tex" ],
 	    "points" : 1,
 	    "validation": [
                 {
