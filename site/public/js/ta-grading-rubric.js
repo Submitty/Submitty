@@ -1638,13 +1638,14 @@ function toggleDOMCustomMark(component_id) {
  * @param {int} gradedComponentCount
  * @param {int} totalComponentCount
  * @param {Array} submitterIds
+ * @param {int} totalSubmittersWithMark
  */
-function openMarkStatsPopup(component_title, mark_title, gradedComponentCount, totalComponentCount, submitterIds) {
+function openMarkStatsPopup(component_title, mark_title, gradedComponentCount, totalComponentCount, submitterIds, totalSubmittersWithMark) {
     let popup = $('#student-marklist-popup');
 
     popup.find('.question-title').html(component_title);
     popup.find('.mark-title').html(mark_title);
-    popup.find('.submitter-count').html(submitterIds.length);
+    popup.find('.submitter-count').html(totalSubmittersWithMark);
     popup.find('.graded-component-count').html(gradedComponentCount);
     popup.find('.total-component-count').html(totalComponentCount);
 
@@ -1802,7 +1803,7 @@ function onGetMarkStats(me) {
                 }
             }
 
-            openMarkStatsPopup(component_title, mark_title, graded, total, stats.submitter_ids);
+            openMarkStatsPopup(component_title, mark_title, graded, total, stats.submitter_ids, stats.total_with_mark);
         })
         .catch(function (err) {
             alert('Failed to get stats for mark: ' + err.message);

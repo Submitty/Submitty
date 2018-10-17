@@ -1562,11 +1562,12 @@ DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=?
     }
 
 // END FIXME
-
-
+     
     /**
      * Gets the ids of all submitters who received a mark
      * @param Mark $mark
+     * @param User $grader
+     * @param Gradeable $gradeable
      * @return string[]
      */
     public function getSubmittersWhoGotMark($mark, $grader, $gradeable) {
@@ -1612,7 +1613,24 @@ DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=?
          return array_map(function ($row) use ($row_type) {
              return $row[$row_type];
          }, $this->course_db->rows());
-     }
+    }
+     
+    /**
+     * Gets the count of all submitters who received a mark
+     * @param Mark $mark
+     * @return int
+     */
+    public function getTotalSubmittersWhoGotMark($mark) {
+        $type = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'team' : 'user'; 
+        $row_type = "gd_" . $type . "_id";
+        $this->course_db->query("
+             SELECT COUNT(gd.gd_{$type}_id) as cnt
+             FROM gradeable_component_mark_data gcmd
+               JOIN gradeable_data gd ON gd.gd_id=gcmd.gd_id
+             WHERE gcm_id = ?", [$mark->getId()]);
+                     
+        return ($this->course_db->row()['cnt']);
+    }
 
     public function insertGradeableComponentMarkData($gd_id, $gc_id, $gcd_grader_id, GradeableComponentMark $mark) {
         $params = array($gc_id, $gd_id, $gcd_grader_id, $mark->getId());

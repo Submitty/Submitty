@@ -2221,6 +2221,7 @@ class ElectronicGraderController extends GradingController {
     private function getMarkStats(Mark $mark, User $grader) {
         $gradeable = $mark->getComponent()->getGradeable();
         $submitter_ids = $this->core->getQueries()->getSubmittersWhoGotMark($mark, $grader, $gradeable);
+        $total_with_mark = $this->core->getQueries()->getTotalSubmittersWhoGotMark($mark);
 
         // TODO: this function should not return this data...
         $sections = array();
@@ -2228,7 +2229,8 @@ class ElectronicGraderController extends GradingController {
 
         return [
             'submitter_ids' => $submitter_ids,
-            'sections' => $sections
+            'sections' => $sections,
+            'total_with_mark' => $total_with_mark
         ];
     }
 
