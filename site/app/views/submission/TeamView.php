@@ -3,17 +3,19 @@
 namespace app\views\submission;
 
 use app\libraries\FileUtils;
+use app\models\gradeable\Gradeable;
 use app\views\AbstractView;
 
 class TeamView extends AbstractView {
 
     /**
     * Show team management page
-    * @param \app\models\Gradeable $gradeable
+    * @param \app\models\gradeable\Gradeable $gradeable
+    * @param \app\models\Team|null $team The team the user is on
     * @param \app\models\Team[] $teams
     * @return string
     */
-    public function showTeamPage($gradeable, $teams, $lock, $users_seeking_team) {
+    public function showTeamPage(Gradeable $gradeable, $team, $teams, $lock, $users_seeking_team) {
         $site_url = $this->core->getConfig()->getSiteUrl();
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
@@ -22,8 +24,6 @@ class TeamView extends AbstractView {
         $seekers = [];
         $invites_received = [];
         $seeking_partner = false;
-
-        $team = $gradeable->getTeam();
 
         if ($team !== null) {
             //List team members
@@ -57,6 +57,7 @@ class TeamView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("submission/Team.twig", [
             "gradeable" => $gradeable,
             "team" => $team,
+            "user" => $this->core->getUser(),
             "lock" => $lock,
             "members" => $members,
             "seekers" => $seekers,

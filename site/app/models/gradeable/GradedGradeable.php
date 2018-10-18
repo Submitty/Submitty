@@ -105,7 +105,7 @@ class GradedGradeable extends AbstractModel {
      * @return bool
      */
     public function hasTaGradingInfo() {
-        return $this->ta_graded_gradeable !== null;
+        return $this->ta_graded_gradeable !== null && $this->ta_graded_gradeable->anyGrades();
     }
 
     /**
