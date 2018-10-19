@@ -42,7 +42,9 @@ class HomeworkView extends AbstractView {
             $version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions()[$display_version] ?? null;
         }
 
-        $return .= $this->renderLateDayMessage($old_gradeable, $extensions);
+        if ($gradeable->isLateSubmissionAllowed()) {
+            $return .= $this->renderLateDayMessage($old_gradeable, $extensions);
+        }
 
         // showing submission if user is grader or student can submit
         if ($this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit()) {
