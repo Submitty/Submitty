@@ -423,7 +423,12 @@ class NavigationView extends AbstractView {
                 } else {
                     $title = "VIEW SUBMISSION";
                     $class = 'btn-default';
+                    $display_date = "";
                 }
+            } else if (!$graded_gradeable->getAutoGradedGradeable()->hasSubmission() && !$gradeable->isLateSubmissionAllowed() && $list_section == GradeableList::CLOSED) {
+                $title = "NO SUBMISSION";
+                $class = "btn-danger";
+                $display_date = "";
             } else if (!$graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() && ($list_section == GradeableList::GRADED || $list_section == GradeableList::GRADING)) {
                 //to change the text to overdue submission if nothing was submitted on time
                 $title = "OVERDUE SUBMISSION";
