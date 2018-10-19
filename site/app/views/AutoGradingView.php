@@ -67,8 +67,6 @@ class AutoGradingView extends AbstractView {
             $hidden_earned = $version_instance->getTotalPoints();
             $hidden_max = $autograding_config->getTotalNonExtraCredit();
 
-            $show_hidden_breakdown = ($version_instance->getNonHiddenNonExtraCredit() + $version_instance->getHiddenNonExtraCredit() > $autograding_config->getTotalNonHiddenNonExtraCredit()) && $show_hidden;
-
             if ($gradeable->isTaGradeReleased()) {
                 foreach ($version_instance->getTestcases() as $testcase) {
                     if (!$testcase->canView()) continue;
@@ -78,6 +76,9 @@ class AutoGradingView extends AbstractView {
                     }
                 }
             }
+
+            $show_hidden_breakdown = $any_visible_hidden && $show_hidden &&
+                ($version_instance->getNonHiddenNonExtraCredit() + $version_instance->getHiddenNonExtraCredit() > $autograding_config->getTotalNonHiddenNonExtraCredit());
         }
         foreach ($version_instance->getTestcases() as $testcase) {
 
@@ -100,7 +101,6 @@ class AutoGradingView extends AbstractView {
             "hidden_earned" => $hidden_earned,
             "hidden_max" => $hidden_max,
             "show_hidden" => $show_hidden,
-            "any_visible_hidden" => $any_visible_hidden,
             "has_badges" => $has_badges,
             'testcases' => $testcase_array,
             'is_ta_grade_released' => $gradeable->isTaGradeReleased(),
