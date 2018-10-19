@@ -1606,4 +1606,19 @@ class Gradeable extends AbstractModel {
         }
         return $repo;
     }
+
+    /**
+     * Gets if a user or team has a submission for this gradeable
+     * @param Submitter $submitter
+     * @return bool
+     */
+    public function hasSubmission(Submitter $submitter) {
+        if ($submitter->isTeam() && !$this->isTeamAssignment()) {
+           return false;
+        }
+        if (!$submitter->isTeam() && $this->isTeamAssignment()) {
+            $submitter = $this->core->getQueries()->getTeamByGradeableAndUser($this->getId(), $submitter->getId());
+        }
+        return $this->core->getQueries()->getHasSubmission($this, $submitter);
+    }
 }

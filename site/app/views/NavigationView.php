@@ -420,6 +420,9 @@ class NavigationView extends AbstractView {
                 $title = "BULK UPLOAD";
                 $class = "btn-primary";
                 $display_date = "";
+            } else if ($gradeable->isStudentSubmit() && !$gradeable->hasDueDate() && $list_section != GradeableList::OPEN) {
+                $title = "SUBMIT";
+                $class = "btn-default";
             } else if ($graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() && $list_section == GradeableList::OPEN) {
                 //if the user submitted something on time
                 $title = "RESUBMIT";

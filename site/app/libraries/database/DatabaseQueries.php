@@ -3601,4 +3601,16 @@ AND gc_id IN (
         $this->course_db->query('DELETE FROM gradeable_data WHERE g_id=? AND (gd_user_id=? OR gd_team_id=?)',
             [$gradeable_id, $submitter_id, $submitter_id]);
     }
+
+    /**
+     * Gets if the provied submitter has a submission for a particular gradeable
+     * @param \app\models\gradeable\Gradeable $gradeable
+     * @param Submitter $submitter
+     * @return bool
+     */
+    public function getHasSubmission(gradeable\Gradeable $gradeable, Submitter $submitter) {
+        $this->course_db->query('SELECT EXISTS (SELECT g_id FROM electronic_gradeable_data WHERE g_id=? AND (user_id=? OR team_id=?))',
+            [$gradeable->getId(), $submitter->getId(), $submitter->getId()]);
+        return $this->course_db->row()['exists'] ?? false;
+    }
 }
