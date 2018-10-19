@@ -237,6 +237,14 @@ table tr.table-header {
     margin: 0 auto -60px;
 }
 
+#container.full_height {
+    max-height: 100%;
+}
+
+#header.full_height {
+    min-height: fit-content;
+}
+
 #nav {
     background-color: #000000;
     color: #FFFFFF;

@@ -17,6 +17,7 @@ class ForumThreadView extends AbstractView {
     public function searchResult($threads){
 
     	$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
+    	$this->core->getOutput()->addBreadcrumb("Search");
 
     	$return = <<<HTML
 
@@ -201,8 +202,6 @@ HTML;
 				$('#{$display_option}').attr('checked', 'checked'); //Saves the radiobutton state when refreshing the page
 				$(".post_reply_from").submit(publishPost);
 				$("form").areYouSure();
-				$("#container").css("max-height", "100%");
-				$("#header").css("min-height", "fit-content");
 			});
 
 		</script>
@@ -1053,6 +1052,9 @@ HTML;
 			$this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
 			return;
 		}
+
+		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
+		$this->core->getOutput()->addBreadcrumb("Statistics", $this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats')));
 
 		$return = <<<HTML
 
