@@ -46,7 +46,11 @@ class HomeworkView extends AbstractView {
 
         // showing submission if user is grader or student can submit
         if ($this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit()) {
-            $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use);
+            if ($gradeable->canStudentSubmit()) {
+                $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use);
+            } else {
+                $return .= $this->renderSubmitNotAllowedBox();
+            }
         }
         $all_directories = $gradeable->getSplitPdfFiles();
         if ($this->core->getUser()->accessFullGrading() && count($all_directories) > 0) {
@@ -218,6 +222,10 @@ class HomeworkView extends AbstractView {
             'messages' => $messages,
             'error' => $error
         ]);
+    }
+
+    private function renderSubmitNotAllowedBox() {
+        return $this->core->getOutput()->renderTwigOutput("submission/homework/SubmitNotAllowedBox.twig");
     }
 
     /**
