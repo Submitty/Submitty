@@ -85,7 +85,7 @@ class TestForum(BaseTestCase):
             if len(divs) > 0:
                 # Thread Found
                 break
-            # Scroll Dowm
+            # Scroll Down
             self.driver.execute_script("$('#thread_list').scrollTop($('#thread_list').prop('scrollHeight'));")
             self.wait_after_ajax()
             new_thread_count = int(self.driver.execute_script('return $("#thread_list .thread_box").length;'))
