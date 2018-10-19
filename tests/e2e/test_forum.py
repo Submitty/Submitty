@@ -76,7 +76,7 @@ class TestForum(BaseTestCase):
         #move_to_top_button = self.driver.find_element_by_xpath("//i[contains(@class, 'fa-angle-double-up')]")
         # Move to top of thread list
         #move_to_top_button.click()
-		self.driver.execute_script('$("#thread_list").scrollTop(0);')
+        self.driver.execute_script('$("#thread_list").scrollTop(0);')
         #self.wait_after_ajax()
         thread_count = int(self.driver.execute_script('return $("#thread_list .thread_box").length;'))
         while True:
