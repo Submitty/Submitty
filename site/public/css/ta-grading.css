@@ -754,3 +754,23 @@ tr.is_publish {
 #mark-conflict-popup .mark-conflict-container {
     margin-top: 25px;
 }
+
+/*Submission Panel CSS*/
+
+#submission_browser {
+    left:15px;
+    bottom:40px;
+    width:48%;
+    height:30%;
+    overflow: hidden;
+}
+
+#directory_view {
+    position:relative;
+    float:left;
+    width:100%;
+}
+
+#changeCodeStyle {
+    display:inline-block;
+}
