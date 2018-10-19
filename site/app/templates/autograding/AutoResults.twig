@@ -41,7 +41,7 @@
                 <h4>{{ is_ta_grade_released ? "Autograding Subtotal" : "Total" }}</h4>
             </div>
         </div>
-        {% if display_hidden %}
+        {% if any_visible_hidden and show_hidden %}
             <div class="box">
                 <div class="box-title">
                     {{ Badge.render(hidden_earned, hidden_max, false) }}
@@ -56,11 +56,11 @@
     {% set can_view = (not testcase.hidden or show_hidden) %}
     <div class="box" {{ testcase.hidden and show_hidden ? "style='background-color:#D3D3D3;'" : "" }}>
         <div id='tc_{{ loop.index0 }}' class="box-title"
-                {{ testcase.has_extra_results and can_view ? "style='cursor: pointer;'" : "" }}
+                {{ testcase.has_extra_results and not testcase.hidden ? "style='cursor: pointer;'" : "" }}
              onclick="loadTestcaseOutput('testcase_{{ loop.index0 }}', '{{ gradeable_id }}', '{{ submitter_id }}', '{{ loop.index0 }}', {{ display_version }});">
 
             {# Details button #}
-            {% if testcase.has_extra_results and can_view %}
+            {% if testcase.has_extra_results and not testcase.hidden %}
                 <div style="float:right; color: #0000EE; text-decoration: underline">
                     Details
                 </div>
@@ -69,15 +69,11 @@
 
             {# Badge #}
             {% if testcase.has_points %}
-                {% if can_view %}
+                {% if not testcase.hidden or show_hidden %}
                     {{ Badge.render(testcase.points, testcase.points_total, testcase.extra_credit) }}
                 {% else %}
                     <div class="badge">
                         Hidden
-                        {% if is_ta_grade_released %}
-                            <br>
-                            {{ Badge.format_value(testcase.points, testcase.points_total, testcase.extra_credit) }}
-                        {% endif %}
                     </div>
                 {% endif %}
             {% elseif has_badges %}
@@ -86,7 +82,7 @@
             {# /Badge #}
 
             <h4>
-                {% if testcase.hidden and show_hidden %}
+                {% if testcase.hidden %}
                     HIDDEN:
                 {% endif %}
                 {{ testcase.name }}
