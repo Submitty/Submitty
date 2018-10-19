@@ -317,7 +317,7 @@ class SubmissionController extends AbstractController {
                     $this->core->getQueries()->saveTaGradedGradeable($graded_gradeable->getTaGradedGradeable());
                 }
 
-                // Only show hidden test cases if the display version is the graded version
+                // Only show hidden test cases if the display version is the graded version (and grades are released)
                 $show_hidden = $version == $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedVersion(false) && $gradeable->isTaGradeReleased();
 
                 // If we get here, then we can safely construct the old model w/o checks
