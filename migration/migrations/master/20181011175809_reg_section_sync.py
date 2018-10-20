@@ -1,7 +1,7 @@
 def up(config, conn):
     with conn.cursor() as cursor:
         cursor.execute("DROP TRIGGER IF EXISTS registration_sync_registration_id ON courses_registration_sections;")
-        cursor.execute("DROP FUNCTION IF EXISTS sync_registration_section();"
+        cursor.execute("DROP FUNCTION IF EXISTS sync_registration_section();")
         cursor.execute("""
 CREATE OR REPLACE FUNCTION sync_insert_registration_section() RETURNS trigger AS $$
 -- AFTER INSERT trigger function to INSERT registration sections to course DB, as needed.
