@@ -15,21 +15,21 @@ Andrew Aikens 2017-current
 Timothy Cyrus 2017-current  
 Buster Holzbauer 2017-current  
 Evan Maicus 2016-current  
-Ana Milanova 2016-current
+Ana Milanova 2016-current  
 Steven Lindsey 2014-current  
-Peter Bailie 2014-current
-David Goldschmidt 2014-current
-Konstantin Kuzmin 2018
-Salles Viana Gomes de Magalhaes 2018
-Alex Belsten 2018
-Richard Collins 2018
-Rylan O'Connell 2018
-Jared Okun 2018
-Shail Patel 2018
-Elizabeth Dinella 2017-2018
-Leon Montealegre 2017-2018
-Justin LaPre 2017-2018
-Samuel Breese 2015-2018
+Peter Bailie 2014-current  
+David Goldschmidt 2014-current  
+Konstantin Kuzmin 2018-current  
+Rylan O'Connell 2018-current  
+Shail Patel 2018-current  
+Leon Montealegre 2017-current  
+Salles Viana Gomes de Magalhaes 2018  
+Alex Belsten 2018  
+Richard Collins 2018  
+Jared Okun 2018  
+Elizabeth Dinella 2017-2018  
+Justin LaPre 2017-2018  
+Samuel Breese 2015-2018  
 Brandon Drumheller 2015-2018  
 Marisa Lee 2017  
 Jessica Wang 2017  
