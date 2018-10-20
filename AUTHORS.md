@@ -3,17 +3,17 @@
 [Matthew Peveler](http://mpeveler.com/)  
 
 ## Developers
-John (Jack) Hulton 2018-current
-Kevin Mackenzie 2018-current
-Victor Nazzaro 2018-current
-Joanna Ng 2018-current
-Nick Roper 2018-current
-Glenn Smith 2018-current
-Tushar Gurjar 2018-current, Google Summer of Code 2018
-Gagan Kumar  2018-current, Google Summer of Code 2018
-Andrew Aikens 2017-current
-Timothy Cyrus 2017-current
-Buster Holzbauer 2017-current
+John (Jack) Hulton 2018-current  
+Kevin Mackenzie 2018-current  
+Victor Nazzaro 2018-current  
+Joanna Ng 2018-current  
+Nick Roper 2018-current  
+Glenn Smith 2018-current  
+Tushar Gurjar 2018-current, Google Summer of Code 2018  
+Gagan Kumar  2018-current, Google Summer of Code 2018  
+Andrew Aikens 2017-current  
+Timothy Cyrus 2017-current  
+Buster Holzbauer 2017-current  
 Evan Maicus 2016-current  
 Ana Milanova 2016-current
 Steven Lindsey 2014-current  
@@ -61,6 +61,7 @@ We'd like to recognize and thank [RPISec](https://rpis.ec/) and these individual
 Andrew Fasano  
 Markus Gaasedelen    
 Nick Burnett  
+Aidan Noll  
 Toshi Piazza  
-Zachary Wimer
+Zachary Wimer  
 For their bug reports of specific security vulnerabilities :)
