@@ -251,6 +251,11 @@ pip3 install parso
 # Python3 implementation of python-clang bindings (may not work < 6.0)
 pip3 install clang
 
+#zbar dll files
+
+pip3 install pyzbar
+pip3 install Pillow
+
 sudo chmod -R 555 /usr/local/lib/python*/*
 sudo chmod 555 /usr/lib/python*/dist-packages
 sudo chmod 500 /usr/local/lib/python*/dist-packages/pam.py*
@@ -674,17 +679,17 @@ fi
 # CAUTION: needs users/groups for security 
 # These commands should be run manually if testing Docker integration
 
-# rm -rf /tmp/docker
-# mkdir -p /tmp/docker
-# cp ${SUBMITTY_REPOSITORY}/.setup/Dockerfile /tmp/docker/Dockerfile
-# cp -R ${SUBMITTY_INSTALL_DIR}/drmemory/ /tmp/docker/
-# cp -R ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools /tmp/docker/
+rm -rf /tmp/docker
+mkdir -p /tmp/docker
+cp ${SUBMITTY_REPOSITORY}/.setup/Dockerfile /tmp/docker/Dockerfile
+cp -R ${SUBMITTY_INSTALL_DIR}/drmemory/ /tmp/docker/
+cp -R ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools /tmp/docker/
 
-# chown ${DAEMON_USER}:${DAEMON_GROUP} -R /tmp/docker
+chown ${DAEMON_USER}:${DAEMON_GROUP} -R /tmp/docker
 
-# pushd /tmp/docker
-# su -c 'docker build --network=host -t ubuntu:custom -f Dockerfile .' ${DAEMON_USER}
-# popd > /dev/null
+pushd /tmp/docker
+su -c 'docker build --network=host -t ubuntu:custom -f Dockerfile .' ${DAEMON_USER}
+popd > /dev/null
 
 
 #################################################################

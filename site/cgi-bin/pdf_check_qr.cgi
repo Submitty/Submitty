@@ -19,6 +19,8 @@ import shutil
 import stat
 import PyPDF2
 from PyPDF2 import PdfFileReader, PdfFileWriter
+from PIL import Image
+#from pyzbar.pyzbar import decode
 #from grade_item.py
 
 
