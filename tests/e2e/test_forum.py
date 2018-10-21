@@ -1,8 +1,9 @@
 import tempfile
 import os
-import urllib
+import urllib.request
 from selenium.webdriver.common.by import By
 from .base_testcase import BaseTestCase
+import time
 
 class TestForum(BaseTestCase):
     def __init__(self,testname):
@@ -107,7 +108,9 @@ class TestForum(BaseTestCase):
         div.click()
         thread_title = self.driver.find_elements_by_xpath("//div[contains(@class, 'post_box') and contains(@class, 'first_post')]/h3[contains(string(),'{}')]".format(title))
         assert len(thread_title) > 0
-        assert thread_title[0].text.strip() == title.strip()
+        thread_title_with_id = thread_title[0].text.strip()
+        thread_title_pos = thread_title_with_id.index(')')+2
+        assert thread_title_with_id[thread_title_pos:] == title.strip()
 
     def find_posts(self, content, must_exists = True, move_to_thread = None, check_attachment = None):
         if move_to_thread is not None:
@@ -169,7 +172,9 @@ class TestForum(BaseTestCase):
         else:
             submit_button = merge_threads_div.find_element(By.XPATH, ".//input[@value='Submit']")
             possible_parents = self.driver.find_element_by_name("merge_thread_parent")
-            possible_parents.find_element(By.XPATH, ".//option[contains(normalize-space(.), '{}')]".format(parent_thread_title)).click()
+            possible_parents.send_keys(parent_thread_title)
+            time.sleep(.5)
+            self.driver.find_elements_by_partial_link_text(parent_thread_title)[-1].click()
             if press_cancel:
                 cancel_button.click()
             else:
