@@ -74,11 +74,7 @@ class TestForum(BaseTestCase):
     def thread_exists(self, title):
         assert 'page=view_thread' in self.driver.current_url
         target_xpath = "//div[contains(@class, 'thread_box') and contains(string(),'{}')]".format(title)
-        #move_to_top_button = self.driver.find_element_by_xpath("//i[contains(@class, 'fa-angle-double-up')]")
-        # Move to top of thread list
-        #move_to_top_button.click()
         self.driver.execute_script('$("#thread_list").scrollTop(0);')
-        #self.wait_after_ajax()
         thread_count = int(self.driver.execute_script('return $("#thread_list .thread_box").length;'))
         while True:
             # Scroll down in thread list until required thread is found
