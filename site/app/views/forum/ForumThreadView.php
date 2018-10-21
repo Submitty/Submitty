@@ -359,11 +359,6 @@ HTML;
 					<div style="position:relative;" class="row">
 
   						<div id="thread_list" class="col-3" prev_page="{$prev_page}" next_page="{$next_page}">
-
-						<!--<a class="btn-sm btn-primary hover_glow" style="z-index: 1; position: absolute;right: 0px;top: 0px;" onclick="updateThreads(true, function(){ $('#thread_list').animate({ scrollTop: 0 }, 'fast');});"><i class="fa fa-2x fa-angle-double-up" style="position: relative;" title="Move to top"></i></a>
-						<a class="btn-sm btn-primary hover_glow" style=" z-index: 1; position: absolute;right: 0px;bottom: 0px;" onclick="updateThreads(false, function(){ $('#thread_list').animate({ scrollTop: $('#thread_list').prop('scrollHeight') }, 'fast');});"><i class="fa fa-2x fa-angle-double-down" style="position: relative;" title="Move to bottom"></i></a>
-						<a class="btn-sm btn-primary hover_glow" style="z-index: 1; position: absolute;right: 0px;top: 0px;" onclick="updateThreads(true, function(){ $('#thread_list').animate({ scrollTop: 0 }, 'fast');});"><i class="fa fa-2x fa-angle-double-up" style="position: relative;" title="Move to top"></i></a>
-						<a class="btn-sm btn-primary hover_glow" style="z-index: 1; position: absolute;right: 0px;bottom: 0px;" onclick="updateThreads(false, function(){ $('#thread_list').animate({ scrollTop: $('#thread_list').prop('scrollHeight') }, 'fast');});"><i class="fa fa-2x fa-angle-double-down" style="position: relative;" title="Move to bottom"></i></a>-->
 						<i class="fa fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
 						<i class="fa fa-caret-up fa-2x fa-fw fill-available" style="color:gray;{$arrowup_visibility}" aria-hidden="true"></i>
 HTML;
