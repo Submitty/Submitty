@@ -707,8 +707,12 @@ fi
 # Restart php-fpm and apache
 if [ "${WORKER}" == 0 ]; then
     if [[ "$#" -ge 1 && $1 == "restart_web" ]]; then
-        echo -n "restarting php7.0-fpm..."
-        systemctl restart php7.0-fpm.service
+        # ubuntu 18.04 is now 7.2!
+        echo -n "restarting php7.2-fpm..."
+        systemctl restart php7.2-fpm.service
+        # (older versions may be 7.0)
+        #echo -n "restarting php7.2-fpm..."
+        #systemctl restart php7.2-fpm.service
         echo "done"
         echo -n "restarting apache2..."
         systemctl restart apache2.service
