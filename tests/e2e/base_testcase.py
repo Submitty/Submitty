@@ -61,6 +61,7 @@ class BaseTestCase(unittest.TestCase):
             user_password = user_id
         self.user_password = user_password if user_password is not None else BaseTestCase.USER_PASSWORD
         self.semester = BaseTestCase.get_current_semester()
+        self.full_semester = BaseTestCase.get_display_semester(self.semester)
         self.logged_in = False
         self.use_log_in = log_in
 
@@ -180,6 +181,12 @@ class BaseTestCase(unittest.TestCase):
         if today.month < 7:
             semester = "s" + str(today.year)[-2:]
         return semester
+
+    @staticmethod
+    def get_display_semester(current_semester):
+        s = 'Fall' if current_semester[0] == 'f' else 'Summer' if current_semester[0] == 'u' else 'Spring'
+        s += ' 20' + current_semester[1:]
+        return s
 
     # https://stackoverflow.com/a/47366981/214063
     def enable_download_in_headless_chrome(self, download_dir):
