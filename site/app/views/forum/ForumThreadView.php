@@ -356,9 +356,9 @@ HTML;
 					$prev_page = ($initialPageNumber == 1)?0:($initialPageNumber - 1);
 					$arrowup_visibility = ($initialPageNumber == 1)?"display:none;":"";
 					$return .= <<<HTML
-					<div style="position:relative;" class="row">
+					<div style="position:relative; height:100%; overflow-y:hidden;" class="row">
 
-  						<div id="thread_list" class="col-3" prev_page="{$prev_page}" next_page="{$next_page}">
+  						<div id="thread_list" style="max-height: 100%" class="col-3" prev_page="{$prev_page}" next_page="{$next_page}">
 						<i class="fa fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
 						<i class="fa fa-caret-up fa-2x fa-fw fill-available" style="color:gray;{$arrowup_visibility}" aria-hidden="true"></i>
 HTML;
@@ -390,7 +390,7 @@ HTML;
 							}
 						});
 					</script>
-					<div id="posts_list" class="col-9">
+					<div id="posts_list" style="max-height: 100%" class="col-9">
 HTML;
 
             $title_html .= <<<HTML

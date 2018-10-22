@@ -237,12 +237,13 @@ table tr.table-header {
     margin: 0 auto -60px;
 }
 
-#container.full_height {
+.full_height {
     max-height: 100%;
 }
 
 #header.full_height {
     min-height: fit-content;
+    min-height: -moz-fit-content;
 }
 
 #nav {
