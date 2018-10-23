@@ -535,12 +535,13 @@ class SubmissionController extends AbstractController {
         // Open a cURL connection
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
+        $qr_prefix = $_POST['qr_prefix'];
 
         $ch = curl_init();
         if($_POST['use_qr_codes'] === "false"){
             curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."pdf_check.cgi?&num={$num_pages}&sem={$semester}&course={$course}&g_id={$gradeable_id}&ver={$current_time}");
         }else{
-           curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."pdf_check_qr.cgi?&sem={$semester}");
+            curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."pdf_check_qr.cgi?&sem={$semester}&course={$course}&g_id={$gradeable_id}&ver={$current_time}&qr_prefix={$qr_prefix}");
         }
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $output = curl_exec($ch);
@@ -556,9 +557,10 @@ class SubmissionController extends AbstractController {
             FileUtils::recursiveRmdir($version_path);
             return $this->uploadResult("Error JSON response for pdf split: ".json_last_error_msg(),false);
         }
-        else if (!isset($output['valid'])) {
+        if (!isset($output['valid'])) {
             FileUtils::recursiveRmdir($version_path);
-            return $this->uploadResult("Missing response in JSON for pdf split",false);
+            return $this->uploadResult($output, false);
+            //return $this->uploadResult("Missing response in JSON for pdf split",false);
         }
         else if ($output['valid'] !== true) {
             FileUtils::recursiveRmdir($version_path);

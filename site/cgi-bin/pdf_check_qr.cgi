@@ -14,15 +14,12 @@ import cgi
 # import cgitb; cgitb.enable()
 import json
 import os
-import subprocess
 import shutil
 import stat
-import PyPDF2
 from PyPDF2 import PdfFileReader, PdfFileWriter
-from PIL import Image
-#from pyzbar.pyzbar import decode
+from pdf2image import convert_from_bytes
+import pyzbar.pyzbar as pyzbar
 #from grade_item.py
-
 
 def add_permissions(item,perms):
     if os.getuid() == os.stat(item).st_uid:
@@ -36,7 +33,7 @@ def add_permissions_recursive(top_dir,root_perms,dir_perms,file_perms):
         for f in files:
             add_permissions(os.path.join(root, f),file_perms)
 
-print("Content-type: text/html")
+print("Content-type: application/json")
 print()
 
 valid = True
@@ -44,56 +41,90 @@ message = "Something went wrong."
 
 try:
     arguments = cgi.FieldStorage()
-    #num = int(os.path.basename(arguments['num'].value))
-    sem = os.path.basename(arguments['sem'].value)
-    # course = os.path.basename(arguments['course'].value)
-    # g_id = os.path.basename(arguments['g_id'].value)
-    # ver = os.path.basename(arguments['ver'].value)
-    #
 
-    # check that all pages are divisible
-    # for filename in os.listdir(bulk_path):
-    #     pdfFileObj = open(filename, 'rb')
-    #     pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
-    #     total_pages = pdfReader.numPages
-    #     if (total_pages % num != 0):
-    #         valid = False
-    #         message = "For file '{f}' the total # of pages: {t} is not divisible by the # of page(s) per exam: {n}".format(f=filename,t=total_pages,n=num)
-    #         shutil.rmtree(split_path)
-    #         break
+    sem = os.path.basename(arguments['sem'].value)
+    course = os.path.basename(arguments['course'].value)
+    g_id = os.path.basename(arguments['g_id'].value)
+    ver = os.path.basename(arguments['ver'].value)
+    qr_prefix = ''
+    #check if qr_prefix is passed in, an empty string since is not considered a valid CGI arg
+    for arg in cgi.parse(arguments):
+        if arg == 'qr_prefix':
+            qr_prefix = os.path.basename(arguments['qr_prefix'].value)
+            break
+        qr_prefix = ""
+
+    with open("/usr/local/submitty/config/submitty.json", encoding='utf-8') as data_file:
+        data = json.loads(data_file.read())
+
+    #print("making paths")
+    current_path = os.path.dirname(os.path.realpath(__file__))
+    uploads_path = os.path.join(data["submitty_data_dir"],"courses",sem,course,"uploads")
+    bulk_path = os.path.join(data["submitty_data_dir"],"courses",sem,course,"uploads/bulk_pdf",g_id,ver)
+    split_path = os.path.join(data["submitty_data_dir"],"courses",sem,course,"uploads/split_pdf",g_id,ver)
+
+    # copy folder
+    if not os.path.exists(split_path):
+        os.makedirs(split_path)
+
+    # adding write permissions for the PHP
+    add_permissions_recursive(uploads_path, stat.S_IWGRP | stat.S_IXGRP, stat.S_IWGRP | stat.S_IXGRP, stat.S_IWGRP)
+    # message = "Something went wrong:  preparing split folder"
+
+    # copy over files to new directory
+    for filename in os.listdir(bulk_path):
+        shutil.copyfile(os.path.join(bulk_path, filename), os.path.join(split_path, filename))
+
+    # move to copy folder
+    os.chdir(split_path)
+    #message = "Something went wrong: preparing bulk folder"
+
 
     # # split pdfs
-    # for filename in os.listdir(bulk_path):
+    for filename in os.listdir(bulk_path):
+        pdfPages = PdfFileReader(filename)
+        #convert pdf to series of images for scanning
+        pages = convert_from_bytes(open(filename, 'rb').read())
+        pdf_writer = PdfFileWriter()
+    
+        i = 0
+        cover_index = 0
+        output = []
+        for page in pages:
+            val = pyzbar.decode(page)
+            if val != []:
+                #found a new qr code, split here
+                data = val[0][0]
+                cover_filename = '{}_{}_cover.pdf'.format(filename[:-4], i)
+                output_filename = '{}_{}.pdf'.format(filename[:-4], cover_index)
 
-    #     # recalculate the total # of pages for each file
-    #     pdfFileObj = open(filename, 'rb')
-    #     pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
-    #     total_pages = pdfReader.numPages
+                if i != 0:
+                    output.append(data)
+                    with open(output_filename, 'wb') as out:
+                        pdf_writer.write(out)
 
-    #     div = total_pages // num
-        
-    #     # pdf = PdfFileReader(path)
-    #     i = 0
-    #     while i < total_pages:
-    #         cover_writer = PdfFileWriter()
-    #         cover_writer.addPage(pdfReader.getPage(i)) 
-    #         cover_filename = '{}_{}_cover.pdf'.format(filename[:-4], i)
-    #         output_filename = '{}_{}.pdf'.format(filename[:-4], i)
-    #         pdf_writer = PdfFileWriter()
-    #         start = i
-    #         for j in range(start, start+num):
-    #             pdf_writer.addPage(pdfReader.getPage(j)) 
-    #             i+=1
-    #         with open(output_filename, 'wb') as out:
-    #             pdf_writer.write(out)
-    #         with open(cover_filename, 'wb') as out:
-    #             cover_writer.write(out)
-    # message += "=> finished PyPDF2"
-    # # get rid of unnecessary copies
-    # for filename in os.listdir(bulk_path):
-    #     os.remove(filename)
+                cover_writer = PdfFileWriter()
+                pdf_writer = PdfFileWriter()
+                cover_writer.addPage(pdfPages.getPage(i)) 
+                pdf_writer.addPage(pdfPages.getPage(i))
 
-    # os.chdir(current_path) #make sure this is in right place
+                with open(cover_filename,'wb') as out:
+                    cover_writer.write(out)
+                cover_index = i
+            else:
+                #add pages to current split_pdf
+                pdf_writer.addPage(pdfPages.getPage(i))
+            i += 1
+
+        output_filename = '{}_{}.pdf'.format(filename[:-4], cover_index)
+        with open(output_filename,'wb') as out:
+            pdf_writer.write(out)
+        output.append(data)
+
+    for filename in os.listdir(bulk_path):
+        os.remove(filename)
+
+    os.chdir(current_path) #make sure this is in right place
     message += ",and finished"
 except Exception as e:
     valid = False

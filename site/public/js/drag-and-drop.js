@@ -582,6 +582,7 @@ function deleteSplitItem(csrf_token, gradeable_id, path, count) {
  * @param gradeable_id
  * @param num_pages
  * @param use_qr_codes
+ * @param qr_prefix
  */
 function handleBulk(gradeable_id, num_pages, use_qr_codes = false, qr_prefix = "") {
     $("#submit").prop("disabled", true);
