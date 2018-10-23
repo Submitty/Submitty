@@ -14,12 +14,16 @@
                 <td width="53%">PDF preview</td>
                 <td width="5%">Full PDF</td>
                 <td width="15%">User ID</td>
+                {% if json_data is not same as("") %}
+                    <td>Page Count</td>
+                {% endif %}
                 <td width="8%">Submit</td>
                 <td width="8%">Delete</td>
             </tr>
             </thead>
             <tbody>
                 {% for file in files %}
+
                     <tr class="tr tr-vertically-centered">
                         <td>{{ loop.index }}</td>
                         <td>{{ file.clean_timestamp }}</td>
@@ -36,7 +40,11 @@
                         <td>
                             <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
                             <div id="users_{{ loop.index }}">
-                                <input type="text" id="bulk_user_id_{{ loop.index }}[0]" value =""/>
+                                {% if json_data is not same as("") %}
+                                    <input type="text" id="bulk_user_id_{{ loop.index }}[0]" value ="{{ json_data[loop.index]["id"] }}"/>
+                                {% else %}
+                                    <input type="text" id="bulk_user_id_{{ loop.index }}[0]" value =""/>
+                                {% endif %}
                                 {% if team_assignment %}
                                     {# (size - 1) because twig loops are range inclusive #}
                                     {% for i in 1..(max_team_size - 1) %}
@@ -45,6 +53,11 @@
                                 {% endif %}
                             </div>
                         </td>
+                        {% if json_data is not same as("") %}
+                            <td>
+                                {{ json_data[loop.index]["page_count"] }}
+                            </td>
+                        {% endif %}
                         <td>
                             <button type="button" id="bulk_submit_{{ loop.index }}" class="btn btn-success">Submit</button>
                         </td>

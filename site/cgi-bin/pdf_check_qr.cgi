@@ -79,9 +79,9 @@ try:
     os.chdir(split_path)
     #message = "Something went wrong: preparing bulk folder"
 
-
     # # split pdfs
     for filename in os.listdir(bulk_path):
+        output = {}
         pdfPages = PdfFileReader(filename)
         #convert pdf to series of images for scanning
         pages = convert_from_bytes(open(filename, 'rb').read())
@@ -89,38 +89,56 @@ try:
     
         i = 0
         cover_index = 0
-        output = []
+        #start student id index at to match up with displaying files in BulkUploadBox.twig
+        id_index = 1
+        page_count = 1
         for page in pages:
             val = pyzbar.decode(page)
             if val != []:
                 #found a new qr code, split here
-                data = val[0][0]
+                #convert byte literal to string
+                data = val[0][0].decode("utf-8")
+                output[id_index] = {}
+                output[id_index]['id'] = data
+                output[id_index]['page_count'] = page_count
                 cover_filename = '{}_{}_cover.pdf'.format(filename[:-4], i)
                 output_filename = '{}_{}.pdf'.format(filename[:-4], cover_index)
-
+                #save pdf
                 if i != 0:
-                    output.append(data)
                     with open(output_filename, 'wb') as out:
                         pdf_writer.write(out)
-
+                if id_index == 2:
+                    #correct first pdf's page count
+                    output[1]['page_count'] = page_count
+                #start a new pdf and grab the cover
                 cover_writer = PdfFileWriter()
                 pdf_writer = PdfFileWriter()
                 cover_writer.addPage(pdfPages.getPage(i)) 
                 pdf_writer.addPage(pdfPages.getPage(i))
 
+                #save cover
                 with open(cover_filename,'wb') as out:
                     cover_writer.write(out)
+                #make sure the index of the full pdf name mateches the cover.pdf name
                 cover_index = i
+                id_index += 1
+                page_count = 1
             else:
                 #add pages to current split_pdf
+                page_count += 1
                 pdf_writer.addPage(pdfPages.getPage(i))
             i += 1
 
+        #save whatever is left
         output_filename = '{}_{}.pdf'.format(filename[:-4], cover_index)
         with open(output_filename,'wb') as out:
             pdf_writer.write(out)
-        output.append(data)
 
+    #save json to parse student names later
+    with open('decoded.json', 'w') as out:
+        json.dump(output, out)
+
+    #cleanup
     for filename in os.listdir(bulk_path):
         os.remove(filename)
 
@@ -132,6 +150,5 @@ except Exception as e:
     if os.path.exists(split_path):
         shutil.rmtree(split_path)
     message += str(e)
-        
 
-print(json.dumps({"valid": valid, "message": message}))
+print(json.dumps({"valid" : valid, "message" : message}))

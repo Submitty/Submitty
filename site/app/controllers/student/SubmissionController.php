@@ -733,7 +733,7 @@ class SubmissionController extends AbstractController {
         $timestamp_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
             $gradeable->getId(), $timestamp);
         $files = FileUtils::getAllFiles($timestamp_path);
-        if (count($files) == 0) {
+        if (count($files) == 0 || (count($files) == 1 && array_key_exists('decoded.json', $files)  )) {
             if (!FileUtils::recursiveRmdir($timestamp_path)) {
                 return $this->uploadResult("Failed to remove the empty timestamp directory {$timestamp} from the split_pdf directory.", false);
             }
@@ -851,7 +851,7 @@ class SubmissionController extends AbstractController {
         $timestamp_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
             $gradeable->getId(), $timestamp);
         $files = FileUtils::getAllFiles($timestamp_path);
-        if (count($files) == 0) {
+        if (count($files) == 0 || (count($files) == 1 && array_key_exists('decoded.json', $files)  )) {
             if (!FileUtils::recursiveRmdir($timestamp_path)) {
                 return $this->uploadResult("Failed to remove the empty timestamp directory {$timestamp} from the split_pdf directory.", false);
             }
