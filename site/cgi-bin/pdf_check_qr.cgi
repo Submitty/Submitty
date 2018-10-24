@@ -89,7 +89,7 @@ try:
     
         i = 0
         cover_index = 0
-        #start student id index at to match up with displaying files in BulkUploadBox.twig
+        #start student id index at 1 to match up with displaying files in BulkUploadBox.twig
         id_index = 1
         page_count = 1
         for page in pages:
@@ -98,6 +98,8 @@ try:
                 #found a new qr code, split here
                 #convert byte literal to string
                 data = val[0][0].decode("utf-8")
+                if qr_prefix != "":
+                    data = data[len(qr_prefix):]
                 output[id_index] = {}
                 output[id_index]['id'] = data
                 output[id_index]['page_count'] = page_count
@@ -131,6 +133,7 @@ try:
 
         #save whatever is left
         output_filename = '{}_{}.pdf'.format(filename[:-4], cover_index)
+        output[2]['page_count'] = page_count
         with open(output_filename,'wb') as out:
             pdf_writer.write(out)
 
