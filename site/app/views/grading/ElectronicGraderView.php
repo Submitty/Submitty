@@ -532,7 +532,7 @@ class ElectronicGraderView extends AbstractView {
     }
 
     /**
-     * Render the Auto-Grading Testcases panel
+     * Render the Autograding Testcases panel
      * @param AutoGradedVersion $version_instance
      * @param bool $show_hidden_cases
      * @return string
