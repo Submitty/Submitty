@@ -35,11 +35,11 @@ class AutoGradingView extends AbstractView {
         $display_hidden = false;
         $num_visible_testcases = 0;
 
-        // FIXME: This variable should be false if autograding results
+        // This variable should be false if autograding results
         // (files/database values) exist, but true if the assignment
         // is in the queue or something went wrong with autograding
         // (it crashed, files were corrupted, etc)
-        $incomplete_autograding = true;
+        $incomplete_autograding = !$version_instance->isAutogradingComplete();
 
         $testcase_array = array_map(function (AutoGradedTestcase $testcase) {
             $testcase_config = $testcase->getTestcase();
@@ -81,9 +81,6 @@ class AutoGradingView extends AbstractView {
             }
         }
         foreach ($version_instance->getTestcases() as $testcase) {
-
-            // FIXME: I don't know if this is the right check
-            $incomplete_autograding = false;
 
             if ($testcase->canView()) {
                 $num_visible_testcases++;

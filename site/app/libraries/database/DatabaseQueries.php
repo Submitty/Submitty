@@ -710,6 +710,20 @@ ORDER BY egd.g_version", array($g_id, $user_id));
         return $return;
     }
 
+    public function getGradeableVersionHasAutogradingResults($g_id, $version, $user_id, $team_id) {
+        $query = "SELECT * FROM electronic_gradeable_data WHERE g_id=? AND g_version=? AND ";
+        if($user_id === null) {
+            $query .= "team_id=?";
+            $params = [$g_id, $version, $team_id];
+        }
+        else {
+            $query .= "user_id=?";
+            $params = [$g_id, $version, $user_id];
+        }
+        $this->course_db->query($query, $params);
+        return count($this->course_db->rows()) > 0 && $this->course_db->rows()[0]['autograding_complete'] === true;
+    }
+
 
     // Moved from class LateDaysCalculation on port from TAGrading server.  May want to incorporate late day information into gradeable object rather than having a separate query
     public function getLateDayUpdates($user_id) {
