@@ -32,7 +32,7 @@ class AutoGradingView extends AbstractView {
         $hidden_earned = 0;
         $hidden_max = 0;
         $show_hidden_breakdown = false;
-        $display_hidden = false;
+        $any_visible_hidden = false;
         $num_visible_testcases = 0;
 
         // FIXME: This variable should be false if autograding results
@@ -67,18 +67,18 @@ class AutoGradingView extends AbstractView {
             $hidden_earned = $version_instance->getTotalPoints();
             $hidden_max = $autograding_config->getTotalNonExtraCredit();
 
-            $show_hidden_breakdown = ($version_instance->getNonHiddenNonExtraCredit() + $version_instance->getHiddenNonExtraCredit() > $autograding_config->getTotalNonHiddenNonExtraCredit()) && $show_hidden;
-
-            $display_hidden = false;
             if ($gradeable->isTaGradeReleased()) {
                 foreach ($version_instance->getTestcases() as $testcase) {
                     if (!$testcase->canView()) continue;
                     if ($testcase->getTestcase()->isHidden()) {
-                        $display_hidden = true;
+                        $any_visible_hidden = true;
                         break;
                     }
                 }
             }
+
+            $show_hidden_breakdown = $any_visible_hidden && $show_hidden &&
+                ($version_instance->getNonHiddenNonExtraCredit() + $version_instance->getHiddenNonExtraCredit() > $autograding_config->getTotalNonHiddenNonExtraCredit());
         }
         foreach ($version_instance->getTestcases() as $testcase) {
 
@@ -100,11 +100,10 @@ class AutoGradingView extends AbstractView {
             "nonhidden_max" => $nonhidden_max,
             "hidden_earned" => $hidden_earned,
             "hidden_max" => $hidden_max,
-            "display_hidden" => $display_hidden,
+            "show_hidden" => $show_hidden,
             "has_badges" => $has_badges,
             'testcases' => $testcase_array,
             'is_ta_grade_released' => $gradeable->isTaGradeReleased(),
-            "show_hidden" => $show_hidden,
             'display_version' => $version_instance->getVersion()
         ]);
     }
