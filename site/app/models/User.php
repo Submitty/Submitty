@@ -267,8 +267,9 @@ class User extends AbstractModel {
             //user_group check is a digit between 1 - 4.
 			return preg_match("~^[1-4]{1}$~", $data) === 1;
 		case 'registration_section':
-			//Registration section must contain only alpha, numbers, underscores, hyphens
-			return preg_match("~^[A-Za-z0-9_\-]+$~", $data) === 1;	
+			//Registration section must contain only alpha (upper and lower permitted), numbers, underscores, hyphens.
+			//"NULL" is reserved, so section must not contain any alpha-case variation of "null".  e.g. "null", "NULL", "Null", etc.
+			return preg_match("~^(?!^null$)[a-z0-9_\-]+$~i", $data) === 1;
 		case 'user_password':
 	        //Database password cannot be blank, no check on format
 			return $data !== "";
