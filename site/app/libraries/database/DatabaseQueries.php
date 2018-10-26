@@ -421,7 +421,7 @@ class DatabaseQueries {
     }
 
     public function threadExists(){
-		$this->course_db->query("SELECT id from threads LIMIT 1");
+		$this->course_db->query("SELECT id from threads where deleted = false LIMIT 1");
 		return count($this->course_db->rows()) == 1;
     }
 
@@ -1375,11 +1375,17 @@ ORDER BY user_id ASC");
     }
 
     public function insertNewRegistrationSection($section) {
-        $this->course_db->query("INSERT INTO sections_registration (sections_registration_id) VALUES(?)", array($section));
+        $semester = $this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
+        $this->submitty_db->query("INSERT INTO courses_registration_sections (semester, course, registration_section_id) VALUES (?,?,?) ON CONFLICT DO NOTHING", array($semester, $course, $section));
+        return $this->submitty_db->getrowcount();
     }
 
     public function deleteRegistrationSection($section) {
-        $this->course_db->query("DELETE FROM sections_registration WHERE sections_registration_id=?", array($section));
+       	$semester = $this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
+        $this->submitty_db->query("DELETE FROM courses_registration_sections WHERE semester=? AND course=? AND registration_section_id=?", array($semester, $course, $section));
+        return $this->submitty_db->getRowCount();
     }
 
     public function setupRotatingSections($graders, $gradeable_id) {

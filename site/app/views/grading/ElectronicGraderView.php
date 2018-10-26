@@ -577,10 +577,10 @@ class ElectronicGraderView extends AbstractView {
         $display_version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($display_version);
         if ($display_version_instance !==  null) {
             add_files($submissions, array_merge($display_version_instance->getMetaFiles(), $display_version_instance->getFiles()), 'submissions');
+            add_files($checkout, array_merge($display_version_instance->getMetaFiles(), $display_version_instance->getFiles()), 'checkout');
+            
+            add_files($results, $display_version_instance->getResultsFiles(), 'results');
         }
-
-        // TODO: this function doesn't exist!! where did it go?
-//        add_files($results, $gradeable->getResultsFiles(), 'results');
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
             "gradeable_id" => $graded_gradeable->getGradeableId(),

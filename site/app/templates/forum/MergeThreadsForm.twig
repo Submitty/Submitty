@@ -4,9 +4,24 @@
 {% block body %}
         Merge current thread into
         <input type="hidden" id="merge_thread_child" name="merge_thread_child" value="{{ current_thread }}" data-ays-ignore="true">
-        <select style="margin-right:10px;" name="merge_thread_parent" class="form-control" required data-ays-ignore="true" current-thead-date="{{ current_thread_date }}">
-                <option>Loading...</option>
-        </select>
+        <input type="text" size="50" placeholder="e.g. (thread_id) title" class="ui-autocomplete-input" autocomplete="off" name="merge_thread_parent" id="merge_thread_parent" data-ays-ignore="true">
+        <script>
+            //Override JQuery autocomplete to ensure valid display of entities
+            $.ui.autocomplete.prototype._renderItem = function (ul, item) {
+                    return $( "<li style='padding:5px;'></li>" )
+                    .data( "item.autocomplete", item )
+                    .append( $( "<a></a>" ).html( item.label ) )
+                    .appendTo( ul );
+            };
+            $("#merge_thread_parent").autocomplete({
+                source: {{ possibleMerges|raw }},
+                //Override JQuery autocomplete to ensure valid selection of entities
+                select: function (event, ui) {
+                    event.preventDefault();
+                    this.value = $('<div />').html(ui.item.label).text();
+                }
+            });
+        </script>
 {% endblock %}
 {% block form %}
     <form method="post" action="{{ core.buildUrl({'component': 'forum', 'page': 'merge_thread'}) }}">
@@ -15,5 +30,5 @@
 {% endblock %}
 {% block buttons %}
     {{ block('close_button') }}
-    <input class="btn btn-primary" type="submit" value="Submit" disabled="disabled" />
+    <input class="btn btn-primary" type="submit" value="Submit" />
 {% endblock %}
