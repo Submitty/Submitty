@@ -237,6 +237,15 @@ table tr.table-header {
     margin: 0 auto -60px;
 }
 
+.full_height {
+    max-height: 100%;
+}
+
+#header.full_height {
+    min-height: fit-content;
+    min-height: -moz-fit-content;
+}
+
 #nav {
     background-color: #000000;
     color: #FFFFFF;
@@ -372,6 +381,16 @@ table tr.table-header {
     padding: 30px;
     margin: 15px;
     flex-grow: 1;
+}
+
+.forum_content {
+    padding: 0px;
+}
+
+.forum_show_threads {
+    overflow: hidden;
+    flex-direction: column;
+    display: flex;
 }
 
 .content h1 {
@@ -615,7 +634,7 @@ table tr.table-header {
 }
 
 .active {
-    background-color: #21C2F6;
+    background-color: #d8eef6;
 }
 
 .deleted {
@@ -759,8 +778,10 @@ table tr.table-header {
 }
 
 #search_wrapper{
-    background-color: #E9EFEF;
     border-radius: 3px;
+    padding-bottom:10px;
+    padding-right:10px;
+    padding-left:10px;
 }
 
 .notification_badge{
@@ -785,27 +806,19 @@ table tr.table-header {
 
 }
 
-.thread_list {
-    display:inline-block;
-    width:25%;
-    background-color: #E9EFEF;
-    box-shadow: 0 2px 15px -5px #888888;
-    margin-right:2px;
-    overflow-y: auto;
-    height: 100%;
-    float: left;
-    border-radius: 3px;
+#forum_bar {
+    margin-right: 10px;
+    margin-left: 10px;
+    margin-top: 10px;
 }
 
-.posts_list {
-    padding-right: 20px;
-    padding-left: 20px;
-    overflow: auto;
-    height: 100%;
-    width: 100%;
-    box-shadow: 0 2px 15px -5px #888888;
-    background-color: #E9EFEF;
-    border-radius: 3px;
+#thread_list {
+    padding-right: 0px;
+    overflow-y: auto;
+}
+
+#posts_list {
+    overflow-y: auto;
 }
 
 .first_post .post_content{
@@ -849,8 +862,6 @@ table tr.table-header {
 .first_post{
     padding-left: 10px !important;
     margin-top: 0px !important;
-    margin-left: -20px !important;
-    margin-right: -20px !important;
     border-radius: 0 !important;
 }
 

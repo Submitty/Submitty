@@ -654,6 +654,11 @@ tr.is_publish {
     background: #FFAAAA
 }
 
+.gradeable .custom-mark-error {
+    border-color: #F00;
+    background-color: #FEE;
+}
+
 .gradeable .mark-deleted span.delete-mark-container {
     display: none;
 }
@@ -753,4 +758,24 @@ tr.is_publish {
 
 #mark-conflict-popup .mark-conflict-container {
     margin-top: 25px;
+}
+
+/*Submission Panel CSS*/
+
+#submission_browser {
+    left:15px;
+    bottom:40px;
+    width:48%;
+    height:30%;
+    overflow: hidden;
+}
+
+#directory_view {
+    position:relative;
+    float:left;
+    width:100%;
+}
+
+#changeCodeStyle {
+    display:inline-block;
 }

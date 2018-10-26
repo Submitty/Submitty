@@ -1750,19 +1750,19 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
                var page_number = parseInt(x.page_number);
                x = x.html;
                x = `${x}`;
-               var jElement = $(".thread_list");
+               var jElement = $("#thread_list");
                jElement.children(":not(.fa)").remove();
-               $(".thread_list .fa-caret-up").after(x);
+               $("#thread_list .fa-caret-up").after(x);
                jElement.attr("prev_page", page_number - 1);
                jElement.attr("next_page", page_number + 1);
                jElement.data("dynamic_lock_load", false);
-               $(".thread_list .fa-spinner").hide();
+               $("#thread_list .fa-spinner").hide();
                if(loadFirstPage) {
-                   $(".thread_list .fa-caret-up").hide();
-                   $(".thread_list .fa-caret-down").show();
+                   $("#thread_list .fa-caret-up").hide();
+                   $("#thread_list .fa-caret-down").show();
                } else {
-                   $(".thread_list .fa-caret-up").show();
-                   $(".thread_list .fa-caret-down").hide();
+                   $("#thread_list .fa-caret-up").show();
+                   $("#thread_list .fa-caret-down").hide();
                }
                dynamicScrollLoadIfScrollVisible(jElement);
                if(success_callback != null) {
@@ -1857,56 +1857,6 @@ function showHistory(post_id) {
             },
             error: function(){
                 window.alert("Something went wrong while trying to display post history. Please try again.");
-            }
-    });
-}
-
-function loadMergeableThreads() {
-    var selectNode = $("[name='merge_thread_parent']");
-    var current_thead_date = selectNode.attr("current-thead-date");
-    if(!current_thead_date) {
-        // Already Loaded
-        return;
-    }
-    var url = buildUrl({'component': 'forum', 'page': 'get_threads_before'});
-    $.ajax({
-            url: url,
-            type: "POST",
-            data: {
-                current_thead_date: current_thead_date
-            },
-            success: function(data){
-                try {
-                    var json = JSON.parse(data);
-                } catch (err){
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
-                    $('#messages').append(message);
-                    return;
-                }
-                if(json['error']){
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
-                    $('#messages').append(message);
-                    return;
-                }
-                if(json.content.length == 0) {
-                    selectNode.closest('.form-body').text("Nothing to merge.");
-                } else {
-                    selectNode.empty();
-                    var options = [];
-                    for(var i = 0; i < json.content.length ; i++ ) {
-                        var row = json.content[i];
-                        var id = escapeSpecialChars(""+row.id);
-                        var title = escapeSpecialChars(row.title);
-                        var element = "<option value='" + id + "'>" + title + " (" + id + ")</option>";
-                        options.push(element);
-                    }
-                    selectNode.append(options.join(''));
-                    selectNode.closest("form").find("input[type='submit']").prop('disabled', false);
-                }
-                selectNode.attr("current-thead-date", "");
-            },
-            error: function(){
-                window.alert("Something went wrong while trying to load threads list. Please try again.");
             }
     });
 }
