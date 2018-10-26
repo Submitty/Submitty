@@ -348,12 +348,12 @@
     <td>
         {% if not graded_gradeable.getGradeable().isTeamAssignment() %}
             {{ graded_gradeable.getSubmitter().getUser().getDisplayedFirstName() }}
-            {{ graded_gradeable.getSubmitter().getUser().getLastName() }}
+            {{ graded_gradeable.getSubmitter().getUser().getDisplayedLastName() }}
         {% else %}
             {%- for member in graded_gradeable.getSubmitter().getTeam().getMemberUsers() -%}
                 {%- if loop.index != 1 -%}, {% endif -%}
                 {{- member.getDisplayedFirstName() }}
-                {{ member.getLastName() -}}
+                {{ member.getDisplayedLastName() -}}
             {%- endfor -%}
         {% endif %}
     </td>
@@ -428,7 +428,7 @@
 
 {# Last Name #}
 {% macro render_column_user_last(self, section, graded_gradeable, index, info, column) %}
-    <td>{{ graded_gradeable.getSubmitter().getUser().getLastName() }}</td>
+    <td>{{ graded_gradeable.getSubmitter().getUser().getDisplayedLastName() }}</td>
 {% endmacro %}
 
 {# Viewed Grade #}

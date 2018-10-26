@@ -272,7 +272,7 @@ class AutoGradingView extends AbstractView {
                 if ($component->getGrader() === NULL) {
                     continue;
                 }
-                $name = $component->getGrader()->getDisplayedFirstName() . " " . $component->getGrader()->getLastName();
+                $name = $component->getGrader()->getDisplayedFirstName() . " " . $component->getGrader()->getDisplayedLastName();
                 if (!in_array($name, $grader_names) && $component->getGrader()->accessFullGrading()) {
                     $grader_names[] = $name;
                 }
@@ -349,7 +349,7 @@ class AutoGradingView extends AbstractView {
 
         // Get the names of all full access or above graders
         $grader_names = array_map(function (User $grader) {
-            return $grader->getDisplayedFirstName() . ' ' . $grader->getLastName();
+            return $grader->getDisplayedFirstName() . ' ' . $grader->getDisplayedLastName();
         }, $ta_graded_gradeable->getVisibleGraders());
 
         // Special messages for peer / mentor-only grades
@@ -407,7 +407,7 @@ class AutoGradingView extends AbstractView {
                 'custom_mark_score' => $container->getScore(),
                 'comment' => $container->getComment(),
                 'graders' => array_map(function (User $grader) {
-                    return $grader->getLastName();
+                    return $grader->getDisplayedLastName();
                 }, $container->getVisibleGraders()),
                 'marks' => array_map(function (Mark $mark) use ($container) {
                     return [

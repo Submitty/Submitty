@@ -11,12 +11,16 @@ use app\libraries\Core;
  * @method void setId(string $id) Get the id of the loaded user
  * @method void setAnonId(string $anon_id)
  * @method string getPassword()
- * @method string getFirstName() Get the first name of the loaded user
- * @method string getPreferredFirstName() Get the preferred name of the loaded user
- * @method string getDisplayedFirstName() Returns the preferred name if one exists and is not null or blank,
- *                                        otherwise return the first name field for the user.
- * @method string getLastName() Get the last name of the loaded user
- * @method void setLastName(string $last_name)
+ * @method string getLegalFirstName() Get the first name of the loaded user
+ * @method string getPreferredFirstName() Get the preferred first name of the loaded user
+ * @method string getDisplayedFirstName() Returns the preferred first name if one exists and is not null or blank,
+ *                                        otherwise return the legal first name field for the user.
+ * @method string getLegalLastName() Get the last name of the loaded user
+ * @method string getPreferredLastName()  Get the preferred last name of the loaded user
+ * @method string getDisplayedLastName()  Returns the preferred last name if one exists and is not null or blank,
+ *                                        otherwise return the legal last name field for the user.
+ * @method void setLegalFirstName(string $name)
+ * @method void setLegalLastName(string $name)
  * @method string getEmail()
  * @method void setEmail(string $email)
  * @method int getGroup()
@@ -59,13 +63,17 @@ class User extends AbstractModel {
      */
     protected $password = null;
     /** @property @var string The first name of the user */
-    protected $first_name;
-    /** @property @var string The first name of the user */
+    protected $legal_first_name;
+    /** @property @var string The preferred first name of the user */
     protected $preferred_first_name = "";
-    /** @property @var  string The name to be displayed by the system (either preferred name or first name) */
+    /** @property @var  string The first name to be displayed by the system (either first name or preferred first name) */
     protected $displayed_first_name;
     /** @property @var string The last name of the user */
-    protected $last_name;
+    protected $legal_last_name;
+    /** @property @var string The preferred last name of the user */
+    protected $preferred_last_name = "";
+    /** @property @var  string The last name to be displayed by the system (either last name or preferred last name) */
+    protected $displayed_last_name;
     /** @property @var string The email of the user */
     protected $email;
     /** @property @var int The group of the user, used for access controls (ex: student, instructor, etc.) */
@@ -125,12 +133,16 @@ class User extends AbstractModel {
             $this->anon_id = $details['anon_id'];
         }
 
-        $this->setFirstName($details['user_firstname']);
+        $this->setLegalFirstName($details['user_firstname']);
         if (isset($details['user_preferred_firstname'])) {
             $this->setPreferredFirstName($details['user_preferred_firstname']);
         }
 
-        $this->last_name = $details['user_lastname'];
+        $this->setLegalLastName($details['user_lastname']);
+        if (isset($details['user_preferred_lastname'])) {
+            $this->setPreferredLastName($details['user_preferred_lastname']);
+        }
+
         $this->email = $details['user_email'];
         $this->group = isset($details['user_group']) ? intval($details['user_group']) : 4;
         if ($this->group > 4 || $this->group < 0) {
@@ -184,13 +196,18 @@ class User extends AbstractModel {
         }
     }
 
-    public function setFirstName($name) {
-        $this->first_name = $name;
+    public function setLegalFirstName($name) {
+        $this->legal_first_name = $name;
         $this->setDisplayedFirstName();
     }
 
+    public function setLegalLastName($name) {
+        $this->legal_last_name = $name;
+        $this->setDisplayedLastName();
+    }
+
     /**
-     * Set the preferred name of the loaded user (does not affect db. call updateUser.)
+     * Set the preferred first name of the loaded user (does not affect db. call updateUser.)
      * @param string $name
      */
     public function setPreferredFirstName($name) {
@@ -198,13 +215,17 @@ class User extends AbstractModel {
         $this->setDisplayedFirstName();
     }
 
+    public function setPreferredLastName($name) {
+        $this->preferred_last_name = $name;
+        $this->setDisplayedLastName();
+    }
+
     private function setDisplayedFirstName() {
-        if ($this->preferred_first_name !== "" && $this->preferred_first_name !== null) {
-            $this->displayed_first_name = $this->preferred_first_name;
-        }
-        else {
-            $this->displayed_first_name = $this->first_name;
-        }
+        $this->displayed_first_name = (!empty($this->preferred_first_name)) ? $this->preferred_first_name : $this->legal_first_name;
+    }
+
+    private function setDisplayedlastName() {
+        $this->displayed_last_name = (!empty($this->preferred_last_name)) ? $this->preferred_last_name : $this->legal_last_name;
     }
 
     public function setRegistrationSection($section) {
@@ -253,13 +274,16 @@ class User extends AbstractModel {
 
     	switch($field) {
 		case 'user_id':
-			//Username / useer_id must contain only lowercase alpha, numbers, underscores, hyphens
+			//Username / user_id must contain only lowercase alpha, numbers, underscores, hyphens
 			return preg_match("~^[a-z0-9_\-]+$~", $data) === 1;
-		case 'user_firstname':
-		case 'user_lastname':
-		case 'user_preferred_firstname':
-			//First, Last, Preferred name must be alpha characters, white-space, or certain punctuation.
+		case 'user_legal_firstname':
+		case 'user_legal_lastname':
+			//First and last name must be alpha characters, white-space, or certain punctuation.
         	return preg_match("~^[a-zA-Z'`\-\.\(\) ]+$~", $data) === 1;
+   		case 'user_preferred_firstname':
+   		case 'user_preferred_lastname':
+   		    //Preferred first and last name may be "", alpha chars, white-space, certain punctuation AND between 0 and 30 chars.
+   		    return preg_match("~^[a-zA-Z'`\-\.\(\) ]{0,30}$~", $data) === 1;
 		case 'user_email':
 			//Check email address for appropriate format. e.g. "user@university.edu", "user@cs.university.edu", etc.
 			return preg_match("~^[^(),:;<>@\\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?<!\-)(\.[a-zA-Z0-9]+)+$~", $data) === 1;

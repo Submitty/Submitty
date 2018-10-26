@@ -444,7 +444,7 @@ class ElectronicGraderView extends AbstractView {
         $student_full = array();
         foreach ($students as $student) {
             $student_full[] = array('value' => $student->getId(),
-                                    'label' => str_replace("'","&#039;",$student->getDisplayedFirstName()).' '.str_replace("'","&#039;",$student->getLastName()).' <'.$student->getId().'>');
+                                    'label' => str_replace("'","&#039;",$student->getDisplayedFirstName()).' '.str_replace("'","&#039;",$student->getDisplayedLastName()).' <'.$student->getId().'>');
         }
         $student_full = json_encode($student_full);
 
@@ -699,7 +699,7 @@ class ElectronicGraderView extends AbstractView {
             "graded_gradeable" => $graded_gradeable
         ]);
     }
-    
+
     public function popupStudents() {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/ReceivedMarkForm.twig");
     }

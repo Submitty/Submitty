@@ -55,8 +55,8 @@ class ReportController extends AbstractController {
                 //Prepare new user row
                 $current_user = $gradeable->getUser()->getId();
                 $row['User ID'] = $gradeable->getUser()->getId();
-                $row['First Name'] = (empty($gradeable->getUser()->getPreferredFirstName())) ? $gradeable->getUser()->getFirstName() : $gradeable->getUser()->getPreferredFirstName();
-                $row['Last Name'] = $gradeable->getUser()->getLastName();
+                $row['First Name'] = $gradeable->getUser()->getDisplayedFirstName();
+                $row['Last Name'] = $gradeable->getUser()->getDisplayedLastName();
                 $row['Registration Section'] = $gradeable->getUser()->getRegistrationSection();
             }
 
@@ -108,9 +108,10 @@ class ReportController extends AbstractController {
                 $current_user = $gradeable->getUser()->getId();
                 $user = [];
                 $user['user_id'] = $gradeable->getUser()->getId();
-                $user['legal_first_name'] = $gradeable->getUser()->getFirstName();
+                $user['legal_first_name'] = $gradeable->getUser()->getLegalFirstName();
                 $user['preferred_first_name'] = $gradeable->getUser()->getPreferredFirstName();
-                $user['last_name'] = $gradeable->getUser()->getLastName();
+                $user['legal_last_name'] = $gradeable->getUser()->getLegalLastName();
+                $user['preferred_last_name'] = $gradeable->getUser->getPreferredLastName();
                 $user['registration_section'] = $gradeable->getUser()->getRegistrationSection();
                 $user['default_allowed_late_days'] = $this->core->getConfig()->getDefaultStudentLateDays();
                 $user['last_update'] = date("l, F j, Y");

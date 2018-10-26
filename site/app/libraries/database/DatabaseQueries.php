@@ -2390,17 +2390,11 @@ AND gc_id IN (
     }
 
     public function getDisplayUserInfoFromUserId($user_id){
-      $this->course_db->query("SELECT user_firstname, user_preferred_firstname, user_lastname, user_email from users where user_id = ?", array($user_id));
+      $this->course_db->query("SELECT user_firstname, user_preferred_firstname, user_lastname, user_preferred_lastname, user_email FROM users WHERE user_id = ?", array($user_id));
       $name_rows = $this->course_db->rows()[0];
-      $last_name =  " " . $name_rows["user_lastname"];
-      if(empty($name_rows["user_preferred_firstname"])){
-        $name = $name_rows["user_firstname"];
-      } else {
-        $name = $name_rows["user_preferred_firstname"];
-      }
       $ar = array();
-      $ar["first_name"] = $name;
-      $ar["last_name"] = $last_name;
+      $ar["first_name"] = (empty($name_rows["user_preferred_firstname"])) ? $name_rows["user_firstname"]      : $name_rows["user_preferred_firstname"];
+      $ar["last_name"]  = (empty($name_rows["user_preferred_lastname"]))  ? " " . $name_rows["user_lastname"] : " " . $name_rows["user_preferred_lastname"];
       $ar["user_email"] = $name_rows["user_email"];
       return $ar;
     }

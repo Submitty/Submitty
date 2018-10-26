@@ -82,9 +82,10 @@ class UsersController extends AbstractController {
         $user = $this->core->getQueries()->getUserById($user_id);
         $this->core->getOutput()->renderJson(array(
             'user_id' => $user->getId(),
-            'user_firstname' => $user->getFirstName(),
-            'user_lastname' => $user->getLastName(),
+            'user_firstname' => $user->getLegalFirstName(),
+            'user_lastname' => $user->getLegalLastName(),
             'user_preferred_firstname' => $user->getPreferredFirstName(),
+            'user_preferred_lastname' => $user->getPreferredLastName(),
             'user_email' => $user->getEmail(),
             'user_group' => $user->getGroup(),
             'registration_section' => $user->getRegistrationSection(),
@@ -116,14 +117,18 @@ class UsersController extends AbstractController {
         //Username must contain only lowercase alpha, numbers, underscores, hyphens
         $error_message .= User::validateUserData('user_id', trim($_POST['user_id'])) ? "" : "Error in username: \"".strip_tags($_POST['user_id'])."\"<br>";
         //First and Last name must be alpha characters, white-space, or certain punctuation.
-        $error_message .= User::validateUserData('user_firstname', trim($_POST['user_firstname'])) ? "" : "Error in first name: \"".strip_tags($_POST['user_firstname'])."\"<br>";
-        $error_message .= User::validateUserData('user_lastname', trim($_POST['user_lastname'])) ? "" : "Error in last name: \"".strip_tags($_POST['user_lastname'])."\"<br>";
+        $error_message .= User::validateUserData('user_legal_firstname', trim($_POST['user_firstname'])) ? "" : "Error in first name: \"".strip_tags($_POST['user_firstname'])."\"<br>";
+        $error_message .= User::validateUserData('user_legal_lastname', trim($_POST['user_lastname'])) ? "" : "Error in last name: \"".strip_tags($_POST['user_lastname'])."\"<br>";
         //Check email address for appropriate format. e.g. "user@university.edu", "user@cs.university.edu", etc.
         $error_message .= User::validateUserData('user_email', trim($_POST['user_email'])) ? "" : "Error in email: \"".strip_tags($_POST['user_email'])."\"<br>";
         //Preferred first name must be alpha characters, white-space, or certain punctuation.
-        if (!empty($_POST['user_preferred_firstname']) && trim($_POST['user_preferred_firstname']) != "") {
+        if (!empty($_POST['user_preferred_firstname']) && trim($_POST['user_preferred_firstname']) !== "") {
             $error_message .= User::validateUserData('user_preferred_firstname', trim($_POST['user_preferred_firstname'])) ? "" : "Error in preferred first name: \"".strip_tags($_POST['user_preferred_firstname'])."\"<br>";
         }
+        if (!empty($_POST['user_preferred_lastname']) && trim($_POST['user_preferred_lastname']) !== "") {
+            $error_message .= User::validateUserData('user_preferred_lastname', trim($_POST['user_preferred_lastname'])) ? "" : "Error in preferred last name: \"".strip_tags($_POST['user_preferred_lastname'])."\"<br>";
+        }
+
         //Database password cannot be blank, no check on format
         if ($use_database && (($_POST['edit_user'] == 'true' && !empty($_POST['user_password'])) || $_POST['edit_user'] != 'true')) {
             $error_message .= User::validateUserData('user_password', $_POST['user_password']) ? "" : "Error must enter password for user<br>";
@@ -149,12 +154,16 @@ class UsersController extends AbstractController {
             $user->setId(trim($_POST['user_id']));
         }
 
-        $user->setFirstName(trim($_POST['user_firstname']));
+        $user->setLegalFirstName(trim($_POST['user_firstname']));
         if (isset($_POST['user_preferred_firstname']) && trim($_POST['user_preferred_firstname']) != "") {
             $user->setPreferredFirstName(trim($_POST['user_preferred_firstname']));
         }
 
-        $user->setLastName(trim($_POST['user_lastname']));
+        $user->setLegalLastName(trim($_POST['user_lastname']));
+        if (isset($_POST['user_preferred_lastname']) && trim($_POST['user_preferred_lastname']) != "") {
+            $user->setPreferredLastName(trim($_POST['user_preferred_lastname']));
+        }
+
         $user->setEmail(trim($_POST['user_email']));
 
         if (!empty($_POST['user_password'])) {
@@ -248,7 +257,7 @@ class UsersController extends AbstractController {
                 $_SESSION['request'] = $_POST;
             }
         }
-        else if (isset($_POST['delete_reg_section']) && $_POST['delete_reg_section'] != "") {
+        else if (isset($_POST['delete_reg_section']) && $_POST['delete_reg_section'] !== "") {
             if (User::validateUserData('registration_section', $_POST['delete_reg_section'])) {
                 // DELETE trigger function in master DB will catch integrity violation exceptions (such as FK violations when users/graders are still enrolled in section).
                 // $num_del_sections indicates how many DELETEs were performed.  0 DELETEs means either the section didn't exist or there are users still enrolled.
@@ -505,7 +514,8 @@ class UsersController extends AbstractController {
         $contents = $this->getCsvOrXlsxData($_FILES['upload']['name'], $_FILES['upload']['tmp_name'], $return_url);
 
         //Validation and error checking.
-        $pref_name_idx = $use_database ? 6 : 5;
+        $pref_firstname_idx = $use_database ? 6 : 5;
+        $pref_lastname_idx = $pref_firstname_idx + 1;
         $error_message = "";
         $row_num = 0;
         $graders_data = array();
@@ -519,8 +529,8 @@ class UsersController extends AbstractController {
             $error_message .= User::validateUserData('user_id', $vals[0]) ? "" : "ERROR on row {$row_num}, User Name \"".strip_tags($vals[0])."\"<br>";
 
             //First and Last name must be alpha characters, white-space, or certain punctuation.
-            $error_message .= User::validateUserData('user_firstname', $vals[1]) ? "" : "ERROR on row {$row_num}, First Name \"".strip_tags($vals[1])."\"<br>";
-            $error_message .= User::validateUserData('user_lastname', $vals[2]) ? "" : "ERROR on row {$row_num}, Last Name \"".strip_tags($vals[2])."\"<br>";
+            $error_message .= User::validateUserData('user_legal_firstname', $vals[1]) ? "" : "ERROR on row {$row_num}, First Name \"".strip_tags($vals[1])."\"<br>";
+            $error_message .= User::validateUserData('user_legal_lastname', $vals[2]) ? "" : "ERROR on row {$row_num}, Last Name \"".strip_tags($vals[2])."\"<br>";
 
             //Check email address for appropriate format. e.g. "grader@university.edu", "grader@cs.university.edu", etc.
             $error_message .= User::validateUserData('user_email', $vals[3]) ? "" : "ERROR on row {$row_num}, email \"".strip_tags($vals[3])."\"<br>";
@@ -528,9 +538,12 @@ class UsersController extends AbstractController {
             //grader-level check is a digit between 1 - 4.
             $error_message .= User::validateUserData('user_group', $vals[4]) ? "" : "ERROR on row {$row_num}, Grader Group \"".strip_tags($vals[4])."\"<br>";
 
-            //Preferred first name must be alpha characters, white-space, or certain punctuation.
-            if (isset($vals[$pref_name_idx]) && ($vals[$pref_name_idx] != "")) {
-                $error_message .= User::validateUserData('user_preferred_firstname', $vals[$pref_name_idx]) ? "" : "ERROR on row {$row_num}, Preferred First Name \"".strip_tags($vals[$pref_name_idx])."\"<br>";
+            //Preferred first and last name must be alpha characters, white-space, or certain punctuation.
+            if (isset($vals[$pref_firstname_idx]) && ($vals[$pref_firstname_idx] !== "")) {
+                $error_message .= User::validateUserData('user_preferred_firstname', $vals[$pref_firstname_idx]) ? "" : "ERROR on row {$row_num}, Preferred First Name \"".strip_tags($vals[$pref_firstname_idx])."\"<br>";
+            }
+            if (isset($vals[$pref_lastname_idx]) && ($vals[$pref_lastname_idx] !== "")) {
+                $error_message .= User::validateUserData('user_preferred_lastname', $vals[$pref_lastname_idx]) ? "" : "ERROR on row {$row_num}, Preferred Last Name \"".strip_tags($vals[$pref_lastname_idx])."\"<br>";
             }
 
             //Database password cannot be blank, no check on format
@@ -574,13 +587,17 @@ class UsersController extends AbstractController {
         foreach($graders_to_add as $grader_data) {
             $grader = new User($this->core);
             $grader->setId($grader_data[0]);
-            $grader->setFirstName($grader_data[1]);
-            $grader->setLastName($grader_data[2]);
+            $grader->setLegalFirstName($grader_data[1]);
+            $grader->setLegalLastName($grader_data[2]);
             $grader->setEmail($grader_data[3]);
             $grader->setGroup($grader_data[4]);
-            if (isset($grader_data[$pref_name_idx]) && ($grader_data[$pref_name_idx] != "")) {
-                $grader->setPreferredFirstName($grader_data[$pref_name_idx]);
+            if (isset($grader_data[$pref_firstname_idx]) && ($grader_data[$pref_firstname_idx] !== "")) {
+                $grader->setPreferredFirstName($grader_data[$pref_firstname_idx]);
             }
+            if (isset($grader_data[$pref_lastname_idx]) && ($grader_data[$pref_lastname_idx] !== "")) {
+                $grader->setPreferredLastName($grader_data[$pref_lastname_idx]);
+            }
+
             if ($use_database) {
                 $grader->setPassword($grader_data[5]);
             }
@@ -619,7 +636,8 @@ class UsersController extends AbstractController {
 
         //Validation and error checking.
         $num_reg_sections = count($this->core->getQueries()->getRegistrationSections());
-        $pref_name_idx = $use_database ? 6 : 5;
+        $pref_firstname_idx = $use_database ? 6 : 5;
+        $pref_lastname_idx = $pref_firstname_idx + 1;
         $error_message = "";
         $row_num = 0;
         $students_data = array();
@@ -638,8 +656,8 @@ class UsersController extends AbstractController {
             $error_message .= User::validateUserData('user_id', $vals[0]) ? "" : "ERROR on row {$row_num}, User Name \"".strip_tags($vals[0])."\"<br>";
 
             //First and Last name must be alpha characters, white-space, or certain punctuation.
-            $error_message .= User::validateUserData('user_firstname', $vals[1]) ? "" : "ERROR on row {$row_num}, First Name \"{$vals[1]}\"<br>";
-            $error_message .= User::validateUserData('user_lastname', $vals[2]) ? "" : "ERROR on row {$row_num}, Last Name \"".strip_tags($vals[2])."\"<br>";
+            $error_message .= User::validateUserData('user_legal_firstname', $vals[1]) ? "" : "ERROR on row {$row_num}, First Name \"{$vals[1]}\"<br>";
+            $error_message .= User::validateUserData('user_legal_lastname', $vals[2]) ? "" : "ERROR on row {$row_num}, Last Name \"".strip_tags($vals[2])."\"<br>";
 
             //Check email address for appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.
             $error_message .= User::validateUserData('user_email', $vals[3]) ? "" : "ERROR on row {$row_num}, email \"".strip_tags($vals[3])."\"<br>";
@@ -647,9 +665,12 @@ class UsersController extends AbstractController {
             //Check registration for appropriate format. Allowed characters - A-Z,a-z,_,-
             $error_message .= User::validateUserData('registration_section', $vals[4]) ? "" : "ERROR on row {$row_num}, Registration Section \"".strip_tags($vals[4])."\"<br>";
 
-            //Preferred first name must be alpha characters, white-space, or certain punctuation.
-            if (isset($vals[$pref_name_idx]) && ($vals[$pref_name_idx] != "")) {
-                $error_message .= User::validateUserData('user_preferred_firstname', $vals[$pref_name_idx]) ? "" : "ERROR on row {$row_num}, Preferred First Name \"".strip_tags($vals[$pref_name_idx])."\"<br>";
+            //Preferred first and last name must be alpha characters, white-space, or certain punctuation.
+            if (isset($vals[$pref_firstname_idx]) && ($vals[$pref_firstname_idx] !== "")) {
+                $error_message .= User::validateUserData('user_preferred_firstname', $vals[$pref_firstname_idx]) ? "" : "ERROR on row {$row_num}, Preferred First Name \"".strip_tags($vals[$pref_firstname_idx])."\"<br>";
+            }
+            if (isset($vals[$pref_lastname_idx]) && ($vals[$pref_lastname_idx] !== "")) {
+                $error_message .= User::validateUserData('user_preferred_lastname', $vals[$pref_lastname_idx]) ? "" : "ERROR on row {$row_num}, Preferred Last Name \"".strip_tags($vals[$pref_lastname_idx])."\"<br>";
             }
 
             //Database password cannot be blank, no check on format
@@ -693,13 +714,16 @@ class UsersController extends AbstractController {
         foreach($students_to_add as $student_data) {
             $student = new User($this->core);
             $student->setId($student_data[0]);
-            $student->setFirstName($student_data[1]);
-            $student->setLastName($student_data[2]);
+            $student->setLegalFirstName($student_data[1]);
+            $student->setLegalLastName($student_data[2]);
             $student->setEmail($student_data[3]);
             $student->setRegistrationSection($student_data[4]);
             $student->setGroup(4);
-            if (isset($student_data[$pref_name_idx]) && ($student_data[$pref_name_idx] != "")) {
-                $student->setPreferredFirstName($student_data[$pref_name_idx]);
+            if (isset($student_data[$pref_firstname_idx]) && ($student_data[$pref_firstname_idx] !== "")) {
+                $student->setPreferredFirstName($student_data[$pref_firstname_idx]);
+            }
+            if (isset($student_data[$pref_lastname_idx]) && ($student_data[$pref_lastname_idx] !== "")) {
+                $student->setPreferredLastName($student_data[$pref_lastname_idx]);
             }
             if ($use_database) {
                 $student->setPassword($student_data[5]);
