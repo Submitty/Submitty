@@ -311,7 +311,9 @@ class GlobalController extends AbstractController {
             }
         }
 
-        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css, $js);
+        $fixed_height = $this->fixedHeightPage($breadcrumbs);
+
+        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $fixed_height, $css, $js);
     }
 
     public function footer() {
@@ -328,6 +330,14 @@ class GlobalController extends AbstractController {
         },  $wrapper_files);
         $runtime = $this->core->getOutput()->getRunTime();
         return $this->core->getOutput()->renderTemplate('Global', 'footer', $runtime, $wrapper_urls);
+    }
+
+    private function fixedHeightPage($breadcrumbs){
+        switch($breadcrumbs[count($breadcrumbs)-1]->getTitle()) {
+            case 'Discussion Forum':
+                return true;
+        }
+        return false;
     }
 
     private function routeEquals(string $a, string $b) {

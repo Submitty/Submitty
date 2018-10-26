@@ -80,9 +80,6 @@ class ForumController extends AbstractController {
             case 'show_stats':
                 $this->showStats();
                 break;
-            case 'get_threads_before':
-                $this->getThreadsBefore();
-                break;
             case 'merge_thread':
                 $this->mergeThread();
                 break;
@@ -833,26 +830,11 @@ class ForumController extends AbstractController {
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'statPage', $users);
     }
 
-    public function getThreadsBefore(){
-        $output = array();
-        if($this->core->getUser()->getGroup() <= 2){
-            if(!empty($_POST["current_thead_date"])){
-                $current_thead_date = $_POST["current_thead_date"];
-                $merge_thread_list = $this->core->getQueries()->getThreadsBefore($current_thead_date, 1);
-                $output["content"] = $merge_thread_list;
-            } else {
-               $output["error"] = "No date provided. Please try again.";
-            }
-        } else {
-            $output["error"] = "You do not have permissions to do that.";
-        }
-        $this->core->getOutput()->renderJson($output);
-        return $output;
-    }
-
     public function mergeThread(){
         $parent_thread_id = $_POST["merge_thread_parent"];
         $child_thread_id = $_POST["merge_thread_child"];
+        preg_match('/\((.*?)\)/', $parent_thread_id, $result);
+        $parent_thread_id = $result[1];
         $thread_id = $child_thread_id;
         if($this->core->getUser()->getGroup() <= 2){
             if(is_numeric($parent_thread_id) && is_numeric($child_thread_id)) {

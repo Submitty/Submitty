@@ -421,7 +421,7 @@ class DatabaseQueries {
     }
 
     public function threadExists(){
-		$this->course_db->query("SELECT id from threads LIMIT 1");
+		$this->course_db->query("SELECT id from threads where deleted = false LIMIT 1");
 		return count($this->course_db->rows()) == 1;
     }
 
