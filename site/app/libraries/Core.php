@@ -426,6 +426,20 @@ class Core {
             return $this->getConfig()->getCourse();
         }
     }
+
+    public function getFullSemester(){
+        $semester = $this->getConfig()->getSemester();
+        if ($this->getConfig()->getSemester() !== ""){
+            $arr1 = str_split($semester);
+            $semester = "";
+            if($arr1[0] == "f")  $semester .= "Fall ";
+            else if($arr1[0] == "s")  $semester .= "Spring ";
+            else if ($arr1[0] == "u") $semester .= "Summer ";
+
+            $semester .= "20". $arr1[1]. $arr1[2];
+        }
+        return $semester;
+    }
     
     /**
      * @return Output
