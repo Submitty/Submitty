@@ -57,7 +57,7 @@ Sam Seng 2014
 Victor Zhu 2014  
 
 ------------------------------
-We'd like to recognize and thank [RPISec](https://rpis.ec/) and these individual members:  
+We'd like to recognize and thank [RPISEC](https://rpis.ec/) and these individual members:  
 Andrew Fasano  
 Markus Gaasedelen    
 Nick Burnett  
