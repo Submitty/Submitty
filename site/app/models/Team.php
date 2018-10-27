@@ -3,6 +3,7 @@
 namespace app\models;
 use app\libraries\Core;
 use app\libraries\FileUtils;
+use app\models\gradeable\Gradeable;
 
 /**
  * Class Team
@@ -70,6 +71,15 @@ class Team extends AbstractModel {
             }
         }
         $this->member_list = count($this->member_user_ids) === 0 ? "[empty team]" : implode(", ", $this->member_user_ids);
+    }
+
+    /**
+     * Gets the anonymous id of this team
+     * TODO: this is to create symmetry with the User class, teams' anon ids are just their ids for now
+     * @return string
+     */
+    public function getAnonId() {
+        return $this->id;
     }
 
     /**

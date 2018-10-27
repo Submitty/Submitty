@@ -37,7 +37,7 @@ class SubmissionController extends AbstractController {
 
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-            $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
+            $now = $this->core->getDateTimeNow();
 
             if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE
                 && ($this->core->getUser()->accessAdmin()
@@ -99,57 +99,164 @@ class SubmissionController extends AbstractController {
                 break;
         }
     }
-    private function requestRegrade(){
-        $content = $_POST['replyTextArea'];
-        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
-        $student_id = (isset($_REQUEST['student_id'])) ? $_REQUEST['student_id'] : null;
-        if($this->core->getUser()->getId() !== $student_id && !$this->core->getUser()->accessFullGrading()){
-            $this->core->getOutput()->renderJson(["status" => "failure"]);
+    private function requestRegrade() {
+        $content = $_POST['replyTextArea'] ?? '';
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+        $submitter_id = $_REQUEST['submitter_id'] ?? '';
+
+        $user = $this->core->getUser();
+
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
             return;
         }
-        if($this->core->getQueries()->insertNewRegradeRequest($gradeable_id, $student_id, $content)){
-            $this->core->getOutput()->renderJson(["status" => "success"]);
-        }else{
-            $this->core->getOutput()->renderJson(["status" => "failure"]);
+
+        if(!$gradeable->isRegradeAllowed()) {
+            $this->core->getOutput()->renderJsonFail('Regrade requests not enabled for this gradeable');
+            return;
+        }
+
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        if ($graded_gradeable === false) {
+            return;
+        }
+
+        // TODO: add to access control method
+        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$user->accessFullGrading()) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to request regrade');
+            return;
+        }
+
+        try {
+            $this->core->getQueries()->insertNewRegradeRequest($graded_gradeable, $user, $content);
+            $this->core->getOutput()->renderJsonSuccess();
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
 
-    private function makeRequestPost(){
-        $regrade_id = $_REQUEST['regrade_id'];
+    private function makeRequestPost() {
         $content = str_replace("\r", "", $_POST['replyTextArea']);
-        $user_id = (isset($_REQUEST['user_id'])) ? $_REQUEST['user_id'] : null;
-        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
-        $gradeable=$this->core->getQueries()->getGradeable($gradeable_id);
-        //Prevent students making post requests for other studnets
-        if($this->core->getUser()->getId() !== $user_id && !$this->core->getUser()->accessFullGrading()){
-            $this->core->getOutput()->renderJson(["status" => "failure"]);
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+        $submitter_id = $_REQUEST['submitter_id'] ?? '';
+        $status = $_REQUEST['status'] ?? -1;
+
+        $user = $this->core->getUser();
+
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
             return;
         }
-        $this->core->getQueries()->insertNewRegradePost($regrade_id, $gradeable_id, $user_id, $content);
-        $this->core->getOutput()->renderJson(["status" => "success"]);
+
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        if ($graded_gradeable === false) {
+            return;
+        }
+
+        if (!$graded_gradeable->hasRegradeRequest()) {
+            $this->core->getOutput()->renderJsonFail('Submitter has no regrade request');
+            return;
+        }
+
+        // TODO: add to access control method
+        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$user->accessFullGrading()) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to make regrade post');
+            return;
+        }
+
+        try {
+            $this->core->getQueries()->insertNewRegradePost($graded_gradeable->getRegradeRequest()->getId(), $user->getId(), $content);
+            $graded_gradeable->getRegradeRequest()->setStatus($status);
+            $this->core->getQueries()->saveRegradeRequest($graded_gradeable->getRegradeRequest());
+            $this->core->getOutput()->renderJsonSuccess();
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
+        }
     }
 
-    private function deleteRequest(){
-        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
-        $student_id = (isset($_REQUEST['student_id'])) ? $_REQUEST['student_id'] : null;
-        if($this->core->getUser()->getId() !== $student_id && !$this->core->getUser()->accessFullGrading()){
-            $this->core->getOutput()->renderJson(["status" => "failure"]);
+    private function deleteRequest() {
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+        $submitter_id = $_REQUEST['submitter_id'] ?? '';
+
+        $user = $this->core->getUser();
+
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
             return;
         }
-        $this->core->getQueries()->deleteRegradeRequest($gradeable_id, $student_id);
-        $this->core->getOutput()->renderJson(["status" => "success"]);
+
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        if ($graded_gradeable === false) {
+            return;
+        }
+
+        if (!$graded_gradeable->hasRegradeRequest()) {
+            $this->core->getOutput()->renderJsonFail('Submitter has no regrade request');
+            return;
+        }
+
+        // TODO: add to access control method
+        if (!$user->accessFullGrading()) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to delete regrade request');
+            return;
+        }
+
+        try {
+            $this->core->getQueries()->deleteRegradeRequest($graded_gradeable->getRegradeRequest());
+            $this->core->getOutput()->renderJsonSuccess();
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
+        }
     }
-    private function changeRequestStatus(){
-        $regrade_id = $_REQUEST['regrade_id'];
-        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
-        $student_id = (isset($_REQUEST['student_id'])) ? $_REQUEST['student_id'] : null;
-        $status = $_REQUEST['status'];
-        if($this->core->getUser()->getId() !== $student_id && !$this->core->getUser()->accessFullGrading()){
-            $this->core->getOutput()->renderJson(["status" => "failure"]);
+
+    private function changeRequestStatus() {
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+        $submitter_id = $_REQUEST['submitter_id'] ?? '';
+        $status = $_REQUEST['status'] ?? null;
+
+        if ($status === null) {
+            $this->core->getOutput()->renderJsonFail('Missing status parameter');
             return;
         }
-        $this->core->getQueries()->modifyRegradeStatus($regrade_id, $status);
-        $this->core->getOutput()->renderJson(["status" => "success"]);
+
+        $user = $this->core->getUser();
+
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        if ($graded_gradeable === false) {
+            return;
+        }
+
+        if (!$graded_gradeable->hasRegradeRequest()) {
+            $this->core->getOutput()->renderJsonFail('Submitter has no regrade request');
+            return;
+        }
+
+        // TODO: add to access control method
+        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$user->accessFullGrading()) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to change regrade request status');
+            return;
+        }
+
+        try {
+            $graded_gradeable->getRegradeRequest()->setStatus($status);
+            $this->core->getQueries()->saveRegradeRequest($graded_gradeable->getRegradeRequest());
+            $this->core->getOutput()->renderJsonSuccess();
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
+        }
     }
 
     private function showHomeworkPage() {
@@ -173,13 +280,14 @@ class SubmissionController extends AbstractController {
         }
 
         $error = false;
-        $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
+        $now = $this->core->getDateTimeNow();
 
         // ORIGINAL
         //if (!$gradeable->isSubmissionOpen() && !$this->core->getUser()->accessAdmin()) {
 
         // TEMPORARY - ALLOW LIMITED & FULL ACCESS GRADERS TO PRACTICE ALL FUTURE HOMEWORKS
-        if (!$gradeable->isSubmissionOpen() && !$this->core->getUser()->accessGrading()) {
+        if (!$gradeable->isSubmissionOpen() && !$this->core->getUser()->accessGrading()
+            || $gradeable->isStudentView() && $gradeable->isStudentViewAfterGrades() && !$gradeable->isTaGradeReleased()) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
             return array('error' => true, 'message' => 'No gradeable with that id.');
         }
@@ -208,13 +316,15 @@ class SubmissionController extends AbstractController {
                     $graded_gradeable->getOrCreateTaGradedGradeable()->setUserViewedDate($now);
                     $this->core->getQueries()->saveTaGradedGradeable($graded_gradeable->getTaGradedGradeable());
                 }
-                $canViewWholeGradeable = false;
+
+                // Only show hidden test cases if the display version is the graded version (and grades are released)
+                $show_hidden = $version == $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedVersion(false) && $gradeable->isTaGradeReleased();
 
                 // If we get here, then we can safely construct the old model w/o checks
                 // FIXME: remove this 'old_gradeable' once none of the HomeworkView relies on it
                 $old_gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $this->core->getUser()->getId());
                 $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                       'showGradeable', $gradeable, $graded_gradeable, $old_gradeable, $version, $late_days_use, $extensions, $canViewWholeGradeable);
+                                                       'showGradeable', $gradeable, $graded_gradeable, $old_gradeable, $version, $late_days_use, $extensions, $show_hidden);
             }
         }
         return array('id' => $gradeable_id, 'error' => $error);
@@ -396,7 +506,7 @@ class SubmissionController extends AbstractController {
 
         // creating directory under gradeable_id with the timestamp
 
-        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("m-d-Y_H:i:sO");
+        $current_time = $this->core->getDateTimeNow()->format("m-d-Y_H:i:sO");
         $version_path = FileUtils::joinPaths($pdf_path, $current_time);
         if (!FileUtils::createDir($version_path)) {
             return $this->uploadResult("Failed to make gradeable path.", false);
@@ -571,7 +681,7 @@ class SubmissionController extends AbstractController {
         $this->upload_details['version_path'] = $version_path;
         $this->upload_details['version'] = $new_version;
 
-        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO");
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
         $current_time_string_tz = $current_time . " " . $this->core->getConfig()->getTimezone()->getName();
 
         $path = rawurldecode(htmlspecialchars_decode($path));
@@ -872,7 +982,7 @@ class SubmissionController extends AbstractController {
             $part_path[1] = $version_path;
         }
 
-        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO");
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
         $current_time_string_tz = $current_time . " " . $this->core->getConfig()->getTimezone()->getName();
 
         $max_size = $gradeable->getAutogradingConfig()->getMaxSubmissionSize();
@@ -1333,7 +1443,7 @@ class SubmissionController extends AbstractController {
             return array('error' => true, 'message' => $msg);
         }
         $json["active_version"] = $new_version;
-        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO");
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
         $current_time_string_tz = $current_time . " " . $this->core->getConfig()->getTimezone()->getName();
 
         $json["history"][] = array("version" => $new_version, "time" => $current_time_string_tz, "who" => $original_user_id, "type" => "select");

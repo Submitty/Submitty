@@ -1,8 +1,7 @@
 {% import _self as self %}
-{% set has_vcs_files = gradeable.getVcsFiles() != 0 %}
 
-<div id="submission_browser" class="draggable rubric_panel" style="left:15px; bottom:40px; width:48%; height:30%;overflow: hidden;">
-    <div id="directory_view" style="position:relative; float:left;">
+<div id="submission_browser" class="draggable rubric_panel">
+    <div id="directory_view">
         <div class="draggable_content">
             <span class="grading_label">Submissions and Results Browser</span>
             <button class="btn btn-default expand-button" data-linked-type="submissions" data-clicked-state="wasntClicked" id="toggleSubmissionButton">Open/Close Submissions</button>
@@ -36,10 +35,10 @@
             </script>
 
             {% if not peer %}
-                <button class="btn btn-default" onclick="downloadZip('{{  gradeable.getId() }}','{{ gradeable.getUser().getId() }}')">Download Zip File</button>
+                <button class="btn btn-default" onclick="downloadZip('{{  gradeable_id }}','{{ submitter_id }}')">Download Zip File</button>
             {% endif %}
 
-            <div id="changeCodeStyle" class="btn-group btn-group-toggle" style="display:inline-block;" onchange="changeEditorStyle($('[name=codeStyle]:checked')[0].id);" data-toggle="buttons">
+            <div id="changeCodeStyle" class="btn-group btn-group-toggle" onchange="changeEditorStyle($('[name=codeStyle]:checked')[0].id);" data-toggle="buttons">
                 <label class="btn btn-secondary">
                     <input type="radio" name="codeStyle" id="style_light" autocomplete="off" checked> Light
                 </label>
@@ -137,17 +136,20 @@
         else if (url_file.includes("checkout")) {
             directory = "checkout";
         }
+        else if (url_file.includes("split_pdf")) {
+            directory = "split_pdf";
+        }
         window.open("{{ site_url|escape("js") }}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
         return false;
     }
     //TODO: Name better
-    function expandFile(dir, path) {
+    function expandFile(name, path) {
         if($('#viewer').length != 0){
             $('#viewer').remove();
         }
-        let promise = loadFile(dir, path);
+        let promise = loadFile(name, path);
         $('#file_view').show();
-        $("#grading_file_name").html(dir);
+        $("#grading_file_name").html(name);
         let precision = $("#submission_browser").width()-$("#directory_view").width();
         let offset = $("#submission_browser").width()-precision;
         $("#directory_view").animate({'left': '+=' + -offset + 'px'}, 200);
@@ -156,18 +158,18 @@
         return promise;
     }
 
-    function loadFile(dir, path){
-        let extension = dir.split('.').pop();
+    function loadFile(name, path){
+        let extension = name.split('.').pop();
         if(extension == "pdf"){
             $('#pdf_annotation_bar').show();
             $('#save_status').show();
             return $.ajax({
                 type: 'POST',
-                url: buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'pdf_annotation_embedded'}),
+                url: buildUrl({'component': 'pdf', 'page': 'grader_embedded'}),
                 data: {
-                    'gradeable_id': '{{ gradeable.getId() }}',
-                    'user_id': '{{ gradeable.getUser().getId() }}',
-                    'filename': dir
+                    'gradeable_id': '{{ gradeable_id }}',
+                    'user_id': '{{ submitter_id }}',
+                    'filename': name
                 },
                 success: function(data){
                     $('#file_content').append(data);
@@ -179,9 +181,9 @@
             $("#file_viewer_full_panel").empty();
             $("#file_viewer_full_panel").attr("data-file_name", "");
             $("#file_viewer_full_panel").attr("data-file_url", "");
-            $("#file_viewer_full_panel").attr("data-file_name", dir);
+            $("#file_viewer_full_panel").attr("data-file_name", name);
             $("#file_viewer_full_panel").attr("data-file_url", path);
-            openFrame(dir, path, "full_panel");
+            openFrame(name, path, "full_panel");
         }
     }
 
@@ -190,7 +192,7 @@
         $("#file_viewer_full_panel").remove();
         $("#content-wrapper").remove();
         if($("#pdf_annotation_bar").is(":visible")){
-            $('#pdf_annotation_bar').hide();
+            $("#pdf_annotation_bar").hide();
         }
         $("#directory_view").show();
         var offset1 = $("#directory_view").css('left');

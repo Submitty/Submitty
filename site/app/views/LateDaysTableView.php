@@ -29,7 +29,7 @@ class LateDaysTableView extends AbstractView {
             $status_array[] = $gradeable->getLateStatus();
             $late_charged_array[] = $gradeable->getCurrLateCharged();
         }
-        $preferred_name = $this->core->getQueries()->getUserById($user_id)->getDisplayedFirstName() . " " . $this->core->getQueries()->getUserById($user_id)->getLastName();
+        $preferred_name = $this->core->getQueries()->getUserById($user_id)->getDisplayedFirstName() . " " . $this->core->getQueries()->getUserById($user_id)->getDisplayedLastName();
         if($full_page){
             $this->core->getOutput()->addBreadcrumb("My Late Days");
             $template = "/LateDaysTable.twig";
@@ -82,7 +82,7 @@ class LateDaysTableView extends AbstractView {
         }
 
         //If we're not instructor and this is not open to TAs
-        $date = new \DateTime("now", $this->core->getConfig()->getTimezone());
+        $date = $this->core->getDateTimeNow();
         if ($gradeable->getTAViewDate() > $date && !$user->accessAdmin()) {
             return false;
         }

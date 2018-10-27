@@ -18,10 +18,11 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
      *
      * @param array $config_values
      * @param array $user_config
+     * @param array $queries
      *
      * @return Core
      */
-    protected function createMockCore($config_values=array(), $user_config=array()) {
+    protected function createMockCore($config_values=array(), $user_config=array(), $queries=array()) {
         $core = $this->createMock(Core::class);
 
         $config = $this->createMockModel(Config::class);
@@ -33,6 +34,10 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
             $config->method('getCourse')->willReturn($config_values['course']);
         }
 
+        if (isset($config_values['semester']) && isset($config_values['course'])) {
+            $config->method('isCourseLoaded')->willReturn(true);
+        }
+
         if (isset($config_values['tmp_path'])) {
             $config->method('getSubmittyPath')->willReturn($config_values['tmp_path']);
         }
@@ -42,6 +47,10 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
         }
 
         $config->method('getTimezone')->willReturn(new \DateTimeZone("America/New_York"));
+
+        $core->method('getDateTimeNow')->willReturnCallback(function() use($config) {
+            return new \DateTime('now', $config->getTimezone());
+        });
 
         $core->method('getConfig')->willReturn($config);
 
@@ -58,8 +67,11 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
             $core->method('isTesting')->willReturn(true);
         }
 
-        $queries = $this->createMock(DatabaseQueries::class);
-        $core->method('getQueries')->willReturn($queries);
+        $mock_queries = $this->createMock(DatabaseQueries::class);
+        foreach ($queries as $method => $value) {
+            $mock_queries->method($method)->willReturn($value);
+        }
+        $core->method('getQueries')->willReturn($mock_queries);
 
         /** @noinspection PhpUnhandledExceptionInspection */
         $user = $this->createMockModel(User::class);
@@ -85,7 +97,10 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
 
         $core->method('getUser')->willReturn($user);
 
-        $output = $this->createMock(Output::class);
+        /** @noinspection PhpParamsInspection */
+        $output = new Output($core);
+        $output->disableRender();
+
         $core->method('getOutput')->willReturn($output);
 
         /** @noinspection PhpIncompatibleReturnTypeInspection */

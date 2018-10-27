@@ -117,8 +117,13 @@ class NavigationController extends AbstractController {
             return false;
         }
 
+        // if student view is true and they can only view after grades are released, filter appropriately
+        if ($gradeable->isStudentView() && $gradeable->isStudentViewAfterGrades() && !$user->accessGrading()) {
+            return $gradeable->isTaGradeReleased();
+        }
+
         //If we're not instructor and this is not open to TAs
-        $date = new \DateTime("now", $this->core->getConfig()->getTimezone());
+        $date = $this->core->getDateTimeNow();
         if ($gradeable->getTaViewStartDate() > $date && !$user->accessAdmin()) {
             return false;
         }
@@ -129,14 +134,14 @@ class NavigationController extends AbstractController {
 
     private function notificationsHandler() {
         $user_id = $this->core->getUser()->getId();
-        if(!empty($_GET['action']) && !empty($_GET['nid']) && isset($_GET['nid'])) {
-            if($_GET['action'] == 'open_notification' && is_numeric($_GET['nid']) && $_GET['nid'] >= 1) {
+        if(!empty($_GET['action'])) {
+            if($_GET['action'] == 'open_notification' && !empty($_GET['nid']) && is_numeric($_GET['nid']) && $_GET['nid'] >= 1) {
                 if(!$_GET['seen']) {
                     $this->core->getQueries()->markNotificationAsSeen($user_id, $_GET['nid']);
                 }
                 $metadata = $this->core->getQueries()->getNotificationInfoById($user_id, $_GET['nid'])['metadata'];
                 $this->core->redirect(Notification::getUrl($this->core, $metadata));
-            } else if($_GET['action'] == 'mark_as_seen' && is_numeric($_GET['nid']) && $_GET['nid'] >= 1) {
+            } else if($_GET['action'] == 'mark_as_seen' && !empty($_GET['nid']) && is_numeric($_GET['nid']) && $_GET['nid'] >= 1) {
                 $this->core->getQueries()->markNotificationAsSeen($user_id, $_GET['nid']);
                 $this->core->redirect($this->core->buildUrl(array('component' => 'navigation', 'page' => 'notifications')));
             } else if($_GET['action'] == 'mark_all_as_seen') {

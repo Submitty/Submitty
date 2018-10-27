@@ -24,12 +24,12 @@
                     <td>{{ loop.index }}</td>
                     <td style="text-align: left">{{ grader.getId() }}</td>
                     <td style="text-align: left">{{ grader.getDisplayedFirstName() }}</td>
-                    <td style="text-align: left">{{ grader.getLastName() }}</td>
+                    <td style="text-align: left">{{ grader.getDisplayedLastName() }}</td>
                     <td>{{ groups[grader.getGroup()].name }}</td>
                     <td>
                     {{ grader.getGradingRegistrationSections()|join(", ") }}
                     </td>
-                    <td><a onclick="editUserForm('{{ grader.getId() }}');"><i class="fa fa-pencil" aria-hidden="true"></i></a></td>
+                    <td><a onclick="editUserForm('{{ grader.getId() }}');" aria-label="edit user {{ grader.getId() }}"><i class="fa fa-pencil" aria-hidden="true"></i></a></td>
                 </tr>
             {% endfor %}
         {% else %}

@@ -3,6 +3,9 @@
 #include <string>
 #include <iostream>
 #include <cassert>
+#include <algorithm>
+#include <ctype.h>
+
 
 #include "TestCase.h"
 #include "load_config_json.h"
@@ -51,7 +54,18 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
   }
 
   bool docker_enabled = whole_config["docker_enabled"];
-  
+
+  if (!whole_config["use_router"].is_boolean()){
+    whole_config["use_router"] = true;
+  }
+
+  if (!whole_config["single_port_per_container"].is_boolean()){
+    whole_config["single_port_per_container"] = false; // connection
+  }
+
+  bool use_router = whole_config["use_router"];
+  bool single_port_per_container = whole_config["single_port_per_container"];
+
   nlohmann::json::iterator tc = whole_config.find("testcases");
   assert (tc != whole_config.end());
   
@@ -60,6 +74,16 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
     std::string title = whole_config["testcases"][testcase_num].value("title","BAD_TITLE");
 
     nlohmann::json this_testcase = whole_config["testcases"][testcase_num];
+
+    if (!this_testcase["use_router"].is_boolean()){
+      this_testcase["use_router"] = use_router;
+    }
+
+    if (!this_testcase["single_port_per_container"].is_boolean()){
+      this_testcase["single_port_per_container"] = single_port_per_container;
+    }
+
+    assert(!(single_port_per_container && use_router));
 
     nlohmann::json commands = nlohmann::json::array();
     // if "command" exists in whole_config, we must wrap it in a container.
@@ -112,6 +136,10 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
         this_testcase["containers"][container_num]["container_name"] = "container" + std::to_string(container_num); 
       }
 
+      std::string container_name = this_testcase["containers"][container_num]["container_name"];
+
+      assert(std::find_if(container_name.begin(), container_name.end(), isspace) == container_name.end());
+
       if(this_testcase["containers"][container_num]["outgoing_connections"].is_null()){
         this_testcase["containers"][container_num]["outgoing_connections"] = nlohmann::json::array();
       }
@@ -126,6 +154,166 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
     assert(!whole_config["testcases"][testcase_num]["containers"].is_null());
   }
 }
+
+void FormatDispatcherActions(nlohmann::json &whole_config) {
+
+  bool docker_enabled = whole_config["docker_enabled"];
+
+  nlohmann::json::iterator tc = whole_config.find("testcases");
+  assert (tc != whole_config.end());
+
+  int testcase_num = 0;
+  for (typename nlohmann::json::iterator itr = tc->begin(); itr != tc->end(); itr++,testcase_num++){
+
+    nlohmann::json this_testcase = whole_config["testcases"][testcase_num];
+
+    if(this_testcase["dispatcher_actions"].is_null()){
+      whole_config["testcases"][testcase_num]["dispatcher_actions"] = nlohmann::json::array();
+      continue;
+    }
+
+    std::vector<nlohmann::json> dispatcher_actions = mapOrArrayOfMaps(this_testcase, "dispatcher_actions");
+
+    if(dispatcher_actions.size() > 0){
+      assert(docker_enabled);
+    }
+
+    for (int i = 0; i < dispatcher_actions.size(); i++){
+      nlohmann::json dispatcher_action = dispatcher_actions[i];
+
+      std::string action = dispatcher_action.value("action","");
+      std::cout << "we just got action " << action << std::endl;
+      assert(action != "");
+
+      if(action == "delay"){
+        assert(!dispatcher_action["seconds"].is_null());
+        assert(!dispatcher_action["delay"].is_string());
+
+        float delay_time_in_seconds = 1.0;
+        delay_time_in_seconds = float(dispatcher_action.value("seconds",1.0));
+        dispatcher_action["seconds"] = delay_time_in_seconds;
+      }else if(action == "stdin"){
+        assert(!dispatcher_action["string"].is_null());
+        assert(!dispatcher_action["containers"].is_null());
+
+        nlohmann::json containers = nlohmann::json::array();
+
+        if (dispatcher_action["containers"].is_array()){
+          containers = dispatcher_action["containers"];
+        }
+        else{
+          containers.push_back(dispatcher_action["containers"]);
+        }
+
+        dispatcher_action.erase("containers");
+        dispatcher_action["containers"] = containers;
+
+        whole_config["testcases"][testcase_num]["dispatcher_actions"][i] = dispatcher_action;
+      }
+    }
+  }
+}
+
+void formatPreActions(nlohmann::json &whole_config) {
+  nlohmann::json::iterator tc = whole_config.find("testcases");
+  if (tc == whole_config.end()) { /* no testcases */ return; }
+
+  // loop over testcases
+  int which_testcase = 0;
+  for (nlohmann::json::iterator my_testcase = tc->begin(); my_testcase != tc->end(); my_testcase++, which_testcase++) {
+
+    nlohmann::json this_testcase = whole_config["testcases"][which_testcase];
+
+    if(this_testcase["pre_commands"].is_null()){
+      whole_config["testcases"][which_testcase]["pre_commands"] = nlohmann::json::array();
+      continue;
+    }
+
+    std::vector<nlohmann::json> pre_commands = mapOrArrayOfMaps(this_testcase, "pre_commands");
+
+    for (int i = 0; i < pre_commands.size(); i++){
+      nlohmann::json pre_command = pre_commands[i];
+      
+      //right now we only support copy.
+      assert(pre_command["command"] == "cp");
+
+      if(!pre_command["option"].is_string()){
+        pre_command["option"] = "-R";
+      }
+
+      //right now we only support recursive.
+      assert(pre_command["option"] == "-R");
+
+      assert(pre_command["testcase"].is_string());
+
+      std::string testcase = pre_command["testcase"];
+      
+      //remove trailing slash
+      if(testcase.length() == 7){
+        testcase = testcase.substr(0,6);
+      }
+
+      assert(testcase.length() == 6);
+
+      std::string prefix = testcase.substr(0,4);
+      assert(prefix == "test");
+
+      std::string number = testcase.substr(4,6);
+      int remainder = std::stoi( number );
+      
+      //we must be referencing a previous testcase. (+1 because we start at 0)
+      assert(remainder > 0);
+      assert(remainder < which_testcase+1);
+
+      pre_command["testcase"] = testcase;
+
+
+      //The source must be a string.
+      assert(pre_command["source"].is_string());
+
+      //the source must be of the form prefix = test, remainder is less than size 3 and is an int.
+      std::string source_name = pre_command["source"];
+
+      assert(source_name[0] != '/');
+
+      //The command must not container .. or $.
+      assert(source_name.find("..") == std::string::npos);
+      assert(source_name.find("$")  == std::string::npos);
+      assert(source_name.find("~")  == std::string::npos);
+      assert(source_name.find("\"") == std::string::npos);
+      assert(source_name.find("\'") == std::string::npos);
+
+      if(!pre_command["pattern"].is_string()){
+         this_testcase["pattern"] = "";
+      }else{
+        std::string pattern = pre_command["pattern"];
+        //The pattern must not container .. or $ 
+        assert(pattern.find("..") == std::string::npos);
+        assert(pattern.find("$") == std::string::npos);
+        assert(pattern.find("~") == std::string::npos);
+        assert(pattern.find("\"") == std::string::npos);
+        assert(pattern.find("\'") == std::string::npos);
+      }
+
+      //there must be a destination
+      assert(pre_command["destination"].is_string());
+
+      std::string destination = pre_command["destination"];
+
+      //The destination must not container .. or $ 
+      assert(destination.find("..") == std::string::npos);
+      assert(destination.find("$") == std::string::npos);
+      assert(destination.find("~") == std::string::npos);
+      assert(destination.find("\"") == std::string::npos);
+      assert(destination.find("\'") == std::string::npos);
+
+      whole_config["testcases"][which_testcase]["pre_commands"][i] = pre_command;
+    }
+  }
+}
+
+
+
 
 void RewriteDeprecatedMyersDiff(nlohmann::json &whole_config) {
 
@@ -267,6 +455,8 @@ nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid) {
   sstr >> answer;
   
   AddDockerConfiguration(answer);
+  FormatDispatcherActions(answer);
+  formatPreActions(answer);
   AddSubmissionLimitTestCase(answer);
   AddAutogradingConfiguration(answer);
 
@@ -362,10 +552,14 @@ void AddDefaultGrader(const std::string &command,
     std::string program_name = get_program_name(command,whole_config);
     if (program_name == "/usr/bin/python") {
       j["description"] = "syntax error output from running python";
-    } else if (program_name == "/usr/bin/java") {
+    } else if (program_name.find("java") != std::string::npos) {
       j["description"] = "syntax error output from running java";
-    } else if (program_name == "/usr/bin/javac") {
-      j["description"] = "syntax error output from running javac";
+      if (program_name.find("javac") != std::string::npos) {
+        j["description"] = "syntax error output from compiling java";
+      }
+      if (j["method"] == "warnIfNotEmpty" || j["method"] == "errorIfNotEmpty") {
+        j["jvm_memory"] = true;
+      }
     } else {
       j["description"] = "Standard Error ("+filename+")";
     }
@@ -500,6 +694,12 @@ void Compilation_Helper(nlohmann::json &single_testcase) {
         v2["actual_file"] = "STDERR_" + std::to_string(i) + ".txt";
       }
       v2["description"] = "Compilation Errors and/or Warnings";
+      nlohmann::json command_json = commands[i];
+      assert (command_json.is_string());
+      std::string command = command_json;
+      if (command.find("java") != std::string::npos) {
+        v2["jvm_memory"] = true;
+      }
       v2["show_actual"] = "on_failure";
       v2["show_message"] = "on_failure";
       v2["deduction"] = warning_fraction;

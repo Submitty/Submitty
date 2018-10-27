@@ -19,6 +19,8 @@
 // for system call filtering
 #include <seccomp.h>
 #include <elf.h>
+#include <sys/poll.h>
+
 
 #include "TestCase.h"
 #include "execute.h"
@@ -41,9 +43,9 @@ extern const int CPU_TO_WALLCLOCK_TIME_BUFFER;  // defined in default_config.h
 // =====================================================================================
 
 
-bool system_program(const std::string &program, std::string &full_path_executable) {
+bool system_program(const std::string &program, std::string &full_path_executable, const bool running_in_docker) {
 
-  const std::map<std::string,std::string> allowed_system_programs = {
+  std::map<std::string,std::string> allowed_system_programs = {
 
     // Basic System Utilities (for debugging)
     { "ls",                      "/bin/ls", },
@@ -142,6 +144,9 @@ bool system_program(const std::string &program, std::string &full_path_executabl
 
   };
 
+  if(running_in_docker){
+    allowed_system_programs.insert({"bash", "/bin/bash"});
+  }
   // find full path name
   std::map<std::string,std::string>::const_iterator itr = allowed_system_programs.find(program);
   if (itr != allowed_system_programs.end()) {
@@ -216,7 +221,8 @@ std::string validate_program(const std::string &program, const nlohmann::json &w
     std::cerr << message << std::endl;
     exit(1);
   } else {
-    if (system_program(program,full_path_executable)) {
+    bool running_in_docker = whole_config.value("docker_enabled", false);
+    if (system_program(program,full_path_executable,running_in_docker)) {
       return full_path_executable;
     }
 
@@ -564,7 +570,7 @@ void parse_command_line(const std::string &cmd,
       std::string &my_stdout,
       std::string &my_stderr,
       std::ofstream &logfile, 
-                        const nlohmann::json &whole_config) {
+      const nlohmann::json &whole_config) {
 
   std::cout << "PARSE COMMAND LINE " << cmd << std::endl;
 
@@ -668,19 +674,29 @@ void parse_command_line(const std::string &cmd,
       my_args.push_back(" ");
       // because we don't want to run in interactive mode and wait for it to time out!
     } else if (my_args.size() > 1) {
-      bool multiple_py_files = false;
-      for (int i = 1; i < my_args.size(); i++) {
-        if (my_args[i].find(".py") != std::string::npos) {
-          multiple_py_files = true;
-          std::cout << "WARNING!  .py file as arg " << my_args[i] << std::endl;
-          logfile << "WARNING!  .py file as arg " << my_args[i] << std::endl;
+      // a common student error is to submit multiple .py files where
+      // only one is expected and we want to run 'python *.py'
+      int python_file_count = 0;
+      for (int i = 0; i < my_args.size(); i++) {
+        unsigned int pos = my_args[i].find(".py");
+        if (pos != std::string::npos &&
+            pos == (my_args[i].size())-3) {
+          python_file_count++;
         }
       }
-      if (multiple_py_files == true) {
-        // FIXME: This might be an ok way to call the program...  (but
-        // not if multiple things matched a wildcard search *py)
-        std::cout << "WARNING!  RUNNING PYTHON WITH MULTIPLE ARGS" << std::endl;
-        logfile << "WARNING!  RUNNING PYTHON WITH MULTIPLE ARGS" << std::endl;
+      if (python_file_count == 0) {
+        std::cout << "WARNING!  RUNNING PYTHON WITH NO .py FILES" << std::endl;
+        logfile << "WARNING!  RUNNING PYTHON WITH NO .py FILES" << std::endl;
+      }
+      if (python_file_count > 1) {
+        std::cout << "WARNING!  RUNNING PYTHON WITH MULTIPLE .py FILES" << std::endl;
+        logfile << "WARNING!  RUNNING PYTHON WITH MULTIPLE .py FILES" << std::endl;
+      }
+      if (python_file_count != 1) {
+        for (int i = 0; i < my_args.size(); i++) {
+          logfile << my_args[i] << " ";
+        }
+        logfile << std::endl;
       }
     }
   }
@@ -883,6 +899,15 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   setenv("OMP_NUM_THREADS","4",1);
 
 
+  // Set an environment variable to override the defaults for the
+  // initial java virtual machine heap (xms) and maximum virtual
+  // machine heap.
+  setenv("JAVA_TOOL_OPTIONS","-Xms128m -Xmx256m",1);
+  // NOTE: Instructors can still override this setting with the
+  // command line.  E.g.,
+  //    java -Xms128m -Xmx256m -cp . MyProgram
+
+
   // Haskell compiler needs a home environment variable (but it can be anything)
   setenv("HOME","/tmp",1);
 
@@ -896,6 +921,7 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   // FIXME: if we want to assert or print stuff afterward, we should save
   // the originals and restore after the exec fails.
   if (my_stdin != "") {
+    std::cout << "PIPED STDIN FILE DETECTED. DISPATCHER ACTIONS WILL BE IGNORED." << std::endl;
     int new_stdinfd  = open(my_stdin.c_str()  , O_RDONLY );
     int stdinfd = fileno(stdin);
     close(stdinfd);
@@ -922,8 +948,9 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   }
   // END SECCOMP
 
-  
   int child_result =  execv ( my_program.c_str(), my_char_args );
+  
+
   // if exec does not fail, we'll never get here
 
   umask(prior_umask);  // reset to the prior umask
@@ -986,10 +1013,47 @@ void TerminateProcess(float &elapsed, int childPID) {
   elapsed+=0.001;
 }
 
+//Thread function for dispatcher actions
+void cin_reader(std::mutex* lock, std::queue<std::string>* input_queue, bool* CHILD_NOT_TERMINATED){
+  std::cout << "thread function " << getpid() << std::endl;
+  std::string my_string;
+
+  try
+  {
+    struct pollfd fds;
+    int ret;
+    fds.fd = 0; /* this is STDIN */
+    fds.events = POLLIN;
+
+    while(*CHILD_NOT_TERMINATED) {
+      ret = poll(&fds, 1, 100); //.1 second timeout
+
+      if (ret > 0){
+        std::getline (std::cin,my_string);
+        std::cout << "Cin recieved: " << my_string << std::endl;
+        std::cout << "Appending a newline" << std::endl;
+        my_string += "\n";
+
+        lock->lock();
+        input_queue->push(my_string);
+        lock->unlock();
+      }
+    }
+  }
+  catch (const std::exception &exc)
+  {
+      // catch anything thrown within try block that derives from std::exception
+      std::cout << exc.what();
+  }
+
+  std::cout << "exiting thread function" << std::endl;
+}
+
 
 // Executes command (from shell) and returns error code (0 = success)
 int execute(const std::string &cmd, 
       const std::vector<nlohmann::json> actions,
+      const std::vector<nlohmann::json> dispatcher_actions,
       const std::string &execute_logfile,
       const nlohmann::json &test_case_limits,
       const nlohmann::json &assignment_limits,
@@ -999,6 +1063,12 @@ int execute(const std::string &cmd,
   std::set<std::string> invalid_windows;
   bool window_mode = windowed; //Tells us if the process is expected to spawn a window. (additional support later) 
   
+
+  int num_dispatched_actions = dispatcher_actions.size();
+
+  //Dispatcher actions variables
+  std::mutex lock;
+  std::queue<std::string> input_queue;
 
   //check if there are any actions present which require a window.
   if(actions.size() > 0){ 
@@ -1025,6 +1095,7 @@ int execute(const std::string &cmd,
 
 
   std::cout << "IN EXECUTE:  '" << cmd << "'" << std::endl;
+  std::cout << "identified " << dispatcher_actions.size() << " dispatcher actions" << std::endl;
 
   std::ofstream logfile(execute_logfile.c_str(), std::ofstream::out | std::ofstream::app);
 
@@ -1032,6 +1103,13 @@ int execute(const std::string &cmd,
   int result = -1;
   int time_kill=0;
   int memory_kill=0;
+
+  //used to pipe cin to the running student process (dispatcher_actions)
+  int dispatcherpipe[2];
+  pipe(dispatcherpipe);
+
+  //used to synchronize pipe setup.
+  lock.lock();
   pid_t childPID = fork();
   // ensure fork was successful
   assert (childPID >= 0);
@@ -1050,6 +1128,12 @@ int execute(const std::string &cmd,
     int pgrp = setpgid(getpid(), 0);
     assert(pgrp == 0);
 
+    if(num_dispatched_actions > 0){
+      close(dispatcherpipe[1]); //close write end of the pipe
+      close(0); //close stdin
+      dup2(dispatcherpipe[0], 0); //copy read end of the pipe onto stdin.
+      close(dispatcherpipe[0]); // close read end of the pipe
+    }
     int child_result;
     child_result = exec_this_command(cmd,logfile,whole_config);
 
@@ -1059,8 +1143,17 @@ int execute(const std::string &cmd,
     }
     else {
       // PARENT PROCESS
+      std::thread cin_thread;
+      bool CHILD_NOT_TERMINATED = true;
+      if(num_dispatched_actions > 0){
+        close(dispatcherpipe[0]); // close the read end of the pipe
+        cin_thread = std::thread(cin_reader, &lock, &input_queue, &CHILD_NOT_TERMINATED);
+      }
+
       std::cout << "childPID = " << childPID << std::endl;
       std::cout << "PARENT PROCESS START: " << std::endl;
+      //allow the cin thread to begin reading.
+      lock.unlock();
       int parent_result = system("date");
       assert (parent_result == 0);
       //std::cout << "  parent_result = " << parent_result << std::endl;
@@ -1074,6 +1167,20 @@ int execute(const std::string &cmd,
       int number_of_screenshots = 0;
 
       do {
+          //dispatcher actions
+          if(!input_queue.empty()){
+            lock.lock();
+            std::string popped = input_queue.front();
+            input_queue.pop();
+            lock.unlock();
+
+            char piped_message[popped.length()];
+            strncpy(piped_message, popped.c_str(),popped.length()); //ignore the null byte
+
+            write(dispatcherpipe[1], piped_message, strlen(popped.c_str()));
+            std::cout << "Writing to student stdin: " << popped;
+          }
+
           if(window_mode && windowName == ""){ //if we are expecting a window, but know nothing about it
             initializeWindow(windowName, childPID, invalid_windows, elapsed); //attempt to get information about the window
             if(windowName != ""){ //if we found information about the window
@@ -1095,22 +1202,23 @@ int execute(const std::string &cmd,
               if(window_mode && windowName != "" && windowExists(windowName) && actions_taken < actions.size()){ 
                 takeAction(actions, actions_taken, number_of_screenshots, windowName, 
                   childPID, elapsed, next_checkpoint, seconds_to_run, rss_memory, allowed_rss_memory, 
-                  memory_kill, time_kill); //Takes each action on the window. Requires delay parameters to do delays.
+                  memory_kill, time_kill, logfile); //Takes each action on the window. Requires delay parameters to do delays.
               }
               //If we do not expect a window and we still have actions to take
               else if(!window_mode && actions_taken < actions.size()){ 
                 takeAction(actions, actions_taken, number_of_screenshots, windowName, 
                   childPID, elapsed, next_checkpoint, seconds_to_run, rss_memory, allowed_rss_memory, 
-                  memory_kill, time_kill); //Takes each action on the window. Requires delay parameters to do delays.
+                  memory_kill, time_kill, logfile); //Takes each action on the window. Requires delay parameters to do delays.
               }
               //if we are out of actions or there were none, delay 1/10th second.
               else{ 
                 delay_and_mem_check(100000, childPID, elapsed, next_checkpoint, seconds_to_run, 
-                  rss_memory, allowed_rss_memory, memory_kill, time_kill);
+                  rss_memory, allowed_rss_memory, memory_kill, time_kill, logfile);
               }
             }
          }
       } while (wpid == 0);
+
       if (WIFEXITED(status)) {
         std::cout << "Child exited, status=" << WEXITSTATUS(status) << std::endl;
         if (WEXITSTATUS(status) == 0){
@@ -1129,15 +1237,15 @@ int execute(const std::string &cmd,
         }
       }
       else if (WIFSIGNALED(status)) {
-        int what_signal =  WTERMSIG(status);
-        OutputSignalErrorMessageToExecuteLogfile(what_signal,logfile);
-        std::cout << "Child " << childPID << " was terminated with a status of: " << what_signal << std::endl;
-        if (WTERMSIG(status) == 0){
-          result=0;
-        }
-        else{
-          result=2;
-        }
+          int what_signal =  WTERMSIG(status);
+          OutputSignalErrorMessageToExecuteLogfile(what_signal,logfile);
+          std::cout << "Child " << childPID << " was terminated with a status of: " << what_signal << std::endl;
+          if (WTERMSIG(status) == 0){
+            result=0;
+          }
+          else{
+            result=2;
+          }
       }
       if (time_kill){
        logfile << "ERROR: Maximum run time exceeded" << std::endl;
@@ -1152,7 +1260,15 @@ int execute(const std::string &cmd,
       std::cout << "PARENT PROCESS COMPLETE: " << std::endl;
       parent_result = system("date");
       assert (parent_result == 0);
+
+      CHILD_NOT_TERMINATED = false;
+      if(num_dispatched_actions > 0){
+         std::cout <<"Terminating Thread"<<std::endl;
+        cin_thread.join();
+      }
     }
+
+    logfile.close();
     std::cout <<"Result: "<<result<<std::endl;
     return result;
 }
@@ -1165,7 +1281,7 @@ int execute(const std::string &cmd,
 /**
 * Tests to see if the student has used too much memory.
 */
-bool memory_ok(int rss_memory, int allowed_rss_memory){
+bool memory_ok(int rss_memory, int allowed_rss_memory, std::ostream &logfile){
   if(rss_memory > allowed_rss_memory){
       return false;
   }
@@ -1177,7 +1293,7 @@ bool memory_ok(int rss_memory, int allowed_rss_memory){
 /**
 * Tests to see if the student has used too much time.
 */
-bool time_ok(float elapsed, float seconds_to_run){
+bool time_ok(float elapsed, float seconds_to_run, std::ostream &logfile){
   // allow 10 extra seconds for differences in wall clock
   // vs CPU time (imperfect solution)
   if(elapsed > seconds_to_run + CPU_TO_WALLCLOCK_TIME_BUFFER){
@@ -1192,7 +1308,8 @@ bool time_ok(float elapsed, float seconds_to_run){
 * Delays for a number of microseconds, checking the student's memory and time consumption at intervals.
 */
 bool delay_and_mem_check(float sleep_time_in_microseconds, int childPID, float &elapsed, float& next_checkpoint, 
-                float seconds_to_run, int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill){
+                float seconds_to_run, int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill,
+                std::ostream &logfile){
   float time_left = sleep_time_in_microseconds;
   while(time_left > 0){
     if(time_left > 100000){ //while we have more than 1/10th second left. 
@@ -1211,14 +1328,14 @@ bool delay_and_mem_check(float sleep_time_in_microseconds, int childPID, float &
       next_checkpoint = std::min(elapsed+5.0,elapsed*2.0);
     }
 
-    if (!time_ok(elapsed, seconds_to_run)) { //If the student's program ran too long
+    if (!time_ok(elapsed, seconds_to_run,logfile)) { //If the student's program ran too long
       // terminate for excessive time
       std::cout << "Killing child process " << childPID << " after " << elapsed << " seconds elapsed." << std::endl;
       TerminateProcess(elapsed,childPID); //kill it.
       time_kill=1;
       return true;
     }
-    if (!memory_ok(rss_memory, allowed_rss_memory)){ //if the student's program used too much memory
+    if (!memory_ok(rss_memory, allowed_rss_memory,logfile)){ //if the student's program used too much memory
       // terminate for excessive memory usage (RSS = resident set size = RAM)
       memory_kill=1;
       TerminateProcess(elapsed,childPID); //kill it.

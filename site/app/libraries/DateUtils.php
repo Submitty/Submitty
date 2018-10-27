@@ -78,33 +78,67 @@ class DateUtils {
         return true;
     }
 
+    /** @var string The php-limit for dates.  Note that the database limit is later */
+    const MAX_TIME = '9999-02-01 00:00:00';
 
     /**
      * Parses a date string into a \DateTime object, or does nothing if $date is already a \DateTime object
+     * Note: This will clamp the date to be earlier than MAX_TIME
      *
-     * @param $date \DateTime|string The date to parse
-     * @param $time_zone \DateTimeZone The timezone to parse with
+     * @param \DateTime|string $date The date to parse
+     * @param \DateTimeZone $time_zone
      * @return \DateTime The parsed date
-     * @throws \InvalidArgumentException If $date is not a string or a \DateTime
-     * @throws \Exception If $date is a string, but not a valid date string
+     * @throws \InvalidArgumentException If $date is not a string or a \DateTime, or not a valid \DateTime string
      */
     public static function parseDateTime($date, \DateTimeZone $time_zone) {
-        if ($date instanceof \DateTime) {
-            return $date;
-        } else if (gettype($date) === 'string') {
-            return new \DateTime($date, $time_zone);
-        } else {
+        if (gettype($date) === 'string') {
+            try {
+                $date = new \DateTime($date, $time_zone);
+            } catch (\Exception $e) {
+                throw new \InvalidArgumentException('Invalid DateTime Format');
+            }
+        } else if (!($date instanceof \DateTime)) {
             throw new \InvalidArgumentException('Passed object was not a DateTime object or a date string');
         }
+
+        // Make sure we always set the timezone
+        $date->setTimezone($time_zone);
+
+        // Make sure we don't go above our range
+        return min($date, new \DateTime(self::MAX_TIME, $time_zone));
     }
+
+    /**
+     * Parses a date string into a \DateTime object using regex.  This allows dates to be year >9999
+     * Note: This is designed so that dates larger than year 9999 can be loaded from the db without exception.
+     * Format YYYYY-MM-DD HH:mm:ssZ
+     *
+     * @param string $date_time
+     * @param \DateTimeZone|null $default_time_zone The default timezone to use if none provided
+     * @return DateTime
+     */
+    public static function parseDateTimeLong(string $date_time, $default_time_zone = null) {
+        $matches = [];
+        if (!preg_match('/^([0-9]{4,5})-([0-9]{2})-([0-9]{2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})(\.[0-9]+)?([-|+]?[0-9]{2})?/', $date_time, $matches)) {
+            throw new \InvalidArgumentException('Invalid DateTime Format');
+        }
+
+        $timezone = $matches[8] ?? '';
+        $date = new \DateTime('now', ($timezone !== '') ? new DateTimeZone($timezone) : $default_time_zone);
+        $date->setDate($matches[1], $matches[2], $matches[3]);
+        $date->setTime($matches[4], $matches[5], $matches[6]);
+        return $date;
+    }
+
     /**
      * Converts a \DateTime object to a string in one place so if we change the format
      *  here, it changes everywhere
      *
-     * @param $date \DateTime The date to format
+     * @param \DateTime  $date The date to format
+     * @param bool $add_utc_offset If the UTC offset should be part of the output
      * @return string The formatted date
      */
-    public static function dateTimeToString(DateTime $date) {
-        return $date->format('Y-m-d H:i:sO');
+    public static function dateTimeToString(DateTime $date, bool $add_utc_offset = true) {
+        return $date->format('Y-m-d H:i:s' . ($add_utc_offset ? 'O' : ''));
     }
 }

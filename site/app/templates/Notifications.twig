@@ -20,6 +20,7 @@
                 </tr>
                 <tbody style="text-align: left;">
                     {% for notification in notifications %}
+                        {% set hasLink = not notification.hasEmptyMetadata() %}
                         <tr>
                             <td colspan="1">
                                 {% if notification.getComponent() == "forum" %}
@@ -27,11 +28,15 @@
                                 {% endif %}
                             </td>
                             <td colspan="4">
-                                <a href="{{ core.buildUrl({"component": "navigation", "page": "notifications", "action": "open_notification", "nid": notification.getId(), "seen": notification.isSeen() }) }}">
+                                {% if hasLink %}
+                                    <a href="{{ core.buildUrl({"component": "navigation", "page": "notifications", "action": "open_notification", "nid": notification.getId(), "seen": notification.isSeen() }) }}">
+                                {% endif %}
                                     <div style="height: 100%; width: 100%;">
                                         {{ notification.getNotifyContent() }}
                                     </div>
-                                </a>
+                                {% if hasLink %}
+                                    </a>
+                                {% endif %}
                             </td>
                             <td colspan="2">
                                 {{ notification.getNotifyTime() }}

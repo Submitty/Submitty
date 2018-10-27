@@ -125,26 +125,30 @@ class GlobalController extends AbstractController {
                 $links = json_decode(file_get_contents($sidebar_links), true);
                 if (is_array($links)) {
                     foreach ($links as $link) {
-                        if (empty($link['title'])) {
-                            continue;
+                        if (is_array($link)) {
+                            if (empty($link['title'])) {
+                                continue;
+                            }
+                            if (empty($link['icon'])) {
+                                $link['icon'] = "fa-question";
+                            }
+                            if (!Utils::startsWith($link['icon'], "fa-")) {
+                                $link['icon'] = "fa-" . $link['icon'];
+                            }
+                            $sidebar_buttons[] = new Button($this->core, [
+                                "href" => $link['link'] ?? null,
+                                "title" => $link['title'],
+                                "class" => "nav-row",
+                                "id" => "nav-sidebar-" . strtolower(str_replace(" ", "_", $link['title'])),
+                                "icon" => $link['icon']
+                            ]);
                         }
-                        if (empty($link['icon'])) {
-                            $link['icon'] = "fa-question";
-                        }
-                        if (!Utils::startsWith($link['icon'], "fa-")) {
-                            $link['icon'] = "fa-".$link['icon'];
-                        }
+                    }
+                    if (count($links) > 0) {
                         $sidebar_buttons[] = new Button($this->core, [
-                            "href" => $link['link'] ?? null,
-                            "title" => $link['title'],
-                            "class" => "nav-row",
-                            "id" => "nav-sidebar-".strtolower(str_replace(" ", "_", $link['title'])),
-                            "icon" => $link['icon']
+                            "class" => "nav-row short-line"
                         ]);
                     }
-                    $sidebar_buttons[] = new Button($this->core, [
-                        "class" => "nav-row short-line"
-                    ]);
                 }
             }
 
@@ -257,7 +261,7 @@ class GlobalController extends AbstractController {
 
             $sidebar_buttons[] = new Button($this->core, [
                 "href" => $this->core->buildUrl(array('component' => 'student', 'page' => 'view_late_table')),
-                "title" => "My Late Days",
+                "title" => "My Late Days/Extensions",
                 "class" => "nav-row",
                 "id" => "nav-sidebar-late-days",
                 "icon" => "fa-calendar-o"
@@ -307,7 +311,9 @@ class GlobalController extends AbstractController {
             }
         }
 
-        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css, $js);
+        $fixed_height = $this->fixedHeightPage($breadcrumbs);
+
+        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $fixed_height, $css, $js);
     }
 
     public function footer() {
@@ -324,6 +330,14 @@ class GlobalController extends AbstractController {
         },  $wrapper_files);
         $runtime = $this->core->getOutput()->getRunTime();
         return $this->core->getOutput()->renderTemplate('Global', 'footer', $runtime, $wrapper_urls);
+    }
+
+    private function fixedHeightPage($breadcrumbs){
+        switch($breadcrumbs[count($breadcrumbs)-1]->getTitle()) {
+            case 'Discussion Forum':
+                return true;
+        }
+        return false;
     }
 
     private function routeEquals(string $a, string $b) {

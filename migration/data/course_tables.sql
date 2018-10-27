@@ -129,7 +129,9 @@ CREATE TABLE electronic_gradeable (
     eg_max_team_size integer NOT NULL,
     eg_team_lock_date timestamp(6) with time zone NOT NULL,
     eg_use_ta_grading boolean NOT NULL,
+    eg_scanned_exam boolean DEFAULT (FALSE) NOT NULL,
     eg_student_view boolean NOT NULL,
+    eg_student_view_after_grades boolean DEFAULT (FALSE) NOT NULL,
     eg_student_submit boolean NOT NULL,
     eg_student_download boolean NOT NULL,
     eg_student_any_version boolean NOT NULL,
@@ -142,7 +144,10 @@ CREATE TABLE electronic_gradeable (
     eg_precision numeric NOT NULL,
     eg_regrade_allowed boolean DEFAULT true NOT NULL,
     eg_regrade_request_date timestamp(6) with time zone NOT NULL,
-    CONSTRAINT eg_submission_date CHECK ((eg_submission_open_date <= eg_submission_due_date))
+    CONSTRAINT eg_submission_date CHECK ((eg_submission_open_date <= eg_submission_due_date)),
+    CONSTRAINT eg_team_lock_date_max CHECK ((eg_team_lock_date <= '9999-03-01 00:00:00.000000')),
+    CONSTRAINT eg_submission_due_date_max CHECK ((eg_submission_due_date <= '9999-03-01 00:00:00.000000')),
+    CONSTRAINT eg_regrade_request_date_max CHECK ((eg_regrade_request_date <= '9999-03-01 00:00:00.000000'))
 );
 
 
@@ -187,7 +192,7 @@ CREATE TABLE electronic_gradeable_version (
 CREATE TABLE gradeable (
     g_id character varying(255) NOT NULL,
     g_title character varying(255) NOT NULL,
-    g_instructions_url character varying(255) NOT NULL,
+    g_instructions_url character varying NOT NULL,
     g_overall_ta_instructions character varying NOT NULL,
     g_gradeable_type integer NOT NULL,
     g_grade_by_registration boolean NOT NULL,
@@ -201,12 +206,13 @@ CREATE TABLE gradeable (
     CONSTRAINT g_ta_view_start_date CHECK ((g_ta_view_start_date <= g_grade_start_date)),
     CONSTRAINT g_grade_start_date CHECK ((g_grade_start_date <= g_grade_due_date)),
     CONSTRAINT g_grade_due_date CHECK ((g_grade_due_date <= g_grade_released_date)),
-    CONSTRAINT g_grade_released_date CHECK ((g_grade_released_date <= g_grade_locked_date))
+    CONSTRAINT g_grade_released_date CHECK ((g_grade_released_date <= g_grade_locked_date)),
+    CONSTRAINT g_grade_locked_date_max CHECK ((g_grade_locked_date <= '9999-03-01 00:00:00.000000'))
 );
 
 
 
--- 
+--
 -- Name: gradeable_component_mark; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -445,6 +451,7 @@ CREATE TABLE users (
     user_firstname character varying NOT NULL,
     user_preferred_firstname character varying,
     user_lastname character varying NOT NULL,
+    user_preferred_lastname character varying,
     user_email character varying NOT NULL,
     user_group integer NOT NULL,
     registration_section character varying(255),
@@ -523,7 +530,7 @@ CREATE TABLE notifications (
 );
 
 
--- Begins Forum 
+-- Begins Forum
 
 --
 -- Name: posts; Type: Table; Schema: public; Owner: -
@@ -625,7 +632,7 @@ ALTER TABLE ONLY electronic_gradeable
 
 ALTER TABLE ONLY gradeable_component_data
     ADD CONSTRAINT gradeable_component_data_pkey PRIMARY KEY (gc_id, gd_id, gcd_grader_id);
-    
+
 
 --
 -- Name: gradeable_component_data_normal_index; Type: INDEX; Schema: public; Owner: -
@@ -694,8 +701,8 @@ ALTER TABLE ONLY grading_registration
 
 ALTER TABLE ONLY grading_rotating
     ADD CONSTRAINT grading_rotating_pkey PRIMARY KEY (sections_rotating_id, user_id, g_id);
-    
-    
+
+
 --
 -- Name: seeking_team; Type: CONSTRAINT; Schema: public; Owner: -
 --
@@ -703,11 +710,11 @@ ALTER TABLE ONLY grading_rotating
 ALTER TABLE seeking_team
     ADD CONSTRAINT seeking_team_pkey PRIMARY KEY (g_id, user_id);
 
-    
+
 --
 -- Name: peer_assign_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
-    
+
 ALTER TABLE ONLY peer_assign
     ADD CONSTRAINT peer_assign_pkey PRIMARY KEY (g_id, grader_id, user_id);
 
@@ -989,7 +996,7 @@ ALTER TABLE ONLY late_days
 -- Name: peer_assign_g_id_fkey; Type: FK CONSTRAINT; Schma: public; Owner: -
 --
 
-ALTER TABLE ONLY peer_assign 
+ALTER TABLE ONLY peer_assign
     ADD CONSTRAINT peer_assign_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
@@ -999,7 +1006,7 @@ ALTER TABLE ONLY peer_assign
 
 ALTER TABLE ONLY peer_assign
     ADD CONSTRAINT peer_assign_grader_id_fkey FOREIGN KEY (grader_id) REFERENCES users(user_id) ON UPDATE CASCADE;
-    
+
 
 --
 -- Name: peer_assign_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -

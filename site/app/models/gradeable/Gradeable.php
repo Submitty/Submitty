@@ -49,8 +49,12 @@ use app\models\User;
  * @method int getTeamSizeMax()
  * @method \DateTime getTeamLockDate()
  * @method bool isTaGrading()
+ * @method bool isScannedExam()
+ * @method void setScannedExam($scanned_exam)
  * @method bool isStudentView()
  * @method void setStudentView($can_student_view)
+ * @method bool isStudentViewAfterGrades()
+ * @method void setStudentViewAfterGrades($can_student_view_after_grades)
  * @method bool isStudentSubmit()
  * @method void setStudentSubmit($can_student_submit)
  * @method bool isStudentDownload()
@@ -67,9 +71,9 @@ use app\models\User;
  * @method bool isLateSubmissionAllowed()
  * @method void setLateSubmissionAllowed($allow_late_submission)
  * @method float getPrecision()
- * @method void setPrecision($grading_precision)
  * @method Component[] getComponents()
  * @method bool isRegradeAllowed()
+ * @method int getActiveRegradeRequestCount()
  */
 class Gradeable extends AbstractModel {
     /* Properties for all types of gradeables */
@@ -92,6 +96,9 @@ class Gradeable extends AbstractModel {
     protected $components = [];
     /** @property @var Component[] An array of all gradeable components loaded from the database */
     private $db_components = [];
+
+    /** @property @var bool If any submitters have active regrade requests */
+    protected $active_regrade_request_count = 0;
 
     /* (private) Lazy-loaded Properties */
 
@@ -134,8 +141,12 @@ class Gradeable extends AbstractModel {
     protected $team_size_max = 0;
     /** @property @var bool If the gradeable is using any manual grading */
     protected $ta_grading = false;
+    /** @property @var bool If the gradeable is a 'scanned exam' */
+    protected $scanned_exam = false;
     /** @property @var bool If students can view submissions */
     protected $student_view = false;
+    /** @property @var bool If students can only view submissions after grades released date */
+    protected $student_view_after_grades = false;
     /** @property @var bool If students can make submissions */
     protected $student_submit = false;
     /** @property @var bool If students can download submitted files */
@@ -206,7 +217,9 @@ class Gradeable extends AbstractModel {
             $this->setTeamAssignmentInternal($details['team_assignment']);
             $this->setTeamSizeMax($details['team_size_max']);
             $this->setTaGradingInternal($details['ta_grading']);
+            $this->setScannedExam($details['scanned_exam']);
             $this->setStudentView($details['student_view']);
+            $this->setStudentViewAfterGrades($details['student_view_after_grades']);
             $this->setStudentSubmit($details['student_submit']);
             $this->setStudentDownload($details['student_download']);
             $this->setStudentDownloadAnyVersion($details['student_download_any_version']);
@@ -216,6 +229,8 @@ class Gradeable extends AbstractModel {
             $this->setPrecision($details['precision']);
             $this->setRegradeAllowedInternal($details['regrade_allowed']);
         }
+
+        $this->setActiveRegradeRequestCount($details['active_regrade_request_count'] ?? 0);
 
         // Set dates last
         $this->setDates($details);
@@ -251,6 +266,20 @@ class Gradeable extends AbstractModel {
         'team_lock_date' => 'Teams Locked',
         'late_days' => 'Late Days',
         'regrade_request_date' => 'Regrade Requests\' Due'
+    ];
+
+    /**
+     * All \DateTime properties that should be validated
+     */
+    const date_validated_properties = [
+        'ta_view_start_date',
+        'submission_open_date',
+        'submission_due_date',
+        'grade_start_date',
+        'grade_due_date',
+        'grade_released_date',
+        'grade_locked_date',
+        'regrade_request_date'
     ];
 
     /**
@@ -521,8 +550,8 @@ class Gradeable extends AbstractModel {
         $black_list = $this->getDateValidationSet();
 
 		// First coerce in the forward direction, then in the reverse direction
-		return $coerce_dates(array_reverse(self::date_properties), $black_list,
-            $coerce_dates(self::date_properties, $black_list, $dates,
+		return $coerce_dates(array_reverse(self::date_validated_properties), $black_list,
+            $coerce_dates(self::date_validated_properties, $black_list, $dates,
                 function (\DateTime $val, \DateTime $cmp) {
                     return $val < $cmp;
                 }),
@@ -583,13 +612,14 @@ class Gradeable extends AbstractModel {
 
     /**
      * Gets all of the gradeable's date values as strings indexed by property name (including late_days)
+     * @param bool $add_utc_offset True to add the UTC offset to the output strings
      * @return string[]
      */
-    public function getDateStrings() {
+    public function getDateStrings(bool $add_utc_offset = true) {
         $date_strings = [];
-        $now = new \DateTime('now', $this->core->getConfig()->getTimezone());
+        $now = $this->core->getDateTimeNow();
         foreach (self::date_properties as $property) {
-            $date_strings[$property] = DateUtils::dateTimeToString($this->$property ?? $now);
+            $date_strings[$property] = DateUtils::dateTimeToString($this->$property ?? $now, $add_utc_offset);
         }
         $date_strings['late_days'] = strval($this->late_days);
         return $date_strings;
@@ -609,7 +639,7 @@ class Gradeable extends AbstractModel {
 
     /**
      * Gets the autograding configuration object
-     * @return AutogradingConfig
+     * @return AutogradingConfig|null returns null if loading from the disk fails
      */
     public function getAutogradingConfig() {
         if($this->autograding_config === null) {
@@ -672,6 +702,15 @@ class Gradeable extends AbstractModel {
     }
 
     /**
+     * Sets the number of active regrade requests
+     * @param int $count
+     * @internal
+     */
+    public function setActiveRegradeRequestCount(int $count) {
+        $this->active_regrade_request_count = $count;
+    }
+
+    /**
      * Sets the gradeable Id.  Must match the regular expression:  ^[a-zA-Z0-9_-]*$
      * @param string $id The gradeable id to set
      */
@@ -719,9 +758,9 @@ class Gradeable extends AbstractModel {
      * Sets the minimum user level that can grade an assignment.
      * @param int $group Must be at least 1 and no more than 4
      */
-    public function setMinGradingGroup($group) {
+    public function setMinGradingGroup(int $group) {
         // Disallow the 0 group (this may catch some potential bugs with instructors not being able to edit gradeables)
-        if ((is_int($group) || ctype_digit($group)) && intval($group) > 0 && intval($group) <= 4) {
+        if ($group > 0 && $group <= 4) {
             $this->min_grading_group = $group;
         } else {
             throw new \InvalidArgumentException('Grading group must be an integer larger than 0');
@@ -733,8 +772,8 @@ class Gradeable extends AbstractModel {
      * Sets the maximum team size
      * @param int $max_team_size Must be at least 0
      */
-    public function setTeamSizeMax($max_team_size) {
-        if ((is_int($max_team_size) || ctype_digit($max_team_size)) && intval($max_team_size) >= 0) {
+    public function setTeamSizeMax(int $max_team_size) {
+        if ($max_team_size >= 0) {
             $this->team_size_max = intval($max_team_size);
         } else {
             throw new \InvalidArgumentException('Max team size must be a non-negative integer!');
@@ -743,11 +782,20 @@ class Gradeable extends AbstractModel {
     }
 
     /**
+     * Sets the precision for grading
+     * @param float $precision
+     */
+    public function setPrecision(float $precision) {
+        $this->precision = $precision;
+        $this->modified = true;
+    }
+
+    /**
      * Sets the peer grading set
      * @param int $peer_grading_set Must be at least 0
      */
-    public function setPeerGradingSet($peer_grading_set) {
-        if ((is_int($peer_grading_set) || ctype_digit($peer_grading_set)) && intval($peer_grading_set) >= 0) {
+    public function setPeerGradingSet(int $peer_grading_set) {
+        if ($peer_grading_set >= 0) {
             $this->peer_grade_set = intval($peer_grading_set);
         } else {
             throw new \InvalidArgumentException('Peer grade set must be a non-negative integer!');
@@ -1023,6 +1071,14 @@ class Gradeable extends AbstractModel {
     }
 
     /**
+     * Gets if this gradeable has any regrade requests active
+     * @return bool
+     */
+    public function anyActiveRegradeRequests() {
+        return $this->active_regrade_request_count > 0;
+    }
+
+    /**
      * Gets if this gradeable has any manual grades (any GradedGradeables exist)
      * @return bool True if any manual grades exist
      */
@@ -1160,6 +1216,26 @@ class Gradeable extends AbstractModel {
     }
 
     /**
+     * Gets the components that are not for peer grading
+     * @return Component[]
+     */
+    public function getNonPeerComponents() {
+        return array_filter($this->components, function (Component $component) {
+            return !$component->isPeer();
+        });
+    }
+
+    /**
+     * Gets the components that are for peer grading
+     * @return Component[]
+     */
+    public function getPeerComponents() {
+        return array_filter($this->components, function (Component $component) {
+            return $component->isPeer();
+        });
+    }
+
+    /**
      * Gets the percent of grading complete for the provided user for this gradeable
      * @param User $grader
      * @return float The percentage (0 to 1) of grading completed or NAN if none required
@@ -1253,7 +1329,7 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function isTaGradeReleased() {
-        return $this->grade_released_date < new \DateTime("now", $this->core->getConfig()->getTimezone());
+        return $this->grade_released_date < $this->core->getDateTimeNow();
     }
 
     /**
@@ -1261,7 +1337,7 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function isSubmissionOpen() {
-        return $this->submission_open_date < new \DateTime("now", $this->core->getConfig()->getTimezone());
+        return $this->submission_open_date < $this->core->getDateTimeNow();
     }
 
     /**
@@ -1378,6 +1454,7 @@ class Gradeable extends AbstractModel {
             foreach ($section_names as $i => $section) {
                 $section_names[$i] = $section['sections_registration_id'];
             }
+            $section_names[] = null; // add in the null section
             $graders = $this->core->getQueries()->getGradersForRegistrationSections($section_names);
         } else {
             if ($this->isTeamAssignment()) {
@@ -1397,6 +1474,7 @@ class Gradeable extends AbstractModel {
             foreach ($section_names as $i => $section) {
                 $section_names[$i] = $section['sections_rotating_id'];
             }
+            $section_names[] = null; // add in the null section
             $graders = $this->core->getQueries()->getGradersForRotatingSections($this->getId(), $section_names);
         }
 
@@ -1413,7 +1491,7 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function isRegradeOpen() {
-        if ($this->core->getConfig()->isRegradeEnabled()==true && $this->isTaGradeReleased() && $this->regrade_allowed && ($this->regrade_request_date > new \DateTime('now', $this->core->getConfig()->getTimezone()))) {
+        if ($this->core->getConfig()->isRegradeEnabled()==true && $this->isTaGradeReleased() && $this->regrade_allowed && ($this->regrade_request_date > $this->core->getDateTimeNow())) {
             return true;
         }
         return false;
@@ -1477,7 +1555,7 @@ class Gradeable extends AbstractModel {
             throw new \Exception("Failed to make folder for this assignment for the team");
         }
 
-        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO")
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")
             . " " . $this->core->getConfig()->getTimezone()->getName();
         $settings_file = FileUtils::joinPaths($user_path, "user_assignment_settings.json");
 

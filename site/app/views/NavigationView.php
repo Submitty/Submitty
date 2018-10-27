@@ -74,7 +74,9 @@ class NavigationView extends AbstractView {
 
     public function noAccessCourse() {
         return $this->core->getOutput()->renderTwigTemplate("error/NoAccessCourse.twig", [
-            "course_name" => $this->core->getDisplayedCourseName()
+            "course_name" => $this->core->getDisplayedCourseName(),
+            "semester" => $this->core->getFullSemester(),
+            "main_url" => $this->core->getConfig()->getHomepageUrl()
         ]);
     }
 
@@ -119,11 +121,14 @@ class NavigationView extends AbstractView {
             if(is_file($seating_user_path)) {
                 $user_seating_details = json_decode(file_get_contents($seating_user_path));
 
-                $seating_config_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'uploads', 'seating',
-                    $gradeable_id, $user_seating_details->building, $user_seating_details->room.'.json');
-                // if the report the instructor generated corresponds to a valid room config
-                if(is_file($seating_config_path)) {
-                    $seating_config = file_get_contents($seating_config_path);
+                // if the user seating details have both a building and a room property
+                if(property_exists($user_seating_details, 'building') && property_exists($user_seating_details, 'room')) {
+                    $seating_config_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'uploads', 'seating',
+                        $gradeable_id, $user_seating_details->building, $user_seating_details->room . '.json');
+                    // if the report the instructor generated corresponds to a valid room config and a valid room template
+                    if (is_file($seating_config_path) && is_file(FileUtils::joinPaths(dirname(dirname(__DIR__)), 'room_templates', $user_seating_details->building, $user_seating_details->room . '.twig'))) {
+                        $seating_config = file_get_contents($seating_config_path);
+                    }
                 }
             }
             else {
@@ -279,7 +284,7 @@ class NavigationView extends AbstractView {
      */
     private function getTeamButton(Gradeable $gradeable, $graded_gradeable) {
         // Team management button, only visible on team assignments
-        $date = new \DateTime("now", $this->core->getConfig()->getTimezone());
+        $date = $this->core->getDateTimeNow();
         $past_lock_date = $date < $gradeable->getTeamLockDate();
 
         if ($past_lock_date) {
@@ -496,7 +501,7 @@ class NavigationView extends AbstractView {
                 return $button;
             }
 
-            if ($this->core->getQueries()->getNumberRegradeRequests($gradeable->getId()) !== 0) {
+            if ($gradeable->anyActiveRegradeRequests()) {
                 //Open regrade requests
                 $button = new Button($this->core, [
                     "title" => "REGRADE",

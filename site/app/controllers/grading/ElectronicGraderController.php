@@ -3,9 +3,11 @@
 namespace app\controllers\grading;
 
 use app\libraries\DiffViewer;
+use app\models\AbstractModel;
 use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
+use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Mark;
 use app\models\gradeable\TaGradedGradeable;
 use app\models\GradeableAutocheck;
@@ -29,9 +31,15 @@ class ElectronicGraderController extends GradingController {
                 break;
             case 'import_teams':
                 $this->importTeams();
-                break;    
+                break;
             case 'grade':
                 $this->showGrading();
+                break;
+            case 'delete_component':
+                $this->ajaxDeleteComponent();
+                break;
+            case 'add_component':
+                $this->ajaxAddComponent();
                 break;
             case 'save_graded_component':
                 $this->ajaxSaveGradedComponent();
@@ -42,47 +50,60 @@ class ElectronicGraderController extends GradingController {
             case 'save_mark_order':
                 $this->ajaxSaveMarkOrder();
                 break;
-            case 'save_general_comment':
+            case 'save_overall_comment':
                 $this->ajaxSaveOverallComment();
                 break;
-            case 'get_mark_data':
+            case 'save_component':
+                $this->ajaxSaveComponent();
+                break;
+            case 'save_component_order':
+                $this->ajaxSaveComponentOrder();
+                break;
+            case 'save_component_pages':
+                $this->ajaxSaveComponentPages();
+                break;
+            case 'get_graded_component':
                 $this->ajaxGetGradedComponent();
                 break;
-            case 'get_gradeable_comment':
+            case 'get_gradeable_rubric':
+                $this->ajaxGetGradeableRubric();
+                break;
+            case 'get_component_rubric':
+                $this->ajaxGetComponent();
+                break;
+            case 'get_graded_gradeable':
+                $this->ajaxGetGradedGradeable();
+                break;
+            case 'get_overall_comment':
                 $this->ajaxGetOverallComment();
                 break;
-            case 'get_marked_users':
-                $this->ajaxGetSubmittersThatGotMark();
+            case 'get_mark_stats':
+                $this->ajaxGetMarkStats();
                 break;
-            case 'add_one_new_mark':
+            case 'add_new_mark':
                 $this->ajaxAddNewMark();
                 break;
-            case 'delete_one_mark':
+            case 'delete_mark':
                 $this->ajaxDeleteMark();
                 break;
             case 'load_student_file':
                 $this->ajaxGetStudentOutput();
                 break;
-            case 'verify_grader':
-                $this->verifyGrader();
+            case 'verify_component':
+                $this->ajaxVerifyComponent();
                 break;
-            case 'verify_all':
-                $this->verifyGrader(true);
+            case 'verify_all_components':
+                $this->ajaxVerifyAllComponents();
                 break;
             case 'remove_empty':
                 $this->ajaxRemoveEmpty();
                 break;
-            case 'pdf_annotation_fullpage':
-                $this->showPDFAnnotationFullPage();
-                break;
-            case 'pdf_annotation_embedded':
-                $this->showEmbeddedPDFAnnotation();
-                break;
-            case 'save_pdf_annotation':
-                $this->savePDFAnnotation();
+            case '':
+                $this->showStatus();
                 break;
             default:
-                $this->showStatus();
+                // TODO: this is for testing
+                throw new \InvalidArgumentException('AHHH');
                 break;
         }
     }
@@ -111,71 +132,6 @@ class ElectronicGraderController extends GradingController {
             return false;
         }
         return true;
-    }
-    
-    public function savePDFAnnotation(){
-        //Save the annotation layer to a folder.
-        $annotation_layer = $_POST['annotation_layer'];
-        $annotation_info = $_POST['GENERAL_INFORMATION'];
-        $grader_id = $this->core->getUser()->getId();
-        $course_path = $this->core->getConfig()->getCoursePath();
-        $active_version = $this->core->getQueries()->getGradeable($annotation_info['gradeable_id'], $annotation_info['user_id'])->getActiveVersion();
-        $annotation_gradeable_path = FileUtils::joinPaths($course_path, 'annotations', $annotation_info['gradeable_id']);
-        if(!FileUtils::createDir($annotation_gradeable_path) && !is_dir($annotation_gradeable_path)){
-            $this->core->addErrorMessage("Creating annotation gradeable folder failed");
-            return false;
-        }
-        $annotation_user_path = FileUtils::joinPaths($annotation_gradeable_path, $annotation_info['user_id']);
-        if(!FileUtils::createDir($annotation_user_path) && !is_dir($annotation_user_path)){
-            $this->core->addErrorMessage("Creating annotation user folder failed");
-            return false;
-        }
-        $annotation_version_path = FileUtils::joinPaths($annotation_user_path, $active_version);
-        if(!FileUtils::createDir($annotation_version_path) && !is_dir($annotation_version_path)){
-            $this->core->addErrorMessage("Creating annotation version folder failed");
-            return false;
-        }
-        $new_file_name = preg_replace('/\\.[^.\\s]{3,4}$/', '', $annotation_info['file_name']) . "_" .$grader_id .'.json';
-        file_put_contents(FileUtils::joinPaths($annotation_version_path, $new_file_name), $annotation_layer);
-        return true;
-    }
-
-    public function showEmbeddedPDFAnnotation(){
-        //This is the embedded pdf annotator that we built.
-        $gradeable_id = $_POST['gradeable_id'] ?? NULL;
-        $user_id = $_POST['user_id'] ?? NULL;
-        $filename = $_POST['filename'] ?? NULL;
-        $active_version = $this->core->getQueries()->getGradeable($gradeable_id, $user_id)->getActiveVersion();
-        $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $user_id, $active_version);
-        $annotation_jsons = [];
-        //Dir iterator needs the first file.
-        if(is_dir($annotation_path) && count(scandir($annotation_path)) > 2){
-            $first_file = scandir($annotation_path)[2];
-            $annotation_path = FileUtils::joinPaths($annotation_path, $first_file);
-            if(is_file($annotation_path)) {
-                $dir_iter = new \DirectoryIterator(dirname($annotation_path . '/'));
-                foreach ($dir_iter as $fileinfo) {
-                    if (!$fileinfo->isDot()) {
-                        $no_extension = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileinfo->getFilename());
-                        $pdf_info = explode('_', $no_extension);
-                        $pdf_id = $pdf_info[0];
-                        $grader_id = $pdf_info[1];
-                        if($pdf_id.'.pdf' === $filename){
-                            $annotation_jsons[$grader_id] = file_get_contents($fileinfo->getPathname());
-                        }
-                    }
-                }
-            }
-        }
-        $this->core->getOutput()->renderOutput(array('PDF'), 'showPDFEmbedded', $gradeable_id, $user_id, $filename, $annotation_jsons, false);
-    }
-
-    public function showPDFAnnotationFullPage(){
-        //This shows the pdf-annotate.js library's default pdf annotator. It might be useful in the future to have
-        //a full-sized annotator, so keeping this in for now.
-        $this->core->getOutput()->useFooter(false);
-        $this->core->getOutput()->useHeader(false);
-        $this->core->getOutput()->renderOutput(array('grading', 'PDFAnnotation'), 'showAnnotationPage');
     }
 
     /**
@@ -251,72 +207,161 @@ class ElectronicGraderController extends GradingController {
         return ['html' => $html, 'whitespaces' => $white_spaces];
     }
 
-    private function verifyGrader($verifyAll = false){
-        //check that I am able to verify.
-        if ($verifyAll) {
-            if (!$this->core->getAccess()->canI("grading.electronic.verify_all")) {
-                $this->core->addErrorMessage("You do not have the proper privileges to verify this grade.");
-                return;
-            }
-        } else {
-            if (!$this->core->getAccess()->canI("grading.electronic.verify_grader")) {
-                $this->core->addErrorMessage("You do not have the proper privileges to verify this grade.");
-                return;
-            }
-        }
+    /**
+     * Route for verifying the grader of a graded component
+     * Note: Until verify graders migration gets added, this just overwrites the grader
+     */
+    private function ajaxVerifyComponent() {
+        $gradeable_id = $_POST['gradeable_id'] ?? '';
+        $component_id = $_POST['component_id'] ?? '';
+        $anon_id = $_POST['anon_id'] ?? '';
 
-        $gradeable_id = $_POST['gradeable_id'];
-        $component_id = $_POST['component_id'];
-        $user_id = $this->core->getQueries()->getUserFromAnon($_POST['anon_id'])[$_POST['anon_id']];
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
-        //stores whether or not we verified at least one gradeable. Should never be false at the end of an execution.
-        $verified = false;
-        //Search across all components for components to verify
-        foreach ($gradeable->getComponents() as $component) {
-            //If this component hasn't been graded, we can't verify it.
-            if(!$component->getGrader()) {
-                continue;
-            }
-            //If we are either verifying all components or this is the component we were asked to verify,
-            //verify the component.
-            if($verifyAll || $component->getId() == $component_id){
-                //Only verify the component if we weren't already the grader.
-                if($component->getGrader()->getId() !== $this->core->getUser()->getId()){
-                    $component->setGrader($this->core->getUser());
-                    $component->saveGradeableComponentData($gradeable->getGdId());
-                    $verified = true;
-                }
-                //If we aren't verifying all, we have verified the only component we need to.
-                if(!$verifyAll && $component->getId() == $component_id) {
-                    break;
-                }
-            }
-        }
+        $grader = $this->core->getUser();
 
-        if($verified){
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
             return;
-        }else{
-            $this->core->addErrorMessage("Gradeable component does not exist or was previously verified by you.");
+        }
+
+        // get the component
+        $component = $this->tryGetComponent($gradeable, $component_id);
+        if ($component === false) {
+            return;
+        }
+
+        // Get user id from the anon id
+        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id);
+        if ($submitter_id === false) {
+            return;
+        }
+
+        // Get the graded gradeable
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        if ($graded_gradeable === false) {
+            return;
+        }
+
+        // checks if user has permission TODO: make these permissions should be more refined
+        if (!$this->core->getAccess()->canI("grading.electronic.verify_grader")) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to verify component');
+            return;
+        }
+
+        // Get / create the TA grade
+        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+
+        // Get / create the graded component
+        $graded_component = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, false);
+
+        // Verifying individual component should fail if its ungraded
+        if ($graded_component === null) {
+            $this->core->getOutput()->renderJsonFail('Cannot verify ungraded component');
+            return;
+        }
+
+        try {
+            // Once we've parsed the inputs and checked permissions, perform the operation
+            $this->verifyComponent($graded_component, $grader);
+            $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
+
+            $this->core->getOutput()->renderJsonSuccess();
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
+
+    /**
+     * Route for verifying all components of a graded gradeable
+     * Note: Until verify graders migration gets added, this just overwrites the graders
+     */
+    private function ajaxVerifyAllComponents() {
+        $gradeable_id = $_POST['gradeable_id'] ?? '';
+        $anon_id = $_POST['anon_id'] ?? '';
+
+        $grader = $this->core->getUser();
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+
+        // Get user id from the anon id
+        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id);
+        if ($submitter_id === false) {
+            return;
+        }
+
+        // Get the graded gradeable
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        if ($graded_gradeable === false) {
+            return;
+        }
+
+        // checks if user has permission TODO: make these permissions should be more refined
+        if (!$this->core->getAccess()->canI("grading.electronic.verify_all")) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to verify component');
+            return;
+        }
+
+        // Verifying all components should not fail because there are no components to verify,
+        //  but it should only verify components with a grader
+        if ($graded_gradeable->hasTaGradingInfo()) {
+            $this->core->getOutput()->renderJsonSuccess();
+        }
+
+        // Get / create the TA grade
+        $ta_graded_gradeable = $graded_gradeable->getTaGradedGradeable();
+
+        try {
+            // Once we've parsed the inputs and checked permissions, perform the operation
+            foreach ($gradeable->getComponents() as $component) {
+                $graded_component = $ta_graded_gradeable->getGradedComponent($component);
+                if ($graded_component !== null) {
+                    $this->verifyComponent($graded_component, $grader);
+                }
+            }
+            $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
+
+            $this->core->getOutput()->renderJsonSuccess();
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
+        }
+    }
+
+    private function verifyComponent(GradedComponent $graded_component, User $verifier) {
+        // TODO: swap out body of this function with verifying logic
+        $graded_component->setGrader($verifier);
+    }
+
     /**
      * Shows statistics for the grading status of a given electronic submission. This is shown to all full access
      * graders. Limited access graders will only see statistics for the sections they are assigned to.
-     * TODO: refactor for new model
      */
     public function showStatus() {
-        $gradeable_id = $_REQUEST['gradeable_id'];
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
+            $this->core->addErrorMessage('Invalid gradeable id');
+            $this->core->redirect($this->core->buildUrl());
+        }
 
         if (!$this->core->getAccess()->canI("grading.electronic.status", ["gradeable" => $gradeable])) {
-            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
+            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getTitle()}");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
         $gradeableUrl = $this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable_id));
-        $this->core->getOutput()->addBreadcrumb("{$gradeable->getName()} Grading", $gradeableUrl);
+        $this->core->getOutput()->addBreadcrumb("{$gradeable->getTitle()} Grading", $gradeableUrl);
+
         $peer = false;
-        if ($gradeable->getPeerGrading() && ($this->core->getUser()->getGroup() == User::GROUP_STUDENT)) {
+        if ($gradeable->isPeerGrading() && ($this->core->getUser()->getGroup() == User::GROUP_STUDENT)) {
             $peer = true;
         }
 
@@ -341,9 +386,9 @@ class ElectronicGraderController extends GradingController {
         if ($peer) {
             $peer_grade_set = $gradeable->getPeerGradeSet();
             $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'registration_section');
-            $num_components = $gradeable->getNumPeerComponents();
+            $num_components = count($gradeable->getPeerComponents());
             $graded_components = $this->core->getQueries()->getGradedPeerComponentsByRegistrationSection($gradeable_id, $sections);
-            $my_grading = $this->core->getQueries()->getNumGradedPeerComponents($gradeable->getId(), $this->core->getUser()->getId());
+            $my_grading = $this->core->getQueries()->getNumGradedPeerComponents($gradeable_id, $this->core->getUser()->getId());
             $component_averages = array();
             $autograded_average = null;
             $overall_average = null;
@@ -363,7 +408,7 @@ class ElectronicGraderController extends GradingController {
             if (count($sections) > 0) {
                 $graders = $this->core->getQueries()->getGradersForRegistrationSections($sections);
             }
-            $num_components = $gradeable->getNumTAComponents();
+            $num_components = count($gradeable->getNonPeerComponents());
         }
         //grading by rotating section
         else {
@@ -403,7 +448,7 @@ class ElectronicGraderController extends GradingController {
             $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id, $section_key, $gradeable->isTeamAssignment());
             $autograded_average = $this->core->getQueries()->getAverageAutogradedScores($gradeable_id, $section_key, $gradeable->isTeamAssignment());
             $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id, $section_key, $gradeable->isTeamAssignment());
-            $num_components = $gradeable->getNumTAComponents();
+            $num_components = count($gradeable->getNonPeerComponents());
             $viewed_grade = $this->core->getQueries()->getNumUsersWhoViewedGrade($gradeable_id);
         }
         $sections = array();
@@ -435,7 +480,7 @@ class ElectronicGraderController extends GradingController {
                 $sections['all']['graded_components'] -= $my_grading;
             }
             else {
-                foreach ($total_users as $key => $value) {                           
+                foreach ($total_users as $key => $value) {
                     if(array_key_exists($key, $num_submitted)){
                         $sections[$key] = array(
                             'total_components' => $num_submitted[$key] * $num_components,
@@ -481,22 +526,31 @@ class ElectronicGraderController extends GradingController {
 
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'statusPage', $gradeable, $sections, $component_averages, $autograded_average, $overall_average, $total_submissions, $registered_but_not_rotating, $rotating_but_not_registered, $viewed_grade, $section_key, $regrade_requests, $show_warnings);
     }
+
+    /**
+     * Shows the list of submitters
+     */
     public function showDetails() {
-        $gradeable_id = $_REQUEST['gradeable_id'];
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+        // Default is viewing your sections
+        // Limited grader does not have "View All" option
+        // If nothing to grade, Instructor will see all sections
+        $view_all = isset($_GET['view']) && $_GET['view'] === 'all';
+
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            $this->core->addErrorMessage('Invalid Gradeable!');
+            $this->core->redirect($this->core->buildUrl());
+        }
 
         $gradeableUrl = $this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable_id));
-        $this->core->getOutput()->addBreadcrumb("{$gradeable->getName()} Grading", $gradeableUrl);
+        $this->core->getOutput()->addBreadcrumb("{$gradeable->getTitle()} Grading", $gradeableUrl);
 
         $this->core->getOutput()->addBreadcrumb('Student Index');
 
-        if ($gradeable === null) {
-            $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
-            return;
-        }
-        $peer = ($gradeable->getPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT);
+        $peer = ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT);
         if (!$this->core->getAccess()->canI("grading.electronic.details", ["gradeable" => $gradeable])) {
-            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getName()}");
+            $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getTitle()}");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
         }
 
@@ -522,10 +576,13 @@ class ElectronicGraderController extends GradingController {
         }
         else {
             $section_key = "rotating_section";
-            $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id,
-                $this->core->getUser()->getId());
             if (!$show_all) {
+                $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id,
+                    $this->core->getUser()->getId());
                 $students = $this->core->getQueries()->getUsersByRotatingSections($sections);
+            }
+            else {
+                $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id);
             }
             $graders = $this->core->getQueries()->getGradersForRotatingSections($gradeable->getId(), $sections);
         }
@@ -553,54 +610,25 @@ class ElectronicGraderController extends GradingController {
             }
         }
 
-        $rows = $this->core->getQueries()->getGradeables($gradeable_id, $student_ids, $section_key);
+        $graded_gradeables = [];
+        $user_ids = []; // Collect user ids so we know who isn't on a team
+        /** @var GradedGradeable $g */
+        foreach ($this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids, null, [$section_key, 'user_id', 'team_id']) as $g) {
+            $graded_gradeables[] = $g;
+            if($gradeable->isTeamAssignment()) {
+                $user_ids = array_merge($user_ids, $g->getSubmitter()->getTeam()->getMemberUserIds());
+            }
+        }
+        $teamless_users = [];
         if ($gradeable->isTeamAssignment()) {
-            // Rearrange gradeables arrray into form (sec 1 teams, sec 1 individuals, sec 2 teams, sec 2 individuals, etc...)
-            $sections = array();
-            $individual_rows = array();
-            $team_rows = array();
-            foreach($rows as $row) {
-                if ($gradeable->isGradeByRegistration()) {
-                    $section = $row->getTeam() === null ? strval($row->getUser()->getRegistrationSection()) : strval($row->getTeam()->getRegistrationSection());
+            // Get al users and separate by section (registration or rotating)
+            $get_user_section = function (User $user) use ($gradeable) {
+                return $gradeable->isGradeByRegistration() ? $user->getRegistrationSection() ?? 'NULL' : $user->getRotatingSection();
+            };
+            foreach ($students as $user) {
+                if (!in_array($user->getId(), $user_ids)) {
+                    $teamless_users[] = $user;
                 }
-                else {
-                    $section = $row->getTeam() === null ? strval($row->getUser()->getRotatingSection()) : strval($row->getTeam()->getRotatingSection());
-                }
-
-                if ($section != null && !in_array($section, $sections)) {
-                    $sections[] = $section;
-                }
-
-                if ($row->getTeam() === null) {
-                    if (!isset($individual_rows[$section])) {
-                        $individual_rows[$section] = array();
-                    }
-                    $individual_rows[$section][] = $row;
-                }
-                else {
-                    if (!isset($team_rows[$section])) {
-                        $team_rows[$section] = array();
-                    }
-                    $team_rows[$section][] = $row;
-                }
-            }
-
-            asort($sections);
-            $rows = array();
-            foreach($sections as $section) {
-                if (isset($team_rows[$section])) {
-                    $rows = array_merge($rows, $team_rows[$section]);
-                }
-                if (isset($individual_rows[$section])) {
-                    $rows = array_merge($rows, $individual_rows[$section]);
-                }
-            }
-            // Put null section at end of array
-            if (isset($team_rows[""])) {
-                $rows = array_merge($rows, $team_rows[""]);
-            }
-            if (isset($individual_rows[""])) {
-                $rows = array_merge($rows, $individual_rows[""]);
             }
         }
 
@@ -617,7 +645,7 @@ class ElectronicGraderController extends GradingController {
         $show_import_teams_button = $show_edit_teams && (count($all_teams) > count($empty_teams));
         $show_export_teams_button = $show_edit_teams && (count($all_teams) == count($empty_teams));
 
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $rows, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $view_all);
 
         if ($show_edit_teams) {
             $all_reg_sections = $this->core->getQueries()->getRegistrationSections();
@@ -628,7 +656,7 @@ class ElectronicGraderController extends GradingController {
 
             $all_rot_sections = $this->core->getQueries()->getRotatingSections();
             $key = 'sections_rotating_id';
-            
+
             foreach ($all_rot_sections as $i => $section) {
                 $all_rot_sections[$i] = $section[$key];
             }
@@ -759,7 +787,7 @@ class ElectronicGraderController extends GradingController {
                 foreach ($team->getMemberUsers() as $user) {
                     $csvdata .= implode(',', [
                         $user->getDisplayedFirstName(),
-                        $user->getLastName(),
+                        $user->getDisplayedLastName(),
                         $user->getId(),
                         $team->getId(),
                         $team->getRegistrationSection(),
@@ -877,7 +905,7 @@ class ElectronicGraderController extends GradingController {
             }
             $this->core->addSuccessMessage("Updated Team {$team_id}");
 
-            $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO") . " " . $this->core->getConfig()->getTimezone()->getName();
+            $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO") . " " . $this->core->getConfig()->getTimezone()->getName();
             $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id, $team_id, "user_assignment_settings.json");
             $json = FileUtils::readJsonFile($settings_file);
             if ($json === false) {
@@ -902,18 +930,31 @@ class ElectronicGraderController extends GradingController {
 
     /**
      * Display the electronic grading page
-     * TODO: refactor for new model
      */
     public function showGrading() {
-        $gradeable_id = $_REQUEST['gradeable_id'];
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+        $submitter_id = $_REQUEST['who_id'] ?? '';
+
+        /** @var Gradeable $gradeable */
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
+            $this->core->addErrorMessage('Invalid Gradeable!');
+            $this->core->redirect($this->core->buildUrl());
+        }
+
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id, false);
+        if($graded_gradeable === false) {
+            $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'details',
+                'gradeable_id' => $gradeable_id)));
+        }
+
         $peer = false;
-        if($gradeable->getPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
+        if($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
             $peer = true;
         }
 
         $gradeableUrl = $this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable_id));
-        $this->core->getOutput()->addBreadcrumb("{$gradeable->getName()} Grading", $gradeableUrl);
+        $this->core->getOutput()->addBreadcrumb("{$gradeable->getTitle()} Grading", $gradeableUrl);
         $indexUrl = $this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'details', 'gradeable_id' => $gradeable_id));
         $this->core->getOutput()->addBreadcrumb('Student Index', $indexUrl);
 
@@ -924,7 +965,7 @@ class ElectronicGraderController extends GradingController {
             $section_key = 'registration_section';
             $user_ids_to_grade = $this->core->getQueries()->getPeerAssignment($gradeable->getId(), $this->core->getUser()->getId());
             $total = $gradeable->getPeerGradeSet();
-            $graded = $this->core->getQueries()->getNumGradedPeerComponents($gradeable->getId(), $this->core->getUser()->getId()) / $gradeable->getNumPeerComponents();
+            $graded = $this->core->getQueries()->getNumGradedPeerComponents($gradeable->getId(), $this->core->getUser()->getId()) / count($gradeable->getPeerComponents());
         }
         else if ($gradeable->isGradeByRegistration()) {
             $section_key = "registration_section";
@@ -971,7 +1012,7 @@ class ElectronicGraderController extends GradingController {
             if ($team) {
                 $teams_to_grade = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
                 //order teams first by rotating section, then by leader id.
-                usort($teams_to_grade, function($a, $b) {
+                usort($teams_to_grade, function(Team $a, Team $b) {
                     if($a->getRotatingSection() == $b->getRotatingSection())
                         return $a->getMembers()[0] < $b->getMembers()[0] ? -1 : 1;
                     return $a->getRotatingSection() < $b->getRotatingSection() ? -1 : 1;
@@ -1012,21 +1053,13 @@ class ElectronicGraderController extends GradingController {
                 $user_ids_to_grade[] = $team_id->getId();
             }
         }
-        
-        //$gradeables_to_grade = $this->core->getQueries()->getGradeables($gradeable_id, $user_ids_to_grade, $section_key);
 
-        $who_id = isset($_REQUEST['who_id']) ? $_REQUEST['who_id'] : "";
-        //$who_id = isset($who_id[$_REQUEST['who_id']]) ? $who_id[$_REQUEST['who_id']] : "";
+        //$gradeables_to_grade = $this->core->getQueries()->getGradeables($gradeable_id, $user_ids_to_grade, $section_key);
 
         $prev_id = "";
         $next_id = "";
-        $break_next = false;
-        if($who_id === ""){
-            $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action'=>'details', 
-                'gradeable_id' => $gradeable_id)));
-        }
         
-        $index = array_search($who_id, $user_ids_to_grade);
+        $index = array_search($submitter_id, $user_ids_to_grade);
         $not_in_my_section = false;
         //If the student isn't in our list of students to grade.
         if($index === false){
@@ -1045,42 +1078,208 @@ class ElectronicGraderController extends GradingController {
             }
         }
 
-        if ($team) {
-            if ($teams_assoc[$who_id] === NULL) {
-                $gradeable = NULL;
-            } else {
-                $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $teams_assoc[$who_id]->getLeaderId());
-            }
-        } else {
-            $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $who_id);
-        }
-
         if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable])) {
             $this->core->addErrorMessage("ERROR: You do not have access to grade the requested student.");
             $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
         }
 
-        $gradeable->loadResultDetails();
-
-        $can_verify = false;
+        $show_verify_all = false;
         //check if verify all button should be shown or not
         foreach ($gradeable->getComponents() as $component) {
-            if (!$component->getGrader()) {
+            $graded_component = $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getUser());
+            if ($graded_component === null) {
                 continue;
             }
-            if ($component->getGrader()->getId() !== $this->core->getUser()->getId()) {
-                $can_verify = true;
+            if ($graded_component->getGrader()->getId() !== $this->core->getUser()->getId()) {
+                $show_verify_all = true;
                 break;
             }
         }
-        $can_verify = $can_verify && $this->core->getAccess()->canI("grading.electronic.verify_grader");
+        $can_verify = $this->core->getAccess()->canI("grading.electronic.verify_grader");
+        $show_verify_all = $show_verify_all && $can_verify;
+
+        $show_silent_edit = $this->core->getAccess()->canI("grading.electronic.silent_edit");
+
+        $display_version = intval($_REQUEST['gradeable_version'] ?? '0');
+        if($display_version <= 0) {
+            $display_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
+        }
+
+        // TODO: delete this once late days are using new model
+        $old_gradeable = null;
+        if($graded_gradeable->getSubmitter()->isTeam()) {
+            $old_gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $graded_gradeable->getSubmitter()->getTeam()->getLeaderId());
+        } else {
+            $old_gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $submitter_id);
+        }
+        $late_status = $old_gradeable->calculateLateStatus();
+        // TODO: End region
 
         $this->core->getOutput()->addInternalCss('ta-grading.css');
         $show_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $gradeable]);
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $progress, $prev_id, $next_id, $not_in_my_section, $show_hidden, $can_verify);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $prev_id, $next_id, $not_in_my_section, $show_hidden, $can_verify, $show_verify_all, $show_silent_edit, $late_status);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupNewMark');
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupMarkConflicts');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupSettings');
+    }
+
+    /**
+     * Route for fetching a gradeable's rubric information
+     */
+    public function ajaxGetGradeableRubric() {
+        $gradeable_id = $_GET['gradeable_id'] ?? '';
+
+        $grader = $this->core->getUser();
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+
+        // checks if user has permission
+        if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable])) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to get gradeable rubric data');
+            return;
+        }
+
+        try {
+            // Once we've parsed the inputs and checked permissions, perform the operation
+            $results = $this->getGradeableRubric($gradeable, $grader);
+            $this->core->getOutput()->renderJsonSuccess($results);
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
+        }
+    }
+
+    public function getGradeableRubric(Gradeable $gradeable, User $grader) {
+        $return = [
+            'id' => $gradeable->getId(),
+            'precision' => $gradeable->getPrecision()
+        ];
+
+        // Filter out the components that we shouldn't see
+        //  TODO: instructors see all components, some may not be visible in non-super-edit-mode
+        $return['components'] = array_map(function (Component $component) {
+            return $component->toArray();
+        }, array_filter($gradeable->getComponents(), function (Component $component) use ($grader, $gradeable) {
+            return $this->core->getAccess()->canUser($grader, 'grading.electronic.view_component', ['gradeable' => $gradeable, 'component' => $component]);
+        }));
+        // return $grader->getGroup() === User::GROUP_INSTRUCTOR || ($component->isPeer() === ($grader->getGroup() === User::GROUP_STUDENT));
+        return $return;
+    }
+
+    /**
+     * Gets a component and all of its marks
+     */
+    public function ajaxGetComponent() {
+        $gradeable_id = $_GET['gradeable_id'] ?? '';
+        $component_id = $_GET['component_id'] ?? '';
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+
+        // Get the component
+        $component = $this->tryGetComponent($gradeable, $component_id);
+        if ($component === false) {
+            return;
+        }
+
+        // checks if user has permission
+        if (!$this->core->getAccess()->canI("grading.electronic.view_component", ["gradeable" => $gradeable, "component" => $component])) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to get component');
+            return;
+        }
+
+        try {
+            // Once we've parsed the inputs and checked permissions, perform the operation
+            $this->core->getOutput()->renderJsonSuccess($component->toArray());
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
+        }
+    }
+
+    /**
+     * Route for getting information about a individual grader
+     */
+    public function ajaxGetGradedGradeable() {
+        $gradeable_id = $_GET['gradeable_id'] ?? '';
+        $anon_id = $_GET['anon_id'] ?? '';
+
+        $grader = $this->core->getUser();
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+
+        // Get user id from the anon id
+        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id);
+        if ($submitter_id === false) {
+            return;
+        }
+
+        // Get the graded gradeable
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        if ($graded_gradeable === false) {
+            return;
+        }
+
+        // checks if user has permission
+        if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $graded_gradeable])) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to get graded gradeable');
+            return;
+        }
+
+        // Get / create the TA grade
+        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+
+        try {
+            // Once we've parsed the inputs and checked permissions, perform the operation
+            $response_data = null;
+            if ($ta_graded_gradeable !== null) {
+                $response_data = $this->getGradedGradeable($ta_graded_gradeable, $grader);
+            }
+            $this->core->getOutput()->renderJsonSuccess($response_data);
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
+        }
+    }
+
+    public function getGradedGradeable(TaGradedGradeable $ta_graded_gradeable, User $grader) {
+        $response_data = $ta_graded_gradeable->toArray($grader);
+
+        $graded_gradeable = $ta_graded_gradeable->getGradedGradeable();
+        $gradeable = $graded_gradeable->getGradeable();
+
+        // If there is autograding, also send that information TODO: this should be restricted to non-peer
+        if ($gradeable->getAutogradingConfig()->anyPoints()) {
+            $response_data['auto_grading_total'] = $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
+
+            // Furthermore, if the user has a grade, send that information
+            if ($graded_gradeable->getAutoGradedGradeable()->hasActiveVersion()) {
+                $response_data['auto_grading_earned'] = $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance()->getTotalPoints();
+            }
+        }
+
+        // If it is graded at all, then send ta score information
+        $response_data['ta_grading_total'] = $gradeable->getTaPoints();
+        if ($ta_graded_gradeable->getPercentGraded() !== 0.0) {
+            $response_data['ta_grading_earned'] = $ta_graded_gradeable->getTotalScore();
+        }
+
+        $response_data['anon_id'] = $graded_gradeable->getSubmitter()->getAnonId();
+        return $response_data;
     }
 
     /**
@@ -1092,7 +1291,7 @@ class ElectronicGraderController extends GradingController {
         $component_id = $_POST['component_id'] ?? '';
         $custom_message = $_POST['custom_message'] ?? null;
         $custom_points = $_POST['custom_points'] ?? null;
-        $component_version = $_POST['active_version'] ?? null;
+        $component_version = $_POST['graded_version'] ?? null;
 
         // Optional marks parameter
         $marks = $_POST['mark_ids'] ?? [];
@@ -1111,11 +1310,11 @@ class ElectronicGraderController extends GradingController {
             return;
         }
         if ($component_version === null) {
-            $this->core->getOutput()->renderJsonFail('Missing active_version parameter');
+            $this->core->getOutput()->renderJsonFail('Missing graded_version parameter');
             return;
         }
         if (!ctype_digit($component_version)) {
-            $this->core->getOutput()->renderJsonFail('Invalid active_version parameter');
+            $this->core->getOutput()->renderJsonFail('Invalid graded_version parameter');
             return;
         }
 
@@ -1135,7 +1334,7 @@ class ElectronicGraderController extends GradingController {
         $custom_points = floatval($custom_points);
 
         // Optional Parameters
-        $overwrite = ($_POST['overwrite'] ?? true) === true;
+        $silent_edit = ($_POST['silent_edit'] ?? 'false') === 'true';
 
         $grader = $this->core->getUser();
 
@@ -1152,13 +1351,13 @@ class ElectronicGraderController extends GradingController {
         }
 
         // Get user id from the anon id
-        $user_id = $this->tryGetUserIdFromAnonId($anon_id);
-        if ($user_id === false) {
+        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id);
+        if ($submitter_id === false) {
             return;
         }
 
         // Get the graded gradeable
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id);
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
         if ($graded_gradeable === false) {
             return;
         }
@@ -1169,6 +1368,11 @@ class ElectronicGraderController extends GradingController {
             return;
         }
 
+        // Check if the user can silently edit assigned marks
+        if (!$this->core->getAccess()->canI('grading.electronic.silent_edit')) {
+            $silent_edit = false;
+        }
+
         // Get / create the TA grade
         $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
 
@@ -1177,9 +1381,9 @@ class ElectronicGraderController extends GradingController {
 
         try {
             // Once we've parsed the inputs and checked permissions, perform the operation
-            $results = $this->saveGradedComponent($ta_graded_gradeable, $graded_component, $grader, $custom_points,
-                $custom_message, $marks, $component_version, $overwrite);
-            $this->core->getOutput()->renderJsonSuccess($results);
+            $this->saveGradedComponent($ta_graded_gradeable, $graded_component, $grader, $custom_points,
+                $custom_message, $marks, $component_version, !$silent_edit);
+            $this->core->getOutput()->renderJsonSuccess();
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
         } catch (\Exception $e) {
@@ -1198,7 +1402,7 @@ class ElectronicGraderController extends GradingController {
         }
         $graded_component->setComment($custom_message);
         $graded_component->setScore($custom_points);
-        $graded_component->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+        $graded_component->setGradeTime($this->core->getDateTimeNow());
 
         // Set the marks the submitter received
         $graded_component->setMarkIds($mark_ids);
@@ -1217,12 +1421,294 @@ class ElectronicGraderController extends GradingController {
 
         // Finally, save the changes to the database
         $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
+    }
 
-        // Response 'data'
-        return [
-            'component_reset' => $graded_component === null,
-            'version_updated' => $version_updated
-        ];
+    /**
+     * Route for saving a component's properties (not its marks)
+     */
+    public function ajaxSaveComponent() {
+        // Required parameters
+        $gradeable_id = $_POST['gradeable_id'] ?? '';
+        $component_id = $_POST['component_id'] ?? '';
+        $title = $_POST['title'] ?? '';
+        $ta_comment = $_POST['ta_comment'] ?? '';
+        $student_comment = $_POST['student_comment'] ?? '';
+        $lower_clamp = $_POST['lower_clamp'] ?? null;
+        $default = $_POST['default'] ?? null;
+        $max_value = $_POST['max_value'] ?? null;
+        $upper_clamp = $_POST['upper_clamp'] ?? null;
+        $peer = $_POST['peer'] ?? 'false';
+        // Use 'page_number' since 'page' is used in the router
+        $page = $_POST['page_number'] ?? '';
+
+        // Validate required parameters
+        if ($lower_clamp === null) {
+            $this->core->getOutput()->renderJsonFail('Missing lower_clamp parameter');
+            return;
+        }
+        if ($default === null) {
+            $this->core->getOutput()->renderJsonFail('Missing default parameter');
+            return;
+        }
+        if ($max_value === null) {
+            $this->core->getOutput()->renderJsonFail('Missing max_value parameter');
+            return;
+        }
+        if ($upper_clamp === null) {
+            $this->core->getOutput()->renderJsonFail('Missing upper_clamp parameter');
+            return;
+        }
+        if ($page === '') {
+            $this->core->getOutput()->renderJsonFail('Missing page parameter');
+        }
+        if (!is_numeric($lower_clamp)) {
+            $this->core->getOutput()->renderJsonFail('Invalid lower_clamp parameter');
+            return;
+        }
+        if (!is_numeric($default)) {
+            $this->core->getOutput()->renderJsonFail('Invalid default parameter');
+            return;
+        }
+        if (!is_numeric($max_value)) {
+            $this->core->getOutput()->renderJsonFail('Invalid max_value parameter');
+            return;
+        }
+        if (!is_numeric($upper_clamp)) {
+            $this->core->getOutput()->renderJsonFail('Invalid upper_clamp parameter');
+            return;
+        }
+        if (strval(intval($page)) !== $page) {
+            $this->core->getOutput()->renderJsonFail('Invalid page parameter');
+        }
+        $peer = $peer === 'true';
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+
+        // get the component
+        $component = $this->tryGetComponent($gradeable, $component_id);
+        if ($component === false) {
+            return;
+        }
+
+        // checks if user has permission
+        if (!$this->core->getAccess()->canI("grading.electronic.save_component", ["gradeable" => $gradeable])) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to save components');
+            return;
+        }
+
+        try {
+            // Once we've parsed the inputs and checked permissions, perform the operation
+            $component->setTitle($title);
+            $component->setTaComment($ta_comment);
+            $component->setStudentComment($student_comment);
+            $component->setPoints([
+                'lower_clamp' => $lower_clamp,
+                'default' => $default,
+                'max_value' => $max_value,
+                'upper_clamp' => $upper_clamp
+            ]);
+            $component->setPage($page);
+            $component->setPeer($peer);
+            $this->core->getQueries()->saveComponent($component);
+            $this->core->getOutput()->renderJsonSuccess();
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
+        }
+    }
+
+    /**
+     * Route for saving the order of components in a gradeable
+     */
+    public function ajaxSaveComponentOrder() {
+        // Required parameters
+        $gradeable_id = $_POST['gradeable_id'] ?? '';
+        $order = json_decode($_POST['order'] ?? '[]', true);
+
+        // Validate required parameters
+        if (count($order) === 0) {
+            $this->core->getOutput()->renderJsonFail('Missing order parameter');
+            return;
+        }
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+
+        // checks if user has permission
+        if (!$this->core->getAccess()->canI("grading.electronic.save_component", ["gradeable" => $gradeable])) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to save marks');
+            return;
+        }
+
+        try {
+            // Once we've parsed the inputs and checked permissions, perform the operation
+            $this->saveComponentOrder($gradeable, $order);
+            $this->core->getOutput()->renderJsonSuccess();
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
+        }
+    }
+
+    public function saveComponentOrder(Gradeable $gradeable, array $orders) {
+        foreach ($gradeable->getComponents() as $component) {
+            if (!isset($orders[$component->getId()])) {
+                throw new \InvalidArgumentException('Missing component id in order array');
+            }
+            $order = $orders[$component->getId()];
+            if (!is_int($order) || $order < 0) {
+                throw new \InvalidArgumentException('All order values must be non-negative integers');
+            }
+            $component->setOrder(intval($order));
+        }
+        $this->core->getQueries()->updateGradeable($gradeable);
+    }
+
+    /**
+     * Route for saving the page numbers of the components
+     * NOTE: the 'pages' parameter can be an associate array to set the page numbers of each component,
+     *  or a single-element array with the key 'page' of the page number to set all components' page to
+     */
+    public function ajaxSaveComponentPages() {
+        // Required parameters
+        $gradeable_id = $_POST['gradeable_id'] ?? '';
+        $pages = json_decode($_POST['pages'] ?? '[]', true);
+
+        // Validate required parameters
+        if (count($pages) === 0) {
+            $this->core->getOutput()->renderJsonFail('Missing pages parameter');
+            return;
+        }
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+
+        // checks if user has permission
+        if (!$this->core->getAccess()->canI("grading.electronic.save_component", ["gradeable" => $gradeable])) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to save marks');
+            return;
+        }
+
+        try {
+            // Once we've parsed the inputs and checked permissions, perform the operation
+            if(isset($pages['page']) && count($pages) === 1) {
+                // if one page is sent, set all to that page.  This is useful
+                //  for setting the page settings to 'none' or 'student-assign'
+                $this->saveComponentsPage($gradeable, $pages['page']);
+            } else {
+                $this->saveComponentPages($gradeable, $pages);
+            }
+            $this->core->getQueries()->updateGradeable($gradeable);
+            $this->core->getOutput()->renderJsonSuccess();
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
+        }
+    }
+
+    public function saveComponentPages(Gradeable $gradeable, array $pages) {
+        foreach ($gradeable->getComponents() as $component) {
+            if (!isset($orders[$component->getId()])) {
+                throw new \InvalidArgumentException('Missing component id in pages array');
+            }
+            $page = $pages[$component->getId()];
+            if (!is_int($page)) {
+                throw new \InvalidArgumentException('All page values must be integers');
+            }
+            $component->setPage(max(intval($page), -1));
+        }
+    }
+
+    public function saveComponentsPage(Gradeable $gradeable, int $page) {
+        foreach ($gradeable->getComponents() as $component) {
+            $component->setPage(max($page, -1));
+        }
+    }
+
+    /**
+     * Route for adding a new component to a gradeable
+     */
+    public function ajaxAddComponent() {
+        // Required parameters
+        $gradeable_id = $_POST['gradeable_id'] ?? '';
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+
+        // checks if user has permission
+        if (!$this->core->getAccess()->canI("grading.electronic.add_component", ["gradeable" => $gradeable])) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to add components');
+            return;
+        }
+
+        try {
+            $page = $gradeable->isPdfUpload() ? ($gradeable->isStudentPdfUpload() ? Component::PDF_PAGE_STUDENT : 1) : Component::PDF_PAGE_NONE;
+
+            // Once we've parsed the inputs and checked permissions, perform the operation
+            $component = $gradeable->addComponent('Problem ' . strval(count($gradeable->getComponents()) + 1), '', '', 0, 0,
+                0, 0, false, false, $page);
+            $component->addMark('No Credit', 0.0, false);
+            $this->core->getQueries()->updateGradeable($gradeable);
+            $this->core->getOutput()->renderJsonSuccess(['component_id' => $component->getId()]);
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
+        }
+    }
+
+    /**
+     * Route for deleting a component from a gradeable
+     */
+    public function ajaxDeleteComponent() {
+        // Required parameters
+        $gradeable_id = $_POST['gradeable_id'] ?? '';
+        $component_id = $_POST['component_id'] ?? '';
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+
+        // get the component
+        $component = $this->tryGetComponent($gradeable, $component_id);
+        if ($component === false) {
+            return;
+        }
+
+        // checks if user has permission
+        if (!$this->core->getAccess()->canI("grading.electronic.delete_component", ["gradeable" => $gradeable])) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to delete components');
+            return;
+        }
+
+        try {
+            // Once we've parsed the inputs and checked permissions, perform the operation
+            $gradeable->deleteComponent($component);
+            $this->core->getQueries()->updateGradeable($gradeable);
+            $this->core->getOutput()->renderJsonSuccess();
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
+        }
     }
 
     /**
@@ -1234,7 +1720,8 @@ class ElectronicGraderController extends GradingController {
         $component_id = $_POST['component_id'] ?? '';
         $mark_id = $_POST['mark_id'] ?? '';
         $points = $_POST['points'] ?? '';
-        $title = $_POST['note'] ?? null;
+        $title = $_POST['title'] ?? null;
+        $publish = ($_POST['publish'] ?? 'false') === 'true';
 
         // Validate required parameters
         if ($title === null) {
@@ -1278,7 +1765,7 @@ class ElectronicGraderController extends GradingController {
 
         try {
             // Once we've parsed the inputs and checked permissions, perform the operation
-            $this->saveMark($mark, $points, $title);
+            $this->saveMark($mark, $points, $title, $publish);
             $this->core->getOutput()->renderJsonSuccess();
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
@@ -1287,12 +1774,15 @@ class ElectronicGraderController extends GradingController {
         }
     }
 
-    public function saveMark(Mark $mark, float $points, string $title) {
-        if($mark->getPoints() !== $points) {
+    public function saveMark(Mark $mark, float $points, string $title, bool $publish) {
+        if ($mark->getPoints() !== $points) {
             $mark->setPoints($points);
         }
-        if($mark->getTitle() !== $title) {
+        if ($mark->getTitle() !== $title) {
             $mark->setTitle($title);
+        }
+        if ($mark->isPublish() !== $publish) {
+            $mark->setPublish($publish);
         }
         $this->core->getQueries()->updateGradeable($mark->getComponent()->getGradeable());
     }
@@ -1415,7 +1905,7 @@ class ElectronicGraderController extends GradingController {
         $gradeable_id = $_POST['gradeable_id'] ?? '';
         $component_id = $_POST['component_id'] ?? '';
         $points = $_POST['points'] ?? '';
-        $title = $_POST['note'] ?? null;
+        $title = $_POST['title'] ?? null;
 
         // Validate required parameters
         if ($title === null) {
@@ -1444,7 +1934,7 @@ class ElectronicGraderController extends GradingController {
         }
 
         // checks if user has permission
-        if (!$this->core->getAccess()->canI("grading.electronic.add_one_new_mark", ["gradeable" => $gradeable])) {
+        if (!$this->core->getAccess()->canI("grading.electronic.add_new_mark", ["gradeable" => $gradeable])) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to add mark');
             return;
         }
@@ -1459,7 +1949,7 @@ class ElectronicGraderController extends GradingController {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
-    
+
     public function addNewMark(Component $component, string $title, float $points) {
         $mark = $component->addMark($title, $points, false);
         $this->core->getQueries()->saveComponent($component);
@@ -1494,7 +1984,7 @@ class ElectronicGraderController extends GradingController {
         }
 
         // checks if user has permission
-        if (!$this->core->getAccess()->canI("grading.electronic.delete_one_mark", ["gradeable" => $gradeable])) {
+        if (!$this->core->getAccess()->canI("grading.electronic.delete_mark", ["gradeable" => $gradeable])) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to delete marks');
             return;
         }
@@ -1521,7 +2011,7 @@ class ElectronicGraderController extends GradingController {
     public function ajaxSaveOverallComment() {
         $gradeable_id = $_POST['gradeable_id'] ?? '';
         $anon_id = $_POST['anon_id'] ?? '';
-        $comment = $_POST['gradeable_comment'] ?? '';
+        $comment = $_POST['overall_comment'] ?? '';
 
         // Get the gradeable
         $gradeable = $this->tryGetGradeable($gradeable_id);
@@ -1530,13 +2020,13 @@ class ElectronicGraderController extends GradingController {
         }
 
         // Get user id from the anon id
-        $user_id = $this->tryGetUserIdFromAnonId($anon_id);
-        if ($user_id === false) {
+        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id);
+        if ($submitter_id === false) {
             return;
         }
 
         // Get the graded gradeable
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id);
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
         if ($graded_gradeable === false) {
             return;
         }
@@ -1573,7 +2063,7 @@ class ElectronicGraderController extends GradingController {
     }
 
     /**
-     * Route for getting merged GradedComponent and Component data (similar to old model)
+     * Route for getting a GradedComponent
      */
     protected function ajaxGetGradedComponent() {
         $gradeable_id = $_GET['gradeable_id'] ?? '';
@@ -1595,19 +2085,19 @@ class ElectronicGraderController extends GradingController {
         }
 
         // Get user id from the anon id
-        $user_id = $this->tryGetUserIdFromAnonId($anon_id);
-        if ($user_id === false) {
+        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id);
+        if ($submitter_id === false) {
             return;
         }
 
         // Get the graded gradeable
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id);
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
         if ($graded_gradeable === false) {
             return;
         }
 
         // checks if user has permission
-        if (!$this->core->getAccess()->canI("grading.electronic.get_mark_data", ["gradeable" => $graded_gradeable, "component" => $component])) {
+        if (!$this->core->getAccess()->canI("grading.electronic.view_component_grade", ["gradeable" => $graded_gradeable, "component" => $component])) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to get component data');
             return;
         }
@@ -1616,31 +2106,20 @@ class ElectronicGraderController extends GradingController {
         $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
 
         // Get / create the graded component
-        $graded_component = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
+        $graded_component = $ta_graded_gradeable->getGradedComponent($component, $grader);
 
         try {
             // Once we've parsed the inputs and checked permissions, perform the operation
-            $details = $this->getGradedComponent($graded_component);
-            $this->core->getOutput()->renderJsonSuccess($details);
+            $response_data = null;
+            if ($graded_component !== null) {
+                $response_data = $graded_component->toArray();
+            }
+            $this->core->getOutput()->renderJsonSuccess($response_data);
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
         } catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
-    }
-
-    protected function getGradedComponent(GradedComponent $graded_component) {
-        $component_data = [];
-        $mark_data = [];
-        foreach ($graded_component->getComponent()->getMarks() as $mark) {
-            $data = $mark->toArray();
-            $data['has_mark'] = $graded_component->hasMark($mark);
-            $mark_data[] = $data;
-        }
-        $component_data['marks'] = $mark_data;
-        $component_data['score'] = $graded_component->getScore();
-        $component_data['comment'] = $graded_component->getComment();
-        return $component_data;
     }
 
     /**
@@ -1656,13 +2135,13 @@ class ElectronicGraderController extends GradingController {
             return;
         }
         // Get user id from the anon id
-        $user_id = $this->tryGetUserIdFromAnonId($anon_id);
-        if ($user_id === false) {
+        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id);
+        if ($submitter_id === false) {
             return;
         }
 
         // Get the graded gradeable
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id);
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
         if ($graded_gradeable === false) {
             return;
         }
@@ -1681,9 +2160,9 @@ class ElectronicGraderController extends GradingController {
     }
 
     /**
-     * Route for getting all submitters that received a mark
+     * Route for getting all submitters that received a mark and stats about that mark
      */
-    public function ajaxGetSubmittersThatGotMark() {
+    public function ajaxGetMarkStats() {
         // Required parameters
         $gradeable_id = $_POST['gradeable_id'] ?? '';
         $component_id = $_POST['component_id'] ?? '';
@@ -1717,7 +2196,7 @@ class ElectronicGraderController extends GradingController {
 
         try {
             // Once we've parsed the inputs and checked permissions, perform the operation
-            $results = $this->getSubmittersThatGotMark($mark, $grader);
+            $results = $this->getMarkStats($mark, $grader);
             $this->core->getOutput()->renderJsonSuccess($results);
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
@@ -1726,7 +2205,7 @@ class ElectronicGraderController extends GradingController {
         }
     }
 
-    private function getSubmittersThatGotMark(Mark $mark, User $grader) {
+    private function getMarkStats(Mark $mark, User $grader) {
         // TODO: filter users based on who the grader is allowed to see
         $submitter_ids = $this->core->getQueries()->getSubmittersWhoGotMark($mark);
 
@@ -1819,6 +2298,3 @@ class ElectronicGraderController extends GradingController {
         }
     }
 }
-
-
-

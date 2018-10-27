@@ -58,7 +58,9 @@ class AutoGradedVersion extends AbstractModel {
      *      Note: 0'th part contains all files, flattened
      */
     private $files = null;
-
+    /** @property @var array[] An array of all the autograded results files  */
+    private $results_files = null;
+    
     /** @property @var int The position of the submission in the queue (0 if being graded, -1 if not in queue)
      *      Note: null default value used to indicate that no queue status data has been loaded
      */
@@ -159,6 +161,7 @@ class AutoGradedVersion extends AbstractModel {
         $result_file_info = [];
         foreach ($result_files as $file => $details) {
             $result_file_info[$file] = $details;
+            $this->results_files[$file] = $details;
         }
 
         // Load file that contains numeric results
@@ -183,12 +186,15 @@ class AutoGradedVersion extends AbstractModel {
                 // TODO: Autograding results file was incomplete.  This is a big problem, but how should
                 // TODO:   we handle this error
             }
-            $graded_testcase = new AutoGradedTestcase(
-                $this->core, $testcase, $path, $result_details['testcases'][$testcase->getIndex()]);
-            $this->graded_testcases[$testcase->getIndex()] = $graded_testcase;
-
-            if (in_array($testcase, $config->getEarlySubmissionTestCases())) {
+            if ($result_details != null &&
+                count($result_details['testcases']) > $testcase->getIndex() &&
+                $result_details['testcases'][$testcase->getIndex()] != null) {
+              $graded_testcase = new AutoGradedTestcase
+                ($this->core, $testcase, $path, $result_details['testcases'][$testcase->getIndex()]);
+              $this->graded_testcases[$testcase->getIndex()] = $graded_testcase;
+              if (in_array($testcase, $config->getEarlySubmissionTestCases())) {
                 $this->early_incentive_points += $graded_testcase->getPoints();
+              }
             }
         }
     }
@@ -244,6 +250,17 @@ class AutoGradedVersion extends AbstractModel {
             $this->loadSubmissionFiles();
         }
         return $this->meta_files;
+    }
+    
+    /**
+     * Gets an array of file details (indexed by file name) for all autograded results files
+     * @return array
+     */
+    public function getResultsFiles() {
+        if($this->results_files === null) {
+            $this->loadTestcases();
+        }
+        return $this->results_files;
     }
 
     /**
@@ -459,11 +476,7 @@ class AutoGradedVersion extends AbstractModel {
      */
     private function setSubmissionTimeInternal($submission_time) {
         if ($submission_time !== null) {
-            try {
-                $this->submission_time = DateUtils::parseDateTime($submission_time, $this->core->getConfig()->getTimezone());
-            } catch(\Exception $e) {
-                throw new \InvalidArgumentException('Graded version submission time format invalid');
-            }
+            $this->submission_time = DateUtils::parseDateTime($submission_time, $this->core->getConfig()->getTimezone());
         } else {
             throw new \InvalidArgumentException('Graded version submission time must not be null');
         }
