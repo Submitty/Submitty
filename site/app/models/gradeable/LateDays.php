@@ -124,6 +124,7 @@ class LateDays extends AbstractModel {
     public static function fromUser(Core $core, User $user) {
         $gradeables = [];
         $graded_gradeables = [];
+        // TODO: filter out the gradeable at the QUERY level if possible
         foreach ($core->getQueries()->getGradeableConfigs(null, ['submission_due_date', 'grade_released_date', 'g_id']) as $g) {
             // User the 'core' user since it is the one permission checks are done for
             if (!LateDays::filterCanView($core, $g)) {
