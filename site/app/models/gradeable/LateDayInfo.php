@@ -35,7 +35,7 @@ class LateDayInfo extends AbstractModel {
      * @param User $user
      * @param GradedGradeable $graded_gradeable
      * @param int $cumulative_late_days_used Number of late days used by other gradeables
-     * @param int $late_days_available
+     * @param int $late_days_available The number of late days available for this gradeable (not including exceptions)
      */
     public function __construct(Core $core, User $user, GradedGradeable $graded_gradeable, int $cumulative_late_days_used, int $late_days_available) {
         parent::__construct($core);
@@ -79,8 +79,12 @@ class LateDayInfo extends AbstractModel {
         return $this->graded_gradeable;
     }
 
+    /**
+     * Gets the number of days late the user may submit this gradeable and not be STATUS_BAD
+     * @return int
+     */
     public function getLateDaysAllowed() {
-        return min($this->graded_gradeable->getGradeable()->getLateDays(), $this->late_days_available);
+        return min($this->graded_gradeable->getGradeable()->getLateDays(), $this->late_days_available) + $this->graded_gradeable->getLateDayException($this->user);
     }
 
     /**

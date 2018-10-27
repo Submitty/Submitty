@@ -95,7 +95,7 @@ class LateDays extends AbstractModel {
      */
     public function getLateDaysRemaining() {
         // Use 'now' because it is possible that there are changes that occur in the future
-        return $this->getLateDaysRemainingByContext(new \DateTime());
+        return $this->getLateDaysRemainingByContext($this->core->getDateTimeNow());
     }
 
     /**
