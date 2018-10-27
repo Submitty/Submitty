@@ -332,6 +332,7 @@ class HomeworkView extends AbstractView {
             'part_names' => $gradeable->getAutogradingConfig()->getPartNames(),
             'is_vcs' => $gradeable->isVcs(),
             'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
+            'has_due_date' => $gradeable->hasDueDate(),
             'repository_path' => $my_repository,
             // This is only used as a placeholder, so the who loads this page is the 'user' unless the
             //  client overrides the user
