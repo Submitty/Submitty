@@ -160,7 +160,7 @@ class LateDays extends AbstractModel {
             if ($info->getGradedGradeable()->getGradeable()->getSubmissionDueDate() > $context) {
                 break;
             }
-            $total += $info->getDaysLate();
+            $total += $info->getLateDaysCharged();
         }
         return $total;
     }
@@ -228,7 +228,7 @@ class LateDays extends AbstractModel {
                 //  Clamp to 0 to ensure that subtractions don't make us go below zero
                 $new_late_days_available = $event['update']['allowed_late_days'];
                 $diff = $new_late_days_available - $prev_late_days_available;
-                $late_days_remaining = min(0, $late_days_remaining + $diff);
+                $late_days_remaining = max(0, $late_days_remaining + $diff);
                 $prev_late_days_available = $new_late_days_available;
             }
             if ($late_days_remaining < 0) {
