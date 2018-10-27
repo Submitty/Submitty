@@ -475,7 +475,6 @@ class HomeworkView extends AbstractView {
             $param = array_merge($param, [
                 'in_queue' => $version_instance->isQueued(),
                 'grading' => $version_instance->isGrading(),
-                'submission_time' => DateUtils::dateTimeToString($version_instance->getSubmissionTime()),
                 'days_late' => $version_instance->getDaysLate(),
                 'num_autogrades' => $version_instance->getHistoryCount(),
                 'files' => $version_instance->getFiles(),
@@ -487,6 +486,7 @@ class HomeworkView extends AbstractView {
                 $param = array_merge($param, [
                     'results' => 0,
                     'grade_time' => $history->getGradeTime(),
+                    'submission_time' => $history->getSubmissionTime(),
                     'grading_finished' => DateUtils::dateTimeToString($history->getGradingFinished()),
                     'wait_time' => $history->getWaitTime(),
                     'revision' => $history->getVcsRevision(),
