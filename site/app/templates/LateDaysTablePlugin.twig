@@ -5,9 +5,9 @@
     {% for late_days_update in late_days.getLateDaysUpdates() %}
         {% set diff = late_days_update.allowed_late_days - cumulative_days %}
         {% if diff >= 0 %}
-            <p style='margin-left:30px'>{{ lateday.since_timestamp|date('m/d/Y') }}: Earned {{ diff }} late day(s)</p>
+            <p style='margin-left:30px'>{{ late_days_update.since_timestamp|date('m/d/Y') }}: Earned {{ diff }} late day(s)</p>
         {% else %}
-            <p style='margin-left:30px'>{{ lateday.since_timestamp|date('m/d/Y') }}: Lost {{ -diff }} late day(s)</p>
+            <p style='margin-left:30px'>{{ late_days_update.since_timestamp|date('m/d/Y') }}: Lost {{ -diff }} late day(s)</p>
         {% endif %}
         {% set cumulative_days = late_days_update.allowed_late_days %}
     {% endfor %}
