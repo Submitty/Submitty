@@ -111,7 +111,7 @@ class ReportController extends AbstractController {
                 $user['legal_first_name'] = $gradeable->getUser()->getLegalFirstName();
                 $user['preferred_first_name'] = $gradeable->getUser()->getPreferredFirstName();
                 $user['legal_last_name'] = $gradeable->getUser()->getLegalLastName();
-                $user['preferred_last_name'] = $gradeable->getUser->getPreferredLastName();
+                $user['preferred_last_name'] = $gradeable->getUser()->getPreferredLastName();
                 $user['registration_section'] = $gradeable->getUser()->getRegistrationSection();
                 $user['default_allowed_late_days'] = $this->core->getConfig()->getDefaultStudentLateDays();
                 $user['last_update'] = date("l, F j, Y");
