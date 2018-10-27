@@ -67,11 +67,21 @@ class LateDays extends AbstractModel {
 
     /**
      * Test if the current user is allowed to view late day info for this gradeable
+     * @param Core $core
      * @param Gradeable $gradeable
      * @return bool True if they are
      */
     private static function filterCanView(Core $core, Gradeable $gradeable) {
-        // TODO: update this with new after merged
+        if ($gradeable->getType() !== GradeableType::ELECTRONIC_FILE) {
+            return false;
+        }
+
+//         TODO: for when 2993 is merged
+//        // Don't show the students gradeables they don't submit for / don't have due dates
+//        if (!$gradeable->getStudentSubmit() || !$gradeable->getHasDueDate()) {
+//            return false;
+//        }
+
         $user = $core->getUser();
 
         //Remove incomplete gradeables for non-instructors
