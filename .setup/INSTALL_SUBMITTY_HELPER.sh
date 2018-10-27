@@ -21,7 +21,7 @@ CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../config
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
 SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
 
-DAEMONS=( submitty_autograding_shipper submitty_autograding_shipper submitty_daemon_jobs_handler )
+DAEMONS=( submitty_autograding_shipper submitty_autograding_worker submitty_daemon_jobs_handler )
 
 ########################################################################################################################
 ########################################################################################################################
@@ -614,7 +614,7 @@ fi
 #############################################################
 # update the various daemons
 
-for i in "${array[@]}"; do
+for i in "${DAEMONS[@]}"; do
     # update the autograding shipper & worker daemons
     rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/${i}.service  /etc/systemd/system/${i}.service
     chown -R ${DAEMON_USER}:${DAEMON_GROUP} /etc/systemd/system/${i}.service
@@ -674,10 +674,7 @@ if [ "${WORKER}" == 0 ]; then
 fi
 
 
-# If the submitty_autograding_shipper.service,
-# submitty_autograding_worker.service, or
-# submitty_daemon_jobs_handler.service files have changed, we should
-# reload the units:
+# If any of our daemon files have changed, we should reload the units:
 systemctl daemon-reload
 
 # start the shipper daemon (if it was running)
