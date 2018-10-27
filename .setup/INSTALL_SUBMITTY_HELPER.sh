@@ -598,7 +598,7 @@ if [ -f $original_autograding_workers ]; then
 fi
 
 array=( autograding_TODO autograding_DONE )
-for i in "${array[@]}"; then
+for i in "${array[@]}"; do
     rm -rf ${SUBMITTY_DATA_DIR}/${i}
     mkdir -p ${SUBMITTY_DATA_DIR}/${i}
     chown -R ${DAEMON_USER}:${DAEMON_GID} ${SUBMITTY_DATA_DIR}/${i}
