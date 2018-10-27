@@ -11,9 +11,9 @@
     <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
     <div>
     	<label for="user_firstname_change">Preferred First Name:&emsp;</label>
-        <input type="text" name="user_firstname_change" id="user_firstname_change" /><br /><br />
+        <input type="text" name="user_firstname_change" value="{{ user_first }}" id="user_firstname_change" /><br /><br />
     	<label for="user_lastname_change">Preferred Last Name:&emsp;</label>
-        <input type="text" name="user_lastname_change" id="user_lastname_change" />
+        <input value="{{ user_last }}" type="text" name="user_lastname_change" id="user_lastname_change" />
     </div>
 {% endblock %}
 {% block form %}
