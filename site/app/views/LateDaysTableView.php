@@ -9,8 +9,7 @@ use app\models\gradeable\LateDays;
 
 class LateDaysTableView extends AbstractView {
     public function showLateTable(LateDays $late_days, string $hightlight_gradeable) {
-        // TODO: preferred last name
-        $preferred_name = $late_days->getUser()->getDisplayedFirstName() . " " . $late_days->getUser()->getLastName();
+        $preferred_name = $late_days->getUser()->getDisplayFullName();
         $table_data = $this->core->getOutput()->renderTwigTemplate('LateDaysTablePlugin.twig', [
             'late_days' => $late_days,
             'highlight_gradeable' => $hightlight_gradeable,
