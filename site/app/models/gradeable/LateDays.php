@@ -37,6 +37,7 @@ class LateDays extends AbstractModel {
 
     /**
      * LateDays constructor.
+     * NOTE: use LateDays::fromUser if you want to use default gradeable filtering behavior
      * @param Core $core
      * @param User $user
      * @param GradedGradeable[] $graded_gradeables An array of only electronic GradedGradeables
@@ -44,8 +45,6 @@ class LateDays extends AbstractModel {
     public function __construct(Core $core, User $user, array $graded_gradeables) {
         parent::__construct($core);
         $this->user = $user;
-
-        // TODO: filter out non-late-days gradeables here (i.e. no due date gradeables)
 
         // Sort by due date
         usort($graded_gradeables, function (GradedGradeable $gg1, GradedGradeable $gg2) {
