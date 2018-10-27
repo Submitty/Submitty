@@ -111,6 +111,7 @@ CREATE TABLE users (
     user_firstname character varying NOT NULL,
     user_preferred_firstname character varying,
     user_lastname character varying NOT NULL,
+    user_preferred_lastname character varying,
     user_email character varying NOT NULL,
     user_updated BOOLEAN NOT NULL DEFAULT FALSE,
     instructor_updated BOOLEAN NOT NULL DEFAULT FALSE,
@@ -224,11 +225,11 @@ BEGIN
   IF (TG_OP = 'INSERT') THEN
     -- FULL data sync on INSERT of a new user record.
     SELECT * INTO user_row FROM users WHERE user_id=NEW.user_id;
-    query_string := 'INSERT INTO users (user_id, user_firstname, user_preferred_firstname, user_lastname, user_email, user_group, registration_section, manual_registration) ' ||
+    query_string := 'INSERT INTO users (user_id, user_firstname, user_preferred_firstname, user_lastname, user_preferred_lastname, user_email, user_group, registration_section, manual_registration) ' ||
                     'VALUES (' || quote_literal(user_row.user_id) || ', ' || quote_literal(user_row.user_firstname) || ', ' || quote_nullable(user_row.user_preferred_firstname) || ', ' ||
-                    '' || quote_literal(user_row.user_lastname) || ', ' || quote_literal(user_row.user_email) || ', ' || NEW.user_group || ', ' || quote_nullable(NEW.registration_section) || ', ' || NEW.manual_registration || ')';
+                    '' || quote_literal(user_row.user_lastname) || ', ' || quote_nullable(user_row.user_preferred_lastname) || ', ' || quote_literal(user_row.user_email) || ', ' || NEW.user_group || ', ' || quote_nullable(NEW.registration_section) || ', ' || NEW.manual_registration || ')';
     IF query_string IS NULL THEN
-      RAISE EXCEPTION 'dblink_query set as NULL';
+      RAISE EXCEPTION 'query_string error in trigger function sync_courses_user() when doing INSERT';
     END IF;
     PERFORM dblink_exec(db_conn, query_string);
 
@@ -238,7 +239,7 @@ BEGIN
     -- registration is updated to NULL.  (e.g. student has dropped)
     query_string = 'UPDATE users SET user_group=' || NEW.user_group || ', registration_section=' || quote_nullable(NEW.registration_section) || ', rotating_section=' || CASE WHEN NEW.registration_section IS NULL THEN 'null' ELSE 'rotating_section' END || ', manual_registration=' || NEW.manual_registration || ' WHERE user_id=' || QUOTE_LITERAL(NEW.user_id);
     IF query_string IS NULL THEN
-      RAISE EXCEPTION 'dblink_query set as NULL';
+      RAISE EXCEPTION 'query_string error in trigger function sync_courses_user() when doing UPDATE';
     END IF;
     PERFORM dblink_exec(db_conn, query_string);
   END IF;
@@ -261,10 +262,10 @@ BEGIN
   FOR course_row IN SELECT semester, course FROM courses_users WHERE user_id=NEW.user_id LOOP
     RAISE NOTICE 'Semester: %, Course: %', course_row.semester, course_row.course;
     db_conn := format('dbname=submitty_%s_%s', course_row.semester, course_row.course);
-    query_string := 'UPDATE users SET user_firstname=' || quote_literal(NEW.user_firstname) || ', user_preferred_firstname=' || quote_nullable(NEW.user_preferred_firstname) || ', user_lastname=' || quote_literal(NEW.user_lastname) || ', user_email=' || quote_literal(NEW.user_email) || ' WHERE user_id=' || quote_literal(NEW.user_id);
+    query_string := 'UPDATE users SET user_firstname=' || quote_literal(NEW.user_firstname) || ', user_preferred_firstname=' || quote_nullable(NEW.user_preferred_firstname) || ', user_lastname=' || quote_literal(NEW.user_lastname) || ', user_preferred_lastname=' || quote_nullable(NEW.user_preferred_lastname) || ', user_email=' || quote_literal(NEW.user_email) || ' WHERE user_id=' || quote_literal(NEW.user_id);
     -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
     IF query_string IS NULL THEN
-      RAISE EXCEPTION 'dblink_query set as NULL';
+      RAISE EXCEPTION 'query_string error in trigger function sync_user()';
     END IF;
     PERFORM dblink_exec(db_conn, query_string);
   END LOOP;
@@ -274,26 +275,51 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION sync_registration_section() RETURNS trigger AS
--- TRIGGER function to INSERT registration sections to course DB, as needed.
-$$
+CREATE OR REPLACE FUNCTION sync_insert_registration_section() RETURNS trigger AS $$
+-- AFTER INSERT trigger function to INSERT registration sections to course DB, as needed.
 DECLARE
-  registration_row RECORD;
-  db_conn VARCHAR;
-  query_string TEXT;
+    registration_row RECORD;
+    db_conn VARCHAR;
+    query_string TEXT;
 BEGIN
-  FOR registration_row IN SELECT semester, course FROM courses_registration_sections WHERE registration_section_id=NEW.registration_section_id LOOP
-    db_conn := format('dbname=submitty_%s_%s', registration_row.semester, registration_row.course);
+    db_conn := format('dbname=submitty_%s_%s', NEW.semester, NEW.course);
     query_string := 'INSERT INTO sections_registration VALUES(' || quote_literal(NEW.registration_section_id) || ') ON CONFLICT DO NOTHING';
     -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
     IF query_string IS NULL THEN
-      RAISE EXCEPTION 'dblink_query set as NULL';
+        RAISE EXCEPTION 'query_string error in trigger function sync_insert_registration_section()';
     END IF;
     PERFORM dblink_exec(db_conn, query_string);
-  END LOOP;
 
-  -- All done.
-  RETURN NULL;
+    -- All done.
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION sync_delete_registration_section() RETURNS TRIGGER AS $$
+-- BEFORE DELETE trigger function to DELETE registration sections from course DB, as needed.
+DECLARE
+    registration_row RECORD;
+    db_conn VARCHAR;
+    query_string TEXT;
+BEGIN
+    db_conn := format('dbname=submitty_%s_%s', OLD.semester, OLD.course);
+    query_string := 'DELETE FROM sections_registration WHERE sections_registration_id = ' || quote_literal(OLD.registration_section_id);
+    -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
+    IF query_string IS NULL THEN
+        RAISE EXCEPTION 'query_string error in trigger function sync_delete_registration_section()';
+    END IF;
+    PERFORM dblink_exec(db_conn, query_string);
+
+    -- All done.  As this is a BEFORE DELETE trigger, RETURN OLD allows original triggering DELETE query to proceed.
+    RETURN OLD;
+
+-- Trying to delete a registration section while users are still enrolled will raise an integrity constraint violation exception.
+-- We should catch this exception and stop execution with no rows processed.
+-- No rows processed will indicate to the UsersController that deletion had an error and did not occur.
+EXCEPTION WHEN integrity_constraint_violation THEN
+    RAISE NOTICE 'Users are still enrolled in registration section ''%''', OLD.registration_section_id;
+    -- Return NULL so we do not proceed with original triggering DELETE query.
+    RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -301,4 +327,7 @@ $$ LANGUAGE plpgsql;
 -- Updates can happen in either users and/or courses_users.
 CREATE TRIGGER user_sync_courses_users AFTER INSERT OR UPDATE ON courses_users FOR EACH ROW EXECUTE PROCEDURE sync_courses_user();
 CREATE TRIGGER user_sync_users AFTER UPDATE ON users FOR EACH ROW EXECUTE PROCEDURE sync_user();
-CREATE TRIGGER registration_sync_registration_id AFTER INSERT ON courses_registration_sections FOR EACH ROW EXECUTE PROCEDURE sync_registration_section();
+
+-- INSERT and DELETE triggers for syncing registration sections happen on different instances of TG_WHEN (after vs before).
+CREATE TRIGGER insert_sync_registration_id AFTER INSERT OR UPDATE ON courses_registration_sections FOR EACH ROW EXECUTE PROCEDURE sync_insert_registration_section();
+CREATE TRIGGER delete_sync_registration_id BEFORE DELETE ON courses_registration_sections FOR EACH ROW EXECUTE PROCEDURE sync_delete_registration_section();

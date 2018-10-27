@@ -212,7 +212,7 @@ CREATE TABLE gradeable (
 
 
 
--- 
+--
 -- Name: gradeable_component_mark; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -451,6 +451,7 @@ CREATE TABLE users (
     user_firstname character varying NOT NULL,
     user_preferred_firstname character varying,
     user_lastname character varying NOT NULL,
+    user_preferred_lastname character varying,
     user_email character varying NOT NULL,
     user_group integer NOT NULL,
     registration_section character varying(255),
@@ -529,7 +530,7 @@ CREATE TABLE notifications (
 );
 
 
--- Begins Forum 
+-- Begins Forum
 
 --
 -- Name: posts; Type: Table; Schema: public; Owner: -
@@ -631,7 +632,7 @@ ALTER TABLE ONLY electronic_gradeable
 
 ALTER TABLE ONLY gradeable_component_data
     ADD CONSTRAINT gradeable_component_data_pkey PRIMARY KEY (gc_id, gd_id, gcd_grader_id);
-    
+
 
 --
 -- Name: gradeable_component_data_normal_index; Type: INDEX; Schema: public; Owner: -
@@ -700,8 +701,8 @@ ALTER TABLE ONLY grading_registration
 
 ALTER TABLE ONLY grading_rotating
     ADD CONSTRAINT grading_rotating_pkey PRIMARY KEY (sections_rotating_id, user_id, g_id);
-    
-    
+
+
 --
 -- Name: seeking_team; Type: CONSTRAINT; Schema: public; Owner: -
 --
@@ -709,11 +710,11 @@ ALTER TABLE ONLY grading_rotating
 ALTER TABLE seeking_team
     ADD CONSTRAINT seeking_team_pkey PRIMARY KEY (g_id, user_id);
 
-    
+
 --
 -- Name: peer_assign_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
-    
+
 ALTER TABLE ONLY peer_assign
     ADD CONSTRAINT peer_assign_pkey PRIMARY KEY (g_id, grader_id, user_id);
 
@@ -995,7 +996,7 @@ ALTER TABLE ONLY late_days
 -- Name: peer_assign_g_id_fkey; Type: FK CONSTRAINT; Schma: public; Owner: -
 --
 
-ALTER TABLE ONLY peer_assign 
+ALTER TABLE ONLY peer_assign
     ADD CONSTRAINT peer_assign_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
@@ -1005,7 +1006,7 @@ ALTER TABLE ONLY peer_assign
 
 ALTER TABLE ONLY peer_assign
     ADD CONSTRAINT peer_assign_grader_id_fkey FOREIGN KEY (grader_id) REFERENCES users(user_id) ON UPDATE CASCADE;
-    
+
 
 --
 -- Name: peer_assign_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -

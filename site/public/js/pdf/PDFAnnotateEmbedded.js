@@ -68,6 +68,7 @@ function render(gradeable_id, user_id, grader_id, file_name, url = "") {
                         e.preventDefault();
                     }
                 });
+                $("a[value='zoomcustom']").text(parseInt(RENDER_OPTIONS.scale * 100) + "%");
                 viewer.innerHTML = '';
                 NUM_PAGES = pdf.pdfInfo.numPages;
                 for (let i=0; i<NUM_PAGES; i++) {

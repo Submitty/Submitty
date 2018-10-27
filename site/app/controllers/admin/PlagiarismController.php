@@ -13,7 +13,7 @@ class PlagiarismController extends AbstractController {
                 $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildUrl(array('component' => 'admin', 'semester' => $_REQUEST['semester'] , 'course'=> $_REQUEST['course'],'page' => 'plagiarism')));
                 $this->core->getOutput()->addBreadcrumb('Configure New Gradeable');
                 $this->configureNewGradeableForPlagiarismForm();
-                break;    
+                break;
             case 'save_new_plagiarism_configuration':
                 $this->saveNewPlagiarismConfiguration();
                 break;
@@ -22,7 +22,7 @@ class PlagiarismController extends AbstractController {
             	break;
             case 'get_matching_users':
             	$this->ajaxGetMatchingUsers();
-            	break;     
+            	break;
             case 'get_matches_for_clicked_match':
                 $this->ajaxGetMatchesForClickedMatch();
                 break;
@@ -30,7 +30,7 @@ class PlagiarismController extends AbstractController {
                 $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildUrl(array('component' => 'admin', 'semester' => $_REQUEST['semester'] , 'course'=> $_REQUEST['course'],'page' => 'plagiarism')));
                 $this->core->getOutput()->addBreadcrumb('Configure '.($this->core->getQueries()->getGradeable($_REQUEST['gradeable_id']))->getName());
                 $this->editPlagiarismSavedConfig();
-                break;    
+                break;
             case 're_run_plagiarism':
                 $this->reRunPlagiarism();
                 break;
@@ -42,12 +42,12 @@ class PlagiarismController extends AbstractController {
                 break;
             case 'toggle_nightly_rerun':
                 $this->toggleNightlyRerun();
-                break;             
+                break;
             case 'show_plagiarism_result':
                 $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildUrl(array('component' => 'admin', 'semester' => $_REQUEST['semester'] , 'course'=> $_REQUEST['course'],'page' => 'plagiarism')));
                 $this->core->getOutput()->addBreadcrumb(($this->core->getQueries()->getGradeable($_REQUEST['gradeable_id']))->getName().' Results');
-                $this->showPlagiarismResult(); 
-                break;            
+                $this->showPlagiarismResult();
+                break;
             default:
                 $this->core->getOutput()->addBreadcrumb('Plagiarism Detection');
                 $this->plagiarismMainPage();
@@ -62,7 +62,7 @@ class PlagiarismController extends AbstractController {
         #refresh page ensures atleast one refresh of lichen mainpage when delete , rerun , edit or new configuration is saved.
         $refresh_page ="NO_REFRESH";
         if(isset($_REQUEST['refresh_page'])) {
-            $refresh_page = $_REQUEST['refresh_page'];            
+            $refresh_page = $_REQUEST['refresh_page'];
         }
 
 
@@ -81,7 +81,7 @@ class PlagiarismController extends AbstractController {
         if(!file_exists($nightly_rerun_info_file)) {
             $nightly_rerun_info = array();
             foreach($gradeables_with_plagiarism_result as $gradeable_id_title) {
-               $nightly_rerun_info[$gradeable_id_title['g_id']] = false; 
+               $nightly_rerun_info[$gradeable_id_title['g_id']] = false;
             }
             if (file_put_contents($nightly_rerun_info_file, json_encode($nightly_rerun_info, JSON_PRETTY_PRINT)) === false) {
                 die("Failed to create nightly rerun info file");
@@ -110,14 +110,14 @@ class PlagiarismController extends AbstractController {
             }
             if (file_put_contents($nightly_rerun_info_file, json_encode($nightly_rerun_info, JSON_PRETTY_PRINT)) === false) {
                 die("Failed to create nightly rerun info file");
-            }   
+            }
         }
 
 
 
         $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismMainPage', $semester, $course, $gradeables_with_plagiarism_result, $refresh_page, $nightly_rerun_info);
         $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'deletePlagiarismResultAndConfigForm');
-        
+
     }
 
     public function showPlagiarismResult() {
@@ -137,7 +137,7 @@ class PlagiarismController extends AbstractController {
         }
         if(file_get_contents($file_path) == "") {
             $this->core->addSuccessMessage("There are no matches(plagiarism) for the gradeable with current configuration");
-            $this->core->redirect($return_url);   
+            $this->core->redirect($return_url);
         }
         $content =file_get_contents($file_path);
         $content = trim(str_replace(array("\r", "\n"), '', $content));
@@ -145,11 +145,11 @@ class PlagiarismController extends AbstractController {
         $rankings = array_chunk($rankings,3);
         foreach($rankings as $i => $ranking) {
             array_push($rankings[$i], $this->core->getQueries()->getUserById($ranking[1])->getDisplayedFirstName());
-            array_push($rankings[$i], $this->core->getQueries()->getUserById($ranking[1])->getLastName());  
+            array_push($rankings[$i], $this->core->getQueries()->getUserById($ranking[1])->getDisplayedLastName());
         }
-        
+
         $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'showPlagiarismResult', $semester, $course, $gradeable_id, $gradeable_title, $rankings);
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismPopUpToShowMatches');         
+        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismPopUpToShowMatches');
     }
 
     public function configureNewGradeableForPlagiarismForm() {
@@ -161,7 +161,7 @@ class PlagiarismController extends AbstractController {
             if(!in_array($gradeable_id_title['g_id'], $gradeable_with_submission) || file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json") || file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json") || file_exists("/var/local/submitty/courses/".$semester."/".$course."/lichen/config/lichen_".$semester."_".$course."_".$gradeable_id_title['g_id'].".json")) {
                 unset($gradeable_ids_titles[$i]);
             }
-        }       
+        }
 
         $prior_term_gradeables = FileUtils::getGradeablesFromPriorTerm();
 
@@ -181,9 +181,9 @@ class PlagiarismController extends AbstractController {
         if ($_REQUEST['new_or_edit'] == "edit") {
             $gradeable_id = $_REQUEST['gradeable_id'];
             $return_url = $this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester, 'gradeable_id'=> $gradeable_id,'action' => 'edit_plagiarism_saved_config'));
-        
+
         }
-        
+
         if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
             $this->core->addErrorMessage("Invalid CSRF token");
             $this->core->redirect($return_url);
@@ -218,7 +218,7 @@ class PlagiarismController extends AbstractController {
             else {
                 $this->core->addErrorMessage("No regrex provided for selecting files");
                 $this->core->redirect($return_url);
-            }    
+            }
         }
 
         $language= $_POST['language'];
@@ -228,14 +228,14 @@ class PlagiarismController extends AbstractController {
         else {
             $this->core->addErrorMessage("No input provided for threshold");
             $this->core->redirect($return_url);
-        } 
+        }
         if( isset($_POST['sequence_length']) && $_POST['sequence_length'] !== '') {
             $sequence_length = $_POST['sequence_length'];
         }
         else {
             $this->core->addErrorMessage("No input provided for sequence length");
             $this->core->redirect($return_url);
-        } 
+        }
 
         $prev_term_gradeables = array();
         for( $i = 0; $i < $prev_gradeable_number; $i++ ) {
@@ -251,9 +251,9 @@ class PlagiarismController extends AbstractController {
                 if(isset($_POST['ignore_submission_'.$i]) && $_POST['ignore_submission_'.$i] !== '') {
                     array_push($ignore_submissions, $_POST['ignore_submission_'.$i]);
                 }
-            }    
+            }
         }
-        
+
         $gradeable_path =  FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id);
         $provided_code_option = $_POST['provided_code_option'];
         if($provided_code_option == "code_provided") {
@@ -261,7 +261,7 @@ class PlagiarismController extends AbstractController {
         }
         else {
             if(is_dir(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen/provided_code", $gradeable_id))) {
-                FileUtils::emptyDir(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen/provided_code", $gradeable_id));   
+                FileUtils::emptyDir(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen/provided_code", $gradeable_id));
             }
             $instructor_provided_code= false;
         }
@@ -280,7 +280,7 @@ class PlagiarismController extends AbstractController {
                 $upload = $_FILES['provided_code_file'];
                 $target_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "lichen/provided_code", $gradeable_id);
                 if (!is_dir($target_dir)) {
-                    FileUtils::createDir($target_dir);    
+                    FileUtils::createDir($target_dir);
                 }
                 FileUtils::emptyDir($target_dir);
 
@@ -329,7 +329,7 @@ class PlagiarismController extends AbstractController {
             $json_data["regrex"] = $regrex_for_selecting_files;
         }
         if($instructor_provided_code == true) {
-            $json_data["instructor_provided_code_path"] = $instructor_provided_code_path;   
+            $json_data["instructor_provided_code_path"] = $instructor_provided_code_path;
         }
 
         if (file_put_contents($json_file, json_encode($json_data, JSON_PRETTY_PRINT)) === false) {
@@ -345,15 +345,15 @@ class PlagiarismController extends AbstractController {
         $course_path = $this->core->getConfig()->getCoursePath();
         if (!@file_put_contents(FileUtils::joinPaths($course_path, "lichen", "config", ".".$gradeable_id.".lichenrun.timestamp"), $current_time_string_tz."\n")) {
             $this->core->addErrorMessage("Failed to save timestamp file for this Lichen Run. Create the configuration again.");
-            $this->core->redirect($return_url);  
+            $this->core->redirect($return_url);
         }
 
         // if fails at following step, still provided code, cnfiguration, timestamp file get saved
-        
+
         $ret = $this->enqueueLichenJob("RunLichen", $gradeable_id);
         if($ret !== null) {
             $this->core->addErrorMessage("Failed to create configuration. Create the configuration again.");
-            $this->core->redirect($return_url);  
+            $this->core->redirect($return_url);
         }
 
         $this->core->addSuccessMessage("Lichen Plagiarism Detection configuration created for ".$gradeable_id);
@@ -363,21 +363,21 @@ class PlagiarismController extends AbstractController {
     private function enqueueLichenJob($job, $gradeable_id) {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        
+
         $lichen_job_data = [
             "job" => $job,
             "semester" => $semester,
             "course" => $course,
             "gradeable" => $gradeable_id
         ];
-        $lichen_job_file = "/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id . ".json";    
-        
+        $lichen_job_file = "/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id . ".json";
+
         if(file_exists($lichen_job_file) && !is_writable($lichen_job_file)) {
             return "Failed to create lichen job. Try again";
         }
 
         if(file_put_contents($lichen_job_file, json_encode($lichen_job_data, JSON_PRETTY_PRINT)) === false) {
-            return "Failed to write lichen job file. Try again";   
+            return "Failed to write lichen job file. Try again";
         }
         return null;
     }
@@ -396,7 +396,7 @@ class PlagiarismController extends AbstractController {
 
         if(!file_exists("/var/local/submitty/courses/".$semester."/".$course."/lichen/config/lichen_".$semester."_".$course."_".$gradeable_id.".json")) {
             $this->core->addErrorMessage("Plagiarism results have been deleted. Add new configuration for the gradeable.");
-            $this->core->redirect($return_url);   
+            $this->core->redirect($return_url);
         }
 
         $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
@@ -404,13 +404,13 @@ class PlagiarismController extends AbstractController {
         $course_path = $this->core->getConfig()->getCoursePath();
         if (!@file_put_contents(FileUtils::joinPaths($course_path, "lichen", "config", ".".$gradeable_id.".lichenrun.timestamp"), $current_time_string_tz."\n")) {
             $this->core->addErrorMessage("Failed to save timestamp file for this Lichen Run. Re-run the detector.");
-            $this->core->redirect($return_url);  
+            $this->core->redirect($return_url);
         }
-        
+
         $ret = $this->enqueueLichenJob("RunLichen", $gradeable_id);
         if($ret !== null) {
             $this->core->addErrorMessage($ret);
-            $this->core->redirect($return_url);  
+            $this->core->redirect($return_url);
         }
 
         $this->core->addSuccessMessage("Re-Run of Lichen Plagiarism for ".$gradeable_id);
@@ -420,19 +420,19 @@ class PlagiarismController extends AbstractController {
     public function editPlagiarismSavedConfig() {
         $semester = $_REQUEST['semester'];
         $course = $_REQUEST['course'];
-        $gradeable_id = $_REQUEST['gradeable_id'];       
+        $gradeable_id = $_REQUEST['gradeable_id'];
 
         $prior_term_gradeables = FileUtils::getGradeablesFromPriorTerm();
 
         if(!file_exists("/var/local/submitty/courses/".$semester."/".$course."/lichen/config/lichen_".$semester."_".$course."_".$gradeable_id.".json")) {
             $this->core->addErrorMessage("Saved configuration not found.");
-            $this->core->redirect($return_url);   
+            $this->core->redirect($return_url);
         }
 
         $saved_config= json_decode(file_get_contents("/var/local/submitty/courses/".$semester."/".$course."/lichen/config/lichen_".$semester."_".$course."_".$gradeable_id.".json"),true);
 
         $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'configureGradeableForPlagiarismForm', 'edit', null , $prior_term_gradeables, $saved_config);
-        
+
     }
 
     public function deletePlagiarismResultAndConfig() {
@@ -446,7 +446,7 @@ class PlagiarismController extends AbstractController {
             $this->core->addErrorMessage("Invalid CSRF token");
             $this->core->redirect($return_url);
         }
-        
+
         if(file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id . ".json") || file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id . ".json")) {
                 $this->core->addErrorMessage("A job is already running for the gradeable. Try again after a while.");
                 $this->core->redirect($return_url);
@@ -454,17 +454,17 @@ class PlagiarismController extends AbstractController {
 
         if(!file_exists("/var/local/submitty/courses/".$semester."/".$course."/lichen/config/lichen_".$semester."_".$course."_".$gradeable_id.".json")) {
             $this->core->addErrorMessage("Plagiarism results for the gradeable are already deleted. Refresh the page.");
-            $this->core->redirect($return_url);   
+            $this->core->redirect($return_url);
         }
 
         $ret = $this->enqueueLichenJob("DeleteLichenResult", $gradeable_id);
         if($ret !== null) {
             $this->core->addErrorMessage($ret);
-            $this->core->redirect($return_url);   
+            $this->core->redirect($return_url);
         }
 
         $this->core->addSuccessMessage("Lichen results and saved configuration for the gradeable will be deleted.");
-        $this->core->redirect($this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester, 'refresh_page'=> 'REFRESH_ME')));   
+        $this->core->redirect($this->core->buildUrl(array('component'=>'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester, 'refresh_page'=> 'REFRESH_ME')));
     }
 
     public function toggleNightlyRerun() {
@@ -480,7 +480,7 @@ class PlagiarismController extends AbstractController {
         if (file_put_contents($nightly_rerun_info_file, json_encode($nightly_rerun_info, JSON_PRETTY_PRINT)) === false) {
             $this->core->addErrorMessage("Failed to change nightly rerun for the gradeable");
             $this->core->redirect($return_url);
-        } 
+        }
         $this->core->addSuccessMessage("Nightly Rerun status changed for the gradeable");
         $this->core->redirect($return_url);
     }
@@ -489,7 +489,7 @@ class PlagiarismController extends AbstractController {
     	$gradeable_id = $_REQUEST['gradeable_id'];
     	$user_id_1 =$_REQUEST['user_id_1'];
     	$version_user_1 = $_REQUEST['version_user_1'];
-    	
+
         $course_path = $this->core->getConfig()->getCoursePath();
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
@@ -521,7 +521,7 @@ class PlagiarismController extends AbstractController {
         $data="";
     	if(($this->core->getUser()->accessAdmin()) && (file_exists($file_name))) {
     		if(isset($_REQUEST['user_id_2']) && !empty($_REQUEST['user_id_2']) && isset($_REQUEST['version_user_2']) && !empty($_REQUEST['version_user_2'])) {
-    			$color_info = $this->getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, $_REQUEST['user_id_2'], $_REQUEST['version_user_2'] , '1');	
+    			$color_info = $this->getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, $_REQUEST['user_id_2'], $_REQUEST['version_user_2'] , '1');
     		}
     		else {
     			$color_info = $this->getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, '', '', '1');
@@ -540,22 +540,22 @@ class PlagiarismController extends AbstractController {
 	    	if(($this->core->getUser()->accessAdmin()) && (file_exists($file_name))) {
 	    		$color_info = $this->getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, $_REQUEST['user_id_2'], $_REQUEST['version_user_2'], '2');
 	  			$data['display_code2'] = htmlentities($this->getDisplayForCode($file_name, $color_info));
-	        }   
+	        }
 	        else {
 	        	$return = array('error' => 'User 2 submission.concatenated for matching version not found.');
 		    	$return = json_encode($return);
 		    	echo($return);
 		    	return;
-	        }	
+	        }
         }
 
        	$return= json_encode($data);
-    	echo($return);	
+    	echo($return);
     }
 
     public function getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, $user_id_2, $version_user_2, $codebox) {
     	$color_info = array();
-    	
+
 		$file_path= $course_path."/lichen/matches/".$gradeable_id."/".$user_id_1."/".$version_user_1."/matches.json";
         if (!file_exists($file_path)) {
         	return $color_info;
@@ -582,15 +582,15 @@ class PlagiarismController extends AbstractController {
 	    						$orange_color =true;
                                 $user_2_index_in_others=$i;
 	    					}
-	    				}	
+	    				}
 	    			}
 	    			if($codebox == "1" && $orange_color) {
                         $onclick_function = 'getMatchesForClickedMatch("'.$gradeable_id.'", event,'.$match["start"].','.$match["end"].',"code_box_1","orange",this);';
                         $name = '{"start":'.$match["start"].', "end":'.$match["end"].'}';
 	    				if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {
-			    			$color_info[$start_line][$start_pos] .= "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffa500;cursor: pointer;'>";		
+			    			$color_info[$start_line][$start_pos] .= "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffa500;cursor: pointer;'>";
 			    		}
-			    		else {	
+			    		else {
 			    			$color_info[$start_line][$start_pos] = "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffa500;cursor: pointer;'>";
 			    		}
 			    		if(array_key_exists($end_line, $color_info) && array_key_exists($end_pos+strlen(strval($end_value)), $color_info[$end_line])) {
@@ -604,9 +604,9 @@ class PlagiarismController extends AbstractController {
                         $onclick_function = 'getMatchesForClickedMatch("'.$gradeable_id.'", event,'.$match["start"].','.$match["end"].',"code_box_1","yellow",this);';
                         $name = '{"start":'.$match["start"].', "end":'.$match["end"].'}';
 	    				if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {
-			    			$color_info[$start_line][$start_pos] .= "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffff00;cursor: pointer;'>";		
+			    			$color_info[$start_line][$start_pos] .= "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffff00;cursor: pointer;'>";
 			    		}
-			    		else {	
+			    		else {
 			    			$color_info[$start_line][$start_pos] = "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffff00;cursor: pointer;'>";
 			    		}
 			    		if(array_key_exists($end_line, $color_info) && array_key_exists($end_pos+strlen(strval($end_value)), $color_info[$end_line])) {
@@ -626,9 +626,9 @@ class PlagiarismController extends AbstractController {
                             $onclick_function = 'getMatchesForClickedMatch("'.$gradeable_id.'", event,'.$match["start"].','.$match["end"].',"code_box_2","orange", this);';
                             $name = '{"start":'.$user_2_matchingposition["start"].', "end":'.$user_2_matchingposition["end"].'}';
     	    				if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {
-    			    			$color_info[$start_line][$start_pos] .= "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffa500;cursor: pointer;'>";		
+    			    			$color_info[$start_line][$start_pos] .= "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffa500;cursor: pointer;'>";
     			    		}
-    			    		else {	
+    			    		else {
     			    			$color_info[$start_line][$start_pos] = "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffa500;cursor: pointer;'>";
     			    		}
     			    		if(array_key_exists($end_line, $color_info) && array_key_exists($end_pos+strlen(strval($end_value)), $color_info[$end_line])) {
@@ -637,16 +637,16 @@ class PlagiarismController extends AbstractController {
     			    		else {
     			    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>";
     			    		}
-                        }    
-	    			}	
-	    				
+                        }
+	    			}
+
 	    		}
 	    		else if($match["type"] == "common" && $codebox == "1") {
-	    			if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {		
+	    			if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {
 		    			$color_info[$start_line][$start_pos] .= "<span style='background-color:#cccccc'>";
 		    		}
 		    		else {
-		    			$color_info[$start_line][$start_pos] = "<span style='background-color:#cccccc'>";	
+		    			$color_info[$start_line][$start_pos] = "<span style='background-color:#cccccc'>";
 		    		}
 		    		if(array_key_exists($end_line, $color_info) && array_key_exists($end_pos+strlen(strval($end_value)), $color_info[$end_line])) {
 		    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>".$color_info[$end_line][$end_pos+strlen(strval($end_value))];
@@ -660,17 +660,17 @@ class PlagiarismController extends AbstractController {
 		    			$color_info[$start_line][$start_pos] .= "<span style='background-color:#b5e3b5'>";
 		    		}
 		    		else {
-		    			$color_info[$start_line][$start_pos] = "<span style='background-color:#b5e3b5'>";	
+		    			$color_info[$start_line][$start_pos] = "<span style='background-color:#b5e3b5'>";
 		    		}
 		    		if(array_key_exists($end_line, $color_info) && array_key_exists($end_pos+strlen(strval($end_value)), $color_info[$end_line])) {
 		    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>".$color_info[$end_line][$end_pos+strlen(strval($end_value))];
 		    		}
 		    		else {
 		    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>";
-		    		}	
+		    		}
 	    		}
 	    	}
-        } 	
+        }
     	foreach($color_info as $i=>$color_info_for_line) {
 	    	krsort($color_info[$i]);
     	}
@@ -678,39 +678,39 @@ class PlagiarismController extends AbstractController {
     }
 
     public function getDisplayForCode($file_name , $color_info){
-    	$lines= file($file_name); 
+    	$lines= file($file_name);
     	foreach($lines as $i=>$line) {
     		$lines[$i] = rtrim($line, "\n");
     	}
 	    $html = "<div style='background:white;border:none;' class='diff-container'><div class='diff-code'>";
 	    $last_line_unmatched_span="";
 	    $present_line_unmatched_span="";
-	    
+
 	    for ($i = 0; $i < count($lines); $i++) {
 	        $j = $i + 1;
 	        $html .= "<div style='white-space: nowrap;'>";
 	        $html .= "<span class='line_number'>". $j ."</span>";
 	        $html .= "<span class='line_code'>";
-	        
+
 	        if(array_key_exists($i+1, $color_info)) {
 		        if($color_info[$i+1][max(array_keys($color_info[$i+1]))] != "</span>") {
 	    			$lines[$i] = substr_replace($lines[$i], "</span>", strlen($lines[$i]), 0);
 	    			$present_line_unmatched_span = str_replace("</span>", "", $color_info[$i+1][max(array_keys($color_info[$i+1]))]);
 	    		}
 	    		else {
-	    			$present_line_unmatched_span = ""; 
+	    			$present_line_unmatched_span = "";
 	    		}
 		        foreach ($color_info[$i+1] as $c => $color_info_for_position) {
 		    		$lines[$i] = substr_replace($lines[$i], $color_info_for_position, $c-1, 0);
 		    	}
 
 	    		if((strpos($color_info[$i+1][min(array_keys($color_info[$i+1]))],"</span>") == 0)) {
-	    			$lines[$i] = substr_replace($lines[$i], $last_line_unmatched_span, 0, 0);	
+	    			$lines[$i] = substr_replace($lines[$i], $last_line_unmatched_span, 0, 0);
 	    		}
 		    }
 		    else if($last_line_unmatched_span != "") {
 	    		$lines[$i] = substr_replace($lines[$i], "</span>", strlen($lines[$i]), 0);
-	    		$lines[$i] = substr_replace($lines[$i], $last_line_unmatched_span, 0, 0);	
+	    		$lines[$i] = substr_replace($lines[$i], $last_line_unmatched_span, 0, 0);
 	    	}
 	    	$last_line_unmatched_span = $present_line_unmatched_span;
 	        $html .= $lines[$i];
@@ -767,11 +767,11 @@ class PlagiarismController extends AbstractController {
 	    	}
 	    	foreach($return as $i => $match_user) {
     			array_push($return[$i], $this->core->getQueries()->getUserById($match_user[0])->getDisplayedFirstName());
-                array_push($return[$i], $this->core->getQueries()->getUserById($match_user[0])->getLastName());  
+                array_push($return[$i], $this->core->getQueries()->getUserById($match_user[0])->getDisplayedLastName());
     		}
 	    	$return = json_encode($return);
 	        echo($return);
-	    }    
+	    }
     }
 
     public function ajaxGetMatchesForClickedMatch() {
@@ -798,14 +798,14 @@ class PlagiarismController extends AbstractController {
                             array_push($matchingpositions, array("start"=> $matchingpos["start"] , "end"=>$matchingpos["end"]));
                         }
                         $first_name= $this->core->getQueries()->getUserById($match_info["username"])->getDisplayedFirstName();
-                        $last_name= $this->core->getQueries()->getUserById($match_info["username"])->getLastName();
+                        $last_name= $this->core->getQueries()->getUserById($match_info["username"])->getDisplayedLastName();
                         array_push($return, array($match_info["username"],$match_info["version"], $matchingpositions, $first_name, $last_name));
                     }
                 }
             }
             $return = json_encode($return);
             echo($return);
-        }    
+        }
     }
 
     /**
@@ -825,9 +825,9 @@ class PlagiarismController extends AbstractController {
             if (file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json") || file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json")) {
                 $this->core->getOutput()->renderString("REFRESH_ME");
                 return;
-            }    
+            }
         }
-        
+
         $this->core->getOutput()->renderString("NO_REFRESH");
         return;
     }

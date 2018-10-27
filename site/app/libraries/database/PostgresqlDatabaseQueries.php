@@ -69,7 +69,7 @@ GROUP BY user_id", array($user_id));
         else {
           $orderBy = "u.{$section_key}, u.user_id";
         }
-        
+
         $this->course_db->query("
 SELECT u.*, sr.grading_registration_sections
 FROM users u
@@ -112,13 +112,13 @@ ORDER BY SUBSTRING(u.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(u.reg
 
 
     public function insertSubmittyUser(User $user) {
-        $array = array($user->getId(), $user->getPassword(), $user->getFirstName(), $user->getPreferredFirstName(),
-                       $user->getLastName(), $user->getEmail(),
+        $array = array($user->getId(), $user->getPassword(), $user->getLegalFirstName(), $user->getPreferredFirstName(),
+                       $user->getLegalLastName(), $user->getPreferredLastName(), $user->getEmail(),
                        $this->submitty_db->convertBoolean($user->isUserUpdated()),
                        $this->submitty_db->convertBoolean($user->isInstructorUpdated()));
 
-        $this->submitty_db->query("INSERT INTO users (user_id, user_password, user_firstname, user_preferred_firstname, user_lastname, user_email, user_updated, instructor_updated)
-                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)", $array);
+        $this->submitty_db->query("INSERT INTO users (user_id, user_password, user_firstname, user_preferred_firstname, user_lastname, user_preferred_lastname, user_email, user_updated, instructor_updated)
+                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", $array);
     }
 
     public function insertCourseUser(User $user, $semester, $course) {
@@ -134,8 +134,8 @@ VALUES (?,?,?,?,?,?)", $params);
     }
 
     public function updateUser(User $user, $semester=null, $course=null) {
-        $params = array($user->getFirstName(), $user->getPreferredFirstName(),
-                       $user->getLastName(), $user->getEmail(),
+        $params = array($user->getLegalFirstName(), $user->getPreferredFirstName(),
+                       $user->getLegalLastName(), $user->getPreferredLastName(), $user->getEmail(),
                        $this->submitty_db->convertBoolean($user->isUserUpdated()),
                        $this->submitty_db->convertBoolean($user->isInstructorUpdated()));
         $extra = "";
@@ -148,7 +148,7 @@ VALUES (?,?,?,?,?,?)", $params);
         $this->submitty_db->query("
 UPDATE users
 SET
-  user_firstname=?, user_preferred_firstname=?, user_lastname=?,
+  user_firstname=?, user_preferred_firstname=?, user_lastname=?, user_preferred_lastname=?,
   user_email=?, user_updated=?, instructor_updated=?{$extra}
 WHERE user_id=?", $params);
 
@@ -459,12 +459,12 @@ WHERE ".implode(" AND ", $where);
         }
         $order_by = [];
         if ($user_ids !== null) {
-            if ($section_key == "rotating_section") { 
+            if ($section_key == "rotating_section") {
               $order_by[] = "u.rotating_section";
             }
             else if ($section_key == "registration_section"){
               $order_by[] = "SUBSTRING(u.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(u.registration_section, '[0-9]+')::INT, -1), SUBSTRING(u.registration_section, '[^0-9]*$')";
-            }  
+            }
             $order_by[] = $sort_key;
         }
         $order_by = array_merge($order_by, $extra_order_by);
@@ -758,7 +758,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
     public function getUsersWithLateDays() {
         $this->course_db->query("
         SELECT u.user_id, user_firstname, user_preferred_firstname,
-          user_lastname, allowed_late_days, since_timestamp::timestamp::date
+          user_lastname, user_preferred_lastname, allowed_late_days, since_timestamp::timestamp::date
         FROM users AS u
         FULL OUTER JOIN late_days AS l
           ON u.user_id=l.user_id
@@ -1185,9 +1185,9 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
         $query = "
             SELECT /* Select everything we retrieved */
-            
+
               g.g_id,
-            
+
               /* Gradeable Data */
               gd.gd_id AS id,
               gd.gd_overall_comment AS overall_comment,
@@ -1232,7 +1232,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               ldet.array_late_day_exceptions,
               ldet.array_late_day_user_ids,
               ldeu.late_day_exceptions,
-              
+
               /* Regrade request data */
               rr.id AS regrade_request_id,
               rr.status AS regrade_request_status,
@@ -1248,6 +1248,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               u.user_firstname,
               u.user_preferred_firstname,
               u.user_lastname,
+              u.user_preferred_lastname,
               u.user_email,
               u.user_group,
               u.manual_registration,
@@ -1297,10 +1298,10 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   ) AS tu ON gt.team_id = tu.team_id
                 GROUP BY gt.team_id
               ) AS team ON eg.team_assignment AND EXISTS (
-                SELECT 1 FROM gradeable_teams gt 
-                WHERE gt.team_id=team.team_id AND gt.g_id=g.g_id 
+                SELECT 1 FROM gradeable_teams gt
+                WHERE gt.team_id=team.team_id AND gt.g_id=g.g_id
                 LIMIT 1)
-                         
+
               /* Join manual grading data */
               LEFT JOIN (
                 SELECT *
@@ -1376,13 +1377,13 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 SELECT *
                 FROM electronic_gradeable_version
               ) AS egv ON (egv.team_id=egd.team_id OR egv.user_id=egd.user_id) AND egv.g_id=egd.g_id
-              
+
               /* Join user late day exceptions */
               LEFT JOIN late_day_exceptions ldeu ON g.g_id=ldeu.g_id AND u.user_id=ldeu.user_id
-              
+
               /* Join team late day exceptions */
               LEFT JOIN (
-                SELECT 
+                SELECT
                   json_agg(e.late_day_exceptions) AS array_late_day_exceptions,
                   json_agg(e.user_id) AS array_late_day_user_ids,
                   t.team_id,
@@ -1391,7 +1392,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 LEFT JOIN teams t ON e.user_id=t.user_id AND t.state=1
                 GROUP BY team_id, g_id
               ) AS ldet ON g.g_id=ldet.g_id AND ldet.team_id=team.team_id
-              
+
               /* Join regrade request */
               LEFT JOIN regrade_requests AS rr ON (rr.user_id=gd.gd_user_id OR rr.team_id=gd.gd_team_id) AND rr.g_id=g.g_id
             WHERE $selector
@@ -1624,7 +1625,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               g_syllabus_bucket AS syllabus_bucket,
               eg.*,
               gc.*,
-              (SELECT COUNT(*) AS cnt FROM regrade_requests WHERE g_id=g.g_id AND status = -1) AS active_regrade_request_count              
+              (SELECT COUNT(*) AS cnt FROM regrade_requests WHERE g_id=g.g_id AND status = -1) AS active_regrade_request_count
             FROM gradeable g
               LEFT JOIN (
                 SELECT
@@ -1669,8 +1670,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   json_agg(gc_order) AS array_order,
                   json_agg(gc_page) AS array_page,
                     json_agg(EXISTS(
-                      SELECT gc_id 
-                      FROM gradeable_component_data 
+                      SELECT gc_id
+                      FROM gradeable_component_data
                       WHERE gc_id=gc.gc_id)) AS array_any_grades,
                   json_agg(gcm.array_id) AS array_mark_id,
                   json_agg(gcm.array_points) AS array_mark_points,
@@ -1688,8 +1689,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                     json_agg(gcm_publish) AS array_publish,
                     json_agg(gcm_order) AS array_order,
                     json_agg(EXISTS(
-                      SELECT gcm_id 
-                      FROM gradeable_component_mark_data 
+                      SELECT gcm_id
+                      FROM gradeable_component_mark_data
                       WHERE gcm_id=in_gcm.gcm_id)) AS array_any_receivers
                     FROM gradeable_component_mark AS in_gcm
                   GROUP BY gcm_gc_id

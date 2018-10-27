@@ -316,13 +316,15 @@ class SubmissionController extends AbstractController {
                     $graded_gradeable->getOrCreateTaGradedGradeable()->setUserViewedDate($now);
                     $this->core->getQueries()->saveTaGradedGradeable($graded_gradeable->getTaGradedGradeable());
                 }
-                $canViewWholeGradeable = false;
+
+                // Only show hidden test cases if the display version is the graded version (and grades are released)
+                $show_hidden = $version == $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedVersion(false) && $gradeable->isTaGradeReleased();
 
                 // If we get here, then we can safely construct the old model w/o checks
                 // FIXME: remove this 'old_gradeable' once none of the HomeworkView relies on it
                 $old_gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $this->core->getUser()->getId());
                 $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                       'showGradeable', $gradeable, $graded_gradeable, $old_gradeable, $version, $late_days_use, $extensions, $canViewWholeGradeable);
+                                                       'showGradeable', $gradeable, $graded_gradeable, $old_gradeable, $version, $late_days_use, $extensions, $show_hidden);
             }
         }
         return array('id' => $gradeable_id, 'error' => $error);

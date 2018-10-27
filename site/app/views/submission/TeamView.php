@@ -50,7 +50,7 @@ class TeamView extends AbstractView {
         $student_full = array();
         foreach ($students as $student) {
             $student_full[] = array('value' => $student->getId(),
-                                    'label' => $student->getDisplayedFirstName().' '.$student->getLastName().' <'.$student->getId().'>');
+                                    'label' => $student->getDisplayedFirstName().' '.$student->getDisplayedLastName().' <'.$student->getId().'>');
         }
         $student_full = json_encode($student_full);
 

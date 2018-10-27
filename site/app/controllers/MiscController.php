@@ -56,16 +56,39 @@ class MiscController extends AbstractController {
         $gradeable_id = $_POST['gradeable_id'] ?? NULL;
         $user_id = $_POST['user_id'] ?? NULL;
         $file_name = $_POST['filename'] ?? NULL;
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
-        $id = $user_id;
-        if($gradeable->isTeamAssignment()){
-            $first_member = $this->core->getQueries()->getTeamById($user_id)->getMemberUserIds()[0];
-            $active_version = $this->core->getQueries()->getGradeable($gradeable_id, $first_member)->getActiveVersion();
-        } else {
-            $active_version = $this->core->getQueries()->getGradeable($gradeable_id, $user_id)->getActiveVersion();
+
+        $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+        if ($gradeable === null) {
+            $this->core->getOutput()->renderJsonError("You do not have access to this file");
+            return false;
         }
-        $pdf64 = base64_encode(file_get_contents(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'submissions', $gradeable_id, $id, $active_version, $file_name)));
-        return $this->core->getOutput()->renderJson($pdf64);
+
+        $submitter = $this->core->getQueries()->getSubmitterById($user_id);
+        if ($submitter === null) {
+            $this->core->getOutput()->renderJsonError("You do not have access to this file");
+            return false;
+        }
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($gradeable, $submitter);
+
+        if ($graded_gradeable === null) {
+            $this->core->getOutput()->renderJsonError("You do not have access to this file");
+            return false;
+        }
+
+        $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
+
+        $dir = "submissions";
+        $path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), $dir, $gradeable_id, $user_id, $active_version, $file_name);
+
+        //See if we are allowed to access this path
+        $path = $this->core->getAccess()->resolveDirPath($dir, $path);
+        if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path, "gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
+            $this->core->getOutput()->renderJsonError("You do not have access to this file");
+            return false;
+        }
+
+        $pdf64 = base64_encode(file_get_contents($path));
+        $this->core->getOutput()->renderJson($pdf64);
     }
 
     private function displayFile() {
@@ -210,7 +233,7 @@ class MiscController extends AbstractController {
 
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
-        readfile(pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . basename(rawurldecode(htmlspecialchars_decode($_REQUEST['path']))));
+        readfile($path);
     }
 
     private function downloadFile($download_with_any_role = false) {
@@ -231,13 +254,13 @@ class MiscController extends AbstractController {
             }
         }
 
-        $filename = rawurldecode(htmlspecialchars_decode($_REQUEST['file']));
+        $filename = pathinfo($path, PATHINFO_BASENAME);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         header('Content-Type: application/octet-stream');
         header("Content-Transfer-Encoding: Binary");
         header("Content-disposition: attachment; filename=\"{$filename}\"");
-        readfile(pathinfo($_REQUEST['path'], PATHINFO_DIRNAME) . "/" . basename(rawurldecode(htmlspecialchars_decode($_REQUEST['path']))));
+        readfile($path);
     }
 
     private function downloadZip() {
