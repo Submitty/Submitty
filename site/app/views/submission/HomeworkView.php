@@ -413,14 +413,28 @@ class HomeworkView extends AbstractView {
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         $current_time = $this->core->getDateTimeNow()->format("m-d-Y_H:i:sO");
         $ch = curl_init();
+        //$user = $this->core->getQueries()->getUserById($id);
+
         $json_data = ($json_file !== '') ? FileUtils::readJsonFile($json_file) : '';
+        $use_qr_codes = false;
+        //check for invalid ID's
+        if($json_data != ''){
+            $use_qr_codes = true;
+            for($i = 0; $i < count($files); $i++){
+                if($files[$i]['filename_full'] == $json_data[$i+1]['pdf_name'])
+                    $files[$i]['page_count'] = $json_data[$i+1]['page_count'];
+                //validate users
+                $files[$i]['user_id']['id'] = $json_data[$i+1]['id'];
+                $files[$i]['user_id']['valid'] = ($this->core->getQueries()->getUserById($json_data[$i+1]['id']) === null) ? false : true;
+            }
+        }
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/BulkUploadBox.twig', [
             'gradeable_id' => $gradeable->getId(),
             'team_assignment' => $gradeable->isTeamAssignment(),
             'max_team_size' => $gradeable->getTeamSizeMax(),
             'count_array' => $count_array,
             'files' => $files,
-            'json_data' => $json_data,
+            'use_qr_codes' => $use_qr_codes,
         ]);
     }
 

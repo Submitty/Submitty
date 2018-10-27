@@ -1,13 +1,9 @@
 #!/usr/bin/env python3
 
 """
-Given a semester, course, gradeable id, version, and number of pages per pdf,
-it checks whether the total number of pages in each bulk pdf file is divisible
-by the page per pdf, and splits accordingly. The split pdf items are placed
+Given a semester, course, gradeable id, version, and qr_code prefix per pdf,
+splits by QR code. The split pdf items are placed
 in the split pdf directory. 
-If any of the uploaded bulk pdfs are not divisible by the number of pages
-per pdf, all created split pdfs for this version are deleted and an error message
-is returned.
 """
 import cgi
 # If things are not working, then this should be enabled for better troubleshooting
@@ -92,26 +88,35 @@ try:
         #start student id index at 1 to match up with displaying files in BulkUploadBox.twig
         id_index = 1
         page_count = 1
+        first_file = ''
         for page in pages:
             val = pyzbar.decode(page)
             if val != []:
+                cover_index = i
                 #found a new qr code, split here
                 #convert byte literal to string
                 data = val[0][0].decode("utf-8")
-                if qr_prefix != "":
+                if qr_prefix != "" and data[0:len(qr_prefix)] == qr_prefix:
                     data = data[len(qr_prefix):]
+
+                cover_filename = '{}_{}_cover.pdf'.format(filename[:-4], i)
+                output_filename = '{}_{}.pdf'.format(filename[:-4], cover_index)
+
                 output[id_index] = {}
                 output[id_index]['id'] = data
                 output[id_index]['page_count'] = page_count
-                cover_filename = '{}_{}_cover.pdf'.format(filename[:-4], i)
-                output_filename = '{}_{}.pdf'.format(filename[:-4], cover_index)
+                output[id_index]['pdf_name'] = output_filename
                 #save pdf
                 if i != 0:
                     with open(output_filename, 'wb') as out:
                         pdf_writer.write(out)
+                else:
+                    first_file = output_filename
                 if id_index == 2:
-                    #correct first pdf's page count
+                    #correct first pdf's page count and print file
                     output[1]['page_count'] = page_count
+                    with open(first_file, 'wb') as out:
+                        pdf_writer.write(out)
                 #start a new pdf and grab the cover
                 cover_writer = PdfFileWriter()
                 pdf_writer = PdfFileWriter()
@@ -121,8 +126,7 @@ try:
                 #save cover
                 with open(cover_filename,'wb') as out:
                     cover_writer.write(out)
-                #make sure the index of the full pdf name mateches the cover.pdf name
-                cover_index = i
+
                 id_index += 1
                 page_count = 1
             else:
@@ -133,7 +137,9 @@ try:
 
         #save whatever is left
         output_filename = '{}_{}.pdf'.format(filename[:-4], cover_index)
-        output[2]['page_count'] = page_count
+        output[id_index-1]['id'] = data
+        output[id_index-1]['page_count'] = page_count
+        output[id_index-1]['pdf_name'] = output_filename
         with open(output_filename,'wb') as out:
             pdf_writer.write(out)
 

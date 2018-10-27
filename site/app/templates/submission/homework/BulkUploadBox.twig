@@ -6,7 +6,7 @@
     {% endif %}
 
     <form id="bulkForm" method="post">
-         {% if json_data is not null %}
+         {% if use_qr_codes %}
                 <div style="text-align:center;margin:10px;padding:5px;">
                     <button type="button" id="bulk_submit_all" class="btn btn-success">Submit All Uploaded PDFS</button>
                     <button type="button" id="bulk_delete_all" class="btn btn-danger">Delete All Uploaded PDFS</button>
@@ -20,7 +20,7 @@
                 <td width="53%">PDF preview</td>
                 <td width="5%">Full PDF</td>
                 <td width="15%">User ID</td>
-                {% if json_data is not null %}
+                {% if use_qr_codes %}
                     <td>Page Count</td>
                 {% endif %}
                 <td width="8%">Submit</td>
@@ -29,8 +29,11 @@
             </thead>
             <tbody>
                 {% for file in files %}
-
-                    <tr class="tr tr-vertically-centered">
+                    {% if use_qr_codes and file["user_id"]["valid"] == false %}
+                        <tr class="tr tr-vertically-centered" style="background-color:red;">
+                    {% else %}
+                        <tr class="tr tr-vertically-centered" >
+                    {% endif %}
                         <td>{{ loop.index }}</td>
                         <td>{{ file.clean_timestamp }}</td>
                         <td>
@@ -46,8 +49,8 @@
                         <td>
                             <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
                             <div id="users_{{ loop.index }}">
-                                {% if json_data is not null %}
-                                    <input type="text" id="bulk_user_id_{{ loop.index }}[0]" value ="{{ json_data[loop.index]["id"] }}"/>
+                                {% if use_qr_codes %}
+                                    <input type="text" id="bulk_user_id_{{ loop.index }}[0]" value ="{{ file["user_id"]["id"] }}"/>
                                 {% else %}
                                     <input type="text" id="bulk_user_id_{{ loop.index }}[0]" value =""/>
                                 {% endif %}
@@ -59,9 +62,9 @@
                                 {% endif %}
                             </div>
                         </td>
-                        {% if json_data is not null %}
+                        {% if use_qr_codes %}
                             <td>
-                                {{ json_data[loop.index]["page_count"] }}
+                                {{ file["page_count"] }}
                             </td>
                         {% endif %}
                         <td>
