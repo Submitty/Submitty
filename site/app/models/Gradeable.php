@@ -367,7 +367,7 @@ class Gradeable extends AbstractModel {
             $this->team_lock_date = DateUtils::parseDateTime($details['eg_team_lock_date'], $timezone);
             $this->regrade_request_date = DateUtils::parseDateTime($details['eg_regrade_request_date'], $timezone);
             $this->regrade_allowed = $details['eg_regrade_allowed'];
-            $this->regrade_status = $this->core->getQueries()->getRegradeRequestStatus($this->user->getId(), $this->id);
+            //$this->regrade_status = $this->core->getQueries()->getRegradeRequestStatus($this->user->getId(), $this->id);
             if ($this->team_assignment) {
                 $this->team = $this->core->getQueries()->getTeamByGradeableAndUser($this->id, $this->user->getId());
             }
