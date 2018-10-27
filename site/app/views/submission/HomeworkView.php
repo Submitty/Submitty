@@ -342,6 +342,7 @@ class HomeworkView extends AbstractView {
             'is_vcs' => $gradeable->isVcs(),
             'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
             'repository_path' => $my_repository,
+            'show_no_late_submission_warning' => !$gradeable->isLateSubmissionAllowed() && $gradeable->isSubmissionClosed(),
             // This is only used as a placeholder, so the who loads this page is the 'user' unless the
             //  client overrides the user
             'user_id' => $this->core->getUser()->getId(),
