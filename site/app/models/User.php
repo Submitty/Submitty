@@ -207,6 +207,11 @@ class User extends AbstractModel {
         }
     }
 
+    public function getDisplayFullName() {
+        // TODO: preferred last name
+        return $this->getDisplayedFirstName() . ' ' . $this->getLastName();
+    }
+
     public function setRegistrationSection($section) {
         $this->registration_section = ($section !== null) ? $section : null;
     }

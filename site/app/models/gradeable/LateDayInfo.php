@@ -3,6 +3,7 @@
 namespace app\models\gradeable;
 
 
+use app\controllers\student\LateDaysTableController;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\models\AbstractModel;
@@ -35,7 +36,7 @@ class LateDayInfo extends AbstractModel {
      * @param User $user
      * @param GradedGradeable $graded_gradeable
      * @param int $cumulative_late_days_used Number of late days used by other gradeables
-     * @param int $late_days_available The number of late days available for this gradeable (not including exceptions)
+     * @param int $late_days_available The number of late days available for use as of the time of this gradeable
      */
     public function __construct(Core $core, User $user, GradedGradeable $graded_gradeable, int $cumulative_late_days_used, int $late_days_available) {
         parent::__construct($core);
@@ -84,7 +85,15 @@ class LateDayInfo extends AbstractModel {
      * @return int
      */
     public function getLateDaysAllowed() {
-        return min($this->graded_gradeable->getGradeable()->getLateDays(), $this->late_days_available) + $this->graded_gradeable->getLateDayException($this->user);
+        return min($this->graded_gradeable->getGradeable()->getLateDays(), $this->late_days_available) + $this->getLateDayExceptions();
+    }
+
+    /**
+     * Gets the number of late days the student gets extra for this gradeable
+     * @return int
+     */
+    public function getLateDayException() {
+        return $this->getGradedGradeable()->getLateDayException($this->user);
     }
 
     /**
@@ -114,6 +123,31 @@ class LateDayInfo extends AbstractModel {
     }
 
     /**
+     * Gets the status message for this gradeable
+     * @return string
+     * @throws \Exception
+     */
+    public function getStatusMessage() {
+        switch ($this->getStatus()) {
+            case LateDays::STATUS_NO_SUBMISSION:
+                return 'No Submission';
+            case LateDays::STATUS_GOOD:
+                return 'Good';
+            case LateDays::STATUS_LATE:
+                return 'Late';
+            case LateDays::STATUS_BAD:
+                $days_late = $this->getDaysLate();
+                if ($days_late > $this->late_days_available) {
+                    return 'Bad (too many late days used this term)';
+                } else {
+                    return 'Bad (too many late days used on this assignment)';
+                }
+            default:
+                return 'INTERNAL ERROR';
+        }
+    }
+
+    /**
      * Gets if this user has late days info available (if they have an active version)
      * @return bool
      */
@@ -131,10 +165,12 @@ class LateDayInfo extends AbstractModel {
 
     /**
      * Gets the number of days late for the active version
-     * Note: Check hasLateDaysInfo() before calling this
      * @return int
      */
     public function getDaysLate() {
+        if (!$this->hasLateDaysInfo()) {
+            return 0;
+        }
         return $this->graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance()->getDaysLate();
     }
 

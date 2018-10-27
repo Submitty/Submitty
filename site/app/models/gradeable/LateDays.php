@@ -4,6 +4,7 @@ namespace app\models\gradeable;
 
 
 use app\libraries\Core;
+use app\libraries\GradeableType;
 use app\models\AbstractModel;
 use app\models\User;
 
@@ -12,6 +13,9 @@ use app\models\User;
  * @package app\models\gradeable
  *
  * Late day calculation model per user
+ *
+ * @method LateDayInfo[] getLateDayInfo()
+ * @method array getLateDaysUpdates()
  */
 class LateDays extends AbstractModel {
 
@@ -45,7 +49,7 @@ class LateDays extends AbstractModel {
 
         // Sort by due date
         usort($graded_gradeables, function (GradedGradeable $gg1, GradedGradeable $gg2) {
-            return $gg1->getGradeable()->getSubmissionDueDate() - $gg2->getGradeable()->getSubmissionDueDate();
+            return $gg1->getGradeable()->getSubmissionDueDate()->getTimestamp() - $gg2->getGradeable()->getSubmissionDueDate()->getTimestamp();
         });
 
         // Get the late day updates that the instructor will enter
@@ -59,6 +63,65 @@ class LateDays extends AbstractModel {
             $cumulative_charged_late_days += $info->getLateDaysCharged();
             $this->late_day_info[$graded_gradeable->getGradeableId()] = $info;
         }
+    }
+
+    /**
+     * Test if the current user is allowed to view late day info for this gradeable
+     * @param Gradeable $gradeable
+     * @return bool True if they are
+     */
+    private static function filterCanView(Core $core, Gradeable $gradeable) {
+        // TODO: update this with new after merged
+        $user = $core->getUser();
+
+        //Remove incomplete gradeables for non-instructors
+        if (!$user->accessAdmin() && $gradeable->getType() == GradeableType::ELECTRONIC_FILE &&
+            !$gradeable->hasAutogradingConfig()) {
+            return false;
+        }
+
+        // student users should only see electronic gradeables -- NOTE: for now, we might change this design later
+        if ($gradeable->getType() !== GradeableType::ELECTRONIC_FILE && !$user->accessGrading()) {
+            return false;
+        }
+
+        // if student view false, never show
+        if (!$gradeable->isStudentView() && !$user->accessGrading()) {
+            return false;
+        }
+
+        //If we're not instructor and this is not open to TAs
+        $date = $core->getDateTimeNow();
+        if ($gradeable->getTaViewStartDate() > $date && !$user->accessAdmin()) {
+            return false;
+        }
+        if ($gradeable->getSubmissionOpenDate() > $date && !$user->accessGrading()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Create a new LateDay instance for a given user
+     * @param Core $core
+     * @param User $user
+     * @return LateDays
+     */
+    public static function fromUser(Core $core, User $user) {
+        $gradeables = [];
+        $graded_gradeables = [];
+        foreach ($core->getQueries()->getGradeableConfigs(null, ['submission_due_date', 'grade_released_date']) as $g) {
+            // User the 'core' user since it is the one permission checks are done for
+            if (!LateDays::filterCanView($core, $g)) {
+                continue;
+            }
+            $gradeables[] = $g;
+        }
+        foreach ($core->getQueries()->getGradedGradeables($gradeables, $user->getId()) as $gg) {
+            $graded_gradeables[] = $gg;
+        }
+        return new LateDays($core, $user, $graded_gradeables);
     }
 
     public function toArray() {
@@ -79,14 +142,31 @@ class LateDays extends AbstractModel {
 
     /**
      * Gets the cumulative number of late days the user has used
+     * @return int
      */
     public function getLateDaysUsed() {
+        return $this->getLateDaysUsedByContext($this->core->getDateTimeNow());
+    }
+
+    /**
+     * Gets the cumulative number of late days the user has used at a certain date
+     * @param \DateTime $context
+     * @return int
+     */
+    public function getLateDaysUsedByContext(\DateTime $context) {
         $total = 0;
         /** @var LateDayInfo $info */
         foreach ($this->late_day_info as $info) {
+            if ($info->getGradedGradeable()->getGradeable()->getSubmissionDueDate() > $context) {
+                break;
+            }
             $total += $info->getDaysLate();
         }
         return $total;
+    }
+
+    public function getDefaultLateDays() {
+        return $this->core->getConfig()->getDefaultStudentLateDays();
     }
 
     /**
@@ -123,7 +203,7 @@ class LateDays extends AbstractModel {
 
         // Sort by 'timestamp'
         usort($late_day_events, function ($e1, $e2) {
-            return $e1['timestamp'] - $e2['timestamp'];
+            return $e1['timestamp']->getTimestamp() - $e2['timestamp']->getTimestamp();
         });
 
         // step through each event and keep a running count of the late days
@@ -172,7 +252,7 @@ class LateDays extends AbstractModel {
      * @param Gradeable $gradeable
      * @return LateDayInfo
      */
-    public function getLateDayInfo(Gradeable $gradeable) {
+    public function getLateDayInfoByGradeable(Gradeable $gradeable) {
         return $this->late_day_info[$gradeable->getId()];
     }
 
