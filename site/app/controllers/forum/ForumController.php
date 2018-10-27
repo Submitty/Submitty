@@ -414,7 +414,7 @@ class ForumController extends AbstractController {
             }
         }
         $this->core->getOutput()->renderJson($result);
-        return $result;   
+        return $result;
     }
 
     public function alterAnnouncement($type){
@@ -705,8 +705,8 @@ class ForumController extends AbstractController {
                     $this->core->addErrorMessage("No posts found for selected thread.");
                 }
             }
-            
-        } 
+
+        }
         if(empty($_REQUEST["thread_id"]) || empty($posts)) {
             $posts = $this->core->getQueries()->getPostsForThread($current_user, -1, $show_deleted);
         }
@@ -808,7 +808,7 @@ class ForumController extends AbstractController {
                 $users[$user] = array();
                 $u = $this->core->getQueries()->getSubmittyUser($user);
                 $users[$user]["first_name"] = htmlspecialchars($u -> getDisplayedFirstName());
-                $users[$user]["last_name"] = htmlspecialchars($u -> getLastName());
+                $users[$user]["last_name"] = htmlspecialchars($u -> getDisplayedLastName());
                 $users[$user]["posts"]=array();
                 $users[$user]["id"]=array();
                 $users[$user]["timestamps"]=array();

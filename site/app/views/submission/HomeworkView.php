@@ -29,10 +29,10 @@ class HomeworkView extends AbstractView {
      * @param int $display_version
      * @param int $late_days_use
      * @param int $extensions
-     * @param bool $canViewWholeGradeable
+     * @param bool $show_hidden_testcases
      * @return string
      */
-    public function showGradeable(Gradeable $gradeable, $graded_gradeable, \app\models\Gradeable $old_gradeable, int $display_version, int $late_days_use, int $extensions, bool $canViewWholeGradeable = false) {
+    public function showGradeable(Gradeable $gradeable, $graded_gradeable, \app\models\Gradeable $old_gradeable, int $display_version, int $late_days_use, int $extensions, bool $show_hidden_testcases = false) {
         $return = '';
 
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
@@ -71,7 +71,7 @@ class HomeworkView extends AbstractView {
         if ($submission_count === 0) {
             $return .= $this->renderNoSubmissionBox($graded_gradeable);
         } else {
-            $return .= $this->renderVersionBox($graded_gradeable, $version_instance, $canViewWholeGradeable);
+            $return .= $this->renderVersionBox($graded_gradeable, $version_instance, $show_hidden_testcases);
         }
 
         $regrade_available = $this->core->getConfig()->isRegradeEnabled()
@@ -81,7 +81,7 @@ class HomeworkView extends AbstractView {
             && $graded_gradeable->isTaGradingComplete()
             && $gradeable->isRegradeOpen()
             && $submission_count !== 0;
-            
+
         if ($gradeable->isTaGradeReleased()
             && $gradeable->isTaGrading()
             && $submission_count !== 0
@@ -257,7 +257,7 @@ class HomeworkView extends AbstractView {
                 $student = $student_pair[0];
 
                 $student_entry = array('value' => $student->getId(),
-                    'label' => $student->getDisplayedFirstName() . ' ' . $student->getLastName() . ' <' . $student->getId() . '>');
+                    'label' => $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>');
 
                 if ($student_pair[1] !== 0) {
                     $student_entry['label'] .= ' (' . $student_pair[1] . ' Prev Submission)';
@@ -312,7 +312,7 @@ class HomeworkView extends AbstractView {
         $component_names = array_map(function(Component $component) {
             return $component->getTitle();
         }, $gradeable->getComponents());
-        
+
         $textbox_data = array_map(function(SubmissionTextBox $text_box) {
             return $text_box->toArray();
         }, $textboxes);
@@ -603,7 +603,7 @@ class HomeworkView extends AbstractView {
             'graded_gradeable' => $graded_gradeable
         ]);
     }
-    
+
     /**
      * @param GradedGradeable $graded_gradeable
      * @return string

@@ -8,6 +8,7 @@ use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\AutogradingConfig;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Submitter;
+use app\models\gradeable\TaGradedGradeable;
 use \ZipArchive;
 use app\controllers\student\SubmissionController;
 use app\exceptions\IOException;
@@ -1167,8 +1168,12 @@ class SubmissionControllerTester extends BaseUnitTest {
         $gradeable->method('isSubmissionOpen')->willReturn(true);
         $core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($gradeable);
 
+        $ta_graded_gradeable = $this->createMockModel(TaGradedGradeable::class);
+        $ta_graded_gradeable->method('getGradedVersion')->willReturn(0);
+
         $graded_gradeable = $this->createMockGradedGradeable();
         $graded_gradeable->method('getSubmitter')->willReturn($this->createMockSubmitter('testUser'));
+        $graded_gradeable->method('getOrCreateTaGradedGradeable')->willReturn($ta_graded_gradeable);
         $core->getQueries()->method('getGradedGradeable')->willReturn($graded_gradeable);
 
         $return = $this->runController($core);
