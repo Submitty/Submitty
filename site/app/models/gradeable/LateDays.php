@@ -48,7 +48,11 @@ class LateDays extends AbstractModel {
 
         // Sort by due date
         usort($graded_gradeables, function (GradedGradeable $gg1, GradedGradeable $gg2) {
-            return $gg1->getGradeable()->getSubmissionDueDate()->getTimestamp() - $gg2->getGradeable()->getSubmissionDueDate()->getTimestamp();
+            $time_diff = $gg1->getGradeable()->getSubmissionDueDate()->getTimestamp() - $gg2->getGradeable()->getSubmissionDueDate()->getTimestamp();
+            if ($time_diff === 0) {
+                return strcmp($gg1->getGradeableId(), $gg2->getGradeableId());
+            }
+            return $time_diff;
         });
 
         // Get the late day updates that the instructor will enter
@@ -120,7 +124,7 @@ class LateDays extends AbstractModel {
     public static function fromUser(Core $core, User $user) {
         $gradeables = [];
         $graded_gradeables = [];
-        foreach ($core->getQueries()->getGradeableConfigs(null, ['submission_due_date', 'grade_released_date']) as $g) {
+        foreach ($core->getQueries()->getGradeableConfigs(null, ['submission_due_date', 'grade_released_date', 'g_id']) as $g) {
             // User the 'core' user since it is the one permission checks are done for
             if (!LateDays::filterCanView($core, $g)) {
                 continue;
