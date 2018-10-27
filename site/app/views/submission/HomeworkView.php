@@ -106,9 +106,6 @@ class HomeworkView extends AbstractView {
         $late_day_budget = 0;
         foreach ($this->core->getQueries()->getGradeablesIterator(null, $gradeable->getUser()->getId(), 'registration_section', 'u.user_id', 0, $order_by) as $g) {
             $g->calculateLateDays($total_late_used);
-            $message = "total_late_used in loop";
-            var_dump($message);
-            var_dump($total_late_used);
             if($g->getId() === $gradeable->getId()){
                 $student_late_days = $g->getStudentAllowedLateDays();
                 $late_day_budget = $student_late_days-$total_late_used;
@@ -120,15 +117,8 @@ class HomeworkView extends AbstractView {
         }
 
         $active_days_late = $gradeable->getActiveVersion() == 0 ? 0 : $gradeable->getActiveDaysLate();
-        $message = "Student late days, total late days used";
-        var_dump($message);
-        var_dump($student_late_days);
-        var_dump($total_late_used);
         $late_days_remaining = $student_late_days - $total_late_used + $extensions;
         $would_be_days_late = $gradeable->getWouldBeDaysLate();
-        $message = "would be days late";
-        var_dump($message);
-        var_dump($would_be_days_late);
         $late_days_allowed = $gradeable->getAllowedLateDays();
         $active_version = $gradeable->getActiveVersion();
 
@@ -149,13 +139,7 @@ class HomeworkView extends AbstractView {
         // ------------------------------------------------------------
         // IF STUDENT HAS ALREADY SUBMITTED AND THE ACTIVE VERSION IS LATE, PRINT LATE DAY INFORMATION FOR THE ACTIVE VERSION
         if ($active_version >= 1 && $active_days_late > 0) {
-            $message = "late days remaining = student_late_days-$total_late_used+extensions";
-            var_dump($message);
-            var_dump($late_days_remaining);
             // BAD STATUS - AUTO ZERO BECAUSE INSUFFICIENT LATE DAYS REMAIN
-            $message = "late day budget";
-            var_dump($message);
-            var_dump($late_day_budget);
             if ($student_late_days < $active_days_late) {
                 $error = true;
                 $messages[] = ['type' => 'too_few_remain', 'info' => [
