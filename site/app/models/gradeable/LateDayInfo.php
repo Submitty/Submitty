@@ -24,7 +24,7 @@ class LateDayInfo extends AbstractModel {
     /** @var User */
     private $user = null;
 
-    /** @property @var int The number of unused late days the user has for this gradeable, not including exceptions */
+    /** @property @var int The number of unused late days the user has as of this gradeable, not including exceptions */
     protected $late_days_available = null;
 
     /** @var int|null The number of late days used by previous gradeables */
@@ -160,6 +160,10 @@ class LateDayInfo extends AbstractModel {
      * @return int
      */
     public function getLateDaysCharged() {
+        if ($this->getStatus() === LateDays::STATUS_BAD) {
+            // Don't charge late days for BAD status
+            return 0;
+        }
         return min($this->getDaysLate() - $this->getLateDayExceptions(), $this->getLateDaysAllowed());
     }
 
