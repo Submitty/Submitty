@@ -731,6 +731,7 @@ class AdminGradeableController extends AbstractController {
                 'regrade_allowed' => $details['regrade_allowed'] === 'true',
                 'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/upload_only/config',
                 'scanned_exam' => $details['scanned_exam'] === 'true',
+                'has_due_date' => true,
 
                 // TODO: properties that aren't supported yet
                 'peer_grading' => false,
@@ -747,7 +748,8 @@ class AdminGradeableController extends AbstractController {
                 'autograding_config_path' => '',
                 'peer_grading' => false,
                 'peer_grade_set' => 0,
-                'late_submission_allowed' => true
+                'late_submission_allowed' => true,
+                'has_due_date' => false,
             ]);
         }
 
@@ -776,6 +778,7 @@ class AdminGradeableController extends AbstractController {
             $gradeable->setStudentDownload(true);
             $gradeable->setStudentDownloadAnyVersion(false);
             $gradeable->setAutogradingConfigPath('/usr/local/submitty/more_autograding_examples/pdf_exam/config');
+            $gradeable->setHasDueDate(false);
         }
 
         // Generate a blank component to make the rubric UI work properly
@@ -834,7 +837,8 @@ class AdminGradeableController extends AbstractController {
             'peer_grading',
             'late_submission_allowed',
             'regrade_allowed',
-            'vcs'
+            'vcs',
+            'has_due_date'
         ];
 
         $numeric_properties = [

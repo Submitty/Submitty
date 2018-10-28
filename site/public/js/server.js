@@ -1417,7 +1417,9 @@ function publishFormWithAttachments(form, test_category, error_message) {
             window.location.href = json['next_page'];
         },
         error: function(){
-            window.alert(error_message);
+            var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + error_message + '</div>';
+            $('#messages').append(message);
+            return;
         }
     });
     return false;
@@ -1834,6 +1836,7 @@ function showHistory(post_id) {
                 }
                 $("#popup-post-history").show();
                 $("#popup-post-history .post_box.history_box").remove();
+                $("#popup-post-history .form-body").css("padding", "5px");
                 var dummy_box = $($("#popup-post-history .post_box")[0]);
                 for(var i = json.length - 1 ; i >= 0 ; i -= 1) {
                     var post = json[i];

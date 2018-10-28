@@ -3162,6 +3162,7 @@ AND gc_id IN (
                 $this->course_db->convertBoolean($gradeable->isStudentSubmit()),
                 $this->course_db->convertBoolean($gradeable->isStudentDownload()),
                 $this->course_db->convertBoolean($gradeable->isStudentDownloadAnyVersion()),
+                $this->course_db->convertBoolean($gradeable->hasDueDate()),
                 $gradeable->getAutogradingConfigPath(),
                 $gradeable->getLateDays(),
                 $this->course_db->convertBoolean($gradeable->isLateSubmissionAllowed()),
@@ -3188,6 +3189,7 @@ AND gc_id IN (
                   eg_student_submit,
                   eg_student_download,
                   eg_student_any_version,
+                  eg_has_due_date,
                   eg_config_path,
                   eg_late_days,
                   eg_allow_late_submission,
@@ -3196,7 +3198,7 @@ AND gc_id IN (
                   eg_peer_grade_set,
                   eg_regrade_request_date,
                   eg_regrade_allowed)
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
         }
 
         // Make sure to create the rotating sections
@@ -3292,6 +3294,7 @@ AND gc_id IN (
                     $this->course_db->convertBoolean($gradeable->isStudentSubmit()),
                     $this->course_db->convertBoolean($gradeable->isStudentDownload()),
                     $this->course_db->convertBoolean($gradeable->isStudentDownloadAnyVersion()),
+                    $this->course_db->convertBoolean($gradeable->hasDueDate()),
                     $gradeable->getAutogradingConfigPath(),
                     $gradeable->getLateDays(),
                     $this->course_db->convertBoolean($gradeable->isLateSubmissionAllowed()),
@@ -3318,6 +3321,7 @@ AND gc_id IN (
                       eg_student_submit=?,
                       eg_student_download=?,
                       eg_student_any_version=?,
+                      eg_has_due_date=?,
                       eg_config_path=?,
                       eg_late_days=?,
                       eg_allow_late_submission=?,
@@ -3600,5 +3604,17 @@ AND gc_id IN (
     public function deleteTaGradedGradeableByIds($gradeable_id, $submitter_id) {
         $this->course_db->query('DELETE FROM gradeable_data WHERE g_id=? AND (gd_user_id=? OR gd_team_id=?)',
             [$gradeable_id, $submitter_id, $submitter_id]);
+    }
+
+    /**
+     * Gets if the provied submitter has a submission for a particular gradeable
+     * @param \app\models\gradeable\Gradeable $gradeable
+     * @param Submitter $submitter
+     * @return bool
+     */
+    public function getHasSubmission(gradeable\Gradeable $gradeable, Submitter $submitter) {
+        $this->course_db->query('SELECT EXISTS (SELECT g_id FROM electronic_gradeable_data WHERE g_id=? AND (user_id=? OR team_id=?))',
+            [$gradeable->getId(), $submitter->getId(), $submitter->getId()]);
+        return $this->course_db->row()['exists'] ?? false;
     }
 }

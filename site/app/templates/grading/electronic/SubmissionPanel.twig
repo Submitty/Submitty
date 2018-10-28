@@ -1,5 +1,4 @@
 {% import _self as self %}
-
 <div id="submission_browser" class="draggable rubric_panel">
     <div id="directory_view">
         <div class="draggable_content">
@@ -19,12 +18,7 @@
                     //is intended to allow open and close to change dynamically on click
                     //the problem is currently if you click the submissions folder then the text won't change b/c it's being double clicked effectively.
                     $(".expand-button").on('click', function(){
-                        // $(this).attr('clicked-state', "clicked");
-                        // updateValue($(this), "Open", "Close");
                         openAll( 'openable-element-', $(this).data('linked-type'))
-                        // $.when(openAll( 'openable-element-', $(this).data('linked-type'))).then(function(){
-                        //     console.log('HELLLO');
-                        // });
                     })
 
                     var currentCodeStyle = localStorage.getItem('codeDisplayStyle');
@@ -144,6 +138,7 @@
     }
     //TODO: Name better
     function expandFile(name, path) {
+        // debugger;
         if($('#viewer').length != 0){
             $('#viewer').remove();
         }
@@ -225,7 +220,7 @@
                 <span class="fa fa-plus-circle" style='vertical-align:text-bottom;'></span>
                 {{ dir }}</a> &nbsp;
             <a onclick='openFile("{{ dir }}", "{{ path }}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
-            <a onclick='expandFile("{{ dir }}", "{{ path }}", "{{ id }}")'><i class="fa fa-mail-forward" aria-hidden="true" title="Show file in full panel"></i></a>
+            <a onclick='expandFile("{{ dir }}", "{{ path }}")'><i class="fa fa-mail-forward" aria-hidden="true" title="Show file in full panel"></i></a>
             <a onclick='downloadFile("{{ dir }}", "{{ path }}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
         </div>
         <div id="file_viewer_{{ id }}" style="margin-left:{{ indent * -15 }}px" data-file_name="{{ dir }}" data-file_url="{{ path }}"></div>

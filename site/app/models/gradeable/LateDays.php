@@ -79,22 +79,20 @@ class LateDays extends AbstractModel {
             return false;
         }
 
-//         TODO: for when 2993 is merged
-//        // Don't show the students gradeables they don't submit for / don't have due dates
-//        if (!$gradeable->getStudentSubmit() || !$gradeable->getHasDueDate()) {
-//            return false;
-//        }
+        // Don't show the students gradeables they don't submit for / don't have due dates
+        if (!$gradeable->isStudentSubmit() || !$gradeable->hasDueDate()) {
+            return false;
+        }
 
         $user = $core->getUser();
 
         //Remove incomplete gradeables for non-instructors
-        if (!$user->accessAdmin() && $gradeable->getType() == GradeableType::ELECTRONIC_FILE &&
-            !$gradeable->hasAutogradingConfig()) {
+        if (!$user->accessAdmin() && !$gradeable->hasAutogradingConfig()) {
             return false;
         }
 
         // student users should only see electronic gradeables -- NOTE: for now, we might change this design later
-        if ($gradeable->getType() !== GradeableType::ELECTRONIC_FILE && !$user->accessGrading()) {
+        if (!$user->accessGrading()) {
             return false;
         }
 
