@@ -1,13 +1,5 @@
 @import url("reset.css");
-@import url("https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,300italic,700");
 @import url("https://fonts.googleapis.com/css?family=Inconsolata");
-
-@font-face {
-    font-family: 'Grand Hotel';
-    src: url('../fonts/grand-hotel/GrandHotel-Regular.otf') format('opentype');
-    font-weight: normal;
-    font-style: normal;
-}
 
 html {
     height: 100%;
@@ -249,7 +241,6 @@ table tr.table-header {
 #nav {
     background-color: #000000;
     color: #FFFFFF;
-    font-family: 'Open Sans Condensed', sans-serif;
     width: 100%;
     left: 0;
     top: 0;
@@ -323,7 +314,6 @@ table tr.table-header {
     /* min-height: 125px; */
     height: auto;
     width: 100%;
-    font-family: 'Calibri', sans-serif;
     overflow: hidden;
 }
 
@@ -380,6 +370,9 @@ table tr.table-header {
     border-radius: 3px;
     padding: 30px;
     margin: 15px;
+}
+
+.content:last-child {
     flex-grow: 1;
 }
 
@@ -579,7 +572,6 @@ table tr.table-header {
 }
 
 .label {
-    font-family: 'PT Sans', sans-serif;
     font-weight: 700;
     margin-top: 5px;
     margin-right: 0;
@@ -755,7 +747,6 @@ table tr.table-header {
 .gradeable_list{
 	width: 100%;
     padding: 0px 50px 50px;
-    font-family: 'Source Sans Pro', sans-serif;
 	font-size: 18px;
 	text-align: left !important;
 }
@@ -1350,7 +1341,6 @@ table .instructor .two-options{
     opacity: 0;
     transition: opacity 0.3s;
     font-size: 12px;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 .tooltip .tooltiptext::after {

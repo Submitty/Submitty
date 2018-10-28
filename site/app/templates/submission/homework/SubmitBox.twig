@@ -32,7 +32,11 @@
             </div>
             <div class = "sub" id="pdf_submit_button" style="display: none">
                 <div class="sub">
-                    # of page(s) per PDF: <input type="number" id= "num_pages" placeholder="required"/>
+                    <span id="pages_prompt"># of page(s) per PDF:</span> 
+                    <span id="prefix_prompt">QR code prefix:</span>
+                    <input type="number" id= "num_pages" placeholder="required"/>
+                    <input type="text" id="qr_prefix" placeholder="optional" />
+                    Split by QR code? <input type="checkbox" id="use_qr">
                 </div>
             </div>
         </form>
@@ -41,6 +45,8 @@
             $(function() {
                 var cookie = document.cookie;
                 students_full = {{ students_full|json_encode|raw }};
+                $('#qr_prefix').prop('hidden', true);
+                $('#prefix_prompt').prop('hidden', true);
                 if (cookie.indexOf("student_checked=") !== -1) {
                     var cookieValue = cookie.substring(cookie.indexOf("student_checked=")+16, cookie.indexOf("student_checked=")+17);
                     $("#radio_student").prop("checked", cookieValue==1);
@@ -66,6 +72,12 @@
                     $('#user_id_input').hide();
                     $('#pdf_submit_button').show();
                     $('#user_id').val('');
+                });
+                $('#use_qr').click(function(){
+                    $('#num_pages').prop('hidden', !$('#num_pages').is(':hidden'));
+                    $('#qr_prefix').prop('hidden', !$('#qr_prefix').is(':hidden'));
+                    $('#prefix_prompt').prop('hidden', !$('#prefix_prompt').is(':hidden'));
+                    $('#pages_prompt').prop('hidden', !$('#pages_prompt').is(':hidden'));
                 });
                 $("#user_id").autocomplete({
                     source: students_full
@@ -271,6 +283,8 @@
             if ($('#radio_bulk').is(':checked')) {
                 document.cookie="student_checked="+2;
                 num_pages = $("#num_pages").val();
+                use_qr = $("#use_qr").is(":checked");
+                qr_prefix = $('#qr_prefix').val();
             };
             // vcs upload
             if ({{ is_vcs ? "true" : "false" }}) {
@@ -278,7 +292,7 @@
             }
             // bulk upload
             if ($("#radio_bulk").is(":checked")) {
-                handleBulk("{{ gradeable_id }}", num_pages);
+                handleBulk("{{ gradeable_id }}", num_pages, use_qr, qr_prefix );
             }
             // no user id entered, upload for whoever is logged in
             else if (user_id == ""){
