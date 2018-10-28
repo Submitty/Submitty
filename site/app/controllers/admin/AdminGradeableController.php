@@ -672,8 +672,6 @@ class AdminGradeableController extends AbstractController {
             'student_view',
             'student_view_after_grades',
             'student_submit',
-            'student_download',
-            'student_download_any_version',
             'late_days',
             'precision'
         ];
@@ -701,8 +699,6 @@ class AdminGradeableController extends AbstractController {
                 'student_view' => true,
                 'student_view_after_grades' => false,
                 'student_submit' => true,
-                'student_download' => false,
-                'student_download_any_version' => false,
                 'late_days' => 0,
                 'precision' => 0.5
             ];
@@ -775,8 +771,6 @@ class AdminGradeableController extends AbstractController {
             $gradeable->setStudentView(true);
             $gradeable->setStudentViewAfterGrades(true);
             $gradeable->setStudentSubmit(false);
-            $gradeable->setStudentDownload(true);
-            $gradeable->setStudentDownloadAnyVersion(false);
             $gradeable->setAutogradingConfigPath('/usr/local/submitty/more_autograding_examples/pdf_exam/config');
             $gradeable->setHasDueDate(false);
         }
@@ -832,8 +826,6 @@ class AdminGradeableController extends AbstractController {
             'student_view',
             'student_view_after_grades',
             'student_submit',
-            'student_download',
-            'student_download_any_version',
             'peer_grading',
             'late_submission_allowed',
             'regrade_allowed',

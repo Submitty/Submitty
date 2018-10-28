@@ -57,10 +57,6 @@ use app\models\User;
  * @method void setStudentViewAfterGrades($can_student_view_after_grades)
  * @method bool isStudentSubmit()
  * @method void setStudentSubmit($can_student_submit)
- * @method bool isStudentDownload()
- * @method void setStudentDownload($can_student_download)
- * @method bool isStudentDownloadAnyVersion()
- * @method void setStudentDownloadAnyVersion($student_download_any_version)
  * @method bool isPeerGrading()
  * @method void setPeerGrading($use_peer_grading)
  * @method int getPeerGradeSet()
@@ -150,10 +146,6 @@ class Gradeable extends AbstractModel {
     protected $student_view_after_grades = false;
     /** @property @var bool If students can make submissions */
     protected $student_submit = false;
-    /** @property @var bool If students can download submitted files */
-    protected $student_download = false;
-    /** @property @var bool If students can view/download any version of the submitted files, or just the active version */
-    protected $student_download_any_version = false;
     /** @property @var bool If the gradeable uses peer grading */
     protected $peer_grading = false;
     /** @property @var int The number of peers each student will be graded by */
@@ -224,8 +216,6 @@ class Gradeable extends AbstractModel {
             $this->setStudentView($details['student_view']);
             $this->setStudentViewAfterGrades($details['student_view_after_grades']);
             $this->setStudentSubmit($details['student_submit']);
-            $this->setStudentDownload($details['student_download']);
-            $this->setStudentDownloadAnyVersion($details['student_download_any_version']);
             $this->setHasDueDate($details['has_due_date']);
             $this->setPeerGrading($details['peer_grading']);
             $this->setPeerGradeSet($details['peer_grade_set']);
