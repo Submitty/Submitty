@@ -326,6 +326,9 @@ find ${SUBMITTY_INSTALL_DIR}/src -type d -exec chmod 555 {} \;
 # "other" can read all files
 find ${SUBMITTY_INSTALL_DIR}/src -type f -exec chmod 444 {} \;
 
+chgrp submitty_daemon ${SUBMITTY_INSTALL_DIR}/src/grading/python/submitty_router.py
+chmod g+wrx ${SUBMITTY_INSTALL_DIR}/src/grading/python/submitty_router.py
+
 
 #Set up sample files if not in worker mode.
 if [ "${WORKER}" == 0 ]; then

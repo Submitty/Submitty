@@ -82,25 +82,20 @@ class PDFController extends AbstractController {
             $active_version = $this->core->getQueries()->getGradeable($annotation_info['gradeable_id'], $user_id)->getActiveVersion();
         }
         $annotation_gradeable_path = FileUtils::joinPaths($course_path, 'annotations', $annotation_info['gradeable_id']);
-        if(!FileUtils::createDir($annotation_gradeable_path) && !is_dir($annotation_gradeable_path)){
-            $this->core->addErrorMessage("Creating annotation gradeable folder failed");
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
-            return array('error' => true, 'message' => 'Creating annotation gradeable folder failed');
+        if(!is_dir($annotation_gradeable_path) && !FileUtils::createDir($annotation_gradeable_path)){
+            return $this->core->getOutput()->renderJsonFail('Creating annotation gradeable folder failed');
         }
         $annotation_user_path = FileUtils::joinPaths($annotation_gradeable_path, $user_id);
-        if(!FileUtils::createDir($annotation_user_path) && !is_dir($annotation_user_path)){
-            $this->core->addErrorMessage("Creating annotation user folder failed");
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
-            return array('error' => true, 'message' => 'Creating annotation user folder failed');
+        if(!is_dir($annotation_user_path) && !FileUtils::createDir($annotation_user_path)){
+            return $this->core->getOutput()->renderJsonFail('Creating annotation user folder failed');
         }
         $annotation_version_path = FileUtils::joinPaths($annotation_user_path, $active_version);
-        if(!FileUtils::createDir($annotation_version_path) && !is_dir($annotation_version_path)){
-            $this->core->addErrorMessage("Creating annotation version folder failed");
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
-            return array('error' => true, 'message' => 'Creating annotation version folder failed');
+        if(!is_dir($annotation_version_path) && !FileUtils::createDir($annotation_version_path)){
+            return $this->core->getOutput()->renderJsonFail('Creating annotation version folder failed.');
         }
         $new_file_name = preg_replace('/\\.[^.\\s]{3,4}$/', '', $annotation_info['file_name']) . "_" .$grader_id .'.json';
         file_put_contents(FileUtils::joinPaths($annotation_version_path, $new_file_name), $annotation_layer);
+        $this->core->getOutput()->renderJsonSuccess('Annotation saved successfully!');
         return true;
     }
 

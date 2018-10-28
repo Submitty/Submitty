@@ -1,6 +1,8 @@
 const { UI } = PDFAnnotate;
-let RENDER_OPTIONS = window.RENDER_OPTIONS;
-let GENERAL_INFORMATION = window.GENERAL_INFORMATION;
+let loaded = sessionStorage.getItem('toolbar_loaded');
+window.onbeforeunload = function(){
+    sessionStorage.removeItem('toolbar_loaded');
+};
 //Toolbar stuff
 (function (){
     let active_toolbar = true;
@@ -57,7 +59,7 @@ let GENERAL_INFORMATION = window.GENERAL_INFORMATION;
                     clearCanvas();
                     break;
                 case 'save':
-                    saveFile();
+                    debounce(saveFile, 500);
                     break;
                 case 'zoomin':
                     debounce(zoom, 500, 'in');
@@ -90,14 +92,14 @@ let GENERAL_INFORMATION = window.GENERAL_INFORMATION;
     }
 
     function rotate(){
-        RENDER_OPTIONS.rotate += 90;
-        localStorage.setItem('rotate', RENDER_OPTIONS.rotate);
-        render(GENERAL_INFORMATION.gradeable_id, GENERAL_INFORMATION.user_id, RENDER_OPTIONS.grader_id, GENERAL_INFORMATION.file_name);
+        window.RENDER_OPTIONS.rotate += 90;
+        localStorage.setItem('rotate', window.RENDER_OPTIONS.rotate);
+        render(window.GENERAL_INFORMATION.gradeable_id, window.GENERAL_INFORMATION.user_id, window.RENDER_OPTIONS.grader_id, window.GENERAL_INFORMATION.file_name);
     }
 
     function zoom(option, custom_val){
         let zoom_flag = true;
-        let zoom_level = RENDER_OPTIONS.scale;
+        let zoom_level = window.RENDER_OPTIONS.scale;
         if(option == 'in'){
             zoom_level += 1;
         } else if(option == 'out'){
@@ -114,11 +116,11 @@ let GENERAL_INFORMATION = window.GENERAL_INFORMATION;
             alert("Cannot zoom more");
             return;
         }
-        RENDER_OPTIONS.scale = zoom_level;
-        $("a[value='zoomcustom']").text(parseInt(RENDER_OPTIONS.scale * 100) + "%");
         if(zoom_flag){
-            localStorage.setItem('scale', RENDER_OPTIONS.scale);
-            render(GENERAL_INFORMATION.gradeable_id, GENERAL_INFORMATION.user_id, GENERAL_INFORMATION.grader_id, GENERAL_INFORMATION.file_name);
+            $("a[value='zoomcustom']").text(parseInt(RENDER_OPTIONS.scale * 100) + "%");
+            window.RENDER_OPTIONS.scale = zoom_level;
+            localStorage.setItem('scale', window.RENDER_OPTIONS.scale);
+            render(window.GENERAL_INFORMATION.gradeable_id, window.GENERAL_INFORMATION.user_id, window.GENERAL_INFORMATION.grader_id, window.GENERAL_INFORMATION.file_name);
         }
     }
 
@@ -133,8 +135,9 @@ let GENERAL_INFORMATION = window.GENERAL_INFORMATION;
     }
 
     function saveFile(){
+        let GENERAL_NFORMATION = window.GENERAL_INFORMATION;
         let url = buildUrl({'component': 'PDF','page': 'save_pdf_annotation'});
-        let annotation_layer = localStorage.getItem(`${RENDER_OPTIONS.documentId}/${GENERAL_INFORMATION.grader_id}/annotations`);
+        let annotation_layer = localStorage.getItem(`${window.RENDER_OPTIONS.documentId}/${GENERAL_INFORMATION.grader_id}/annotations`);
         $.ajax({
             type: 'POST',
             url: url,
@@ -143,8 +146,16 @@ let GENERAL_INFORMATION = window.GENERAL_INFORMATION;
                 GENERAL_INFORMATION
             },
             success: function(data){
-                $('#save_status').text("Saved");
-                $('#save_status').css('color', 'black');
+                let response = JSON.parse(data);
+                if(response.status == "success"){
+                    $('#save_status').text("Saved");
+                    $('#save_status').css('color', 'black');
+                } else {
+                    alert(data.message);
+                }
+            },
+            error: function(){
+                alert("Something went wrong, please contact a administrator.");
             }
         });
     }
@@ -152,7 +163,10 @@ let GENERAL_INFORMATION = window.GENERAL_INFORMATION;
     function handleToolbarClick(e){
         setActiveToolbarItem(e.target.getAttribute('value'));
     }
-    document.getElementById('pdf_annotation_icons').addEventListener('click', handleToolbarClick);
+    if(!loaded){
+        document.getElementById('pdf_annotation_icons').addEventListener('click', handleToolbarClick);
+    }
+    sessionStorage.setItem('toolbar_loaded', true);
 })();
 
 // Color/size selection
@@ -187,9 +201,11 @@ let GENERAL_INFORMATION = window.GENERAL_INFORMATION;
             document.getElementById('color_selector').style.backgroundColor = color;
         }
     }
-    document.getElementById("color_selector").addEventListener('click', colorMenuToggle);
-    document.getElementById("size_selector").addEventListener('click', sizeMenuToggle);
-    document.addEventListener('colorchange', changeColor);
+    if(!loaded){
+        document.getElementById("color_selector").addEventListener('click', colorMenuToggle);
+        document.getElementById("size_selector").addEventListener('click', sizeMenuToggle);
+        document.addEventListener('colorchange', changeColor);
+    }
     initColors();
 })();
 
@@ -271,12 +287,14 @@ let GENERAL_INFORMATION = window.GENERAL_INFORMATION;
             UI.setText(textSize, textColor);
         }
     }
-    document.addEventListener('colorchange', function(e){
-        setText(textSize, e.srcElement.getAttribute('value'));
-    });
-    document.getElementById('text_size_selector').addEventListener('change', function(e) {
-        let value = e.target.value ? e.target.value : e.srcElement.value;
-        setText(value, textColor);
-    });
+    if(!loaded){
+        document.addEventListener('colorchange', function(e){
+            setText(textSize, e.srcElement.getAttribute('value'));
+        });
+        document.getElementById('text_size_selector').addEventListener('change', function(e) {
+            let value = e.target.value ? e.target.value : e.srcElement.value;
+            setText(value, textColor);
+        });
+    }
     initText();
 })();
