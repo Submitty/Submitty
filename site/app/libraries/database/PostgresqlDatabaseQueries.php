@@ -1047,18 +1047,30 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
      * Maps sort keys to an array of expressions to sort by in place of the key.
      *  Useful for ambiguous keys or for key alias's
      */
-    const graded_gradeable_key_map = [
+    const graded_gradeable_key_map_user = [
         'registration_section' => [
             'SUBSTRING(u.registration_section, \'^[^0-9]*\')',
             'COALESCE(SUBSTRING(u.registration_section, \'[0-9]+\')::INT, -1)',
             'SUBSTRING(u.registration_section, \'[^0-9]*$\')',
+        ],
+        'rotating_section' => [
+            'u.rotating_section',
+        ],
+        'team_id' => [
+            'user_id'
+        ]
+    ];
+    const graded_gradeable_key_map_team = [
+        'registration_section' => [
             'SUBSTRING(team.registration_section, \'^[^0-9]*\')',
             'COALESCE(SUBSTRING(team.registration_section, \'[0-9]+\')::INT, -1)',
             'SUBSTRING(team.registration_section, \'[^0-9]*$\')'
         ],
         'rotating_section' => [
-            'u.rotating_section',
             'team.rotating_section'
+        ],
+        'team_id' => [
+            'team.team_id'
         ]
     ];
 
@@ -1109,7 +1121,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
     public function getGradedGradeables(array $gradeables, $users = null, $teams = null, $sort_keys = null) {
         $non_team_gradeables = [];
         $team_gradeables = [];
-        foreach($gradeables as $gradeable) {
+        foreach ($gradeables as $gradeable) {
             /** @var \app\models\gradeable\Gradeable $gradeable */
             if ($gradeable->isTeamAssignment()) {
                 $team_gradeables[] = $gradeable;
@@ -1118,9 +1130,13 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             }
         }
         // Make one call to each teams and users.  This is because doing a JOIN on a team OR a user is REALLY expensive
-        $non_team_it = $this->getGradedGradeablesUserOrTeam($non_team_gradeables, $users, $teams, $sort_keys, false);
-        $team_it = $this->getGradedGradeablesUserOrTeam($team_gradeables, $users, $teams, $sort_keys, true);
-        return new MultiIterator([$team_it, $non_team_it]);
+        $non_team_it = function () use ($non_team_gradeables, $users, $teams, $sort_keys) {
+            return $this->getGradedGradeablesUserOrTeam($non_team_gradeables, $users, $teams, $sort_keys, false);
+        };
+        $team_it = function () use ($team_gradeables, $users, $teams, $sort_keys) {
+            return $this->getGradedGradeablesUserOrTeam($team_gradeables, $users, $teams, $sort_keys, true);
+        };
+        return new MultiIterator([[$non_team_it, $this], [$team_it, $this]]);
     }
 
     /**
@@ -1145,7 +1161,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             $gradeables_by_id[$gradeable->getId()] = $gradeable;
         }
         if (count($gradeables_by_id) === 0) {
-            throw new \InvalidArgumentException('Gradeable array must not be blank!');
+            return new \EmptyIterator();
         }
 
         // If one array is blank, and the other is null or also blank, don't get anything
@@ -1182,7 +1198,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
         // switch the join type depending on the boolean
         $submitter_type = $team ? 'team_id' : 'user_id';
-        $submitter_type_ext = $team ? 't.team_id' : 'u.user_id';
+        $submitter_type_ext = $team ? 'team.team_id' : 'u.user_id';
 
         // Generate a logical expression from the provided parameters
         $selector_union_list = [];
@@ -1204,6 +1220,51 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             }
         }
 
+        $team_data_inject = 'u.registration_section, u.rotating_section,';
+        $team_inject = '';
+        if ($team) {
+            $team_data_inject =
+              'ldet.array_late_day_exceptions,
+               ldet.array_late_day_user_ids,
+               /* Aggregate Team User Data */
+               team.team_id,
+               team.array_team_users,
+               team.registration_section,
+               team.rotating_section,';
+
+            $team_inject ='
+              LEFT JOIN (
+                SELECT gt.team_id,
+                  gt.registration_section,
+                  gt.rotating_section,
+                  json_agg(tu) AS array_team_users
+                FROM gradeable_teams gt
+                  JOIN (
+                    SELECT
+                      t.team_id,
+                      t.state,
+                      tu.*
+                    FROM teams t
+                    JOIN users tu ON t.user_id = tu.user_id ORDER BY t.user_id
+                  ) AS tu ON gt.team_id = tu.team_id
+                GROUP BY gt.team_id
+              ) AS team ON eg.team_assignment AND EXISTS (
+                SELECT 1 FROM gradeable_teams gt
+                WHERE gt.team_id=team.team_id AND gt.g_id=g.g_id
+                LIMIT 1)
+
+              /* Join team late day exceptions */
+              LEFT JOIN (
+                SELECT
+                  json_agg(e.late_day_exceptions) AS array_late_day_exceptions,
+                  json_agg(e.user_id) AS array_late_day_user_ids,
+                  t.team_id,
+                  g_id
+                FROM late_day_exceptions e
+                LEFT JOIN teams t ON e.user_id=t.user_id AND t.state=1
+                GROUP BY team_id, g_id
+              ) AS ldet ON g.g_id=ldet.g_id AND ldet.team_id=team.team_id';
+        }
         if ($team && count($teams) > 0) {
             $team_placeholders = implode(',', array_fill(0, count($teams), '?'));
             $selector_union_list[] = "team.team_id IN ($team_placeholders)";
@@ -1222,7 +1283,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         $selector = implode(' AND ', $selector_intersection_list);
 
         // Generate the ORDER BY clause
-        $order = self::generateOrderByClause($sort_keys, self::graded_gradeable_key_map);
+        $order = self::generateOrderByClause($sort_keys, $team ? self::graded_gradeable_key_map_team : self::graded_gradeable_key_map_user);
 
         $query = "
             SELECT /* Select everything we retrieved */
@@ -1270,18 +1331,14 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               egv.active_version,
 
               /* Late day exception data */
-              ldet.array_late_day_exceptions,
-              ldet.array_late_day_user_ids,
               ldeu.late_day_exceptions,
 
               /* Regrade request data */
               rr.id AS regrade_request_id,
               rr.status AS regrade_request_status,
               rr.timestamp AS regrade_request_timestamp,
-
-              /* Aggregate Team User Data */
-              team.team_id,
-              team.array_team_users,
+              
+              {$team_data_inject}
 
               /* User Submitter Data */
               u.user_id,
@@ -1294,11 +1351,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               u.user_group,
               u.manual_registration,
               u.last_updated,
-              u.grading_registration_sections,
+              u.grading_registration_sections
 
-              /* Only select the section information for the submitter type */
-              (CASE WHEN team.team_id IS NULL THEN u.registration_section ELSE team.registration_section END) AS registration_section,
-              (CASE WHEN team.team_id IS NULL THEN u.rotating_section ELSE team.rotating_section END) AS rotating_section
             FROM gradeable g
 
               /* Get teamness so we know to join teams or users*/
@@ -1321,27 +1375,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   GROUP BY user_id
                 ) AS sr ON u.user_id=sr.user_id
               ) AS u ON eg IS NULL OR NOT eg.team_assignment
-
-              /* Join team data */
-              LEFT JOIN (
-                SELECT gt.team_id,
-                  gt.registration_section,
-                  gt.rotating_section,
-                  json_agg(tu) AS array_team_users
-                FROM gradeable_teams gt
-                  JOIN (
-                    SELECT
-                      t.team_id,
-                      t.state,
-                      tu.*
-                    FROM teams t
-                    JOIN users tu ON t.user_id = tu.user_id ORDER BY t.user_id
-                  ) AS tu ON gt.team_id = tu.team_id
-                GROUP BY gt.team_id
-              ) AS team ON eg.team_assignment AND EXISTS (
-                SELECT 1 FROM gradeable_teams gt
-                WHERE gt.team_id=team.team_id AND gt.g_id=g.g_id
-                LIMIT 1)
+              
+              {$team_inject}
 
               /* Join manual grading data */
               LEFT JOIN (
@@ -1421,18 +1456,6 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
               /* Join user late day exceptions */
               LEFT JOIN late_day_exceptions ldeu ON g.g_id=ldeu.g_id AND u.user_id=ldeu.user_id
-
-              /* Join team late day exceptions */
-              LEFT JOIN (
-                SELECT
-                  json_agg(e.late_day_exceptions) AS array_late_day_exceptions,
-                  json_agg(e.user_id) AS array_late_day_user_ids,
-                  t.team_id,
-                  g_id
-                FROM late_day_exceptions e
-                LEFT JOIN teams t ON e.user_id=t.user_id AND t.state=1
-                GROUP BY team_id, g_id
-              ) AS ldet ON g.g_id=ldet.g_id AND ldet.team_id=team.team_id
 
               /* Join regrade request */
               LEFT JOIN regrade_requests AS rr ON rr.{$submitter_type}=gd.gd_{$submitter_type} AND rr.g_id=g.g_id
@@ -1615,8 +1638,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
         return $this->course_db->queryIterator($query,
             array_merge(
-                array_keys($gradeables_by_id),
-                $param
+                $param,
+                array_keys($gradeables_by_id)
             ),
             $constructGradedGradeable);
     }

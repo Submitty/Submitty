@@ -10,8 +10,8 @@ namespace app\libraries;
  */
 class MultiIterator implements \Iterator {
 
-    /** @var \Iterator[] */
-    private $iterators = [];
+    /** @var array array of [\Closure, $this] */
+    private $iterator_generators = [];
     /** @var \Iterator */
     private $curr_it = null;
     /** @var int  */
@@ -19,16 +19,11 @@ class MultiIterator implements \Iterator {
 
     /**
      * MultiIterator constructor.
-     * @param \Iterator[] $iterators
+     * @param \Closure[] $iterator_generators
      */
-    public function __construct(array $iterators) {
-        foreach ($iterators as $iterator) {
-            if (!($iterator instanceof  \Iterator)) {
-                throw new \InvalidArgumentException('Parameter must be an iterator');
-            }
-        }
-        $this->iterators = $iterators;
-        $this->curr_it = array_shift($this->iterators);
+    public function __construct(array $iterator_generators) {
+        $this->iterator_generators = $iterator_generators;
+        $this->seek();
     }
 
     /**
@@ -45,19 +40,28 @@ class MultiIterator implements \Iterator {
     }
 
     /**
+     * Loads the next iterator with contents or keeps the current if still valid
+     */
+    private function seek() {
+        // If we aren't valid, try to get the next one
+        while (!$this->valid()) {
+            $cl = array_shift($this->iterator_generators);
+            if ($cl === null) {
+                $this->curr_it = null;
+                return;
+            }
+            $this->curr_it = $cl[0]->call($cl[1]);
+        }
+    }
+
+    /**
      * Move forward to next element
      * @link http://php.net/manual/en/iterator.next.php
      * @return void Any returned value is ignored.
      * @since 5.0.0
      */
     public function next() {
-        // If we aren't valid, try to get the next one
-        while (!$this->valid()) {
-            $this->curr_it = array_shift($this->iterators);
-            if ($this->curr_it === null) {
-                return;
-            }
-        }
+        $this->seek();
         $this->key++;
         $this->curr_it->next();
     }
