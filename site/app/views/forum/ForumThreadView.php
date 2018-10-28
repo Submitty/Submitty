@@ -486,7 +486,7 @@ HTML;
 
 			<hr style="border-top:1px solid #999;margin-bottom: 5px;" />
 			
-					<form style="margin-right:17px;" class="post_reply_from" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
+					<form style="margin-right:17px;" class="post_reply_from" method="POST" onsubmit="post.disabled=true; post.value='Submitting post...'; return true;" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
 						<input type="hidden" name="thread_id" value="{$thread_id}" />
 						<input type="hidden" name="parent_id" value="{$first_post_id}" />
 						<input type="hidden" name="display_option" value="{$display_option}" />
@@ -860,8 +860,8 @@ HTML;
 				<a class="expand btn btn-default btn-sm" style="float:right; text-decoration:none; margin-top: -8px" onClick="hidePosts(this, {$post['id']})"></a>
 HTML;
 		}
-		if($this->core->getUser()->getGroup() <= 2) {
-			if($deleted){
+		if($this->core->getUser()->getGroup() <= 2 || $post['author_user_id'] === $current_user) {
+			if($deleted && $this->core->getUser()->getGroup() <= 2){
 				$ud_toggle_status = "false";
 				$ud_button_title = "Undelete post";
 				$ud_button_icon = "fa-undo";
@@ -920,7 +920,7 @@ HTML;
 						$return .= <<<HTML
 </div>
 
-           	<form class="reply-box post_reply_from" id="$post_id-reply" style="margin-left:{$offset}px" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
+					<form class="reply-box post_reply_from" id="$post_id-reply" onsubmit="post.disabled=true; post.value='Submitting post...'; return true;" style="margin-left:{$offset}px" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
 						<input type="hidden" name="thread_id" value="{$thread_id}" />
 						<input type="hidden" name="parent_id" value="{$post_id}" />
 	            		<br/>
