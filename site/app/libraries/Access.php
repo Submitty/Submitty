@@ -68,7 +68,7 @@ class Access {
      * Check that students are allowed to submit the given gradeable
      * Only applies to students
      */
-    const CHECK_STUDENT_SUBMIT = 1 << 16 | self::REQUIRE_ARG_GRADEABLE;
+    const CHECK_STUDENT_SUBMIT = 1 << 16 | self::REQUIRE_ARG_GRADEABLE | self::REQUIRE_ARG_VERSION;
 
     /** Check that the course status is such that the user can view the course */
     const CHECK_COURSE_STATUS           = 1 << 18;
@@ -173,7 +173,7 @@ class Access {
         $this->permissions["path.read.forum_attachments"] = self::ALLOW_MIN_STUDENT;
         //TODO: Can students see their results?
         $this->permissions["path.read.results"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_HAS_SUBMISSION;
-        $this->permissions["path.read.submissions"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_STUDENT_SUBMIT;
+        $this->permissions["path.read.submissions"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_STUDENT_VIEW | self::CHECK_STUDENT_SUBMIT;
 
         $this->permissions["path.write.submissions"] = self::ALLOW_MIN_STUDENT | self::ALLOW_ONLY_SELF_GRADEABLE | self::CHECK_CSRF;
         $this->permissions["path.write.split_pdf"] = self::ALLOW_MIN_FULL_ACCESS_GRADER | self::CHECK_CSRF;
@@ -421,16 +421,10 @@ class Access {
             }
 
             //As these are not grading-related they can return false immediately
-            $can_submit = ($new_gradeable ? $new_gradeable->isStudentSubmit() : $gradeable->getStudentSubmit());
             if ($group === User::GROUP_STUDENT) {
                 if (self::checkBits($checks, self::CHECK_STUDENT_VIEW)) {
                     $can_view = ($new_gradeable ? $new_gradeable->isStudentView() : $gradeable->getStudentView());
                     if (!$can_view) {
-                        return false;
-                    }
-                }
-                if (self::checkBits($checks, self::CHECK_STUDENT_SUBMIT)) {
-                    if (!$can_submit) {
                         return false;
                     }
                 }
@@ -440,6 +434,7 @@ class Access {
             if (self::checkBits($checks, self::REQUIRE_ARG_VERSION)) {
                 /* @var int $version */
                 $version = $this->requireArg($args, "gradeable_version");
+                $can_submit = ($new_gradeable ? $new_gradeable->isStudentSubmit() : $gradeable->getStudentSubmit());
                 // Can only view active version for non-student-submit assignment
                 if ($group === User::GROUP_STUDENT && !$can_submit) {
                     $active = ($new_graded_gradeable ? $new_graded_gradeable->getAutoGradedGradeable()->getActiveVersion() : $graded_gradeable->getActiveVersion());
