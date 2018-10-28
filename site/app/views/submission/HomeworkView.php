@@ -421,11 +421,14 @@ class HomeworkView extends AbstractView {
         if($json_data != ''){
             $use_qr_codes = true;
             for($i = 0; $i < count($files); $i++){
-                if($files[$i]['filename_full'] == $json_data[$i+1]['pdf_name'])
-                    $files[$i]['page_count'] = $json_data[$i+1]['page_count'];
-                //validate users
-                $files[$i]['user_id']['id'] = $json_data[$i+1]['id'];
-                $files[$i]['user_id']['valid'] = ($this->core->getQueries()->getUserById($json_data[$i+1]['id']) === null) ? false : true;
+                for($j = 0; $j < count($files); $j++){
+                    if($files[$i]['filename_full'] == $json_data[$j+1]['pdf_name']){
+                        $files[$i]['page_count'] = $json_data[$j+1]['page_count'];
+                                    //validate users
+                        $files[$i]['user_id']['id'] = $json_data[$j+1]['id'];
+                        $files[$i]['user_id']['valid'] = ($this->core->getQueries()->getUserById($json_data[$j+1]['id']) === null) ? false : true;
+                    }
+                }
             }
         }
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/BulkUploadBox.twig', [
