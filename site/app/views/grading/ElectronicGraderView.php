@@ -444,7 +444,7 @@ class ElectronicGraderView extends AbstractView {
         $student_full = array();
         foreach ($students as $student) {
             $student_full[] = array('value' => $student->getId(),
-                                    'label' => str_replace("'","&#039;",$student->getDisplayedFirstName()).' '.str_replace("'","&#039;",$student->getLastName()).' <'.$student->getId().'>');
+                                    'label' => str_replace("'","&#039;",$student->getDisplayedFirstName()).' '.str_replace("'","&#039;",$student->getDisplayedLastName()).' <'.$student->getId().'>');
         }
         $student_full = json_encode($student_full);
 
@@ -577,10 +577,10 @@ class ElectronicGraderView extends AbstractView {
         $display_version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($display_version);
         if ($display_version_instance !==  null) {
             add_files($submissions, array_merge($display_version_instance->getMetaFiles(), $display_version_instance->getFiles()), 'submissions');
+            add_files($checkout, array_merge($display_version_instance->getMetaFiles(), $display_version_instance->getFiles()), 'checkout');
+            
+            add_files($results, $display_version_instance->getResultsFiles(), 'results');
         }
-
-        // TODO: this function doesn't exist!! where did it go?
-//        add_files($results, $gradeable->getResultsFiles(), 'results');
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
             "gradeable_id" => $graded_gradeable->getGradeableId(),
@@ -621,10 +621,11 @@ class ElectronicGraderView extends AbstractView {
             $submission_time = $display_version_instance->getSubmissionTime();
         }
 
-        $version_data = array_map(function(AutoGradedVersion $version) {
+        // TODO: this is duplicated in Homework View
+        $version_data = array_map(function(AutoGradedVersion $version) use ($gradeable) {
             return [
                 'points' => $version->getNonHiddenPoints(),
-                'days_late' => $version->getDaysLate()
+                'days_late' => $gradeable->isStudentSubmit() && $gradeable->hasDueDate() ? $version->getDaysLate() : 0
             ];
         }, $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions());
 
@@ -699,7 +700,7 @@ class ElectronicGraderView extends AbstractView {
             "graded_gradeable" => $graded_gradeable
         ]);
     }
-    
+
     public function popupStudents() {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/ReceivedMarkForm.twig");
     }

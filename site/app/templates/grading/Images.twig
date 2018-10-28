@@ -21,7 +21,7 @@
                         {% set imgName = imageNameArray[loop.index-1] %}
                         {% if student.getId() == imgName %}
                             <td><img src="data:imgName/png;base64,{{ imageData }}" width="150" height="200/>
-                            <div class="name"><br /><br />{{student.getDisplayedFirstName()}} {{student.getLastName()}}
+                            <div class="name"><br /><br />{{student.getDisplayedFirstName()}} {{student.getDisplayedLastName()}}
                             <br />{{student.getId()}}</div>
                             </td>
                             {% set image_found = true %}
@@ -35,7 +35,7 @@
                             <td><img src="data:imgName/png;base64,{{ errorImageData }}" width="150" height="200/>
                             <div class="name"><br /><br />
                         {% endif %}
-                        {{student.getDisplayedFirstName()}} {{student.getLastName()}}
+                        {{student.getDisplayedFirstName()}} {{student.getDisplayedLastName()}}
                         <br />{{student.getId()}}</div>
                         </td>
                     {% endif %}
