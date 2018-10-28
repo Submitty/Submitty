@@ -326,6 +326,9 @@ find ${SUBMITTY_INSTALL_DIR}/src -type d -exec chmod 555 {} \;
 # "other" can read all files
 find ${SUBMITTY_INSTALL_DIR}/src -type f -exec chmod 444 {} \;
 
+chgrp submitty_daemon ${SUBMITTY_INSTALL_DIR}/src/grading/python/submitty_router.py
+chmod g+wrx ${SUBMITTY_INSTALL_DIR}/src/grading/python/submitty_router.py
+
 
 #Set up sample files if not in worker mode.
 if [ "${WORKER}" == 0 ]; then
@@ -707,11 +710,12 @@ fi
 # Restart php-fpm and apache
 if [ "${WORKER}" == 0 ]; then
     if [[ "$#" -ge 1 && $1 == "restart_web" ]]; then
-        echo -n "restarting php7.0-fpm..."
-        systemctl restart php7.0-fpm.service
+        PHP_VERSION=$(php -r 'print PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
+        echo -n "restarting php${PHP_VERSION}-fpm..."
+        systemctl restart php${PHP_VERSION}-fpm
         echo "done"
         echo -n "restarting apache2..."
-        systemctl restart apache2.service
+        systemctl restart apache2
         echo "done"
     fi
 fi

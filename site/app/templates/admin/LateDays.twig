@@ -39,10 +39,10 @@
                 <tr>
                     <td>{{ user.getId() }}</td>
                     <td>{{ user.getDisplayedFirstName() }}</td>
-                    <td>{{ user.getLastName() }}</td>
+                    <td>{{ user.getDisplayedLastName() }}</td>
                     <td>{{ user.getAllowedLateDays() }}</td>
                     <td>{{ user.getSinceTimestamp() }}</td>
-                    <td><a aria-label='Delete latedays for {{ user.getId() }} on {{user.getSinceTimestamp() }}' onclick="deleteLateDays('{{ user.getId() }}', '{{ user.getSinceTimestamp() }}');"><i class="fa fa-close"></i></a></td>
+                    <td><a aria-label='Delete latedays for {{ user.getId() }} on {{ user.getSinceTimestamp() }}' onclick="deleteLateDays('{{ user.getId() }}', '{{ user.getSinceTimestamp() }}');"><i class="fa fa-close"></i></a></td>
                 </tr>
                 {% endfor %}
             {% endif %}

@@ -118,7 +118,7 @@ let GENERAL_INFORMATION = window.GENERAL_INFORMATION;
         $("a[value='zoomcustom']").text(parseInt(RENDER_OPTIONS.scale * 100) + "%");
         if(zoom_flag){
             localStorage.setItem('scale', RENDER_OPTIONS.scale);
-            render(GENERAL_INFORMATION.gradeable_id, GENERAL_INFORMATION.user_id, RENDER_OPTIONS.grader_id, GENERAL_INFORMATION.file_name);
+            render(GENERAL_INFORMATION.gradeable_id, GENERAL_INFORMATION.user_id, GENERAL_INFORMATION.grader_id, GENERAL_INFORMATION.file_name);
         }
     }
 

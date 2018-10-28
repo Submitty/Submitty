@@ -53,7 +53,7 @@
                     <h4>{{ component.getTitle() }}
                         {# Grader only shows up if they are not peer and full access #}
                         {% if not gradeable.getPeerGrading() and component.getGrader().accessFullGrading() %}
-                            <i>(Graded by: {{ component.getGrader().getLastName() }})</i>
+                            <i>(Graded by: {{ component.getGrader().getDisplayedLastName() }})</i>
                         {% endif %}
                     </h4>
                     <div style="float:left; word-break: break-word;">

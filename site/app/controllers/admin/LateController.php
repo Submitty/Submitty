@@ -138,7 +138,7 @@ class LateController extends AbstractController {
 						$team_members = array();
 						for($i = 0; $i < count($team_member_ids); $i++){
 							$team_members[$team_member_ids[$i]] = $this->core->getQueries()->getUserById($team_member_ids[$i])->getDisplayedFirstName() . " " .
-								$this->core->getQueries()->getUserById($team_member_ids[$i])->getLastName();
+								$this->core->getQueries()->getUserById($team_member_ids[$i])->getDisplayedLastName();
 						}
 						$return = $this->core->getOutput()->renderTwigTemplate("admin/users/MoreExtensions.twig",
 							['g_id' => $_POST['g_id'],
@@ -158,7 +158,7 @@ class LateController extends AbstractController {
         $users = $this->core->getQueries()->getUsersWithLateDays();
         $user_table = array();
         foreach($users as $user){
-            $user_table[] = array('user_id' => $user->getId(),'user_firstname' => $user->getDisplayedFirstName(), 'user_lastname' => $user->getLastName(), 'late_days' => $user->getAllowedLateDays(), 'datestamp' => $user->getSinceTimestamp(), 'late_day_exceptions' => $user->getLateDayExceptions());
+            $user_table[] = array('user_id' => $user->getId(),'user_firstname' => $user->getDisplayedFirstName(), 'user_lastname' => $user->getDisplayedLastName(), 'late_days' => $user->getAllowedLateDays(), 'datestamp' => $user->getSinceTimestamp(), 'late_day_exceptions' => $user->getLateDayExceptions());
         }
         $this->core->getOutput()->renderJson(array(
             'users' => $user_table
@@ -169,7 +169,7 @@ class LateController extends AbstractController {
         $users = $this->core->getQueries()->getUsersWithExtensions($g_id);
         $user_table = array();
         foreach($users as $user) {
-            $user_table[] = array('user_id' => $user->getId(),'user_firstname' => $user->getDisplayedFirstName(), 'user_lastname' => $user->getLastName(), 'late_day_exceptions' => $user->getLateDayExceptions());
+            $user_table[] = array('user_id' => $user->getId(),'user_firstname' => $user->getDisplayedFirstName(), 'user_lastname' => $user->getDisplayedLastName(), 'late_day_exceptions' => $user->getLateDayExceptions());
         }
         $this->core->getOutput()->renderJson(array(
             'gradeable_id' => $g_id,
