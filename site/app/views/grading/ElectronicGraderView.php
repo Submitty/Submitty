@@ -10,7 +10,6 @@ use app\models\SimpleStat;
 use app\models\Team;
 use app\models\User;
 use app\views\AbstractView;
-use app\libraries\Utils;
 
 class ElectronicGraderView extends AbstractView {
     /**
