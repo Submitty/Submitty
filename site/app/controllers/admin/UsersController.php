@@ -326,7 +326,15 @@ class UsersController extends AbstractController {
             $users = $this->core->getQueries()->getRegisteredUserIds();
             $teams = $this->core->getQueries()->getTeamIdsAllGradeables();
             $users_with_reg_section = $this->core->getQueries()->getAllUsers();
-            $exclude_sections = $_POST['exclude_sections'];
+
+            $exclude_sections = [];
+            $reg_sections = $this->core->getQueries()->getRegistrationSections();
+            foreach ($reg_sections as $row) {
+                $test = $row['sections_registration_id'];
+                if (isset($_POST[$test])) {
+                    array_push($exclude_sections,$_POST[$row['sections_registration_id']]);
+                }
+            }
             //remove people who should not be added to rotating sections
             for ($j = 0;$j < count($users_with_reg_section);) {
                 for ($i = 0;$i < count($exclude_sections);++$i) {

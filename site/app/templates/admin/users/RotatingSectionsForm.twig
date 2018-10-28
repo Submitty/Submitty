@@ -156,11 +156,13 @@
                             <label>excluding students in registration </label>
 
 
-                        <select multiple name="exclude_sections[]">
+
                             {% for row in reg_sections %}
-                                <option value="{{ row['sections_registration_id'] }}">Section {{ row['sections_registration_id'] }}</option>
+                                <input type="checkbox" name="{{ row['sections_registration_id'] }}" value="{{ row['sections_registration_id'] }}" >Section {{ row['sections_registration_id'] }}</input>
+                                <option ></option>
                             {% endfor %}
-                        </select>
+
+
                         <br /><br />
 					</legend>
 					<label>
