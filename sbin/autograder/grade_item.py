@@ -182,6 +182,13 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     os.chdir(SUBMITTY_DATA_DIR)
     tmp = os.path.join("/var/local/submitty/autograding_tmp/",which_untrusted,"tmp")
 
+    if os.path.exists(tmp):
+        untrusted_grant_rwx_access(which_untrusted, tmp)
+        add_permissions_recursive(tmp,
+                  stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                  stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                  stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+
     # clean up old usage of this directory
     shutil.rmtree(tmp,ignore_errors=True)
     os.mkdir(tmp)

@@ -34,8 +34,7 @@ fi
 #################
 
 # PATHS
-SOURCE="${BASH_SOURCE[0]}"
-CURRENT_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
 SUBMITTY_DATA_DIR=/var/local/submitty
@@ -51,6 +50,9 @@ CGI_GROUP=submitty_cgi
 
 DAEMONPHP_GROUP=submitty_daemonphp
 DAEMONCGI_GROUP=submitty_daemoncgi
+
+# VERSIONS
+source ${CURRENT_DIR}/bin/versions.sh
 
 #################################################################
 # PROVISION SETUP
@@ -274,8 +276,7 @@ pushd /tmp > /dev/null
 
 # -----------------------------------------
 echo "Getting JUnit & Hamcrest..."
-JUNIT_VER=4.12
-HAMCREST_VER=1.3
+
 mkdir -p ${SUBMITTY_INSTALL_DIR}/JUnit
 
 if [ ${WORKER} == 0 ]; then
@@ -285,12 +286,11 @@ fi
 chmod 751 ${SUBMITTY_INSTALL_DIR}/JUnit
 cd ${SUBMITTY_INSTALL_DIR}/JUnit
 
-wget http://repo1.maven.org/maven2/junit/junit/${JUNIT_VER}/junit-${JUNIT_VER}.jar -o /dev/null > /dev/null 2>&1
-wget http://repo1.maven.org/maven2/org/hamcrest/hamcrest-core/${HAMCREST_VER}/hamcrest-core-${HAMCREST_VER}.jar -o /dev/null > /dev/null 2>&1
+wget http://repo1.maven.org/maven2/junit/junit/${JUNIT_VERSION}/junit-${JUNIT_VERSION}.jar -o /dev/null > /dev/null 2>&1
+wget http://repo1.maven.org/maven2/org/hamcrest/hamcrest-core/${HAMCREST_VERSION}/hamcrest-core-${HAMCREST_VERSION}.jar -o /dev/null > /dev/null 2>&1
 
 # TODO:  Want to Install JUnit 5.0
 # And maybe also Hamcrest 2.0 (or maybe that piece isn't needed anymore)
-
 
 popd > /dev/null
 
@@ -299,14 +299,11 @@ popd > /dev/null
 echo "Getting emma..."
 
 pushd ${SUBMITTY_INSTALL_DIR}/JUnit > /dev/null
-
-EMMA_VER=2.0.5312
-wget https://github.com/Submitty/emma/archive/${EMMA_VER}.zip -O emma-${EMMA_VER}.zip -o /dev/null > /dev/null 2>&1
-unzip emma-${EMMA_VER}.zip > /dev/null
-mv emma-${EMMA_VER}/lib/emma.jar emma.jar
-rm -rf emma-${EMMA_VER}*
+wget https://github.com/Submitty/emma/archive/${EMMA_VERSION}.zip -O emma-${EMMA_VERSION}.zip -o /dev/null > /dev/null 2>&1
+unzip emma-${EMMA_VERSION}.zip > /dev/null
+mv emma-${EMMA_VERSION}/lib/emma.jar emma.jar
+rm -rf emma-${EMMA_VERSION}*
 chmod o+r . *.jar
-
 popd > /dev/null
 
 # JaCoCo is a potential replacement for EMMA
@@ -314,18 +311,14 @@ popd > /dev/null
 echo "Getting JaCoCo..."
 
 pushd ${SUBMITTY_INSTALL_DIR}/JUnit > /dev/null
-
-JACOCO_VER=0.8.0
-wget https://github.com/jacoco/jacoco/releases/download/v${JACOCO_VER}/jacoco-${JACOCO_VER}.zip -o /dev/null > /dev/null 2>&1
-mkdir jacoco-${JACOCO_VER}
-unzip jacoco-${JACOCO_VER}.zip -d jacoco-${JACOCO_VER} > /dev/null
-mv jacoco-${JACOCO_VER}/lib/jacococli.jar jacococli.jar
-mv jacoco-${JACOCO_VER}/lib/jacocoagent.jar jacocoagent.jar
-rm -rf jacoco-${JACOCO_VER}
-rm -f jacoco-${JACOCO_VER}.zip
-
+wget https://github.com/jacoco/jacoco/releases/download/v${JACOCO_VERSION}/jacoco-${JACOCO_VERSION}.zip -o /dev/null > /dev/null 2>&1
+mkdir jacoco-${JACOCO_VERSION}
+unzip jacoco-${JACOCO_VERSION}.zip -d jacoco-${JACOCO_VERSION} > /dev/null
+mv jacoco-${JACOCO_VERSION}/lib/jacococli.jar jacococli.jar
+mv jacoco-${JACOCO_VERSION}/lib/jacocoagent.jar jacocoagent.jar
+rm -rf jacoco-${JACOCO_VERSION}
+rm -f jacoco-${JACOCO_VERSION}.zip
 chmod o+r . *.jar
-
 popd > /dev/null
 
 
@@ -339,11 +332,9 @@ pushd /tmp > /dev/null
 
 echo "Getting DrMemory..."
 
-DRMEM_TAG=release_2.0.1
-DRMEM_VER=2.0.1-2
-wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEM_TAG}/DrMemory-Linux-${DRMEM_VER}.tar.gz -o /dev/null > /dev/null 2>&1
-tar -xpzf DrMemory-Linux-${DRMEM_VER}.tar.gz
-rsync --delete -a /tmp/DrMemory-Linux-${DRMEM_VER}/ ${SUBMITTY_INSTALL_DIR}/drmemory
+wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEMORY_TAG}/DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz -o /dev/null > /dev/null 2>&1
+tar -xpzf DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz
+rsync --delete -a /tmp/DrMemory-Linux-${DRMEMORY_VERSION}/ ${SUBMITTY_INSTALL_DIR}/drmemory
 rm -rf /tmp/DrMemory*
 
 chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/drmemory
