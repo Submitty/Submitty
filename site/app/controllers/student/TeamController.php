@@ -181,6 +181,11 @@ class TeamController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
+        if($this->core->getQueries()->getUserByID($invite_id)->getRegistrationSection() === null){
+            $this->core->addErrorMessage("Cannot invite {$invite_id}");
+            $this->core->redirect($return_url);
+        }
+
         $invite_team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $invite_id);
         if ($invite_team !== null) {
             $this->core->addErrorMessage("Did not send invitation, {$invite_id} is already on a team");
