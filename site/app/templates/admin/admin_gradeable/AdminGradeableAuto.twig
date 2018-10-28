@@ -72,7 +72,7 @@
                         {{ gradeable.isStudentView() ? 'checked' : '' }} hidden/>
             </div>
 
-            <div id="student_submit_download_view">
+            <div id="student_submit_view">
                 <div>
                     Make new submissions?
                     <input type="radio" id="yes_student_submit" name="student_submit" value="true"
@@ -177,16 +177,17 @@
     function onStudentViewChange() {
         if($('#yes_student_view').is(':checked')) {
             //$('#student_submit_download_view').show();
-            disableElementChildren('#student_submit_download_view', false);
+            disableElementChildren('#student_submit_view', !$('#no_student_view_after_grades').is(':checked'));
         }
         else {
             // $('#student_submit_download_view').hide();
-            disableElementChildren('#student_submit_download_view', true);
+            disableElementChildren('#student_submit_view', true);
             let studentSubmit = $('#no_student_submit');
 
             studentSubmit.prop('checked', true);
             studentSubmit.change();
-            $('#student_submit_download_view').hide();
+
+            $('input[name=student_view_after_grades]').prop('checked', false);
         }
     }
 
@@ -244,6 +245,9 @@
             let elem = $('#yes_student_view');
             elem.prop('checked', true);
             elem.change();
+            let sub = $('#no_student_submit');
+            sub.prop('checked', true);
+            sub.change();
         });
 
         {% if is_in_rebuild_queue %}
