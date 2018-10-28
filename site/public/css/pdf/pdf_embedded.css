@@ -1,0 +1,16 @@
+.annotationLayer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    cursor: url('https://www.bg-wiki.com/imagevags/d/d3/Demon_Pen_icon.png'), auto;
+    cursor: default;
+}
+
+.pdfViewer .canvasWrapper {
+    box-shadow: 0 0 3px #bbb;
+}
+.pdfViewer .page {
+    margin-bottom: 10px;
+}

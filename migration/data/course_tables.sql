@@ -138,6 +138,7 @@ CREATE TABLE electronic_gradeable (
     eg_peer_grading boolean NOT NULL,
     eg_submission_open_date timestamp(6) with time zone NOT NULL,
     eg_submission_due_date timestamp(6) with time zone NOT NULL,
+    eg_has_due_date boolean DEFAULT TRUE NOT NULL,
     eg_late_days integer DEFAULT (-1) NOT NULL,
     eg_allow_late_submission boolean DEFAULT true NOT NULL,
     eg_peer_grade_set integer DEFAULT (0) NOT NULL,

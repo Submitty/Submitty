@@ -414,8 +414,18 @@ class NavigationView extends AbstractView {
                 ($list_section == GradeableList::GRADED || $list_section == GradeableList::GRADING)) {
                 $display_date = "";
             }
-
-            if ($graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() && $list_section == GradeableList::OPEN) {
+            if (!$gradeable->hasDueDate()) {
+                $display_date = "";
+            }
+            if (!$gradeable->isStudentSubmit() && $this->core->getUser()->accessGrading()) {
+                // Student isn't submitting
+                $title = "BULK UPLOAD";
+                $class = "btn-primary";
+                $display_date = "";
+            } else if ($gradeable->isStudentSubmit() && !$gradeable->hasDueDate() && $list_section != GradeableList::OPEN) {
+                $title = "SUBMIT";
+                $class = "btn-default";
+            } else if ($graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() && $list_section == GradeableList::OPEN) {
                 //if the user submitted something on time
                 $title = "RESUBMIT";
             } else if ($graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() && $list_section == GradeableList::CLOSED) {
@@ -423,7 +433,12 @@ class NavigationView extends AbstractView {
                 $title = "LATE RESUBMIT";
             } else if (!$graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() && ($list_section == GradeableList::GRADED || $list_section == GradeableList::GRADING)) {
                 //to change the text to overdue submission if nothing was submitted on time
-                $title = "OVERDUE SUBMISSION";
+                if ($gradeable->isStudentSubmit()) {
+                    $title = "OVERDUE SUBMISSION";
+                } else {
+                    $title = "NO SUBMISSION";
+                    $display_date = "";
+                }
             } else if ($gradeable->isTaGrading() && !$graded_gradeable->isTaGradingComplete() && $list_section == GradeableList::GRADED) {
                 //when there is no TA grade and due date passed
                 $title = "TA GRADE NOT AVAILABLE";

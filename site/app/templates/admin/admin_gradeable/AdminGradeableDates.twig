@@ -18,10 +18,17 @@
 
         <br />
 
-        <input id="date_due" name="submission_due_date" class="date_picker" type="text" value="{{ gradeable.getSubmissionDueDate()|date(date_format) }}">
-        Due Date
+        <div id="due_date_options_container">
+            <div>Will this assignment have a due date?
+                <input id="has_due_date_yes" name="has_due_date" value="true" type="radio" {{ gradeable.hasDueDate() ? 'checked' : '' }}/>Yes
+                <input id="has_due_date_no" name="has_due_date" value="false" type="radio" {{ not gradeable.hasDueDate() ? 'checked' : '' }}/>No
+            </div>
 
-        <br />
+            <div id="due_date_container" {{ gradeable.hasDueDate() ? '' : 'hidden' }}>
+                <input id="date_due" name="submission_due_date" class="date_picker" type="text" value="{{ gradeable.getSubmissionDueDate()|date(date_format) }}">
+                Due Date
+            </div>
+        </div>
     </div>
 
     <div class="manual_grading manual_grading_dates">
@@ -47,26 +54,26 @@
             Regrade Request Due Date (Regrade Requests must be sent by this date)
         </div>
 
-        <br />
-
-        Should submissions be accepted after the due date?  [ FIXME: UI MODIFICATIONS REQUIRED]
-        <br />
-        <input type="radio" id = "yes_late_submission" name="late_submission_allowed" value="true"
-                {{ action != 'new' and gradeable.isLateSubmissionAllowed() ? 'checked' : '' }}> Yes
-
-        <input type="radio" id = "no_late_submission" name="late_submission_allowed" value ="false"
-                {{ not (action != 'new' and gradeable.isLateSubmissionAllowed()) ? 'checked' :  '' }}> No
-        <br />
-        <div class="yes-late-submission">
-            How many late days may students use on this assignment?
-            <input style="width: 50px" id="late_days" name="late_days" class="int_val" type="text" value="{{ gradeable.getLateDays() }}"/>
-
+        <div id="late_days_options_container" {{ gradeable.hasDueDate() and gradeable.isStudentSubmit() ? '' : 'hidden' }}>
+            Should submissions be accepted after the due date?  [ FIXME: UI MODIFICATIONS REQUIRED]
             <br />
+            <input type="radio" id = "yes_late_submission" name="late_submission_allowed" value="true"
+                    {{ action != 'new' and gradeable.isLateSubmissionAllowed() ? 'checked' : '' }}> Yes
 
-            <span id="late-days-message">Note: Submissions received after the deadline will be automatically recorded as a zero if late days are not allowed
-                for this assignment (or the student does not have sufficient late days to cover the submission) and no excused
-                absence extension is entered for this student for this gradeable.  See <a href="http://submitty.org/student/late_days">Late Days & Extensions</a>.
-            </span>
+            <input type="radio" id = "no_late_submission" name="late_submission_allowed" value ="false"
+                    {{ not (action != 'new' and gradeable.isLateSubmissionAllowed()) ? 'checked' :  '' }}> No
+            <br />
+            <div class="yes-late-submission">
+                How many late days may students use on this assignment?
+                <input style="width: 50px" id="late_days" name="late_days" class="int_val" type="text" value="{{ gradeable.getLateDays() }}"/>
+
+                <br />
+
+                <span id="late-days-message">Note: Submissions received after the deadline will be automatically recorded as a zero if late days are not allowed
+                    for this assignment (or the student does not have sufficient late days to cover the submission) and no excused
+                    absence extension is entered for this student for this gradeable.  See <a href="http://submitty.org/student/late_days">Late Days & Extensions</a>.
+                </span>
+            </div>
         </div>
     </div>
 
@@ -96,6 +103,23 @@
         onManualGradingChange();
         onIsRegradeAllowedChange();
         onLateSubmissionAllowedChanged();
+        if (onStudentSubmitChange !== undefined) {
+            onStudentSubmitChange();
+        }
     }
+
+    $(document).ready(function() {
+        $('input[name=has_due_date]').change(function() {
+            let cont = $('#due_date_container');
+            let cont1 = $('#late_days_options_container');
+            if($('#has_due_date_no').is(':checked')) {
+                cont.hide();
+                cont1.hide();
+            } else {
+                cont.show();
+                cont1.show();
+            }
+        });
+    });
 
 </script>
