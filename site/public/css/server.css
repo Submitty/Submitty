@@ -1,5 +1,4 @@
 @import url("reset.css");
-@import url("https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,300italic,700");
 @import url("https://fonts.googleapis.com/css?family=Inconsolata");
 
 html {
@@ -242,7 +241,7 @@ table tr.table-header {
 #nav {
     background-color: #000000;
     color: #FFFFFF;
-    font-family: 'Open Sans Condensed', sans-serif;
+    font-family: 'Source Sans Pro', sans-serif;
     width: 100%;
     left: 0;
     top: 0;
@@ -1343,7 +1342,7 @@ table .instructor .two-options{
     opacity: 0;
     transition: opacity 0.3s;
     font-size: 12px;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: "Source Sans Pro", Helvetica, Arial, sans-serif;
 }
 
 .tooltip .tooltiptext::after {
