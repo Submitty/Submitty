@@ -188,7 +188,7 @@ class HomeworkView extends AbstractView {
                 // SUBMISSION NOW WOULD BE BAD STATUS -- INSUFFICIENT LATE DAYS
                 if ($new_late_charged > $late_days_remaining) {
                     $messages[] = ['type' => 'would_too_few_remain', 'info' => [
-                        'remaining' => $student_late_days
+                        'remaining' => $late_days_remaining
                     ]];
                     $error = true;
                     $messages[] = ['type' => 'would_get_zero'];
