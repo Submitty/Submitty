@@ -74,7 +74,7 @@ class LateDays extends AbstractModel {
      * @param Gradeable $gradeable
      * @return bool True if they are
      */
-    private static function filterCanView(Core $core, Gradeable $gradeable) {
+    public static function filterCanView(Core $core, Gradeable $gradeable) {
         if ($gradeable->getType() !== GradeableType::ELECTRONIC_FILE) {
             return false;
         }
@@ -88,11 +88,6 @@ class LateDays extends AbstractModel {
 
         //Remove incomplete gradeables for non-instructors
         if (!$user->accessAdmin() && !$gradeable->hasAutogradingConfig()) {
-            return false;
-        }
-
-        // student users should only see electronic gradeables -- NOTE: for now, we might change this design later
-        if (!$user->accessGrading()) {
             return false;
         }
 
@@ -265,7 +260,7 @@ class LateDays extends AbstractModel {
      * @return LateDayInfo
      */
     public function getLateDayInfoByGradeable(Gradeable $gradeable) {
-        return $this->late_day_info[$gradeable->getId()];
+        return $this->late_day_info[$gradeable->getId()] ?? null;
     }
 
     /**
