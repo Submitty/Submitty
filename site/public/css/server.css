@@ -241,7 +241,6 @@ table tr.table-header {
 #nav {
     background-color: #000000;
     color: #FFFFFF;
-    font-family: 'Source Sans Pro', sans-serif;
     width: 100%;
     left: 0;
     top: 0;
@@ -747,7 +746,6 @@ table tr.table-header {
 .gradeable_list{
 	width: 100%;
     padding: 0px 50px 50px;
-    font-family: 'Source Sans Pro', sans-serif;
 	font-size: 18px;
 	text-align: left !important;
 }
@@ -1342,7 +1340,6 @@ table .instructor .two-options{
     opacity: 0;
     transition: opacity 0.3s;
     font-size: 12px;
-    font-family: "Source Sans Pro", Helvetica, Arial, sans-serif;
 }
 
 .tooltip .tooltiptext::after {
