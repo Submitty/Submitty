@@ -2,6 +2,7 @@
 
 namespace app\views\grading;
 
+use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\GradedGradeable;
@@ -441,12 +442,7 @@ class ElectronicGraderView extends AbstractView {
 
     public function adminTeamForm(Gradeable $gradeable, $all_reg_sections, $all_rot_sections) {
         $students = $this->core->getQueries()->getAllUsers();
-        $student_full = array();
-        foreach ($students as $student) {
-            $student_full[] = array('value' => $student->getId(),
-                                    'label' => str_replace("'","&#039;",$student->getDisplayedFirstName()).' '.str_replace("'","&#039;",$student->getDisplayedLastName()).' <'.$student->getId().'>');
-        }
-        $student_full = json_encode($student_full);
+        $student_full = Utils::getAutoFillData($students);
 
         return $this->core->getOutput()->renderTwigTemplate("grading/AdminTeamForm.twig", [
             "gradeable_id" => $gradeable->getId(),
@@ -532,7 +528,7 @@ class ElectronicGraderView extends AbstractView {
     }
 
     /**
-     * Render the Auto-Grading Testcases panel
+     * Render the Autograding Testcases panel
      * @param AutoGradedVersion $version_instance
      * @param bool $show_hidden_cases
      * @return string
@@ -553,17 +549,19 @@ class ElectronicGraderView extends AbstractView {
     public function renderSubmissionPanel(GradedGradeable $graded_gradeable, int $display_version) {
         function add_files(&$files, $new_files, $start_dir_name) {
             $files[$start_dir_name] = array();
-            foreach($new_files as $file) {
-                $path = explode('/', $file['relative_name']);
-                array_pop($path);
-                $working_dir = &$files[$start_dir_name];
-                foreach($path as $dir) {
-                    if (!isset($working_dir[$dir])) {
-                        $working_dir[$dir] = array();
+            if($new_files) {
+                foreach ($new_files as $file) {
+                    $path = explode('/', $file['relative_name']);
+                    array_pop($path);
+                    $working_dir = &$files[$start_dir_name];
+                    foreach ($path as $dir) {
+                        if (!isset($working_dir[$dir])) {
+                            $working_dir[$dir] = array();
+                        }
+                        $working_dir = &$working_dir[$dir];
                     }
-                    $working_dir = &$working_dir[$dir];
+                    $working_dir[$file['name']] = $file['path'];
                 }
-                $working_dir[$file['name']] = $file['path'];
             }
         }
         $submissions = array();
@@ -631,7 +629,6 @@ class ElectronicGraderView extends AbstractView {
 
         //sort array by version number after values have been mapped
         ksort($version_data);
-
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/StudentInformationPanel.twig", [
             "gradeable_id" => $gradeable->getId(),
             "submission_time" => $submission_time,

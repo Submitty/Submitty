@@ -121,7 +121,7 @@ HTML;
 				$return .= <<<HTML
 
 				<tr title="Go to post" style="cursor: pointer;" onclick="window.location = '{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id))}#{$post['p_id']}';" id="search-row-{$count}" class="hoverable">
-	                <td align="left"><pre style="font-family: inherit;"><p class="post_content" style="white-space: pre-wrap; ">{$post_content}</p></pre></td>
+	                <td align="left"><pre><p class="post_content" style="white-space: pre-wrap; ">{$post_content}</p></pre></td>
 	                <td>{$visible_username}</td>
 	                <td>{$posted_on}</td>      
 
@@ -186,7 +186,7 @@ HTML;
 		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/shell.js"></script>
 		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 		<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.AreYouSure/1.9.0/jquery.are-you-sure.min.js"></script>
-		<style>body {min-width: 925px;} pre { font-family: inherit; }</style>
+		<style>body {min-width: 925px;}</style>
 
 
 
@@ -486,7 +486,7 @@ HTML;
 
 			<hr style="border-top:1px solid #999;margin-bottom: 5px;" />
 			
-					<form style="margin-right:17px;" class="post_reply_from" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
+					<form style="margin-right:17px;" class="post_reply_from" method="POST" onsubmit="post.disabled=true; post.value='Submitting post...'; return true;" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
 						<input type="hidden" name="thread_id" value="{$thread_id}" />
 						<input type="hidden" name="parent_id" value="{$first_post_id}" />
 						<input type="hidden" name="display_option" value="{$display_option}" />
@@ -521,18 +521,15 @@ HTML;
 HTML;
 
         if($this->core->getUser()->getGroup() <= 2){
+        	$this->core->getOutput()->addInternalCss('chosen.min.css');
+        	$this->core->getOutput()->addInternalJs('chosen.jquery.min.js');
 			$current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
 			$current_thread_date = $current_thread_first_post["timestamp"];
 			$merge_thread_list = $this->core->getQueries()->getThreadsBefore($current_thread_date, 1);
-			$possibleMerges = json_encode(array_map(function(array $row) {
-						$temp_title = htmlentities($row['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-						return ['value' => "({$row['id']}) {$temp_title}",
-								'label' => "({$row['id']}) {$temp_title}"];
-						}, $merge_thread_list));
 			$return .= $this->core->getOutput()->renderTwigTemplate("forum/MergeThreadsForm.twig", [
 				"current_thread_date" => $current_thread_date,
 				"current_thread" => $currentThread,
-				"possibleMerges" => $possibleMerges
+				"possibleMerges" => $merge_thread_list
 			]);
 		}
 		$return .= $this->core->getOutput()->renderTwigTemplate("forum/EditPostForm.twig");
@@ -860,8 +857,8 @@ HTML;
 				<a class="expand btn btn-default btn-sm" style="float:right; text-decoration:none; margin-top: -8px" onClick="hidePosts(this, {$post['id']})"></a>
 HTML;
 		}
-		if($this->core->getUser()->getGroup() <= 2) {
-			if($deleted){
+		if($this->core->getUser()->getGroup() <= 2 || $post['author_user_id'] === $current_user) {
+			if($deleted && $this->core->getUser()->getGroup() <= 2){
 				$ud_toggle_status = "false";
 				$ud_button_title = "Undelete post";
 				$ud_button_icon = "fa-undo";
@@ -920,7 +917,7 @@ HTML;
 						$return .= <<<HTML
 </div>
 
-           	<form class="reply-box post_reply_from" id="$post_id-reply" style="margin-left:{$offset}px" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
+					<form class="reply-box post_reply_from" id="$post_id-reply" onsubmit="post.disabled=true; post.value='Submitting post...'; return true;" style="margin-left:{$offset}px" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
 						<input type="hidden" name="thread_id" value="{$thread_id}" />
 						<input type="hidden" name="parent_id" value="{$post_id}" />
 	            		<br/>
@@ -1149,7 +1146,7 @@ HTML;
 							post_string = escapeSpecialChars(post_string);
 							var thread_title = thread_titles[i]["title"];
 							thread_title = escapeSpecialChars(thread_title);
-							$(this).parent().parent().parent().append('<tr id="'+ids[i]+'"><td></td><td>'+timestamps[i]+'</td><td style = "cursor:pointer;" data-type = "thread" data-thread_id="'+thread_ids[i]+'"><pre style="font-family: inherit;white-space: pre-wrap;">'+thread_title+'</pre></td><td colspan = "2" style = "cursor:pointer;" align = "left" data-type = "post" data-thread_id="'+thread_ids[i]+'"><pre style="font-family: inherit;white-space: pre-wrap;">'+post_string+'</pre></td></tr> ');
+							$(this).parent().parent().parent().append('<tr id="'+ids[i]+'"><td></td><td>'+timestamps[i]+'</td><td style = "cursor:pointer;" data-type = "thread" data-thread_id="'+thread_ids[i]+'"><pre style="white-space: pre-wrap;">'+thread_title+'</pre></td><td colspan = "2" style = "cursor:pointer;" align = "left" data-type = "post" data-thread_id="'+thread_ids[i]+'"><pre style="white-space: pre-wrap;">'+post_string+'</pre></td></tr> ');
 							
 						}
 						$(this).html("Collapse");

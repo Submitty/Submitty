@@ -4,23 +4,18 @@
 {% block body %}
         Merge current thread into
         <input type="hidden" id="merge_thread_child" name="merge_thread_child" value="{{ current_thread }}" data-ays-ignore="true">
-        <input type="text" size="50" placeholder="e.g. (thread_id) title" class="ui-autocomplete-input" autocomplete="off" name="merge_thread_parent" id="merge_thread_parent" data-ays-ignore="true">
+        <select class="chosen-select" id="merge_thread_parent" name="merge_thread_parent" style="width:200px;">
+            {% for threads in possibleMerges %}
+                <option>({{ threads['id'] }}) {{ threads['title'] }}</option>
+            {% endfor %}
+        </select>
         <script>
-            //Override JQuery autocomplete to ensure valid display of entities
-            $.ui.autocomplete.prototype._renderItem = function (ul, item) {
-                    return $( "<li style='padding:5px;'></li>" )
-                    .data( "item.autocomplete", item )
-                    .append( $( "<a></a>" ).html( item.label ) )
-                    .appendTo( ul );
-            };
-            $("#merge_thread_parent").autocomplete({
-                source: {{ possibleMerges|raw }},
-                //Override JQuery autocomplete to ensure valid selection of entities
-                select: function (event, ui) {
-                    event.preventDefault();
-                    this.value = $('<div />').html(ui.item.label).text();
-                }
+            $(document).ready(function(){
+                $(".chosen-select").chosen({ width: "210px" });
+                $(".form-body").css("min-height", "inherit");
+                $(".form-body").css('overflow-y', 'initial');
             });
+
         </script>
 {% endblock %}
 {% block form %}

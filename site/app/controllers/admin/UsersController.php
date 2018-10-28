@@ -325,6 +325,42 @@ class UsersController extends AbstractController {
         if ($sort === 'redo') {
             $users = $this->core->getQueries()->getRegisteredUserIds();
             $teams = $this->core->getQueries()->getTeamIdsAllGradeables();
+            $users_with_reg_section = $this->core->getQueries()->getAllUsers();
+
+            $exclude_sections = [];
+            $reg_sections = $this->core->getQueries()->getRegistrationSections();
+            foreach ($reg_sections as $row) {
+                $test = $row['sections_registration_id'];
+                if (isset($_POST[$test])) {
+                    array_push($exclude_sections,$_POST[$row['sections_registration_id']]);
+                }
+            }
+            //remove people who should not be added to rotating sections
+            for ($j = 0;$j < count($users_with_reg_section);) {
+                for ($i = 0;$i < count($exclude_sections);++$i) {
+                    if ($users_with_reg_section[$j]->getRegistrationSection() == $exclude_sections[$i]) {
+                        array_splice($users_with_reg_section,$j,1);
+                        $j--;
+                        break;
+                    }
+                }
+                ++$j;
+
+            }
+            for ($i = 0;$i < count($users);) {
+                $found_in = false;
+                for ($j = 0;$j < count($users_with_reg_section);++$j) {
+                    if ($users[$i] == $users_with_reg_section[$j]->getId()) {
+                        $found_in = true;
+                        break;
+                    }
+                }
+                if (!$found_in) {
+                    array_splice($users,$i,1);
+                    continue;
+                }
+                ++$i;
+            }
             if ($type === 'random') {
                 shuffle($users);
                 foreach ($teams as $g_id => $team_ids) {
