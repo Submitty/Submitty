@@ -6,20 +6,24 @@ use app\libraries\Core;
 use app\libraries\DateUtils;
 
 class SimpleLateUser extends AbstractModel {
-    
+
     /** @property @var bool Is this user actually loaded (else you cannot access the other member variables) */
     protected $loaded = false;
-    
+
     /** @property @var string The id of this user which should be a unique identifier (ex: RCS ID at RPI) */
     protected $id;
     /** @property @var string The first name of the user */
-    protected $first_name;
+    protected $legal_first_name;
     /** @property @var string The preferred first name of the user if exists */
     protected $preferred_first_name = "";
-    /** @property @var  string The name to be displayed by the system (either preferred name or first name) */
+    /** @property @var  string The name to be displayed by the system (either preferred last name or legal first name) */
     protected $displayed_first_name;
     /** @property @var string The last name of the user */
-    protected $last_name;
+    protected $legal_last_name;
+    /** @property @var string The preferred last name of the user if exists */
+    protected $preferred_last_name;
+    /** @property @var  string The name to be displayed by the system (either preferred last name or legal last name) */
+    protected $displayed_last_name;
     /** @property @var string The allowed late days of the user */
     protected $allowed_late_days;
     /** @property @var string The day late days are put into effect */
@@ -39,15 +43,24 @@ class SimpleLateUser extends AbstractModel {
 
         $this->loaded = true;
         $this->id = $details['user_id'];
-        $this->first_name = $details['user_firstname'];
+        $this->legal_first_name = $details['user_firstname'];
         if (isset($details['user_preferred_firstname']) && $details['user_preferred_firstname'] !== "") {
-            $this->prefered_first_name = $details['user_preferred_firstname'];
+            $this->preferred_first_name = $details['user_preferred_firstname'];
             $this->displayed_first_name = $details['user_preferred_firstname'];
         }
         else{
             $this->displayed_first_name = $details['user_firstname'];
         }
-        $this->last_name = $details['user_lastname'];
+
+        $this->legal_last_name = $details['user_lastname'];
+        if (isset($details['user_preferred_lastname']) && $details['user_preferred_lastname'] !== "") {
+            $this->preferred_last_name = $details['user_preferred_lastname'];
+            $this->displayed_last_name = $details['user_preferred_lastname'];
+        }
+        else{
+            $this->displayed_last_name = $details['user_lastname'];
+        }
+
         if(isset($details['allowed_late_days']) && isset($details['since_timestamp'])){
             $this->allowed_late_days = $details['allowed_late_days'];
             $this->since_timestamp = DateUtils::parseDateTime($details['since_timestamp'], $this->core->getConfig()->getTimezone());

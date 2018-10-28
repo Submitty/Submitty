@@ -35,10 +35,10 @@
                             Team:<br/>
 
                             {% for team_member in submitter.getTeam().getMemberUsers() %}
-                                &emsp;{{ team_member.getDisplayedFirstName() }} {{ team_member.getLastName() }} ({{ team_member.getId() }})<br/>
+                                &emsp;{{ team_member.getDisplayedFirstName() }} {{ team_member.getDisplayedLastName() }} ({{ team_member.getId() }})<br/>
                             {% endfor %}
                         {% else %}
-                            {{ submitter.getUser().getDisplayedFirstName() }} {{ submitter.getUser().getLastName() }} ({{ submitter.getId() }})
+                            {{ submitter.getUser().getDisplayedFirstName() }} {{ submitter.getUser().getDisplayedLastName() }} ({{ submitter.getId() }})
                             <br/>
                         {% endif %}
 

@@ -74,6 +74,7 @@ use app\models\User;
  * @method Component[] getComponents()
  * @method bool isRegradeAllowed()
  * @method int getActiveRegradeRequestCount()
+ * @method void setHasDueDate($has_due_date)
  */
 class Gradeable extends AbstractModel {
     /* Properties for all types of gradeables */
@@ -163,6 +164,8 @@ class Gradeable extends AbstractModel {
     protected $late_submission_allowed = true;
     /** @property @var float The point precision for manual grading */
     protected $precision = 0.0;
+    /** @property @var bool If this gradeable has a due date or not */
+    protected $has_due_date = false;
 
     /* Dates for all types of gradeables */
 
@@ -223,6 +226,7 @@ class Gradeable extends AbstractModel {
             $this->setStudentSubmit($details['student_submit']);
             $this->setStudentDownload($details['student_download']);
             $this->setStudentDownloadAnyVersion($details['student_download_any_version']);
+            $this->setHasDueDate($details['has_due_date']);
             $this->setPeerGrading($details['peer_grading']);
             $this->setPeerGradeSet($details['peer_grade_set']);
             $this->setLateSubmissionAllowed($details['late_submission_allowed']);
@@ -300,7 +304,6 @@ class Gradeable extends AbstractModel {
     const date_properties_elec_ta = [
         'ta_view_start_date',
         'submission_open_date',
-        'submission_due_date',
         'grade_start_date',
         'grade_due_date',
         'grade_released_date'
@@ -313,7 +316,6 @@ class Gradeable extends AbstractModel {
     const date_properties_elec_no_ta = [
         'ta_view_start_date',
         'submission_open_date',
-        'submission_due_date',
         'grade_released_date'
     ];
 
@@ -478,8 +480,14 @@ class Gradeable extends AbstractModel {
                 $result = self::date_properties_elec_no_ta;
             }
 
+            // Only add in submission due date if student submission is enabled
+            if ($this->isStudentSubmit() && $this->hasDueDate()) {
+                // Make sure we insert the due date into the correct location (after the open date)
+                array_splice($result, array_search('submission_open_date', $result)+1, 0, 'submission_due_date');
+            }
+
             // Only add in regrade request date if its allowed & enabled
-            if($this->isTaGrading() && $this->core->getConfig()->isRegradeEnabled() && $this->isRegradeAllowed()) {
+            if ($this->isTaGrading() && $this->core->getConfig()->isRegradeEnabled() && $this->isRegradeAllowed()) {
                 $result[] = 'regrade_request_date';
             }
         } else {
@@ -623,6 +631,14 @@ class Gradeable extends AbstractModel {
         }
         $date_strings['late_days'] = strval($this->late_days);
         return $date_strings;
+    }
+
+    /**
+     * Gets if this gradeable has a due date or not for electronic gradeables
+     * @return bool
+     */
+    public function hasDueDate() {
+        return $this->has_due_date;
     }
 
     /**
@@ -1589,5 +1605,20 @@ class Gradeable extends AbstractModel {
             $repo = str_replace('{$team_id}', $team->getId(), $repo);
         }
         return $repo;
+    }
+
+    /**
+     * Gets if a user or team has a submission for this gradeable
+     * @param Submitter $submitter
+     * @return bool
+     */
+    public function hasSubmission(Submitter $submitter) {
+        if ($submitter->isTeam() && !$this->isTeamAssignment()) {
+           return false;
+        }
+        if (!$submitter->isTeam() && $this->isTeamAssignment()) {
+            $submitter = $this->core->getQueries()->getTeamByGradeableAndUser($this->getId(), $submitter->getId());
+        }
+        return $this->core->getQueries()->getHasSubmission($this, $submitter);
     }
 }

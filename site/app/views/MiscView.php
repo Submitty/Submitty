@@ -10,11 +10,11 @@ class MiscView extends AbstractView {
         ]);
     }
 
-    public function displayCode($mime_type, $filename, $file_contents) {
+    public function displayCode($file_type, $filename, $file_contents) {
         return $this->core->getOutput()->renderTwigTemplate("misc/Code.twig", [
             "filename" => $filename,
             "file_contents" => $file_contents,
-            "mime_type" => $mime_type,
+            "file_type" => $file_type,
             "base_url" => $this->core->getConfig()->getBaseUrl()
         ]);
 	}

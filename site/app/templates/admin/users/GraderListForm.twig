@@ -3,8 +3,8 @@
 {% block title %}Upload Grader List{% endblock %}
 {% block body %}
     <p>
-        Format your grader data as an .xlsx or .csv file with {{ use_database ? 7 : 6 }} columns:<br>
-        &emsp;username, first name, last name, email, grader group, {{ use_database ? "password, " : "" }}preferred first name<br>
+        Format your grader data as an .xlsx or .csv file with {{ use_database ? 8 : 7 }} columns:<br>
+        &emsp;username, first name, last name, email, grader group, {{ use_database ? "password, " : "" }}preferred first name, preferred last name<br>
     </p>
     <p>&emsp;</p>
     <p>
@@ -16,7 +16,7 @@
     </p>
     <p>&emsp;</p>
     <p>
-        Preferred first name is optional.<br>
+        Preferred first and last names are optional.<br>
         Do not use a header row.<br>
     </p>
     <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />

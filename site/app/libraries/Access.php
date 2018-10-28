@@ -78,15 +78,15 @@ class Access {
     /** Check that the course status is such that the user can view the course */
     const CHECK_COURSE_STATUS           = 1 << 18;
 
-    /** If the current set of flags requires the "gradeable" argument */
+    /** If the current set of flags requires the "gradeable" (type Gradeable) argument */
     const REQUIRE_ARG_GRADEABLE         = 1 << 24;
-    /** If the current set of flags requires the "gradeable" argument */
+    /** If the current set of flags requires the "component" (type GradeableComponent) argument */
     const REQUIRE_ARG_COMPONENT         = 1 << 25;
-    /** If the current set of flags requires the "dir" and "path" arguments */
+    /** If the current set of flags requires the "dir" (type string) and "path" (type string) arguments */
     const REQUIRE_ARGS_DIR_PATH         = 1 << 26;
-    /** If the current set of flags requires the "gradeable_version" argument */
+    /** If the current set of flags requires the "gradeable_version" (type int) argument */
     const REQUIRE_ARG_VERSION           = 1 << 27;
-    /** If the current set of flags requires the "semester" and "course" arguments */
+    /** If the current set of flags requires the "semester" (type string) and "course" (type string) arguments */
     const REQUIRE_ARGS_SEMESTER_COURSE  = 1 << 28;
 
 

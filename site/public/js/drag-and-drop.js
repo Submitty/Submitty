@@ -581,24 +581,29 @@ function deleteSplitItem(csrf_token, gradeable_id, path, count) {
 /**
  * @param gradeable_id
  * @param num_pages
+ * @param use_qr_codes
+ * @param qr_prefix
  */
-function handleBulk(gradeable_id, num_pages) {
+function handleBulk(gradeable_id, num_pages, use_qr_codes = false, qr_prefix = "") {
     $("#submit").prop("disabled", true);
 
     var formData = new FormData();
 
-    if(num_pages == "") {
-        alert("You didn't enter the # of page(s)!");
-        $("#submit").prop("disabled", false);
-        return;
+    if(!use_qr_codes){
+        if(num_pages == "") {
+            alert("You didn't enter the # of page(s)!");
+            $("#submit").prop("disabled", false);
+            return;
+        }
+        else if(num_pages < 1 || num_pages % 1 != 0) {
+            alert(num_pages + " is not a valid # of page(s)!");
+            $("#submit").prop("disabled", false);
+            return;
+        }
     }
-    else if(num_pages < 1 || num_pages % 1 != 0) {
-        alert(num_pages + " is not a valid # of page(s)!");
-        $("#submit").prop("disabled", false);
-        return;
-    }
-
     formData.append('num_pages', num_pages);
+    formData.append('use_qr_codes', use_qr_codes);
+    formData.append('qr_prefix', qr_prefix);
 
     for (var i = 0; i < file_array.length; i++) {
         for (var j = 0; j < file_array[i].length; j++) {

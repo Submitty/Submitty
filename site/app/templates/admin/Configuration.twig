@@ -152,7 +152,7 @@
                     <div class="option-alt">Input the message shown on grades returned to students. Recommended to include directions for regrade requests or the course's email.</div>
                 </label>
             </div>
-            <div class="option-input col-md-4"><input type="text" name="course_email" id="course_email" value="{{ fields['course_email'] }}" /></div>
+            <div class="option-input col-md-4"><textarea style="height: 50px" name="course_email" id="course_email"  />{{ fields['course_email']|raw  }}</textarea></div>
         </div>
 
         <div class="option row">
@@ -173,7 +173,7 @@
                     <div class="option-alt">Input the warning message show to students while submitting a regrade request.</div>
                 </label>
             </div>
-            <div class="option-input col-md-4"><input type="text" name="regrade_message" id="regrade_message" value="{{ fields['regrade_message'] }}" /></div>
+            <div class="option-input col-md-4"><textarea style="height: 50px" name="regrade_message" id="regrade_message" rows="4"/>{{ fields['regrade_message']|raw}}</textarea></div>
         </div>
 
         {# TODO: Not sure what this is

@@ -586,7 +586,6 @@ tr.is_publish {
     border-radius: 4px;
     color: #888;
     font-size: 14px;
-    font-family: 'Source Sans Pro', sans-serif;
     text-align: center;
 }
 
@@ -652,6 +651,11 @@ tr.is_publish {
 
 .gradeable .mark-deleted {
     background: #FFAAAA
+}
+
+.gradeable .custom-mark-error {
+    border-color: #F00;
+    background-color: #FEE;
 }
 
 .gradeable .mark-deleted span.delete-mark-container {
@@ -753,4 +757,24 @@ tr.is_publish {
 
 #mark-conflict-popup .mark-conflict-container {
     margin-top: 25px;
+}
+
+/*Submission Panel CSS*/
+
+#submission_browser {
+    left:15px;
+    bottom:40px;
+    width:48%;
+    height:30%;
+    overflow: hidden;
+}
+
+#directory_view {
+    position:relative;
+    float:left;
+    width:100%;
+}
+
+#changeCodeStyle {
+    display:inline-block;
 }
