@@ -262,7 +262,7 @@ class HomeworkView extends AbstractView {
                     $students_full[] = $student_entry;
                 }else{
                     $null_entry = array('value' => $student->getId(),
-                    'label' => '(In null section) ' . $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>'); 
+                    'label' => '[NULL section] ' . $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>'); 
 
                     $in_null_section = false;
                     foreach ($null_section as $null_student) {
