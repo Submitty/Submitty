@@ -14,6 +14,7 @@ import operator
 import paramiko
 import tempfile
 import socket
+import traceback
 
 from autograder import grade_items_logging
 from autograder import grade_item
@@ -303,6 +304,7 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
         packer_unpacker.unpack_grading_results_zip(which_machine,which_untrusted,local_results_zip)
     except:
         grade_items_logging.log_message(JOB_ID,jobname=item_name,message="ERROR: Exception when unpacking zip")
+        traceback.print_exc()
         with contextlib.suppress(FileNotFoundError):
             os.remove(local_results_zip)
 
