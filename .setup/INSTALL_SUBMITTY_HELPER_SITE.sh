@@ -6,6 +6,9 @@
 
 echo -e "Copy the submission website"
 
+THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+source ${THIS_DIR}/bin/versions.sh
+
 if [ -z ${PHP_USER+x} ]; then
     # constants are not initialized,
     CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../config
@@ -51,16 +54,14 @@ cp ${SUBMITTY_INSTALL_DIR}/zone_images/* ${SUBMITTY_INSTALL_DIR}/site/public/zon
 #####################################
 # Installing PDF annotator
 
-VERSION=v.18.09.00
-
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public/js/pdf
 pushd ${SUBMITTY_INSTALL_DIR}/site/public/js/pdf
-if [[ ! -f VERSION || $(< VERSION) != "${VERSION}" ]]; then
+if [[ ! -f VERSION || $(< VERSION) != "${Pdf_Annotate_Js_Version}" ]]; then
     for b in pdf-annotate.min.js pdf-annotate.min.js.map;
-        do wget -nv "https://github.com/Submitty/pdf-annotate.js/releases/download/${VERSION}/${b}" -O ${b}
+        do wget -nv "https://github.com/Submitty/pdf-annotate.js/releases/download/${Pdf_Annotate_Js_Version}/${b}" -O ${b}
     done
 
-    echo ${VERSION} > VERSION
+    echo ${Pdf_Annotate_Js_Version} > VERSION
 fi
 popd > /dev/null
 

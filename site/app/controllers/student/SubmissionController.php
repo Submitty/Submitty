@@ -318,7 +318,10 @@ class SubmissionController extends AbstractController {
                 }
 
                 // Only show hidden test cases if the display version is the graded version (and grades are released)
-                $show_hidden = $version == $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedVersion(false) && $gradeable->isTaGradeReleased();
+                $show_hidden = false;
+                if ($graded_gradeable != NULL) {
+                  $show_hidden = $version == $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedVersion(false) && $gradeable->isTaGradeReleased();
+                }
 
                 // If we get here, then we can safely construct the old model w/o checks
                 // FIXME: remove this 'old_gradeable' once none of the HomeworkView relies on it
@@ -770,7 +773,16 @@ class SubmissionController extends AbstractController {
         if (!@file_put_contents(FileUtils::joinPaths($version_path, ".submit.timestamp"), $current_time_string_tz."\n")) {
             return $this->uploadResult("Failed to save timestamp file for this submission.", false);
         }
-
+        $upload_time_string_tz = $timestamp . " " . $this->core->getConfig()->getTimezone()->getName() . "\n";
+       
+        $bulk_upload_data_json = array("submit_timestamp" =>  $current_time_string_tz,
+                                       "upload_timestamp" =>  $upload_time_string_tz,
+                                       "filepath" => $uploaded_file);
+        
+        if (!@file_put_contents(FileUtils::joinPaths($version_path, "bulk_upload_data.json"), serialize($bulk_upload_data_json)."\n")) {
+            return $this->uploadResult("Failed to create bulk upload file for this submission.", false);
+        }
+        
         $queue_file = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
             $gradeable->getId(), $who_id, $new_version);
         $queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_queue",
