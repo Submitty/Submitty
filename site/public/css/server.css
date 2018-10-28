@@ -541,6 +541,7 @@ table tr.table-header {
 .option-input > textarea,
 .option-input > input[type="text"] {
     width: 95%;
+    resize: none;
 }
 
 .option-small-input > textarea,
