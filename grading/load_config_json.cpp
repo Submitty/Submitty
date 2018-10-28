@@ -56,7 +56,7 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
   bool docker_enabled = whole_config["docker_enabled"];
 
   if (!whole_config["use_router"].is_boolean()){
-    whole_config["use_router"] = true;
+    whole_config["use_router"] = false;
   }
 
   if (!whole_config["single_port_per_container"].is_boolean()){
