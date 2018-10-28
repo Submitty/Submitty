@@ -251,6 +251,13 @@ pip3 install parso
 # Python3 implementation of python-clang bindings (may not work < 6.0)
 pip3 install clang
 
+#libraries for QR code processing:
+#install DLL for zbar
+apt-get install libzbar0 --yes
+
+pip3 install pyzbar
+pip3 install pdf2image
+
 sudo chmod -R 555 /usr/local/lib/python*/*
 sudo chmod 555 /usr/lib/python*/dist-packages
 sudo chmod 500 /usr/local/lib/python*/dist-packages/pam.py*
