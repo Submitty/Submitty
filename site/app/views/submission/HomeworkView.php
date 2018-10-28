@@ -249,18 +249,28 @@ class HomeworkView extends AbstractView {
             }
 
             $students_full = array();
+            $null_section = array();
             foreach ($students_version as $student_pair) {
                 /* @var User $student */
                 $student = $student_pair[0];
-
-                $student_entry = array('value' => $student->getId(),
+                if($student->getRegistrationSection() != null){
+                    $student_entry = array('value' => $student->getId(),
                     'label' => $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>');
+                    if ($student_pair[1] !== 0) {
+                        $student_entry['label'] .= ' (' . $student_pair[1] . ' Prev Submission)';
+                    }
+                    $students_full[] = $student_entry;
+                }else{
+                    $null_entry = array('value' => $student->getId(),
+                    'label' => '(In null section) ' . $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>'); 
 
-                if ($student_pair[1] !== 0) {
-                    $student_entry['label'] .= ' (' . $student_pair[1] . ' Prev Submission)';
+                    $in_null_section = false;
+                    foreach ($null_section as $null_student) {
+                        if($null_student['value'] === $student->getId()) $in_null_section = true;
+                    }
+                    if(!$in_null_section) $null_section[] = $null_entry;
                 }
-
-                $students_full[] = $student_entry;
+                $students_full = array_unique(array_merge($students_full, $null_section), SORT_REGULAR);
             }
         }
 
