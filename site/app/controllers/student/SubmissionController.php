@@ -762,11 +762,13 @@ class SubmissionController extends AbstractController {
         if (!@file_put_contents(FileUtils::joinPaths($version_path, ".submit.timestamp"), $current_time_string_tz."\n")) {
             return $this->uploadResult("Failed to save timestamp file for this submission.", false);
         }
-        
+        $upload_time_string_tz = $timestamp . " " . $this->core->getConfig()->getTimezone()->getName() . "\n";
+       
         $bulk_upload_data_json = array("submit_timestamp" =>  $current_time_string_tz,
-                                  "filepath" => $uploaded_file);
+                                       "upload_timestamp" =>  $upload_time_string_tz,
+                                       "filepath" => $uploaded_file);
         
-        if (!@file_put_contents(FileUtils::joinPaths($version_path, "bulk_upload_data_json"), serialize($bulk_upload_data_json)."\n")) {
+        if (!@file_put_contents(FileUtils::joinPaths($version_path, "bulk_upload_data.json"), serialize($bulk_upload_data_json)."\n")) {
             return $this->uploadResult("Failed to create bulk upload file for this submission.", false);
         }
         
