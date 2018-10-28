@@ -318,7 +318,10 @@ class SubmissionController extends AbstractController {
                 }
 
                 // Only show hidden test cases if the display version is the graded version (and grades are released)
-                $show_hidden = $version == $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedVersion(false) && $gradeable->isTaGradeReleased();
+                $show_hidden = false;
+                if ($graded_gradeable != NULL) {
+                  $show_hidden = $version == $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedVersion(false) && $gradeable->isTaGradeReleased();
+                }
 
                 // If we get here, then we can safely construct the old model w/o checks
                 // FIXME: remove this 'old_gradeable' once none of the HomeworkView relies on it
@@ -529,7 +532,7 @@ class SubmissionController extends AbstractController {
                 if (!@unlink($uploaded_file["tmp_name"][$j])) {
                     return $this->uploadResult("Failed to delete the uploaded file {$uploaded_file["name"][$j]} from temporary storage.", false);
                 }
-            }
+            } 
         }
 
         // use pdf_check.cgi to check that # of pages is valid and split
@@ -538,9 +541,14 @@ class SubmissionController extends AbstractController {
         // Open a cURL connection
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
+        $qr_prefix = $_POST['qr_prefix'];
 
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."pdf_check.cgi?&num={$num_pages}&sem={$semester}&course={$course}&g_id={$gradeable_id}&ver={$current_time}");
+        if($_POST['use_qr_codes'] === "false"){
+            curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."pdf_check.cgi?&num={$num_pages}&sem={$semester}&course={$course}&g_id={$gradeable_id}&ver={$current_time}");
+        }else{
+            curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."pdf_check_qr.cgi?&sem={$semester}&course={$course}&g_id={$gradeable_id}&ver={$current_time}&qr_prefix={$qr_prefix}");
+        }
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $output = curl_exec($ch);
 
@@ -555,9 +563,10 @@ class SubmissionController extends AbstractController {
             FileUtils::recursiveRmdir($version_path);
             return $this->uploadResult("Error JSON response for pdf split: ".json_last_error_msg(),false);
         }
-        else if (!isset($output['valid'])) {
+        if (!isset($output['valid'])) {
             FileUtils::recursiveRmdir($version_path);
-            return $this->uploadResult("Missing response in JSON for pdf split",false);
+            return $this->uploadResult($output, false);
+            //return $this->uploadResult("Missing response in JSON for pdf split",false);
         }
         else if ($output['valid'] !== true) {
             FileUtils::recursiveRmdir($version_path);
@@ -730,7 +739,7 @@ class SubmissionController extends AbstractController {
         $timestamp_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
             $gradeable->getId(), $timestamp);
         $files = FileUtils::getAllFiles($timestamp_path);
-        if (count($files) == 0) {
+        if (count($files) == 0 || (count($files) == 1 && array_key_exists('decoded.json', $files)  )) {
             if (!FileUtils::recursiveRmdir($timestamp_path)) {
                 return $this->uploadResult("Failed to remove the empty timestamp directory {$timestamp} from the split_pdf directory.", false);
             }
@@ -764,7 +773,16 @@ class SubmissionController extends AbstractController {
         if (!@file_put_contents(FileUtils::joinPaths($version_path, ".submit.timestamp"), $current_time_string_tz."\n")) {
             return $this->uploadResult("Failed to save timestamp file for this submission.", false);
         }
-
+        $upload_time_string_tz = $timestamp . " " . $this->core->getConfig()->getTimezone()->getName() . "\n";
+       
+        $bulk_upload_data_json = array("submit_timestamp" =>  $current_time_string_tz,
+                                       "upload_timestamp" =>  $upload_time_string_tz,
+                                       "filepath" => $uploaded_file);
+        
+        if (!@file_put_contents(FileUtils::joinPaths($version_path, "bulk_upload_data.json"), serialize($bulk_upload_data_json)."\n")) {
+            return $this->uploadResult("Failed to create bulk upload file for this submission.", false);
+        }
+        
         $queue_file = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
             $gradeable->getId(), $who_id, $new_version);
         $queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_queue",
@@ -848,7 +866,7 @@ class SubmissionController extends AbstractController {
         $timestamp_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
             $gradeable->getId(), $timestamp);
         $files = FileUtils::getAllFiles($timestamp_path);
-        if (count($files) == 0) {
+        if (count($files) == 0 || (count($files) == 1 && array_key_exists('decoded.json', $files)  )) {
             if (!FileUtils::recursiveRmdir($timestamp_path)) {
                 return $this->uploadResult("Failed to remove the empty timestamp directory {$timestamp} from the split_pdf directory.", false);
             }

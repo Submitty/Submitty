@@ -6,6 +6,12 @@
     {% endif %}
 
     <form id="bulkForm" method="post">
+         {% if use_qr_codes %}
+                <div style="text-align:center;margin:10px;padding:5px;">
+                    <button type="button" id="bulk_submit_all" class="btn btn-success">Submit All Uploaded PDFS</button>
+                    <button type="button" id="bulk_delete_all" class="btn btn-danger">Delete All Uploaded PDFS</button>
+                </div>
+            {% endif %}
         <table class="table table-striped table-bordered persist-area">
             <thead class="persist-thead">
             <tr>
@@ -14,13 +20,20 @@
                 <td width="53%">PDF preview</td>
                 <td width="5%">Full PDF</td>
                 <td width="15%">User ID</td>
+                {% if use_qr_codes %}
+                    <td>Page Count</td>
+                {% endif %}
                 <td width="8%">Submit</td>
                 <td width="8%">Delete</td>
             </tr>
             </thead>
             <tbody>
                 {% for file in files %}
-                    <tr class="tr tr-vertically-centered">
+                    {% if use_qr_codes and file["user_id"]["valid"] == false %}
+                        <tr class="tr tr-vertically-centered" style="background-color:pink;">
+                    {% else %}
+                        <tr class="tr tr-vertically-centered" >
+                    {% endif %}
                         <td>{{ loop.index }}</td>
                         <td>{{ file.clean_timestamp }}</td>
                         <td>
@@ -36,7 +49,11 @@
                         <td>
                             <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
                             <div id="users_{{ loop.index }}">
-                                <input type="text" id="bulk_user_id_{{ loop.index }}[0]" value =""/>
+                                {% if use_qr_codes %}
+                                    <input type="text" id="bulk_user_id_{{ loop.index }}[0]" value ="{{ file["user_id"]["id"] }}"/>
+                                {% else %}
+                                    <input type="text" id="bulk_user_id_{{ loop.index }}[0]" value =""/>
+                                {% endif %}
                                 {% if team_assignment %}
                                     {# (size - 1) because twig loops are range inclusive #}
                                     {% for i in 1..(max_team_size - 1) %}
@@ -45,6 +62,11 @@
                                 {% endif %}
                             </div>
                         </td>
+                        {% if use_qr_codes %}
+                            <td>
+                                {{ file["page_count"] }}
+                            </td>
+                        {% endif %}
                         <td>
                             <button type="button" id="bulk_submit_{{ loop.index }}" class="btn btn-success">Submit</button>
                         </td>
@@ -60,12 +82,33 @@
 {# Todo: This should go into its own file if possible #}
 <script type="text/javascript">
     $(function() {
+        var show_alert = true;
         $("#bulkForm input").autocomplete({
             source: students_full
+        });
+        $('#bulk_submit_all').click(function(e){
+            var submit_buttons = $(".tr-vertically-centered > td > .btn-success");
+            for(var i = 0; i < submit_buttons.length;i++){
+                $("#" +  submit_buttons[i].id).focus();
+                $("#" +  submit_buttons[i].id).click();
+            }
+        });
+        $('#bulk_delete_all').click(function(e){
+            var delete_buttons = $(".tr-vertically-centered > td > .btn-danger");
+            for(var i = 0; i < delete_buttons.length;i++){
+                show_alert = false;
+                var delete_btn = $("#" +  delete_buttons[i].id);
+                delete_btn.focus();
+                delete_btn.click();
+                delete_btn.blur();
+            }
+            $('#bulk_delete_all').focus();
         });
         $("#bulkForm button").click(function(e) {
             var btn = $(document.activeElement);
             var id = btn.attr("id");
+            if(id == "bulk_submit_all" || id == "bulk_delete_all") return;
+            console.log("deleting " + id);
             var count = btn.parent().parent().index()+1;
             var name = "bulk_user_id_"+count;
             var user_ids = [];
@@ -73,12 +116,16 @@
             var js_count_array = {{ count_array|json_encode|raw }};
             var path = decodeURIComponent(js_count_array[count]);
             if (id.includes("delete")) {
-                message = "Are you sure you want to delete this submission?";
-                if (!confirm(message)) {
-                    return;
+                if(show_alert){
+                    message = "Are you sure you want to delete this submission?";
+                    if (!confirm(message)) {
+                        return;
+                    }
+                    $("bulk_delete_all").prop('disabled', true);
                 }
                 deleteSplitItem("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", path, count);
                 moveNextInput(count);
+                show_alert = true;
             } else {
                 validateUserId("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_ids, true, path, count, "", makeSubmission);
             }
@@ -89,6 +136,7 @@
             if(e.keyCode === 13) { // enter was pressed
                 var text = $(document.activeElement);
                 var id = text.attr("id");
+                if(id == "bulk_submit_all" || id == "bulk_delete_all") return;
                 var count = text.parent().parent().parent().index()+1;
                 var name = "bulk_user_id_"+count;
                 var user_ids = [];

@@ -374,16 +374,18 @@ class HomeworkView extends AbstractView {
         $all_directories = $gradeable->getSplitPdfFiles();
 
         $files = [];
-
         $count = 1;
         $count_array = array();
         foreach ($all_directories as $timestamp => $content) {
             $dir_files = $content['files'];
-
+            $json_file = '';
             foreach ($dir_files as $filename => $details) {
+                if($filename === 'decoded.json'){
+                    $json_file = $details['path'];
+                }
                 $clean_timestamp = str_replace('_', ' ', $timestamp);
                 $path = rawurlencode(htmlspecialchars($details['path']));
-                if (strpos($filename, 'cover') === false) {
+                if (strpos($filename, 'cover') === false || pathinfo($filename)['extension'] === '.json') {
                     continue;
                 }
                 // get the full filename for PDF popout
@@ -419,13 +421,36 @@ class HomeworkView extends AbstractView {
                 $count++;
             }
         }
+        $semester = $this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+        $current_time = $this->core->getDateTimeNow()->format("m-d-Y_H:i:sO");
+        $ch = curl_init();
+        //$user = $this->core->getQueries()->getUserById($id);
 
+        $json_data = ($json_file !== '') ? FileUtils::readJsonFile($json_file) : '';
+        $use_qr_codes = false;
+        //check for invalid ID's
+        if($json_data != ''){
+            $use_qr_codes = true;
+            for($i = 0; $i < count($files); $i++){
+                for($j = 0; $j < count($files); $j++){
+                    if($files[$i]['filename_full'] == $json_data[$j+1]['pdf_name']){
+                        $files[$i]['page_count'] = $json_data[$j+1]['page_count'];
+                                    //validate users
+                        $files[$i]['user_id']['id'] = $json_data[$j+1]['id'];
+                        $files[$i]['user_id']['valid'] = ($this->core->getQueries()->getUserById($json_data[$j+1]['id']) === null) ? false : true;
+                    }
+                }
+            }
+        }
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/BulkUploadBox.twig', [
             'gradeable_id' => $gradeable->getId(),
             'team_assignment' => $gradeable->isTeamAssignment(),
             'max_team_size' => $gradeable->getTeamSizeMax(),
             'count_array' => $count_array,
             'files' => $files,
+            'use_qr_codes' => $use_qr_codes,
         ]);
     }
 
@@ -490,7 +515,7 @@ class HomeworkView extends AbstractView {
             $param = array_merge($param, [
                 'in_queue' => $version_instance->isQueued(),
                 'grading' => $version_instance->isGrading(),
-                'submission_time' => DateUtils::dateTimeToString($version_instance->getSubmissionTime()),
+                'db_submission_time' => DateUtils::dateTimeToString($version_instance->getSubmissionTime()),
                 'days_late' => $version_instance->getDaysLate(),
                 'num_autogrades' => $version_instance->getHistoryCount(),
                 'files' => $version_instance->getFiles(),
@@ -502,6 +527,7 @@ class HomeworkView extends AbstractView {
                 $param = array_merge($param, [
                     'results' => 0,
                     'grade_time' => $history->getGradeTime(),
+                    'history_submission_time' => DateUtils::dateTimeToString($history->getSubmissionTime()),
                     'grading_finished' => DateUtils::dateTimeToString($history->getGradingFinished()),
                     'wait_time' => $history->getWaitTime(),
                     'revision' => $history->getVcsRevision(),

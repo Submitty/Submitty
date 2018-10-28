@@ -90,6 +90,8 @@ def unzip_queue_file(zipfilename):
         raise RuntimeError("ERROR: zip file does not exist '", zipfilename, "'")
     zip_ref = zipfile.ZipFile(zipfilename,'r')
     names = zip_ref.namelist()
+    if 'failure.txt' in names:
+        return None
     if not 'queue_file.json' in names:
         raise RuntimeError("ERROR: zip file does not contain queue file '", zipfilename, "'")
     # remember the current directory
@@ -278,6 +280,10 @@ def unpack_grading_results_zip(which_machine,which_untrusted,my_results_zip_file
 
     queue_obj = unzip_queue_file(my_results_zip_file)
 
+    if queue_obj is None:
+        return False
+
+
     job_id = queue_obj["job_id"]
     partial_path = os.path.join(queue_obj["gradeable"],queue_obj["who"],str(queue_obj["version"]))
     item_name = os.path.join(queue_obj["semester"],queue_obj["course"],"submissions",partial_path)
@@ -311,6 +317,7 @@ def unpack_grading_results_zip(which_machine,which_untrusted,my_results_zip_file
     print (which_machine,which_untrusted,"unzip",item_name, " in ", int(gradingtime), " seconds")
 
     grade_items_logging.log_message(job_id,is_batch_job,"unzip",item_name,"grade:",gradingtime,grade_result)
+    return True
 
 
 # ==================================================================================

@@ -177,6 +177,15 @@ class TeamController extends AbstractController {
 
         $invite_id = $_POST['invite_id'];
         if ($this->core->getQueries()->getUserByID($invite_id) === null) {
+            // If a student with this id does not exist in the course...
+            $this->core->addErrorMessage("User {$invite_id} does not exist");
+            $this->core->redirect($return_url);
+        }
+
+        if($this->core->getQueries()->getUserByID($invite_id)->getRegistrationSection() === null){
+            // If a student with this id is in the null section...
+            // (make this look the same as a non-existant student so as not to
+            // reveal information about dropped students)
             $this->core->addErrorMessage("User {$invite_id} does not exist");
             $this->core->redirect($return_url);
         }
