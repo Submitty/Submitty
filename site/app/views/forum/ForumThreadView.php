@@ -521,18 +521,15 @@ HTML;
 HTML;
 
         if($this->core->getUser()->getGroup() <= 2){
+        	$this->core->getOutput()->addInternalCss('chosen.min.css');
+        	$this->core->getOutput()->addInternalJs('chosen.jquery.min.js');
 			$current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
 			$current_thread_date = $current_thread_first_post["timestamp"];
 			$merge_thread_list = $this->core->getQueries()->getThreadsBefore($current_thread_date, 1);
-			$possibleMerges = json_encode(array_map(function(array $row) {
-						$temp_title = htmlentities($row['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-						return ['value' => "({$row['id']}) {$temp_title}",
-								'label' => "({$row['id']}) {$temp_title}"];
-						}, $merge_thread_list));
 			$return .= $this->core->getOutput()->renderTwigTemplate("forum/MergeThreadsForm.twig", [
 				"current_thread_date" => $current_thread_date,
 				"current_thread" => $currentThread,
-				"possibleMerges" => $possibleMerges
+				"possibleMerges" => $merge_thread_list
 			]);
 		}
 		$return .= $this->core->getOutput()->renderTwigTemplate("forum/EditPostForm.twig");
