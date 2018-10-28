@@ -182,7 +182,7 @@ class TeamController extends AbstractController {
         }
 
         if($this->core->getQueries()->getUserByID($invite_id)->getRegistrationSection() === null){
-            $this->core->addErrorMessage("Cannot invite {$invite_id}");
+            $this->core->addErrorMessage("User {$invite_id} does not exist");
             $this->core->redirect($return_url);
         }
 
