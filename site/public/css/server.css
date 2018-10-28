@@ -380,6 +380,9 @@ table tr.table-header {
     border-radius: 3px;
     padding: 30px;
     margin: 15px;
+}
+
+.content:last-child {
     flex-grow: 1;
 }
 
