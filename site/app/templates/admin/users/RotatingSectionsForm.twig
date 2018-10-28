@@ -155,11 +155,15 @@
                         </label>
                             <label>excluding students in registration </label>
 
-
-
+                        <table style="width:100%">
                             {% for row in reg_sections %}
+                            <tr><th>
                                 <input type="checkbox" name="{{ row['sections_registration_id'] }}" value="{{ row['sections_registration_id'] }}" >Section {{ row['sections_registration_id'] }}</input>
+                                </th></tr>
                             {% endfor %}
+                        </table>
+
+
 
 
                         <br /><br />
