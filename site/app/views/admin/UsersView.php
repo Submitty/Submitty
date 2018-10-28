@@ -115,7 +115,7 @@ class UsersView extends AbstractView {
                         break;
                 }
                 $first_name = str_replace("'", "&#039;", $student->getDisplayedFirstName());
-                $last_name = str_replace("'", "&#039;", $student->getLastName());
+                $last_name = str_replace("'", "&#039;", $student->getDisplayedLastName());
                 array_push($download_info, ['first_name' => $first_name, 'last_name' => $last_name, 'user_id' => $student->getId(), 'email' => $student->getEmail(), 'reg_section' => "$reg_sec", 'rot_section' => "$rot_sec", 'group' => "$grp"]);
             }
         }
@@ -145,9 +145,9 @@ class UsersView extends AbstractView {
                         break;
                 }
                 $first_name = str_replace("'", "&#039;", $grader->getDisplayedFirstName());
-                $last_name = str_replace("'", "&#039;", $grader->getLastName());
+                $last_name = str_replace("'", "&#039;", $grader->getDisplayedLastName());
                 array_push($download_info, ['first_name' => $first_name, 'last_name' => $last_name, 'user_id' => $grader->getId(), 'email' => $grader->getEmail(), 'reg_section' => "$reg_sec", 'rot_section' => "$rot_sec", 'group' => $grp]);
-            }   
+            }
         }
         $download_info_json = json_encode($download_info);
         return $this->core->getOutput()->renderTwigTemplate("admin/users/DownloadForm.twig", [

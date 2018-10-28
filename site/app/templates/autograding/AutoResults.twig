@@ -18,37 +18,21 @@
 {% endif %}
 
 {% if num_visible_testcases > 1 %}
+    {# check if instructor grades exist and change title, display hidden points when TA grades are released (if hidden tests exist) #}
+
+    <div class="box">
+        <div class="box-title">
+            {{ Badge.render(nonhidden_earned, nonhidden_max, false) }}
+            <h4>{{ is_ta_grade_released ? "Autograding Subtotal" : "Total" }} {% if show_hidden_breakdown %} <i>(Without Hidden Points)</i>{% endif %}</h4>
+        </div>
+    </div>
     {% if show_hidden_breakdown %}
         <div class="box">
             <div class="box-title">
-                {{ Badge.render(nonhidden_earned, nonhidden_max, false) }}
-                <h4>Total (No Hidden Points)</h4>
-            </div>
-        </div>
-
-        <div class="box" style="background-color:#D3D3D3;">
-            <div class="box-title">
                 {{ Badge.render(hidden_earned, hidden_max, false) }}
-                <h4>Total (With Hidden Points)</h4>
+                <h4>{{ is_ta_grade_released ? "Autograding Subtotal" : "Total" }} <i>(With Hidden Points)</i></h4>
             </div>
         </div>
-    {% else %}
-        {# check if instructor grades exist and change title, display hidden points when TA grades are released (if hidden tests exist) #}
-
-        <div class="box">
-            <div class="box-title">
-                {{ Badge.render(nonhidden_earned, nonhidden_max, false) }}
-                <h4>{{ is_ta_grade_released ? "Autograding Subtotal" : "Total" }}</h4>
-            </div>
-        </div>
-        {% if display_hidden %}
-            <div class="box">
-                <div class="box-title">
-                    {{ Badge.render(hidden_earned, hidden_max, false) }}
-                    <h4>{{ is_ta_grade_released ? "Autograding Subtotal" : "Total" }} <i>(With Hidden Points)</i></h4>
-                </div>
-            </div>
-        {% endif %}
     {% endif %}
 {% endif %}
 
@@ -69,15 +53,11 @@
 
             {# Badge #}
             {% if testcase.has_points %}
-                {% if can_view %}
+                {% if not testcase.hidden or show_hidden %}
                     {{ Badge.render(testcase.points, testcase.points_total, testcase.extra_credit) }}
                 {% else %}
                     <div class="badge">
                         Hidden
-                        {% if is_ta_grade_released %}
-                            <br>
-                            {{ Badge.format_value(testcase.points, testcase.points_total, testcase.extra_credit) }}
-                        {% endif %}
                     </div>
                 {% endif %}
             {% elseif has_badges %}
@@ -86,7 +66,7 @@
             {# /Badge #}
 
             <h4>
-                {% if testcase.hidden and show_hidden %}
+                {% if testcase.hidden %}
                     HIDDEN:
                 {% endif %}
                 {{ testcase.name }}

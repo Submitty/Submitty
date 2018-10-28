@@ -3,7 +3,9 @@
 <div class="content">
     <div class="upperinfo">
         <h1 class="upperinfo-left">New submission for: {{ gradeable_name }}</h1>
-        <h3 class="upperinfo-right">Due: {{ formatted_due_date }}</h3>
+        {% if has_due_date %}
+            <h3 class="upperinfo-right">Due: {{ formatted_due_date }}</h3>
+        {% endif %}
     </div>
 
     {# Admin submission type selector #}
