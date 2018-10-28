@@ -13,6 +13,7 @@ use app\models\gradeable\SubmissionTextBox;
 use app\models\User;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
+use app\libraries\Utils;
 
 class HomeworkView extends AbstractView {
 
@@ -247,31 +248,7 @@ class HomeworkView extends AbstractView {
             foreach ($gradeables as $g) {
                 $students_version[] = array($g->getUser(), $g->getHighestVersion());
             }
-
-            $students_full = array();
-            $null_section = array();
-            foreach ($students_version as $student_pair) {
-                /* @var User $student */
-                $student = $student_pair[0];
-                if($student->getRegistrationSection() != null){
-                    $student_entry = array('value' => $student->getId(),
-                    'label' => $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>');
-                    if ($student_pair[1] !== 0) {
-                        $student_entry['label'] .= ' (' . $student_pair[1] . ' Prev Submission)';
-                    }
-                    $students_full[] = $student_entry;
-                }else{
-                    $null_entry = array('value' => $student->getId(),
-                    'label' => '[NULL section] ' . $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>'); 
-
-                    $in_null_section = false;
-                    foreach ($null_section as $null_student) {
-                        if($null_student['value'] === $student->getId()) $in_null_section = true;
-                    }
-                    if(!$in_null_section) $null_section[] = $null_entry;
-                }
-                $students_full = array_unique(array_merge($students_full, $null_section), SORT_REGULAR);
-            }
+            $students_full = json_decode(Utils::getAutoFillData($students, $students_version));
         }
 
         $image_data = [];
