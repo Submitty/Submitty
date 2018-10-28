@@ -102,14 +102,12 @@ class PDFController extends AbstractController {
     private function showGraderPDFEmbedded(){
         //This is the embedded pdf annotator that we built.
         $gradeable_id = $_POST['gradeable_id'] ?? NULL;
-        $user_id = $_POST['user_id'] ?? NULL;
+        //User can be a team
+        $id = $_POST['user_id'] ?? NULL;
         $filename = $_POST['filename'] ?? NULL;
-        $active_version = $this->core->getQueries()->getGradeable($gradeable_id, $user_id)->getActiveVersion();
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
-        $id = $user_id;
-        if($gradeable->isTeamAssignment()){
-            $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $user_id)->getId();
-        }
+        $config = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($config, null, $id);
+        $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
         $annotation_jsons = [];
         //Dir iterator needs the first file.
