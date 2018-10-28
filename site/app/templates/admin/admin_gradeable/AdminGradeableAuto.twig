@@ -3,7 +3,7 @@
     <fieldset>
         <input type="radio" class="config_option ignore" name="config_option" value="defaults"/> Provided autograding configurations
         <input type="radio" class="config_option ignore" name="config_option" value="uploaded"/> Custom uploaded autograding configurations
-        {% if repo_name != "" %}
+        {% if config_repo_name != "" %}
             <input type="radio" class="config_option ignore" name="config_option" value="repo"/> Use Private repository ({{ config_repo_name }})
         {% endif %}
         <input type="radio" class="config_option ignore" name="config_option" value="manual"/> Other full path

@@ -168,7 +168,7 @@ class AdminGradeableController extends AbstractController {
         // This helps determine which radio button to check when selecting config.
         // Default option, which means the user has to specify the path.
         $config_select_mode = 'manual';
-
+       
         // These are hard coded default config options.
         $default_config_paths = [ ['upload_only (1 mb maximum total student file submission)', '/usr/local/submitty/more_autograding_examples/upload_only/config'],
                                   ['pdf_exam (100 mb maximum total student file submission)', '/usr/local/submitty/more_autograding_examples/pdf_exam/config'],
@@ -176,6 +176,7 @@ class AdminGradeableController extends AbstractController {
                                   ['left_right_exam_seating (for collecting student handedness for exam seating assignment', '/usr/local/submitty/more_autograding_examples/left_right_exam_seating/config'],
                                   ['test_notes_upload (expects single file, 2 mb maximum, 2-page pdf student submission)', '/usr/local/submitty/more_autograding_examples/test_notes_upload/config'],
                                   ['test_notes_upload_3page (expects single file, 3 mb maximum, 3-page pdf student submission)', '/usr/local/submitty/more_autograding_examples/test_notes_upload_3page/config'] ];
+        
         foreach ($default_config_paths as $default_config_path) {
             $path = $default_config_path[1];
             // If this happens then select the first radio button 'Using Default'
@@ -184,11 +185,12 @@ class AdminGradeableController extends AbstractController {
                 break;
             }
         }
-
+        
         // Configs uploaded to the 'Upload Gradeable Config' page
         $uploaded_configs_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'config_upload');
         $all_uploaded_configs = FileUtils::getAllFiles($uploaded_configs_dir);
         $all_uploaded_config_paths = array();
+        
         foreach ($all_uploaded_configs as $file) {
             $all_uploaded_config_paths[] = $file['path'];
             // If this happens then select the second radio button 'Using Uploaded'
@@ -196,7 +198,7 @@ class AdminGradeableController extends AbstractController {
                 $config_select_mode = 'uploaded';
             }
         }
-
+        
         // Configs stored in a private repository (specified in course config)
         $config_repo_name = $this->core->getConfig()->getPrivateRepository();
         $all_repository_config_paths = array();
