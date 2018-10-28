@@ -63,7 +63,7 @@ class Access {
      * Check that students are allowed to view the given gradeable
      * Only applies to students
      */
-    const CHECK_STUDENT_VIEW            = 1 << 16 | self::REQUIRE_ARG_GRADEABLE;
+    const CHECK_STUDENT_VIEW            = 1 << 15 | self::REQUIRE_ARG_GRADEABLE;
     /**
      * Check that students are allowed to submit the given gradeable
      * Only applies to students
