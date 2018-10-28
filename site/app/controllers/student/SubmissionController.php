@@ -308,7 +308,7 @@ class SubmissionController extends AbstractController {
             else {
                 $extensions = $graded_gradeable !== null ? $graded_gradeable->getLateDayException($this->core->getUser()) : 0;
                 $days_late = DateUtils::calculateDayDiff($gradeable->getSubmissionDueDate());
-                $late_days_use = max(0, $days_late - $extensions);
+                $late_days_use = $gradeable->hasDueDate() ? max(0, $days_late - $extensions) : 0;
                 if ($graded_gradeable !== null
                     && $gradeable->isTaGradeReleased()
                     && $gradeable->isTaGrading()

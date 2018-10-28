@@ -283,11 +283,13 @@ class GradeableListTester extends BaseUnitTest {
      * @return \PHPUnit\Framework\MockObject\MockObject
      */
     private function mockGradeable($id, $type, $ta_view_start_date, $submission_open_date, $submission_due_date, $grade_start_date,
-                                   $grade_released_date, $ta_grading = true) {
+                                   $grade_released_date, $ta_grading = true, $student_submit = true, $has_due_date = true) {
         $gradeable = $this->createMockModel(Gradeable::class);
         $gradeable->method('getId')->willReturn($id);
         $gradeable->method('getType')->willReturn($type);
         $gradeable->method('isTaGrading')->willReturn($ta_grading);
+        $gradeable->method('isStudentSubmit')->willReturn($student_submit);
+        $gradeable->method('hasDueDate')->willReturn($has_due_date);
         $temp = array('ta_view_start_date' => 'getTaViewStartDate', 'submission_open_date' => 'getSubmissionOpenDate',
                       'submission_due_date' => 'getSubmissionDueDate', 'grade_start_date' => 'getGradeStartDate',
                       'grade_released_date' => 'getGradeReleasedDate');
