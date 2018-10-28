@@ -1106,13 +1106,14 @@ class ElectronicGraderController extends GradingController {
         }
 
         // TODO: delete this once late days are using new model
-        $old_gradeable = null;
-        if($graded_gradeable->getSubmitter()->isTeam()) {
-            $old_gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $graded_gradeable->getSubmitter()->getTeam()->getLeaderId());
-        } else {
-            $old_gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $submitter_id);
-        }
-        $late_status = $old_gradeable->calculateLateStatus();
+//        $old_gradeable = null;
+//        if($graded_gradeable->getSubmitter()->isTeam()) {
+//            $old_gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $graded_gradeable->getSubmitter()->getTeam()->getLeaderId());
+//        } else {
+//            $old_gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $submitter_id);
+//        }
+//        $late_status = $old_gradeable->calculateLateStatus();
+        $late_status = 'GOOD';
         // TODO: End region
 
         $this->core->getOutput()->addInternalCss('ta-grading.css');
