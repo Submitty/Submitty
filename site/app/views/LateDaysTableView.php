@@ -63,6 +63,10 @@ class LateDaysTableView extends AbstractView {
     private function filterCanView(Gradeable $gradeable) {
         //TODO: Move all this logic to the controller
 
+        // Don't show the students gradeables they don't submit for / don't have due dates
+        if (!$gradeable->getStudentSubmit() || !$gradeable->getHasDueDate()) {
+            return false;
+        }
         $user = $this->core->getUser();
 
         //Remove incomplete gradeables for non-instructors

@@ -89,6 +89,7 @@ use app\libraries\Utils;
  * @method int getRegradeStatus()
  * @method \DateTime getRegradeRequestDate()
  * @method bool isRegradeAllowed()
+ * @method getHasDueDate()
  */
 class Gradeable extends AbstractModel {
     
@@ -164,6 +165,9 @@ class Gradeable extends AbstractModel {
 
     /** @property @var \DateTime|null Due date for an electronic submission */
     protected $due_date = null;
+
+    /** @property @var bool If this gradeable has a due date */
+    protected $has_due_date = false;
 
     /** @property @var bool Is the electronic submission via a VCS repository or by upload */
     protected $is_repository = false;
@@ -349,6 +353,7 @@ class Gradeable extends AbstractModel {
         if ($this->type === GradeableType::ELECTRONIC_FILE) {
             $this->open_date = DateUtils::parseDateTime($details['eg_submission_open_date'], $timezone);
             $this->due_date = DateUtils::parseDateTime($details['eg_submission_due_date'], $timezone);
+            $this->has_due_date = $details['eg_has_due_date'] === true;
             $this->allowed_late_days = $details['eg_late_days'];
             $this->is_repository = $details['eg_is_repository'] === true;
             $this->subdirectory = $details['eg_subdirectory'];
@@ -483,6 +488,12 @@ class Gradeable extends AbstractModel {
 
     public function calculateLateDays(&$total_late_days = 0){
         $late_flag = false;
+
+        // If the student doesn't submit or the gradeable has no due date,
+        //  this gradeable shouldn't contribute to the late days
+        if (!$this->student_submit || !$this->getHasDueDate()) {
+            return;
+        }
 
         if ($this->late_days - $this->late_day_exceptions > 0) {
             $this->late_status = "Late";
@@ -939,7 +950,7 @@ class Gradeable extends AbstractModel {
     }
 
     public function getDaysLate() {
-        return ($this->hasResults()) ? $this->getCurrentVersion()->getDaysLate() : 0;
+        return ($this->hasResults() && $this->has_due_date) ? $this->getCurrentVersion()->getDaysLate() : 0;
     }
 
     public function getInstructionsURL(){
