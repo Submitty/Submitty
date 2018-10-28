@@ -130,16 +130,19 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                             #can go negative (subtracts .1 even in the else case) but that's fine.
                             time_in_seconds -= .1
                       elif action_type == "stdin":
-                          string = action_obj["string"]
+                          disp_str = action_obj["string"]
                           targets = action_obj["containers"]
-                          for target in targets:
-                              p = processes[target]
-                              # poll returns None if the process is still running.
-                              if p.poll() == None:
-                                  p.stdin.write(string.encode('utf-8'))
-                                  p.stdin.flush()
-                              else:
-                                  pass
+                          send_message_to_processes(disp_str, processes, targets)
+                      elif action_type == "stop":
+                        targets = action_obj["containers"]
+                        send_message_to_processes("SUBMITTY_SIGNAL:STOP\n", processes, targets)
+                      elif action_type == "start":
+                        targets = action_obj["containers"]
+                        send_message_to_processes("SUBMITTY_SIGNAL:START\n", processes, targets)
+                      elif action_type == "kill":
+                        targets = action_obj["containers"]
+                        send_message_to_processes("SUBMITTY_SIGNAL:KILL\n", processes, targets)
+
 
                     #Now that all dockers are running, wait on their return code for success or failure. If any fail, we count it
                     #   as a total failure.
@@ -200,6 +203,17 @@ def at_least_one_alive(processes):
       return True
   return False
 
+#targets must hold names/keys for the processes dictionary
+def send_message_to_processes(message, processes, targets):
+    print("sending {0} to {1}".format(message, targets))
+    for target in targets:
+        p = processes[target]
+        # poll returns None if the process is still running.
+        if p.poll() == None:
+            p.stdin.write(message.encode('utf-8'))
+            p.stdin.flush()
+        else:
+            pass
 
 def setup_folder_for_grading(target_folder, tmp_work, job_id, tmp_logs, testcase):
     #The paths to the important folders.
