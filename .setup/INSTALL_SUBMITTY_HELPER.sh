@@ -21,6 +21,7 @@ CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../config
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
 SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
 
+DAEMONS=( submitty_autograding_shipper submitty_autograding_worker submitty_daemon_jobs_handler )
 
 ########################################################################################################################
 ########################################################################################################################
@@ -62,15 +63,13 @@ fi
 
 ################################################################################################################
 ################################################################################################################
-# REMEMBER IF THE SHIPPER & WORKER ARE ACTIVE BEFORE INSTALLATION BEGINS
-# Note: We will stop & restart the shipper & worker at the end of this script.
-#       But it may be necessary to stop the the shipper & worker as part of the migration.
-systemctl is-active --quiet submitty_autograding_shipper
-is_shipper_active_before=$?
-systemctl is-active --quiet submitty_autograding_worker
-is_worker_active_before=$?
-systemctl is-active --quiet submitty_daemon_jobs_handler
-is_jobs_handler_active_before=$?
+# REMEMBER IF THE ANY OF OUR DAEMONS ARE ACTIVE BEFORE INSTALLATION BEGINS
+# Note: We will stop & restart the daemons at the end of this script.
+#       But it may be necessary to stop the the daemons as part of the migration.
+for i in "${DAEMONS[@]}"; do
+    systemctl is-active --quiet ${i}
+    declare is_${i}_active_before=$?
+done
 
 
 ################################################################################################################
@@ -448,7 +447,6 @@ echo -e "Compile and install analysis tools"
 ST_VERSION=v.18.06.00
 mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
-#if [ "1" == "0" ]; then
 pushd ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 if [[ ! -f VERSION || $(< VERSION) != "${ST_VERSION}" ]]; then
     for b in count plagiarism diagnostics;
@@ -458,7 +456,6 @@ if [[ ! -f VERSION || $(< VERSION) != "${ST_VERSION}" ]]; then
     echo ${ST_VERSION} > VERSION
 fi
 popd > /dev/null
-#fi
 
 # change permissions
 chown -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
@@ -475,33 +472,22 @@ ANALYSIS_TOOLS_REPO=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/AnalysisTools
 #copying commonAST scripts 
 mkdir -p ${clangsrc}/llvm/tools/clang/tools/extra/ASTMatcher/
 mkdir -p ${clangsrc}/llvm/tools/clang/tools/extra/UnionTool/
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/astMatcher.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/commonast.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+
+array=( astMatcher.py commonast.py unionToolRunner.py jsonDiff.py utils.py refMaps.py match.py eqTag.py context.py \
+        removeTokens.py jsonDiffSubmittyRunner.py jsonDiffRunner.py jsonDiffRunnerRunner.py createAllJson.py )
+for i in "${array[@]}"; do
+    rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/${i} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+done
+
 rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/unionTool.cpp ${clangsrc}/llvm/tools/clang/tools/extra/UnionTool/
 rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/CMakeLists.txt ${clangsrc}/llvm/tools/clang/tools/extra/ASTMatcher/
 rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/ASTMatcher.cpp ${clangsrc}/llvm/tools/clang/tools/extra/ASTMatcher/
 rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/CMakeListsUnion.txt ${clangsrc}/llvm/tools/clang/tools/extra/UnionTool/CMakeLists.txt
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/unionToolRunner.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 #copying tree visualization scrips
 rsync -rtz ${ANALYSIS_TOOLS_REPO}/treeTool/make_tree_interactive.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 rsync -rtz ${ANALYSIS_TOOLS_REPO}/treeTool/treeTemplate1.txt ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 rsync -rtz ${ANALYSIS_TOOLS_REPO}/treeTool/treeTemplate2.txt ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-
-#copying jsonDiff files
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/jsonDiff.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/utils.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/refMaps.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/match.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/eqTag.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/context.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/removeTokens.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-
-#copying runners for jsonDiffs
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/jsonDiffSubmittyRunner.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/jsonDiffRunner.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/jsonDiffRunnerRunner.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/createAllJson.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 #building commonAST excecutable
 pushd ${ANALYSIS_TOOLS_REPO}
@@ -582,36 +568,21 @@ echo -e "Completed installation of the Submitty version ${most_recent_git_tag//\
 ################################################################################################################
 # INSTALL & START GRADING SCHEDULER DAEMON
 #############################################################
-# stop the shipper daemon (if it's running)
-systemctl is-active --quiet submitty_autograding_shipper
-is_shipper_active_now=$?
-if [[ "$is_shipper_active_now" == "0" ]]; then
-    systemctl stop submitty_autograding_shipper
-    echo -e "Stopped Submitty Grading Shipper Daemon"
-fi
-systemctl is-active --quiet submitty_autograding_shipper
-is_active_tmp=$?
-if [[ "$is_active_tmp" == "0" ]]; then
-    echo -e "ERROR: did not successfully stop submitty grading shipper daemon\n"
-    exit 1
-fi
-
-
-#############################################################
-# stop the worker daemon (if it's running)
-systemctl is-active --quiet submitty_autograding_worker
-is_worker_active_now=$?
-if [[ "$is_worker_active_now" == "0" ]]; then
-    systemctl stop submitty_autograding_worker
-    echo -e "Stopped Submitty Grading Worker Daemon"
-fi
-systemctl is-active --quiet submitty_autograding_worker
-is_active_tmp=$?
-if [[ "$is_active_tmp" == "0" ]]; then
-    echo -e "ERROR: did not successfully stop submitty grading worker daemon\n"
-    exit 1
-fi
-
+# stop the any of the submitty daemons (if they're running)
+for i in "${DAEMONS[@]}"; do
+    systemctl is-active --quiet ${i}
+    is_active_now=$?
+    if [[ "${is_active_now}" == "0" ]]; then
+        systemctl stop ${i}
+        echo -e "Stopped ${i}"
+    fi
+    systemctl is-active --quiet ${i}
+    is_active_tmp=$?
+    if [[ "$is_active_tmp" == "0" ]]; then
+        echo -e "ERROR: did not successfully stop {$i}\n"
+        exit 1
+    fi
+done
 
 if [ "${WORKER}" == 0 ]; then
     # Stop all foreign worker daemons
@@ -619,7 +590,6 @@ if [ "${WORKER}" == 0 ]; then
     sudo -H -u ${DAEMON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py stop --target perform_on_all_workers
     echo -e "done"
 fi
-
 
 #############################################################
 # cleanup the TODO and DONE folders
@@ -630,19 +600,13 @@ if [ -f $original_autograding_workers ]; then
     mv ${original_autograding_workers} ${temp_autograding_workers}
 fi
 
-rm -rf $SUBMITTY_DATA_DIR/autograding_TODO
-rm -rf $SUBMITTY_DATA_DIR/autograding_DONE
-
-
-
-
-# recreate the TODO and DONE folders
-mkdir -p $SUBMITTY_DATA_DIR/autograding_TODO
-mkdir -p $SUBMITTY_DATA_DIR/autograding_DONE
-chown -R ${DAEMON_USER}:${DAEMON_GID} ${SUBMITTY_DATA_DIR}/autograding_TODO
-chown -R ${DAEMON_USER}:${DAEMON_GID} ${SUBMITTY_DATA_DIR}/autograding_DONE
-chmod 770 ${SUBMITTY_DATA_DIR}/autograding_TODO
-chmod 770 ${SUBMITTY_DATA_DIR}/autograding_DONE
+array=( autograding_TODO autograding_DONE )
+for i in "${array[@]}"; do
+    rm -rf ${SUBMITTY_DATA_DIR}/${i}
+    mkdir -p ${SUBMITTY_DATA_DIR}/${i}
+    chown -R ${DAEMON_USER}:${DAEMON_GID} ${SUBMITTY_DATA_DIR}/${i}
+    chown 770 ${SUBMITTY_DATA_DIR}/${i}
+done
 
 # return the autograding_workers json
 if [ -f "$temp_autograding_workers" ]; then
@@ -651,19 +615,14 @@ if [ -f "$temp_autograding_workers" ]; then
 fi
 
 #############################################################
+# update the various daemons
 
-# update the autograding shipper & worker daemons
-rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/submitty_autograding_shipper.service   /etc/systemd/system/submitty_autograding_shipper.service
-chown -R ${DAEMON_USER}:${DAEMON_GROUP} /etc/systemd/system/submitty_autograding_shipper.service
-chmod 444 /etc/systemd/system/submitty_autograding_shipper.service
-rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/submitty_autograding_worker.service   /etc/systemd/system/submitty_autograding_worker.service
-chown -R ${DAEMON_USER}:${DAEMON_GROUP} /etc/systemd/system/submitty_autograding_worker.service
-chmod 444 /etc/systemd/system/submitty_autograding_worker.service
-# update the daemon jobs handler daemon
-rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/submitty_daemon_jobs_handler.service   /etc/systemd/system/submitty_daemon_jobs_handler.service
-chown -R ${DAEMON_USER}:${DAEMON_GROUP} /etc/systemd/system/submitty_daemon_jobs_handler.service
-chmod 444 /etc/systemd/system/submitty_daemon_jobs_handler.service
-
+for i in "${DAEMONS[@]}"; do
+    # update the autograding shipper & worker daemons
+    rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/${i}.service  /etc/systemd/system/${i}.service
+    chown -R ${DAEMON_USER}:${DAEMON_GROUP} /etc/systemd/system/${i}.service
+    chmod 444 /etc/systemd/system/${i}.service
+done
 
 # delete the autograding tmp directories
 rm -rf /var/local/submitty/autograding_tmp
@@ -688,7 +647,6 @@ python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py
 chmod o+r ${SUBMITTY_INSTALL_DIR}/config/version.json
 
 
-
 #############################################################################
 # If the migrations have indicated that it is necessary to rebuild all
 # existing gradeables, do so.
@@ -702,8 +660,6 @@ if [ -f $REBUILD_ALL_FILENAME ]; then
     echo -e "\n\nDone rebuilding ALL GRADEABLES for ALL COURSES\n\n"
     rm $REBUILD_ALL_FILENAME
 fi
-
-
 
 #############################################################################
 
@@ -721,54 +677,26 @@ if [ "${WORKER}" == 0 ]; then
 fi
 
 
-# If the submitty_autograding_shipper.service,
-# submitty_autograding_worker.service, or
-# submitty_daemon_jobs_handler.service files have changed, we should
-# reload the units:
+# If any of our daemon files have changed, we should reload the units:
 systemctl daemon-reload
 
 # start the shipper daemon (if it was running)
-if [[ "$is_shipper_active_before" == "0" ]]; then
-    systemctl start submitty_autograding_shipper
-    systemctl is-active --quiet submitty_autograding_shipper
-    is_shipper_active_after=$?
-    if [[ "$is_shipper_active_after" != "0" ]]; then
-        echo -e "\nERROR!  Failed to restart Submitty Grading Shipper Daemon\n"
-    fi
-    echo -e "Restarted Submitty Grading Shipper Daemon"
-else
-    is_worker_active_before="1"
-    echo -e "\nNOTE: Submitty Grading Shipper Daemon is not currently running\n"
-    echo -e "To start the daemon, run:\n   sudo systemctl start submitty_autograding_shipper\n"
-fi
 
-# start the worker daemon (if it was running)
-if [[ "$is_worker_active_before" == "0" ]]; then
-    systemctl start submitty_autograding_worker
-    systemctl is-active --quiet submitty_autograding_worker
-    is_worker_active_after=$?
-    if [[ "$is_worker_active_after" != "0" ]]; then
-        echo -e "\nERROR!  Failed to restart Submitty Grading Worker Daemon\n"
+for i in "${DAEMONS[@]}"; do
+    is_active=is_${i}_active_before
+    if [[ "${!is_active}" == "0" ]]; then
+        systemctl start ${i}
+        systemctl is-active --quiet ${i}
+        is_active_after=$?
+        if [[ "$is_active_after" != "0" ]]; then
+            echo -e "\nERROR!  Failed to restart ${i}\n"
+        fi
+        echo -e "Restarted ${i}"
+    else
+        echo -e "\nNOTE: ${i} is not currently running\n"
+        echo -e "To start the daemon, run:\n   sudo systemctl start ${i}\n"
     fi
-    echo -e "Restarted Submitty Grading Worker Daemon"
-else
-    echo -e "\nNOTE: Submitty Grading Worker Daemon is not currently running\n"
-    echo -e "To start the daemon, run:\n   sudo systemctl start submitty_autograding_worker\n"
-fi
-
-# start the jobs handler daemon (if it was running)
-if [[ "$is_jobs_handler_active_before" == "0" ]]; then
-    systemctl start submitty_daemon_jobs_handler
-    systemctl is-active --quiet submitty_daemon_jobs_handler
-    is_jobs_handler_active_after=$?
-    if [[ "$is_jobs_handler_active_after" != "0" ]]; then
-        echo -e "\nERROR!  Failed to restart Submitty Jobs Handler Daemon\n"
-    fi
-    echo -e "Restarted Submitty Jobs Handler Daemon"
-else
-    echo -e "\nNOTE: Submitty Jobs Handler Daemon is not currently running\n"
-    echo -e "To start the daemon, run:\n   sudo systemctl start submitty_daemon_jobs_handler\n"
-fi
+done
 
 ################################################################################################################
 ################################################################################################################
