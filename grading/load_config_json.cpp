@@ -56,7 +56,7 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
   bool docker_enabled = whole_config["docker_enabled"];
 
   if (!whole_config["use_router"].is_boolean()){
-    whole_config["use_router"] = true;
+    whole_config["use_router"] = false;
   }
 
   if (!whole_config["single_port_per_container"].is_boolean()){
@@ -123,6 +123,8 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
       assert(this_testcase["containers"].size() == 1 || docker_enabled == true);
     }
 
+    bool found_router = false;
+
     for (int container_num = 0; container_num < this_testcase["containers"].size(); container_num++){
       if(this_testcase["containers"][container_num]["commands"].is_string()){
         std::string this_command = this_testcase["containers"][container_num].value("commands", "");
@@ -134,6 +136,10 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
       if(this_testcase["containers"][container_num]["container_name"].is_null()){
         //pad this out correctly?
         this_testcase["containers"][container_num]["container_name"] = "container" + std::to_string(container_num); 
+      }
+
+      if (this_testcase["containers"][container_num]["container_name"] == "router"){
+        found_router = true;
       }
 
       std::string container_name = this_testcase["containers"][container_num]["container_name"];
@@ -149,6 +155,18 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
         this_testcase["containers"][container_num]["container_image"] = "ubuntu:custom";
       }    
     }
+
+    if(this_testcase["use_router"] && !found_router){
+      nlohmann::json insert_router = nlohmann::json::object();
+      insert_router["outgoing_connections"] = nlohmann::json::array();
+      insert_router["commands"] = nlohmann::json::array();
+      insert_router["commands"].push_back("python3 submitty_router.py");
+      insert_router["container_name"] = "router";
+      insert_router["import_default_router"] = true;
+      insert_router["container_image"] = "ubuntu:custom";
+      this_testcase["containers"].push_back(insert_router);
+    }
+
     whole_config["testcases"][testcase_num] = this_testcase;
     assert(!whole_config["testcases"][testcase_num]["title"].is_null());
     assert(!whole_config["testcases"][testcase_num]["containers"].is_null());

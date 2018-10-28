@@ -46,14 +46,6 @@ class TeamView extends AbstractView {
             $seekers[] = $this->core->getQueries()->getUserById($user_seeking_team);
         }
 
-        $students = $this->core->getQueries()->getAllUsers();
-        $student_full = array();
-        foreach ($students as $student) {
-            $student_full[] = array('value' => $student->getId(),
-                                    'label' => $student->getDisplayedFirstName().' '.$student->getDisplayedLastName().' <'.$student->getId().'>');
-        }
-        $student_full = json_encode($student_full);
-
         return $this->core->getOutput()->renderTwigTemplate("submission/Team.twig", [
             "gradeable" => $gradeable,
             "team" => $team,
@@ -62,8 +54,7 @@ class TeamView extends AbstractView {
             "members" => $members,
             "seekers" => $seekers,
             "invites_received" => $invites_received,
-            "seeking_partner" => $seeking_partner,
-            "student_full" => $student_full
+            "seeking_partner" => $seeking_partner
         ]);
     }
 }

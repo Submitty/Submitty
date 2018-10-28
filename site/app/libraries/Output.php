@@ -78,7 +78,6 @@ class Output {
 
     public function setInternalResources() {
         $this->addCss('https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css');
-        $this->addCss("https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,300italic,700");
         $this->addCss("https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic,700italic");
         $this->addCss("https://fonts.googleapis.com/css?family=PT+Sans:700,700italic");
         $this->addCss("https://fonts.googleapis.com/css?family=Inconsolata");

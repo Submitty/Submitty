@@ -2,6 +2,7 @@
 
 namespace app\views\grading;
 
+use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\GradedGradeable;
@@ -528,7 +529,7 @@ class ElectronicGraderView extends AbstractView {
     }
 
     /**
-     * Render the Auto-Grading Testcases panel
+     * Render the Autograding Testcases panel
      * @param AutoGradedVersion $version_instance
      * @param bool $show_hidden_cases
      * @return string
@@ -549,17 +550,19 @@ class ElectronicGraderView extends AbstractView {
     public function renderSubmissionPanel(GradedGradeable $graded_gradeable, int $display_version) {
         function add_files(&$files, $new_files, $start_dir_name) {
             $files[$start_dir_name] = array();
-            foreach($new_files as $file) {
-                $path = explode('/', $file['relative_name']);
-                array_pop($path);
-                $working_dir = &$files[$start_dir_name];
-                foreach($path as $dir) {
-                    if (!isset($working_dir[$dir])) {
-                        $working_dir[$dir] = array();
+            if($new_files) {
+                foreach ($new_files as $file) {
+                    $path = explode('/', $file['relative_name']);
+                    array_pop($path);
+                    $working_dir = &$files[$start_dir_name];
+                    foreach ($path as $dir) {
+                        if (!isset($working_dir[$dir])) {
+                            $working_dir[$dir] = array();
+                        }
+                        $working_dir = &$working_dir[$dir];
                     }
-                    $working_dir = &$working_dir[$dir];
+                    $working_dir[$file['name']] = $file['path'];
                 }
-                $working_dir[$file['name']] = $file['path'];
             }
         }
         $submissions = array();
@@ -617,16 +620,16 @@ class ElectronicGraderView extends AbstractView {
             $submission_time = $display_version_instance->getSubmissionTime();
         }
 
-        $version_data = array_map(function(AutoGradedVersion $version) {
+        // TODO: this is duplicated in Homework View
+        $version_data = array_map(function(AutoGradedVersion $version) use ($gradeable) {
             return [
                 'points' => $version->getNonHiddenPoints(),
-                'days_late' => $version->getDaysLate()
+                'days_late' => $gradeable->isStudentSubmit() && $gradeable->hasDueDate() ? $version->getDaysLate() : 0
             ];
         }, $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions());
 
         //sort array by version number after values have been mapped
         ksort($version_data);
-
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/StudentInformationPanel.twig", [
             "gradeable_id" => $gradeable->getId(),
             "submission_time" => $submission_time,

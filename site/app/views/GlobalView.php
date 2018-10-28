@@ -41,8 +41,8 @@ class GlobalView extends AbstractView {
             "runtime" => $runtime,
             "wrapper_enabled" => $this->core->getConfig()->wrapperEnabled(),
             "is_debug" => $this->core->getConfig()->isDebug(),
-            "submitty_queries" => $this->core->getSubmittyDB() ? $this->core->getSubmittyDB()->getPrintQueries() : [],
-            "course_queries" => $this->core->getCourseDB() ? $this->core->getCourseDB()->getPrintQueries() : [],
+            "submitty_queries" => $this->core->getConfig()->isDebug() && $this->core->getSubmittyDB() ? $this->core->getSubmittyDB()->getPrintQueries() : [],
+            "course_queries" => $this->core->getConfig()->isDebug() && $this->core->getCourseDB() ? $this->core->getCourseDB()->getPrintQueries() : [],
             "wrapper_urls" => $wrapper_urls
         ]);
     }
