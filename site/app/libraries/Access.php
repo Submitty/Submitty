@@ -60,6 +60,11 @@ class Access {
     /** Require that the given file exists */
     const CHECK_FILE_EXISTS             = 1 << 14 | self::REQUIRE_ARGS_DIR_PATH;
     /**
+     * Check that students are allowed to view the given gradeable
+     * Only applies to students
+     */
+    const CHECK_STUDENT_VIEW            = 1 << 16 | self::REQUIRE_ARG_GRADEABLE;
+    /**
      * Check that students are allowed to submit the given gradeable
      * Only applies to students
      */
