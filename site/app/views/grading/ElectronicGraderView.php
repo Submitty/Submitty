@@ -533,7 +533,7 @@ class ElectronicGraderView extends AbstractView {
     }
 
     /**
-     * Render the Auto-Grading Testcases panel
+     * Render the Autograding Testcases panel
      * @param AutoGradedVersion $version_instance
      * @param bool $show_hidden_cases
      * @return string
@@ -624,10 +624,11 @@ class ElectronicGraderView extends AbstractView {
             $submission_time = $display_version_instance->getSubmissionTime();
         }
 
-        $version_data = array_map(function(AutoGradedVersion $version) {
+        // TODO: this is duplicated in Homework View
+        $version_data = array_map(function(AutoGradedVersion $version) use ($gradeable) {
             return [
                 'points' => $version->getNonHiddenPoints(),
-                'days_late' => $version->getDaysLate()
+                'days_late' => $gradeable->isStudentSubmit() && $gradeable->hasDueDate() ? $version->getDaysLate() : 0
             ];
         }, $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions());
 
