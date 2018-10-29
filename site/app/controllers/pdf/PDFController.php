@@ -43,12 +43,12 @@ class PDFController extends AbstractController {
         $gradeable_id = $_GET['gradeable_id'] ?? NULL;
         $filename = $_GET['file_name'] ?? NULL;
         $id = $this->core->getUser()->getId();
-        $config = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        if($config->isTeamAssignment()){
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if($gradeable->isTeamAssignment()){
             $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id)->getId();
         }
         $submitter = $this->core->getQueries()->getSubmitterById($id);
-        $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($config, $submitter);
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($gradeable, $submitter);
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
         $annotation_jsons = [];
@@ -111,11 +111,11 @@ class PDFController extends AbstractController {
         //User can be a team
         $id = $_POST['user_id'] ?? NULL;
         $filename = $_POST['filename'] ?? NULL;
-        $config = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        if($config->isTeamAssignment()){
-            $graded_gradeable = $this->core->getQueries()->getGradedGradeable($config, null, $id);
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if($gradeable->isTeamAssignment()){
+            $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, null, $id);
         } else {
-            $graded_gradeable = $this->core->getQueries()->getGradedGradeable($config, $id);
+            $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $id);
         }
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
