@@ -58,11 +58,8 @@ class MiscController extends AbstractController {
         $file_name = $_POST['filename'] ?? NULL;
 
         $config = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        if($config->isTeamAssignment()){
-            $graded_gradeable = $this->core->getQueries()->getGradedGradeable($config, null, $id);
-        } else {
-            $graded_gradeable = $this->core->getQueries()->getGradedGradeable($config, $id);
-        }
+        $submitter = $this->core->getQueries()->getSubmitterById($id);
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($config, $submitter);
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
 
 

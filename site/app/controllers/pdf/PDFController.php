@@ -46,11 +46,10 @@ class PDFController extends AbstractController {
         $config = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         if($config->isTeamAssignment()){
             $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id)->getId();
-            $active_version = $this->core->getQueries()->getGradedGradeable($config, null, $id)->getAutoGradedGradeable()->getActiveVersion();
-        } else {
-            $active_version = $this->core->getQueries()->getGradedGradeable($config, $id)->getAutoGradedGradeable()->getActiveVersion();
         }
-
+        $submitter = $this->core->getQueries()->getSubmitterById($id);
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($config, $submitter);
+        $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
         $annotation_jsons = [];
         if(is_dir($annotation_path) && count(scandir($annotation_path)) > 2){
