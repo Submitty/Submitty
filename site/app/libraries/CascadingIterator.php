@@ -8,12 +8,7 @@ namespace app\libraries;
  *
  * An iterator that allows for sequentially iterating over each passed
  * iterator in-order, one at a time. This means that iterator2 will not be
- * called until iterator1 has been exhausted. This differs from
- * MultipleIterator as that commits all iterator functions over all attached
- * iterators in parallel (i.e. calling next() will return an array with the
- * results of next() on all attached iterators).
- *
- * @see \MultipleIterator
+ * called until iterator1 has been exhausted.
  */
 class CascadingIterator implements \Iterator {
 
