@@ -4,9 +4,7 @@ namespace app\libraries\database;
 
 use app\exceptions\DatabaseException;
 use app\exceptions\ValidationException;
-use app\libraries\DateUtils;
-use app\libraries\MultiIterator;
-use app\libraries\Utils;
+use app\libraries\CascadingIterator;
 use \app\libraries\GradeableType;
 use app\models\Gradeable;
 use app\models\gradeable\AutoGradedGradeable;
@@ -19,9 +17,6 @@ use app\models\gradeable\Mark;
 use app\models\gradeable\RegradeRequest;
 use app\models\gradeable\Submitter;
 use app\models\gradeable\TaGradedGradeable;
-use app\models\GradeableComponent;
-use app\models\GradeableComponentMark;
-use app\models\GradeableVersion;
 use app\models\User;
 use app\models\SimpleLateUser;
 use app\models\Team;
@@ -1129,7 +1124,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             }
         }
 
-        return new MultiIterator(
+        return new CascadingIterator(
             $this->getGradedGradeablesUserOrTeam($non_team_gradeables, $users, $teams, $sort_keys, false),
             $this->getGradedGradeablesUserOrTeam($team_gradeables, $users, $teams, $sort_keys, true)
         );

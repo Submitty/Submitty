@@ -3,10 +3,10 @@
 namespace tests\app\libraries;
 
 use app\libraries\FileUtils;
-use \app\libraries\MultiIterator;
+use \app\libraries\CascadingIterator;
 use app\libraries\Utils;
 
-class MultiIteratorTester extends \PHPUnit\Framework\TestCase {
+class CascadingIteratorTester extends \PHPUnit\Framework\TestCase {
     public function testIterator() {
         $temp_dir1 = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
         $temp_dir2 = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
@@ -20,7 +20,7 @@ class MultiIteratorTester extends \PHPUnit\Framework\TestCase {
             touch(FileUtils::joinPaths($temp_dir2, 'file_3'));
             touch(FileUtils::joinPaths($temp_dir2, 'file_4'));
 
-            $multi_iterator = new MultiIterator(
+            $multi_iterator = new CascadingIterator(
                 new \FilesystemIterator($temp_dir1, \RecursiveDirectoryIterator::SKIP_DOTS),
                 new \FilesystemIterator($temp_dir2, \RecursiveDirectoryIterator::SKIP_DOTS)
             );
@@ -36,6 +36,7 @@ class MultiIteratorTester extends \PHPUnit\Framework\TestCase {
             $count = 0;
             foreach ($multi_iterator as $item) {
                 $this->assertEquals($count, $multi_iterator->key());
+                $this->assertEquals(($count > 1) ? 1 : 0, $multi_iterator->iteratorKey());
                 $iterator_files[] = $item->getFilename();
                 $count++;
             }
@@ -47,6 +48,7 @@ class MultiIteratorTester extends \PHPUnit\Framework\TestCase {
             $count = 0;
             foreach ($multi_iterator as $item) {
                 $this->assertEquals($count, $multi_iterator->key());
+                $this->assertEquals(($count > 1) ? 1 : 0, $multi_iterator->iteratorKey());
                 $iterator_files[] = $item->getFilename();
                 $count++;
             }
