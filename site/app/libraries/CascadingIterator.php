@@ -3,7 +3,7 @@
 namespace app\libraries;
 
 /**
- * Class MultiIterator
+ * Class CascadingIterator
  * @package app\libraries
  *
  * An iterator that allows for sequentially iterating over each passed
