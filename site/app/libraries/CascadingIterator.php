@@ -21,8 +21,6 @@ class CascadingIterator implements \Iterator {
     private $iterators = [];
     /** @var int */
     private $iterator_key = 0;
-    /** @var \Iterator */
-    private $curr_it = null;
     /** @var int  */
     private $key = 0;
 
@@ -56,7 +54,6 @@ class CascadingIterator implements \Iterator {
         while (!$this->valid()) {
             $this->iterator_key++;
             if (count($this->iterators) === 0 || count($this->iterators) === $this->iterator_key) {
-                $this->curr_it = null;
                 return;
             }
         }
@@ -72,7 +69,7 @@ class CascadingIterator implements \Iterator {
         $this->seek();
         $this->key++;
         $this->iterators[$this->iterator_key]->next();
-        // Seek after 'next' to be sure 'curr_it' is valid
+        // Seek after 'next' to be sure our current iterator is valid
         $this->seek();
     }
 
