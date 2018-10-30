@@ -71,6 +71,7 @@ Vagrant.configure(2) do |config|
     # VirtualBox sometimes has isseus with getting the DNS to work inside of itself for whatever reason.
     # While it will sometimes randomly work, we can just set VirtualBox to use a DNS proxy from the host,
     # which seems to be far more reliable in having the DNS work, rather than leaving it to VirtualBox.
+    # See https://serverfault.com/a/453260 for more info.
     # vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
     vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
   end
