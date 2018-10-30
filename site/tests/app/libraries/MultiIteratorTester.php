@@ -32,21 +32,27 @@ class MultiIteratorTester extends \PHPUnit\Framework\TestCase {
                 'file_4'
             ];
 
+            $iterator_files = [];
             $count = 0;
             foreach ($multi_iterator as $item) {
                 $this->assertEquals($count, $multi_iterator->key());
-                $this->assertEquals($files[$count], $item->getFilename());
+                $iterator_files[] = $item->getFilename();
                 $count++;
             }
-
+            sort($iterator_files);
+            $this->assertEquals($files, $iterator_files);
             $this->assertNull($multi_iterator->current());
 
+            $iterator_files = [];
             $count = 0;
             foreach ($multi_iterator as $item) {
                 $this->assertEquals($count, $multi_iterator->key());
-                $this->assertEquals($files[$count], $item->getFilename());
+                $iterator_files[] = $item->getFilename();
                 $count++;
             }
+            sort($iterator_files);
+            $this->assertEquals($files, $iterator_files);
+            $this->assertNull($multi_iterator->current());
         }
         finally {
             if (file_exists($temp_dir1)) {
