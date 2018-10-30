@@ -2,16 +2,27 @@
 
 namespace app\libraries;
 
+use app\exceptions\NotImplementedException;
+
 /**
  * Class MultiIterator
  * @package app\libraries
  *
- * Allows the chaining of multiple iterators in one iterator object
+ * An iterator that allows for sequentially iterating over each passed
+ * iterator in-order, one at a time. This means that iterator2 will not be
+ * called until iterator1 has been exhausted. This differs from
+ * MultipleIterator as that commits all iterator functions over all attached
+ * iterators in parallel (i.e. calling next() will return an array with the
+ * results of next() on all attached iterators).
+ *
+ * @see \MultipleIterator
  */
 class MultiIterator implements \Iterator {
 
-    /** @var array array of [\Closure, $this] */
-    private $iterator_generators = [];
+    /** @var \Iterator[] */
+    private $iterators = [];
+    /** @var int */
+    private $iterator_key = 0;
     /** @var \Iterator */
     private $curr_it = null;
     /** @var int  */
@@ -19,10 +30,10 @@ class MultiIterator implements \Iterator {
 
     /**
      * MultiIterator constructor.
-     * @param \Closure[] $iterator_generators
+     * @param \Iterator[] $iterator_generators
      */
-    public function __construct(array $iterator_generators) {
-        $this->iterator_generators = $iterator_generators;
+    public function __construct(...$iterator_generators) {
+        $this->iterators = $iterator_generators;
         $this->seek();
     }
 
@@ -45,12 +56,12 @@ class MultiIterator implements \Iterator {
     private function seek() {
         // If we aren't valid, try to get the next one
         while (!$this->valid()) {
-            $cl = array_shift($this->iterator_generators);
-            if ($cl === null) {
+            $this->iterator_key++;
+            if (count($this->iterators) === 0 || count($this->iterators) === $this->iterator_key) {
                 $this->curr_it = null;
                 return;
             }
-            $this->curr_it = $cl[0]->call($cl[1]);
+            $this->curr_it = $this->iterators[$this->iterator_key];
         }
     }
 
@@ -93,8 +104,21 @@ class MultiIterator implements \Iterator {
     }
 
     /**
-     * NOTE: This is an unsupported function
+     * Rewind each iterator that we've used as specified by the
+     * the iterator key
      */
     public function rewind() {
+        if (count($this->iterators) > $this->iterator_key) {
+            $this->iterators[$this->iterator_key]->rewind();
+        }
+
+        while ($this->iterator_key > 0) {
+            $this->iterator_key--;
+            $this->iterators[$this->iterator_key]->rewind();
+        }
+
+        $this->key = 0;
+        $this->iterator_key = 0;
+        $this->curr_it = $this->iterators[$this->iterator_key];
     }
 }
