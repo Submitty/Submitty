@@ -181,7 +181,7 @@ else if ($core->getConfig()->isCourseLoaded()
 // Log the user action if they were logging in, logging out, or uploading something
 if ($core->getUser() !== null) {
     if (empty($_COOKIE['submitty_token'])) {
-        Utils::setCookie('submitty_token', \Ramsey\Uuid\Uuid::uuid4()->toString());
+        Utils::setCookie('submitty_token', Utils::guidv4());
     }
     $log = false;
     $action = "";
