@@ -67,6 +67,13 @@ Vagrant.configure(2) do |config|
     # times are important for late day calculations and building so we set the maximum time the VM and host can drift
     # to be 10 seconds at most which should make things work generally ideally
     vb.customize ['guestproperty', 'set', :id, '/VirtualBox/GuestAdd/VBoxService/--timesync-set-threshold', 10000 ]
+
+    # VirtualBox sometimes has isseus with getting the DNS to work inside of itself for whatever reason.
+    # While it will sometimes randomly work, we can just set VirtualBox to use a DNS proxy from the host,
+    # which seems to be far more reliable in having the DNS work, rather than leaving it to VirtualBox.
+    # See https://serverfault.com/a/453260 for more info.
+    # vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+    vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
   end
 
   config.vm.provision :shell, :inline => " sudo timedatectl set-timezone America/New_York", run: "once"

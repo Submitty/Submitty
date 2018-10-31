@@ -16,7 +16,6 @@ apt-get install -qqy python python-dev python3 python3-dev libpython3.5
 
 if [ ${VAGRANT} == 1 ]; then
     export SUBMISSION_URL='http://192.168.56.101'
-    export GIT_URL='http://192.168.56.101'
 fi
 
 #################################################################
