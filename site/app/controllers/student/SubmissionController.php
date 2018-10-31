@@ -1772,7 +1772,7 @@ class SubmissionController extends AbstractController {
 
         $results_json_exists = file_exists($filepath);
 
-        // if the results json exists, check the database to make sure that the autogradingresults are done.
+        // if the results json exists, check the database to make sure that the autograding results are there.
         $has_results = $results_json_exists && $this->core->getQueries()->getGradeableVersionHasAutogradingResults(
             $gradeable_id, $version, $user_id, $team_id);
 
