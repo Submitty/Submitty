@@ -5,8 +5,50 @@ namespace tests\app\libraries;
 use \app\libraries\CascadingIterator;
 
 class CascadingIteratorTester extends \PHPUnit\Framework\TestCase {
-    public function testIterator() {
+    public function testNoIterators() {
+        $multi_iterator = new CascadingIterator();
+        foreach ($multi_iterator as $item) {
+            $this->fail("There should not be any items to foreach over");
+        }
+        $this->assertEquals(0, $multi_iterator->iteratorKey());
+        $this->assertFalse($multi_iterator->valid());
+        $this->assertNull($multi_iterator->current());
+    }
 
+    public function testOneIterator() {
+        $multi_iterator = new CascadingIterator(
+            new \ArrayIterator(['file_1', 'file_2'])
+        );
+
+        $files = [
+            'file_1',
+            'file_2'
+        ];
+
+        $count = 0;
+        foreach ($multi_iterator as $item) {
+            $this->assertEquals($count, $multi_iterator->key());
+            $this->assertEquals(0, $multi_iterator->iteratorKey());
+            $this->assertEquals($files[$count], $item);
+            $count++;
+        }
+        $this->assertEquals(1, $multi_iterator->iteratorKey());
+        $this->assertFalse($multi_iterator->valid());
+        $this->assertNull($multi_iterator->current());
+
+        $count = 0;
+        foreach ($multi_iterator as $item) {
+            $this->assertEquals($count, $multi_iterator->key());
+            $this->assertEquals(0, $multi_iterator->iteratorKey());
+            $this->assertEquals($files[$count], $item);
+            $count++;
+        }
+        $this->assertEquals(1, $multi_iterator->iteratorKey());
+        $this->assertFalse($multi_iterator->valid());
+        $this->assertNull($multi_iterator->current());
+    }
+
+    public function testTwoIterators() {
         $multi_iterator = new CascadingIterator(
             new \ArrayIterator(['file_1', 'file_2']),
             new \ArrayIterator(['file_3', 'file_4'])
@@ -26,6 +68,8 @@ class CascadingIteratorTester extends \PHPUnit\Framework\TestCase {
             $this->assertEquals($files[$count], $item);
             $count++;
         }
+        $this->assertEquals(2, $multi_iterator->iteratorKey());
+        $this->assertFalse($multi_iterator->valid());
         $this->assertNull($multi_iterator->current());
 
         $count = 0;
@@ -35,6 +79,33 @@ class CascadingIteratorTester extends \PHPUnit\Framework\TestCase {
             $this->assertEquals($files[$count], $item);
             $count++;
         }
+        $this->assertEquals(2, $multi_iterator->iteratorKey());
+        $this->assertFalse($multi_iterator->valid());
+        $this->assertNull($multi_iterator->current());
+    }
+
+    public function testOneEmptyIterators() {
+        $multi_iterator = new CascadingIterator(
+            new \EmptyIterator()
+        );
+        foreach ($multi_iterator as $item) {
+            $this->fail("There should not be any items to foreach over");
+        }
+        $this->assertEquals(1, $multi_iterator->iteratorKey());
+        $this->assertFalse($multi_iterator->valid());
+        $this->assertNull($multi_iterator->current());
+    }
+
+    public function testTwoEmptyIterators() {
+        $multi_iterator = new CascadingIterator(
+            new \EmptyIterator(),
+            new \EmptyIterator()
+        );
+        foreach ($multi_iterator as $item) {
+            $this->fail("There should not be any items to foreach over");
+        }
+        $this->assertEquals(2, $multi_iterator->iteratorKey());
+        $this->assertFalse($multi_iterator->valid());
         $this->assertNull($multi_iterator->current());
     }
 
