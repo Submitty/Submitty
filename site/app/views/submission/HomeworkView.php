@@ -13,6 +13,7 @@ use app\models\gradeable\SubmissionTextBox;
 use app\models\User;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
+use app\libraries\Utils;
 
 class HomeworkView extends AbstractView {
 
@@ -250,21 +251,7 @@ class HomeworkView extends AbstractView {
             foreach ($gradeables as $g) {
                 $students_version[] = array($g->getUser(), $g->getHighestVersion());
             }
-
-            $students_full = array();
-            foreach ($students_version as $student_pair) {
-                /* @var User $student */
-                $student = $student_pair[0];
-
-                $student_entry = array('value' => $student->getId(),
-                    'label' => $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>');
-
-                if ($student_pair[1] !== 0) {
-                    $student_entry['label'] .= ' (' . $student_pair[1] . ' Prev Submission)';
-                }
-
-                $students_full[] = $student_entry;
-            }
+            $students_full = json_decode(Utils::getAutoFillData($students, $students_version));
         }
 
         $image_data = [];
