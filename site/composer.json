@@ -15,6 +15,7 @@
     "php-coveralls/php-coveralls": "^2"
   },
   "require": {
-    "twig/twig": "^2.0"
+    "twig/twig": "^2.0",
+    "ramsey/uuid": "^3.8"
   }
 }
