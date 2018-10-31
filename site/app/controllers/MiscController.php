@@ -54,31 +54,17 @@ class MiscController extends AbstractController {
 
     private function encodePDF(){
         $gradeable_id = $_POST['gradeable_id'] ?? NULL;
-        $user_id = $_POST['user_id'] ?? NULL;
+        $id = $_POST['user_id'] ?? NULL;
         $file_name = $_POST['filename'] ?? NULL;
 
-        $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        if ($gradeable === null) {
-            $this->core->getOutput()->renderJsonError("You do not have access to this file");
-            return false;
-        }
-
-        $submitter = $this->core->getQueries()->getSubmitterById($user_id);
-        if ($submitter === null) {
-            $this->core->getOutput()->renderJsonError("You do not have access to this file");
-            return false;
-        }
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        $submitter = $this->core->getQueries()->getSubmitterById($id);
         $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($gradeable, $submitter);
-
-        if ($graded_gradeable === null) {
-            $this->core->getOutput()->renderJsonError("You do not have access to this file");
-            return false;
-        }
-
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
 
+
         $dir = "submissions";
-        $path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), $dir, $gradeable_id, $user_id, $active_version, $file_name);
+        $path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), $dir, $gradeable_id, $id, $active_version, $file_name);
 
         //See if we are allowed to access this path
         $path = $this->core->getAccess()->resolveDirPath($dir, $path);
