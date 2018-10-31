@@ -64,6 +64,8 @@ class MultiIterator implements \Iterator {
         $this->seek();
         $this->key++;
         $this->curr_it->next();
+        // Seek after 'next' to be sure 'curr_it' is valid
+        $this->seek();
     }
 
     /**

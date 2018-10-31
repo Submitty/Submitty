@@ -122,7 +122,8 @@
     }
 
     function openFileCourseMaterial(html_file, url_file) {
-        window.open("{{ core.getConfig().getSiteUrl()|escape("js")}}&component=misc&page=display_file&dir=course_materials&file=" + html_file + "&path=" + url_file,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+        var win = window.open("{{ core.getConfig().getSiteUrl()|escape("js")}}&component=misc&page=display_file&dir=course_materials&file=" + html_file + "&path=" + url_file,'_blank');
+        win.focus();
         return false;
     }
 
