@@ -58,8 +58,7 @@ function render(gradeable_id, user_id, grader_id, file_name, url = "") {
                 pdfData = JSON.parse(data);
                 pdfData = atob(pdfData);
             } catch (err){
-                alert("Please make sure that this is the correct version. If it is, " +
-                    "then the PDF is either corrupt or broken");
+                alert("Something went wrong, please try again later.");
             }
             PDFJS.getDocument({data:pdfData}).then((pdf) => {
                 window.RENDER_OPTIONS.pdfDocument = pdf;

@@ -76,7 +76,7 @@ ${DISTRO_LINE}
 ##  The VM can be accessed with the following urls:       ##
 ##    ${SUBMISSION_URL} (submission)                  ##
 ##    ${SUBMISSION_URL}/cgi-bin (cgi-bin scripts)     ##
-##    ${GIT_URL}/git (git)                     ##
+##    ${SUBMISSION_URL}/git (git)                     ##
 ##                                                        ##
 ##  The database can be accessed on the host machine at   ##
 ##   localhost:15432                                      ##
