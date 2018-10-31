@@ -607,7 +607,7 @@ for i in "${array[@]}"; do
     rm -rf ${SUBMITTY_DATA_DIR}/${i}
     mkdir -p ${SUBMITTY_DATA_DIR}/${i}
     chown -R ${DAEMON_USER}:${DAEMON_GID} ${SUBMITTY_DATA_DIR}/${i}
-    chown 770 ${SUBMITTY_DATA_DIR}/${i}
+    chmod 770 ${SUBMITTY_DATA_DIR}/${i}
 done
 
 # return the autograding_workers json
