@@ -131,7 +131,7 @@ class ForumController extends AbstractController {
             $result["error"] = "You do not have permissions to do that.";
 		}
         $this->core->getOutput()->renderJson($result);
-		return $result;
+		return $this->core->getOutput()->getOutput();
 	}
 
     private function checkGoodAttachment($isThread, $thread_id, $file_post){
@@ -216,7 +216,7 @@ class ForumController extends AbstractController {
             $result["error"] = "You do not have permissions to do that.";
         }
         $this->core->getOutput()->renderJson($result);
-        return $result;
+        return $this->core->getOutput()->getOutput();
     }
 
     public function deleteCategory(){
@@ -242,7 +242,7 @@ class ForumController extends AbstractController {
             $result["error"] = "You do not have permissions to do that.";
         }
         $this->core->getOutput()->renderJson($result);
-        return $result;
+        return $this->core->getOutput()->getOutput();
     }
 
     public function editCategory(){
@@ -277,7 +277,7 @@ class ForumController extends AbstractController {
             $result["error"] = "You do not have permissions to do that.";
         }
         $this->core->getOutput()->renderJson($result);
-        return $result;
+        return $this->core->getOutput()->getOutput();
     }
 
     public function reorderCategories(){
@@ -304,7 +304,7 @@ class ForumController extends AbstractController {
             $result["error"] = "You do not have permissions to do that.";
         }
         $this->core->getOutput()->renderJson($result);
-        return $result;
+        return $this->core->getOutput()->getOutput();
     }
 
     //CODE WILL BE CONSOLIDATED IN FUTURE
@@ -358,7 +358,7 @@ class ForumController extends AbstractController {
             }
         }
         $this->core->getOutput()->renderJson($result);
-        return $result;
+        return $this->core->getOutput()->getOutput();
     }
 
     private function search(){
@@ -414,7 +414,7 @@ class ForumController extends AbstractController {
             }
         }
         $this->core->getOutput()->renderJson($result);
-        return $result;
+        return $this->core->getOutput()->getOutput();
     }
 
     public function alterAnnouncement($type){
@@ -436,7 +436,7 @@ class ForumController extends AbstractController {
         $this->core->getQueries()->addPinnedThread($current_user, $thread_id, $type);
         $response = array('user' => $current_user, 'thread' => $thread_id, 'type' => $type);
         $this->core->getOutput()->renderJson($response);
-        return $response;
+        return $this->core->getOutput()->getOutput();
     }
 
     private function checkPostEditAccess($post_id) {
@@ -494,7 +494,7 @@ class ForumController extends AbstractController {
             $this->core->getQueries()->pushNotification($notification);
             $this->core->getQueries()->removeNotificationsPost($post_id);
             $this->core->getOutput()->renderJson($response = array('type' => $type));
-            return $response;
+            return $this->core->getOutput()->getOutput();
         } else if($modifyType == 2) { //undelete post or thread
             $thread_id = $_POST["thread_id"];
             $type = "";
@@ -511,7 +511,7 @@ class ForumController extends AbstractController {
                 $this->core->getQueries()->pushNotification($notification);
                 $this->core->getOutput()->renderJson($response = array('type' => $type));
             }
-            return $response;
+            return $this->core->getOutput()->getOutput();
         } else if($modifyType == 1) { //edit post or thread
             $thread_id = $_POST["edit_thread_id"];
             $status_edit_thread = $this->editThread();
@@ -766,7 +766,7 @@ class ForumController extends AbstractController {
             $output['error'] = "You do not have permissions to do that.";
         }
         $this->core->getOutput()->renderJson($output);
-        return $output;
+        return $this->core->getOutput()->getOutput();
     }
 
     public function getEditPostContent(){
@@ -782,10 +782,10 @@ class ForumController extends AbstractController {
                 $this->getThreadContent($_POST["thread_id"], $output);
             }
             $this->core->getOutput()->renderJson($output);
-            return $output;
         } else {
             $this->core->getOutput()->renderJson(array('error' => "You do not have permissions to do that."));
         }
+        return $this->core->getOutput()->getOutput();
     }
 
     private function getThreadContent($thread_id, &$output){
