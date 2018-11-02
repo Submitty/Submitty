@@ -89,7 +89,8 @@
 
     <div class="sub">
         {% if has_gradeable_message %}
-            <p class='green-message'>{{ gradeable_message|raw }}</p>
+            <br>
+            <div class='content' style="margin-top: 0px; border: 2px solid #006398; padding: 20px 20px"><p>{{ gradeable_message|raw }}</p></div>
         {% endif %}
     </div>
 

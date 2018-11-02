@@ -559,6 +559,8 @@ class Gradeable extends AbstractModel {
 
         if (isset($details['gradeable_message'])) {
             $this->message = Utils::prepareHtmlString($details['gradeable_message']);
+        } else if (isset($details['assignment_message'])) {
+            $this->message = Utils::prepareHtmlString($details['assignment_message']);
         }
 
         if (isset($details['early_submission_incentive'])) {

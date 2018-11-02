@@ -44,7 +44,9 @@ class GradeableAutogradingConfig extends AbstractModel {
             $details['max_submissions'] = intval($details['max_submissions']);
         }
 
-        if (isset($details['gradeable_message'])) {
+        if (isset($details['assignment_message'])) {
+            $details['gradeable_message'] = Utils::prepareHtmlString($details['assignment_message']);
+        } else if (isset($details['gradeable_message'])) {
             $details['gradeable_message'] = Utils::prepareHtmlString($details['gradeable_message']);
         }
 
