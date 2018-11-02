@@ -7,7 +7,9 @@ use app\libraries\Core;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;
 use app\libraries\Output;
-use app\models\Gradeable;
+use app\models\gradeable\Gradeable;
+use app\models\gradeable\GradedGradeable;
+use app\models\gradeable\Mark;
 use app\models\GradeSummary;
 
 /*
@@ -89,21 +91,109 @@ class ReportController extends AbstractController {
         $this->core->getOutput()->renderFile($csv, $this->core->getConfig()->getCourse() . "_csvreport_" . date("ymdHis") . ".csv");
     }
 
+    public function generateGradeSummary(GradedGradeable $gg) {
+        $g = $gg->getGradeable();
+        $autograding_score = $gg->getAutoGradedGradeable()->hasActiveVersion() ? $gg->getAutoGradedGradeable()->getTotalPoints() : 0;
+        $ta_grading_score = $gg->hasTaGradingInfo() ? $gg->getTaGradedGradeable()->getTotalScore() : 0;
+
+        $entry = [
+            'id' => $g->getId(),
+            'name' => $g->getTitle(),
+            'gradeable_type' => GradeableType::typeToString($g->getType()),
+            'grade_released_date' => $g->getGradeReleasedDate()->format('Y-m-d H:i:s O'),
+        ];
+
+        if ($g->getType() !== GradeableType::ELECTRONIC_FILE) {
+            $entry['score'] = max(0, $ta_grading_score);
+        } else {
+            $ta_gg = $gg->getOrCreateTaGradedGradeable();
+            $entry['overall_comment'] = $ta_gg->getOverallComment();
+
+            if (!$ta_gg->hasVersionConflict() || !$g->isTaGrading()) {
+                $entry['score'] = max(0, $autograding_score + $ta_grading_score);
+                $entry['autograding_score'] = $autograding_score;
+                $entry['tagrading_score'] = $ta_grading_score;
+                $this->addLateDays($g, $entry);
+            } else {
+                $entry['score'] = 0;
+                $entry['autograding_score'] = 0;
+                $entry['tagrading_score'] = 0;
+                if (!$ta_gg->isComplete()) {
+                    $entry['note'] = 'This has not been graded yet.';
+                    // can't be late if not submitted
+                    $entry['days_late'] = 0;
+                    $entry['status'] = 'unsubmitted';
+                } elseif ($gg->getAutoGradedGradeable()->getActiveVersion() !== 0) {
+                    $entry['note'] = 'Score is set to 0 because there are version conflicts.';
+                    $this->addLateDays($g, $entry);
+                }
+            }
+        }
+
+        // Component/marks
+        $entry['components'] = [];
+        foreach ($g->getComponents() as $component) {
+            $gcc = $gg->getOrCreateTaGradedGradeable()->getGradedComponentContainer($component);
+
+            // iterate through each component container so we can account for peer grading
+            foreach ($gcc->getGradedComponents() as $gc) {
+                $inner = [
+                    'title' => $component->getTitle()
+                ];
+                if ($component->isText()) {
+                    $inner['comment'] = $gc->getComment();
+                } else {
+                    $inner['score'] = $gc->getTotalScore();
+                    $inner['default_score'] = $component->getDefault();
+                    $inner['upper_clamp'] = $component->getUpperClamp();
+                    $inner['lower_clamp'] = $component->getLowerClamp();
+                }
+
+                if ($g->getType() === GradeableType::ELECTRONIC_FILE) {
+                    $marks = array_map(function (Mark $m) {
+                        return ['points' => $m->getPoints(), 'note' => $m->getTitle()];
+                    }, $gc->getMarks());
+
+                    if ($gc->hasCustomMark()) {
+                        $marks[] = ['points' => $gc->getScore(), 'note' => $gc->getComment()];
+                    }
+                    $inner['marks'] = $marks;
+                }
+               $entry['components'][] = $inner;
+            }
+        }
+        return $entry;
+    }
     public function generateGradeSummaries() {
         $base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'all_grades');
         $current_user = null;
-        $total_late_used = 0;
         $user = [];
-        $order_by = [
+        $sort_keys = [
+            'user_id',
             'g.g_gradeable_type',
             'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END',
             'g.g_id'
         ];
-        foreach ($this->core->getQueries()->getGradeablesIterator(null, true, 'registration_section', 'u.user_id', null, $order_by) as $gradeable) {
-            /** @var \app\models\Gradeable $gradeable */
+
+        // Get all gradeables
+        $gradeables = [];
+        foreach ($this->core->getQueries()->getGradeableConfigs(null) as $g) {
+            $gradeables[] = $g;
+        }
+
+        // Array of graded gradeables, first indexed by gradeable id, then by user id (so multiple entries per team)
+        $team_graded_gradeables = [];
+
+        // Array of graded gradeables for active user
+        $user_graded_gradeables = [];
+        foreach ($this->core->getQueries()->getGradedGradeables($gradeables, null, null, $sort_keys) as $gg) {
+            /** @var GradedGradeable $gg */
+            if ($gg->getGradeable()->isTeamAssignment()) {
+                $team_graded_gradeables[$getGradeableId]
+            }
             if ($current_user !== $gradeable->getUser()->getId()) {
                 if ($current_user !== null) {
-                    file_put_contents(FileUtils::joinPaths($base_path, $current_user.'_summary.json'), FileUtils::encodeJson($user));
+                    file_put_contents(FileUtils::joinPaths($base_path, $current_user . '_summary.json'), FileUtils::encodeJson($user));
                 }
                 $current_user = $gradeable->getUser()->getId();
                 $user = [];
@@ -115,95 +205,24 @@ class ReportController extends AbstractController {
                 $user['registration_section'] = $gradeable->getUser()->getRegistrationSection();
                 $user['default_allowed_late_days'] = $this->core->getConfig()->getDefaultStudentLateDays();
                 $user['last_update'] = date("l, F j, Y");
-                $total_late_used = 0;
+                $user_graded_gradeables = [];
             }
-            $bucket = ucwords($gradeable->getBucket());
+            $user_graded_gradeables[] = $gg;
+
+            $bucket = ucwords($g->getSyllabusBucket());
             if (!isset($user[$bucket])) {
                 $user[$bucket] = [];
             }
-
-            $autograding_score = $gradeable->getGradedAutoGraderPoints();
-            $ta_grading_score = $gradeable->getGradedTAPoints();
-
-            $entry = [
-                'id' => $gradeable->getId(),
-                'name' => $gradeable->getName(),
-                'gradeable_type' => GradeableType::typeToString($gradeable->getType()),
-                'grade_released_date' => $gradeable->getGradeReleasedDate()->format('Y-m-d H:i:s O'),
-            ];
-
-            if ($gradeable->getType() !== GradeableType::ELECTRONIC_FILE) {
-                $entry['score'] = max(0, $ta_grading_score);
-            }
-            else {
-                $entry['overall_comment'] = $gradeable->getOverallComment();
-
-                if ($gradeable->validateVersions() || !$gradeable->useTAGrading()) {
-                    $entry['score'] = max(0, $autograding_score + $ta_grading_score);
-                    $entry['autograding_score'] = $autograding_score;
-                    $entry['tagrading_score'] = $ta_grading_score;
-                    $this->addLateDays($gradeable, $entry, $total_late_used);
-                }
-                else {
-                    $entry['score'] = 0;
-                    $entry['autograding_score'] = 0;
-                    $entry['tagrading_score'] = 0;
-                    if ($gradeable->validateVersions(-1)) {
-                        $entry['note'] = 'This has not been graded yet.';
-                        // can't be late if not submitted
-                        $entry['days_late'] = 0;
-                        $entry['status'] = 'unsubmitted';
-                    }
-                    elseif ($gradeable->getActiveVersion() !== 0) {
-                        $entry['note'] = 'Score is set to 0 because there are version conflicts.';
-                        $this->addLateDays($gradeable, $entry, $total_late_used);
-                    }
-                }
-            }
-
-            $entry['components'] = [];
-            foreach ($gradeable->getComponents() as $component) {
-                $inner = [
-                    'title' => $component->getTitle()
-                ];
-
-                if ($component->getIsText()) {
-                    $inner['comment'] = $component->getComment();
-                }
-                else {
-                    $inner['score'] = $component->getGradedTAPoints();
-                    $inner['default_score'] = $component->getDefault();
-                    $inner['upper_clamp'] = $component->getUpperClamp();
-                    $inner['lower_clamp'] = $component->getLowerClamp();
-                }
-
-                if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
-                    $marks = [];
-                    if ($component->getHasMarks()) {
-                        foreach ($component->getMarks() as $mark) {
-                            if ($mark->getHasMark()) {
-                                $marks[] = ['points' => $mark->getPoints(), 'note' => $mark->getNote()];
-                            }
-                        }
-                    }
-
-                    if (!empty($component->getComment()) || $component->getScore() != 0) {
-                        $marks[] = ['points' => $component->getScore(), 'note' => $component->getComment()];
-                    }
-                    $inner['marks'] = $marks;
-                }
-                $entry['components'][] = $inner;
-            }
-
-            $user[$bucket][] = $entry;
+            $user[$bucket][] = $this->generateGradeSummary($gg);
         }
 
-        file_put_contents(FileUtils::joinPaths($base_path, $current_user.'_summary.json'), FileUtils::encodeJson($user));
+        file_put_contents(FileUtils::joinPaths($base_path, $current_user . '_summary.json'), FileUtils::encodeJson($user));
         $this->core->addSuccessMessage("Successfully Generated Grade Summaries");
         $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
     }
 
-    private function addLateDays(Gradeable $gradeable, &$entry, &$total_late_used) {
+    // TODO: make this use the new late days model
+    private function addLateDays(Gradeable $gradeable, &$entry) {
         $late_days_used = $gradeable->getLateDays() - $gradeable->getLateDayExceptions();
         $status = 'Good';
         $late_flag = false;
