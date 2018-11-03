@@ -329,7 +329,7 @@ class SubmissionController extends AbstractController {
                 // FIXME: remove this 'old_gradeable' once none of the HomeworkView relies on it
                 $old_gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $this->core->getUser()->getId());
                 $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                       'showGradeable', $gradeable, $graded_gradeable, $old_gradeable, $version, $late_days_use, $extensions, $show_hidden);
+                                                       'showGradeable', $gradeable, $graded_gradeable, $old_gradeable, $version, $late_days_use, $extensions, $show_hidden, false);
             }
         }
         return array('id' => $gradeable_id, 'error' => $error);
