@@ -286,8 +286,10 @@ class SubmissionController extends AbstractController {
         //if (!$gradeable->isSubmissionOpen() && !$this->core->getUser()->accessAdmin()) {
 
         // TEMPORARY - ALLOW LIMITED & FULL ACCESS GRADERS TO PRACTICE ALL FUTURE HOMEWORKS
-        if (!$gradeable->isSubmissionOpen() && !$this->core->getUser()->accessGrading()
-            || $gradeable->isStudentView() && $gradeable->isStudentViewAfterGrades() && !$gradeable->isTaGradeReleased()) {
+        if (!$this->core->getUser()->accessGrading() && (
+                !$gradeable->isSubmissionOpen()
+                || $gradeable->isStudentView() && $gradeable->isStudentViewAfterGrades() && !$gradeable->isTaGradeReleased()
+            )) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
             return array('error' => true, 'message' => 'No gradeable with that id.');
         }
