@@ -70,18 +70,23 @@ void ArchiveValidatedFiles(nlohmann::json &whole_config) {
 
       // IF the autocheck has a file to compare (and it's not an executable)...
       if (autocheck.find("actual_file") == autocheck.end()) continue;
-      std::string actual_file = autocheck["actual_file"];
-      bool skip = false;
-      for (int j = 0; j < executable_names.size(); j++) {
-        if (executable_names[j] == actual_file) { skip = true; continue; }
-      }
-      if (skip) { /*std::cout << "SKIP EXECUTABLE " << actual_file << std::endl;*/ continue; }
 
-      // THEN add each actual file to the list of files to archive
-      std::stringstream ss;
-      ss << "test" << std::setfill('0') << std::setw(2) << which_testcase+1 << "/" << actual_file;
-      actual_file = ss.str();
-      whole_config["autograding"]["work_to_details"].push_back(actual_file);
+      std::vector<std::string> actual_filenames = stringOrArrayOfStrings(*my_testcase,"actual_file");
+      for (int i = 0; i < actual_filenames.size(); i++) {
+        std::string actual_file = actual_filenames[i];
+
+        bool skip = false;
+        for (int j = 0; j < executable_names.size(); j++) {
+          if (executable_names[j] == actual_file) { skip = true; continue; }
+        }
+        if (skip) { /*std::cout << "SKIP EXECUTABLE " << actual_file << std::endl;*/ continue; }
+        
+        // THEN add each actual file to the list of files to archive
+        std::stringstream ss;
+        ss << "test" << std::setfill('0') << std::setw(2) << which_testcase+1 << "/" << actual_file;
+        actual_file = ss.str();
+        whole_config["autograding"]["work_to_details"].push_back(actual_file);
+      }
     }
   }
 }
