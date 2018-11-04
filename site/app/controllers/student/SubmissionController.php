@@ -286,8 +286,10 @@ class SubmissionController extends AbstractController {
         //if (!$gradeable->isSubmissionOpen() && !$this->core->getUser()->accessAdmin()) {
 
         // TEMPORARY - ALLOW LIMITED & FULL ACCESS GRADERS TO PRACTICE ALL FUTURE HOMEWORKS
-        if (!$gradeable->isSubmissionOpen() && !$this->core->getUser()->accessGrading()
-            || $gradeable->isStudentView() && $gradeable->isStudentViewAfterGrades() && !$gradeable->isTaGradeReleased()) {
+        if (!$this->core->getUser()->accessGrading() && (
+                !$gradeable->isSubmissionOpen()
+                || $gradeable->isStudentView() && $gradeable->isStudentViewAfterGrades() && !$gradeable->isTaGradeReleased()
+            )) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
             return array('error' => true, 'message' => 'No gradeable with that id.');
         }
@@ -322,7 +324,7 @@ class SubmissionController extends AbstractController {
 
                 // If we get here, then we can safely construct the old model w/o checks
                 $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                       'showGradeable', $gradeable, $graded_gradeable, $version, $show_hidden);
+                                                       'showGradeable', $gradeable, $graded_gradeable, $version, $show_hidden, false);
             }
         }
         return array('id' => $gradeable_id, 'error' => $error);
@@ -927,7 +929,7 @@ class SubmissionController extends AbstractController {
         }
 
         // if student submission, make sure that gradeable allows submissions
-        if (!$this->core->getUser()->accessGrading() && $original_user_id == $user_id && !$gradeable->isStudentSubmit()) {
+        if (!$this->core->getUser()->accessFullGrading() && !$gradeable->canStudentSubmit()) {
             $msg = "You do not have access to that page.";
             $this->core->addErrorMessage($msg);
             return $this->uploadResult($msg, false);

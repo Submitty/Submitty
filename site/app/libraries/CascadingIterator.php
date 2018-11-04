@@ -46,11 +46,8 @@ class CascadingIterator implements \Iterator {
      */
     private function seek() {
         // If we aren't valid, try to get the next one
-        while (!$this->valid()) {
+        while (count($this->iterators) > 0 && $this->iterator_key < count($this->iterators) && !$this->valid()) {
             $this->iterator_key++;
-            if (count($this->iterators) === 0 || count($this->iterators) === $this->iterator_key) {
-                return;
-            }
         }
     }
 
@@ -62,8 +59,8 @@ class CascadingIterator implements \Iterator {
      */
     public function next() {
         $this->seek();
-        $this->key++;
         $this->iterators[$this->iterator_key]->next();
+        $this->key++;
         // Seek after 'next' to be sure our current iterator is valid
         $this->seek();
     }
@@ -90,10 +87,7 @@ class CascadingIterator implements \Iterator {
      * @since 5.0.0
      */
     public function valid() {
-        if ($this->iterator_key >= count($this->iterators)) {
-            return false;
-        }
-        return $this->iterators[$this->iterator_key]->valid();
+        return $this->iterator_key < count($this->iterators) && $this->iterators[$this->iterator_key]->valid();
     }
 
     /**
@@ -112,5 +106,6 @@ class CascadingIterator implements \Iterator {
 
         $this->key = 0;
         $this->iterator_key = 0;
+        $this->seek();
     }
 }

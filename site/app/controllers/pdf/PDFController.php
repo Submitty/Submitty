@@ -41,30 +41,36 @@ class PDFController extends AbstractController {
 
     private function showStudentPDF(){
         $gradeable_id = $_GET['gradeable_id'] ?? NULL;
-        $user_id = $this->core->getUser()->getId();
         $filename = $_GET['file_name'] ?? NULL;
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id);
-        $active_version = $this->core->getQueries()->getGradeable($gradeable_id, $user_id)->getActiveVersion();
+        $id = $this->core->getUser()->getId();
+        $gradeable = $this->tryGetGradeable($gradeable_id);
         if($gradeable->isTeamAssignment()){
-            $user_id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $user_id)->getId();
+            $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id)->getId();
         }
-        $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $user_id, $active_version);
+        $submitter = $this->core->getQueries()->getSubmitterById($id);
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($gradeable, $submitter);
+        $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
+        $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
         $annotation_jsons = [];
-        if(is_dir($annotation_path)){
+        if(is_dir($annotation_path) && count(scandir($annotation_path)) > 2){
             $first_file = scandir($annotation_path)[2];
             $annotation_path = FileUtils::joinPaths($annotation_path, $first_file);
             if(is_file($annotation_path)) {
                 $dir_iter = new \DirectoryIterator(dirname($annotation_path . '/'));
                 foreach ($dir_iter as $fileinfo) {
                     if (!$fileinfo->isDot()) {
-                        $grader_id = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileinfo->getFilename());
-                        $grader_id = explode('_', $grader_id)[1];
-                        $annotation_jsons[$grader_id] = file_get_contents($fileinfo->getPathname());
+                        $no_extension = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileinfo->getFilename());
+                        $pdf_info = explode('_', $no_extension);
+                        $pdf_id = $pdf_info[0];
+                        $grader_id = $pdf_info[1];
+                        if($pdf_id.'.pdf' === $filename){
+                            $annotation_jsons[$grader_id] = file_get_contents($fileinfo->getPathname());
+                        }
                     }
                 }
             }
         }
-        return $this->core->getOutput()->renderOutput(array('PDF'), 'showPDFEmbedded', $gradeable_id, $user_id, $filename, $annotation_jsons, true);
+        $this->core->getOutput()->renderOutput(array('PDF'), 'showPDFEmbedded', $gradeable_id, $id, $filename, $annotation_jsons, true);
     }
 
     private function savePDFAnnotation(){
@@ -102,14 +108,16 @@ class PDFController extends AbstractController {
     private function showGraderPDFEmbedded(){
         //This is the embedded pdf annotator that we built.
         $gradeable_id = $_POST['gradeable_id'] ?? NULL;
-        $user_id = $_POST['user_id'] ?? NULL;
+        //User can be a team
+        $id = $_POST['user_id'] ?? NULL;
         $filename = $_POST['filename'] ?? NULL;
-        $active_version = $this->core->getQueries()->getGradeable($gradeable_id, $user_id)->getActiveVersion();
-        $gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $user_id);
-        $id = $user_id;
+        $gradeable = $this->tryGetGradeable($gradeable_id);
         if($gradeable->isTeamAssignment()){
-            $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $user_id)->getId();
+            $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, null, $id);
+        } else {
+            $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $id);
         }
+        $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
         $annotation_jsons = [];
         //Dir iterator needs the first file.

@@ -297,7 +297,7 @@ class TeamController extends AbstractController {
         $return_url = $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable_id, 'page' => 'team'));
 
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id, false);
-        if ($graded_gradeable !== false) {
+        if ($graded_gradeable === false) {
             $this->core->addErrorMessage("You are not on a team");
             $this->core->redirect($return_url);
         }

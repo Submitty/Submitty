@@ -80,7 +80,7 @@ class LateDays extends AbstractModel {
         }
 
         // Don't show the students gradeables they don't submit for / don't have due dates
-        if (!$gradeable->isStudentSubmit() || !$gradeable->hasDueDate()) {
+        if (!$gradeable->isStudentSubmit() || !$gradeable->hasDueDate() || !$gradeable->isLateSubmissionAllowed()) {
             return false;
         }
 
