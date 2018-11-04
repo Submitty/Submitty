@@ -1003,6 +1003,23 @@ class AdminGradeableController extends AbstractController {
         )));
     }
 
+    /**
+     * Shifts all dates in the array up to and including $date_prop to be no later than $time
+     * @param array $dates
+     * @param string $date_prop
+     * @param \DateTime $time
+     */
+    private function shiftDates(array &$dates, string $date_prop, \DateTime $time) {
+        foreach (Gradeable::date_validated_properties as $d) {
+            if ($dates[$d] > $time) {
+                $dates[$d] = $time;
+            }
+            if ($date_prop === $d) {
+                break;
+            }
+        }
+    }
+
     private function quickLink() {
         $g_id = $_REQUEST['id'];
         $action = $_REQUEST['quick_link_action'];
@@ -1015,9 +1032,7 @@ class AdminGradeableController extends AbstractController {
         //what happens on the quick link depends on the action
         if ($action === "release_grades_now") {
             if ($dates['grade_released_date'] > $now) {
-                // Also set the grade due date so our dates are valid
-                $dates['grade_due_date'] = $now;
-                $dates['grade_released_date'] = $now;
+                $this->shiftDates($dates, 'grade_released_date', $now);
                 $message .= "Released grades for ";
                 $success = true;
             } else {
@@ -1026,7 +1041,7 @@ class AdminGradeableController extends AbstractController {
             }
         } else if ($action === "open_ta_now") {
             if ($dates['ta_view_start_date'] > $now) {
-                $dates['ta_view_start_date'] = $now;
+                $this->shiftDates($dates, 'ta_view_start_date', $now);
                 $message .= "Opened TA access to ";
                 $success = true;
             } else {
@@ -1035,7 +1050,7 @@ class AdminGradeableController extends AbstractController {
             }
         } else if ($action === "open_grading_now") {
             if ($dates['grade_start_date'] > $now) {
-                $dates['grade_start_date'] = $now;
+                $this->shiftDates($dates, 'grade_start_date', $now);
                 $message .= "Opened grading for ";
                 $success = true;
             } else {
@@ -1044,7 +1059,7 @@ class AdminGradeableController extends AbstractController {
             }
         } else if ($action === "open_students_now") {
             if ($dates['submission_open_date'] > $now) {
-                $dates['submission_open_date'] = $now;
+                $this->shiftDates($dates, 'submission_open_date', $now);
                 $message .= "Opened student access to ";
                 $success = true;
             } else {
