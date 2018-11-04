@@ -488,13 +488,15 @@ class HomeworkView extends AbstractView {
                 && $version_instance->getEarlyIncentivePoints() >= $autograding_config->getEarlySubmissionMinimumPoints()
                 && $version_instance->getDaysEarly() > $autograding_config->getEarlySubmissionMinimumDaysEarly();
 
+            $files = $version_instance->getFiles();
+
             $param = array_merge($param, [
                 'in_queue' => $version_instance->isQueued(),
                 'grading' => $version_instance->isGrading(),
                 'db_submission_time' => DateUtils::dateTimeToString($version_instance->getSubmissionTime()),
                 'days_late' => $version_instance->getDaysLate(),
                 'num_autogrades' => $version_instance->getHistoryCount(),
-                'files' => $version_instance->getFiles(),
+                'files' => array_merge($files['submissions'], $files['checkout']),
                 'display_version_days_late' => $version_instance->getDaysLate(),
                 'result_text' => $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $version_instance, $show_hidden)
             ]);
