@@ -4,9 +4,7 @@ namespace app\libraries\database;
 
 use app\exceptions\DatabaseException;
 use app\exceptions\ValidationException;
-use app\libraries\DateUtils;
-use app\libraries\MultiIterator;
-use app\libraries\Utils;
+use app\libraries\CascadingIterator;
 use \app\libraries\GradeableType;
 use app\models\Gradeable;
 use app\models\gradeable\AutoGradedGradeable;
@@ -19,9 +17,6 @@ use app\models\gradeable\Mark;
 use app\models\gradeable\RegradeRequest;
 use app\models\gradeable\Submitter;
 use app\models\gradeable\TaGradedGradeable;
-use app\models\GradeableComponent;
-use app\models\GradeableComponentMark;
-use app\models\GradeableVersion;
 use app\models\User;
 use app\models\SimpleLateUser;
 use app\models\Team;
@@ -1111,7 +1106,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
      * Gets all GradedGradeable's associated with each Gradeable.  If
      *  both $users and $teams are null, then everyone will be retrieved.
      *  Note: The users' teams will be included in the search
-     * @param \app\models\gradeable\Gradeable[] The gradeable(s) to retrieve data for
+     * @param \app\models\gradeable\Gradeable[] $gradeables The gradeable(s) to retrieve data for
      * @param string[]|string|null $users The id(s) of the user(s) to get data for
      * @param string[]|string|null $teams The id(s) of the team(s) to get data for
      * @param string[]|string|null $sort_keys An ordered list of keys to sort by (i.e. `user_id` or `g_id DESC`)
@@ -1122,21 +1117,17 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         $non_team_gradeables = [];
         $team_gradeables = [];
         foreach ($gradeables as $gradeable) {
-            /** @var \app\models\gradeable\Gradeable $gradeable */
             if ($gradeable->isTeamAssignment()) {
                 $team_gradeables[] = $gradeable;
             } else {
                 $non_team_gradeables[] = $gradeable;
             }
         }
-        // Make one call to each teams and users.  This is because doing a JOIN on a team OR a user is REALLY expensive
-        $non_team_it = function () use ($non_team_gradeables, $users, $teams, $sort_keys) {
-            return $this->getGradedGradeablesUserOrTeam($non_team_gradeables, $users, $teams, $sort_keys, false);
-        };
-        $team_it = function () use ($team_gradeables, $users, $teams, $sort_keys) {
-            return $this->getGradedGradeablesUserOrTeam($team_gradeables, $users, $teams, $sort_keys, true);
-        };
-        return new MultiIterator([[$non_team_it, $this], [$team_it, $this]]);
+
+        return new CascadingIterator(
+            $this->getGradedGradeablesUserOrTeam($non_team_gradeables, $users, $teams, $sort_keys, false),
+            $this->getGradedGradeablesUserOrTeam($team_gradeables, $users, $teams, $sort_keys, true)
+        );
     }
 
     /**
@@ -1636,12 +1627,14 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             return $graded_gradeable;
         };
 
-        return $this->course_db->queryIterator($query,
+        return $this->course_db->queryIterator(
+            $query,
             array_merge(
                 $param,
                 array_keys($gradeables_by_id)
             ),
-            $constructGradedGradeable);
+            $constructGradedGradeable
+        );
     }
 
     /**

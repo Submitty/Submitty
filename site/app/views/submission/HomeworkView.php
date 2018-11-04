@@ -44,13 +44,19 @@ class HomeworkView extends AbstractView {
         }
 
         // Only show the late banner if the submission has a due date
-        if ($gradeable->isStudentSubmit() && $gradeable->hasDueDate()) {
+        if ($gradeable->isStudentSubmit() && $gradeable->hasDueDate() && $gradeable->isLateSubmissionAllowed()) {
             $return .= $this->renderLateDayMessage($old_gradeable, $extensions);
         }
 
-        // showing submission if user is grader or student can submit
-        if ($this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit()) {
+        // showing submission if user is full grader or student can submit
+        if ($this->core->getUser()->accessFullGrading()) {
             $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use);
+        } else if ($gradeable->isStudentSubmit()) {
+            if ($gradeable->canStudentSubmit()) {
+                $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use);
+            } else {
+                $return .= $this->renderSubmitNotAllowedBox();
+            }
         }
         $all_directories = $gradeable->getSplitPdfFiles();
         if ($this->core->getUser()->accessFullGrading() && count($all_directories) > 0) {
@@ -224,6 +230,10 @@ class HomeworkView extends AbstractView {
         ]);
     }
 
+    private function renderSubmitNotAllowedBox() {
+        return $this->core->getOutput()->renderTwigOutput("submission/homework/SubmitNotAllowedBox.twig");
+    }
+
     /**
      * @param Gradeable $gradeable
      * @param GradedGradeable|null $graded_gradeable
@@ -321,6 +331,7 @@ class HomeworkView extends AbstractView {
             'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
             'has_due_date' => $gradeable->hasDueDate(),
             'repository_path' => $my_repository,
+            'show_no_late_submission_warning' => !$gradeable->isLateSubmissionAllowed() && $gradeable->isSubmissionClosed(),
             // This is only used as a placeholder, so the who loads this page is the 'user' unless the
             //  client overrides the user
             'user_id' => $this->core->getUser()->getId(),

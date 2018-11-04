@@ -118,6 +118,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
         $gradeable->method('getSubmissionOpenDate')->willReturn($now);
         $gradeable->method('getTaViewStartDate')->willReturn($now);
+        $gradeable->method('canStudentSubmit')->willReturn(true);
 
         $autograding_config = $this->createMockModel(AutogradingConfig::class);
         $autograding_config->method('getNumParts')->willReturn(intval($num_parts));
