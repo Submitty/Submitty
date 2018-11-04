@@ -3,11 +3,6 @@
         "AUTO_POINTS" : 18,
         "EXTRA_CREDIT_POINTS" : 0
     },
-
-    
-    "autograding" : {
-        "work_to_details" : [ "test03/something_new/foo.txt", "test04/foobar/another/thing.txt" ]
-    },
     
     "testcases" : [
 
