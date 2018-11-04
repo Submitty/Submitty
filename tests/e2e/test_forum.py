@@ -166,7 +166,7 @@ class TestForum(BaseTestCase):
             cancel_button.click()
             assert merge_threads_div.value_of_css_property("display") == "none"
         else:
-            submit_button = merge_threads_div.find_element(By.XPATH, ".//input[@value='Submit']")
+            submit_button = merge_threads_div.find_element(By.XPATH, ".//input[@value='Merge Thread']")
             possible_parents = merge_threads_div.find_element(By.XPATH, ".//a[@class='chosen-single']").click()
             self.driver.find_element(By.XPATH, ".//li[contains(normalize-space(.), '{}')]".format(parent_thread_title)).click()
             if press_cancel:
