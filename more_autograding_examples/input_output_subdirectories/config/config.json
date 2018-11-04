@@ -6,7 +6,7 @@
 
     
     "autograding" : {
-        "work_to_details" : [ "**/*.txt" ]
+        "work_to_details" : [ "test03/something_new/foo.txt", "test04/foobar/another/thing.txt" ]
     },
     
     "testcases" : [
