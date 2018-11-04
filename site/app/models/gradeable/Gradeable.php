@@ -1357,6 +1357,23 @@ class Gradeable extends AbstractModel {
     }
 
     /**
+     * Gets if the submission due date has passed yet
+     * @return bool
+     */
+    public function isSubmissionClosed() {
+        return $this->submission_due_date < $this->core->getDateTimeNow();
+    }
+
+    /**
+     * Gets if students can make submissions at this time
+     * @return bool
+     */
+    public function canStudentSubmit() {
+        return $this->isStudentSubmit() && $this->isSubmissionOpen() &&
+            (!$this->isSubmissionClosed() || $this->isLateSubmissionAllowed());
+    }
+
+    /**
      * Gets the total possible non-extra-credit ta points
      * @return float
      */
