@@ -1882,6 +1882,7 @@ class ElectronicGraderController extends GradingController {
         if (!$this->core->getAccess()->canI("autograding.load_checks", ["gradeable" => $graded_gradeable])) {
             // TODO: streamline permission error strings
             $this->core->getOutput()->renderJsonFail('You have insufficient permissions to access this command');
+            return;
         }
 
         try {

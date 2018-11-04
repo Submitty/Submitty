@@ -38,13 +38,17 @@
 
 {% for testcase in testcases if testcase.can_view %}
     {% set can_view = (not testcase.hidden or show_hidden) %}
+    {% set can_view_details = (not testcase.hidden or show_hidden_details and show_hidden) %}
     <div class="box" {{ testcase.hidden and show_hidden ? "style='background-color:#D3D3D3;'" : "" }}>
         <div id='tc_{{ loop.index0 }}' class="box-title"
-                {{ testcase.has_extra_results and can_view ? "style='cursor: pointer;'" : "" }}
-             onclick="loadTestcaseOutput('testcase_{{ loop.index0 }}', '{{ gradeable_id }}', '{{ submitter_id }}', '{{ loop.index0 }}', {{ display_version }});">
+                {% if can_view_details and testcase.has_extra_results %}
+                    style="cursor: pointer"
+                    onclick="loadTestcaseOutput('testcase_{{ loop.index0 }}', '{{ gradeable_id }}', '{{ submitter_id }}', '{{ loop.index0 }}', {{ display_version }});"
+                {% endif %}
+        >
 
             {# Details button #}
-            {% if testcase.has_extra_results and can_view %}
+            {% if testcase.has_extra_results and can_view_details %}
                 <div style="float:right; color: #0000EE; text-decoration: underline">
                     Details
                 </div>

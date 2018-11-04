@@ -2,67 +2,302 @@
 
 namespace tests\app\libraries;
 
-use app\libraries\FileUtils;
 use \app\libraries\CascadingIterator;
-use app\libraries\Utils;
 
 class CascadingIteratorTester extends \PHPUnit\Framework\TestCase {
-    public function testIterator() {
-        $temp_dir1 = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
-        $temp_dir2 = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
-
-        try {
-            FileUtils::createDir($temp_dir1);
-            touch(FileUtils::joinPaths($temp_dir1, 'file_1'));
-            touch(FileUtils::joinPaths($temp_dir1, 'file_2'));
-
-            FileUtils::createDir($temp_dir2);
-            touch(FileUtils::joinPaths($temp_dir2, 'file_3'));
-            touch(FileUtils::joinPaths($temp_dir2, 'file_4'));
-
-            $multi_iterator = new CascadingIterator(
-                new \FilesystemIterator($temp_dir1, \RecursiveDirectoryIterator::SKIP_DOTS),
-                new \FilesystemIterator($temp_dir2, \RecursiveDirectoryIterator::SKIP_DOTS)
-            );
-
-            $files = [
-                'file_1',
-                'file_2',
-                'file_3',
-                'file_4'
-            ];
-
-            $iterator_files = [];
-            $count = 0;
-            foreach ($multi_iterator as $item) {
-                $this->assertEquals($count, $multi_iterator->key());
-                $this->assertEquals(($count > 1) ? 1 : 0, $multi_iterator->iteratorKey());
-                $iterator_files[] = $item->getFilename();
-                $count++;
-            }
-            sort($iterator_files);
-            $this->assertEquals($files, $iterator_files);
-            $this->assertNull($multi_iterator->current());
-
-            $iterator_files = [];
-            $count = 0;
-            foreach ($multi_iterator as $item) {
-                $this->assertEquals($count, $multi_iterator->key());
-                $this->assertEquals(($count > 1) ? 1 : 0, $multi_iterator->iteratorKey());
-                $iterator_files[] = $item->getFilename();
-                $count++;
-            }
-            sort($iterator_files);
-            $this->assertEquals($files, $iterator_files);
-            $this->assertNull($multi_iterator->current());
+    public function testNoIterators() {
+        $multi_iterator = new CascadingIterator();
+        foreach ($multi_iterator as $item) {
+            $this->fail("There should not be any items to foreach over");
         }
-        finally {
-            if (file_exists($temp_dir1)) {
-                FileUtils::recursiveRmdir($temp_dir1);
-            }
-            if (file_exists($temp_dir2)) {
-                FileUtils::recursiveRmdir($temp_dir2);
-            }
+        $this->assertEquals(0, $multi_iterator->iteratorKey());
+        $this->assertFalse($multi_iterator->valid());
+        $this->assertNull($multi_iterator->current());
+    }
+
+    public function testOneIterator() {
+        $multi_iterator = new CascadingIterator(
+            new \ArrayIterator(['file_1', 'file_2'])
+        );
+
+        $files = [
+            'file_1',
+            'file_2'
+        ];
+
+        $count = 0;
+        foreach ($multi_iterator as $item) {
+            $this->assertEquals($count, $multi_iterator->key());
+            $this->assertEquals(0, $multi_iterator->iteratorKey());
+            $this->assertEquals($files[$count], $item);
+            $count++;
         }
+        $this->assertEquals(1, $multi_iterator->iteratorKey());
+        $this->assertFalse($multi_iterator->valid());
+        $this->assertNull($multi_iterator->current());
+
+        $count = 0;
+        foreach ($multi_iterator as $item) {
+            $this->assertEquals($count, $multi_iterator->key());
+            $this->assertEquals(0, $multi_iterator->iteratorKey());
+            $this->assertEquals($files[$count], $item);
+            $count++;
+        }
+        $this->assertEquals(1, $multi_iterator->iteratorKey());
+        $this->assertFalse($multi_iterator->valid());
+        $this->assertNull($multi_iterator->current());
+    }
+
+    public function testTwoIterators() {
+        $multi_iterator = new CascadingIterator(
+            new \ArrayIterator(['file_1', 'file_2']),
+            new \ArrayIterator(['file_3', 'file_4'])
+        );
+
+        $files = [
+            'file_1',
+            'file_2',
+            'file_3',
+            'file_4'
+        ];
+
+        $count = 0;
+        foreach ($multi_iterator as $item) {
+            $this->assertEquals($count, $multi_iterator->key());
+            $this->assertEquals(($count > 1) ? 1 : 0, $multi_iterator->iteratorKey());
+            $this->assertEquals($files[$count], $item);
+            $count++;
+        }
+        $this->assertEquals(2, $multi_iterator->iteratorKey());
+        $this->assertFalse($multi_iterator->valid());
+        $this->assertNull($multi_iterator->current());
+
+        $count = 0;
+        foreach ($multi_iterator as $item) {
+            $this->assertEquals($count, $multi_iterator->key());
+            $this->assertEquals(($count > 1) ? 1 : 0, $multi_iterator->iteratorKey());
+            $this->assertEquals($files[$count], $item);
+            $count++;
+        }
+        $this->assertEquals(2, $multi_iterator->iteratorKey());
+        $this->assertFalse($multi_iterator->valid());
+        $this->assertNull($multi_iterator->current());
+    }
+
+    public function testOneEmptyIterators() {
+        $multi_iterator = new CascadingIterator(
+            new \EmptyIterator()
+        );
+        foreach ($multi_iterator as $item) {
+            $this->fail("There should not be any items to foreach over");
+        }
+        $this->assertEquals(1, $multi_iterator->iteratorKey());
+        $this->assertFalse($multi_iterator->valid());
+        $this->assertNull($multi_iterator->current());
+    }
+
+    public function testTwoEmptyIterators() {
+        $multi_iterator = new CascadingIterator(
+            new \EmptyIterator(),
+            new \EmptyIterator()
+        );
+        foreach ($multi_iterator as $item) {
+            $this->fail("There should not be any items to foreach over");
+        }
+        $this->assertEquals(2, $multi_iterator->iteratorKey());
+        $this->assertFalse($multi_iterator->valid());
+        $this->assertNull($multi_iterator->current());
+    }
+
+    public function testEmptyIteratorFirst() {
+        $multi_iterator = new CascadingIterator(
+            new \EmptyIterator(),
+            new \ArrayIterator(['file_1', 'file_2'])
+        );
+
+        $files = [
+            'file_1',
+            'file_2'
+        ];
+
+        $count = 0;
+        foreach ($multi_iterator as $item) {
+            $this->assertEquals($count, $multi_iterator->key());
+            $this->assertEquals(1, $multi_iterator->iteratorKey());
+            $this->assertEquals($files[$count], $item);
+            $count++;
+        }
+        $this->assertNull($multi_iterator->current());
+
+        $count = 0;
+        foreach ($multi_iterator as $item) {
+            $this->assertEquals($count, $multi_iterator->key());
+            $this->assertEquals(1, $multi_iterator->iteratorKey());
+            $this->assertEquals($files[$count], $item);
+            $count++;
+        }
+        $this->assertNull($multi_iterator->current());
+    }
+
+    public function testEmptyIteratorLast() {
+        $multi_iterator = new CascadingIterator(
+            new \ArrayIterator(['file_1', 'file_2']),
+            new \EmptyIterator()
+        );
+
+        $files = [
+            'file_1',
+            'file_2'
+        ];
+
+        $count = 0;
+        foreach ($multi_iterator as $item) {
+            $this->assertEquals($count, $multi_iterator->key());
+            $this->assertEquals(0, $multi_iterator->iteratorKey());
+            $this->assertEquals($files[$count], $item);
+            $count++;
+        }
+        $this->assertNull($multi_iterator->current());
+
+        $count = 0;
+        foreach ($multi_iterator as $item) {
+            $this->assertEquals($count, $multi_iterator->key());
+            $this->assertEquals(0, $multi_iterator->iteratorKey());
+            $this->assertEquals($files[$count], $item);
+            $count++;
+        }
+        $this->assertNull($multi_iterator->current());
+    }
+
+    public function testEmptyIteratorBookend() {
+        $multi_iterator = new CascadingIterator(
+            new \EmptyIterator(),
+            new \ArrayIterator(['file_1', 'file_2']),
+            new \EmptyIterator()
+        );
+
+        $files = [
+            'file_1',
+            'file_2'
+        ];
+
+        $count = 0;
+        foreach ($multi_iterator as $item) {
+            $this->assertEquals($count, $multi_iterator->key());
+            $this->assertEquals(1, $multi_iterator->iteratorKey());
+            $this->assertEquals($files[$count], $item);
+            $count++;
+        }
+        $this->assertNull($multi_iterator->current());
+
+        $count = 0;
+        foreach ($multi_iterator as $item) {
+            $this->assertEquals($count, $multi_iterator->key());
+            $this->assertEquals(1, $multi_iterator->iteratorKey());
+            $this->assertEquals($files[$count], $item);
+            $count++;
+        }
+        $this->assertNull($multi_iterator->current());
+    }
+
+    public function testEmptyIteratorMiddle() {
+        $multi_iterator = new CascadingIterator(
+            new \ArrayIterator(['file_1', 'file_2']),
+            new \EmptyIterator(),
+            new \ArrayIterator(['file_3', 'file_4'])
+        );
+
+        $files = [
+            'file_1',
+            'file_2',
+            'file_3',
+            'file_4'
+        ];
+
+        $count = 0;
+        foreach ($multi_iterator as $item) {
+            $this->assertEquals($count, $multi_iterator->key());
+            $this->assertEquals(($count < 2) ? 0 : 2, $multi_iterator->iteratorKey());
+            $this->assertEquals($files[$count], $item);
+            $count++;
+        }
+        $this->assertNull($multi_iterator->current());
+
+        $count = 0;
+        foreach ($multi_iterator as $item) {
+            $this->assertEquals($count, $multi_iterator->key());
+            $this->assertEquals(($count < 2) ? 0 : 2, $multi_iterator->iteratorKey());
+            $this->assertEquals($files[$count], $item);
+            $count++;
+        }
+        $this->assertNull($multi_iterator->current());
+    }
+
+    public function testEmptyIteratorMixStarting() {
+        $multi_iterator = new CascadingIterator(
+            new \EmptyIterator(),
+            new \ArrayIterator(['file_1', 'file_2']),
+            new \EmptyIterator(),
+            new \ArrayIterator(['file_3', 'file_4'])
+        );
+
+        $files = [
+            'file_1',
+            'file_2',
+            'file_3',
+            'file_4'
+        ];
+
+        $count = 0;
+        foreach ($multi_iterator as $item) {
+            $this->assertEquals($count, $multi_iterator->key());
+            $this->assertEquals(($count < 2) ? 1 : 3, $multi_iterator->iteratorKey());
+            $this->assertEquals($files[$count], $item);
+            $count++;
+        }
+        $this->assertNull($multi_iterator->current());
+
+        $count = 0;
+        foreach ($multi_iterator as $item) {
+            $this->assertEquals($count, $multi_iterator->key());
+            $this->assertEquals(($count < 2) ? 1 : 3, $multi_iterator->iteratorKey());
+            $this->assertEquals($files[$count], $item);
+            $count++;
+        }
+        $this->assertNull($multi_iterator->current());
+    }
+
+    public function testEmptyIteratorMixEnding() {
+        $multi_iterator = new CascadingIterator(
+            new \ArrayIterator(['file_1', 'file_2']),
+            new \EmptyIterator(),
+            new \ArrayIterator(['file_3', 'file_4']),
+            new \EmptyIterator()
+        );
+
+        $files = [
+            'file_1',
+            'file_2',
+            'file_3',
+            'file_4'
+        ];
+
+        $count = 0;
+        foreach ($multi_iterator as $item) {
+            $this->assertEquals($count, $multi_iterator->key());
+            $this->assertEquals(($count < 2) ? 0 : 2, $multi_iterator->iteratorKey());
+            $this->assertEquals($files[$count], $item);
+            $count++;
+        }
+        $this->assertNull($multi_iterator->current());
+
+        $count = 0;
+        foreach ($multi_iterator as $item) {
+            $this->assertEquals($count, $multi_iterator->key());
+            $this->assertEquals(($count < 2) ? 0 : 2, $multi_iterator->iteratorKey());
+            $this->assertEquals($files[$count], $item);
+            $count++;
+        }
+        $this->assertNull($multi_iterator->current());
     }
 }
