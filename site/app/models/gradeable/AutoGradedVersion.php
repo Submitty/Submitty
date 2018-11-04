@@ -292,7 +292,7 @@ class AutoGradedVersion extends AbstractModel {
      */
     public function getQueuePosition() {
         if($this->queue_position === null) {
-            $this->loadQueueStatus();
+            return $this->loadQueueStatus();
         }
         return $this->queue_position;
     }

@@ -1,6 +1,8 @@
 {
+
     "autograding" : {
-        "submission_to_runner" : [ "*.txt", "*.png" ]
+        "submission_to_validation" : [ "*.txt", "*.png" ],
+        "work_to_details" : [ "*.txt", "*.png" ]
     },
     "textboxes" : [
         { 
