@@ -501,7 +501,7 @@ clangsrc=${SUBMITTY_INSTALL_DIR}/clang-llvm/src
 clangbuild=${SUBMITTY_INSTALL_DIR}/clang-llvm/build
 # note, we are not running 'ninja install', so this path is unused.
 clanginstall=${SUBMITTY_INSTALL_DIR}/clang-llvm/install
- 
+
 # skip if this is a re-run
 if [ ! -d "${clangsrc}" ]; then
     echo 'GOING TO PREPARE CLANG INSTALLATION FOR STATIC ANALYSIS'
@@ -525,7 +525,7 @@ if [ ! -d "${clangsrc}" ]; then
 
     echo 'DONE PREPARING CLANG INSTALLATION'
 fi
-    
+
 #################################################################
 # SUBMITTY SETUP
 #################
@@ -580,7 +580,8 @@ if [ ${WORKER} == 0 ]; then
 
     if [ "$DB_EXISTS" == "" ]; then
 	echo "Submitty master database does not yet exist"
-	PGPASSWORD=${dbuser_password} psql -d postgres -h localhost -U ${DB_USER} -c "CREATE DATABASE submitty;"
+	su postgres -c 'createdb submitty -eO ${db_user}'
+	su postgres -c 'psql submitty -ec "ALTER SCHEMA public OWNER TO ${DB_USER}"'
 	python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
     else
 	echo "Submitty master database already exists"
@@ -668,7 +669,7 @@ fi
 #################
 
 # WIP: creates basic container for grading CS1 & DS assignments
-# CAUTION: needs users/groups for security 
+# CAUTION: needs users/groups for security
 # These commands should be run manually if testing Docker integration
 
 rm -rf /tmp/docker
