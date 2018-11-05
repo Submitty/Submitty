@@ -71,7 +71,7 @@ void ArchiveValidatedFiles(nlohmann::json &whole_config) {
       // IF the autocheck has a file to compare (and it's not an executable)...
       if (autocheck.find("actual_file") == autocheck.end()) continue;
 
-      std::vector<std::string> actual_filenames = stringOrArrayOfStrings(*my_testcase,"actual_file");
+      std::vector<std::string> actual_filenames = stringOrArrayOfStrings(autocheck,"actual_file");
       for (int i = 0; i < actual_filenames.size(); i++) {
         std::string actual_file = actual_filenames[i];
 
