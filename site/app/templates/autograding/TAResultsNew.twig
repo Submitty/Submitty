@@ -22,7 +22,7 @@
                 {% if overall_comment|length != 0 %}
             <hr>
             Overall note from Grader:
-            <span class='gradeable_comment'>{{ overall_comment }}</span>
+            <span class='gradeable_comment'>{{ overall_comment|escape }}</span>
             {% endif %}
             </p>
         </div>
@@ -58,7 +58,7 @@
                     {{ Badge.render(component.total_score, component.points_possible, component.extra_credit) }}
                 </div>
                 <div class="box-info">
-                    <h4>{{ component.title }}
+                    <h4>{{ component.title|escape }}
                         {% if not is_peer and component.graders|length != 0 %}
                             <i>(Graded by: {{ component.graders|join(' / ') }})</i>
                         {% endif %}
@@ -80,7 +80,7 @@
                                         {{ mark.points|number_format(num_decimals) }}
                                     </td>
                                     <td>
-                                        {{ mark.title }}
+                                        {{ mark.title|escape }}
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -93,7 +93,7 @@
                                         {{ component.custom_mark_score|number_format(num_decimals) }}
                                     </td>
                                     <td>
-                                        {{ component.comment }}
+                                        {{ component.comment|escape }}
                                     </td>
                                 </tr>
                             {% endif %}
