@@ -1,0 +1,67 @@
+{
+    "testcases": [
+        {
+            "points_awarded": 3,
+            "test_name": "Test 1 Compilation"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test02/bar.txt",
+                    "description": "bar.txt",
+                    "difference_file": "test02/0_diff.json",
+                    "expected_file": "test_output/testassignment/inst_output.txt"
+                },
+                {
+                    "actual_file": "test02/STDOUT.txt",
+                    "description": "STDOUT.txt",
+                    "difference_file": "test02/1_diff.json",
+                    "expected_file": "test_output/testassignment/my_stdout/test02.txt"
+                }
+            ],
+            "points_awarded": 5,
+            "test_name": "Test 2 no subdirectory"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test03/something_new/foo.txt",
+                    "description": "something_new/foo.txt",
+                    "difference_file": "test03/0_diff.json",
+                    "expected_file": "test_output/testassignment/one_directory/inst_output.txt"
+                },
+                {
+                    "actual_file": "test03/STDOUT.txt",
+                    "description": "STDOUT.txt",
+                    "difference_file": "test03/1_diff.json",
+                    "expected_file": "test_output/testassignment/my_stdout/test03.txt"
+                }
+            ],
+            "points_awarded": 5,
+            "test_name": "Test 3 with subdirectory"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test04/foobar/another/thing.txt",
+                    "description": "foobar/another/thing.txt",
+                    "difference_file": "test04/0_diff.json",
+                    "expected_file": "test_output/testassignment/second_directory/nested/inst_output.txt"
+                },
+                {
+                    "actual_file": "test04/STDOUT.txt",
+                    "description": "STDOUT.txt",
+                    "difference_file": "test04/1_diff.json",
+                    "expected_file": "test_output/testassignment/my_stdout/test04.txt"
+                }
+            ],
+            "points_awarded": 5,
+            "test_name": "Test 4 with nested subdirectories"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Test 5 Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}
