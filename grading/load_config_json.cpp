@@ -75,12 +75,13 @@ void ArchiveValidatedFiles(nlohmann::json &whole_config) {
       for (int i = 0; i < actual_filenames.size(); i++) {
         std::string actual_file = actual_filenames[i];
 
+        // skip the executables
         bool skip = false;
         for (int j = 0; j < executable_names.size(); j++) {
           if (executable_names[j] == actual_file) { skip = true; continue; }
         }
-        if (skip) { /*std::cout << "SKIP EXECUTABLE " << actual_file << std::endl;*/ continue; }
-        
+        if (skip) { continue; }
+
         // THEN add each actual file to the list of files to archive
         std::stringstream ss;
         ss << "test" << std::setfill('0') << std::setw(2) << which_testcase+1 << "/" << actual_file;

@@ -177,18 +177,17 @@ def allow_only_one_part(path, log_path=os.devnull):
 # ==================================================================================
 # ==================================================================================
 
+# go through the testcase folder (e.g. test01/) and remove anything
+# that matches the test input (avoid archiving copies of these files!)
 def remove_test_input_files(overall_log,test_input_path,testcase_folder):
     with open(overall_log,'a') as f:
         for path, subdirs, files in os.walk(test_input_path):
             for name in files:
                 relative = path[len(test_input_path)+1:]
                 my_file = os.path.join(testcase_folder, relative, name)
-
                 if os.path.isfile(my_file):
-                    print ("HERE want to YAY REMOVED  ", my_file, file=f)
-                    #os.remove(my_file)
-                else:
-                    print ("HERE DNE  ", my_file, file=f)
+                    print ("removing (likely) stale test_input file: ", my_file, file=f)
+                    os.remove(my_file)
 
 
 def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untrusted):
