@@ -10,7 +10,7 @@ import shutil
 ############################################################################
 # COPY THE ASSIGNMENT FROM THE SAMPLE ASSIGNMENTS DIRECTORIES
 
-SAMPLE_ASSIGNMENT_CONFIG = SUBMITTY_INSTALL_DIR + "/more_autograding_examples/input_output_subdirectores/config"
+SAMPLE_ASSIGNMENT_CONFIG = SUBMITTY_INSTALL_DIR + "/more_autograding_examples/input_output_subdirectories/config"
 SAMPLE_SUBMISSIONS       = SUBMITTY_INSTALL_DIR + "/more_autograding_examples/input_output_subdirectories/submissions"
 
 @prebuild
@@ -30,24 +30,25 @@ def initialize(test):
     subprocess.call(["cp",
         os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
         os.path.join(test.testcase_path, "assignment_config")])
-    subprocess.call(["cp",
-        glob.glob(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_input", "**.*")),
-        os.path.join(test.testcase_path, "data")])
-    subprocess.call(["cp",
-        glob.glob(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "**.*")),
-        os.path.join(test.testcase_path, "data")])
 
-    subprocess.call(["cp"] +
-            glob.glob(os.path.join(SAMPLE_SUBMISSIONS, "*.cpp")) +
-            [os.path.join(test.testcase_path, "data")])
+    subprocess.call(["cp"] + ["-r"] +
+        glob.glob(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_input", "*")) +
+        [data_path])
 
+    subprocess.call(["cp"] + ["-r"] +
+        glob.glob(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "*")) +
+        [data_path])
 
+    
 ############################################################################
 def cleanup(test):
     subprocess.call(["rm"] + ["-rf"] +
                     glob.glob(os.path.join(test.testcase_path, "data", "test*")))
     subprocess.call(["rm"] + ["-f"] +
                     glob.glob(os.path.join(test.testcase_path, "data", "results*")))
+    subprocess.call(["rm"] + ["-f"] +
+                    glob.glob(os.path.join(test.testcase_path, "data", "*.cpp")))
+
 
 @testcase
 def correct(test):
