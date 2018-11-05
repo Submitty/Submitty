@@ -246,7 +246,8 @@ class AutoGradedVersion extends AbstractModel {
         if($this->files === null) {
             $this->loadSubmissionFiles();
         }
-        return array('submissions' => $this->files['submissions'][$part], 'checkout' => ($this->graded_gradeable->getGradeable()->isVcs()) ? $this->files['checkout'][$part] : []);
+        return array('submissions' => (array_key_exists($part, $this->files['submissions'])) ? $this->files['submissions'][$part] : [], 
+            'checkout' => ($this->graded_gradeable->getGradeable()->isVcs()) ? $this->files['checkout'][$part] : []);
     }
 
     /**
