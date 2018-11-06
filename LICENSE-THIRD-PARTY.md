@@ -26,7 +26,7 @@ their relevant licenses.
 &nbsp;&nbsp;&nbsp;&nbsp;[MIT License](https://github.com/trentrichardson/jQuery-Timepicker-Addon/blob/master/LICENSE-MIT)
 
 #### CodeMirror
-&nbsp;&nbsp;&nbsp;&nbsp;Copyright (C) 2016 by Marijn Haverbeke <marijnh@gmail.com> and others  
+&nbsp;&nbsp;&nbsp;&nbsp;Copyright (C) 2016 by Marijn Haverbeke \<marijnh@gmail.com\> and others  
 &nbsp;&nbsp;&nbsp;&nbsp;https://codemirror.net/  
 &nbsp;&nbsp;&nbsp;&nbsp;[MIT License](https://github.com/codemirror/CodeMirror/blob/master/LICENSE)
 
@@ -36,6 +36,6 @@ their relevant licenses.
 &nbsp;&nbsp;&nbsp;&nbsp;[MIT License](https://github.com/twbs/bootstrap/blob/master/LICENSE)
 
 #### ramsey/uuid
-&nbsp;&nbsp;&nbsp;&nbsp;Copyright (c) 2012-2018 Ben Ramsey <ben@benramsey.com>
-&nbsp;&nbsp;&nbsp;&nbsp;https://github.com/ramsey/uuid
+&nbsp;&nbsp;&nbsp;&nbsp;Copyright (c) 2012-2018 Ben Ramsey \<ben@benramsey.com\>  
+&nbsp;&nbsp;&nbsp;&nbsp;https://github.com/ramsey/uuid  
 &nbsp;&nbsp;&nbsp;&nbsp;[MIT License](https://github.com/ramsey/uuid/blob/master/LICENSE)
