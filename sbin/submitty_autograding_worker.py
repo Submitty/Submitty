@@ -9,6 +9,8 @@ from submitty_utils import dateutils
 import multiprocessing
 import contextlib
 import traceback
+import tempfile
+import zipfile
 
 from autograder import grade_items_logging
 from autograder import grade_item
@@ -71,6 +73,25 @@ def worker_process(which_machine,address,which_untrusted,my_server):
                     os.remove(autograding_zip)
                 with contextlib.suppress(FileNotFoundError):
                     os.remove(submission_zip)
+
+                #Respond with a failure zip file.
+                results_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE",servername_workername+"_"+which_untrusted+"_results.zip")
+                tmp_dir = tempfile.mkdtemp()
+                with open(os.path.join(tmp_dir, 'failure.txt'), 'w') as outfile:
+                    outfile.write("grading failed.\n")
+
+                results_zip_tmp = zipfile.ZipFile(results_zip, 'w')
+                results_zip_tmp.write(os.path.join(tmp_dir, 'failure.txt'))
+                results_zip_tmp.close()
+
+                shutil.rmtree(tmp_dir)
+                done_queue_file = os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE",servername_workername+"_"+which_untrusted+"_queue.json")
+                with open(todo_queue_file, 'r') as infile:
+                    queue_obj = json.load(infile)
+                    queue_obj["done_time"]=dateutils.write_submitty_date(microseconds=True)
+                with open(done_queue_file, 'w') as outfile:
+                    json.dump(queue_obj, outfile, sort_keys=True, indent=4)
+
             with contextlib.suppress(FileNotFoundError):
                 os.remove(todo_queue_file)
             counter = 0

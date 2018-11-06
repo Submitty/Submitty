@@ -8,6 +8,7 @@ use app\controllers\AbstractController;
 use app\libraries\Output;
 use app\libraries\Utils;
 use app\libraries\FileUtils;
+use app\libraries\DateUtils;
 
 /**
  * Class ForumHomeController
@@ -79,9 +80,6 @@ class ForumController extends AbstractController {
             case 'show_stats':
                 $this->showStats();
                 break;
-            case 'get_threads_before':
-                $this->getThreadsBefore();
-                break;
             case 'merge_thread':
                 $this->mergeThread();
                 break;
@@ -133,7 +131,7 @@ class ForumController extends AbstractController {
             $result["error"] = "You do not have permissions to do that.";
 		}
         $this->core->getOutput()->renderJson($result);
-		return $result;
+		return $this->core->getOutput()->getOutput();
 	}
 
     private function checkGoodAttachment($isThread, $thread_id, $file_post){
@@ -218,7 +216,7 @@ class ForumController extends AbstractController {
             $result["error"] = "You do not have permissions to do that.";
         }
         $this->core->getOutput()->renderJson($result);
-        return $result;
+        return $this->core->getOutput()->getOutput();
     }
 
     public function deleteCategory(){
@@ -244,7 +242,7 @@ class ForumController extends AbstractController {
             $result["error"] = "You do not have permissions to do that.";
         }
         $this->core->getOutput()->renderJson($result);
-        return $result;
+        return $this->core->getOutput()->getOutput();
     }
 
     public function editCategory(){
@@ -279,7 +277,7 @@ class ForumController extends AbstractController {
             $result["error"] = "You do not have permissions to do that.";
         }
         $this->core->getOutput()->renderJson($result);
-        return $result;
+        return $this->core->getOutput()->getOutput();
     }
 
     public function reorderCategories(){
@@ -306,7 +304,7 @@ class ForumController extends AbstractController {
             $result["error"] = "You do not have permissions to do that.";
         }
         $this->core->getOutput()->renderJson($result);
-        return $result;
+        return $this->core->getOutput()->getOutput();
     }
 
     //CODE WILL BE CONSOLIDATED IN FUTURE
@@ -360,7 +358,7 @@ class ForumController extends AbstractController {
             }
         }
         $this->core->getOutput()->renderJson($result);
-        return $result;
+        return $this->core->getOutput()->getOutput();
     }
 
     private function search(){
@@ -409,13 +407,14 @@ class ForumController extends AbstractController {
                 // Notification to parent post author
                 $post = $this->core->getQueries()->getPost($parent_id);
                 $post_author = $post['author_user_id'];
-                $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'reply', 'thread_id' => $thread_id, 'post_id' => $parent_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
+                $notification_anonymous = ($anon == 1) ? true : false;
+                $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'reply', 'thread_id' => $thread_id, 'post_id' => $parent_id, 'post_content' => $post['content'], 'reply_to' => $post_author, 'child_id' => $post_id, 'anonymous' => $notification_anonymous));
                 $this->core->getQueries()->pushNotification($notification);
                 $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'option' => $display_option, 'thread_id' => $thread_id));
             }
         }
         $this->core->getOutput()->renderJson($result);
-        return $result;   
+        return $this->core->getOutput()->getOutput();
     }
 
     public function alterAnnouncement($type){
@@ -437,7 +436,7 @@ class ForumController extends AbstractController {
         $this->core->getQueries()->addPinnedThread($current_user, $thread_id, $type);
         $response = array('user' => $current_user, 'thread' => $thread_id, 'type' => $type);
         $this->core->getOutput()->renderJson($response);
-        return $response;
+        return $this->core->getOutput()->getOutput();
     }
 
     private function checkPostEditAccess($post_id) {
@@ -476,14 +475,13 @@ class ForumController extends AbstractController {
      * @param integer(0/1/2) $modifyType - 0 => delete, 1 => edit content, 2 => undelete
      */
     public function alterPost($modifyType){
+        $post_id = $_POST["post_id"] ?? $_POST["edit_post_id"];
+        if(!($this->checkPostEditAccess($post_id))) {
+                $this->core->addErrorMessage("You do not have permissions to do that.");
+                return;
+        }
         if($modifyType == 0) { //delete post or thread
-            if(!($this->core->getUser()->getGroup() <= 2)) {
-                $error = "You do not have permissions to do that.";
-                $this->core->getOutput()->renderJson($response = array('error' => $error));
-                return $response;
-            }
             $thread_id = $_POST["thread_id"];
-            $post_id = $_POST["post_id"];
             $type = "";
             if($this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 1)){
                 $type = "thread";
@@ -494,16 +492,11 @@ class ForumController extends AbstractController {
             $post_author = $post['author_user_id'];
             $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'deleted', 'thread_id' => $thread_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
             $this->core->getQueries()->pushNotification($notification);
+            $this->core->getQueries()->removeNotificationsPost($post_id);
             $this->core->getOutput()->renderJson($response = array('type' => $type));
-            return $response;
+            return $this->core->getOutput()->getOutput();
         } else if($modifyType == 2) { //undelete post or thread
-            if(!($this->core->getUser()->getGroup() <= 2)) {
-                $error = "You do not have permissions to do that.";
-                $this->core->getOutput()->renderJson($response = array('error' => $error));
-                return $response;
-            }
             $thread_id = $_POST["thread_id"];
-            $post_id = $_POST["post_id"];
             $type = "";
             $result = $this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 0);
             if(is_null($result)) {
@@ -518,14 +511,9 @@ class ForumController extends AbstractController {
                 $this->core->getQueries()->pushNotification($notification);
                 $this->core->getOutput()->renderJson($response = array('type' => $type));
             }
-            return $response;
+            return $this->core->getOutput()->getOutput();
         } else if($modifyType == 1) { //edit post or thread
             $thread_id = $_POST["edit_thread_id"];
-            $post_id = $_POST["edit_post_id"];
-            if(!($this->checkPostEditAccess($post_id))) {
-                $this->core->addErrorMessage("You do not have permissions to do that.");
-                return;
-            }
             $status_edit_thread = $this->editThread();
             $status_edit_post   = $this->editPost();
             $any_changes = false;
@@ -595,9 +583,13 @@ class ForumController extends AbstractController {
         $new_post_content = $_POST["thread_post_content"];
         if(!empty($new_post_content)) {
             $post_id = $_POST["edit_post_id"];
+            $original_creator = $this->core->getQueries()->getPost($post_id);
+            if(!empty($original_creator)) {
+                $original_creator = $original_creator['author_user_id'];
+            }
             $anon = ($_POST["Anon"] == "Anon") ? 1 : 0;
             $current_user = $this->core->getUser()->getId();
-            return $this->core->getQueries()->editPost($current_user, $post_id, $new_post_content, $anon);
+            return $this->core->getQueries()->editPost($original_creator, $current_user, $post_id, $new_post_content, $anon);
         }
         return null;
     }
@@ -713,8 +705,8 @@ class ForumController extends AbstractController {
                     $this->core->addErrorMessage("No posts found for selected thread.");
                 }
             }
-            
-        } 
+
+        }
         if(empty($_REQUEST["thread_id"]) || empty($posts)) {
             $posts = $this->core->getQueries()->getPostsForThread($current_user, -1, $show_deleted);
         }
@@ -754,8 +746,7 @@ class ForumController extends AbstractController {
             foreach ($older_posts as $post) {
                 $_post['user'] = $post["edit_author"];
                 $_post['content'] = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'filter_post_content',  $post["content"]);
-                $my_timezone = $this->core->getConfig()->getTimezone();
-                $_post['post_time'] = date_format(date_create($post['edit_timestamp'])->setTimezone($my_timezone),"n/j g:i A");
+                $_post['post_time'] = DateUtils::parseDateTime($post['edit_timestamp'], $this->core->getConfig()->getTimezone())->format("n/j g:i A");
                 $output[] = $_post;
             }
             if(count($output) == 0) {
@@ -763,8 +754,7 @@ class ForumController extends AbstractController {
                 // Current post
                 $_post['user'] = $current_post["author_user_id"];
                 $_post['content'] = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'filter_post_content',  $current_post["content"]);
-                $my_timezone = $this->core->getConfig()->getTimezone();
-                $_post['post_time'] = date_format(date_create($current_post['timestamp'])->setTimezone($my_timezone),"n/j g:i A");
+                $_post['post_time'] = DateUtils::parseDateTime($current_post['timestamp'], $this->core->getConfig()->getTimezone())->format("n/j g:i A");
                 $output[] = $_post;
             }
             // Fetch additional information
@@ -776,7 +766,7 @@ class ForumController extends AbstractController {
             $output['error'] = "You do not have permissions to do that.";
         }
         $this->core->getOutput()->renderJson($output);
-        return $output;
+        return $this->core->getOutput()->getOutput();
     }
 
     public function getEditPostContent(){
@@ -792,10 +782,10 @@ class ForumController extends AbstractController {
                 $this->getThreadContent($_POST["thread_id"], $output);
             }
             $this->core->getOutput()->renderJson($output);
-            return $output;
         } else {
             $this->core->getOutput()->renderJson(array('error' => "You do not have permissions to do that."));
         }
+        return $this->core->getOutput()->getOutput();
     }
 
     private function getThreadContent($thread_id, &$output){
@@ -809,7 +799,6 @@ class ForumController extends AbstractController {
         $posts = array();
         $posts = $this->core->getQueries()->getPosts();
         $num_posts = count($posts);
-        $function_date = 'date_format';
         $num_threads = 0;
         $users = array();
         for($i=0;$i<$num_posts;$i++){
@@ -819,7 +808,7 @@ class ForumController extends AbstractController {
                 $users[$user] = array();
                 $u = $this->core->getQueries()->getSubmittyUser($user);
                 $users[$user]["first_name"] = htmlspecialchars($u -> getDisplayedFirstName());
-                $users[$user]["last_name"] = htmlspecialchars($u -> getLastName());
+                $users[$user]["last_name"] = htmlspecialchars($u -> getDisplayedLastName());
                 $users[$user]["posts"]=array();
                 $users[$user]["id"]=array();
                 $users[$user]["timestamps"]=array();
@@ -831,9 +820,7 @@ class ForumController extends AbstractController {
             }
             $users[$user]["posts"][] = $content;
             $users[$user]["id"][] = $posts[$i]["id"];
-            $date = date_create($posts[$i]["timestamp"]);
-            $my_timezone = $this->core->getConfig()->getTimezone();
-            $users[$user]["timestamps"][] = $function_date($date->setTimezone($my_timezone),"n/j g:i A");
+            $users[$user]["timestamps"][] = DateUtils::parseDateTime($posts[$i]["timestamp"], $this->core->getConfig()->getTimezone())->format("n/j g:i A");
             $users[$user]["thread_id"][] = $posts[$i]["thread_id"];
             $users[$user]["thread_title"][] = $this->core->getQueries()->getThreadTitle($posts[$i]["thread_id"]);
 
@@ -843,26 +830,11 @@ class ForumController extends AbstractController {
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'statPage', $users);
     }
 
-    public function getThreadsBefore(){
-        $output = array();
-        if($this->core->getUser()->getGroup() <= 2){
-            if(!empty($_POST["current_thead_date"])){
-                $current_thead_date = $_POST["current_thead_date"];
-                $merge_thread_list = $this->core->getQueries()->getThreadsBefore($current_thead_date, 1);
-                $output["content"] = $merge_thread_list;
-            } else {
-               $output["error"] = "No date provided. Please try again.";
-            }
-        } else {
-            $output["error"] = "You do not have permissions to do that.";
-        }
-        $this->core->getOutput()->renderJson($output);
-        return $output;
-    }
-
     public function mergeThread(){
         $parent_thread_id = $_POST["merge_thread_parent"];
         $child_thread_id = $_POST["merge_thread_child"];
+        preg_match('/\((.*?)\)/', $parent_thread_id, $result);
+        $parent_thread_id = $result[1];
         $thread_id = $child_thread_id;
         if($this->core->getUser()->getGroup() <= 2){
             if(is_numeric($parent_thread_id) && is_numeric($child_thread_id)) {

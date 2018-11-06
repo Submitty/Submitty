@@ -1,13 +1,5 @@
 @import url("reset.css");
-@import url("https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,300italic,700");
 @import url("https://fonts.googleapis.com/css?family=Inconsolata");
-
-@font-face {
-    font-family: 'Grand Hotel';
-    src: url('../fonts/grand-hotel/GrandHotel-Regular.otf') format('opentype');
-    font-weight: normal;
-    font-style: normal;
-}
 
 html {
     height: 100%;
@@ -237,10 +229,18 @@ table tr.table-header {
     margin: 0 auto -60px;
 }
 
+.full_height {
+    max-height: 100%;
+}
+
+#header.full_height {
+    min-height: fit-content;
+    min-height: -moz-fit-content;
+}
+
 #nav {
     background-color: #000000;
     color: #FFFFFF;
-    font-family: 'Open Sans Condensed', sans-serif;
     width: 100%;
     left: 0;
     top: 0;
@@ -314,7 +314,6 @@ table tr.table-header {
     /* min-height: 125px; */
     height: auto;
     width: 100%;
-    font-family: 'Calibri', sans-serif;
     overflow: hidden;
 }
 
@@ -373,6 +372,21 @@ table tr.table-header {
     margin: 15px;
 }
 
+.content:last-child {
+    flex-grow: 1;
+}
+
+.forum_content {
+    flex-grow: 1;
+    padding: 0px;
+}
+
+.forum_show_threads {
+    overflow: hidden;
+    flex-direction: column;
+    display: flex;
+}
+
 .content h1 {
     margin-bottom: 20px;
 }
@@ -388,8 +402,12 @@ table tr.table-header {
 }
 
 #footer {
-    margin-top: 15px;
+    margin-top: -10px;
     z-index: 20;
+    width: 100%;
+    padding: 5px 0 10px 0;
+    text-align: center;
+    clear: both;
 }
 
 #push {
@@ -402,13 +420,6 @@ table tr.table-header {
 
 #footer a:hover {
     color: #4078c0;
-}
-
-#footer {
-    width: 100%;
-    padding: 5px 0;
-    text-align: center;
-    clear: both;
 }
 
 #footer #copyright {
@@ -524,6 +535,7 @@ table tr.table-header {
 .option-input > textarea,
 .option-input > input[type="text"] {
     width: 95%;
+    resize: none;
 }
 
 .option-small-input > textarea,
@@ -561,7 +573,6 @@ table tr.table-header {
 }
 
 .label {
-    font-family: 'PT Sans', sans-serif;
     font-weight: 700;
     margin-top: 5px;
     margin-right: 0;
@@ -617,7 +628,7 @@ table tr.table-header {
 }
 
 .active {
-    background-color: #21C2F6;
+    background-color: #d8eef6;
 }
 
 .deleted {
@@ -641,6 +652,11 @@ table tr.table-header {
 
 .box-title > h4 {
     margin-left: 20px;
+}
+
+.grade-results {
+    display: flex;
+    flex-direction: row;
 }
 
 .box > h4 {
@@ -691,13 +707,13 @@ table tr.table-header {
     background-color: #999;
     border-radius: 10px;
     margin-left: 10px;
-    margin-right: 20px;
+    margin-right: 10px;
 }
 
 .no-badge {
-    width: 85px;
+    width: 70px;
     height: 10px;
-    margin-right: 20px;
+    margin-right: 10px;
     margin-left: 10px;
     float: left;
 }
@@ -732,7 +748,6 @@ table tr.table-header {
 .gradeable_list{
 	width: 100%;
     padding: 0px 50px 50px;
-    font-family: 'Source Sans Pro', sans-serif;
 	font-size: 18px;
 	text-align: left !important;
 }
@@ -750,9 +765,16 @@ table tr.table-header {
     padding: 0 4px;
 }
 
+.gradeable_comment td.mark-score {
+    text-align: right;
+    white-space: nowrap;
+}
+
 #search_wrapper{
-    background-color: #E9EFEF;
     border-radius: 3px;
+    padding-bottom:10px;
+    padding-right:10px;
+    padding-left:10px;
 }
 
 .notification_badge{
@@ -777,27 +799,19 @@ table tr.table-header {
 
 }
 
-.thread_list {
-    display:inline-block;
-    width:25%;
-    background-color: #E9EFEF;
-    box-shadow: 0 2px 15px -5px #888888;
-    margin-right:2px;
-    overflow-y: auto;
-    height: 100%;
-    float: left;
-    border-radius: 3px;
+#forum_bar {
+    margin-right: 10px;
+    margin-left: 10px;
+    margin-top: 10px;
 }
 
-.posts_list {
-    padding-right: 20px;
-    padding-left: 20px;
-    overflow: auto;
-    height: 100%;
-    width: 100%;
-    box-shadow: 0 2px 15px -5px #888888;
-    background-color: #E9EFEF;
-    border-radius: 3px;
+#thread_list {
+    padding-right: 0px;
+    overflow-y: auto;
+}
+
+#posts_list {
+    overflow-y: auto;
 }
 
 .first_post .post_content{
@@ -841,8 +855,6 @@ table tr.table-header {
 .first_post{
     padding-left: 10px !important;
     margin-top: 0px !important;
-    margin-left: -20px !important;
-    margin-right: -20px !important;
     border-radius: 0 !important;
 }
 
@@ -933,6 +945,8 @@ table .instructor .two-options{
 #nav-positioner {
     margin-left: -30px;
     flex-grow: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 #nav-buttons {
@@ -1103,13 +1117,13 @@ table .instructor .two-options{
 }
 
 .hover_glow {
-    opacity: 0.8;
+    opacity: 0.08;
     filter: alpha(opacity=80);
     z-index: 1;
 }
 
 .hover_glow:hover {
-    opacity: 1.0;
+    opacity: 0.8;
     filter: alpha(opacity=100);
 }
 
@@ -1328,7 +1342,6 @@ table .instructor .two-options{
     opacity: 0;
     transition: opacity 0.3s;
     font-size: 12px;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 .tooltip .tooltiptext::after {

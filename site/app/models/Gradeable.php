@@ -89,6 +89,7 @@ use app\libraries\Utils;
  * @method int getRegradeStatus()
  * @method \DateTime getRegradeRequestDate()
  * @method bool isRegradeAllowed()
+ * @method getHasDueDate()
  */
 class Gradeable extends AbstractModel {
     
@@ -164,6 +165,9 @@ class Gradeable extends AbstractModel {
 
     /** @property @var \DateTime|null Due date for an electronic submission */
     protected $due_date = null;
+
+    /** @property @var bool If this gradeable has a due date */
+    protected $has_due_date = false;
 
     /** @property @var bool Is the electronic submission via a VCS repository or by upload */
     protected $is_repository = false;
@@ -347,8 +351,9 @@ class Gradeable extends AbstractModel {
 
         $this->type = $details['g_gradeable_type'];
         if ($this->type === GradeableType::ELECTRONIC_FILE) {
-            $this->open_date = new \DateTime($details['eg_submission_open_date'], $timezone);
-            $this->due_date = new \DateTime($details['eg_submission_due_date'], $timezone);
+            $this->open_date = DateUtils::parseDateTime($details['eg_submission_open_date'], $timezone);
+            $this->due_date = DateUtils::parseDateTime($details['eg_submission_due_date'], $timezone);
+            $this->has_due_date = $details['eg_has_due_date'] === true;
             $this->allowed_late_days = $details['eg_late_days'];
             $this->is_repository = $details['eg_is_repository'] === true;
             $this->subdirectory = $details['eg_subdirectory'];
@@ -364,24 +369,25 @@ class Gradeable extends AbstractModel {
             $this->team_assignment = isset($details['eg_team_assignment']) ? $details['eg_team_assignment'] === true : false;
             //$this->inherit_teams_from = $details['eg_inherit_teams_from'];
             $this->max_team_size = $details['eg_max_team_size'];
-            $this->team_lock_date = new \DateTime($details['eg_team_lock_date'], $timezone);
-            $this->regrade_request_date = new \DateTime($details['eg_regrade_request_date'], $timezone);
+            $this->team_lock_date = DateUtils::parseDateTime($details['eg_team_lock_date'], $timezone);
+            $this->regrade_request_date = DateUtils::parseDateTime($details['eg_regrade_request_date'], $timezone);
             $this->regrade_allowed = $details['eg_regrade_allowed'];
             $this->regrade_status = $this->core->getQueries()->getRegradeRequestStatus($this->user->getId(), $this->id);
             if ($this->team_assignment) {
                 $this->team = $this->core->getQueries()->getTeamByGradeableAndUser($this->id, $this->user->getId());
             }
-            if (isset($details['active_version']) && $details['active_version'] !== null) {
+            $this->student_allowed_late_days = $details['student_allowed_late_days'] ?? $this->core->getConfig()->getDefaultStudentLateDays();
+
+            if (isset($details['g_version']) && $details['g_version'] !== null) {
                 $this->been_autograded = true;
                 $this->active_version = $details['active_version'];
                 $this->graded_auto_non_hidden_non_extra_credit = floatval($details['autograding_non_hidden_non_extra_credit']);
                 $this->graded_auto_non_hidden_extra_credit = floatval($details['autograding_non_hidden_extra_credit']);
                 $this->graded_auto_hidden_non_extra_credit = floatval($details['autograding_hidden_non_extra_credit']);
                 $this->graded_auto_hidden_extra_credit = floatval($details['autograding_hidden_extra_credit']);
-                $this->submission_time = new \DateTime($details['submission_time'], $timezone);
+                $this->submission_time = DateUtils::parseDateTime($details['submission_time'], $timezone);
                 $this->late_day_exceptions = $details['late_day_exceptions'];
                 $this->late_days = $details['days_late'];
-                $this->student_allowed_late_days = $details['student_allowed_late_days'] ?? $this->core->getConfig()->getDefaultStudentLateDays();
             }
             
             if (isset($details['highest_version']) && $details['highest_version']!== null) {
@@ -472,16 +478,22 @@ class Gradeable extends AbstractModel {
 
         $this->minimum_grading_group = $details['g_min_grading_group'];
         $this->grade_by_registration = $details['g_grade_by_registration'] === true;
-        $this->grade_start_date = new \DateTime($details['g_grade_start_date'], $timezone);
-        $this->grade_released_date = new \DateTime($details['g_grade_released_date'], $timezone);
-        $this->ta_view_date = new \DateTime($details['g_ta_view_start_date'], $timezone);
+        $this->grade_start_date = DateUtils::parseDateTime($details['g_grade_start_date'], $timezone);
+        $this->grade_released_date = DateUtils::parseDateTime($details['g_grade_released_date'], $timezone);
+        $this->ta_view_date = DateUtils::parseDateTime($details['g_ta_view_start_date'], $timezone);
         // Is it past when the TA grades should be released
-        $this->ta_grades_released = $this->grade_released_date < new \DateTime("now", $timezone);
+        $this->ta_grades_released = $this->grade_released_date < $this->core->getDateTimeNow();
         $this->bucket = $details['g_syllabus_bucket'];
     }
 
     public function calculateLateDays(&$total_late_days = 0){
         $late_flag = false;
+
+        // If the student doesn't submit or the gradeable has no due date,
+        //  this gradeable shouldn't contribute to the late days
+        if (!$this->student_submit || !$this->getHasDueDate()) {
+            return;
+        }
 
         if ($this->late_days - $this->late_day_exceptions > 0) {
             $this->late_status = "Late";
@@ -938,7 +950,7 @@ class Gradeable extends AbstractModel {
     }
 
     public function getDaysLate() {
-        return ($this->hasResults()) ? $this->getCurrentVersion()->getDaysLate() : 0;
+        return ($this->hasResults() && $this->has_due_date) ? $this->getCurrentVersion()->getDaysLate() : 0;
     }
 
     public function getInstructionsURL(){
@@ -1531,7 +1543,7 @@ class Gradeable extends AbstractModel {
     }
     //return true if students can currently submit regrades for this assignment, false otherwise
     public function isRegradeOpen(){
-        if($this->core->getConfig()->isRegradeEnabled()==true && $this->isTaGradeReleased() && $this->regrade_allowed && ($this->regrade_request_date > new \DateTime('now', $this->core->getConfig()->getTimezone()))){
+        if($this->core->getConfig()->isRegradeEnabled()==true && $this->isTaGradeReleased() && $this->regrade_allowed && ($this->regrade_request_date > $this->core->getDateTimeNow())){
             return true;
         }
         return false;

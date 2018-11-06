@@ -46,6 +46,9 @@ try:
     g_id = os.path.basename(arguments['g_id'].value)
     ver = os.path.basename(arguments['ver'].value)
     message = "Something went wrong:  just defined variables"
+    for key in ['sem', 'course', 'g_id', 'ver']:
+        if os.path.basename(arguments[key].value) in ['.', '..']:
+            raise ValueError('. Invalid value for ' + key + '.')
     with open("/usr/local/submitty/config/submitty.json", encoding='utf-8') as data_file:
         data = json.loads(data_file.read())
 
@@ -115,6 +118,9 @@ try:
 
     os.chdir(current_path) #make sure this is in right place
     message += ",and finished"
+except ValueError as e:
+    valid = False
+    message += str(e)
 except Exception as e:
     valid = False
     # if copy exists, delete it... but relies on the fact that copy_path exists :(

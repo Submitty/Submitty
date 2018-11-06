@@ -165,6 +165,10 @@ function editUserForm(user_id) {
             }
             $('[name="user_preferred_firstname"]', form).val(json['user_preferred_firstname']);
             $('[name="user_lastname"]', form).val(json['user_lastname']);
+            if (json['user_preferred_lastname'] === null) {
+                json['user_preferred_lastname'] = "";
+            }
+            $('[name="user_preferred_lastname"]', form).val(json['user_preferred_lastname']);
             $('[name="user_email"]', form).val(json['user_email']);
             var registration_section;
             if (json['registration_section'] === null) {
@@ -397,8 +401,8 @@ function setUserSubmittedCode(gradeable_id, changed) {
         var version_user_1 = $('[name="version_user_1"]', form).val();
         if(changed == 'version_user_1' && version_user_1 == '') {
             $('[name="user_id_2"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
-            $('[name="code_box_1"]').empty(); 
-            $('[name="code_box_2"]').empty(); 
+            $('[name="code_box_1"]').empty();
+            $('[name="code_box_2"]').empty();
         }
         else {
             if(changed == 'user_id_1' || changed =='version_user_1') {
@@ -406,7 +410,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                     version_user_1 = "max_matching";
                 }
 
-                var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatinated',
+                var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatenated',
                         'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1});
                 $.ajax({
                     url: url,
@@ -471,7 +475,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
             if (changed == 'user_id_2') {
                 if (($('[name="user_id_2"]', form).val()) == '') {
                     $('[name="code_box_2"]').empty();
-                    var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatinated',
+                    var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatenated',
                         'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'user_id_2':'', 'version_user_2': ''});
                     $.ajax({
                         url: url,
@@ -492,7 +496,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                 else {
                     var user_id_2 = JSON.parse($('[name="user_id_2"]', form).val())["user_id"];
                     var version_user_2 = JSON.parse($('[name="user_id_2"]', form).val())["version"];
-                    var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatinated',
+                    var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatenated',
                         'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'user_id_2':user_id_2, 'version_user_2': version_user_2});
                     $.ajax({
                         url: url,
@@ -581,7 +585,7 @@ function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user
             else if(where == 'code_box_1') {
                 var to_append='';
                 $.each(data, function(i,match){
-                    to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick=getMatchesForClickedMatch("'+gradeable_id+'",event,'+user_1_match_start+','+ user_1_match_end+',"popup","'+ color+ '","","'+match[0]+'",'+match[1]+');>'+ match[3]+' '+match[4]+' &lt;'+match[0]+'&gt; (version:'+match[1]+')</div></li>';                        
+                    to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick=getMatchesForClickedMatch("'+gradeable_id+'",event,'+user_1_match_start+','+ user_1_match_end+',"popup","'+ color+ '","","'+match[0]+'",'+match[1]+');>'+ match[3]+' '+match[4]+' &lt;'+match[0]+'&gt; (version:'+match[1]+')</div></li>';
                 });
                 to_append = $.parseHTML(to_append);
                 $("#popup_to_show_matches_id").empty().append(to_append);
@@ -662,7 +666,7 @@ function toggleUsersPlagiarism(gradeable_id) {
 function configureNewGradeableForPlagiarismFormOptionChanged(prior_term_gradeables, select_element_name) {
     var form = $("#save-configuration-form");
     if(select_element_name == "language") {
-        
+
         //
         // Following code is used to set default window size for different languages
         // that will appear in 'configureNewGradeableForPlagiarismForm'
@@ -1091,9 +1095,9 @@ function check_lichen_jobs(url, semester, course) {
             else if(data="NO_REFRESH" && last_data == "REFRESH_ME"){
                 last_data= "NO_REFRESH";
                 localStorage.setItem("last_data", last_data);
-                window.location.href = buildUrl({'component':'admin', 'page' :'plagiarism', 'course':course, 'semester': semester});   
+                window.location.href = buildUrl({'component':'admin', 'page' :'plagiarism', 'course':course, 'semester': semester});
             }
-            else {  
+            else {
                 checkRefreshLichenMainPage(url, semester, course);
             }
         }
@@ -1413,7 +1417,9 @@ function publishFormWithAttachments(form, test_category, error_message) {
             window.location.href = json['next_page'];
         },
         error: function(){
-            window.alert(error_message);
+            var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + error_message + '</div>';
+            $('#messages').append(message);
+            return;
         }
     });
     return false;
@@ -1617,14 +1623,14 @@ function dynamicScrollLoadPage(element, atEnd) {
             spinner_up.hide();
         };
     }
-    
+
     var urlPattern = $(element).data("urlPattern");
     var currentThreadId = $(element).data("currentThreadId",);
     var currentCategoriesId = $(element).data("currentCategoriesId",);
     var course = $(element).data("course",);
 
     var next_url = urlPattern.replace("{{#}}", load_page);
-           
+
     var categories_value = $("#thread_category").val();
     var thread_status_value = $("#thread_status_select").val();
     categories_value = (categories_value == null)?"":categories_value.join("|");
@@ -1670,7 +1676,7 @@ function dynamicScrollContentOnDemand(jElement, urlPattern, currentThreadId, cur
     jElement.data("course", course);
 
     dynamicScrollLoadIfScrollVisible(jElement);
-    $(jElement).scroll(function(){ 
+    $(jElement).scroll(function(){
         var element = $(this)[0];
         var sensitivity = 3;
         var isTop = element.scrollTop < sensitivity;
@@ -1750,19 +1756,19 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
                var page_number = parseInt(x.page_number);
                x = x.html;
                x = `${x}`;
-               var jElement = $(".thread_list");
+               var jElement = $("#thread_list");
                jElement.children(":not(.fa)").remove();
-               $(".thread_list .fa-caret-up").after(x);
+               $("#thread_list .fa-caret-up").after(x);
                jElement.attr("prev_page", page_number - 1);
                jElement.attr("next_page", page_number + 1);
                jElement.data("dynamic_lock_load", false);
-               $(".thread_list .fa-spinner").hide();
+               $("#thread_list .fa-spinner").hide();
                if(loadFirstPage) {
-                   $(".thread_list .fa-caret-up").hide();
-                   $(".thread_list .fa-caret-down").show();
+                   $("#thread_list .fa-caret-up").hide();
+                   $("#thread_list .fa-caret-down").show();
                } else {
-                   $(".thread_list .fa-caret-up").show();
-                   $(".thread_list .fa-caret-down").hide();
+                   $("#thread_list .fa-caret-up").show();
+                   $("#thread_list .fa-caret-down").hide();
                }
                dynamicScrollLoadIfScrollVisible(jElement);
                if(success_callback != null) {
@@ -1830,6 +1836,7 @@ function showHistory(post_id) {
                 }
                 $("#popup-post-history").show();
                 $("#popup-post-history .post_box.history_box").remove();
+                $("#popup-post-history .form-body").css("padding", "5px");
                 var dummy_box = $($("#popup-post-history .post_box")[0]);
                 for(var i = json.length - 1 ; i >= 0 ; i -= 1) {
                     var post = json[i];
@@ -1857,56 +1864,6 @@ function showHistory(post_id) {
             },
             error: function(){
                 window.alert("Something went wrong while trying to display post history. Please try again.");
-            }
-    });
-}
-
-function loadMergeableThreads() {
-    var selectNode = $("[name='merge_thread_parent']");
-    var current_thead_date = selectNode.attr("current-thead-date");
-    if(!current_thead_date) {
-        // Already Loaded
-        return;
-    }
-    var url = buildUrl({'component': 'forum', 'page': 'get_threads_before'});
-    $.ajax({
-            url: url,
-            type: "POST",
-            data: {
-                current_thead_date: current_thead_date
-            },
-            success: function(data){
-                try {
-                    var json = JSON.parse(data);
-                } catch (err){
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
-                    $('#messages').append(message);
-                    return;
-                }
-                if(json['error']){
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
-                    $('#messages').append(message);
-                    return;
-                }
-                if(json.content.length == 0) {
-                    selectNode.closest('.form-body').text("Nothing to merge.");
-                } else {
-                    selectNode.empty();
-                    var options = [];
-                    for(var i = 0; i < json.content.length ; i++ ) {
-                        var row = json.content[i];
-                        var id = escapeSpecialChars(""+row.id);
-                        var title = escapeSpecialChars(row.title);
-                        var element = "<option value='" + id + "'>" + title + " (" + id + ")</option>";
-                        options.push(element);
-                    }
-                    selectNode.append(options.join(''));
-                    selectNode.closest("form").find("input[type='submit']").prop('disabled', false);
-                }
-                selectNode.attr("current-thead-date", "");
-            },
-            error: function(){
-                window.alert("Something went wrong while trying to load threads list. Please try again.");
             }
     });
 }

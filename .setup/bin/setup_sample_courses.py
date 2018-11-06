@@ -144,6 +144,7 @@ def main():
                               user_firstname=user.firstname,
                               user_preferred_firstname=user.preferred_firstname,
                               user_lastname=user.lastname,
+                              user_preferred_lastname=user.preferred_lastname,
                               user_email=user.email,
                               last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
 
@@ -157,6 +158,7 @@ def main():
                               user_firstname=user.firstname,
                               user_preferred_firstname=user.preferred_firstname,
                               user_lastname=user.lastname,
+                              user_preferred_lastname=user.preferred_lastname,
                               user_email=user.email,
                               last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
     submitty_conn.close()
@@ -240,8 +242,8 @@ def generate_versions_to_submit(num=3, original_value=3):
 
 def generate_probability_space(probability_dict, default = 0):
     """
-    This function takes in a dictionary whose key is the probability (decimal less than 1), 
-    and the value is the outcome (whatever the outcome is). 
+    This function takes in a dictionary whose key is the probability (decimal less than 1),
+    and the value is the outcome (whatever the outcome is).
     """
     probability_counter = 0
     target_random = random.random()
@@ -496,6 +498,7 @@ class User(object):
         email
         group
         preferred_firstname
+        preferred_lastname
         registration_section
         rotating_section
         unix_groups
@@ -510,6 +513,7 @@ class User(object):
         self.email = self.id + "@example.com"
         self.group = 4
         self.preferred_firstname = None
+        self.preferred_lastname = None
         self.registration_section = None
         self.rotating_section = None
         self.grading_registration_section = None
@@ -520,6 +524,8 @@ class User(object):
 
         if 'user_preferred_firstname' in user:
             self.preferred_firstname = user['user_preferred_firstname']
+        if 'user_preferred_lastname' in user:
+            self.preferred_lastname = user['user_preferred_lastname']
         if 'user_email' in user:
             self.email = user['user_email']
         if 'user_group' in user:
@@ -670,23 +676,24 @@ class Course(object):
 
         os.environ['PGPASSWORD'] = DB_PASS
         database = "submitty_" + self.semester + "_" + self.code
-
         print("Database created, now populating ", end="")
+
         submitty_engine = create_engine("postgresql://{}:{}@{}/submitty".format(DB_USER, DB_PASS, DB_HOST))
         submitty_conn = submitty_engine.connect()
         submitty_metadata = MetaData(bind=submitty_engine)
+        print("(Master DB connection made, metadata bound)...")
 
-        engine = create_engine("postgresql://{}:{}@{}/{}".format(DB_USER, DB_PASS, DB_HOST,
-                                                                 database))
+        engine = create_engine("postgresql://{}:{}@{}/{}".format(DB_USER, DB_PASS, DB_HOST, database))
         self.conn = engine.connect()
         self.metadata = MetaData(bind=engine)
-        print("(connection made, metadata bound)...")
+        print("(Course DB connection made, metadata bound)...")
+
         print("Creating registration sections ", end="")
-        table = Table("sections_registration", self.metadata, autoload=True)
+        table = Table("courses_registration_sections", submitty_metadata, autoload=True)
         print("(tables loaded)...")
         for section in range(1, self.registration_sections+1):
             print("Create section {}".format(section))
-            self.conn.execute(table.insert(), sections_registration_id=str(section))
+            submitty_conn.execute(table.insert(), semester=self.semester, course=self.code, registration_section_id=str(section))
 
         print("Creating rotating sections ", end="")
         table = Table("sections_rotating", self.metadata, autoload=True)
@@ -711,7 +718,7 @@ class Course(object):
             if rot_section is not None and rot_section > self.rotating_sections:
                 rot_section = None
             if reg_section is not None:
-                reg_section=str(reg_section)    
+                reg_section=str(reg_section)
             # We already have a row in submitty.users for this user,
             # just need to add a row in courses_users which will put a
             # a row in the course specific DB, and off we go.
@@ -776,7 +783,7 @@ class Course(object):
         # On python 3, replace with os.makedirs(..., exist_ok=True)
         os.system("mkdir -p {}".format(os.path.join(self.course_path, "submissions")))
         os.system('chown submitty_php:{}_tas_www {}'.format(self.code, os.path.join(self.course_path, 'submissions')))
-        
+
         for gradeable in self.gradeables:
             #create_teams
             if gradeable.team_assignment is True:
@@ -787,7 +794,7 @@ class Course(object):
                  gradeable.config_path is None):
                 #  Make sure the electronic gradeable is valid
                     continue
-            
+
             #creating the folder containing all the submissions
             gradeable_path = os.path.join(self.course_path, "submissions", gradeable.id)
 
@@ -955,10 +962,10 @@ class Course(object):
                             self.conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
                                          gcd_score=score, gcd_component_comment="", gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time, gcd_graded_version=-1)
         #This segment adds the sample forum posts for the sample course only
-        if self.code == "sample": 
+        if self.code == "sample":
             self.add_sample_forum_data()
-            print('Added forum data to sample course.') 
-       
+            print('Added forum data to sample course.')
+
         self.conn.close()
         submitty_conn.close()
         os.environ['PGPASSWORD'] = ""
@@ -994,13 +1001,13 @@ class Course(object):
         teams_table = Table("teams", self.metadata, autoload=True)
         ucounter = 0
         for user in self.users:
-            #the unique team id is made up of 5 digits, an underline, and the team creater's userid. 
+            #the unique team id is made up of 5 digits, an underline, and the team creater's userid.
             #example: 00001_aphacker
             unique_team_id=str(ucounter).zfill(5)+"_"+user.get_detail(self.code, "id")
             team_in_other_gradeable = select([gradeable_teams_table]).where(
             gradeable_teams_table.c['team_id'] == unique_team_id)
             res = self.conn.execute(team_in_other_gradeable)
-            num = res.rowcount                        
+            num = res.rowcount
             while num is not 0:
                 ucounter+=1
                 unique_team_id=str(ucounter).zfill(5)+"_"+user.get_detail(self.code, "id")
@@ -1015,7 +1022,7 @@ class Course(object):
             #The teams are created based on the order of the users. As soon as the number of teamates
             #exceeds the max team size, then a new team will be created within the same registration section
             print("Adding team for " + unique_team_id + " in gradeable " + gradeable.id)
-            #adding json data for team history                     
+            #adding json data for team history
             teams_registration = select([gradeable_teams_table]).where(
                 (gradeable_teams_table.c['registration_section'] == str(reg_section)) &
                 (gradeable_teams_table.c['g_id'] == gradeable.id))
@@ -1023,13 +1030,13 @@ class Course(object):
             added = False
             if res.rowcount != 0:
                 #If the registration has a team already, join it
-                for team_in_section in res:  
+                for team_in_section in res:
                     members_in_team = select([teams_table]).where(
                         teams_table.c['team_id'] == team_in_section['team_id'])
                     res = self.conn.execute(members_in_team)
-                    if res.rowcount < gradeable.max_team_size:                        
+                    if res.rowcount < gradeable.max_team_size:
                         self.conn.execute(teams_table.insert(),
-                                    team_id=team_in_section['team_id'], 
+                                    team_id=team_in_section['team_id'],
                                     user_id=user.get_detail(self.code, "id"),
                                     state=1)
                         json_team_history[team_in_section['team_id']].append({"action": "admin_create",
@@ -1045,7 +1052,7 @@ class Course(object):
                              registration_section=str(reg_section),
                              rotating_section=str(random.randint(1, self.rotating_sections)))
                 self.conn.execute(teams_table.insert(),
-                             team_id=unique_team_id, 
+                             team_id=unique_team_id,
                              user_id=user.get_detail(self.code, "id"),
                              state=1)
                 json_team_history[unique_team_id] =  [{"action": "admin_create",
@@ -1058,7 +1065,7 @@ class Course(object):
 
     def add_sample_forum_data(self):
         #set sample course to have forum enabled by default
-        config = configparser.ConfigParser()    
+        config = configparser.ConfigParser()
         config.read(os.path.join(self.course_path, "config", "config.ini"))
         config.set("course_details", "forum_enabled", "true")
         with open(os.path.join(self.course_path, "config", "config.ini"), 'w') as configfile:
@@ -1245,7 +1252,7 @@ class Course(object):
 
         gradeables_json_output["section"] = section_ta_mapping
         messages = ["<b>{} Course</b>".format(course_id),
-                    "Note: Please be patient with data entry/grade corrections for the most recent " 
+                    "Note: Please be patient with data entry/grade corrections for the most recent "
                     "lab, homework, and test.",
                     "Please contact your graduate lab TA if a grade remains missing or incorrect for more than a week."]
         gradeables_json_output["messages"] = messages
@@ -1478,7 +1485,7 @@ class Gradeable(object):
             conn.execute(reg_table.insert(), g_id=self.id, user_id=rotate['user_id'],
                          sections_rotating=rotate['section_rotating_id'])
 
-        
+
 
         if self.type == 0:
             conn.execute(electronic_table.insert(), g_id=self.id,
@@ -1488,8 +1495,8 @@ class Gradeable(object):
                          eg_team_assignment=self.team_assignment,
                          eg_max_team_size=self.max_team_size,
                          eg_team_lock_date=self.team_lock_date,
-                         eg_use_ta_grading=self.use_ta_grading, 
-                         eg_student_view=self.student_view, 
+                         eg_use_ta_grading=self.use_ta_grading,
+                         eg_student_view=self.student_view,
                          eg_student_submit=self.student_submit, eg_student_download=self.student_download,
                          eg_student_any_version=self.student_any_version, eg_config_path=self.config_path,
                          eg_late_days=self.late_days, eg_precision=self.precision, eg_peer_grading=self.peer_grading,
@@ -1628,7 +1635,7 @@ class Component(object):
     def create(self, g_id, conn, table, mark_table):
         ins = table.insert().values(g_id=g_id, gc_title=self.title, gc_ta_comment=self.ta_comment,
                                     gc_student_comment=self.student_comment,
-                                    gc_lower_clamp=self.lower_clamp, gc_default=self.default, gc_max_value=self.max_value, 
+                                    gc_lower_clamp=self.lower_clamp, gc_default=self.default, gc_max_value=self.max_value,
                                     gc_upper_clamp=self.upper_clamp, gc_is_text=self.is_text,
                                     gc_is_peer=self.is_peer, gc_order=self.order, gc_page=self.page)
         res = conn.execute(ins)
@@ -1650,6 +1657,6 @@ class Mark(object):
                                     gcm_order=self.order)
         res = conn.execute(ins)
         self.key = res.inserted_primary_key[0]
-        
+
 if __name__ == "__main__":
     main()

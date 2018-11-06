@@ -10,6 +10,7 @@ use app\models\gradeable\TaGradedGradeable;
 use app\models\GradingSection;
 use app\models\User;
 use app\controllers\GradingController;
+use app\libraries\Utils;
 
 class SimpleGraderController extends GradingController  {
     public function run() {
@@ -178,12 +179,7 @@ class SimpleGraderController extends GradingController  {
             return $user->getId();
         }, $students);
 
-        $student_full = json_encode(array_map(function(User $user) {
-            return ['value' => $user->getId(),
-                'label' => $user->getDisplayedFirstName() . ' '
-                    . $user->getLastName()
-                    . ' <' . $user->getId() . '>'];
-        }, $students));
+        $student_full = Utils::getAutoFillData($students);
 
         if ($gradeable->isGradeByRegistration()) {
             $section_key = "registration_section";
@@ -258,7 +254,7 @@ class SimpleGraderController extends GradingController  {
                     }
                     $component_grade->setScore($data);
                 }
-                $component_grade->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+                $component_grade->setGradeTime($this->core->getDateTimeNow());
             }
         }
 
@@ -327,7 +323,7 @@ class SimpleGraderController extends GradingController  {
                     if (isset($data_array[$j][$index2])) {
                         if ($component->isText()){
                             $component_grade->setComment($data_array[$j][$index2]);
-                            $component_grade->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+                            $component_grade->setGradeTime($this->core->getDateTimeNow());
                             $temp_array[$value_temp_str] = $data_array[$j][$index2];
                             $temp_array[$status_temp_str] = "OK";
                         }
@@ -337,7 +333,7 @@ class SimpleGraderController extends GradingController  {
                                 $temp_array[$status_temp_str] = "ERROR";
                             } else {
                                 $component_grade->setScore($data_array[$j][$index2]);
-                                $component_grade->setGradeTime(new \DateTime('now', $this->core->getConfig()->getTimezone()));
+                                $component_grade->setGradeTime($this->core->getDateTimeNow());
                                 $temp_array[$value_temp_str] = $data_array[$j][$index2];
                                 $temp_array[$status_temp_str] = "OK";
                             }
@@ -367,5 +363,5 @@ class SimpleGraderController extends GradingController  {
         return $response;
     }
 
-    
+
 }

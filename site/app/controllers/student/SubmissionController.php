@@ -37,7 +37,7 @@ class SubmissionController extends AbstractController {
 
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-            $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
+            $now = $this->core->getDateTimeNow();
 
             if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE
                 && ($this->core->getUser()->accessAdmin()
@@ -280,13 +280,16 @@ class SubmissionController extends AbstractController {
         }
 
         $error = false;
-        $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
+        $now = $this->core->getDateTimeNow();
 
         // ORIGINAL
         //if (!$gradeable->isSubmissionOpen() && !$this->core->getUser()->accessAdmin()) {
 
         // TEMPORARY - ALLOW LIMITED & FULL ACCESS GRADERS TO PRACTICE ALL FUTURE HOMEWORKS
-        if (!$gradeable->isSubmissionOpen() && !$this->core->getUser()->accessGrading()) {
+        if (!$this->core->getUser()->accessGrading() && (
+                !$gradeable->isSubmissionOpen()
+                || $gradeable->isStudentView() && $gradeable->isStudentViewAfterGrades() && !$gradeable->isTaGradeReleased()
+            )) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
             return array('error' => true, 'message' => 'No gradeable with that id.');
         }
@@ -307,7 +310,7 @@ class SubmissionController extends AbstractController {
             else {
                 $extensions = $graded_gradeable !== null ? $graded_gradeable->getLateDayException($this->core->getUser()) : 0;
                 $days_late = DateUtils::calculateDayDiff($gradeable->getSubmissionDueDate());
-                $late_days_use = max(0, $days_late - $extensions);
+                $late_days_use = $gradeable->hasDueDate() ? max(0, $days_late - $extensions) : 0;
                 if ($graded_gradeable !== null
                     && $gradeable->isTaGradeReleased()
                     && $gradeable->isTaGrading()
@@ -315,13 +318,18 @@ class SubmissionController extends AbstractController {
                     $graded_gradeable->getOrCreateTaGradedGradeable()->setUserViewedDate($now);
                     $this->core->getQueries()->saveTaGradedGradeable($graded_gradeable->getTaGradedGradeable());
                 }
-                $canViewWholeGradeable = false;
+
+                // Only show hidden test cases if the display version is the graded version (and grades are released)
+                $show_hidden = false;
+                if ($graded_gradeable != NULL) {
+                  $show_hidden = $version == $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedVersion(false) && $gradeable->isTaGradeReleased();
+                }
 
                 // If we get here, then we can safely construct the old model w/o checks
                 // FIXME: remove this 'old_gradeable' once none of the HomeworkView relies on it
                 $old_gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $this->core->getUser()->getId());
                 $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                       'showGradeable', $gradeable, $graded_gradeable, $old_gradeable, $version, $late_days_use, $extensions, $canViewWholeGradeable);
+                                                       'showGradeable', $gradeable, $graded_gradeable, $old_gradeable, $version, $late_days_use, $extensions, $show_hidden, false);
             }
         }
         return array('id' => $gradeable_id, 'error' => $error);
@@ -503,7 +511,7 @@ class SubmissionController extends AbstractController {
 
         // creating directory under gradeable_id with the timestamp
 
-        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("m-d-Y_H:i:sO");
+        $current_time = $this->core->getDateTimeNow()->format("m-d-Y_H:i:sO");
         $version_path = FileUtils::joinPaths($pdf_path, $current_time);
         if (!FileUtils::createDir($version_path)) {
             return $this->uploadResult("Failed to make gradeable path.", false);
@@ -526,7 +534,7 @@ class SubmissionController extends AbstractController {
                 if (!@unlink($uploaded_file["tmp_name"][$j])) {
                     return $this->uploadResult("Failed to delete the uploaded file {$uploaded_file["name"][$j]} from temporary storage.", false);
                 }
-            }
+            } 
         }
 
         // use pdf_check.cgi to check that # of pages is valid and split
@@ -535,9 +543,14 @@ class SubmissionController extends AbstractController {
         // Open a cURL connection
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
+        $qr_prefix = $_POST['qr_prefix'];
 
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."pdf_check.cgi?&num={$num_pages}&sem={$semester}&course={$course}&g_id={$gradeable_id}&ver={$current_time}");
+        if($_POST['use_qr_codes'] === "false"){
+            curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."pdf_check.cgi?&num={$num_pages}&sem={$semester}&course={$course}&g_id={$gradeable_id}&ver={$current_time}");
+        }else{
+            curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."pdf_check_qr.cgi?&sem={$semester}&course={$course}&g_id={$gradeable_id}&ver={$current_time}&qr_prefix={$qr_prefix}");
+        }
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $output = curl_exec($ch);
 
@@ -552,9 +565,10 @@ class SubmissionController extends AbstractController {
             FileUtils::recursiveRmdir($version_path);
             return $this->uploadResult("Error JSON response for pdf split: ".json_last_error_msg(),false);
         }
-        else if (!isset($output['valid'])) {
+        if (!isset($output['valid'])) {
             FileUtils::recursiveRmdir($version_path);
-            return $this->uploadResult("Missing response in JSON for pdf split",false);
+            return $this->uploadResult($output, false);
+            //return $this->uploadResult("Missing response in JSON for pdf split",false);
         }
         else if ($output['valid'] !== true) {
             FileUtils::recursiveRmdir($version_path);
@@ -678,7 +692,7 @@ class SubmissionController extends AbstractController {
         $this->upload_details['version_path'] = $version_path;
         $this->upload_details['version'] = $new_version;
 
-        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO");
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
         $current_time_string_tz = $current_time . " " . $this->core->getConfig()->getTimezone()->getName();
 
         $path = rawurldecode(htmlspecialchars_decode($path));
@@ -727,7 +741,7 @@ class SubmissionController extends AbstractController {
         $timestamp_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
             $gradeable->getId(), $timestamp);
         $files = FileUtils::getAllFiles($timestamp_path);
-        if (count($files) == 0) {
+        if (count($files) == 0 || (count($files) == 1 && array_key_exists('decoded.json', $files)  )) {
             if (!FileUtils::recursiveRmdir($timestamp_path)) {
                 return $this->uploadResult("Failed to remove the empty timestamp directory {$timestamp} from the split_pdf directory.", false);
             }
@@ -761,7 +775,16 @@ class SubmissionController extends AbstractController {
         if (!@file_put_contents(FileUtils::joinPaths($version_path, ".submit.timestamp"), $current_time_string_tz."\n")) {
             return $this->uploadResult("Failed to save timestamp file for this submission.", false);
         }
-
+        $upload_time_string_tz = $timestamp . " " . $this->core->getConfig()->getTimezone()->getName() . "\n";
+       
+        $bulk_upload_data_json = array("submit_timestamp" =>  $current_time_string_tz,
+                                       "upload_timestamp" =>  $upload_time_string_tz,
+                                       "filepath" => $uploaded_file);
+        
+        if (!@file_put_contents(FileUtils::joinPaths($version_path, "bulk_upload_data.json"), serialize($bulk_upload_data_json)."\n")) {
+            return $this->uploadResult("Failed to create bulk upload file for this submission.", false);
+        }
+        
         $queue_file = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
             $gradeable->getId(), $who_id, $new_version);
         $queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_queue",
@@ -845,7 +868,7 @@ class SubmissionController extends AbstractController {
         $timestamp_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
             $gradeable->getId(), $timestamp);
         $files = FileUtils::getAllFiles($timestamp_path);
-        if (count($files) == 0) {
+        if (count($files) == 0 || (count($files) == 1 && array_key_exists('decoded.json', $files)  )) {
             if (!FileUtils::recursiveRmdir($timestamp_path)) {
                 return $this->uploadResult("Failed to remove the empty timestamp directory {$timestamp} from the split_pdf directory.", false);
             }
@@ -911,7 +934,7 @@ class SubmissionController extends AbstractController {
         }
 
         // if student submission, make sure that gradeable allows submissions
-        if (!$this->core->getUser()->accessGrading() && $original_user_id == $user_id && !$gradeable->isStudentSubmit()) {
+        if (!$this->core->getUser()->accessFullGrading() && !$gradeable->canStudentSubmit()) {
             $msg = "You do not have access to that page.";
             $this->core->addErrorMessage($msg);
             return $this->uploadResult($msg, false);
@@ -979,7 +1002,7 @@ class SubmissionController extends AbstractController {
             $part_path[1] = $version_path;
         }
 
-        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO");
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
         $current_time_string_tz = $current_time . " " . $this->core->getConfig()->getTimezone()->getName();
 
         $max_size = $gradeable->getAutogradingConfig()->getMaxSubmissionSize();
@@ -1440,7 +1463,7 @@ class SubmissionController extends AbstractController {
             return array('error' => true, 'message' => $msg);
         }
         $json["active_version"] = $new_version;
-        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:sO");
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
         $current_time_string_tz = $current_time . " " . $this->core->getConfig()->getTimezone()->getName();
 
         $json["history"][] = array("version" => $new_version, "time" => $current_time_string_tz, "who" => $original_user_id, "type" => "select");

@@ -128,6 +128,14 @@ class Utils {
         return substr($haystack, (-1*strlen($needle)), strlen($needle)) === $needle;
     }
 
+    public static function getDisplayNameForum($anonymous, $real_name) {
+        if($anonymous) {
+            return "Anonymous";
+        }
+        return $real_name['first_name'] . substr($real_name['last_name'], 0, 2) . '.';
+    }
+
+
     /**
      * Wrapper around the PHP function setcookie that deals with figuring out if we should be setting this cookie
      * such that it should only be accessed via HTTPS (secure) as well as allow easily passing an array to set as
@@ -248,5 +256,42 @@ class Utils {
         return function ($a, $b) {
             return strcmp(spl_object_hash($a), spl_object_hash($b));
         };
+    }
+
+    /*
+     * Given an array of students, returns a json object of formated student names in the form:
+     * First_Name Last_Name <student_id>
+     * Students in the null section are at the bottom of the list in the form:
+     * (In null section) First_Name Last_Name <student_id>
+     * Optional param to show previous submission count
+     * students_version is an array of user and their highest submitted version
+     */
+
+    public static function getAutoFillData($students, $students_version = null){
+        $students_full = array();
+        $null_section = array();
+        $i = 0;
+        foreach ($students as $student) {
+            if($student->getRegistrationSection() != null){
+                $student_entry = array('value' => $student->getId(),
+                'label' => $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>');
+                if ($students_version != null && $students_version[$i][1] !== 0) {
+                    $student_entry['label'] .= ' (' . $students_version[$i][1] . ' Prev Submission)';
+                }
+                $students_full[] = $student_entry;
+            }else{
+                $null_entry = array('value' => $student->getId(),
+                'label' => '[NULL section] ' . $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>'); 
+
+                $in_null_section = false;
+                foreach ($null_section as $null_student) {
+                    if($null_student['value'] === $student->getId()) $in_null_section = true;
+                }
+                if(!$in_null_section) $null_section[] = $null_entry;
+            }
+            $i++;
+        }
+        $students_full = array_unique(array_merge($students_full, $null_section), SORT_REGULAR);
+        return json_encode($students_full);
     }
 }

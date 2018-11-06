@@ -1,0 +1,4 @@
+START
+MAKE THIS DIR: foobar
+MAKE THIS DIR: foobar/another
+END

@@ -18,10 +18,11 @@ class AutoGradingView extends AbstractView {
 
     /**
      * @param AutoGradedVersion $version_instance
-     * @param bool $show_hidden
+     * @param bool $show_hidden True to show the scores of hidden testcases
+     * @param bool $show_hidden_details True to show the details of hidden testcases
      * @return string
      */
-    public function showResults(AutoGradedVersion $version_instance, bool $show_hidden = false) {
+    public function showResults(AutoGradedVersion $version_instance, bool $show_hidden = false, bool $show_hidden_details = false) {
         $graded_gradeable = $version_instance->getGradedGradeable();
         $gradeable = $graded_gradeable->getGradeable();
         $autograding_config = $gradeable->getAutogradingConfig();
@@ -32,8 +33,14 @@ class AutoGradingView extends AbstractView {
         $hidden_earned = 0;
         $hidden_max = 0;
         $show_hidden_breakdown = false;
-        $display_hidden = false;
+        $any_visible_hidden = false;
         $num_visible_testcases = 0;
+
+        // FIXME: This variable should be false if autograding results
+        // (files/database values) exist, but true if the assignment
+        // is in the queue or something went wrong with autograding
+        // (it crashed, files were corrupted, etc)
+        $incomplete_autograding = true;
 
         $testcase_array = array_map(function (AutoGradedTestcase $testcase) {
             $testcase_config = $testcase->getTestcase();
@@ -61,20 +68,24 @@ class AutoGradingView extends AbstractView {
             $hidden_earned = $version_instance->getTotalPoints();
             $hidden_max = $autograding_config->getTotalNonExtraCredit();
 
-            $show_hidden_breakdown = ($version_instance->getNonHiddenNonExtraCredit() + $version_instance->getHiddenNonExtraCredit() > $autograding_config->getTotalNonHiddenNonExtraCredit()) && $show_hidden;
-
-            $display_hidden = false;
             if ($gradeable->isTaGradeReleased()) {
                 foreach ($version_instance->getTestcases() as $testcase) {
                     if (!$testcase->canView()) continue;
                     if ($testcase->getTestcase()->isHidden()) {
-                        $display_hidden = true;
+                        $any_visible_hidden = true;
                         break;
                     }
                 }
             }
+
+            $show_hidden_breakdown = $any_visible_hidden && $show_hidden &&
+                ($version_instance->getNonHiddenNonExtraCredit() + $version_instance->getHiddenNonExtraCredit() > $autograding_config->getTotalNonHiddenNonExtraCredit());
         }
         foreach ($version_instance->getTestcases() as $testcase) {
+
+            // FIXME: I don't know if this is the right check
+            $incomplete_autograding = false;
+
             if ($testcase->canView()) {
                 $num_visible_testcases++;
             }
@@ -84,16 +95,17 @@ class AutoGradingView extends AbstractView {
             'gradeable_id' => $gradeable->getId(),
             'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
             "num_visible_testcases" => $num_visible_testcases,
+            "incomplete_autograding" => $incomplete_autograding,
             "show_hidden_breakdown" => $show_hidden_breakdown,
             "nonhidden_earned" => $nonhidden_earned,
             "nonhidden_max" => $nonhidden_max,
             "hidden_earned" => $hidden_earned,
             "hidden_max" => $hidden_max,
-            "display_hidden" => $display_hidden,
+            "show_hidden" => $show_hidden,
+            "show_hidden_details" => $show_hidden_details,
             "has_badges" => $has_badges,
             'testcases' => $testcase_array,
-            'is_ta_grading_complete' => $graded_gradeable->isTaGradingComplete(),
-            "show_hidden" => $show_hidden,
+            'is_ta_grade_released' => $gradeable->isTaGradeReleased(),
             'display_version' => $version_instance->getVersion()
         ]);
     }
@@ -240,14 +252,6 @@ class AutoGradingView extends AbstractView {
         return ''; // ?
     }
 
-    public function showVersionChoice($gradeable, $onChange, $formatting = "") {
-        return $this->core->getOutput()->renderTwigTemplate("grading/VersionChoice.twig", [
-            "gradeable" => $gradeable,
-            "onChange" => $onChange,
-            "formatting" => $formatting,
-        ]);
-    }
-
     /**
      * @param Gradeable $gradeable
      * @return string
@@ -270,7 +274,7 @@ class AutoGradingView extends AbstractView {
                 if ($component->getGrader() === NULL) {
                     continue;
                 }
-                $name = $component->getGrader()->getDisplayedFirstName() . " " . $component->getGrader()->getLastName();
+                $name = $component->getGrader()->getDisplayedFirstName() . " " . $component->getGrader()->getDisplayedLastName();
                 if (!in_array($name, $grader_names) && $component->getGrader()->accessFullGrading()) {
                     $grader_names[] = $name;
                 }
@@ -347,7 +351,7 @@ class AutoGradingView extends AbstractView {
 
         // Get the names of all full access or above graders
         $grader_names = array_map(function (User $grader) {
-            return $grader->getDisplayedFirstName() . ' ' . $grader->getLastName();
+            return $grader->getDisplayedFirstName() . ' ' . $grader->getDisplayedLastName();
         }, $ta_graded_gradeable->getVisibleGraders());
 
         // Special messages for peer / mentor-only grades
@@ -405,7 +409,7 @@ class AutoGradingView extends AbstractView {
                 'custom_mark_score' => $container->getScore(),
                 'comment' => $container->getComment(),
                 'graders' => array_map(function (User $grader) {
-                    return $grader->getLastName();
+                    return $grader->getDisplayedLastName();
                 }, $container->getVisibleGraders()),
                 'marks' => array_map(function (Mark $mark) use ($container) {
                     return [

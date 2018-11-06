@@ -177,10 +177,30 @@ def allow_only_one_part(path, log_path=os.devnull):
 # ==================================================================================
 # ==================================================================================
 
+# go through the testcase folder (e.g. test01/) and remove anything
+# that matches the test input (avoid archiving copies of these files!)
+def remove_test_input_files(overall_log,test_input_path,testcase_folder):
+    with open(overall_log,'a') as f:
+        for path, subdirs, files in os.walk(test_input_path):
+            for name in files:
+                relative = path[len(test_input_path)+1:]
+                my_file = os.path.join(testcase_folder, relative, name)
+                if os.path.isfile(my_file):
+                    print ("removing (likely) stale test_input file: ", my_file, file=f)
+                    os.remove(my_file)
+
+
 def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untrusted):
 
     os.chdir(SUBMITTY_DATA_DIR)
     tmp = os.path.join("/var/local/submitty/autograding_tmp/",which_untrusted,"tmp")
+
+    if os.path.exists(tmp):
+        untrusted_grant_rwx_access(which_untrusted, tmp)
+        add_permissions_recursive(tmp,
+                  stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                  stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                  stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
     # clean up old usage of this directory
     shutil.rmtree(tmp,ignore_errors=True)
@@ -303,9 +323,9 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
 
     # give the untrusted user read/write/execute permissions on the tmp directory & files
     # add_permissions_recursive(tmp_compilation,
-    #                           stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP,
-    #                           stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP,
-    #                           stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP)
+    #                   stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+    #                   stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+    #                   stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
     # add_permissions(tmp,stat.S_IROTH | stat.S_IXOTH) #stat.S_ISGID
     add_permissions(tmp_logs,stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
@@ -356,7 +376,9 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
             
             # copy compile.out to the current directory
             shutil.copy (os.path.join(bin_path,"compile.out"),os.path.join(testcase_folder,"my_compile.out"))
-
+            add_permissions(os.path.join(testcase_folder,"my_compile.out"), stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+            #untrusted_grant_rwx_access(which_untrusted, tmp_compilation)          
+            untrusted_grant_rwx_access(which_untrusted, testcase_folder)
             add_permissions_recursive(testcase_folder,
                       stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
                       stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
@@ -373,18 +395,17 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                         container_image = my_testcases[testcase_num-1]["containers"][0]["container_image"]
                         print('creating a compilation container with image {0}'.format(container_image))
                     untrusted_uid = str(getpwnam(which_untrusted).pw_uid)
+
                     compilation_container = None
-                    compilation_container = subprocess.check_output(['docker', 'create','-i', 
-                                               '-v', tmp + ':' + tmp,
+                    compilation_container = subprocess.check_output(['docker', 'create', '-i', '-u', untrusted_uid, '--network', 'none',
+                                               '-v', testcase_folder + ':' + testcase_folder,
                                                '-w', testcase_folder,
-                                               # '-u', untrusted_uid, 
-                                               '--network', 'none',
                                                container_image,
                                                #The command to be run.
                                                os.path.join(testcase_folder, 'my_compile.out'), queue_obj['gradeable'],
                                                queue_obj['who'], str(queue_obj['version']), submission_string, str(testcase_num)
                                                ]).decode('utf8').strip()
-                    print("started container")
+                    print("starting container")
                     compile_success = subprocess.call(['docker', 'start', '-i', compilation_container],
                                                    stdout=logfile,
                                                    cwd=testcase_folder)
@@ -395,7 +416,6 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                     if compilation_container != None:
                         subprocess.call(['docker', 'rm', '-f', compilation_container])
                         print("cleaned up compilation container.")
-
             else:
                 compile_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                                                    which_untrusted,
@@ -416,7 +436,6 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     else:
         print (which_machine,which_untrusted,"COMPILATION FAILURE")
         grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,message="COMPILATION FAILURE")
-
     add_permissions_recursive(tmp_compilation,
                       stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
                       stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
@@ -607,6 +626,14 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     subprocess.call(['ls', '-lR', '.'], stdout=open(tmp_logs + "/overall.txt", 'a'))
 
     os.makedirs(os.path.join(tmp_results,"details"))
+
+    # remove the test_input directory, so we don't archive it!
+    shutil.rmtree(os.path.join(tmp_work,"test_input"))
+
+    # loop over the test case directories, and remove any files that are also in the test_input folder
+    for testcase_num in range(1, len(my_testcases)+1):
+        testcase_folder = os.path.join(tmp_work, "test{:02}".format(testcase_num))
+        remove_test_input_files(os.path.join(tmp_logs,"overall.txt"),test_input_path,testcase_folder)
 
     patterns_work_to_details = complete_config_obj["autograding"]["work_to_details"]
     pattern_copy("work_to_details",patterns_work_to_details,tmp_work,os.path.join(tmp_results,"details"),tmp_logs)

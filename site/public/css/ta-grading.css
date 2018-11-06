@@ -535,7 +535,8 @@ tr.is_publish {
 
 .gradeable .ta-rubric-table,
 .gradeable .received-marks-list {
-    padding: 8px;
+    padding: 8px 0px;
+    margin: 0 -5px;
 }
 
 .gradeable .done-container {
@@ -565,6 +566,12 @@ tr.is_publish {
 
 .gradeable .mark-container {
     min-height: 28px;
+    border-bottom: 1px solid #999;
+    padding: 3px;
+}
+
+.gradeable .mark-container:last-child {
+    border-bottom: none;
 }
 
 .gradeable .container.box-title {
@@ -578,8 +585,7 @@ tr.is_publish {
     border: 2px solid #000;
     border-radius: 4px;
     color: #888;
-    font-size: 10px;
-    font-family: 'Source Sans Pro', sans-serif;
+    font-size: 14px;
     text-align: center;
 }
 
@@ -613,6 +619,10 @@ tr.is_publish {
     justify-content: flex-start;
 }
 
+.gradeable .mark-container input, .gradeable .mark-container textarea {
+    box-sizing: border-box;
+}
+
 .gradeable .mark-container span.mark-title textarea {
     width: 100%;
     resize: vertical;
@@ -630,6 +640,10 @@ tr.is_publish {
     border: none;
 }
 
+.gradeable .mark-container.mark-publish {
+    background-color: #bde;
+}
+
 .gradeable .mark-disabled span {
     cursor: not-allowed;
     opacity: 0.3;
@@ -637,6 +651,11 @@ tr.is_publish {
 
 .gradeable .mark-deleted {
     background: #FFAAAA
+}
+
+.gradeable .custom-mark-error {
+    border-color: #F00;
+    background-color: #FEE;
 }
 
 .gradeable .mark-deleted span.delete-mark-container {
@@ -738,4 +757,24 @@ tr.is_publish {
 
 #mark-conflict-popup .mark-conflict-container {
     margin-top: 25px;
+}
+
+/*Submission Panel CSS*/
+
+#submission_browser {
+    left:15px;
+    bottom:40px;
+    width:48%;
+    height:30%;
+    overflow: hidden;
+}
+
+#directory_view {
+    position:relative;
+    float:left;
+    width:100%;
+}
+
+#changeCodeStyle {
+    display:inline-block;
 }

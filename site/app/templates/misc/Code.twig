@@ -18,6 +18,6 @@
 </head>
 <body>
     <textarea id="code0">{{ file_contents }}</textarea>
-    {% include 'misc/SourceSettings.twig' with { type: mime_type, number: 0 } %}
+    {% include 'misc/SourceSettings.twig' with { type: file_type, number: 0 } %}
 </body>
 </html>

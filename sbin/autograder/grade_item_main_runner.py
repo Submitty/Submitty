@@ -63,7 +63,7 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                     use_router = testcases[testcase_num-1]['use_router']
                     single_port_per_container = testcases[testcase_num-1]['single_port_per_container']
                     # returns a dictionary where container_name maps to outgoing connections and container image
-                    container_info = find_container_information(testcases[testcase_num -1], testcase_num, use_router)
+                    container_info = find_container_information(testcases[testcase_num -1], testcase_num, use_router,tmp_work)
                     # Creates folders for each docker container if there are more than one. Otherwise, we grade in testcase_folder.
                     # Updates container_info so that each docker has a 'mounted_directory' element
                     create_container_subfolders(container_info, testcase_folder, which_untrusted)
@@ -84,7 +84,7 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                         mounted_directory = info['mounted_directory']
                         #Copies the code needed to run into mounted_directory
                         #TODO this can eventually be extended so that only the needed code is copied in.
-                        setup_folder_for_grading(mounted_directory, tmp_work, job_id, tmp_logs)
+                        setup_folder_for_grading(mounted_directory, tmp_work, job_id, tmp_logs,testcases[testcase_num-1])
 
 
                     # Start the docker containers.
@@ -158,7 +158,7 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
             else:
                 try:
                     # Move the files necessary for grading (runner, inputs, etc.) into the testcase folder.
-                    setup_folder_for_grading(testcase_folder, tmp_work, job_id, tmp_logs)
+                    setup_folder_for_grading(testcase_folder, tmp_work, job_id, tmp_logs,testcases[testcase_num-1])
                     my_testcase_runner = os.path.join(testcase_folder, 'my_runner.out')
                     runner_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                                                       which_untrusted,
@@ -201,19 +201,59 @@ def at_least_one_alive(processes):
   return False
 
 
-def setup_folder_for_grading(target_folder, tmp_work, job_id, tmp_logs):
+def setup_folder_for_grading(target_folder, tmp_work, job_id, tmp_logs, testcase):
     #The paths to the important folders.
     tmp_work_test_input = os.path.join(tmp_work, "test_input")
-    tmp_work_subission = os.path.join(tmp_work, "submitted_files")
+    tmp_work_submission = os.path.join(tmp_work, "submitted_files")
     tmp_work_compiled = os.path.join(tmp_work, "compiled_files")
     tmp_work_checkout = os.path.join(tmp_work, "checkout")
     my_runner = os.path.join(tmp_work,"my_runner.out")
 
+    #######################################################################################
+    #
+    # PRE-COMMANDS
+    #
+    ######################################################################################
+
+    pre_commands = testcase.get('pre_commands', [])
+
+    for pre_command in pre_commands:
+      command = pre_command['command']
+      option  = pre_command['option']
+      source_testcase   = pre_command["testcase"]
+      source_directory  = pre_command['source']
+      source = os.path.join(source_testcase,source_directory)
+      destination = pre_command['destination']
+      # pattern is not currently in use.
+      #pattern    = pre_command['pattern']
+
+      if command == 'cp':
+        #currently ignoring option
+        if not os.path.isdir(os.path.join(tmp_work,source)):
+          try:
+            shutil.copy(os.path.join(tmp_work,source),os.path.join(target_folder,destination))
+          except Exception as e:
+            print("encountered a copy error")
+            traceback.print_exc()
+            #TODO: can we pass something useful to students?
+            pass
+        else:
+          try:
+            grade_item.copy_contents_into(job_id,os.path.join(tmp_work,source),os.path.join(target_folder,destination),tmp_logs)
+          except Exception as e:
+            print("encountered a copy error")
+            traceback.print_exc()
+            #TODO: can we pass something useful to students?
+            pass
+      else:
+        print("Invalid pre-command '{0}'".format(command))
+
+    #TODO: pre-commands may eventually wipe the following logic out.
     #copy the required files to the test directory
-    grade_item.copy_contents_into(job_id,tmp_work_test_input,target_folder,tmp_logs)
-    grade_item.copy_contents_into(job_id,tmp_work_subission ,target_folder,tmp_logs)
+    grade_item.copy_contents_into(job_id,tmp_work_submission ,target_folder,tmp_logs)
     grade_item.copy_contents_into(job_id,tmp_work_compiled  ,target_folder,tmp_logs)
     grade_item.copy_contents_into(job_id,tmp_work_checkout  ,target_folder,tmp_logs)
+    grade_item.copy_contents_into(job_id,tmp_work_test_input,target_folder,tmp_logs)
     #copy the compiled runner to the test directory
     shutil.copy(my_runner,target_folder)
 
@@ -229,18 +269,22 @@ def setup_folder_for_grading(target_folder, tmp_work, job_id, tmp_logs):
 #     'outgoing_connections' : [OTHER DOCKER NAMES],
 #   }
 # }
-def find_container_information(testcase, testcase_num, use_router):
+def find_container_information(testcase, testcase_num, use_router, tmp_work):
   if not 'containers' in testcase:
     raise SystemExit("Error, this container's testcase {0} is missing the 'containers' field".format(testcase_num))
 
   container_info = {}
   instructor_container_specification = testcase['containers']
 
+  insert_default = False
   num = 0
   for container_spec in instructor_container_specification:
     # Get the name, image, and outgoing_connections out of the instructor specification, filling in defaults if necessary.
     # Container name will always be set, and is populated by the complete config if not specified by the instructor
     container_name  = container_spec['container_name']
+
+    if container_name == "router":
+      insert_default = container_spec.get('import_default_router', False)
 
     container_image = container_spec['container_image']
     outgoing_conns  = container_spec['outgoing_connections']
@@ -249,12 +293,17 @@ def find_container_information(testcase, testcase_num, use_router):
     container_info[container_name] = container_info_element
     num += 1
 
-  #TODO: Remove this eventually.
-  if len(container_info) > 1 and 'router' not in container_info and use_router:
-    container_info['router'] = container_info_element("ubuntu:custom", [])
+  if use_router:
+    #backwards compatibility
+    if 'router' not in container_info:
+      insert_default_router(tmp_work)
+      container_info['router'] = container_info_element("ubuntu:custom", [])
+
+    if insert_default:
+      print("Inserting default router")
+      insert_default_router(tmp_work)
 
   return container_info
-
 
 #Create an element to add to the container_information dictionary
 def create_container_info_element(container_image, outgoing_connections, container_id=''):
@@ -262,6 +311,13 @@ def create_container_info_element(container_image, outgoing_connections, contain
   if container_id != '':
     element['container_id'] = container_id
   return element
+
+def insert_default_router(tmp_work):
+  tmp_work_test_input = os.path.join(tmp_work, "test_input")
+  router_path = os.path.join(SUBMITTY_INSTALL_DIR, "src", 'grading','python','submitty_router.py')
+  print("COPYING:\n\t{0}\n\t{1}".format(router_path, tmp_work_test_input))
+  shutil.copy(router_path, tmp_work_test_input)
+
 
 #Create the subdirectories needed for the containers and specify permissions.
 def create_container_subfolders(container_info, target_folder, which_untrusted):
@@ -297,7 +353,7 @@ def launch_container(container_name, container_image, mounted_directory,job_id,i
                                                                   grading_began,queue_obj,submission_string,testcase_num,name):
   #TODO error handling.
   untrusted_uid = str(getpwnam(which_untrusted).pw_uid)
-  this_container = subprocess.check_output(['docker', 'create','-i', '-u', untrusted_uid, '--network', 'none',
+  this_container = subprocess.check_output(['docker', 'create', '-i', '-u', untrusted_uid, '--network', 'none',
                                            '-v', mounted_directory + ':' + mounted_directory,
                                            '-w', mounted_directory,
                                            '--name', container_name,

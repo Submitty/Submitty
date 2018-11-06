@@ -35,7 +35,7 @@
     <div id="admin-team-history-right"></div>
 {% endblock %}
 {% block form %}
-    <form method="post" action="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'submit_team_form', 'gradeable_id': gradeable.getId()}) }}">
+    <form method="post" action="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'submit_team_form', 'gradeable_id': gradeable_id }) }}">
         {{ parent() }}
     </form>
 {% endblock %}

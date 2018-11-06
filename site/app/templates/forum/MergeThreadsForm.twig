@@ -4,9 +4,19 @@
 {% block body %}
         Merge current thread into
         <input type="hidden" id="merge_thread_child" name="merge_thread_child" value="{{ current_thread }}" data-ays-ignore="true">
-        <select style="margin-right:10px;" name="merge_thread_parent" class="form-control" required data-ays-ignore="true" current-thead-date="{{ current_thread_date }}">
-                <option>Loading...</option>
+        <select class="chosen-select" id="merge_thread_parent" name="merge_thread_parent" style="width:200px;" data-ays-ignore="true">
+            {% for threads in possibleMerges %}
+                <option value=({{ threads['id'] }})>({{ threads['id'] }}) {{ threads['title'] }}</option>
+            {% endfor %}
         </select>
+        <script>
+            $(document).ready(function(){
+                $(".chosen-select").chosen({ width: "210px" });
+                $(".form-body").css("min-height", "inherit");
+                $(".form-body").css('overflow-y', 'initial');
+            });
+
+        </script>
 {% endblock %}
 {% block form %}
     <form method="post" action="{{ core.buildUrl({'component': 'forum', 'page': 'merge_thread'}) }}">
@@ -15,5 +25,5 @@
 {% endblock %}
 {% block buttons %}
     {{ block('close_button') }}
-    <input class="btn btn-primary" type="submit" value="Submit" disabled="disabled" />
+    <input class="btn btn-primary" type="submit" value="Merge Thread" />
 {% endblock %}
