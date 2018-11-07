@@ -18,10 +18,11 @@ class AutoGradingView extends AbstractView {
 
     /**
      * @param AutoGradedVersion $version_instance
-     * @param bool $show_hidden
+     * @param bool $show_hidden True to show the scores of hidden testcases
+     * @param bool $show_hidden_details True to show the details of hidden testcases
      * @return string
      */
-    public function showResults(AutoGradedVersion $version_instance, bool $show_hidden = false) {
+    public function showResults(AutoGradedVersion $version_instance, bool $show_hidden = false, bool $show_hidden_details = false) {
         $graded_gradeable = $version_instance->getGradedGradeable();
         $gradeable = $graded_gradeable->getGradeable();
         $autograding_config = $gradeable->getAutogradingConfig();
@@ -101,6 +102,7 @@ class AutoGradingView extends AbstractView {
             "hidden_earned" => $hidden_earned,
             "hidden_max" => $hidden_max,
             "show_hidden" => $show_hidden,
+            "show_hidden_details" => $show_hidden_details,
             "has_badges" => $has_badges,
             'testcases' => $testcase_array,
             'is_ta_grade_released' => $gradeable->isTaGradeReleased(),
