@@ -1,6 +1,11 @@
 {% import _self as self %}
 
-<div class="content">
+{# Display the gradeable_message if one exists at the top of the page #}
+{% if has_gradeable_message %}
+    <div class='content'><p>{{ gradeable_message|raw }}</p></div>
+{% endif %}
+
+<div class="content">    
     <div class="upperinfo">
         <h1 class="upperinfo-left">New submission for: {{ gradeable_name }}</h1>
         {% if has_due_date %}
@@ -86,13 +91,6 @@
         </script>
     {% endif %}
     {# /Admin submission type selector #}
-
-    <div class="sub">
-        {% if has_gradeable_message %}
-            <br>
-            <div class='content' style="margin-top: 0px; border: 2px solid #006398; padding: 20px 20px"><p>{{ gradeable_message|raw }}</p></div>
-        {% endif %}
-    </div>
 
     {% if is_vcs %}
         {#
