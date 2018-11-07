@@ -579,12 +579,12 @@ if [ ${WORKER} == 0 ]; then
     DB_EXISTS=`su -c 'psql -lqt | cut -d \| -f 1 | grep -w submitty || true' postgres`
 
     if [ "$DB_EXISTS" == "" ]; then
-	echo "Submitty master database does not yet exist"
-	su postgres -c 'createdb submitty -eO ${db_user}'
-	su postgres -c 'psql submitty -ec "ALTER SCHEMA public OWNER TO ${DB_USER}"'
-	python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
+        echo "Creating submitty master database"
+        su postgres -c "psql -c \"CREATE DATABASE submitty WITH OWNER ${DB_USER}\""
+        su postgres -c "psql submitty -c \"ALTER SCHEMA public OWNER TO ${DB_USER}\""
+        python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
     else
-	echo "Submitty master database already exists"
+        echo "Submitty master database already exists"
     fi
 
 
