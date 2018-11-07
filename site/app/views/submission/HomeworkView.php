@@ -291,7 +291,7 @@ class HomeworkView extends AbstractView {
             if($version_instance !== null) {
                 $display_version = $version_instance->getVersion();
                 for ($i = 1; $i <= $gradeable->getAutogradingConfig()->getNumParts(); $i++) {
-                    foreach ($version_instance->getPartFiles($i) as $file) {
+                    foreach ($version_instance->getPartFiles($i)['submissions'] as $file) {
                         $size = number_format($file['size'] / 1024, 2);
                         // $escape_quote_filename = str_replace('\'','\\\'',$file['name']);
                         if (substr($file['relative_name'], 0, strlen("part{$i}/")) === "part{$i}/") {
@@ -499,13 +499,15 @@ class HomeworkView extends AbstractView {
                 && $version_instance->getEarlyIncentivePoints() >= $autograding_config->getEarlySubmissionMinimumPoints()
                 && $version_instance->getDaysEarly() > $autograding_config->getEarlySubmissionMinimumDaysEarly();
 
+            $files = $version_instance->getFiles();
+
             $param = array_merge($param, [
                 'in_queue' => $version_instance->isQueued(),
                 'grading' => $version_instance->isGrading(),
                 'db_submission_time' => DateUtils::dateTimeToString($version_instance->getSubmissionTime()),
                 'days_late' => $version_instance->getDaysLate(),
                 'num_autogrades' => $version_instance->getHistoryCount(),
-                'files' => $version_instance->getFiles(),
+                'files' => array_merge($files['submissions'], $files['checkout']),
                 'display_version_days_late' => $version_instance->getDaysLate(),
                 'result_text' => $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $version_instance, $show_hidden)
             ]);

@@ -204,7 +204,7 @@ def at_least_one_alive(processes):
 def setup_folder_for_grading(target_folder, tmp_work, job_id, tmp_logs, testcase):
     #The paths to the important folders.
     tmp_work_test_input = os.path.join(tmp_work, "test_input")
-    tmp_work_subission = os.path.join(tmp_work, "submitted_files")
+    tmp_work_submission = os.path.join(tmp_work, "submitted_files")
     tmp_work_compiled = os.path.join(tmp_work, "compiled_files")
     tmp_work_checkout = os.path.join(tmp_work, "checkout")
     my_runner = os.path.join(tmp_work,"my_runner.out")
@@ -250,7 +250,7 @@ def setup_folder_for_grading(target_folder, tmp_work, job_id, tmp_logs, testcase
 
     #TODO: pre-commands may eventually wipe the following logic out.
     #copy the required files to the test directory
-    grade_item.copy_contents_into(job_id,tmp_work_subission ,target_folder,tmp_logs)
+    grade_item.copy_contents_into(job_id,tmp_work_submission ,target_folder,tmp_logs)
     grade_item.copy_contents_into(job_id,tmp_work_compiled  ,target_folder,tmp_logs)
     grade_item.copy_contents_into(job_id,tmp_work_checkout  ,target_folder,tmp_logs)
     grade_item.copy_contents_into(job_id,tmp_work_test_input,target_folder,tmp_logs)

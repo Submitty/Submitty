@@ -47,6 +47,52 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
   }
 }
 
+
+// This function will automatically archive all non-executable files
+// that are validated.  This ensures that the web viewers will have
+// the necessary files to display the results to students and graders.
+void ArchiveValidatedFiles(nlohmann::json &whole_config) {
+
+  // FIRST, loop over all of the test cases
+  nlohmann::json::iterator tc = whole_config.find("testcases");
+  assert (tc != whole_config.end());
+  int which_testcase = 0;
+  for (nlohmann::json::iterator my_testcase = tc->begin();
+       my_testcase != tc->end(); my_testcase++,which_testcase++) {
+    nlohmann::json::iterator validators = my_testcase->find("validation");
+    if (validators == my_testcase->end()) { /* no autochecks */ continue; }
+    std::vector<std::string> executable_names = stringOrArrayOfStrings(*my_testcase,"executable_name");
+
+    // SECOND loop over all of the autocheck validations
+    for (int which_autocheck = 0; which_autocheck < validators->size(); which_autocheck++) {
+      nlohmann::json& autocheck = (*validators)[which_autocheck];
+      std::string method = autocheck.value("method","");
+
+      // IF the autocheck has a file to compare (and it's not an executable)...
+      if (autocheck.find("actual_file") == autocheck.end()) continue;
+
+      std::vector<std::string> actual_filenames = stringOrArrayOfStrings(autocheck,"actual_file");
+      for (int i = 0; i < actual_filenames.size(); i++) {
+        std::string actual_file = actual_filenames[i];
+
+        // skip the executables
+        bool skip = false;
+        for (int j = 0; j < executable_names.size(); j++) {
+          if (executable_names[j] == actual_file) { skip = true; continue; }
+        }
+        if (skip) { continue; }
+
+        // THEN add each actual file to the list of files to archive
+        std::stringstream ss;
+        ss << "test" << std::setfill('0') << std::setw(2) << which_testcase+1 << "/" << actual_file;
+        actual_file = ss.str();
+        whole_config["autograding"]["work_to_details"].push_back(actual_file);
+      }
+    }
+  }
+}
+
+
 void AddDockerConfiguration(nlohmann::json &whole_config) {
 
   if (!whole_config["docker_enabled"].is_boolean()){
@@ -485,6 +531,8 @@ nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid) {
   RewriteDeprecatedMyersDiff(answer);
 
   InflateTestcases(answer);
+
+  ArchiveValidatedFiles(answer);
   
   return answer;
 }
