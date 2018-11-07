@@ -417,7 +417,7 @@ class NavigationView extends AbstractView {
             if (!$gradeable->hasDueDate()) {
                 $display_date = "";
             }
-            if (!$gradeable->isStudentSubmit() && $this->core->getUser()->accessGrading()) {
+            if (!$gradeable->isStudentSubmit() && $this->core->getUser()->accessFullGrading()) {
                 // Student isn't submitting
                 $title = "BULK UPLOAD";
                 $class = "btn-primary";
@@ -430,7 +430,17 @@ class NavigationView extends AbstractView {
                 $title = "RESUBMIT";
             } else if ($graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() && $list_section == GradeableList::CLOSED) {
                 //if the user submitted something past time
-                $title = "LATE RESUBMIT";
+                if ($gradeable->isLateSubmissionAllowed()) {
+                    $title = "LATE RESUBMIT";
+                } else {
+                    $title = "VIEW SUBMISSION";
+                    $class = 'btn-default';
+                    $display_date = "";
+                }
+            } else if (!$graded_gradeable->getAutoGradedGradeable()->hasSubmission() && !$gradeable->isLateSubmissionAllowed() && $list_section == GradeableList::CLOSED) {
+                $title = "NO SUBMISSION";
+                $class = "btn-danger";
+                $display_date = "";
             } else if (!$graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() && ($list_section == GradeableList::GRADED || $list_section == GradeableList::GRADING)) {
                 //to change the text to overdue submission if nothing was submitted on time
                 if ($gradeable->isStudentSubmit()) {

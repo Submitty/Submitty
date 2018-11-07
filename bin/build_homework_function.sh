@@ -24,6 +24,60 @@ function clean_homework {
 }
 
 
+function fix_permissions {
+
+    hw_config=$1
+    hw_bin_path=$2
+    hw_build_path=$3
+    course_dir=$4
+    assignment=$5
+    course_group=$6
+
+    # set the permissions
+    chmod  -f  u=rw,g=rw,o=r     $hw_config
+    chmod  -f  u=rwx,g=rwx,o=x   $hw_bin_path
+    chmod  -f  u=rwx,g=rwx,o=x   $hw_bin_path/*out
+
+    # copy the provided code, test input, test output, and custom validation code files to the appropriate directories
+    if [ -d $hw_build_path/provided_code/ ]; then
+	rsync -ruz --delete $hw_build_path/provided_code/    $course_dir/provided_code/$assignment/
+    fi
+    if [ -d $hw_build_path/test_input/ ]; then
+	rsync -ruz --delete $hw_build_path/test_input/   $course_dir/test_input/$assignment/
+    fi
+    if [ -d $hw_build_path/test_output/ ]; then
+	rsync -ruz --delete $hw_build_path/test_output/  $course_dir/test_output/$assignment/
+    fi
+    if [ -d $hw_build_path/custom_validation_code/ ]; then
+	rsync -ruz --delete $hw_build_path/custom_validation_code/    $course_dir/custom_validation_code/$assignment/
+    fi
+
+    # change permissions so other instructor users in this course & DAEMON_USER can re-run the build course script
+    find $course_dir/build/                   -type d -exec chmod -f ug+rwx,g+s,o= {} \;
+    find $course_dir/build/                   -type f -exec chmod -f ug+rw,o= {} \;
+    find $course_dir/build/                           -exec chgrp -f ${course_group} {} \;
+    find $course_dir/provided_code/           -type d -exec chmod -f ug+rwx,g+s,o= {} \;
+    find $course_dir/provided_code/           -type f -exec chmod -f ug+rw,o= {} \;
+    find $course_dir/provided_code/                   -exec chgrp -f ${course_group} {} \;
+    find $course_dir/test_input/              -type d -exec chmod -f ug+rwx,g+s,o= {} \;
+    find $course_dir/test_input/              -type f -exec chmod -f ug+rw,o= {} \;
+    find $course_dir/test_input/                      -exec chgrp -f ${course_group} {} \;
+    find $course_dir/test_output/             -type d -exec chmod -f ug+rwx,g+s,o= {} \;
+    find $course_dir/test_output/             -type f -exec chmod -f ug+rw,o= {} \;
+    find $course_dir/test_output/                     -exec chgrp -f ${course_group} {} \;
+    find $course_dir/custom_validation_code/  -type d -exec chmod -f ug+rwx,g+s,o= {} \;
+    find $course_dir/custom_validation_code/  -type f -exec chmod -f ug+rw,o= {} \;
+    find $course_dir/custom_validation_code/          -exec chgrp -f ${course_group} {} \;
+    find $course_dir/config/build/            -type d -exec chmod -f ug+rwx,g+s,o= {} \;
+    find $course_dir/config/build/            -type f -exec chmod -f ug+rw,o= {} \;
+    find $course_dir/config/build/            -exec chgrp -f ${course_group} {} \;
+    find $course_dir/config/complete_config/  -type d -exec chmod -f ug+rwx,g+s,o= {} \;
+    find $course_dir/config/complete_config/  -type f -exec chmod -f ug+rw,o= {} \;
+    find $course_dir/config/complete_config/  -exec chgrp -f ${course_group} {} \;
+
+}
+
+
 function build_homework {
 
     CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../config
@@ -101,6 +155,8 @@ function build_homework {
     if (( $cmake_res != 0 )); then
         echo -e "\nCMAKE ERROR\nlogfile: $hw_build_path/log_cmake_output.txt\n\n"
         cat $hw_build_path/log_cmake_output.txt
+        fix_permissions $hw_config $hw_bin_path $hw_build_path $course_dir $assignment $course_group
+        popd > /dev/null
         exit 1
     fi
 
@@ -115,51 +171,12 @@ function build_homework {
     if (( $make_res != 0 )); then
         echo -e "\nMAKE ERROR\nlogfile: $hw_build_path/log_make_output.txt\n\n"
         cat $hw_build_path/log_make_output.txt
+        fix_permissions $hw_config $hw_bin_path $hw_build_path $course_dir $assignment $course_group
+        popd > /dev/null
         exit 1
     fi
 
-    # set the permissions 
-    chmod  -f  u=rw,g=rw,o=r     $hw_config
-    chmod  -f  u=rwx,g=rwx,o=x   $hw_bin_path
-    chmod  -f  u=rwx,g=rwx,o=x   $hw_bin_path/*out
-
-    # copy the provided code, test input, test output, and custom validation code files to the appropriate directories
-    if [ -d $hw_build_path/provided_code/ ]; then
-	rsync -ruz --delete $hw_build_path/provided_code/    $course_dir/provided_code/$assignment/
-    fi
-    if [ -d $hw_build_path/test_input/ ]; then
-	rsync -ruz --delete $hw_build_path/test_input/   $course_dir/test_input/$assignment/
-    fi
-    if [ -d $hw_build_path/test_output/ ]; then
-	rsync -ruz --delete $hw_build_path/test_output/  $course_dir/test_output/$assignment/
-    fi
-    if [ -d $hw_build_path/custom_validation_code/ ]; then
-	rsync -ruz --delete $hw_build_path/custom_validation_code/    $course_dir/custom_validation_code/$assignment/
-    fi
-
-    # change permissions so other instructor users in this course & DAEMON_USER can re-run the build course script
-    find $course_dir/build/                   -type d -exec chmod -f ug+rwx,g+s,o= {} \;
-    find $course_dir/build/                   -type f -exec chmod -f ug+rw,o= {} \;
-    find $course_dir/build/                           -exec chgrp -f ${course_group} {} \;
-    find $course_dir/provided_code/           -type d -exec chmod -f ug+rwx,g+s,o= {} \;
-    find $course_dir/provided_code/           -type f -exec chmod -f ug+rw,o= {} \;
-    find $course_dir/provided_code/                   -exec chgrp -f ${course_group} {} \;
-    find $course_dir/test_input/              -type d -exec chmod -f ug+rwx,g+s,o= {} \;
-    find $course_dir/test_input/              -type f -exec chmod -f ug+rw,o= {} \;
-    find $course_dir/test_input/                      -exec chgrp -f ${course_group} {} \;
-    find $course_dir/test_output/             -type d -exec chmod -f ug+rwx,g+s,o= {} \;
-    find $course_dir/test_output/             -type f -exec chmod -f ug+rw,o= {} \;
-    find $course_dir/test_output/                     -exec chgrp -f ${course_group} {} \;
-    find $course_dir/custom_validation_code/  -type d -exec chmod -f ug+rwx,g+s,o= {} \;
-    find $course_dir/custom_validation_code/  -type f -exec chmod -f ug+rw,o= {} \;
-    find $course_dir/custom_validation_code/          -exec chgrp -f ${course_group} {} \;
-    find $course_dir/config/build/            -type d -exec chmod -f ug+rwx,g+s,o= {} \;
-    find $course_dir/config/build/            -type f -exec chmod -f ug+rw,o= {} \;
-    find $course_dir/config/build/            -exec chgrp -f ${course_group} {} \;
-    find $course_dir/config/complete_config/  -type d -exec chmod -f ug+rwx,g+s,o= {} \;
-    find $course_dir/config/complete_config/  -type f -exec chmod -f ug+rw,o= {} \;
-    find $course_dir/config/complete_config/  -exec chgrp -f ${course_group} {} \;
-
+    fix_permissions $hw_config $hw_bin_path $hw_build_path $course_dir $assignment $course_group
     popd > /dev/null
 }
 
