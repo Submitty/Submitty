@@ -14,6 +14,7 @@ import operator
 import paramiko
 import tempfile
 import socket
+import traceback
 
 from autograder import grade_items_logging
 from autograder import grade_item
@@ -300,15 +301,19 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
                 return False
     # archive the results of grading
     try:
-        packer_unpacker.unpack_grading_results_zip(which_machine,which_untrusted,local_results_zip)
+        success = packer_unpacker.unpack_grading_results_zip(which_machine,which_untrusted,local_results_zip)
     except:
         grade_items_logging.log_message(JOB_ID,jobname=item_name,message="ERROR: Exception when unpacking zip")
         with contextlib.suppress(FileNotFoundError):
             os.remove(local_results_zip)
+        success = False
 
     with contextlib.suppress(FileNotFoundError):
         os.remove(local_done_queue_file)
-    grade_items_logging.log_message(JOB_ID, jobname=item_name, which_untrusted=which_untrusted, is_batch=is_batch, message="Unpacked job from " + which_machine)
+
+    msg = "Unpacked job from " + which_machine if success else "ERROR: failure returned from worker machine"
+    print(msg)
+    grade_items_logging.log_message(JOB_ID, jobname=item_name, which_untrusted=which_untrusted, is_batch=is_batch, message=msg)
     return True
 
 

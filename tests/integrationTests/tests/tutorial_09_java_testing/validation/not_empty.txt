@@ -1,0 +1,1 @@
+Picked up JAVA_TOOL_OPTIONS: -Xms128m -Xmx256m

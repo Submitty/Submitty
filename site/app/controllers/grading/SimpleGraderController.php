@@ -10,6 +10,7 @@ use app\models\gradeable\TaGradedGradeable;
 use app\models\GradingSection;
 use app\models\User;
 use app\controllers\GradingController;
+use app\libraries\Utils;
 
 class SimpleGraderController extends GradingController  {
     public function run() {
@@ -178,12 +179,7 @@ class SimpleGraderController extends GradingController  {
             return $user->getId();
         }, $students);
 
-        $student_full = json_encode(array_map(function(User $user) {
-            return ['value' => $user->getId(),
-                'label' => $user->getDisplayedFirstName() . ' '
-                    . $user->getLastName()
-                    . ' <' . $user->getId() . '>'];
-        }, $students));
+        $student_full = Utils::getAutoFillData($students);
 
         if ($gradeable->isGradeByRegistration()) {
             $section_key = "registration_section";
@@ -367,5 +363,5 @@ class SimpleGraderController extends GradingController  {
         return $response;
     }
 
-    
+
 }

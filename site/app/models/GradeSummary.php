@@ -32,9 +32,10 @@ class GradeSummary extends AbstractModel {
 
                 // CREATE HEADER FOR JSON
                 $student_output_json[$student_id]["user_id"] = $student_id;
-                $student_output_json[$student_id]["legal_first_name"] = $gradeable->getUser()->getFirstName();
+                $student_output_json[$student_id]["legal_first_name"] = $gradeable->getUser()->getLegalFirstName();
                 $student_output_json[$student_id]["preferred_first_name"] = $gradeable->getUser()->getPreferredFirstName();
-                $student_output_json[$student_id]["last_name"] = $gradeable->getUser()->getLastName();
+                $student_output_json[$student_id]["last_name"] = $gradeable->getUser()->getLegalLastName();
+                $student_output_json[$student_id]["preferred_last_name"] = $gradeable->getUser()->getPreferredLastName();
                 $student_output_json[$student_id]["registration_section"] = $gradeable->getUser()->getRegistrationSection();
 
                 $student_output_json[$student_id]["default_allowed_late_days"] = $this->core->getConfig()->getDefaultStudentLateDays();
@@ -62,14 +63,14 @@ class GradeSummary extends AbstractModel {
      */
     private function generateSummary($gradeable, $student, &$total_late_used) {
         $this_g = array();
-        
+
         $autograding_score = $gradeable->getGradedAutoGraderPoints();
         $ta_grading_score = $gradeable->getGradedTAPoints();
 
         $this_g['id'] = $gradeable->getId();
         $this_g['name'] = $gradeable->getName();
         $this_g['grade_released_date'] = $gradeable->getGradeReleasedDate();
-        
+
         if($gradeable->validateVersions() || !$gradeable->useTAGrading()){
             $this_g['score'] = max(0,floatval($autograding_score)+floatval($ta_grading_score));
         }
@@ -82,7 +83,7 @@ class GradeSummary extends AbstractModel {
                 $this_g['note'] = 'Score is set to 0 because there are version conflicts.';
             }
         }
-        
+
         switch ($gradeable->getType()) {
             case GradeableType::ELECTRONIC_FILE:
                 $this->addLateDays($this_g, $gradeable);
@@ -155,7 +156,7 @@ class GradeSummary extends AbstractModel {
         }
         $this_g["component_scores"] = $component_scores;
     }
-    
+
     public function generateAllSummaries() {
         $users = $this->core->getQueries()->getAllUsers();
         $user_ids = array_map(function($user) {return $user->getId();}, $users);

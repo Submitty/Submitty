@@ -47,6 +47,52 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
   }
 }
 
+
+// This function will automatically archive all non-executable files
+// that are validated.  This ensures that the web viewers will have
+// the necessary files to display the results to students and graders.
+void ArchiveValidatedFiles(nlohmann::json &whole_config) {
+
+  // FIRST, loop over all of the test cases
+  nlohmann::json::iterator tc = whole_config.find("testcases");
+  assert (tc != whole_config.end());
+  int which_testcase = 0;
+  for (nlohmann::json::iterator my_testcase = tc->begin();
+       my_testcase != tc->end(); my_testcase++,which_testcase++) {
+    nlohmann::json::iterator validators = my_testcase->find("validation");
+    if (validators == my_testcase->end()) { /* no autochecks */ continue; }
+    std::vector<std::string> executable_names = stringOrArrayOfStrings(*my_testcase,"executable_name");
+
+    // SECOND loop over all of the autocheck validations
+    for (int which_autocheck = 0; which_autocheck < validators->size(); which_autocheck++) {
+      nlohmann::json& autocheck = (*validators)[which_autocheck];
+      std::string method = autocheck.value("method","");
+
+      // IF the autocheck has a file to compare (and it's not an executable)...
+      if (autocheck.find("actual_file") == autocheck.end()) continue;
+
+      std::vector<std::string> actual_filenames = stringOrArrayOfStrings(autocheck,"actual_file");
+      for (int i = 0; i < actual_filenames.size(); i++) {
+        std::string actual_file = actual_filenames[i];
+
+        // skip the executables
+        bool skip = false;
+        for (int j = 0; j < executable_names.size(); j++) {
+          if (executable_names[j] == actual_file) { skip = true; continue; }
+        }
+        if (skip) { continue; }
+
+        // THEN add each actual file to the list of files to archive
+        std::stringstream ss;
+        ss << "test" << std::setfill('0') << std::setw(2) << which_testcase+1 << "/" << actual_file;
+        actual_file = ss.str();
+        whole_config["autograding"]["work_to_details"].push_back(actual_file);
+      }
+    }
+  }
+}
+
+
 void AddDockerConfiguration(nlohmann::json &whole_config) {
 
   if (!whole_config["docker_enabled"].is_boolean()){
@@ -56,7 +102,7 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
   bool docker_enabled = whole_config["docker_enabled"];
 
   if (!whole_config["use_router"].is_boolean()){
-    whole_config["use_router"] = true;
+    whole_config["use_router"] = false;
   }
 
   if (!whole_config["single_port_per_container"].is_boolean()){
@@ -123,6 +169,8 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
       assert(this_testcase["containers"].size() == 1 || docker_enabled == true);
     }
 
+    bool found_router = false;
+
     for (int container_num = 0; container_num < this_testcase["containers"].size(); container_num++){
       if(this_testcase["containers"][container_num]["commands"].is_string()){
         std::string this_command = this_testcase["containers"][container_num].value("commands", "");
@@ -134,6 +182,10 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
       if(this_testcase["containers"][container_num]["container_name"].is_null()){
         //pad this out correctly?
         this_testcase["containers"][container_num]["container_name"] = "container" + std::to_string(container_num); 
+      }
+
+      if (this_testcase["containers"][container_num]["container_name"] == "router"){
+        found_router = true;
       }
 
       std::string container_name = this_testcase["containers"][container_num]["container_name"];
@@ -149,6 +201,18 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
         this_testcase["containers"][container_num]["container_image"] = "ubuntu:custom";
       }    
     }
+
+    if(this_testcase["use_router"] && !found_router){
+      nlohmann::json insert_router = nlohmann::json::object();
+      insert_router["outgoing_connections"] = nlohmann::json::array();
+      insert_router["commands"] = nlohmann::json::array();
+      insert_router["commands"].push_back("python3 submitty_router.py");
+      insert_router["container_name"] = "router";
+      insert_router["import_default_router"] = true;
+      insert_router["container_image"] = "ubuntu:custom";
+      this_testcase["containers"].push_back(insert_router);
+    }
+
     whole_config["testcases"][testcase_num] = this_testcase;
     assert(!whole_config["testcases"][testcase_num]["title"].is_null());
     assert(!whole_config["testcases"][testcase_num]["containers"].is_null());
@@ -467,6 +531,8 @@ nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid) {
   RewriteDeprecatedMyersDiff(answer);
 
   InflateTestcases(answer);
+
+  ArchiveValidatedFiles(answer);
   
   return answer;
 }
@@ -552,10 +618,14 @@ void AddDefaultGrader(const std::string &command,
     std::string program_name = get_program_name(command,whole_config);
     if (program_name == "/usr/bin/python") {
       j["description"] = "syntax error output from running python";
-    } else if (program_name == "/usr/bin/java") {
+    } else if (program_name.find("java") != std::string::npos) {
       j["description"] = "syntax error output from running java";
-    } else if (program_name == "/usr/bin/javac") {
-      j["description"] = "syntax error output from running javac";
+      if (program_name.find("javac") != std::string::npos) {
+        j["description"] = "syntax error output from compiling java";
+      }
+      if (j["method"] == "warnIfNotEmpty" || j["method"] == "errorIfNotEmpty") {
+        j["jvm_memory"] = true;
+      }
     } else {
       j["description"] = "Standard Error ("+filename+")";
     }
@@ -690,6 +760,12 @@ void Compilation_Helper(nlohmann::json &single_testcase) {
         v2["actual_file"] = "STDERR_" + std::to_string(i) + ".txt";
       }
       v2["description"] = "Compilation Errors and/or Warnings";
+      nlohmann::json command_json = commands[i];
+      assert (command_json.is_string());
+      std::string command = command_json;
+      if (command.find("java") != std::string::npos) {
+        v2["jvm_memory"] = true;
+      }
       v2["show_actual"] = "on_failure";
       v2["show_message"] = "on_failure";
       v2["deduction"] = warning_fraction;

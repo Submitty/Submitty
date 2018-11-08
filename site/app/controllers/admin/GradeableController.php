@@ -34,9 +34,9 @@ class GradeableController extends AbstractController {
             $all_paths[] = $file['path'];
         }
         $inuse_config = array();
-        foreach($this->core->getQueries()->getGradeablesIterator() as $gradeable){
+        foreach($this->core->getQueries()->getGradeableConfigs(null) as $gradeable){
             foreach($all_paths as $path){
-                if(strpos($gradeable->getConfigPath(), $path) !== false){
+                if(strpos($gradeable->getAutogradingConfigPath(), $path) !== false){
                     $inuse_config[] = $path;
                 }
             }
@@ -127,8 +127,8 @@ class GradeableController extends AbstractController {
     public function delete_config(){
         $config_path = $_GET['config'] ?? null;
         $in_use = false;
-        foreach($this->core->getQueries()->getGradeablesIterator() as $gradeable){
-            if(strpos($gradeable->getConfigPath(), $config_path) !== false){
+        foreach($this->core->getQueries()->getGradeableConfigs(null) as $gradeable){
+            if(strpos($gradeable->getAutogradingConfigPath(), $config_path) !== false){
                 $in_use = true;
                 break;
             }
@@ -150,20 +150,18 @@ class GradeableController extends AbstractController {
             'action' => 'upload_config')));
     }
 
-    private function configUsedBy(){
+    private function configUsedBy() {
         // Returns a list of gradeables that are using this config
         $config_path = $_GET['config'] ?? null;
-        if($config_path == null){
-            return null;
-        } else {
+        if (!$config_path == null) {
             $inuse_config = array();
-            foreach($this->core->getQueries()->getGradeablesIterator() as $gradeable){
-                if(strpos($gradeable->getConfigPath(), $config_path) !== false){
-                        $inuse_config[] = $gradeable->getId();
+            foreach ($this->core->getQueries()->getGradeableConfigs(null) as $gradeable) {
+                if (strpos($gradeable->getAutogradingConfigPath(), $config_path) !== false) {
+                    $inuse_config[] = $gradeable->getId();
                 }
             }
+            $this->core->getOutput()->renderJson($inuse_config);
         }
-        return $this->core->getOutput()->renderJson($inuse_config);
     }
 
     /**

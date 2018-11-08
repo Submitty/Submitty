@@ -3,7 +3,7 @@
 namespace app\views;
 
 class GlobalView extends AbstractView {
-    public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, $css=array(), $js=array()) {
+    public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, $fixed_height, $css=array(), $js=array()) {
         $messages = [];
         foreach (array('error', 'notice', 'success') as $type) {
             foreach ($_SESSION['messages'][$type] as $key => $error) {
@@ -31,7 +31,8 @@ class GlobalView extends AbstractView {
             "site_url" => $this->core->getConfig()->getSiteUrl(),
             "notifications_info" => $notifications_info,
             "wrapper_enabled" => $this->core->getConfig()->wrapperEnabled(),
-            "wrapper_urls" => $wrapper_urls
+            "wrapper_urls" => $wrapper_urls,
+            "fixed_height" => $fixed_height
         ]);
      }
 
@@ -40,8 +41,8 @@ class GlobalView extends AbstractView {
             "runtime" => $runtime,
             "wrapper_enabled" => $this->core->getConfig()->wrapperEnabled(),
             "is_debug" => $this->core->getConfig()->isDebug(),
-            "submitty_queries" => $this->core->getSubmittyDB() ? $this->core->getSubmittyDB()->getPrintQueries() : [],
-            "course_queries" => $this->core->getCourseDB() ? $this->core->getCourseDB()->getPrintQueries() : [],
+            "submitty_queries" => $this->core->getConfig()->isDebug() && $this->core->getSubmittyDB() ? $this->core->getSubmittyDB()->getPrintQueries() : [],
+            "course_queries" => $this->core->getConfig()->isDebug() && $this->core->getCourseDB() ? $this->core->getCourseDB()->getPrintQueries() : [],
             "wrapper_urls" => $wrapper_urls
         ]);
     }
