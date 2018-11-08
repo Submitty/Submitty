@@ -286,7 +286,7 @@ class HomeworkView extends AbstractView {
             if($version_instance !== null) {
                 $display_version = $version_instance->getVersion();
                 for ($i = 1; $i <= $gradeable->getAutogradingConfig()->getNumParts(); $i++) {
-                    foreach ($version_instance->getPartFiles($i) as $file) {
+                    foreach ($version_instance->getPartFiles($i)['submissions'] as $file) {
                         $size = number_format($file['size'] / 1024, 2);
                         // $escape_quote_filename = str_replace('\'','\\\'',$file['name']);
                         if (substr($file['relative_name'], 0, strlen("part{$i}/")) === "part{$i}/") {
@@ -494,13 +494,15 @@ class HomeworkView extends AbstractView {
                 && $version_instance->getEarlyIncentivePoints() >= $autograding_config->getEarlySubmissionMinimumPoints()
                 && $version_instance->getDaysEarly() > $autograding_config->getEarlySubmissionMinimumDaysEarly();
 
+            $files = $version_instance->getFiles();
+
             $param = array_merge($param, [
                 'in_queue' => $version_instance->isQueued(),
                 'grading' => $version_instance->isGrading(),
                 'db_submission_time' => DateUtils::dateTimeToString($version_instance->getSubmissionTime()),
                 'days_late' => $version_instance->getDaysLate(),
                 'num_autogrades' => $version_instance->getHistoryCount(),
-                'files' => $version_instance->getFiles(),
+                'files' => array_merge($files['submissions'], $files['checkout']),
                 'display_version_days_late' => $version_instance->getDaysLate(),
                 'result_text' => $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $version_instance, $show_hidden)
             ]);
@@ -524,10 +526,8 @@ class HomeworkView extends AbstractView {
             }
         }
 
-        // if not active version and student cannot see any more than active version
-        $can_download = !$gradeable->isVcs()
-            && $gradeable->isStudentDownload()
-            && ($active_version_number === $display_version || $gradeable->isStudentDownloadAnyVersion());
+        // If its not git checkout
+        $can_download = !$gradeable->isVcs();
 
         $active_same_as_graded = true;
         if ($active_version_number !== 0 || $display_version !== 0) {
@@ -585,7 +585,7 @@ class HomeworkView extends AbstractView {
             'is_vcs' => $gradeable->isVcs(),
             'can_download' => $can_download,
             'can_change_submissions' => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
-            'can_see_all_versions' => $this->core->getUser()->accessGrading() || $gradeable->isStudentDownloadAnyVersion(),
+            'can_see_all_versions' => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
             'show_testcases' => $show_testcases,
             'active_same_as_graded' => $active_same_as_graded,
             'show_incentive_message' => $show_incentive_message

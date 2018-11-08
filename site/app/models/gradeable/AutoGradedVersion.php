@@ -115,33 +115,41 @@ class AutoGradedVersion extends AbstractModel {
         $config = $gradeable->getAutogradingConfig();
 
         // Get the path to load files from (based on submission type)
-        $dir = $gradeable->isVcs() ? 'checkout' : 'submissions';
-        $path = FileUtils::joinPaths($course_path, $dir, $gradeable->getId(), $submitter_id, $this->version);
+        $dirs = $gradeable->isVcs() ? ['submissions', 'checkout'] : ['submissions'];
 
-        // Now load all files in the directory, flattening the results
-        $submitted_files = FileUtils::getAllFiles($path, array(), true);
-        foreach ($submitted_files as $file => $details) {
-            if (substr(basename($file), 0, 1) === '.') {
-                $this->meta_files[$file] = $details;
-            } else {
-                $this->files[0][$file] = $details;
-            }
-        }
 
-        // If there is only one part (no separation of upload files),
-        //  be sure to set the "Part 1" files to the "all" files
-        if($config->getNumParts() === 1) {
-            $this->files[1] = $this->files[0];
-        }
+        foreach($dirs as $dir) {
 
-        // A second time, look through the folder, but now split up based on part number
-        foreach ($config->getPartNames() as $i => $name) {
+            $this->meta_files[$dir] = [];
+            $this->files[$dir][0] = [];
+
+            $path = FileUtils::joinPaths($course_path, $dir, $gradeable->getId(), $submitter_id, $this->version);
+
+            // Now load all files in the directory, flattening the results
+            $submitted_files = FileUtils::getAllFiles($path, array(), true);
             foreach ($submitted_files as $file => $details) {
-                $dir_name = "part{$i}/";
-                if (substr($file, 0, strlen($dir_name)) === "part{$i}/") {
-                    $this->files[$i][substr($file, strlen($dir_name), null)] = $details;
+                if (substr(basename($file), 0, 1) === '.') {
+                    $this->meta_files[$dir][$file] = $details;
+                } else {
+                    $this->files[$dir][0][$file] = $details;
                 }
             }
+            // If there is only one part (no separation of upload files),
+            //  be sure to set the "Part 1" files to the "all" files
+            if($config->getNumParts() === 1) {
+                $this->files[$dir][1] = $this->files[$dir][0];
+            }
+
+            // A second time, look through the folder, but now split up based on part number
+            foreach ($config->getPartNames() as $i => $name) {
+                foreach ($submitted_files as $file => $details) {
+                    $dir_name = "part{$i}/";
+                    if (substr($file, 0, strlen($dir_name)) === "part{$i}/") {
+                        $this->files[$dir][$i][substr($file, strlen($dir_name), null)] = $details;
+                    }
+                }
+            }
+
         }
     }
 
@@ -238,7 +246,8 @@ class AutoGradedVersion extends AbstractModel {
         if($this->files === null) {
             $this->loadSubmissionFiles();
         }
-        return $this->files[$part];
+        return array('submissions' => (array_key_exists($part, $this->files['submissions'])) ? $this->files['submissions'][$part] : [], 
+            'checkout' => ($this->graded_gradeable->getGradeable()->isVcs()) ? $this->files['checkout'][$part] : []);
     }
 
     /**
@@ -249,7 +258,7 @@ class AutoGradedVersion extends AbstractModel {
         if($this->files === null) {
             $this->loadSubmissionFiles();
         }
-        return $this->meta_files;
+        return array('submissions' => $this->meta_files['submissions'], 'checkout' => ($this->graded_gradeable->getGradeable()->isVcs()) ? $this->meta_files['checkout'] : []);
     }
     
     /**

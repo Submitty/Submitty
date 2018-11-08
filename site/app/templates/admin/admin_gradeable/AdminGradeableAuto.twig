@@ -60,7 +60,7 @@
                 What are students allowed to do?
             </div>
             <div>
-                View the gradeable on the course home page?
+                View the gradeable on the course home page and download submitted files?
                 <input type="radio" id="no_student_view_after_grades" name="student_view_after_grades" value="false"
                         {{ gradeable.isStudentView() and not gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}/> Yes
                 <input type="radio" id="no_student_view" name="student_view" value="false"
@@ -72,27 +72,13 @@
                         {{ gradeable.isStudentView() ? 'checked' : '' }} hidden/>
             </div>
 
-            <div id="student_submit_download_view">
+            <div id="student_submit_view">
                 <div>
-                    Make new submissions?
+                    Make new submissions and access all prior versions?
                     <input type="radio" id="yes_student_submit" name="student_submit" value="true"
                             {{ gradeable.isStudentSubmit() ? 'checked' : '' }}/> Yes
                     <input type="radio" id="no_student_submit" name="student_submit" value="false"
                             {{ not gradeable.isStudentSubmit() ? 'checked' : '' }}/> No
-                </div>
-
-                <div>
-                    Download submission files?
-                    <input type="radio" id="yes_student_any_version" name="student_download_any_version" value="true"
-                            {{ gradeable.isStudentDownload() and gradeable.isStudentDownloadAnyVersion() ? 'checked' : '' }}/> Any version
-                    <input type="radio" id="no_student_any_version" name="student_download_any_version" value="false"
-                            {{ gradeable.isStudentDownload() and not gradeable.isStudentDownloadAnyVersion() ? 'checked' : '' }}/> Active version only
-                    <input type="radio" id="no_student_download" name="student_download" value="false"
-                            {{ not gradeable.isStudentDownload() ? 'checked' : '' }}/> None
-
-
-                    <input type="radio" id="yes_student_download" name="student_download" value="true"
-                            {{ gradeable.isStudentDownload() ? 'checked' : '' }} hidden/>
                 </div>
             </div>
         </fieldset>
@@ -191,23 +177,17 @@
     function onStudentViewChange() {
         if($('#yes_student_view').is(':checked')) {
             //$('#student_submit_download_view').show();
-            disableElementChildren('#student_submit_download_view', false);
+            disableElementChildren('#student_submit_view', !$('#no_student_view_after_grades').is(':checked'));
         }
         else {
             // $('#student_submit_download_view').hide();
-            disableElementChildren('#student_submit_download_view', true);
+            disableElementChildren('#student_submit_view', true);
             let studentSubmit = $('#no_student_submit');
-            let studentDownload =$('#no_student_download');
 
             studentSubmit.prop('checked', true);
-            studentDownload.prop('checked',true);
-
-            studentDownload.change();
             studentSubmit.change();
 
-            $('input[name=student_download_any_version]').prop('checked', false);
             $('input[name=student_view_after_grades]').prop('checked', false);
-            $('#student_submit_download_view').hide();
         }
     }
 
@@ -261,22 +241,13 @@
         // Update the text box when the path config changes
         $('.select_config_path').change(onConfigPathChange);
 
-        $('#no_student_download').change(function() {
-            if ($(this).is(':checked')) {
-                $('input[name=student_download_any_version]').prop('checked', false);
-            }
-        });
-
-        $('input[name=student_download_any_version]').change(function() {
-            let elem = $('#yes_student_download');
-            elem.prop('checked', true);
-            elem.change();
-        });
-
         $('input[name=student_view_after_grades]').change(function() {
             let elem = $('#yes_student_view');
             elem.prop('checked', true);
             elem.change();
+            let sub = $('#no_student_submit');
+            sub.prop('checked', true);
+            sub.change();
         });
 
         {% if is_in_rebuild_queue %}
