@@ -935,7 +935,7 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
     dup2(new_stdoutfd, stdoutfd);
   }
   if (my_stderr != "") {
-    int new_stderrfd = open(my_stdout.c_str(), O_WRONLY|O_CREAT|O_APPEND, everyone_read);
+    int new_stderrfd = open(my_stderr.c_str(), O_WRONLY|O_CREAT|O_APPEND, everyone_read);
                      //creat(my_stderr.c_str(), everyone_read );
     int stderrfd = fileno(stderr);
     close(stderrfd);
@@ -1147,7 +1147,11 @@ int execute(const std::string &cmd,
       // PARENT PROCESS
       std::thread cin_thread;
       bool CHILD_NOT_TERMINATED = true;
+
+      bool dispatcher_actions_ended = true;
+      
       if(num_dispatched_actions > 0){
+        dispatcher_actions_ended = false;
         close(dispatcherpipe[0]); // close the read end of the pipe
         cin_thread = std::thread(cin_reader, &lock, &input_queue, &CHILD_NOT_TERMINATED);
       }
@@ -1167,8 +1171,6 @@ int execute(const std::string &cmd,
       int rss_memory = 0;
       int actions_taken = 0;   
       int number_of_screenshots = 0;
-      bool manually_killed_student_process = false;
-      bool kill_now = false;
       do {
           //dispatcher actions
           if(!input_queue.empty()){
@@ -1184,10 +1186,9 @@ int execute(const std::string &cmd,
               std::cout << "Sending interrupt to student process." << std::endl;
               kill(childPID, SIGINT);
               kill(-childPID, SIGINT);
-              manually_killed_student_process = true;
               close(dispatcherpipe[1]);
-            }else if(std::string(piped_message) == "SUBMITTY_SIGNAL:START\n" && manually_killed_student_process){
-              manually_killed_student_process = false;
+            //TODO: what if we try to start a running process (act as restart or ignore?)
+            }else if(std::string(piped_message) == "SUBMITTY_SIGNAL:START\n"){
               pipe(dispatcherpipe);
               childPID = fork();
               // ensure fork was successful
@@ -1221,8 +1222,11 @@ int execute(const std::string &cmd,
               std::cout << "Sending SIGKILL to student process" << std::endl;
               int k  = kill(childPID, SIGKILL);
               int k2 = kill(-childPID, SIGKILL);
-              manually_killed_student_process = true;
               close(dispatcherpipe[1]);
+            }
+            else if(std::string(piped_message) == "SUBMITTY_SIGNAL:FINALMESSAGE\n"){
+              std::cout << "The dispatcher actions are complete." << std::endl;
+              dispatcher_actions_ended = true;
             }else{
               write(dispatcherpipe[1], piped_message, strlen(popped.c_str()));
               std::cout << "Writing to student stdin: " << popped << std::endl;
@@ -1243,6 +1247,7 @@ int execute(const std::string &cmd,
           // sleep 1/10 of a second
           wpid = waitpid(childPID, &status, WNOHANG);
           
+          //if the student process is alive.
           if (wpid == 0){
             // monitor time & memory usage
             if (!time_kill && !memory_kill){
@@ -1261,16 +1266,14 @@ int execute(const std::string &cmd,
               //if we are out of actions or there were none, delay 1/10th second.
               else{ 
                 delay_and_mem_check(100000, childPID, elapsed, next_checkpoint, seconds_to_run, 
-                  rss_memory, allowed_rss_memory, memory_kill, time_kill, logfile);
+                                    rss_memory, allowed_rss_memory, memory_kill, time_kill, logfile);
               }
             }
-         }else{ //keep on performing checks even if we killed the child process (for dispatcher actions). 
+         }else if(!dispatcher_actions_ended){ //keep on performing checks even if we killed the child process (for dispatcher actions). 
             delay_and_mem_check(100000, childPID, elapsed, next_checkpoint, seconds_to_run, 
-            rss_memory, allowed_rss_memory, memory_kill, time_kill, logfile);
+                                rss_memory, allowed_rss_memory, memory_kill, time_kill, logfile);
          }
-         kill_now = wpid != 0 && (!manually_killed_student_process || time_kill || memory_kill);
-         std::cout << "kill_now is " << kill_now << std::endl;
-      } while (!kill_now);
+      } while (!(dispatcher_actions_ended && wpid != 0) && !time_kill && !memory_kill);
 
       if (WIFEXITED(status)) {
         std::cout << "Child exited, status=" << WEXITSTATUS(status) << std::endl;
