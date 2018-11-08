@@ -1570,6 +1570,27 @@ DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=?
 
 // END FIXME
      
+    public function getAllSectionsForGradeable($gradeable) {
+         $grade_type = $gradeable->isGradeByRegistration() ? 'registration' : 'rotating';
+         
+         $this->course_db->query("
+             SELECT * FROM sections_{$grade_type} 
+             ORDER BY SUBSTRING(sections_{$grade_type}_id, '^[^0-9]*'), 
+             COALESCE(SUBSTRING(sections_{$grade_type}_id, '[0-9]+')::INT, -1), 
+             SUBSTRING(sections_{$grade_type}_id, '[^0-9]*$') ");
+         
+         $sections = $this->course_db->rows();
+         foreach ($sections as $i => $section)
+             $sections[$i] = $section['sections_registration_id'];
+         return $sections;
+    }
+    
+    public function getSectionsForGradeableAndUser($gradeable, $grader) {
+        if ($gradeable->isGradeByRegistration())
+            return $grader->getGradingRegistrationSections();
+        return getRotatingSectionsForGradeableAndUser($gradeable->getId(), $grader->getId());
+    }
+    
     /**
      * Gets the ids of all submitters who received a mark
      * @param Mark $mark
