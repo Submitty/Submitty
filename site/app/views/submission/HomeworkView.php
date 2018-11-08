@@ -531,10 +531,8 @@ class HomeworkView extends AbstractView {
             }
         }
 
-        // if not active version and student cannot see any more than active version
-        $can_download = !$gradeable->isVcs()
-            && $gradeable->isStudentDownload()
-            && ($active_version_number === $display_version || $gradeable->isStudentDownloadAnyVersion());
+        // If its not git checkout
+        $can_download = !$gradeable->isVcs();
 
         $active_same_as_graded = true;
         if ($active_version_number !== 0 || $display_version !== 0) {
@@ -592,7 +590,7 @@ class HomeworkView extends AbstractView {
             'is_vcs' => $gradeable->isVcs(),
             'can_download' => $can_download,
             'can_change_submissions' => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
-            'can_see_all_versions' => $this->core->getUser()->accessGrading() || $gradeable->isStudentDownloadAnyVersion(),
+            'can_see_all_versions' => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
             'show_testcases' => $show_testcases,
             'active_same_as_graded' => $active_same_as_graded,
             'show_incentive_message' => $show_incentive_message

@@ -133,8 +133,6 @@ CREATE TABLE electronic_gradeable (
     eg_student_view boolean NOT NULL,
     eg_student_view_after_grades boolean DEFAULT (FALSE) NOT NULL,
     eg_student_submit boolean NOT NULL,
-    eg_student_download boolean NOT NULL,
-    eg_student_any_version boolean NOT NULL,
     eg_peer_grading boolean NOT NULL,
     eg_submission_open_date timestamp(6) with time zone NOT NULL,
     eg_submission_due_date timestamp(6) with time zone NOT NULL,

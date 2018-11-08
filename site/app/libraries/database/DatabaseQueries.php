@@ -3156,8 +3156,6 @@ AND gc_id IN (
                 $this->course_db->convertBoolean($gradeable->isStudentView()),
                 $this->course_db->convertBoolean($gradeable->isStudentViewAfterGrades()),
                 $this->course_db->convertBoolean($gradeable->isStudentSubmit()),
-                $this->course_db->convertBoolean($gradeable->isStudentDownload()),
-                $this->course_db->convertBoolean($gradeable->isStudentDownloadAnyVersion()),
                 $this->course_db->convertBoolean($gradeable->hasDueDate()),
                 $gradeable->getAutogradingConfigPath(),
                 $gradeable->getLateDays(),
@@ -3183,8 +3181,6 @@ AND gc_id IN (
                   eg_student_view,
                   eg_student_view_after_grades,
                   eg_student_submit,
-                  eg_student_download,
-                  eg_student_any_version,
                   eg_has_due_date,
                   eg_config_path,
                   eg_late_days,
@@ -3194,7 +3190,7 @@ AND gc_id IN (
                   eg_peer_grade_set,
                   eg_regrade_request_date,
                   eg_regrade_allowed)
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
         }
 
         // Make sure to create the rotating sections
@@ -3288,8 +3284,6 @@ AND gc_id IN (
                     $this->course_db->convertBoolean($gradeable->isStudentView()),
                     $this->course_db->convertBoolean($gradeable->isStudentViewAfterGrades()),
                     $this->course_db->convertBoolean($gradeable->isStudentSubmit()),
-                    $this->course_db->convertBoolean($gradeable->isStudentDownload()),
-                    $this->course_db->convertBoolean($gradeable->isStudentDownloadAnyVersion()),
                     $this->course_db->convertBoolean($gradeable->hasDueDate()),
                     $gradeable->getAutogradingConfigPath(),
                     $gradeable->getLateDays(),
@@ -3315,8 +3309,6 @@ AND gc_id IN (
                       eg_student_view=?,
                       eg_student_view_after_grades=?,
                       eg_student_submit=?,
-                      eg_student_download=?,
-                      eg_student_any_version=?,
                       eg_has_due_date=?,
                       eg_config_path=?,
                       eg_late_days=?,
