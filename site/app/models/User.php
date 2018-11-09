@@ -111,6 +111,9 @@ class User extends AbstractModel {
     /** @property @var array */
     protected $grading_registration_sections = array();
 
+    /** @property @var array */
+    protected $notification_settings = array();
+
     /**
      * User constructor.
      *
@@ -151,6 +154,12 @@ class User extends AbstractModel {
 
         $this->user_updated = isset($details['user_updated']) && $details['user_updated'] === true;
         $this->instructor_updated = isset($details['instructor_updated']) && $details['instructor_updated'] === true;
+
+        //Other call to get notification settings??
+        $this->notification_settings['reply_to_external_thread'] = !empty($details['notif_reply_to_external_thread']) ? $details['notif_reply_to_external_thread'] : false;
+        $this->notification_settings['merge_all_threads'] = !empty($details['notif_merge_all_threads']) ? $details['notif_merge_all_threads'] : false;
+        $this->notification_settings['all_new_threads'] = !empty($details['notif_all_new_threads']) ? $details['notif_all_new_threads'] : false;
+        $this->notification_settings['all_new_posts'] = !empty($details['notif_all_new_posts']) ? $details['notif_all_new_posts'] : false;
 
         $this->registration_section = isset($details['registration_section']) ? $details['registration_section'] : null;
         $this->rotating_section = isset($details['rotating_section']) ? intval($details['rotating_section']) : null;
@@ -204,6 +213,10 @@ class User extends AbstractModel {
     public function setLegalLastName($name) {
         $this->legal_last_name = $name;
         $this->setDisplayedLastName();
+    }
+
+    public function getNotifcationSetting($type) {
+        return $this->notification_settings[$type]; //either recieves it or not
     }
 
     /**
