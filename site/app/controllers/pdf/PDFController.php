@@ -42,6 +42,7 @@ class PDFController extends AbstractController {
     private function showStudentPDF(){
         $gradeable_id = $_GET['gradeable_id'] ?? NULL;
         $filename = $_GET['file_name'] ?? NULL;
+        $filename = html_entity_decode($filename);
         $id = $this->core->getUser()->getId();
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if($gradeable->isTeamAssignment()){
@@ -111,6 +112,7 @@ class PDFController extends AbstractController {
         //User can be a team
         $id = $_POST['user_id'] ?? NULL;
         $filename = $_POST['filename'] ?? NULL;
+        $filename = html_entity_decode($filename);
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if($gradeable->isTeamAssignment()){
             $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, null, $id);
