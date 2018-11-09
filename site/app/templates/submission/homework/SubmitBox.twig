@@ -8,6 +8,12 @@
         {% endif %}
     </div>
 
+    {% if show_no_late_submission_warning %}
+        <div>
+            <i class="red-message">Warning, you are making a late submission for a gradeable without late submissions enabled!</i>
+        </div>
+    {% endif %}
+
     {# Admin submission type selector #}
     {% if core.getUser().accessFullGrading() %}
         <form id="submissionForm" method="post" style="text-align: center; margin: 0 auto; width: 100%; ">

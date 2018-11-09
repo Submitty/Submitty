@@ -56,7 +56,7 @@ class MiscController extends AbstractController {
         $gradeable_id = $_POST['gradeable_id'] ?? NULL;
         $id = $_POST['user_id'] ?? NULL;
         $file_name = $_POST['filename'] ?? NULL;
-
+        $file_name = html_entity_decode($file_name);
         $gradeable = $this->tryGetGradeable($gradeable_id);
         $submitter = $this->core->getQueries()->getSubmitterById($id);
         $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($gradeable, $submitter);

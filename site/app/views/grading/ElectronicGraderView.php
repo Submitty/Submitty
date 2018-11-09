@@ -573,17 +573,20 @@ class ElectronicGraderView extends AbstractView {
         // order of these statements matter I believe
 
         $display_version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($display_version);
+        $isVcs = $graded_gradeable->getGradeable()->isVcs();
         if ($display_version_instance !==  null) {
-            add_files($submissions, array_merge($display_version_instance->getMetaFiles(), $display_version_instance->getFiles()), 'submissions');
-            add_files($checkout, array_merge($display_version_instance->getMetaFiles(), $display_version_instance->getFiles()), 'checkout');
-            
+            $meta_files = $display_version_instance->getMetaFiles();
+            $files = $display_version_instance->getFiles();
+
+            add_files($submissions, array_merge($meta_files['submissions'], $files['submissions']), 'submissions');
+            add_files($checkout, array_merge($meta_files['checkout'], $files['checkout']), 'checkout');
             add_files($results, $display_version_instance->getResultsFiles(), 'results');
         }
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
             "gradeable_id" => $graded_gradeable->getGradeableId(),
             "submitter_id" => $graded_gradeable->getSubmitter()->getId(),
-            "has_vcs_files" => false, // TODO: add this to AutoGradedVersion
+            "has_vcs_files" => $isVcs,
             "submissions" => $submissions,
             "checkout" => $checkout,
             "results" => $results,

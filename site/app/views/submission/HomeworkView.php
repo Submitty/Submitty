@@ -44,13 +44,19 @@ class HomeworkView extends AbstractView {
         }
 
         // Only show the late banner if the submission has a due date
-        if ($gradeable->isStudentSubmit() && $gradeable->hasDueDate()) {
+        if ($gradeable->isStudentSubmit() && $gradeable->hasDueDate() && $gradeable->isLateSubmissionAllowed()) {
             $return .= $this->renderLateDayMessage($old_gradeable, $extensions);
         }
 
-        // showing submission if user is grader or student can submit
-        if ($this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit()) {
+        // showing submission if user is full grader or student can submit
+        if ($this->core->getUser()->accessFullGrading()) {
             $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use);
+        } else if ($gradeable->isStudentSubmit()) {
+            if ($gradeable->canStudentSubmit()) {
+                $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use);
+            } else {
+                $return .= $this->renderSubmitNotAllowedBox();
+            }
         }
         $all_directories = $gradeable->getSplitPdfFiles();
         if ($this->core->getUser()->accessFullGrading() && count($all_directories) > 0) {
@@ -106,18 +112,22 @@ class HomeworkView extends AbstractView {
             'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END'
         ];
         $total_late_used = 0;
-        $curr_late = 0;
+        $student_late_days = 0;
         $late_day_budget = 0;
         foreach ($this->core->getQueries()->getGradeablesIterator(null, $gradeable->getUser()->getId(), 'registration_section', 'u.user_id', 0, $order_by) as $g) {
             $g->calculateLateDays($total_late_used);
-            $total_late_used-=$g->getLateDayExceptions();
-            $curr_late = $g->getStudentAllowedLateDays();
             if($g->getId() === $gradeable->getId()){
-                $late_day_budget = $curr_late-$total_late_used;
+                $student_late_days = $g->getStudentAllowedLateDays();
+                $late_day_budget = $student_late_days-$total_late_used;
+            }
+            // make sure we don't "double count" late days used on this assignment
+            else{
+                $total_late_used -= $g->getLateDayExceptions();
             }
         }
-        $late_days_remaining = $curr_late - $total_late_used;
+
         $active_days_late = $gradeable->getActiveVersion() == 0 ? 0 : $gradeable->getActiveDaysLate();
+        $late_days_remaining = $student_late_days - $total_late_used + $extensions;
         $would_be_days_late = $gradeable->getWouldBeDaysLate();
         $late_days_allowed = $gradeable->getAllowedLateDays();
         $active_version = $gradeable->getActiveVersion();
@@ -140,11 +150,11 @@ class HomeworkView extends AbstractView {
         // IF STUDENT HAS ALREADY SUBMITTED AND THE ACTIVE VERSION IS LATE, PRINT LATE DAY INFORMATION FOR THE ACTIVE VERSION
         if ($active_version >= 1 && $active_days_late > 0) {
             // BAD STATUS - AUTO ZERO BECAUSE INSUFFICIENT LATE DAYS REMAIN
-            if ($active_days_charged > $late_day_budget) {
+            if ($student_late_days < $active_days_late) {
                 $error = true;
                 $messages[] = ['type' => 'too_few_remain', 'info' => [
                     'late' => $active_days_late,
-                    'remaining' => $late_days_remaining
+                    'remaining' => $student_late_days
                 ]];
             } // BAD STATUS - AUTO ZERO BECAUSE TOO MANY LATE DAYS USED ON THIS ASSIGNMENT
             else if ($active_days_charged > $late_days_allowed) {
@@ -201,7 +211,7 @@ class HomeworkView extends AbstractView {
                     $messages[] = ['type' => 'would_get_zero'];
                 } // SUBMISSION NOW WOULD BE LATE
                 else {
-                    $new_late_days_remaining = $late_days_remaining + $active_days_charged - $new_late_charged;
+                    $new_late_days_remaining = $late_days_remaining - $new_late_charged;
                     $messages[] = ['type' => 'would_allowed', 'info' => [
                         'charged' => $new_late_charged,
                         'remaining' => $new_late_days_remaining
@@ -222,6 +232,10 @@ class HomeworkView extends AbstractView {
             'messages' => $messages,
             'error' => $error
         ]);
+    }
+
+    private function renderSubmitNotAllowedBox() {
+        return $this->core->getOutput()->renderTwigOutput("submission/homework/SubmitNotAllowedBox.twig");
     }
 
     /**
@@ -281,7 +295,7 @@ class HomeworkView extends AbstractView {
             if($version_instance !== null) {
                 $display_version = $version_instance->getVersion();
                 for ($i = 1; $i <= $gradeable->getAutogradingConfig()->getNumParts(); $i++) {
-                    foreach ($version_instance->getPartFiles($i) as $file) {
+                    foreach ($version_instance->getPartFiles($i)['submissions'] as $file) {
                         $size = number_format($file['size'] / 1024, 2);
                         // $escape_quote_filename = str_replace('\'','\\\'',$file['name']);
                         if (substr($file['relative_name'], 0, strlen("part{$i}/")) === "part{$i}/") {
@@ -321,6 +335,7 @@ class HomeworkView extends AbstractView {
             'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
             'has_due_date' => $gradeable->hasDueDate(),
             'repository_path' => $my_repository,
+            'show_no_late_submission_warning' => !$gradeable->isLateSubmissionAllowed() && $gradeable->isSubmissionClosed(),
             // This is only used as a placeholder, so the who loads this page is the 'user' unless the
             //  client overrides the user
             'user_id' => $this->core->getUser()->getId(),
@@ -488,13 +503,15 @@ class HomeworkView extends AbstractView {
                 && $version_instance->getEarlyIncentivePoints() >= $autograding_config->getEarlySubmissionMinimumPoints()
                 && $version_instance->getDaysEarly() > $autograding_config->getEarlySubmissionMinimumDaysEarly();
 
+            $files = $version_instance->getFiles();
+
             $param = array_merge($param, [
                 'in_queue' => $version_instance->isQueued(),
                 'grading' => $version_instance->isGrading(),
                 'db_submission_time' => DateUtils::dateTimeToString($version_instance->getSubmissionTime()),
                 'days_late' => $version_instance->getDaysLate(),
                 'num_autogrades' => $version_instance->getHistoryCount(),
-                'files' => $version_instance->getFiles(),
+                'files' => array_merge($files['submissions'], $files['checkout']),
                 'display_version_days_late' => $version_instance->getDaysLate(),
                 'result_text' => $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $version_instance, $show_hidden)
             ]);
@@ -518,10 +535,8 @@ class HomeworkView extends AbstractView {
             }
         }
 
-        // if not active version and student cannot see any more than active version
-        $can_download = !$gradeable->isVcs()
-            && $gradeable->isStudentDownload()
-            && ($active_version_number === $display_version || $gradeable->isStudentDownloadAnyVersion());
+        // If its not git checkout
+        $can_download = !$gradeable->isVcs();
 
         $active_same_as_graded = true;
         if ($active_version_number !== 0 || $display_version !== 0) {
@@ -579,7 +594,7 @@ class HomeworkView extends AbstractView {
             'is_vcs' => $gradeable->isVcs(),
             'can_download' => $can_download,
             'can_change_submissions' => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
-            'can_see_all_versions' => $this->core->getUser()->accessGrading() || $gradeable->isStudentDownloadAnyVersion(),
+            'can_see_all_versions' => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
             'show_testcases' => $show_testcases,
             'active_same_as_graded' => $active_same_as_graded,
             'show_incentive_message' => $show_incentive_message

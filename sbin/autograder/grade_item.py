@@ -177,6 +177,19 @@ def allow_only_one_part(path, log_path=os.devnull):
 # ==================================================================================
 # ==================================================================================
 
+# go through the testcase folder (e.g. test01/) and remove anything
+# that matches the test input (avoid archiving copies of these files!)
+def remove_test_input_files(overall_log,test_input_path,testcase_folder):
+    with open(overall_log,'a') as f:
+        for path, subdirs, files in os.walk(test_input_path):
+            for name in files:
+                relative = path[len(test_input_path)+1:]
+                my_file = os.path.join(testcase_folder, relative, name)
+                if os.path.isfile(my_file):
+                    print ("removing (likely) stale test_input file: ", my_file, file=f)
+                    os.remove(my_file)
+
+
 def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untrusted):
 
     os.chdir(SUBMITTY_DATA_DIR)
@@ -613,6 +626,14 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     subprocess.call(['ls', '-lR', '.'], stdout=open(tmp_logs + "/overall.txt", 'a'))
 
     os.makedirs(os.path.join(tmp_results,"details"))
+
+    # remove the test_input directory, so we don't archive it!
+    shutil.rmtree(os.path.join(tmp_work,"test_input"))
+
+    # loop over the test case directories, and remove any files that are also in the test_input folder
+    for testcase_num in range(1, len(my_testcases)+1):
+        testcase_folder = os.path.join(tmp_work, "test{:02}".format(testcase_num))
+        remove_test_input_files(os.path.join(tmp_logs,"overall.txt"),test_input_path,testcase_folder)
 
     patterns_work_to_details = complete_config_obj["autograding"]["work_to_details"]
     pattern_copy("work_to_details",patterns_work_to_details,tmp_work,os.path.join(tmp_results,"details"),tmp_logs)
