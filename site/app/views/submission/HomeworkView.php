@@ -36,16 +36,17 @@ class HomeworkView extends AbstractView {
 
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
 
+        // The number of days late this gradeable would be if submitted now (including exceptions)
+        $late_days_use = 0;
         $version_instance = null;
         if ($graded_gradeable !== null) {
             $version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions()[$display_version] ?? null;
+            $late_days_use = max(0, $gradeable->getWouldBeDaysLate() - $graded_gradeable->getLateDayException($this->core->getUser()));
         }
 
         // Only show the late banner if the submission has a due date
-        $late_days_used = 0;
         if (LateDays::filterCanView($this->core, $gradeable)) {
             $late_days = LateDays::fromUser($this->core, $this->core->getUser());
-            $late_days_used = $late_days->getLateDaysUsed();
             $return .= $this->renderLateDayMessage($late_days, $gradeable, $graded_gradeable);
         }
 
