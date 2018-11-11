@@ -114,7 +114,6 @@ class BaseTestCase(unittest.TestCase):
         #OLD self.assertEqual(user_name, self.driver.find_element_by_id("login-id").get_attribute('innerText').strip(' \t\r\n'))
 
         #FIXME: WANT SOMETHING LIKE THIS...  WHEN WE HAVE JUST ONE ELEMENT WITH THIS ID
-        print(self.driver.page_source)
         #self.assertEqual("Logout "+user_name, self.driver.find_element_by_id("logout").get_attribute('innerText').strip(' \t\r\n'))
 
         #instead, just make sure this element exists
