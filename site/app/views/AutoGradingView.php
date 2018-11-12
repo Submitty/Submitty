@@ -428,6 +428,7 @@ class AutoGradingView extends AbstractView {
                 $uploaded_pdfs[] = $file;
             }
         }
+        $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable->getId(), $this->core->getUser()->getId(), $active_version);
         return $this->core->getOutput()->renderTwigTemplate('autograding/TAResultsNew.twig', [
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
             'ta_graded_version' => $version_instance !== null ? $version_instance->getVersion() : 'INCONSISTENT',
@@ -449,7 +450,8 @@ class AutoGradingView extends AbstractView {
             'regrade_message' => $regrade_message,
             'num_decimals' => $num_decimals,
             'uploaded_pdfs' => $uploaded_pdfs,
-            'gradeable_id' => $gradeable->getId()
+            'gradeable_id' => $gradeable->getId(),
+            'has_annotation' => file_exists($annotation_path)
         ]);
     }
 }
