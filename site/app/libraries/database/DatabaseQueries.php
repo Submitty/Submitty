@@ -3549,12 +3549,15 @@ AND gc_id IN (
                 $ta_graded_gradeable->getOverallComment(),
                 $ta_graded_gradeable->getUserViewedDate() !== null ?
                     DateUtils::dateTimeToString($ta_graded_gradeable->getUserViewedDate()) : null,
+                $ta_graded_gradeable->getUserAnnotationViewedDate() !== null ?
+                    DateUtils::dateTimeToString($ta_graded_gradeable->getUserAnnotationViewedDate()) : null,
                 $ta_graded_gradeable->getId()
             ];
             $query = "
                 UPDATE gradeable_data SET
                   gd_overall_comment=?,
-                  gd_user_viewed_date=?
+                  gd_user_viewed_date=?,
+                  gd_user_annotation_viewed_date=?
                 WHERE gd_id=?";
             $this->course_db->query($query, $params);
         }

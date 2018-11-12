@@ -71,6 +71,9 @@ class PDFController extends AbstractController {
                 }
             }
         }
+        $ta_graded_gradeable = $graded_gradeable->getTaGradedGradeable();
+        $ta_graded_gradeable->setUserAnnotationViewedDate($this->core->getDateTimeNow());
+        $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
         $this->core->getOutput()->renderOutput(array('PDF'), 'showPDFEmbedded', $gradeable_id, $id, $filename, $annotation_jsons, true);
     }
 

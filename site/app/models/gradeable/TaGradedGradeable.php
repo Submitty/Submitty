@@ -17,6 +17,7 @@ use app\models\User;
  * @method void setOverallComment($comment)
  * @method int getId()
  * @method \DateTime|null getUserViewedDate()
+ * @method \DateTime|null getUserAnnotationViewedDate()
  */
 class TaGradedGradeable extends AbstractModel {
     /** @property @var GradedGradeable A reference to the graded gradeable this Ta grade belongs to */
@@ -27,6 +28,8 @@ class TaGradedGradeable extends AbstractModel {
     protected $overall_comment = "";
     /** @property @var \DateTime|null The date the user viewed their grade */
     protected $user_viewed_date = null;
+    /** @property @var \DateTime|null The date the user viewed their annotation */
+    protected $user_annotation_viewed_date = null;
     /** @property @var GradedComponentContainer[] The GradedComponentContainers, indexed by component id */
     private $graded_component_containers = [];
     /** @property @var GradedComponent[] The components that have been marked for deletion */
@@ -51,6 +54,7 @@ class TaGradedGradeable extends AbstractModel {
         $this->setIdFromDatabase($details['id'] ?? 0);
         $this->setOverallComment($details['overall_comment'] ?? '');
         $this->setUserViewedDate($details['user_viewed_date'] ?? null);
+        $this->setUserAnnotationViewedDate($details['user_annotation_viewed_date'] ?? null);
 
         // Default to all blank components
         foreach ($graded_gradeable->getGradeable()->getComponents() as $component) {
@@ -356,6 +360,23 @@ class TaGradedGradeable extends AbstractModel {
      */
     public function getDeletedGradedComponents() {
         return $this->deleted_graded_components;
+    }
+    /**
+     * Sets the date that the user viewed their annotation
+     * @param string|\DateTime $user_annotation_viewed_date The date or date string of when the user viewed their annotation
+     * @throws \InvalidArgumentException if $grade_time is a string and failed to parse into a \DateTime object
+     */
+    public function setUserAnnotationViewedDate($user_annotation_viewed_date){
+        if ($user_annotation_viewed_date === null) {
+            $this->user_annotation_viewed_date = null;
+        } else {
+            try {
+                $this->user_annotation_viewed_date = DateUtils::parseDateTime($user_annotation_viewed_date, $this->core->getConfig()->getTimezone());
+            } catch (\Exception $e) {
+                throw new \InvalidArgumentException('Invalid date string format');
+            }
+        }
+        $this->modified = true;
     }
 
     /**
