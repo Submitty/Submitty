@@ -301,7 +301,8 @@ CREATE TABLE gradeable_data (
     gd_user_id character varying(255),
     gd_team_id character varying(255),
     gd_overall_comment character varying NOT NULL,
-    gd_user_viewed_date timestamp(6) with time zone DEFAULT NULL
+    gd_user_viewed_date timestamp(6) with time zone DEFAULT NULL,
+    gd_user_annotation_viewed_date timestamp(6) with time zone DEFAULT NULL
 );
 
 
