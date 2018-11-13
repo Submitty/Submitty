@@ -5,4 +5,4 @@ def up(config, conn, semester, course):
 
 def down(config, conn, semester, course):
     with conn.cursor() as cursor:
-            cursor.execute("ALTER TABLE gradeable_data DROP COLUMN eg_regrade_request_date;")
+            cursor.execute("ALTER TABLE gradeable_data DROP COLUMN gd_user_annotation_viewed_date;")
