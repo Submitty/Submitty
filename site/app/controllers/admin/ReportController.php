@@ -4,12 +4,14 @@ namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
 use app\libraries\Core;
+use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;
 use app\libraries\Output;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Mark;
+use app\models\gradeable\Submitter;
 use app\models\GradeSummary;
 
 /*
@@ -176,23 +178,59 @@ class ReportController extends AbstractController {
         ];
 
         // Get all gradeables
-        $gradeables = [];
+        $user_gradeables = [];
+        $team_gradeables = [];
         foreach ($this->core->getQueries()->getGradeableConfigs(null) as $g) {
-            $gradeables[] = $g;
+            if ($g->isTeamAssignment()) {
+                $team_gradeables = $g;
+            } else {
+                $user_gradeables[] = $g;
+            }
         }
 
         // Array of graded gradeables, first indexed by gradeable id, then by user id (so multiple entries per team)
         $team_graded_gradeables = [];
 
+        // Get the team gradeables first and, unfortunately, fully cache them
+        foreach ($this->core->getQueries()->getGradedGradeables($team_gradeables, null, null, $sort_keys) as $gg) {
+            /** @var GradedGradeable $gg */
+            $team_graded_gradeables[$gg->getGradeableId()] = [];
+            foreach ($gg->getSubmitter()->getTeam()->getMemberUserIds() as $user_id) {
+                $team_graded_gradeables[$gg->getGradeableId()][$user_id] = $gg;
+            }
+        }
+
         // Array of graded gradeables for active user
         $user_graded_gradeables = [];
-        foreach ($this->core->getQueries()->getGradedGradeables($gradeables, null, null, $sort_keys) as $gg) {
+        foreach ($this->core->getQueries()->getGradedGradeables($user_gradeables, null, null, $sort_keys) as $gg) {
             /** @var GradedGradeable $gg */
-            if ($gg->getGradeable()->isTeamAssignment()) {
-                $team_graded_gradeables[$getGradeableId]
-            }
-            if ($current_user !== $gradeable->getUser()->getId()) {
+            $gradeable = $gg->getGradeable();
+
+            if ($current_user !== $gg->getSubmitter()->getId()) {
                 if ($current_user !== null) {
+                    // Merge the user gradeables with the team gradeables
+                    $user_graded_gradeables = array_merge($user_graded_gradeables, array_map(function($arr) use ($team_gradeables, $current_user) {
+                        $ggs = [];
+                        foreach ($team_gradeables as $team_gradeable) {
+                            /** @var Gradeable $team_gradeable */
+                            // if the user doesn't have a team, MAKE THE USER A SUBMITTER
+                            $ggs[] = $arr[$team_gradeable->getId()][$current_user] ?? new GradedGradeable($this->core, $team_gradeable, new Submitter($this->core, $current_user), []);
+                        }
+                    }, $team_graded_gradeables));
+
+                    // Sort by due date.  Since our two lists are sorted, we can easily merge-sort
+                    $graded_gradeables = [];
+                    $i_team = 0;
+                    $i_user = 0;
+                    for($i = 0; $i < count($team_gradeables) + count($user_gradeables); ++$i) {
+                        if ($team_gradeables[$i_team] < $user_gradeables[$i_user]) {
+                            // TODO:
+                        }
+                    }
+                    foreach ($graded_gradeables as $ugg) {
+                        $bucket = ucwords($gg->getGradeable()->getSyllabusBucket());
+                        $user[$bucket][] = $this->generateGradeSummary($ugg);
+                    }
                     file_put_contents(FileUtils::joinPaths($base_path, $current_user . '_summary.json'), FileUtils::encodeJson($user));
                 }
                 $current_user = $gradeable->getUser()->getId();
@@ -208,14 +246,10 @@ class ReportController extends AbstractController {
                 $user_graded_gradeables = [];
             }
             $user_graded_gradeables[] = $gg;
-
-            $bucket = ucwords($g->getSyllabusBucket());
-            if (!isset($user[$bucket])) {
-                $user[$bucket] = [];
-            }
-            $user[$bucket][] = $this->generateGradeSummary($gg);
         }
 
+        // Make sure to save the last user too
+        // TODO: see the $current_user !== null if block. that code needs to go here too
         file_put_contents(FileUtils::joinPaths($base_path, $current_user . '_summary.json'), FileUtils::encodeJson($user));
         $this->core->addSuccessMessage("Successfully Generated Grade Summaries");
         $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
