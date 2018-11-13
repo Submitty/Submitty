@@ -204,6 +204,12 @@ class ReportController extends AbstractController {
     }
 
     private function addLateDays(Gradeable $gradeable, &$entry, &$total_late_used) {
+        // If there is no due date or not student submit, short circuit the late day calculation
+        if (!$gradeable->getStudentSubmit() || !$gradeable->getHasDueDate()) {
+            $entry['status'] = 'Good';
+            $entry['days_late'] = 0;
+            return;
+        }
         $late_days_used = $gradeable->getLateDays() - $gradeable->getLateDayExceptions();
         $status = 'Good';
         $late_flag = false;
