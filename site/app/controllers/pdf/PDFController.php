@@ -45,35 +45,28 @@ class PDFController extends AbstractController {
         $filename = html_entity_decode($filename);
         $id = $this->core->getUser()->getId();
         $gradeable = $this->tryGetGradeable($gradeable_id);
+        if($gradeable === NULL){
+            $this->core->addErrorMessage("Gradeable does not exist!");
+            $this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
+        }
         if($gradeable->isTeamAssignment()){
             $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id)->getId();
         }
         $submitter = $this->core->getQueries()->getSubmitterById($id);
+        if($submitter === NULL){
+            $this->core->addErrorMessage("Submitter does not exist!");
+            $this->core->redirect($this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable_id)));
+        }
         $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($gradeable, $submitter);
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
-        $annotation_jsons = [];
-        if(is_dir($annotation_path) && count(scandir($annotation_path)) > 2){
-            $first_file = scandir($annotation_path)[2];
-            $annotation_path = FileUtils::joinPaths($annotation_path, $first_file);
-            if(is_file($annotation_path)) {
-                $dir_iter = new \DirectoryIterator(dirname($annotation_path . '/'));
-                foreach ($dir_iter as $fileinfo) {
-                    if (!$fileinfo->isDot()) {
-                        $no_extension = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileinfo->getFilename());
-                        $pdf_info = explode('_', $no_extension);
-                        $pdf_id = $pdf_info[0];
-                        $grader_id = $pdf_info[1];
-                        if($pdf_id.'.pdf' === $filename){
-                            $annotation_jsons[$grader_id] = file_get_contents($fileinfo->getPathname());
-                        }
-                    }
-                }
-            }
-        }
+        $annotation_jsons = $this->getAnnotationJsons($annotation_path, $filename);
+
         $ta_graded_gradeable = $graded_gradeable->getTaGradedGradeable();
-        $ta_graded_gradeable->setUserAnnotationViewedDate($this->core->getDateTimeNow());
-        $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
+        if($ta_graded_gradeable != NULL) {
+            $ta_graded_gradeable->setUserAnnotationViewedDate($this->core->getDateTimeNow());
+            $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
+        }
         $this->core->getOutput()->renderOutput(array('PDF'), 'showPDFEmbedded', $gradeable_id, $id, $filename, $annotation_jsons, true);
     }
 
@@ -124,6 +117,19 @@ class PDFController extends AbstractController {
         }
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
+        $annotation_jsons = $this->getAnnotationJsons($annotation_path, $filename);
+        $this->core->getOutput()->renderOutput(array('PDF'), 'showPDFEmbedded', $gradeable_id, $id, $filename, $annotation_jsons, false);
+    }
+
+    private function showGraderPDFFullpage(){
+        //This shows the pdf-annotate.js library's default pdf annotator. It might be useful in the future to have
+        //a full-sized annotator, so keeping this in for now.
+        $this->core->getOutput()->useFooter(false);
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->renderOutput(array('grading', 'PDFAnnotation'), 'showAnnotationPage');
+    }
+
+    private function getAnnotationJsons($annotation_path, $filename){
         $annotation_jsons = [];
         //Dir iterator needs the first file.
         if(is_dir($annotation_path) && count(scandir($annotation_path)) > 2){
@@ -144,14 +150,6 @@ class PDFController extends AbstractController {
                 }
             }
         }
-        $this->core->getOutput()->renderOutput(array('PDF'), 'showPDFEmbedded', $gradeable_id, $id, $filename, $annotation_jsons, false);
-    }
-
-    private function showGraderPDFFullpage(){
-        //This shows the pdf-annotate.js library's default pdf annotator. It might be useful in the future to have
-        //a full-sized annotator, so keeping this in for now.
-        $this->core->getOutput()->useFooter(false);
-        $this->core->getOutput()->useHeader(false);
-        $this->core->getOutput()->renderOutput(array('grading', 'PDFAnnotation'), 'showAnnotationPage');
+        return $annotation_jsons;
     }
 }
