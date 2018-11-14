@@ -162,22 +162,69 @@ int main(int argc, char *argv[]) {
       j["part_names"].push_back((*parts)[i]);
     }
   }
-  nlohmann::json::iterator textboxes = config_json.find("textboxes");
-  if (textboxes != config_json.end()) {
-    j["textboxes"] =  nlohmann::json::array();
-    for (int i = 0; i < textboxes->size(); i++) {
-      nlohmann::json textbox;
-      nlohmann::json::iterator label = (*textboxes)[i].find("label");
-      assert (label != (*textboxes)[i].end());
-      assert (label->is_string());
-      textbox["label"] = *label;
-      // default #rows = 0 => single row, non resizeable, textbox
-      textbox["rows"]  = (*textboxes)[i].value("rows",0);
-      assert (int(textbox["rows"]) >= 0);
-      textbox["filename"] = (*textboxes)[i].value("filename","textbox_"+std::to_string(i)+".txt");
-      //list of images to display above the text box
-      textbox["images"] = (*textboxes)[i].value("images", nlohmann::json::array({}));
-      j["textboxes"].push_back(textbox);
+
+  // JSON parsing for content block
+  nlohmann::json::iterator content_blocks = config_json.find("content");
+  if (content_blocks != config_json.end()) {
+    j["content"] = nlohmann::json::array();
+    for (int i = 0; i < content_blocks->size(); i++) {
+      nlohmann::json content;
+      // Title, optional
+      nlohmann::json::iterator title = (*content_blocks)[i].find("title");
+      if (title != (*content_blocks)[i].end()) {
+        assert (title != (*content_blocks)[i].end());
+        assert (title->is_string());
+        content["title"] = *title;
+      }
+      
+      // Exposition, optional
+      nlohmann::json::iterator exposition = (*content_blocks)[i].find("exposition");
+      if (exposition != (*content_blocks)[i].end()) {
+        assert (exposition != (*content_blocks)[i].end());
+        assert (exposition->is_string());
+        content["exposition"] = *exposition;  
+      }
+      
+      // Images, optional
+      content["images"] = (*content_blocks)[i].value("images", nlohmann::json::array({}));
+
+      // Textboxes
+      nlohmann::json::iterator textboxes = (*content_blocks)[i].find("textboxes");
+      if (textboxes != (*content_blocks)[i].end()) {
+        content["textboxes"] =  nlohmann::json::array();
+        for (int i = 0; i < textboxes->size(); i++) {
+          nlohmann::json textbox;
+          // Label
+          nlohmann::json::iterator tb_label = (*textboxes)[i].find("label");
+          assert (tb_label != (*textboxes)[i].end());
+          assert (tb_label->is_string());
+          textbox["label"] = *tb_label;
+
+          bool specified_is_code = false;
+
+          // Is_Code and Language
+          nlohmann::json::iterator is_code = (*textboxes)[i].find("is_code");
+          if (is_code != (*textboxes)[i].end()) {
+            textbox["is_code"] = *is_code;
+            specified_is_code = true;
+          }
+
+          if (specified_is_code) {
+            nlohmann::json::iterator language = (*textboxes)[i].find("language");
+            assert (language != (*textboxes)[i].end());
+            assert (language->is_string());
+            textbox["language"] = *language;
+          }
+
+          // default #rows = 0 => single row, non resizeable, textbox
+          textbox["rows"]  = (*textboxes)[i].value("rows",0);
+          assert (int(textbox["rows"]) >= 0);
+          textbox["filename"] = (*textboxes)[i].value("filename","textbox_"+std::to_string(i)+".txt");
+          //list of images to display above the text box
+          textbox["images"] = (*textboxes)[i].value("images", nlohmann::json::array({}));
+          content["textboxes"].push_back(textbox);
+        }
+      }
     }
   }
 
