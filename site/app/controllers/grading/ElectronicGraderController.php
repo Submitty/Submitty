@@ -449,7 +449,7 @@ class ElectronicGraderController extends GradingController {
             $autograded_average = $this->core->getQueries()->getAverageAutogradedScores($gradeable_id, $section_key, $gradeable->isTeamAssignment());
             $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id, $section_key, $gradeable->isTeamAssignment());
             $num_components = count($gradeable->getNonPeerComponents());
-            $viewed_grade = $this->core->getQueries()->getNumUsersWhoViewedGrade($gradeable_id);
+            $viewed_grade = $this->core->getQueries()->getNumUsersWhoViewedGrade($gradeable_id, $section_key);
         }
         $sections = array();
         //Either # of teams or # of students (for non-team assignments). Either case
@@ -1058,7 +1058,7 @@ class ElectronicGraderController extends GradingController {
 
         $prev_id = "";
         $next_id = "";
-        
+
         $index = array_search($submitter_id, $user_ids_to_grade);
         $not_in_my_section = false;
         //If the student isn't in our list of students to grade.
