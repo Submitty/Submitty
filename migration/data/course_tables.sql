@@ -497,6 +497,21 @@ CREATE TABLE regrade_requests (
 );
 
 
+CREATE TABLE notification_settings (
+	user_id character varying NOT NULL,
+	merge_threads BOOLEAN DEFAULT FALSE NOT NULL,
+	all_new_threads BOOLEAN DEFAULT FALSE NOT NULL,
+	all_new_posts BOOLEAN DEFAULT FALSE NOT NULL,
+	all_modifications_forum BOOLEAN DEFAULT FALSE NOT NULL,
+	reply_in_post_thread BOOLEAN DEFAULT FALSE NOT NULL
+);
+
+ALTER TABLE ONLY notification_settings
+    ADD CONSTRAINT notification_settings_pkey PRIMARY KEY (user_id);
+
+ALTER TABLE ONLY notification_settings
+    ADD CONSTRAINT notification_settings_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
+
 --
 -- Name: regrade_discussion; Type: TABLE; Schema: public; Owner: -
 --
