@@ -364,6 +364,11 @@ table tr.table-header {
     }
 }
 
+.gradeable_message {
+    background-color: #006398; 
+    color: white;
+}
+
 .content {
     box-shadow: 0 2px 15px -5px #888888;
     background-color: #ffffff;
