@@ -225,6 +225,35 @@ int main(int argc, char *argv[]) {
           content["textboxes"].push_back(textbox);
         }
       }
+
+      // Multiple Choice
+      nlohmann::json::iterator multiple_choice = (*content_blocks)[i].find("multiplechoice");
+      if (multiple_choice != (*content_blocks)[i].end()) {
+        content["multiplechoice"] = nlohmann::json::array();
+        for (int i = 0; i < multiple_choice->size(); i++) {
+            nlohmann::json mc;
+            // Label
+            nlohmann::json::iterator mc_label = (*multiple_choice)[i].find("label");
+            assert (mc_label != (*multiple_choice)[i].end());
+            assert (mc_label->is_string());
+            mc["label"] = *mc_label;
+
+            // Allow Multiple
+            nlohmann::json::iterator mc_allow_multiple = (*multiple_choice)[i].find("allow_multiple");
+            assert (mc_allow_multiple != (*multiple_choice)[i].end());
+            assert (mc_allow_multiple->is_boolean());
+            mc["allow_multiple"] = *mc_allow_multiple;
+
+            // Choices
+            mc["choices"] = (*multiple_choice)[i].value("choices", nlohmann::json::array({}));
+            // Filename
+            std::string s = "";
+            if (i < 10) 
+                s += "0";
+            s += std::to_string(i);
+            mc["filename"] = (*multiple_choice)[i].value("filename","mc_"+s+".txt");
+        }
+      }
     }
   }
 
