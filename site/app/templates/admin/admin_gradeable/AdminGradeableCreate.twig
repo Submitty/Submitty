@@ -90,12 +90,12 @@
 
 <!-- This is only relevant to Electronic Files -->
 <fieldset class="gradeable_type_options electronic_file" id="electronic_file">
-    <div>Will any or all of this assignment be manually graded (e.g., by the TAs or the instructor)?</div>
+    <div><legend>Will any or all of this assignment be manually graded (e.g., by the TAs or the instructor)?</legend></div>
     <div>
         <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val auto_save date-related"
-                {{ action != 'new' and gradeable.getTaGrading() ? 'checked' : '' }} /> Yes
+                {{ action != 'new' and gradeable.getTaGrading() ? 'checked' : '' }} /> <label for="yes_ta_grade">Yes</label>
         <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val auto_save date-related"
-                {{ not (action != 'new' and gradeable.getTaGrading()) ? 'checked' : '' }} /> No
+                {{ not (action != 'new' and gradeable.getTaGrading()) ? 'checked' : '' }} /> <label for="no_ta_grade">No</label>
     </div>
     {% if regrade_enabled %}
         <div id="regrade_request_enable_container">
