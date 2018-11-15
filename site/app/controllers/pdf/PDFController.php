@@ -110,6 +110,10 @@ class PDFController extends AbstractController {
         $filename = $_POST['filename'] ?? NULL;
         $filename = html_entity_decode($filename);
         $gradeable = $this->tryGetGradeable($gradeable_id);
+        if($gradeable === NULL){
+            $this->core->addErrorMessage("Gradeable does not exist!");
+            $this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
+        }
         if($gradeable->isTeamAssignment()){
             $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, null, $id);
         } else {
