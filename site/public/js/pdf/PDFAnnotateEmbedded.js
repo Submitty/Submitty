@@ -25,10 +25,10 @@ let NUM_PAGES = 0;
 //For the student popup window, buildURL doesn't work because the context switched. Therefore, we need to pass in the url
 //as a parameter.
 function render_student(gradeable_id, user_id, file_name, pdf_url){
-    render(gradeable_id, user_id, "", file_name, pdf_url)
+    render(gradeable_id, user_id, "", file_name, 1, pdf_url)
 }
 
-function render(gradeable_id, user_id, grader_id, file_name, url = "") {
+function render(gradeable_id, user_id, grader_id, file_name, page_num, url = "") {
     window.GENERAL_INFORMATION = {
         grader_id: grader_id,
         user_id: user_id,
@@ -79,6 +79,7 @@ function render(gradeable_id, user_id, grader_id, file_name, url = "") {
                     UI.renderPage(page_id, window.RENDER_OPTIONS).then(([pdfPage, annotations]) => {
                         let viewport = pdfPage.getViewport(window.RENDER_OPTIONS.scale, window.RENDER_OPTIONS.rotate);
                         PAGE_HEIGHT = viewport.height;
+                        $('#file_content').animate({scrollTop: page_num*PAGE_HEIGHT}, 500);
                     }).then(function(){
                         document.getElementById('pageContainer'+page_id).addEventListener('mousedown', function(){
                             //Makes sure the panel don't move when writing on it.
