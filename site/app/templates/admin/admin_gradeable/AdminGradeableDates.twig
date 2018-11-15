@@ -1,6 +1,6 @@
 <div id="gradeable-dates">
     <input name="ta_view_start_date" id="date_ta_view" class="date_picker" type="text" value="{{ gradeable.getTaViewStartDate()|date(date_format) }}">
-    TA Beta Testing Date (visible to TAs)
+    <label for="date_ta_view">TA Beta Testing Date (visible to TAs)</label>
 
     <br />
 
@@ -8,63 +8,63 @@
     <div class="electronic_file electronic_file_dates">
         <div class="team_yes team_yes_dates">
             <input name="team_lock_date" id="date_team_lock" class="date_picker" type="text" value="{{ gradeable.getTeamLockDate()|date(date_format) }}">
-            Team Lock Date (Instructors can still manually manage teams)
+            <label for="date_team_lock">Team Lock Date (Instructors can still manually manage teams)</label>
 
             <br />
         </div>
 
         <input id="date_submit" name="submission_open_date" class="date_picker" type="text" value="{{ gradeable.getSubmissionOpenDate()|date(date_format) }}">
-        Submission Open Date (submission available to students)
+        <label for="date_submit">Submission Open Date (submission available to students)</label>
 
         <br />
 
         <div id="due_date_options_container">
             <div>Will this assignment have a due date?
-                <input id="has_due_date_yes" name="has_due_date" value="true" type="radio" {{ gradeable.hasDueDate() ? 'checked' : '' }}/>Yes
-                <input id="has_due_date_no" name="has_due_date" value="false" type="radio" {{ not gradeable.hasDueDate() ? 'checked' : '' }}/>No
+                <input id="has_due_date_yes" name="has_due_date" value="true" type="radio" {{ gradeable.hasDueDate() ? 'checked' : '' }}/><label for="has_due_date_yes">Yes</label>
+                <input id="has_due_date_no" name="has_due_date" value="false" type="radio" {{ not gradeable.hasDueDate() ? 'checked' : '' }}/><label for="has_due_date_no">No</label>
             </div>
 
             <div id="due_date_container" {{ gradeable.hasDueDate() ? '' : 'hidden' }}>
                 <input id="date_due" name="submission_due_date" class="date_picker" type="text" value="{{ gradeable.getSubmissionDueDate()|date(date_format) }}">
-                Due Date
+                <label for="date_due">Due Date</label>
             </div>
         </div>
     </div>
 
     <div class="manual_grading manual_grading_dates">
         <input name="grade_start_date" id="date_grade" class="date_picker" type="text" value="{{ gradeable.getGradeStartDate()|date(date_format) }}">
-        TA/Instructor Manual Grading Open Date (grading may begin)
+        <label for="date_grade">TA/Instructor Manual Grading Open Date (grading may begin)</label>
 
         <br />
 
         <input name="grade_due_date" id="date_grade_due" class="date_picker" type="text" value="{{ gradeable.getGradeDueDate()|date(date_format) }}">
-        TA/Instructor Manual Grading Due Date
+        <label for="date_grade_due">TA/Instructor Manual Grading Due Date</label>
 
         <br />
     </div>
 
     <input name="grade_released_date" id="date_released" class="date_picker" type="text" value="{{ gradeable.getGradeReleasedDate()|date(date_format) }}">
-    Grades Released Date (grades will be visible to students)
+    <label for="date_released">Grades Released Date (grades will be visible to students)</label>
 
     <br />
 
     <div class="electronic_file electronic_file_dates">
         <div class="regrade_request_date" {{ regrade_allowed != true or regrade_enabled != true ? 'hidden' : '' }}>
             <input name="regrade_request_date" id="date_regrade_request" class="date_picker" type="text" value="{{ gradeable.getRegradeRequestDate()|date(date_format) }}">
-            Regrade Request Due Date (Regrade Requests must be sent by this date)
+            <label for="date_regrade_request">Regrade Request Due Date (Regrade Requests must be sent by this date)</label>
         </div>
 
         <div id="late_days_options_container" {{ gradeable.hasDueDate() and gradeable.isStudentSubmit() ? '' : 'hidden' }}>
             Should submissions be accepted after the due date?
             <br />
             <input type="radio" id = "yes_late_submission" name="late_submission_allowed" value="true"
-                    {{ action != 'new' and gradeable.isLateSubmissionAllowed() ? 'checked' : '' }}> Yes
+                    {{ action != 'new' and gradeable.isLateSubmissionAllowed() ? 'checked' : '' }}> <label for="yes_late_submission">Yes</label>
 
             <input type="radio" id = "no_late_submission" name="late_submission_allowed" value ="false"
-                    {{ not (action != 'new' and gradeable.isLateSubmissionAllowed()) ? 'checked' :  '' }}> No
+                    {{ not (action != 'new' and gradeable.isLateSubmissionAllowed()) ? 'checked' :  '' }}> <label for="no_late_submission">No</label>
             <br />
             <div class="yes-late-submission">
-                How many late days may students use on this assignment?
+                <label for="late_days">How many late days may students use on this assignment?</label>
                 <input style="width: 50px" id="late_days" name="late_days" class="int_val" type="text" value="{{ gradeable.getLateDays() }}"/>
 
                 <br />
