@@ -135,9 +135,10 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                           send_message_to_processes(disp_str, processes, targets)
                       elif action_type in ['stop', 'start', 'kill']:
                           targets = action_obj['containers']
-                          send_message_to_processes("SUBMITTY_SIGNAL:{}\n".format(action_type.upper), processes, )
+                          send_message_to_processes("SUBMITTY_SIGNAL:{0}\n".format(action_type.upper()), processes, targets)
 
-                    send_message_to_processes("SUBMITTY_SIGNAL:FINALMESSAGE\n",processes, processes.keys())
+                    if len(dispatcher_actions) > 0:
+                      send_message_to_processes("SUBMITTY_SIGNAL:FINALMESSAGE\n",processes, list(processes.keys()))
 
                     #Now that all dockers are running, wait on their return code for success or failure. If any fail, we count it
                     #   as a total failure.

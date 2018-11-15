@@ -1033,8 +1033,6 @@ void cin_reader(std::mutex* lock, std::queue<std::string>* input_queue, bool* CH
       if (ret > 0){
         std::getline (std::cin,my_string);
         std::cout << "Cin recieved: " << my_string << std::endl;
-        std::cout << "Appending a newline" << std::endl;
-        my_string += "\n";
 
         lock->lock();
         input_queue->push(my_string);
@@ -1176,19 +1174,25 @@ int execute(const std::string &cmd,
           if(!input_queue.empty()){
             lock.lock();
             std::string popped = input_queue.front();
+            std::string popped_nl = popped + "\n";
             input_queue.pop();
             lock.unlock();
 
-            char piped_message[popped.length()];
-            strncpy(piped_message, popped.c_str(),popped.length()); //ignore the null byte
+            char piped_message[popped_nl.length()];
+            strncpy(piped_message, popped_nl.c_str(),popped_nl.length()); //ignore the null byte
 
-            if(std::string(piped_message) == "SUBMITTY_SIGNAL:STOP\n"){
+            if(popped == "SUBMITTY_SIGNAL:STOP"){
               std::cout << "Sending interrupt to student process." << std::endl;
               kill(childPID, SIGINT);
               kill(-childPID, SIGINT);
               close(dispatcherpipe[1]);
-            //TODO: what if we try to start a running process (act as restart or ignore?)
-            }else if(std::string(piped_message) == "SUBMITTY_SIGNAL:START\n"){
+            }else if(popped == "SUBMITTY_SIGNAL:START"){
+              //If the child is still alive, terminate it.
+              if(wpid == 0){
+                kill(childPID, SIGINT);
+                kill(-childPID, SIGINT);
+                close(dispatcherpipe[1]);
+              }
               pipe(dispatcherpipe);
               childPID = fork();
               // ensure fork was successful
@@ -1218,17 +1222,17 @@ int execute(const std::string &cmd,
               }else{
                 close(dispatcherpipe[0]);
               }
-            }else if(std::string(piped_message) == "SUBMITTY_SIGNAL:KILL\n"){
+            }else if(popped == "SUBMITTY_SIGNAL:KILL"){
               std::cout << "Sending SIGKILL to student process" << std::endl;
               int k  = kill(childPID, SIGKILL);
               int k2 = kill(-childPID, SIGKILL);
               close(dispatcherpipe[1]);
             }
-            else if(std::string(piped_message) == "SUBMITTY_SIGNAL:FINALMESSAGE\n"){
+            else if(popped == "SUBMITTY_SIGNAL:FINALMESSAGE"){
               std::cout << "The dispatcher actions are complete." << std::endl;
               dispatcher_actions_ended = true;
             }else{
-              write(dispatcherpipe[1], piped_message, strlen(popped.c_str()));
+              write(dispatcherpipe[1], piped_message, strlen(popped_nl.c_str()));
               std::cout << "Writing to student stdin: " << popped << std::endl;
             }
           }
