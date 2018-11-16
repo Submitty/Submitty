@@ -2621,13 +2621,29 @@ AND gc_id IN (
 
         $type = $notification->getType();
 
+
         if(empty($notification->getNotifyTarget())) {
             // Notify all users
             $target_users_query = "SELECT user_id FROM users";
         } else {
+            $column = '';
+            switch ($type) {
+                case 'reply':
+                    $column = 'all_new_posts';
+                    break;
+                case 'merge_thread':
+                    $column = 'merge_threads';
+                    break;
+                case 'edited':
+                case 'deleted':
+                case 'undeleted':
+                    $column = 'all_modifications_forum';
+                    break;
+            }
             // To a specific user
             $params[] = $notification->getNotifyTarget();
-            $target_users_query = "SELECT ?::text as user_id";
+            $params[] = $column;
+            $target_users_query = "SELECT ?::text as user_id UNION select user_id from notification_settings where ? = 1";
         }
 
         if($notification->getNotifyNotToSource()){
