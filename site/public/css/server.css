@@ -364,11 +364,6 @@ table tr.table-header {
     }
 }
 
-.gradeable_message {
-    background-color: #006398 !important; 
-    color: white;
-}
-
 .content {
     box-shadow: 0 2px 15px -5px #888888;
     background-color: #ffffff;
@@ -379,6 +374,11 @@ table tr.table-header {
 
 .content:last-child {
     flex-grow: 1;
+}
+
+.content.gradeable_message {
+    background-color: #006398 !important; 
+    color: white;
 }
 
 .forum_content {
