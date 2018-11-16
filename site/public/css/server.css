@@ -377,7 +377,7 @@ table tr.table-header {
 }
 
 .content.gradeable_message {
-    background-color: #006398 !important; 
+    background-color: #006398; 
     color: white;
 }
 
