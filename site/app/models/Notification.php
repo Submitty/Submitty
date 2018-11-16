@@ -138,7 +138,7 @@ class Notification extends AbstractModel {
                 $this->actAsForumReplyNotification($details['thread_id'], $details['post_id'], $details['post_content'], $details['reply_to'], $details['child_id'], $details['anonymous']);
                 break;
             case 'merge_thread':
-                $this->actAsForumMergeThreadNotification($details['parent_thread_id'],  $details['parent_thread_title'], $details['child_thread_title'], $details['child_root_post'], $details['reply_to']);
+                $this->actAsForumMergeThreadNotification($details['parent_thread_id'],  $details['parent_thread_title'], $details['child_thread_title'], $details['child_root_post'], $details['child_thread_author']);
                 break;
             case 'edited':
                 $this->actAsForumEditedNotification($details['thread_id'], $details['post_id'], $details['post_content'], $details['reply_to']);
