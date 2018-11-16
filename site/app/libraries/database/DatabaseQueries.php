@@ -75,7 +75,7 @@ class DatabaseQueries {
      * @return User
      */
     public function getSubmittyUser($user_id) {
-        $this->submitty_db->query("SELECT * FROM users WHERE user_id=?", array($user_id));
+        $this->submitty_db->query("SELECT u.*, n.* FROM users u, notification_settings n WHERE user_id=?", array($user_id));
         return ($this->submitty_db->getRowCount() > 0) ? new User($this->core, $this->submitty_db->row()) : null;
     }
 
@@ -291,6 +291,32 @@ class DatabaseQueries {
 		}
 		return false;
 	}
+
+    public function updateNotificationSettings($results) {
+        $values = implode(', ', array_fill(0, count($results)+1, '?'));
+        $keys = implode(', ', array_keys($results));
+        $updates = '';
+        
+        foreach($results as $key => $value) { 
+            if($value != 'false') {
+                $results[$key] = 'true';
+            }
+            $this->core->getUser()->updateUserNotificationSettings($key, $results[$key] == 'true' ? true : false);
+            $updates .= $key . ' = ?,';
+        }
+
+        $updates = substr($updates, 0, -1);
+        $test = array_merge(array_merge(array($this->core->getUser()->getId()), array_values($results)), array_values($results));
+        $this->course_db->query("INSERT INTO notification_settings (user_id, $keys)
+                                    VALUES
+                                     (
+                                        $values
+                                     ) 
+                                    ON CONFLICT (user_id) 
+                                    DO
+                                     UPDATE
+                                        SET $updates", $test);
+    }
 
 	public function getAuthorOfThread($thread_id) {
 		$this->course_db->query("SELECT created_by from threads where id = ?", array($thread_id));
@@ -2592,6 +2618,8 @@ AND gc_id IN (
         $params[] = $notification->getNotifyMetadata();
         $params[] = $notification->getNotifyContent();
         $params[] = $notification->getNotifySource();
+
+        $type = $notification->getType();
 
         if(empty($notification->getNotifyTarget())) {
             // Notify all users

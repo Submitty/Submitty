@@ -157,7 +157,8 @@ class NavigationController extends AbstractController {
             return $this->core->getOutput()->renderTwigOutput("Notifications.twig", [
                 'course' => $currentCourse,
                 'show_all' => $show_all,
-                'notifications' => $notifications
+                'notifications' => $notifications,
+                'notification_saves' => $this->core->getUser()->getNotifcationSettings()
             ]);
         }
     }

@@ -156,10 +156,11 @@ class User extends AbstractModel {
         $this->instructor_updated = isset($details['instructor_updated']) && $details['instructor_updated'] === true;
 
         //Other call to get notification settings??
-        $this->notification_settings['reply_to_external_thread'] = !empty($details['notif_reply_to_external_thread']) ? $details['notif_reply_to_external_thread'] : false;
-        $this->notification_settings['merge_all_threads'] = !empty($details['notif_merge_all_threads']) ? $details['notif_merge_all_threads'] : false;
-        $this->notification_settings['all_new_threads'] = !empty($details['notif_all_new_threads']) ? $details['notif_all_new_threads'] : false;
-        $this->notification_settings['all_new_posts'] = !empty($details['notif_all_new_posts']) ? $details['notif_all_new_posts'] : false;
+        $this->notification_settings['reply_in_post_thread'] = !empty($details['reply_in_post_thread']) ? $details['reply_in_post_thread'] : false;
+        $this->notification_settings['merge_threads'] = !empty($details['merge_threads']) ? $details['merge_threads'] : false;
+        $this->notification_settings['all_new_threads'] = !empty($details['all_new_threads']) ? $details['all_new_threads'] : false;
+        $this->notification_settings['all_new_posts'] = !empty($details['all_new_posts']) ? $details['all_new_posts'] : false;
+        $this->notification_settings['all_modifications_forum'] = !empty($details['all_modifications_forum']) ? $details['all_modifications_forum'] : false;
 
         $this->registration_section = isset($details['registration_section']) ? $details['registration_section'] : null;
         $this->rotating_section = isset($details['rotating_section']) ? intval($details['rotating_section']) : null;
@@ -215,8 +216,16 @@ class User extends AbstractModel {
         $this->setDisplayedLastName();
     }
 
-    public function getNotifcationSetting($type) {
-        return $this->notification_settings[$type]; //either recieves it or not
+    public function getNotifcationSettings() {
+        return $this->notification_settings; //either recieves it or not
+    }
+
+    public function getNotifcationSetting($type){
+        return $this->notification_settings[$type];
+    }
+
+    public function updateUserNotificationSettings($key, $value) {
+        $this->notification_settings[$key] = $value;
     }
 
     /**

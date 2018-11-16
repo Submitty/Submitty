@@ -31,6 +31,7 @@ use app\libraries\Utils;
  * @method string   getNotifyContent()
  * @method string   getNotifyMetadata()
  * @method bool     getNotifyNotToSource()
+ * @method string   getType()
  */
 class Notification extends AbstractModel {
     /** @property @var bool Notification fetched from DB */
@@ -60,6 +61,9 @@ class Notification extends AbstractModel {
     protected $elapsed_time;
     /** @property @var string Timestamp for creation of notification */
     protected $created_at;
+
+    /** @property @var string Type of notification used for settings */
+    protected $type;
 
 
     /**
@@ -122,6 +126,7 @@ class Notification extends AbstractModel {
      * @param array $details
      */
     private function handleForum($details) {
+        $this->$type = $details['type'];
         switch ($details['type']) {
             case 'new_announcement':
                 $this->actAsNewAnnouncementNotification($details['thread_id'], $details['thread_title']);

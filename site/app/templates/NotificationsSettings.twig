@@ -2,7 +2,35 @@
 {% block popup_id %}notification-settings{% endblock %}
 {% block title %}Notification Settings{% endblock %}
 {% block body %}
-    
+    <script>
+        $('#form_notification_settings').submit(function(e) {
+            var f = $(this);
+            var url = f.attr('action');
+            e.preventDefault(); 
+            $.ajax({
+                type: "POST",
+                data: f.serialize(),
+                url: url,
+                success: function(data) {
+                    try {
+                        var json = JSON.parse(data);
+                        if(json['error']) {
+                            var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onclick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                        } else {
+                            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onclick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['success'] + '</div>';
+                        }
+                    } catch(err) {
+                        console.log(data);
+                        var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onclick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    }
+                    $('#notification-settings').css('display', 'none');
+                    $('#messages').empty();
+                    $('#messages').append(message);
+                }
+            });
+            
+        });
+    </script>
     <div id="config">
         <div class="heading">
             <h2>Discussion Forum</h2>
@@ -29,7 +57,7 @@
                     <div class="option-alt">Recieve a notification whenever a reply is posted in a thread you created</div>
                 </label>
             </div>
-            <div class="option-input col-md-4"><input type="checkbox" name="merge_all" id="merge_all" value="false"></div>
+            <div class="option-input col-md-4"><input type="checkbox" name="reply_in_post_thread" id="reply_in_post_thread" {% if notification_saves['reply_in_post_thread'] %}checked="true"{% endif %}></div>
         </div>
         <div class="option row">
             <div class="option-desc col-md-8">
@@ -38,7 +66,7 @@
                     <div class="option-alt">Recieve a notification whenever a thread is merged</div>
                 </label>
             </div>
-            <div class="option-input col-md-4"><input type="checkbox" name="merge_all" id="merge_all" value="false"></div>
+            <div class="option-input col-md-4"><input type="checkbox" name="merge_threads" id="merge_threads" {% if notification_saves['merge_threads'] %}checked="true"{% endif %}></div>
         </div>
         <div class="option row">
             <div class="option-desc col-md-8">
@@ -47,7 +75,7 @@
                     <div class="option-alt">Recieve a notification whenever a thread is created</div>
                 </label>
             </div>
-            <div class="option-input col-md-4"><input type="checkbox" name="merge_all" id="merge_all" value="false"></div>
+            <div class="option-input col-md-4"><input type="checkbox" name="all_new_threads" id="all_new_threads" {% if notification_saves['all_new_threads'] %}checked="true"{% endif %}></div>
         </div>
         <div class="option row">
             <div class="option-desc col-md-8">
@@ -56,7 +84,7 @@
                     <div class="option-alt">Recieve a notification whenever a post is created</div>
                 </label>
             </div>
-            <div class="option-input col-md-4"><input type="checkbox" name="merge_all" id="merge_all" value="false"></div>
+            <div class="option-input col-md-4"><input type="checkbox" name="all_new_posts" id="all_new_posts" {% if notification_saves['all_new_posts'] %}checked="true"{% endif %}></div>
         </div>
         {% if core.getUser().accessFullGrading() %}
         <div class="option row">
@@ -66,14 +94,14 @@
                     <div class="option-alt">Recieve a notification whenever a thread/post has been altered</div>
                 </label>
             </div>
-            <div class="option-input col-md-4"><input type="checkbox" name="merge_all" id="merge_all" value="false"></div>
+            <div class="option-input col-md-4"><input type="checkbox" name="all_modifications_forum" id="all_modifications_forum" {% if notification_saves['all_modifications_forum'] %}checked="true"{% endif %}></div>
         </div>
         {% endif %}
     </div>
 
 {% endblock %}
 {% block form %}
-    <form method="post" action="{{ core.buildUrl({'component': 'forum', 'page': 'save_notifications'}) }}">
+    <form method="post" action="{{ core.buildUrl({'component': 'notification_settings', 'page': 'alter_notifcation_settings'}) }}" id="form_notification_settings">
         {{ parent() }}
     </form>
 {% endblock %}
