@@ -90,15 +90,23 @@ try:
         page_count = 1
         first_file = ''
         for page in pages:
+        #    i += 1
             val = pyzbar.decode(page)
             if val != []:
-                cover_index = i
                 #found a new qr code, split here
                 #convert byte literal to string
                 data = val[0][0].decode("utf-8")
+                # if data == "none":  # blank exam with 'none' qr code
+                #     data = "BLANK EXAM"
                 if qr_prefix != "" and data[0:len(qr_prefix)] == qr_prefix:
                     data = data[len(qr_prefix):]
+                #else:
+                 #   page_count += 1
+                 #   i += 1
+                  #  pdf_writer.addPage(pdfPages.getPage(i))
+                  #  continue
 
+                cover_index = i
                 cover_filename = '{}_{}_cover.pdf'.format(filename[:-4], i)
                 output_filename = '{}_{}.pdf'.format(filename[:-4], cover_index)
 
@@ -108,15 +116,15 @@ try:
                 output[id_index]['pdf_name'] = output_filename
                 #save pdf
                 if i != 0:
-                    with open(output_filename, 'wb') as out:
+                    with open(output[id_index-1]['pdf_name'], 'wb') as out:
                         pdf_writer.write(out)
                 else:
                     first_file = output_filename
-                if id_index == 2:
+                #if id_index == 2:
                     #correct first pdf's page count and print file
-                    output[1]['page_count'] = page_count
-                    with open(first_file, 'wb') as out:
-                        pdf_writer.write(out)
+                    #output[1]['page_count'] = page_count
+                    #with open(first_file, 'wb') as out:
+                        #pdf_writer.write(out)
                 #start a new pdf and grab the cover
                 cover_writer = PdfFileWriter()
                 pdf_writer = PdfFileWriter()
