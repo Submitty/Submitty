@@ -79,7 +79,9 @@ function render(gradeable_id, user_id, grader_id, file_name, page_num, url = "")
                     UI.renderPage(page_id, window.RENDER_OPTIONS).then(([pdfPage, annotations]) => {
                         let viewport = pdfPage.getViewport(window.RENDER_OPTIONS.scale, window.RENDER_OPTIONS.rotate);
                         PAGE_HEIGHT = viewport.height;
-                        $('#file_content').animate({scrollTop: page_num*PAGE_HEIGHT}, 500);
+                        if(i == page_num) {
+                            $('#file_content').animate({scrollTop: page_num * PAGE_HEIGHT}, 500);
+                        }
                     }).then(function(){
                         document.getElementById('pageContainer'+page_id).addEventListener('mousedown', function(){
                             //Makes sure the panel don't move when writing on it.
