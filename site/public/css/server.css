@@ -376,6 +376,11 @@ table tr.table-header {
     flex-grow: 1;
 }
 
+.content.gradeable_message {
+    background-color: #006398; 
+    color: white;
+}
+
 .forum_content {
     flex-grow: 1;
     padding: 0px;
