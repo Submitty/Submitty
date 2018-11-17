@@ -136,6 +136,8 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                       elif action_type in ['stop', 'start', 'kill']:
                           targets = action_obj['containers']
                           send_message_to_processes("SUBMITTY_SIGNAL:{0}\n".format(action_type.upper()), processes, targets)
+                      # A .1 second delay after each action to keep things flowing smoothly.
+                      time.sleep(.1)
 
                     if len(dispatcher_actions) > 0:
                       send_message_to_processes("SUBMITTY_SIGNAL:FINALMESSAGE\n",processes, list(processes.keys()))
