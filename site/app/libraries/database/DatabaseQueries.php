@@ -75,7 +75,7 @@ class DatabaseQueries {
      * @return User
      */
     public function getSubmittyUser($user_id) {
-        $this->submitty_db->query("SELECT u.*, n.* FROM users u, notification_settings n WHERE user_id=?", array($user_id));
+        $this->submitty_db->query("SELECT * FROM users WHERE user_id=?", array($user_id));
         return ($this->submitty_db->getRowCount() > 0) ? new User($this->core, $this->submitty_db->row()) : null;
     }
 
