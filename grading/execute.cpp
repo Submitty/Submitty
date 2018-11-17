@@ -1147,7 +1147,8 @@ int execute(const std::string &cmd,
       bool CHILD_NOT_TERMINATED = true;
 
       bool dispatcher_actions_ended = true;
-      
+      bool allowed_to_die = false;
+      bool override = false;
       if(num_dispatched_actions > 0){
         dispatcher_actions_ended = false;
         close(dispatcherpipe[0]); // close the read end of the pipe
@@ -1276,8 +1277,14 @@ int execute(const std::string &cmd,
          }else if(!dispatcher_actions_ended){ //keep on performing checks even if we killed the child process (for dispatcher actions). 
             delay_and_mem_check(100000, childPID, elapsed, next_checkpoint, seconds_to_run, 
                                 rss_memory, allowed_rss_memory, memory_kill, time_kill, logfile);
+            //this wpid is necessary to make sure allowed_to_die is up to date.
          }
-      } while (!(dispatcher_actions_ended && wpid != 0) && !time_kill && !memory_kill);
+         wpid = waitpid(childPID, &status, WNOHANG);
+         //If the dispatcher actions have ended and the process is dead, we can terminate.
+         allowed_to_die = dispatcher_actions_ended && wpid != 0;
+         // If we have received a time or memory kill, we must halt even if the dispatcher actions are ongoing.
+         override = time_kill || memory_kill;
+      } while (!allowed_to_die && !override);
 
       if (WIFEXITED(status)) {
         std::cout << "Child exited, status=" << WEXITSTATUS(status) << std::endl;
