@@ -352,6 +352,8 @@ class ForumController extends AbstractController {
                 }
                 if($announcment){
                     $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'new_announcement', 'thread_id' => $id, 'thread_title' => $title));
+                    $notification->sendEmailAnnouncement($title, $thread_post_content);
+
                     $this->core->getQueries()->pushNotification($notification);
                 }
                 $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $id));

@@ -244,4 +244,34 @@ class Notification extends AbstractModel {
             return date_format(DateUtils::parseDateTime($actual_time, $this->core->getConfig()->getTimezone()), "n/j g:i A");
         }
     }
+
+    //use email_announcements.cgi to send an email.. 
+    public function sendEmailAnnouncement($thread_title, $thread_content) {
+
+            $course = urlencode($this->core->getConfig()->getCourse());
+            $semester = urlencode($this->core->getConfig()->getSemester());
+
+            if($course == 'blank') {
+
+                $thread_title_encoded = urlencode($thread_title);
+                $thread_content_encoded = urlencode($thread_content);
+
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."submitty_mailer.cgi?email_type=announce&thread_title={$thread_title_encoded}&thread_content={$thread_content_encoded}&course={$course}&semester={$semester}");
+
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                $output = curl_exec($ch);
+                $output = json_decode($output, true); 
+                
+                if ($output['error'] === true) {
+                    $this->core->addErrorMessage("Error sending email announcement: ");
+                }
+                
+                $this->core->addErrorMessage($output);
+
+
+                curl_close($ch);
+        }
+
+    }
 }
