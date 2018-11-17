@@ -2439,9 +2439,7 @@ function scrollToPage(page_num){
             if($("#file_view").is(":visible")){
                 $('#file_content').animate({scrollTop: scrollY}, 500);
             } else {
-                expandFile("upload.pdf", files[i].getAttribute("file-url")).then(function(){
-                    $('#file_content').animate({scrollTop: scrollY}, 500);
-                });
+                expandFile("upload.pdf", files[i].getAttribute("file-url"), page_num-1);
             }
         }
     }

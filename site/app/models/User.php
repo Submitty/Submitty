@@ -228,6 +228,10 @@ class User extends AbstractModel {
         $this->displayed_last_name = (!empty($this->preferred_last_name)) ? $this->preferred_last_name : $this->legal_last_name;
     }
 
+    public function getDisplayFullName() {
+        return $this->getDisplayedFirstName() . ' ' . $this->getDisplayedLastName();
+    }
+
     public function setRegistrationSection($section) {
         $this->registration_section = ($section !== null) ? $section : null;
     }

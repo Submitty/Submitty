@@ -728,7 +728,11 @@ ORDER BY egd.g_version", array($g_id, $user_id));
         else {
             $this->course_db->query("SELECT * FROM late_days");
         }
-        return $this->course_db->rows();
+        // Parse the date-times
+        return array_map(function ($arr)  {
+            $arr['since_timestamp'] = DateUtils::parseDateTime($arr['since_timestamp'], $this->core->getConfig()->getTimezone());
+            return $arr;
+        }, $this->course_db->rows());
     }
 
     public function getLateDayInformation($user_id) {
@@ -989,10 +993,18 @@ ORDER BY gc_order
         $this->course_db->query("
 SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_dev, 0 AS max, COUNT(*) FROM(
    SELECT * FROM (
-      SELECT (egv.autograding_non_hidden_non_extra_credit + egv.autograding_non_hidden_extra_credit + egv.autograding_hidden_non_extra_credit + egv.autograding_hidden_extra_credit) AS score
-      FROM electronic_gradeable_data AS egv
-      INNER JOIN {$users_or_teams} AS {$u_or_t} ON {$u_or_t}.{$user_or_team_id} = egv.{$user_or_team_id}, electronic_gradeable_version AS egd
-      WHERE egv.g_id=? AND {$u_or_t}.{$section_key} IS NOT NULL AND egv.g_version=egd.active_version AND active_version>0 AND egd.{$user_or_team_id}=egv.{$user_or_team_id}
+      SELECT (egd.autograding_non_hidden_non_extra_credit + egd.autograding_non_hidden_extra_credit + egd.autograding_hidden_non_extra_credit + egd.autograding_hidden_extra_credit) AS score
+      FROM electronic_gradeable_data AS egd
+      INNER JOIN (
+          SELECT {$user_or_team_id}, {$section_key} FROM {$users_or_teams}
+      ) AS {$u_or_t}
+      ON {$u_or_t}.{$user_or_team_id} = egd.{$user_or_team_id}
+      INNER JOIN (
+          SELECT g_id, {$user_or_team_id}, active_version FROM electronic_gradeable_version AS egv
+          WHERE active_version > 0
+      ) AS egv
+      ON egd.g_id=egv.g_id AND egd.{$user_or_team_id}=egv.{$user_or_team_id} AND egd.g_version=egv.active_version
+      WHERE egd.g_id=? AND {$u_or_t}.{$section_key} IS NOT NULL
    )g
 ) as individual;
           ", array($g_id));
@@ -1056,11 +1068,17 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
 
-    public function getNumUsersWhoViewedGrade($g_id) {
+    public function getNumUsersWhoViewedGrade($g_id, $section_key) {
         $this->course_db->query("
-SELECT COUNT(*) as cnt FROM gradeable_data
-WHERE g_id = ?
-AND gd_user_viewed_date IS NOT NULL
+SELECT COUNT(*) as cnt
+FROM gradeable_data
+INNER JOIN (
+    SELECT user_id FROM users AS u
+    WHERE {$section_key} IS NOT NULL
+) AS u
+ON u.user_id=gd_user_id
+WHERE g_id = ? AND gd_user_viewed_date IS NOT NULL
+
         ", array($g_id));
 
         return intval($this->course_db->row()['cnt']);
@@ -3156,8 +3174,6 @@ AND gc_id IN (
                 $this->course_db->convertBoolean($gradeable->isStudentView()),
                 $this->course_db->convertBoolean($gradeable->isStudentViewAfterGrades()),
                 $this->course_db->convertBoolean($gradeable->isStudentSubmit()),
-                $this->course_db->convertBoolean($gradeable->isStudentDownload()),
-                $this->course_db->convertBoolean($gradeable->isStudentDownloadAnyVersion()),
                 $this->course_db->convertBoolean($gradeable->hasDueDate()),
                 $gradeable->getAutogradingConfigPath(),
                 $gradeable->getLateDays(),
@@ -3183,8 +3199,6 @@ AND gc_id IN (
                   eg_student_view,
                   eg_student_view_after_grades,
                   eg_student_submit,
-                  eg_student_download,
-                  eg_student_any_version,
                   eg_has_due_date,
                   eg_config_path,
                   eg_late_days,
@@ -3194,7 +3208,7 @@ AND gc_id IN (
                   eg_peer_grade_set,
                   eg_regrade_request_date,
                   eg_regrade_allowed)
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
         }
 
         // Make sure to create the rotating sections
@@ -3288,8 +3302,6 @@ AND gc_id IN (
                     $this->course_db->convertBoolean($gradeable->isStudentView()),
                     $this->course_db->convertBoolean($gradeable->isStudentViewAfterGrades()),
                     $this->course_db->convertBoolean($gradeable->isStudentSubmit()),
-                    $this->course_db->convertBoolean($gradeable->isStudentDownload()),
-                    $this->course_db->convertBoolean($gradeable->isStudentDownloadAnyVersion()),
                     $this->course_db->convertBoolean($gradeable->hasDueDate()),
                     $gradeable->getAutogradingConfigPath(),
                     $gradeable->getLateDays(),
@@ -3315,8 +3327,6 @@ AND gc_id IN (
                       eg_student_view=?,
                       eg_student_view_after_grades=?,
                       eg_student_submit=?,
-                      eg_student_download=?,
-                      eg_student_any_version=?,
                       eg_has_due_date=?,
                       eg_config_path=?,
                       eg_late_days=?,
