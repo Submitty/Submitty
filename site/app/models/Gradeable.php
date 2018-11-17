@@ -547,7 +547,9 @@ class Gradeable extends AbstractModel {
             $this->max_submissions = intval($details['max_submissions']);
         }
 
-        if (isset($details['assignment_message'])) {
+        if (isset($details['gradeable_message'])) {
+            $this->message = Utils::prepareHtmlString($details['gradeable_message']);
+        } else if (isset($details['assignment_message'])) {
             $this->message = Utils::prepareHtmlString($details['assignment_message']);
         }
 
@@ -962,11 +964,11 @@ class Gradeable extends AbstractModel {
         return $this->result_details;
     }
 
-    public function hasAssignmentMessage() {
+    public function hasGradeableMessage() {
         return trim($this->message) !== "";
     }
 
-    public function getAssignmentMessage() {
+    public function getGradeableMessage() {
         return $this->message;
     }
 
