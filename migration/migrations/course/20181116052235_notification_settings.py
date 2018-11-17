@@ -9,7 +9,11 @@ def up(config, conn, semester, course):
 							reply_in_post_thread BOOLEAN DEFAULT FALSE NOT NULL);""")
         cursor.execute("ALTER TABLE ONLY notification_settings ADD CONSTRAINT notification_settings_pkey PRIMARY KEY (user_id);")
         cursor.execute("ALTER TABLE ONLY notification_settings ADD CONSTRAINT notification_settings_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;")
-        cursor.execute("INSERT INTO notification_settings (user_id) values (select user_id from users)")
+        cursor.execute("INSERT INTO notification_settings SELECT user_id from users")
 
 def down(config, conn, semester, course):
 	pass
+	#with conn.cursor() as cursor:
+		#cursor.execute("DROP TABLE IF EXISTS notification_settings")
+		#cursor.execute("ALTER TABLE notification_settings DROP CONSTRAINT IF EXISTS notification_settings_pkey")
+		#cursor.execute("ALTER TABLE notification_settings DROP CONSTRAINT IF EXISTS notification_settings_fkey")

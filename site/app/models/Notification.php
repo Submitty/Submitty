@@ -17,6 +17,7 @@ use app\libraries\Utils;
  * @method void     setCreatedAt($time)
  * @method void     setNotifyMetadata()
  * @method void     setNotifyContent()
+ * @method void     setType($t)
  *
  * @method bool     isViewOnly()
  * @method int      getId()
@@ -126,13 +127,16 @@ class Notification extends AbstractModel {
      * @param array $details
      */
     private function handleForum($details) {
-        $this->$type = $details['type'];
+        $this->setType($details['type']);
         switch ($details['type']) {
             case 'new_announcement':
                 $this->actAsNewAnnouncementNotification($details['thread_id'], $details['thread_title']);
                 break;
             case 'updated_announcement':
                 $this->actAsUpdatedAnnouncementNotification($details['thread_id'], $details['thread_title']);
+                break;
+            case 'new_thread':
+                $this->actAsNewForumThread($details['thread_id'], $details['thread_title']);
                 break;
             case 'reply':
                 $this->actAsForumReplyNotification($details['thread_id'], $details['post_id'], $details['post_content'], $details['reply_to'], $details['child_id'], $details['anonymous']);
@@ -154,6 +158,13 @@ class Notification extends AbstractModel {
         }
     }
 
+    private function actAsNewForumThread($thread_id, $thread_title) {
+        $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id))));
+        $this->setNotifyContent("New Thread: ".$thread_title);
+        $this->setNotifySource($this->getCurrentUser());
+        $this->setNotifyTarget(null);
+    }
+
     private function actAsNewAnnouncementNotification($thread_id, $thread_title) {
         $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id))));
         $this->setNotifyContent("New Announcement: ".$thread_title);
@@ -170,7 +181,7 @@ class Notification extends AbstractModel {
 
     private function actAsForumReplyNotification($thread_id, $post_id, $post_content, $target, $child_id, $anon) {
         $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id, (string)$child_id)));
-        $this->setNotifyContent("Reply: Your post '".$this->textShortner($post_content)."' got new a reply from ".Utils::getDisplayNameForum($anon, $this->core->getQueries()->getDisplayUserInfoFromUserId($this->getCurrentUser())));
+        $this->setNotifyContent("Reply: A post '".$this->textShortner($post_content)."' got new a reply from ".Utils::getDisplayNameForum($anon, $this->core->getQueries()->getDisplayUserInfoFromUserId($this->getCurrentUser())));
         $this->setNotifySource($this->getCurrentUser());
         $this->setNotifyTarget($target);
     }
@@ -184,21 +195,21 @@ class Notification extends AbstractModel {
 
     private function actAsForumEditedNotification($thread_id, $post_id, $post_content, $target){
         $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id)));
-        $this->setNotifyContent("Update: Your thread/post '".$this->textShortner($post_content)."' got an edit from ".Utils::getDisplayNameForum(false, $this->core->getQueries()->getDisplayUserInfoFromUserId($this->getCurrentUser())));
+        $this->setNotifyContent("Update: A thread/post '".$this->textShortner($post_content)."' got an edit from ".Utils::getDisplayNameForum(false, $this->core->getQueries()->getDisplayUserInfoFromUserId($this->getCurrentUser())));
         $this->setNotifySource($this->getCurrentUser());
         $this->setNotifyTarget($target);
     }
 
     private function actAsForumDeletedNotification($thread_id, $post_content, $target){
         $this->setNotifyMetadata(json_encode(array()));
-        $this->setNotifyContent("Deleted: Your thread/post '".$this->textShortner($post_content)."' was deleted by ".Utils::getDisplayNameForum(false, $this->core->getQueries()->getDisplayUserInfoFromUserId($this->getCurrentUser())));
+        $this->setNotifyContent("Deleted: A thread/post '".$this->textShortner($post_content)."' was deleted by ".Utils::getDisplayNameForum(false, $this->core->getQueries()->getDisplayUserInfoFromUserId($this->getCurrentUser())));
         $this->setNotifySource($this->getCurrentUser());
         $this->setNotifyTarget($target);
     }
 
     private function actAsForumUndeletedNotification($thread_id, $post_id, $post_content, $target){
         $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id)));
-        $this->setNotifyContent("Undeleted: Your thread/post '".$this->textShortner($post_content)."' has been undeleted by ".Utils::getDisplayNameForum(false, $this->core->getQueries()->getDisplayUserInfoFromUserId($this->getCurrentUser())));
+        $this->setNotifyContent("Undeleted: A thread/post '".$this->textShortner($post_content)."' has been undeleted by ".Utils::getDisplayNameForum(false, $this->core->getQueries()->getDisplayUserInfoFromUserId($this->getCurrentUser())));
         $this->setNotifySource($this->getCurrentUser());
         $this->setNotifyTarget($target);
     }

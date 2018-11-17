@@ -2638,18 +2638,18 @@ AND gc_id IN (
         $params[] = $notification->getNotifySource();
 
         $type = $notification->getType();
-
         $target_users_query = "SELECT user_id FROM users";
-
+        
         $column = '';
             switch ($type) {
                 case 'reply':
-                    $post_thread_id = json_decode($params[1])['thread_id'];
-                    $target_users_query = "SELECT n.user_id from notification_settings n, posts p where p.thread_id = ? and p.author_user_id = n.user_id and n.reply_in_post_thread = 1";
-                    $target_users_query .= "UNION SELECT user_id from notification_settings where all_new_posts = 1";
+                    $post_thread_id = json_decode($params[1], true)[0]['thread_id'];
+                    $params[] = $post_thread_id;
+                    $target_users_query = "SELECT n.user_id from notification_settings n, posts p where p.thread_id = ? and p.author_user_id = n.user_id and n.reply_in_post_thread = 'true' ";
+                    $target_users_query .= "UNION SELECT user_id from notification_settings where all_new_posts = 'true'";
                     break;
                 case 'new_thread':
-                    $target_users_query = "SELECT user_id FROM notification_settings where all_new_threads = 1";
+                    $target_users_query = "SELECT user_id FROM notification_settings where all_new_threads = 'true'";
                     break;
                 case 'merge_thread':
                     $column = 'merge_threads';
@@ -2661,12 +2661,6 @@ AND gc_id IN (
                     break;
         }
 
-        if(!empty($notification->getNotifyTarget())) {
-            // To a specific user
-            $params[] = $notification->getNotifyTarget();
-            $params[] = $column;
-            $target_users_query = "SELECT ?::text as user_id UNION select user_id from notification_settings where ? = 1"; 
-        }
 
         if($notification->getNotifyNotToSource()){
             $ignore_self_query = "WHERE user_id <> ?";

@@ -26,8 +26,11 @@ class PostgresqlDatabaseQueries extends DatabaseQueries{
 
     public function getUserById($user_id) {
         $this->course_db->query("
-SELECT u.*, n.*, sr.grading_registration_sections
-FROM notification_settings n, users u
+SELECT u.*, ns.merge_threads, ns.all_new_threads, 
+        ns.all_new_posts, ns.all_modifications_forum,
+        ns.reply_in_post_thread, sr.grading_registration_sections
+FROM users u
+LEFT JOIN notification_settings as ns ON u.user_id = ns.user_id
 LEFT JOIN (
 	SELECT array_agg(sections_registration_id) as grading_registration_sections, user_id
 	FROM grading_registration
