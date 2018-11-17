@@ -989,10 +989,18 @@ ORDER BY gc_order
         $this->course_db->query("
 SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_dev, 0 AS max, COUNT(*) FROM(
    SELECT * FROM (
-      SELECT (egv.autograding_non_hidden_non_extra_credit + egv.autograding_non_hidden_extra_credit + egv.autograding_hidden_non_extra_credit + egv.autograding_hidden_extra_credit) AS score
-      FROM electronic_gradeable_data AS egv
-      INNER JOIN {$users_or_teams} AS {$u_or_t} ON {$u_or_t}.{$user_or_team_id} = egv.{$user_or_team_id}, electronic_gradeable_version AS egd
-      WHERE egv.g_id=? AND {$u_or_t}.{$section_key} IS NOT NULL AND egv.g_version=egd.active_version AND active_version>0 AND egd.{$user_or_team_id}=egv.{$user_or_team_id}
+      SELECT (egd.autograding_non_hidden_non_extra_credit + egd.autograding_non_hidden_extra_credit + egd.autograding_hidden_non_extra_credit + egd.autograding_hidden_extra_credit) AS score
+      FROM electronic_gradeable_data AS egd
+      INNER JOIN (
+          SELECT {$user_or_team_id}, {$section_key} FROM {$users_or_teams}
+      ) AS {$u_or_t}
+      ON {$u_or_t}.{$user_or_team_id} = egd.{$user_or_team_id}
+      INNER JOIN (
+          SELECT g_id, {$user_or_team_id}, active_version FROM electronic_gradeable_version AS egv
+          WHERE active_version > 0
+      ) AS egv
+      ON egd.g_id=egv.g_id AND egd.{$user_or_team_id}=egv.{$user_or_team_id} AND egd.g_version=egv.active_version
+      WHERE egd.g_id=? AND {$u_or_t}.{$section_key} IS NOT NULL
    )g
 ) as individual;
           ", array($g_id));
@@ -1056,11 +1064,17 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
 
-    public function getNumUsersWhoViewedGrade($g_id) {
+    public function getNumUsersWhoViewedGrade($g_id, $section_key) {
         $this->course_db->query("
-SELECT COUNT(*) as cnt FROM gradeable_data
-WHERE g_id = ?
-AND gd_user_viewed_date IS NOT NULL
+SELECT COUNT(*) as cnt
+FROM gradeable_data
+INNER JOIN (
+    SELECT user_id FROM users AS u
+    WHERE {$section_key} IS NOT NULL
+) AS u
+ON u.user_id=gd_user_id
+WHERE g_id = ? AND gd_user_viewed_date IS NOT NULL
+
         ", array($g_id));
 
         return intval($this->course_db->row()['cnt']);
