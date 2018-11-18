@@ -9,7 +9,6 @@ use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
 use app\models\gradeable\GradedGradeable;
-use app\models\gradeable\LateDays;
 use app\models\gradeable\SubmissionTextBox;
 use app\models\User;
 use app\views\AbstractView;
@@ -27,27 +26,26 @@ class HomeworkView extends AbstractView {
     /**
      * @param Gradeable $gradeable
      * @param GradedGradeable|null $graded_gradeable
+     * @param \app\models\Gradeable $old_gradeable
      * @param int $display_version
+     * @param int $late_days_use
+     * @param int $extensions
      * @param bool $show_hidden_testcases
      * @return string
      */
-    public function showGradeable(Gradeable $gradeable, $graded_gradeable, int $display_version, bool $show_hidden_testcases = false) {
+    public function showGradeable(Gradeable $gradeable, $graded_gradeable, \app\models\Gradeable $old_gradeable, int $display_version, int $late_days_use, int $extensions, bool $show_hidden_testcases = false) {
         $return = '';
 
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
 
-        // The number of days late this gradeable would be if submitted now (including exceptions)
-        $late_days_use = 0;
         $version_instance = null;
         if ($graded_gradeable !== null) {
             $version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions()[$display_version] ?? null;
-            $late_days_use = max(0, $gradeable->getWouldBeDaysLate() - $graded_gradeable->getLateDayException($this->core->getUser()));
         }
 
         // Only show the late banner if the submission has a due date
-        if (LateDays::filterCanView($this->core, $gradeable)) {
-            $late_days = LateDays::fromUser($this->core, $this->core->getUser());
-            $return .= $this->renderLateDayMessage($late_days, $gradeable, $graded_gradeable);
+        if ($gradeable->isStudentSubmit() && $gradeable->hasDueDate() && $gradeable->isLateSubmissionAllowed()) {
+            $return .= $this->renderLateDayMessage($old_gradeable, $extensions);
         }
 
         // showing submission if user is full grader or student can submit
@@ -104,25 +102,35 @@ class HomeworkView extends AbstractView {
     }
 
     /**
-     * Render the late days banner
-     * @param LateDays $late_days
-     * @param Gradeable $gradeable
-     * @param GradedGradeable|null $graded_gradeable
+     * TODO: waiting on late day model class before converting this method
+     * @param \app\models\Gradeable $gradeable
+     * @param int $extensions
      * @return string
      */
-    public function renderLateDayMessage(LateDays $late_days, Gradeable $gradeable, $graded_gradeable) {
-        $extensions = 0;
-        $active_version = null;
-        if ($graded_gradeable !== null) {
-            $extensions = $graded_gradeable->getLateDayException($this->core->getUser());
-            $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance();
+    public function renderLateDayMessage(\app\models\Gradeable $gradeable, int $extensions) {
+        $order_by = [
+            'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END'
+        ];
+        $total_late_used = 0;
+        $student_late_days = 0;
+        $late_day_budget = 0;
+        foreach ($this->core->getQueries()->getGradeablesIterator(null, $gradeable->getUser()->getId(), 'registration_section', 'u.user_id', 0, $order_by) as $g) {
+            $g->calculateLateDays($total_late_used);
+            if($g->getId() === $gradeable->getId()){
+                $student_late_days = $g->getStudentAllowedLateDays();
+                $late_day_budget = $student_late_days-$total_late_used;
+            }
+            // make sure we don't "double count" late days used on this assignment
+            else{
+                $total_late_used -= $g->getLateDayExceptions();
+            }
         }
-        $late_days_remaining = $late_days->getLateDaysRemaining();
-        $active_days_late =  $active_version !== null ? $active_version->getDaysLate() : 0;
+
+        $active_days_late = $gradeable->getActiveVersion() == 0 ? 0 : $gradeable->getActiveDaysLate();
+        $late_days_remaining = $student_late_days - $total_late_used + $extensions;
         $would_be_days_late = $gradeable->getWouldBeDaysLate();
-        $late_day_info = $late_days->getLateDayInfoByGradeable($gradeable);
-        $late_days_allowed = $gradeable->getLateDays();
-        $late_day_budget = $late_day_info->getLateDaysAllowed();
+        $late_days_allowed = $gradeable->getAllowedLateDays();
+        $active_version = $gradeable->getActiveVersion();
 
         $error = false;
         $messages = [];
@@ -142,11 +150,11 @@ class HomeworkView extends AbstractView {
         // IF STUDENT HAS ALREADY SUBMITTED AND THE ACTIVE VERSION IS LATE, PRINT LATE DAY INFORMATION FOR THE ACTIVE VERSION
         if ($active_version >= 1 && $active_days_late > 0) {
             // BAD STATUS - AUTO ZERO BECAUSE INSUFFICIENT LATE DAYS REMAIN
-            if ($active_days_charged > $late_day_budget) {
+            if ($student_late_days < $active_days_late) {
                 $error = true;
                 $messages[] = ['type' => 'too_few_remain', 'info' => [
                     'late' => $active_days_late,
-                    'remaining' => $late_days_remaining
+                    'remaining' => $student_late_days
                 ]];
             } // BAD STATUS - AUTO ZERO BECAUSE TOO MANY LATE DAYS USED ON THIS ASSIGNMENT
             else if ($active_days_charged > $late_days_allowed) {
