@@ -256,12 +256,10 @@ void FormatDispatcherActions(nlohmann::json &whole_config) {
         float delay_time_in_seconds = 1.0;
         delay_time_in_seconds = float(dispatcher_action.value("seconds",1.0));
         dispatcher_action["seconds"] = delay_time_in_seconds;
-      }else if(action == "stdin"){
-        assert(!dispatcher_action["string"].is_null());
+      }else{
+
         assert(!dispatcher_action["containers"].is_null());
-
         nlohmann::json containers = nlohmann::json::array();
-
         if (dispatcher_action["containers"].is_array()){
           containers = dispatcher_action["containers"];
         }
@@ -272,7 +270,12 @@ void FormatDispatcherActions(nlohmann::json &whole_config) {
         dispatcher_action.erase("containers");
         dispatcher_action["containers"] = containers;
 
-        whole_config["testcases"][testcase_num]["dispatcher_actions"][i] = dispatcher_action;
+        if(action == "stdin"){
+          assert(!dispatcher_action["string"].is_null());
+          whole_config["testcases"][testcase_num]["dispatcher_actions"][i] = dispatcher_action;
+        }else{
+          assert(action == "stop" || action == "start" || action == "kill");
+        }
       }
     }
   }
