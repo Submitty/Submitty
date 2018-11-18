@@ -34,8 +34,7 @@ fi
 #################
 
 # PATHS
-SOURCE="${BASH_SOURCE[0]}"
-CURRENT_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
 SUBMITTY_DATA_DIR=/var/local/submitty
@@ -51,6 +50,9 @@ CGI_GROUP=submitty_cgi
 
 DAEMONPHP_GROUP=submitty_daemonphp
 DAEMONCGI_GROUP=submitty_daemoncgi
+
+# VERSIONS
+source ${CURRENT_DIR}/bin/versions.sh
 
 #################################################################
 # PROVISION SETUP
@@ -251,6 +253,13 @@ pip3 install parso
 # Python3 implementation of python-clang bindings (may not work < 6.0)
 pip3 install clang
 
+#libraries for QR code processing:
+#install DLL for zbar
+apt-get install libzbar0 --yes
+
+pip3 install pyzbar
+pip3 install pdf2image
+
 sudo chmod -R 555 /usr/local/lib/python*/*
 sudo chmod 555 /usr/lib/python*/dist-packages
 sudo chmod 500 /usr/local/lib/python*/dist-packages/pam.py*
@@ -267,8 +276,7 @@ pushd /tmp > /dev/null
 
 # -----------------------------------------
 echo "Getting JUnit & Hamcrest..."
-JUNIT_VER=4.12
-HAMCREST_VER=1.3
+
 mkdir -p ${SUBMITTY_INSTALL_DIR}/JUnit
 
 if [ ${WORKER} == 0 ]; then
@@ -278,12 +286,11 @@ fi
 chmod 751 ${SUBMITTY_INSTALL_DIR}/JUnit
 cd ${SUBMITTY_INSTALL_DIR}/JUnit
 
-wget http://repo1.maven.org/maven2/junit/junit/${JUNIT_VER}/junit-${JUNIT_VER}.jar -o /dev/null > /dev/null 2>&1
-wget http://repo1.maven.org/maven2/org/hamcrest/hamcrest-core/${HAMCREST_VER}/hamcrest-core-${HAMCREST_VER}.jar -o /dev/null > /dev/null 2>&1
+wget http://repo1.maven.org/maven2/junit/junit/${JUNIT_VERSION}/junit-${JUNIT_VERSION}.jar -o /dev/null > /dev/null 2>&1
+wget http://repo1.maven.org/maven2/org/hamcrest/hamcrest-core/${HAMCREST_VERSION}/hamcrest-core-${HAMCREST_VERSION}.jar -o /dev/null > /dev/null 2>&1
 
 # TODO:  Want to Install JUnit 5.0
 # And maybe also Hamcrest 2.0 (or maybe that piece isn't needed anymore)
-
 
 popd > /dev/null
 
@@ -292,14 +299,11 @@ popd > /dev/null
 echo "Getting emma..."
 
 pushd ${SUBMITTY_INSTALL_DIR}/JUnit > /dev/null
-
-EMMA_VER=2.0.5312
-wget https://github.com/Submitty/emma/archive/${EMMA_VER}.zip -O emma-${EMMA_VER}.zip -o /dev/null > /dev/null 2>&1
-unzip emma-${EMMA_VER}.zip > /dev/null
-mv emma-${EMMA_VER}/lib/emma.jar emma.jar
-rm -rf emma-${EMMA_VER}*
+wget https://github.com/Submitty/emma/archive/${EMMA_VERSION}.zip -O emma-${EMMA_VERSION}.zip -o /dev/null > /dev/null 2>&1
+unzip emma-${EMMA_VERSION}.zip > /dev/null
+mv emma-${EMMA_VERSION}/lib/emma.jar emma.jar
+rm -rf emma-${EMMA_VERSION}*
 chmod o+r . *.jar
-
 popd > /dev/null
 
 # JaCoCo is a potential replacement for EMMA
@@ -307,18 +311,14 @@ popd > /dev/null
 echo "Getting JaCoCo..."
 
 pushd ${SUBMITTY_INSTALL_DIR}/JUnit > /dev/null
-
-JACOCO_VER=0.8.0
-wget https://github.com/jacoco/jacoco/releases/download/v${JACOCO_VER}/jacoco-${JACOCO_VER}.zip -o /dev/null > /dev/null 2>&1
-mkdir jacoco-${JACOCO_VER}
-unzip jacoco-${JACOCO_VER}.zip -d jacoco-${JACOCO_VER} > /dev/null
-mv jacoco-${JACOCO_VER}/lib/jacococli.jar jacococli.jar
-mv jacoco-${JACOCO_VER}/lib/jacocoagent.jar jacocoagent.jar
-rm -rf jacoco-${JACOCO_VER}
-rm -f jacoco-${JACOCO_VER}.zip
-
+wget https://github.com/jacoco/jacoco/releases/download/v${JACOCO_VERSION}/jacoco-${JACOCO_VERSION}.zip -o /dev/null > /dev/null 2>&1
+mkdir jacoco-${JACOCO_VERSION}
+unzip jacoco-${JACOCO_VERSION}.zip -d jacoco-${JACOCO_VERSION} > /dev/null
+mv jacoco-${JACOCO_VERSION}/lib/jacococli.jar jacococli.jar
+mv jacoco-${JACOCO_VERSION}/lib/jacocoagent.jar jacocoagent.jar
+rm -rf jacoco-${JACOCO_VERSION}
+rm -f jacoco-${JACOCO_VERSION}.zip
 chmod o+r . *.jar
-
 popd > /dev/null
 
 
@@ -332,11 +332,9 @@ pushd /tmp > /dev/null
 
 echo "Getting DrMemory..."
 
-DRMEM_TAG=release_2.0.1
-DRMEM_VER=2.0.1-2
-wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEM_TAG}/DrMemory-Linux-${DRMEM_VER}.tar.gz -o /dev/null > /dev/null 2>&1
-tar -xpzf DrMemory-Linux-${DRMEM_VER}.tar.gz
-rsync --delete -a /tmp/DrMemory-Linux-${DRMEM_VER}/ ${SUBMITTY_INSTALL_DIR}/drmemory
+wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEMORY_TAG}/DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz -o /dev/null > /dev/null 2>&1
+tar -xpzf DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz
+rsync --delete -a /tmp/DrMemory-Linux-${DRMEMORY_VERSION}/ ${SUBMITTY_INSTALL_DIR}/drmemory
 rm -rf /tmp/DrMemory*
 
 chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/drmemory
@@ -373,7 +371,6 @@ if [ ${WORKER} == 0 ]; then
         # cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/sites-available/git.conf      /etc/apache2/sites-available/git.conf
 
         sed -i -e "s/SUBMITTY_URL/${SUBMISSION_URL:7}/g" /etc/apache2/sites-available/submitty.conf
-        # sed -i -e "s/GIT_URL/${GIT_URL:7}/g" /etc/apache2/sites-available/git.conf
 
         # permissions: rw- r-- ---
         chmod 0640 /etc/apache2/sites-available/*.conf
@@ -504,7 +501,7 @@ clangsrc=${SUBMITTY_INSTALL_DIR}/clang-llvm/src
 clangbuild=${SUBMITTY_INSTALL_DIR}/clang-llvm/build
 # note, we are not running 'ninja install', so this path is unused.
 clanginstall=${SUBMITTY_INSTALL_DIR}/clang-llvm/install
- 
+
 # skip if this is a re-run
 if [ ! -d "${clangsrc}" ]; then
     echo 'GOING TO PREPARE CLANG INSTALLATION FOR STATIC ANALYSIS'
@@ -528,7 +525,7 @@ if [ ! -d "${clangsrc}" ]; then
 
     echo 'DONE PREPARING CLANG INSTALLATION'
 fi
-    
+
 #################################################################
 # SUBMITTY SETUP
 #################
@@ -575,21 +572,21 @@ fi
 if [ ${WORKER} == 0 ]; then
     dbuser_password=`cat ${SUBMITTY_INSTALL_DIR}/.setup/submitty_conf.json | jq .database_password | tr -d '"'`
 
-    # create the submitty_dbuser role in postgres (if it does not yet exist
-    su postgres -c "psql -c \"DO \\\$do\\\$ BEGIN IF NOT EXISTS ( SELECT FROM  pg_catalog.pg_roles WHERE  rolname = '${DB_USER}') THEN  CREATE ROLE ${DB_USER} LOGIN PASSWORD '${dbuser_password}'; END IF; END \\\$do\\\$;\""
+    # create the submitty_dbuser role in postgres (if it does not yet exist)
+    # SUPERUSER privilege is required to use dblink extension (needed for data sync between master and course DBs).
+    su postgres -c "psql -c \"DO \\\$do\\\$ BEGIN IF NOT EXISTS ( SELECT FROM  pg_catalog.pg_roles WHERE  rolname = '${DB_USER}') THEN CREATE ROLE ${DB_USER} SUPERUSER LOGIN PASSWORD '${dbuser_password}'; END IF; END \\\$do\\\$;\""
 
     # check to see if a submitty master database exists
     DB_EXISTS=`su -c 'psql -lqt | cut -d \| -f 1 | grep -w submitty || true' postgres`
 
     if [ "$DB_EXISTS" == "" ]; then
-	echo "Submitty master database does not yet exist"
-	PGPASSWORD=${dbuser_password} psql -d postgres -h localhost -U ${DB_USER} -c "CREATE DATABASE submitty;"
-	python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
+        echo "Creating submitty master database"
+        su postgres -c "psql -c \"CREATE DATABASE submitty WITH OWNER ${DB_USER}\""
+        su postgres -c "psql submitty -c \"ALTER SCHEMA public OWNER TO ${DB_USER}\""
+        python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
     else
-	echo "Submitty master database already exists"
+        echo "Submitty master database already exists"
     fi
-
-
 fi
 
 echo Beginning Install Submitty Script
@@ -671,7 +668,7 @@ fi
 #################
 
 # WIP: creates basic container for grading CS1 & DS assignments
-# CAUTION: needs users/groups for security 
+# CAUTION: needs users/groups for security
 # These commands should be run manually if testing Docker integration
 
 rm -rf /tmp/docker

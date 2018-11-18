@@ -1,0 +1,74 @@
+{
+    "grading_parameters" : {
+        "AUTO_POINTS" : 18,
+        "EXTRA_CREDIT_POINTS" : 0
+    },
+    
+    "testcases" : [
+
+        // *************** COMPILATION *****************
+        {
+            "type" : "Compilation",
+            "title" : "Compilation",
+            "command" : "clang++ -Wall -o a.out -- *.cpp",
+            "executable_name" : "a.out",
+            "points" : 3
+        },
+
+        // *************** TEST CASES *****************
+        {
+            "title" : "no subdirectory",
+            "command" : "./a.out small_file.txt bar.txt",
+            "points" : 5,
+            "validation" : [
+                {
+                    "method" : "diff",
+                    "actual_file" : "bar.txt",
+                    "expected_file" : "inst_output.txt"
+                },
+                {
+                    "method" : "diff",
+                    "actual_file" : "STDOUT.txt",
+                    "expected_file" : "my_stdout/test02.txt"
+                }
+            ]
+        },
+
+        {
+            "title" : "with subdirectory",
+            "command" : "./a.out DIRECTORY/text_file.txt something_new/foo.txt",
+            "points" : 5,
+            "validation" : [
+                {
+                    "method" : "diff",
+                    "actual_file" : "something_new/foo.txt",
+                    "expected_file" : "one_directory/inst_output.txt"
+                },
+                {
+                    "method" : "diff",
+                    "actual_file" : "STDOUT.txt",
+                    "expected_file" : "my_stdout/test03.txt"
+                }
+            ]
+        },
+               
+        {
+            "title" : "with nested subdirectories",
+            "command" : "./a.out DIRECTORY/THING/another.txt foobar/another/thing.txt",
+            "points" : 5,
+            "validation" : [
+                {
+                    "method" : "diff",
+                    "actual_file" : "foobar/another/thing.txt",
+                    "expected_file" : "second_directory/nested/inst_output.txt"
+                },
+                {
+                    "method" : "diff",
+                    "actual_file" : "STDOUT.txt",
+                    "expected_file" : "my_stdout/test04.txt"
+                }
+            ]
+        }
+
+    ]
+}

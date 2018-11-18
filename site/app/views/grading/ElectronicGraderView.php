@@ -2,6 +2,8 @@
 
 namespace app\views\grading;
 
+use app\controllers\student\LateDaysTableController;
+use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\GradedGradeable;
@@ -441,12 +443,7 @@ class ElectronicGraderView extends AbstractView {
 
     public function adminTeamForm(Gradeable $gradeable, $all_reg_sections, $all_rot_sections) {
         $students = $this->core->getQueries()->getAllUsers();
-        $student_full = array();
-        foreach ($students as $student) {
-            $student_full[] = array('value' => $student->getId(),
-                                    'label' => str_replace("'","&#039;",$student->getDisplayedFirstName()).' '.str_replace("'","&#039;",$student->getLastName()).' <'.$student->getId().'>');
-        }
-        $student_full = json_encode($student_full);
+        $student_full = Utils::getAutoFillData($students);
 
         return $this->core->getOutput()->renderTwigTemplate("grading/AdminTeamForm.twig", [
             "gradeable_id" => $gradeable->getId(),
@@ -532,7 +529,7 @@ class ElectronicGraderView extends AbstractView {
     }
 
     /**
-     * Render the Auto-Grading Testcases panel
+     * Render the Autograding Testcases panel
      * @param AutoGradedVersion $version_instance
      * @param bool $show_hidden_cases
      * @return string
@@ -553,17 +550,19 @@ class ElectronicGraderView extends AbstractView {
     public function renderSubmissionPanel(GradedGradeable $graded_gradeable, int $display_version) {
         function add_files(&$files, $new_files, $start_dir_name) {
             $files[$start_dir_name] = array();
-            foreach($new_files as $file) {
-                $path = explode('/', $file['relative_name']);
-                array_pop($path);
-                $working_dir = &$files[$start_dir_name];
-                foreach($path as $dir) {
-                    if (!isset($working_dir[$dir])) {
-                        $working_dir[$dir] = array();
+            if($new_files) {
+                foreach ($new_files as $file) {
+                    $path = explode('/', $file['relative_name']);
+                    array_pop($path);
+                    $working_dir = &$files[$start_dir_name];
+                    foreach ($path as $dir) {
+                        if (!isset($working_dir[$dir])) {
+                            $working_dir[$dir] = array();
+                        }
+                        $working_dir = &$working_dir[$dir];
                     }
-                    $working_dir = &$working_dir[$dir];
+                    $working_dir[$file['name']] = $file['path'];
                 }
-                $working_dir[$file['name']] = $file['path'];
             }
         }
         $submissions = array();
@@ -575,17 +574,20 @@ class ElectronicGraderView extends AbstractView {
         // order of these statements matter I believe
 
         $display_version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($display_version);
+        $isVcs = $graded_gradeable->getGradeable()->isVcs();
         if ($display_version_instance !==  null) {
-            add_files($submissions, array_merge($display_version_instance->getMetaFiles(), $display_version_instance->getFiles()), 'submissions');
-        }
+            $meta_files = $display_version_instance->getMetaFiles();
+            $files = $display_version_instance->getFiles();
 
-        // TODO: this function doesn't exist!! where did it go?
-//        add_files($results, $gradeable->getResultsFiles(), 'results');
+            add_files($submissions, array_merge($meta_files['submissions'], $files['submissions']), 'submissions');
+            add_files($checkout, array_merge($meta_files['checkout'], $files['checkout']), 'checkout');
+            add_files($results, $display_version_instance->getResultsFiles(), 'results');
+        }
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
             "gradeable_id" => $graded_gradeable->getGradeableId(),
             "submitter_id" => $graded_gradeable->getSubmitter()->getId(),
-            "has_vcs_files" => false, // TODO: add this to AutoGradedVersion
+            "has_vcs_files" => $isVcs,
             "submissions" => $submissions,
             "checkout" => $checkout,
             "results" => $results,
@@ -607,10 +609,10 @@ class ElectronicGraderView extends AbstractView {
         //Late day calculation
         if ($gradeable->isTeamAssignment()) {
             foreach ($graded_gradeable->getSubmitter()->getTeam()->getMemberUsers() as $team_member) {
-                $tables[] = $this->core->getOutput()->renderTemplate('LateDaysTable', 'showLateTable', $team_member->getId(), $gradeable->getId(), false);
+                $tables[] = LateDaysTableController::renderLateTable($this->core, $team_member, $gradeable->getId());
             }
         } else {
-            $tables[] = $this->core->getOutput()->renderTemplate('LateDaysTable', 'showLateTable', $graded_gradeable->getSubmitter()->getId(), $gradeable->getId(), false);
+            $tables[] = LateDaysTableController::renderLateTable($this->core, $graded_gradeable->getSubmitter()->getUser(), $gradeable->getId());
         }
 
         if ($display_version_instance === null) {
@@ -621,16 +623,16 @@ class ElectronicGraderView extends AbstractView {
             $submission_time = $display_version_instance->getSubmissionTime();
         }
 
-        $version_data = array_map(function(AutoGradedVersion $version) {
+        // TODO: this is duplicated in Homework View
+        $version_data = array_map(function(AutoGradedVersion $version) use ($gradeable) {
             return [
                 'points' => $version->getNonHiddenPoints(),
-                'days_late' => $version->getDaysLate()
+                'days_late' => $gradeable->isStudentSubmit() && $gradeable->hasDueDate() ? $version->getDaysLate() : 0
             ];
         }, $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions());
 
         //sort array by version number after values have been mapped
         ksort($version_data);
-
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/StudentInformationPanel.twig", [
             "gradeable_id" => $gradeable->getId(),
             "submission_time" => $submission_time,
@@ -699,7 +701,7 @@ class ElectronicGraderView extends AbstractView {
             "graded_gradeable" => $graded_gradeable
         ]);
     }
-    
+
     public function popupStudents() {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/ReceivedMarkForm.twig");
     }

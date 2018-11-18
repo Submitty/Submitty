@@ -1635,22 +1635,23 @@ function toggleDOMCustomMark(component_id) {
  * Opens the 'users who got mark' dialog
  * @param {string} component_title
  * @param {string} mark_title
- * @param {int} gradedComponentCount
- * @param {int} totalComponentCount
- * @param {Array} submitterIds
+ * @param {Object} stats
  */
-function openMarkStatsPopup(component_title, mark_title, gradedComponentCount, totalComponentCount, submitterIds) {
+function openMarkStatsPopup(component_title, mark_title, stats) {
     let popup = $('#student-marklist-popup');
 
     popup.find('.question-title').html(component_title);
     popup.find('.mark-title').html(mark_title);
-    popup.find('.submitter-count').html(submitterIds.length);
-    popup.find('.graded-component-count').html(gradedComponentCount);
-    popup.find('.total-component-count').html(totalComponentCount);
+    popup.find('.section-submitter-count').html(stats.section_submitter_count);
+    popup.find('.total-submitter-count').html(stats.total_submitter_count);
+    popup.find('.section-graded-component-count').html(stats.section_graded_component_count);
+    popup.find('.total-graded-component-count').html(stats.total_graded_component_count);
+    popup.find('.section-total-component-count').html(stats.section_total_component_count);
+    popup.find('.total-total-component-count').html(stats.total_total_component_count);
 
     // Create an array of links for each submitter
     let submitterHtmlElements = [];
-    submitterIds.forEach(function (id) {
+    stats.submitter_ids.forEach(function (id) {
         let href = window.location.href.replace(/&who_id=([a-z0-9_]*)/, '&who_id=' + id);
         submitterHtmlElements.push('<a href="' + href + '">' + id + '</a>');
     });
@@ -1689,6 +1690,23 @@ function updateVerifyAllButton() {
  */
 function getComponentVersionConflict(graded_component) {
     return graded_component !== undefined && graded_component.graded_version !== getDisplayVersion();
+}
+
+/**
+ * Sets the error state of the custom mark message
+ * @param {int} component_id
+ * @param {boolean} show_error
+ */
+function setCustomMarkError(component_id, show_error) {
+    let jquery = getComponentJQuery(component_id).find('textarea.mark-note-custom');
+    let c = 'custom-mark-error';
+    if (show_error) {
+        jquery.addClass(c);
+        jquery.prop('title', 'Custom mark cannot be blank!');
+    } else {
+        jquery.removeClass(c);
+        jquery.prop('title', '');
+    }
 }
 
 
@@ -1792,17 +1810,8 @@ function onGetMarkStats(me) {
         .then(function (stats) {
             let component_title = getComponentFromDOM(component_id).title;
             let mark_title = getMarkFromDOM(mark_id).title;
-
-            // TODO: this is too much math in the view.  Make the server do this
-            let graded = 0, total = 0;
-            for (let sectionNumber in stats.sections) {
-                if (stats.sections.hasOwnProperty(sectionNumber)) {
-                    graded += parseInt(stats.sections[sectionNumber]['graded_components']);
-                    total += parseInt(stats.sections[sectionNumber]['total_components']);
-                }
-            }
-
-            openMarkStatsPopup(component_title, mark_title, graded, total, stats.submitter_ids);
+            
+            openMarkStatsPopup(component_title, mark_title, stats);
         })
         .catch(function (err) {
             alert('Failed to get stats for mark: ' + err.message);
@@ -1903,6 +1912,11 @@ function onCustomMarkChange(me) {
  */
 function onToggleCustomMark(me) {
     let component_id = getComponentIdFromDOMElement(me);
+    let graded_component = getGradedComponentFromDOM(component_id);
+    if (graded_component.comment === '') {
+        setCustomMarkError(component_id, true);
+        return;
+    }
     toggleDOMCustomMark(component_id);
     toggleCustomMark(component_id)
         .catch(function (err) {
@@ -2417,9 +2431,7 @@ function scrollToPage(page_num){
             if($("#file_view").is(":visible")){
                 $('#file_content').animate({scrollTop: scrollY}, 500);
             } else {
-                expandFile("upload.pdf", files[i].getAttribute("file-url")).then(function(){
-                    $('#file_content').animate({scrollTop: scrollY}, 500);
-                });
+                expandFile("upload.pdf", files[i].getAttribute("file-url"), page_num-1);
             }
         }
     }
@@ -2506,6 +2518,14 @@ function closeComponentGrading(component_id, saveChanges) {
                     component_tmp = component;
                 });
         } else {
+            // The grader unchecked the custom mark, but didn't delete the text.  This shouldn't happen too often,
+            //  so prompt the grader if this is what they really want since it will delete the text / score.
+            let gradedComponent = getGradedComponentFromDOM(component_id);
+            if (gradedComponent.comment !== '' && !gradedComponent.custom_mark_selected) {
+                if (!confirm("Are you sure you want to delete the custom mark?")) {
+                    return sequence;
+                }
+            }
             // We're in grade mode, so save the graded component
             sequence = sequence
                 .then(function () {
@@ -2538,9 +2558,12 @@ function closeComponentGrading(component_id, saveChanges) {
 function closeComponent(component_id, saveChanges = true) {
     setComponentInProgress(component_id);
     // Achieve polymorphism in the interface using this `isInstructorEditEnabled` flag
-    return isInstructorEditEnabled()
+    return (isInstructorEditEnabled()
         ? closeComponentInstructorEdit(component_id, saveChanges)
-        : closeComponentGrading(component_id, saveChanges)
+        : closeComponentGrading(component_id, saveChanges))
+        .then(function () {
+            setComponentInProgress(component_id, false);
+        });
 }
 
 /**

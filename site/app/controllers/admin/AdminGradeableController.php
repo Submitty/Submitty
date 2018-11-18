@@ -672,8 +672,6 @@ class AdminGradeableController extends AbstractController {
             'student_view',
             'student_view_after_grades',
             'student_submit',
-            'student_download',
-            'student_download_any_version',
             'late_days',
             'precision'
         ];
@@ -701,8 +699,6 @@ class AdminGradeableController extends AbstractController {
                 'student_view' => true,
                 'student_view_after_grades' => false,
                 'student_submit' => true,
-                'student_download' => false,
-                'student_download_any_version' => false,
                 'late_days' => 0,
                 'precision' => 0.5
             ];
@@ -731,6 +727,7 @@ class AdminGradeableController extends AbstractController {
                 'regrade_allowed' => $details['regrade_allowed'] === 'true',
                 'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/upload_only/config',
                 'scanned_exam' => $details['scanned_exam'] === 'true',
+                'has_due_date' => true,
 
                 // TODO: properties that aren't supported yet
                 'peer_grading' => false,
@@ -747,7 +744,8 @@ class AdminGradeableController extends AbstractController {
                 'autograding_config_path' => '',
                 'peer_grading' => false,
                 'peer_grade_set' => 0,
-                'late_submission_allowed' => true
+                'late_submission_allowed' => true,
+                'has_due_date' => false,
             ]);
         }
 
@@ -773,9 +771,8 @@ class AdminGradeableController extends AbstractController {
             $gradeable->setStudentView(true);
             $gradeable->setStudentViewAfterGrades(true);
             $gradeable->setStudentSubmit(false);
-            $gradeable->setStudentDownload(true);
-            $gradeable->setStudentDownloadAnyVersion(false);
             $gradeable->setAutogradingConfigPath('/usr/local/submitty/more_autograding_examples/pdf_exam/config');
+            $gradeable->setHasDueDate(false);
         }
 
         // Generate a blank component to make the rubric UI work properly
@@ -829,12 +826,11 @@ class AdminGradeableController extends AbstractController {
             'student_view',
             'student_view_after_grades',
             'student_submit',
-            'student_download',
-            'student_download_any_version',
             'peer_grading',
             'late_submission_allowed',
             'regrade_allowed',
-            'vcs'
+            'vcs',
+            'has_due_date'
         ];
 
         $numeric_properties = [
@@ -1007,6 +1003,23 @@ class AdminGradeableController extends AbstractController {
         )));
     }
 
+    /**
+     * Shifts all dates in the array up to and including $date_prop to be no later than $time
+     * @param array $dates
+     * @param string $date_prop
+     * @param \DateTime $time
+     */
+    private function shiftDates(array &$dates, string $date_prop, \DateTime $time) {
+        foreach (Gradeable::date_validated_properties as $d) {
+            if ($dates[$d] > $time) {
+                $dates[$d] = $time;
+            }
+            if ($date_prop === $d) {
+                break;
+            }
+        }
+    }
+
     private function quickLink() {
         $g_id = $_REQUEST['id'];
         $action = $_REQUEST['quick_link_action'];
@@ -1019,9 +1032,7 @@ class AdminGradeableController extends AbstractController {
         //what happens on the quick link depends on the action
         if ($action === "release_grades_now") {
             if ($dates['grade_released_date'] > $now) {
-                // Also set the grade due date so our dates are valid
-                $dates['grade_due_date'] = $now;
-                $dates['grade_released_date'] = $now;
+                $this->shiftDates($dates, 'grade_released_date', $now);
                 $message .= "Released grades for ";
                 $success = true;
             } else {
@@ -1030,7 +1041,7 @@ class AdminGradeableController extends AbstractController {
             }
         } else if ($action === "open_ta_now") {
             if ($dates['ta_view_start_date'] > $now) {
-                $dates['ta_view_start_date'] = $now;
+                $this->shiftDates($dates, 'ta_view_start_date', $now);
                 $message .= "Opened TA access to ";
                 $success = true;
             } else {
@@ -1039,7 +1050,7 @@ class AdminGradeableController extends AbstractController {
             }
         } else if ($action === "open_grading_now") {
             if ($dates['grade_start_date'] > $now) {
-                $dates['grade_start_date'] = $now;
+                $this->shiftDates($dates, 'grade_start_date', $now);
                 $message .= "Opened grading for ";
                 $success = true;
             } else {
@@ -1048,7 +1059,7 @@ class AdminGradeableController extends AbstractController {
             }
         } else if ($action === "open_students_now") {
             if ($dates['submission_open_date'] > $now) {
-                $dates['submission_open_date'] = $now;
+                $this->shiftDates($dates, 'submission_open_date', $now);
                 $message .= "Opened student access to ";
                 $success = true;
             } else {

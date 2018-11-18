@@ -586,7 +586,6 @@ tr.is_publish {
     border-radius: 4px;
     color: #888;
     font-size: 14px;
-    font-family: 'Source Sans Pro', sans-serif;
     text-align: center;
 }
 
@@ -652,6 +651,11 @@ tr.is_publish {
 
 .gradeable .mark-deleted {
     background: #FFAAAA
+}
+
+.gradeable .custom-mark-error {
+    border-color: #F00;
+    background-color: #FEE;
 }
 
 .gradeable .mark-deleted span.delete-mark-container {
