@@ -130,6 +130,7 @@
                 show_alert = true;
             } else {
                 validateUserId("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_ids, true, path, count, "", makeSubmission);
+                btn.attr('disabled', false);
             }
             e.preventDefault();
             e.stopPropagation();
