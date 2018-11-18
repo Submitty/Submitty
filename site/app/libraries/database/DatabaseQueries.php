@@ -928,6 +928,7 @@ ORDER BY {$u_or_t}.{$section_key}", $params);
         }
         return $return;
     }
+    
     public function getAverageComponentScores($g_id, $section_key, $is_team) {
         $u_or_t="u";
         $users_or_teams="users";
@@ -1586,25 +1587,80 @@ DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=?
     }
 
 // END FIXME
-
-
+     
+    public function getAllSectionsForGradeable($gradeable) {
+         $grade_type = $gradeable->isGradeByRegistration() ? 'registration' : 'rotating';
+         
+         $this->course_db->query("
+             SELECT * FROM sections_{$grade_type} 
+             ORDER BY SUBSTRING(sections_{$grade_type}_id, '^[^0-9]*'), 
+             COALESCE(SUBSTRING(sections_{$grade_type}_id, '[0-9]+')::INT, -1), 
+             SUBSTRING(sections_{$grade_type}_id, '[^0-9]*$') ");
+         
+         $sections = $this->course_db->rows();
+         foreach ($sections as $i => $section)
+             $sections[$i] = $section['sections_registration_id'];
+         return $sections;
+    }
+    
+    public function getSectionsForGradeableAndUser($gradeable, $grader) {
+        if ($gradeable->isGradeByRegistration())
+            return $grader->getGradingRegistrationSections();
+        return getRotatingSectionsForGradeableAndUser($gradeable->getId(), $grader->getId());
+    }
+    
     /**
      * Gets the ids of all submitters who received a mark
      * @param Mark $mark
+     * @param User $grader
+     * @param Gradeable $gradeable
      * @return string[]
      */
-    public function getSubmittersWhoGotMark(Mark $mark) {
+    public function getSubmittersWhoGotMarkBySection($mark, $grader, $gradeable) {
+         // Switch the column based on gradeable team-ness
+         $type = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'team' : 'user'; 
+         $row_type = $type . "_id";
+         
+         $params = array($grader->getId(), $mark->getId());
+         $table = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'gradeable_teams' : 'users';
+         $grade_type = $gradeable->isGradeByRegistration() ? 'registration' : 'rotating';
+         
+         $this->course_db->query("
+             SELECT u.{$type}_id
+             FROM {$table} u
+                 JOIN (
+                     SELECT gr.sections_registration_id
+                     FROM grading_registration AS gr
+                     WHERE gr.user_id = ?
+                 ) AS gr
+                 ON gr.sections_registration_id=u.registration_section
+                 JOIN (
+                     SELECT gd.gd_{$type}_id, gcmd.gcm_id
+                     FROM gradeable_component_mark_data AS gcmd
+                         JOIN gradeable_data gd ON gd.gd_id=gcmd.gd_id
+                 ) as gcmd
+                 ON gcmd.gd_{$type}_id=u.{$type}_id
+             WHERE gcmd.gcm_id = ?", $params);
+
+         // Map the results into a non-associative array of team/user ids
+         return array_map(function ($row) use ($row_type) {
+             return $row[$row_type];
+         }, $this->course_db->rows());
+    }
+    
+    public function getAllSubmittersWhoGotMark($mark) {
         // Switch the column based on gradeable team-ness
-        $submitter_type = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'gd_team_id' : 'gd_user_id';
+        $type = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'team' : 'user';     
+        $row_type = "gd_" . $type . "_id";
         $this->course_db->query("
-            SELECT gd.{$submitter_type}
+            SELECT gd.gd_{$type}_id
             FROM gradeable_component_mark_data gcmd
               JOIN gradeable_data gd ON gd.gd_id=gcmd.gd_id
             WHERE gcm_id = ?", [$mark->getId()]);
-
+            
         // Map the results into a non-associative array of team/user ids
-        return array_map(function ($row) use ($submitter_type) {
-            return $row[$submitter_type];
+        return array_map(function ($row) use ($row_type) {
+            return $row[$row_type];
         }, $this->course_db->rows());
     }
 
