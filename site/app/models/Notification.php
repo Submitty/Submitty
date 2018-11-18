@@ -246,32 +246,53 @@ class Notification extends AbstractModel {
     }
 
     //use email_announcements.cgi to send an email.. 
-    public function sendEmailAnnouncement($thread_title, $thread_content) {
+    // public function sendEmailAnnouncement($thread_title, $thread_content) {
 
-            $course = urlencode($this->core->getConfig()->getCourse());
-            $semester = urlencode($this->core->getConfig()->getSemester());
+    //         $course = urlencode($this->core->getConfig()->getCourse());
+    //         $semester = urlencode($this->core->getConfig()->getSemester());
 
-            if($course == 'blank') {
 
-                $thread_title_encoded = urlencode($thread_title);
-                $thread_content_encoded = urlencode($thread_content);
+    //         $email_job_data = [
+    //             "job" => "sendEmail",
+    //             "semester" => $semester,
+    //             "course" => $course,
+    //             "email_type" => "announce"
+    //         ];
 
-                $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."submitty_mailer.cgi?email_type=announce&thread_title={$thread_title_encoded}&thread_content={$thread_content_encoded}&course={$course}&semester={$semester}");
+    //         $email_job_file = "/var/local/submitty/daemon_job_queue/email__" . $semester . "__" . $course . "__" . $ . ".json";
 
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-                $output = curl_exec($ch);
-                $output = json_decode($output, true); 
+    //         if(file_exists($lichen_job_file) && !is_writable($lichen_job_file)) {
+    //             return "Failed to create lichen job. Try again";
+    //         }
+
+    //         if(file_put_contents($lichen_job_file, json_encode($lichen_job_data, JSON_PRETTY_PRINT)) === false) {
+    //             return "Failed to write lichen job file. Try again";
+    //         }
+    //         return null;
+
+
+
+    //     //     if($course == 'blank') {
+
+    //     //         $thread_title_encoded = urlencode($thread_title);
+    //     //         $thread_content_encoded = urlencode($thread_content);
+
+    //     //         $ch = curl_init();
+    //     //         curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."submitty_mailer.cgi?email_type=announce&thread_title={$thread_title_encoded}&thread_content={$thread_content_encoded}&course={$course}&semester={$semester}");
+
+    //     //         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    //     //         $output = curl_exec($ch);
+    //     //         $output = json_decode($output, true); 
                 
-                if ($output['error'] === true) {
-                    $this->core->addErrorMessage("Error sending email announcement: ");
-                }
+    //     //         if ($output['error'] === true) {
+    //     //             $this->core->addErrorMessage("Error sending email announcement: ");
+    //     //         }
                 
-                $this->core->addErrorMessage($output);
+    //     //         $this->core->addErrorMessage($output);
 
 
-                curl_close($ch);
-        }
+    //     //         curl_close($ch);
+    //     // }
 
-    }
+    // }
 }

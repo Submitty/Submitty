@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 
-import cgi 
-# If things are not working, then this should be enabled for better troubleshooting
-# cgitb.enable()
 import smtplib
 import json
 import os
-from sqlalchemy import create_engine, Table, MetaData, bindparam, select, func
+import sys
+from sqlalchemy import create_engine, Table
 
 with open(os.path.join("/usr/local/submitty/config", 'database.json')) as open_file:
     OPEN_JSON = json.load(open_file)
@@ -16,8 +14,6 @@ EMAIL_PASSWORD = OPEN_JSON['email_password']
 DB_HOST = OPEN_JSON['database_host']
 DB_USER = OPEN_JSON['database_user']
 DB_PASSWORD = OPEN_JSON['database_password']
-
-print(EMAIL_USER)
 
 #configures a mail client to send email 
 def constructMailClient():
@@ -59,18 +55,19 @@ def constructAnnouncementEmail(thread_title, thread_content, course, student_ema
 	mail_string = constructMailString(EMAIL_USER, student_email, thread_title, body)
 	return mail_string
 
-def sendAnnouncement(args):
+def sendAnnouncement():
 	mail_client = constructMailClient()
 
-	if 'thread_title' not in args or 'thread_content' not in args or 'course' not in args or 'semester' not in args:
-		print(json.dumps({"success": False, "error": True, "error_message" : "Error: insufficient arguments given to email_script"}))
-		exit(-1)
+	#TODO: check arguments length 
+	semester = sys.argv[2]
+	course = sys.argv[3]
+	thread_title = sys.argv[4]
+	thread_content = sys.argv[5]
 
-	thread_title = str(args['thread_title'].value)
-	thread_content = str(args['thread_content'].value)
-	course = str(args['course'].value)
-	semester = str(args['semester'].value)
 
+	# if 'thread_title' not in args or 'thread_content' not in args or 'course' not in args or 'semester' not in args:
+	# 	print(json.dumps({"success": False, "error": True, "error_message" : "Error: insufficient arguments given to email_script"}))
+	# 	exit(-1)
 
 	class_list = getClassList(semester, course)
 	for student_email in class_list:
@@ -80,17 +77,16 @@ def sendAnnouncement(args):
 def main():
 
 	try:
-		#grab arguments and figure out mail type
-		args = cgi.FieldStorage()
 
-		if 'email_type' not in args:
+		#grab arguments and figure out mail type
+		if len(sys.argv) < 2:
 			print(json.dumps({"success": False, "error": True, "error_message" : "Error: email type not given to to email_script"}))
 			return 
-
-		email_type = str(args['email_type'].value)
+		
+		email_type = sys.argv[1]
 
 		if email_type == 'announce':
-			sendAnnouncement(args)
+			sendAnnouncement()
 
 		print(json.dumps({"success": True, "error": False}))
 	except:
