@@ -164,7 +164,7 @@ class LateDayInfo extends AbstractModel {
             // Don't charge late days for BAD status
             return 0;
         }
-        return min($this->getDaysLate() - $this->getLateDayExceptions(), $this->getLateDaysAllowed());
+        return max(0, min($this->getDaysLate() - $this->getLateDayExceptions(), $this->getLateDaysAllowed()));
     }
 
     /**
