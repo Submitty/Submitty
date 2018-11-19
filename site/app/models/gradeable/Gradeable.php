@@ -1632,4 +1632,12 @@ class Gradeable extends AbstractModel {
         }
         return $this->core->getQueries()->getHasSubmission($this, $submitter);
     }
+
+    /**
+     * Gets the number of days late this gradeable would be if submitted now
+     * @return int
+     */
+    public function getWouldBeDaysLate() {
+        return max(0, DateUtils::calculateDayDiff($this->getSubmissionDueDate(), null));
+    }
 }
