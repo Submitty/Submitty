@@ -208,6 +208,12 @@ int main(int argc, char *argv[]) {
 	  assert (in_label->is_string());
 	  input_obj["label"] = *in_label;
 
+	  // Filename
+	  std::string s = "";
+	  if (i < 10) 
+	    s += "0";
+	  s += std::to_string(i);
+	  
 	  // Actual input configuration
 	  if (*in_type == "textbox" || *in_type == "codebox") {
 	    if (*in_type == "codebox") {
@@ -219,12 +225,6 @@ int main(int argc, char *argv[]) {
 	    
 	    input_obj["rows"] = (*input)[i].value("rows", 0);
 	    assert (int(input_obj["rows"]) >= 0);
-
-	    // Filename
-            std::string s = "";
-            if (i < 10) 
-                s += "0";
-            s += std::to_string(i);
 
 	    input_obj["filename"] = (*input)[i].value("filename", "textbox_" + s + ".txt");
 	    input_obj["images"] = (*input)[i].value("images", nlohmann::json::array({}));
@@ -239,12 +239,6 @@ int main(int argc, char *argv[]) {
 	    assert (mc_choices != (*input)[i].end());
 	    input_obj["choices"] = *mc_choices;
 
-	    // Filename
-            std::string s = "";
-            if (i < 10) 
-                s += "0";
-            s += std::to_string(i);
-	    
 	    input_obj["filename"] = (*input)[i].value("filename", "mc_" + s + ".txt");
 	    content["input"].push_back(input_obj);
 	  } else {
