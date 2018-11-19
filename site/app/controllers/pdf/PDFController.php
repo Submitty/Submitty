@@ -71,7 +71,15 @@ class PDFController extends AbstractController {
                 }
             }
         }
-        $this->core->getOutput()->renderOutput(array('PDF'), 'showPDFEmbedded', $gradeable_id, $id, $filename, $annotation_jsons, true);
+        $params = [
+            "gradeable_id" => $gradeable_id,
+            "id" => $id,
+            "file_name" => $filename,
+            "annotation_jsons" => $annotation_jsons,
+            "is_student" => true,
+            "page_num" => 1
+        ];
+        $this->core->getOutput()->renderOutput(array('PDF'), 'showPDFEmbedded', $params);
     }
 
     private function savePDFAnnotation(){
@@ -112,6 +120,7 @@ class PDFController extends AbstractController {
         //User can be a team
         $id = $_POST['user_id'] ?? NULL;
         $filename = $_POST['filename'] ?? NULL;
+        $page_num = $_POST['page_num'] ?? NULL;
         $filename = html_entity_decode($filename);
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if($gradeable->isTeamAssignment()){
@@ -141,7 +150,15 @@ class PDFController extends AbstractController {
                 }
             }
         }
-        $this->core->getOutput()->renderOutput(array('PDF'), 'showPDFEmbedded', $gradeable_id, $id, $filename, $annotation_jsons, false);
+        $params = [
+            "gradeable_id" => $gradeable_id,
+            "id" => $id,
+            "file_name" => $filename,
+            "annotation_jsons" => $annotation_jsons,
+            "is_student" => false,
+            "page_num" => $page_num
+        ];
+        $this->core->getOutput()->renderOutput(array('PDF'), 'showPDFEmbedded', $params);
     }
 
     private function showGraderPDFFullpage(){
