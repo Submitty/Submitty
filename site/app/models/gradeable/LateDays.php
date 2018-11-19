@@ -26,11 +26,6 @@ class LateDays extends AbstractModel {
     /** @property @var array All entries for the user in the `late_days` table */
     protected $late_days_updates = [];
 
-    const STATUS_NO_SUBMISSION = 0;
-    const STATUS_GOOD = 1;
-    const STATUS_LATE = 2;
-    const STATUS_BAD = 3;
-
     public static function isValidStatus($status) {
         return in_array($status, [self::STATUS_GOOD, self::STATUS_LATE, self::STATUS_BAD]);
     }
@@ -59,11 +54,9 @@ class LateDays extends AbstractModel {
         $this->late_days_updates = $late_days_updates = $this->core->getQueries()->getLateDayUpdates($user->getId());
 
         // Construct late days info for each gradeable
-        $cumulative_charged_late_days = 0;
         foreach ($graded_gradeables as $graded_gradeable) {
-            $info = new LateDayInfo($core, $user, $graded_gradeable, $cumulative_charged_late_days,
+            $info = new LateDayInfo($core, $user, $graded_gradeable,
                 $this->getLateDaysRemainingByContext($graded_gradeable->getGradeable()->getSubmissionDueDate()));
-            $cumulative_charged_late_days += $info->getLateDaysCharged();
             $this->late_day_info[$graded_gradeable->getGradeableId()] = $info;
         }
     }

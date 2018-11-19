@@ -15,10 +15,15 @@ use app\models\User;
  *
  * Late day calculation per graded gradeable (per user)
  *
- * @method int getLateDaysAvailable()
+ * @method int getLateDaysRemaining()
  * @method int getCumulativeLateDaysUsed()
  */
 class LateDayInfo extends AbstractModel {
+
+    const STATUS_NO_SUBMISSION = 0;
+    const STATUS_GOOD = 1;
+    const STATUS_LATE = 2;
+    const STATUS_BAD = 3;
 
     /** @var GradedGradeable */
     private $graded_gradeable = null;
@@ -26,20 +31,16 @@ class LateDayInfo extends AbstractModel {
     private $user = null;
 
     /** @property @var int The number of unused late days the user has as of this gradeable, not including exceptions */
-    protected $late_days_available = null;
-
-    /** @var int|null The number of late days used by previous gradeables */
-    private $cumulative_late_days_used = null;
+    protected $late_days_remaining = null;
 
     /**
      * LateDayInfo constructor.
      * @param Core $core
      * @param User $user
      * @param GradedGradeable $graded_gradeable
-     * @param int $cumulative_late_days_used Number of late days used by other gradeables
-     * @param int $late_days_available The number of late days available for use as of the time of this gradeable
+     * @param int $late_days_remaining The number of late days remaining for use as of the time of this gradeable
      */
-    public function __construct(Core $core, User $user, GradedGradeable $graded_gradeable, int $cumulative_late_days_used, int $late_days_available) {
+    public function __construct(Core $core, User $user, GradedGradeable $graded_gradeable, int $late_days_remaining) {
         parent::__construct($core);
         if (!$graded_gradeable->getSubmitter()->hasUser($user)) {
             throw new \InvalidArgumentException('Provided user did not match provided GradedGradeable');
@@ -49,15 +50,10 @@ class LateDayInfo extends AbstractModel {
         $this->graded_gradeable = $graded_gradeable;
 
         // Get the late days available as of this gradeable's due date
-        if ($late_days_available < 0) {
-            throw new \InvalidArgumentException('Late days available must be at least 0');
+        if ($late_days_remaining< 0) {
+            throw new \InvalidArgumentException('Late days remaining must be at least 0');
         }
-        $this->late_days_available = $late_days_available;
-
-        if ($cumulative_late_days_used < 0) {
-            throw new \InvalidArgumentException('Late days used must be at least 0');
-        }
-        $this->cumulative_late_days_used = $cumulative_late_days_used;
+        $this->late_days_remaining= $late_days_remaining;
     }
 
     public function toArray() {
@@ -67,7 +63,7 @@ class LateDayInfo extends AbstractModel {
             'g_allowed_late_days' => $this->graded_gradeable->getGradeable()->getLateDays(),
             'exceptions' => $this->getLateDayException(),
             'status' => $this->getStatus(),
-            'late_days_available' => $this->late_days_available,
+            'late_days_remaining' => $this->late_days_remaining,
             'days_late' => $this->hasLateDaysInfo() ? $this->getDaysLate() : null,
             'charged_late_days' => $this->hasLateDaysInfo() ? $this->getLateDaysCharged() : null
         ];
@@ -86,7 +82,7 @@ class LateDayInfo extends AbstractModel {
      * @return int
      */
     public function getLateDaysAllowed() {
-        return min($this->graded_gradeable->getGradeable()->getLateDays(), $this->late_days_available) + $this->getLateDayException();
+        return min($this->graded_gradeable->getGradeable()->getLateDays(), $this->late_days_remaining) + $this->getLateDayException();
     }
 
     /**
@@ -99,28 +95,28 @@ class LateDayInfo extends AbstractModel {
 
     /**
      * Gets the late status of the gradeable
-     * @return int One of LateDays::STATUS_NO_SUBMISSION, LateDays::STATUS_BAD, LateDays::STATUS_LATE, or LateDays::STATUS_GOOD
+     * @return int One of self::STATUS_NO_SUBMISSION, self::STATUS_BAD, self::STATUS_LATE, or self::STATUS_GOOD
      */
     public function getStatus() {
         // No late days info, so NO_SUBMISSION
         if (!$this->hasLateDaysInfo()) {
-            return LateDays::STATUS_NO_SUBMISSION;
+            return self::STATUS_NO_SUBMISSION;
         }
 
         $days_late = $this->getDaysLate();
         // If the number of days late is more than the minimum of: the max for this gradeable and the days the user has
         //  left, then this is a BAD status
         if ($days_late > $this->getLateDaysAllowed()) {
-            return LateDays::STATUS_BAD;
+            return self::STATUS_BAD;
         }
 
         // If the number of days late is more 0, it is LATE
         if ($days_late > 0) {
-            return LateDays::STATUS_LATE;
+            return self::STATUS_LATE;
         }
 
         // ... otherwise, its GOOD
-        return LateDays::STATUS_GOOD;
+        return self::STATUS_GOOD;
     }
 
     /**
@@ -129,15 +125,15 @@ class LateDayInfo extends AbstractModel {
      */
     public function getStatusMessage() {
         switch ($this->getStatus()) {
-            case LateDays::STATUS_NO_SUBMISSION:
+            case self::STATUS_NO_SUBMISSION:
                 return 'No Submission';
-            case LateDays::STATUS_GOOD:
+            case self::STATUS_GOOD:
                 return 'Good';
-            case LateDays::STATUS_LATE:
+            case self::STATUS_LATE:
                 return 'Late';
-            case LateDays::STATUS_BAD:
+            case self::STATUS_BAD:
                 $days_late = $this->getDaysLate();
-                if ($days_late > $this->late_days_available) {
+                if ($days_late > $this->late_days_remaining) {
                     return 'Bad (too many late days used this term)';
                 } else {
                     return 'Bad (too many late days used on this assignment)';
@@ -160,7 +156,7 @@ class LateDayInfo extends AbstractModel {
      * @return int
      */
     public function getLateDaysCharged() {
-        if ($this->getStatus() === LateDays::STATUS_BAD) {
+        if ($this->getStatus() === self::STATUS_BAD) {
             // Don't charge late days for BAD status
             return 0;
         }
