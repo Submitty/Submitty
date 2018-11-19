@@ -258,11 +258,11 @@ int main(int argc, char *argv[]) {
   // By default, we have one drop zone without a part label / sub
   // directory.
 
-  // But, if there are textboxes, but there are no explicit parts
+  // But, if there are input fields, but there are no explicit parts
   // (drag & drop zones / "bucket"s for file upload), set part_names
   // to an empty array (no zones for file drag & drop).
   if (parts == config_json.end() &&
-      textboxes != config_json.end()) {
+      content_blocks != config_json.end()) {
     j["part_names"] =  nlohmann::json::array();
   }
 
