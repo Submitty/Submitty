@@ -4,7 +4,6 @@ namespace tests\app\models\gradeable;
 
 use app\libraries\Core;
 use app\libraries\DateUtils;
-use app\models\Config;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\Gradeable;
@@ -12,7 +11,6 @@ use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDayInfo;
 use app\models\gradeable\Submitter;
 use app\models\User;
-use PHPUnit\Framework\TestCase;
 use tests\BaseUnitTest;
 
 class LateDayInfoTest extends BaseUnitTest {
@@ -178,5 +176,14 @@ class LateDayInfoTest extends BaseUnitTest {
 
         $ldi = $this->makeLateDayInfo($due_date, 1, $due_date_d2, 1, 2);
         $this->assertEquals(1, $ldi->getLateDaysCharged(), 'Late extended submission');
+    }
+
+    public function testIsValidStatus() {
+        $this->assertTrue(LateDayInfo::isValidStatus(LateDayInfo::STATUS_GOOD));
+        $this->assertTrue(LateDayInfo::isValidStatus(LateDayInfo::STATUS_LATE));
+        $this->assertTrue(LateDayInfo::isValidStatus(LateDayInfo::STATUS_BAD));
+        $this->assertTrue(LateDayInfo::isValidStatus(LateDayInfo::STATUS_NO_SUBMISSION));
+        $this->assertFalse(LateDayInfo::isValidStatus(-1));
+        $this->assertFalse(LateDayInfo::isValidStatus(4));
     }
 }
