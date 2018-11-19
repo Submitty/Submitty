@@ -16,6 +16,7 @@ use app\models\User;
  * Late day calculation per graded gradeable (per user)
  *
  * @method int getLateDaysAvailable()
+ * @method int getCumulativeLateDaysUsed()
  */
 class LateDayInfo extends AbstractModel {
 
@@ -48,12 +49,12 @@ class LateDayInfo extends AbstractModel {
         $this->graded_gradeable = $graded_gradeable;
 
         // Get the late days available as of this gradeable's due date
-        if($late_days_available < 0) {
+        if ($late_days_available < 0) {
             throw new \InvalidArgumentException('Late days available must be at least 0');
         }
         $this->late_days_available = $late_days_available;
 
-        if($cumulative_late_days_used < 0) {
+        if ($cumulative_late_days_used < 0) {
             throw new \InvalidArgumentException('Late days used must be at least 0');
         }
         $this->cumulative_late_days_used = $cumulative_late_days_used;
@@ -64,11 +65,11 @@ class LateDayInfo extends AbstractModel {
             'gradeable_title' => $this->graded_gradeable->getGradeable()->getTitle(),
             'submission_due_date' => $this->graded_gradeable->getGradeable()->getSubmissionDueDate()->format('m/d/y'),
             'g_allowed_late_days' => $this->graded_gradeable->getGradeable()->getLateDays(),
-            'exceptions' => $this->getLateDayExceptions(),
+            'exceptions' => $this->getLateDayException(),
             'status' => $this->getStatus(),
             'late_days_available' => $this->late_days_available,
             'days_late' => $this->hasLateDaysInfo() ? $this->getDaysLate() : null,
-            'charged_late_days' => $this->hasLateDaysInfo()? $this->getLateDaysCharged() : null
+            'charged_late_days' => $this->hasLateDaysInfo() ? $this->getLateDaysCharged() : null
         ];
     }
 
@@ -85,7 +86,7 @@ class LateDayInfo extends AbstractModel {
      * @return int
      */
     public function getLateDaysAllowed() {
-        return min($this->graded_gradeable->getGradeable()->getLateDays(), $this->late_days_available) + $this->getLateDayExceptions();
+        return min($this->graded_gradeable->getGradeable()->getLateDays(), $this->late_days_available) + $this->getLateDayException();
     }
 
     /**
@@ -102,7 +103,7 @@ class LateDayInfo extends AbstractModel {
      */
     public function getStatus() {
         // No late days info, so NO_SUBMISSION
-        if(!$this->hasLateDaysInfo()) {
+        if (!$this->hasLateDaysInfo()) {
             return LateDays::STATUS_NO_SUBMISSION;
         }
 
@@ -125,7 +126,6 @@ class LateDayInfo extends AbstractModel {
     /**
      * Gets the status message for this gradeable
      * @return string
-     * @throws \Exception
      */
     public function getStatusMessage() {
         switch ($this->getStatus()) {
@@ -177,13 +177,5 @@ class LateDayInfo extends AbstractModel {
             return 0;
         }
         return $this->graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance()->getDaysLate();
-    }
-
-    /**
-     * Gets the late day exception for this gradeable and user
-     * @return int
-     */
-    public function getLateDayExceptions() {
-        return $this->graded_gradeable->getLateDayException($this->user);
     }
 }
