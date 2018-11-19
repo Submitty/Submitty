@@ -277,22 +277,6 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     # intentionally fragile to avoid redundancy
     USE_DOCKER = complete_config_obj['docker_enabled']
 
-
-
-    # WIP: This option file facilitated testing...
-    #USE_DOCKER = os.path.isfile("/tmp/use_docker")
-    #use_docker_string="grading begins, using DOCKER" if USE_DOCKER else "grading begins (not using docker)"
-    #grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,submission_path,message=use_docker_string)
-
-    container = None
-    if USE_DOCKER:
-        container = subprocess.check_output(['docker', 'run', '-t', '-d',
-                                             '-v', tmp + ':' + tmp,
-                                             'ubuntu:custom']).decode('utf8').strip()
-        dockerlaunch_done=dateutils.get_current_time()
-        dockerlaunch_time = (dockerlaunch_done-grading_began).total_seconds()
-        grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,"dcct:",dockerlaunch_time,"docker container created")
-
     # --------------------------------------------------------------------
     # COMPILE THE SUBMITTED CODE
 
@@ -522,7 +506,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     ##################################################################################################
     #call grade_item_main_runner.py
     runner_success = grade_item_main_runner.executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submission_string, 
-                                                                                    item_name, USE_DOCKER, container, which_untrusted,
+                                                                                    item_name, USE_DOCKER, None, which_untrusted,
                                                                                     job_id, grading_began)
     ##################################################################################################
 
@@ -581,6 +565,17 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     # validator the validator.out as the untrusted user
     with open(os.path.join(tmp_logs,"validator_log.txt"), 'w') as logfile:
         if USE_DOCKER:
+            # WIP: This option file facilitated testing...
+            #USE_DOCKER = os.path.isfile("/tmp/use_docker")
+            #use_docker_string="grading begins, using DOCKER" if USE_DOCKER else "grading begins (not using docker)"
+            #grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,submission_path,message=use_docker_string)
+            container = subprocess.check_output(['docker', 'run', '-t', '-d',
+                                                 '-v', tmp + ':' + tmp,
+                                                 'ubuntu:custom']).decode('utf8').strip()
+            dockerlaunch_done=dateutils.get_current_time()
+            dockerlaunch_time = (dockerlaunch_done-grading_began).total_seconds()
+            grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,"dcct:",dockerlaunch_time,"docker container created")
+
             validator_success = subprocess.call(['docker', 'exec', '-w', tmp_work, container,
                                                  os.path.join(tmp_work, 'my_validator.out'), queue_obj['gradeable'],
                                                  queue_obj['who'], str(queue_obj['version']), submission_string], stdout=logfile)
