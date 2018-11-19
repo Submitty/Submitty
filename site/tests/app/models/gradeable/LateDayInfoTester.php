@@ -13,7 +13,7 @@ use app\models\gradeable\Submitter;
 use app\models\User;
 use tests\BaseUnitTest;
 
-class LateDayInfoTest extends BaseUnitTest {
+class LateDayInfoTester extends BaseUnitTest {
 
     protected function makeLateDayInfo(string $due_date, int $late_days, string $submission_date, int $late_day_exception, int $late_days_remaining) {
         $core = $this->createMock(Core::class);
@@ -182,7 +182,7 @@ class LateDayInfoTest extends BaseUnitTest {
         $this->assertTrue(LateDayInfo::isValidStatus(LateDayInfo::STATUS_GOOD));
         $this->assertTrue(LateDayInfo::isValidStatus(LateDayInfo::STATUS_LATE));
         $this->assertTrue(LateDayInfo::isValidStatus(LateDayInfo::STATUS_BAD));
-        $this->assertTrue(LateDayInfo::isValidStatus(LateDayInfo::STATUS_NO_SUBMISSION));
+        $this->assertFalse(LateDayInfo::isValidStatus(LateDayInfo::STATUS_NO_SUBMISSION));
         $this->assertFalse(LateDayInfo::isValidStatus(-1));
         $this->assertFalse(LateDayInfo::isValidStatus(4));
     }

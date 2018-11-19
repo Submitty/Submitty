@@ -13,7 +13,7 @@ use app\models\gradeable\Submitter;
 use app\models\User;
 use tests\BaseUnitTest;
 
-class LateDaysTest extends BaseUnitTest {
+class LateDaysTester extends BaseUnitTest {
 
     private function mockGradedGradeable(string $gradeable_id, string $due_date, int $late_days, string $submission_date, int $late_day_exception) {
         $gradeable = $this->createMockModel(Gradeable::class);
