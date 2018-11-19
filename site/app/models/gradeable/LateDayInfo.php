@@ -3,9 +3,7 @@
 namespace app\models\gradeable;
 
 
-use app\controllers\student\LateDaysTableController;
 use app\libraries\Core;
-use app\libraries\DateUtils;
 use app\models\AbstractModel;
 use app\models\User;
 
@@ -24,6 +22,10 @@ class LateDayInfo extends AbstractModel {
     const STATUS_GOOD = 1;
     const STATUS_LATE = 2;
     const STATUS_BAD = 3;
+
+    public static function isValidStatus($status) {
+        return in_array($status, [self::STATUS_GOOD, self::STATUS_LATE, self::STATUS_BAD]);
+    }
 
     /** @var GradedGradeable */
     private $graded_gradeable = null;
