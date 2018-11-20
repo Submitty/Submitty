@@ -47,7 +47,7 @@ class LateDays extends AbstractModel {
         });
 
         // Get the late day updates that the instructor will enter
-        $this->late_days_updates = $late_days_updates = $this->core->getQueries()->getLateDayUpdates($user->getId());
+        $this->late_days_updates = $this->core->getQueries()->getLateDayUpdates($user->getId());
 
         // Construct late days info for each gradeable
         foreach ($graded_gradeables as $graded_gradeable) {
