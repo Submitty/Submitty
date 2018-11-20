@@ -202,6 +202,12 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                   stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
                   stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
+    # Remove any and all containers left over from past runs.
+    old_containers = subprocess.check_output(['docker', 'ps', '-aq', '-f', 'name={0}'.format(which_untrusted)]).split()
+
+    for old_container in old_containers:
+        subprocess.call(['docker', 'rm', '-f', old_container.decode('utf8')])
+
     # clean up old usage of this directory
     shutil.rmtree(tmp,ignore_errors=True)
     os.mkdir(tmp)
