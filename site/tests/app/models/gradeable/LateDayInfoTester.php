@@ -109,7 +109,7 @@ class LateDayInfoTester extends BaseUnitTest {
         $bad_message_2 = 'Bad (too many late days used on this assignment)';
 
         $ldi = $this->makeLateDayInfo($due_date, 0, '', 0, 0);
-        $this->assertEquals(LateDayInfo::STATUS_NO_SUBMISSION, $ldi->getStatus(), "No submission");
+        $this->assertEquals(LateDayInfo::STATUS_NO_ACTIVE_VERSION, $ldi->getStatus(), "No submission");
         $this->assertEquals($no_sub_message, $ldi->getStatusMessage());
 
         $ldi = $this->makeLateDayInfo($due_date, 0, $due_date_minus_d1, 0, 0);
@@ -182,7 +182,7 @@ class LateDayInfoTester extends BaseUnitTest {
         $this->assertTrue(LateDayInfo::isValidStatus(LateDayInfo::STATUS_GOOD));
         $this->assertTrue(LateDayInfo::isValidStatus(LateDayInfo::STATUS_LATE));
         $this->assertTrue(LateDayInfo::isValidStatus(LateDayInfo::STATUS_BAD));
-        $this->assertFalse(LateDayInfo::isValidStatus(LateDayInfo::STATUS_NO_SUBMISSION));
+        $this->assertFalse(LateDayInfo::isValidStatus(LateDayInfo::STATUS_NO_ACTIVE_VERSION));
         $this->assertFalse(LateDayInfo::isValidStatus(-1));
         $this->assertFalse(LateDayInfo::isValidStatus(4));
     }

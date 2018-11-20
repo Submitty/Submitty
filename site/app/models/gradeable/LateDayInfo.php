@@ -18,7 +18,7 @@ use app\models\User;
  */
 class LateDayInfo extends AbstractModel {
 
-    const STATUS_NO_SUBMISSION = 0;
+    const STATUS_NO_ACTIVE_VERSION = 0;
     const STATUS_GOOD = 1;
     const STATUS_LATE = 2;
     const STATUS_BAD = 3;
@@ -97,12 +97,12 @@ class LateDayInfo extends AbstractModel {
 
     /**
      * Gets the late status of the gradeable
-     * @return int One of self::STATUS_NO_SUBMISSION, self::STATUS_BAD, self::STATUS_LATE, or self::STATUS_GOOD
+     * @return int One of self::STATUS_NO_ACTIVE_VERSION, self::STATUS_BAD, self::STATUS_LATE, or self::STATUS_GOOD
      */
     public function getStatus() {
         // No late days info, so NO_SUBMISSION
         if (!$this->hasLateDaysInfo()) {
-            return self::STATUS_NO_SUBMISSION;
+            return self::STATUS_NO_ACTIVE_VERSION;
         }
 
         // If the number of days late is more than the number allowed, then its BAD
@@ -125,8 +125,12 @@ class LateDayInfo extends AbstractModel {
      */
     public function getStatusMessage() {
         switch ($this->getStatus()) {
-            case self::STATUS_NO_SUBMISSION:
-                return 'No Submission';
+            case self::STATUS_NO_ACTIVE_VERSION:
+                if ($this->graded_gradeable->getAutoGradedGradeable()->hasSubmission()) {
+                    return 'Cancelled Submission';
+                } else {
+                    return 'No Submission';
+                }
             case self::STATUS_GOOD:
                 return 'Good';
             case self::STATUS_LATE:
