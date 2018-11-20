@@ -52,10 +52,10 @@ class LateDayInfo extends AbstractModel {
         $this->graded_gradeable = $graded_gradeable;
 
         // Get the late days available as of this gradeable's due date
-        if ($late_days_remaining< 0) {
+        if ($late_days_remaining < 0) {
             throw new \InvalidArgumentException('Late days remaining must be at least 0');
         }
-        $this->late_days_remaining= $late_days_remaining;
+        $this->late_days_remaining = $late_days_remaining;
     }
 
     public function toArray() {
