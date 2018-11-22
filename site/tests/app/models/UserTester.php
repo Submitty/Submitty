@@ -136,8 +136,8 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'modified' => true,
             'anon_id' => "TestAnonymous",
             'user_updated' => false,
-            'instructor_updated' => false
-            'notification_settings' => array(false, false, false, false, false);
+            'instructor_updated' => false,
+            'notification_settings' => array(false, false, false, false, false)
         );
         $this->assertEquals($expected, $actual);
     }
