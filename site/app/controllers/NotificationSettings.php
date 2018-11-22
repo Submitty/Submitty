@@ -6,9 +6,6 @@ use app\libraries\Core;
 use app\models\Notification;
 use app\controllers\AbstractController;
 use app\libraries\Output;
-use app\libraries\Utils;
-use app\libraries\FileUtils;
-use app\libraries\DateUtils;
 
 /**
  * Class NotificationSettings
@@ -37,7 +34,6 @@ class NotificationSettings extends AbstractController {
     	$result = ['error' => 'Notification settings could not be saved. Please try again.'];
     	if($this->validateNotificationSettings(array_keys($new_settings))) {
     		$values_not_sent = array_diff(self::NOTIFICATION_SELECTIONS, array_keys($new_settings));
-    		//var_dump($values_not_sent);
 	    	foreach(array_values($values_not_sent) as $value) {
 	    		$new_settings[$value] = 'false';
 	    	}
