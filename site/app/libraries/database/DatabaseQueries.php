@@ -2698,9 +2698,11 @@ AND gc_id IN (
         if(!empty($notification->getNotifyTarget())) {
         	//Notify specific user
         	$not_send_users[] = $notification->getNotifyTarget();
-        	$this->course_db->query("INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id)
+        	if($params[3] !== $not_send_users[0]) {
+        		$this->course_db->query("INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id)
                     VALUES (?, ?, ?, current_timestamp, ?, ?)",
                     array_merge($params, $not_send_users));
+        	}
         }
 
         if($notification->getNotifyNotToSource()){
