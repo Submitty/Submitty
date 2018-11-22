@@ -506,12 +506,6 @@ CREATE TABLE notification_settings (
 	reply_in_post_thread BOOLEAN DEFAULT FALSE NOT NULL
 );
 
-ALTER TABLE ONLY notification_settings
-    ADD CONSTRAINT notification_settings_pkey PRIMARY KEY (user_id);
-
-ALTER TABLE ONLY notification_settings
-    ADD CONSTRAINT notification_settings_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
-
 --
 -- Name: regrade_discussion; Type: TABLE; Schema: public; Owner: -
 --
@@ -779,6 +773,12 @@ ALTER TABLE ONLY sessions
 
 ALTER TABLE ONLY users
     ADD CONSTRAINT users_pkey PRIMARY KEY (user_id);
+
+ALTER TABLE ONLY notification_settings
+    ADD CONSTRAINT notification_settings_pkey PRIMARY KEY (user_id);
+
+ALTER TABLE ONLY notification_settings
+    ADD CONSTRAINT notification_settings_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
 
 --
 -- Name: gradeable_teams_pkey; Type: CONSTRAINT; Schema: public; Owner: -
