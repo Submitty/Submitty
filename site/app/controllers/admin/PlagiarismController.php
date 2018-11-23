@@ -45,7 +45,6 @@ class PlagiarismController extends AbstractController {
                 break;
             case 'show_plagiarism_result':
                 $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildUrl(array('component' => 'admin', 'semester' => $_REQUEST['semester'] , 'course'=> $_REQUEST['course'],'page' => 'plagiarism')));
-                $this->core->getOutput()->addBreadcrumb(($this->core->getQueries()->getGradeable($_REQUEST['gradeable_id']))->getName().' Results');
                 $this->showPlagiarismResult();
                 break;
             default:
