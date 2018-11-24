@@ -6,12 +6,11 @@ splits by QR code. The split pdf items are placed
 in the split pdf directory. 
 """
 import cgi
-# If things are not working, then this should be enabled for better troubleshooting
-# import cgitb; cgitb.enable()
 import json
 import os
 import shutil
 import stat
+import traceback
 from PyPDF2 import PdfFileReader, PdfFileWriter
 from pdf2image import convert_from_bytes
 import pyzbar.pyzbar as pyzbar
@@ -33,7 +32,7 @@ print("Content-type: application/json")
 print()
 
 valid = True
-message = "Something went wrong."
+message = "Error from pdf_check_qr.cgi:\n"
 
 try:
     arguments = cgi.FieldStorage()
@@ -53,19 +52,22 @@ try:
     with open("/usr/local/submitty/config/submitty.json", encoding='utf-8') as data_file:
         data = json.loads(data_file.read())
 
-    #print("making paths")
     current_path = os.path.dirname(os.path.realpath(__file__))
     uploads_path = os.path.join(data["submitty_data_dir"],"courses",sem,course,"uploads")
     bulk_path = os.path.join(data["submitty_data_dir"],"courses",sem,course,"uploads/bulk_pdf",g_id,ver)
     split_path = os.path.join(data["submitty_data_dir"],"courses",sem,course,"uploads/split_pdf",g_id,ver)
-
+except Exception as e:
+    valid = False
+    message += "Failed after parsing args and creating paths\n"
+    message += traceback.format_exc()
+    print(json.dumps({"valid" : valid, "message" : message}))
+try:
     # copy folder
     if not os.path.exists(split_path):
         os.makedirs(split_path)
 
     # adding write permissions for the PHP
     add_permissions_recursive(uploads_path, stat.S_IWGRP | stat.S_IXGRP, stat.S_IWGRP | stat.S_IXGRP, stat.S_IWGRP)
-    # message = "Something went wrong:  preparing split folder"
 
     # copy over files to new directory
     for filename in os.listdir(bulk_path):
@@ -73,9 +75,16 @@ try:
 
     # move to copy folder
     os.chdir(split_path)
-    #message = "Something went wrong: preparing bulk folder"
-
-    # # split pdfs
+except Exception as e:
+    valid = False
+    message += "Failed after adding permissions and copying files\n"
+    message += traceback.format_exc()
+    #cleanup
+    if os.path.exists(split_path):
+        shutil.rmtree(split_path)
+    print(json.dumps({"valid" : valid, "message" : message}))
+try:
+    #split pdfs
     for filename in os.listdir(bulk_path):
         output = {}
         pdfPages = PdfFileReader(filename)
@@ -96,15 +105,8 @@ try:
                 #found a new qr code, split here
                 #convert byte literal to string
                 data = val[0][0].decode("utf-8")
-                # if data == "none":  # blank exam with 'none' qr code
-                #     data = "BLANK EXAM"
                 if qr_prefix != "" and data[0:len(qr_prefix)] == qr_prefix:
                     data = data[len(qr_prefix):]
-                #else:
-                 #   page_count += 1
-                 #   i += 1
-                  #  pdf_writer.addPage(pdfPages.getPage(i))
-                  #  continue
 
                 cover_index = i
                 cover_filename = '{}_{}_cover.pdf'.format(filename[:-4], i)
@@ -120,11 +122,11 @@ try:
                         pdf_writer.write(out)
                 else:
                     first_file = output_filename
-                #if id_index == 2:
+                if id_index == 2:
                     #correct first pdf's page count and print file
-                    #output[1]['page_count'] = page_count
-                    #with open(first_file, 'wb') as out:
-                        #pdf_writer.write(out)
+                    output[1]['page_count'] = page_count
+                    with open(first_file, 'wb') as out:
+                        pdf_writer.write(out)
                 #start a new pdf and grab the cover
                 cover_writer = PdfFileWriter()
                 pdf_writer = PdfFileWriter()
@@ -163,9 +165,9 @@ try:
     message += ",and finished"
 except Exception as e:
     valid = False
-    # if copy exists, delete it... but relies on the fact that copy_path exists :(
     if os.path.exists(split_path):
         shutil.rmtree(split_path)
+    message += "Failed when splitting PDFs\n"
     message += str(e)
 
 print(json.dumps({"valid" : valid, "message" : message}))
