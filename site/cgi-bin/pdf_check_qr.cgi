@@ -168,6 +168,7 @@ except Exception as e:
     if os.path.exists(split_path):
         shutil.rmtree(split_path)
     message += "Failed when splitting PDFs\n"
-    message += str(e)
+    message += traceback.format_exc()
+    print(json.dumps({"valid" : valid, "message" : message}))
 
 print(json.dumps({"valid" : valid, "message" : message}))
