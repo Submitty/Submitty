@@ -687,6 +687,7 @@ class ForumController extends AbstractController {
         $option = ($this->core->getUser()->getGroup() <= 2 || $option != 'alpha') ? $option : 'tree';
         if(!empty($_REQUEST["thread_id"])){
             $thread_id = (int)$_REQUEST["thread_id"];
+            $this->core->getQueries()->markNotificationAsSeen($user, -2, (string)$thread_id);
             $thread = $this->core->getQueries()->getThread($thread_id);
             if(!empty($thread)) {
                 $thread = $thread[0];
