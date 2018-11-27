@@ -35,6 +35,7 @@ class BuildConfig(AbstractJob):
         except PermissionError:
             print ("error, could not open "+output_file+" for writing")
 
+
 class RunLichen(AbstractJob):
     def run_job(self):
         semester = self.job_details['semester']
@@ -69,6 +70,7 @@ class DeleteLichenResult(AbstractJob):
             subprocess.call("rm"+ " -rf /var/local/submitty/courses/" +semester+"/"+course+ "/lichen/hashes/"+gradeable, stdout=output_file, stderr=output_file, shell=True)
             subprocess.call("rm"+ " -rf /var/local/submitty/courses/" +semester+"/"+course+ "/lichen/matches/"+gradeable, stdout=output_file, stderr=output_file, shell=True)
             subprocess.call("echo"+ " Deleted lichen plagiarism results and saved config for "+gradeable, stdout=op, stderr=op,shell=True)
+
 
 class SendEmail(AbstractJob):
     def run_job(self):
