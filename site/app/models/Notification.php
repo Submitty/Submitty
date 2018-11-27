@@ -244,5 +244,4 @@ class Notification extends AbstractModel {
             return date_format(DateUtils::parseDateTime($actual_time, $this->core->getConfig()->getTimezone()), "n/j g:i A");
         }
     }
-
 }
