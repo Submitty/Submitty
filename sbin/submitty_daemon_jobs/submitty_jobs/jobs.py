@@ -77,23 +77,12 @@ class SendEmail(AbstractJob):
         course = self.job_details['course']
 
         email_script = '/usr/local/submitty/sbin/sendEmail.py'
-        email_output = 'email_job_output.txt'
 
         thread_title = self.job_details['thread_title']
         thread_content = self.job_details['thread_content']
-        subprocess.call([email_script, email_type, semester, course, thread_title, thread_content])
 
-
-        # try:
-        #     with open(email_output, "w") as output_file:
-        #         subprocess.call([emailScript, email_type, semester, course, thread_title, thread_content], stdout=output_file, stderr=output_file)
-        # except PermissionError:
-        #     print ("error, could not open "+output_file+" for writing")
-
-
-
-
-
-
-
-
+        try:
+            with open('email_job_logs.txt', "a") as output_file:
+                subprocess.call([email_script, email_type, semester, course, thread_title, thread_content], stdout=output_file)
+        except PermissionError:
+            print ("error, could not open "+output_file+" for writing")

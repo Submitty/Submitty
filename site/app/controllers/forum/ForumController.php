@@ -316,6 +316,8 @@ class ForumController extends AbstractController {
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
         $thread_status = $_POST["thread_status"];
         $announcment = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->getGroup() < 3) ? 1 : 0 ;
+        $email_announcement = (isset($_POST["EmailAnnouncement"]) && $_POST["EmailAnnouncement"] == "EmailAnnouncement" && $this->core->getUser()->getGroup() < 3) ? 1 : 0 ;
+
         $categories_ids  = array();
         foreach ($_POST["cat"] as $category_id) {
             $categories_ids[] = (int)$category_id;
@@ -352,9 +354,12 @@ class ForumController extends AbstractController {
                 }
                 if($announcment){
                     $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'new_announcement', 'thread_id' => $id, 'thread_title' => $title));
-                    $this->sendEmailAnnouncement($title, $thread_post_content, $post_id);
 
                     $this->core->getQueries()->pushNotification($notification);
+                }
+
+                if($email_announcement) {
+                    $this->sendEmailAnnouncement($title, $thread_post_content, $post_id);
                 }
                 $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $id));
             }

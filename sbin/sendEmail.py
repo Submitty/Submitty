@@ -4,7 +4,7 @@ import smtplib
 import json
 import os
 import sys
-from sqlalchemy import create_engine, Table
+from sqlalchemy import create_engine, Table, MetaData
 
 with open(os.path.join("/usr/local/submitty/config", 'database.json')) as open_file:
     OPEN_JSON = json.load(open_file)
@@ -18,11 +18,12 @@ DB_PASSWORD = OPEN_JSON['database_password']
 #configures a mail client to send email 
 def constructMailClient():
 	try:
+		#TODO: change hostname for smtp server to a domain name
 		client = smtplib.SMTP_SSL('173.194.66.109', 465)
 		client.ehlo()
 		client.login(EMAIL_USER, EMAIL_PASSWORD)
 	except:
-		print(json.dumps({"success": False, "error": True, "error_message" : "Error: connection to mail server failed. check mail config"}))
+		print("Error: connection to mail server failed. check mail config")
 		exit(-1) 
 	return client 
 
@@ -40,7 +41,7 @@ def getClassList(semester, course):
 	metadata = MetaData(bind=db)
 
 	student_emails = []
-	result = db.execute("SELECT user_email FROM users WHERE registration_section NOTNULL;")
+	result = db.execute("SELECT user_email FROM users WHERE registration_section IS NOT NULL;")
 	for email in result:
 		student_emails.append(email)
 
@@ -58,29 +59,30 @@ def constructAnnouncementEmail(thread_title, thread_content, course, student_ema
 def sendAnnouncement():
 	mail_client = constructMailClient()
 
+	if(len(sys.argv) < 6):
+		print("Error: insufficient arguments given - Usage: python3 sendEmail.py {email_type} {semester} {course} {title} {body}")
+		exit(-1) 
+
+
 	#TODO: check arguments length 
 	semester = sys.argv[2]
 	course = sys.argv[3]
 	thread_title = sys.argv[4]
 	thread_content = sys.argv[5]
-
-
-	# if 'thread_title' not in args or 'thread_content' not in args or 'course' not in args or 'semester' not in args:
-	# 	print(json.dumps({"success": False, "error": True, "error_message" : "Error: insufficient arguments given to email_script"}))
-	# 	exit(-1)
+	print("Attempting to Send an Email Announcement. Course: {}, Semester: {}, Announcement Title: {}".format(course, semester, thread_title))
 
 	class_list = getClassList(semester, course)
 	for student_email in class_list:
 		announcement_email = constructAnnouncementEmail(thread_title, thread_content, course, student_email)
 		mail_client.sendmail(EMAIL_USER, student_email, announcement_email)
 
+	print("Sucessfully Emailed Announcement!")
+
 def main():
-
 	try:
-
 		#grab arguments and figure out mail type
 		if len(sys.argv) < 2:
-			print(json.dumps({"success": False, "error": True, "error_message" : "Error: email type not given to to email_script"}))
+			print("Error: email type not given to to email_script")
 			return 
 		
 		email_type = sys.argv[1]
@@ -88,11 +90,9 @@ def main():
 		if email_type == 'announce':
 			sendAnnouncement()
 
-		print(json.dumps({"success": True, "error": False}))
-	except:
-		print(json.dumps({"success": False, "error": True, "error_message" : "an unexpected error occured"}))
+	except Exception as e:
+		print("Error: " + str(e))
 
 
 if __name__ == "__main__":
     main()
-
