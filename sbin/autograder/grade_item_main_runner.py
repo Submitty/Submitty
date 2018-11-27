@@ -62,6 +62,7 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                 try:
                     use_router = testcases[testcase_num-1]['use_router']
                     single_port_per_container = testcases[testcase_num-1]['single_port_per_container']
+                    num_ports_per_contianer = testcases[testcase_num-1].get('ports_per_container',1)
                     # returns a dictionary where container_name maps to outgoing connections and container image
                     container_info = find_container_information(testcases[testcase_num -1], testcase_num, use_router,tmp_work)
                     # Creates folders for each docker container if there are more than one. Otherwise, we grade in testcase_folder.
@@ -73,7 +74,7 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                                          item_name,grading_began, queue_obj,submission_string,testcase_num)
                     # Networks containers together if there are more than one of them. Modifies container_info to store 'network'
                     #   The name of the docker network it is connected to.
-                    network_containers(container_info,os.path.join(tmp_work, "test_input"),which_untrusted,use_router,single_port_per_container)
+                    network_containers(container_info,os.path.join(tmp_work, "test_input"),which_untrusted,use_router,single_port_per_container,num_ports_per_contianer)
                     print('NETWORKED CONTAINERS')
                     #The containers are now ready to execute.
 
@@ -388,7 +389,7 @@ def launch_container(container_name, container_image, mounted_directory,job_id,i
 
 
 
-def network_containers(container_info,test_input_folder,which_untrusted, use_router,single_port_per_container):
+def network_containers(container_info,test_input_folder,which_untrusted, use_router,single_port_per_container,ports_per_container):
   if len(container_info) <= 1:
     return
 
@@ -403,7 +404,7 @@ def network_containers(container_info,test_input_folder,which_untrusted, use_rou
   else:
     network_containers_routerless(container_info,which_untrusted)
 
-  create_knownhosts_txt(container_info,test_input_folder,single_port_per_container)
+  create_knownhosts_txt(container_info,test_input_folder,single_port_per_container,ports_per_container)
 
 def network_containers_routerless(container_info,which_untrusted):
   network_name = '{0}_routerless_network'.format(which_untrusted)
@@ -467,7 +468,7 @@ def network_containers_with_router(container_info,which_untrusted):
 
 
 
-def create_knownhosts_txt(container_info,test_input_folder,single_port_per_container):
+def create_knownhosts_txt(container_info,test_input_folder,single_port_per_container,ports_per_container):
   tcp_connection_list = list()
   udp_connection_list = list()
   current_tcp_port = 9000
@@ -475,10 +476,11 @@ def create_knownhosts_txt(container_info,test_input_folder,single_port_per_conta
 
   for name, info in sorted(container_info.items()):
       if single_port_per_container:
-          tcp_connection_list.append([name, current_tcp_port])
-          udp_connection_list.append([name, current_udp_port])
-          current_tcp_port += 1
-          current_udp_port += 1  
+          for p in range(ports_per_container):
+              tcp_connection_list.append([name, current_tcp_port])
+              udp_connection_list.append([name, current_udp_port])
+              current_tcp_port += 1
+              current_udp_port += 1  
       else:
           for connected_machine in info['outgoing_connections']:
               if connected_machine == name:

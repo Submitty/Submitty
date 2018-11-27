@@ -109,6 +109,15 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
     whole_config["single_port_per_container"] = false; // connection
   }
 
+  if (!whole_config["ports_per_container"].is_number()){
+    whole_config["ports_per_container"] = 1;
+  }
+
+  int ports_per_container = whole_config["ports_per_container"];
+  assert(ports_per_container > 0);
+  assert(ports_per_container <= 100);
+
+
   bool use_router = whole_config["use_router"];
   bool single_port_per_container = whole_config["single_port_per_container"];
 
@@ -130,6 +139,14 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
     }
 
     assert(!(single_port_per_container && use_router));
+
+    if (!this_testcase["ports_per_container"].is_number()){
+      this_testcase["ports_per_container"] = ports_per_container;
+    }
+    
+    int testcase_ports_per_container = this_testcase["ports_per_container"];
+    assert(testcase_ports_per_container > 0);
+    assert(testcase_ports_per_container <= 100);
 
     nlohmann::json commands = nlohmann::json::array();
     // if "command" exists in whole_config, we must wrap it in a container.
