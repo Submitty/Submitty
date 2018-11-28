@@ -5,97 +5,24 @@ namespace app\views;
 use app\libraries\GradeableType;
 use app\models\Gradeable;
 use app\views\AbstractView;
-use app\views\admin\LateDayView;
+use app\models\gradeable\LateDays;
 
 class LateDaysTableView extends AbstractView {
-    public function showLateTable($user_id, $g_id = NULL, $full_page) {
-        $student_gradeables = array();
-        $status_array = array();
-        $late_charged_array = array();
-        //TODO: Move all this logic to the controller
-        $order_by = [
-            'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END'
-        ];
-        $late_update = $this->core->getQueries()->getLateDayUpdates($user_id);
-        $total_late_used = 0;
-        foreach ($this->core->getQueries()->getGradeablesIterator(null, $user_id, 'registration_section', 'u.user_id', 0, $order_by) as $gradeable) {
-            $gradeable->calculateLateDays($total_late_used);
-
-            if (!$this->filterCanView($gradeable)) {
-                continue;
-            }
-
-            $student_gradeables[] = $gradeable;
-            $status_array[] = $gradeable->getLateStatus();
-            $late_charged_array[] = $gradeable->getCurrLateCharged();
-        }
-        $preferred_name = $this->core->getQueries()->getUserById($user_id)->getDisplayedFirstName() . " " . $this->core->getQueries()->getUserById($user_id)->getDisplayedLastName();
-        if($full_page){
-            $this->core->getOutput()->addBreadcrumb("My Late Days");
-            $template = "/LateDaysTable.twig";
-        } else {
-            $template = "/LateDaysTablePlugin.twig";
-        }
-
-        $table_data =
-          $this->core->getOutput()->renderTwigTemplate($template, [
-            "user_id" => $user_id,
-            "student_gradeables" => $student_gradeables,
-            "status_array" => $status_array,
-            "late_charged_array" => $late_charged_array,
-            "total_late_used" => $total_late_used,
-            "g_id" => $g_id,
-            "late_update" => $late_update,
-            "preferred_name" => $preferred_name
+    public function showLateTable(LateDays $late_days, string $hightlight_gradeable) {
+        $preferred_name = $late_days->getUser()->getDisplayFullName();
+        $table_data = $this->core->getOutput()->renderTwigTemplate('LateDaysTablePlugin.twig', [
+            'late_days' => $late_days,
+            'highlight_gradeable' => $hightlight_gradeable,
         ]);
-        if (!$full_page) {
-          $table_data = "<hr><h2>Late Day Usage by ".$preferred_name." (".$user_id.")</h2><br>".$table_data;
-        }
+        $table_data = "<hr><h2>Late Day Usage by " . $preferred_name . " (" . $late_days->getUser()->getId() . ")</h2><br>" . $table_data;
         return $table_data;
     }
 
-
-    /**
-     * Test if the current user is allowed to view this gradeable
-     * @param Gradeable $gradeable
-     * @return bool True if they are
-     */
-    private function filterCanView(Gradeable $gradeable) {
-        //TODO: Move all this logic to the controller
-
-        // Don't show the students gradeables they don't submit for / don't have due dates
-        if (!$gradeable->getStudentSubmit() || !$gradeable->getHasDueDate()) {
-            return false;
-        }
-        $user = $this->core->getUser();
-
-        //Remove incomplete gradeables for non-instructors
-        if (!$user->accessAdmin() && $gradeable->getType() == GradeableType::ELECTRONIC_FILE &&
-            !$gradeable->hasConfig()) {
-            return false;
-        }
-
-        // student users should only see electronic gradeables -- NOTE: for now, we might change this design later
-        if ($gradeable->getType() !== GradeableType::ELECTRONIC_FILE && !$user->accessGrading()) {
-            return false;
-        }
-
-        // if student view false, never show
-        if (!$gradeable->getStudentView() && !$user->accessGrading()) {
-            return false;
-        }
-
-        //If we're not instructor and this is not open to TAs
-        $date = $this->core->getDateTimeNow();
-        if ($gradeable->getTAViewDate() > $date && !$user->accessAdmin()) {
-            return false;
-        }
-        if ($gradeable->getOpenDate() > $date && !$user->accessGrading()) {
-            return false;
-        }
-
-        return true;
+    public function showLateTablePage(LateDays $late_days) {
+        $this->core->getOutput()->addBreadcrumb("My Late Days");
+        return $this->core->getOutput()->renderTwigTemplate('LateDaysTable.twig', [
+            'late_days' => $late_days
+        ]);
     }
-
 }
 

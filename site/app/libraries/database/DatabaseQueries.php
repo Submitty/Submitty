@@ -728,7 +728,11 @@ ORDER BY egd.g_version", array($g_id, $user_id));
         else {
             $this->course_db->query("SELECT * FROM late_days");
         }
-        return $this->course_db->rows();
+        // Parse the date-times
+        return array_map(function ($arr)  {
+            $arr['since_timestamp'] = DateUtils::parseDateTime($arr['since_timestamp'], $this->core->getConfig()->getTimezone());
+            return $arr;
+        }, $this->course_db->rows());
     }
 
     public function getLateDayInformation($user_id) {
