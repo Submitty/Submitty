@@ -26,15 +26,6 @@ class LateDays extends AbstractModel {
     /** @property @var array All entries for the user in the `late_days` table */
     protected $late_days_updates = [];
 
-    const STATUS_NO_SUBMISSION = 0;
-    const STATUS_GOOD = 1;
-    const STATUS_LATE = 2;
-    const STATUS_BAD = 3;
-
-    public static function isValidStatus($status) {
-        return in_array($status, [self::STATUS_GOOD, self::STATUS_LATE, self::STATUS_BAD]);
-    }
-
     /**
      * LateDays constructor.
      * NOTE: use LateDays::fromUser if you want to use default gradeable filtering behavior
@@ -56,14 +47,12 @@ class LateDays extends AbstractModel {
         });
 
         // Get the late day updates that the instructor will enter
-        $this->late_days_updates = $late_days_updates = $this->core->getQueries()->getLateDayUpdates($user->getId());
+        $this->late_days_updates = $this->core->getQueries()->getLateDayUpdates($user->getId());
 
         // Construct late days info for each gradeable
-        $cumulative_charged_late_days = 0;
         foreach ($graded_gradeables as $graded_gradeable) {
-            $info = new LateDayInfo($core, $user, $graded_gradeable, $cumulative_charged_late_days,
+            $info = new LateDayInfo($core, $user, $graded_gradeable,
                 $this->getLateDaysRemainingByContext($graded_gradeable->getGradeable()->getSubmissionDueDate()));
-            $cumulative_charged_late_days += $info->getLateDaysCharged();
             $this->late_day_info[$graded_gradeable->getGradeableId()] = $info;
         }
     }
@@ -97,11 +86,10 @@ class LateDays extends AbstractModel {
         }
 
         //If we're not instructor and this is not open to TAs
-        $date = $core->getDateTimeNow();
-        if ($gradeable->getTaViewStartDate() > $date && !$user->accessAdmin()) {
+        if (!$gradeable->isTaViewOpen() && !$user->accessAdmin()) {
             return false;
         }
-        if ($gradeable->getSubmissionOpenDate() > $date && !$user->accessGrading()) {
+        if (!$gradeable->isSubmissionOpen() && !$user->accessGrading()) {
             return false;
         }
 
@@ -172,6 +160,10 @@ class LateDays extends AbstractModel {
         return $total;
     }
 
+    /**
+     * Gets the number of late days the students start with (from config)
+     * @return int'
+     */
     public function getDefaultLateDays() {
         return $this->core->getConfig()->getDefaultStudentLateDays();
     }
@@ -257,7 +249,7 @@ class LateDays extends AbstractModel {
     /**
      * Gets the LateDaysInfo instance for a gradeable
      * @param Gradeable $gradeable
-     * @return LateDayInfo
+     * @return LateDayInfo|null
      */
     public function getLateDayInfoByGradeable(Gradeable $gradeable) {
         return $this->late_day_info[$gradeable->getId()] ?? null;
@@ -266,10 +258,10 @@ class LateDays extends AbstractModel {
     /**
      * Gets the gradeables with a provided status
      * @param $status
-     * @return array
+     * @return string[] Array of gradeable ids
      */
-    public function getGradeablesByStatus($status) {
-        if (!self::isValidStatus($status)) {
+    public function getGradeableIdsByStatus($status) {
+        if (!LateDayInfo::isValidStatus($status)) {
             throw new \InvalidArgumentException('Invalid gradeable status');
         }
 
