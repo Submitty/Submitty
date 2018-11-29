@@ -4,6 +4,7 @@ import smtplib
 import json
 import os
 import sys
+import time
 from sqlalchemy import create_engine, Table, MetaData
 
 with open(os.path.join("/usr/local/submitty/config", 'database.json')) as open_file:
@@ -72,11 +73,17 @@ def sendAnnouncement():
 	print("Attempting to Send an Email Announcement. Course: {}, Semester: {}, Announcement Title: {}".format(course, semester, thread_title))
 
 	class_list = getClassList(semester, course)
+	emailCount = 0 
 	for student_email in class_list:
 		announcement_email = constructAnnouncementEmail(thread_title, thread_content, course, student_email)
 		mail_client.sendmail(EMAIL_USER, student_email, announcement_email)
 
-	print("Sucessfully Emailed Announcement!")
+		#Sleep if we reach a certain sending threshold
+		#TODO: bring this in via config. Might be different depending on the mail service being used 
+		emailCount += 1 
+		time.sleep(65)
+
+	print("Sucessfully Emailed an Announcement to {} Students".format(emailCount))
 
 def main():
 	try:
