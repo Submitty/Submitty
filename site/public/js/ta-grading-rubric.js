@@ -2213,7 +2213,10 @@ function openCookieComponent() {
     if (!componentExists(cookieComponent)) {
         return Promise.resolve();
     }
-    return toggleComponent(cookieComponent, false);
+    return toggleComponent(cookieComponent, false)
+        .then(function() {
+            scrollToComponent(cookieComponent);
+        });
 }
 
 /**
@@ -2450,6 +2453,15 @@ function openComponent(component_id) {
 }
 
 /**
+ * Scroll such that a given component is visible
+ * @param component_id
+ */
+function scrollToComponent(component_id) {
+    let component = getComponentJQuery(component_id);
+    component[0].scrollIntoView();
+}
+
+/**
  * Closes a component for instructor edit mode and saves changes
  * NOTE: don't call this function on its own.  Call 'closeComponent' Instead
  * @param {int} component_id
@@ -2596,6 +2608,14 @@ function closeOverallComment(saveChanges = true) {
                 return injectOverallComment(comment, false);
             });
     }
+}
+
+/**
+ * Scroll such that the overall comment is visible
+ */
+function scrollToOverallComment() {
+    let comment = getOverallCommentJQuery();
+    comment[0].scrollIntoView();
 }
 
 /**
