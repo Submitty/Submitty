@@ -136,10 +136,11 @@ class NavigationController extends AbstractController {
         $user_id = $this->core->getUser()->getId();
         if(!empty($_GET['action'])) {
             if($_GET['action'] == 'open_notification' && !empty($_GET['nid']) && is_numeric($_GET['nid']) && $_GET['nid'] >= 1) {
-                if(!$_GET['seen']) {
-                    $this->core->getQueries()->markNotificationAsSeen($user_id, $_GET['nid']);
-                }
                 $metadata = $this->core->getQueries()->getNotificationInfoById($user_id, $_GET['nid'])['metadata'];
+                if(!$_GET['seen']) {
+                    $thread_id = Notification::getThreadIdIfExists($metadata);
+                    $this->core->getQueries()->markNotificationAsSeen($user_id, $_GET['nid'], $thread_id);
+                }
                 $this->core->redirect(Notification::getUrl($this->core, $metadata));
             } else if($_GET['action'] == 'mark_as_seen' && !empty($_GET['nid']) && is_numeric($_GET['nid']) && $_GET['nid'] >= 1) {
                 $this->core->getQueries()->markNotificationAsSeen($user_id, $_GET['nid']);
