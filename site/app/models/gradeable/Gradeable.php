@@ -1339,6 +1339,14 @@ class Gradeable extends AbstractModel {
     }
 
     /**
+     * Gets if tas can view the gradeable now
+     * @return bool
+     */
+    public function isTaViewOpen() {
+        return $this->ta_view_start_date < $this->core->getDateTimeNow();
+    }
+
+    /**
      * Gets if the submission open date has passed yet
      * @return bool
      */

@@ -335,6 +335,7 @@ class GlobalController extends AbstractController {
     private function fixedHeightPage($breadcrumbs){
         switch($breadcrumbs[count($breadcrumbs)-1]->getTitle()) {
             case 'Discussion Forum':
+            case 'Plagiarism Detection':
                 return true;
         }
         return false;
