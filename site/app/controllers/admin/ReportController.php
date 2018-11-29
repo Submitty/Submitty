@@ -10,9 +10,12 @@ use app\libraries\GradeableType;
 use app\libraries\Output;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
+use app\models\gradeable\LateDayInfo;
+use app\models\gradeable\LateDays;
 use app\models\gradeable\Mark;
 use app\models\gradeable\Submitter;
 use app\models\GradeSummary;
+use app\models\User;
 
 /*
 use app\report\CSVReportView;
@@ -93,7 +96,7 @@ class ReportController extends AbstractController {
         $this->core->getOutput()->renderFile($csv, $this->core->getConfig()->getCourse() . "_csvreport_" . date("ymdHis") . ".csv");
     }
 
-    public function generateGradeSummary(GradedGradeable $gg) {
+    public function generateGradeSummary(GradedGradeable $gg, LateDays $ld) {
         $g = $gg->getGradeable();
         $autograding_score = $gg->getAutoGradedGradeable()->hasActiveVersion() ? $gg->getAutoGradedGradeable()->getTotalPoints() : 0;
         $ta_grading_score = $gg->hasTaGradingInfo() ? $gg->getTaGradedGradeable()->getTotalScore() : 0;
@@ -115,7 +118,7 @@ class ReportController extends AbstractController {
                 $entry['score'] = max(0, $autograding_score + $ta_grading_score);
                 $entry['autograding_score'] = $autograding_score;
                 $entry['tagrading_score'] = $ta_grading_score;
-                $this->addLateDays($g, $entry);
+                $this->addLateDays($ld->getLateDayInfoByGradeable($g), $entry);
             } else {
                 $entry['score'] = 0;
                 $entry['autograding_score'] = 0;
@@ -227,9 +230,12 @@ class ReportController extends AbstractController {
                             // TODO:
                         }
                     }
+                    $late_days = new LateDays($this->core, $current_user, array_filter($graded_gradeables, function (GradedGradeable $gg) {
+                        return $gg->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE;
+                    }));
                     foreach ($graded_gradeables as $ugg) {
                         $bucket = ucwords($gg->getGradeable()->getSyllabusBucket());
-                        $user[$bucket][] = $this->generateGradeSummary($ugg);
+                        $user[$bucket][] = $this->generateGradeSummary($ugg, $late_days);
                     }
                     file_put_contents(FileUtils::joinPaths($base_path, $current_user . '_summary.json'), FileUtils::encodeJson($user));
                 }
@@ -255,52 +261,41 @@ class ReportController extends AbstractController {
         $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
     }
 
-    // TODO: make this use the new late days model
-    private function addLateDays(Gradeable $gradeable, &$entry) {
-        $late_days_used = $gradeable->getLateDays() - $gradeable->getLateDayExceptions();
-        $status = 'Good';
-        $late_flag = false;
+    private function addLateDays(LateDayInfo $ldi, &$entry) {
+        $status = $ldi->getStatus();
 
-        if ($late_days_used > 0) {
-            $status = "Late";
-            $late_flag = true;
-        }
-        //If late days used - extensions applied > allowed per assignment then status is "Bad..."
-        if ($late_days_used > $gradeable->getAllowedLateDays()) {
-            $status = "Bad";
-            $late_flag = false;
-        }
-        // If late days used - extensions applied > allowed per term then status is "Bad..."
-        // Do a max(0, ...) to protect against the case where the student's late days goes down
-        // during the semester and they've already used late days
-        if ($late_days_used > max(0, $gradeable->getStudentAllowedLateDays() - $total_late_used)) {
-            $status = "Bad";
-            $late_flag = false;
-        }
-
-        //A submission cannot be late and bad simultaneously. If it's late calculate late days charged. Cannot
-        //be less than 0 in cases of excess extensions. Decrement remaining late days.
-        if ($late_flag) {
-            $curr_late_charged = $late_days_used;
-            $curr_late_charged = ($curr_late_charged < 0) ? 0 : $curr_late_charged;
-            $total_late_used += $curr_late_charged;
-        }
-
-        if($status === 'Bad') {
+        if($status === LateDayInfo::STATUS_BAD) {
             $entry['score'] = 0;
         }
 
-        $entry['status'] = $status;
+        // The report may need this to be different from the 'pretty' version returned from $ldi->getStatusMessage()
+        $status_message = 'ERROR';
+        switch($status) {
+            case LateDayInfo::STATUS_GOOD:
+                $status_message = 'Good';
+                break;
+            case LateDayInfo::STATUS_LATE:
+                $status_message = 'Late';
+                break;
+            case LateDayInfo::STATUS_BAD:
+                $status_message = 'Bad';
+                break;
+            case LateDayInfo::STATUS_NO_ACTIVE_VERSION:
+                $status_message = 'No Submission';
+                break;
+        }
+        $entry['status'] = $status_message;
 
-        if ($late_flag && $late_days_used > 0) {
+        $late_days_charged = $ldi->getLateDaysCharged();
+        if ($late_days_charged > 0) {
 
             // TODO:  DEPRECATE THIS FIELD
-            $entry['days_late'] = $late_days_used;
+            $entry['days_late'] = $late_days_charged;
 
             // REPLACED BY:
-            $entry['days_after_deadline'] = $gradeable->getLateDays();
-            $entry['extensions'] = $gradeable->getLateDayExceptions();
-            $entry['days_charged'] = $late_days_used;
+            $entry['days_after_deadline'] = $ldi->getDaysLate();
+            $entry['extensions'] = $ldi->getLateDayException();
+            $entry['days_charged'] = $ldi->getLateDaysCharged();
         }
         else {
             $entry['days_late'] = 0;
