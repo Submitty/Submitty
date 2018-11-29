@@ -84,22 +84,22 @@ class Submitter extends AbstractModel {
     }
 
     /**
+     * Gets if the provided user is this submitter on this team
+     * @param User $user
+     * @return bool
+     */
+    public function hasUser(User $user) {
+        return $this->isTeam()
+            ? $this->getTeam()->hasMember($user->getId())
+            : $this->getUser()->getId() === $user->getId();
+    }
+    
+    /**
      * Gets the anonymous id of the user/team
      * @return string The anonymous id of the submitter
      */
     public function getAnonId() {
         return $this->team_or_user->getAnonId();
-    }
-
-    /**
-     * Gets if the provided user is a part of this submitter:
-     *  either is the submitter, or on the team submitter
-     * @param User $user
-     * @return bool
-     */
-    public function hasUser($user) {
-        return $this->getId() === $user->getId()
-            || $this->isTeam() && in_array($user->getId(), $this->getTeam()->getMembers());
     }
 
     /**

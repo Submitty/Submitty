@@ -1,0 +1,16 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}Plagiarism-Highlighting-Key{% endblock %}
+{% block title %}Plagiarism Highlighting Key{% endblock %}
+{% block body %}
+<div>
+    <i style="color:white;" class="fa fa-square" aria-hidden="true"></i> Unique <br />
+    <i style="color:#cccccc;" class="fa fa-square" aria-hidden="true"></i> Common (matches many/all students) <br />
+    <i style="color:#b5e3b5;" class="fa fa-square" aria-hidden="true"></i> Matches instructor provided file <br />
+    <i style="color:yellow;" class="fa fa-square" aria-hidden="true"></i> Matches other student(s) <br />
+    <i style="color:#ffa500;" class="fa fa-square" aria-hidden="true"></i> General match between selected users <br />
+    <i style="color:red;" class="fa fa-square" aria-hidden="true"></i> Specific match between selected users <br />
+</div>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+{% endblock %}

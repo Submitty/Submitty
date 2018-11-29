@@ -461,18 +461,18 @@ registerKeyHandler({name: "Open Next Component", code: 'ArrowDown'}, function(e)
         // No component is open, so open the first one
         let componentId = getComponentIdByOrder(0);
         toggleComponent(componentId, true).then(function () {
-            getComponentJQuery(componentId)[0].scrollIntoView();
+            scrollToComponent(componentId);
         });
     } else if (openComponentId === getComponentIdByOrder(numComponents - 1)) {
         // Last component is open, so open the general comment
         toggleOverallComment(true).then(function () {
-            getOverallCommentJQuery()[0].scrollIntoView();
+            scrollToOverallComment();
         });
     } else {
         // Any other case, open the next one
         let nextComponentId = getNextComponentId(openComponentId);
         toggleComponent(nextComponentId, true).then(function () {
-            getComponentJQuery(nextComponentId)[0].scrollIntoView();
+            scrollToComponent(nextComponentId);
         });
     }
     e.preventDefault();
@@ -488,13 +488,13 @@ registerKeyHandler({name: "Open Previous Component", code: 'ArrowUp'}, function(
         // Overall comment open, so open the last component
         let componentId = getComponentIdByOrder(numComponents - 1);
         toggleComponent(componentId, true).then(function () {
-            getComponentJQuery(componentId)[0].scrollIntoView();
+            scrollToComponent(componentId);
         });
     }
     else if (openComponentId === NO_COMPONENT_ID) {
         // No Component is open, so open the overall comment
         toggleOverallComment(true).then(function () {
-            getOverallCommentJQuery()[0].scrollIntoView();
+            scrollToOverallComment();
         });
     } else if (openComponentId === getComponentIdByOrder(0)) {
         // First component is open, so close it
@@ -503,7 +503,7 @@ registerKeyHandler({name: "Open Previous Component", code: 'ArrowUp'}, function(
         // Any other case, open the previous one
         let prevComponentId = getPrevComponentId(openComponentId);
         toggleComponent(prevComponentId, true).then(function () {
-            getComponentJQuery(prevComponentId)[0].scrollIntoView();
+            scrollToComponent(prevComponentId);
         });
     }
     e.preventDefault();
