@@ -1,14 +1,14 @@
 <div class="electronic_file">
     <b>Choose from the simple, provided autograding configurations --OR--<br>Specify the full path to the directory containing your custom autograding config.json file:</b><br>
     <fieldset>
-        <input type="radio" class="config_option ignore" name="config_option" value="defaults"/> Provided autograding configurations
-        <input type="radio" class="config_option ignore" name="config_option" value="uploaded"/> Custom uploaded autograding configurations
+        <input type="radio" class="config_option ignore" name="config_option" id="config_option_defaults" value="defaults"/> <label for="config_option_defaults">Provided autograding configurations</label>
+        <input type="radio" class="config_option ignore" name="config_option" id="config_option_uploaded" value="uploaded"/> <label for="config_option_uploaded">Custom uploaded autograding configurations</label>
         {% if repo_name != "" %}
-            <input type="radio" class="config_option ignore" name="config_option" value="repo"/> Use Private repository ({{ config_repo_name }})
+            <input type="radio" class="config_option ignore" name="config_option" id="config_option_repo" value="repo"/> <label for="config_option_repo">Use Private repository ({{ config_repo_name }})</label>
         {% endif %}
-        <input type="radio" class="config_option ignore" name="config_option" value="manual"/> Other full path
+        <input type="radio" class="config_option ignore" name="config_option" id="config_option_manual" value="manual"/> <label for="config_option_manual">Other full path</label>
         <div class="div_select_config" id="div_default_configs" style="display: {{ config_select_mode == 'defaults' ? 'block' : 'none' }}">
-            <select class="select_config_path ignore" id="select_default_config" style="width: 700px;">
+            <select class="select_config_path ignore" id="select_default_config" style="width: 700px;" aria-label="configuration selection">
                 <option value=""></option>
                 {% for path in default_config_paths %}
                     {% if config_select_mode == 'defaults' and path.1 == gradeable.getAutogradingConfigPath() %}
@@ -45,7 +45,7 @@
             </select>
         </div>
         <br />
-        <p>Current selection for full path to autograding configuration:</p>
+        <p><label for="input_provide_full_path">Current selection for full path to autograding configuration:</label></p>
         <input style='width: 83%' type='text' id='input_provide_full_path' name='autograding_config_path' value="{{ gradeable.getAutogradingConfigPath() }}" class="required" placeholder="(Required)"
                 {{ config_select_mode != 'manual' ? 'disabled' : '' }}/>
     </fieldset>

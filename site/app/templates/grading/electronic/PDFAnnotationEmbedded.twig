@@ -37,6 +37,6 @@
     {% if student_popup %}
     render_student("{{ gradeable_id }}", "{{ user_id }}", "{{ filename }}", "{{ pdf_url_base | raw}}");
     {% else %}
-    render("{{ gradeable_id }}", "{{ user_id }}", "{{ grader_id }}", '{{ filename }}');
+    render("{{ gradeable_id }}", "{{ user_id }}", "{{ grader_id }}", '{{ filename }}', {{ page_num }});
     {% endif %}
 </script>

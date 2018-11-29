@@ -2,6 +2,7 @@
 
 namespace app\views\grading;
 
+use app\controllers\student\LateDaysTableController;
 use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\AutoGradedVersion;
@@ -608,10 +609,10 @@ class ElectronicGraderView extends AbstractView {
         //Late day calculation
         if ($gradeable->isTeamAssignment()) {
             foreach ($graded_gradeable->getSubmitter()->getTeam()->getMemberUsers() as $team_member) {
-                $tables[] = $this->core->getOutput()->renderTemplate('LateDaysTable', 'showLateTable', $team_member->getId(), $gradeable->getId(), false);
+                $tables[] = LateDaysTableController::renderLateTable($this->core, $team_member, $gradeable->getId());
             }
         } else {
-            $tables[] = $this->core->getOutput()->renderTemplate('LateDaysTable', 'showLateTable', $graded_gradeable->getSubmitter()->getId(), $gradeable->getId(), false);
+            $tables[] = LateDaysTableController::renderLateTable($this->core, $graded_gradeable->getSubmitter()->getUser(), $gradeable->getId());
         }
 
         if ($display_version_instance === null) {

@@ -137,19 +137,20 @@ def handle_migration(args):
             course_dir = os.path.join(args.config.submitty['submitty_data_dir'], 'courses')
             if not os.path.exists(course_dir):
                 print("Could not find courses directory: {}".format(course_dir))
-            for semester in os.listdir(course_dir):
-                for course in os.listdir(os.path.join(course_dir, semester)):
-                    if args.choose_course is None or [semester, course] == args.choose_course:
-                        args.semester = semester
-                        args.course = course
-                        print("Running {} migrations for {}.{}...".format(args.direction, semester, course), end="")
-                        params['dbname'] = 'submitty_{}_{}'.format(semester, course)
-                        try:
-                            with psycopg2.connect(**params) as connection:
-                                migrate_environment(connection, environment, args)
-                        except psycopg2.OperationalError:
-                            print("Submitty Database Migration Warning:  Database does not exist for "
-                                  "semester={} course={}".format(semester, course))
+            else:
+                for semester in os.listdir(course_dir):
+                    for course in os.listdir(os.path.join(course_dir, semester)):
+                        if args.choose_course is None or [semester, course] == args.choose_course:
+                            args.semester = semester
+                            args.course = course
+                            print("Running {} migrations for {}.{}...".format(args.direction, semester, course), end="")
+                            params['dbname'] = 'submitty_{}_{}'.format(semester, course)
+                            try:
+                                with psycopg2.connect(**params) as connection:
+                                    migrate_environment(connection, environment, args)
+                            except psycopg2.OperationalError:
+                                print("Submitty Database Migration Warning:  Database does not exist for "
+                                      "semester={} course={}".format(semester, course))
 
 
 def migrate_environment(connection, environment, args):

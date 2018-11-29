@@ -68,7 +68,7 @@ def worker_process(which_machine,address,which_untrusted,my_server):
                     json.dump(queue_obj, outfile, sort_keys=True, indent=4)        
             except Exception as e:
                 traceback.print_exc()
-                grade_items_logging.log_message(JOB_ID, message="ERROR attempting to unzip graded item: " + which_machine + " " + which_untrusted + " exception " + repr(e))
+                grade_items_logging.log_message(JOB_ID, message="ERROR attempting to unzip graded item: " + which_machine + " " + which_untrusted + " exception: " + traceback.format_exc())
                 with contextlib.suppress(FileNotFoundError):
                     os.remove(autograding_zip)
                 with contextlib.suppress(FileNotFoundError):

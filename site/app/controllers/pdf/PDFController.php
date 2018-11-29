@@ -67,7 +67,15 @@ class PDFController extends AbstractController {
             $ta_graded_gradeable->setUserAnnotationViewedDate($this->core->getDateTimeNow());
             $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
         }
-        $this->core->getOutput()->renderOutput(array('PDF'), 'showPDFEmbedded', $gradeable_id, $id, $filename, $annotation_jsons, true);
+        $params = [
+            "gradeable_id" => $gradeable_id,
+            "id" => $id,
+            "file_name" => $filename,
+            "annotation_jsons" => $annotation_jsons,
+            "is_student" => true,
+            "page_num" => 1
+        ];
+        $this->core->getOutput()->renderOutput(array('PDF'), 'showPDFEmbedded', $params);
     }
 
     private function savePDFAnnotation(){
@@ -108,6 +116,7 @@ class PDFController extends AbstractController {
         //User can be a team
         $id = $_POST['user_id'] ?? NULL;
         $filename = $_POST['filename'] ?? NULL;
+        $page_num = $_POST['page_num'] ?? NULL;
         $filename = html_entity_decode($filename);
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if($gradeable === NULL){
@@ -154,6 +163,22 @@ class PDFController extends AbstractController {
                 }
             }
         }
-        return $annotation_jsons;
+        $params = [
+            "gradeable_id" => $gradeable_id,
+            "id" => $id,
+            "file_name" => $filename,
+            "annotation_jsons" => $annotation_jsons,
+            "is_student" => false,
+            "page_num" => $page_num
+        ];
+        $this->core->getOutput()->renderOutput(array('PDF'), 'showPDFEmbedded', $params);
+    }
+
+    private function showGraderPDFFullpage(){
+        //This shows the pdf-annotate.js library's default pdf annotator. It might be useful in the future to have
+        //a full-sized annotator, so keeping this in for now.
+        $this->core->getOutput()->useFooter(false);
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->renderOutput(array('grading', 'PDFAnnotation'), 'showAnnotationPage');
     }
 }

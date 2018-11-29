@@ -379,7 +379,7 @@
     {% set total_possible = graded_gradeable.getGradeable().getAutoGradingConfig().getTotalNonExtraCredit() + graded_gradeable.getGradeable().getTaPoints() %}
     <td>
         {% if not graded_gradeable.getOrCreateTaGradedGradeable().hasVersionConflict() and graded_gradeable.isTaGradingComplete() %}
-            <div class="{{ box_background }}">{{ graded }} / {{ total_possible }}</div>
+            <div class="{{ box_background }}" style="white-space: nowrap;">{{ graded }} / {{ total_possible }}</div>
         {% endif %}
     </td>
 {% endmacro %}
