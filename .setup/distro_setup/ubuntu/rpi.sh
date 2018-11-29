@@ -148,7 +148,7 @@ apt-get install -qqy python3-tk
 pip3 install -U pip numpy
 pip3 install matplotlib
 pip3 install opencv-python
-
+pip3 install -U pip scipy
 
 ##################################################
 # Fixup the permissions
