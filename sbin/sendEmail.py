@@ -12,6 +12,9 @@ with open(os.path.join("/usr/local/submitty/config", 'database.json')) as open_f
 
 EMAIL_USER = OPEN_JSON['email_user']
 EMAIL_PASSWORD = OPEN_JSON['email_password']
+EMAIL_SENDER = OPEN_JSON['email_sender']
+EMAIL_HOSTNAME = OPEN_JSON['email_server_hostname']
+EMAIL_PORT = int(OPEN_JSON['email_server_port'])
 DB_HOST = OPEN_JSON['database_host']
 DB_USER = OPEN_JSON['database_user']
 DB_PASSWORD = OPEN_JSON['database_password']
@@ -20,8 +23,9 @@ DB_PASSWORD = OPEN_JSON['database_password']
 def constructMailClient():
 	try:
 		#TODO: change hostname for smtp server to a domain name
-		client = smtplib.SMTP_SSL('173.194.66.109', 465)
-		client.ehlo()
+		client = smtplib.SMTP(EMAIL_HOSTNAME, EMAIL_PORT)
+		client.starttls() 
+		client.ehlo() 
 		client.login(EMAIL_USER, EMAIL_PASSWORD)
 	except:
 		print("Error: connection to mail server failed. check mail config")
@@ -64,7 +68,6 @@ def sendAnnouncement():
 		print("Error: insufficient arguments given - Usage: python3 sendEmail.py {email_type} {semester} {course} {title} {body}")
 		exit(-1) 
 
-
 	#TODO: check arguments length 
 	semester = sys.argv[2]
 	course = sys.argv[3]
@@ -76,12 +79,13 @@ def sendAnnouncement():
 	emailCount = 0 
 	for student_email in class_list:
 		announcement_email = constructAnnouncementEmail(thread_title, thread_content, course, student_email)
-		mail_client.sendmail(EMAIL_USER, student_email, announcement_email)
+		mail_client.sendmail(EMAIL_SENDER, student_email, announcement_email)
 
 		#Sleep if we reach a certain sending threshold
-		#TODO: bring this in via config. Might be different depending on the mail service being used 
+		#TODO: bring this in via config. Might be different depending on the mail service being used
 		emailCount += 1 
-		time.sleep(65)
+		if(emailCount % 100 == 0):
+			time.sleep(65)
 
 	print("Sucessfully Emailed an Announcement to {} Students".format(emailCount))
 
