@@ -145,10 +145,10 @@ rm glfw-3.2.1.zip
 # Used by Computational Vision course
 apt-get install -qqy python3-tk
 
-pip3 install -U pip numpy
+pip3 install numpy
 pip3 install matplotlib
 pip3 install opencv-python
-
+pip3 install scipy
 
 ##################################################
 # Fixup the permissions
