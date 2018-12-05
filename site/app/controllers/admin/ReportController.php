@@ -112,8 +112,7 @@ class ReportController extends AbstractController {
     }
 
     /**
-     * A general purpose function for generating reports for all
-     *  users, grouped by user
+     * A general purpose function for generating reports for all users, grouped by user
      * @param string[]|null $gradeable_sort_keys
      * @param string[]|null $graded_gradeable_sort_keys
      * @param \Closure $per_user_callback callback that accepts (User, GradedGradeable[], LateDays)
