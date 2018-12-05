@@ -21,9 +21,15 @@ use app\models\User;
 use app\report\CSVReportView;
 use app\report\GradeSummaryView;
 */
+
+/**
+ * Class ReportController
+ * @package app\controllers\admin
+ *
+ */
 class ReportController extends AbstractController {
     public function run() {
-        switch($_REQUEST['action']) {
+        switch ($_REQUEST['action']) {
             case 'csv':
                 $this->generateCSVReport();
                 break;
@@ -53,36 +59,35 @@ class ReportController extends AbstractController {
 
         //Gradeable iterator will append one gradeable score per loop pass.
         foreach ($this->core->getQueries()->getGradeablesIterator(null, true, 'registration_section', 'u.user_id', null, $order_by) as $gradeable) {
-            if ($current_user !== $gradeable->getUser()->getId()) {
+            if ($current_user !== $current_user->getId()) {
                 if (!is_null($current_user)) {
                     //Previous pass completed an entire row.  Push that row to CSV data text.
                     $csv .= implode(',', $row) . PHP_EOL;
                 }
 
                 //Prepare new user row
-                $current_user = $gradeable->getUser()->getId();
-                $row['User ID'] = $gradeable->getUser()->getId();
-                $row['First Name'] = $gradeable->getUser()->getDisplayedFirstName();
-                $row['Last Name'] = $gradeable->getUser()->getDisplayedLastName();
-                $row['Registration Section'] = $gradeable->getUser()->getRegistrationSection();
+                $current_user = $current_user->getId();
+                $row['User ID'] = $current_user->getId();
+                $row['First Name'] = $current_user->getDisplayedFirstName();
+                $row['Last Name'] = $current_user->getDisplayedLastName();
+                $row['Registration Section'] = $current_user->getRegistrationSection();
             }
 
             //Append one gradeable score to row.  Scores are indexed by gradeable's ID.
             if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
                 //Should any case prove true, something is wrong with electronic gradeable.  Grade is zero.
-                switch(true) {
-                //Active version fails validation AND uses TA grading.
-                case !$gradeable->validateVersions() && $gradeable->useTAGrading():
-                //Late assignment (status is "Bad")
-                case $gradeable->getLateDays() - $gradeable->getLateDayExceptions() > $gradeable->getAllowedLateDays():
-                    $row[$gradeable->getId()] = 0;
-                    break;
-                //Gradeable is OK.  Collect grade.
-                default:
-                    $row[$gradeable->getId()] = max(0, $gradeable->getGradedAutoGraderPoints() + $gradeable->getGradedTAPoints());
+                switch (true) {
+                    //Active version fails validation AND uses TA grading.
+                    case !$gradeable->validateVersions() && $gradeable->useTAGrading():
+                        //Late assignment (status is "Bad")
+                    case $gradeable->getLateDays() - $gradeable->getLateDayExceptions() > $gradeable->getAllowedLateDays():
+                        $row[$gradeable->getId()] = 0;
+                        break;
+                    //Gradeable is OK.  Collect grade.
+                    default:
+                        $row[$gradeable->getId()] = max(0, $gradeable->getGradedAutoGraderPoints() + $gradeable->getGradedTAPoints());
                 }
-            }
-            else {
+            } else {
                 //Gradeable is not an electronic file.  Collect TA grading.
                 $row[$gradeable->getId()] = max(0, $gradeable->getGradedTAPoints());
             }
@@ -94,6 +99,77 @@ class ReportController extends AbstractController {
         $csv = implode(',', array_keys($row)) . PHP_EOL . $csv;
         //Send csv data to file download.  Filename: "{course}_csvreport_{date/time stamp}.csv"
         $this->core->getOutput()->renderFile($csv, $this->core->getConfig()->getCourse() . "_csvreport_" . date("ymdHis") . ".csv");
+    }
+
+    public function generateGradeSummaries() {
+        $base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'all_grades');
+        $g_sort_keys = [
+            'gradeable_type',
+            'CASE WHEN submission_due_date IS NOT NULL THEN submission_due_date ELSE grade_released_date END',
+            'g_id',
+        ];
+        $gg_sort_keys = [
+            'user_id',
+        ];
+
+        // Get all gradeables and split into user/team
+        $user_gradeables = [];
+        $team_gradeables = [];
+        $all_gradeables = [];
+        foreach ($this->core->getQueries()->getGradeableConfigs(null, $g_sort_keys) as $g) {
+            $all_gradeables[] = $g;
+            if ($g->isTeamAssignment()) {
+                $team_gradeables[] = $g;
+            } else {
+                $user_gradeables[] = $g;
+            }
+        }
+
+        // Array of team graded gradeables, first indexed by gradeable id, then by user id (so multiple entries per team)
+        $team_graded_gradeables = [];
+
+        // Get the team gradeables first and, unfortunately, fully cache them
+        foreach ($this->core->getQueries()->getGradedGradeables($team_gradeables) as $gg) {
+            /** @var GradedGradeable $gg */
+            $team_graded_gradeables[$gg->getGradeableId()] = [];
+            foreach ($gg->getSubmitter()->getTeam()->getMemberUserIds() as $user_id) {
+                $team_graded_gradeables[$gg->getGradeableId()][$user_id] = $gg;
+            }
+        }
+
+        /** @var User $current_user */
+        $current_user = null;
+        // Array of graded gradeables for active user
+        $user_graded_gradeables = [];
+        // Get all graded gradeables for user gradeables, grouping by user
+        foreach ($this->core->getQueries()->getGradedGradeables($user_gradeables, null, null, $gg_sort_keys) as $gg) {
+            /** @var GradedGradeable $gg */
+
+            if ($current_user !== $gg->getSubmitter()->getUser()) {
+                if ($current_user !== null) {
+                    $this->saveUserToFile($base_path, $current_user, $all_gradeables, $user_graded_gradeables, $team_graded_gradeables);
+                }
+                $current_user = $gg->getSubmitter()->getUser();
+                $user = [];
+                $user['user_id'] = $current_user->getId();
+                $user['legal_first_name'] = $current_user->getLegalFirstName();
+                $user['preferred_first_name'] = $current_user->getPreferredFirstName();
+                $user['legal_last_name'] = $current_user->getLegalLastName();
+                $user['preferred_last_name'] = $current_user->getPreferredLastName();
+                $user['registration_section'] = $current_user->getRegistrationSection();
+                $user['default_allowed_late_days'] = $this->core->getConfig()->getDefaultStudentLateDays();
+                $user['last_update'] = date("l, F j, Y");
+                $user_graded_gradeables = [];
+            }
+            $user_graded_gradeables[$gg->getGradeableId()] = $gg;
+        }
+
+        // Make sure to save the last user too
+        if ($current_user !== null) {
+            $this->saveUserToFile($base_path, $current_user, $all_gradeables, $user_graded_gradeables, $team_graded_gradeables);
+        }
+        $this->core->addSuccessMessage("Successfully Generated Grade Summaries");
+        $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
     }
 
     public function generateGradeSummary(GradedGradeable $gg, LateDays $ld) {
@@ -130,7 +206,7 @@ class ReportController extends AbstractController {
                     $entry['status'] = 'unsubmitted';
                 } elseif ($gg->getAutoGradedGradeable()->getActiveVersion() !== 0) {
                     $entry['note'] = 'Score is set to 0 because there are version conflicts.';
-                    $this->addLateDays($g, $entry);
+                    $this->addLateDays($ld->getLateDayInfoByGradeable($gg->getGradeable()), $entry);
                 }
             }
         }
@@ -164,127 +240,60 @@ class ReportController extends AbstractController {
                     }
                     $inner['marks'] = $marks;
                 }
-               $entry['components'][] = $inner;
+                $entry['components'][] = $inner;
             }
         }
         return $entry;
     }
-    public function generateGradeSummaries() {
-        $base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'all_grades');
-        $current_user = null;
-        $user = [];
-        $sort_keys = [
-            'user_id',
-            'g.g_gradeable_type',
-            'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END',
-            'g.g_id'
-        ];
 
-        // Get all gradeables
-        $user_gradeables = [];
-        $team_gradeables = [];
-        foreach ($this->core->getQueries()->getGradeableConfigs(null) as $g) {
+    private function saveUserToFile(string $base_path, User $user, array $gradeables, array $user_graded_gradeables, array $team_graded_gradeables) {
+        // Merge the user gradeables with the team gradeables
+        $ggs = [];
+        foreach ($gradeables as $g) {
+            /** @var Gradeable $g */
             if ($g->isTeamAssignment()) {
-                $team_gradeables = $g;
+                // if the user doesn't have a team, MAKE THE USER A SUBMITTER
+                $ggs[] = $team_graded_gradeables[$g->getId()][$user->getId()] ?? new GradedGradeable($this->core, $g, new Submitter($this->core, $user), []);
             } else {
-                $user_gradeables[] = $g;
+                $ggs[] = $user_graded_gradeables[$g->getId()];
             }
         }
 
-        // Array of graded gradeables, first indexed by gradeable id, then by user id (so multiple entries per team)
-        $team_graded_gradeables = [];
-
-        // Get the team gradeables first and, unfortunately, fully cache them
-        foreach ($this->core->getQueries()->getGradedGradeables($team_gradeables, null, null, $sort_keys) as $gg) {
-            /** @var GradedGradeable $gg */
-            $team_graded_gradeables[$gg->getGradeableId()] = [];
-            foreach ($gg->getSubmitter()->getTeam()->getMemberUserIds() as $user_id) {
-                $team_graded_gradeables[$gg->getGradeableId()][$user_id] = $gg;
-            }
+        $late_days = new LateDays($this->core, $user, array_filter($ggs, function (GradedGradeable $gg) {
+            return $gg->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE;
+        }));
+        foreach ($ggs as $gg) {
+            $bucket = ucwords($gg->getGradeable()->getSyllabusBucket());
+            $user[$bucket][] = $this->generateGradeSummary($gg, $late_days);
         }
+        file_put_contents(FileUtils::joinPaths($base_path, $user->getId() . '_summary.json'), FileUtils::encodeJson($user));
+    }
 
-        // Array of graded gradeables for active user
-        $user_graded_gradeables = [];
-        foreach ($this->core->getQueries()->getGradedGradeables($user_gradeables, null, null, $sort_keys) as $gg) {
-            /** @var GradedGradeable $gg */
-            $gradeable = $gg->getGradeable();
 
-            if ($current_user !== $gg->getSubmitter()->getId()) {
-                if ($current_user !== null) {
-                    // Merge the user gradeables with the team gradeables
-                    $user_graded_gradeables = array_merge($user_graded_gradeables, array_map(function($arr) use ($team_gradeables, $current_user) {
-                        $ggs = [];
-                        foreach ($team_gradeables as $team_gradeable) {
-                            /** @var Gradeable $team_gradeable */
-                            // if the user doesn't have a team, MAKE THE USER A SUBMITTER
-                            $ggs[] = $arr[$team_gradeable->getId()][$current_user] ?? new GradedGradeable($this->core, $team_gradeable, new Submitter($this->core, $current_user), []);
-                        }
-                    }, $team_graded_gradeables));
-
-                    // Sort by due date.  Since our two lists are sorted, we can easily merge-sort
-                    $graded_gradeables = [];
-                    $i_team = 0;
-                    $i_user = 0;
-                    for($i = 0; $i < count($team_gradeables) + count($user_gradeables); ++$i) {
-                        if ($team_gradeables[$i_team] < $user_gradeables[$i_user]) {
-                            // TODO:
-                        }
-                    }
-                    $late_days = new LateDays($this->core, $current_user, array_filter($graded_gradeables, function (GradedGradeable $gg) {
-                        return $gg->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE;
-                    }));
-                    foreach ($graded_gradeables as $ugg) {
-                        $bucket = ucwords($gg->getGradeable()->getSyllabusBucket());
-                        $user[$bucket][] = $this->generateGradeSummary($ugg, $late_days);
-                    }
-                    file_put_contents(FileUtils::joinPaths($base_path, $current_user . '_summary.json'), FileUtils::encodeJson($user));
-                }
-                $current_user = $gradeable->getUser()->getId();
-                $user = [];
-                $user['user_id'] = $gradeable->getUser()->getId();
-                $user['legal_first_name'] = $gradeable->getUser()->getLegalFirstName();
-                $user['preferred_first_name'] = $gradeable->getUser()->getPreferredFirstName();
-                $user['legal_last_name'] = $gradeable->getUser()->getLegalLastName();
-                $user['preferred_last_name'] = $gradeable->getUser()->getPreferredLastName();
-                $user['registration_section'] = $gradeable->getUser()->getRegistrationSection();
-                $user['default_allowed_late_days'] = $this->core->getConfig()->getDefaultStudentLateDays();
-                $user['last_update'] = date("l, F j, Y");
-                $user_graded_gradeables = [];
-            }
-            $user_graded_gradeables[] = $gg;
+    private function getLateStatusMessage($status) {
+        switch ($status) {
+            case LateDayInfo::STATUS_GOOD:
+                return 'Good';
+            case LateDayInfo::STATUS_LATE:
+                 return 'Late';
+            case LateDayInfo::STATUS_BAD:
+                return 'Bad';
+            case LateDayInfo::STATUS_NO_ACTIVE_VERSION:
+                return 'No Submission';
+            default:
+                return 'ERROR';
         }
-
-        // Make sure to save the last user too
-        // TODO: see the $current_user !== null if block. that code needs to go here too
-        file_put_contents(FileUtils::joinPaths($base_path, $current_user . '_summary.json'), FileUtils::encodeJson($user));
-        $this->core->addSuccessMessage("Successfully Generated Grade Summaries");
-        $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
     }
 
     private function addLateDays(LateDayInfo $ldi, &$entry) {
         $status = $ldi->getStatus();
 
-        if($status === LateDayInfo::STATUS_BAD) {
+        if ($status === LateDayInfo::STATUS_BAD) {
             $entry['score'] = 0;
         }
 
         // The report may need this to be different from the 'pretty' version returned from $ldi->getStatusMessage()
-        $status_message = 'ERROR';
-        switch($status) {
-            case LateDayInfo::STATUS_GOOD:
-                $status_message = 'Good';
-                break;
-            case LateDayInfo::STATUS_LATE:
-                $status_message = 'Late';
-                break;
-            case LateDayInfo::STATUS_BAD:
-                $status_message = 'Bad';
-                break;
-            case LateDayInfo::STATUS_NO_ACTIVE_VERSION:
-                $status_message = 'No Submission';
-                break;
-        }
-        $entry['status'] = $status_message;
+        $entry['status'] = $this->getLateStatusMessage($status);
 
         $late_days_charged = $ldi->getLateDaysCharged();
         if ($late_days_charged > 0) {
@@ -296,8 +305,7 @@ class ReportController extends AbstractController {
             $entry['days_after_deadline'] = $ldi->getDaysLate();
             $entry['extensions'] = $ldi->getLateDayException();
             $entry['days_charged'] = $ldi->getLateDaysCharged();
-        }
-        else {
+        } else {
             $entry['days_late'] = 0;
         }
     }
