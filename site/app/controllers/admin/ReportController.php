@@ -8,6 +8,7 @@ use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;
 use app\libraries\Output;
+use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDayInfo;
@@ -88,6 +89,12 @@ class ReportController extends AbstractController {
         return [$all_gradeables, $user_gradeables, $team_gradeables];
     }
 
+    private function genDummyGradedGradeable(Gradeable $gradeable, Submitter $submitter) {
+        $gg = new GradedGradeable($this->core, $gradeable, $submitter, []);
+        $gg->setAutoGradedGradeable(new AutoGradedGradeable($this->core, $gg, []));
+        return $gg;
+    }
+
     /**
      * Merges user and team graded gradeables for a user
      * @param Gradeable[] $gradeables
@@ -103,7 +110,7 @@ class ReportController extends AbstractController {
             /** @var Gradeable $g */
             if ($g->isTeamAssignment()) {
                 // if the user doesn't have a team, MAKE THE USER A SUBMITTER
-                $ggs[$g->getId()] = $team_graded_gradeables[$g->getId()][$user->getId()] ?? new GradedGradeable($this->core, $g, new Submitter($this->core, $user), []);
+                $ggs[$g->getId()] = $team_graded_gradeables[$g->getId()][$user->getId()] ?? $this->genDummyGradedGradeable($g, new Submitter($this->core, $user));
             } else {
                 $ggs[$g->getId()] = $user_graded_gradeables[$g->getId()];
             }
@@ -129,14 +136,19 @@ class ReportController extends AbstractController {
 
         //Gradeable iterator will append one gradeable score per loop pass.
         $user_graded_gradeables = [];
+
+        // Method to call the callback with the required parameters
+        $call_callback = function ($all_gradeables, User $current_user, $user_graded_gradeables, $team_graded_gradeables, $per_user_callback) {
+            $ggs = $this->mergeGradedGradeables($all_gradeables, $current_user, $user_graded_gradeables, $team_graded_gradeables);
+            $late_days = new LateDays($this->core, $current_user, $ggs);
+            return $per_user_callback($current_user, $ggs, $late_days);
+        };
         foreach ($this->core->getQueries()->getGradedGradeables($user_gradeables, null, null, $graded_gradeable_sort_keys) as $gg) {
             /** @var GradedGradeable $gg */
             if ($current_user === null || $current_user->getId() !== $gg->getSubmitter()->getId()) {
                 if ($current_user !== null) {
                     // Previous pass completed an entire row
-                    $ggs = $this->mergeGradedGradeables($all_gradeables, $current_user, $user_graded_gradeables, $team_graded_gradeables);
-                    $late_days = new LateDays($this->core, $current_user, $ggs);
-                    $results[$current_user->getId()] = $per_user_callback($current_user, $ggs, $late_days);
+                    $results[$current_user->getId()] = $call_callback($all_gradeables, $current_user, $user_graded_gradeables, $team_graded_gradeables, $per_user_callback);
                 }
 
                 //Prepare for the new user
@@ -160,8 +172,9 @@ class ReportController extends AbstractController {
             }
         }
 
+        // Remember to do the callback on the last user
         if ($current_user !== null) {
-            $results[$current_user->getId()] = $per_user_callback($current_user, $all_gradeables, $user_graded_gradeables, $team_graded_gradeables);
+            $results[$current_user->getId()] = $call_callback($all_gradeables, $current_user, $user_graded_gradeables, $team_graded_gradeables, $per_user_callback);
         }
         return $results;
     }
@@ -186,7 +199,7 @@ class ReportController extends AbstractController {
         $csv = '';
         if (count($rows) > 0) {
             // Header row
-            $csv = implode(',', array_keys($rows[0])) . PHP_EOL;
+            $csv = implode(',', array_keys(reset($rows))) . PHP_EOL;
             // Content rows
             foreach ($rows as $row) {
                 $csv .= implode(',', $row) . PHP_EOL;
