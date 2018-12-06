@@ -306,13 +306,15 @@ class ReportController extends AbstractController {
         ];
 
         $entry['score'] = $gg->getTotalScore();
-        $entry['autograding_score'] = $gg->getAutoGradingScore();
-        $entry['tagrading_score'] = $gg->getTaGradingScore();
         $this->addLateDays($ld->getLateDayInfoByGradeable($g), $entry);
 
         if ($g->getType() === GradeableType::ELECTRONIC_FILE) {
             $ta_gg = $gg->getOrCreateTaGradedGradeable();
             $entry['overall_comment'] = $ta_gg->getOverallComment();
+
+            // Only split up scores if electronic gradeables
+            $entry['autograding_score'] = $gg->getAutoGradingScore();
+            $entry['tagrading_score'] = $gg->getTaGradingScore();
 
             if ($g->isTaGrading() && $ta_gg->hasVersionConflict()) {
                 $entry['score'] = 0;
@@ -332,6 +334,7 @@ class ReportController extends AbstractController {
             $gcc = $gg->getOrCreateTaGradedGradeable()->getGradedComponentContainer($component);
 
             // iterate through each component container so we can account for peer grading
+            // TODO: rainbow grades expects this to be fully populated with blank components
             foreach ($gcc->getGradedComponents() as $gc) {
                 $inner = [
                     'title' => $component->getTitle()
@@ -392,8 +395,8 @@ class ReportController extends AbstractController {
             return;
         }
         if (!$ldi->hasLateDaysInfo()) {
+            $entry['status'] = 'Good';
             $entry['days_late'] = 0;
-            $entry['status'] = 'unsubmitted';
             return;
         }
 
