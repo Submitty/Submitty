@@ -60,7 +60,6 @@ class ReportController extends AbstractController {
         // Get the team gradeables first and, unfortunately, fully cache them
         foreach ($this->core->getQueries()->getGradedGradeables($team_gradeables) as $gg) {
             /** @var GradedGradeable $gg */
-            $team_graded_gradeables[$gg->getGradeableId()] = [];
             foreach ($gg->getSubmitter()->getTeam()->getMemberUserIds() as $user_id) {
                 $team_graded_gradeables[$gg->getGradeableId()][$user_id] = $gg;
             }
