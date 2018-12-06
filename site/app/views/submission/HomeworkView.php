@@ -113,9 +113,11 @@ class HomeworkView extends AbstractView {
     public function renderLateDayMessage(LateDays $late_days, Gradeable $gradeable, $graded_gradeable) {
         $extensions = 0;
         $active_version = null;
+        $active_version_number = 0;
         if ($graded_gradeable !== null) {
             $extensions = $graded_gradeable->getLateDayException($this->core->getUser());
             $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance();
+            $active_version_number = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         }
         $late_days_remaining = $late_days->getLateDaysRemaining();
         $active_days_late =  $active_version !== null ? $active_version->getDaysLate() : 0;
@@ -140,7 +142,7 @@ class HomeworkView extends AbstractView {
 
         // ------------------------------------------------------------
         // IF STUDENT HAS ALREADY SUBMITTED AND THE ACTIVE VERSION IS LATE, PRINT LATE DAY INFORMATION FOR THE ACTIVE VERSION
-        if ($active_version >= 1 && $active_days_late > 0) {
+        if ($active_version_number >= 1 && $active_days_late > 0) {
             // BAD STATUS - AUTO ZERO BECAUSE INSUFFICIENT LATE DAYS REMAIN
             if ($active_days_charged > $late_day_budget) {
                 $error = true;
@@ -178,7 +180,7 @@ class HomeworkView extends AbstractView {
             $new_late_charged = max(0, $would_be_days_late - $extensions);
 
             // if unsubmitted, or submitted but still in the late days allowed window
-            if ($active_version < 1 ||
+            if ($active_version_number < 1 ||
                 ($new_late_charged <= $late_days_remaining &&
                     $new_late_charged <= $late_days_allowed)) {
 
