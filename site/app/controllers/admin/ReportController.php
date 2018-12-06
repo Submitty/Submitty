@@ -159,7 +159,7 @@ class ReportController extends AbstractController {
 
         // If there are only team gradeables, check to see that all users were properly covered
         //  If there are users on no teams, then they won't get a result from the above loop...
-        if (count($user_gradeables) === 0) {
+        if (count($all_gradeables) > 0 && count($user_gradeables) === 0) {
             //... So we must find them and give them dummy results
             foreach ($this->core->getQueries()->getAllUsers() as $u) {
                 if (!isset($results[$u->getId()])) {
