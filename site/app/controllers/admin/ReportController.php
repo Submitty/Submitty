@@ -246,8 +246,8 @@ class ReportController extends AbstractController {
     public function generateGradeSummaries() {
         $base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'all_grades');
         $g_sort_keys = [
-            'gradeable_type',
-            'CASE WHEN submission_due_date IS NOT NULL THEN submission_due_date ELSE grade_released_date END',
+            'type',
+            'CASE WHEN submission_due_date IS NOT NULL THEN submission_due_date ELSE g.g_grade_released_date END',
             'g_id',
         ];
         $gg_sort_keys = [
