@@ -112,13 +112,15 @@ class HomeworkView extends AbstractView {
      */
     public function renderLateDayMessage(LateDays $late_days, Gradeable $gradeable, $graded_gradeable) {
         $extensions = 0;
-        $active_version = null;
+        $active_version_instance = null;
+        $active_version = 0;
         if ($graded_gradeable !== null) {
             $extensions = $graded_gradeable->getLateDayException($this->core->getUser());
-            $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance();
+            $active_version_instance = $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance();
+            $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         }
         $late_days_remaining = $late_days->getLateDaysRemaining();
-        $active_days_late =  $active_version !== null ? $active_version->getDaysLate() : 0;
+        $active_days_late =  $active_version_instance !== null ? $active_version_instance->getDaysLate() : 0;
         $would_be_days_late = $gradeable->getWouldBeDaysLate();
         $late_day_info = $late_days->getLateDayInfoByGradeable($gradeable);
         $late_days_allowed = $gradeable->getLateDays();
