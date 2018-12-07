@@ -1772,16 +1772,28 @@ class SubmissionController extends AbstractController {
 
         // Don't load the graded gradeable, since that may not exist yet
         $submitter_id = $this->core->getUser()->getId();
+        $user_id = $submitter_id;
+        $team_id = null;
         if ($gradeable !== null && $gradeable->isTeamAssignment()) {
             $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $submitter_id);
+
             if ($team !== null) {
                 $submitter_id = $team->getId();
+                $team_id = $submitter_id;
+                $user_id = null;
             }
         }
 
-        $path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "results", $gradeable_id,
-            $submitter_id, $version);
-        if (file_exists($path."/results.json")) {
+        $filepath = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "results", $gradeable_id,
+            $submitter_id, $version, "results.json");
+
+        $results_json_exists = file_exists($filepath);
+
+        // if the results json exists, check the database to make sure that the autograding results are there.
+        $has_results = $results_json_exists && $this->core->getQueries()->getGradeableVersionHasAutogradingResults(
+            $gradeable_id, $version, $user_id, $team_id);
+
+        if ($has_results) {
             $refresh_string = "REFRESH_ME";
             $refresh_bool = true;
         }

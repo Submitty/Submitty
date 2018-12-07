@@ -483,12 +483,15 @@ class HomeworkView extends AbstractView {
 
         if ($version_instance !== null) {
             $display_version = $version_instance->getVersion();
-            $history = $version_instance->getLatestHistory();
 
-            foreach ($version_instance->getTestcases() as $testcase) {
-                if ($testcase->canView()) {
-                    $show_testcases = true;
-                    break;
+            if ($version_instance->isAutogradingComplete()) {
+                $history = $version_instance->getLatestHistory();
+
+                foreach ($version_instance->getTestcases() as $testcase) {
+                    if ($testcase->canView()) {
+                        $show_testcases = true;
+                        break;
+                    }
                 }
             }
 
