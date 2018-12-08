@@ -57,6 +57,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "cat",                     "/bin/cat" },
     { "compare",                 "/usr/bin/compare" }, //image magick!
     { "mogrify",                 "/usr/bin/mogrify" }, //image magick!
+    { "convert",                 "/usr/bin/convert" }, //image magick!
     { "cut",                     "/usr/bin/cut" },
     { "sort",                    "/usr/bin/sort" },
     { "grep",                    "/bin/grep" },
