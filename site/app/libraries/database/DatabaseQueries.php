@@ -737,6 +737,7 @@ ORDER BY egd.g_version", array($g_id, $user_id));
                 $query .= '=?';
                 $params = array($user_id);
             }
+            $query .= ' ORDER BY since_timestamp';
             $this->course_db->query($query, $params);
         }
         else {
