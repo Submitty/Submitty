@@ -316,11 +316,13 @@ class ReportController extends AbstractController {
             $entry['autograding_score'] = $gg->getAutoGradingScore();
             $entry['tagrading_score'] = $gg->getTaGradingScore();
 
+            // TODO: this needs to be ironed out.  The old behavior is not very clear and based on
+            // TODO:    rainbow grades should be illegal
             if ($g->isTaGrading() && ($ta_gg->hasVersionConflict() || !$ta_gg->isComplete())) {
                 $entry['score'] = 0;
                 $entry['autograding_score'] = 0;
                 $entry['tagrading_score'] = 0;
-                if (!$ta_gg->isComplete()) {
+                if ($gg->getAutoGradedGradeable()->hasSubmission() && !$ta_gg->isComplete()) {
                     $entry['note'] = 'This has not been graded yet.';
                 } elseif ($gg->getAutoGradedGradeable()->getActiveVersion() !== 0) {
                     $entry['note'] = 'Score is set to 0 because there are version conflicts.';
@@ -386,8 +388,7 @@ class ReportController extends AbstractController {
             case LateDayInfo::STATUS_BAD:
                 return 'Bad';
             case LateDayInfo::STATUS_NO_ACTIVE_VERSION:
-                // TODO: is this case-sensitive
-                return 'unsubmitted';
+                return 'NO SUBMISSION';
             default:
                 return 'ERROR';
         }
