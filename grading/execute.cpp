@@ -79,6 +79,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "python2.7",               "/usr/bin/python2.7" },
     { "python3",                 "/usr/bin/python3" },
     { "python3.5",               "/usr/bin/python3.5" },
+    { "python3.6",               "/usr/bin/python3.6" },
     { "pylint",                  "/usr/local/bin/pylint" },
 
     // for Data Structures
