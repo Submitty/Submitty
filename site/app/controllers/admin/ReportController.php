@@ -333,22 +333,29 @@ class ReportController extends AbstractController {
         foreach ($g->getComponents() as $component) {
             $gcc = $gg->getOrCreateTaGradedGradeable()->getGradedComponentContainer($component);
 
-            // iterate through each component container so we can account for peer grading
-            // TODO: rainbow grades expects this to be fully populated with blank components
-            foreach ($gcc->getGradedComponents() as $gc) {
-                $inner = [
-                    'title' => $component->getTitle()
-                ];
-                if ($component->isText()) {
-                    $inner['comment'] = $gc->getComment();
-                } else {
-                    $inner['score'] = $gc->getTotalScore();
-                    $inner['default_score'] = $component->getDefault();
-                    $inner['upper_clamp'] = $component->getUpperClamp();
-                    $inner['lower_clamp'] = $component->getLowerClamp();
-                }
+            // TODO: we need to convert to the old model single-grader format for rainbow grades
+            $gc = null;
+            foreach ($gcc->getGradedComponents() as $gc_) {
+                $gc = $gc_;
+                // Get the only graded component and short circuit
+                break;
+            }
 
-                if ($g->getType() === GradeableType::ELECTRONIC_FILE) {
+            $inner = [
+                'title' => $component->getTitle()
+            ];
+            if ($component->isText()) {
+                $inner['comment'] = $gc !== null ? $gc->getComment() : '';
+            } else {
+                $inner['score'] = $gc !== null ? $gc->getTotalScore() : 0.0;
+                $inner['default_score'] = $component->getDefault();
+                $inner['upper_clamp'] = $component->getUpperClamp();
+                $inner['lower_clamp'] = $component->getLowerClamp();
+            }
+
+            if ($g->getType() === GradeableType::ELECTRONIC_FILE) {
+                $marks = [];
+                if ($gc !== null) {
                     $marks = array_map(function (Mark $m) {
                         return ['points' => $m->getPoints(), 'note' => $m->getTitle()];
                     }, $gc->getMarks());
@@ -356,10 +363,11 @@ class ReportController extends AbstractController {
                     if ($gc->hasCustomMark()) {
                         $marks[] = ['points' => $gc->getScore(), 'note' => $gc->getComment()];
                     }
-                    $inner['marks'] = $marks;
                 }
-                $entry['components'][] = $inner;
+
+                $inner['marks'] = $marks;
             }
+            $entry['components'][] = $inner;
         }
         return $entry;
     }
@@ -394,11 +402,11 @@ class ReportController extends AbstractController {
         if ($ldi === null) {
             return;
         }
-        if (!$ldi->hasLateDaysInfo()) {
+        /*if (!$ldi->hasLateDaysInfo()) {
             $entry['status'] = 'Good';
             $entry['days_late'] = 0;
             return;
-        }
+        }*/
 
         $status = $ldi->getStatus();
         if ($status === LateDayInfo::STATUS_BAD) {
