@@ -109,9 +109,9 @@ class ReportController extends AbstractController {
             /** @var Gradeable $g */
             if ($g->isTeamAssignment()) {
                 // if the user doesn't have a team, MAKE THE USER A SUBMITTER
-                $ggs[$g->getId()] = $team_graded_gradeables[$g->getId()][$user->getId()] ?? $this->genDummyGradedGradeable($g, new Submitter($this->core, $user));
+                $ggs[] = $team_graded_gradeables[$g->getId()][$user->getId()] ?? $this->genDummyGradedGradeable($g, new Submitter($this->core, $user));
             } else {
-                $ggs[$g->getId()] = $user_graded_gradeables[$g->getId()];
+                $ggs[] = $user_graded_gradeables[$g->getId()];
             }
         }
         return $ggs;
@@ -223,7 +223,7 @@ class ReportController extends AbstractController {
         $row['Last Name'] = $user->getDisplayedLastName();
         $row['Registration Section'] = $user->getRegistrationSection();
 
-        foreach ($ggs as $g_id => $gg) {
+        foreach ($ggs as $gg) {
             /** @var GradedGradeable $gg */
             //Append one gradeable score to row.  Scores are indexed by gradeable's ID.
             $row[$gg->getGradeableId()] = $gg->getTotalScore();
@@ -282,7 +282,7 @@ class ReportController extends AbstractController {
         $user_data['default_allowed_late_days'] = $this->core->getConfig()->getDefaultStudentLateDays();
         $user_data['last_update'] = date("l, F j, Y");
 
-        foreach ($ggs as $g_id => $gg) {
+        foreach ($ggs as $gg) {
             $bucket = ucwords($gg->getGradeable()->getSyllabusBucket());
             $user_data[$bucket][] = $this->generateGradeSummary($gg, $late_days);
         }
@@ -316,7 +316,7 @@ class ReportController extends AbstractController {
             $entry['autograding_score'] = $gg->getAutoGradingScore();
             $entry['tagrading_score'] = $gg->getTaGradingScore();
 
-            if ($g->isTaGrading() && $ta_gg->hasVersionConflict()) {
+            if ($g->isTaGrading() && ($ta_gg->hasVersionConflict() || !$ta_gg->isComplete())) {
                 $entry['score'] = 0;
                 $entry['autograding_score'] = 0;
                 $entry['tagrading_score'] = 0;
@@ -386,7 +386,8 @@ class ReportController extends AbstractController {
             case LateDayInfo::STATUS_BAD:
                 return 'Bad';
             case LateDayInfo::STATUS_NO_ACTIVE_VERSION:
-                return 'No Submission';
+                // TODO: is this case-sensitive
+                return 'unsubmitted';
             default:
                 return 'ERROR';
         }
@@ -402,6 +403,8 @@ class ReportController extends AbstractController {
         if ($ldi === null) {
             return;
         }
+        // TODO: for debugging
+        $entry['active_version'] = $ldi->getGradedGradeable()->getAutoGradedGradeable()->getActiveVersion();
         /*if (!$ldi->hasLateDaysInfo()) {
             $entry['status'] = 'Good';
             $entry['days_late'] = 0;
