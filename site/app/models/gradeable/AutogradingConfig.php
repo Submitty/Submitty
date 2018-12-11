@@ -6,6 +6,7 @@ namespace app\models\gradeable;
 use app\libraries\Core;
 use app\libraries\Utils;
 use app\models\AbstractModel;
+use app\models\grading\AbstractGradingInput;
 use app\models\GradeableTestcase;
 
 /**
@@ -46,8 +47,8 @@ class AutogradingConfig extends AbstractModel {
     /** @property @var string[] The names of different upload bins on the submission page (1-indexed) */
     protected $part_names = [];
 
-    /** @property @var SubmissionTextBox[] Text box configs for text box submissions*/
-    private $textboxes = [];
+    /** @property @var AbstractGradingInput[] Grading input configs for all new types of gradeable input*/
+    private $inputs = [];
     /** @property @var AutogradingTestcase[] Cut-down information about autograding test cases*/
     private $testcases = [];
 
@@ -134,7 +135,16 @@ class AutogradingConfig extends AbstractModel {
         $num_parts = count($details['part_names'] ?? [1]);
 
         // defaults to 0 if not set
-        $num_textboxes = count($details['textboxes'] ?? []);
+        $num_inputs = 0;
+        $temp_count = 0;
+        $actual_input = array();
+        foreach ($details['content'] as &$c) {
+            $num_inputs = $num_inputs + count($c['input'] ?? []);
+            foreach ($c['input'] as &$inp) {
+                $actual_input[$temp_count] = $inp;
+                $temp_count++;
+            }
+        }
 
         // Get all of the part names
         for ($i = 1; $i <= $num_parts; $i++) {
@@ -147,9 +157,15 @@ class AutogradingConfig extends AbstractModel {
             }
         }
 
-        // Get textbox details
-        for ($i = 0; $i < $num_textboxes; $i++) {
-            $this->textboxes[$i] = new SubmissionTextBox($this->core, $details['textboxes'][$i]);
+        // Get the input details
+        for ($i = 0; $i < $num_inputs; $i++) {
+            if ($actual_input[$i]['type'] == "textbox") {
+                $this->inputs[$i] = new SubmissionTextBox($this->core, $actual_input[$i]);
+            } elseif ($actual_input[$i]['type'] == "codebox") {
+                $this->inputs[$i] = new SubmissionCodeBox($this->core, $actual_input[$i]);
+            } elseif ($actual_input[$i]['type'] == "multiplechoice") {
+                $this->inputs[$i] = new SubmissionMultipleChoice($this->core, $actual_input[$i]);
+            }
         }
     }
 
@@ -157,7 +173,7 @@ class AutogradingConfig extends AbstractModel {
         $details = parent::toArray();
 
         $details['testcases'] = parent::parseObject($this->testcases);
-        $details['textboxes'] = parent::parseObject($this->textboxes);
+        $details['inputs'] = parent::parseObject($this->inputs);
 
         return $details;
     }
@@ -171,11 +187,11 @@ class AutogradingConfig extends AbstractModel {
     }
 
     /**
-     * Gets the text boxes for this configuration
-     * @return SubmissionTextBox[]
+     * Gets the abstract inputs for this configuration
+     * @return AbstractGradeableInput[]
      */
-    public function getTextboxes() {
-        return $this->textboxes;
+    public function getInputs() {
+        return $this->inputs;
     }
 
     /**
@@ -195,11 +211,11 @@ class AutogradingConfig extends AbstractModel {
     }
 
     /**
-     * Gets the number of text boxes on the submission page
+     * Gets the number of inputs on the submission page
      * @return int
      */
-    public function getNumTextBoxes() {
-        return count($this->getTextboxes());
+    public function getNumInputs() {
+        return count($this->getInputs());
     }
 
     /**

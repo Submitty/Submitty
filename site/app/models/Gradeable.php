@@ -21,7 +21,7 @@ use app\libraries\Utils;
  * @method string getName()
  * @method int getType()
  * @method array getPartNames()
- * @method array getTextboxes()
+ * @method array getInputs()
  * @method int getHighestVersion()
  * @method int getActiveVersion()
  * @method void setActiveVersion(int $version)
@@ -225,7 +225,7 @@ class Gradeable extends AbstractModel {
     protected $part_names = array();
 
     /** @property @var string[] */
-    protected $textboxes = array();
+    protected $inputs = array();
 
     /** @property @var int Variables for submission details (such as attempts used, etc.) */
     protected $submissions = 0;
@@ -565,11 +565,17 @@ class Gradeable extends AbstractModel {
           $num_parts = count($details['part_names']);
         }
 
-        $num_textboxes = 0;
-        if (isset($details['textboxes'])) {
-          $num_textboxes = count($details['textboxes']);
+        $num_inputs = 0;
+        $temp_count = 0;
+        $actual_input = array();
+        foreach ($details['content'] as &$c) {
+            $num_inputs = $num_inputs + count($c['input'] ?? []);
+            foreach ($c['input'] as &$inp) {
+                $actual_input[$temp_count] = $inp;
+                $temp_count++;
+            }
         }
-
+        
         $this->required_capabilities = $details['required_capabilities'] ?? 'default';
 
         $this->max_possible_grading_time = $details['max_possible_grading_time'] ?? -1;
@@ -586,11 +592,10 @@ class Gradeable extends AbstractModel {
             }
         }
 
-        for ($i = 0; $i < $num_textboxes; $i++) {
-          $this->textboxes[$i] = $details['textboxes'][$i];
-          // if(isset($detailes['']))
+        for ($i = 0; $i < $num_inputs; $i++) {
+            $this->inputs[$i] = $actual_input[$i];
         }
-
+        
         if (isset($details['testcases'])) {
             foreach ($details['testcases'] as $idx => $testcase) {
                 $testcase = $this->core->loadModel(GradeableTestcase::class, $testcase, $idx);
@@ -861,8 +866,8 @@ class Gradeable extends AbstractModel {
       return count($this->part_names);
     }
 
-    public function getNumTextBoxes() {
-      return count($this->textboxes);
+    public function getNumInputs() {
+      return count($this->inputs);
     }
 
     public function getCurrentVersionNumber() {
