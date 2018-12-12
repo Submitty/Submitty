@@ -46,9 +46,9 @@ def getClassList(semester, course):
 	metadata = MetaData(bind=db)
 
 	student_emails = []
-	result = db.execute("SELECT user_email FROM users WHERE registration_section IS NOT NULL;")
+	result = db.execute("SELECT user_email FROM users WHERE user_group != 4 OR registration_section IS NOT null;")
 	for email in result:
-		student_emails.append(email)
+		student_emails.append(email[0])
 
 	return student_emails
 
@@ -76,14 +76,9 @@ def sendAnnouncement():
 	print("Attempting to Send an Email Announcement. Course: {}, Semester: {}, Announcement Title: {}".format(course, semester, thread_title))
 
 	class_list = getClassList(semester, course)
-	# class_list = ['sheikk@rpi.edu']
 	emailCount = 0 
 	for student_email in class_list:
 		announcement_email = constructMailString(student_email, thread_title, thread_content)
-		# print("email sender: " + str(EMAIL_SENDER))
-		# print("email_to: " + str(student_email))
-		# print("announcement_email: " + str(announcement_email))
-
 		mail_client.sendmail(EMAIL_SENDER, student_email, announcement_email)
 
 		#Sleep if we reach a certain sending threshold
