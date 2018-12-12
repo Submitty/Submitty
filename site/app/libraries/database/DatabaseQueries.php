@@ -710,6 +710,20 @@ ORDER BY egd.g_version", array($g_id, $user_id));
         return $return;
     }
 
+    public function getGradeableVersionHasAutogradingResults($g_id, $version, $user_id, $team_id) {
+        $query = "SELECT * FROM electronic_gradeable_data WHERE g_id=? AND g_version=? AND ";
+        if($user_id === null) {
+            $query .= "team_id=?";
+            $params = [$g_id, $version, $team_id];
+        }
+        else {
+            $query .= "user_id=?";
+            $params = [$g_id, $version, $user_id];
+        }
+        $this->course_db->query($query, $params);
+        return count($this->course_db->rows()) > 0 && $this->course_db->rows()[0]['autograding_complete'] === true;
+    }
+
 
     // Moved from class LateDaysCalculation on port from TAGrading server.  May want to incorporate late day information into gradeable object rather than having a separate query
     public function getLateDayUpdates($user_id) {
@@ -723,12 +737,17 @@ ORDER BY egd.g_version", array($g_id, $user_id));
                 $query .= '=?';
                 $params = array($user_id);
             }
+            $query .= ' ORDER BY since_timestamp';
             $this->course_db->query($query, $params);
         }
         else {
             $this->course_db->query("SELECT * FROM late_days");
         }
-        return $this->course_db->rows();
+        // Parse the date-times
+        return array_map(function ($arr)  {
+            $arr['since_timestamp'] = DateUtils::parseDateTime($arr['since_timestamp'], $this->core->getConfig()->getTimezone());
+            return $arr;
+        }, $this->course_db->rows());
     }
 
     public function getLateDayInformation($user_id) {
@@ -2741,10 +2760,13 @@ AND gc_id IN (
      * @param sting $user_id
      * @param int $notification_id  if $notification_id != -1 then marks corresponding as seen else mark all notifications as seen
      */
-    public function markNotificationAsSeen($user_id, $notification_id){
+    public function markNotificationAsSeen($user_id, $notification_id, $thread_id = -1){
         $parameters = array();
         $parameters[] = $user_id;
-        if($notification_id == -1) {
+        if($thread_id != -1) {
+        	$id_query = "metadata::json->0->>'thread_id' = ?";
+        	$parameters[] = $thread_id;
+        } else if($notification_id == -1) {
             $id_query = "true";
         } else {
             $id_query = "id = ?";
