@@ -80,10 +80,6 @@ def sendAnnouncement():
 	emailCount = 0 
 	for student_email in class_list:
 		announcement_email = constructAnnouncementEmail(student_email, thread_title, thread_content)
-		print("email sender: " + str(EMAIL_SENDER))
-		print("email_to: " + str(student_email))
-		print("announcement_email: " + str(announcement_email))
-
 		mail_client.sendmail(EMAIL_SENDER, student_email, announcement_email)
 
 		#Sleep if we reach a certain sending threshold
