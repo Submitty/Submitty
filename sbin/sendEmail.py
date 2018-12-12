@@ -54,8 +54,7 @@ def getClassList(semester, course):
 
 
 def constructMailString(send_to, subject, body):
-	return "TO:%s\nFrom: %s\nSubject:  %s \n\n\n %s \n\n" %(send_to, EMAIL_USER, subject, body)
-	# return "From %s\nTo:  %s\nSubject: %s\n%s" %(sent_from, sent_to, subject, body)
+	return "TO:%s\nFrom: %s\nSubject:  %s \n\n\n %s \n\n" %(send_to, EMAIL_SENDER, subject, body)
 
 def constructAnnouncementEmail(student_email, thread_title, thread_content):
 	body = "Your Intructor Posted a Note\n" + thread_content 
@@ -85,7 +84,7 @@ def sendAnnouncement():
 		print("email_to: " + str(student_email))
 		print("announcement_email: " + str(announcement_email))
 
-		# mail_client.sendmail(EMAIL_SENDER, student_email, announcement_email)
+		mail_client.sendmail(EMAIL_SENDER, student_email, announcement_email)
 
 		#Sleep if we reach a certain sending threshold
 		#TODO: bring this in via config. Might be different depending on the mail service being used
