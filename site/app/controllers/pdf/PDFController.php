@@ -108,6 +108,12 @@ class PDFController extends AbstractController {
         if(!is_dir($annotation_version_path) && !FileUtils::createDir($annotation_version_path)){
             return $this->core->getOutput()->renderJsonFail('Creating annotation version folder failed.');
         }
+
+        //check for bad characters in the filename.
+        if (!preg_match('/^(?:[a-z0-9\/_-]|\.(?!\.))+$/iD', $annotation_info['file_name']) {
+          return false;
+        }
+
         $new_file_name = preg_replace('/\\.[^.\\s]{3,4}$/', '', $annotation_info['file_name']) . "_" .$grader_id .'.json';
         file_put_contents(FileUtils::joinPaths($annotation_version_path, $new_file_name), $annotation_layer);
         $this->core->getOutput()->renderJsonSuccess('Annotation saved successfully!');
