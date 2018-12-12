@@ -109,8 +109,7 @@ class PDFController extends AbstractController {
             return $this->core->getOutput()->renderJsonFail('Creating annotation version folder failed.');
         }
 
-        //check for bad characters in the filename.
-        if (!preg_match('/^(?:[a-z0-9\/_-]|\.(?!\.))+$/iD', $annotation_info['file_name']) {
+        if (strpos($annotation_info['file_name'], '..') !== false) {
           return false;
         }
 
