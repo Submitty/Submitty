@@ -53,12 +53,13 @@ def getClassList(semester, course):
 	return student_emails
 
 
-def constructMailString(sent_from, sent_to, subject, body):
-	return "From %s\nTo:  %s\nSubject: %s\n%s" %(sent_from, sent_to, subject, body)
+def constructMailString(send_to, subject, body):
+	return "TO:%s\nFrom: %s\nSubject:  %s \n\n\n %s \n\n" %(send_to, EMAIL_USER, subject, body)
+	# return "From %s\nTo:  %s\nSubject: %s\n%s" %(sent_from, sent_to, subject, body)
 
-def constructAnnouncementEmail(thread_title, thread_content, course, student_email):
+def constructAnnouncementEmail(student_email, thread_title, thread_content):
 	body = "Your Intructor Posted a Note\n" + thread_content 
-	mail_string = constructMailString(EMAIL_USER, student_email, thread_title, body)
+	mail_string = constructMailString(student_email, thread_title, thread_content)
 	return mail_string
 
 def sendAnnouncement():
@@ -75,11 +76,16 @@ def sendAnnouncement():
 	thread_content = sys.argv[5]
 	print("Attempting to Send an Email Announcement. Course: {}, Semester: {}, Announcement Title: {}".format(course, semester, thread_title))
 
-	class_list = getClassList(semester, course)
+	# class_list = getClassList(semester, course)
+	class_list = ['sheikk@rpi.edu']
 	emailCount = 0 
 	for student_email in class_list:
-		announcement_email = constructAnnouncementEmail(thread_title, thread_content, course, student_email)
-		mail_client.sendmail(EMAIL_SENDER, student_email, announcement_email)
+		announcement_email = constructAnnouncementEmail(student_email, thread_title, thread_content)
+		print("email sender: " + str(EMAIL_SENDER))
+		print("email_to: " + str(student_email))
+		print("announcement_email: " + str(announcement_email))
+
+		# mail_client.sendmail(EMAIL_SENDER, student_email, announcement_email)
 
 		#Sleep if we reach a certain sending threshold
 		#TODO: bring this in via config. Might be different depending on the mail service being used
