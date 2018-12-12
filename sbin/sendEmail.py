@@ -75,8 +75,7 @@ def sendAnnouncement():
 	thread_content = sys.argv[5]
 	print("Attempting to Send an Email Announcement. Course: {}, Semester: {}, Announcement Title: {}".format(course, semester, thread_title))
 
-	# class_list = getClassList(semester, course)
-	class_list = ['sheikk@rpi.edu']
+	class_list = getClassList(semester, course)
 	emailCount = 0 
 	for student_email in class_list:
 		announcement_email = constructAnnouncementEmail(student_email, thread_title, thread_content)
