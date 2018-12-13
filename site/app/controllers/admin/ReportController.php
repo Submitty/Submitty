@@ -306,9 +306,29 @@ class ReportController extends AbstractController {
         ];
 
         $entry['score'] = $gg->getTotalScore();
-        $this->addLateDays($ld->getLateDayInfoByGradeable($g), $entry);
 
+        // Add information special to electronic file submissions
         if ($g->getType() === GradeableType::ELECTRONIC_FILE) {
+            // Add information based on late day status
+            $ldi = $ld->getLateDayInfoByGradeable($g);
+            if ($ldi !== null) {
+                // Zero score if BAD status
+                if ($ldi->getStatus() === LateDayInfo::STATUS_BAD) {
+                    $entry['score'] = 0;
+                }
+
+                // The report needs this to be different from the 'pretty' version returned from $ldi->getStatusMessage()
+                $entry['status'] = $this->getLateStatusMessage($ldi);
+
+                $late_days_charged = $ldi->getLateDaysCharged();
+                if ($late_days_charged > 0) {
+                    $entry['days_after_deadline'] = $ldi->getDaysLate();
+                    $entry['extensions'] = $ldi->getLateDayException();
+                    $entry['days_charged'] = $late_days_charged;
+                }
+            }
+
+            // Add score breakdown
             $ta_gg = $gg->getOrCreateTaGradedGradeable();
             $entry['overall_comment'] = $ta_gg->getOverallComment();
 
@@ -316,15 +336,15 @@ class ReportController extends AbstractController {
             $entry['autograding_score'] = $gg->getAutoGradingScore();
             $entry['tagrading_score'] = $gg->getTaGradingScore();
 
-            // TODO: this needs to be ironed out.  The old behavior is not very clear and based on
-            // TODO:    rainbow grades should be illegal
+            // If the grading isn't complete or there are conflicts in which version is graded,
+            //  let the user know that
             if ($g->isTaGrading() && ($ta_gg->hasVersionConflict() || !$ta_gg->isComplete())) {
                 $entry['score'] = 0;
                 $entry['autograding_score'] = 0;
                 $entry['tagrading_score'] = 0;
-                if ($gg->getAutoGradedGradeable()->hasSubmission() && !$ta_gg->isComplete()) {
+                if (!$ta_gg->isComplete()) {
                     $entry['note'] = 'This has not been graded yet.';
-                } elseif ($gg->getAutoGradedGradeable()->getActiveVersion() !== 0) {
+                } else {
                     $entry['note'] = 'Score is set to 0 because there are version conflicts.';
                 }
             }
@@ -335,13 +355,16 @@ class ReportController extends AbstractController {
         foreach ($g->getComponents() as $component) {
             $gcc = $gg->getOrCreateTaGradedGradeable()->getGradedComponentContainer($component);
 
-            // TODO: we need to convert to the old model single-grader format for rainbow grades
+            // We need to convert to the old model single-grader format for rainbow grades
             $gc = null;
             foreach ($gcc->getGradedComponents() as $gc_) {
                 $gc = $gc_;
                 // Get the only graded component and short circuit
                 break;
             }
+            //
+            // For each $gc in $gcc
+            //
 
             $inner = [
                 'title' => $component->getTitle()
@@ -370,17 +393,19 @@ class ReportController extends AbstractController {
                 $inner['marks'] = $marks;
             }
             $entry['components'][] = $inner;
+
+            // end for
         }
         return $entry;
     }
 
     /**
      * Gets the status message for a from a LateDayInfo status message
-     * @param $status
+     * @param LateDayInfo $ldi
      * @return string
      */
-    private function getLateStatusMessage($status) {
-        switch ($status) {
+    private function getLateStatusMessage(LateDayInfo $ldi) {
+        switch ($ldi->getStatus()) {
             case LateDayInfo::STATUS_GOOD:
                 return 'Good';
             case LateDayInfo::STATUS_LATE:
@@ -388,50 +413,13 @@ class ReportController extends AbstractController {
             case LateDayInfo::STATUS_BAD:
                 return 'Bad';
             case LateDayInfo::STATUS_NO_ACTIVE_VERSION:
-                return 'NO SUBMISSION';
+                if ($ldi->getGradedGradeable()->getAutoGradedGradeable()->hasSubmission()) {
+                    return 'Cancelled';
+                } else {
+                    return 'Unsubmitted';
+                }
             default:
                 return 'ERROR';
-        }
-    }
-
-    /**
-     * Adds late day information to a report entry
-     * TODO: functions that take ref parameters like this are sinful
-     * @param LateDayInfo|null $ldi
-     * @param $entry
-     */
-    private function addLateDays($ldi, &$entry) {
-        if ($ldi === null) {
-            return;
-        }
-        // TODO: for debugging
-        $entry['active_version'] = $ldi->getGradedGradeable()->getAutoGradedGradeable()->getActiveVersion();
-        /*if (!$ldi->hasLateDaysInfo()) {
-            $entry['status'] = 'Good';
-            $entry['days_late'] = 0;
-            return;
-        }*/
-
-        $status = $ldi->getStatus();
-        if ($status === LateDayInfo::STATUS_BAD) {
-            $entry['score'] = 0;
-        }
-
-        // The report may need this to be different from the 'pretty' version returned from $ldi->getStatusMessage()
-        $entry['status'] = $this->getLateStatusMessage($status);
-
-        $late_days_charged = $ldi->getLateDaysCharged();
-        if ($late_days_charged > 0) {
-
-            // TODO:  DEPRECATE THIS FIELD
-            $entry['days_late'] = $late_days_charged;
-
-            // REPLACED BY:
-            $entry['days_after_deadline'] = $ldi->getDaysLate();
-            $entry['extensions'] = $ldi->getLateDayException();
-            $entry['days_charged'] = $ldi->getLateDaysCharged();
-        } else {
-            $entry['days_late'] = 0;
         }
     }
 }
