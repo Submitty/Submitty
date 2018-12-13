@@ -4,6 +4,7 @@
 from abc import ABC, abstractmethod
 import os
 import subprocess
+import shutil
 
 from . import DATA_DIR
 
@@ -62,14 +63,20 @@ class DeleteLichenResult(AbstractJob):
         lichen_output = os.path.join(DATA_DIR, 'courses', semester, course, 'lichen', 'lichen_job_output.txt')
 
         with open(lichen_output, "w") as output_file:
-            subprocess.call("rm"+ " /var/local/submitty/courses/" +semester+"/"+course+ "/lichen/config/lichen_"+semester+"_"+course+"_"+gradeable+".json", stdout=output_file, stderr=output_file, shell=True)
-            subprocess.call("rm"+ " /var/local/submitty/courses/" +semester+"/"+course+ "/lichen/ranking/"+gradeable+".txt", stdout=output_file, stderr=output_file, shell=True)
-            subprocess.call("rm"+ " -rf /var/local/submitty/courses/" +semester+"/"+course+ "/lichen/provided_code/"+gradeable, stdout=output_file, stderr=output_file, shell=True)
-            subprocess.call("rm"+ " -rf /var/local/submitty/courses/" +semester+"/"+course+ "/lichen/tokenized/"+gradeable, stdout=output_file, stderr=output_file, shell=True)
-            subprocess.call("rm"+ " -rf /var/local/submitty/courses/" +semester+"/"+course+ "/lichen/concatenated/"+gradeable, stdout=output_file, stderr=output_file, shell=True)
-            subprocess.call("rm"+ " -rf /var/local/submitty/courses/" +semester+"/"+course+ "/lichen/hashes/"+gradeable, stdout=output_file, stderr=output_file, shell=True)
-            subprocess.call("rm"+ " -rf /var/local/submitty/courses/" +semester+"/"+course+ "/lichen/matches/"+gradeable, stdout=output_file, stderr=output_file, shell=True)
-            subprocess.call("echo"+ " Deleted lichen plagiarism results and saved config for "+gradeable, stdout=op, stderr=op,shell=True)
+            try:
+                os.remove("/var/local/submitty/courses/"+semester+"/"+course+"/lichen/config/lichen_"+semester+"_"+course+"_"+gradeable+".json")
+            except OSError:
+                pass
+            try:
+                os.remove("/var/local/submitty/courses/"+semester+"/"+course+"/lichen/ranking/"+gradeable+".txt")
+            except OSError:
+                pass
+            shutil.rmtree("/var/local/submitty/courses/"+semester+"/"+course+"/lichen/provided_code/"+gradeable,ignore_errors=True)
+            shutil.rmtree("/var/local/submitty/courses/"+semester+"/"+course+"/lichen/tokenized/"+gradeable,ignore_errors=True)
+            shutil.rmtree("/var/local/submitty/courses/"+semester+"/"+course+"/lichen/concatenated/"+gradeable,ignore_errors=True)
+            shutil.rmtree("/var/local/submitty/courses/"+semester+"/"+course+"/lichen/hashes/"+gradeable,ignore_errors=True)
+            shutil.rmtree("/var/local/submitty/courses/"+semester+"/"+course+"/lichen/matches/"+gradeable,ignore_errors=True)
+            print ("Deleted lichen plagiarism results and saved config for "+gradeable)
 
 
 class SendEmail(AbstractJob):
