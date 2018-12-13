@@ -57,7 +57,7 @@ fi
 NETPLANIO_VERSION=$(apt-cache policy netplan.io | grep 'Installed' | sed -E 's/^.*: (.*)$/\1/')
 NPIO_MAJOR=$(echo "$NETPLANIO_VERSION" | cut -d "." -f1)
 NPIO_MINOR=$(echo "$NETPLANIO_VERSION" | cut -d "." -f2)
-if [ ( "$NPIO_MAJOR" -eq 0 ) -a ( "$NPIO_MINOR" -lt 40 ) ]
+if [ "$NPIO_MAJOR" -eq 0 -a "$NPIO_MINOR" -lt 40 ]
 then
     # Update netplan.io
     echo "Detected old version of netplan.io... updating it automatically"
