@@ -2,9 +2,10 @@
 
 import smtplib
 import json
-import os
 import sys
+import os
 import time
+import datetime
 from sqlalchemy import create_engine, Table, MetaData
 
 with open(os.path.join("/usr/local/submitty/config", 'database.json')) as open_file:
@@ -19,6 +20,25 @@ DB_HOST = OPEN_JSON['database_host']
 DB_USER = OPEN_JSON['database_user']
 DB_PASSWORD = OPEN_JSON['database_password']
 
+today = datetime.datetime.now()
+log_path = "/var/local/submitty/logs/emails"
+logfile = open(os.path.join(log_path, (str(today.year) + str(today.month) + str(today.day) + ".txt")), 'a') 
+
+def setupDB():
+	db_name = "submitty"
+	# If using a UNIX socket, have to specify a slightly different connection string
+	if os.path.isdir(DB_HOST):
+		conn_string = "postgresql://{}:{}@/{}?host={}".format(DB_USER, DB_PASSWORD, db_name, DB_HOST)
+	else:
+		conn_string = "postgresql://{}:{}@{}/{}".format(DB_USER, DB_PASSWORD, DB_HOST, db_name)
+
+	engine = create_engine(conn_string)
+	db = engine.connect()
+	metadata = MetaData(bind=db)
+	return db 
+
+db = setupDB()
+
 #configures a mail client to send email 
 def constructMailClient():
 	try:
@@ -32,78 +52,48 @@ def constructMailClient():
 		exit(-1) 
 	return client 
 
-#gets the email list for a class
-def getClassList(semester, course):
-	db_name = "submitty_{}_{}".format(semester, course)
-	 # If using a UNIX socket, have to specify a slightly different connection string
-	if os.path.isdir(DB_HOST):
-		conn_string = "postgresql://{}:{}@/{}?host={}".format(DB_USER, DB_PASSWORD, db_name, DB_HOST)
-	else:
-		conn_string = "postgresql://{}:{}@{}/{}".format(DB_USER, DB_PASSWORD, DB_HOST, db_name)
+#gets queue of emails waiting to be sent
+def getEmailQueue():
+	#TODO: set limit in config
+	result = db.execute("SELECT * FROM emails WHERE sent=FALSE ORDER BY id LIMIT 100;")
+	queuedEmails = []
+	for row in result:
+		emailData = {}
+		emailData["id"] = row[0]
+		emailData["send_to"] = row[1]
+		emailData["subject"] = row[2]
+		emailData["body"] = row[3]
+		emailData["metadata"] = {}
 
-	engine = create_engine(conn_string)
-	db = engine.connect()
-	metadata = MetaData(bind=db)
+		queuedEmails.append(emailData)
 
-	student_emails = []
-	result = db.execute("SELECT user_email FROM users WHERE user_group != 4 OR registration_section IS NOT null;")
-	for email in result:
-		student_emails.append(email[0])
+	return queuedEmails
 
-	return student_emails
-
+def markSent(email_id):
+	queryString = "UPDATE emails SET sent = TRUE WHERE id = {};".format(email_id) 
+	result = db.execute(queryString)
 
 def constructMailString(send_to, subject, body):
 	return "TO:%s\nFrom: %s\nSubject:  %s \n\n\n %s \n\n" %(send_to, EMAIL_SENDER, subject, body)
 
-def constructAnnouncementEmail(student_email, thread_title, thread_content):
-	body = "Your Intructor Posted a Note\n" + thread_content 
-	mail_string = constructMailString(student_email, thread_title, thread_content)
-	return mail_string
+def sendEmail():
+	queuedEmails = getEmailQueue()
+	mailClient = constructMailClient()
 
-def sendAnnouncement():
-	mail_client = constructMailClient()
+	sentCount = 0 
+	for emailData in queuedEmails:
+		email = constructMailString(emailData["send_to"], emailData["subject"], emailData["body"])
+		# mail_client.sendmail(EMAIL_SENDER, emailData["send_to"], email)
+		markSent(emailData["id"])
+		sentCount += 1
 
-	if(len(sys.argv) < 6):
-		print("Error: insufficient arguments given - Usage: python3 sendEmail.py {email_type} {semester} {course} {title} {body}")
-		exit(-1) 
-
-	#TODO: check arguments length 
-	semester = sys.argv[2]
-	course = sys.argv[3]
-	thread_title = sys.argv[4]
-	thread_content = sys.argv[5]
-	print("Attempting to Send an Email Announcement. Course: {}, Semester: {}, Announcement Title: {}".format(course, semester, thread_title))
-
-	class_list = getClassList(semester, course)
-	emailCount = 0 
-	for student_email in class_list:
-		announcement_email = constructMailString(student_email, thread_title, thread_content)
-		mail_client.sendmail(EMAIL_SENDER, student_email, announcement_email)
-
-		#Sleep if we reach a certain sending threshold
-		#TODO: bring this in via config. Might be different depending on the mail service being used
-		emailCount += 1 
-		if(emailCount % 100 == 0):
-			time.sleep(65)
-
-	print("Sucessfully Emailed an Announcement to {} Students".format(emailCount))
+	logfile.write("Sucessfully Emailed {} Users".format(sentCount))
 
 def main():
 	try:
-		#grab arguments and figure out mail type
-		if len(sys.argv) < 2:
-			print("Error: email type not given to to email_script")
-			return 
-		
-		email_type = sys.argv[1]
-
-		if email_type == 'announce':
-			sendAnnouncement()
-
+		sendEmail()
 	except Exception as e:
-		print("Error: " + str(e))
-
+		logfile.write("Error: {}".format(str(e)))
 
 if __name__ == "__main__":
     main()

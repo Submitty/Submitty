@@ -882,28 +882,18 @@ class ForumController extends AbstractController {
     }
 
     private function sendEmailAnnouncement($thread_title, $thread_content, $post_id) {
-            $course = urlencode($this->core->getConfig()->getCourse());
-            $semester = urlencode($this->core->getConfig()->getSemester());
-
-
-            $email_job_data = [
-                "job" => "SendEmail",
-                "email_type" => "announce",
-                "semester" => $semester,
-                "course" => $course,
-                "thread_title" => $thread_title,
-                "thread_content" => $thread_content
+            $email_data = [
+                "subject" => $thread_title,
+                "body" => $thread_content,
+                "metadata" => ""
             ];
 
-            $email_job_file = "/var/local/submitty/daemon_job_queue/email__" . $semester . "__" . $course . "__" . $post_id . ".json";
+            $class_list = $this->core->getQueries()->getClassList();
 
-            if(file_exists($email_job_file) && !is_writable($email_job_file)) {
-                return "Failed to create email job. Try again";
+            foreach($class_list as $student_email) {
+                $this->core->getQueries()->newEmail($email_data, $student_email["user_email"]);
             }
 
-            if(file_put_contents($email_job_file, json_encode($email_job_data, JSON_PRETTY_PRINT)) === false) {
-                return "Failed to write email job file. Try again";
-            }
-            return null;
-    }
+        } 
+
 }

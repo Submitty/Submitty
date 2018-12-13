@@ -2698,6 +2698,7 @@ AND gc_id IN (
         else {
             $ignore_self_query = "";
         }
+
         $this->course_db->query("INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id)
                     SELECT ?, ?, ?, current_timestamp, ?, user_id as to_user_id FROM ({$target_users_query}) as u {$ignore_self_query}",
                     $params);
@@ -3696,5 +3697,25 @@ AND gc_id IN (
         $this->course_db->query('SELECT EXISTS (SELECT g_id FROM electronic_gradeable_data WHERE g_id=? AND (user_id=? OR team_id=?))',
             [$gradeable->getId(), $submitter->getId(), $submitter->getId()]);
         return $this->course_db->row()['exists'] ?? false;
+    }
+
+    public function getClassList(){
+        $parameters = array();
+        $this->course_db->query('SELECT user_email FROM users WHERE user_group != 4 OR registration_section IS NOT null', $parameters);
+
+        return $this->course_db->rows();
+    }
+
+    public function newEmail($emailData, $emailTo){
+        $parameters = array($emailTo, $emailData["subject"], $emailData["body"], $emailData["metadata"], $this->course_db->convertBoolean(false));
+
+        $this->submitty_db->query("
+                INSERT INTO emails(
+                  email_to,
+                  subject,
+                  body,
+                  metadata,
+                  sent)
+                VALUES(?, ?, ?, ?, ?)", $parameters);
     }
 }
