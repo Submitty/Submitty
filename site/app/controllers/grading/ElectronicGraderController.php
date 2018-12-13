@@ -2132,7 +2132,6 @@ class ElectronicGraderController extends GradingController {
             "grader_id" => $this->core->getUser()->getId(),
             "component_id" => $component_id,
             "action" => "OPEN_COMPONENT",
-            "token" => $_COOKIE['submitty_token'],
             "submitter_id" => $submitter_id
         );
         Logger::logTAGrading($logger_params);
