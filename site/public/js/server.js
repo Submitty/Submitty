@@ -856,7 +856,7 @@ function downloadCSV(code) {
     $('#downloadlink').remove();
 }
 
-function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignment_setting_json, members, max_members) {
+function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignment_setting_json, members, pending_members, max_members) {
     $('.popup-form').css('display', 'none');
     var form = $("#admin-team-form");
     form.css("display", "block");
@@ -868,7 +868,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         $('[name="num_users"]', form).val(3);
     }
     else if (!new_team) {
-        $('[name="num_users"]', form).val(members.length+2);
+        $('[name="num_users"]', form).val(members.length+pending_members.length+2);
     }
 
     var title_div = $("#admin-team-title");
@@ -905,9 +905,15 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         title_div.append('Edit Team: ' + who_id);
         for (var i = 0; i < members.length; i++) {
             members_div.append('<input class="readonly" type="text" name="user_id_' + i + '" readonly="readonly" value="' + members[i] + '" /> \
-                <i id="remove_member_'+i+'" class="fa fa-times" onclick="removeTeamMemberInput('+i+');" style="color:red; cursor:pointer;" aria-hidden="true"></i><br />');
+                <input id="remove_member_'+i+'" class = "btn btn-danger" type="submit" value="Remove" onclick="removeTeamMemberInput('+i+');" \
+                style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true"></input><br />');
         }
-        for (var i = members.length; i < (members.length+2); i++) {
+        for (var i = members.length; i < members.length+pending_members.length; i++) {
+            members_div.append('<input class="readonly" type="text" style= "font-style: italic; color:grey;" name="pending_user_id_' + i + '" readonly="readonly" value="Pending: ' + pending_members[i-members.length] + '" />\
+                <input id="approve_member_'+i+'" class = "btn btn-success" type="submit" value="Accept" onclick="approveTeamMemberInput(this,'+i+');" \
+                style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true"></input><br />');
+        }
+        for (var i = members.length+pending_members.length; i < (members.length+pending_members.length+2); i++) {
             members_div.append('<input type="text" name="user_id_' + i + '" /><br />');
             $('[name="user_id_'+i+'"]', form).autocomplete({
                 source: student_full
@@ -922,7 +928,6 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         for (var j = 0; j <=team_history_len-1; j++) {
             if(user_assignment_setting_json.team_history[j].action == "admin_create"){
                 for (var i = 0; i < members.length; i++) {
-                    console.log(i);
                     if(user_assignment_setting_json.team_history[j].first_user == members[i] || user_assignment_setting_json.team_history[j].added_user == members[i]){
                         team_history_div_left.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_left" readonly="readonly" value="'+members[i]+ ' added on: " /><br />');
                         team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[j].time+ '" /><br />');
@@ -938,10 +943,8 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
                 }
             }
             if(user_assignment_setting_json.team_history[j].action == "admin_remove_user"){
-
-                        team_history_div_left.append('<input class="readonly" type="text" style="width:100%;"  readonly="readonly" value="'+user_assignment_setting_json.team_history[j].removed_user+ ' removed on: " /><br />');
-                        team_history_div_right.append('<input class="readonly" type="text" style="width:100%;"  readonly="readonly" value="' +user_assignment_setting_json.team_history[j].time+ '" /><br />');
-
+                team_history_div_left.append('<input class="readonly" type="text" style="width:100%;"  readonly="readonly" value="'+user_assignment_setting_json.team_history[j].removed_user+ ' removed on: " /><br />');
+                team_history_div_right.append('<input class="readonly" type="text" style="width:100%;"  readonly="readonly" value="' +user_assignment_setting_json.team_history[j].time+ '" /><br />');
             }
         }
 
@@ -955,6 +958,17 @@ function removeTeamMemberInput(i) {
     var form = $("#admin-team-form");
     $('[name="user_id_'+i+'"]', form).removeClass('readonly').removeAttr('readonly').val("");
     $("#remove_member_"+i).remove();
+    var student_full = JSON.parse($('#student_full_id').val());
+    $('[name="user_id_'+i+'"]', form).autocomplete({
+        source: student_full
+    });
+}
+
+function approveTeamMemberInput(old, i) {
+    var form = $("#admin-team-form");
+    $("#approve_member_"+i).remove();
+    $('[name="pending_user_id_'+i+'"]', form).attr("name", "user_id_"+i);
+    $('[name="user_id_'+i+'"]', form).attr("style", "font-style: normal;");
     var student_full = JSON.parse($('#student_full_id').val());
     $('[name="user_id_'+i+'"]', form).autocomplete({
         source: student_full
