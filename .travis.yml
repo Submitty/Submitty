@@ -55,6 +55,11 @@ jobs:
     - <<: *00-cache
       php: 7.2
       if: branch = master OR type = pull_request
+    - <<: *00-cache
+      python: 3.5
+      install:
+        - pip3 install flake8 flake8-bugbear flake8-docstrings
+      script: skip
 
     # Lint the codebase to ensure that the code is compliant to our system
     - &01-lint
@@ -68,6 +73,10 @@ jobs:
     - <<: *01-lint
       php: 7.2
       if: branch = master OR type = pull_request
+    - <<: *01-lint
+      python: 3.5
+      script:
+        - flake8
 
     - &02-php-unit
       stage: 02 unit test

@@ -1,0 +1,16 @@
+[flake8]
+max-line-length = 88
+exclude=
+    .git,
+    .setup,
+    bin,
+    grading,
+    junit_test_runner,
+    more_autograding_examples,
+    ParseLogFiles,
+    python_submitty_utils,
+    sample_files,
+    sbin,
+    site,
+    site_internal,
+    tests
