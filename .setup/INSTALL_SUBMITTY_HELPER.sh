@@ -50,6 +50,21 @@ if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow" 
     exit 1
 fi
 
+########################################################################################################################
+########################################################################################################################
+# MAKE SURE THE NETWORKING WORKS FIRST
+
+NETPLANIO_VERSION=$(apt-cache policy netplan.io | grep 'Installed' | sed -E 's/^.*: (.*)$/\1/')
+NPIO_MAJOR=$(echo "$NETPLANIO_VERSION" | cut -d "." -f1)
+NPIO_MINOR=$(echo "$NETPLANIO_VERSION" | cut -d "." -f2)
+if [ "$NPIO_MAJOR" -eq 0 && "$NPIO_MINOR" -lt 40 ]
+then
+    # Update netplan.io
+    echo "Detected old version of netplan.io... updating it automatically"
+    chmod o+r /run/systemd/network/*
+    systemctl start systemd-networkd
+    apt install -y netplan.io=0.40.1~18.04.3
+fi
 
 ########################################################################################################################
 ########################################################################################################################
