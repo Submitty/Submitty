@@ -59,6 +59,7 @@ class DeleteLichenResult(AbstractJob):
         course = self.job_details['course']
         gradeable = self.job_details['gradeable']
 
+
         lichen_output = os.path.join(DATA_DIR, 'courses', semester, course, 'lichen', 'lichen_job_output.txt')
 
         with open(lichen_output, "w") as output_file:
@@ -77,3 +78,20 @@ class DeleteLichenResult(AbstractJob):
             shutil.rmtree("/var/local/submitty/courses/"+semester+"/"+course+"/lichen/matches/"+gradeable,ignore_errors=True)
             print ("Deleted lichen plagiarism results and saved config for "+gradeable)
 
+
+class SendEmail(AbstractJob):
+    def run_job(self):
+        email_type = self.job_details['email_type']
+        semester = self.job_details['semester']
+        course = self.job_details['course']
+
+        email_script = '/usr/local/submitty/sbin/sendEmail.py'
+
+        thread_title = self.job_details['thread_title']
+        thread_content = self.job_details['thread_content']
+
+        try:
+            with open('email_job_logs.txt', "a") as output_file:
+                subprocess.call([email_script, email_type, semester, course, thread_title, thread_content], stdout=output_file)
+        except PermissionError:
+            print ("error, could not open "+output_file+" for writing")
