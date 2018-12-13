@@ -128,11 +128,15 @@ class Component extends AbstractModel {
         unset($arr['id']);
         unset($arr['modified']);
         unset($arr['order']);
+        $marks = [];
         foreach ($arr['marks'] as $mark) {
             unset($mark['any_receivers']);
             unset($mark['id']);
+            unset($mark['order']);
             unset($mark['modified']);
+            $marks[] = $mark;
         }
+        $arr['marks'] = $marks;
         return $arr;
     }
 
