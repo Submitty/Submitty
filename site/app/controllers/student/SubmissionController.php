@@ -308,9 +308,6 @@ class SubmissionController extends AbstractController {
                 $error = true;
             }
             else {
-                $extensions = $graded_gradeable !== null ? $graded_gradeable->getLateDayException($this->core->getUser()) : 0;
-                $days_late = DateUtils::calculateDayDiff($gradeable->getSubmissionDueDate());
-                $late_days_use = $gradeable->hasDueDate() ? max(0, $days_late - $extensions) : 0;
                 if ($graded_gradeable !== null
                     && $gradeable->isTaGradeReleased()
                     && $gradeable->isTaGrading()
@@ -326,10 +323,8 @@ class SubmissionController extends AbstractController {
                 }
 
                 // If we get here, then we can safely construct the old model w/o checks
-                // FIXME: remove this 'old_gradeable' once none of the HomeworkView relies on it
-                $old_gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $this->core->getUser()->getId());
                 $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                       'showGradeable', $gradeable, $graded_gradeable, $old_gradeable, $version, $late_days_use, $extensions, $show_hidden, false);
+                                                       'showGradeable', $gradeable, $graded_gradeable, $version, $show_hidden, false);
             }
         }
         return array('id' => $gradeable_id, 'error' => $error);
@@ -1777,16 +1772,28 @@ class SubmissionController extends AbstractController {
 
         // Don't load the graded gradeable, since that may not exist yet
         $submitter_id = $this->core->getUser()->getId();
+        $user_id = $submitter_id;
+        $team_id = null;
         if ($gradeable !== null && $gradeable->isTeamAssignment()) {
             $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $submitter_id);
+
             if ($team !== null) {
                 $submitter_id = $team->getId();
+                $team_id = $submitter_id;
+                $user_id = null;
             }
         }
 
-        $path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "results", $gradeable_id,
-            $submitter_id, $version);
-        if (file_exists($path."/results.json")) {
+        $filepath = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "results", $gradeable_id,
+            $submitter_id, $version, "results.json");
+
+        $results_json_exists = file_exists($filepath);
+
+        // if the results json exists, check the database to make sure that the autograding results are there.
+        $has_results = $results_json_exists && $this->core->getQueries()->getGradeableVersionHasAutogradingResults(
+            $gradeable_id, $version, $user_id, $team_id);
+
+        if ($has_results) {
             $refresh_string = "REFRESH_ME";
             $refresh_bool = true;
         }

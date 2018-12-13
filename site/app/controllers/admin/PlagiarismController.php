@@ -45,7 +45,6 @@ class PlagiarismController extends AbstractController {
                 break;
             case 'show_plagiarism_result':
                 $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildUrl(array('component' => 'admin', 'semester' => $_REQUEST['semester'] , 'course'=> $_REQUEST['course'],'page' => 'plagiarism')));
-                $this->core->getOutput()->addBreadcrumb(($this->core->getQueries()->getGradeable($_REQUEST['gradeable_id']))->getName().' Results');
                 $this->showPlagiarismResult();
                 break;
             default:
@@ -205,18 +204,18 @@ class PlagiarismController extends AbstractController {
         }
 
         $file_option = $_POST['file_option'];
-        if ($file_option == "regrex_matching_files") {
-            $file_option = "matching_regrex";
+        if ($file_option == "regex_matching_files") {
+            $file_option = "matching_regex";
         }
         else {
             $file_option = "all";
         }
-        if($file_option == "matching_regrex") {
-            if( isset($_POST['regrex_to_select_files']) && $_POST['regrex_to_select_files'] !== '') {
-                $regrex_for_selecting_files = $_POST['regrex_to_select_files'];
+        if($file_option == "matching_regex") {
+            if( isset($_POST['regex_to_select_files']) && $_POST['regex_to_select_files'] !== '') {
+                $regex_for_selecting_files = $_POST['regex_to_select_files'];
             }
             else {
-                $this->core->addErrorMessage("No regrex provided for selecting files");
+                $this->core->addErrorMessage("No regex provided for selecting files");
                 $this->core->redirect($return_url);
             }
         }
@@ -325,8 +324,8 @@ class PlagiarismController extends AbstractController {
                             "instructor_provided_code" =>   $instructor_provided_code,
                                         );
 
-        if($file_option == "matching_regrex") {
-            $json_data["regrex"] = $regrex_for_selecting_files;
+        if($file_option == "matching_regex") {
+            $json_data["regex"] = $regex_for_selecting_files;
         }
         if($instructor_provided_code == true) {
             $json_data["instructor_provided_code_path"] = $instructor_provided_code_path;

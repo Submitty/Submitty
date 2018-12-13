@@ -4,8 +4,8 @@
 #}
 {% if action == 'new' or action == 'template' %}
     <div>
-        From Template: 
-        <select name="gradeable_template" style='width: 400px;'>
+        <label for="gradeable_template">From Template:</label>
+        <select name="gradeable_template" id="gradeable_template" style='width: 400px;'>
             <option>--None--</option>
 
             {% for template in template_list %}
@@ -16,25 +16,25 @@
     </div>
 {% endif %}
 
-{# 
+{#
     Primary Form
 #}
 <!-- Gradeable Title (read/write in all modes) -->
-What is the title of this gradeable?:
+<label for="g_title">What is the title of this gradeable?:</label>
     <input style='width: 350px' type='text' name='title' id='g_title' class="required auto_save"
         value="{{ action != 'new' ? gradeable.getTitle() : '' }}" placeholder="(Required)" required/>
 
 <br />
 
 <!-- Instruction URL (read/write in all modes) -->
-What is the URL to the assignment instructions? (shown to student)
-    <input style='width: 350px' type='text' name='instructions_url' class="auto_save"
+<label for="instructions_url">What is the URL to the assignment instructions? (shown to student)</label>
+    <input style='width: 350px' type='text' name='instructions_url' id='instructions_url' class="auto_save"
         value="{{ action != 'new' ? gradeable.getInstructionsUrl() : '' }}" placeholder="(Optional)" />
 
 <br />
 
 <!-- Gradeable ID (readonly in edit mode, required) -->
-What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>):
+<label for="g_id">>What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>):</label>
 <input style='width: 350px' type='text' name='id' id="g_id" class="required"
        value="{{ action != 'new' ? gradeable.getId() : '' }}" placeholder="(Required)"
         {{ action == 'edit' ? 'readonly' : 'required' }} />
@@ -90,12 +90,12 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
 
 <!-- This is only relevant to Electronic Files -->
 <fieldset class="gradeable_type_options electronic_file" id="electronic_file">
-    <div>Will any or all of this assignment be manually graded (e.g., by the TAs or the instructor)?</div>
+    <div><legend>Will any or all of this assignment be manually graded (e.g., by the TAs or the instructor)?</legend></div>
     <div>
         <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val auto_save date-related"
-                {{ action != 'new' and gradeable.getTaGrading() ? 'checked' : '' }} /> Yes
+                {{ action != 'new' and gradeable.getTaGrading() ? 'checked' : '' }} /> <label for="yes_ta_grade">Yes</label>
         <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val auto_save date-related"
-                {{ not (action != 'new' and gradeable.getTaGrading()) ? 'checked' : '' }} /> No
+                {{ not (action != 'new' and gradeable.getTaGrading()) ? 'checked' : '' }} /> <label for="no_ta_grade">No</label>
     </div>
     {% if regrade_enabled %}
         <div id="regrade_request_enable_container">
@@ -117,18 +117,18 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
         {% endif %}
         <div style="{{ action == 'edit' ? 'display:none' : '' }}">
             <input type="radio" id = "team_yes_radio" name="team_assignment" value="true"
-                    {{ action != 'new' and gradeable.isTeamAssignment() ? 'checked' : '' }}> Yes
+                    {{ action != 'new' and gradeable.isTeamAssignment() ? 'checked' : '' }}> <label for="team_yes_radio">Yes</label>
 
             <input type="radio" id = "team_no_radio" name="team_assignment" value ="false"
-                    {{ not (action != 'new' and gradeable.isTeamAssignment()) ? 'checked' :  '' }}> No
+                    {{ not (action != 'new' and gradeable.isTeamAssignment()) ? 'checked' :  '' }}> <label for="team_no_radio">No</label>
         </div>
     </div>
 
     <!-- Team settings (read only in edit mode) -->
     <div class="team_assignment team_yes" id="team_yes">
 
-        What is the maximum team size?
-            <input style="width: 50px" name="team_size_max" class="int_val auto_save" type="text"
+        <label for="team_size_max">What is the maximum team size?</label>
+            <input style="width: 50px" name="team_size_max" id="team_size_max" class="int_val auto_save" type="text"
                    value="{{ action != 'new' ? gradeable.getTeamSizeMax() : '3' }}"/>
 
         {#Use teams from a previous gradeable:
@@ -183,15 +183,15 @@ What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kb
         <input style='width: 83%' type='text' id="subdirectory" name='vcs_subdirectory' class="auto_save"
                value="{{ action != 'new' ? gradeable.getVcsSubdirectory() : '' }}" placeholder="(Optional)"/><br />
         <br />
-        
+
         FULL VCS URL: <kbd id="vcs_url"></kbd>
     </div>
 </fieldset>
 
 <!-- Gradeable bucket (read/write in all modes) -->
-What <a target=_blank href="http://submitty.org/instructor/rainbow_grades">syllabus category</a> does this item belong to?:
+<label for="syllabus_bucket">What <a target=_blank href="http://submitty.org/instructor/rainbow_grades">syllabus category</a> does this item belong to?:</label>
 
-<select name="syllabus_bucket" class="auto_save" style="width: 170px;">
+<select name="syllabus_bucket" id="syllabus_bucket" class="auto_save" style="width: 170px;">
     {% for bucket in syllabus_buckets %}
         <option value="{{ bucket }}" {{ action != 'new' and gradeable.getSyllabusBucket() == bucket ? 'selected' : '' }}>
             {{ bucket | title }}
