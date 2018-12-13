@@ -12,6 +12,10 @@ from . import INSTALL_DIR, DATA_DIR
 
 
 class AbstractJob(ABC):
+    """
+    Abstract class that all jobs should extend from, creating a common
+    interface that can be expected for all jobs
+    """
     def __init__(self, job_details):
         self.job_details = job_details
 
@@ -26,6 +30,7 @@ class AbstractJob(ABC):
         pass
 
 
+# pylint: disable=abstract-method
 class CourseJob(AbstractJob):
     """
     Base class for jobs that involve operation for a course.
@@ -43,6 +48,7 @@ class CourseJob(AbstractJob):
         return test_path.exists()
 
 
+# pylint: disable=abstract-method
 class CourseGradeableJob(CourseJob):
     """
     Base class for jobs that involve a semester/course as well as a gradeable, validating
@@ -52,7 +58,10 @@ class CourseGradeableJob(CourseJob):
     def validate_job_details(self):
         if not super().validate_job_details():
             return False
-        return 'gradeable' in self.job_details and self.job_details['gradeable'] not in ['', '.', '..']
+        if 'gradeable' not in self.job_details or self.job_details['gradeable'] is None:
+            return False
+        self.job_details['gradeable'] = os.path.basename(self.job_details['gradeable'])
+        return self.job_details['gradeable'] not in ['', '.', '..']
 
 
 class BuildConfig(CourseGradeableJob):
