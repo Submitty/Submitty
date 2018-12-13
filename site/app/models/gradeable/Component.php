@@ -102,6 +102,36 @@ class Component extends AbstractModel {
     }
 
     /**
+     * Creates a component with marks from a nested array (from JSON typically)
+     * @param Core $core
+     * @param Gradeable $gradeable
+     * @param array $arr
+     */
+    public static function import(Core $core, Gradeable $gradeable, array $arr) {
+        $component = new Component($core, $gradeable, $arr);
+
+        $marks_arr = $arr['marks'] ?? [];
+        $marks = [];
+        foreach ($marks_arr as $mark_arr) {
+            $marks[] = new Mark($core, $component, $mark_arr);
+        }
+        $component->setMarksFromDatabase($marks);
+    }
+
+    /**
+     * Exports the component and its marks to an array
+     * @return array
+     */
+    public function export() {
+        $arr = parent::toArray();
+        unset($arr['any_grades']);
+        foreach ($arr['marks'] as $mark) {
+            unset($mark['any_receivers']);
+        }
+        return $arr;
+    }
+
+    /**
      * Gets the component's gradeable
      * @return Gradeable The component's gradeable
      */

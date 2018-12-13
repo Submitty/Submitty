@@ -232,6 +232,19 @@ class Gradeable extends AbstractModel {
     }
 
     /**
+     * Exports all of the components so they can be saved to a json
+     * @return array
+     */
+    public function exportComponents() {
+        $component_arrays = [];
+        foreach ($this->components as $component) {
+            /** @var Component $component */
+            $component_arrays[] = $component->export();
+        }
+        return $component_arrays;
+    }
+
+    /**
      * All \DateTime properties for this class
      */
     const date_properties = [

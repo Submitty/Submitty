@@ -51,6 +51,9 @@ class AdminGradeableController extends AbstractController {
             case 'check_refresh':
                 $this->checkRefresh();
                 break;
+            case 'export_components':
+                $this->exportComponentsRequest();
+                break;
             default:
                 $this->newPage();
                 break;
@@ -128,7 +131,7 @@ class AdminGradeableController extends AbstractController {
             'syllabus_buckets' => self::syllabus_buckets,
             'vcs_base_url' => $vcs_base_url,
             'regrade_enabled' => $this->core->getConfig()->isRegradeEnabled(),
-            'gradeable_type_strings' => self::gradeable_type_strings
+            'gradeable_type_strings' => self::gradeable_type_strings,
         ]);
     }
 
@@ -229,6 +232,13 @@ class AdminGradeableController extends AbstractController {
             'id' => $gradeable->getId()
         ]);
 
+        $export_components_url = $this->core->buildUrl([
+            'component' => 'admin',
+            'page' => 'admin_gradeable',
+            'action' => 'export_components',
+            'gradeable_id' => $gradeable->getId(),
+        ]);
+
         $type_string = 'UNKNOWN';
         if($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             if($gradeable->isScannedExam()) {
@@ -281,6 +291,8 @@ class AdminGradeableController extends AbstractController {
             'type_string' => $type_string,
             'gradeable_type_strings' => self::gradeable_type_strings,
             'show_edit_warning' => $gradeable->anyManualGrades(),
+
+            'export_components_url' => $export_components_url,
 
             // Config selection data
             'config_repo_name' => $config_repo_name,
@@ -1117,5 +1129,32 @@ class AdminGradeableController extends AbstractController {
         $rebuild_filename = 'PROCESSING_'.$this->core->getConfig()->getSemester().'__'.$this->core->getConfig()->getCourse().'__'.$gradeable_id.'.json';
         $daemon_queue_dir = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $rebuild_filename);
         return is_file($daemon_queue_dir);
+    }
+
+    private function exportComponentsRequest() {
+        $url = $this->core->buildUrl([]);
+
+        $gradeable_id = $_GET['gradeable_id'] ?? '';
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
+            $this->core->addErrorMessage("Invalid gradeable id");
+            $this->core->redirect($url);
+        }
+
+        // Permission checks
+        if (!$this->core->getAccess()->canI("grading.electronic.export_components", ["gradeable" => $gradeable])) {
+            $this->core->addErrorMessage("Insufficient permissions to export components");
+            $this->core->redirect($url);
+        }
+
+        try {
+            $arrs = $gradeable->exportComponents();
+            $this->core->getOutput()->renderFile(json_encode($arrs, JSON_PRETTY_PRINT), $gradeable->getId() . '_components.json');
+        } catch (\Exception $e) {
+            $this->core->addErrorMessage($e->getMessage());
+            $this->core->redirect($url);
+        }
     }
 }
