@@ -242,13 +242,6 @@ class AdminGradeableController extends AbstractController {
             'gradeable_id' => $gradeable->getId(),
         ]);
 
-        $import_components_url = $this->core->buildUrl([
-            'component' => 'admin',
-            'page' => 'admin_gradeable',
-            'action' => 'import_components',
-            'gradeable_id' => $gradeable->getId(),
-        ]);
-
         $type_string = 'UNKNOWN';
         if($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             if($gradeable->isScannedExam()) {
@@ -304,7 +297,6 @@ class AdminGradeableController extends AbstractController {
             'show_edit_warning' => $gradeable->anyManualGrades(),
 
             'export_components_url' => $export_components_url,
-            'import_components_url' => $import_components_url,
 
             // Config selection data
             'config_repo_name' => $config_repo_name,
