@@ -122,6 +122,16 @@ def zip_my_directory(path,zipfilename):
     zipf.close()
 
 
+def zip_my_directories(paths,zipfilename):
+    zipf = zipfile.ZipFile(zipfilename,'w',zipfile.ZIP_DEFLATED)
+    for path in paths:
+        for root,dirs,files in os.walk(path):
+            for my_file in files:
+                relpath = root[len(path)+1:]
+                zipf.write(os.path.join(root,my_file),os.path.join(relpath,my_file))
+    zipf.close()
+
+
 def unzip_this_file(zipfilename,path):
     if not os.path.exists(zipfilename):
         raise RuntimeError("ERROR: zip file does not exist '", zipfilename, "'")
@@ -639,6 +649,12 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     patterns_work_to_details = complete_config_obj["autograding"]["work_to_details"]
     pattern_copy("work_to_details",patterns_work_to_details,tmp_work,os.path.join(tmp_results,"details"),tmp_logs)
 
+    tmp_results_public = os.path.join(tmp,"TMP_RESULTS_PUBLIC")
+    os.makedirs(tmp_results_public)
+    if "work_to_results_public" in complete_config_obj["autograding"]:
+        patterns_work_to_results_public = complete_config_obj["autograding"]["work_to_results_public"]
+        pattern_copy("work_to_results_public",patterns_work_to_results_public,tmp_work,tmp_results_public,tmp_logs)
+
     history_file_tmp = os.path.join(tmp_submission,"history.json")
     history_file = os.path.join(tmp_results,"history.json")
     if os.path.isfile(history_file_tmp):
@@ -723,11 +739,12 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
 
     # zip up results folder
     filehandle, my_results_zip_file=tempfile.mkstemp()
-    zip_my_directory(tmp_results,my_results_zip_file)
+    zip_my_directories([tmp_results, tmp_results_public],my_results_zip_file)
     os.close(filehandle)
     shutil.rmtree(tmp_autograding)
     shutil.rmtree(tmp_submission)
     shutil.rmtree(tmp_results)
+    shutil.rmtree(tmp_results_public)
     shutil.rmtree(tmp_work)
     shutil.rmtree(tmp)
 
