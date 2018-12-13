@@ -81,10 +81,14 @@ def process_job(job):
     Path(QUEUE_DIR, job).rename(processing_job)
     try:
         job_class = getattr(jobs, job_details['job'])(job_details)
-        if job_class.validate_job_details():
-            job_class.run_job()
-        else:
+        if not job_class.has_required_keys():
+            print("Missing some details for job:", job)
+            return
+        job_class.sanitize_job_details()
+        if not  job_class.validate_job_details():
             print("Failed to validate details for job:", job)
+            return
+        job_class.run_job()
     except NameError:
         # function does not exist
         pass

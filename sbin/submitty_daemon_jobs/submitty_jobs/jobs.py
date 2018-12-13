@@ -16,10 +16,31 @@ class AbstractJob(ABC):
     Abstract class that all jobs should extend from, creating a common
     interface that can be expected for all jobs
     """
+
+    required_keys = []
+
     def __init__(self, job_details):
         self.job_details = job_details
 
+    def has_required_keys(self):
+        """
+        Validates that the job_details contains all keys specified in
+        the required_keys class variable, and that the values for them
+        is not None
+        """
+        for key in self.required_keys:
+            if key not in self.job_details or self.job_details[key] is None:
+                return False
+        return True
+
+    def sanitize_job_details(self):
+        pass
+
     def validate_job_details(self):
+        """
+        Checks to see if the passed in job details contain all
+        necessary components to run the particular job.
+        """
         return True
 
     @abstractmethod
@@ -37,11 +58,20 @@ class CourseJob(AbstractJob):
     This class validates that the job details includes a semester
     and course and that they are valid directories within Submitty. 
     """
+
+    required_keys = [
+        'semester',
+        'course'
+    ]
+
+    def sanitize_job_details(self):
+        for key in ['semester', 'course']:
+            self.job_details[key] = os.path.basename(self.job_details[key])
+
     def validate_job_details(self):
         for key in ['semester', 'course']:
             if key not in self.job_details or self.job_details[key] is None:
                 return False
-            self.job_details[key] = os.path.basename(self.job_details[key])
             if self.job_details[key] in ['', '.', '..']:
                 return False
         test_path = Path(DATA_DIR, 'courses', self.job_details['semester'], self.job_details['course'])
@@ -55,6 +85,12 @@ class CourseGradeableJob(CourseJob):
     that we have a gradeable within our job details, and that it's not empty nor just a
     dot or two dots.
     """
+
+    required_keys = CourseJob.required_keys + ['gradeable']
+
+    def sanitize_job_details(self):
+        self.job_details['gradeable'] = os.path.basename(self.job_details['gradeable'])
+
     def validate_job_details(self):
         if not super().validate_job_details():
             return False
