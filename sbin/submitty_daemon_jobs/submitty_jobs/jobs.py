@@ -33,9 +33,6 @@ class AbstractJob(ABC):
                 return False
         return True
 
-    def sanitize_job_details(self):
-        pass
-
     def validate_job_details(self):
         """
         Checks to see if the passed in job details contain all
@@ -56,7 +53,7 @@ class CourseJob(AbstractJob):
     """
     Base class for jobs that involve operation for a course.
     This class validates that the job details includes a semester
-    and course and that they are valid directories within Submitty. 
+    and course and that they are valid directories within Submitty
     """
 
     required_keys = [
@@ -64,15 +61,13 @@ class CourseJob(AbstractJob):
         'course'
     ]
 
-    def sanitize_job_details(self):
-        for key in ['semester', 'course']:
-            self.job_details[key] = os.path.basename(self.job_details[key])
-
     def validate_job_details(self):
         for key in ['semester', 'course']:
             if key not in self.job_details or self.job_details[key] is None:
                 return False
             if self.job_details[key] in ['', '.', '..']:
+                return False
+            if self.job_details[key] != os.path.basename(self.job_details[key]):
                 return False
         test_path = Path(DATA_DIR, 'courses', self.job_details['semester'], self.job_details['course'])
         return test_path.exists()
@@ -88,13 +83,12 @@ class CourseGradeableJob(CourseJob):
 
     required_keys = CourseJob.required_keys + ['gradeable']
 
-    def sanitize_job_details(self):
-        self.job_details['gradeable'] = os.path.basename(self.job_details['gradeable'])
-
     def validate_job_details(self):
         if not super().validate_job_details():
             return False
         if 'gradeable' not in self.job_details or self.job_details['gradeable'] is None:
+            return False
+        if self.job_details['gradeable'] != os.path.basename(self.job_details['gradeable']):
             return False
         self.job_details['gradeable'] = os.path.basename(self.job_details['gradeable'])
         return self.job_details['gradeable'] not in ['', '.', '..']

@@ -84,7 +84,6 @@ def process_job(job):
         if not job_class.has_required_keys():
             print("Missing some details for job:", job)
             return
-        job_class.sanitize_job_details()
         if not  job_class.validate_job_details():
             print("Failed to validate details for job:", job)
             return
