@@ -354,7 +354,7 @@ HTML;
 							dynamicScrollContentOnDemand($('.thread_list'), buildUrl({'component': 'forum', 'page': 'get_threads', 'page_number':'{{#}}'}), {$currentThread}, '', '{$currentCourse}');
 							var active_thread = $('#thread_list .active');
 							if(active_thread.length > 0) {
-								active_thread[0].scrollIntoView(true); 
+								active_thread[0].scrollIntoView({block: "center", inline: "nearest"}); 
 							}
 						});
 					</script>
@@ -569,7 +569,7 @@ HTML;
 						$first_post_content = html_entity_decode($first_post['content'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
 						//replace tags from displaying in sidebar
-						$first_post_content = str_replace("[/code]", "", str_replace("[code]", "", strip_tags($first_post["content"])));
+                        $first_post_content = str_replace("[/code]", "", str_replace("[code]", "", strip_tags($first_post["content"])));
 						$temp_first_post_content = preg_replace('#\[url=(.*?)\](.*?)(\[/url\])#', '$2', $first_post_content);
 
 						if(!empty($temp_first_post_content)){
