@@ -206,7 +206,7 @@ class Logger {
      * 2. Opening a component
      * 3. Saving a component
      * The log is in the format of
-     * Timestamp | Gradeable_id | Grader ID | Student ID | Component_ID (except for case 1) | Token | IP ADDRESS | Action | User Agent
+     * Timestamp | Gradeable_id | Grader ID | Student ID | Component_ID (except for case 1) | Action | User Agent
      *
      * where action is defined broadly as the page they're accessing and any other relevant information
      * (so gradeable id for when they're submitting).
@@ -222,8 +222,6 @@ class Logger {
         if(array_key_exists('component_id', $params)){
             $log_message[] = $params['component_id'];
         }
-        $log_message[] = $params['token'];
-        $log_message[] = $_SERVER['REMOTE_ADDR'];
         $log_message[] = $params['action'];
         $log_message[] = $_SERVER['HTTP_USER_AGENT'];
         $log_message = implode(" | ", $log_message)."\n";
