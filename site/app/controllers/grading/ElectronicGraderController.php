@@ -11,6 +11,7 @@ use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Mark;
 use app\models\gradeable\TaGradedGradeable;
 use app\models\GradeableAutocheck;
+use app\libraries\Logger;
 use app\models\Team;
 use app\models\User;
 use app\libraries\FileUtils;
@@ -1115,6 +1116,15 @@ class ElectronicGraderController extends GradingController {
         $late_status = $old_gradeable->calculateLateStatus();
         // TODO: End region
 
+        $logger_params = array(
+            "gradeable_id" => $gradeable_id,
+            "grader_id" => $this->core->getUser()->getId(),
+            "submitter_id" => $submitter_id,
+            "action" => "VIEW_PAGE",
+            "token" => $_COOKIE['submitty_token']
+        );
+        Logger::logTAGrading($logger_params);
+
         $this->core->getOutput()->addInternalCss('ta-grading.css');
         $show_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $gradeable]);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $prev_id, $next_id, $not_in_my_section, $show_hidden, $can_verify, $show_verify_all, $show_silent_edit, $late_status);
@@ -1372,6 +1382,16 @@ class ElectronicGraderController extends GradingController {
         if (!$this->core->getAccess()->canI('grading.electronic.silent_edit')) {
             $silent_edit = false;
         }
+
+        $logger_params = array(
+            "gradeable_id" => $gradeable_id,
+            "grader_id" => $this->core->getUser()->getId(),
+            "component_id" => $component_id,
+            "action" => "SAVE_COMPONENT",
+            "token" => $_COOKIE['submitty_token'],
+            "submitter_id" => $submitter_id
+        );
+        Logger::logTAGrading($logger_params);
 
         // Get / create the TA grade
         $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
@@ -2108,6 +2128,17 @@ class ElectronicGraderController extends GradingController {
 
         // Get / create the graded component
         $graded_component = $ta_graded_gradeable->getGradedComponent($component, $grader);
+
+        $logger_params = array(
+            "gradeable_id" => $gradeable_id,
+            "grader_id" => $this->core->getUser()->getId(),
+            "component_id" => $component_id,
+            "action" => "OPEN_COMPONENT",
+            "token" => $_COOKIE['submitty_token'],
+            "submitter_id" => $submitter_id
+        );
+        Logger::logTAGrading($logger_params);
+
 
         try {
             // Once we've parsed the inputs and checked permissions, perform the operation
