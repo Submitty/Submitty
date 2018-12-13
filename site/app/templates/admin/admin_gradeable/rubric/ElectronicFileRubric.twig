@@ -33,20 +33,48 @@ Point precision:
 </div>
 <div>
     <a href="{{ export_components_url }}" class="btn btn-default">Export Components</a>
-    <input type="button" class="btn btn-default ignore" value="Import Components" onclick="toggleImportBox()" />
-    <div id="import-components-files" hidden>
-        <div id="upload-boxes" style="width:100%">
-            <div id="upload1" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 20px;">
-                <h3 class="label" id="label">"Drag your file(s) here or click to open file browser"</h3>
-                <input type="file" name="files" id="input_file1" class="ignore" style="display: none" onchange="addFilesFromInput(1, false)" multiple />
-            </div>
-        </div>
-        <button type="button" class="btn btn-primary" onclick="makeSubmission();">Submit</button>
-    </div>
+    <label for="import-components-file" class="btn btn-default">Import Components</label>
+    <input id="import-components-file" type="file" class="btn ignore" onchange="makeSubmission();" style="display: none;"/>
 </div>
 
 <script type="text/javascript">
 
+    function handleUploadGradeableComponents(csrf_token, gradeable_id) {
+        let submit_url = buildUrl({'component': 'admin', 'page': 'admin_gradeable', 'action': 'import_components', 'gradeable_id': gradeable_id});
+        let formData = new FormData();
+
+        formData.append('csrf_token', csrf_token);
+        let files = $('#import-components-file')[0].files;
+
+        if (files.length === 0) {
+            return;
+        }
+
+        // Files selected
+        for (let i = 0; i < files.length; i++) {
+            formData.append('files' + i, files[i], files[i].name);
+        }
+
+        $.getJSON({
+            url: submit_url,
+            data: formData,
+            processData: false,
+            contentType: false,
+            type: 'POST',
+            success: function (response) {
+                if (response.status !== 'success') {
+                    console.error('Something went wrong importing components: ' + response.message);
+                    reject(new Error(response.message));
+                } else {
+                    location.reload();
+                }
+            },
+            error: function (e) {
+                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
+                    "send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadGradeableComponents]");
+            }
+        });
+    }
     function makeSubmission() {
         handleUploadGradeableComponents("{{ core.getCsrfToken() }}", "{{ gradeable.getId() }}");
     }
@@ -55,23 +83,5 @@ Point precision:
         loadTemplates().then(function() {
             reloadInstructorEditRubric($('#g_id').val());
         });
-
-        // Setup the 'import components' box
-        createArray(1);
-        let dropzone = document.getElementById("upload1");
-        dropzone.addEventListener("click", clicked_on_box, false);
-        dropzone.addEventListener("dragenter", draghandle, false);
-        dropzone.addEventListener("dragover", draghandle, false);
-        dropzone.addEventListener("dragleave", draghandle, false);
-        dropzone.addEventListener("drop", drop, false);
     });
-
-    function toggleImportBox() {
-        let box = $("#import-components-files");
-        if (box.is(':visible')) {
-            box.hide();
-        } else {
-            box.show();
-        }
-    }
 </script>

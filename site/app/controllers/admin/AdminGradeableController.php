@@ -264,7 +264,6 @@ class AdminGradeableController extends AbstractController {
             $this->core->getOutput()->addInternalJs('ta-grading-rubric-conflict.js');
             $this->core->getOutput()->addInternalJs('ta-grading-rubric.js');
             $this->core->getOutput()->addInternalJs('gradeable.js');
-            $this->core->getOutput()->addInternalJs('drag-and-drop.js');
             $this->core->getOutput()->addInternalCss('ta-grading.css');
         }
         $this->core->getOutput()->addInternalJs('admin-gradeable-updates.js');
@@ -1137,6 +1136,9 @@ class AdminGradeableController extends AbstractController {
 
     /**
      * Exports components to json and downloads for user
+     *
+     * TODO: put the buttons on the same line as 'add component'
+     * TODO: only upload single files
      */
     private function exportComponentsRequest() {
         $url = $this->core->buildUrl([]);
