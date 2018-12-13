@@ -83,7 +83,7 @@ def sendEmail():
 	sentCount = 0 
 	for emailData in queuedEmails:
 		email = constructMailString(emailData["send_to"], emailData["subject"], emailData["body"])
-		# mail_client.sendmail(EMAIL_SENDER, emailData["send_to"], email)
+		mail_client.sendmail(EMAIL_SENDER, emailData["send_to"], email)
 		markSent(emailData["id"])
 		sentCount += 1
 
