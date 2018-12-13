@@ -11,11 +11,22 @@ import os
 import shutil
 import stat
 import traceback
-from PyPDF2 import PdfFileReader, PdfFileWriter
-from pdf2image import convert_from_bytes
-import pyzbar.pyzbar as pyzbar
-#from grade_item.py
+import sys
+#try importing required modules
+try:
+    from PyPDF2 import PdfFileReader, PdfFileWriter
+    from pdf2image import convert_from_bytes
+    import pyzbar.pyzbar as pyzbar
+except ImportError as e:
+    print("Content-type: application/json")
+    print()
+    message = "Error from pdf_check_qr.cgi:\n"
+    message += "One or more required python modules not installed correctly\n"
+    message += traceback.format_exc() 
+    print(json.dumps({"valid" : False, "message" : message}))
+    sys.exit(1)
 
+#from grade_item.py
 def add_permissions(item,perms):
     if os.getuid() == os.stat(item).st_uid:
         os.chmod(item,os.stat(item).st_mode | perms)
@@ -61,6 +72,7 @@ except Exception as e:
     message += "Failed after parsing args and creating paths\n"
     message += traceback.format_exc()
     print(json.dumps({"valid" : valid, "message" : message}))
+    sys.exit(1)
 try:
     # copy folder
     if not os.path.exists(split_path):
@@ -83,6 +95,7 @@ except Exception as e:
     if os.path.exists(split_path):
         shutil.rmtree(split_path)
     print(json.dumps({"valid" : valid, "message" : message}))
+    sys.exit(1)
 try:
     #split pdfs
     for filename in os.listdir(bulk_path):
@@ -170,5 +183,6 @@ except Exception as e:
     message += "Failed when splitting PDFs\n"
     message += traceback.format_exc()
     print(json.dumps({"valid" : valid, "message" : message}))
+    sys.exit(1)
 
 print(json.dumps({"valid" : valid, "message" : message}))
