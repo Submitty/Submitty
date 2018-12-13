@@ -320,6 +320,7 @@ class ReportController extends AbstractController {
                 // The report needs this to be different from the 'pretty' version returned from $ldi->getStatusMessage()
                 $entry['status'] = $this->getLateStatusMessage($ldi);
 
+                // Only include late day info if the submission was late
                 $late_days_charged = $ldi->getLateDaysCharged();
                 if ($late_days_charged > 0) {
                     $entry['days_after_deadline'] = $ldi->getDaysLate();
@@ -342,7 +343,12 @@ class ReportController extends AbstractController {
                 $entry['score'] = 0;
                 $entry['autograding_score'] = 0;
                 $entry['tagrading_score'] = 0;
-                if (!$ta_gg->isComplete()) {
+                if (!$gg->getSubmitter()->isTeam() && $gg->getGradeable()->isTeamAssignment()) {
+                    // This is sort of a hack.  Submitters for team assignments should always be teams,
+                    //  but to keep the rest of the report generation sane, they can be users if the
+                    //  user is not on a team
+                    $entry['note'] = 'User is not on a team';
+                } else if (!$ta_gg->isComplete()) {
                     $entry['note'] = 'This has not been graded yet.';
                 } else {
                     $entry['note'] = 'Score is set to 0 because there are version conflicts.';
