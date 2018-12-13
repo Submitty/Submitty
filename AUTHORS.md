@@ -63,6 +63,6 @@ Markus Gaasedelen
 Nick Burnett  
 Aidan Noll  
 Toshi Piazza  
-Matt Raneri
+Matt Raneri  
 Zachary Wimer  
 For their bug reports of specific security vulnerabilities :)
