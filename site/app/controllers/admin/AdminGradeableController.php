@@ -1143,6 +1143,9 @@ class AdminGradeableController extends AbstractController {
         return is_file($daemon_queue_dir);
     }
 
+    /**
+     * Exports components to json and downloads for user
+     */
     private function exportComponentsRequest() {
         $url = $this->core->buildUrl([]);
 
@@ -1170,6 +1173,9 @@ class AdminGradeableController extends AbstractController {
         }
     }
 
+    /**
+     * Imports components from uploaded files into gradeable (single-depth array)
+     */
     private function importComponents() {
         $gradeable_id = $_GET['gradeable_id'] ?? '';
 
@@ -1194,6 +1200,7 @@ class AdminGradeableController extends AbstractController {
                 }
             }
 
+            // Save to the database
             $this->core->getQueries()->updateGradeable($gradeable);
             $this->core->getOutput()->renderJsonSuccess();
         } catch (\InvalidArgumentException $e) {
