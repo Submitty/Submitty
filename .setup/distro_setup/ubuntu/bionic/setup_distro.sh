@@ -122,8 +122,6 @@ if [ ${VAGRANT} == 1 ]; then
     if [ "$NPIO_MAJOR" -eq 0 -a "$NPIO_MINOR" -lt 40 ]; then
         # Update netplan.io
         echo "Detected old version of netplan.io... updating it automatically"
-        chmod o+r /run/systemd/network/*
-        systemctl start systemd-networkd
         apt install -y netplan.io=0.40.1~18.04.3
     fi
 fi
