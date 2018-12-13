@@ -54,6 +54,9 @@ class AdminGradeableController extends AbstractController {
             case 'export_components':
                 $this->exportComponentsRequest();
                 break;
+            case 'import_components':
+                $this->importComponents();
+                break;
             default:
                 $this->newPage();
                 break;
@@ -239,6 +242,13 @@ class AdminGradeableController extends AbstractController {
             'gradeable_id' => $gradeable->getId(),
         ]);
 
+        $import_components_url = $this->core->buildUrl([
+            'component' => 'admin',
+            'page' => 'admin_gradeable',
+            'action' => 'import_components',
+            'gradeable_id' => $gradeable->getId(),
+        ]);
+
         $type_string = 'UNKNOWN';
         if($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             if($gradeable->isScannedExam()) {
@@ -261,6 +271,7 @@ class AdminGradeableController extends AbstractController {
             $this->core->getOutput()->addInternalJs('ta-grading-rubric-conflict.js');
             $this->core->getOutput()->addInternalJs('ta-grading-rubric.js');
             $this->core->getOutput()->addInternalJs('gradeable.js');
+            $this->core->getOutput()->addInternalJs('drag-and-drop.js');
             $this->core->getOutput()->addInternalCss('ta-grading.css');
         }
         $this->core->getOutput()->addInternalJs('admin-gradeable-updates.js');
@@ -293,6 +304,7 @@ class AdminGradeableController extends AbstractController {
             'show_edit_warning' => $gradeable->anyManualGrades(),
 
             'export_components_url' => $export_components_url,
+            'import_components_url' => $import_components_url,
 
             // Config selection data
             'config_repo_name' => $config_repo_name,
@@ -1155,6 +1167,39 @@ class AdminGradeableController extends AbstractController {
         } catch (\Exception $e) {
             $this->core->addErrorMessage($e->getMessage());
             $this->core->redirect($url);
+        }
+    }
+
+    private function importComponents() {
+        $gradeable_id = $_GET['gradeable_id'] ?? '';
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+
+        // Permission checks
+        if (!$this->core->getAccess()->canI("grading.electronic.add_component", ["gradeable" => $gradeable])) {
+            $this->core->getOutput()->renderJsonFail("Insufficient permissions to import components");
+            return;
+        }
+
+        try {
+            // decode file to array
+            foreach ($_FILES as $f) {
+                $comp_arrs = json_decode(file_get_contents($f['tmp_name']), true);
+                foreach ($comp_arrs as $comp_arr) {
+                    $gradeable->importComponent($comp_arr);
+                }
+            }
+
+            $this->core->getQueries()->updateGradeable($gradeable);
+            $this->core->getOutput()->renderJsonSuccess();
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
 }

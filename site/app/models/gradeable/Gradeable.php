@@ -878,9 +878,20 @@ class Gradeable extends AbstractModel {
             'text' => $text,
             'peer' => $peer,
             'page' => $pdf_page,
-            'id' => 0,
-            'order' => count($this->components)
         ]);
+        $this->components[] = $component;
+        return $component;
+    }
+
+    /**
+     * Adds a new component to this gradeable with the provided properties in array form
+     * @param array $details
+     * @return Component the created component
+     */
+    public function importComponent(array $details) {
+        $details['id'] = 0;
+        $details['order'] = count($this->components);
+        $component = Component::import($this->core, $this, $details);
         $this->components[] = $component;
         return $component;
     }

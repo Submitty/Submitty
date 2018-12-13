@@ -33,12 +33,45 @@ Point precision:
 </div>
 <div>
     <a href="{{ export_components_url }}" class="btn btn-default">Export Components</a>
+    <input type="button" class="btn btn-default ignore" value="Import Components" onclick="toggleImportBox()" />
+    <div id="import-components-files" hidden>
+        <div id="upload-boxes" style="width:100%">
+            <div id="upload1" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 20px;">
+                <h3 class="label" id="label">"Drag your file(s) here or click to open file browser"</h3>
+                <input type="file" name="files" id="input_file1" class="ignore" style="display: none" onchange="addFilesFromInput(1, false)" multiple />
+            </div>
+        </div>
+        <button type="button" class="btn btn-primary" onclick="makeSubmission();">Submit</button>
+    </div>
 </div>
 
 <script type="text/javascript">
+
+    function makeSubmission() {
+        handleUploadGradeableComponents("{{ core.getCsrfToken() }}", "{{ gradeable.getId() }}");
+    }
+
     $(document).ready(function() {
         loadTemplates().then(function() {
             reloadInstructorEditRubric($('#g_id').val());
         });
+
+        // Setup the 'import components' box
+        createArray(1);
+        let dropzone = document.getElementById("upload1");
+        dropzone.addEventListener("click", clicked_on_box, false);
+        dropzone.addEventListener("dragenter", draghandle, false);
+        dropzone.addEventListener("dragover", draghandle, false);
+        dropzone.addEventListener("dragleave", draghandle, false);
+        dropzone.addEventListener("drop", drop, false);
     });
+
+    function toggleImportBox() {
+        let box = $("#import-components-files");
+        if (box.is(':visible')) {
+            box.hide();
+        } else {
+            box.show();
+        }
+    }
 </script>

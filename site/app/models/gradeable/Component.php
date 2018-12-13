@@ -106,16 +106,16 @@ class Component extends AbstractModel {
      * @param Core $core
      * @param Gradeable $gradeable
      * @param array $arr
+     * @return Component
      */
     public static function import(Core $core, Gradeable $gradeable, array $arr) {
         $component = new Component($core, $gradeable, $arr);
 
         $marks_arr = $arr['marks'] ?? [];
-        $marks = [];
         foreach ($marks_arr as $mark_arr) {
-            $marks[] = new Mark($core, $component, $mark_arr);
+            $component->importMark($mark_arr);
         }
-        $component->setMarksFromDatabase($marks);
+        return $component;
     }
 
     /**
@@ -125,8 +125,13 @@ class Component extends AbstractModel {
     public function export() {
         $arr = parent::toArray();
         unset($arr['any_grades']);
+        unset($arr['id']);
+        unset($arr['modified']);
+        unset($arr['order']);
         foreach ($arr['marks'] as $mark) {
             unset($mark['any_receivers']);
+            unset($mark['id']);
+            unset($mark['modified']);
         }
         return $arr;
     }
@@ -338,6 +343,20 @@ class Component extends AbstractModel {
         $this->marks[] = $mark;
         return $mark;
     }
+
+    /**
+     * Imports a mark into the component via array
+     * @param $details
+     * @return Mark
+     */
+    public function importMark($details) {
+        $details['id'] = 0;
+        $details['order'] = count($this->getMarks());
+        $mark = new Mark($this->core, $this, $details);
+        $this->marks[] = $mark;
+        return $mark;
+    }
+
 
     /**
      * Base method for deleting marks.  This isn't exposed as public so
