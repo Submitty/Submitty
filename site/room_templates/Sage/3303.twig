@@ -1,9 +1,7 @@
-IN THE TWIG
-
 <script>
   var title = "Sage Hall 3303"
-  note_left = "reserved for left-handed students"
-  note_right = "skip every other seat"
+  note_left = ""
+  note_right = "seat 1 is on the right, when facing the screen"
 
   var config = {{ seating_config|raw }};
 </script>
@@ -261,11 +259,11 @@ IN THE TWIG
           }
         }
 
-        point = find_point(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_end);
-        ctx.beginPath();
-        ctx.arc(point[0], point[1], BASE_POINT_RADIUS, 0.0, 2.0 * Math.PI);
-        ctx.fillStyle = "#d000d0";
-        ctx.fill();
+        //point = find_point(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_end);
+        //ctx.beginPath();
+        //ctx.arc(point[0], point[1], BASE_POINT_RADIUS, 0.0, 2.0 * Math.PI);
+        //ctx.fillStyle = "#d000d0";
+        //ctx.fill();
       }
     }
 
@@ -354,7 +352,7 @@ IN THE TWIG
 
     // Render title
     ctx.font = "bold 20pt sans-serif";
-    ctx.fillText(title, BASE_ROW_CENTER, 50);
+    ctx.fillText(title, BASE_ROW_CENTER-250, 50);
 
     // Render left note
     ctx.font = "bold 12pt sans-serif";
@@ -364,7 +362,7 @@ IN THE TWIG
     // Render right note
     ctx.font = "bold 12pt sans-serif";
     ctx.fillStyle = "#333333";
-    ctx.fillText(note_right, 775, 50);
+    ctx.fillText(note_right, 625, 50);
 
     // Render front of room legend
     ctx.font = "italic 10pt sans-serif";
