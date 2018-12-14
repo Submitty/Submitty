@@ -53,6 +53,12 @@ try:
     g_id = os.path.basename(arguments['g_id'].value)
     ver = os.path.basename(arguments['ver'].value)
     qr_prefix = ''
+    for key in ['sem', 'course', 'g_id', 'ver']:
+        if os.path.basename(arguments[key].value) in ['.', '..']:
+            valid = False
+            message += '. Invalid value for ' + key + '.'
+            print(json.dumps({"valid" : valid, "message" : message}))
+            sys.exit(1)
     #check if qr_prefix is passed in, an empty string since is not considered a valid CGI arg
     for arg in cgi.parse(arguments):
         if arg == 'qr_prefix':

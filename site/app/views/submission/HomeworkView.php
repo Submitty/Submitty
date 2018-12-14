@@ -428,7 +428,7 @@ class HomeworkView extends AbstractView {
                 for($j = 0; $j < count($files); $j++){
                     if($files[$i]['filename_full'] == $json_data[$j+1]['pdf_name']){
                         $files[$i]['page_count'] = $json_data[$j+1]['page_count'];
-                                    //validate users
+                        //validate users
                         $files[$i]['user_id']['id'] = $json_data[$j+1]['id'];
                         $files[$i]['user_id']['valid'] = ($this->core->getQueries()->getUserById($json_data[$j+1]['id']) === null) ? false : true;
                     }
