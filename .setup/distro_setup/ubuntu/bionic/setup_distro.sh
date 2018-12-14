@@ -115,7 +115,10 @@ apt-get install -qqy imagemagick
 apt-get install -qqy emacs
 
 # fix networking on vagrants 
+# https://bugs.launchpad.net/ubuntu/+source/netplan.io/+bug/1768560
+# When the vagrant box comes with netplan.io 0.40+ we can remove this
 if [ ${VAGRANT} == 1 ]; then
+    # In case they upgrade before we notice, don't run this fix
     NETPLANIO_VERSION=$(apt-cache policy netplan.io | grep 'Installed' | sed -E 's/^.*: (.*)$/\1/')
     NPIO_MAJOR=$(echo "$NETPLANIO_VERSION" | cut -d "." -f1)
     NPIO_MINOR=$(echo "$NETPLANIO_VERSION" | cut -d "." -f2)
