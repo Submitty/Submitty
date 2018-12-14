@@ -80,11 +80,19 @@ class LateDayInfo extends AbstractModel {
     }
 
     /**
+     * Gets the max number of late days the instructor allows for the gradeable
+     * @return int
+     */
+    public function getAssignmentAllowedLateDays() {
+        return $this->graded_gradeable->getGradeable()->getLateDays();
+    }
+
+    /**
      * Gets the number of days late the user may submit this gradeable and not be STATUS_BAD
      * @return int
      */
     public function getLateDaysAllowed() {
-        return min($this->graded_gradeable->getGradeable()->getLateDays(), $this->late_days_remaining) + $this->getLateDayException();
+        return min($this->getAssignmentAllowedLateDays(), $this->late_days_remaining) + $this->getLateDayException();
     }
 
     /**
