@@ -9,6 +9,7 @@ use \app\libraries\FileUtils;
 class LoggerTester extends \PHPUnit\Framework\TestCase {
     private $error;
     private $access;
+    private $ta_grading;
     private $directory;
 
     public static function setUpBeforeClass() {
@@ -34,6 +35,7 @@ class LoggerTester extends \PHPUnit\Framework\TestCase {
         $filename = $date['year'].Utils::pad($date['mon']).Utils::pad($date['mday']);
         $this->access = FileUtils::joinPaths($this->directory, 'access', $filename.".log");
         $this->error = FileUtils::joinPaths($this->directory, 'site_errors', $filename.".log");
+        $this->ta_grading = FileUtils::joinPaths($this->directory, 'ta_grading', $filename.".log");
     }
 
     public function tearDown() {
