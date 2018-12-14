@@ -27,7 +27,7 @@ exclude=
     sbin/autograder/__init__.py,
     sbin/autograder/grade_item.py,
     sbin/autograder/grade_item_main_runner.py,
-    sbin/autograder/grade_item_logging.py,
+    sbin/autograder/grade_items_logging.py,
     sbin/autograder/insert_database_version_data.py,
     sbin/autograder/packer_unpacker.py,
     sbin/autograder/write_grade_history.py,
