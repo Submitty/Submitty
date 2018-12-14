@@ -3710,15 +3710,13 @@ AND gc_id IN (
     }
 
     public function newEmail($emailData, $emailTo){
-        $parameters = array($emailTo, $emailData["subject"], $emailData["body"], $emailData["metadata"], $this->course_db->convertBoolean(false));
+        $parameters = array($emailTo, $emailData["subject"], $emailData["body"]);
 
         $this->submitty_db->query("
                 INSERT INTO emails(
-                  email_to,
+                  send_to,
                   subject,
-                  body,
-                  metadata,
-                  sent)
-                VALUES(?, ?, ?, ?, ?)", $parameters);
+                  body)
+                VALUES(?, ?, ?)", $parameters);
     }
 }

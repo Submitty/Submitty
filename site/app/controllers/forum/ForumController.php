@@ -884,8 +884,7 @@ class ForumController extends AbstractController {
     private function sendEmailAnnouncement($thread_title, $thread_content, $post_id) {
             $email_data = [
                 "subject" => $thread_title,
-                "body" => $thread_content,
-                "metadata" => ""
+                "body" => $thread_content
             ];
 
             $class_list = $this->core->getQueries()->getClassList();

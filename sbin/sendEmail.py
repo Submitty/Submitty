@@ -55,7 +55,7 @@ def constructMailClient():
 #gets queue of emails waiting to be sent
 def getEmailQueue():
 	#TODO: set limit in config
-	result = db.execute("SELECT * FROM emails WHERE sent=FALSE ORDER BY id LIMIT 100;")
+	result = db.execute("SELECT * FROM emails WHERE sent IS NULL ORDER BY id LIMIT 100;")
 	queuedEmails = []
 	for row in result:
 		emailData = {}
@@ -68,9 +68,9 @@ def getEmailQueue():
 		queuedEmails.append(emailData)
 
 	return queuedEmails
-
+#gives sent field a time stamp to indicate a sent email 
 def markSent(email_id):
-	queryString = "UPDATE emails SET sent = TRUE WHERE id = {};".format(email_id) 
+	queryString = "UPDATE emails SET sent=NOW() WHERE id = {};".format(email_id) 
 	result = db.execute(queryString)
 
 def constructMailString(send_to, subject, body):
@@ -80,6 +80,9 @@ def sendEmail():
 	queuedEmails = getEmailQueue()
 	mailClient = constructMailClient()
 
+	if len(queuedEmails) == 0:
+		return
+
 	sentCount = 0 
 	for emailData in queuedEmails:
 		email = constructMailString(emailData["send_to"], emailData["subject"], emailData["body"])
@@ -87,13 +90,13 @@ def sendEmail():
 		markSent(emailData["id"])
 		sentCount += 1
 
-	logfile.write("Sucessfully Emailed {} Users".format(sentCount))
+	logfile.write("Sucessfully Emailed {} Users\n".format(sentCount))
 
 def main():
 	try:
 		sendEmail()
 	except Exception as e:
-		logfile.write("Error: {}".format(str(e)))
+		logfile.write("Error: {}\n".format(str(e)))
 
 if __name__ == "__main__":
     main()
