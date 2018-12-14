@@ -133,7 +133,7 @@ class LoggerTester extends \PHPUnit\Framework\TestCase {
         $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
         $_SERVER['HTTP_USER_AGENT'] = "PHPUnit";
         Logger::logAccess("test", "token", "action");
-        $file = file_get_contents($this->access);
+        $file = file_get_contents($this->ta_grading);
         $lines = explode("\n", $file);
         $this->assertCount(2, $lines);
         $this->assertEmpty($lines[1]);
