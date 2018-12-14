@@ -266,25 +266,33 @@ def migrate_environment(connection, environment, args):
     missing_migrations = OrderedDict()
     migrations = load_migrations(MIGRATIONS_PATH / environment)
 
-    changes = False
+    # Check if the migration table exists, which it won't on the first time we run the migrator. The initial
+    # migration creates the table for us.
     with connection.cursor() as cursor:
-        cursor.execute('SELECT id, commit_time, status FROM migrations_{} '
-                       'ORDER BY id'.format(environment))
-        for migration in cursor.fetchall():
-            # fetchall returns things as a tuple which is a bit unwieldy
-            migration = {
-                'id': migration[0],
-                'commit_time': migration[1],
-                'status': migration[2]
-            }
-            if migration['id'] in migrations:
-                migrations[migration['id']].update({
-                    'commit_time': migration['commit_time'],
-                    'status': migration['status'],
-                    'db': True
-                })
-            else:
-                missing_migrations[migration['id']] = migration
+        cursor.execute("SELECT EXISTS(SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND "
+                       "table_name='migrations_{}')".format(environment))
+        exists = cursor.fetchone()[0]
+
+    changes = False
+    if exists:
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT id, commit_time, status FROM migrations_{} '
+                           'ORDER BY id'.format(environment))
+            for migration in cursor.fetchall():
+                # fetchall returns things as a tuple which is a bit unwieldy
+                migration = {
+                    'id': migration[0],
+                    'commit_time': migration[1],
+                    'status': migration[2]
+                }
+                if migration['id'] in migrations:
+                    migrations[migration['id']].update({
+                        'commit_time': migration['commit_time'],
+                        'status': migration['status'],
+                        'db': True
+                    })
+                else:
+                    missing_migrations[migration['id']] = migration
 
     if len(missing_migrations) > 0:
         if not changes:
