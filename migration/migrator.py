@@ -266,11 +266,13 @@ def migrate_environment(connection, environment, args):
     missing_migrations = OrderedDict()
     migrations = load_migrations(MIGRATIONS_PATH / environment)
 
-    # Check if the migration table exists, which it won't on the first time we run the migrator. The initial
-    # migration creates the table for us.
+    # Check if the migration table exists, which it won't on the first time
+    # we run the migrator. The initial migration is what creates this table for us.
     with connection.cursor() as cursor:
-        cursor.execute("SELECT EXISTS(SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND "
-                       "table_name='migrations_{}')".format(environment))
+        cursor.execute("SELECT EXISTS(SELECT 1 FROM information_schema.tables WHERE "
+                       "table_schema='public' AND table_name='migrations_{}')".format(
+                           environment)
+        )
         exists = cursor.fetchone()[0]
 
     changes = False
