@@ -187,7 +187,6 @@ class Logger {
      * @param $action
      */
     public static function logAccess($user_id, $token, $action) {
-        $filename = static::getFilename();
         $log_message[] = $user_id;
         $log_message[] = $token;
         $log_message[] = $_SERVER['REMOTE_ADDR'];
@@ -226,6 +225,6 @@ class Logger {
         array_unshift($log_message, static::getTimestamp());
         $log_message[] = $_SERVER['HTTP_USER_AGENT'];
         $log_message = implode(" | ", $log_message)."\n";
-        @file_put_contents(FileUtils::joinPaths(static::$log_path, 'ta_grading', "{$filename}.log"), $log_message, FILE_APPEND | LOCK_EX);
+        @file_put_contents(FileUtils::joinPaths(static::$log_path, $folder, "{$filename}.log"), $log_message, FILE_APPEND | LOCK_EX);
     }
 }
