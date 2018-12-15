@@ -11,7 +11,7 @@
 	"submission_to_runner" : [ "*.pdf" ],
 	"submission_to_validation" : [ "*.pdf" ],
 	"work_to_details" : [
-	    "*test_template.pdf", "*student_file.pdf" ]
+	    "**/*.pdf", "*test_template.pdf", "*student_file.pdf" ]
     },
 
     "assignment_message" : "Prepare a 3 page, black & white, 8.5x11”, portrait orientation, max size = 3MB .pdf of notes you would like to have during the test.<br>NOTE:  If you submit a 1 or 2 page .pdf, the attachment test below will fail.  Please make a 3 page pdf to ensure the test below will pass.<br>Be sure to inspect the produced sample test pdf to make sure that your notes are legible.",
@@ -34,8 +34,15 @@
 	},
         {
 	    "title" : "Can we attach your notes page to a sample test?",
-	    "command" : [ //"mv *.pdf student_file.pdf",
-			  "pdflatex test_template.tex" ],
+	    "pre_commands" : [
+		{
+		    "command" : "cp",
+		    "testcase" : "test01",
+		    "source" : "student_file.pdf",
+		    "destination" : "."
+		}
+	    ],
+	    "command" : [ "pdflatex test_template.tex" ],
 	    "points" : 1,
 	    "validation": [
                 {
