@@ -1,5 +1,5 @@
 <script>
-  var title = "Darrin 318"
+  var title = "Sage 3101"
   note_left = ""
   note_right = "seat 1 is on the right, when facing the screen"
 
@@ -22,9 +22,14 @@
   <script>
     var seats = {
       // counting every chair (including ones that might be broken)
-      "left" : [ 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0],    // every row has a lefty desk
-      "middle" : [13,13,13,13,13,13,13,13,13,13,13,13,13],  // every row has a lefty desk
-      "right" :  [ 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0],  // these are all righty desks
+      "left" :  [3,3,3,3,3], // these are tables (ambidextrous)
+      //"middle" : [4,5,5,3,2], // these are tables (ambidextrous)
+      "right" :   [4,5,5,3,2], // these are tables (ambidextrous)
+      //      "middle" : [10,10,10,10,10,10,10,10,10,10,10,10],  // these are all righty desks
+      //"right" :  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]    // these are all righty desks
+      //"left" :   [ 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0],    // every row has a lefty desk
+      //"middle" : [13,13,13,13,13,13,13,13,13,13,13,13,13],  // every row has a lefty desk
+      //"right" :  [ 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0],  // these are all righty desks
     }
     var used = {};
 
@@ -73,16 +78,16 @@
       row = 14
 
       if(section == "left") {
-        var center_x = BASE_ROW_CENTER + 320;
-        var width = 70;
+        var center_x = BASE_ROW_CENTER + 220;
+        var width = 150;
       }
-      else if(section == "middle") {
-        var center_x = BASE_ROW_CENTER;
-        var width = 450;
-      }
+      //else if(section == "middle") {
+      //  var center_x = BASE_ROW_CENTER;
+      //  var width = 450;
+      //}
       else if(section == "right") {
-        var center_x = BASE_ROW_CENTER - 320;
-        var width = 70;
+        var center_x = BASE_ROW_CENTER - 220;
+        var width = 250;
       }
       else {
         console.log("Invalid section: " + section + " (skipping)");
@@ -120,16 +125,16 @@
       }
 
       if(section == "left") {
-        var center_x = BASE_ROW_CENTER + 320;
-        var width = 70;
+        var center_x = BASE_ROW_CENTER + 180;
+        var width = 200;
       }
-      else if(section == "middle") {
-        var center_x = BASE_ROW_CENTER;
-        var width = 450;
-      }
+      //else if(section == "middle") {
+      //  var center_x = BASE_ROW_CENTER;
+      //  var width = 450;
+      //}
       else if(section == "right") {
-        var center_x = BASE_ROW_CENTER - 320;
-        var width = 70;
+        var center_x = BASE_ROW_CENTER - 140;
+        var width = 300;
       }
       else {
         console.log("Invalid section: " + section + " (skipping)");
@@ -157,15 +162,15 @@
         ctx.fillStyle = "#333333";
         ctx.fillText(row, center_x + width_half + 20, center_y, 100);
       }
-      else if(section == "middle") {
-        ctx.font = "bold 7pt sans-serif";
-        ctx.fillStyle = "#333333";
-        ctx.fillText(row, center_x - width_half - 30, center_y, 100);
+      //else if(section == "middle") {
+      //  ctx.font = "bold 7pt sans-serif";
+      //  ctx.fillStyle = "#333333";
+      //  ctx.fillText(row, center_x - width_half - 30, center_y, 100);
 
-        ctx.font = "bold 7pt sans-serif";
-        ctx.fillStyle = "#333333";
-        ctx.fillText(row, center_x + width_half + 30, center_y, 100);
-      }
+      //  ctx.font = "bold 7pt sans-serif";
+      //  ctx.fillStyle = "//333333";
+      //  ctx.fillText(row, center_x + width_half + 30, center_y, 100);
+      //}
       else if(section == "right") {
         ctx.font = "bold 7pt sans-serif";
         ctx.fillStyle = "#333333";
@@ -219,7 +224,7 @@
 
     function render_row(row) {
       render_section_row("left", row);
-      render_section_row("middle", row);
+      //render_section_row("middle", row);
       render_section_row("right", row);
     }
 
@@ -281,7 +286,7 @@
     ctx.textAlign = "center";
 
     var EXPANDED = expand_config(config);
-    var BASE_NUM_ROWS = 13
+    var BASE_NUM_ROWS = 5
     var BASE_ROW_START = 140
     var BASE_ROW_CENTER = document.getElementById("diagram").offsetWidth / 2.0;
     var BASE_ROW_HEIGHT = 6
@@ -338,7 +343,7 @@
     // container = document.getElementById("seats")
     // for(var index in temp) {
     //   var letter = temp[index];
-    //   container.innerHTML += letter + " DARRIN 318 " + used[letter] + "\n";
+    //   container.innerHTML += letter + " SAGE 3101 " + used[letter] + "\n";
     // }
   </script>
 </div>
