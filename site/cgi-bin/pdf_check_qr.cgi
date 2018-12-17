@@ -113,15 +113,17 @@ try:
         data = []
         output = {}
         for page in pages:
+        #    i += 1
             val = pyzbar.decode(page)
             if val != []:
                 #found a new qr code, split here
                 #convert byte literal to string
                 data = val[0][0].decode("utf-8")
-                if qr_prefix != "" and data[0:len(qr_prefix)] == qr_prefix:
+                if data == "none":  # blank exam with 'none' qr code
+                    data = "BLANK EXAM"
+                elif qr_prefix != "" and data[0:len(qr_prefix)] == qr_prefix:
                     data = data[len(qr_prefix):]
 
-                #keep track of the cover index so the pdf's name matches the cover page
                 cover_index = i
                 cover_filename = '{}_{}_cover.pdf'.format(filename[:-4], i)
                 output_filename = '{}_{}.pdf'.format(filename[:-4], cover_index)
@@ -136,11 +138,13 @@ try:
                         pdf_writer.write(out)
                 else:
                     first_file = output_filename
+
                 if id_index == 1:
                     #correct first pdf's page count and print file
                     output[0]['page_count'] = page_count
                     with open(first_file, 'wb') as out:
                         pdf_writer.write(out)
+
                 #start a new pdf and grab the cover
                 cover_writer = PdfFileWriter()
                 pdf_writer = PdfFileWriter()
