@@ -1204,12 +1204,12 @@ ORDER BY g.sections_rotating_id, g.user_id", $params);
         $where = "";
         if ($user_id !== null) {
             $params[] = $user_id;
-            $where = " AND g.user_id=?";
+            $where = " AND user_id=?";
         }
         $this->course_db->query("
-            SELECT g.sections_rotating_id
-            FROM grading_rotating AS g
-            WHERE g.g_id=? {$where}", $params);
+            SELECT sections_rotating_id
+            FROM grading_rotating
+            WHERE g_id=? {$where}", $params);
         $return = array();
         foreach ($this->course_db->rows() as $row) {
             $return[] = $row['sections_rotating_id'];
