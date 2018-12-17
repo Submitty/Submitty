@@ -116,6 +116,15 @@ class Notification extends AbstractModel {
         return $core->buildUrl($parts, $hash);
     }
 
+    public static function getThreadIdIfExists($metadata_json) {
+        $metadata = json_decode($metadata_json, true);
+        if(is_null($metadata)) {
+            return null;
+        }
+        $thread_id = array_key_exists('thread_id', $metadata[0]) ? $metadata[0]['thread_id'] : -1;
+        return $thread_id;
+    }
+
     /**
      * Handles notifications related to forum
      *

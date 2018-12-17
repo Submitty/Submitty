@@ -356,6 +356,16 @@
                 {{ member.getDisplayedLastName() -}}
             {%- endfor -%}
         {% endif %}
+    <div style="font-style: italic; display: inline; color: grey;">
+        {% if graded_gradeable.getGradeable().isTeamAssignment() %}
+            {%- for member in graded_gradeable.getSubmitter().getTeam().getInvitedUsers() -%}
+                {%- if loop.index == 1 -%}Pending: {% endif -%}
+                {%- if loop.index != 1 -%}, {% endif -%}
+                {{- member.getDisplayedFirstName() }}
+                {{ member.getDisplayedLastName() -}}
+            {%- endfor -%}
+        {% endif %}
+    </div>
     </td>
 {% endmacro %}
 
@@ -379,7 +389,7 @@
     {% set total_possible = graded_gradeable.getGradeable().getAutoGradingConfig().getTotalNonExtraCredit() + graded_gradeable.getGradeable().getTaPoints() %}
     <td>
         {% if not graded_gradeable.getOrCreateTaGradedGradeable().hasVersionConflict() and graded_gradeable.isTaGradingComplete() %}
-            <div class="{{ box_background }}">{{ graded }} / {{ total_possible }}</div>
+            <div class="{{ box_background }}" style="white-space: nowrap;">{{ graded }} / {{ total_possible }}</div>
         {% endif %}
     </td>
 {% endmacro %}

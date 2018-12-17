@@ -1339,6 +1339,14 @@ class Gradeable extends AbstractModel {
     }
 
     /**
+     * Gets if tas can view the gradeable now
+     * @return bool
+     */
+    public function isTaViewOpen() {
+        return $this->ta_view_start_date < $this->core->getDateTimeNow();
+    }
+
+    /**
      * Gets if the submission open date has passed yet
      * @return bool
      */
@@ -1631,5 +1639,13 @@ class Gradeable extends AbstractModel {
             $submitter = new Submitter($this->core, $team);
         }
         return $this->core->getQueries()->getHasSubmission($this, $submitter);
+    }
+
+    /**
+     * Gets the number of days late this gradeable would be if submitted now
+     * @return int
+     */
+    public function getWouldBeDaysLate() {
+        return max(0, DateUtils::calculateDayDiff($this->getSubmissionDueDate(), null));
     }
 }

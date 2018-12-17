@@ -501,7 +501,7 @@ clangsrc=${SUBMITTY_INSTALL_DIR}/clang-llvm/src
 clangbuild=${SUBMITTY_INSTALL_DIR}/clang-llvm/build
 # note, we are not running 'ninja install', so this path is unused.
 clanginstall=${SUBMITTY_INSTALL_DIR}/clang-llvm/install
- 
+
 # skip if this is a re-run
 if [ ! -d "${clangsrc}" ]; then
     echo 'GOING TO PREPARE CLANG INSTALLATION FOR STATIC ANALYSIS'
@@ -525,7 +525,7 @@ if [ ! -d "${clangsrc}" ]; then
 
     echo 'DONE PREPARING CLANG INSTALLATION'
 fi
-    
+
 #################################################################
 # SUBMITTY SETUP
 #################
@@ -572,21 +572,21 @@ fi
 if [ ${WORKER} == 0 ]; then
     dbuser_password=`cat ${SUBMITTY_INSTALL_DIR}/.setup/submitty_conf.json | jq .database_password | tr -d '"'`
 
-    # create the submitty_dbuser role in postgres (if it does not yet exist
-    su postgres -c "psql -c \"DO \\\$do\\\$ BEGIN IF NOT EXISTS ( SELECT FROM  pg_catalog.pg_roles WHERE  rolname = '${DB_USER}') THEN  CREATE ROLE ${DB_USER} LOGIN PASSWORD '${dbuser_password}'; END IF; END \\\$do\\\$;\""
+    # create the submitty_dbuser role in postgres (if it does not yet exist)
+    # SUPERUSER privilege is required to use dblink extension (needed for data sync between master and course DBs).
+    su postgres -c "psql -c \"DO \\\$do\\\$ BEGIN IF NOT EXISTS ( SELECT FROM  pg_catalog.pg_roles WHERE  rolname = '${DB_USER}') THEN CREATE ROLE ${DB_USER} SUPERUSER LOGIN PASSWORD '${dbuser_password}'; END IF; END \\\$do\\\$;\""
 
     # check to see if a submitty master database exists
     DB_EXISTS=`su -c 'psql -lqt | cut -d \| -f 1 | grep -w submitty || true' postgres`
 
     if [ "$DB_EXISTS" == "" ]; then
-	echo "Submitty master database does not yet exist"
-	PGPASSWORD=${dbuser_password} psql -d postgres -h localhost -U ${DB_USER} -c "CREATE DATABASE submitty;"
-	python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
+        echo "Creating submitty master database"
+        su postgres -c "psql -c \"CREATE DATABASE submitty WITH OWNER ${DB_USER}\""
+        su postgres -c "psql submitty -c \"ALTER SCHEMA public OWNER TO ${DB_USER}\""
+        python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
     else
-	echo "Submitty master database already exists"
+        echo "Submitty master database already exists"
     fi
-
-
 fi
 
 echo Beginning Install Submitty Script
@@ -668,7 +668,7 @@ fi
 #################
 
 # WIP: creates basic container for grading CS1 & DS assignments
-# CAUTION: needs users/groups for security 
+# CAUTION: needs users/groups for security
 # These commands should be run manually if testing Docker integration
 
 rm -rf /tmp/docker

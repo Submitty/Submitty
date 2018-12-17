@@ -1,9 +1,17 @@
 {
   "name": "submitty/submitty",
+  "config": {
+    "platform": {
+      "php": "7.0"
+    }
+  },
   "autoload": {
     "psr-4": {
       "app\\": "app/"
     }
+  },
+  "require": {
+    "twig/twig": "^2.0"
   },
   "autoload-dev": {
     "psr-4": {
@@ -11,10 +19,7 @@
     }
   },
   "require-dev": {
-    "phpunit/phpunit": "^6.5.8",
+    "phpunit/phpunit": "^6",
     "php-coveralls/php-coveralls": "^2"
-  },
-  "require": {
-    "twig/twig": "^2.0"
   }
 }

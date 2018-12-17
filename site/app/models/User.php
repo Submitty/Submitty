@@ -228,6 +228,10 @@ class User extends AbstractModel {
         $this->displayed_last_name = (!empty($this->preferred_last_name)) ? $this->preferred_last_name : $this->legal_last_name;
     }
 
+    public function getDisplayFullName() {
+        return $this->getDisplayedFirstName() . ' ' . $this->getDisplayedLastName();
+    }
+
     public function setRegistrationSection($section) {
         $this->registration_section = ($section !== null) ? $section : null;
     }
@@ -303,5 +307,16 @@ class User extends AbstractModel {
 			$data = var_export(htmlentities($data), true);
 			trigger_error('User::validateUserData() called with unknown $field '.$field.' and $data '.$data, E_USER_ERROR);
     	}
+    }
+
+    /**
+     * Checks if the user is on ANY team for the given assignment
+     *
+     * @param string gradable_id
+     * @return bool
+     */
+    public function onTeam($gradeable_id) {
+        $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $this->id);
+        return $team !== NULL;
     }
 }

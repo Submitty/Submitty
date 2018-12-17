@@ -137,12 +137,12 @@
         return false;
     }
     //TODO: Name better
-    function expandFile(name, path) {
+    function expandFile(name, path, page_num = 0) {
         // debugger;
         if($('#viewer').length != 0){
             $('#viewer').remove();
         }
-        let promise = loadFile(name, path);
+        let promise = loadFile(name, path, page_num);
         $('#file_view').show();
         $("#grading_file_name").html(name);
         let precision = $("#submission_browser").width()-$("#directory_view").width();
@@ -153,7 +153,7 @@
         return promise;
     }
 
-    function loadFile(name, path){
+    function loadFile(name, path, page_num = 0){
         let extension = name.split('.').pop();
         if(extension == "pdf"){
             $('#pdf_annotation_bar').show();
@@ -164,7 +164,8 @@
                 data: {
                     'gradeable_id': '{{ gradeable_id }}',
                     'user_id': '{{ submitter_id }}',
-                    'filename': name
+                    'filename': name,
+                    'page_num': page_num
                 },
                 success: function(data){
                     $('#file_content').append(data);
