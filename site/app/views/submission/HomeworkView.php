@@ -413,7 +413,7 @@ class HomeworkView extends AbstractView {
                 $count++;
             }
             $json_data = ($json_file !== '') ? FileUtils::readJsonFile($json_file) : '';
-            //check for invalid ID's
+            //check for invalid ID's if using bulk upload with QR codes
             if($json_data != ''){
                 $use_qr_codes = true;
                 for($i = 0; $i < count($files); $i++){
@@ -425,6 +425,7 @@ class HomeworkView extends AbstractView {
                                 $files[$i]['page_count'] = $qr_file['page_count'];
                                 $files[$i]['user_id']['id'] = $qr_file['id'];
                                 $files[$i]['user_id']['valid'] = ($this->core->getQueries()->getUserById($qr_file['id']) === null) ? false:true;
+                                goto end;
                             }
                         }
                     }
@@ -437,7 +438,6 @@ class HomeworkView extends AbstractView {
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         $current_time = $this->core->getDateTimeNow()->format("m-d-Y_H:i:sO");
         $ch = curl_init();
-        //$user = $this->core->getQueries()->getUserById($id);
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/BulkUploadBox.twig', [
             'gradeable_id' => $gradeable->getId(),
             'team_assignment' => $gradeable->isTeamAssignment(),

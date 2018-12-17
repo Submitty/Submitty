@@ -365,6 +365,22 @@ function isValidSubmission(){
     return false;
 }
 
+function checkForPreviousSubmissions(csrf_token, gradeable_id, user_id){
+    var formData = new FormData();
+    formData.append('csrf_token', csrf_token);
+    formData.append('user_id', user_id);
+    var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'verify', 'gradeable_id': gradeable_id});
+
+    return $.ajax({
+        async: false,
+        url: url,
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+    });  
+}
+
 /**
  * @param csrf_token
  * @param gradeable_id
@@ -374,7 +390,7 @@ function isValidSubmission(){
  * @param count
  * @param makeSubmission, a callback function
  */
-function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, repo_id, makeSubmission) {
+function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, repo_id, makeSubmission, qr_bulk_upload = false) {
 
     var formData = new FormData();
     formData.append('csrf_token', csrf_token);
@@ -391,7 +407,7 @@ function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, 
             try {
                 data = JSON.parse(data);
                 if (data['success']) {
-                    if(data['previous_submission']) { // if there is a previous submission, give the user merge options
+                    if(data['previous_submission'] && !qr_bulk_upload) { // if there is a previous submission, give the user merge options
                         var form = $("#previous-submission-form");
                         var submitter = form.find(".submit-button");
                         var closer = form.find(".close-button");

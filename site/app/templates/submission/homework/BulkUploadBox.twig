@@ -88,7 +88,26 @@
         });
         $('#bulk_submit_all').click(function(e){
             var submit_buttons = $(".tr-vertically-centered > td > .btn-success");
+            //check if there are any previous submissions first
+            var prev_submissions = []
             for(var i = 0; i < submit_buttons.length;i++){
+                id = "users_" + (i + 1);
+                user_id = $('#' + id).find('input').val();
+                checkForPreviousSubmissions("{{ core.getCsrfToken }}", "{{gradeable_id}}", user_id).done(function(data){
+                     data = JSON.parse(data);
+                     if(data['success'] && data['previous_submission'])
+                        prev_submissions.push(i);
+                });
+            }
+            for(var i = 0; i < submit_buttons.length;i++){
+                var skip = false;
+                for(var j = 0; j < prev_submissions.length; j++){
+                    if(i == prev_submissions[j]){
+                        skip = true;
+                        break;
+                    }
+                }
+                if(skip) continue;
                 $("#" +  submit_buttons[i].id).focus();
                 $("#" +  submit_buttons[i].id).click();
             }
