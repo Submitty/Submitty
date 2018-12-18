@@ -122,8 +122,8 @@ class LoggerTester extends \PHPUnit\Framework\TestCase {
         $date = explode("/", $datetime[1]);
         $this->assertTimeEqualsCurrent($date, $time);
         $this->assertEquals(2, strlen($time[2]));
-        $this->assertEquals("instructor", $line[1]);
-        $this->assertEquals("grading_homework", $line[2]);
+        $this->assertEquals("grading_homework", $line[1]);
+        $this->assertEquals("instructor", $line[2]);
         $this->assertEquals("aphacker", $line[3]);
         $this->assertEquals("1", $line[4]);
         $this->assertEquals("VIEW_PAGE", $line[5]);

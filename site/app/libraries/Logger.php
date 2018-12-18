@@ -192,7 +192,6 @@ class Logger {
         $log_message[] = $_SERVER['REMOTE_ADDR'];
         $log_message[] = $action;
         //$log_message[] = $_SERVER['REQUEST_URI'];
-        $log_message[] = $_SERVER['HTTP_USER_AGENT'];
         static::logMessage('access', $log_message);
     }
 
@@ -216,7 +215,6 @@ class Logger {
         $log_message[] = $params['submitter_id'];
         $log_message[] = array_key_exists('component_id', $params) ? $params['component_id'] : "-1";
         $log_message[] = $params['action'];
-        $log_message[] = $_SERVER['HTTP_USER_AGENT'];
         static::logMessage('ta_grading', $log_message);
     }
 
