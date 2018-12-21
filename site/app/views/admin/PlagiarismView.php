@@ -278,8 +278,8 @@ HTML;
         $all_version="checked";
         $active_version=""; 
         $all_files="checked";
-        $regrex_matching_files="";
-        $regrex="";
+        $regex_matching_files="";
+        $regex="";
         $language =["python"=>"selected", "java"=>"", "plaintext"=>"", "cpp"=>""];
         $provided_code="";
         $no_provided_code="checked";
@@ -297,10 +297,10 @@ HTML;
             $gradeable_id = $saved_config['gradeable'];
             $all_version = ($saved_config['version'] == "all_version")?"checked":"";
             $active_version = ($saved_config['version'] == "active_version")?"checked":"";
-            if($saved_config['file_option'] == "matching_regrex") {
+            if($saved_config['file_option'] == "matching_regex") {
                 $all_files="";
-                $regrex_matching_files="checked";
-                $regrex=$saved_config['regrex'];
+                $regex_matching_files="checked";
+                $regex=$saved_config['regex'];
             }
             $language[$saved_config['language']] = "selected";
 
@@ -403,9 +403,9 @@ HTML;
         $return .= <<<HTML
                     <input type="radio" id="all_files_id" value="all_files" name="file_option" {$all_files}>
                     <label for="all_files_id">All Files</label>
-                    <input type="radio" id="regrex_matching_files_id" value="regrex_matching_files" name="file_option" {$regrex_matching_files}>
-                    <label for="regrex_matching_files_id">Regrex matching files</label><br />
-                    <input type="text" name="regrex_to_select_files" value="{$regrex}"/>
+                    <input type="radio" id="regex_matching_files_id" value="regex_matching_files" name="file_option" {$regex_matching_files}>
+                    <label for="regex_matching_files_id">Regex matching files</label><br />
+                    <input type="text" name="regex_to_select_files" value="{$regex}"/>
                 </div>
             </div><br /><br /><br /><br /><br />
             <div style="width:100%;">

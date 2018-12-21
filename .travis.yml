@@ -56,17 +56,38 @@ jobs:
       php: 7.2
       if: branch = master OR type = pull_request
 
+    - &00-python-cache
+      language: python
+      python: 3.5
+      install:
+        - pip3 install flake8 flake8-bugbear flake8-docstrings
+      script: skip
+    - <<: *00-python-cache
+      python: 3.6
+      if: branch = master OR type = pull_request
+
     # Lint the codebase to ensure that the code is compliant to our system
-    - &01-lint
+    - &01-php-lint
       stage: 01 lint
       php: 7.0
       script:
         - find -L . -path ./site/vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
-    - <<: *01-lint
+    - <<: *01-php-lint
       php: 7.1
       if: branch = master OR type = pull_request
-    - <<: *01-lint
+    - <<: *01-php-lint
       php: 7.2
+      if: branch = master OR type = pull_request
+    
+    - &01-python-lint
+      language: python
+      python: 3.5
+      install:
+        - pip3 install flake8 flake8-bugbear flake8-docstrings
+      script:
+        - flake8
+    - <<: *01-python-lint
+      python: 3.6
       if: branch = master OR type = pull_request
 
     - &02-php-unit

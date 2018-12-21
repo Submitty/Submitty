@@ -127,7 +127,7 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
     item_name = os.path.join(obj["semester"],obj["course"],"submissions",partial_path)
     submission_path = os.path.join(SUBMITTY_DATA_DIR,"courses",item_name)
     if not os.path.isdir(submission_path):
-        grade_items_logging.log_message(job_id,message="ERROR: the submission directory does not exist", submission_path)
+        grade_items_logging.log_message(job_id, message="ERROR: the submission directory does not exist " + submission_path)
         raise RuntimeError("ERROR: the submission directory does not exist", submission_path)
     print(which_machine,which_untrusted,"prepare zip",submission_path)
     is_vcs,vcs_type,vcs_base_url,vcs_subdirectory = get_vcs_info(SUBMITTY_DATA_DIR,obj["semester"],obj["course"],obj["gradeable"],obj["who"],obj["team"])
