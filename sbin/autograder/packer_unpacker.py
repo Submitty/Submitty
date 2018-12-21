@@ -77,7 +77,7 @@ def get_vcs_info(top_dir, semester, course, gradeable, userid,  teamid):
 def copytree_if_exists(source,target):
     # target must not exist!
     if os.path.exists(target):
-        raise RuntimeError("ERROR: the target directory already exist '", target, "'")
+        raise RuntimeError("ERROR: the target directory already exists", target)
     # source might exist
     if not os.path.isdir(source):
         os.mkdir(target)
@@ -87,11 +87,13 @@ def copytree_if_exists(source,target):
 def unzip_queue_file(zipfilename):
     # be sure the zip file is ok, and contains the queue file
     if not os.path.exists(zipfilename):
-        raise RuntimeError("ERROR: zip file does not exist '", zipfilename, "'")
+        raise RuntimeError("ERROR: zip file does not exist", zipfilename)
     zip_ref = zipfile.ZipFile(zipfilename,'r')
     names = zip_ref.namelist()
+    if 'failure.txt' in names:
+        return None
     if not 'queue_file.json' in names:
-        raise RuntimeError("ERROR: zip file does not contain queue file '", zipfilename, "'")
+        raise RuntimeError("ERROR: zip file does not contain queue file", zipfilename)
     # remember the current directory
     cur_dir = os.getcwd()
     # create a temporary directory and go to it
@@ -125,8 +127,8 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
     item_name = os.path.join(obj["semester"],obj["course"],"submissions",partial_path)
     submission_path = os.path.join(SUBMITTY_DATA_DIR,"courses",item_name)
     if not os.path.isdir(submission_path):
-        grade_items_logging.log_message(job_id,message="ERROR: the submission directory does not exist" + submission_path)
-        raise RuntimeError("ERROR: the submission directory does not exist",submission_path)
+        grade_items_logging.log_message(job_id, message="ERROR: the submission directory does not exist " + submission_path)
+        raise RuntimeError("ERROR: the submission directory does not exist", submission_path)
     print(which_machine,which_untrusted,"prepare zip",submission_path)
     is_vcs,vcs_type,vcs_base_url,vcs_subdirectory = get_vcs_info(SUBMITTY_DATA_DIR,obj["semester"],obj["course"],obj["gradeable"],obj["who"],obj["team"])
 
@@ -278,6 +280,10 @@ def unpack_grading_results_zip(which_machine,which_untrusted,my_results_zip_file
 
     queue_obj = unzip_queue_file(my_results_zip_file)
 
+    if queue_obj is None:
+        return False
+
+
     job_id = queue_obj["job_id"]
     partial_path = os.path.join(queue_obj["gradeable"],queue_obj["who"],str(queue_obj["version"]))
     item_name = os.path.join(queue_obj["semester"],queue_obj["course"],"submissions",partial_path)
@@ -311,6 +317,7 @@ def unpack_grading_results_zip(which_machine,which_untrusted,my_results_zip_file
     print (which_machine,which_untrusted,"unzip",item_name, " in ", int(gradingtime), " seconds")
 
     grade_items_logging.log_message(job_id,is_batch_job,"unzip",item_name,"grade:",gradingtime,grade_result)
+    return True
 
 
 # ==================================================================================

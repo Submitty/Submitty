@@ -21,7 +21,7 @@
                 <span>Title</span>
             </div>
             <div class="col component-title-container">
-                <input class="component-title" type="text" value="{{ component.title }}" placeholder="Component Title" onkeyup="onComponentTitleChange(this)"/>
+                <input class="component-title" type="text" value="{{ component.title|escape }}" placeholder="Component Title" onkeyup="onComponentTitleChange(this)"/>
             </div>
             {% if component.page > 0 %}
                 <div class="col-no-gutters page-label">
@@ -41,7 +41,7 @@
                 <span>Note to TAs</span>
             </div>
             <div class="col tight-right">
-                <textarea class="ta-comment" placeholder="Note to TAs">{{ component.ta_comment }}</textarea>
+                <textarea class="ta-comment" placeholder="Note to TAs">{{ component.ta_comment|escape }}</textarea>
             </div>
         </div>
 
@@ -51,7 +51,7 @@
                 <span>Note to Students</span>
             </div>
             <div class="col tight-right">
-                <textarea class="student-comment" placeholder="Note to Students">{{ component.student_comment }}</textarea>
+                <textarea class="student-comment" placeholder="Note to Students">{{ component.student_comment|escape }}</textarea>
             </div>
         </div>
 

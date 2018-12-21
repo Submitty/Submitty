@@ -43,10 +43,6 @@ use app\libraries\Utils;
  * @method void setStudentView(bool $student_view)
  * @method bool getStudentSubmit()
  * @method void setStudentSubmit(bool $student_submit)
- * @method bool getStudentDownload()
- * @method void setStudentDownload(bool $student_download)
- * @method bool getStudentAnyVersion()
- * @method void setStudentAnyVersion(bool $student_any_version)
  * @method setTaViewDate(\DateTime $datetime)
  * @method \DateTime getOpenDate()
  * @method setOpenDate(\DateTime $datetime)
@@ -89,6 +85,7 @@ use app\libraries\Utils;
  * @method int getRegradeStatus()
  * @method \DateTime getRegradeRequestDate()
  * @method bool isRegradeAllowed()
+ * @method getHasDueDate()
  */
 class Gradeable extends AbstractModel {
     
@@ -165,6 +162,9 @@ class Gradeable extends AbstractModel {
     /** @property @var \DateTime|null Due date for an electronic submission */
     protected $due_date = null;
 
+    /** @property @var bool If this gradeable has a due date */
+    protected $has_due_date = false;
+
     /** @property @var bool Is the electronic submission via a VCS repository or by upload */
     protected $is_repository = false;
 
@@ -191,10 +191,6 @@ class Gradeable extends AbstractModel {
     protected $student_view = true;
     /** @property @var bool Will students be able to make submissions? */
     protected $student_submit = true;
-    /** @property @var bool Will students be able to download submissions? */
-    protected $student_download = false;
-    /** @property @var bool Will students be able to view/download any version or just the active version? */
-    protected $student_any_version = true;
 
     /* Config variables for submission details for this gradeable */
     /** @property @var float Max size (in bytes) allowed for the submission */
@@ -349,6 +345,7 @@ class Gradeable extends AbstractModel {
         if ($this->type === GradeableType::ELECTRONIC_FILE) {
             $this->open_date = DateUtils::parseDateTime($details['eg_submission_open_date'], $timezone);
             $this->due_date = DateUtils::parseDateTime($details['eg_submission_due_date'], $timezone);
+            $this->has_due_date = $details['eg_has_due_date'] === true;
             $this->allowed_late_days = $details['eg_late_days'];
             $this->is_repository = $details['eg_is_repository'] === true;
             $this->subdirectory = $details['eg_subdirectory'];
@@ -356,8 +353,6 @@ class Gradeable extends AbstractModel {
             $this->ta_grading = $details['eg_use_ta_grading'] === true;
             $this->student_view = $details['eg_student_view'] === true;
             $this->student_submit = $details['eg_student_submit'] === true;
-            $this->student_download = $details['eg_student_download'] === true;
-            $this->student_any_version = $details['eg_student_any_version'] === true;
             $this->peer_grading = isset($details['eg_peer_grading']) ? $details['eg_peer_grading'] === true: false;
             $this->peer_grade_set = (isset($details['eg_peer_grade_set']) && $this->peer_grading) ? $details['eg_peer_grade_set']: 0;
             $this->config_path = $details['eg_config_path'];
@@ -484,6 +479,12 @@ class Gradeable extends AbstractModel {
     public function calculateLateDays(&$total_late_days = 0){
         $late_flag = false;
 
+        // If the student doesn't submit or the gradeable has no due date,
+        //  this gradeable shouldn't contribute to the late days
+        if (!$this->student_submit || !$this->getHasDueDate()) {
+            return;
+        }
+
         if ($this->late_days - $this->late_day_exceptions > 0) {
             $this->late_status = "Late";
             $late_flag = true;
@@ -500,8 +501,8 @@ class Gradeable extends AbstractModel {
             $this->late_status = "Bad (too many late days used this term)";
             $late_flag = false;
         }
-        
-        if ($this->getActiveVersion() == 0) {
+
+        if ($this->getActiveVersion() <= 0) {
             if ($this->hasSubmitted()) {
                 $this->late_status = "Cancelled Submission";
             }
@@ -546,7 +547,9 @@ class Gradeable extends AbstractModel {
             $this->max_submissions = intval($details['max_submissions']);
         }
 
-        if (isset($details['assignment_message'])) {
+        if (isset($details['gradeable_message'])) {
+            $this->message = Utils::prepareHtmlString($details['gradeable_message']);
+        } else if (isset($details['assignment_message'])) {
             $this->message = Utils::prepareHtmlString($details['assignment_message']);
         }
 
@@ -939,7 +942,7 @@ class Gradeable extends AbstractModel {
     }
 
     public function getDaysLate() {
-        return ($this->hasResults()) ? $this->getCurrentVersion()->getDaysLate() : 0;
+        return ($this->hasResults() && $this->has_due_date) ? $this->getCurrentVersion()->getDaysLate() : 0;
     }
 
     public function getInstructionsURL(){
@@ -961,11 +964,11 @@ class Gradeable extends AbstractModel {
         return $this->result_details;
     }
 
-    public function hasAssignmentMessage() {
+    public function hasGradeableMessage() {
         return trim($this->message) !== "";
     }
 
-    public function getAssignmentMessage() {
+    public function getGradeableMessage() {
         return $this->message;
     }
 

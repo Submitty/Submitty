@@ -151,7 +151,22 @@
 						<select name="rotating_type">
 							<option value="random">randomly</option>
 							<option value="alphabetically">alphabetically</option>
-						</select></label><br /><br />
+						</select>
+                        </label>
+                            <label>excluding students in registration </label>
+
+                        <table style="width:100%">
+                            {% for row in reg_sections %}
+                            <tr><th>
+                                <input type="checkbox" name="{{ row['sections_registration_id'] }}" value="{{ row['sections_registration_id'] }}" >Section {{ row['sections_registration_id'] }}</input>
+                                </th></tr>
+                            {% endfor %}
+                        </table>
+
+
+
+
+                        <br /><br />
 					</legend>
 					<label>
 						<input type="radio" style="margin-top: -2px" name="sort_type" value="drop_null" /> Only remove unregistered students (registration section=NULL) from rotating sections

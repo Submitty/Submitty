@@ -710,6 +710,20 @@ ORDER BY egd.g_version", array($g_id, $user_id));
         return $return;
     }
 
+    public function getGradeableVersionHasAutogradingResults($g_id, $version, $user_id, $team_id) {
+        $query = "SELECT * FROM electronic_gradeable_data WHERE g_id=? AND g_version=? AND ";
+        if($user_id === null) {
+            $query .= "team_id=?";
+            $params = [$g_id, $version, $team_id];
+        }
+        else {
+            $query .= "user_id=?";
+            $params = [$g_id, $version, $user_id];
+        }
+        $this->course_db->query($query, $params);
+        return count($this->course_db->rows()) > 0 && $this->course_db->rows()[0]['autograding_complete'] === true;
+    }
+
 
     // Moved from class LateDaysCalculation on port from TAGrading server.  May want to incorporate late day information into gradeable object rather than having a separate query
     public function getLateDayUpdates($user_id) {
@@ -723,12 +737,17 @@ ORDER BY egd.g_version", array($g_id, $user_id));
                 $query .= '=?';
                 $params = array($user_id);
             }
+            $query .= ' ORDER BY since_timestamp';
             $this->course_db->query($query, $params);
         }
         else {
             $this->course_db->query("SELECT * FROM late_days");
         }
-        return $this->course_db->rows();
+        // Parse the date-times
+        return array_map(function ($arr)  {
+            $arr['since_timestamp'] = DateUtils::parseDateTime($arr['since_timestamp'], $this->core->getConfig()->getTimezone());
+            return $arr;
+        }, $this->course_db->rows());
     }
 
     public function getLateDayInformation($user_id) {
@@ -924,6 +943,7 @@ ORDER BY {$u_or_t}.{$section_key}", $params);
         }
         return $return;
     }
+
     public function getAverageComponentScores($g_id, $section_key, $is_team) {
         $u_or_t="u";
         $users_or_teams="users";
@@ -989,10 +1009,18 @@ ORDER BY gc_order
         $this->course_db->query("
 SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_dev, 0 AS max, COUNT(*) FROM(
    SELECT * FROM (
-      SELECT (egv.autograding_non_hidden_non_extra_credit + egv.autograding_non_hidden_extra_credit + egv.autograding_hidden_non_extra_credit + egv.autograding_hidden_extra_credit) AS score
-      FROM electronic_gradeable_data AS egv
-      INNER JOIN {$users_or_teams} AS {$u_or_t} ON {$u_or_t}.{$user_or_team_id} = egv.{$user_or_team_id}, electronic_gradeable_version AS egd
-      WHERE egv.g_id=? AND {$u_or_t}.{$section_key} IS NOT NULL AND egv.g_version=egd.active_version AND active_version>0 AND egd.{$user_or_team_id}=egv.{$user_or_team_id}
+      SELECT (egd.autograding_non_hidden_non_extra_credit + egd.autograding_non_hidden_extra_credit + egd.autograding_hidden_non_extra_credit + egd.autograding_hidden_extra_credit) AS score
+      FROM electronic_gradeable_data AS egd
+      INNER JOIN (
+          SELECT {$user_or_team_id}, {$section_key} FROM {$users_or_teams}
+      ) AS {$u_or_t}
+      ON {$u_or_t}.{$user_or_team_id} = egd.{$user_or_team_id}
+      INNER JOIN (
+          SELECT g_id, {$user_or_team_id}, active_version FROM electronic_gradeable_version AS egv
+          WHERE active_version > 0
+      ) AS egv
+      ON egd.g_id=egv.g_id AND egd.{$user_or_team_id}=egv.{$user_or_team_id} AND egd.g_version=egv.active_version
+      WHERE egd.g_id=? AND {$u_or_t}.{$section_key} IS NOT NULL
    )g
 ) as individual;
           ", array($g_id));
@@ -1056,11 +1084,17 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
 
-    public function getNumUsersWhoViewedGrade($g_id) {
+    public function getNumUsersWhoViewedGrade($g_id, $section_key) {
         $this->course_db->query("
-SELECT COUNT(*) as cnt FROM gradeable_data
-WHERE g_id = ?
-AND gd_user_viewed_date IS NOT NULL
+SELECT COUNT(*) as cnt
+FROM gradeable_data
+INNER JOIN (
+    SELECT user_id FROM users AS u
+    WHERE {$section_key} IS NOT NULL
+) AS u
+ON u.user_id=gd_user_id
+WHERE g_id = ? AND gd_user_viewed_date IS NOT NULL
+
         ", array($g_id));
 
         return intval($this->course_db->row()['cnt']);
@@ -1167,12 +1201,15 @@ ORDER BY g.sections_rotating_id, g.user_id", $params);
 
     public function getRotatingSectionsForGradeableAndUser($g_id, $user_id = null) {
         $params = [$g_id];
-        $query = "SELECT sections_rotating_id FROM grading_rotating WHERE g_id=?";
-        if($user_id !== null) {
+        $where = "";
+        if ($user_id !== null) {
             $params[] = $user_id;
-            $query .= " AND user_id=?";
+            $where = " AND user_id=?";
         }
-        $this->course_db->query($query, $params);
+        $this->course_db->query("
+            SELECT sections_rotating_id
+            FROM grading_rotating
+            WHERE g_id=? {$where}", $params);
         $return = array();
         foreach ($this->course_db->rows() as $row) {
             $return[] = $row['sections_rotating_id'];
@@ -1569,24 +1606,79 @@ DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=?
 
 // END FIXME
 
+    public function getAllSectionsForGradeable($gradeable) {
+         $grade_type = $gradeable->isGradeByRegistration() ? 'registration' : 'rotating';
+
+         if ($gradeable->isGradeByRegistration()) {
+             $this->course_db->query("
+                 SELECT * FROM sections_registration
+                 ORDER BY SUBSTRING(sections_registration_id, '^[^0-9]*'),
+                 COALESCE(SUBSTRING(sections_registration_id, '[0-9]+')::INT, -1),
+                 SUBSTRING(sections_registration_id, '[^0-9]*$') ");
+         } else {
+             $this->course_db->query("
+                 SELECT * FROM sections_rotating
+                 ORDER BY sections_rotating_id ");
+         }
+
+         $sections = $this->course_db->rows();
+         foreach ($sections as $i => $section)
+             $sections[$i] = $section["sections_{$grade_type}_id"];
+         return $sections;
+    }
 
     /**
      * Gets the ids of all submitters who received a mark
      * @param Mark $mark
+     * @param User $grader
+     * @param Gradeable $gradeable
      * @return string[]
      */
-    public function getSubmittersWhoGotMark(Mark $mark) {
+    public function getSubmittersWhoGotMarkBySection($mark, $grader, $gradeable) {
+         // Switch the column based on gradeable team-ness
+         $type = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'team' : 'user';
+         $row_type = $type . "_id";
+
+         $params = array($grader->getId(), $mark->getId());
+         $table = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'gradeable_teams' : 'users';
+         $grade_type = $gradeable->isGradeByRegistration() ? 'registration' : 'rotating';
+
+         $this->course_db->query("
+             SELECT u.{$type}_id
+             FROM {$table} u
+                 JOIN (
+                     SELECT gr.sections_{$grade_type}_id
+                     FROM grading_{$grade_type} AS gr
+                     WHERE gr.user_id = ?
+                 ) AS gr
+                 ON gr.sections_{$grade_type}_id=u.{$grade_type}_section
+                 JOIN (
+                     SELECT gd.gd_{$type}_id, gcmd.gcm_id
+                     FROM gradeable_component_mark_data AS gcmd
+                         JOIN gradeable_data gd ON gd.gd_id=gcmd.gd_id
+                 ) as gcmd
+                 ON gcmd.gd_{$type}_id=u.{$type}_id
+             WHERE gcmd.gcm_id = ?", $params);
+
+         // Map the results into a non-associative array of team/user ids
+         return array_map(function ($row) use ($row_type) {
+             return $row[$row_type];
+         }, $this->course_db->rows());
+    }
+
+    public function getAllSubmittersWhoGotMark($mark) {
         // Switch the column based on gradeable team-ness
-        $submitter_type = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'gd_team_id' : 'gd_user_id';
+        $type = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'team' : 'user';
+        $row_type = "gd_" . $type . "_id";
         $this->course_db->query("
-            SELECT gd.{$submitter_type}
+            SELECT gd.gd_{$type}_id
             FROM gradeable_component_mark_data gcmd
               JOIN gradeable_data gd ON gd.gd_id=gcmd.gd_id
             WHERE gcm_id = ?", [$mark->getId()]);
 
         // Map the results into a non-associative array of team/user ids
-        return array_map(function ($row) use ($submitter_type) {
-            return $row[$submitter_type];
+        return array_map(function ($row) use ($row_type) {
+            return $row[$row_type];
         }, $this->course_db->rows());
     }
 
@@ -2671,10 +2763,13 @@ AND gc_id IN (
      * @param sting $user_id
      * @param int $notification_id  if $notification_id != -1 then marks corresponding as seen else mark all notifications as seen
      */
-    public function markNotificationAsSeen($user_id, $notification_id){
+    public function markNotificationAsSeen($user_id, $notification_id, $thread_id = -1){
         $parameters = array();
         $parameters[] = $user_id;
-        if($notification_id == -1) {
+        if($thread_id != -1) {
+        	$id_query = "metadata::json->0->>'thread_id' = ?";
+        	$parameters[] = $thread_id;
+        } else if($notification_id == -1) {
             $id_query = "true";
         } else {
             $id_query = "id = ?";
@@ -3156,8 +3251,7 @@ AND gc_id IN (
                 $this->course_db->convertBoolean($gradeable->isStudentView()),
                 $this->course_db->convertBoolean($gradeable->isStudentViewAfterGrades()),
                 $this->course_db->convertBoolean($gradeable->isStudentSubmit()),
-                $this->course_db->convertBoolean($gradeable->isStudentDownload()),
-                $this->course_db->convertBoolean($gradeable->isStudentDownloadAnyVersion()),
+                $this->course_db->convertBoolean($gradeable->hasDueDate()),
                 $gradeable->getAutogradingConfigPath(),
                 $gradeable->getLateDays(),
                 $this->course_db->convertBoolean($gradeable->isLateSubmissionAllowed()),
@@ -3182,8 +3276,7 @@ AND gc_id IN (
                   eg_student_view,
                   eg_student_view_after_grades,
                   eg_student_submit,
-                  eg_student_download,
-                  eg_student_any_version,
+                  eg_has_due_date,
                   eg_config_path,
                   eg_late_days,
                   eg_allow_late_submission,
@@ -3192,7 +3285,7 @@ AND gc_id IN (
                   eg_peer_grade_set,
                   eg_regrade_request_date,
                   eg_regrade_allowed)
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
         }
 
         // Make sure to create the rotating sections
@@ -3286,8 +3379,7 @@ AND gc_id IN (
                     $this->course_db->convertBoolean($gradeable->isStudentView()),
                     $this->course_db->convertBoolean($gradeable->isStudentViewAfterGrades()),
                     $this->course_db->convertBoolean($gradeable->isStudentSubmit()),
-                    $this->course_db->convertBoolean($gradeable->isStudentDownload()),
-                    $this->course_db->convertBoolean($gradeable->isStudentDownloadAnyVersion()),
+                    $this->course_db->convertBoolean($gradeable->hasDueDate()),
                     $gradeable->getAutogradingConfigPath(),
                     $gradeable->getLateDays(),
                     $this->course_db->convertBoolean($gradeable->isLateSubmissionAllowed()),
@@ -3312,8 +3404,7 @@ AND gc_id IN (
                       eg_student_view=?,
                       eg_student_view_after_grades=?,
                       eg_student_submit=?,
-                      eg_student_download=?,
-                      eg_student_any_version=?,
+                      eg_has_due_date=?,
                       eg_config_path=?,
                       eg_late_days=?,
                       eg_allow_late_submission=?,
@@ -3596,5 +3687,17 @@ AND gc_id IN (
     public function deleteTaGradedGradeableByIds($gradeable_id, $submitter_id) {
         $this->course_db->query('DELETE FROM gradeable_data WHERE g_id=? AND (gd_user_id=? OR gd_team_id=?)',
             [$gradeable_id, $submitter_id, $submitter_id]);
+    }
+
+    /**
+     * Gets if the provied submitter has a submission for a particular gradeable
+     * @param \app\models\gradeable\Gradeable $gradeable
+     * @param Submitter $submitter
+     * @return bool
+     */
+    public function getHasSubmission(gradeable\Gradeable $gradeable, Submitter $submitter) {
+        $this->course_db->query('SELECT EXISTS (SELECT g_id FROM electronic_gradeable_data WHERE g_id=? AND (user_id=? OR team_id=?))',
+            [$gradeable->getId(), $submitter->getId(), $submitter->getId()]);
+        return $this->course_db->row()['exists'] ?? false;
     }
 }

@@ -4,8 +4,7 @@ namespace app\libraries\database;
 
 use app\exceptions\DatabaseException;
 use app\exceptions\ValidationException;
-use app\libraries\DateUtils;
-use app\libraries\Utils;
+use app\libraries\CascadingIterator;
 use \app\libraries\GradeableType;
 use app\models\Gradeable;
 use app\models\gradeable\AutoGradedGradeable;
@@ -18,9 +17,6 @@ use app\models\gradeable\Mark;
 use app\models\gradeable\RegradeRequest;
 use app\models\gradeable\Submitter;
 use app\models\gradeable\TaGradedGradeable;
-use app\models\GradeableComponent;
-use app\models\GradeableComponentMark;
-use app\models\GradeableVersion;
 use app\models\User;
 use app\models\SimpleLateUser;
 use app\models\Team;
@@ -250,12 +246,11 @@ SELECT";
   eg.eg_use_ta_grading,
   eg.eg_student_view,
   eg.eg_student_submit,
-  eg.eg_student_download,
-  eg.eg_student_any_version,
   eg.eg_peer_grading,
   eg.eg_peer_grade_set,
   eg.eg_submission_open_date,
   eg.eg_submission_due_date,
+  eg.eg_has_due_date,
   eg.eg_late_days,
   eg.eg_precision,
   gc.array_gc_id,
@@ -633,10 +628,18 @@ ORDER BY gc_order
         $this->course_db->query("
 SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_dev, 0 AS max, COUNT(*) FROM(
    SELECT * FROM (
-      SELECT (egv.autograding_non_hidden_non_extra_credit + egv.autograding_non_hidden_extra_credit + egv.autograding_hidden_non_extra_credit + egv.autograding_hidden_extra_credit) AS score
-      FROM electronic_gradeable_data AS egv
-      INNER JOIN {$users_or_teams} AS {$u_or_t} ON {$u_or_t}.{$user_or_team_id} = egv.{$user_or_team_id}, electronic_gradeable_version AS egd
-      WHERE egv.g_id=? AND {$u_or_t}.{$section_key} IS NOT NULL AND egv.g_version=egd.active_version AND active_version>0 AND egd.{$user_or_team_id}=egv.{$user_or_team_id}
+      SELECT (egd.autograding_non_hidden_non_extra_credit + egd.autograding_non_hidden_extra_credit + egd.autograding_hidden_non_extra_credit + egd.autograding_hidden_extra_credit) AS score
+      FROM electronic_gradeable_data AS egd
+      INNER JOIN (
+          SELECT {$user_or_team_id}, {$section_key} FROM {$users_or_teams}
+      ) AS {$u_or_t}
+      ON {$u_or_t}.{$user_or_team_id} = egd.{$user_or_team_id}
+      INNER JOIN (
+          SELECT g_id, {$user_or_team_id}, active_version FROM electronic_gradeable_version AS egv
+          WHERE active_version > 0
+      ) AS egv
+      ON egd.g_id=egv.g_id AND egd.{$user_or_team_id}=egv.{$user_or_team_id} AND egd.g_version=egv.active_version
+      WHERE egd.g_id=? AND {$u_or_t}.{$section_key} IS NOT NULL
    )g
 ) as individual;
           ", array($g_id));
@@ -1045,18 +1048,30 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
      * Maps sort keys to an array of expressions to sort by in place of the key.
      *  Useful for ambiguous keys or for key alias's
      */
-    const graded_gradeable_key_map = [
+    const graded_gradeable_key_map_user = [
         'registration_section' => [
             'SUBSTRING(u.registration_section, \'^[^0-9]*\')',
             'COALESCE(SUBSTRING(u.registration_section, \'[0-9]+\')::INT, -1)',
             'SUBSTRING(u.registration_section, \'[^0-9]*$\')',
+        ],
+        'rotating_section' => [
+            'u.rotating_section',
+        ],
+        'team_id' => [
+            'user_id'
+        ]
+    ];
+    const graded_gradeable_key_map_team = [
+        'registration_section' => [
             'SUBSTRING(team.registration_section, \'^[^0-9]*\')',
             'COALESCE(SUBSTRING(team.registration_section, \'[0-9]+\')::INT, -1)',
             'SUBSTRING(team.registration_section, \'[^0-9]*$\')'
         ],
         'rotating_section' => [
-            'u.rotating_section',
             'team.rotating_section'
+        ],
+        'team_id' => [
+            'team.team_id'
         ]
     ];
 
@@ -1097,7 +1112,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
      * Gets all GradedGradeable's associated with each Gradeable.  If
      *  both $users and $teams are null, then everyone will be retrieved.
      *  Note: The users' teams will be included in the search
-     * @param \app\models\gradeable\Gradeable[] The gradeable(s) to retrieve data for
+     * @param \app\models\gradeable\Gradeable[] $gradeables The gradeable(s) to retrieve data for
      * @param string[]|string|null $users The id(s) of the user(s) to get data for
      * @param string[]|string|null $teams The id(s) of the team(s) to get data for
      * @param string[]|string|null $sort_keys An ordered list of keys to sort by (i.e. `user_id` or `g_id DESC`)
@@ -1105,6 +1120,34 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
      * @throws \InvalidArgumentException If any GradedGradeable or GradedComponent fails to construct
      */
     public function getGradedGradeables(array $gradeables, $users = null, $teams = null, $sort_keys = null) {
+        $non_team_gradeables = [];
+        $team_gradeables = [];
+        foreach ($gradeables as $gradeable) {
+            if ($gradeable->isTeamAssignment()) {
+                $team_gradeables[] = $gradeable;
+            } else {
+                $non_team_gradeables[] = $gradeable;
+            }
+        }
+
+        return new CascadingIterator(
+            $this->getGradedGradeablesUserOrTeam($non_team_gradeables, $users, $teams, $sort_keys, false),
+            $this->getGradedGradeablesUserOrTeam($team_gradeables, $users, $teams, $sort_keys, true)
+        );
+    }
+
+    /**
+     * Gets all GradedGradeable's associated with each Gradeable.  If
+     *  Note: The users' teams will be included in the search
+     * @param \app\models\gradeable\Gradeable[] The gradeable(s) to retrieve data for
+     * @param string[]|string|null $users The id(s) of the user(s) to get data for
+     * @param string[]|string|null $teams The id(s) of the team(s) to get data for
+     * @param string[]|string|null $sort_keys An ordered list of keys to sort by (i.e. `user_id` or `g_id DESC`)
+     * @param bool $team True to get only team information, false to get only user information
+     * @return \Iterator Iterator to access each GradeableData
+     * @throws \InvalidArgumentException If any GradedGradeable or GradedComponent fails to construct
+     */
+    private function getGradedGradeablesUserOrTeam(array $gradeables, $users, $teams, $sort_keys, bool $team) {
 
         // Get the gradeables array into a lookup table by id
         $gradeables_by_id = [];
@@ -1115,7 +1158,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             $gradeables_by_id[$gradeable->getId()] = $gradeable;
         }
         if (count($gradeables_by_id) === 0) {
-            throw new \InvalidArgumentException('Gradeable array must not be blank!');
+            return new \EmptyIterator();
         }
 
         // If one array is blank, and the other is null or also blank, don't get anything
@@ -1141,47 +1184,103 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             $teams = [];
         }
 
+        $users = array_values($users);
+        $teams = array_values($teams);
+
         //
         // Generate selector for the submitters the user wants
         //
-
         // If both are zero-count, that indicates to get all users/teams
         $all = (count($users) === count($teams)) && count($users) === 0;
 
-        // Since the query won't like an empty array, try to filter it
+        // switch the join type depending on the boolean
+        $submitter_type = $team ? 'team_id' : 'user_id';
+        $submitter_type_ext = $team ? 'team.team_id' : 'u.user_id';
+
+        // Generate a logical expression from the provided parameters
         $selector_union_list = [];
         $selector_union_list[] = strval($this->course_db->convertBoolean($all));
-        // Users were provided, so check that list
-        if (count($users) > 0) {
-            $user_placeholders = implode(',', array_fill(0, count($users), '?'));
-            $selector_union_list[] = "u.user_id IN ($user_placeholders)";
-
-            // Select the users' teams as well
-            $selector_union_list[] = "team.team_id IN (SELECT team_id FROM teams WHERE state=1 AND user_id IN ($user_placeholders))";
-        }
-        // Teams were provided, so check that list
-        if (count($teams) > 0) {
-            $team_placeholders = implode(',', array_fill(0, count($teams), '?'));
-            $selector_union_list[] = "team.team_id IN ($team_placeholders)";
-        }
 
         $selector_intersection_list = [];
+
+        $param = [];
+
+        // If Users were provided, switch between single users and team members
+        if (count($users) > 0) {
+            $user_placeholders = implode(',', array_fill(0, count($users), '?'));
+            $param = $users;
+            if (!$team) {
+                $selector_union_list[] = "u.user_id IN ($user_placeholders)";
+            } else {
+                // Select the users' teams as well
+                $selector_union_list[] = "team.team_id IN (SELECT team_id FROM teams WHERE state=1 AND user_id IN ($user_placeholders))";
+            }
+        }
+
+        $team_data_inject = 'u.registration_section, u.rotating_section,';
+        $team_inject = '';
+        if ($team) {
+            $team_data_inject =
+              'ldet.array_late_day_exceptions,
+               ldet.array_late_day_user_ids,
+               /* Aggregate Team User Data */
+               team.team_id,
+               team.array_team_users,
+               team.registration_section,
+               team.rotating_section,';
+
+            $team_inject ='
+              LEFT JOIN (
+                SELECT gt.team_id,
+                  gt.registration_section,
+                  gt.rotating_section,
+                  json_agg(tu) AS array_team_users
+                FROM gradeable_teams gt
+                  JOIN (
+                    SELECT
+                      t.team_id,
+                      t.state,
+                      tu.*
+                    FROM teams t
+                    JOIN users tu ON t.user_id = tu.user_id ORDER BY t.user_id
+                  ) AS tu ON gt.team_id = tu.team_id
+                GROUP BY gt.team_id
+              ) AS team ON eg.team_assignment AND EXISTS (
+                SELECT 1 FROM gradeable_teams gt
+                WHERE gt.team_id=team.team_id AND gt.g_id=g.g_id
+                LIMIT 1)
+
+              /* Join team late day exceptions */
+              LEFT JOIN (
+                SELECT
+                  json_agg(e.late_day_exceptions) AS array_late_day_exceptions,
+                  json_agg(e.user_id) AS array_late_day_user_ids,
+                  t.team_id,
+                  g_id
+                FROM late_day_exceptions e
+                LEFT JOIN teams t ON e.user_id=t.user_id AND t.state=1
+                GROUP BY team_id, g_id
+              ) AS ldet ON g.g_id=ldet.g_id AND ldet.team_id=team.team_id';
+        }
+        if ($team && count($teams) > 0) {
+            $team_placeholders = implode(',', array_fill(0, count($teams), '?'));
+            $selector_union_list[] = "team.team_id IN ($team_placeholders)";
+            $param = array_merge($param, $teams);
+        }
+
+        $selector_intersection_list[] = '(' . implode(' OR ', $selector_union_list) . ')';
+
         //
         // Generate selector for the gradeables the user wants
         //
         $gradeable_placeholders = implode(',', array_fill(0, count($gradeables_by_id), '?'));
         $selector_intersection_list[] = "g.g_id IN ($gradeable_placeholders)";
 
-        // Add the user selector later so the gradeable selector can be first
-        if (count($selector_union_list) > 0) {
-            $selector_intersection_list[] = '(' . implode(' OR ', $selector_union_list) . ')';
-        }
-
         // Create the complete selector
         $selector = implode(' AND ', $selector_intersection_list);
 
         // Generate the ORDER BY clause
-        $order = self::generateOrderByClause($sort_keys, self::graded_gradeable_key_map);
+        $order = self::generateOrderByClause($sort_keys, $team ? self::graded_gradeable_key_map_team : self::graded_gradeable_key_map_user);
 
         $query = "
             SELECT /* Select everything we retrieved */
@@ -1229,8 +1328,6 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               egv.active_version,
 
               /* Late day exception data */
-              ldet.array_late_day_exceptions,
-              ldet.array_late_day_user_ids,
               ldeu.late_day_exceptions,
 
               /* Regrade request data */
@@ -1238,9 +1335,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               rr.status AS regrade_request_status,
               rr.timestamp AS regrade_request_timestamp,
 
-              /* Aggregate Team User Data */
-              team.team_id,
-              team.array_team_users,
+              {$team_data_inject}
 
               /* User Submitter Data */
               u.user_id,
@@ -1253,11 +1348,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               u.user_group,
               u.manual_registration,
               u.last_updated,
-              u.grading_registration_sections,
+              u.grading_registration_sections
 
-              /* Only select the section information for the submitter type */
-              (CASE WHEN team.team_id IS NULL THEN u.registration_section ELSE team.registration_section END) AS registration_section,
-              (CASE WHEN team.team_id IS NULL THEN u.rotating_section ELSE team.rotating_section END) AS rotating_section
             FROM gradeable g
 
               /* Get teamness so we know to join teams or users*/
@@ -1281,32 +1373,13 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 ) AS sr ON u.user_id=sr.user_id
               ) AS u ON eg IS NULL OR NOT eg.team_assignment
 
-              /* Join team data */
-              LEFT JOIN (
-                SELECT gt.team_id,
-                  gt.registration_section,
-                  gt.rotating_section,
-                  json_agg(tu) AS array_team_users
-                FROM gradeable_teams gt
-                  JOIN (
-                    SELECT
-                      t.team_id,
-                      t.state,
-                      tu.*
-                    FROM teams t
-                    JOIN users tu ON t.user_id = tu.user_id ORDER BY t.user_id
-                  ) AS tu ON gt.team_id = tu.team_id
-                GROUP BY gt.team_id
-              ) AS team ON eg.team_assignment AND EXISTS (
-                SELECT 1 FROM gradeable_teams gt
-                WHERE gt.team_id=team.team_id AND gt.g_id=g.g_id
-                LIMIT 1)
+              {$team_inject}
 
               /* Join manual grading data */
               LEFT JOIN (
                 SELECT *
                 FROM gradeable_data
-              ) AS gd ON gd.g_id=g.g_id AND (gd.gd_user_id=u.user_id OR gd.gd_team_id=team.team_id)
+              ) AS gd ON gd.g_id=g.g_id AND gd.gd_{$submitter_type}={$submitter_type_ext}
 
               /* Join aggregate gradeable component data */
               LEFT JOIN (
@@ -1372,29 +1445,17 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   team_id
                 FROM electronic_gradeable_data AS in_egd
                 GROUP BY g_id, user_id, team_id
-              ) AS egd ON egd.g_id=g.g_id AND (egd.user_id=u.user_id OR egd.team_id=team.team_id)
+              ) AS egd ON egd.g_id=g.g_id AND egd.{$submitter_type}={$submitter_type_ext}
               LEFT JOIN (
                 SELECT *
                 FROM electronic_gradeable_version
-              ) AS egv ON (egv.team_id=egd.team_id OR egv.user_id=egd.user_id) AND egv.g_id=egd.g_id
+              ) AS egv ON egv.{$submitter_type}=egd.{$submitter_type} AND egv.g_id=egd.g_id
 
               /* Join user late day exceptions */
               LEFT JOIN late_day_exceptions ldeu ON g.g_id=ldeu.g_id AND u.user_id=ldeu.user_id
 
-              /* Join team late day exceptions */
-              LEFT JOIN (
-                SELECT
-                  json_agg(e.late_day_exceptions) AS array_late_day_exceptions,
-                  json_agg(e.user_id) AS array_late_day_user_ids,
-                  t.team_id,
-                  g_id
-                FROM late_day_exceptions e
-                LEFT JOIN teams t ON e.user_id=t.user_id AND t.state=1
-                GROUP BY team_id, g_id
-              ) AS ldet ON g.g_id=ldet.g_id AND ldet.team_id=team.team_id
-
               /* Join regrade request */
-              LEFT JOIN regrade_requests AS rr ON (rr.user_id=gd.gd_user_id OR rr.team_id=gd.gd_team_id) AND rr.g_id=g.g_id
+              LEFT JOIN regrade_requests AS rr ON rr.{$submitter_type}=gd.gd_{$submitter_type} AND rr.g_id=g.g_id
             WHERE $selector
             $order";
 
@@ -1572,14 +1633,14 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             return $graded_gradeable;
         };
 
-        return $this->course_db->queryIterator($query,
+        return $this->course_db->queryIterator(
+            $query,
             array_merge(
-                array_keys($gradeables_by_id),
-                array_values($users),           // for user lookup
-                array_values($users),           // for team lookup
-                array_values($teams)
+                $param,
+                array_keys($gradeables_by_id)
             ),
-            $constructGradedGradeable);
+            $constructGradedGradeable
+        );
     }
 
     /**
@@ -1643,12 +1704,11 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   eg_student_view AS student_view,
                   eg_student_view_after_grades as student_view_after_grades,
                   eg_student_submit AS student_submit,
-                  eg_student_download AS student_download,
-                  eg_student_any_version AS student_download_any_version,
                   eg_peer_grading AS peer_grading,
                   eg_peer_grade_set AS peer_grade_set,
                   eg_submission_open_date AS submission_open_date,
                   eg_submission_due_date AS submission_due_date,
+                  eg_has_due_date AS has_due_date,
                   eg_late_days AS late_days,
                   eg_allow_late_submission AS late_submission_allowed,
                   eg_precision AS precision
@@ -1794,4 +1854,3 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             $gradeable_constructor);
     }
 }
-

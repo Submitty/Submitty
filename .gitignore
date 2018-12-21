@@ -21,10 +21,6 @@ selenium*.jar
 !/site/config/course_template.ini
 
 vendor/
-# Because we're supporting both PHP 5.5 and 7.0 which requires two different PHPUnit versions, we end up with having
-# to then have two different composer.json files depending on the version. This means that that we don't want to
-# necessarily lock the composer dependencies as it'll break the CI for the other version.
-composer.lock
 
 db_update.php
 .setup/data/random_users.txt

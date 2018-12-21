@@ -856,7 +856,7 @@ function downloadCSV(code) {
     $('#downloadlink').remove();
 }
 
-function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignment_setting_json, members, max_members) {
+function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignment_setting_json, members, pending_members, max_members) {
     $('.popup-form').css('display', 'none');
     var form = $("#admin-team-form");
     form.css("display", "block");
@@ -868,7 +868,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         $('[name="num_users"]', form).val(3);
     }
     else if (!new_team) {
-        $('[name="num_users"]', form).val(members.length+2);
+        $('[name="num_users"]', form).val(members.length+pending_members.length+2);
     }
 
     var title_div = $("#admin-team-title");
@@ -905,9 +905,15 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         title_div.append('Edit Team: ' + who_id);
         for (var i = 0; i < members.length; i++) {
             members_div.append('<input class="readonly" type="text" name="user_id_' + i + '" readonly="readonly" value="' + members[i] + '" /> \
-                <i id="remove_member_'+i+'" class="fa fa-times" onclick="removeTeamMemberInput('+i+');" style="color:red; cursor:pointer;" aria-hidden="true"></i><br />');
+                <input id="remove_member_'+i+'" class = "btn btn-danger" type="submit" value="Remove" onclick="removeTeamMemberInput('+i+');" \
+                style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true"></input><br />');
         }
-        for (var i = members.length; i < (members.length+2); i++) {
+        for (var i = members.length; i < members.length+pending_members.length; i++) {
+            members_div.append('<input class="readonly" type="text" style= "font-style: italic; color:grey;" name="pending_user_id_' + i + '" readonly="readonly" value="Pending: ' + pending_members[i-members.length] + '" />\
+                <input id="approve_member_'+i+'" class = "btn btn-success" type="submit" value="Accept" onclick="approveTeamMemberInput(this,'+i+');" \
+                style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true"></input><br />');
+        }
+        for (var i = members.length+pending_members.length; i < (members.length+pending_members.length+2); i++) {
             members_div.append('<input type="text" name="user_id_' + i + '" /><br />');
             $('[name="user_id_'+i+'"]', form).autocomplete({
                 source: student_full
@@ -919,22 +925,29 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="team_formation_date_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[0].time+ '" /><br />');
         team_history_div_left.append('<input class="readonly" type="text" style="width:100%;" name="last_edit_left" readonly="readonly" value="Last edited on: " /><br />');
         team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="last_edit_date_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[team_history_len-1].time+ '" /><br />');
-        for (var i = 0; i < members.length; i++) {
-            for (var j = team_history_len-1; j >= 0; j--) {
-                if(user_assignment_setting_json.team_history[j].action == "admin_add_user"){
-                    if(user_assignment_setting_json.team_history[j].added_user == members[i]){
-                        team_history_div_left.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_left" readonly="readonly" value="'+members[i]+ ' added on: " /><br />');
-                        team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[j].time+ '" /><br />');
-                    }
-                }
-                else if(user_assignment_setting_json.team_history[j].action == "admin_create"){
-                    if(user_assignment_setting_json.team_history[j].first_user == members[i]){
+        for (var j = 0; j <=team_history_len-1; j++) {
+            if(user_assignment_setting_json.team_history[j].action == "admin_create"){
+                for (var i = 0; i < members.length; i++) {
+                    if(user_assignment_setting_json.team_history[j].first_user == members[i] || user_assignment_setting_json.team_history[j].added_user == members[i]){
                         team_history_div_left.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_left" readonly="readonly" value="'+members[i]+ ' added on: " /><br />');
                         team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[j].time+ '" /><br />');
                     }
                 }
             }
+            if(user_assignment_setting_json.team_history[j].action == "admin_add_user"){
+                for (var i = 0; i < members.length; i++) {
+                    if(user_assignment_setting_json.team_history[j].added_user == members[i]){
+                        team_history_div_left.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_left" readonly="readonly" value="'+members[i]+ ' added on: " /><br />');
+                        team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[j].time+ '" /><br />');
+                    }
+                }
+            }
+            if(user_assignment_setting_json.team_history[j].action == "admin_remove_user"){
+                team_history_div_left.append('<input class="readonly" type="text" style="width:100%;"  readonly="readonly" value="'+user_assignment_setting_json.team_history[j].removed_user+ ' removed on: " /><br />');
+                team_history_div_right.append('<input class="readonly" type="text" style="width:100%;"  readonly="readonly" value="' +user_assignment_setting_json.team_history[j].time+ '" /><br />');
+            }
         }
+
     }
     var param = (new_team ? 3 : members.length+2);
     members_div.append('<span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+param+');"><i class="fa fa-plus-square" aria-hidden="true"></i> \
@@ -945,6 +958,17 @@ function removeTeamMemberInput(i) {
     var form = $("#admin-team-form");
     $('[name="user_id_'+i+'"]', form).removeClass('readonly').removeAttr('readonly').val("");
     $("#remove_member_"+i).remove();
+    var student_full = JSON.parse($('#student_full_id').val());
+    $('[name="user_id_'+i+'"]', form).autocomplete({
+        source: student_full
+    });
+}
+
+function approveTeamMemberInput(old, i) {
+    var form = $("#admin-team-form");
+    $("#approve_member_"+i).remove();
+    $('[name="pending_user_id_'+i+'"]', form).attr("name", "user_id_"+i);
+    $('[name="user_id_'+i+'"]', form).attr("style", "font-style: normal;");
     var student_full = JSON.parse($('#student_full_id').val());
     $('[name="user_id_'+i+'"]', form).autocomplete({
         source: student_full
@@ -1417,7 +1441,9 @@ function publishFormWithAttachments(form, test_category, error_message) {
             window.location.href = json['next_page'];
         },
         error: function(){
-            window.alert(error_message);
+            var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + error_message + '</div>';
+            $('#messages').append(message);
+            return;
         }
     });
     return false;
@@ -1834,6 +1860,7 @@ function showHistory(post_id) {
                 }
                 $("#popup-post-history").show();
                 $("#popup-post-history .post_box.history_box").remove();
+                $("#popup-post-history .form-body").css("padding", "5px");
                 var dummy_box = $($("#popup-post-history .post_box")[0]);
                 for(var i = json.length - 1 ; i >= 0 ; i -= 1) {
                     var post = json[i];

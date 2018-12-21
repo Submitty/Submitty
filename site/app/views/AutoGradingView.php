@@ -18,10 +18,11 @@ class AutoGradingView extends AbstractView {
 
     /**
      * @param AutoGradedVersion $version_instance
-     * @param bool $show_hidden
+     * @param bool $show_hidden True to show the scores of hidden testcases
+     * @param bool $show_hidden_details True to show the details of hidden testcases
      * @return string
      */
-    public function showResults(AutoGradedVersion $version_instance, bool $show_hidden = false) {
+    public function showResults(AutoGradedVersion $version_instance, bool $show_hidden = false, bool $show_hidden_details = false) {
         $graded_gradeable = $version_instance->getGradedGradeable();
         $gradeable = $graded_gradeable->getGradeable();
         $autograding_config = $gradeable->getAutogradingConfig();
@@ -35,11 +36,11 @@ class AutoGradingView extends AbstractView {
         $any_visible_hidden = false;
         $num_visible_testcases = 0;
 
-        // FIXME: This variable should be false if autograding results
+        // This variable should be false if autograding results
         // (files/database values) exist, but true if the assignment
         // is in the queue or something went wrong with autograding
         // (it crashed, files were corrupted, etc)
-        $incomplete_autograding = true;
+        $incomplete_autograding = !$version_instance->isAutogradingComplete();
 
         $testcase_array = array_map(function (AutoGradedTestcase $testcase) {
             $testcase_config = $testcase->getTestcase();
@@ -80,13 +81,13 @@ class AutoGradingView extends AbstractView {
             $show_hidden_breakdown = $any_visible_hidden && $show_hidden &&
                 ($version_instance->getNonHiddenNonExtraCredit() + $version_instance->getHiddenNonExtraCredit() > $autograding_config->getTotalNonHiddenNonExtraCredit());
         }
-        foreach ($version_instance->getTestcases() as $testcase) {
+        // testcases should only be visible if autograding is complete
+        if(!$incomplete_autograding) {
+            foreach ($version_instance->getTestcases() as $testcase) {
 
-            // FIXME: I don't know if this is the right check
-            $incomplete_autograding = false;
-
-            if ($testcase->canView()) {
-                $num_visible_testcases++;
+                if ($testcase->canView()) {
+                    $num_visible_testcases++;
+                }
             }
         }
 
@@ -101,6 +102,7 @@ class AutoGradingView extends AbstractView {
             "hidden_earned" => $hidden_earned,
             "hidden_max" => $hidden_max,
             "show_hidden" => $show_hidden,
+            "show_hidden_details" => $show_hidden_details,
             "has_badges" => $has_badges,
             'testcases' => $testcase_array,
             'is_ta_grade_released' => $gradeable->isTaGradeReleased(),

@@ -131,7 +131,7 @@ class ForumController extends AbstractController {
             $result["error"] = "You do not have permissions to do that.";
 		}
         $this->core->getOutput()->renderJson($result);
-		return $result;
+		return $this->core->getOutput()->getOutput();
 	}
 
     private function checkGoodAttachment($isThread, $thread_id, $file_post){
@@ -216,7 +216,7 @@ class ForumController extends AbstractController {
             $result["error"] = "You do not have permissions to do that.";
         }
         $this->core->getOutput()->renderJson($result);
-        return $result;
+        return $this->core->getOutput()->getOutput();
     }
 
     public function deleteCategory(){
@@ -242,7 +242,7 @@ class ForumController extends AbstractController {
             $result["error"] = "You do not have permissions to do that.";
         }
         $this->core->getOutput()->renderJson($result);
-        return $result;
+        return $this->core->getOutput()->getOutput();
     }
 
     public function editCategory(){
@@ -277,7 +277,7 @@ class ForumController extends AbstractController {
             $result["error"] = "You do not have permissions to do that.";
         }
         $this->core->getOutput()->renderJson($result);
-        return $result;
+        return $this->core->getOutput()->getOutput();
     }
 
     public function reorderCategories(){
@@ -304,7 +304,7 @@ class ForumController extends AbstractController {
             $result["error"] = "You do not have permissions to do that.";
         }
         $this->core->getOutput()->renderJson($result);
-        return $result;
+        return $this->core->getOutput()->getOutput();
     }
 
     //CODE WILL BE CONSOLIDATED IN FUTURE
@@ -316,6 +316,8 @@ class ForumController extends AbstractController {
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
         $thread_status = $_POST["thread_status"];
         $announcment = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->getGroup() < 3) ? 1 : 0 ;
+        $email_announcement = (isset($_POST["EmailAnnouncement"]) && $_POST["EmailAnnouncement"] == "EmailAnnouncement" && $this->core->getUser()->getGroup() < 3) ? 1 : 0 ;
+
         $categories_ids  = array();
         foreach ($_POST["cat"] as $category_id) {
             $categories_ids[] = (int)$category_id;
@@ -352,13 +354,18 @@ class ForumController extends AbstractController {
                 }
                 if($announcment){
                     $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'new_announcement', 'thread_id' => $id, 'thread_title' => $title));
+
                     $this->core->getQueries()->pushNotification($notification);
+                }
+
+                if($email_announcement) {
+                    $this->sendEmailAnnouncement($title, $thread_post_content, $post_id);
                 }
                 $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $id));
             }
         }
         $this->core->getOutput()->renderJson($result);
-        return $result;
+        return $this->core->getOutput()->getOutput();
     }
 
     private function search(){
@@ -414,7 +421,7 @@ class ForumController extends AbstractController {
             }
         }
         $this->core->getOutput()->renderJson($result);
-        return $result;
+        return $this->core->getOutput()->getOutput();
     }
 
     public function alterAnnouncement($type){
@@ -436,7 +443,7 @@ class ForumController extends AbstractController {
         $this->core->getQueries()->addPinnedThread($current_user, $thread_id, $type);
         $response = array('user' => $current_user, 'thread' => $thread_id, 'type' => $type);
         $this->core->getOutput()->renderJson($response);
-        return $response;
+        return $this->core->getOutput()->getOutput();
     }
 
     private function checkPostEditAccess($post_id) {
@@ -494,7 +501,7 @@ class ForumController extends AbstractController {
             $this->core->getQueries()->pushNotification($notification);
             $this->core->getQueries()->removeNotificationsPost($post_id);
             $this->core->getOutput()->renderJson($response = array('type' => $type));
-            return $response;
+            return $this->core->getOutput()->getOutput();
         } else if($modifyType == 2) { //undelete post or thread
             $thread_id = $_POST["thread_id"];
             $type = "";
@@ -511,7 +518,7 @@ class ForumController extends AbstractController {
                 $this->core->getQueries()->pushNotification($notification);
                 $this->core->getOutput()->renderJson($response = array('type' => $type));
             }
-            return $response;
+            return $this->core->getOutput()->getOutput();
         } else if($modifyType == 1) { //edit post or thread
             $thread_id = $_POST["edit_thread_id"];
             $status_edit_thread = $this->editThread();
@@ -687,6 +694,7 @@ class ForumController extends AbstractController {
         $option = ($this->core->getUser()->getGroup() <= 2 || $option != 'alpha') ? $option : 'tree';
         if(!empty($_REQUEST["thread_id"])){
             $thread_id = (int)$_REQUEST["thread_id"];
+            $this->core->getQueries()->markNotificationAsSeen($user, -2, (string)$thread_id);
             $thread = $this->core->getQueries()->getThread($thread_id);
             if(!empty($thread)) {
                 $thread = $thread[0];
@@ -766,7 +774,7 @@ class ForumController extends AbstractController {
             $output['error'] = "You do not have permissions to do that.";
         }
         $this->core->getOutput()->renderJson($output);
-        return $output;
+        return $this->core->getOutput()->getOutput();
     }
 
     public function getEditPostContent(){
@@ -782,10 +790,10 @@ class ForumController extends AbstractController {
                 $this->getThreadContent($_POST["thread_id"], $output);
             }
             $this->core->getOutput()->renderJson($output);
-            return $output;
         } else {
             $this->core->getOutput()->renderJson(array('error' => "You do not have permissions to do that."));
         }
+        return $this->core->getOutput()->getOutput();
     }
 
     private function getThreadContent($thread_id, &$output){
@@ -871,5 +879,31 @@ class ForumController extends AbstractController {
             $this->core->addErrorMessage("You do not have permissions to do that.");
         }
         $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
+    }
+
+    private function sendEmailAnnouncement($thread_title, $thread_content, $post_id) {
+            $course = urlencode($this->core->getConfig()->getCourse());
+            $semester = urlencode($this->core->getConfig()->getSemester());
+
+
+            $email_job_data = [
+                "job" => "SendEmail",
+                "email_type" => "announce",
+                "semester" => $semester,
+                "course" => $course,
+                "thread_title" => $thread_title,
+                "thread_content" => $thread_content
+            ];
+
+            $email_job_file = "/var/local/submitty/daemon_job_queue/email__" . $semester . "__" . $course . "__" . $post_id . ".json";
+
+            if(file_exists($email_job_file) && !is_writable($email_job_file)) {
+                return "Failed to create email job. Try again";
+            }
+
+            if(file_put_contents($email_job_file, json_encode($email_job_data, JSON_PRETTY_PRINT)) === false) {
+                return "Failed to write email job file. Try again";
+            }
+            return null;
     }
 }
