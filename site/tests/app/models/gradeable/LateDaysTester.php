@@ -2,6 +2,7 @@
 
 use app\libraries\Core;
 use app\libraries\DateUtils;
+use app\libraries\GradeableType;
 use app\models\Config;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\AutoGradedVersion;
@@ -42,6 +43,7 @@ class LateDaysTester extends BaseUnitTest {
         $graded_gradeable->method('getSubmitter')->willReturn($submitter);
         $graded_gradeable->method('getAutoGradedGradeable')->willReturn($auto_graded_gradeable);
         $graded_gradeable->method('getLateDayException')->willReturn($late_day_exception);
+        $graded_gradeable->method('getType')->willReturn(GradeableType::ELECTRONIC_FILE)
 
         return $graded_gradeable;
     }
