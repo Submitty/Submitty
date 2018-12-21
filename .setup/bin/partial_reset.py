@@ -107,7 +107,7 @@ def main():
         if repo_path.exists():
             shutil.rmtree(str(repo_path))
         repo_path.mkdir()
-        for folder in ['autograding', 'access', 'site_errors']:
+        for folder in ['autograding', 'access', 'site_errors', 'ta_grading']:
             repo_log_path = repo_path / folder
             data_log_path = data_path / folder
             repo_log_path.mkdir()
