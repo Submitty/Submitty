@@ -308,4 +308,15 @@ class User extends AbstractModel {
 			trigger_error('User::validateUserData() called with unknown $field '.$field.' and $data '.$data, E_USER_ERROR);
     	}
     }
+
+    /**
+     * Checks if the user is on ANY team for the given assignment
+     *
+     * @param string gradable_id
+     * @return bool
+     */
+    public function onTeam($gradeable_id) {
+        $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $this->id);
+        return $team !== NULL;
+    }
 }

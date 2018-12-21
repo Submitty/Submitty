@@ -316,6 +316,8 @@ class ForumController extends AbstractController {
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
         $thread_status = $_POST["thread_status"];
         $announcment = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->getGroup() < 3) ? 1 : 0 ;
+        $email_announcement = (isset($_POST["EmailAnnouncement"]) && $_POST["EmailAnnouncement"] == "EmailAnnouncement" && $this->core->getUser()->getGroup() < 3) ? 1 : 0 ;
+
         $categories_ids  = array();
         foreach ($_POST["cat"] as $category_id) {
             $categories_ids[] = (int)$category_id;
@@ -352,7 +354,12 @@ class ForumController extends AbstractController {
                 }
                 if($announcment){
                     $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'new_announcement', 'thread_id' => $id, 'thread_title' => $title));
+
                     $this->core->getQueries()->pushNotification($notification);
+                }
+
+                if($email_announcement) {
+                    $this->sendEmailAnnouncement($title, $thread_post_content, $post_id);
                 }
                 $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $id));
             }
@@ -872,5 +879,31 @@ class ForumController extends AbstractController {
             $this->core->addErrorMessage("You do not have permissions to do that.");
         }
         $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
+    }
+
+    private function sendEmailAnnouncement($thread_title, $thread_content, $post_id) {
+            $course = urlencode($this->core->getConfig()->getCourse());
+            $semester = urlencode($this->core->getConfig()->getSemester());
+
+
+            $email_job_data = [
+                "job" => "SendEmail",
+                "email_type" => "announce",
+                "semester" => $semester,
+                "course" => $course,
+                "thread_title" => $thread_title,
+                "thread_content" => $thread_content
+            ];
+
+            $email_job_file = "/var/local/submitty/daemon_job_queue/email__" . $semester . "__" . $course . "__" . $post_id . ".json";
+
+            if(file_exists($email_job_file) && !is_writable($email_job_file)) {
+                return "Failed to create email job. Try again";
+            }
+
+            if(file_put_contents($email_job_file, json_encode($email_job_data, JSON_PRETTY_PRINT)) === false) {
+                return "Failed to write email job file. Try again";
+            }
+            return null;
     }
 }

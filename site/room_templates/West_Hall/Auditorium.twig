@@ -1,6 +1,6 @@
 <script>
   var title = "West Hall Auditorium"
-  note_left = "reserved for left-handed students"
+  note_left = ""
   note_right = "skip every other seat"
 
   var config = {{ seating_config|raw }};
@@ -322,14 +322,14 @@
           }
         }
 
-        if( ! (section == "middle" && row <= 12))
-        {
-          point = find_point(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_end);
-          ctx.beginPath();
-          ctx.arc(point[0], point[1], BASE_POINT_RADIUS, 0.0, 2.0 * Math.PI);
-          ctx.fillStyle = "#d000d0";
-          ctx.fill();
-        }
+        //if( ! (section == "middle" && row <= 12))
+       // {
+        //  point = find_point(BASE_ROW_CENTER, BASE_ROW_HEIGHT, radius, angle_end);
+         // ctx.beginPath();
+         // ctx.arc(point[0], point[1], BASE_POINT_RADIUS, 0.0, 2.0 * Math.PI);
+         // ctx.fillStyle = "#d000d0";
+         // ctx.fill();
+       // }
       }
     }
 
