@@ -156,7 +156,7 @@ class SubmissionController extends AbstractController {
         }
 
         if (!$graded_gradeable->hasRegradeRequest()) {
-            $this->core->getOutput()->renderJsonFail('Student has not submitted a grade inquiry');
+            $this->core->getOutput()->renderJsonFail('Submitter has not made a grade inquiry');
             return;
         }
 
@@ -195,7 +195,7 @@ class SubmissionController extends AbstractController {
         }
 
         if (!$graded_gradeable->hasRegradeRequest()) {
-            $this->core->getOutput()->renderJsonFail('Student has not submitted a grade inquiry');
+            $this->core->getOutput()->renderJsonFail('Submitter has not made a grade inquiry');
             return;
         }
 
@@ -238,7 +238,7 @@ class SubmissionController extends AbstractController {
         }
 
         if (!$graded_gradeable->hasRegradeRequest()) {
-            $this->core->getOutput()->renderJsonFail('Student has no grade inquiry');
+            $this->core->getOutput()->renderJsonFail('Submitter has not made a grade inquiry');
             return;
         }
 

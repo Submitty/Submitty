@@ -1077,7 +1077,7 @@ class Gradeable extends AbstractModel {
     }
 
     /**
-     * Gets if this gradeable has any active grade inquiries active
+     * Gets if this gradeable has any active grade inquiries
      * @return bool
      */
     public function anyActiveRegradeRequests() {
