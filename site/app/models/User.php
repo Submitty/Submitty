@@ -217,7 +217,7 @@ class User extends AbstractModel {
     }
 
     public function getNotifcationSettings() {
-        return $this->notification_settings; //either recieves it or not
+        return $this->notification_settings; //either receives it or not
     }
 
     public function getNotifcationSetting($type){
