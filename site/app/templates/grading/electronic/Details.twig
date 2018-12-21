@@ -266,7 +266,7 @@
         {% set btn_class = "btn-primary" %}
         {% if graded_gradeable.getOrCreateTaGradedGradeable().anyGrades() %}
             {% if graded_gradeable.hasActiveRegradeRequest() %}
-                {% set contents = "Regrade Requested" %}
+                {% set contents = "Grade Inquiry" %}
                 {% set btn_class = "btn-danger" %}
             {% elseif graded_gradeable.getTaGradedGradeable().hasVersionConflict() %}
                 {% set contents = "Version Conflict" %}
