@@ -146,6 +146,15 @@ $(document).ready(function () {
 });
 
 function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, errorCallback) {
+    let container = $('#container-rubric');
+    if (container.length === 0) {
+        alert("UPDATES DISABLED: no 'container-rubric' element!");
+        return;
+    }
+    // Don't process updates until the page is done loading
+    if (!container.is(':visible')) {
+        return;
+    }
     setGradeableUpdateInProgress();
     $.getJSON({
         type: "POST",

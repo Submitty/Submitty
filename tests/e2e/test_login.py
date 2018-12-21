@@ -18,6 +18,9 @@ class TestLogin(BaseTestCase):
               "&course=sample&component=student&gradeable_id=open_homework&success_login=true"
         self.log_in(url, title='SAMPLE')
         self.assertEqual(self.test_url + url, self.driver.current_url)
+        cookies = list(filter(lambda x: x['name'] == 'submitty_token', self.driver.get_cookies()))
+        self.assertEqual(1, len(cookies))
+        self.assertRegex(cookies[0]['value'], r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$')
 
     def test_bad_login_password(self):
         self.get("/index.php?semester=" + self.semester + "&course=sample")

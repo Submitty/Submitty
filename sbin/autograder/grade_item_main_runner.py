@@ -368,6 +368,7 @@ def launch_container(container_name, container_image, mounted_directory,job_id,i
   this_container = subprocess.check_output(['docker', 'create', '-i', '-u', untrusted_uid, '--network', 'none',
                                            '-v', mounted_directory + ':' + mounted_directory,
                                            '-w', mounted_directory,
+                                           '--hostname', name,
                                            '--name', container_name,
                                            container_image,
                                            #The command to be run.
