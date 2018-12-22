@@ -55,5 +55,5 @@ Parameters:
 * thread_content
 
 Sends out an email for a course. This calls a script that handles
-actually gets the list of receipents for the email as well as
+actually gets the list of recipients for the email as well as
 sending it via the smtp python library.
