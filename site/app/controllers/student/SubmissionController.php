@@ -112,7 +112,7 @@ class SubmissionController extends AbstractController {
         }
 
         if(!$gradeable->isRegradeAllowed()) {
-            $this->core->getOutput()->renderJsonFail('Regrade requests not enabled for this gradeable');
+            $this->core->getOutput()->renderJsonFail('Grade inquiries are not enabled for this gradeable');
             return;
         }
 
@@ -156,13 +156,13 @@ class SubmissionController extends AbstractController {
         }
 
         if (!$graded_gradeable->hasRegradeRequest()) {
-            $this->core->getOutput()->renderJsonFail('Submitter has no regrade request');
+            $this->core->getOutput()->renderJsonFail('Submitter has not made a grade inquiry');
             return;
         }
 
         // TODO: add to access control method
         if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$user->accessFullGrading()) {
-            $this->core->getOutput()->renderJsonFail('Insufficient permissions to make regrade post');
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to make grade inquiry post');
             return;
         }
 
@@ -195,13 +195,13 @@ class SubmissionController extends AbstractController {
         }
 
         if (!$graded_gradeable->hasRegradeRequest()) {
-            $this->core->getOutput()->renderJsonFail('Submitter has no regrade request');
+            $this->core->getOutput()->renderJsonFail('Submitter has not made a grade inquiry');
             return;
         }
 
         // TODO: add to access control method
         if (!$user->accessFullGrading()) {
-            $this->core->getOutput()->renderJsonFail('Insufficient permissions to delete regrade request');
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to delete grade inquiry');
             return;
         }
 
@@ -238,13 +238,13 @@ class SubmissionController extends AbstractController {
         }
 
         if (!$graded_gradeable->hasRegradeRequest()) {
-            $this->core->getOutput()->renderJsonFail('Submitter has no regrade request');
+            $this->core->getOutput()->renderJsonFail('Submitter has not made a grade inquiry');
             return;
         }
 
         // TODO: add to access control method
         if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$user->accessFullGrading()) {
-            $this->core->getOutput()->renderJsonFail('Insufficient permissions to change regrade request status');
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to change grade inquiry status');
             return;
         }
 

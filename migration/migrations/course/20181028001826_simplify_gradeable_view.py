@@ -1,7 +1,7 @@
 def up(config, conn, semester, course):
     with conn.cursor() as cursor:
-        cursor.execute('ALTER TABLE electronic_gradeable DROP COLUMN eg_student_download')
-        cursor.execute('ALTER TABLE electronic_gradeable DROP COLUMN eg_student_any_version')
+        cursor.execute('ALTER TABLE electronic_gradeable DROP COLUMN IF EXISTS eg_student_download')
+        cursor.execute('ALTER TABLE electronic_gradeable DROP COLUMN IF EXISTS eg_student_any_version')
 
 
 def down(config, conn, semester, course):

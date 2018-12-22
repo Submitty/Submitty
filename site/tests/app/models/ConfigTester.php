@@ -95,13 +95,13 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'keep_previous_files' => false,
                 'display_rainbow_grades_summary' => false,
                 'display_custom_message' => false,
-                'course_email' => 'Please contact your TA or instructor for a regrade request.',
+                'course_email' => 'Please contact your TA or instructor to submit a grade inquiry.',
                 'vcs_base_url' => '',
                 'vcs_type' => 'git',
                 'private_repository' => '',
                 'forum_enabled' => true,
                 'regrade_enabled' => false,
-                'regrade_message' => 'Warning: Frivolous regrade requests may lead to grade deductions or lost late days',
+                'regrade_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
                 'room_seating_gradeable_id' => ""
             )
         );
@@ -195,12 +195,12 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'keep_previous_files' => false,
             'display_rainbow_grades_summary' => false,
             'display_custom_message' => false,
-            'course_email' => 'Please contact your TA or instructor for a regrade request.',
+            'course_email' => 'Please contact your TA or instructor to submit a grade inquiry.',
             'vcs_base_url' => 'http://example.com/{$vcs_type}/s17/csci0000/',
             'vcs_type' => 'git',
             'modified' => false,
             'hidden_details' => null,
-            'regrade_message' => 'Warning: Frivolous regrade requests may lead to grade deductions or lost late days',
+            'regrade_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
             'course_ini' => [
                 'database_details' => [
                     'dbname' => 'submitty_s17_csci0000'
@@ -215,13 +215,13 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                     'keep_previous_files' => false,
                     'display_rainbow_grades_summary' => false,
                     'display_custom_message' => false,
-                    'course_email' => 'Please contact your TA or instructor for a regrade request.',
+                    'course_email' => 'Please contact your TA or instructor to submit a grade inquiry.',
                     'vcs_base_url' => '',
                     'vcs_type' => 'git',
                     'private_repository' => '',
                     'forum_enabled' => true,
                     'regrade_enabled' => false,
-                    'regrade_message' => 'Warning: Frivolous regrade requests may lead to grade deductions or lost late days',
+                    'regrade_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
                     'room_seating_gradeable_id' => ""
                 ]
             ],

@@ -6,6 +6,7 @@
         {% else %}
             <a href="{{ core.buildUrl({"component": "navigation", "page": "notifications", "show_all": "1"}) }}" class="btn btn-primary">Show All</a>
         {% endif %}
+        <a onclick="$('#notification-settings').css('display', 'block');" href="#" class="btn btn-primary">Settings</a>
     </div>
     <h1>Notifications</h1>
     <table class="table table-bordered persist-area">
@@ -59,3 +60,5 @@
             {% endif %}        
     </table>
 </div>
+
+{% include 'NotificationsSettings.twig' with { 'notification_saves': notification_saves } %}

@@ -2243,11 +2243,14 @@ class ElectronicGraderController extends GradingController {
      */
     private function getStats(Gradeable $gradeable, User $grader, bool $full_stats, &$total_graded, &$total_total) {
         $num_components = $this->core->getQueries()->getTotalComponentCount($gradeable->getId());
-        $sections = ($full_stats) ?
-                    $this->core->getQueries()->getAllSectionsForGradeable($gradeable) :
-                    ($gradeable->isGradeByRegistration()) ?
-                        $grader->getGradingRegistrationSections() :
-                        $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable->getId(), $grader->getId());
+        $sections = array();
+        if ($full_stats) {
+            $sections = $this->core->getQueries()->getAllSectionsForGradeable($gradeable);
+        } else if ($gradeable->isGradeByRegistration()) {
+            $sections = $grader->getGradingRegistrationSections();
+        } else {
+            $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable->getId(), $grader->getId());
+        }
 
         $section_key = ($gradeable->isGradeByRegistration() ? 'registration_section' : 'rotating_section');
 

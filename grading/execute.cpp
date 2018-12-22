@@ -1034,7 +1034,7 @@ void cin_reader(std::mutex* lock, std::queue<std::string>* input_queue, bool* CH
 
       if (ret > 0){
         std::getline (std::cin,my_string);
-        std::cout << "Cin recieved: " << my_string << std::endl;
+        std::cout << "Cin received: " << my_string << std::endl;
 
         lock->lock();
         input_queue->push(my_string);

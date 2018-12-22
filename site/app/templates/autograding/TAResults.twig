@@ -16,7 +16,7 @@
         <div class="box half" style="padding: 10px; width: 40%; word-break: break-word;">
             <p>Version #{{ gradeable.getActiveVersion() }} graded by: {{ grader_names|join(", ") }}</p>
             {% if allow_regrade == true %}
-                <i>Any regrade requests are due by {{ regrade_date }}</i>
+                <i>Grade inquiries are due by {{ regrade_date }}</i>
             {% endif %}
             <p>
                 {% if gradeable.getOverallComment()|length != 0 %}
@@ -111,7 +111,7 @@
     </div>
     {% if allow_regrade == true %}
     <div id="ShowRegradeRequestButton">
-        <button type="button" title="Show Regrade Requests" onclick="toggleRegradeRequests()" style="margin-right:10px;" class="btn btn-default"> Show Regrade Request </button>
+        <button type="button" title="Submit Grade Inquiry" onclick="toggleRegradeRequests()" style="margin-right:10px;" class="btn btn-default">Submit Grade Inquiry</button>
     </div>
     {% endif %}
 {% endif %}

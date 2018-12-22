@@ -149,7 +149,7 @@
             <div class="option-desc col-md-8">
                 <label for="course_email">
                     <div class="option-title">Grades Returned Message</div>
-                    <div class="option-alt">Input the message shown on grades returned to students. Recommended to include directions for regrade requests or the course's email.</div>
+                    <div class="option-alt">Input the message shown on grades returned to students.  Include instructions for grade inquiries and the course staff mailing list.</div>
                 </label>
             </div>
             <div class="option-input col-md-4"><textarea style="height: 50px" name="course_email" id="course_email"  />{{ fields['course_email']|raw  }}</textarea></div>
@@ -158,8 +158,8 @@
         <div class="option row">
             <div class="option-desc col-md-8">
                 <label for="regrade_enabled">
-                    <div class="option-title">Regrade Requests Allowed</div>
-                    <div class="option-alt">Allow students to submit regrade requests for assignments.</div>
+                    <div class="option-title">Grade Inquiries Allowed</div>
+                    <div class="option-alt">Allow students to submit grade inquiries for assignments.</div>
                 </label>
             </div>
             <div class="option-input col-md-4"><input type="checkbox" name="regrade_enabled" id="regrade_enabled" value="true" {{ fields['regrade_enabled'] ?
@@ -169,8 +169,8 @@
         <div class="option row">
             <div class="option-desc col-md-8">
                 <label for="regrade_message">
-                    <div class="option-title">Regrade Request Warning Message</div>
-                    <div class="option-alt">Input the warning message show to students while submitting a regrade request.</div>
+                    <div class="option-title">Grade Inquiry Warning Message</div>
+                    <div class="option-alt">Input the warning message show to students while submitting a grade inquiry.</div>
                 </label>
             </div>
             <div class="option-input col-md-4"><textarea style="height: 50px" name="regrade_message" id="regrade_message" rows="4"/>{{ fields['regrade_message']|raw}}</textarea></div>

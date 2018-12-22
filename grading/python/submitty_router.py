@@ -216,7 +216,7 @@ def listen_to_sockets():
         sys.exit(1)
 
       #TODO: May have to the max recvfrom size.
-      #The recvfrom call will raise a OSError if there is nothing to recieve. 
+      #The recvfrom call will raise a OSError if there is nothing to receive. 
       message, snd = connection.recvfrom(4096)
       sender = SWITCHBOARD[port]['sender'].replace("_Actual", "")
 
@@ -227,7 +227,7 @@ def listen_to_sockets():
         SWITCHBOARD[port]['connection'] = None
         continue
 
-      log('Recieved message {!r} from {} on port {}'.format(message,sender,port))
+      log('Received message {!r} from {} on port {}'.format(message,sender,port))
 
       #if we did not error:
       connect_outgoing_socket(port)
