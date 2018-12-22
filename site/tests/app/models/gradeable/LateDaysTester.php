@@ -21,6 +21,7 @@ class LateDaysTester extends BaseUnitTest {
         $gradeable->method('getSubmissionDueDate')->willReturn(new \DateTime($due_date));
         $gradeable->method('getLateDays')->willReturn($late_days);
         $gradeable->method('getId')->willReturn($gradeable_id);
+        $gradeable->method('getType')->willReturn(GradeableType::ELECTRONIC_FILE);
 
         $auto_graded_gradeable = $this->createMockModel(AutoGradedGradeable::class);
         if ($submission_date !== '') {
@@ -43,7 +44,6 @@ class LateDaysTester extends BaseUnitTest {
         $graded_gradeable->method('getSubmitter')->willReturn($submitter);
         $graded_gradeable->method('getAutoGradedGradeable')->willReturn($auto_graded_gradeable);
         $graded_gradeable->method('getLateDayException')->willReturn($late_day_exception);
-        $graded_gradeable->method('getType')->willReturn(GradeableType::ELECTRONIC_FILE)
 
         return $graded_gradeable;
     }
