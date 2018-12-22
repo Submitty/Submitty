@@ -94,7 +94,7 @@ class Gradeable extends AbstractModel {
     /** @property @var Component[] An array of all gradeable components loaded from the database */
     private $db_components = [];
 
-    /** @property @var bool If any submitters have active regrade requests */
+    /** @property @var bool If any submitters have active grade inquiries */
     protected $active_regrade_request_count = 0;
 
     /* (private) Lazy-loaded Properties */
@@ -182,9 +182,9 @@ class Gradeable extends AbstractModel {
     protected $submission_due_date = null;
     /** @property @var int The number of late days allowed */
     protected $late_days = 0;
-    /** @property @var \DateTime The deadline for submitting a regrade request */
+    /** @property @var \DateTime The deadline for submitting a grade inquiry */
     protected $regrade_request_date = null;
-    /** @property @var boolean are regrade requests enabled for this assignment*/
+    /** @property @var boolean are grade inquiries enabled for this assignment*/
     protected $regrade_allowed = true;
     /**
      * Gradeable constructor.
@@ -259,7 +259,7 @@ class Gradeable extends AbstractModel {
         'grade_locked_date' => 'Grades Locked',
         'team_lock_date' => 'Teams Locked',
         'late_days' => 'Late Days',
-        'regrade_request_date' => 'Regrade Requests\' Due'
+        'regrade_request_date' => 'Grade Inquiries Due'
     ];
 
     /**
@@ -476,7 +476,7 @@ class Gradeable extends AbstractModel {
                 array_splice($result, array_search('submission_open_date', $result)+1, 0, 'submission_due_date');
             }
 
-            // Only add in regrade request date if its allowed & enabled
+            // Only add in grade inquiry date if its allowed & enabled
             if ($this->isTaGrading() && $this->core->getConfig()->isRegradeEnabled() && $this->isRegradeAllowed()) {
                 $result[] = 'regrade_request_date';
             }
@@ -708,7 +708,7 @@ class Gradeable extends AbstractModel {
     }
 
     /**
-     * Sets the number of active regrade requests
+     * Sets the number of active grade inquiries
      * @param int $count
      * @internal
      */
@@ -985,7 +985,7 @@ class Gradeable extends AbstractModel {
     /**
      * Sets whether regrades are allowed for this gradeable
      * @param bool $regrade_allowed
-     * @throws ValidationException If date validation fails in this new regrade request configuration
+     * @throws ValidationException If date validation fails in this new grade inquiry configuration
      */
     public function setRegradeAllowed(bool $regrade_allowed) {
         $old = $this->regrade_allowed;
@@ -1077,7 +1077,7 @@ class Gradeable extends AbstractModel {
     }
 
     /**
-     * Gets if this gradeable has any regrade requests active
+     * Gets if this gradeable has any active grade inquiries
      * @return bool
      */
     public function anyActiveRegradeRequests() {

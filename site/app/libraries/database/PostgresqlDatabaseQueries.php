@@ -1330,7 +1330,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               /* Late day exception data */
               ldeu.late_day_exceptions,
 
-              /* Regrade request data */
+              /* Grade inquiry data */
               rr.id AS regrade_request_id,
               rr.status AS regrade_request_status,
               rr.timestamp AS regrade_request_timestamp,
@@ -1454,7 +1454,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               /* Join user late day exceptions */
               LEFT JOIN late_day_exceptions ldeu ON g.g_id=ldeu.g_id AND u.user_id=ldeu.user_id
 
-              /* Join regrade request */
+              /* Join grade inquiry */
               LEFT JOIN regrade_requests AS rr ON rr.{$submitter_type}=gd.gd_{$submitter_type} AND rr.g_id=g.g_id
             WHERE $selector
             $order";

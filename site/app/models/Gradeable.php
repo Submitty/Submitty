@@ -137,7 +137,7 @@ class Gradeable extends AbstractModel {
     /** @property @var \DateTime|null Date for when the grade will be released to students */
     protected $grade_released_date = null;
 
-    /** @property @var \DateTime|null Date by when regrade requests can be submitted */
+    /** @property @var \DateTime|null Date by when grade inquiries can be submitted */
     protected $regrade_request_date = null;
 
     /** @property @var bool */

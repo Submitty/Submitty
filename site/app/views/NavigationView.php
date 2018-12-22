@@ -527,7 +527,7 @@ class NavigationView extends AbstractView {
             }
 
             if ($gradeable->anyActiveRegradeRequests()) {
-                //Open regrade requests
+                //Open grade inquiries
                 $button = new Button($this->core, [
                     "title" => "REGRADE",
                     "class" => "btn btn-danger btn-nav btn-nav-grade",

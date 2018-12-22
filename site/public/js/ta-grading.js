@@ -441,7 +441,7 @@ registerKeyHandler({name: "Toggle Student Information Panel", code: "KeyS"}, fun
     toggleInfo();
     updateCookies();
 });
-registerKeyHandler({name: "Toggle Regrade Requests Panel", code: "KeyX"}, function() {
+registerKeyHandler({name: "Toggle Grade Inquiry Panel", code: "KeyX"}, function() {
     toggleRegrade();
     updateCookies();
 });

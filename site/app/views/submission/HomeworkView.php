@@ -337,7 +337,8 @@ class HomeworkView extends AbstractView {
             // This is only used as a placeholder, so the who loads this page is the 'user' unless the
             //  client overrides the user
             'user_id' => $this->core->getUser()->getId(),
-            'has_gradeable_message' => $gradeable->getAutogradingConfig()->getGradeableMessage() !== '',
+            'has_gradeable_message' => $gradeable->getAutogradingConfig()->getGradeableMessage() !== null
+               && $gradeable->getAutogradingConfig()->getGradeableMessage() !== '',
             'gradeable_message' => $gradeable->getAutogradingConfig()->getGradeableMessage(),
             'allowed_late_days' => $gradeable->getLateDays(),
             'num_text_boxes' => $gradeable->getAutogradingConfig()->getNumTextBoxes(),
