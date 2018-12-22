@@ -216,11 +216,11 @@ class User extends AbstractModel {
         $this->setDisplayedLastName();
     }
 
-    public function getNotifcationSettings() {
+    public function getNotificationSettings() {
         return $this->notification_settings; //either receives it or not
     }
 
-    public function getNotifcationSetting($type){
+    public function getNotificationSetting($type){
         return $this->notification_settings[$type];
     }
 

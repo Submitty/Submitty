@@ -159,7 +159,7 @@ class NavigationController extends AbstractController {
                 'course' => $currentCourse,
                 'show_all' => $show_all,
                 'notifications' => $notifications,
-                'notification_saves' => $this->core->getUser()->getNotifcationSettings()
+                'notification_saves' => $this->core->getUser()->getNotificationSettings()
             ]);
         }
     }

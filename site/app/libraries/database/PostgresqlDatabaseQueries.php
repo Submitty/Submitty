@@ -1329,7 +1329,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               rr.id AS regrade_request_id,
               rr.status AS regrade_request_status,
               rr.timestamp AS regrade_request_timestamp,
-              
+
               {$team_data_inject}
 
               /* User Submitter Data */
@@ -1367,7 +1367,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   GROUP BY user_id
                 ) AS sr ON u.user_id=sr.user_id
               ) AS u ON eg IS NULL OR NOT eg.team_assignment
-              
+
               {$team_inject}
 
               /* Join manual grading data */
