@@ -47,14 +47,14 @@ def print_status_message(status_code, mode, daemon, machine):
   elif status_code == 2:
     print("{0}Failure performing the {1} operation".format(prefix, mode))
   elif status_code == 3:
-    print("{0}Recieved an argument error. This could be an issue with this script.".format(prefix))
+    print("{0}Received an argument error. This could be an issue with this script.".format(prefix))
   else:
-    print("{0}Recieved unknown status code {1} when attempting to {2} the \
+    print("{0}Received unknown status code {1} when attempting to {2} the \
       {3} daemon".format(prefix, status_code, mode, daemon))
 
 # A wrapper for perform_systemctl_command_on_worker that iterates over all workers.
 def perform_systemctl_command_on_all_workers(daemon, mode):
-  # Right now, this script returns the greatesr (worst) status it recieves from a worker.
+  # Right now, this script returns the greatesr (worst) status it receives from a worker.
   greatest_status = 0
 
   for target in WORKERS.keys():

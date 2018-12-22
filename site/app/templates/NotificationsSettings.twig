@@ -38,12 +38,12 @@
         <div class="option row">
             <div class="option-desc col-md-8">
                 <label for="forum_enabled">
-                    <div class="option-title">Notifications on by default:</div>
+                    <div class="option-title">Default Notifications:</div>
                     <div class="option-alt">
                         <ul style="margin-left:20px;">
                             <li>New announcements</li>
                             <li>Replies to my thread</li>
-                            <li>My thread/post was edited or deleted or merged</li>
+                            <li>My thread/post was edited, deleted, merged</li>
                         </ul>
                     </div>
                 </label>
@@ -52,8 +52,8 @@
         <div class="option row">
             <div class="option-desc col-md-8">
                 <label for="forum_enabled">
-                    <div class="option-title">Replies to thread you have posted in</div>
-                    <div class="option-alt">Recieve a notification whenever a reply is posted in a thread you also posted in</div>
+                    <div class="option-title">Replies to thread in which you have posted</div>
+                    <div class="option-alt">Receive a notification whenever a reply is posted in a thread in which you also posted</div>
                 </label>
             </div>
             <div class="option-input col-md-4"><input type="checkbox" name="reply_in_post_thread" id="reply_in_post_thread" {% if notification_saves['reply_in_post_thread'] %}checked="true"{% endif %}></div>
