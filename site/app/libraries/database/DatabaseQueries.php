@@ -292,6 +292,32 @@ class DatabaseQueries {
 		return false;
 	}
 
+    public function updateNotificationSettings($results) {
+        $values = implode(', ', array_fill(0, count($results)+1, '?'));
+        $keys = implode(', ', array_keys($results));
+        $updates = '';
+        
+        foreach($results as $key => $value) { 
+            if($value != 'false') {
+                $results[$key] = 'true';
+            }
+            $this->core->getUser()->updateUserNotificationSettings($key, $results[$key] == 'true' ? true : false);
+            $updates .= $key . ' = ?,';
+        }
+
+        $updates = substr($updates, 0, -1);
+        $test = array_merge(array_merge(array($this->core->getUser()->getId()), array_values($results)), array_values($results));
+        $this->course_db->query("INSERT INTO notification_settings (user_id, $keys)
+                                    VALUES
+                                     (
+                                        $values
+                                     ) 
+                                    ON CONFLICT (user_id) 
+                                    DO
+                                     UPDATE
+                                        SET $updates", $test);
+    }
+
 	public function getAuthorOfThread($thread_id) {
 		$this->course_db->query("SELECT created_by from threads where id = ?", array($thread_id));
 		return $this->course_db->rows()[0]['created_by'];
@@ -2685,25 +2711,58 @@ AND gc_id IN (
         $params[] = $notification->getNotifyContent();
         $params[] = $notification->getNotifySource();
 
-        if(empty($notification->getNotifyTarget())) {
-            // Notify all users
-            $target_users_query = "SELECT user_id FROM users";
-        } else {
-            // To a specific user
-            $params[] = $notification->getNotifyTarget();
-            $target_users_query = "SELECT ?::text as user_id";
+        $type = $notification->getType();
+        $target_users_query = "SELECT user_id FROM users";
+        $ignore_self_query = "";
+        $not_send_users = array();
+        $announcement = $type === 'new_announcement' || $type === 'updated_announcement';
+
+        if(!empty($notification->getNotifyTarget())) {
+        	//Notify specific user
+        	$not_send_users[] = $notification->getNotifyTarget();
+        	if($params[3] !== $not_send_users[0]) {
+        		$this->course_db->query("INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id)
+                    VALUES (?, ?, ?, current_timestamp, ?, ?)",
+                    array_merge($params, $not_send_users));
+        	}
         }
 
         if($notification->getNotifyNotToSource()){
-            $ignore_self_query = "WHERE user_id <> ?";
-            $params[] = $notification->getNotifySource();
+            $not_send_users[] = $notification->getNotifySource();
         }
-        else {
-            $ignore_self_query = "";
+        
+        $restrict = count($not_send_users);
+        if($restrict > 0) {
+        	$ignore_self_query = "WHERE user_id NOT IN (" . implode(',', array_fill(0, $restrict, '?')) . ')';
         }
+        
+        $column = '';
+        if($type === 'reply') {
+        	$post_thread_id = json_decode($params[1], true)[0]['thread_id'];
+            $params[] = $post_thread_id;
+            $target_users_query = "SELECT n.user_id from notification_settings n, posts p where p.thread_id = ? and p.author_user_id = n.user_id and n.reply_in_post_thread = 'true' ";
+            $target_users_query .= "UNION SELECT user_id from notification_settings where all_new_posts = 'true'";
+        } else if(!$announcement) {
+        	switch ($type) {
+	            case 'new_thread':
+	                $column = 'all_new_threads';
+	                break;
+	            case 'merge_thread':
+	                $column = 'merge_threads';
+	                break;
+	            case 'edited':
+	            case 'deleted':
+	            case 'undeleted':
+	                $column = 'all_modifications_forum';
+	                break;
+    		}
+    		$target_users_query = "SELECT user_id FROM notification_settings where {$column} = 'true'";
+        }
+
+        //Notify users based on settings
         $this->course_db->query("INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id)
                     SELECT ?, ?, ?, current_timestamp, ?, user_id as to_user_id FROM ({$target_users_query}) as u {$ignore_self_query}",
-                    $params);
+                    array_merge($params, $not_send_users));
     }
 
     /**

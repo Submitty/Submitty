@@ -111,6 +111,9 @@ class User extends AbstractModel {
     /** @property @var array */
     protected $grading_registration_sections = array();
 
+    /** @property @var array */
+    protected $notification_settings = array();
+
     /**
      * User constructor.
      *
@@ -151,6 +154,13 @@ class User extends AbstractModel {
 
         $this->user_updated = isset($details['user_updated']) && $details['user_updated'] === true;
         $this->instructor_updated = isset($details['instructor_updated']) && $details['instructor_updated'] === true;
+
+        //Other call to get notification settings??
+        $this->notification_settings['reply_in_post_thread'] = !empty($details['reply_in_post_thread']) ? $details['reply_in_post_thread'] : false;
+        $this->notification_settings['merge_threads'] = !empty($details['merge_threads']) ? $details['merge_threads'] : false;
+        $this->notification_settings['all_new_threads'] = !empty($details['all_new_threads']) ? $details['all_new_threads'] : false;
+        $this->notification_settings['all_new_posts'] = !empty($details['all_new_posts']) ? $details['all_new_posts'] : false;
+        $this->notification_settings['all_modifications_forum'] = !empty($details['all_modifications_forum']) ? $details['all_modifications_forum'] : false;
 
         $this->registration_section = isset($details['registration_section']) ? $details['registration_section'] : null;
         $this->rotating_section = isset($details['rotating_section']) ? intval($details['rotating_section']) : null;
@@ -204,6 +214,18 @@ class User extends AbstractModel {
     public function setLegalLastName($name) {
         $this->legal_last_name = $name;
         $this->setDisplayedLastName();
+    }
+
+    public function getNotificationSettings() {
+        return $this->notification_settings; //either receives it or not
+    }
+
+    public function getNotificationSetting($type){
+        return $this->notification_settings[$type];
+    }
+
+    public function updateUserNotificationSettings($key, $value) {
+        $this->notification_settings[$key] = $value;
     }
 
     /**
