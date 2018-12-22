@@ -1117,6 +1117,8 @@ class ElectronicGraderController extends GradingController {
         // TODO: End region
 
         $logger_params = array(
+            "course_semester" => $this->core->getConfig()->getSemester(),
+            "course_name" => $this->core->getDisplayedCourseName(),
             "gradeable_id" => $gradeable_id,
             "grader_id" => $this->core->getUser()->getId(),
             "submitter_id" => $submitter_id,
@@ -1383,6 +1385,8 @@ class ElectronicGraderController extends GradingController {
         }
 
         $logger_params = array(
+            "course_semester" => $this->core->getConfig()->getSemester(),
+            "course_name" => $this->core->getDisplayedCourseName(),
             "gradeable_id" => $gradeable_id,
             "grader_id" => $this->core->getUser()->getId(),
             "component_id" => $component_id,
@@ -2128,6 +2132,8 @@ class ElectronicGraderController extends GradingController {
         $graded_component = $ta_graded_gradeable->getGradedComponent($component, $grader);
 
         $logger_params = array(
+            "course_semester" => $this->core->getConfig()->getSemester(),
+            "course_name" => $this->core->getDisplayedCourseName(),
             "gradeable_id" => $gradeable_id,
             "grader_id" => $this->core->getUser()->getId(),
             "component_id" => $component_id,

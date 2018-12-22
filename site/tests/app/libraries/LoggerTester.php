@@ -106,7 +106,9 @@ class LoggerTester extends \PHPUnit\Framework\TestCase {
     public function testTALog(){
         $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
         $_SERVER['HTTP_USER_AGENT'] = "PHPUnit";
-        $logging_params = array("gradeable_id" => "test_gradeable",
+        $logging_params = array("course_semester" => "test_semester",
+                                "course_name" => "test_course",
+                                "gradeable_id" => "test_gradeable",
                                 "grader_id" => "test_grader",
                                 "submitter_id" => "test_submitter",
                                 "action" => "test_action",
@@ -122,12 +124,14 @@ class LoggerTester extends \PHPUnit\Framework\TestCase {
         $date = explode("/", $datetime[1]);
         $this->assertTimeEqualsCurrent($date, $time);
         $this->assertEquals(2, strlen($time[2]));
-        $this->assertEquals("test_gradeable", $line[1]);
-        $this->assertEquals("test_grader", $line[2]);
-        $this->assertEquals("test_submitter", $line[3]);
-        $this->assertEquals("1", $line[4]);
-        $this->assertEquals("test_action", $line[5]);
-        $this->assertEquals("PHPUnit", $line[6]);
+        $this->assertEquals("test_semester", $line[1]);
+        $this->assertEquals("test_course", $line[2]);
+        $this->assertEquals("test_gradeable", $line[3]);
+        $this->assertEquals("test_grader", $line[4]);
+        $this->assertEquals("test_submitter", $line[5]);
+        $this->assertEquals("1", $line[6]);
+        $this->assertEquals("test_action", $line[7]);
+        $this->assertEquals("PHPUnit", $line[8]);
     }
 
     public function testAccessLog() {

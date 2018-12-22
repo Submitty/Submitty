@@ -210,6 +210,8 @@ class Logger {
      * @param $params All the params in a key-value array
      */
     public static function logTAGrading($params){
+        $log_message[] = $params['course_semester'];
+        $log_message[] = $params['course_name'];
         $log_message[] = $params['gradeable_id'];
         $log_message[] = $params['grader_id'];
         $log_message[] = $params['submitter_id'];
