@@ -44,8 +44,12 @@ class HomeworkView extends AbstractView {
             $late_days_use = max(0, $gradeable->getWouldBeDaysLate() - $graded_gradeable->getLateDayException($this->core->getUser()));
         }
 
+        $is_admin = $this->core->getAccess()->canI('admin.wrapper', []);
+        $on_team = $this->core->getUser()->onTeam($gradeable->getId());
+
         // Only show the late banner if the submission has a due date
-        if (LateDays::filterCanView($this->core, $gradeable)) {
+        // Instructors shouldn't see this banner if they're not on a team (they won't have proper information)
+        if (LateDays::filterCanView($this->core, $gradeable) && !($is_admin && !$on_team)) {
             $late_days = LateDays::fromUser($this->core, $this->core->getUser());
             $return .= $this->renderLateDayMessage($late_days, $gradeable, $graded_gradeable);
         }
@@ -112,13 +116,15 @@ class HomeworkView extends AbstractView {
      */
     public function renderLateDayMessage(LateDays $late_days, Gradeable $gradeable, $graded_gradeable) {
         $extensions = 0;
-        $active_version = null;
+        $active_version_instance = null;
+        $active_version = 0;
         if ($graded_gradeable !== null) {
             $extensions = $graded_gradeable->getLateDayException($this->core->getUser());
-            $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance();
+            $active_version_instance = $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance();
+            $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         }
         $late_days_remaining = $late_days->getLateDaysRemaining();
-        $active_days_late =  $active_version !== null ? $active_version->getDaysLate() : 0;
+        $active_days_late =  $active_version_instance !== null ? $active_version_instance->getDaysLate() : 0;
         $would_be_days_late = $gradeable->getWouldBeDaysLate();
         $late_day_info = $late_days->getLateDayInfoByGradeable($gradeable);
         $late_days_allowed = $gradeable->getLateDays();
@@ -481,12 +487,15 @@ class HomeworkView extends AbstractView {
 
         if ($version_instance !== null) {
             $display_version = $version_instance->getVersion();
-            $history = $version_instance->getLatestHistory();
 
-            foreach ($version_instance->getTestcases() as $testcase) {
-                if ($testcase->canView()) {
-                    $show_testcases = true;
-                    break;
+            if ($version_instance->isAutogradingComplete()) {
+                $history = $version_instance->getLatestHistory();
+
+                foreach ($version_instance->getTestcases() as $testcase) {
+                    if ($testcase->canView()) {
+                        $show_testcases = true;
+                        break;
+                    }
                 }
             }
 

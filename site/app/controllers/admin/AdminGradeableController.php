@@ -815,8 +815,8 @@ class AdminGradeableController extends AbstractController {
             throw new \InvalidArgumentException('Request contained no properties, perhaps the name was blank?');
         }
 
-        // Trigger a rebuild if the config / due date changes
-        $trigger_rebuild_props = ['autograding_config_path', 'submission_due_date'];
+        // Trigger a rebuild if the config changes
+        $trigger_rebuild_props = ['autograding_config_path'];
         $trigger_rebuild = count(array_intersect($trigger_rebuild_props, array_keys($details))) > 0;
 
         $boolean_properties = [
