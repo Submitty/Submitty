@@ -52,6 +52,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         FileUtils::createDir(FileUtils::joinPaths($log_path, 'access'));
         FileUtils::createDir(FileUtils::joinPaths($log_path, 'autograding'));
         FileUtils::createDir(FileUtils::joinPaths($log_path, 'site_errors'));
+        FileUtils::createDir(FileUtils::joinPaths($log_path, 'ta_grading'));
 
         $config = [
             "authentication_method" => "PamAuthentication",
