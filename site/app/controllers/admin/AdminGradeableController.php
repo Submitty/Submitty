@@ -134,7 +134,7 @@ class AdminGradeableController extends AbstractController {
             'syllabus_buckets' => self::syllabus_buckets,
             'vcs_base_url' => $vcs_base_url,
             'regrade_enabled' => $this->core->getConfig()->isRegradeEnabled(),
-            'gradeable_type_strings' => self::gradeable_type_strings,
+            'gradeable_type_strings' => self::gradeable_type_strings
         ]);
     }
 
@@ -235,13 +235,6 @@ class AdminGradeableController extends AbstractController {
             'id' => $gradeable->getId()
         ]);
 
-        $export_components_url = $this->core->buildUrl([
-            'component' => 'admin',
-            'page' => 'admin_gradeable',
-            'action' => 'export_components',
-            'gradeable_id' => $gradeable->getId(),
-        ]);
-
         $type_string = 'UNKNOWN';
         if($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             if($gradeable->isScannedExam()) {
@@ -294,8 +287,6 @@ class AdminGradeableController extends AbstractController {
             'type_string' => $type_string,
             'gradeable_type_strings' => self::gradeable_type_strings,
             'show_edit_warning' => $gradeable->anyManualGrades(),
-
-            'export_components_url' => $export_components_url,
 
             // Config selection data
             'config_repo_name' => $config_repo_name,
@@ -1136,9 +1127,6 @@ class AdminGradeableController extends AbstractController {
 
     /**
      * Exports components to json and downloads for user
-     *
-     * TODO: put the buttons on the same line as 'add component'
-     * TODO: only upload single files
      */
     private function exportComponentsRequest() {
         $url = $this->core->buildUrl([]);
