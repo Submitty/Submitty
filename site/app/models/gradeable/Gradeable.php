@@ -878,6 +878,8 @@ class Gradeable extends AbstractModel {
             'text' => $text,
             'peer' => $peer,
             'page' => $pdf_page,
+            'id' => 0,
+            'order' => count($this->components),
         ]);
         $this->components[] = $component;
         return $component;

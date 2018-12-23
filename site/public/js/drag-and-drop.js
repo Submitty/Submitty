@@ -961,5 +961,3 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, cmPath, requested_p
         }
     });
 }
-
-
