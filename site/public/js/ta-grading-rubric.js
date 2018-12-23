@@ -1787,6 +1787,9 @@ function onAddComponent() {
         });
 }
 
+/**
+ * Called when the 'Import Components' button is pressed
+ */
 function importComponentsFromFile() {
     let submit_url = buildUrl({'component': 'admin', 'page': 'admin_gradeable', 'action': 'import_components', 'gradeable_id': getGradeableId()});
     let formData = new FormData();
@@ -1801,6 +1804,8 @@ function importComponentsFromFile() {
     for (let i = 0; i < files.length; i++) {
         formData.append('files' + i, files[i], files[i].name);
     }
+
+    formData.append('csrf_token', csrfToken);
 
     $.getJSON({
         url: submit_url,
