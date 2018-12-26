@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 """Basic migration script to handle the database."""
 
 from collections import OrderedDict
