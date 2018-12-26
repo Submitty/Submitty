@@ -9,7 +9,7 @@ from pathlib import Path
 # migration)
 
 
-def up(config, conn, semester, course):
+def up(config, database, semester, course):
     course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
     uploads_dir = Path(course_dir, 'uploads')
 
@@ -25,9 +25,3 @@ def up(config, conn, semester, course):
     os.system("chmod u+rwx  "+str(uploads_dir))
     os.system("chmod g+rxs  "+str(uploads_dir))
     os.system("chmod o-rwx  "+str(uploads_dir))
-
-    pass
-
-
-def down(config, conn, semester, course):
-    pass

@@ -3,7 +3,7 @@ import grp
 from pathlib import Path
 
 
-def up(config, conn, semester, course):
+def up(config, database, semester, course):
     course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
     lichen_dir = Path(course_dir, 'lichen')
     lichen_config_dir = Path(lichen_dir, 'config')
@@ -24,9 +24,3 @@ def up(config, conn, semester, course):
     os.system("chmod -R u+rwx  "+str(lichen_dir))
     os.system("chmod -R g+rwxs "+str(lichen_dir))
     os.system("chmod -R o-rwx  "+str(lichen_dir))
-
-    pass
-
-
-def down(config, conn, semester, course):
-    pass

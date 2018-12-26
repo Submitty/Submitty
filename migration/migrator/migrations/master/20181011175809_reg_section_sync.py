@@ -1,8 +1,7 @@
-def up(config, conn):
-    with conn.cursor() as cursor:
-        cursor.execute("DROP TRIGGER IF EXISTS registration_sync_registration_id ON courses_registration_sections;")
-        cursor.execute("DROP FUNCTION IF EXISTS sync_registration_section();")
-        cursor.execute("""
+def up(config, database):
+    database.execute("DROP TRIGGER IF EXISTS registration_sync_registration_id ON courses_registration_sections;")
+    database.execute("DROP FUNCTION IF EXISTS sync_registration_section();")
+    database.execute("""
 CREATE OR REPLACE FUNCTION sync_insert_registration_section() RETURNS trigger AS $$
 -- AFTER INSERT trigger function to INSERT registration sections to course DB, as needed.
 DECLARE
@@ -23,7 +22,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;""")
 
-        cursor.execute("""
+    database.execute("""
 CREATE OR REPLACE FUNCTION sync_delete_registration_section() RETURNS TRIGGER AS $$
 -- BEFORE DELETE trigger function to DELETE registration sections from course DB, as needed.
 DECLARE
@@ -52,16 +51,15 @@ EXCEPTION WHEN integrity_constraint_violation THEN
 END;
 $$ LANGUAGE plpgsql;""")
 
-        cursor.execute("CREATE TRIGGER insert_sync_registration_id AFTER INSERT OR UPDATE ON courses_registration_sections FOR EACH ROW EXECUTE PROCEDURE sync_insert_registration_section();")
-        cursor.execute("CREATE TRIGGER delete_sync_registration_id BEFORE DELETE ON courses_registration_sections FOR EACH ROW EXECUTE PROCEDURE sync_delete_registration_section();")
+    database.execute("CREATE TRIGGER insert_sync_registration_id AFTER INSERT OR UPDATE ON courses_registration_sections FOR EACH ROW EXECUTE PROCEDURE sync_insert_registration_section();")
+    database.execute("CREATE TRIGGER delete_sync_registration_id BEFORE DELETE ON courses_registration_sections FOR EACH ROW EXECUTE PROCEDURE sync_delete_registration_section();")
 
-def down(config, conn):
-    with conn.cursor() as cursor:
-        cursor.execute("DROP TRIGGER IF EXISTS insert_registration_sync_registration_id ON courses_registration_sections;")
-        cursor.execute("DROP TRIGGER IF EXISTS delete_registration_sync_registration_id ON courses_registration_sections;")
-        cursor.execute("DROP FUNCTION IF EXISTS sync_insert_registration_section();")
-        cursor.execute("DROP FUNCTION IF EXISTS sync_delete_registration_section();")
-        cursor.execute("""
+def down(config, database):
+    database.execute("DROP TRIGGER IF EXISTS insert_registration_sync_registration_id ON courses_registration_sections;")
+    database.execute("DROP TRIGGER IF EXISTS delete_registration_sync_registration_id ON courses_registration_sections;")
+    database.execute("DROP FUNCTION IF EXISTS sync_insert_registration_section();")
+    database.execute("DROP FUNCTION IF EXISTS sync_delete_registration_section();")
+    database.execute("""
 CREATE OR REPLACE FUNCTION sync_registration_section() RETURNS trigger AS
 -- TRIGGER function to INSERT registration sections to course DB, as needed.
 $$
@@ -85,4 +83,4 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;""")
 
-        cursor.execute("CREATE TRIGGER registration_sync_registration_id AFTER INSERT ON courses_registration_sections FOR EACH ROW EXECUTE PROCEDURE sync_registration_section();")
+    database.execute("CREATE TRIGGER registration_sync_registration_id AFTER INSERT ON courses_registration_sections FOR EACH ROW EXECUTE PROCEDURE sync_registration_section();")

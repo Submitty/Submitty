@@ -1,10 +1,9 @@
-def up(config, conn):
-    with conn.cursor() as cursor:
-        # add user_preferred_lastname column
-        cursor.execute("ALTER TABLE ONLY users ADD COLUMN IF NOT EXISTS user_preferred_lastname character varying;")
+def up(config, database):
+    # add user_preferred_lastname column
+    database.execute("ALTER TABLE ONLY users ADD COLUMN IF NOT EXISTS user_preferred_lastname character varying;")
 
-        # Add user_preferred_lastname to trigger function sync_courses_users()
-        cursor.execute("""
+    # Add user_preferred_lastname to trigger function sync_courses_users()
+    database.execute("""
 CREATE OR REPLACE FUNCTION sync_courses_user() RETURNS TRIGGER AS
 -- TRIGGER function to sync users data on INSERT or UPDATE of user_record in
 -- table courses_user.
@@ -43,8 +42,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;""")
 
-        # Add user_preferred_lastname to trigger function sync_users()
-        cursor.execute("""
+    # Add user_preferred_lastname to trigger function sync_users()
+    database.execute("""
 CREATE OR REPLACE FUNCTION sync_user() RETURNS trigger AS
 -- TRIGGER function to sync users data on INSERT or UPDATE of user_record in
 -- table users.  NOTE: INSERT should not trigger this function as function
@@ -71,9 +70,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;""")
 
-        # There is no reference to user_preferred_lastname in trigger function sync_registration_section()
-        # But there is an update to improve the exception message to be more helpful.  q.v. line 90 (up) vs 189 (down).
-        cursor.execute("""
+    # There is no reference to user_preferred_lastname in trigger function sync_registration_section()
+    # But there is an update to improve the exception message to be more helpful.  q.v. line 90 (up) vs 189 (down).
+    database.execute("""
 CREATE OR REPLACE FUNCTION sync_registration_section() RETURNS trigger AS
 -- TRIGGER function to INSERT registration sections to course DB, as needed.
 $$
@@ -98,13 +97,12 @@ END;
 $$ LANGUAGE plpgsql;""")
 
 
-def down(config, conn):
-    with conn.cursor() as cursor:
-        # Remove user_preferred_lastname column.
-        cursor.execute("ALTER TABLE ONLY users DROP COLUMN IF EXISTS user_preferred_lastname RESTRICT;")
+def down(config, database):
+    # Remove user_preferred_lastname column.
+    database.execute("ALTER TABLE ONLY users DROP COLUMN IF EXISTS user_preferred_lastname RESTRICT;")
 
-        # Revert trigger function sync_courses_users()
-        cursor.execute("""
+# Revert trigger function sync_courses_users()
+    database.execute("""
 CREATE OR REPLACE FUNCTION sync_courses_user() RETURNS TRIGGER AS
 -- TRIGGER function to sync users data on INSERT or UPDATE of user_record in
 -- table courses_user.
@@ -143,8 +141,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;""")
 
-        # Revert trigger function sync_users()
-        cursor.execute("""
+    # Revert trigger function sync_users()
+    database.execute("""
 CREATE OR REPLACE FUNCTION sync_user() RETURNS trigger AS
 -- TRIGGER function to sync users data on INSERT or UPDATE of user_record in
 -- table users.  NOTE: INSERT should not trigger this function as function
@@ -171,8 +169,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;""")
 
-        # Revert trigger function sync_registration_section()
-        cursor.execute("""
+    # Revert trigger function sync_registration_section()
+    database.execute("""
 CREATE OR REPLACE FUNCTION sync_registration_section() RETURNS trigger AS
 -- TRIGGER function to INSERT registration sections to course DB, as needed.
 $$
@@ -195,6 +193,3 @@ BEGIN
   RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;""")
-
-
-

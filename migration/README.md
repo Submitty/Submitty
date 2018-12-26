@@ -11,6 +11,7 @@ Requirements
 ------------
 * Python 3.4
 * psycopg2
+* sqlalchemy
 
 Usage
 -----
@@ -102,3 +103,7 @@ as being run, without actually running them. `--initial` will only run the first
 useful for first spinning up a fresh instance of Submitty as the initial migration for 
 all categories contains the full up-to-date schema dump and does not require any 
 transformations.
+
+Note: When running the above commands, if a migration file is lacking an `up`/`down`
+function, a no-op function is run instead that does nothing, but marks the migration
+then as either migrated or rollbacked.

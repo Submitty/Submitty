@@ -2,7 +2,7 @@ import os
 import grp
 from pathlib import Path
 
-def up(config, conn, semester, course):
+def up(config, database, semester, course):
     course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
     reports_seating_dir = Path(course_dir, 'reports', 'seating')
     uploads_seating_dir = Path(course_dir, 'uploads', 'seating')
@@ -28,7 +28,3 @@ def up(config, conn, semester, course):
     os.system("chmod -R u+rwx  " + str(uploads_seating_dir))
     os.system("chmod -R g+rwxs " + str(uploads_seating_dir))
     os.system("chmod -R o-rwx  " + str(uploads_seating_dir))
-
-
-def down(config, conn, semester, course):
-    pass

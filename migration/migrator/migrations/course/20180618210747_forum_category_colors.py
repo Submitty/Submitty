@@ -1,12 +1,8 @@
-def up(config, conn, semester, course):
-    with conn.cursor() as cursor:
-        cursor.execute("ALTER TABLE ONLY categories_list ADD COLUMN rank int")
-        cursor.execute("ALTER TABLE ONLY categories_list ADD COLUMN color varchar DEFAULT '#000080' NOT NULL")
-    pass
+def up(config, database, semester, course):
+    database.execute("ALTER TABLE ONLY categories_list ADD COLUMN rank int")
+    database.execute("ALTER TABLE ONLY categories_list ADD COLUMN color varchar DEFAULT '#000080' NOT NULL")
 
 
-def down(config, conn, semester, course):
-    with conn.cursor() as cursor:
-        cursor.execute("ALTER TABLE ONLY categories_list DROP COLUMN rank")
-        cursor.execute("ALTER TABLE ONLY categories_list DROP COLUMN color")
-    pass
+def down(config, database, semester, course):
+    database.execute("ALTER TABLE ONLY categories_list DROP COLUMN rank")
+    database.execute("ALTER TABLE ONLY categories_list DROP COLUMN color")

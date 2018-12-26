@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from sqlalchemy import Column, create_engine
+from sqlalchemy.engine import reflection
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.types import SmallInteger, String, TIMESTAMP
 from sqlalchemy.orm import sessionmaker
@@ -29,6 +30,7 @@ class Database:
                 connection_string += '?host={}'.format(params['host'])
 
         self.engine = create_engine(connection_string)
+        self.inspector = reflection.Inspector.from_engine(self.engine)
         self.Session = sessionmaker()
         self.Session.configure(bind=self.engine)
         self.session = self.Session()
@@ -36,11 +38,34 @@ class Database:
         self.migration_table = get_migration_table(environment, DynamicBase)
 
     def execute(self, query):
-        return self.engine.execute(query)
+        """
+        Run a raw query through the session.
+
+        :param query: raw query string to execute
+        :type query: str
+        :rtype: sqlalchemy.engine.ResultProxy
+        """
+        return self.session.execute(query)
 
     def close(self):
+        """Close the session and DB connnection."""
         self.session.close()
         self.engine.dispose()
+
+    def table_has_column(self, table, search_column):
+        """
+        Check if a table has a given column.
+
+        :param table: Table to search in
+        :type table: str
+        :param search_column: column to search for
+        :type search_column: str
+        :rtype: bool
+        """
+        for column in self.inspector.get_columns(table):
+            if search_column == column['name']:
+                return True
+        return False
 
 
 def get_migration_table(environment, Base):

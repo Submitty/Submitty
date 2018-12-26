@@ -4,14 +4,16 @@
 
 from collections import OrderedDict
 from datetime import datetime
-from importlib.machinery import SourceFileLoader
 import os
 from pathlib import Path
 import re
 
 import psycopg2
-from . import MIGRATIONS_PATH
-from . import db
+
+from sqlalchemy.exc import OperationalError
+
+from . import DIR_PATH, MIGRATIONS_PATH, db
+from .loader import load_migrations
 
 
 def create(args):
@@ -46,13 +48,9 @@ def create(args):
         if environment == 'course':
             parameters.append('semester')
             parameters.append('course')
-        with Path(MIGRATIONS_PATH, environment, filename).open('w') as open_file:
-            open_file.write("""def up({0}):
-    pass
-
-
-def down({0}):
-    pass""".format(', '.join(parameters)))
+        with Path(MIGRATIONS_PATH, environment, filename).open('w') as open_file, \
+                Path(DIR_PATH, 'data', 'base_migration.py').open() as template_file:
+            open_file.write(template_file.read().format(', '.join(parameters)))
 
 
 def status(args):
@@ -65,16 +63,18 @@ def status(args):
                 'user': args.config.database['database_user'],
                 'password': args.config.database['database_password']
             }
-            database = db.Database(params, environment)
-            exists = database.engine.dialect.has_table(
-                database.engine,
-                database.migration_table.__tablename__
-            )
-            if not exists:
-                print('Database for {} does not exist!'.format(environment))
-                continue
-            print_status(database)
-
+            try:
+                database = db.Database(params, environment+'aaa')
+                exists = database.engine.dialect.has_table(
+                    database.engine,
+                    database.migration_table.__tablename__
+                )
+                if not exists:
+                    print('Database for {} does not exist!'.format(environment))
+                    continue
+                print_status(database)
+            except OperationalError:
+                print('Could not get status for migrations for {}'.format(environment))
         else:
             params = {
                 'driver': args.config.database['database_driver'],
@@ -95,17 +95,26 @@ def status(args):
                         continue
                     args.semester = semester
                     args.course = course
-                    params['dbname'] = 'submitty_{}_{}'.format(semester, course)
-                    database = db.Database(params, environment)
-                    print_status(database)
+                    params['dbname'] = 'submitty_{}_{}aa'.format(semester, course)
+                    try:
+                        database = db.Database(params, environment)
+                        print_status(database)
+                    except OperationalError:
+                        print('Could not get the status for the migrations '
+                              'for {}.{}'.format(semester, course))
+                        continue
 
 
 def print_status(database):
-    print('{:75s} {}'.format('MIGRATION', 'STATUS'))
-    print('-'*83)
     query = database.session.query(database.migration_table) \
         .order_by(database.migration_table.id).all()
+    migrations = []
     for migration in query:
+        migrations.append(migration)
+
+    print('{:75s} {}'.format('MIGRATION', 'STATUS'))
+    print('-'*83)
+    for migration in migrations:
         status = 'UP' if migration.status == 1 else 'DOWN'
         print("{:75s} {}".format(migration.id, status))
 
@@ -334,6 +343,8 @@ def run_migration(database, migration, environment, args):
             environment,
             args
         )
+        database.session.commit()
+
     status = 1 if args.direction == 'up' else 0
     if migration['table'] is not None:
         database.session.update(migration['table']).values(status=status)
@@ -342,31 +353,3 @@ def run_migration(database, migration, environment, args):
             database.migration_table(id=migration['id'], status=status)
         )
     database.session.commit()
-
-
-def load_migration_module(name, path):
-    """Load the migration file as a python module."""
-    # TODO: change this to not use deprecated loader.load_module
-    # after dropping Python 3.4 support
-    loader = SourceFileLoader(name, str(path))
-    module = loader.load_module(name)
-    return module
-
-
-def load_migrations(path):
-    """Given a path, load all migrations in that path."""
-    migrations = OrderedDict()
-    filtered = filter(
-        lambda x: x.endswith('.py'),
-        [x.name for x in path.iterdir()]
-    )
-    for migration in sorted(filtered):
-        migration_id = migration[:-3]
-        migrations[migration_id] = {
-            'id': migration_id,
-            'commit_time': None,
-            'status': 0,
-            'module': load_migration_module(migration_id, path / migration),
-            'table': None
-        }
-    return migrations

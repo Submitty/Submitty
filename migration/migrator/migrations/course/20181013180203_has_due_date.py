@@ -1,10 +1,3 @@
-def up(config, conn, semester, course):
-    with conn.cursor() as cursor:
-        cursor.execute("SELECT * FROM electronic_gradeable LIMIT 0")
-        colnames = [desc[0] for desc in cursor.description]
-        if 'eg_has_due_date' not in colnames:
-            cursor.execute('ALTER TABLE electronic_gradeable ADD COLUMN eg_has_due_date BOOL NOT NULL DEFAULT TRUE')
-
-
-def down(config, conn, semester, course):
-    pass
+def up(config, database, semester, course):
+    if not database.table_has_column('electronic_gradeable', 'eg_has_due_date'):
+        database.execute('ALTER TABLE electronic_gradeable ADD COLUMN eg_has_due_date BOOL NOT NULL DEFAULT TRUE')

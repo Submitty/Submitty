@@ -3,7 +3,7 @@ import grp
 from pathlib import Path
 
 
-def up(config, conn, semester, course):
+def up(config, database, semester, course):
 
     # Redo permissions from previous migrations (in case of error
     # related to system user name changes)
@@ -19,9 +19,3 @@ def up(config, conn, semester, course):
     # set the owner/group/permissions
     os.system("chown -R submitty_php:"+course_group+" "+str(images_dir))
     os.system("chown -R submitty_php:"+course_group+" "+str(lichen_dir))
-
-    pass
-
-
-def down(config, conn, semester, course):
-    pass

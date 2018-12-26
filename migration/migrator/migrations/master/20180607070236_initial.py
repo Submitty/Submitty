@@ -5,8 +5,7 @@ from sqlalchemy import text
 def up(config, database):
     sql_file = Path(Path(__file__).parent.parent.parent, 'data', 'submitty_db.sql')
     with sql_file.open() as open_file:
-        database.session.execute(text(open_file.read()))
-        database.session.commit()
+        database.execute(text(open_file.read()))
 
 
 def down(config, database):

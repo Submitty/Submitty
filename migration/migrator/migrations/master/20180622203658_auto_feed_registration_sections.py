@@ -1,6 +1,5 @@
-def up(config, conn):
-    with conn.cursor() as cursor:
-        cursor.execute("""
+def up(config, database):
+    database.execute("""
 CREATE TABLE public.courses_registration_sections (
     semester character varying(255) NOT NULL,
     course character varying(255) NOT NULL,
@@ -8,7 +7,7 @@ CREATE TABLE public.courses_registration_sections (
     CONSTRAINT courses_registration_sections_pkey PRIMARY KEY (semester, course, registration_section_id),
     CONSTRAINT courses_registration_sections_fkey FOREIGN KEY (semester, course) REFERENCES courses(semester, course) ON UPDATE CASCADE);""")
 
-        cursor.execute("""
+    database.execute("""
 CREATE OR REPLACE FUNCTION sync_registration_section() RETURNS trigger AS
 -- TRIGGER function to INSERT registration sections to course DB, as needed.
 $$
@@ -32,11 +31,10 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;""")
 
-        cursor.execute('CREATE TRIGGER registration_sync_registration_id AFTER INSERT ON courses_registration_sections FOR EACH ROW EXECUTE PROCEDURE sync_registration_section();')
+    database.execute('CREATE TRIGGER registration_sync_registration_id AFTER INSERT ON courses_registration_sections FOR EACH ROW EXECUTE PROCEDURE sync_registration_section();')
 
 
-def down(config, conn):
-    with conn.cursor() as cursor:
-        cursor.execute('DROP TRIGGER registration_sync_registration_id;')
-        cursor.execute('DROP FUNCTION sync_registration_section();')
-        cursor.execute('DROP TABLE courses_registration_sections;')
+def down(config, database):
+    database.execute('DROP TRIGGER registration_sync_registration_id;')
+    database.execute('DROP FUNCTION sync_registration_section();')
+    database.execute('DROP TABLE courses_registration_sections;')
