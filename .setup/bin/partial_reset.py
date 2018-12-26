@@ -123,7 +123,7 @@ def main():
     os.system("psql -U "+db_user+" --list | grep submitty* | awk '{print $1}' | "
               "xargs -I \"@@\" dropdb -h localhost -U "+db_user+" \"@@\"")
     os.system('psql -d postgres -U '+db_user+' -c "CREATE DATABASE submitty"')
-    migrator_script = str(SUBMITTY_REPOSITORY / 'migration' / 'migrator.py')
+    migrator_script = str(SUBMITTY_REPOSITORY / 'migration' / 'run_migrator.py')
     subprocess.check_call(['python3', migrator_script, '-e', 'system', '-e', 'master', 'migrate', '--initial'])
     del os.environ['PGPASSWORD']
 

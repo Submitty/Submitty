@@ -74,7 +74,7 @@ usermod -a -G travis ${PHP_USER}
 usermod -a -G travis submitty_daemon
 
 # necessary to pass config path as submitty_repository is a symlink
-python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
+python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -e master -e system migrate --initial
 
 bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
 

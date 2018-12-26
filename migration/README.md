@@ -15,7 +15,7 @@ Requirements
 Usage
 -----
 ```
-usage: migrator.py [-h] [--environment {course,system,master}] --config
+usage: run_migrator.py [-h] [--environment {course,system,master}] --config
                    CONFIG_PATH
                    command ...
 
@@ -33,7 +33,7 @@ optional arguments:
   --config CONFIG_PATH, -c CONFIG_PATH
  ```
  
-By default, `migrator.py` will look for a config directory two directories up 
+By default, `run_migrator.py` will look for a config directory two directories up 
 from where it's run (`../../config`) and if found, you don't need to provide
 an argument to `-c`, else you will have to provide one. The environment
 defaults to selecting all three (`course`, `system`, `master`), but you can
@@ -79,7 +79,7 @@ It then loads all migrations from the environment's folder
 the files. For any file that doesn't have a corresponding DB row, or does have a DB
 row, but the status is down, will be run, having its `up` function run (assuming it
 exists). After the migration is successfully run, the DB is updated to reflect that,
-and then `migrator.py` moves on to the next migration.
+and then `run_migrator.py` moves on to the next migration.
 
 `rollback` will attempt to reverse the last run migration for a given environment.
 It scans the DB, getting all of the migrations that have been run. It the matches
@@ -88,7 +88,7 @@ the migration that has an up status and latest id, and runs its `down` function 
 then sets its status in the DB as down. It will then not do anything else with any
 of other migrations.
 
-When running `migrate` or `rollback`, `migrator.py` will load all migrations in the
+When running `migrate` or `rollback`, `run_migrator.py` will load all migrations in the
 select environment folder (under `migrations/`) into memory, and then make a select
 against the DB to get the status of the migrations. For any migration that is in
 the DB, but not in the folder, it will attempt to see if the migration exists

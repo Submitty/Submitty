@@ -2,115 +2,16 @@
 
 """Basic migration script to handle the database."""
 
-from argparse import ArgumentParser
 from collections import OrderedDict
 from datetime import datetime
 from importlib.machinery import SourceFileLoader
-import json
 import os
 from pathlib import Path
 import re
-import sys
 
 import psycopg2
-
-VERSION = "1.3.0"
-DIR_PATH = Path(__file__).parent.resolve()
-MIGRATIONS_PATH = DIR_PATH / 'migrations'
-ENVIRONMENTS = ['master', 'system', 'course']
-
-
-class Config:
-    """
-    Class to hold the config details for Submitty to use within the migrator.
-
-    It dynamically loads the JSON files in the config directory into a dictionary
-    with the maching name accessible at Config.<name> (e.g. Config.database).
-    """
-
-    def __init__(self, config_path):
-        """
-        Initialize the Config class, loading files from the passed in config_path.
-
-        :param config_path: Path or str to the config directory for Submitty
-        """
-        self.config_path = Path(config_path)
-
-        self.database = self._get_data('database')
-        self.submitty = self._get_data('submitty')
-        self.submitty_users = self._get_data('submitty_users')
-
-    def _get_data(self, filename):
-        with Path(self.config_path, filename + '.json').open('r') as open_file:
-            return json.load(open_file, object_pairs_hook=OrderedDict)
-
-
-def parse_args():
-    """
-    Parse the arguments passed to the script using argparse.
-
-    :return: argparse.Namespace of the parsed args
-    """
-    desc = 'Migration script for upgrading/downgrading the database'
-    parser = ArgumentParser(description=desc)
-    parser.add_argument(
-        '-v', '--version', action='version',
-        version='%(prog)s {}'.format(VERSION)
-    )
-    config_path = Path(DIR_PATH, '..', '..', '..', 'config')
-    default_config = config_path.resolve() if config_path.exists() else None
-    required = False if default_config is not None else True
-    parser.add_argument(
-        '-c', '--config', dest='config_path', type=str,
-        required=required, default=default_config
-    )
-    parser.add_argument(
-        '-e', '--environment', dest='environments',
-        choices=ENVIRONMENTS, action='append'
-    )
-    parser.add_argument(
-        '--course', dest='choose_course', nargs=2,
-        metavar=('semester', 'course'), default=None
-    )
-
-    subparsers = parser.add_subparsers(metavar='command', dest='command')
-    subparsers.required = True
-    sub = subparsers.add_parser('create', help='Create migration')
-    sub.add_argument('name', help='Name of new migration')
-    sub = subparsers.add_parser('migrate', help='Run migrations')
-    sub.add_argument(
-        '--single', action='store_true', default=False,
-        dest='single', help='Only run one migration'
-    )
-    sub.add_argument(
-        '--fake', action='store_true', default=False, dest='set_fake',
-        help='Mark migrations as run without actually running them'
-    )
-    sub.add_argument(
-        '--initial', action='store_true', default=False,
-        help='Only run the first migration and then mark '
-             'the rest as done without running them.'
-    )
-    subparsers.add_parser('rollback', help='Rollback the previously done migration')
-    args = parser.parse_args()
-    if args.environments is None:
-        args.environments = ENVIRONMENTS
-    # make sure the order is of 'master', 'system', 'course' depending on what
-    # environments have been selected system must be run after master initially
-    # as system relies on master DB being setup for migration table
-    environments = []
-    for env in ENVIRONMENTS:
-        if env in args.environments:
-            environments.append(env)
-    args.environments = environments
-    args.config = Config(args.config_path)
-    return args
-
-
-def main():
-    """Run the migrator tool, parsing the incoming arguments and a command."""
-    args = parse_args()
-    getattr(sys.modules[__name__], args.command)(args)
+from . import MIGRATIONS_PATH
+from . import db
 
 
 def create(args):
@@ -141,7 +42,7 @@ def create(args):
     for environment in args.environments:
         parameters = ['config']
         if environment in ['course', 'master']:
-            parameters.append('conn')
+            parameters.append('database')
         if environment == 'course':
             parameters.append('semester')
             parameters.append('course')
@@ -152,6 +53,61 @@ def create(args):
 
 def down({0}):
     pass""".format(', '.join(parameters)))
+
+
+def status(args):
+    for environment in args.environments:
+        if environment in ['master', 'system']:
+            params = {
+                'driver': args.config.database['database_driver'],
+                'dbname': 'submitty',
+                'host': args.config.database['database_host'],
+                'user': args.config.database['database_user'],
+                'password': args.config.database['database_password']
+            }
+            database = db.Database(params, environment)
+            exists = database.engine.dialect.has_table(
+                database.engine,
+                database.migration_table.__tablename__
+            )
+            if not exists:
+                print('Database for {} does not exist!'.format(environment))
+                continue
+            print_status(database)
+
+        else:
+            params = {
+                'driver': args.config.database['database_driver'],
+                'host': args.config.database['database_host'],
+                'user': args.config.database['database_user'],
+                'password': args.config.database['database_password']
+            }
+
+            course_dir = Path(args.config.submitty['submitty_data_dir'], 'courses')
+            if not course_dir.exists():
+                print("Could not find courses directory: {}".format(course_dir))
+                continue
+            for semester in os.listdir(course_dir):
+                for course in os.listdir(os.path.join(course_dir, semester)):
+                    cond1 = args.choose_course is not None
+                    cond2 = [semester, course] != args.choose_course
+                    if cond1 and cond2:
+                        continue
+                    args.semester = semester
+                    args.course = course
+                    params['dbname'] = 'submitty_{}_{}'.format(semester, course)
+                    database = db.Database(params, environment)
+                    print_status(database)
+
+
+def print_status(database):
+    print('{:75s} {}'.format('MIGRATION', 'STATUS'))
+    print('-'*83)
+    query = database.session.query(database.migration_table) \
+        .order_by(database.migration_table.id).all()
+    for migration in query:
+        status = 'UP' if migration.status == 1 else 'DOWN'
+        print("{:75s} {}".format(migration.id, status))
 
 
 def migrate(args):
@@ -201,6 +157,7 @@ def handle_migration(args):
         args.semester = None
         if environment in ['master', 'system']:
             params = {
+                'driver': args.config.database['database_driver'],
                 'dbname': 'submitty',
                 'host': args.config.database['database_host'],
                 'user': args.config.database['database_user'],
@@ -210,11 +167,13 @@ def handle_migration(args):
             print("Running {} migrations for {}...".format(
                 args.direction, environment
             ), end="")
-            with psycopg2.connect(**params) as connection:
-                migrate_environment(connection, environment, args)
+            database = db.Database(params, environment)
+            migrate_environment(database, environment, args)
+            database.close()
 
         if environment == 'course':
             params = {
+                'driver': args.config.database['database_driver'],
                 'host': args.config.database['database_host'],
                 'user': args.config.database['database_user'],
                 'password': args.config.database['database_password']
@@ -236,15 +195,16 @@ def handle_migration(args):
                         ), end="")
                         params['dbname'] = 'submitty_{}_{}'.format(semester, course)
                         try:
-                            with psycopg2.connect(**params) as connection:
-                                migrate_environment(connection, environment, args)
+                            database = db.Database(params, environment)
+                            migrate_environment(database, environment, args)
+                            database.close()
                         except psycopg2.OperationalError:
                             print("Submitty Database Migration Warning:  "
                                   "Database does not exist for "
                                   "semester={} course={}".format(semester, course))
 
 
-def migrate_environment(connection, environment, args):
+def migrate_environment(database, environment, args):
     """
     Determine list of migrations/rollback steps that need to be run for environment.
 
@@ -268,41 +228,37 @@ def migrate_environment(connection, environment, args):
 
     # Check if the migration table exists, which it won't on the first time
     # we run the migrator. The initial migration is what creates this table for us.
-    with connection.cursor() as cursor:
-        cursor.execute(
-            "SELECT EXISTS(SELECT 1 FROM information_schema.tables WHERE "
-            "table_schema='public' AND "
-            "table_name='migrations_{}')".format(environment)
-        )
-        exists = cursor.fetchone()[0]
+    exists = database.engine.dialect.has_table(
+        database.engine,
+        database.migration_table.__tablename__
+    )
 
     changes = False
     if exists:
-        with connection.cursor() as cursor:
-            cursor.execute('SELECT id, commit_time, status FROM migrations_{} '
-                           'ORDER BY id'.format(environment))
-            for migration in cursor.fetchall():
-                # fetchall returns things as a tuple which is a bit unwieldy
-                migration = {
-                    'id': migration[0],
-                    'commit_time': migration[1],
-                    'status': migration[2]
-                }
-                if migration['id'] in migrations:
-                    migrations[migration['id']].update({
-                        'commit_time': migration['commit_time'],
-                        'status': migration['status'],
-                        'db': True
-                    })
-                else:
-                    missing_migrations[migration['id']] = migration
+        query = database.session.query(database.migration_table) \
+            .order_by(database.migration_table.id).all()
+        for migration in query:
+            if migration.id in migrations:
+                migrations[migration.id].update({
+                    'commit_time': migration.commit_time,
+                    'status': migration.status,
+                    'db': True,
+                    'table': migration
+                })
+            else:
+                missing_migrations[migration['id']] = migration
 
     if len(missing_migrations) > 0:
         if not changes:
             print()
         print('Removing {} missing migrations:'.format(len(missing_migrations)))
         for key in missing_migrations:
-            remove_migration(connection, missing_migrations[key], environment, args)
+            remove_migration(
+                database,
+                missing_migrations[key],
+                environment,
+                args
+            )
             changes = True
         print()
 
@@ -314,17 +270,17 @@ def migrate_environment(connection, environment, args):
             if not changes:
                 print("")
                 changes = True
-            run_migration(connection, migrations[key], environment, args)
+            run_migration(database, migrations[key], environment, args)
             args.fake = True
         for key in keys:
             if migrations[key]['status'] == 0:
-                run_migration(connection, migrations[key], environment, args)
+                run_migration(database, migrations[key], environment, args)
                 if args.single:
                     break
     else:
         for key in reversed(list(migrations.keys())):
             if migrations[key]['status'] == 1:
-                run_migration(connection, migrations[key], environment, args)
+                run_migration(database, migrations[key], environment, args)
                 break
 
     print("DONE")
@@ -332,7 +288,7 @@ def migrate_environment(connection, environment, args):
         print()
 
 
-def remove_migration(connection, migration, environment, args):
+def remove_migration(database, migration, environment, args):
     """Remove migrations that exist on the system, but not within the migrator tool."""
     print("  {}".format(migration['id']))
     file_path = Path(
@@ -341,17 +297,13 @@ def remove_migration(connection, migration, environment, args):
     )
     if file_path.exists():
         module = load_migration_module(migration['id'], file_path)
-        call_func(getattr(module, 'down', noop), connection, environment, args)
+        call_func(getattr(module, 'down', noop), database, environment, args)
         file_path.unlink()
-    with connection.cursor() as cursor:
-        cursor.execute(
-            'DELETE FROM migrations_{} WHERE id=%s'.format(environment),
-            (migration['id'],)
-        )
-    connection.commit()
+    database.session.delete(migration)
+    database.session.commit()
 
 
-def call_func(func, connection, environment, args):
+def call_func(func, database, environment, args):
     """
     Call a user supplied function with variable number of parameters.
 
@@ -360,7 +312,7 @@ def call_func(func, connection, environment, args):
     """
     parameters = [args.config]
     if environment in ['course', 'master']:
-        parameters.append(connection)
+        parameters.append(database)
     if environment == 'course':
         parameters.append(args.semester)
         parameters.append(args.course)
@@ -372,32 +324,24 @@ def noop(_):
     pass
 
 
-def run_migration(connection, migration, environment, args):
+def run_migration(database, migration, environment, args):
     """Run the actual migration/rollback function for the migration module."""
     print("  {}{}".format(migration['id'], ' (FAKE)' if args.fake else ''))
     if not args.fake:
         call_func(
             getattr(migration['module'], args.direction, noop),
-            connection,
+            database,
             environment,
             args
         )
     status = 1 if args.direction == 'up' else 0
-    with connection.cursor() as cursor:
-        if migration['db']:
-            cursor.execute(
-                'UPDATE migrations_{} SET commit_time=CURRENT_TIMESTAMP, '
-                'status=%s WHERE id=%s'.format(environment),
-                (status, migration['id'],)
-            )
-        else:
-            cursor.execute(
-                'INSERT INTO migrations_{} (id, status) VALUES(%s, %s)'.format(
-                    environment
-                ),
-                (migration['id'], status,)
-            )
-    connection.commit()
+    if migration['table'] is not None:
+        database.session.update(migration['table']).values(status=status)
+    else:
+        database.session.add(
+            database.migration_table(id=migration['id'], status=status)
+        )
+    database.session.commit()
 
 
 def load_migration_module(name, path):
@@ -422,11 +366,7 @@ def load_migrations(path):
             'id': migration_id,
             'commit_time': None,
             'status': 0,
-            'db': False,
-            'module': load_migration_module(migration_id, path / migration)
+            'module': load_migration_module(migration_id, path / migration),
+            'table': None
         }
     return migrations
-
-
-if __name__ == '__main__':
-    main()
