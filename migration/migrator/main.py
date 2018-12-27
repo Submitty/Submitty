@@ -6,12 +6,10 @@ import os
 from pathlib import Path
 import re
 
-import psycopg2
-
 from sqlalchemy.exc import OperationalError
 
-from . import DIR_PATH, MIGRATIONS_PATH, db
-from .loader import load_migrations
+from . import db, get_dir_path, get_migrations_path
+from .loader import load_module, load_migrations
 
 
 def create(args):
@@ -25,7 +23,7 @@ def create(args):
     etc.). The file's name is prefixed with a timestamp and then suffixed with
     a user given name, that can only contain alphanumerics or underscores.
 
-    :param args:
+    :param args: arguments for create
     :type args: argparse.Namespace
     """
     now = datetime.now()
@@ -40,29 +38,40 @@ def create(args):
         ))
     filename += '.py'
     for environment in args.environments:
-        parameters = ['config']
-        if environment in ['course', 'master']:
-            parameters.append('database')
-        if environment == 'course':
-            parameters.append('semester')
-            parameters.append('course')
-        with Path(MIGRATIONS_PATH, environment, filename).open('w') as open_file, \
-                Path(DIR_PATH, 'data', 'base_migration.py').open() as template_file:
-            open_file.write(template_file.read().format(', '.join(parameters)))
+        new_file = Path(get_migrations_path(), environment, filename)
+        base_file = Path(
+            get_dir_path(),
+            'data',
+            'base_migration_{}.py'.format(environment)
+        )
+        with new_file.open('w') as open_file, base_file.open() as template_file:
+            open_file.write(template_file.read())
 
 
 def status(args):
+    """
+    Get status of migrations.
+
+    This will display all migrations (missing and normal) and their status on
+    the server (UP/DOWN/MISSING) in a table sorted by migration id. This
+    should make it easy to see what the consequence of running migrate or
+    rollback will be.
+
+    :param args: arguments for status
+    :type args: argparse.Namespace
+    """
+    db_params = {
+        'driver': args.config.database['database_driver'],
+        'dbname': 'submitty',
+        'host': args.config.database['database_host'],
+        'user': args.config.database['database_user'],
+        'password': args.config.database['database_password']
+    }
+
     for environment in args.environments:
         if environment in ['master', 'system']:
-            params = {
-                'driver': args.config.database['database_driver'],
-                'dbname': 'submitty',
-                'host': args.config.database['database_host'],
-                'user': args.config.database['database_user'],
-                'password': args.config.database['database_password']
-            }
             try:
-                database = db.Database(params, environment+'aaa')
+                database = db.Database(db_params, environment)
                 exists = database.engine.dialect.has_table(
                     database.engine,
                     database.migration_table.__tablename__
@@ -70,17 +79,10 @@ def status(args):
                 if not exists:
                     print('Database for {} does not exist!'.format(environment))
                     continue
-                print_status(database)
+                print_status(database, environment)
             except OperationalError:
                 print('Could not get status for migrations for {}'.format(environment))
         else:
-            params = {
-                'driver': args.config.database['database_driver'],
-                'host': args.config.database['database_host'],
-                'user': args.config.database['database_user'],
-                'password': args.config.database['database_password']
-            }
-
             course_dir = Path(args.config.submitty['submitty_data_dir'], 'courses')
             if not course_dir.exists():
                 print("Could not find courses directory: {}".format(course_dir))
@@ -93,28 +95,37 @@ def status(args):
                         continue
                     args.semester = semester
                     args.course = course
-                    params['dbname'] = 'submitty_{}_{}aa'.format(semester, course)
+                    db_params['dbname'] = 'submitty_{}_{}aa'.format(semester, course)
                     try:
-                        database = db.Database(params, environment)
-                        print_status(database)
+                        database = db.Database(db_params, environment)
+                        print_status(database, environment)
                     except OperationalError:
                         print('Could not get the status for the migrations '
                               'for {}.{}'.format(semester, course))
                         continue
 
 
-def print_status(database):
+def print_status(database, environment):
+    """Print the status table for environment/database."""
+    migrations = load_migrations(get_migrations_path() / environment)
+    missing_migrations = []
+
     query = database.session.query(database.migration_table) \
         .order_by(database.migration_table.id).all()
-    migrations = []
     for migration in query:
-        migrations.append(migration)
+        if migration.id in migrations:
+            migrations[migration.id]['table'] = migration
+        else:
+            missing_migrations.append(migration.id)
 
     print('{:75s} {}'.format('MIGRATION', 'STATUS'))
     print('-'*83)
-    for migration in migrations:
-        status = 'UP' if migration.status == 1 else 'DOWN'
-        print("{:75s} {}".format(migration.id, status))
+    for key in sorted(missing_migrations + migrations.keys()):
+        if key in migrations:
+            status = 'UP' if migrations[key].status == 1 else 'DOWN'
+        else:
+            status = 'MISSING'
+        print("{:75s} {:7s}".format(key, status))
 
 
 def migrate(args):
@@ -159,33 +170,26 @@ def handle_migration(args):
     :param args: arguments parsed from argparse
     :type args: argparse.Namespace
     """
+    db_params = {
+        'driver': args.config.database['database_driver'],
+        'dbname': 'submitty',
+        'host': args.config.database['database_host'],
+        'user': args.config.database['database_user'],
+        'password': args.config.database['database_password']
+    }
+
     for environment in args.environments:
         args.course = None
         args.semester = None
         if environment in ['master', 'system']:
-            params = {
-                'driver': args.config.database['database_driver'],
-                'dbname': 'submitty',
-                'host': args.config.database['database_host'],
-                'user': args.config.database['database_user'],
-                'password': args.config.database['database_password']
-            }
-
             print("Running {} migrations for {}...".format(
                 args.direction, environment
             ), end="")
-            database = db.Database(params, environment)
+            database = db.Database(db_params, environment)
             migrate_environment(database, environment, args)
             database.close()
 
         if environment == 'course':
-            params = {
-                'driver': args.config.database['database_driver'],
-                'host': args.config.database['database_host'],
-                'user': args.config.database['database_user'],
-                'password': args.config.database['database_password']
-            }
-
             course_dir = Path(args.config.submitty['submitty_data_dir'], 'courses')
             if not course_dir.exists():
                 print("Could not find courses directory: {}".format(course_dir))
@@ -200,12 +204,12 @@ def handle_migration(args):
                         print("Running {} migrations for {}.{}...".format(
                             args.direction, semester, course
                         ), end="")
-                        params['dbname'] = 'submitty_{}_{}'.format(semester, course)
+                        db_params['dbname'] = 'submitty_{}_{}'.format(semester, course)
                         try:
-                            database = db.Database(params, environment)
+                            database = db.Database(db_params, environment)
                             migrate_environment(database, environment, args)
                             database.close()
-                        except psycopg2.OperationalError:
+                        except OperationalError:
                             print("Submitty Database Migration Warning:  "
                                   "Database does not exist for "
                                   "semester={} course={}".format(semester, course))
@@ -231,19 +235,18 @@ def migrate_environment(database, environment, args):
     :param args: arguments parsed from argparse
     """
     missing_migrations = OrderedDict()
-    migrations = load_migrations(MIGRATIONS_PATH / environment)
+    migrations = load_migrations(get_migrations_path() / environment)
 
-    # Check if the migration table exists, which it won't on the first time
-    # we run the migrator. The initial migration is what creates this table for us.
-    exists = database.engine.dialect.has_table(
-        database.engine,
-        database.migration_table.__tablename__
-    )
-
-    changes = False
-    if exists:
+    # We have to check that the migrator table exixts as it gets created as part
+    # of the initial migration for the environment.
+    if database.has_table(database.migration_table.__tablename__):
         query = database.session.query(database.migration_table) \
             .order_by(database.migration_table.id).all()
+        # We need to determine what migrations are missing, which
+        # are migrations that we have rows in the DB for, but do not
+        # have a migration file for. As part of the installation process,
+        # we copy all migration files into the SUBMITTY_INSTALL_DIR,
+        # which we can use to "remove" any missing migration.
         for migration in query:
             if migration.id in migrations:
                 migrations[migration.id].update({
@@ -253,8 +256,9 @@ def migrate_environment(database, environment, args):
                     'table': migration
                 })
             else:
-                missing_migrations[migration['id']] = migration
+                missing_migrations[migration.id] = migration
 
+    changes = False
     if len(missing_migrations) > 0:
         if not changes:
             print()
@@ -297,13 +301,13 @@ def migrate_environment(database, environment, args):
 
 def remove_migration(database, migration, environment, args):
     """Remove migrations that exist on the system, but not within the migrator tool."""
-    print("  {}".format(migration['id']))
+    print("  {}".format(migration.id))
     file_path = Path(
         args.config.submitty['submitty_install_dir'], 'migrations',
-        environment, migration['id'] + '.py'
+        environment, migration.id + '.py'
     )
     if file_path.exists():
-        module = load_migration_module(migration['id'], file_path)
+        module = load_module(migration.id, file_path)
         call_func(getattr(module, 'down', noop), database, environment, args)
         file_path.unlink()
     database.session.delete(migration)
@@ -326,7 +330,7 @@ def call_func(func, database, environment, args):
     func(*parameters)
 
 
-def noop(_):
+def noop(*_):
     """Run noop function that does nothing if migration is missing up or down func."""
     pass
 

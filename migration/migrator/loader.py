@@ -4,7 +4,14 @@ from importlib.machinery import SourceFileLoader
 
 
 def load_module(name, path):
-    """Load the migration file as a python module."""
+    """
+    Load the migration file as a python module.
+
+    :param name: Name of module
+    :type name: str
+    :param path: Path to module
+    :type path: pathlib.Path
+    """
     # TODO: change this to not use deprecated loader.load_module
     # after dropping Python 3.4 support
     loader = SourceFileLoader(name, str(path))
@@ -13,7 +20,12 @@ def load_module(name, path):
 
 
 def load_migrations(path):
-    """Given a path, load all migrations in that path."""
+    """
+    Given a path, load all migrations in that path.
+
+    :param path: path to look for migrations in
+    :type path: pathlib.Path or str
+    """
     migrations = OrderedDict()
     filtered = filter(
         lambda x: x.endswith('.py'),

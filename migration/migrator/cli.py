@@ -2,7 +2,7 @@
 
 from argparse import ArgumentParser
 from pathlib import Path
-from . import VERSION, DIR_PATH, ENVIRONMENTS
+from . import VERSION, get_dir_path, get_environments
 from .config import Config
 import migrator.main
 
@@ -19,7 +19,7 @@ def parse_args():
         '-v', '--version', action='version',
         version='%(prog)s {}'.format(VERSION)
     )
-    config_path = Path(DIR_PATH, '..', '..', '..', '..', 'config')
+    config_path = Path(get_dir_path(), '..', '..', '..', '..', 'config')
     default_config = config_path.resolve() if config_path.exists() else None
     required = False if default_config is not None else True
     parser.add_argument(
@@ -28,7 +28,7 @@ def parse_args():
     )
     parser.add_argument(
         '-e', '--environment', dest='environments',
-        choices=ENVIRONMENTS, action='append'
+        choices=get_environments(), action='append'
     )
     parser.add_argument(
         '--course', dest='choose_course', nargs=2,
@@ -44,7 +44,6 @@ def parse_args():
         'status',
         help='Get status of migrations for environment'
     )
-    sub.add_argument('--json', '-j', help='Output as JSON')
 
     sub = subparsers.add_parser('migrate', help='Run migrations')
     sub.add_argument(
@@ -65,12 +64,12 @@ def parse_args():
 
     args = parser.parse_args()
     if args.environments is None:
-        args.environments = ENVIRONMENTS
+        args.environments = get_environments()
     # make sure the order is of 'master', 'system', 'course' depending on what
     # environments have been selected system must be run after master initially
     # as system relies on master DB being setup for migration table
     environments = []
-    for env in ENVIRONMENTS:
+    for env in get_environments():
         if env in args.environments:
             environments.append(env)
     args.environments = environments
