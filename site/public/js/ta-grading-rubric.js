@@ -143,6 +143,7 @@ function ajaxSaveComponent(gradeable_id, component_id, title, ta_comment, studen
                 'action': 'save_component'
             }),
             data: {
+                'csrf_token': csrfToken,
                 'gradeable_id': gradeable_id,
                 'component_id': component_id,
                 'title': title,
@@ -302,6 +303,7 @@ function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, graded_ver
                 'action': 'save_graded_component'
             }),
             data: {
+                'csrf_token': csrfToken,
                 'gradeable_id': gradeable_id,
                 'component_id': component_id,
                 'anon_id': anon_id,
@@ -381,6 +383,7 @@ function ajaxSaveOverallComment(gradeable_id, anon_id, overall_comment) {
                 'action': 'save_overall_comment'
             }),
             data: {
+                'csrf_token': csrfToken,
                 'gradeable_id': gradeable_id,
                 'anon_id': anon_id,
                 'overall_comment': overall_comment
@@ -420,6 +423,7 @@ function ajaxAddNewMark(gradeable_id, component_id, title, points) {
                 'action': 'add_new_mark'
             }),
             data: {
+                'csrf_token': csrfToken,
                 'gradeable_id': gradeable_id,
                 'component_id': component_id,
                 'title': title,
@@ -459,6 +463,7 @@ function ajaxDeleteMark(gradeable_id, component_id, mark_id) {
                 'action': 'delete_mark'
             }),
             data: {
+                'csrf_token': csrfToken,
                 'gradeable_id': gradeable_id,
                 'component_id': component_id,
                 'mark_id': mark_id
@@ -500,6 +505,7 @@ function ajaxSaveMark(gradeable_id, component_id, mark_id, title, points, publis
                 'action': 'save_mark'
             }),
             data: {
+                'csrf_token': csrfToken,
                 'gradeable_id': gradeable_id,
                 'component_id': component_id,
                 'mark_id': mark_id,
@@ -579,6 +585,7 @@ function ajaxSaveMarkOrder(gradeable_id, component_id, order) {
                 'action': 'save_mark_order'
             }),
             data: {
+                'csrf_token': csrfToken,
                 'gradeable_id': gradeable_id,
                 'component_id': component_id,
                 'order': JSON.stringify(order)
@@ -616,6 +623,7 @@ function ajaxSaveComponentPages(gradeable_id, pages) {
                 'action': 'save_component_pages'
             }),
             data: {
+                'csrf_token': csrfToken,
                 'gradeable_id': gradeable_id,
                 'pages': JSON.stringify(pages)
             },
@@ -652,6 +660,7 @@ function ajaxSaveComponentOrder(gradeable_id, order) {
                 'action': 'save_component_order'
             }),
             data: {
+                'csrf_token': csrfToken,
                 'gradeable_id': gradeable_id,
                 'order': JSON.stringify(order)
             },
@@ -687,6 +696,7 @@ function ajaxAddComponent(gradeable_id) {
                 'action': 'add_component'
             }),
             data: {
+                'csrf_token': csrfToken,
                 'gradeable_id': gradeable_id,
             },
             success: function (response) {
@@ -722,6 +732,7 @@ function ajaxDeleteComponent(gradeable_id, component_id) {
                 'action': 'delete_component'
             }),
             data: {
+                'csrf_token': csrfToken,
                 'gradeable_id': gradeable_id,
                 'component_id': component_id
             },
@@ -759,6 +770,7 @@ function ajaxVerifyComponent(gradeable_id, component_id, anon_id) {
                 'action': 'verify_component'
             }),
             data: {
+                'csrf_token': csrfToken,
                 'gradeable_id': gradeable_id,
                 'component_id': component_id,
                 'anon_id': anon_id,
@@ -796,6 +808,7 @@ function ajaxVerifyAllComponents(gradeable_id, anon_id) {
                 'action': 'verify_all_components'
             }),
             data: {
+                'csrf_token': csrfToken,
                 'gradeable_id': gradeable_id,
                 'anon_id': anon_id,
             },
