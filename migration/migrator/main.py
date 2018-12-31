@@ -89,7 +89,10 @@ def status(args):
                         continue
                     args.semester = semester
                     args.course = course
-                    args.config.database['dbname'] = 'submitty_{}_{}aa'.format(semester, course)
+                    args.config.database['dbname'] = 'submitty_{}_{}'.format(
+                        semester,
+                        course
+                    )
                     try:
                         database = db.Database(args.config.database, environment)
                         print_status(database, environment)

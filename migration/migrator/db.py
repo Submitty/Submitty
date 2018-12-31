@@ -31,7 +31,7 @@ class Database:
                 connection_string = 'postgresql+psycopg2://'
             else:
                 raise RuntimeError('Invalid driver')
-            
+
             host = params['database_host']
             connection_string += '{}:{}@{}/{}'.format(
                 params['database_user'],
