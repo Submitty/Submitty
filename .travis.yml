@@ -116,6 +116,7 @@ jobs:
       install:
         - pip3 install -U pip
         - pip3 install tzlocal
+        - pip3 install sqlalchemy
       script:
         - pushd python_submitty_utils
         - python3 setup.py test

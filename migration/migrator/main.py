@@ -60,18 +60,12 @@ def status(args):
     :param args: arguments for status
     :type args: argparse.Namespace
     """
-    db_params = {
-        'driver': args.config.database['database_driver'],
-        'dbname': 'submitty',
-        'host': args.config.database['database_host'],
-        'user': args.config.database['database_user'],
-        'password': args.config.database['database_password']
-    }
+    args.config.database['dbname'] = 'submitty'
 
     for environment in args.environments:
         if environment in ['master', 'system']:
             try:
-                database = db.Database(db_params, environment)
+                database = db.Database(args.config.database, environment)
                 exists = database.engine.dialect.has_table(
                     database.engine,
                     database.migration_table.__tablename__
@@ -95,9 +89,9 @@ def status(args):
                         continue
                     args.semester = semester
                     args.course = course
-                    db_params['dbname'] = 'submitty_{}_{}aa'.format(semester, course)
+                    args.config.database['dbname'] = 'submitty_{}_{}aa'.format(semester, course)
                     try:
-                        database = db.Database(db_params, environment)
+                        database = db.Database(args.config.database, environment)
                         print_status(database, environment)
                     except OperationalError:
                         print('Could not get the status for the migrations '
@@ -114,18 +108,19 @@ def print_status(database, environment):
         .order_by(database.migration_table.id).all()
     for migration in query:
         if migration.id in migrations:
+            migrations[migration.id]['status'] = migration.status
             migrations[migration.id]['table'] = migration
         else:
             missing_migrations.append(migration.id)
 
     print('{:75s} {}'.format('MIGRATION', 'STATUS'))
-    print('-'*83)
-    for key in sorted(missing_migrations + migrations.keys()):
+    print('-'*82)
+    for key in sorted(missing_migrations + list(migrations.keys())):
         if key in migrations:
-            status = 'UP' if migrations[key].status == 1 else 'DOWN'
+            status = 'UP' if migrations[key]['status'] == 1 else 'DOWN'
         else:
             status = 'MISSING'
-        print("{:75s} {:7s}".format(key, status))
+        print("{:74s} {:>7s}".format(key, status))
 
 
 def migrate(args):
@@ -170,22 +165,13 @@ def handle_migration(args):
     :param args: arguments parsed from argparse
     :type args: argparse.Namespace
     """
-    db_params = {
-        'driver': args.config.database['database_driver'],
-        'dbname': 'submitty',
-        'host': args.config.database['database_host'],
-        'user': args.config.database['database_user'],
-        'password': args.config.database['database_password']
-    }
+    args.config.database['dbname'] = 'submitty'
 
     for environment in args.environments:
         args.course = None
         args.semester = None
         if environment in ['master', 'system']:
-            print("Running {} migrations for {}...".format(
-                args.direction, environment
-            ), end="")
-            database = db.Database(db_params, environment)
+            database = db.Database(args.config.database, environment)
             migrate_environment(database, environment, args)
             database.close()
 
@@ -201,12 +187,12 @@ def handle_migration(args):
                             continue
                         args.semester = semester
                         args.course = course
-                        print("Running {} migrations for {}.{}...".format(
-                            args.direction, semester, course
-                        ), end="")
-                        db_params['dbname'] = 'submitty_{}_{}'.format(semester, course)
+                        args.config.database['dbname'] = 'submitty_{}_{}'.format(
+                            semester,
+                            course
+                        )
                         try:
-                            database = db.Database(db_params, environment)
+                            database = db.Database(args.config.database, environment)
                             migrate_environment(database, environment, args)
                             database.close()
                         except OperationalError:
@@ -234,6 +220,18 @@ def migrate_environment(database, environment, args):
     :param environment: environment we're using for migration step
     :param args: arguments parsed from argparse
     """
+    if environment == 'course':
+        print("Running {} migrations for {}.{}...".format(
+            args.direction,
+            args.semester,
+            args.course
+        ), end="")
+    else:
+        print("Running {} migrations for {}...".format(
+            args.direction,
+            environment
+        ), end="")
+
     missing_migrations = OrderedDict()
     migrations = load_migrations(get_migrations_path() / environment)
 
@@ -349,7 +347,7 @@ def run_migration(database, migration, environment, args):
 
     status = 1 if args.direction == 'up' else 0
     if migration['table'] is not None:
-        database.session.update(migration['table']).values(status=status)
+        migration['table'].status = status
     else:
         database.session.add(
             database.migration_table(id=migration['id'], status=status)

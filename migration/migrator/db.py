@@ -22,24 +22,26 @@ class Database:
         :type environment: str
         """
         self.DynamicBase = declarative_base(class_registry=dict())
-        if 'driver' not in params:
+        if 'database_driver' not in params:
             raise RuntimeError('Need to supply a driver')
-        if params['driver'] == 'sqlite':
+        if params['database_driver'] == 'sqlite':
             connection_string = 'sqlite://'
         else:
-            if params['driver'] == 'psql':
+            if params['database_driver'] == 'psql':
                 connection_string = 'postgresql+psycopg2://'
             else:
                 raise RuntimeError('Invalid driver')
+            
+            host = params['database_host']
             connection_string += '{}:{}@{}/{}'.format(
-                params['user'],
-                params['password'],
-                params['host'] if not Path(params['host']).exists() else '',
+                params['database_user'],
+                params['database_password'],
+                host if not Path(host).exists() else '',
                 params['dbname']
             )
 
-            if Path(params['host']).exists():
-                connection_string += '?host={}'.format(params['host'])
+            if Path(host).exists():
+                connection_string += '?host={}'.format(host)
 
         self.engine = create_engine(connection_string)
         self.engine.connect()

@@ -9,10 +9,10 @@ class TestDb(unittest.TestCase):
 
     def test_invalid_driver(self):
         with self.assertRaises(RuntimeError):
-            migrator.db.Database({'driver': 'mysql'}, 'system')
+            migrator.db.Database({'database_driver': 'mysql'}, 'system')
     
     def test_db(self):
-        db = migrator.db.Database({'driver': 'sqlite'}, 'master')
+        db = migrator.db.Database({'database_driver': 'sqlite'}, 'master')
         db.execute("""
             CREATE TABLE users (
                 id INTEGER NOT NULL, name VARCHAR,
