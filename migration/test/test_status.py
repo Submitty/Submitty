@@ -13,6 +13,7 @@ import migrator
 
 class TestStatus(unittest.TestCase):
     def setUp(self):
+        self.args = Namespace()
         self.dir = tempfile.mkdtemp()
         self.old_migrations_path = migrator.MIGRATIONS_PATH
         migrator.MIGRATIONS_PATH = Path(self.dir)
@@ -28,9 +29,11 @@ class TestStatus(unittest.TestCase):
         migrator.MIGRATIONS_PATH = self.old_migrations_path
 
     def test_status_none(self):
-        migrator.main.print_status(self.database, 'master')
-        expected = """MIGRATION                                                                   STATUS
+        migrator.main.print_status(self.database, 'master', self.args)
+        expected = """Status for master
+MIGRATION                                                                   STATUS
 ----------------------------------------------------------------------------------
+
 """
         self.assertEqual(expected, sys.stdout.getvalue())
 
@@ -38,12 +41,14 @@ class TestStatus(unittest.TestCase):
         create_migration(self.database, self.dir, 'master', '01_test.py')
         create_migration(self.database, self.dir, 'master', '02_test.py')
         create_migration(self.database, self.dir, 'master', '03_test.py')
-        migrator.main.print_status(self.database, 'master')
-        expected = """MIGRATION                                                                   STATUS
+        migrator.main.print_status(self.database, 'master', self.args)
+        expected = """Status for master
+MIGRATION                                                                   STATUS
 ----------------------------------------------------------------------------------
 01_test                                                                         UP
 02_test                                                                         UP
 03_test                                                                         UP
+
 """
         self.assertEqual(expected, sys.stdout.getvalue())
 
@@ -51,12 +56,14 @@ class TestStatus(unittest.TestCase):
         create_migration(self.database, self.dir, 'master', '01_test.py')
         create_migration(self.database, self.dir, 'master', '02_test.py', False)
         create_migration(self.database, self.dir, 'master', '03_test.py')
-        migrator.main.print_status(self.database, 'master')
-        expected = """MIGRATION                                                                   STATUS
+        migrator.main.print_status(self.database, 'master', self.args)
+        expected = """Status for master
+MIGRATION                                                                   STATUS
 ----------------------------------------------------------------------------------
 01_test                                                                         UP
 02_test                                                                    MISSING
 03_test                                                                         UP
+
 """
         self.assertEqual(expected, sys.stdout.getvalue())
 
@@ -64,12 +71,14 @@ class TestStatus(unittest.TestCase):
         create_migration(self.database, self.dir, 'master', '01_test.py')
         create_migration(self.database, self.dir, 'master', '02_test.py', False)
         create_migration(self.database, self.dir, 'master', '03_test.py', True, 0)
-        migrator.main.print_status(self.database, 'master')
-        expected = """MIGRATION                                                                   STATUS
+        migrator.main.print_status(self.database, 'master', self.args)
+        expected = """Status for master
+MIGRATION                                                                   STATUS
 ----------------------------------------------------------------------------------
 01_test                                                                         UP
 02_test                                                                    MISSING
 03_test                                                                       DOWN
+
 """
         self.assertEqual(expected, sys.stdout.getvalue())
 

@@ -73,7 +73,7 @@ def status(args):
                 if not exists:
                     print('Database for {} does not exist!'.format(environment))
                     continue
-                print_status(database, environment)
+                print_status(database, environment, args)
             except OperationalError:
                 print('Could not get status for migrations for {}'.format(environment))
         else:
@@ -95,14 +95,14 @@ def status(args):
                     )
                     try:
                         database = db.Database(args.config.database, environment)
-                        print_status(database, environment)
+                        print_status(database, environment, args)
                     except OperationalError:
                         print('Could not get the status for the migrations '
                               'for {}.{}'.format(semester, course))
                         continue
 
 
-def print_status(database, environment):
+def print_status(database, environment, args):
     """Print the status table for environment/database."""
     migrations = load_migrations(get_migrations_path() / environment)
     missing_migrations = []
@@ -116,6 +116,12 @@ def print_status(database, environment):
         else:
             missing_migrations.append(migration.id)
 
+    if environment == 'course':
+        name = '{}.{} ({})'.format(args.semester, args.course, environment)
+    else:
+        name = environment
+
+    print('Status for {}'.format(name))
     print('{:75s} {}'.format('MIGRATION', 'STATUS'))
     print('-'*82)
     for key in sorted(missing_migrations + list(migrations.keys())):
@@ -124,6 +130,7 @@ def print_status(database, environment):
         else:
             status = 'MISSING'
         print("{:74s} {:>7s}".format(key, status))
+    print()
 
 
 def migrate(args):
