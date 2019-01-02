@@ -6,10 +6,11 @@ from migrator import main
 
 class TestMain(unittest.TestCase):
     def test_noop(self):
-        main.noop()
-        main.noop(1)
-        main.noop(1, 2)
-        main.noop(1, 2, 3)
+        """Test that noop function can take variable amount of parameters."""
+        test = []
+        for i in range(5):
+            main.noop(*test)
+            test.append(i)
 
     def test_call_func_system(self):
         args = Namespace()

@@ -1,37 +1,46 @@
 migrator
 ========
 
-Internal tool of Submitty to handle upgrading the DB and system in a seamless way to
-users. The tool contains three migration folders:
+Internal tool of Submitty to handle upgrading the components of Submitty
+in a nice seamless way.
+
+Migrator operates under the idea that Submitty can be split into three
+distinct environments:
+* system - migrations pertaining to altering the system submitty runs on
 * master - migrations pertaining to changing the master submitty DB
 * course - migrations pertaining to changing each course DB
-* system - migrations pertaining to altering the system submitty runs on
+
+where each environment has its own set of migration files.
 
 Requirements
 ------------
-* Python 3.4
-* psycopg2
+* Python 3.4+
 * sqlalchemy
+* psycopg2 (if using PostgreSQL)
 
 Usage
 -----
 ```
-usage: run_migrator.py [-h] [--environment {course,system,master}] --config
-                   CONFIG_PATH
-                   command ...
+$ python3 run_migrator.py --help
+usage: run_migrator.py [-h] [-v] -c CONFIG_PATH [-e {master,system,course}]
+                       [--course semester course]
+                       command ...
 
 Migration script for upgrading/downgrading the database
 
 positional arguments:
   command
     create              Create migration
+    status              Get status of migrations for environment
     migrate             Run migrations
     rollback            Rollback the previously done migration
 
 optional arguments:
   -h, --help            show this help message and exit
-  --environment {course,system,master}, -e {course,system,master}
-  --config CONFIG_PATH, -c CONFIG_PATH
+  -v, --version         show program's version number and exit
+  -c CONFIG_PATH, --config CONFIG_PATH
+  -e {master,system,course}, --environment {master,system,course}
+  --course semester course
  ```
  
 By default, `run_migrator.py` will look for a config directory two directories up 
@@ -50,28 +59,14 @@ to the migration file. The name can only contain alphanumeric characters, unders
 and dashes (regex validation string: `[a-zA-Z0-9_\-]`). This will then create a file
 for the set environment in `migration/migrations/<environment>` which has then name
 structure `YYYYMMDDHHmmss_NAME.py` where the first part of the string is the current
-timestmap concatentated by year, month, day, hour, minute, and second. Migration
-files will have a slightly different signature depending on the environment. System
-migrations have the following template:
-```
-def up():
-    pass
-
-def down():
-    pass
-```
-
-Coures and Master DB migrations have the following template:
-```
-def up(conn):
-    pass
-
-def down(conn):
-    pass
-```
-where `conn` represents a [DB Connection](https://www.python.org/dev/peps/pep-0249/)
-which you can execute queries against. System intentially doesn't have a `conn`
-parameter to help enforce a better separation between things in `master` and `system`.
+timestmap concatentated by year, month, day, hour, minute, and second. The created
+file will have an `up` and `down` function which will both have the same parameters.
+The parameters are dependent on the environment you're using. System will only have
+a `Config` object (see `migrator.config.Config`), Master will have a `Config` object
+and a `Database` object (see `migrator.db.Database`), and Course will have a `Config`
+object, `Database` object, `semester` string, and `course` string. You are not
+required to have both functions in the file and it's perfectly safe and recommended
+to delete the `up` or `down` function if you're not using it.
 
 `migrate` will attempt to run any migrations that are down or haven't been run yet.
 It scans the DB to get the list of migrations that have been run and their status.
