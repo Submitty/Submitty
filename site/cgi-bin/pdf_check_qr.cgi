@@ -6,17 +6,27 @@ splits by QR code. The split pdf items are placed
 in the split pdf directory. 
 """
 import cgi
-# If things are not working, then this should be enabled for better troubleshooting
-# import cgitb; cgitb.enable()
 import json
 import os
 import shutil
 import stat
-from PyPDF2 import PdfFileReader, PdfFileWriter
-from pdf2image import convert_from_bytes
-import pyzbar.pyzbar as pyzbar
-#from grade_item.py
+import traceback
+import sys
+#try importing required modules
+try:
+    from PyPDF2 import PdfFileReader, PdfFileWriter
+    from pdf2image import convert_from_bytes
+    import pyzbar.pyzbar as pyzbar
+except ImportError as e:
+    print("Content-type: application/json")
+    print()
+    message = "Error from pdf_check_qr.cgi:\n"
+    message += "One or more required python modules not installed correctly\n"
+    message += traceback.format_exc() 
+    print(json.dumps({"valid" : False, "message" : message}))
+    sys.exit(1)
 
+#from grade_item.py
 def add_permissions(item,perms):
     if os.getuid() == os.stat(item).st_uid:
         os.chmod(item,os.stat(item).st_mode | perms)
@@ -32,8 +42,7 @@ def add_permissions_recursive(top_dir,root_perms,dir_perms,file_perms):
 print("Content-type: application/json")
 print()
 
-valid = True
-message = "Something went wrong."
+message = "Error from pdf_check_qr.cgi:\n"
 
 try:
     arguments = cgi.FieldStorage()
@@ -43,6 +52,11 @@ try:
     g_id = os.path.basename(arguments['g_id'].value)
     ver = os.path.basename(arguments['ver'].value)
     qr_prefix = ''
+    for key in ['sem', 'course', 'g_id', 'ver']:
+        if os.path.basename(arguments[key].value) in ['.', '..']:
+            message += '. Invalid value for ' + key + '.'
+            print(json.dumps({"valid" : False, "message" : message}))
+            sys.exit(1)
     #check if qr_prefix is passed in, an empty string since is not considered a valid CGI arg
     for arg in cgi.parse(arguments):
         if arg == 'qr_prefix':
@@ -53,19 +67,22 @@ try:
     with open("/usr/local/submitty/config/submitty.json", encoding='utf-8') as data_file:
         data = json.loads(data_file.read())
 
-    #print("making paths")
     current_path = os.path.dirname(os.path.realpath(__file__))
     uploads_path = os.path.join(data["submitty_data_dir"],"courses",sem,course,"uploads")
     bulk_path = os.path.join(data["submitty_data_dir"],"courses",sem,course,"uploads/bulk_pdf",g_id,ver)
     split_path = os.path.join(data["submitty_data_dir"],"courses",sem,course,"uploads/split_pdf",g_id,ver)
-
+except Exception as e:
+    message += "Failed after parsing args and creating paths\n"
+    message += traceback.format_exc()
+    print(json.dumps({"valid" : False, "message" : message}))
+    sys.exit(1)
+try:
     # copy folder
     if not os.path.exists(split_path):
         os.makedirs(split_path)
 
     # adding write permissions for the PHP
     add_permissions_recursive(uploads_path, stat.S_IWGRP | stat.S_IXGRP, stat.S_IWGRP | stat.S_IXGRP, stat.S_IWGRP)
-    # message = "Something went wrong:  preparing split folder"
 
     # copy over files to new directory
     for filename in os.listdir(bulk_path):
@@ -73,22 +90,28 @@ try:
 
     # move to copy folder
     os.chdir(split_path)
-    #message = "Something went wrong: preparing bulk folder"
-
-    # # split pdfs
+except Exception as e:
+    valid = False
+    message += "Failed after adding permissions and copying files\n"
+    message += traceback.format_exc()
+    #cleanup
+    if os.path.exists(split_path):
+        shutil.rmtree(split_path)
+    print(json.dumps({"valid" : False, "message" : message}))
+    sys.exit(1)
+try:
+    json_data = {}
+    #split pdfs
     for filename in os.listdir(bulk_path):
-        output = {}
         pdfPages = PdfFileReader(filename)
         #convert pdf to series of images for scanning
         pages = convert_from_bytes(open(filename, 'rb').read())
         pdf_writer = PdfFileWriter()
-    
-        i = 0
-        cover_index = 0
-        #start student id index at 1 to match up with displaying files in BulkUploadBox.twig
-        id_index = 1
+        i = cover_index = id_index = 0
         page_count = 1
         first_file = ''
+        data = []
+        output = {}
         for page in pages:
         #    i += 1
             val = pyzbar.decode(page)
@@ -96,15 +119,10 @@ try:
                 #found a new qr code, split here
                 #convert byte literal to string
                 data = val[0][0].decode("utf-8")
-                # if data == "none":  # blank exam with 'none' qr code
-                #     data = "BLANK EXAM"
-                if qr_prefix != "" and data[0:len(qr_prefix)] == qr_prefix:
+                if data == "none":  # blank exam with 'none' qr code
+                    data = "BLANK EXAM"
+                elif qr_prefix != "" and data[0:len(qr_prefix)] == qr_prefix:
                     data = data[len(qr_prefix):]
-                #else:
-                 #   page_count += 1
-                 #   i += 1
-                  #  pdf_writer.addPage(pdfPages.getPage(i))
-                  #  continue
 
                 cover_index = i
                 cover_filename = '{}_{}_cover.pdf'.format(filename[:-4], i)
@@ -120,11 +138,13 @@ try:
                         pdf_writer.write(out)
                 else:
                     first_file = output_filename
-                #if id_index == 2:
+
+                if id_index == 1:
                     #correct first pdf's page count and print file
-                    #output[1]['page_count'] = page_count
-                    #with open(first_file, 'wb') as out:
-                        #pdf_writer.write(out)
+                    output[0]['page_count'] = page_count
+                    with open(first_file, 'wb') as out:
+                        pdf_writer.write(out)
+
                 #start a new pdf and grab the cover
                 cover_writer = PdfFileWriter()
                 pdf_writer = PdfFileWriter()
@@ -143,6 +163,14 @@ try:
                 pdf_writer.addPage(pdfPages.getPage(i))
             i += 1
 
+        if len(output) == 0:
+            message = "Could not find any QR codes!\n"
+            for filename in os.listdir(bulk_path):
+                os.remove(filename)
+            os.chdir(current_path)
+            print(json.dumps({"valid" : False, "message" : message}))
+            sys.exit(1)
+
         #save whatever is left
         output_filename = '{}_{}.pdf'.format(filename[:-4], cover_index)
         output[id_index-1]['id'] = data
@@ -151,21 +179,24 @@ try:
         with open(output_filename,'wb') as out:
             pdf_writer.write(out)
 
-    #save json to parse student names later
+        #combine all json data
+        json_data[filename] = output
+    #write json to file for parsing page counts and decoded ids later
     with open('decoded.json', 'w') as out:
-        json.dump(output, out)
+        json.dump(json_data, out)
 
-    #cleanup
+    #done going over all files in uploads directory, cleanup
     for filename in os.listdir(bulk_path):
         os.remove(filename)
 
-    os.chdir(current_path) #make sure this is in right place
-    message += ",and finished"
+    os.chdir(current_path)
+    message = "finished splitting qr codes normally\n"
 except Exception as e:
-    valid = False
-    # if copy exists, delete it... but relies on the fact that copy_path exists :(
     if os.path.exists(split_path):
         shutil.rmtree(split_path)
-    message += str(e)
+    message += "Failed when splitting PDFs\n"
+    message += traceback.format_exc()
+    print(json.dumps({"valid" : False, "message" : message}))
+    sys.exit(1)
 
-print(json.dumps({"valid" : valid, "message" : message}))
+print(json.dumps({"valid" : True, "message" : message}))
