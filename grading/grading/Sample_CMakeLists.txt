@@ -109,7 +109,7 @@ file(WRITE "${my_config_json_no_comments}" "${json_generated}")
 
 # Now run the comment-free version of the json file through a simple
 # python json syntax checker
-find_program(PYTHON_PATH python DOC "path to python")
+find_program(PYTHON_PATH python3 DOC "path to python")
 execute_process(COMMAND ${PYTHON_PATH} ${GRADINGCODE}/grading/json_syntax_checker.py
   "${my_config_json_no_comments}" OUTPUT_QUIET RESULT_VARIABLE py_res ERROR_VARIABLE py_err)
 if (py_res OR py_err)
