@@ -120,6 +120,10 @@ jobs:
         - pushd python_submitty_utils
         - python3 setup.py test
         - popd
+
+        - pushd grading
+        - python3 -m unittest discover
+        - popd
     - <<: *02-python-unit
       python: 3.5
       if: branch = master OR type = pull_request
