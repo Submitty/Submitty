@@ -303,7 +303,7 @@ chmod 511 ${SUBMITTY_DATA_DIR}/tmp
 echo -e "Copy the grading code"
 
 # copy the files from the repo
-rsync -rtz ${SUBMITTY_REPOSITORY}/grading ${SUBMITTY_INSTALL_DIR}/src
+rsync -rtz ${SUBMITTY_REPOSITORY}/grading/grading ${SUBMITTY_INSTALL_DIR}/src
 
 #replace necessary variables
 array=( Sample_CMakeLists.txt CMakeLists.txt system_call_check.cpp seccomp_functions.cpp execute.cpp )

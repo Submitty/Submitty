@@ -9,8 +9,8 @@ exclude=
     bin/make_assignments_txt_file.py,
     bin/read_iclicker_ids.py,
     bin/regrade.py,
-    grading/python/submitty_router.py,
-    grading/json_syntax_checker.py
+    grading/grading/python/submitty_router.py,
+    grading/test,
     junit_test_runner,
     migration/migrations,
     more_autograding_examples,
