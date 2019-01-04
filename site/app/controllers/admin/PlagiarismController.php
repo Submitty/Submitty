@@ -583,7 +583,15 @@ class PlagiarismController extends AbstractController {
 	    					}
 	    				}
 	    			}
-	    			if($codebox == "1" && $orange_color) {
+                    if($match["type"] == "common" && $codebox == "1") {
+                        //Color is grey -- common matches among all students
+                        $color = '#cccccc';
+                    }
+                    else if($match["type"] == "provided"  && $codebox == "1") {
+                        //Color is green -- instructor provided code #b5e3b5
+                        $color = '#b5e3b5';
+                    }
+	    			else if($codebox == "1" && $orange_color) {
                         //Color is orange -- general match from selected match
                         $color = '#ffa500';
 	    			}
@@ -616,16 +624,10 @@ class PlagiarismController extends AbstractController {
 	    			// }
 
 	    		//}
-	    		else if($match["type"] == "common" && $codebox == "1") {
-                    //Color is grey -- common matches among all students
-                    $color = '#cccccc';
-	    		}
-	    		else if($match["type"] == "provided"  && $codebox == "1") {
-                    //Color is green -- instructor provided code #b5e3b5
-	    			$color = '#b5e3b5';
-	    		}
-	    	}
-            $color_info[] = [$start_pos, $start_line, $end_pos, $end_line, $color];
+	    		
+	    	  $color_info[] = [$start_pos, $start_line, $end_pos, $end_line, $color];
+            }
+            
         }
     	// foreach($color_info as $i=>$color_info_for_line) {
 	    // 	ksort($color_info[$i]);
@@ -636,10 +638,6 @@ class PlagiarismController extends AbstractController {
 
     public function getDisplayForCode($file_name , $color_info){
     	$content= file_get_contents($file_name);
-        ksort($color_info);
-        var_dump($color_info);
-        throw new Exception();
-
 	    return $content;
 	}
 
