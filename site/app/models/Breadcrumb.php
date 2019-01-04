@@ -13,6 +13,9 @@ use app\libraries\Core;
  * an anchor tag pointing to the external url.
  *
  * @link https://fontawesome.com/v4.7.0/icon/external-link
+ * @link https://fontawesome.com/start
+ * @link https://use.fontawesome.com/releases/v5.6.3/css/solid.css
+ * @link https://use.fontawesome.com/releases/v5.6.3/css/fontawesome.css
  *
  * @method string getTitle()
  * @method string|null getUrl()
