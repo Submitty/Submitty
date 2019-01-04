@@ -163,6 +163,8 @@ HTML;
     public function showPlagiarismResult($semester, $course, $gradeable_id, $gradeable_title , $rankings) {
         $return = "";
         $return .= <<<HTML
+        <script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/codemirror.js"></script>
+        <link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}css/iframe/codemirror.css" />
 <div style="padding:5px 5px 0px 5px;" class="content forum_content forum_show_threads">
 HTML;
 
@@ -197,9 +199,11 @@ HTML;
         </form><br />
         <div style="position:relative; height:100%; overflow-y:hidden;" class="row">
         <div style="max-height: 100%; width:100%;" class="sub">
-        <div id="" name="code_box_1" style="float:left;width:48%;height:100%;line-height:1.5em;overflow:auto;padding:5px;border: solid 1px #555;background:white;border-width: 2px;">
+        <div style="float:left;width:48%;height:100%;line-height:1.5em;overflow:auto;padding:5px;border: solid 1px #555;background:white;border-width: 2px;">
+        <textarea id="code_box_1" name="code_box_1"></textarea>
         </div>
-        <div name="code_box_2" style="float:right;width:48%;height:100%;line-height:1.5em;overflow:auto;padding:5px;border: solid 1px #555;background:white;border-width: 2px;">
+        <div style="float:right;width:48%;height:100%;line-height:1.5em;overflow:auto;padding:5px;border: solid 1px #555;background:white;border-width: 2px;">
+        <textarea id="code_box_2" name="code_box_2"></textarea>
         </div>
         </div>
         </div>
@@ -209,6 +213,18 @@ HTML;
 </div>
 <script>
     var form = $("#users_with_plagiarism");
+    var code_user_1 = CodeMirror.fromTextArea(document.getElementById('code_box_1'), {
+        lineNumbers: true,
+        readOnly: true,
+        cursorHeight: 0.0,
+        lineWrapping: true
+    });
+    var code_user_2 = CodeMirror.fromTextArea(document.getElementById('code_box_2'), {
+        lineNumbers: true,
+        readOnly: true,
+        cursorHeight: 0.0,
+        lineWrapping: true
+    });
     $('[name="user_id_1"]', form).change(function(){
         setUserSubmittedCode('{$gradeable_id}','user_id_1');
     });

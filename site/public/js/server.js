@@ -415,6 +415,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                 $.ajax({
                     url: url,
                     success: function(data) {
+                    	console.log(data);
                         data = JSON.parse(data);
                         if(data.error){
                             alert(data.error);
@@ -437,7 +438,10 @@ function setUserSubmittedCode(gradeable_id, changed) {
                             }
                         });
                         $('[name="version_user_1"]', form).find('option').remove().end().append(append_options).val(data.code_version_user_1);
-                        $('[name="code_box_1"]').empty().append($('<textarea/>').html(data.display_code1).text());
+
+                        $('.CodeMirror')[0].CodeMirror.getDoc().setValue(data.display_code1);
+                        $('.CodeMirror')[0].CodeMirror.refresh();
+                        //$('[name="code_box_1"]').empty().append(data.display_code1);
                     },
                     error: function(e) {
                         alert("Could not load submitted code, please refresh the page and try again.");
@@ -485,7 +489,9 @@ function setUserSubmittedCode(gradeable_id, changed) {
                                 alert(data.error);
                                 return;
                             }
-                            $('[name="code_box_1"]').empty().append($('<textarea/>').html(data.display_code1).text());
+                            $('.CodeMirror')[0].CodeMirror.getDoc().setValue(data.display_code1);
+                        	$('.CodeMirror')[0].CodeMirror.refresh();
+                            //$('[name="code_box_1"]').empty().append(data.display_code1);
                         },
                         error: function(e) {
                             alert("Could not load submitted code, please refresh the page and try again.");
@@ -506,8 +512,12 @@ function setUserSubmittedCode(gradeable_id, changed) {
                                 alert(data.error);
                                 return;
                             }
-                            $('[name="code_box_1"]').empty().append($('<textarea/>').html(data.display_code1).text());
-                            $('[name="code_box_2"]').empty().append($('<textarea/>').html(data.display_code2).text());
+                            $('.CodeMirror')[0].CodeMirror.getDoc().setValue(data.display_code1);
+                        	$('.CodeMirror')[0].CodeMirror.refresh();
+                        	$('.CodeMirror')[1].CodeMirror.getDoc().setValue(data.display_code2);
+                        	$('.CodeMirror')[1].CodeMirror.refresh();
+                            // $('[name="code_box_1"]').empty().append(data.display_code1);
+                            // $('[name="code_box_2"]').empty().append(data.display_code2);
                         },
                         error: function(e) {
                             alert("Could not load submitted code, please refresh the page and try again.");
