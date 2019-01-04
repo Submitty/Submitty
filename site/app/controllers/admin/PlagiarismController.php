@@ -525,7 +525,7 @@ class PlagiarismController extends AbstractController {
     		else {
     			$color_info = $this->getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, '', '', '1');
     		}
-    		$data= array('display_code1'=> htmlentities($this->getDisplayForCode($file_name, $color_info)), 'code_version_user_1' => $version_user_1, 'max_matching_version' => $max_matching_version, 'active_version_user_1' => $active_version_user_1, 'all_versions_user_1' => $all_versions_user_1, 'ci'=> $color_info);
+    		$data= array('display_code1'=> $this->getDisplayForCode($file_name, $color_info), 'code_version_user_1' => $version_user_1, 'max_matching_version' => $max_matching_version, 'active_version_user_1' => $active_version_user_1, 'all_versions_user_1' => $all_versions_user_1, 'ci'=> $color_info);
         }
         else {
         	$return = array('error' => 'User 1 submission.concatenated for specified version not found.');
@@ -538,7 +538,7 @@ class PlagiarismController extends AbstractController {
 
 	    	if(($this->core->getUser()->accessAdmin()) && (file_exists($file_name))) {
 	    		$color_info = $this->getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, $_REQUEST['user_id_2'], $_REQUEST['version_user_2'], '2');
-	  			$data['display_code2'] = htmlentities($this->getDisplayForCode($file_name, $color_info));
+	  			$data['display_code2'] = $this->getDisplayForCode($file_name, $color_info);
 	        }
 	        else {
 	        	$return = array('error' => 'User 2 submission.concatenated for matching version not found.');
@@ -584,140 +584,63 @@ class PlagiarismController extends AbstractController {
 	    				}
 	    			}
 	    			if($codebox == "1" && $orange_color) {
-                        $onclick_function = 'getMatchesForClickedMatch("'.$gradeable_id.'", event,'.$match["start"].','.$match["end"].',"code_box_1","orange",this);';
-                        $name = '{"start":'.$match["start"].', "end":'.$match["end"].'}';
-	    				if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {
-			    			$color_info[$start_line][$start_pos] .= "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffa500;cursor: pointer;'>";
-			    		}
-			    		else {
-			    			$color_info[$start_line][$start_pos] = "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffa500;cursor: pointer;'>";
-			    		}
-			    		if(array_key_exists($end_line, $color_info) && array_key_exists($end_pos+strlen(strval($end_value)), $color_info[$end_line])) {
-			    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>".$color_info[$end_line][$end_pos+strlen(strval($end_value))];
-			    		}
-			    		else {
-			    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>";
-			    		}
+                        //Color is orange -- general match from selected match
+                        $color = '#ffa500';
 	    			}
 	    			else if($codebox == "1" && !$orange_color) {
-                        $onclick_function = 'getMatchesForClickedMatch("'.$gradeable_id.'", event,'.$match["start"].','.$match["end"].',"code_box_1","yellow",this);';
-                        $name = '{"start":'.$match["start"].', "end":'.$match["end"].'}';
-	    				if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {
-			    			$color_info[$start_line][$start_pos] .= "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffff00;cursor: pointer;'>";
-			    		}
-			    		else {
-			    			$color_info[$start_line][$start_pos] = "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffff00;cursor: pointer;'>";
-			    		}
-			    		if(array_key_exists($end_line, $color_info) && array_key_exists($end_pos+strlen(strval($end_value)), $color_info[$end_line])) {
-			    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>".$color_info[$end_line][$end_pos+strlen(strval($end_value))];
-			    		}
-			    		else {
-			    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>";
-			    		}
+                        //Color is yellow -- matches other students...
+                        $color = '#ffff00';
 	    			}
-	    			else if($codebox == "2" && $user_id_2 !="" && $orange_color) {
-                        foreach($match['others'][$user_2_index_in_others]['matchingpositions'] as $user_2_matchingposition) {
-    	    				$start_pos =$tokens_user_2[$user_2_matchingposition["start"]-1]["char"];
-    			    		$start_line= $tokens_user_2[$user_2_matchingposition["start"]-1]["line"];
-    			    		$end_pos =$tokens_user_2[$user_2_matchingposition["end"]-1]["char"];
-    			    		$end_line= $tokens_user_2[$user_2_matchingposition["end"]-1]["line"];
-    			    		$end_value =$tokens_user_2[$user_2_matchingposition["end"]-1]["value"];
-                            $onclick_function = 'getMatchesForClickedMatch("'.$gradeable_id.'", event,'.$match["start"].','.$match["end"].',"code_box_2","orange", this);';
-                            $name = '{"start":'.$user_2_matchingposition["start"].', "end":'.$user_2_matchingposition["end"].'}';
-    	    				if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {
-    			    			$color_info[$start_line][$start_pos] .= "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffa500;cursor: pointer;'>";
-    			    		}
-    			    		else {
-    			    			$color_info[$start_line][$start_pos] = "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffa500;cursor: pointer;'>";
-    			    		}
-    			    		if(array_key_exists($end_line, $color_info) && array_key_exists($end_pos+strlen(strval($end_value)), $color_info[$end_line])) {
-    			    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>".$color_info[$end_line][$end_pos+strlen(strval($end_value))];
-    			    		}
-    			    		else {
-    			    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>";
-    			    		}
-                        }
-	    			}
+	    			// else if($codebox == "2" && $user_id_2 !="" && $orange_color) {
+        //                 foreach($match['others'][$user_2_index_in_others]['matchingpositions'] as $user_2_matchingposition) {
+    	   //  				$start_pos =$tokens_user_2[$user_2_matchingposition["start"]-1]["char"];
+    			 //    		$start_line= $tokens_user_2[$user_2_matchingposition["start"]-1]["line"];
+    			 //    		$end_pos =$tokens_user_2[$user_2_matchingposition["end"]-1]["char"];
+    			 //    		$end_line= $tokens_user_2[$user_2_matchingposition["end"]-1]["line"];
+    			 //    		$end_value =$tokens_user_2[$user_2_matchingposition["end"]-1]["value"];
+        //                     $onclick_function = 'getMatchesForClickedMatch("'.$gradeable_id.'", event,'.$match["start"].','.$match["end"].',"code_box_2","orange", this);';
+        //                     $name = '{"start":'.$user_2_matchingposition["start"].', "end":'.$user_2_matchingposition["end"].'}';
+    	   //  				if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {
+    			 //    			$color_info[$start_line][$start_pos] .= "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffa500;cursor: pointer;'>";
+    			 //    		}
+    			 //    		else {
+    			 //    			$color_info[$start_line][$start_pos] = "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffa500;cursor: pointer;'>";
+    			 //    		}
+    			 //    		if(array_key_exists($end_line, $color_info) && array_key_exists($end_pos+strlen(strval($end_value)), $color_info[$end_line])) {
+    			 //    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>".$color_info[$end_line][$end_pos+strlen(strval($end_value))];
+    			 //    		}
+    			 //    		else {
+    			 //    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>";
+    			 //    		}
+        //                 }
+	    			// }
 
-	    		}
+	    		//}
 	    		else if($match["type"] == "common" && $codebox == "1") {
-	    			if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {
-		    			$color_info[$start_line][$start_pos] .= "<span style='background-color:#cccccc'>";
-		    		}
-		    		else {
-		    			$color_info[$start_line][$start_pos] = "<span style='background-color:#cccccc'>";
-		    		}
-		    		if(array_key_exists($end_line, $color_info) && array_key_exists($end_pos+strlen(strval($end_value)), $color_info[$end_line])) {
-		    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>".$color_info[$end_line][$end_pos+strlen(strval($end_value))];
-		    		}
-		    		else {
-		    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>";
-		    		}
+                    //Color is grey -- common matches among all students
+                    $color = '#cccccc';
 	    		}
 	    		else if($match["type"] == "provided"  && $codebox == "1") {
-	    			if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {
-		    			$color_info[$start_line][$start_pos] .= "<span style='background-color:#b5e3b5'>";
-		    		}
-		    		else {
-		    			$color_info[$start_line][$start_pos] = "<span style='background-color:#b5e3b5'>";
-		    		}
-		    		if(array_key_exists($end_line, $color_info) && array_key_exists($end_pos+strlen(strval($end_value)), $color_info[$end_line])) {
-		    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>".$color_info[$end_line][$end_pos+strlen(strval($end_value))];
-		    		}
-		    		else {
-		    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>";
-		    		}
+                    //Color is green -- instructor provided code #b5e3b5
+	    			$color = '#b5e3b5';
 	    		}
 	    	}
+            $color_info[] = [$start_pos, $start_line, $end_pos, $end_line, $color];
         }
-    	foreach($color_info as $i=>$color_info_for_line) {
-	    	krsort($color_info[$i]);
-    	}
+    	// foreach($color_info as $i=>$color_info_for_line) {
+	    // 	ksort($color_info[$i]);
+    	// }
+    }
     	return $color_info;
     }
 
     public function getDisplayForCode($file_name , $color_info){
-    	$lines= file($file_name);
-    	foreach($lines as $i=>$line) {
-    		$lines[$i] = rtrim($line, "\n");
-    	}
-	    $html = "<div style='background:white;border:none;' class='diff-container'><div class='diff-code'>";
-	    $last_line_unmatched_span="";
-	    $present_line_unmatched_span="";
+    	$content= file_get_contents($file_name);
+        ksort($color_info);
+        var_dump($color_info);
+        throw new Exception();
 
-	    for ($i = 0; $i < count($lines); $i++) {
-	        $j = $i + 1;
-	        $html .= "<div style='white-space: nowrap;'>";
-	        $html .= "<span class='line_number'>". $j ."</span>";
-	        $html .= "<span class='line_code'>";
-
-	        if(array_key_exists($i+1, $color_info)) {
-		        if($color_info[$i+1][max(array_keys($color_info[$i+1]))] != "</span>") {
-	    			$lines[$i] = substr_replace($lines[$i], "</span>", strlen($lines[$i]), 0);
-	    			$present_line_unmatched_span = str_replace("</span>", "", $color_info[$i+1][max(array_keys($color_info[$i+1]))]);
-	    		}
-	    		else {
-	    			$present_line_unmatched_span = "";
-	    		}
-		        foreach ($color_info[$i+1] as $c => $color_info_for_position) {
-		    		$lines[$i] = substr_replace($lines[$i], $color_info_for_position, $c-1, 0);
-		    	}
-
-	    		if((strpos($color_info[$i+1][min(array_keys($color_info[$i+1]))],"</span>") == 0)) {
-	    			$lines[$i] = substr_replace($lines[$i], $last_line_unmatched_span, 0, 0);
-	    		}
-		    }
-		    else if($last_line_unmatched_span != "") {
-	    		$lines[$i] = substr_replace($lines[$i], "</span>", strlen($lines[$i]), 0);
-	    		$lines[$i] = substr_replace($lines[$i], $last_line_unmatched_span, 0, 0);
-	    	}
-	    	$last_line_unmatched_span = $present_line_unmatched_span;
-	        $html .= $lines[$i];
-	        $html .= "</span></div>";
-	    }
-	    $j++;
-	    $html .= "</div></div>";
-	    return $html;
+	    return $content;
 	}
 
     public function ajaxGetMatchingUsers() {
