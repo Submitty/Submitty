@@ -71,9 +71,9 @@
                                 <tr>
                                     <td>
                                         {% if mark.earned %}
-                                            <i class="fas fa-check-square fa-1g"></i>
+                                            <i class="far fa-check-square fa-1g"></i>
                                         {% else %}
-                                            <i class="fas fa-square fa-1g"></i>
+                                            <i class="far fa-square fa-1g"></i>
                                         {% endif %}
                                     </td>
                                     <td class="mark-score">
@@ -87,7 +87,7 @@
                             {% if component.custom_mark_score != 0 or component.comment != '' %}
                                 <tr>
                                     <td>
-                                        <i class="fas fa-check-square fa-1g"></i>
+                                        <i class="far fa-check-square fa-1g"></i>
                                     </td>
                                     <td class="mark-score">
                                         {{ component.custom_mark_score|number_format(num_decimals) }}
