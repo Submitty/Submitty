@@ -78,6 +78,8 @@ class Output {
 
     public function setInternalResources() {
         $this->addCss('https://use.fontawesome.com/releases/v5.6.3/css/solid.css');
+        $this->addCss('https://use.fontawesome.com/releases/v5.6.3/css/regular.css');
+        $this->addCss('https://use.fontawesome.com/releases/v5.6.3/css/brands.css');
         $this->addCss('https://use.fontawesome.com/releases/v5.6.3/css/fontawesome.css');
 
         $this->addCss("https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic,700italic");
