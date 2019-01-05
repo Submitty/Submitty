@@ -415,8 +415,10 @@ function setUserSubmittedCode(gradeable_id, changed) {
                 $.ajax({
                     url: url,
                     success: function(data) {
-                    	console.log(data);
+                    	
                         data = JSON.parse(data);
+                        console.log(data.ci);
+
                         if(data.error){
                             alert(data.error);
                             return;
@@ -440,6 +442,17 @@ function setUserSubmittedCode(gradeable_id, changed) {
                         $('[name="version_user_1"]', form).find('option').remove().end().append(append_options).val(data.code_version_user_1);
 
                         $('.CodeMirror')[0].CodeMirror.getDoc().setValue(data.display_code1);
+                        var count = 0;
+                        data.ci.forEach(function(element) {
+                        	if(count == 0) {
+                        		console.log('Start: ' + element[5] + " End: " + element[6] + ' ' + {line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}.toString());
+                        		$('.CodeMirror')[0].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {css: "border: 1px solid black; border-right:1px solid red;background: green"});
+                        	} else {
+                	
+                        	$('.CodeMirror')[0].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});
+                        	}
+                        	count++;	
+                        });
                         $('.CodeMirror')[0].CodeMirror.refresh();
                         //$('[name="code_box_1"]').empty().append(data.display_code1);
                     },

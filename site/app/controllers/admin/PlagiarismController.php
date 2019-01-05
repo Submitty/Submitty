@@ -568,10 +568,11 @@ class PlagiarismController extends AbstractController {
         		$tokens_user_2 = json_decode(file_get_contents($file_path), true);
         	}
 	    	foreach($matches as $match) {
-	    		$start_pos =$tokens_user_1[$match["start"]-1]["char"];
-	    		$start_line= $tokens_user_1[$match["start"]-1]["line"];
+	    		$start_pos =$tokens_user_1[$match["start"]-1]["char"]-1;
+	    		$start_line= $tokens_user_1[$match["start"]-1]["line"]-1;
 	    		$end_pos =$tokens_user_1[$match["end"]-1]["char"];
-	    		$end_line= $tokens_user_1[$match["end"]-1]["line"];
+	    		$end_line= $tokens_user_1[$match["end"]-1]["line"]-1;
+                $start_value = $tokens_user_1[$match["start"]-1]["value"];
 	    		$end_value =$tokens_user_1[$match["end"]-1]["value"];
 	    		if($match["type"] == "match") {
 	    			$orange_color = false;
@@ -583,19 +584,12 @@ class PlagiarismController extends AbstractController {
 	    					}
 	    				}
 	    			}
-                    if($match["type"] == "common" && $codebox == "1") {
-                        //Color is grey -- common matches among all students
-                        $color = '#cccccc';
-                    }
-                    else if($match["type"] == "provided"  && $codebox == "1") {
-                        //Color is green -- instructor provided code #b5e3b5
-                        $color = '#b5e3b5';
-                    }
-	    			else if($codebox == "1" && $orange_color) {
+                    
+	    			if($orange_color) {
                         //Color is orange -- general match from selected match
                         $color = '#ffa500';
 	    			}
-	    			else if($codebox == "1" && !$orange_color) {
+	    			else if(!$orange_color) {
                         //Color is yellow -- matches other students...
                         $color = '#ffff00';
 	    			}
@@ -625,8 +619,17 @@ class PlagiarismController extends AbstractController {
 
 	    		//}
 	    		
-	    	  $color_info[] = [$start_pos, $start_line, $end_pos, $end_line, $color];
+	    	  
+            } 
+            else if($match["type"] == "common") {
+                //Color is grey -- common matches among all students
+                $color = '#cccccc';
             }
+            else if($match["type"] == "provided") {
+                //Color is green -- instructor provided code #b5e3b5
+                $color = '#b5e3b5';
+            }
+            $color_info[] = [$start_pos, $start_line, $end_pos, $end_line, $color, $start_value, $end_value];
             
         }
     	// foreach($color_info as $i=>$color_info_for_line) {
