@@ -16,7 +16,7 @@ use app\models\User;
  * @method float getScore()
  * @method string getComment()
  * @method void setComment($comment)
- * @method string getGraderId()
+ * @method string `Id()
  * @method int getGradedVersion()
  * @method void setGradedVersion($graded_version)
  * @method \DateTime getGradeTime()
@@ -55,6 +55,12 @@ class GradedComponent extends AbstractModel {
     protected $graded_version = 0;
     /** @property @var \DateTime The time which this grade was most recently updated */
     protected $grade_time = null;
+
+    protected $verifier = null;
+
+    protected $verifier_id = "";
+
+    protected $verify_time = "";
 
     /**
      * GradedComponent constructor.
@@ -299,6 +305,24 @@ class GradedComponent extends AbstractModel {
         $this->modified = true;
     }
 
+    public function setVerifier(User $verifier){
+        $this->verifier = $verifier;
+        $this->verifier_id = $verifier->getId();
+        $this->modified = true;
+    }
+
+    public function getVerifier(){
+        return $this->verifier;
+    }
+
+    public function setVerifyTime($grade_time){
+        try {
+            $this->grade_time = DateUtils::parseDateTime($grade_time, $this->core->getConfig()->getTimezone());
+        } catch (\Exception $e) {
+            throw new \InvalidArgumentException('Invalid date string format');
+        }
+        $this->modified = true;
+    }
     /* Intentionally Unimplemented accessor methods */
 
     /** @internal */

@@ -337,7 +337,7 @@ class ElectronicGraderController extends GradingController {
 
     private function verifyComponent(GradedComponent $graded_component, User $verifier) {
         // TODO: swap out body of this function with verifying logic
-        $graded_component->setGrader($verifier);
+        $graded_component->setVerifier($verifier);
     }
 
     /**
