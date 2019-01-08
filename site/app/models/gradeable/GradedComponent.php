@@ -22,6 +22,7 @@ use app\models\User;
  * @method \DateTime getGradeTime()
  * @method int[] getMarkIds()
  * @method bool isMarksModified()
+ * @method \DateTime getVerifyTime()
  */
 class GradedComponent extends AbstractModel {
     /** @var Component Reference to component */
@@ -315,11 +316,15 @@ class GradedComponent extends AbstractModel {
         return $this->verifier;
     }
 
-    public function setVerifyTime($grade_time){
-        try {
-            $this->grade_time = DateUtils::parseDateTime($grade_time, $this->core->getConfig()->getTimezone());
-        } catch (\Exception $e) {
-            throw new \InvalidArgumentException('Invalid date string format');
+    public function setVerifyTime($verify_time){
+        if ($verify_time === null) {
+            $this->verify_time = null;
+        } else {
+            try {
+                $this->verify_time = DateUtils::parseDateTime($verify_time, $this->core->getConfig()->getTimezone());
+            } catch (\Exception $e) {
+                throw new \InvalidArgumentException('Invalid date string format');
+            }
         }
         $this->modified = true;
     }

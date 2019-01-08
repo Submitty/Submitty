@@ -3582,6 +3582,8 @@ AND gc_id IN (
                     $graded_component->getGradedVersion(),
                     DateUtils::dateTimeToString($graded_component->getGradeTime()),
                     $graded_component->getGraderId(),
+                    $graded_component->getVerifier()->getId(),
+                    DateUtils::dateTimeToString($graded_component->getVerifyTime()),
                     $graded_component->getTaGradedGradeable()->getId(),
                     $graded_component->getComponentId()
                 ];
@@ -3591,7 +3593,9 @@ AND gc_id IN (
                       gcd_component_comment=?,
                       gcd_graded_version=?,
                       gcd_grade_time=?,
-                      gcd_grader_id=?
+                      gcd_grader_id=?,
+                      gcd_verifier_id=?,
+                      gcd_verify_time = ?
                     WHERE gd_id=? AND gc_id=?";
             }
             else {

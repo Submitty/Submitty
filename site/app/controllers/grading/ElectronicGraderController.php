@@ -212,7 +212,7 @@ class ElectronicGraderController extends GradingController {
      * Route for verifying the grader of a graded component
      * Note: Until verify graders migration gets added, this just overwrites the grader
      */
-    private function ajaxVerifyComponent() {
+    private function ajaxVerifyComponent($verify_all = false) {
         $gradeable_id = $_POST['gradeable_id'] ?? '';
         $component_id = $_POST['component_id'] ?? '';
         $anon_id = $_POST['anon_id'] ?? '';
@@ -262,82 +262,25 @@ class ElectronicGraderController extends GradingController {
         }
 
         try {
-            // Once we've parsed the inputs and checked permissions, perform the operation
-            $this->verifyComponent($graded_component, $grader);
-            $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
-
-            $this->core->getOutput()->renderJsonSuccess();
-        } catch (\InvalidArgumentException $e) {
-            $this->core->getOutput()->renderJsonFail($e->getMessage());
-        } catch (\Exception $e) {
-            $this->core->getOutput()->renderJsonError($e->getMessage());
-        }
-    }
-
-    /**
-     * Route for verifying all components of a graded gradeable
-     * Note: Until verify graders migration gets added, this just overwrites the graders
-     */
-    private function ajaxVerifyAllComponents() {
-        $gradeable_id = $_POST['gradeable_id'] ?? '';
-        $anon_id = $_POST['anon_id'] ?? '';
-
-        $grader = $this->core->getUser();
-
-        // Get the gradeable
-        $gradeable = $this->tryGetGradeable($gradeable_id);
-        if ($gradeable === false) {
-            return;
-        }
-
-        // Get user id from the anon id
-        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id);
-        if ($submitter_id === false) {
-            return;
-        }
-
-        // Get the graded gradeable
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
-        if ($graded_gradeable === false) {
-            return;
-        }
-
-        // checks if user has permission TODO: make these permissions should be more refined
-        if (!$this->core->getAccess()->canI("grading.electronic.verify_all")) {
-            $this->core->getOutput()->renderJsonFail('Insufficient permissions to verify component');
-            return;
-        }
-
-        // Verifying all components should not fail because there are no components to verify,
-        //  but it should only verify components with a grader
-        if ($graded_gradeable->hasTaGradingInfo()) {
-            $this->core->getOutput()->renderJsonSuccess();
-        }
-
-        // Get / create the TA grade
-        $ta_graded_gradeable = $graded_gradeable->getTaGradedGradeable();
-
-        try {
-            // Once we've parsed the inputs and checked permissions, perform the operation
-            foreach ($gradeable->getComponents() as $component) {
-                $graded_component = $ta_graded_gradeable->getGradedComponent($component);
-                if ($graded_component !== null) {
-                    $this->verifyComponent($graded_component, $grader);
+            if($verify_all){
+                foreach ($gradeable->getComponents() as $component) {
+                    $graded_component = $ta_graded_gradeable->getGradedComponent($component);
+                    if ($graded_component !== null){
+                        $graded_component->setVerifier($grader);
+                        $graded_component->setVerifyTime($this->core->getDateTimeNow());
+                    }
                 }
+            }else{
+                $graded_component->setVerifier($grader);
+                $graded_component->setVerifyTime($this->core->getDateTimeNow());
             }
             $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
-
             $this->core->getOutput()->renderJsonSuccess();
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
         } catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
-    }
-
-    private function verifyComponent(GradedComponent $graded_component, User $verifier) {
-        // TODO: swap out body of this function with verifying logic
-        $graded_component->setVerifier($verifier);
     }
 
     /**
