@@ -135,10 +135,11 @@ input[type="checkbox"]:checked{
 
 /* this requires loading the FontAwesome CSS from the CDN before loading the server.css */
 input[type="checkbox"]:checked:before {
-    font-family: FontAwesome;
+    font-family: 'Font Awesome\ 5 Free';
     content: "\f00c";
     color: #FFF;
-    font-size: 18px
+    font-size: 18px;
+    font-weight: 900
 }
 
 input[type="checkbox"]:focus{
