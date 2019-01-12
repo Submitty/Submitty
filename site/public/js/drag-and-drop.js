@@ -276,7 +276,7 @@ function addLabel(filename, filesize, part, previous){
     var tmp = document.createElement('label');
     tmp.setAttribute("class", "mylabel");
     tmp.setAttribute("fname", filename);
-    tmp.innerHTML =  filename + " " + filesize + "kb <i class='fa fa-trash-o'></i><br />";
+    tmp.innerHTML =  filename + " " + filesize + "kb <i class='fas fa-trash'></i><br />";
     // styling
     tmp.children[0].onmouseover = function(e){
         e.stopPropagation();
@@ -509,7 +509,7 @@ function submitSplitItem(csrf_token, gradeable_id, user_id, path, count, merge_p
                     $("#bulk_submit_" + count).prop("disabled", true);
                     $("#bulk_delete_" + count).prop("disabled", true);
                     $("#users_" + count + " :input").prop("disabled", true);
-                    var message ='<div id="submit_' + count +  '" class="inner-message alert alert-success"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'submit_' + count +'\');"></a><i class="fa fa-times-circle"></i>' + data['message'] + '</div>';
+                    var message ='<div id="submit_' + count +  '" class="inner-message alert alert-success"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'submit_' + count +'\');"></a><i class="fas fa-times-circle"></i>' + data['message'] + '</div>';
                     $('#messages').append(message);
                     setTimeout(function() {
                         $('#submit_' + count).fadeOut();
@@ -571,7 +571,7 @@ function deleteSplitItem(csrf_token, gradeable_id, path, count) {
                     $("#bulk_delete_" + count).prop("disabled", true);
                     $("#bulk_user_id_" + count).val("");
                     $("#bulk_user_id_" + count).prop("disabled", true);
-                    var message ='<div id="delete_' + count + '" class="inner-message alert alert-success"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'delete_' + count + '\');"></a><i class="fa fa-times-circle"></i>' + data['message'] + '</div>';
+                    var message ='<div id="delete_' + count + '" class="inner-message alert alert-success"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'delete_' + count + '\');"></a><i class="fas fa-times-circle"></i>' + data['message'] + '</div>';
                     $('#messages').append(message);
                     setTimeout(function() {
                         $('#delete_' + count).fadeOut();
