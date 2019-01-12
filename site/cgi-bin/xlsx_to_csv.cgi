@@ -16,6 +16,7 @@
 import cgi
 import json
 import os
+import tempfile
 import xlsx2csv
 
 def print_error(message):
@@ -26,8 +27,9 @@ def main():
     print()
 
     args = cgi.FieldStorage()
-    xlsx_file = "/tmp/" + os.path.basename(args['xlsx_file'].value)
-    csv_file = "/tmp/" + os.path.basename(args['csv_file'].value)
+    temp_dir = tempfile.gettempdir()
+    xlsx_file = os.path.join(temp_dir, os.path.basename(args['xlsx_file'].value))
+    csv_file = os.path.join(temp_dir, os.path.basename(args['csv_file'].value))
 
     if (not os.path.isfile(xlsx_file)):
         print_error("XLSX spreadsheet not found")
