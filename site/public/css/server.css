@@ -392,6 +392,10 @@ table tr.table-header {
     display: flex;
 }
 
+.pre_forum {
+    font-family: inherit;
+}
+
 .content h1 {
     margin-bottom: 20px;
 }
