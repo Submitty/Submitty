@@ -56,8 +56,9 @@
                                 {% endif %}
                                 {% if team_assignment %}
                                     {# (size - 1) because twig loops are range inclusive #}
+                                    {% set outer_loop = loop %}
                                     {% for i in 1..(max_team_size - 1) %}
-                                        <input type="text" id="bulk_user_id_{{ loop.index }}[{{ i }}]" value =""/>
+                                        <input type="text" id="bulk_user_id_{{ outer_loop.index }}[{{ i }}]" value =""/>
                                     {% endfor %}
                                 {% endif %}
                             </div>
