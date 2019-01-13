@@ -41,6 +41,26 @@ a.fa:hover,
 a > i.fa:hover {
     color: #2627ee;
 }
+a,
+a:visited,
+a:link,
+a.external,
+a.external:visited,
+a.external:link,
+a.fas:hover,
+a > i.fas:hover {
+    color: #2627ee;
+}
+a,
+a:visited,
+a:link,
+a.external,
+a.external:visited,
+a.external:link,
+a.far:hover,
+a > i.far:hover {
+    color: #2627ee;
+}
 
 a:hover,
 a.external:hover {
@@ -56,11 +76,33 @@ a.fa.btn-success, a.btn-primary, a.btn-danger,
 a.btn-success > i.fa, a.btn-primary > i.fa, a.btn-danger > i.fa {
     color: #ffffff;
 }
+a.btn-success, a.btn-primary, a.btn-danger,
+a.fas.btn-success, a.btn-primary, a.btn-danger,
+a.btn-success > i.fas, a.btn-primary > i.fas, a.btn-danger > i.fas {
+    color: #ffffff;
+}
+a.btn-success, a.btn-primary, a.btn-danger,
+a.far.btn-success, a.btn-primary, a.btn-danger,
+a.btn-success > i.far, a.btn-primary > i.far, a.btn-danger > i.far {
+    color: #ffffff;
+}
 
 a.btn-default,
 a.fa.btn-default,
 a.fa,
 a > i.fa {
+    color: #000000;
+}
+a.btn-default,
+a.fas.btn-default,
+a.fas,
+a > i.fas {
+    color: #000000;
+}
+a.btn-default,
+a.far.btn-default,
+a.far,
+a > i.far {
     color: #000000;
 }
 
@@ -137,10 +179,11 @@ input[type="checkbox"]:checked{
 
 /* this requires loading the FontAwesome CSS from the CDN before loading the server.css */
 input[type="checkbox"]:checked:before {
-    font-family: FontAwesome;
+    font-family: 'Font Awesome\ 5 Free';
     content: "\f00c";
     color: #FFF;
-    font-size: 18px
+    font-size: 18px;
+    font-weight: 900
 }
 
 input[type="checkbox"]:focus{
@@ -335,6 +378,12 @@ table tr.table-header {
 #header a > i.fa {
     font-size: 20px;
 }
+#header a > i.fas {
+    font-size: 20px;
+}
+#header a > i.far {
+    font-size: 20px;
+}
 
 #header-text>h2:nth-child(2) {
     padding-top: 25px;
@@ -493,8 +542,20 @@ table tr.table-header {
 .fa-green {
     color: green;
 }
+.fas-green {
+    color: green;
+}
+.far-green {
+    color: green;
+}
 
 .fa-red {
+    color: red;
+}
+.fas-red {
+    color: red;
+}
+.far-red {
     color: red;
 }
 
@@ -1043,6 +1104,14 @@ table .instructor .two-options{
     margin-left: 0;
     width: 48px;
 }
+#nav-buttons ul li .nav-row.collapse-icon i.fas {
+    margin-left: 0;
+    width: 48px;
+}
+#nav-buttons ul li .nav-row.collapse-icon i.far {
+    margin-left: 0;
+    width: 48px;
+}
 
 #nav-buttons ul li a.nav-row {
     color: #006398;
@@ -1060,20 +1129,54 @@ table .instructor .two-options{
 #nav-buttons ul li a.nav-row i.fa {
     color: #000000;
 }
+#nav-buttons ul li a.nav-row i.fas {
+    color: #000000;
+}
+#nav-buttons ul li a.nav-row i.far {
+    color: #000000;
+}
 
 #nav-buttons ul li a.collapse-icon i.fa {
+    color: #000000;
+}
+#nav-buttons ul li a.collapse-icon i.fas {
+    color: #000000;
+}
+#nav-buttons ul li a.collapse-icon i.far {
     color: #000000;
 }
 
 #nav-buttons ul li a.collapse-icon:hover i.fa {
     color: #006398;
 }
+#nav-buttons ul li a.collapse-icon:hover i.fas {
+    color: #006398;
+}
+#nav-buttons ul li a.collapse-icon:hover i.far {
+    color: #006398;
+}
 
 #nav-buttons ul li a.collapse-icon:active i.fa {
     color: #790000;
 }
+#nav-buttons ul li a.collapse-icon:active i.fas {
+    color: #790000;
+}
+#nav-buttons ul li a.collapse-icon:active i.far {
+    color: #790000;
+}
 
 #nav-buttons ul li .nav-row i.fa {
+    margin-left: -33px;
+    width: 30px;
+    text-align: center;
+}
+#nav-buttons ul li .nav-row i.fas {
+    margin-left: -33px;
+    width: 30px;
+    text-align: center;
+}
+#nav-buttons ul li .nav-row i.far {
     margin-left: -33px;
     width: 30px;
     text-align: center;
