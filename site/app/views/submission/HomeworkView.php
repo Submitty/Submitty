@@ -14,6 +14,7 @@ use app\models\User;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
+use app\models\gradeable\AbstractGradeableInput;
 
 class HomeworkView extends AbstractView {
 
@@ -249,6 +250,7 @@ class HomeworkView extends AbstractView {
         $student_page = $gradeable->isStudentPdfUpload();
         $students_full = [];
         $inputs = $gradeable->getAutogradingConfig()->getInputs();
+        $contents = $gradeable->getAutogradingConfig()->getContent();
         $old_files = [];
         $display_version = 0;
 
@@ -342,7 +344,7 @@ class HomeworkView extends AbstractView {
             'has_gradeable_message' => $gradeable->getAutogradingConfig()->getGradeableMessage() !== '',
             'gradeable_message' => $gradeable->getAutogradingConfig()->getGradeableMessage(),
             'allowed_late_days' => $gradeable->getLateDays(),
-            'num_inputs' => $gradeable->getAutogradingConfig()->getNumInputss(),
+            'num_inputs' => $gradeable->getAutogradingConfig()->getNumInputs(),
             'max_submissions' => $gradeable->getAutogradingConfig()->getMaxSubmissions(),
             'display_version' => $display_version,
             'highest_version' => $highest_version,
@@ -351,6 +353,7 @@ class HomeworkView extends AbstractView {
             'late_days_use' => $late_days_use,
             'old_files' => $old_files,
             'inputs' => $input_data,
+            'contents' => $contents,
             'image_data' => $image_data,
             'component_names' => $component_names,
             'upload_message' => $this->core->getConfig()->getUploadMessage()

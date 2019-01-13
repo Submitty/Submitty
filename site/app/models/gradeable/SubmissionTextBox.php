@@ -4,7 +4,7 @@ namespace app\models\gradeable;
 
 
 use app\libraries\Core;
-use app\models\AbstractTextBox;
+use app\models\gradeable\AbstractTextBox;
 
 /**
  * Class SubmissionTextBox
@@ -12,6 +12,6 @@ use app\models\AbstractTextBox;
  */
 class SubmissionTextBox extends AbstractTextBox {
     public function __construct(Core $core, array $details) {
-        parent::__construct($core);
+        parent::__construct($core, $details);
     }
 }

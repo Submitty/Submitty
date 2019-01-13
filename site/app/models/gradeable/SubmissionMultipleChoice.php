@@ -23,14 +23,14 @@ class SubmissionMultipleChoice extends AbstractGradeableInput {
     protected $choices;
 
     public function __construct(Core $core, array $details) {
-        parent::__construct($core);
+        parent::__construct($core, $details);
 
-        if (details["allow_multiple"] == true) {
+        if ($details["allow_multiple"] == true) {
             $this->allow_multiple = true;
         } else {
             $this->allow_multiple = false;
         }
 
-        $this->choices = details["choices"];
+        $this->choices = $details["choices"];
     }
 }

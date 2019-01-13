@@ -118,14 +118,74 @@
         <samp>git  clone  {{ repository_path }}  SPECIFY_TARGET_DIRECTORY</samp><br /><br />
         <input type="submit" id="submit" class="btn btn-primary" value="Grade My Repository" />
     {% else %}
-        <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
+      <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
 
-            {# Text boxes #}
-            {% for textbox in textboxes %}
-                {{ self.render_textbox(textbox, image_data, loop.index0) }}
-            {% endfor %}
-            {# /Text boxes #}
+	<script type="text/javascript" src="../../../../js/showdown.min.js"></script>
+	<script type="text/javascript" src="../../../../js/xss.min.js"></script>
+	<script type="text/javascript" src="../../../../js/showdown-xss-filter.js"></script>
 
+	{# Render content #}
+	{% for c in contents %}
+	  <h2>{{ c.title }}</h2>
+	  <div id="exp_{{ loop.index0 }}"></div>
+	  <script type="text/javascript">
+	    var converter = new showdown.Converter({ extensions: ['xssfilter']});
+	    var md = "{{ c.exposition|raw }}";
+	    document.getElementById("exp_{{ loop.index0 }}").innerHTML = converter.makeHtml(md);
+	  </script>
+	  <br>
+
+	    {# Render the inputs for the given content block #}
+	    {% for i in c.input %}
+	      {% if i.type == "textbox" %}
+		{{ self.render_textbox(i, image_data, loop.index0) }}
+	      {% elseif i.type == "codebox" %}
+		<style type="text/css" media="screen">
+		  #editor_{{ loop.index0 }} { 
+		  width: 75%;
+		  border: 3px solid #FF00FF;
+		  }
+		</style>
+
+		<strong>{{ i.label }}</strong>
+		<div id="editor_{{ loop.index0 }}">
+int main(int argc, char **argv) {
+  std::cout << "Hello World!" << std::endl;
+  return 0;		  
+}
+		</div>
+        <br>
+		
+		<script src="../../../../js/ace-builds/src-min/mode-{{ i.language }}.js"></script>
+        <script src="../../../../js/ace-builds/src-min/ace.js" type="text/javascript" charset="utf-8"></script>
+		<script>
+		  var editor = ace.edit("editor_{{ loop.index0 }}", {
+		  theme: "ace/theme/monokai",
+		  mode: "ace/mode/{{ i.language }}",
+		  autoScrollEditorIntoView: true,
+		  maxLines: 30,
+		  minLines: 10
+		  });
+		</script>
+	      {% elseif i.type == "multiplechoice" %}
+            <strong>{{ i.label }}</strong>
+            <br>
+            <fieldset>
+		      {% for choice in i.choices %}
+                {% if i.allow_multiple == true %}
+                    <input type="checkbox" value="{{ choice }}" /><label for="{{ choice }}">{{ choice }}</label><br />
+                {% else %}
+                    <input type="radio" name="choice" value="{{ choice }}" /><label for="{{ choice }}">{{ choice }}</label><br />
+                {% endif %}
+              {% endfor %}
+            </fieldset>
+            <br>
+	      {% endif %}
+	    {% endfor %}
+	{% endfor %}
+    
+
+	
             {# Submit boxes #}
             {% for part in part_names %}
                 <div id="upload{{ loop.index }}" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 150px;">
@@ -325,9 +385,10 @@
     {% endfor %}
 
     <p style="max-width: 50em;">
-        {{ textbox.label }}
+        <strong>{{ textbox.label }}</strong>
         <br>
-        {% if textbox.row_count == 0 %}
+          {% if textbox.row_count == 0 %}
+	    {# Maybe refactor this so that it uses input_### or something for compatability #}
             <input type="text" name="textbox_{{ index }}" id="textbox_{{ index }}" onKeyPress="handle_textbox_keypress();">
         {% else %}
             <textarea rows="{{ textbox.row_count }}" cols="50"  style="width:60em; height:100%;" name="textbox_{{ index }}" id="textbox_{{ index }}" onKeyPress="handle_textbox_keypress();"></textarea>

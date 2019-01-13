@@ -170,7 +170,6 @@ int main(int argc, char *argv[]) {
   if (content_blocks != config_json.end()) {
     j["content"] = nlohmann::json::array();
     for (int i = 0; i < content_blocks->size(); i++) {
-      std::cout << "COUNT BLAH: " << i << std::endl;
       nlohmann::json content;
       // Title, optional
       nlohmann::json::iterator title = (*content_blocks)[i].find("title");
@@ -247,6 +246,7 @@ int main(int argc, char *argv[]) {
 	  }
 	}
       }
+      j["content"].push_back(content);
     }
   }
 

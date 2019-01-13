@@ -23,7 +23,7 @@ class AbstractTextBox extends AbstractGradeableInput {
     protected $is_codebox;
 
     public function __construct(Core $core, array $details) {
-        parent::__construct($core);
+        parent::__construct($core, $details);
 
         $this->row_count = $details['rows'];
         if ($details['type'] === "codebox") {

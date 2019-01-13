@@ -568,14 +568,16 @@ class Gradeable extends AbstractModel {
         $num_inputs = 0;
         $temp_count = 0;
         $actual_input = array();
-        foreach ($details as $c) {
-            echo json_encode($c);
-        }
-        foreach ($details['content'] as $c) {
-            $num_inputs = $num_inputs + count($c['input'] ?? []);
-            foreach ($c['input'] as $inp) {
-                $actual_input[$temp_count] = $inp;
-                $temp_count++;
+
+        if (isset($details['content'])) {
+            foreach ($details['content'] as $c) {
+                if (isset($c['input'])) {
+                    $num_inputs = $num_inputs + count($c['input'] ?? []);
+                    foreach ($c['input'] as $inp) {
+                        $actual_input[$temp_count] = $inp;
+                        $temp_count++;
+                    }
+                }
             }
         }
         

@@ -47,6 +47,8 @@ class AutogradingConfig extends AbstractModel {
     /** @property @var string[] The names of different upload bins on the submission page (1-indexed) */
     protected $part_names = [];
 
+    /** @property @var array Array of content objects */
+    private $content = [];
     /** @property @var AbstractGradingInput[] Grading input configs for all new types of gradeable input*/
     private $inputs = [];
     /** @property @var AutogradingTestcase[] Cut-down information about autograding test cases*/
@@ -78,7 +80,7 @@ class AutogradingConfig extends AbstractModel {
 
     public function __construct(Core $core, array $details) {
         parent::__construct($core);
-
+        
         // Was there actually a config file to read from
         if ($details === null || $details === []) {
             throw new \InvalidArgumentException('Provided details were blank or null');
@@ -137,16 +139,17 @@ class AutogradingConfig extends AbstractModel {
         // defaults to 0 if not set
         $num_inputs = 0;
         $temp_count = 0;
+        $other_count = 0;
         $actual_input = array();
-        foreach ($details as $c) {
-            echo json_encode($c);
-        }
-        
-        foreach ($details['content'] as $c) {
-            $num_inputs = $num_inputs + count($c['input'] ?? []);
-            foreach ($c['input'] as $inp) {
-                $actual_input[$temp_count] = $inp;
-                $temp_count++;
+        if (isset($details['content'])) {
+            foreach ($details['content'] as $c) {
+                $this->content[$other_count] = $c;
+                $num_inputs = $num_inputs + count($c['input'] ?? []);
+                foreach ($c['input'] as $inp) {
+                    $actual_input[$temp_count] = $inp;
+                    $temp_count++;
+                }
+                $other_count++;
             }
         }
 
@@ -196,6 +199,10 @@ class AutogradingConfig extends AbstractModel {
      */
     public function getInputs() {
         return $this->inputs;
+    }
+
+    public function getContent() {
+        return $this->content;
     }
 
     /**

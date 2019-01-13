@@ -4,7 +4,7 @@ namespace app\models\gradeable;
 
 
 use app\libraries\Core;
-use app\models\gradeable\AbstractTextBoxModel;
+use app\models\gradeable\AbstractTextBox;
 
 /**
  * Class SubmissionCodeBox
@@ -19,7 +19,7 @@ class SubmissionCodeBox extends AbstractTextBox {
     protected $language;
 
     public function __construct(Core $core, array $details) {
-        parent::__construct($core);
+        parent::__construct($core, $details);
 
         $this->language = $details['language'];
     }
