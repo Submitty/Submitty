@@ -16,7 +16,7 @@ use app\models\User;
  * @method float getScore()
  * @method string getComment()
  * @method void setComment($comment)
- * @method string `Id()
+ * @method string getGraderId()
  * @method int getGradedVersion()
  * @method void setGradedVersion($graded_version)
  * @method \DateTime getGradeTime()
@@ -61,7 +61,7 @@ class GradedComponent extends AbstractModel {
 
     protected $verifier_id = "";
 
-    protected $verify_time = "";
+    protected $verify_time = null;
 
     /**
      * GradedComponent constructor.

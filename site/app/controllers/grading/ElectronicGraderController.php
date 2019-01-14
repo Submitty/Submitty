@@ -94,7 +94,7 @@ class ElectronicGraderController extends GradingController {
                 $this->ajaxVerifyComponent();
                 break;
             case 'verify_all_components':
-                $this->ajaxVerifyAllComponents();
+                $this->ajaxVerifyComponent(true);
                 break;
             case 'remove_empty':
                 $this->ajaxRemoveEmpty();
