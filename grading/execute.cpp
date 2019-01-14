@@ -57,6 +57,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "cat",                     "/bin/cat" },
     { "compare",                 "/usr/bin/compare" }, //image magick!
     { "mogrify",                 "/usr/bin/mogrify" }, //image magick!
+    { "convert",                 "/usr/bin/convert" }, //image magick!
     { "cut",                     "/usr/bin/cut" },
     { "sort",                    "/usr/bin/sort" },
     { "grep",                    "/bin/grep" },
@@ -78,6 +79,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "python2.7",               "/usr/bin/python2.7" },
     { "python3",                 "/usr/bin/python3" },
     { "python3.5",               "/usr/bin/python3.5" },
+    { "python3.6",               "/usr/bin/python3.6" },
     { "pylint",                  "/usr/local/bin/pylint" },
 
     // for Data Structures
@@ -1032,7 +1034,7 @@ void cin_reader(std::mutex* lock, std::queue<std::string>* input_queue, bool* CH
 
       if (ret > 0){
         std::getline (std::cin,my_string);
-        std::cout << "Cin recieved: " << my_string << std::endl;
+        std::cout << "Cin received: " << my_string << std::endl;
 
         lock->lock();
         input_queue->push(my_string);

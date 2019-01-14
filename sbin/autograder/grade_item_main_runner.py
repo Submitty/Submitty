@@ -151,7 +151,7 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                         first_testcase = False
 
                 except Exception as e:
-                    print('An error occurred when grading by docker.')
+                    grade_items_logging.log_message(job_id, message="ERROR while grading by docker:\n {0}".format(traceback.format_exc()))
                     traceback.print_exc()
                 finally:
                     clean_up_containers(container_info,job_id,is_batch_job,which_untrusted,item_name,grading_began,use_router)
@@ -368,6 +368,7 @@ def launch_container(container_name, container_image, mounted_directory,job_id,i
   this_container = subprocess.check_output(['docker', 'create', '-i', '-u', untrusted_uid, '--network', 'none',
                                            '-v', mounted_directory + ':' + mounted_directory,
                                            '-w', mounted_directory,
+                                           '--hostname', name,
                                            '--name', container_name,
                                            container_image,
                                            #The command to be run.
@@ -506,6 +507,8 @@ def create_knownhosts_txt(container_info,test_input_folder,single_port_per_conta
 def clean_up_containers(container_info,job_id,is_batch_job,which_untrusted,submission_path,grading_began,use_router):
     # First, clean up the dockers.
     for name, info in container_info.items():
+        if not "container_id" in info:
+          continue
         c_id = info['container_id']
         subprocess.call(['docker', 'rm', '-f', c_id])
 

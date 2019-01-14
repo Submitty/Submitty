@@ -12,7 +12,7 @@
             {# download icon if student can download files #}
             {% if can_download %}
                 <a onclick='downloadFile("{{ file.relative_name|url_encode }}","{{ file.path|url_encode }}")'>
-                    <i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
+                    <i class="fas fa-download" aria-hidden="true" title="Download the file"></i></a>
             {% endif %}
 
             {% if loop.index != files|length %}
@@ -22,7 +22,7 @@
         {% if can_download and files|length > 1 %}
             <br />
             <br />
-            Download all files: <a onclick='downloadZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}")'><i class="fa fa-download" aria-hidden="true" title="Download zip of all files"></i></a>
+            Download all files: <a onclick='downloadZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}")'><i class="fas fa-download" aria-hidden="true" title="Download zip of all files"></i></a>
         {% endif %}
     </div>
     <div class="box col-md-6">

@@ -26,8 +26,11 @@ class PostgresqlDatabaseQueries extends DatabaseQueries{
 
     public function getUserById($user_id) {
         $this->course_db->query("
-SELECT u.*, sr.grading_registration_sections
+SELECT u.*, ns.merge_threads, ns.all_new_threads, 
+        ns.all_new_posts, ns.all_modifications_forum,
+        ns.reply_in_post_thread, sr.grading_registration_sections
 FROM users u
+LEFT JOIN notification_settings as ns ON u.user_id = ns.user_id
 LEFT JOIN (
 	SELECT array_agg(sections_registration_id) as grading_registration_sections, user_id
 	FROM grading_registration
@@ -628,18 +631,10 @@ ORDER BY gc_order
         $this->course_db->query("
 SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_dev, 0 AS max, COUNT(*) FROM(
    SELECT * FROM (
-      SELECT (egd.autograding_non_hidden_non_extra_credit + egd.autograding_non_hidden_extra_credit + egd.autograding_hidden_non_extra_credit + egd.autograding_hidden_extra_credit) AS score
-      FROM electronic_gradeable_data AS egd
-      INNER JOIN (
-          SELECT {$user_or_team_id}, {$section_key} FROM {$users_or_teams}
-      ) AS {$u_or_t}
-      ON {$u_or_t}.{$user_or_team_id} = egd.{$user_or_team_id}
-      INNER JOIN (
-          SELECT g_id, {$user_or_team_id}, active_version FROM electronic_gradeable_version AS egv
-          WHERE active_version > 0
-      ) AS egv
-      ON egd.g_id=egv.g_id AND egd.{$user_or_team_id}=egv.{$user_or_team_id} AND egd.g_version=egv.active_version
-      WHERE egd.g_id=? AND {$u_or_t}.{$section_key} IS NOT NULL
+      SELECT (egv.autograding_non_hidden_non_extra_credit + egv.autograding_non_hidden_extra_credit + egv.autograding_hidden_non_extra_credit + egv.autograding_hidden_extra_credit) AS score
+      FROM electronic_gradeable_data AS egv
+      INNER JOIN {$users_or_teams} AS {$u_or_t} ON {$u_or_t}.{$user_or_team_id} = egv.{$user_or_team_id}, electronic_gradeable_version AS egd
+      WHERE egv.g_id=? AND {$u_or_t}.{$section_key} IS NOT NULL AND egv.g_version=egd.active_version AND active_version>0 AND egd.{$user_or_team_id}=egv.{$user_or_team_id}
    )g
 ) as individual;
           ", array($g_id));
@@ -1330,7 +1325,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               /* Late day exception data */
               ldeu.late_day_exceptions,
 
-              /* Regrade request data */
+              /* Grade inquiry data */
               rr.id AS regrade_request_id,
               rr.status AS regrade_request_status,
               rr.timestamp AS regrade_request_timestamp,
@@ -1454,7 +1449,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               /* Join user late day exceptions */
               LEFT JOIN late_day_exceptions ldeu ON g.g_id=ldeu.g_id AND u.user_id=ldeu.user_id
 
-              /* Join regrade request */
+              /* Join grade inquiry */
               LEFT JOIN regrade_requests AS rr ON rr.{$submitter_type}=gd.gd_{$submitter_type} AND rr.g_id=g.g_id
             WHERE $selector
             $order";
@@ -1854,3 +1849,4 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             $gradeable_constructor);
     }
 }
+

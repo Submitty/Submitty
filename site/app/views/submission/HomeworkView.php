@@ -9,6 +9,7 @@ use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
 use app\models\gradeable\GradedGradeable;
+use app\models\gradeable\LateDays;
 use app\models\gradeable\SubmissionTextBox;
 use app\models\User;
 use app\views\AbstractView;
@@ -27,26 +28,31 @@ class HomeworkView extends AbstractView {
     /**
      * @param Gradeable $gradeable
      * @param GradedGradeable|null $graded_gradeable
-     * @param \app\models\Gradeable $old_gradeable
      * @param int $display_version
-     * @param int $late_days_use
-     * @param int $extensions
      * @param bool $show_hidden_testcases
      * @return string
      */
-    public function showGradeable(Gradeable $gradeable, $graded_gradeable, \app\models\Gradeable $old_gradeable, int $display_version, int $late_days_use, int $extensions, bool $show_hidden_testcases = false) {
+    public function showGradeable(Gradeable $gradeable, $graded_gradeable, int $display_version, bool $show_hidden_testcases = false) {
         $return = '';
 
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
 
+        // The number of days late this gradeable would be if submitted now (including exceptions)
+        $late_days_use = 0;
         $version_instance = null;
         if ($graded_gradeable !== null) {
             $version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions()[$display_version] ?? null;
+            $late_days_use = max(0, $gradeable->getWouldBeDaysLate() - $graded_gradeable->getLateDayException($this->core->getUser()));
         }
 
+        $is_admin = $this->core->getAccess()->canI('admin.wrapper', []);
+        $on_team = $this->core->getUser()->onTeam($gradeable->getId());
+
         // Only show the late banner if the submission has a due date
-        if ($gradeable->isStudentSubmit() && $gradeable->hasDueDate() && $gradeable->isLateSubmissionAllowed()) {
-            $return .= $this->renderLateDayMessage($old_gradeable, $extensions);
+        // Instructors shouldn't see this banner if they're not on a team (they won't have proper information)
+        if (LateDays::filterCanView($this->core, $gradeable) && !($is_admin && !$on_team)) {
+            $late_days = LateDays::fromUser($this->core, $this->core->getUser());
+            $return .= $this->renderLateDayMessage($late_days, $gradeable, $graded_gradeable);
         }
 
         // showing submission if user is full grader or student can submit
@@ -96,42 +102,34 @@ class HomeworkView extends AbstractView {
             && $active_version !== 0) {
             $return .= $this->renderTAResultsBox($graded_gradeable, $regrade_available);
         }
-        if ($regrade_available) {
+        if ($regrade_available || $graded_gradeable->hasRegradeRequest()) {
             $return .= $this->renderRegradeBox($graded_gradeable);
         }
         return $return;
     }
 
     /**
-     * TODO: waiting on late day model class before converting this method
-     * @param \app\models\Gradeable $gradeable
-     * @param int $extensions
+     * Render the late days banner
+     * @param LateDays $late_days
+     * @param Gradeable $gradeable
+     * @param GradedGradeable|null $graded_gradeable
      * @return string
      */
-    public function renderLateDayMessage(\app\models\Gradeable $gradeable, int $extensions) {
-        $order_by = [
-            'CASE WHEN eg.eg_submission_due_date IS NOT NULL THEN eg.eg_submission_due_date ELSE g.g_grade_released_date END'
-        ];
-        $total_late_used = 0;
-        $student_late_days = 0;
-        $late_day_budget = 0;
-        foreach ($this->core->getQueries()->getGradeablesIterator(null, $gradeable->getUser()->getId(), 'registration_section', 'u.user_id', 0, $order_by) as $g) {
-            $g->calculateLateDays($total_late_used);
-            if($g->getId() === $gradeable->getId()){
-                $student_late_days = $g->getStudentAllowedLateDays();
-                $late_day_budget = $student_late_days-$total_late_used;
-            }
-            // make sure we don't "double count" late days used on this assignment
-            else{
-                $total_late_used -= $g->getLateDayExceptions();
-            }
+    public function renderLateDayMessage(LateDays $late_days, Gradeable $gradeable, $graded_gradeable) {
+        $extensions = 0;
+        $active_version_instance = null;
+        $active_version = 0;
+        if ($graded_gradeable !== null) {
+            $extensions = $graded_gradeable->getLateDayException($this->core->getUser());
+            $active_version_instance = $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance();
+            $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         }
-
-        $active_days_late = $gradeable->getActiveVersion() == 0 ? 0 : $gradeable->getActiveDaysLate();
-        $late_days_remaining = $student_late_days - $total_late_used + $extensions;
+        $late_days_remaining = $late_days->getLateDaysRemaining();
+        $active_days_late =  $active_version_instance !== null ? $active_version_instance->getDaysLate() : 0;
         $would_be_days_late = $gradeable->getWouldBeDaysLate();
-        $late_days_allowed = $gradeable->getAllowedLateDays();
-        $active_version = $gradeable->getActiveVersion();
+        $late_day_info = $late_days->getLateDayInfoByGradeable($gradeable);
+        $late_days_allowed = $gradeable->getLateDays();
+        $late_day_budget = $late_day_info->getLateDaysAllowed();
 
         $error = false;
         $messages = [];
@@ -151,11 +149,11 @@ class HomeworkView extends AbstractView {
         // IF STUDENT HAS ALREADY SUBMITTED AND THE ACTIVE VERSION IS LATE, PRINT LATE DAY INFORMATION FOR THE ACTIVE VERSION
         if ($active_version >= 1 && $active_days_late > 0) {
             // BAD STATUS - AUTO ZERO BECAUSE INSUFFICIENT LATE DAYS REMAIN
-            if ($student_late_days < $active_days_late) {
+            if ($active_days_charged > $late_day_budget) {
                 $error = true;
                 $messages[] = ['type' => 'too_few_remain', 'info' => [
                     'late' => $active_days_late,
-                    'remaining' => $student_late_days
+                    'remaining' => $late_days_remaining
                 ]];
             } // BAD STATUS - AUTO ZERO BECAUSE TOO MANY LATE DAYS USED ON THIS ASSIGNMENT
             else if ($active_days_charged > $late_days_allowed) {
@@ -341,7 +339,8 @@ class HomeworkView extends AbstractView {
             // This is only used as a placeholder, so the who loads this page is the 'user' unless the
             //  client overrides the user
             'user_id' => $this->core->getUser()->getId(),
-            'has_gradeable_message' => $gradeable->getAutogradingConfig()->getGradeableMessage() !== '',
+            'has_gradeable_message' => $gradeable->getAutogradingConfig()->getGradeableMessage() !== null
+               && $gradeable->getAutogradingConfig()->getGradeableMessage() !== '',
             'gradeable_message' => $gradeable->getAutogradingConfig()->getGradeableMessage(),
             'allowed_late_days' => $gradeable->getLateDays(),
             'num_inputs' => $gradeable->getAutogradingConfig()->getNumInputs(),
@@ -370,6 +369,7 @@ class HomeworkView extends AbstractView {
         $files = [];
         $count = 1;
         $count_array = array();
+        $use_qr_codes = false;
         foreach ($all_directories as $timestamp => $content) {
             $dir_files = $content['files'];
             $json_file = '';
@@ -414,30 +414,32 @@ class HomeworkView extends AbstractView {
                 ];
                 $count++;
             }
+            $json_data = ($json_file !== '') ? FileUtils::readJsonFile($json_file) : '';
+            //check for invalid ID's if using bulk upload with QR codes
+            if($json_data != ''){
+                $use_qr_codes = true;
+                for($i = 0; $i < count($files); $i++){
+                    $filename = rawurldecode($files[$i]['filename_full']);
+                    foreach($json_data as $decoded_data){
+                        //compare each file name in json data with ones split
+                        foreach ($decoded_data as $qr_file) {
+                            if($qr_file['pdf_name'] === $filename){
+                                $files[$i]['page_count'] = $qr_file['page_count'];
+                                $files[$i]['user_id']['id'] = $qr_file['id'];
+                                $files[$i]['user_id']['valid'] = ($this->core->getQueries()->getUserById($qr_file['id']) === null) ? false:true;
+                                goto end;
+                            }
+                        }
+                    }
+                    end:;
+                }
+            }
         }
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         $current_time = $this->core->getDateTimeNow()->format("m-d-Y_H:i:sO");
         $ch = curl_init();
-        //$user = $this->core->getQueries()->getUserById($id);
-
-        $json_data = ($json_file !== '') ? FileUtils::readJsonFile($json_file) : '';
-        $use_qr_codes = false;
-        //check for invalid ID's
-        if($json_data != ''){
-            $use_qr_codes = true;
-            for($i = 0; $i < count($files); $i++){
-                for($j = 0; $j < count($files); $j++){
-                    if($files[$i]['filename_full'] == $json_data[$j+1]['pdf_name']){
-                        $files[$i]['page_count'] = $json_data[$j+1]['page_count'];
-                                    //validate users
-                        $files[$i]['user_id']['id'] = $json_data[$j+1]['id'];
-                        $files[$i]['user_id']['valid'] = ($this->core->getQueries()->getUserById($json_data[$j+1]['id']) === null) ? false : true;
-                    }
-                }
-            }
-        }
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/BulkUploadBox.twig', [
             'gradeable_id' => $gradeable->getId(),
             'team_assignment' => $gradeable->isTeamAssignment(),
@@ -492,12 +494,15 @@ class HomeworkView extends AbstractView {
 
         if ($version_instance !== null) {
             $display_version = $version_instance->getVersion();
-            $history = $version_instance->getLatestHistory();
 
-            foreach ($version_instance->getTestcases() as $testcase) {
-                if ($testcase->canView()) {
-                    $show_testcases = true;
-                    break;
+            if ($version_instance->isAutogradingComplete()) {
+                $history = $version_instance->getLatestHistory();
+
+                foreach ($version_instance->getTestcases() as $testcase) {
+                    if ($testcase->canView()) {
+                        $show_testcases = true;
+                        break;
+                    }
                 }
             }
 

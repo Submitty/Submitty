@@ -17,7 +17,7 @@ Required Input:
 >
     {% if edit_marks_enabled %}
         <span class="reorder-mark-container col-no-gutters {{ first_mark ? 'hidden' : '' }}" title="Click and drag to reorder marks">
-            <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+            <i class="fas fa-ellipsis-v" aria-hidden="true"></i>
         </span>
     {% endif %}
     <span class="mark-selector-container">
@@ -58,20 +58,20 @@ Required Input:
         {% endif %}
     {% endif %}
     <span class="col-no-gutters mark-tools" onclick="onGetMarkStats(this);event.stopPropagation()">
-        <i class="fa fa-users icon-mark-stats" title="See who got this mark"></i>
+        <i class="fas fa-users icon-mark-stats" title="See who got this mark"></i>
     </span>
     {% if edit_marks_enabled %}
         {% if first_mark %}
             {# The first mark shouldn't get a real delete button, but to keep the tools aligned, put a hidden one in #}
             <span class="col-no-gutters mark-tools">
-                <i class="fa fa-trash hidden"></i>
+                <i class="fas fa-trash hidden"></i>
             </span>
         {% else %}
             <span class="delete-mark-container col-no-gutters mark-tools" onclick="onDeleteMark(this)" title="Tag for deletion">
-                <i class="fa fa-trash"></i>
+                <i class="fas fa-trash"></i>
             </span>
             <span class="restore-mark-container col-no-gutters mark-tools" onclick="onRestoreMark(this)" title="Don't delete" hidden>
-                <i class="fa fa-undo"></i>
+                <i class="fas fa-undo"></i>
             </span>
         {% endif %}
     {% endif %}
