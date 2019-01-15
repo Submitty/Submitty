@@ -117,7 +117,13 @@ class RunLichen(CourseGradeableJob):
         gradeable = self.job_details['gradeable']
 
         lichen_script = Path(INSTALL_DIR, 'sbin', 'run_lichen_plagiarism.py')
-        lichen_output = Path(DATA_DIR, 'courses', semester, course, 'lichen', 'lichen_job_output.txt')
+
+        # create directory for logging
+        logging_dir = os.path.join(DATA_DIR, 'courses', semester, course, 'lichen', 'logs', gradeable)
+        if(not os.path.isdir(logging_dir)):
+            os.makedirs(logging_dir)
+
+        lichen_output = Path(DATA_DIR, 'courses', semester, course, 'lichen', 'logs', gradeable, 'lichen_job_output.txt')
 
         try:
             with lichen_output.open("w") as output_file:
@@ -136,7 +142,7 @@ class DeleteLichenResult(CourseGradeableJob):
         if not lichen_dir.exists():
             return
 
-        log_file = Path(DATA_DIR, 'courses', semester, course, 'lichen', 'lichen_job_output.txt')
+        log_file = Path(DATA_DIR, 'courses', semester, course, 'lichen', 'logs', gradeable, 'lichen_job_output.txt')
 
         with log_file.open('w') as open_file:
             lichen_json = 'lichen_{}_{}_{}.json'.format(semester, course, gradeable)
