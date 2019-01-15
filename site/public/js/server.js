@@ -445,7 +445,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                         var count = 0;
                         data.ci.forEach(function(element) {
                         	if(count == 0) {
-                        		console.log('Start: ' + element[5] + " End: " + element[6] + ' ' + {line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}.toString());
+                        		//console.log('Start: ' + element[5] + " End: " + element[6] + ' ' + {line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}.toString());
                         		$('.CodeMirror')[0].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {css: "border: 1px solid black; border-right:1px solid red;background: green"});
                         	} else {
                 	
@@ -503,6 +503,9 @@ function setUserSubmittedCode(gradeable_id, changed) {
                                 return;
                             }
                             $('.CodeMirror')[0].CodeMirror.getDoc().setValue(data.display_code1);
+                            data.ci.forEach(function(element) {
+                                $('.CodeMirror')[0].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});   
+                            });
                         	$('.CodeMirror')[0].CodeMirror.refresh();
                             //$('[name="code_box_1"]').empty().append(data.display_code1);
                         },
@@ -526,6 +529,9 @@ function setUserSubmittedCode(gradeable_id, changed) {
                                 return;
                             }
                             $('.CodeMirror')[0].CodeMirror.getDoc().setValue(data.display_code1);
+                            data.ci.forEach(function(element) {
+                                $('.CodeMirror')[0].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});   
+                            });
                         	$('.CodeMirror')[0].CodeMirror.refresh();
                         	$('.CodeMirror')[1].CodeMirror.getDoc().setValue(data.display_code2);
                         	$('.CodeMirror')[1].CodeMirror.refresh();
