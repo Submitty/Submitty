@@ -22,10 +22,11 @@ jobs:
       stage: pr test for wip
       php: 7.0
       script:
-        - TITLE=$(curl -s https://api.github.com/repos/${TRAVIS_REPO_SLUG}/pulls/${TRAVIS_PULL_REQUEST} | jq -r '.title')
+        - echo "Getting title for ${TRAVIS_REPO_SLUG}/pulls/${TRAVIS_PULL_REQUEST}"
+        - TITLE=$(curl -s https://api.github.com/repos/${TRAVIS_REPO_SLUG}/pulls/${TRAVIS_PULL_REQUEST} | jq -r '.title' | tr '[:upper:]' '[:lower:]')
         - echo "PR Title => ${TITLE}"
         # We just output false instead of doing "exit 1" or "travis_terminate 1" so that Travis can do any post-script steps
-        - if [ "${TITLE:0:5}" = "[WIP]" ]; then echo "[WIP] tag detected, build failed. Remove [WIP] tag and re-run build when ready for merging."; false; fi
+        - if [ "${TITLE:0:4}" = "wip:" ] || [ "${TITLE:0:5}" = "[wip]" ]; then echo "[WIP] tag detected, build failed. Remove [WIP] tag and re-run build when ready for merging."; false; fi
 
     # Warm up the pip and composer caches to use it for the rest of the build stages
     - &00-cache

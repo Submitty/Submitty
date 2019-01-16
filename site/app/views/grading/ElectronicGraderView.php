@@ -693,7 +693,7 @@ class ElectronicGraderView extends AbstractView {
     }
 
     /**
-     * Render the Regrade Requests panel
+     * Render the Grade Inquiry panel
      * @param GradedGradeable $graded_gradeable
      * @return string
      */

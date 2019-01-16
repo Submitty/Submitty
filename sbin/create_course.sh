@@ -236,7 +236,7 @@ create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/co
 create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/site
 create_and_set  u=rwx,g=rxs,o=   $DAEMON_USER     $ta_www_group   $course_dir/results
 create_and_set  u=rwx,g=rxs,o=   $DAEMON_USER     $ta_www_group   $course_dir/checkout
-create_and_set  u=rwx,g=rxs,o=   $DAEMON_USER     $ta_www_group   $course_dir/uploads
+create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/uploads
 create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/uploads/bulk_pdf
 create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/uploads/student_images
 create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/uploads/student_images/tmp

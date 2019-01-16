@@ -32,15 +32,15 @@
 {% macro display_file(self, dir, fileShares, fileReleaseDates, path, id, indent, title, userGroup) %}
     <div>
         <div class="file-viewer">
-            <k class="fa fa-file" style='vertical-align:text-bottom;'></k>
+            <k class="fas fa-file" style='vertical-align:text-bottom;'></k>
             {{ dir }}&nbsp;
             {% set dirExtension = dir|split('.')|last %}
             {% if '.' ~ dirExtension in ['.pdf', '.jpg', '.jpeg', '.c', '.cpp', '.s', '.twig', '.py', '.java', '.png', '.txt', '.h', '.html', '.php', '.js', '.sql', '.sh', '.md', '.csv', '.salsa', '.erl', '.oz', '.pl', '.hs'] %}
-                 <a onclick='openFileCourseMaterial("{{ dir }}", "{{ path | url_encode }}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
+                 <a onclick='openFileCourseMaterial("{{ dir }}", "{{ path | url_encode }}")'><i class="fas fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
             {% endif %}
-            <a onclick='downloadFileWithAnyRole("{{ dir }}", "{{ path | url_encode }}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
+            <a onclick='downloadFileWithAnyRole("{{ dir }}", "{{ path | url_encode }}")'><i class="fas fa-download" aria-hidden="true" title="Download the file"></i></a>
             {% if userGroup == 1 %}
-                <a onclick='newDeleteCourseMaterialForm("{{ core.buildUrl({'component': 'misc', 'page': 'delete_course_material_file', 'dir': 'course_materials', 'file': dir, 'path': path }) }}", "{{ dir }}");'> <i class="fa fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                <a onclick='newDeleteCourseMaterialForm("{{ core.buildUrl({'component': 'misc', 'page': 'delete_course_material_file', 'dir': 'course_materials', 'file': dir, 'path': path }) }}", "{{ dir }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                 <input id="share_checkbox_{{ id }}" type="checkbox"
                 {% if ( (fileShares[path] == "1") )%}
                    checked="true"
@@ -60,11 +60,11 @@
     <div>
         <div class="div-viewer">
             <a class='openAllDiv openAllDiv{{ title }} openable-element-{{ title }}' id='{{ dir }}' onclick='openDivForCourseMaterials("{{ id }}");'>
-                <span class="fa fa-folder open-all-folder" style='vertical-align:text-top;font-size:20px'></span>
+                <span class="fas fa-folder open-all-folder" style='vertical-align:text-top;font-size:20px'></span>
                 {{ dir }}
             </a>
             {% if userGroup == 1 %}
-                <a onclick='newDeleteCourseMaterialForm("{{ core.buildUrl({'component': 'misc', 'page': 'delete_course_material_folder', 'dir': 'course_materials', 'file': dir, 'path': folderPath }) }}", "{{ dir }}");'> <i class="fa fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                <a onclick='newDeleteCourseMaterialForm("{{ core.buildUrl({'component': 'misc', 'page': 'delete_course_material_folder', 'dir': 'course_materials', 'file': dir, 'path': folderPath }) }}", "{{ dir }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
             {% endif %}
         </div>
         <div id='div_viewer_{{ id }}' style='margin-left:15px; display: none' data-file_name="{{ dir }}">

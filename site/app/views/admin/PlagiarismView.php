@@ -113,11 +113,11 @@ HTML;
                 }
                 
                 $return .= <<<HTML
-            <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 'edit_plagiarism_saved_config', 'gradeable_id' => $id))}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+            <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 'edit_plagiarism_saved_config', 'gradeable_id' => $id))}"><i class="fas fa-pencil-alt" aria-hidden="true"></i></a>
             </td>
-            <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 're_run_plagiarism', 'gradeable_id' => $id))}"><i class="fa fa-refresh" aria-hidden="true"></i></a>
+            <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 're_run_plagiarism', 'gradeable_id' => $id))}"><i class="fas fa-sync" aria-hidden="true"></i></a>
             </td>
-            <td><a onclick="deletePlagiarismResultAndConfigForm('{$delete_form_action}', '{$title}');"><i class="fa fa-trash" aria-hidden="true"></i></a>
+            <td><a onclick="deletePlagiarismResultAndConfigForm('{$delete_form_action}', '{$title}');"><i class="fas fa-trash" aria-hidden="true"></i></a>
             </td>
             <td>
                 Last run: $timestamp
@@ -520,7 +520,7 @@ HTML;
                 </div><br />
                 <div style="width:70%;float:right">
                     <span name="add_more_prev_gradeable">
-                        <i class="fa fa-plus-square" aria-hidden="true" ></i>Add more
+                        <i class="fas fa-plus-square" aria-hidden="true" ></i>Add more
                     </span>
                 </div>
             </div><br /><br /><br /><br /><br /> 
@@ -549,7 +549,7 @@ HTML;
                 </div><br />
                 <div style="width:70%;float:right">
                     <span name="add_more_ignore">
-                        <i class="fa fa-plus-square" aria-hidden="true" ></i>Add more
+                        <i class="fas fa-plus-square" aria-hidden="true" ></i>Add more
                     </span>     
                 </div>    
             </div><br /><br />
