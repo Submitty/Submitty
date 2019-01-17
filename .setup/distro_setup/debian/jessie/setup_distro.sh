@@ -74,6 +74,7 @@ chmod -R o+rx /usr/local/lib/cmake
 # Install OpenJDK 8 Non-Interactively
 echo "installing java8"
 apt-get -t jessie-backports install -qqy openjdk-8-jdk
+update-java-alternatives --set java-1.8.0-openjdk-amd64
 
 # Install Image Magick for image comparison, etc.
 apt-get install -qqy imagemagick
