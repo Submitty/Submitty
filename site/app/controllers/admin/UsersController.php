@@ -456,11 +456,24 @@ class UsersController extends AbstractController {
         $this->core->redirect($return_url);
     }
 
+    /**
+     * Parse uploaded users data file as either XLSX or CSV, and return its data
+     *
+     * @param string $filename  Original name of uploaded file
+     * @param string $tmp_name  PHP assigned unique name and path of uploaded file
+     * @param string $return_url
+     *
+     * @return array $contents  Data rows read from xlsx or csv file
+     */
     private function getCsvOrXlsxData($filename, $tmp_name, $return_url) {
+        // Data is confidential, and therefore must be deleted immediately after
+        // this process ends, regardless if process completes successfully or not.
+        // Vars need to exist so we can declare shutdown callback.
         $xlsx_file = null;
         $csv_file = null;
 
         register_shutdown_function(
+            // Use vars by reference or otherwise they will always copy init'd value assigned above.
             function() use (&$csv_file, &$xlsx_file) {
                 if (!is_null($xlsx_file) && file_exists($xlsx_file)) {
                     unlink($xlsx_file);
@@ -474,18 +487,23 @@ class UsersController extends AbstractController {
         $content_type = FileUtils::getContentType($filename);
         $mime_type = FileUtils::getMimeType($tmp_name);
 
+        // If an XLSX spreadsheet is uploaded.
         if ($content_type === 'spreadsheet/xlsx' && $mime_type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
             $csv_file = FileUtils::joinPaths($this->core->getConfig()->getCgiTmpDir(), uniqid("", true));
             $xlsx_file = FileUtils::joinPaths($this->core->getConfig()->getCgiTmpDir(), uniqid("", true));
 
+            // This is to set permissions on the temp files to RW-RW----
+            // chmod() is disabled by security policy, so we are using umask().
+            // NOTE: php.net recommends against using umask() and instead suggests using chmod().
+            // q.v. https://secure.php.net/manual/en/function.umask.php
             $old_umask = umask(0117);
             file_put_contents($csv_file, "");
             $did_move = move_uploaded_file($tmp_name, $xlsx_file);
             umask($old_umask);
 
-            var_dump($csv_file, $xlsx_file); die;
-
             if ($did_move) {
+                // exec() and similar functions are disabled by security policy,
+                // so we are using a python script via CGI to invoke external program 'xlsx2csv'
                 $xlsx_tmp = basename($xlsx_file);
                 $csv_tmp = basename($csv_file);
                 $ch = curl_init();
@@ -517,15 +535,16 @@ class UsersController extends AbstractController {
             }
 
         } else if ($content_type === 'text/csv' && $mime_type === 'text/plain') {
-            $csv_file = $uploaded_file;
+            $csv_file = $tmp_name;
         } else {
             $this->core->addErrorMessage("Must upload xlsx or csv");
             $this->core->redirect($return_url);
         }
 
-        //Set environment config to allow '\r' EOL encoding. (Used by older versions of Microsoft Excel on Macintosh)
+        // Set environment config to allow '\r' EOL encoding. (Used by older versions of Microsoft Excel on Macintosh)
         ini_set("auto_detect_line_endings", true);
 
+        // Parse user data (should be in CSV form by now)
         $contents = file($csv_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         if ($contents === false) {
             $this->core->addErrorMessage("File was not properly uploaded. Contact your sysadmin.");
