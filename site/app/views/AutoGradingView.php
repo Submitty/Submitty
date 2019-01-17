@@ -423,8 +423,8 @@ class AutoGradingView extends AbstractView {
             ];
         }, $gradeable->getComponents());
         $uploaded_pdfs = [];
-        foreach($uploaded_files['submissions'] as $file){
-            if(mime_content_type($file['path']) === "application/pdf"){
+        foreach($uploaded_files as $file){
+          if(array_key_exists('path',$file) && mime_content_type($file['path']) === "application/pdf"){
                 $uploaded_pdfs[] = $file;
             }
         }

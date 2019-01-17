@@ -30,7 +30,7 @@ class GradedGradeable extends AbstractModel {
     protected $ta_graded_gradeable = null;
     /** @property @var AutoGradedGradeable The Autograding info */
     protected $auto_graded_gradeable = null;
-    /** @property @var RegradeRequest|null The regrade request for this submitter/gradeable  */
+    /** @property @var RegradeRequest|null The grade inquiry for this submitter/gradeable  */
     protected $regrade_request = null;
 
     /** @property @var array The late day exceptions indexed by user id */
@@ -117,7 +117,7 @@ class GradedGradeable extends AbstractModel {
     }
 
     /**
-     * Sets the regrade request for this graded gradeable
+     * Sets the grade inquiry for this graded gradeable
      * @param RegradeRequest $regrade_request
      */
     public function setRegradeRequest(RegradeRequest $regrade_request) {
@@ -125,7 +125,7 @@ class GradedGradeable extends AbstractModel {
     }
 
     /**
-     * Gets if the submitter has a regrade request
+     * Gets if the submitter has a grade inquiry
      * @return bool
      */
     public function hasRegradeRequest() {
@@ -133,7 +133,7 @@ class GradedGradeable extends AbstractModel {
     }
 
     /**
-     * Gets if the submitter has an active regrade request
+     * Gets if the submitter has an active grade inquiry
      * @return bool
      */
     public function hasActiveRegradeRequest() {

@@ -15,11 +15,11 @@ use app\models\AbstractModel;
  */
 class RegradeRequest extends AbstractModel {
 
-    /** @var int The unique Id of this regrade request */
+    /** @var int The unique Id of this grade inquiry */
     private $id = 0;
     /** @property @var \DateTime The timestamp (readonly) of most recent update to $status */
     protected $timestamp = null;
-    /** @property @var int The status of the regrade request */
+    /** @property @var int The status of the grade inquiry */
     protected $status = 0;
 
     const STATUS_RESOLVED = 0;
@@ -35,18 +35,18 @@ class RegradeRequest extends AbstractModel {
     }
 
     /**
-     * Internal method to set and sanity check the regrade request id
+     * Internal method to set and sanity check the grade inquiry id
      * @param int $id
      */
     private function setId(int $id) {
         if ($id < 1) {
-            throw new \InvalidArgumentException('Regrade request ids must be > 0');
+            throw new \InvalidArgumentException('Grade inquiry ids must be > 0');
         }
         $this->id = $id;
     }
 
     /**
-     * Get the id of this regrade request
+     * Get the id of this grade inquiry
      * @return int
      */
     public function getId() {
@@ -54,12 +54,12 @@ class RegradeRequest extends AbstractModel {
     }
 
     /**
-     * Sets the status of the regrade request
+     * Sets the status of the grade inquiry
      * @param int $status
      */
     public function setStatus(int $status) {
         if (!in_array($status, [self::STATUS_RESOLVED, self::STATUS_ACTIVE])) {
-            throw new \InvalidArgumentException('Invalid regrade request status');
+            throw new \InvalidArgumentException('Invalid grade inquiry status');
         }
         $this->status = $status;
         $this->modified = true;

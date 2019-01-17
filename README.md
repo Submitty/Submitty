@@ -1,6 +1,6 @@
 <img src="http://submitty.org/images/submitty_logo.png" alt="Submitty Logo" style="width: 500px;"/>
 
-[![Build Status](https://travis-ci.org/Submitty/Submitty.svg?branch=master)](https://travis-ci.org/Submitty/Submitty)
+[![Build Status](https://travis-ci.com/Submitty/Submitty.svg?branch=master)](https://travis-ci.com/Submitty/Submitty)
 
 # Usage
 
