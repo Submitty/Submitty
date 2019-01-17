@@ -457,17 +457,35 @@ class UsersController extends AbstractController {
     }
 
     private function getCsvOrXlsxData($filename, $tmp_name, $return_url) {
+        $xlsx_file = null;
+        $csv_file = null;
+
+        register_shutdown_function(
+            function() use (&$csv_file, &$xlsx_file) {
+                if (!is_null($xlsx_file) && file_exists($xlsx_file)) {
+                    unlink($xlsx_file);
+                }
+                if (!is_null($csv_file) && file_exists($csv_file)) {
+                    unlink($csv_file);
+                }
+            }
+        );
+
         $content_type = FileUtils::getContentType($filename);
         $mime_type = FileUtils::getMimeType($tmp_name);
 
         if ($content_type === 'spreadsheet/xlsx' && $mime_type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-            $csv_file = sys_get_temp_dir() . '/' . Utils::generateRandomString();
-            $xlsx_file = sys_get_temp_dir() . '/' . Utils::generateRandomString();
-            $old_umask = umask(0007);
+            $csv_file = FileUtils::joinPaths($this->core->getConfig()->getCgiTmpDir(), uniqid("", true));
+            $xlsx_file = FileUtils::joinPaths($this->core->getConfig()->getCgiTmpDir(), uniqid("", true));
+
+            $old_umask = umask(0117);
             file_put_contents($csv_file, "");
+            $did_move = move_uploaded_file($tmp_name, $xlsx_file);
             umask($old_umask);
 
-            if (move_uploaded_file($tmp_name, $xlsx_file)) {
+            var_dump($csv_file, $xlsx_file); die;
+
+            if ($did_move) {
                 $xlsx_tmp = basename($xlsx_file);
                 $csv_tmp = basename($csv_file);
                 $ch = curl_init();
@@ -499,23 +517,11 @@ class UsersController extends AbstractController {
             }
 
         } else if ($content_type === 'text/csv' && $mime_type === 'text/plain') {
-            $csv_file = $tmp_name;
-            $xlsx_file = null;
+            $csv_file = $uploaded_file;
         } else {
             $this->core->addErrorMessage("Must upload xlsx or csv");
             $this->core->redirect($return_url);
         }
-
-        register_shutdown_function(
-            function() use ($csv_file, $xlsx_file) {
-                if (file_exists($xlsx_file)) {
-                    unlink($xlsx_file);
-                }
-                if (file_exists($csv_file)) {
-                    unlink($csv_file);
-                }
-            }
-        );
 
         //Set environment config to allow '\r' EOL encoding. (Used by older versions of Microsoft Excel on Macintosh)
         ini_set("auto_detect_line_endings", true);
