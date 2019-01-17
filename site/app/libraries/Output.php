@@ -77,7 +77,11 @@ class Output {
     }
 
     public function setInternalResources() {
-        $this->addCss('https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css');
+        $this->addCss('https://use.fontawesome.com/releases/v5.6.3/css/solid.css');
+        $this->addCss('https://use.fontawesome.com/releases/v5.6.3/css/regular.css');
+        $this->addCss('https://use.fontawesome.com/releases/v5.6.3/css/brands.css');
+        $this->addCss('https://use.fontawesome.com/releases/v5.6.3/css/fontawesome.css');
+
         $this->addCss("https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic,700italic");
         $this->addCss("https://fonts.googleapis.com/css?family=PT+Sans:700,700italic");
         $this->addCss("https://fonts.googleapis.com/css?family=Inconsolata");

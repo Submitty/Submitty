@@ -15,12 +15,6 @@ fi
 #################
 
 apt-get install -qqy apt-transport-https ca-certificates curl software-properties-common
-
-# We add this well before we install Java as we can do an apt-get update before our installations
-echo "\n" | add-apt-repository ppa:webupd8team/java
-echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
-apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys EEA14886
-
 apt-get install -qqy python python-dev python3 python3-dev libpython3.6
 
 apt-get -qqy update
@@ -82,31 +76,10 @@ apt-get install -qqy cmake
 # for Lichen (Plagiarism Detection)
 apt-get install -qqy python-clang-6.0
 
-# Install Oracle 8 Non-Interactively
+# Install OpenJDK8 Non-Interactively
 echo "installing java8"
-
-# Try to install Java.... But sometimes they release new security updates faster
-# than the package managers
-
-# Run this in a subshell so it doesn't crash the script when Java fails to install
-GOT_JAVA=$(bash -c 'apt-get install -qqy oracle-java8-installer > /dev/null 2>&1; echo $?')
-# If it didn't work, our package manager is out of date so we need to 
-# patch in the updated version 
-if [ $GOT_JAVA -ne 0 ]; then
-    pushd .
-    # https://askubuntu.com/a/996986
-    cd /var/lib/dpkg/info
-    sed -i 's|JAVA_VERSION=8u171|JAVA_VERSION=8u181|' oracle-java8-installer.*
-    sed -i 's|J_DIR=jdk1.8.0_171|J_DIR=jdk1.8.0_181|' oracle-java8-installer.*
-    sed -i 's|PARTNER_URL=http://download.oracle.com/otn-pub/java/jdk/8u171-b11/512cd62ec5174c3487ac17c61aaa89e8/|PARTNER_URL=http://download.oracle.com/otn-pub/java/jdk/8u181-b13/96a7b8442fe848ef90c96a2fad6ed6d1/|' oracle-java8-installer.*
-    sed -i 's|SHA256SUM_TGZ="b6dd2837efaaec4109b36cfbb94a774db100029f98b0d78be68c27bec0275982"|SHA256SUM_TGZ="1845567095bfbfebd42ed0d09397939796d05456290fb20a83c476ba09f991d3"|' oracle-java8-installer.*
-    popd
-    # Try again! If this fails then someone needs to update the above for whatever
-    # new version of Java has come out. 
-    apt-get install -qqy oracle-java8-installer > /dev/null 2>&1
-fi
-
-apt-get install -qqy oracle-java8-set-default
+apt-get install -qqy openjdk-8-jdk
+update-java-alternatives --set java-1.8.0-openjdk-amd64
 
 # Install Image Magick for image comparison, etc.
 apt-get install -qqy imagemagick
@@ -124,7 +97,7 @@ if [ ${VAGRANT} == 1 ]; then
     NPIO_MINOR=$(echo "$NETPLANIO_VERSION" | cut -d "." -f2)
     if [ "$NPIO_MAJOR" -eq 0 -a "$NPIO_MINOR" -lt 40 ]; then
         # Update netplan.io
-        echo "Detected old version of netplan.io... updating it automatically"
+        echo "Detected old version of netplan.io (${NETPLANIO_VERSION})... updating it automatically"
         apt install -y netplan.io=0.40.1~18.04.3
     fi
 fi

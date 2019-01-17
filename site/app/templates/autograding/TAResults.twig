@@ -64,9 +64,9 @@
                                     <tr>
                                         <td>
                                             {% if mark.getHasMark() %}
-                                                <i class="fa fa-check-square-o fa-1g"></i>
+                                                <i class="far fa-check-square fa-1g"></i>
                                             {% else %}
-                                                <i class="fa fa-square-o fa-1g"></i>
+                                                <i class="far fa-square fa-1g"></i>
                                             {% endif %}
                                         </td>
                                         <td class="mark-score">
@@ -80,7 +80,7 @@
                                 {% if component.getScore() != 0 or component.getComment() != '' %}
                                     <tr>
                                         <td>
-                                            <i class="fa fa-check-square-o fa-1g"></i>
+                                            <i class="far fa-check-square fa-1g"></i>
                                         </td>
                                         <td class="mark-score">
                                             {{ component.getScore()|number_format(num_decimals) }}
