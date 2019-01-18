@@ -16,7 +16,6 @@
 import cgi
 import json
 import os
-import tempfile
 import xlsx2csv
 
 def print_error(message):
@@ -26,8 +25,11 @@ def main():
     print("Content-type: text/html")
     print()
 
+    with open("/usr/local/submitty/config/submitty.json") as data:
+        config = json.load(data)
+
     args = cgi.FieldStorage()
-    temp_dir = "/var/local/submitty/tmp/cgi"
+    temp_dir = os.path.join(config['submitty_data_dir'], "tmp", "cgi")
     xlsx_file = os.path.join(temp_dir, os.path.basename(args['xlsx_file'].value))
     csv_file = os.path.join(temp_dir, os.path.basename(args['csv_file'].value))
 
