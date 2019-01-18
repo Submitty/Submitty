@@ -473,13 +473,11 @@ class UsersController extends AbstractController {
         $csv_file = null;
 
         register_shutdown_function(
-            // Use vars by reference or otherwise they will always copy init'd value assigned above.
             function() use (&$csv_file, &$xlsx_file) {
-                if (!is_null($xlsx_file) && file_exists($xlsx_file)) {
-                    unlink($xlsx_file);
-                }
-                if (!is_null($csv_file) && file_exists($csv_file)) {
-                    unlink($csv_file);
+                foreach (array($csv_file, $xlsx_file) as $file) {
+                    if (!is_null($file) && file_exists($file)) {
+                        unlink($file);
+                    }
                 }
             }
         );
@@ -489,6 +487,7 @@ class UsersController extends AbstractController {
 
         // If an XLSX spreadsheet is uploaded.
         if ($content_type === 'spreadsheet/xlsx' && $mime_type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+            // Prepare tmp file paths with unique file names.
             $csv_file = FileUtils::joinPaths($this->core->getConfig()->getCgiTmpDir(), uniqid("", true));
             $xlsx_file = FileUtils::joinPaths($this->core->getConfig()->getCgiTmpDir(), uniqid("", true));
 
