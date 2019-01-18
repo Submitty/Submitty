@@ -136,7 +136,16 @@ class PDFController extends AbstractController {
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
         $annotation_jsons = $this->getAnnotationJsons($annotation_path, $filename);
-        $this->core->getOutput()->renderOutput(array('PDF'), 'showPDFEmbedded', $gradeable_id, $id, $filename, $annotation_jsons, false);
+        $params = [
+            "gradeable_id" => $gradeable_id,
+            "id" => $id,
+            "file_name" => $filename,
+            "annotation_jsons" => $annotation_jsons,
+            "is_student" => false,
+            "page_num" => $page_num
+        ];
+        $this->core->getOutput()->renderOutput(array('PDF'), 'showPDFEmbedded', $params);
+//        $this->core->getOutput()->renderOutput(array('PDF'), 'showPDFEmbedded', $gradeable_id, $id, $filename, $annotation_jsons, false);
     }
 
     private function showGraderPDFFullpage(){
@@ -168,22 +177,7 @@ class PDFController extends AbstractController {
                 }
             }
         }
-        $params = [
-            "gradeable_id" => $gradeable_id,
-            "id" => $id,
-            "file_name" => $filename,
-            "annotation_jsons" => $annotation_jsons,
-            "is_student" => false,
-            "page_num" => $page_num
-        ];
-        $this->core->getOutput()->renderOutput(array('PDF'), 'showPDFEmbedded', $params);
+        return $annotation_jsons;
     }
 
-    private function showGraderPDFFullpage(){
-        //This shows the pdf-annotate.js library's default pdf annotator. It might be useful in the future to have
-        //a full-sized annotator, so keeping this in for now.
-        $this->core->getOutput()->useFooter(false);
-        $this->core->getOutput()->useHeader(false);
-        $this->core->getOutput()->renderOutput(array('grading', 'PDFAnnotation'), 'showAnnotationPage');
-    }
 }
