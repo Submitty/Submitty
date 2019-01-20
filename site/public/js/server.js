@@ -442,17 +442,13 @@ function setUserSubmittedCode(gradeable_id, changed) {
                         $('[name="version_user_1"]', form).find('option').remove().end().append(append_options).val(data.code_version_user_1);
 
                         $('.CodeMirror')[0].CodeMirror.getDoc().setValue(data.display_code1);
-                        var count = 0;
-                        data.ci.forEach(function(element) {
-                        	if(count == 0) {
-                        		//console.log('Start: ' + element[5] + " End: " + element[6] + ' ' + {line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}.toString());
-                        		$('.CodeMirror')[0].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {css: "border: 1px solid black; border-right:1px solid red;background: green"});
-                        	} else {
-                	
-                        	$('.CodeMirror')[0].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});
-                        	}
-                        	count++;	
-                        });
+                        for(var users_color in data.ci) {
+                            //console.log(data.ci[users_color]);
+                            for(var pos in data.ci[users_color]) {
+                                var element = data.ci[users_color][pos];
+                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});   
+                            }
+                        }
                         $('.CodeMirror')[0].CodeMirror.refresh();
                         //$('[name="code_box_1"]').empty().append(data.display_code1);
                     },
@@ -503,9 +499,13 @@ function setUserSubmittedCode(gradeable_id, changed) {
                                 return;
                             }
                             $('.CodeMirror')[0].CodeMirror.getDoc().setValue(data.display_code1);
-                            data.ci.forEach(function(element) {
-                                $('.CodeMirror')[0].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});   
-                            });
+                            for(var users_color in data.ci) {
+                            //console.log(data.ci[users_color]);
+                            for(var pos in data.ci[users_color]) {
+                                var element = data.ci[users_color][pos];
+                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});   
+                            }
+                        }
                         	$('.CodeMirror')[0].CodeMirror.refresh();
                             //$('[name="code_box_1"]').empty().append(data.display_code1);
                         },
@@ -529,11 +529,17 @@ function setUserSubmittedCode(gradeable_id, changed) {
                                 return;
                             }
                             $('.CodeMirror')[0].CodeMirror.getDoc().setValue(data.display_code1);
-                            data.ci.forEach(function(element) {
-                                $('.CodeMirror')[0].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});   
-                            });
+                            $('.CodeMirror')[1].CodeMirror.getDoc().setValue(data.display_code2);
+                            var code_mirror = 0;
+                            console.log(data.ci);
+                            for(var users_color in data.ci) {
+                            for(var pos in data.ci[users_color]) {
+                                var element = data.ci[users_color][pos];
+                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});   
+                            }
+                        }   
                         	$('.CodeMirror')[0].CodeMirror.refresh();
-                        	$('.CodeMirror')[1].CodeMirror.getDoc().setValue(data.display_code2);
+                        	
                         	$('.CodeMirror')[1].CodeMirror.refresh();
                             // $('[name="code_box_1"]').empty().append(data.display_code1);
                             // $('[name="code_box_2"]').empty().append(data.display_code2);
