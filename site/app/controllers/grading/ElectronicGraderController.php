@@ -265,7 +265,7 @@ class ElectronicGraderController extends GradingController {
             if($verify_all){
                 foreach ($gradeable->getComponents() as $component) {
                     $graded_component = $ta_graded_gradeable->getGradedComponent($component);
-                    if ($graded_component !== null){
+                    if ($graded_component !== null && $graded_component->getGraderId() != $grader->getId()){
                         $graded_component->setVerifier($grader);
                         $graded_component->setVerifyTime($this->core->getDateTimeNow());
                     }

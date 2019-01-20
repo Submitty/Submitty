@@ -22,7 +22,6 @@ use app\models\User;
  * @method \DateTime getGradeTime()
  * @method int[] getMarkIds()
  * @method bool isMarksModified()
- * @method \DateTime getVerifyTime()
  */
 class GradedComponent extends AbstractModel {
     /** @var Component Reference to component */
@@ -56,11 +55,11 @@ class GradedComponent extends AbstractModel {
     protected $graded_version = 0;
     /** @property @var \DateTime The time which this grade was most recently updated */
     protected $grade_time = null;
-
+    /** @var User The verifier of this component */
     protected $verifier = null;
-
+    /** @property @var string The Id of the verifier who verified the grade */
     protected $verifier_id = "";
-
+    /** @property @var \DateTime The time which this grade was verified */
     protected $verify_time = null;
 
     /**
@@ -94,7 +93,6 @@ class GradedComponent extends AbstractModel {
             $score = $details['score'] ?? $component->getDefault();
         }
         $this->setScore($score);
-
         $this->modified = false;
     }
 
@@ -103,7 +101,7 @@ class GradedComponent extends AbstractModel {
 
         // Make sure to convert the date into a string
         $details['grade_time'] = DateUtils::dateTimeToString($this->grade_time);
-
+        $details['verify_time'] = (!is_null($this->verify_time)) ?  DateUtils::dateTimeToString($this->verify_time) : null;
         return $details;
     }
 
@@ -308,12 +306,16 @@ class GradedComponent extends AbstractModel {
 
     public function setVerifier(User $verifier){
         $this->verifier = $verifier;
-        $this->verifier_id = $verifier->getId();
-        $this->modified = true;
+        $this->verifier_id = $this->grader !== null ? $verifier->getId() : '';
+        $this->modified = true;    
     }
 
     public function getVerifier(){
         return $this->verifier;
+    }
+
+    public function getVerifierId(){
+        return $this->verifier_id;
     }
 
     public function setVerifyTime($verify_time){
@@ -327,6 +329,10 @@ class GradedComponent extends AbstractModel {
             }
         }
         $this->modified = true;
+    }
+
+    public function getVerifyTime(){
+        return $this->verify_time;
     }
     /* Intentionally Unimplemented accessor methods */
 

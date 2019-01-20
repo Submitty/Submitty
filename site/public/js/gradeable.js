@@ -95,7 +95,7 @@ function prepGradedComponent(component, graded_component) {
         graded_component.grader_id = undefined;
     }
 
-    if (graded_component.verifier_id === '') {
+    if (graded_component.verifier_id == '') {
         graded_component.verifier_id = undefined;
     }
 
@@ -123,7 +123,6 @@ function renderGradingGradeable(grader_id, gradeable, graded_gradeable, grading_
         graded_gradeable.graded_components[component.id]
             = prepGradedComponent(component, graded_gradeable.graded_components[component.id]);
     });
-
     // TODO: i don't think this is async
     return Twig.twig({ref: "GradingGradeable"}).render({
         'gradeable': gradeable,
