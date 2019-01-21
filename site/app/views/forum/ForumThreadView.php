@@ -267,7 +267,9 @@ HTML;
 
 	$cookieSelectedCategories = array();
 	$cookieSelectedThreadStatus = array();
+	$cookieSelectedUnread = false;
 	$category_ids_array = array_column($categories, 'category_id');
+
 	if(!empty($_COOKIE[$currentCourse . '_forum_categories'])) {
 		foreach(explode('|', $_COOKIE[$currentCourse . '_forum_categories']) as $selectedId) {
 			if(in_array((int)$selectedId, $category_ids_array)) {
@@ -282,7 +284,7 @@ HTML;
 			}
 		}
 	}
-
+	$cookieSelectedUnread = $_COOKIE['unread_select_value'];
 	$default_button = array(
 		array(
 			"required_rank" => 4,
@@ -542,6 +544,7 @@ HTML;
 			"current_course" => $currentCourse,
 			"cookie_selected_categories" => $cookieSelectedCategories,
 			"cookie_selected_thread_status" => $cookieSelectedThreadStatus,
+			"cookie_selected_unread_value" => $cookieSelectedUnread,
 			"display_option" => $display_option,
 			"thread_exists" => $threadExists
 		]);

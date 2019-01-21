@@ -1761,10 +1761,12 @@ function alterShowMergeThreadStatus(newStatus, course) {
 function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirstPage, success_callback){
     var categories_value = $("#thread_category").val();
     var thread_status_value = $("#thread_status_select").val();
+    var unread_select_value = $("#unread").is(':checked');
     categories_value = (categories_value == null)?"":categories_value.join("|");
     thread_status_value = (thread_status_value == null)?"":thread_status_value.join("|");
     document.cookie = course + "_forum_categories=" + categories_value + ";";
     document.cookie = "forum_thread_status=" + thread_status_value + ";";
+    document.cookie = "unread_select_value=" + unread_select_value + ";";
     var url = buildUrl({'component': 'forum', 'page': 'get_threads', 'page_number': (loadFirstPage?'1':'-1')});
     $.ajax({
             url: url,
@@ -1772,6 +1774,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
             data: {
                 thread_categories: categories_value,
                 thread_status: thread_status_value,
+                unread_select: unread_select_value,
                 currentThreadId: currentThreadId,
                 currentCategoriesId: currentCategoriesId,
             },
