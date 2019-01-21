@@ -120,7 +120,7 @@ class DatabaseQueries {
     /**
      * Helper function for generating sql query according to the given requirements
      */
-    public function buildLoadThreadQuery($categories_ids, $thread_status, $show_deleted, $show_merged_thread, $current_user,
+    public function buildLoadThreadQuery($categories_ids, $thread_status, $unread_threads, $show_deleted, $show_merged_thread, $current_user,
                                         &$query_select, &$query_join, &$query_where, &$query_order, &$query_parameters,
                                         $want_categories, $want_order) {
         $query_raw_select = array();
@@ -184,6 +184,10 @@ class DatabaseQueries {
             $query_raw_join[] = "JOIN ({$query_select_categories}) AS QSC ON QSC.thread_id = t.id";
         }
 
+        if($unread_threads) {
+            $query_raw_where[]  = "NOT EXISTS(SELECT thread_id FROM viewed_responses v WHERE v.thread_id = t.id AND v.user_id = '{$current_user}')";
+        }
+
         $query_select   = implode(", ", $query_raw_select);
         $query_join     = implode(" ", $query_raw_join);
         $query_where    = implode(" and ", $query_raw_where);
@@ -195,6 +199,7 @@ class DatabaseQueries {
      *
      * @param  array(int)    categories_ids     Filter threads having atleast provided categories
      * @param  array(int)    thread_status      Filter threads having thread status among $thread_status
+     * @param  bool          unread_threads     Filter threads to show only unread threads
      * @param  bool          show_deleted       Consider deleted threads
      * @param  bool          show_merged_thread Consider merged threads
      * @param  string        current_user       user_id of currrent user
@@ -202,7 +207,7 @@ class DatabaseQueries {
      * @param  int           thread_id          If blockNumber is not known, find it using thread_id
      * @return array('block_number' => int, 'threads' => array(threads))    Ordered filtered threads
      */
-    public function loadThreadBlock($categories_ids, $thread_status, $show_deleted, $show_merged_thread, $current_user, $blockNumber, $thread_id){
+    public function loadThreadBlock($categories_ids, $thread_status, $unread_threads, $show_deleted, $show_merged_thread, $current_user, $blockNumber, $thread_id){
         $blockSize = 30;
         $loadLastPage = false;
 
@@ -214,7 +219,7 @@ class DatabaseQueries {
         // $blockNumber is 1 based index
         if($blockNumber <= -1) {
             // Find the last block
-            $this->buildLoadThreadQuery($categories_ids, $thread_status, $show_deleted, $show_merged_thread, $current_user, $query_select, $query_join, $query_where, $query_order, $query_parameters, false, false);
+            $this->buildLoadThreadQuery($categories_ids, $thread_status, $unread_threads, $show_deleted, $show_merged_thread, $current_user, $query_select, $query_join, $query_where, $query_order, $query_parameters, false, false);
             $query = "SELECT count(*) FROM (SELECT {$query_select} FROM threads t {$query_join} WHERE {$query_where}) AS SUBQUERY";
             $this->course_db->query($query, $query_parameters);
             $results = $this->course_db->rows();
@@ -226,7 +231,7 @@ class DatabaseQueries {
             if($thread_id >= 1)
             {
                 // Find $blockNumber
-                $this->buildLoadThreadQuery($categories_ids, $thread_status, $show_deleted, $show_merged_thread, $current_user, $query_select, $query_join, $query_where, $query_order, $query_parameters, false, true);
+                $this->buildLoadThreadQuery($categories_ids, $thread_status, $unread_threads, $show_deleted, $show_merged_thread, $current_user, $query_select, $query_join, $query_where, $query_order, $query_parameters, false, true);
                 $query = "SELECT SUBQUERY.row_number as row_number FROM (SELECT {$query_select} FROM threads t {$query_join} WHERE {$query_where} ORDER BY {$query_order}) AS SUBQUERY WHERE SUBQUERY.id = ?";
                 $query_parameters[] = $thread_id;
                 $this->course_db->query($query, $query_parameters);
@@ -238,7 +243,7 @@ class DatabaseQueries {
             }
         }
         $query_offset = ($blockNumber-1) * $blockSize;
-        $this->buildLoadThreadQuery($categories_ids, $thread_status, $show_deleted, $show_merged_thread, $current_user, $query_select, $query_join, $query_where, $query_order, $query_parameters, true, true);
+        $this->buildLoadThreadQuery($categories_ids, $thread_status, $unread_threads, $show_deleted, $show_merged_thread, $current_user, $query_select, $query_join, $query_where, $query_order, $query_parameters, true, true);
         $query = "SELECT {$query_select} FROM threads t {$query_join} WHERE {$query_where} ORDER BY {$query_order} LIMIT ? OFFSET ?";
         $query_parameters[] = $blockSize;
         $query_parameters[] = $query_offset;
