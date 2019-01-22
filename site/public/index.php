@@ -269,6 +269,10 @@ switch($_REQUEST['component']) {
         $control = new app\controllers\forum\ForumController($core);
         $control->run();
         break;
+    case 'notification_settings':
+        $control = new app\controllers\NotificationSettings($core);
+        $control->run();
+        break;
     case 'pdf':
         $control = new app\controllers\pdf\PDFController($core);
         $control->run();

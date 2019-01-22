@@ -60,7 +60,7 @@ Victor Zhu 2014
 We'd like to recognize and thank [RPISEC](https://rpis.ec/) and these individual members:  
 Andrew Fasano  
 Markus Gaasedelen    
-Nick Burnett  
+Amy Burnett  
 Aidan Noll  
 Toshi Piazza  
 Matt Raneri  

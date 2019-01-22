@@ -6,22 +6,15 @@ if [[ "$UID" -ne "0" ]] ; then
     exit
 fi
 
-# Add repo for Java 8
-apt-get install -qy software-properties-common
-add-apt-repository "deb http://ppa.launchpad.net/webupd8team/java/ubuntu xenial main"
-echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
-apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys EEA14886
-
-# Some non-free repos
+# Some non-free repos and backports
 add-apt-repository "deb http://ftp.debian.org/debian/ jessie main contrib non-free"
+add-apt-repository "deb http://ftp.debian.org/debian jessie-backports main"
 
 # Add repo to make it possible to use PHP 7 instead of the PHP that comes with Jessie (5.6)
 add-apt-repository 'deb http://packages.dotdeb.org jessie all'
 wget https://www.dotdeb.org/dotdeb.gpg -O /tmp/dotdeb.gpg
 apt-key add /tmp/dotdeb.gpg
 rm /tmp/dotdeb.gpg
-
-add-apt-repository "deb http://ftp.debian.org/debian jessie-backports main"
 
 apt-get update
 
@@ -78,10 +71,10 @@ chmod -R o+rx /usr/local/lib/cmake
 # TODO: Skipping Racket, Prolog, GLFW as these aren't tested currently and are "extra" packages anyway
 
 
-# Install Oracle 8 Non-Interactively
+# Install OpenJDK 8 Non-Interactively
 echo "installing java8"
-apt-get install -qqy oracle-java8-installer > /dev/null 2>&1
-apt-get install -qqy oracle-java8-set-default
+apt-get -t jessie-backports install -qqy openjdk-8-jdk
+update-java-alternatives --set java-1.8.0-openjdk-amd64
 
 # Install Image Magick for image comparison, etc.
 apt-get install -qqy imagemagick

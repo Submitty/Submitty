@@ -268,7 +268,7 @@ class Config extends AbstractModel {
             $this->$path = rtrim($this->$path, "/");
         }
 
-        foreach(array('site_errors', 'access') as $path) {
+        foreach(array('autograding', 'access', 'site_errors', 'ta_grading') as $path) {
             if (!is_dir(FileUtils::joinPaths($this->submitty_log_path, $path))) {
                 throw new ConfigException("Missing log folder: {$path}");
             }
