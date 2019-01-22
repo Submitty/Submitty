@@ -25,7 +25,7 @@
                         <tr>
                             <td colspan="1">
                                 {% if notification.getComponent() == "forum" %}
-                                    <i class="fa fa-comments" title="Forum"></i>
+                                    <i class="fas fa-comments" title="Forum"></i>
                                 {% endif %}
                             </td>
                             <td colspan="4">
@@ -45,7 +45,7 @@
                             <td colspan="1">
                                 {% if not notification.isSeen() %}
                                     <a href="{{ core.buildUrl({"component": "navigation", "page": "notifications", "action": "mark_as_seen", "nid": notification.getId() }) }}" title="Mark as seen">
-                                        <i class="fa fa-check" aria-hidden="true"></i>
+                                        <i class="fas fa-check" aria-hidden="true"></i>
                                     </a>
                                 {% endif %}
                             </td>
