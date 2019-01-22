@@ -666,13 +666,16 @@ class ForumController extends AbstractController {
         $category_id = in_array('thread_category', $_POST) ? $_POST['thread_category'] : -1;
         $category_id = array($category_id);
         $thread_status = array();
+        $unread_threads = false;
         if(!empty($_COOKIE[$currentCourse . '_forum_categories']) &&  $category_id[0] == -1 ) {
             $category_id = explode('|', $_COOKIE[$currentCourse . '_forum_categories']);
         }
         if(!empty($_COOKIE['forum_thread_status'])){
             $thread_status = explode("|", $_COOKIE['forum_thread_status']);
         }
-        $unread_threads = ($_COOKIE['unread_select_value'] === 'true');
+        if(!empty($_COOKIE['unread_select_value'])){
+            $unread_threads = ($_COOKIE['unread_select_value'] === 'true');
+        }
         foreach ($category_id as &$id) {
             $id = (int)$id;
         }
