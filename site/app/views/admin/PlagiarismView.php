@@ -177,7 +177,7 @@ HTML;
                     if (markers.length === 0) { return; }
                     var lineData = markers[0].find();
                     console.log(lineData);
-                    editor0.markText(lineData.from, lineData.to, {'inclusiveRight': true, 'css': 'background: #e26563;'});
+                    editor0.markText(lineData.from, lineData.to, {'css': 'background: #FF0000;'});
                     getMatchesForClickedMatch("{$gradeable_id}", event, lineData.from, lineData.to, "code_box_1", "orange", null, "", "");
                 }
             });
