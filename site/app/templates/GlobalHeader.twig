@@ -32,7 +32,7 @@
 </head>
 <script>var onAjaxInit;</script>
 <body data-site-url="{{ site_url }}" data-csrf-token="{{ core.getCsrfToken() }}" onload="if (onAjaxInit) { onAjaxInit(); }">
-<div id="container" {{ container_class }}>
+<div id="container">
     {% if wrapper_urls['top_bar.html'] != null %}
         {# uploaded homepage redirect can go here? #}
         <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="top_bar" src="{{ wrapper_urls['top_bar.html'] }}" frameborder="0"></iframe>
@@ -75,7 +75,7 @@
                     <img id="logo-submitty" src="../img/submitty_logo.png" alt="Submitty Logo">
                 </a>
             </div>
-            <div class="row" id="push" {{ row_height }}>
+            <div class="row {{ header_class  }}" id="push">
                 {% if sidebar_buttons|length > 0 %}
                     <div class="col-md-auto" id="sidebar">
                         <div id="nav-buttons-visible">
