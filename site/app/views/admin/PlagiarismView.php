@@ -164,6 +164,22 @@ HTML;
         $return = "";
         $return .= <<<HTML
         <script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/codemirror.js"></script>
+        <script>
+
+            $(document).ready(function() {
+                var editor0 = $('.CodeMirror')[0].CodeMirror;
+
+                console.log('hello');
+
+                editor0.getWrapperElement().onmousedown = function(e) {
+                    var lineCh = editor0.coordsChar({ left: e.clientX, top: e.clientY });
+                    var markers = editor0.findMarksAt(lineCh);
+                    if (markers.length === 0) { return; }
+                    console.log(markers[0].find())
+                }
+            });
+
+        </script>
         <link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}css/iframe/codemirror.css" />
 <div style="padding:5px 5px 0px 5px;" class="content forum_content forum_show_threads">
 HTML;
