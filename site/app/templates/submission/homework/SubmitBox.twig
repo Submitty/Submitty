@@ -179,7 +179,7 @@
 		</style>
 
 		<strong>{{ i.label }}</strong>
-		<div id="editor_{{ loop.index0 }}">
+		<div id="editor_{{ loop.index0 }}" class="editor">
 int main(int argc, char **argv) {
   std::cout << "Hello World!" << std::endl;
   return 0;		  
@@ -187,8 +187,8 @@ int main(int argc, char **argv) {
 		</div>
         <br>
 		
-		<script src="../../../../js/ace-builds/src-min/mode-{{ i.language }}.js"></script>
-        <script src="../../../../js/ace-builds/src-min/ace.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../../../../js/ace/mode-{{ i.language }}.js"></script>
+        <script src="../../../../js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
 		<script>
 		  var editor = ace.edit("editor_{{ loop.index0 }}", {
 		  theme: "ace/theme/monokai",
