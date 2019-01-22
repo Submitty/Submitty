@@ -180,6 +180,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'course_path' => $this->temp_dir.'/courses/s17/csci0000',
             'submitty_log_path' => $this->temp_dir.'/logs',
             'log_exceptions' => true,
+            'cgi_tmp_dir' => FileUtils::joinPaths($this->submitty_path, "tmp", "cgi");
             'database_driver' => 'pgsql',
             'submitty_database_params' => $db_params,
             'course_database_params' => array_merge($db_params, array('dbname' => 'submitty_s17_csci0000')),
