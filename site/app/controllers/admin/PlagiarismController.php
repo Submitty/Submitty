@@ -597,8 +597,23 @@ class PlagiarismController extends AbstractController {
                         //Color is yellow -- matches other students...
                         $color = '#ffff00';
 	    			}
-	    			 
-            else if($match["type"] == "common") {
+
+                    if($codebox == "2" && $user_id_2 !="" && $orange_color) {
+                         foreach($match['others'][$user_2_index_in_others]['matchingpositions'] as $user_2_matchingposition) {
+                            $start_pos_2 =$tokens_user_2[$user_2_matchingposition["start"]-1]["char"]-1;
+                            $start_line_2 = $tokens_user_2[$user_2_matchingposition["start"]-1]["line"]-1;
+                            $end_pos_2 =$tokens_user_2[$user_2_matchingposition["end"]-1]["char"]-1; //!!!!
+                            $end_line_2 = $tokens_user_2[$user_2_matchingposition["end"]-1]["line"]-1;
+                            $start_value_2 = $tokens_user_2[$user_2_matchingposition["start"]-1]["value"];
+                            $end_value_2 =$tokens_user_2[$user_2_matchingposition["end"]-1]["value"];
+                            $color_info[2][] = [$start_pos_2, $start_line_2, $end_pos_2, $end_line_2, '#ffa500', $start_value_2, $end_value_2];
+
+                }
+                
+              
+            }
+	    	
+            } else if($match["type"] == "common") {
                 //Color is grey -- common matches among all students
                 $color = '#cccccc';
             }
@@ -607,40 +622,11 @@ class PlagiarismController extends AbstractController {
                 $color = '#b5e3b5';
             }
 
-            if($codebox == "2" && $user_id_2 !="" && $orange_color) {
-                         foreach($match['others'][$user_2_index_in_others]['matchingpositions'] as $user_2_matchingposition) {
-                            $start_pos_2 =$tokens_user_2[$user_2_matchingposition["start"]-1]["char"]-1;
-                            $start_line_2 = $tokens_user_2[$user_2_matchingposition["start"]-1]["line"]-1;
-                            $end_pos_2 =$tokens_user_2[$user_2_matchingposition["end"]-1]["char"]; //!!!!
-                            $end_line_2 = $tokens_user_2[$user_2_matchingposition["end"]-1]["line"]-1;
-                            $start_value_2 = $tokens_user_2[$user_2_matchingposition["start"]-1]["value"];
-                            $end_value_2 =$tokens_user_2[$user_2_matchingposition["end"]-1]["value"];
-                            $color_info[2][] = [$start_pos_2, $start_line_2, $end_pos_2, $end_line_2, '#ffa500', $start_value_2, $end_value_2];
-        //                     $onclick_function = 'getMatchesForClickedMatch("'.$gradeable_id.'", event,'.$match["start"].','.$match["end"].',"code_box_2","orange", this);';
-        //                     $name = '{"start":'.$user_2_matchingposition["start"].', "end":'.$user_2_matchingposition["end"].'}';
-           //               if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {
-                 //             $color_info[$start_line][$start_pos] .= "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffa500;cursor: pointer;'>";
-                 //         }
-                 //         else {
-                 //             $color_info[$start_line][$start_pos] = "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffa500;cursor: pointer;'>";
-                 //         }
-                 //         if(array_key_exists($end_line, $color_info) && array_key_exists($end_pos+strlen(strval($end_value)), $color_info[$end_line])) {
-                 //             $color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>".$color_info[$end_line][$end_pos+strlen(strval($end_value))];
-                 //         }
-                 //         else {
-                 //             $color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>";
-                 //         }
-        //                 }
-                    // }
-
-                }
-                
-              
-            } 
+             
 
             array_push($color_info[1], [$start_pos, $start_line, $end_pos, $end_line, $color, $start_value, $end_value]);
             
-        }
+        
     	// foreach($color_info as $i=>$color_info_for_line) {
 	    // 	ksort($color_info[$i]);
     	// }
