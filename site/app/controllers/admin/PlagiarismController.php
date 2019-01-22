@@ -698,6 +698,10 @@ class PlagiarismController extends AbstractController {
         $user_id_1 =$_REQUEST['user_id_1'];
         $version_user_1 = $_REQUEST['version_user_1'];
         $course_path = $this->core->getConfig()->getCoursePath();
+
+        $token_path= $course_path."/lichen/tokenized/".$gradeable_id."/".$user_id_1."/".$version_user_1."/tokens.json";
+        $tokens_user_1 = json_decode(file_get_contents($token_path), true);
+
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
 
@@ -710,11 +714,15 @@ class PlagiarismController extends AbstractController {
         else {
             $content = json_decode(file_get_contents($file_path), true);
             foreach($content as $match) {
-                if($match["start"] == $_REQUEST['start'] && $match["end"] == $_REQUEST['end']) {
+                if($tokens_user_1[$match["start"]-1]["line"]-1 == $_REQUEST['start'] && $tokens_user_1[$match["end"]-1]["line"]-1 == $_REQUEST['end']) { //also do char place
                     foreach ($match["others"] as $match_info) {
                         $matchingpositions= array();
+                        $token_path_2= $course_path."/lichen/tokenized/".$gradeable_id."/".$match_info['username']."/".$match_info['version']."/tokens.json";
+                        $tokens_user_2 = json_decode(file_get_contents($token_path_2), true);
                         foreach($match_info['matchingpositions'] as $matchingpos) {
-                            array_push($matchingpositions, array("start"=> $matchingpos["start"] , "end"=>$matchingpos["end"]));
+                            
+                            array_push($matchingpositions, array("start_line"=> $tokens_user_2[$matchingpos["start"]-1]["line"]-1 , "start_ch" => $tokens_user_2[$matchingpos["start"]-1]["char"]-1,
+                                 "end_line"=> $tokens_user_2[$matchingpos["end"]-1]["line"]-1, "end_ch" => $tokens_user_2[$matchingpos["end"]-1]["char"]-1 ));
                         }
                         $first_name= $this->core->getQueries()->getUserById($match_info["username"])->getDisplayedFirstName();
                         $last_name= $this->core->getQueries()->getUserById($match_info["username"])->getDisplayedLastName();

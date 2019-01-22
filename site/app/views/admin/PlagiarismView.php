@@ -175,7 +175,10 @@ HTML;
                     var lineCh = editor0.coordsChar({ left: e.clientX, top: e.clientY });
                     var markers = editor0.findMarksAt(lineCh);
                     if (markers.length === 0) { return; }
-                    console.log(markers[0].find())
+                    var lineData = markers[0].find();
+                    console.log(lineData);
+                    editor0.markText(lineData.from, lineData.to, {'inclusiveRight': true, 'css': 'background: #e26563;'});
+                    getMatchesForClickedMatch("{$gradeable_id}", event, lineData.from, lineData.to, "code_box_1", "orange", null, "", "");
                 }
             });
 
