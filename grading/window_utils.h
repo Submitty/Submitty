@@ -15,6 +15,12 @@ std::vector<int> extractIntsFromString(std::string input);
 std::vector<int> getPidsAssociatedWithPid(int pid);
 
 /**
+*  Returns the location of the mouse as an x, y vector.
+*  Returns empty vector on failure.
+*/
+std::vector<int> getMouseLocation();
+
+/**
 * Given a pid, this function finds any windows directly belonging to it. 
 * To do this, it iterates through the list of active windows (on the order of 3-10 usually)
 * and looks at their pids. To do this, we break down the output of the wmctrl -lp system command

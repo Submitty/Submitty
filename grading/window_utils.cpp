@@ -103,7 +103,8 @@ std::vector<int> getPidsAssociatedWithPid(int pid){
 * anything before one or more tabs or spaces. Runs in O(number_of_windows)
 */
 std::vector<std::string> getWindowNameAssociatedWithPid(int pid){
-  getPidsAssociatedWithPid(pid);
+  //The below call is currently unused, but will be helpful when detecting multiwindow apps.
+  // getPidsAssociatedWithPid(pid);
   //This vector will contain any windows associated with our child's pid.
   std::vector<std::string> associatedWindows; 
   //returns list of active windows with pid.
@@ -245,11 +246,10 @@ std::set<std::string> snapshotOfActiveWindows(){
 void initializeWindow(std::string& window_name, int pid, std::set<std::string>& invalid_windows, float elapsed){
   
   //for the first two seconds, only try to init via pid.
-  std::cout << "Elapsed is " << elapsed << std::endl;
   if (elapsed < 2)
   {
     //get the window names associated with our pid.
-     std::vector<std::string> windows = getWindowNameAssociatedWithPid(pid);
+    std::vector<std::string> windows = getWindowNameAssociatedWithPid(pid);
     if(windows.size() == 0){
       return;
     }
@@ -463,10 +463,33 @@ bool mouse_move(std::string window_name, int moved_mouse_x, int moved_mouse_y,
 
   //only move the mouse if the window exists. (get focus and mousemove.)
   if(windowExists(window_name)){
-    std::string command = "wmctrl -R " + window_name + 
-    " &&  xdotool mousemove --sync " + std::to_string(moved_mouse_x) + " " 
-                                            + std::to_string(moved_mouse_y);  
-    system(command.c_str());
+    std::vector<int> current_mouse_position = getMouseLocation();
+
+    if(current_mouse_position.size() < 2){
+      return false;
+    }
+
+    //Explicit clamping.
+    if(moved_mouse_x > x_end || moved_mouse_x < x_start){
+      std::cout << "Attempted to move outside of the window bounds." << std::endl;
+      return false;
+    }
+    //Explicit clamping
+    if(moved_mouse_y > y_end || moved_mouse_y < y_start){
+      std::cout << "Attempted to move outside of the window bounds." << std::endl;
+      return false;
+    }
+
+    if(current_mouse_position[0] == moved_mouse_x && current_mouse_position[1] == moved_mouse_y){
+      std::cout << "mouse was already in position. Skipping movement." << std::endl;
+    }
+    else{
+      std::string command = "wmctrl -R " + window_name +
+      " &&  xdotool mousemove --sync " + std::to_string(moved_mouse_x) + " "
+                                              + std::to_string(moved_mouse_y);
+        system(command.c_str());
+    }
+
     return true;
   }
   else{
@@ -583,7 +606,21 @@ std::vector<float> getLineIntersectionPoint(std::vector<int> p1,
   return answer;
 }
 
+/**
+ *  Returns the location of the mouse as an x, y vector.
+ *  Returns empty vector on failure.
+ */
+std::vector<int> getMouseLocation(){
+  std::string mouse_location_string = output_of_system_command("xdotool getmouselocation");
+  std::vector<int> xy = extractIntsFromString(mouse_location_string);
 
+  if(xy.size() < 2){
+    std::vector<int> empty;
+    return empty;
+  }
+
+  return xy;
+}
 
 /**
 * The 'delta' version of the click and drag command. This function moves an xy
@@ -830,15 +867,13 @@ bool centerMouse(std::string window_name){
   int height, width, x_start, x_end, y_start, y_end; 
   bool success = populateWindowData(window_name, height, width, x_start,x_end,
                                                                 y_start,y_end);
-  int x_middle = x_start + width/2;
-  int y_middle = y_start+height/2;
+  int x_middle = x_start + (width/2);
+  int y_middle = y_start+(height/2);
 
   //wait until the last moment to check window existence.
   if(success && windowExists(window_name)){ 
-    std::string command = "wmctrl -R " + window_name + " &&  xdotool mousemove"
-      + " --sync " + std::to_string(x_middle) + " " + std::to_string(y_middle); 
-    system(command.c_str());
-    return true;
+    success = mouse_move(window_name, x_middle, y_middle, x_start, x_end, y_start, y_end, false);
+    return success;
   }
   else{
     std::cout << "Attempted to center mouse on a nonexistent window" 
@@ -859,11 +894,9 @@ bool moveMouseToOrigin(std::string window_name){
 
   //wait until the last moment to check window existence.
   if(success&& windowExists(window_name)){ 
-    std::string command = "wmctrl -R " + window_name + " &&  xdotool" 
-             +" mousemove --sync " + std::to_string(x_start) + " " + 
-                                              std::to_string(y_start); 
-    system(command.c_str());
-    return true;
+
+    success = mouse_move(window_name, x_start, y_start, x_start, x_end, y_start, y_end, false);
+    return success;
   }
   else{
     std::cout << "Attempted to move mouse to origin of nonexistent window" 
@@ -1098,10 +1131,14 @@ void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken,
   else{
     std::cout << "ERROR: ill formatted action: " << actions[actions_taken] << std::endl;
   }
-  std::cout << "Success was " << success << std::endl;
+
   if(success){
+    std::cout << "The action was successful" << std::endl;
     actions_taken++;
+  }else{
+    std::cout << "The action was unsuccessful" << std::endl;
   }
+
   delay_and_mem_check(delay_time, childPID, elapsed, next_checkpoint, 
     seconds_to_run, rss_memory, allowed_rss_memory, memory_kill, time_kill,logfile);   
 }
