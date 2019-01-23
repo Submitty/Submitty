@@ -1781,7 +1781,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
                x = x.html;
                x = `${x}`;
                var jElement = $("#thread_list");
-               jElement.children(":not(.fa)").remove();
+               jElement.children(":not(.fas)").remove();
                $("#thread_list .fa-caret-up").after(x);
                jElement.attr("prev_page", page_number - 1);
                jElement.attr("next_page", page_number + 1);
