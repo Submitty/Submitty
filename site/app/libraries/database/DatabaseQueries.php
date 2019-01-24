@@ -279,18 +279,18 @@ class DatabaseQueries {
         return $this->course_db->rows()[0]["max_id"];
     }
 
-	public function getResolveState($thread_id) {
-		$this->course_db->query("SELECT status from threads where id = ?", array($thread_id));
-		return $this->course_db->rows();
-	}
+    public function getResolveState($thread_id) {
+        $this->course_db->query("SELECT status from threads where id = ?", array($thread_id));
+        return $this->course_db->rows();
+    }
 
-	public function updateResolveState($thread_id, $state) {
-		if(in_array($state, array(-1, 0, 1))) {
-			$this->course_db->query("UPDATE threads set status = ? where id = ?", array($state, $thread_id));
-			return true;
-		}
-		return false;
-	}
+    public function updateResolveState($thread_id, $state) {
+        if(in_array($state, array(-1, 0, 1))) {
+            $this->course_db->query("UPDATE threads set status = ? where id = ?", array($state, $thread_id));
+            return true;
+        }
+        return false;
+    }
 
     public function updateNotificationSettings($results) {
         $values = implode(', ', array_fill(0, count($results)+1, '?'));
@@ -318,10 +318,10 @@ class DatabaseQueries {
                                         SET $updates", $test);
     }
 
-	public function getAuthorOfThread($thread_id) {
-		$this->course_db->query("SELECT created_by from threads where id = ?", array($thread_id));
-		return $this->course_db->rows()[0]['created_by'];
-	}
+    public function getAuthorOfThread($thread_id) {
+        $this->course_db->query("SELECT created_by from threads where id = ?", array($thread_id));
+        return $this->course_db->rows()[0]['created_by'];
+    }
 
     public function getPosts(){
         $this->course_db->query("SELECT * FROM posts where deleted = false");
@@ -442,13 +442,13 @@ class DatabaseQueries {
     }
 
     public function searchThreads($searchQuery){
-    	$this->course_db->query("SELECT post_content, p_id, p_author, thread_id, thread_title, author, pin, anonymous, timestamp_post FROM (SELECT t.id as thread_id, t.title as thread_title, p.id as p_id, t.created_by as author, t.pinned as pin, p.timestamp as timestamp_post, p.content as post_content, p.anonymous, p.author_user_id as p_author, to_tsvector(p.content) || to_tsvector(t.title) as document from posts p, threads t JOIN (SELECT thread_id, timestamp from posts where parent_id = -1) p2 ON p2.thread_id = t.id where t.id = p.thread_id and p.deleted=false and t.deleted=false) p_doc where p_doc.document @@ plainto_tsquery(:q) ORDER BY timestamp_post DESC", array(':q' => $searchQuery));
-    	return $this->course_db->rows();
+        $this->course_db->query("SELECT post_content, p_id, p_author, thread_id, thread_title, author, pin, anonymous, timestamp_post FROM (SELECT t.id as thread_id, t.title as thread_title, p.id as p_id, t.created_by as author, t.pinned as pin, p.timestamp as timestamp_post, p.content as post_content, p.anonymous, p.author_user_id as p_author, to_tsvector(p.content) || to_tsvector(t.title) as document from posts p, threads t JOIN (SELECT thread_id, timestamp from posts where parent_id = -1) p2 ON p2.thread_id = t.id where t.id = p.thread_id and p.deleted=false and t.deleted=false) p_doc where p_doc.document @@ plainto_tsquery(:q) ORDER BY timestamp_post DESC", array(':q' => $searchQuery));
+        return $this->course_db->rows();
     }
 
     public function threadExists(){
-		$this->course_db->query("SELECT id from threads where deleted = false LIMIT 1");
-		return count($this->course_db->rows()) == 1;
+        $this->course_db->query("SELECT id from threads where deleted = false LIMIT 1");
+        return count($this->course_db->rows()) == 1;
     }
 
     /**
@@ -787,7 +787,7 @@ ORDER BY egd.g_version", array($g_id, $user_id));
     public function getUsersByRegistrationSections($sections, $orderBy="registration_section") {
         $return = array();
         if (count($sections) > 0) {
-        	$orderBy = str_replace("registration_section","SUBSTRING(registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(registration_section, '[0-9]+')::INT, -1), SUBSTRING(registration_section, '[^0-9]*$')",$orderBy);
+            $orderBy = str_replace("registration_section","SUBSTRING(registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(registration_section, '[0-9]+')::INT, -1), SUBSTRING(registration_section, '[^0-9]*$')",$orderBy);
             $values = $this->createParamaterList(count($sections));
             $this->course_db->query("SELECT * FROM users AS u WHERE registration_section IN {$values} ORDER BY {$orderBy}", $sections);
             foreach ($this->course_db->rows() as $row) {
@@ -1234,21 +1234,12 @@ ORDER BY g.sections_rotating_id, g.user_id", $params);
         $where = "";
         if ($user_id !== null) {
             $params[] = $user_id;
-<<<<<<< HEAD
-            $where = " AND g.user_id=?";
-        }
-        $this->course_db->query("
-            SELECT g.sections_rotating_id
-            FROM grading_rotating AS g
-            WHERE g.g_id=? {$where}", $params);
-=======
             $where = " AND user_id=?";
         }
         $this->course_db->query("
             SELECT sections_rotating_id
             FROM grading_rotating
             WHERE g_id=? {$where}", $params);
->>>>>>> eb26200767cda53852bf1b96ad996f517e9b2e6a
         $return = array();
         foreach ($this->course_db->rows() as $row) {
             $return[] = $row['sections_rotating_id'];
@@ -1458,7 +1449,7 @@ ORDER BY user_id ASC");
     }
 
     public function deleteRegistrationSection($section) {
-       	$semester = $this->core->getConfig()->getSemester();
+        $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $this->submitty_db->query("DELETE FROM courses_registration_sections WHERE semester=? AND course=? AND registration_section_id=?", array($semester, $course, $section));
         return $this->submitty_db->getRowCount();
@@ -1639,7 +1630,7 @@ DELETE FROM gradeable_component_data WHERE gc_id=? AND gd_id=?", $params);
 
    public function deleteGradeableComponentMarkData($gd_id, $gc_id, $grader_id, GradeableComponentMark $mark) {
            $params = array($gc_id, $gd_id, $mark->getId());
-	           $this->course_db->query("
+               $this->course_db->query("
 DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=?", $params);
     }
 
@@ -1779,8 +1770,8 @@ WHERE gcm_id=?", $params);
     }
 
     public function getGreatestGradeableComponentMarkOrder(GradeableComponent $component) {
-    	$this->course_db->query("SELECT MAX(gcm_order) as max FROM gradeable_component_mark WHERE gc_id=? ", array($component->getId()));
-    	$row = $this->course_db->row();
+        $this->course_db->query("SELECT MAX(gcm_order) as max FROM gradeable_component_mark WHERE gc_id=? ", array($component->getId()));
+        $row = $this->course_db->row();
         return $row['max'];
 
     }
@@ -2124,12 +2115,12 @@ ORDER BY {$section_key}", $params);
             $params = array_merge($sections, $params);
         }
         $orderBy="";
- 		if($section_key == "registration_section") {
- 			$orderBy = "SUBSTRING(registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(registration_section, '[0-9]+')::INT, -1), SUBSTRING(registration_section, '[^0-9]*$')";
- 		}
- 		else {
- 			$orderBy = $section_key;
- 		}
+        if($section_key == "registration_section") {
+            $orderBy = "SUBSTRING(registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(registration_section, '[0-9]+')::INT, -1), SUBSTRING(registration_section, '[^0-9]*$')";
+        }
+        else {
+            $orderBy = $section_key;
+        }
         $this->course_db->query("
 SELECT count(*) as cnt, {$section_key}
 FROM users
@@ -2161,12 +2152,12 @@ ORDER BY {$orderBy}", $params);
             $params = array_merge($sections, $params);
         }
         $orderBy="";
- 		if($section_key == "registration_section") {
- 			$orderBy = "SUBSTRING(registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(registration_section, '[0-9]+')::INT, -1), SUBSTRING(registration_section, '[^0-9]*$')";
- 		}
- 		else {
- 			$orderBy = $section_key;
- 		}
+        if($section_key == "registration_section") {
+            $orderBy = "SUBSTRING(registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(registration_section, '[0-9]+')::INT, -1), SUBSTRING(registration_section, '[^0-9]*$')";
+        }
+        else {
+            $orderBy = $section_key;
+        }
 
         $this->course_db->query("
 SELECT count(*) as cnt, {$section_key}
@@ -2262,9 +2253,9 @@ ORDER BY gt.{$section_key}", $params);
      * @param string $csv_option value determined by selected radio button
      */
     public function updateLateDays($user_id, $timestamp, $days, $csv_option=null) {
-		//q.v. PostgresqlDatabaseQueries.php
-		throw new NotImplementedException();
-	}
+        //q.v. PostgresqlDatabaseQueries.php
+        throw new NotImplementedException();
+    }
 
     /**
      * Delete a given user's allowed late days entry at given effective time
@@ -2316,16 +2307,16 @@ ORDER BY gt.{$section_key}", $params);
         $this->course_db->query("INSERT INTO peer_assign(grader_id, user_id, g_id) VALUES (?,?,?)", array($grader, $student, $gradeable_id));
     }
 
-	/**
-	 * Retrieves all unarchived courses (and details) that are accessible by $user_id
-	 *
-	 * (u.user_id=? AND c.status=1) checks if a course is active
-	 * An active course may be accessed by all users
-	 *
-	 * @param string $user_id
-	 * @param string $submitty_path
-	 * @return array - unarchived courses (and their details) accessible by $user_id
-	 */
+    /**
+     * Retrieves all unarchived courses (and details) that are accessible by $user_id
+     *
+     * (u.user_id=? AND c.status=1) checks if a course is active
+     * An active course may be accessed by all users
+     *
+     * @param string $user_id
+     * @param string $submitty_path
+     * @return array - unarchived courses (and their details) accessible by $user_id
+     */
     public function getUnarchivedCoursesById($user_id) {
         $this->submitty_db->query("
 SELECT u.semester, u.course
@@ -2731,61 +2722,48 @@ AND gc_id IN (
         $announcement = $type === 'new_announcement' || $type === 'updated_announcement';
 
         if(!empty($notification->getNotifyTarget())) {
-        	//Notify specific user
-        	$not_send_users[] = $notification->getNotifyTarget();
-        	if($params[3] !== $not_send_users[0]) {
-        		$this->course_db->query("INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id)
+            //Notify specific user
+            $not_send_users[] = $notification->getNotifyTarget();
+            if($params[3] !== $not_send_users[0]) {
+                $this->course_db->query("INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id)
                     VALUES (?, ?, ?, current_timestamp, ?, ?)",
                     array_merge($params, $not_send_users));
-        	}
+            }
         }
 
         if($notification->getNotifyNotToSource()){
-<<<<<<< HEAD
-            $ignore_self_query = "WHERE user_id <> ?";
-            $params[] = $notification->getNotifySource();
-        }
-        else {
-            $ignore_self_query = "";
-        }
-
-<<<<<<< HEAD
-=======
             $not_send_users[] = $notification->getNotifySource();
         }
         
         $restrict = count($not_send_users);
         if($restrict > 0) {
-        	$ignore_self_query = "WHERE user_id NOT IN (" . implode(',', array_fill(0, $restrict, '?')) . ')';
+            $ignore_self_query = "WHERE user_id NOT IN (" . implode(',', array_fill(0, $restrict, '?')) . ')';
         }
         
         $column = '';
         if($type === 'reply') {
-        	$post_thread_id = json_decode($params[1], true)[0]['thread_id'];
+            $post_thread_id = json_decode($params[1], true)[0]['thread_id'];
             $params[] = $post_thread_id;
             $target_users_query = "SELECT n.user_id from notification_settings n, posts p where p.thread_id = ? and p.author_user_id = n.user_id and n.reply_in_post_thread = 'true' ";
             $target_users_query .= "UNION SELECT user_id from notification_settings where all_new_posts = 'true'";
         } else if(!$announcement) {
-        	switch ($type) {
-	            case 'new_thread':
-	                $column = 'all_new_threads';
-	                break;
-	            case 'merge_thread':
-	                $column = 'merge_threads';
-	                break;
-	            case 'edited':
-	            case 'deleted':
-	            case 'undeleted':
-	                $column = 'all_modifications_forum';
-	                break;
-    		}
-    		$target_users_query = "SELECT user_id FROM notification_settings where {$column} = 'true'";
+            switch ($type) {
+                case 'new_thread':
+                    $column = 'all_new_threads';
+                    break;
+                case 'merge_thread':
+                    $column = 'merge_threads';
+                    break;
+                case 'edited':
+                case 'deleted':
+                case 'undeleted':
+                    $column = 'all_modifications_forum';
+                    break;
+            }
+            $target_users_query = "SELECT user_id FROM notification_settings where {$column} = 'true'";
         }
 
         //Notify users based on settings
->>>>>>> eb26200767cda53852bf1b96ad996f517e9b2e6a
-=======
->>>>>>> 4c0015b9b4cbb5ceae2420262f316932fb6c9f64
         $this->course_db->query("INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id)
                     SELECT ?, ?, ?, current_timestamp, ?, user_id as to_user_id FROM ({$target_users_query}) as u {$ignore_self_query}",
                     array_merge($params, $not_send_users));
@@ -2852,8 +2830,8 @@ AND gc_id IN (
         $parameters = array();
         $parameters[] = $user_id;
         if($thread_id != -1) {
-        	$id_query = "metadata::json->0->>'thread_id' = ?";
-        	$parameters[] = $thread_id;
+            $id_query = "metadata::json->0->>'thread_id' = ?";
+            $parameters[] = $thread_id;
         } else if($notification_id == -1) {
             $id_query = "true";
         } else {
@@ -3797,11 +3775,11 @@ AND gc_id IN (
         $parameters = array($recipient, $emailData["subject"], $emailData["body"]);
 
         $this->submitty_db->query("
-                INSERT INTO emails(
-                  recipient,
-                  subject,
-                  body,
-                  created)
-                VALUES(?, ?, ?, NOW())", $parameters);
+            INSERT INTO emails(
+              recipient,
+              subject,
+              body,
+              created)
+            VALUES(?, ?, ?, NOW())", $parameters);
     }
 }
