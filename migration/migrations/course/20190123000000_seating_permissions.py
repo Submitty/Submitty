@@ -7,7 +7,7 @@ def up(config, conn, semester, course):
     course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
     uploads_seating_dir = Path(course_dir, 'uploads', 'seating')
 
-    # set the owner
+    # add group write
     os.system("chmod g+w "+str(uploads_seating_dir))
 
     pass
