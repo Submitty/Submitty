@@ -627,6 +627,8 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     subprocess.call(['ls', '-lR', '.'], stdout=open(tmp_logs + "/overall.txt", 'a'))
 
     os.makedirs(os.path.join(tmp_results,"details"))
+    os.makedirs(os.path.join(tmp_results,"results_public"))
+    shutil.copy(os.path.join(tmp_logs,"overall.txt"),os.path.join(tmp_results,"results_public","foo.txt"))
 
     # remove the test_input directory, so we don't archive it!
     shutil.rmtree(os.path.join(tmp_work,"test_input"))
