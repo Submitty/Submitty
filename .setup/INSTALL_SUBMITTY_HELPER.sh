@@ -224,12 +224,14 @@ fi
 
 mkdir -p ${SUBMITTY_DATA_DIR}/logs
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding
+mkdir -p ${SUBMITTY_DATA_DIR}/logs/emails
 
 #Make site logging directories if not in worker mode.
 if [ "${WORKER}" == 0 ]; then
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/site_errors
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/access
 fi
+
 
 # set the permissions of these directories
 chown  root:${COURSE_BUILDERS_GROUP}              ${SUBMITTY_DATA_DIR}

@@ -77,6 +77,13 @@ for i in "${array[@]}"; do
     find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.${i} -exec chmod o+r {} \;
 done
 
+#Setup Cron Jobs
+crontab -r
+crontab -l > cron_jobs
+echo "* * * * * python3 /usr/local/submitty/sbin/send_email.py" >> cron_jobs
+crontab cron_jobs
+rm cron_jobs
+
 # "other" can read & execute these files
 find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.js -exec chmod o+rx {} \;
 find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -type f -name \*.cgi -exec chmod u+x {} \;
