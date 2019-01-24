@@ -233,7 +233,6 @@ if [ "${WORKER}" == 0 ]; then
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/ta_grading
 fi
 
-
 # set the permissions of these directories
 chown  root:${COURSE_BUILDERS_GROUP}              ${SUBMITTY_DATA_DIR}
 chmod  751                                        ${SUBMITTY_DATA_DIR}
