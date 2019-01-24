@@ -2749,6 +2749,7 @@ AND gc_id IN (
             $ignore_self_query = "";
         }
 
+<<<<<<< HEAD
 =======
             $not_send_users[] = $notification->getNotifySource();
         }
@@ -2783,6 +2784,8 @@ AND gc_id IN (
 
         //Notify users based on settings
 >>>>>>> eb26200767cda53852bf1b96ad996f517e9b2e6a
+=======
+>>>>>>> 4c0015b9b4cbb5ceae2420262f316932fb6c9f64
         $this->course_db->query("INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id)
                     SELECT ?, ?, ?, current_timestamp, ?, user_id as to_user_id FROM ({$target_users_query}) as u {$ignore_self_query}",
                     array_merge($params, $not_send_users));
