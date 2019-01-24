@@ -572,7 +572,7 @@ class UsersController extends AbstractController {
          * Validate $row[4] depending on $list_type
          * @return string "" on successful validation, an error message otherwise
          */
-        $row4_validation_function = function() use ($list_type, &$row[4]) {
+        $row4_validation_function = function() use ($list_type, &$row) {
             //$row[4] is different based on classlist vs graderlist
             switch($list_type) {
             case "classlist":
