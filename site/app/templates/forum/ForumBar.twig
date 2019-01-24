@@ -16,14 +16,14 @@
 
 	{% if show_threads %}
 		<div style="margin-left:10px;display:inline-block;position:relative;top:3px;" class="btn-group btn-group-toggle" data-toggle="buttons">
-  			<label id="tree_label" for="radio" onclick="changeDisplayOptions('tree', {{ currentThread }})" class="btn btn-secondary">
+  			<label id="tree_label" for="radio" onclick="changeDisplayOptions('tree', {{ current_thread }})" class="btn btn-secondary">
     			<input type="radio" name="selectOption" id="tree" value="tree"> Hierarchical
   			</label>
-  			<label id="time_label" for="radio2" onclick="changeDisplayOptions('time', {{ currentThread }})" class="btn btn-secondary">
+  			<label id="time_label" for="radio2" onclick="changeDisplayOptions('time', {{ current_thread }})" class="btn btn-secondary">
     			<input type="radio" name="selectOption" id="time" value="time"> Chronological
   			</label>
 		{% if user_group <= 2 %}
-			<label id="alpha_label" for="radio3" onclick="changeDisplayOptions('alpha', {{ currentThread }})" class="btn btn-secondary">
+			<label id="alpha_label" for="radio3" onclick="changeDisplayOptions('alpha', {{ current_thread }})" class="btn btn-secondary">
     			<input type="radio" name="selectOption" id="alpha" value="alpha"> Alphabetical
   			</label>
   		{% endif %}
