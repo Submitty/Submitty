@@ -16,6 +16,7 @@ import sys
 try:
     from PyPDF2 import PdfFileReader, PdfFileWriter
     from pdf2image import convert_from_bytes
+    from PIL import Image
     import pyzbar.pyzbar as pyzbar
 except ImportError as e:
     print("Content-type: application/json")
@@ -161,8 +162,10 @@ try:
                 #add pages to current split_pdf
                 page_count += 1
                 pdf_writer.addPage(pdfPages.getPage(i))
-            i += 1
 
+            #save PDF page as an image
+            page.save(str(filename[:-4] + "_" + str(i) + ".jpg"), "JPEG", quality = 100);
+            i += 1
         if len(output) == 0:
             message = "Could not find any QR codes!\n"
             for filename in os.listdir(bulk_path):
