@@ -11,6 +11,7 @@ use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Mark;
 use app\models\gradeable\TaGradedGradeable;
 use app\models\GradeableAutocheck;
+use app\libraries\Logger;
 use app\models\Team;
 use app\models\User;
 use app\libraries\FileUtils;
@@ -1115,6 +1116,16 @@ class ElectronicGraderController extends GradingController {
         $late_status = $old_gradeable->calculateLateStatus();
         // TODO: End region
 
+        $logger_params = array(
+            "course_semester" => $this->core->getConfig()->getSemester(),
+            "course_name" => $this->core->getDisplayedCourseName(),
+            "gradeable_id" => $gradeable_id,
+            "grader_id" => $this->core->getUser()->getId(),
+            "submitter_id" => $submitter_id,
+            "action" => "VIEW_PAGE",
+        );
+        Logger::logTAGrading($logger_params);
+
         $this->core->getOutput()->addInternalCss('ta-grading.css');
         $show_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $gradeable]);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $prev_id, $next_id, $not_in_my_section, $show_hidden, $can_verify, $show_verify_all, $show_silent_edit, $late_status);
@@ -1372,6 +1383,17 @@ class ElectronicGraderController extends GradingController {
         if (!$this->core->getAccess()->canI('grading.electronic.silent_edit')) {
             $silent_edit = false;
         }
+
+        $logger_params = array(
+            "course_semester" => $this->core->getConfig()->getSemester(),
+            "course_name" => $this->core->getDisplayedCourseName(),
+            "gradeable_id" => $gradeable_id,
+            "grader_id" => $this->core->getUser()->getId(),
+            "component_id" => $component_id,
+            "action" => "SAVE_COMPONENT",
+            "submitter_id" => $submitter_id
+        );
+        Logger::logTAGrading($logger_params);
 
         // Get / create the TA grade
         $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
@@ -2109,6 +2131,18 @@ class ElectronicGraderController extends GradingController {
         // Get / create the graded component
         $graded_component = $ta_graded_gradeable->getGradedComponent($component, $grader);
 
+        $logger_params = array(
+            "course_semester" => $this->core->getConfig()->getSemester(),
+            "course_name" => $this->core->getDisplayedCourseName(),
+            "gradeable_id" => $gradeable_id,
+            "grader_id" => $this->core->getUser()->getId(),
+            "component_id" => $component_id,
+            "action" => "OPEN_COMPONENT",
+            "submitter_id" => $submitter_id
+        );
+        Logger::logTAGrading($logger_params);
+
+
         try {
             // Once we've parsed the inputs and checked permissions, perform the operation
             $response_data = null;
@@ -2208,21 +2242,21 @@ class ElectronicGraderController extends GradingController {
 
     private function getMarkStats(Mark $mark, User $grader) {
         $gradeable = $mark->getComponent()->getGradeable();
-        
+
         $section_submitter_ids = $this->core->getQueries()->getSubmittersWhoGotMarkBySection($mark, $grader, $gradeable);
         $all_submitter_ids     = $this->core->getQueries()->getAllSubmittersWhoGotMark($mark);
-        
+
         // Show all submitters if grader has permissions, otherwise just section submitters
         $submitter_ids = ($grader->accessFullGrading() ? $all_submitter_ids : $section_submitter_ids);
-        
+
         $section_graded_component_count = 0;
         $section_total_component_count  = 0;
         $total_graded_component_count   = 0;
         $total_total_component_count    = 0;
-        
+
         $this->getStats($gradeable, $grader, true,  $total_graded_component_count,   $total_total_component_count);
         $this->getStats($gradeable, $grader, false, $section_graded_component_count, $section_total_component_count);
-        
+
         return [
             'section_submitter_count' => count($section_submitter_ids),
             'total_submitter_count'   => count($all_submitter_ids),
@@ -2238,26 +2272,31 @@ class ElectronicGraderController extends GradingController {
      * Gets... stats
      * @param Gradeable $gradeable
      * @param User $grader
-     * @param bool $full_sets 
+     * @param bool $full_sets
      * @param $sections
      */
     private function getStats(Gradeable $gradeable, User $grader, bool $full_stats, &$total_graded, &$total_total) {
         $num_components = $this->core->getQueries()->getTotalComponentCount($gradeable->getId());
-        $sections = ($full_stats) ?
-                    $this->core->getQueries()->getAllSectionsForGradeable($gradeable) :
-                    $this->core->getQueries()->getSectionsForGradeableAndUser($gradeable, $grader);
-        
+        $sections = array();
+        if ($full_stats) {
+            $sections = $this->core->getQueries()->getAllSectionsForGradeable($gradeable);
+        } else if ($gradeable->isGradeByRegistration()) {
+            $sections = $grader->getGradingRegistrationSections();
+        } else {
+            $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable->getId(), $grader->getId());
+        }
+
         $section_key = ($gradeable->isGradeByRegistration() ? 'registration_section' : 'rotating_section');
 
         $total_users       = array();
         $graded_components = array();
         if (count($sections) > 0) {
-            $total_users = ($gradeable->isTeamAssignment()) ? 
+            $total_users = ($gradeable->isTeamAssignment()) ?
                             $this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable->getId(), $sections, $section_key) :
                             $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key);
             $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable->getId(), $sections, $section_key, $gradeable->isTeamAssignment());
         }
-        
+
         foreach ($graded_components as $key => $value)
             $total_graded += intval($value);
         foreach ($total_users as $key => $value)

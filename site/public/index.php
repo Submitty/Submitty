@@ -181,7 +181,7 @@ else if ($core->getConfig()->isCourseLoaded()
 // Log the user action if they were logging in, logging out, or uploading something
 if ($core->getUser() !== null) {
     if (empty($_COOKIE['submitty_token'])) {
-        Utils::setCookie('submitty_token', Utils::guidv4());
+        Utils::setCookie('submitty_token', \Ramsey\Uuid\Uuid::uuid4()->toString());
     }
     $log = false;
     $action = "";
@@ -267,6 +267,10 @@ switch($_REQUEST['component']) {
         break;
     case 'forum':
         $control = new app\controllers\forum\ForumController($core);
+        $control->run();
+        break;
+    case 'notification_settings':
+        $control = new app\controllers\NotificationSettings($core);
         $control->run();
         break;
     case 'pdf':

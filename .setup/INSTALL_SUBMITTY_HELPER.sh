@@ -230,6 +230,7 @@ mkdir -p ${SUBMITTY_DATA_DIR}/logs/emails
 if [ "${WORKER}" == 0 ]; then
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/site_errors
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/access
+    mkdir -p ${SUBMITTY_DATA_DIR}/logs/ta_grading
 fi
 
 
