@@ -488,8 +488,8 @@ class UsersController extends AbstractController {
         // If an XLSX spreadsheet is uploaded.
         if ($content_type === 'spreadsheet/xlsx' && $mime_type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
             // Declare tmp file paths with unique file names.
-            $csv_file = FileUtils::joinPaths($this->core->getConfig()->getCgiTmpDir(), uniqid("", true));
-            $xlsx_file = FileUtils::joinPaths($this->core->getConfig()->getCgiTmpDir(), uniqid("", true));
+            $csv_file = FileUtils::joinPaths($this->core->getConfig()->getCgiTmpPath(), uniqid("", true));
+            $xlsx_file = FileUtils::joinPaths($this->core->getConfig()->getCgiTmpPath(), uniqid("", true));
 
             // This is to create tmp files and set permissions to RW-RW----
             // chmod() is disabled by security policy, so we are using umask().

@@ -24,7 +24,7 @@ use app\libraries\Utils;
  * @method string getCgiUrl()
  * @method string getSiteUrl()
  * @method string getSubmittyPath()
- * @method string getCgiTmpDir()
+ * @method string getCgiTmpPath()
  * @method string getCoursePath()
  * @method string getDatabaseDriver()
  * @method array getSubmittyDatabaseParams()
@@ -108,7 +108,7 @@ class Config extends AbstractModel {
     /** @property @var bool */
     protected $log_exceptions;
     /** @property @var string */
-    protected $cgi_tmp_dir;
+    protected $cgi_tmp_path;
 
     /** @property @var string */
     protected $database_driver = "pgsql";
@@ -263,7 +263,7 @@ class Config extends AbstractModel {
             $this->vcs_url = rtrim($submitty_json['vcs_url'], '/').'/';
         }
 
-        $this->cgi_tmp_dir = FileUtils::joinPaths($this->submitty_path, "tmp", "cgi");
+        $this->cgi_tmp_path = FileUtils::joinPaths($this->submitty_path, "tmp", "cgi");
 
         // Check that the paths from the config file are valid
         foreach(array('submitty_path', 'submitty_log_path') as $path) {
