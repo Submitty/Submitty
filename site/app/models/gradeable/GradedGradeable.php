@@ -30,7 +30,7 @@ class GradedGradeable extends AbstractModel {
     protected $ta_graded_gradeable = null;
     /** @property @var AutoGradedGradeable The Autograding info */
     protected $auto_graded_gradeable = null;
-    /** @property @var RegradeRequest|null The regrade request for this submitter/gradeable  */
+    /** @property @var RegradeRequest|null The grade inquiry for this submitter/gradeable  */
     protected $regrade_request = null;
 
     /** @property @var array The late day exceptions indexed by user id */
@@ -117,7 +117,7 @@ class GradedGradeable extends AbstractModel {
     }
 
     /**
-     * Sets the regrade request for this graded gradeable
+     * Sets the grade inquiry for this graded gradeable
      * @param RegradeRequest $regrade_request
      */
     public function setRegradeRequest(RegradeRequest $regrade_request) {
@@ -125,7 +125,7 @@ class GradedGradeable extends AbstractModel {
     }
 
     /**
-     * Gets if the submitter has a regrade request
+     * Gets if the submitter has a grade inquiry
      * @return bool
      */
     public function hasRegradeRequest() {
@@ -133,7 +133,7 @@ class GradedGradeable extends AbstractModel {
     }
 
     /**
-     * Gets if the submitter has an active regrade request
+     * Gets if the submitter has an active grade inquiry
      * @return bool
      */
     public function hasActiveRegradeRequest() {
@@ -153,6 +153,40 @@ class GradedGradeable extends AbstractModel {
             return $this->late_day_exceptions[$this->submitter->getId()] ?? 0;
         }
         return $this->late_day_exceptions[$user->getId()] ?? 0;
+    }
+
+    /**
+     * Gets the auto grading score for the active version, or 0 if none
+     * @return int
+     */
+    public function getAutoGradingScore() {
+        if ($this->getAutoGradedGradeable()->hasActiveVersion()) {
+            return $this->getAutoGradedGradeable()->getActiveVersionInstance()->getTotalPoints();
+        }
+        return 0;
+    }
+
+    /**
+     * Gets the ta grading score
+     * Note: This does not check any consistency with submission version
+     *  and graded version
+     * @return float
+     */
+    public function getTaGradingScore() {
+        if ($this->hasTaGradingInfo()) {
+            return $this->getTaGradedGradeable()->getTotalScore();
+        }
+        return 0.0;
+    }
+
+    /**
+     * Gets the total score for this student's active submission
+     * Note: This does not check that the graded version matches
+     *      the active version or any other consistency checking
+     * @return float max(0.0, auto_score + ta_score)
+     */
+    public function getTotalScore() {
+        return floatval(max(0.0, $this->getTaGradingScore() + $this->getAutoGradingScore()));
     }
 
     /* Intentionally Unimplemented accessor methods */

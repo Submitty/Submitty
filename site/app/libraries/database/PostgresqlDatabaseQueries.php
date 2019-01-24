@@ -26,8 +26,11 @@ class PostgresqlDatabaseQueries extends DatabaseQueries{
 
     public function getUserById($user_id) {
         $this->course_db->query("
-SELECT u.*, sr.grading_registration_sections
+SELECT u.*, ns.merge_threads, ns.all_new_threads, 
+        ns.all_new_posts, ns.all_modifications_forum,
+        ns.reply_in_post_thread, sr.grading_registration_sections
 FROM users u
+LEFT JOIN notification_settings as ns ON u.user_id = ns.user_id
 LEFT JOIN (
 	SELECT array_agg(sections_registration_id) as grading_registration_sections, user_id
 	FROM grading_registration
@@ -1322,11 +1325,11 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               /* Late day exception data */
               ldeu.late_day_exceptions,
 
-              /* Regrade request data */
+              /* Grade inquiry data */
               rr.id AS regrade_request_id,
               rr.status AS regrade_request_status,
               rr.timestamp AS regrade_request_timestamp,
-              
+
               {$team_data_inject}
 
               /* User Submitter Data */
@@ -1364,7 +1367,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   GROUP BY user_id
                 ) AS sr ON u.user_id=sr.user_id
               ) AS u ON eg IS NULL OR NOT eg.team_assignment
-              
+
               {$team_inject}
 
               /* Join manual grading data */
@@ -1446,7 +1449,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               /* Join user late day exceptions */
               LEFT JOIN late_day_exceptions ldeu ON g.g_id=ldeu.g_id AND u.user_id=ldeu.user_id
 
-              /* Join regrade request */
+              /* Join grade inquiry */
               LEFT JOIN regrade_requests AS rr ON rr.{$submitter_type}=gd.gd_{$submitter_type} AND rr.g_id=g.g_id
             WHERE $selector
             $order";

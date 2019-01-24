@@ -44,7 +44,7 @@ if [ -d "${SUBMITTY_INSTALL_DIR}/site/vendor/composer" ]; then
 fi
 
 # install composer dependencies and generate classmap
-su - ${PHP_USER} -c "composer install -d \"${SUBMITTY_INSTALL_DIR}/site\" --no-dev --optimize-autoloader"
+su - ${PHP_USER} -c "composer install -d \"${SUBMITTY_INSTALL_DIR}/site\" --no-dev --optimize-autoloader --no-suggest"
 
 # TEMPORARY (until we have generalized code for generating charts in html)
 # copy the zone chart images

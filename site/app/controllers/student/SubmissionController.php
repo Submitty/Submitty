@@ -112,7 +112,7 @@ class SubmissionController extends AbstractController {
         }
 
         if(!$gradeable->isRegradeAllowed()) {
-            $this->core->getOutput()->renderJsonFail('Regrade requests not enabled for this gradeable');
+            $this->core->getOutput()->renderJsonFail('Grade inquiries are not enabled for this gradeable');
             return;
         }
 
@@ -156,13 +156,13 @@ class SubmissionController extends AbstractController {
         }
 
         if (!$graded_gradeable->hasRegradeRequest()) {
-            $this->core->getOutput()->renderJsonFail('Submitter has no regrade request');
+            $this->core->getOutput()->renderJsonFail('Submitter has not made a grade inquiry');
             return;
         }
 
         // TODO: add to access control method
         if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$user->accessFullGrading()) {
-            $this->core->getOutput()->renderJsonFail('Insufficient permissions to make regrade post');
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to make grade inquiry post');
             return;
         }
 
@@ -195,13 +195,13 @@ class SubmissionController extends AbstractController {
         }
 
         if (!$graded_gradeable->hasRegradeRequest()) {
-            $this->core->getOutput()->renderJsonFail('Submitter has no regrade request');
+            $this->core->getOutput()->renderJsonFail('Submitter has not made a grade inquiry');
             return;
         }
 
         // TODO: add to access control method
         if (!$user->accessFullGrading()) {
-            $this->core->getOutput()->renderJsonFail('Insufficient permissions to delete regrade request');
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to delete grade inquiry');
             return;
         }
 
@@ -238,13 +238,13 @@ class SubmissionController extends AbstractController {
         }
 
         if (!$graded_gradeable->hasRegradeRequest()) {
-            $this->core->getOutput()->renderJsonFail('Submitter has no regrade request');
+            $this->core->getOutput()->renderJsonFail('Submitter has not made a grade inquiry');
             return;
         }
 
         // TODO: add to access control method
         if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$user->accessFullGrading()) {
-            $this->core->getOutput()->renderJsonFail('Insufficient permissions to change regrade request status');
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to change grade inquiry status');
             return;
         }
 
@@ -308,9 +308,6 @@ class SubmissionController extends AbstractController {
                 $error = true;
             }
             else {
-                $extensions = $graded_gradeable !== null ? $graded_gradeable->getLateDayException($this->core->getUser()) : 0;
-                $days_late = DateUtils::calculateDayDiff($gradeable->getSubmissionDueDate());
-                $late_days_use = $gradeable->hasDueDate() ? max(0, $days_late - $extensions) : 0;
                 if ($graded_gradeable !== null
                     && $gradeable->isTaGradeReleased()
                     && $gradeable->isTaGrading()
@@ -326,10 +323,8 @@ class SubmissionController extends AbstractController {
                 }
 
                 // If we get here, then we can safely construct the old model w/o checks
-                // FIXME: remove this 'old_gradeable' once none of the HomeworkView relies on it
-                $old_gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $this->core->getUser()->getId());
                 $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                       'showGradeable', $gradeable, $graded_gradeable, $old_gradeable, $version, $late_days_use, $extensions, $show_hidden, false);
+                                                       'showGradeable', $gradeable, $graded_gradeable, $version, $show_hidden, false);
             }
         }
         return array('id' => $gradeable_id, 'error' => $error);
@@ -399,13 +394,18 @@ class SubmissionController extends AbstractController {
             $graded_gradeables[] = $gg;
         }
 
-        if (count($graded_gradeables) === 0) {
-            // No user was on a team
-            $msg = 'No user on a team';
-            $return = array('success' => false, 'message' => $msg);
-            $this->core->getOutput()->renderJson($return);
-            return $return;
-        } else if (count($graded_gradeables) > 1) {
+        // Below is true if no users are on a team. In this case, we later make the team automatically,
+        //   so this should not return a failure.
+        // if (count($graded_gradeables) === 0) {
+        //     // No user was on a team
+        //     $msg = 'No user on a team';
+        //     $return = array('success' => false, 'message' => $msg);
+        //     $this->core->getOutput()->renderJson($return);
+        //     return $return;
+        // } else 
+
+        //If the users are on multiple teams.
+        if (count($graded_gradeables) > 1) {
             // Not all users were on the same team
             $msg = "Inconsistent teams. One or more users are on different teams.";
             $return = array('success' => false, 'message' => $msg);
@@ -413,8 +413,11 @@ class SubmissionController extends AbstractController {
             return $return;
         }
 
-        $graded_gradeable = $graded_gradeables[0];
-        $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
+        $highest_version = -1;
+        if(count($graded_gradeables) > 0){
+            $graded_gradeable = $graded_gradeables[0];
+            $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
+        }
 
         //If there has been a previous submission, we tag it so that we can pop up a warning.
         $return = array('success' => true, 'highest_version' => $highest_version, 'previous_submission' => $highest_version > 0);
@@ -659,7 +662,15 @@ class SubmissionController extends AbstractController {
             else{
                 //If the team doesn't exist yet, we need to build a new one. (Note, we have already checked in ajaxvalidgradeable
                 //that all users are either on the same team or no team).
-                $members = $this->core->getQueries()->getUsersById($user_ids);
+
+                $leaderless = array();
+                foreach($user_ids as $i => $member){
+                    if($member !== $leader){
+                        $leaderless[] = $member;
+                    }
+                }
+
+                $members = $this->core->getQueries()->getUsersById($leaderless);
                 $leader_user = $this->core->getQueries()->getUserById($leader);
                 try {
                     $gradeable->createTeam($leader_user, $members);
@@ -1777,16 +1788,28 @@ class SubmissionController extends AbstractController {
 
         // Don't load the graded gradeable, since that may not exist yet
         $submitter_id = $this->core->getUser()->getId();
+        $user_id = $submitter_id;
+        $team_id = null;
         if ($gradeable !== null && $gradeable->isTeamAssignment()) {
             $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $submitter_id);
+
             if ($team !== null) {
                 $submitter_id = $team->getId();
+                $team_id = $submitter_id;
+                $user_id = null;
             }
         }
 
-        $path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "results", $gradeable_id,
-            $submitter_id, $version);
-        if (file_exists($path."/results.json")) {
+        $filepath = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "results", $gradeable_id,
+            $submitter_id, $version, "results.json");
+
+        $results_json_exists = file_exists($filepath);
+
+        // if the results json exists, check the database to make sure that the autograding results are there.
+        $has_results = $results_json_exists && $this->core->getQueries()->getGradeableVersionHasAutogradingResults(
+            $gradeable_id, $version, $user_id, $team_id);
+
+        if ($has_results) {
             $refresh_string = "REFRESH_ME";
             $refresh_bool = true;
         }
