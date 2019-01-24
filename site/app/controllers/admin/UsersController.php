@@ -561,9 +561,39 @@ class UsersController extends AbstractController {
     /**
      * Upsert user list data to database
      *
-     * @param string $type  "classlist" or "graderlist"
+     * @param string $list_type "classlist" or "graderlist"
      */
     public function uploadUserList($list_type = "classlist") {
+        // A few places have different behaviors depending on $list_type.
+        // These closure functions will help control those few times when
+        // $list_type dictates behavior.
+
+        /**
+         * Validate $row[4] depending on $list_type
+         * @return string "" on successful validation, an error message otherwise
+         */
+        $row4_validation_function = function() use ($list_type, &$row[4]) {
+            //$row[4] is different based on classlist vs graderlist
+            switch($list_type) {
+            case "classlist":
+                //student
+                if (isset($row[4]) && strtolower($row[4]) === "null") {
+                    $row[4] = null;
+                }
+                //Check registration for appropriate format. Allowed characters - A-Z,a-z,_,-
+                return User::validateUserData('registration_section', $row[4]) ? "" : "ERROR on row {$row_num}, Registration Section \"".strip_tags($row[4])."\"<br>";
+            case "graderlist":
+                //grader
+                if (isset($row[4]) && is_numeric($row[4])) {
+                    $row = intval($row[4]); //change float read from xlsx to int
+                }
+                //grader-level check is a digit between 1 - 4.
+               return User::validateUserData('user_group', $row[4]) ? "" : "ERROR on row {$row_num}, Grader Group \"".strip_tags($row[4])."\"<br>";
+            default:
+                return "Developer error: Unknown classlist: \"{$list_type}\"";
+            }
+        };
+
         $return_url = $this->core->buildUrl(array('component'=>'admin', 'page'=>'users', 'action'=>'students'));
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
 
@@ -588,21 +618,6 @@ class UsersController extends AbstractController {
         foreach($user_data as $row) {
             $row_num++;
 
-            //$row[4] is different based on classlist vs graderlist
-            if (isset($row[4])) {
-                if ($list_type === "classlist") {
-                    //student
-                    if (strtolower($row[4]) === "null") {
-                        $vals[4] = null;
-                    }
-                } else {
-                    //grader
-                    if (is_numeric($row[4])) {
-                        $row[4] = intval($row[4]); //change float read from xlsx to int
-                    }
-                }
-            }
-
             //Username must contain only lowercase alpha, numbers, underscores, hyphens
             $error_message .= User::validateUserData('user_id', $row[0]) ? "" : "ERROR on row {$row_num}, User Name \"".strip_tags($vals[0])."\"<br>";
 
@@ -613,8 +628,8 @@ class UsersController extends AbstractController {
             //Check email address for appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.
             $error_message .= User::validateUserData('user_email', $row[3]) ? "" : "ERROR on row {$row_num}, email \"".strip_tags($vals[3])."\"<br>";
 
-            //Check registration for appropriate format. Allowed characters - A-Z,a-z,_,-
-            $error_message .= User::validateUserData('registration_section', $row[4]) ? "" : "ERROR on row {$row_num}, Registration Section \"".strip_tags($vals[4])."\"<br>";
+            //$row[4] validation varies by $list_type
+            $error_message .= $row4_validation_function();
 
             //Preferred first and last name must be alpha characters, white-space, or certain punctuation.
             if (isset($vals[$pref_firstname_idx]) && ($vals[$pref_firstname_idx] !== "")) {
