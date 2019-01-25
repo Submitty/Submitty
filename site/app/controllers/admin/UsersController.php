@@ -619,7 +619,7 @@ class UsersController extends AbstractController {
             default:
                 throw new ValidationException("Unknown classlist", array($list_type, "$set_user_registration_or_group_function", __FILE__));
             }
-        }
+        };
 
         $return_url = $this->core->buildUrl(array('component'=>'admin', 'page'=>'users', 'action'=>'students'));
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
