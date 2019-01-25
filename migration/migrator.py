@@ -224,8 +224,8 @@ def handle_migration(args):
             if not course_dir.exists():
                 print("Could not find courses directory: {}".format(course_dir))
             else:
-                for semester in os.listdir(course_dir):
-                    for course in os.listdir(os.path.join(course_dir, semester)):
+                for semester in os.listdir(str(course_dir)):
+                    for course in os.listdir(os.path.join(str(course_dir), semester)):
                         if args.choose_course is not None and \
                            [semester, course] != args.choose_course:
                             continue

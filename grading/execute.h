@@ -14,7 +14,8 @@ int execute(const std::string &cmd,
       const nlohmann::json &test_case_limits,
       const nlohmann::json &assignment_limits,
       const nlohmann::json &whole_config,
-      const bool windowed);
+      const bool windowed,
+      const std::string display_variable);
 
 int exec_this_command(const std::string &cmd, std::ofstream &logfile);
 

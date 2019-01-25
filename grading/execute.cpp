@@ -1060,7 +1060,8 @@ int execute(const std::string &cmd,
       const nlohmann::json &test_case_limits,
       const nlohmann::json &assignment_limits,
       const nlohmann::json &whole_config,
-      const bool windowed) {
+      const bool windowed,
+      const std::string display_variable) {
 
   std::set<std::string> invalid_windows;
   bool window_mode = windowed; //Tells us if the process is expected to spawn a window. (additional support later) 
@@ -1088,7 +1089,7 @@ int execute(const std::string &cmd,
     std::cout <<"Window mode activated." << std::endl;
     char* my_display = getenv("DISPLAY"); //The display environment variable is unset. This sets it for child and parent.
     if (my_display == NULL) {
-      setenv("DISPLAY", ":0", 1);
+      setenv("DISPLAY", display_variable.c_str(), 1);
     }
     window_mode = true;
     invalid_windows = snapshotOfActiveWindows();
