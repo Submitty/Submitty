@@ -569,30 +569,58 @@ class UsersController extends AbstractController {
         // $list_type dictates behavior.
 
         /**
-         * Validate $row[4] depending on $list_type
+         * Validate $vals[4] depending on $list_type
          * @return string "" on successful validation, an error message otherwise
          */
-        $row4_validation_function = function() use ($list_type, &$row) {
+        $row4_validation_function = function() use ($list_type, &$vals) {
             //$row[4] is different based on classlist vs graderlist
             switch($list_type) {
             case "classlist":
                 //student
-                if (isset($row[4]) && strtolower($row[4]) === "null") {
-                    $row[4] = null;
+                if (isset($vals[4]) && strtolower($vals[4]) === "null") {
+                    $vals[4] = null;
                 }
                 //Check registration for appropriate format. Allowed characters - A-Z,a-z,_,-
-                return User::validateUserData('registration_section', $row[4]) ? "" : "ERROR on row {$row_num}, Registration Section \"".strip_tags($row[4])."\"<br>";
+                return User::validateUserData('registration_section', $vals[4]) ? "" : "ERROR on row {$row_num}, Registration Section \"".strip_tags($vals[4])."\"<br>";
             case "graderlist":
                 //grader
-                if (isset($row[4]) && is_numeric($row[4])) {
-                    $row = intval($row[4]); //change float read from xlsx to int
+                if (isset($vals[4]) && is_numeric($vals[4])) {
+                    $vals[4] = intval($vals[4]); //change float read from xlsx to int
                 }
                 //grader-level check is a digit between 1 - 4.
-               return User::validateUserData('user_group', $row[4]) ? "" : "ERROR on row {$row_num}, Grader Group \"".strip_tags($row[4])."\"<br>";
+                return User::validateUserData('user_group', $vals[4]) ? "" : "ERROR on row {$row_num}, Grader Group \"".strip_tags($vals[4])."\"<br>";
             default:
-                return "Developer error: Unknown classlist: \"{$list_type}\"";
+                throw new BaseException("Unknown classlist", array($list_type, "$row4_validation_function", __FILE__));
             }
         };
+
+        $get_user_registration_or_group_function = function($existing_user) use ($list_type) {
+            switch($list_type) {
+            case "classlist":
+                return $existing_user->getRegistrationSection()
+            case "graderlist":
+                return $existing_user->getGroup();
+            default:
+                throw new BaseException("Unknown classlist", array($list_type, "$get_user_registration_or_group_function", __FILE__));
+            }
+        };
+
+        $set_user_registration_or_group_function = function() use ($list_type, &$user, &$user_data) {
+            switch($list_type) {
+            case "classlist":
+                //student
+                $user->setRegistrationSection($user_data[4]);
+                $user->setGroup(4);
+                break;
+            case "graderlist":
+                //grader
+                $user->setGroup($user_data[4]);
+                break;
+            default:
+                throw new BaseException("Unknown classlist", array($list_type, "$set_user_registration_or_group_function", __FILE__));
+                break;
+            }
+        }
 
         $return_url = $this->core->buildUrl(array('component'=>'admin', 'page'=>'users', 'action'=>'students'));
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
@@ -615,18 +643,18 @@ class UsersController extends AbstractController {
         $pref_lastname_idx = $pref_firstname_idx + 1;
         $error_message = "";
         $row_num = 0;
-        foreach($user_data as $row) {
+        foreach($user_data as $vals) {
             $row_num++;
 
             //Username must contain only lowercase alpha, numbers, underscores, hyphens
-            $error_message .= User::validateUserData('user_id', $row[0]) ? "" : "ERROR on row {$row_num}, User Name \"".strip_tags($vals[0])."\"<br>";
+            $error_message .= User::validateUserData('user_id', $vals[0]) ? "" : "ERROR on row {$row_num}, User Name \"".strip_tags($vals[0])."\"<br>";
 
             //First and Last name must be alpha characters, white-space, or certain punctuation.
-            $error_message .= User::validateUserData('user_legal_firstname', $row[1]) ? "" : "ERROR on row {$row_num}, First Name \"{$vals[1]}\"<br>";
-            $error_message .= User::validateUserData('user_legal_lastname', $row[2]) ? "" : "ERROR on row {$row_num}, Last Name \"".strip_tags($vals[2])."\"<br>";
+            $error_message .= User::validateUserData('user_legal_firstname', $vals[1]) ? "" : "ERROR on row {$row_num}, First Name \"{$vals[1]}\"<br>";
+            $error_message .= User::validateUserData('user_legal_lastname', $vals[2]) ? "" : "ERROR on row {$row_num}, Last Name \"".strip_tags($vals[2])."\"<br>";
 
             //Check email address for appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.
-            $error_message .= User::validateUserData('user_email', $row[3]) ? "" : "ERROR on row {$row_num}, email \"".strip_tags($vals[3])."\"<br>";
+            $error_message .= User::validateUserData('user_email', $vals[3]) ? "" : "ERROR on row {$row_num}, email \"".strip_tags($vals[3])."\"<br>";
 
             //$row[4] validation varies by $list_type
             $error_message .= $row4_validation_function();
@@ -651,8 +679,7 @@ class UsersController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-
-        /* NOTE: Checking for existing users and skipping over them is better achieved on database side using SQL */
+        /* NOTE: Determining if a user already exists is better processed on the database side using SQL */
         //Existing students are not updated.
         $existing_users = $this->core->getQueries()->getAllUsers();
         $users_to_add = array();
@@ -661,9 +688,8 @@ class UsersController extends AbstractController {
             $exists = false;
             foreach($existing_users as $i => $existing_user) {
                 if ($user_data[0] === $existing_user->getId()) {
-                    $datapoint = ($list_type === 'classlist') ? $existing_user->getRegistrationSection() : $existing_user->getGroup();
-                    if ($user_data[4] !== $datapoint) {
-                            $users_to_update[] = $user;
+                    if ($user_data[4] !== $get_user_registration_or_group_function()) {
+                        $users_to_update[] = $user;
                     }
                     unset($existing_users[$i]);
                     $exists = true;
@@ -684,17 +710,7 @@ class UsersController extends AbstractController {
             $user->setLegalFirstName($user_data[1]);
             $user->setLegalLastName($user_data[2]);
             $user->setEmail($user_data[3]);
-
-            if ($list_type === 'classlist') {
-                //student
-                $user->setRegistrationSection($user_data[4]);
-                $user->setGroup(4);
-            }
-            else {
-                //grader
-                $user->setGroup($user_data[4]);
-            }
-
+            $set_user_registration_or_group_function();
             if (isset($student_data[$pref_firstname_idx]) && ($student_data[$pref_firstname_idx] !== "")) {
                 $user->setPreferredFirstName($user_data[$pref_firstname_idx]);
             }
