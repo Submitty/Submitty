@@ -44,8 +44,12 @@ class HomeworkView extends AbstractView {
             $late_days_use = max(0, $gradeable->getWouldBeDaysLate() - $graded_gradeable->getLateDayException($this->core->getUser()));
         }
 
+        $is_admin = $this->core->getAccess()->canI('admin.wrapper', []);
+        $on_team = $this->core->getUser()->onTeam($gradeable->getId());
+
         // Only show the late banner if the submission has a due date
-        if (LateDays::filterCanView($this->core, $gradeable)) {
+        // Instructors shouldn't see this banner if they're not on a team (they won't have proper information)
+        if (LateDays::filterCanView($this->core, $gradeable) && !($is_admin && !$on_team)) {
             $late_days = LateDays::fromUser($this->core, $this->core->getUser());
             $return .= $this->renderLateDayMessage($late_days, $gradeable, $graded_gradeable);
         }
@@ -97,7 +101,7 @@ class HomeworkView extends AbstractView {
             && $active_version !== 0) {
             $return .= $this->renderTAResultsBox($graded_gradeable, $regrade_available);
         }
-        if ($regrade_available) {
+        if ($regrade_available || $graded_gradeable->hasRegradeRequest()) {
             $return .= $this->renderRegradeBox($graded_gradeable);
         }
         return $return;
@@ -333,7 +337,8 @@ class HomeworkView extends AbstractView {
             // This is only used as a placeholder, so the who loads this page is the 'user' unless the
             //  client overrides the user
             'user_id' => $this->core->getUser()->getId(),
-            'has_gradeable_message' => $gradeable->getAutogradingConfig()->getGradeableMessage() !== '',
+            'has_gradeable_message' => $gradeable->getAutogradingConfig()->getGradeableMessage() !== null
+               && $gradeable->getAutogradingConfig()->getGradeableMessage() !== '',
             'gradeable_message' => $gradeable->getAutogradingConfig()->getGradeableMessage(),
             'allowed_late_days' => $gradeable->getLateDays(),
             'num_text_boxes' => $gradeable->getAutogradingConfig()->getNumTextBoxes(),
@@ -361,6 +366,7 @@ class HomeworkView extends AbstractView {
         $files = [];
         $count = 1;
         $count_array = array();
+        $use_qr_codes = false;
         foreach ($all_directories as $timestamp => $content) {
             $dir_files = $content['files'];
             $json_file = '';
@@ -405,30 +411,32 @@ class HomeworkView extends AbstractView {
                 ];
                 $count++;
             }
+            $json_data = ($json_file !== '') ? FileUtils::readJsonFile($json_file) : '';
+            //check for invalid ID's if using bulk upload with QR codes
+            if($json_data != ''){
+                $use_qr_codes = true;
+                for($i = 0; $i < count($files); $i++){
+                    $filename = rawurldecode($files[$i]['filename_full']);
+                    foreach($json_data as $decoded_data){
+                        //compare each file name in json data with ones split
+                        foreach ($decoded_data as $qr_file) {
+                            if($qr_file['pdf_name'] === $filename){
+                                $files[$i]['page_count'] = $qr_file['page_count'];
+                                $files[$i]['user_id']['id'] = $qr_file['id'];
+                                $files[$i]['user_id']['valid'] = ($this->core->getQueries()->getUserById($qr_file['id']) === null) ? false:true;
+                                goto end;
+                            }
+                        }
+                    }
+                    end:;
+                }
+            }
         }
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         $current_time = $this->core->getDateTimeNow()->format("m-d-Y_H:i:sO");
         $ch = curl_init();
-        //$user = $this->core->getQueries()->getUserById($id);
-
-        $json_data = ($json_file !== '') ? FileUtils::readJsonFile($json_file) : '';
-        $use_qr_codes = false;
-        //check for invalid ID's
-        if($json_data != ''){
-            $use_qr_codes = true;
-            for($i = 0; $i < count($files); $i++){
-                for($j = 0; $j < count($files); $j++){
-                    if($files[$i]['filename_full'] == $json_data[$j+1]['pdf_name']){
-                        $files[$i]['page_count'] = $json_data[$j+1]['page_count'];
-                                    //validate users
-                        $files[$i]['user_id']['id'] = $json_data[$j+1]['id'];
-                        $files[$i]['user_id']['valid'] = ($this->core->getQueries()->getUserById($json_data[$j+1]['id']) === null) ? false : true;
-                    }
-                }
-            }
-        }
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/BulkUploadBox.twig', [
             'gradeable_id' => $gradeable->getId(),
             'team_assignment' => $gradeable->isTeamAssignment(),

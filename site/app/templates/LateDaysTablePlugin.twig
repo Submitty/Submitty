@@ -41,7 +41,7 @@
         <tr>
             <td {{ class }} style="padding:5px; border:thin solid black">{{ gradeable.getTitle() }}</td>
             <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{ gradeable.getSubmissionDueDate()|date('m/d/Y') }}</td>
-            <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{ late_day_info.getLateDaysAllowed() }}</td>
+            <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{ late_day_info.getAssignmentAllowedLateDays() }}</td>
             <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{ (late_day_info.getDaysLate() != 0) ? late_day_info.getDaysLate() : "" }}</td>
             <td {{ class }} align="center" style="padding:5px; border:thin solid black">{{ (late_day_info.getLateDayException() != 0) ? late_day_info.getLateDayException() : "" }}</td>
             <td {{ class }} {{ id }} align="center" style="padding:5px; border:thin solid black">{{ late_day_info.getStatusMessage() }}</td>
