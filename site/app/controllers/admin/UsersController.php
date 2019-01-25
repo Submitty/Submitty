@@ -590,18 +590,18 @@ class UsersController extends AbstractController {
                 //grader-level check is a digit between 1 - 4.
                 return User::validateUserData('user_group', $vals[4]) ? "" : "ERROR on row {$row_num}, Grader Group \"".strip_tags($vals[4])."\"<br>";
             default:
-                throw new BaseException("Unknown classlist", array($list_type, "$row4_validation_function", __FILE__));
+                throw new ValidationException("Unknown classlist", array($list_type, "$row4_validation_function", __FILE__));
             }
         };
 
-        $get_user_registration_or_group_function = function($existing_user) use ($list_type) {
+        $get_user_registration_or_group_function = function() use ($list_type, &$existing_user) {
             switch($list_type) {
             case "classlist":
-                return $existing_user->getRegistrationSection()
+                return $existing_user->getRegistrationSection();
             case "graderlist":
                 return $existing_user->getGroup();
             default:
-                throw new BaseException("Unknown classlist", array($list_type, "$get_user_registration_or_group_function", __FILE__));
+                throw new ValidationException("Unknown classlist", array($list_type, "$get_user_registration_or_group_function", __FILE__));
             }
         };
 
@@ -617,8 +617,7 @@ class UsersController extends AbstractController {
                 $user->setGroup($user_data[4]);
                 break;
             default:
-                throw new BaseException("Unknown classlist", array($list_type, "$set_user_registration_or_group_function", __FILE__));
-                break;
+                throw new ValidationException("Unknown classlist", array($list_type, "$set_user_registration_or_group_function", __FILE__));
             }
         }
 
