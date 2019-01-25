@@ -285,11 +285,9 @@ def unpack_grading_results_zip(which_machine,which_untrusted,my_results_zip_file
 
     job_id = queue_obj["job_id"]
     partial_path = os.path.join(queue_obj["gradeable"],queue_obj["who"],str(queue_obj["version"]))
-    #partial_path_parent = os.path.join(queue_obj["gradeable"],queue_obj["who"])
     item_name = os.path.join(queue_obj["semester"],queue_obj["course"],"submissions",partial_path)
     results_path = os.path.join(SUBMITTY_DATA_DIR,"courses",queue_obj["semester"],queue_obj["course"],"results",partial_path)
     results_public_path = os.path.join(SUBMITTY_DATA_DIR,"courses",queue_obj["semester"],queue_obj["course"],"results_public",partial_path)
-    #results_public_path_parent = os.path.join(SUBMITTY_DATA_DIR,"courses",queue_obj["semester"],queue_obj["course"],"results_public",partial_path_parent)
 
     # clean out all of the old files if this is a re-run
     shutil.rmtree(results_path,ignore_errors=True)
