@@ -3764,15 +3764,22 @@ AND gc_id IN (
         return $this->course_db->row()['exists'] ?? false;
     }
 
-    public function getClassList(){
+    /**
+     * Gets a list of emails for all active particpants in a course  
+     */
+    public function getClassEmailList(){
         $parameters = array();
         $this->course_db->query('SELECT user_email FROM users WHERE user_group != 4 OR registration_section IS NOT null', $parameters);
 
         return $this->course_db->rows();
     }
-
-    public function newEmail($emailData, $recipient){
-        $parameters = array($recipient, $emailData["subject"], $emailData["body"]);
+    /**
+     * Queues an email to be sent by email job
+     * @param array $email_data
+     * @param string $recipient  
+     */ 
+    public function sendEmail($email_data, $recipient){
+        $parameters = array($recipient, $email_data["subject"], $email_data["body"]);
 
         $this->submitty_db->query("
             INSERT INTO emails(

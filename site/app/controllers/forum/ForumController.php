@@ -885,10 +885,10 @@ class ForumController extends AbstractController {
                 "body" => $thread_content
             ];
 
-            $class_list = $this->core->getQueries()->getClassList();
-
+            $class_list = $this->core->getQueries()->getClassEmailList();
+             
             foreach($class_list as $student_email) {
-                $this->core->getQueries()->newEmail($email_data, $student_email["user_email"]);
+                $this->core->getQueries()->sendEmail($email_data, $student_email["user_email"]);
             }
 
         } 
