@@ -87,6 +87,9 @@
             if (url_file.includes("submissions")) {
                 directory = "submissions";
             }
+            else if (url_file.includes("results_public")) {
+                directory = "results_public";
+            }
             else if (url_file.includes("results")) {
                 directory = "results";
             }
@@ -124,6 +127,9 @@
         var directory = "";
         if (url_file.includes("submissions")) {
             directory = "submissions";
+        }
+        else if (url_file.includes("results_public")) {
+            directory = "results_public";
         }
         else if (url_file.includes("results")) {
             directory = "results";
