@@ -125,7 +125,7 @@ try:
             #save pdfs as images
             pdf_images = convert_from_bytes(open(output_filename, 'rb').read())
             for k in range(len(pdf_images)):
-                pdf_images[k].save(str(filename[:-4] + "_" + str(k + split_index) + ".jpg"), "JPEG", quality = 100);
+                page.save(str(filename[:-4] + "-" + str(split_index) + "-" + str(k) + ".jpg"), "JPEG", quality = 100);
 
             with open(cover_filename, 'wb') as out:
                 cover_writer.write(out)
