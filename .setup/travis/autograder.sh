@@ -31,6 +31,23 @@ rm DrMemory-Linux-${DRMEM_VER}.tar.gz
 popd
 
 # --------------------------------------
+pushd /tmp
+
+echo "Getting TCLAPP"
+wget https://sourceforge.net/projects/tclap/files/tclap-1.2.2.tar.gz -o /dev/null > /dev/null 2>&1
+tar -xpzf tclap-1.2.2.tar.gz
+rm /tmp/tclap-1.2.2.tar.gz
+cd tclap-1.2.2/
+bash configure
+make
+make install
+cd /tmp
+rm -rf /tmp/tclap-1.2.2
+
+popd > /dev/null
+
+
+# --------------------------------------
 echo "Getting JUnit..."
 mkdir -p ${SUBMITTY_INSTALL_DIR}/JUnit
 chmod 751 ${SUBMITTY_INSTALL_DIR}/JUnit
