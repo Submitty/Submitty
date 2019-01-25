@@ -162,10 +162,11 @@ class AutoGradedVersion extends AbstractModel {
         $course_path = $this->core->getConfig()->getCoursePath();
         $config = $gradeable->getAutogradingConfig();
 
-        $path = FileUtils::joinPaths($course_path, 'results', $gradeable->getId(), $submitter_id, $this->version);
+        $results_path = FileUtils::joinPaths($course_path, 'results', $gradeable->getId(), $submitter_id, $this->version);
+        $results_public_path = FileUtils::joinPaths($course_path, 'results_public', $gradeable->getId(), $submitter_id, $this->version);
 
         // Load files produced by autograding
-        $result_files = FileUtils::getAllFiles($path, [], true);
+        $result_files = FileUtils::getAllFiles($results_path, [], true);
         $result_file_info = [];
         foreach ($result_files as $file => $details) {
             $result_file_info[$file] = $details;
@@ -173,7 +174,7 @@ class AutoGradedVersion extends AbstractModel {
         }
 
         // Load file that contains numeric results
-        $result_details = FileUtils::readJsonFile(FileUtils::joinPaths($path, 'results.json'));
+        $result_details = FileUtils::readJsonFile(FileUtils::joinPaths($results_path, 'results.json'));
         if ($result_details === false) {
             // Couldn't find the file, so grading hasn't happened yet...
             $this->graded_testcases = [];
@@ -181,7 +182,7 @@ class AutoGradedVersion extends AbstractModel {
         }
 
         // Load the historical results (for early submission incentive)
-        $history = FileUtils::readJsonFile(FileUtils::joinPaths($path, 'history.json'));
+        $history = FileUtils::readJsonFile(FileUtils::joinPaths($results_path, 'history.json'));
         if ($history !== false) {
             $this->history = array_map(function ($data) {
                 return new AutoGradedVersionHistory($this->core, $data);
@@ -198,7 +199,7 @@ class AutoGradedVersion extends AbstractModel {
                 count($result_details['testcases']) > $testcase->getIndex() &&
                 $result_details['testcases'][$testcase->getIndex()] != null) {
               $graded_testcase = new AutoGradedTestcase
-                ($this->core, $testcase, $path, $result_details['testcases'][$testcase->getIndex()]);
+                ($this->core, $testcase, $results_path, $results_public_path, $result_details['testcases'][$testcase->getIndex()]);
               $this->graded_testcases[$testcase->getIndex()] = $graded_testcase;
               if (in_array($testcase, $config->getEarlySubmissionTestCases())) {
                 $this->early_incentive_points += $graded_testcase->getPoints();
