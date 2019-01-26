@@ -1004,8 +1004,7 @@ HTML;
 	$return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", [
 								"forum_bar_buttons" => $buttons,
 								"show_threads" => false,
-								"thread_exists" => $thread_exists,
-								"current_thread" => (isset($currentThread) ? $currentThread : -1)
+								"thread_exists" => $thread_exists
 	]);
 
 
