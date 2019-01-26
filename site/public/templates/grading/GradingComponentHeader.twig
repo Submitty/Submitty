@@ -52,7 +52,7 @@
     {% if graded_component.grader_id is defined %}
         Graded by {{ graded_component.grader_id }}
         {% if graded_component.verifier_id is defined %}
-            / {{ graded_component.verifier_id }}
+           <br> Verified by {{ graded_component.verifier_id }}
         {% endif %}
     {% else %}
         Ungraded!

@@ -210,7 +210,7 @@ class ElectronicGraderController extends GradingController {
 
     /**
      * Route for verifying the grader of a graded component
-     * Note: Until verify graders migration gets added, this just overwrites the grader
+     * @param bool verify all components or not 
      */
     private function ajaxVerifyComponent($verify_all = false) {
         $gradeable_id = $_POST['gradeable_id'] ?? '';

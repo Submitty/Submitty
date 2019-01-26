@@ -55,8 +55,6 @@ class GradedComponent extends AbstractModel {
     protected $graded_version = 0;
     /** @property @var \DateTime The time which this grade was most recently updated */
     protected $grade_time = null;
-    /** @var User The verifier of this component */
-    protected $verifier = null;
     /** @property @var string The Id of the verifier who verified the grade */
     protected $verifier_id = "";
     /** @property @var \DateTime The time which this grade was verified */
@@ -85,7 +83,8 @@ class GradedComponent extends AbstractModel {
         $this->setComment($details['comment'] ?? '');
         $this->setGradedVersion($details['graded_version'] ?? 0);
         $this->setGradeTime($details['grade_time'] ?? $this->core->getDateTimeNow());
-
+        $this->verifier_id = $details['verifier_id'] ?? '';
+        $this->setVerifyTime($details['verify_time'] ?? '');
         // assign the default score if its not electronic (or rather not a custom mark)
         if ($component->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {
             $score = $details['score'] ?? 0;
@@ -101,7 +100,7 @@ class GradedComponent extends AbstractModel {
 
         // Make sure to convert the date into a string
         $details['grade_time'] = DateUtils::dateTimeToString($this->grade_time);
-        $details['verify_time'] = (!is_null($this->verify_time)) ?  DateUtils::dateTimeToString($this->verify_time) : null;
+        $details['verify_time'] = DateUtils::dateTimeToString($this->verify_time);
         return $details;
     }
 

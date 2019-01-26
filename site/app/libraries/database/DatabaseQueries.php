@@ -3555,7 +3555,7 @@ AND gc_id IN (
             $graded_component->getGraderId(),
             $graded_component->getGradedVersion(),
             DateUtils::dateTimeToString($graded_component->getGradeTime()),
-            $graded_component->getVerifierId(),
+            $graded_component->getVerifierId() != '' ? $graded_component->getVerifyId() : null,
             !is_null($graded_component->getVerifyTime()) ? DateUtils::dateTimeToString($graded_component->getVerifyTime()) : null
         ];
         $query = "
@@ -3586,7 +3586,7 @@ AND gc_id IN (
                     $graded_component->getGradedVersion(),
                     DateUtils::dateTimeToString($graded_component->getGradeTime()),
                     $graded_component->getGraderId(),
-                    $graded_component->getVerifierId(),
+                    $graded_component->getVerifierId() != "" ? $graded_component->getVerifyId() : null,
                     !is_null($graded_component->getVerifyTime()) ? DateUtils::dateTimeToString($graded_component->getVerifyTime()) : null,
                     $graded_component->getTaGradedGradeable()->getId(),
                     $graded_component->getComponentId()
