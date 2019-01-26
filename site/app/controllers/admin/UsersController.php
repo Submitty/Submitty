@@ -9,6 +9,7 @@ use app\libraries\Output;
 use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\models\User;
+use app\exceptions\ValidationException;
 
 class UsersController extends AbstractController {
     public function run() {
@@ -590,7 +591,7 @@ class UsersController extends AbstractController {
                 //grader-level check is a digit between 1 - 4.
                 return User::validateUserData('user_group', $vals[4]) ? "" : "ERROR on row {$row_num}, Grader Group \"".strip_tags($vals[4])."\"<br>";
             default:
-                throw new ValidationException("Unknown classlist", array($list_type, "$row4_validation_function", __FILE__));
+                throw new ValidationException("Unknown classlist", array($list_type, '$row4_validation_function'));
             }
         };
 
@@ -601,7 +602,7 @@ class UsersController extends AbstractController {
             case "graderlist":
                 return $existing_user->getGroup();
             default:
-                throw new ValidationException("Unknown classlist", array($list_type, "$get_user_registration_or_group_function", __FILE__));
+                throw new ValidationException("Unknown classlist", array($list_type, '$get_user_registration_or_group_function'));
             }
         };
 
@@ -617,7 +618,7 @@ class UsersController extends AbstractController {
                 $user->setGroup($user_data[4]);
                 break;
             default:
-                throw new ValidationException("Unknown classlist", array($list_type, "$set_user_registration_or_group_function", __FILE__));
+                throw new ValidationException("Unknown classlist", array($list_type, '$set_user_registration_or_group_function'));
             }
         };
 
@@ -686,8 +687,8 @@ class UsersController extends AbstractController {
         foreach($user_data as $user) {
             $exists = false;
             foreach($existing_users as $i => $existing_user) {
-                if ($user_data[0] === $existing_user->getId()) {
-                    if ($user_data[4] !== $get_user_registration_or_group_function()) {
+                if ($user[0] === $existing_user->getId()) {
+                    if ($user[4] !== $get_user_registration_or_group_function()) {
                         $users_to_update[] = $user;
                     }
                     unset($existing_users[$i]);
@@ -725,14 +726,9 @@ class UsersController extends AbstractController {
             $this->core->getQueries()->insertCourseUser($user, $semester, $course);
         }
         foreach($users_to_update as $user_data) {
-            $student = $this->core->getQueries()->getUserById($user_data[0]);
-            if ($list_type === 'classlist') {
-                $user->setRegistrationSection($user_data[4]);
-            }
-            else {
-                $user->setGroup($user_data[4]);
-            }
-            $this->core->getQueries()->updateUser($student, $semester, $course);
+            $user = $this->core->getQueries()->getUserById($user_data[0]);
+            $set_user_registration_or_group_function();
+            $this->core->getQueries()->updateUser($user, $semester, $course);
         }
 
         $added = count($users_to_add);
@@ -740,7 +736,7 @@ class UsersController extends AbstractController {
 
         if ($list_type === "classlist" && isset($_POST['move_missing'])) {
             foreach($existing_users as $user) {
-                if (is_null($user->getRegistrationSection())) {
+                if (!is_null($user->getRegistrationSection())) {
                     $user->setRegistrationSection(null);
                     $this->core->getQueries()->updateUser($user, $semester, $course);
                     $updated++;

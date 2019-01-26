@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\libraries\Core;
+use app\exceptions\ValidationException;
 
 /**
  * Class User
@@ -325,9 +326,9 @@ class User extends AbstractModel {
 			return $data !== "";
 		default:
 			//$data can't be validated since $field is unknown.  Notify developer with a stop error (also protectes data record integrity).
-			$field = var_export(htmlentities($field), true);
-			$data = var_export(htmlentities($data), true);
-			trigger_error('User::validateUserData() called with unknown $field '.$field.' and $data '.$data, E_USER_ERROR);
+			$ex_field = '$field: ' . var_export(htmlentities($field), true);
+			$ex_data = '$data:  ' . var_export(htmlentities($data), true);
+			throw new ValidationException('User::validateUserData() called with unknown $field.  See extra details, below.', array($ex_field, $ex_data));
     	}
     }
 
