@@ -177,8 +177,10 @@ HTML;
                     if (markers.length === 0) { return; }
                     var lineData = markers[0].find();
                     console.log(lineData);
-                    editor0.markText(lineData.from, lineData.to, {'css': 'background: #FF0000;'});
-                    getMatchesForClickedMatch("{$gradeable_id}", event, lineData.from, lineData.to, "code_box_1", "orange", null, "", "");
+                    if(markers[0].css.toLowerCase().indexOf("#ffff00") != -1) { //Can be used to determine click
+                        editor0.markText(lineData.from, lineData.to, {'className': 'red_plag', 'css': 'background: #FF0000;'});
+                        getMatchesForClickedMatch("{$gradeable_id}", event, lineData.from, lineData.to, "code_box_1", "orange", null, "", "");
+                    }
                 }
             });
 
