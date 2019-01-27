@@ -11,6 +11,8 @@
 	"submission_to_runner" : [ "*.pdf" ],
 	"submission_to_validation" : [ "*.pdf" ],
 	"work_to_details" : [
+	    "**/*.pdf", "*test_template.pdf", "*student_file.pdf" ],
+        "work_to_public" : [
 	    "**/*.pdf", "*test_template.pdf", "*student_file.pdf" ]
     },
 

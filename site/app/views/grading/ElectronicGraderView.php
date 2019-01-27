@@ -568,6 +568,7 @@ class ElectronicGraderView extends AbstractView {
         }
         $submissions = array();
         $results = array();
+        $results_public = array();
         $checkout = array();
 
         // NOTE TO FUTURE DEVS: There is code around line 830 (ctrl-f openAll) which depends on these names,
@@ -583,6 +584,7 @@ class ElectronicGraderView extends AbstractView {
             add_files($submissions, array_merge($meta_files['submissions'], $files['submissions']), 'submissions');
             add_files($checkout, array_merge($meta_files['checkout'], $files['checkout']), 'checkout');
             add_files($results, $display_version_instance->getResultsFiles(), 'results');
+            add_files($results_public, $display_version_instance->getResultsPublicFiles(), 'results_public');
         }
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
@@ -592,6 +594,7 @@ class ElectronicGraderView extends AbstractView {
             "submissions" => $submissions,
             "checkout" => $checkout,
             "results" => $results,
+            "results_public" => $results_public,
             "site_url" => $this->core->getConfig()->getSiteUrl()
         ]);
     }

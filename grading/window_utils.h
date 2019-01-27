@@ -15,6 +15,12 @@ std::vector<int> extractIntsFromString(std::string input);
 std::vector<int> getPidsAssociatedWithPid(int pid);
 
 /**
+*  Returns the location of the mouse as an x, y vector.
+*  Returns empty vector on failure.
+*/
+std::vector<int> getMouseLocation();
+
+/**
 * Given a pid, this function finds any windows directly belonging to it. 
 * To do this, it iterates through the list of active windows (on the order of 3-10 usually)
 * and looks at their pids. To do this, we break down the output of the wmctrl -lp system command
@@ -66,29 +72,29 @@ bool windowExists(std::string window_name);
 * uses number_of_screenshots to title the image (submitty prepends it with the test #)
 * updates the number of screenshots taken. 
 */
-void screenshot(std::string window_name, int& number_of_screenshots);
+bool screenshot(std::string window_name, int& number_of_screenshots);
 
 /**
 * This function uses xdotool to put the mouse button associated with int button into the 'down' state
 * Checks to see if the window exists so that we don't click on anything that doesn't belong to us.
 */
-void mouseDown(std::string window_name, int button);
+bool mouseDown(std::string window_name, int button);
 
 /**
 * This function uses xdotool to put the mouse button associated with the int button into the 'up' state.
 * Checks to see if the window exists so that we don't click on anything that doesn't belong to us.
 */
-void mouseUp(std::string window_name, int button);
+bool mouseUp(std::string window_name, int button);
 
 /**
 * This function mousedowns then mouseups to simulate a click. 
 */
-void click(std::string window_name, int button);
+bool click(std::string window_name, int button);
 
 /**
 * This function moves the mouse to moved_mouse_x, moved_mouse_y, clamping between x_start x_end and y_start y_end.
 */
-void mouse_move(std::string window_name, int moved_mouse_x, int moved_mouse_y, 
+bool mouse_move(std::string window_name, int moved_mouse_x, int moved_mouse_y, 
                  int x_start, int x_end, int y_start, int y_end, bool no_clamp);
 /**
 * This function sets the height, width, x_start, y_start (upper left coords), x_end, and y_end (lower right) 
@@ -111,35 +117,35 @@ bool populateClickAndDragValues(std::string command, std::string window_name, in
 * mousedown, and then move again. We give a one pixel border at each side of the window and clamp using 
 * that value to avoid accidental resizing.
 */
-void clickAndDragDelta(std::string window_name, std::string command);
+bool clickAndDragDelta(std::string window_name, std::string command);
 
 /**
 * Click and drag absolute: move to a relative coordinate within the window windowname, clamped.
 */
-void clickAndDragAbsolute(std::string window_name, std::string command);
+bool clickAndDragAbsolute(std::string window_name, std::string command);
 
 /**
 * Routing function, forwards to delta or absolute click and drag based on command.
 * (Separated due to length.)
 */
-void clickAndDrag(std::string window_name, std::string command);
+bool clickAndDrag(std::string window_name, std::string command);
 
 /**
 * Centers the mouse on the window associated with windowname if it exists.
 */
-void centerMouse(std::string window_name);
+bool centerMouse(std::string window_name);
 
 /**
 * Moves the mouse to the upper left of the window associated with windowname if it exists.
 */
-void moveMouseToOrigin(std::string window_name);
+bool moveMouseToOrigin(std::string window_name);
 
 /**
 * This function processes the 'type' action, which types a quoted string one character at a time
 * an option number of times with an optional delay in between. Because of the dealy, we need
 * all parameters necessary for a call to execute.cpp's delayAndMemCheck.
 */
-void type(std::string command, std::string window_name, int childPID, float &elapsed, float& next_checkpoint, 
+bool type(std::string command, std::string window_name, int childPID, float &elapsed, float& next_checkpoint, 
                 float seconds_to_run, int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill,
                 std::ostream &logfile);
 
