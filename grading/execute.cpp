@@ -1064,7 +1064,6 @@ int execute(const std::string &cmd,
 
   std::set<std::string> invalid_windows;
   bool window_mode = windowed; //Tells us if the process is expected to spawn a window. (additional support later) 
-  
 
   int num_dispatched_actions = dispatcher_actions.size();
 
@@ -1243,6 +1242,8 @@ int execute(const std::string &cmd,
           if(window_mode && windowName == ""){ //if we are expecting a window, but know nothing about it
             initializeWindow(windowName, childPID, invalid_windows, elapsed); //attempt to get information about the window
             if(windowName != ""){ //if we found information about the window
+              delay_and_mem_check(100000, childPID, elapsed, next_checkpoint, seconds_to_run,
+                                    rss_memory, allowed_rss_memory, memory_kill, time_kill, logfile);
               centerMouse(windowName); //center our mouse on its screen
             }
           }

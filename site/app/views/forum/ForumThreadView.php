@@ -413,11 +413,11 @@ HTML;
                     }
                     if(isset($activeThread['favorite']) && $activeThread['favorite']) {
                     	$title_html .= <<<HTML
-							<a style="position:relative; display:inline-block; color:orange; " onClick="pinThread({$activeThread['id']}, 'unpin_thread');" title="Pin Thread"><i class="fas fa-thumb-tack" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;-webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
+							<a style="position:relative; display:inline-block; color:orange; " onClick="pinThread({$activeThread['id']}, 'unpin_thread');" title="Pin Thread"><i class="fas fa-thumbtack" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;-webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
 HTML;
 					} else {
                     	$title_html .= <<<HTML
-							<a style="position:relative; display:inline-block; color:orange; " onClick="pinThread({$activeThread['id']}, 'pin_thread');" title="Pin Thread"><i class="fas fa-thumb-tack" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'gold')" style="position:relative; display:inline-block; color:#e0e0e0; -webkit-text-stroke-width: 1px;-webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
+							<a style="position:relative; display:inline-block; color:orange; " onClick="pinThread({$activeThread['id']}, 'pin_thread');" title="Pin Thread"><i class="fas fa-thumbtack" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'gold')" style="position:relative; display:inline-block; color:#e0e0e0; -webkit-text-stroke-width: 1px;-webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
 HTML;
 					}
                     $title_html .= <<< HTML
@@ -647,7 +647,7 @@ HTML;
 						}
 						if(isset($thread['favorite']) && $thread['favorite']) {
 							$return .= <<<HTML
-							<i class="fas fa-thumb-tack" style="padding-left:3px;position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
+							<i class="fas fa-thumbtack" style="padding-left:3px;position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i>
 HTML;
 						}
