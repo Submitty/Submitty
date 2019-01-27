@@ -133,12 +133,20 @@ class AutoGradingView extends AbstractView {
             $diff_viewer = $autocheck->getDiffViewer();
             $file_path = $diff_viewer->getActualFilename();
             if (substr($file_path, strlen($file_path) - 4, 4) == ".pdf") {
+                $public = $autocheck->getPublic();
                 $file_name = pathinfo($file_path, PATHINFO_BASENAME);
                 $file_path = urlencode($file_path);
                 $checks[] = [
                     "pdf" => true,
                     "name" => $file_name,
-                    "path" => $file_path
+                    "path" => $file_path,
+                    "url" => $this->core->buildUrl([
+                        "component" => "misc",
+                        "page" => "display_file",
+                        "dir" => $public ? "results_public": "results",
+                        "file" => $file_name,
+                        "path" => $file_path
+                    ])
                 ];
             } else {
                 $check = [
