@@ -303,14 +303,9 @@ class GradedComponent extends AbstractModel {
         $this->modified = true;
     }
 
-    public function setVerifier(User $verifier){
-        $this->verifier = $verifier;
-        $this->verifier_id = $this->grader !== null ? $verifier->getId() : '';
+    public function setVerifier($verifier_id){
+        $this->verifier_id = $verifier_id !== null ? $verifier_id : '';
         $this->modified = true;    
-    }
-
-    public function getVerifier(){
-        return $this->verifier;
     }
 
     public function getVerifierId(){

@@ -301,14 +301,21 @@ class GradedComponentContainer extends AbstractModel {
 
     /**
      * Gets all of the graders for this component
+     * If a verifier exists return that instead
      * @return User[] indexed by user id
      */
     public function getGraders() {
         $graders = [];
         /** @var GradedComponent $graded_component */
         foreach ($this->graded_components as $graded_component) {
-            $grader = $graded_component->getGrader();
-            $graders[$grader->getId()] = $grader;
+            $verifier_id = $graded_component->getVerifierId();
+            if($verifier_id == ''){
+                $grader = $graded_component->getGrader();
+                $graders[$grader->getId()] = $grader;
+            }else{
+                $grader = $this->core->getQueries()->getUserById($graded_component->getVerifierId());
+                $graders[$verifier_id] = $grader; 
+            }
         }
         return $graders;
     }

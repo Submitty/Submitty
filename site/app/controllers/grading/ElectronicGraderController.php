@@ -214,7 +214,6 @@ class ElectronicGraderController extends GradingController {
      */
     private function ajaxVerifyComponent($verify_all = false) {
         $gradeable_id = $_POST['gradeable_id'] ?? '';
-        $component_id = $_POST['component_id'] ?? '';
         $anon_id = $_POST['anon_id'] ?? '';
 
         $grader = $this->core->getUser();
@@ -224,54 +223,46 @@ class ElectronicGraderController extends GradingController {
         if ($gradeable === false) {
             return;
         }
-
-        // get the component
-        $component = $this->tryGetComponent($gradeable, $component_id);
-        if ($component === false) {
-            return;
-        }
-
         // Get user id from the anon id
         $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id);
-        if ($submitter_id === false) {
-            return;
-        }
-
         // Get the graded gradeable
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
         if ($graded_gradeable === false) {
             return;
         }
-
-        // checks if user has permission TODO: make these permissions should be more refined
-        if (!$this->core->getAccess()->canI("grading.electronic.verify_grader")) {
-            $this->core->getOutput()->renderJsonFail('Insufficient permissions to verify component');
-            return;
-        }
-
         // Get / create the TA grade
         $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+        if(!$verify_all){
+            $component_id = $_POST['component_id'] ?? '';
+            // get the component
+            $component = $this->tryGetComponent($gradeable, $component_id);
+            if ($component === false) {
+                return;
+            }
+            if ($submitter_id === false) {
+                return;
+            }
 
-        // Get / create the graded component
-        $graded_component = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, false);
+            // Get / create the graded component
+            $graded_component = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, false);
 
-        // Verifying individual component should fail if its ungraded
-        if ($graded_component === null) {
-            $this->core->getOutput()->renderJsonFail('Cannot verify ungraded component');
-            return;
+            // Verifying individual component should fail if its ungraded
+            if ($graded_component === null) {
+                $this->core->getOutput()->renderJsonFail('Cannot verify ungraded component');
+                return;
+            }
         }
-
         try {
             if($verify_all){
-                foreach ($gradeable->getComponents() as $component) {
-                    $graded_component = $ta_graded_gradeable->getGradedComponent($component);
+                foreach ($gradeable->getComponents() as $comp) {
+                    $graded_component = $ta_graded_gradeable->getGradedComponent($comp);
                     if ($graded_component !== null && $graded_component->getGraderId() != $grader->getId()){
-                        $graded_component->setVerifier($grader);
+                        $graded_component->setVerifier($grader->getId());
                         $graded_component->setVerifyTime($this->core->getDateTimeNow());
                     }
                 }
             }else{
-                $graded_component->setVerifier($grader);
+                $graded_component->setVerifier($grader->getId());
                 $graded_component->setVerifyTime($this->core->getDateTimeNow());
             }
             $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
@@ -1034,7 +1025,7 @@ class ElectronicGraderController extends GradingController {
             if ($graded_component === null) {
                 continue;
             }
-            if ($graded_component->getGrader()->getId() !== $this->core->getUser()->getId()) {
+            if ($graded_component->getGrader()->getId() !== $this->core->getUser()->getId() && $graded_component->getVerifierId() == '') {
                 $show_verify_all = true;
                 break;
             }
