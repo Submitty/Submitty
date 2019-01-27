@@ -284,7 +284,10 @@ HTML;
 			}
 		}
 	}
-	$cookieSelectedUnread = $_COOKIE['unread_select_value'];
+	if(!empty($_COOKIE['unread_select_value'])){
+		$cookieSelectedUnread = $_COOKIE['unread_select_value'];
+	}
+
 	$default_button = array(
 		array(
 			"required_rank" => 4,
