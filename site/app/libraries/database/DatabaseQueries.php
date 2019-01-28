@@ -183,9 +183,25 @@ class DatabaseQueries {
 
             $query_raw_join[] = "JOIN ({$query_select_categories}) AS QSC ON QSC.thread_id = t.id";
         }
-
+        // Unread Threads
         if($unread_threads) {
-            $query_raw_where[]  = "NOT EXISTS(SELECT thread_id FROM viewed_responses v WHERE v.thread_id = t.id AND v.user_id = '{$current_user}')";
+            $query_raw_where[] = 
+            "EXISTS(
+                SELECT thread_id 
+                FROM (posts LEFT JOIN forum_posts_history ON posts.id = forum_posts_history.post_id) AS jp
+                WHERE(
+                    jp.thread_id = t.id
+                    AND (NOT EXISTS(
+                        SELECT thread_id 
+                        FROM viewed_responses v
+                        WHERE v.thread_id = t.id AND v.user_id = '{$current_user}')
+                    OR NOT EXISTS(
+                        SELECT thread_id 
+                        FROM viewed_responses v 
+                        WHERE v.thread_id = jp.thread_id
+                            AND v.user_id = '{$current_user}'
+                            AND v.timestamp >= jp.timestamp
+                            AND (jp.timestamp IS NULL OR (jp.timestamp IS NOT NULL AND v.timestamp >= jp.timestamp))))))";
         }
 
         $query_select   = implode(", ", $query_raw_select);
@@ -991,7 +1007,7 @@ ORDER BY {$u_or_t}.{$section_key}", $params);
         $return = array();
         $this->course_db->query("
 SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_score),2) AS avg_comp_score, round(stddev_pop(comp_score),2) AS std_dev, COUNT(*) FROM(
-  SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order,
+  SELECT gc_id, gc_title+, gc_max_value, gc_is_peer, gc_order,
   CASE WHEN (gc_default + sum_points + gcd_score) > gc_upper_clamp THEN gc_upper_clamp
   WHEN (gc_default + sum_points + gcd_score) < gc_lower_clamp THEN gc_lower_clamp
   ELSE (gc_default + sum_points + gcd_score) END AS comp_score FROM(
