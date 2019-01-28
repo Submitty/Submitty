@@ -284,9 +284,14 @@ class TestcaseWrapper:
 
                 copy_contents_into(tmp_data_folder, testcase_folder)
 
-                return_code = subprocess.call([os.path.join(self.testcase_path, "bin", "compile.out"),
-                    "testassignment", "testuser", "1", "0", str(testcase_num)], \
-                            cwd=testcase_folder, stdout=log, stderr=log)
+                return_code = subprocess.call(
+                    [os.path.join(self.testcase_path, "bin", "compile.out"),
+                    "testassignment", 
+                    "testuser", 
+                    "1", 
+                    "0", 
+                    '--testcase', str(testcase_num)],
+                    cwd=testcase_folder, stdout=log, stderr=log)
                 
                 if return_code != 0:
                     raise RuntimeError("Compile exited with exit code " + str(return_code))
@@ -354,7 +359,11 @@ class TestcaseWrapper:
                 copy_contents_into(compiled_files_directory, testcase_folder)
 
                 return_code = subprocess.call([os.path.join(self.testcase_path, "bin", "run.out"),
-                                            "testassignment", "testuser", "1", "0",str(testcase_num)], \
+                                            "testassignment", 
+                                            "testuser", 
+                                            "1", 
+                                            "0",
+                                            '--testcase', str(testcase_num)],
                                              cwd=testcase_folder, stdout=log, stderr=log)
                 if return_code != 0:
                     raise RuntimeError("run.out exited with exit code " + str(return_code))
