@@ -622,6 +622,31 @@ class UsersController extends AbstractController {
             }
         };
 
+        $insert_or_update_user_function = function($action) use (&$user, &$semester, &$course, &$user_data, &$return_url) {
+            try {
+                switch($action) {
+                case 'insert':
+                    //User must first exist in Submitty before being enrolled to a course.
+                    //$user_data[0] = authentication ID.
+                    if (is_null($this->core->getQueries()->getSubmittyUser($user_data[0]))) {
+                        $this->core->getQueries()->insertSubmittyUser($user);
+                    }
+                    $this->core->getQueries()->insertCourseUser($user, $semester, $course);
+                    break;
+                case 'update':
+                    $this->core->getQueries()->updateUser($user);
+                    break;
+                default:
+                    throw new ValidationException("Unknown DB operation", array($action, '$insert_or_update_user_function'));
+                    break;
+                }
+            }
+            catch (DatabaseException $e) {
+                $this->core->addErrorMessage("Database Exception.  Please contact your sysadmin.");
+                $this->core->redirect($return_url);
+            }
+        };
+
         $return_url = $this->core->buildUrl(array('component'=>'admin', 'page'=>'users', 'action'=>'students'));
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
 
@@ -720,17 +745,13 @@ class UsersController extends AbstractController {
             if ($use_database) {
                 $user->setPassword($user_data[5]);
             }
-            if ($this->core->getQueries()->getSubmittyUser($user_data[0]) === null) {
-                $this->core->getQueries()->insertSubmittyUser($user);
-            }
-            $this->core->getQueries()->insertCourseUser($user, $semester, $course);
+            $insert_or_update_user_function('insert');
         }
         foreach($users_to_update as $user_data) {
             $user = $this->core->getQueries()->getUserById($user_data[0]);
             $set_user_registration_or_group_function();
-            $this->core->getQueries()->updateUser($user, $semester, $course);
+            $insert_or_update_user_function('update');
         }
-
         $added = count($users_to_add);
         $updated = count($users_to_update);
 
@@ -738,7 +759,7 @@ class UsersController extends AbstractController {
             foreach($existing_users as $user) {
                 if (!is_null($user->getRegistrationSection())) {
                     $user->setRegistrationSection(null);
-                    $this->core->getQueries()->updateUser($user, $semester, $course);
+                    $insert_or_update_user_function('update');
                     $updated++;
                 }
             }
