@@ -2,6 +2,7 @@
 
 namespace app\views\grading;
 
+use app\controllers\student\LateDaysTableController;
 use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\AutoGradedVersion;
@@ -328,7 +329,8 @@ class ElectronicGraderView extends AbstractView {
                 $rot_section = ($row->getSubmitter()->getRotatingSection() === null) ? "NULL" : $row->getSubmitter()->getRotatingSection();
                 $user_assignment_setting_json = json_encode($row->getSubmitter()->getTeam()->getAssignmentSettings($gradeable));
                 $members = json_encode($row->getSubmitter()->getTeam()->getMembers());
-                $info["team_edit_onclick"] = "adminTeamForm(false, '{$row->getSubmitter()->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, {$members}, {$gradeable->getTeamSizeMax()});";
+                $pending_members = json_encode($row->getSubmitter()->getTeam()->getInvitations());
+                $info["team_edit_onclick"] = "adminTeamForm(false, '{$row->getSubmitter()->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, {$members}, {$pending_members},{$gradeable->getTeamSizeMax()});";
             }
 
             //List of graded components
@@ -394,7 +396,7 @@ class ElectronicGraderView extends AbstractView {
             //Team edit button, specifically the onclick event.
             $reg_section = $teamless_user->getRegistrationSection() ?? 'NULL';
             $rot_section = $teamless_user->getRotatingSection() ?? 'NULL';
-            $info['new_team_onclick'] = "adminTeamForm(true, '{$teamless_user->getId()}', '{$reg_section}', '{$rot_section}', [], [], {$gradeable->getTeamSizeMax()});";
+            $info['new_team_onclick'] = "adminTeamForm(true, '{$teamless_user->getId()}', '{$reg_section}', '{$rot_section}', [], [], [],{$gradeable->getTeamSizeMax()});";
 
             //-----------------------------------------------------------------
             // Now insert this student into the list of sections
@@ -421,7 +423,7 @@ class ElectronicGraderView extends AbstractView {
             $rot_section = ($team->getRotatingSection() === null) ? "NULL" : $team->getRotatingSection();
 
             $empty_team_info[] = [
-                "team_edit_onclick" => "adminTeamForm(false, '{$team->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, [], {$gradeable->getTeamSizeMax()});"
+                "team_edit_onclick" => "adminTeamForm(false, '{$team->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, [], [],{$gradeable->getTeamSizeMax()});"
             ];
         }
 
@@ -442,12 +444,7 @@ class ElectronicGraderView extends AbstractView {
 
     public function adminTeamForm(Gradeable $gradeable, $all_reg_sections, $all_rot_sections) {
         $students = $this->core->getQueries()->getAllUsers();
-        $student_full = array();
-        foreach ($students as $student) {
-            $student_full[] = array('value' => $student->getId(),
-                                    'label' => str_replace("'","&#039;",$student->getDisplayedFirstName()).' '.str_replace("'","&#039;",$student->getDisplayedLastName()).' <'.$student->getId().'>');
-        }
-        $student_full = json_encode($student_full);
+        $student_full = Utils::getAutoFillData($students);
 
         return $this->core->getOutput()->renderTwigTemplate("grading/AdminTeamForm.twig", [
             "gradeable_id" => $gradeable->getId(),
@@ -571,6 +568,7 @@ class ElectronicGraderView extends AbstractView {
         }
         $submissions = array();
         $results = array();
+        $results_public = array();
         $checkout = array();
 
         // NOTE TO FUTURE DEVS: There is code around line 830 (ctrl-f openAll) which depends on these names,
@@ -578,20 +576,25 @@ class ElectronicGraderView extends AbstractView {
         // order of these statements matter I believe
 
         $display_version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($display_version);
+        $isVcs = $graded_gradeable->getGradeable()->isVcs();
         if ($display_version_instance !==  null) {
-            add_files($submissions, array_merge($display_version_instance->getMetaFiles(), $display_version_instance->getFiles()), 'submissions');
-            add_files($checkout, array_merge($display_version_instance->getMetaFiles(), $display_version_instance->getFiles()), 'checkout');
-            
+            $meta_files = $display_version_instance->getMetaFiles();
+            $files = $display_version_instance->getFiles();
+
+            add_files($submissions, array_merge($meta_files['submissions'], $files['submissions']), 'submissions');
+            add_files($checkout, array_merge($meta_files['checkout'], $files['checkout']), 'checkout');
             add_files($results, $display_version_instance->getResultsFiles(), 'results');
+            add_files($results_public, $display_version_instance->getResultsPublicFiles(), 'results_public');
         }
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
             "gradeable_id" => $graded_gradeable->getGradeableId(),
             "submitter_id" => $graded_gradeable->getSubmitter()->getId(),
-            "has_vcs_files" => false, // TODO: add this to AutoGradedVersion
+            "has_vcs_files" => $isVcs,
             "submissions" => $submissions,
             "checkout" => $checkout,
             "results" => $results,
+            "results_public" => $results_public,
             "site_url" => $this->core->getConfig()->getSiteUrl()
         ]);
     }
@@ -610,10 +613,10 @@ class ElectronicGraderView extends AbstractView {
         //Late day calculation
         if ($gradeable->isTeamAssignment()) {
             foreach ($graded_gradeable->getSubmitter()->getTeam()->getMemberUsers() as $team_member) {
-                $tables[] = $this->core->getOutput()->renderTemplate('LateDaysTable', 'showLateTable', $team_member->getId(), $gradeable->getId(), false);
+                $tables[] = LateDaysTableController::renderLateTable($this->core, $team_member, $gradeable->getId());
             }
         } else {
-            $tables[] = $this->core->getOutput()->renderTemplate('LateDaysTable', 'showLateTable', $graded_gradeable->getSubmitter()->getId(), $gradeable->getId(), false);
+            $tables[] = LateDaysTableController::renderLateTable($this->core, $graded_gradeable->getSubmitter()->getUser(), $gradeable->getId());
         }
 
         if ($display_version_instance === null) {
@@ -693,7 +696,7 @@ class ElectronicGraderView extends AbstractView {
     }
 
     /**
-     * Render the Regrade Requests panel
+     * Render the Grade Inquiry panel
      * @param GradedGradeable $graded_gradeable
      * @return string
      */

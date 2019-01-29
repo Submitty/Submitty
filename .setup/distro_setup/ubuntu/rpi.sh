@@ -9,7 +9,7 @@ fi
 
 # We assume a relative path from this repository to the installation
 # directory and configuration directory.
-CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../../../../config
+CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../../../config
 SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
 
 CGI_USER=$(jq -r '.cgi_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
@@ -27,7 +27,6 @@ sudo apt-get install -qqy clisp emacs
 echo "Getting pylint..."
 
 # install pylint for python3 using pip
-apt install -qqy python3-pip
 pip3 install pylint
 pip3 install pillow
 
@@ -145,10 +144,10 @@ rm glfw-3.2.1.zip
 # Used by Computational Vision course
 apt-get install -qqy python3-tk
 
-pip3 install -U pip numpy
+pip3 install numpy
 pip3 install matplotlib
 pip3 install opencv-python
-
+pip3 install scipy
 
 ##################################################
 # Fixup the permissions

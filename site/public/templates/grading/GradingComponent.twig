@@ -74,14 +74,14 @@ Required inputs:
                           rows="1"
                           placeholder="Custom message for student..."
                           class="mark-note-custom"
-                >{{ graded_component.comment }}</textarea>
+                >{{ graded_component.comment|escape }}</textarea>
             </span>
         </div>
     {% else %}
         <div class="custom-mark-data"
              data-selected="{{ graded_component.custom_mark_selected }}"
              data-score="{{ graded_component.score }}"
-             data-comment="{{ graded_component.comment }}"
+             data-comment="{{ graded_component.comment|escape }}"
              hidden></div>
     {% endif %}
     {# /Custom mark #}
@@ -98,13 +98,13 @@ Required inputs:
                 {% if mark.id in graded_component.mark_ids %}
                     <div class="row">
                         <div class="col-no-gutters indicator">
-                            <i class="fa fa-check-square-o fa-1g"></i>
+                            <i class="far fa-check-square fa-1g"></i>
                         </div>
                         <div class="col-no-gutters point-value">
                             <span>{{ mark.points }}</span>
                         </div>
                         <div class="col">
-                            <span>{{ mark.title }}</span>
+                            <span>{{ mark.title|escape }}</span>
                         </div>
                     </div>
                 {% endif %}
@@ -113,13 +113,13 @@ Required inputs:
             {% if graded_component.comment|length > 0 %}
                 <div class="row">
                     <div class="col-no-gutters indicator">
-                        <i class="fa fa-check-square-o fa-1g"></i>
+                        <i class="far fa-check-square fa-1g"></i>
                     </div>
                     <div class="col-no-gutters point-value">
                         <span>{{ graded_component.score }}</span>
                     </div>
                     <div class="col">
-                        <span>{{ graded_component.comment }}</span>
+                        <span>{{ graded_component.comment|escape }}</span>
                     </div>
                 </div>
             {% endif %}

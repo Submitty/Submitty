@@ -46,8 +46,8 @@
             <div id='messages'>
                 {% for message in messages %}
                     <div id='{{ message.type }}-{{ message.key }}' class="inner-message alert alert-{{ message.type }}">
-                        <a class="fa fa-times message-close" onClick="removeMessagePopup('{{ message.type }}-{{ message.key }}');"></a>
-                        <i class="fa fa-times-circle"></i> {{ message.error }}
+                        <a class="fas fa-times message-close" onClick="removeMessagePopup('{{ message.type }}-{{ message.key }}');"></a>
+                        <i class="fas fa-times-circle"></i> {{ message.error }}
                     </div>
                 {% endfor %}
             </div>
@@ -65,7 +65,7 @@
                                     {{ b.getTitle() }}
                                 {% endif %}
                                 {% if b.getExternalUrl() is not empty %}
-                                    <a class="external" href="{{ b.getExternalUrl() }}" target="_blank"><i class="fa fa-external-link"></i></a>
+                                    <a class="external" href="{{ b.getExternalUrl() }}" target="_blank"><i class="fas fa-external-link-alt"></i></a>
                                 {% endif %}
                             {% endfor %}
                         </h2>

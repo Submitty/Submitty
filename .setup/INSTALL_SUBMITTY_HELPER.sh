@@ -16,10 +16,13 @@
 
 # We assume a relative path from this repository to the installation
 # directory and configuration directory.
-CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../config
+THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+CONF_DIR=${THIS_DIR}/../../../config
 
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
 SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
+
+source ${THIS_DIR}/bin/versions.sh
 
 DAEMONS=( submitty_autograding_shipper submitty_autograding_worker submitty_daemon_jobs_handler )
 
@@ -226,6 +229,7 @@ mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding
 if [ "${WORKER}" == 0 ]; then
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/site_errors
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/access
+    mkdir -p ${SUBMITTY_DATA_DIR}/logs/ta_grading
 fi
 
 # set the permissions of these directories
@@ -444,16 +448,15 @@ fi
 
 echo -e "Compile and install analysis tools"
 
-ST_VERSION=v.18.06.00
 mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 pushd ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-if [[ ! -f VERSION || $(< VERSION) != "${ST_VERSION}" ]]; then
+if [[ ! -f VERSION || $(< VERSION) != "${AnalysisTools_Version}" ]]; then
     for b in count plagiarism diagnostics;
-        do wget -nv "https://github.com/Submitty/AnalysisTools/releases/download/${ST_VERSION}/${b}" -O ${b}
+        do wget -nv "https://github.com/Submitty/AnalysisTools/releases/download/${AnalysisTools_Version}/${b}" -O ${b}
     done
 
-    echo ${ST_VERSION} > VERSION
+    echo ${AnalysisTools_Version} > VERSION
 fi
 popd > /dev/null
 
@@ -605,7 +608,7 @@ for i in "${array[@]}"; do
     rm -rf ${SUBMITTY_DATA_DIR}/${i}
     mkdir -p ${SUBMITTY_DATA_DIR}/${i}
     chown -R ${DAEMON_USER}:${DAEMON_GID} ${SUBMITTY_DATA_DIR}/${i}
-    chown 770 ${SUBMITTY_DATA_DIR}/${i}
+    chmod 770 ${SUBMITTY_DATA_DIR}/${i}
 done
 
 # return the autograding_workers json

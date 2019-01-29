@@ -130,16 +130,17 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                             #can go negative (subtracts .1 even in the else case) but that's fine.
                             time_in_seconds -= .1
                       elif action_type == "stdin":
-                          string = action_obj["string"]
+                          disp_str = action_obj["string"]
                           targets = action_obj["containers"]
-                          for target in targets:
-                              p = processes[target]
-                              # poll returns None if the process is still running.
-                              if p.poll() == None:
-                                  p.stdin.write(string.encode('utf-8'))
-                                  p.stdin.flush()
-                              else:
-                                  pass
+                          send_message_to_processes(disp_str, processes, targets)
+                      elif action_type in ['stop', 'start', 'kill']:
+                          targets = action_obj['containers']
+                          send_message_to_processes("SUBMITTY_SIGNAL:{0}\n".format(action_type.upper()), processes, targets)
+                      # A .1 second delay after each action to keep things flowing smoothly.
+                      time.sleep(.1)
+
+                    if len(dispatcher_actions) > 0:
+                      send_message_to_processes("SUBMITTY_SIGNAL:FINALMESSAGE\n",processes, list(processes.keys()))
 
                     #Now that all dockers are running, wait on their return code for success or failure. If any fail, we count it
                     #   as a total failure.
@@ -150,7 +151,7 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                         first_testcase = False
 
                 except Exception as e:
-                    print('An error occurred when grading by docker.')
+                    grade_items_logging.log_message(job_id, message="ERROR while grading by docker:\n {0}".format(traceback.format_exc()))
                     traceback.print_exc()
                 finally:
                     clean_up_containers(container_info,job_id,is_batch_job,which_untrusted,item_name,grading_began,use_router)
@@ -200,11 +201,22 @@ def at_least_one_alive(processes):
       return True
   return False
 
+#targets must hold names/keys for the processes dictionary
+def send_message_to_processes(message, processes, targets):
+    print("sending {0} to {1}".format(message, targets))
+    for target in targets:
+        p = processes[target]
+        # poll returns None if the process is still running.
+        if p.poll() == None:
+            p.stdin.write(message.encode('utf-8'))
+            p.stdin.flush()
+        else:
+            pass
 
 def setup_folder_for_grading(target_folder, tmp_work, job_id, tmp_logs, testcase):
     #The paths to the important folders.
     tmp_work_test_input = os.path.join(tmp_work, "test_input")
-    tmp_work_subission = os.path.join(tmp_work, "submitted_files")
+    tmp_work_submission = os.path.join(tmp_work, "submitted_files")
     tmp_work_compiled = os.path.join(tmp_work, "compiled_files")
     tmp_work_checkout = os.path.join(tmp_work, "checkout")
     my_runner = os.path.join(tmp_work,"my_runner.out")
@@ -250,7 +262,7 @@ def setup_folder_for_grading(target_folder, tmp_work, job_id, tmp_logs, testcase
 
     #TODO: pre-commands may eventually wipe the following logic out.
     #copy the required files to the test directory
-    grade_item.copy_contents_into(job_id,tmp_work_subission ,target_folder,tmp_logs)
+    grade_item.copy_contents_into(job_id,tmp_work_submission ,target_folder,tmp_logs)
     grade_item.copy_contents_into(job_id,tmp_work_compiled  ,target_folder,tmp_logs)
     grade_item.copy_contents_into(job_id,tmp_work_checkout  ,target_folder,tmp_logs)
     grade_item.copy_contents_into(job_id,tmp_work_test_input,target_folder,tmp_logs)
@@ -356,6 +368,7 @@ def launch_container(container_name, container_image, mounted_directory,job_id,i
   this_container = subprocess.check_output(['docker', 'create', '-i', '-u', untrusted_uid, '--network', 'none',
                                            '-v', mounted_directory + ':' + mounted_directory,
                                            '-w', mounted_directory,
+                                           '--hostname', name,
                                            '--name', container_name,
                                            container_image,
                                            #The command to be run.
@@ -494,6 +507,8 @@ def create_knownhosts_txt(container_info,test_input_folder,single_port_per_conta
 def clean_up_containers(container_info,job_id,is_batch_job,which_untrusted,submission_path,grading_began,use_router):
     # First, clean up the dockers.
     for name, info in container_info.items():
+        if not "container_id" in info:
+          continue
         c_id = info['container_id']
         subprocess.call(['docker', 'rm', '-f', c_id])
 

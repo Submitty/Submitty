@@ -34,7 +34,22 @@ def arg_parse():
                         help="Specify start time for replay?  example format: '2018-02-14 00:13:17.000 -0500'")
     parser.add_argument("--no_input", dest="no_input", action='store_const', const=True, default=False,
                         help="Do not wait for confirmation input, even if many things are being added to the queue.")
+    parser.add_argument("--active_only", dest="active_only", action='store_const', const=True, default=False,
+                        help="Only regrade versions that are currently tagged as the active version.")
     return parser.parse_args()
+
+
+# check to see if the assignment version in this directory is the
+# currently active version
+def is_active_version(directory):
+    my_dirs = directory.split(os.sep)
+    this_version = my_dirs[-1]
+    my_dirs.pop()
+    f = os.path.join("/",*my_dirs,"user_assignment_settings.json")
+    with open(f,'r') as settings_file:
+        settings = json.load(settings_file)
+        active_version = str(settings["active_version"])
+    return this_version == active_version
 
 
 # For the specified interval, walks over the log file and creates
@@ -165,10 +180,13 @@ def main():
         # Find all matching submissions
         for d in glob.glob(pattern):
             if os.path.isdir(d):
-                print("match: ",d)
                 my_dirs = d.split(os.sep)
                 if len(my_dirs) != len(data_dirs)+6:
                     raise SystemExit("ERROR: directory length not as expected")
+                # if requested, only regrade the currently active versions
+                if args.active_only and not is_active_version(d):
+                    continue
+                print("match: ",d)
                 my_semester=my_dirs[len(data_dirs)]
                 my_course=my_dirs[len(data_dirs)+1]
                 my_gradeable=my_dirs[len(data_dirs)+3]

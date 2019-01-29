@@ -177,10 +177,36 @@ def allow_only_one_part(path, log_path=os.devnull):
 # ==================================================================================
 # ==================================================================================
 
+# go through the testcase folder (e.g. test01/) and remove anything
+# that matches the test input (avoid archiving copies of these files!)
+def remove_test_input_files(overall_log,test_input_path,testcase_folder):
+    with open(overall_log,'a') as f:
+        for path, subdirs, files in os.walk(test_input_path):
+            for name in files:
+                relative = path[len(test_input_path)+1:]
+                my_file = os.path.join(testcase_folder, relative, name)
+                if os.path.isfile(my_file):
+                    print ("removing (likely) stale test_input file: ", my_file, file=f)
+                    os.remove(my_file)
+
+
 def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untrusted):
 
     os.chdir(SUBMITTY_DATA_DIR)
     tmp = os.path.join("/var/local/submitty/autograding_tmp/",which_untrusted,"tmp")
+
+    if os.path.exists(tmp):
+        untrusted_grant_rwx_access(which_untrusted, tmp)
+        add_permissions_recursive(tmp,
+                  stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                  stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                  stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+
+    # Remove any and all containers left over from past runs.
+    old_containers = subprocess.check_output(['docker', 'ps', '-aq', '-f', 'name={0}'.format(which_untrusted)]).split()
+
+    for old_container in old_containers:
+        subprocess.call(['docker', 'rm', '-f', old_container.decode('utf8')])
 
     # clean up old usage of this directory
     shutil.rmtree(tmp,ignore_errors=True)
@@ -256,22 +282,6 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
 
     # intentionally fragile to avoid redundancy
     USE_DOCKER = complete_config_obj['docker_enabled']
-
-
-
-    # WIP: This option file facilitated testing...
-    #USE_DOCKER = os.path.isfile("/tmp/use_docker")
-    #use_docker_string="grading begins, using DOCKER" if USE_DOCKER else "grading begins (not using docker)"
-    #grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,submission_path,message=use_docker_string)
-
-    container = None
-    if USE_DOCKER:
-        container = subprocess.check_output(['docker', 'run', '-t', '-d',
-                                             '-v', tmp + ':' + tmp,
-                                             'ubuntu:custom']).decode('utf8').strip()
-        dockerlaunch_done=dateutils.get_current_time()
-        dockerlaunch_time = (dockerlaunch_done-grading_began).total_seconds()
-        grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,"dcct:",dockerlaunch_time,"docker container created")
 
     # --------------------------------------------------------------------
     # COMPILE THE SUBMITTED CODE
@@ -502,7 +512,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     ##################################################################################################
     #call grade_item_main_runner.py
     runner_success = grade_item_main_runner.executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submission_string, 
-                                                                                    item_name, USE_DOCKER, container, which_untrusted,
+                                                                                    item_name, USE_DOCKER, None, which_untrusted,
                                                                                     job_id, grading_began)
     ##################################################################################################
 
@@ -561,6 +571,17 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     # validator the validator.out as the untrusted user
     with open(os.path.join(tmp_logs,"validator_log.txt"), 'w') as logfile:
         if USE_DOCKER:
+            # WIP: This option file facilitated testing...
+            #USE_DOCKER = os.path.isfile("/tmp/use_docker")
+            #use_docker_string="grading begins, using DOCKER" if USE_DOCKER else "grading begins (not using docker)"
+            #grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,submission_path,message=use_docker_string)
+            container = subprocess.check_output(['docker', 'run', '-t', '-d',
+                                                 '-v', tmp + ':' + tmp,
+                                                 'ubuntu:custom']).decode('utf8').strip()
+            dockerlaunch_done=dateutils.get_current_time()
+            dockerlaunch_time = (dockerlaunch_done-grading_began).total_seconds()
+            grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,"dcct:",dockerlaunch_time,"docker container created")
+
             validator_success = subprocess.call(['docker', 'exec', '-w', tmp_work, container,
                                                  os.path.join(tmp_work, 'my_validator.out'), queue_obj['gradeable'],
                                                  queue_obj['who'], str(queue_obj['version']), submission_string], stdout=logfile)
@@ -607,8 +628,24 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
 
     os.makedirs(os.path.join(tmp_results,"details"))
 
+    # remove the test_input directory, so we don't archive it!
+    shutil.rmtree(os.path.join(tmp_work,"test_input"))
+
+    # loop over the test case directories, and remove any files that are also in the test_input folder
+    for testcase_num in range(1, len(my_testcases)+1):
+        testcase_folder = os.path.join(tmp_work, "test{:02}".format(testcase_num))
+        remove_test_input_files(os.path.join(tmp_logs,"overall.txt"),test_input_path,testcase_folder)
+
     patterns_work_to_details = complete_config_obj["autograding"]["work_to_details"]
     pattern_copy("work_to_details",patterns_work_to_details,tmp_work,os.path.join(tmp_results,"details"),tmp_logs)
+
+    if ("work_to_public" in complete_config_obj["autograding"] and
+        len(complete_config_obj["autograding"]["work_to_public"]) > 0):
+        # create the directory
+        os.makedirs(os.path.join(tmp_results,"results_public"))
+        # copy the files
+        patterns_work_to_public = complete_config_obj["autograding"]["work_to_public"]
+        pattern_copy("work_to_public",patterns_work_to_public,tmp_work,os.path.join(tmp_results,"results_public"),tmp_logs)
 
     history_file_tmp = os.path.join(tmp_submission,"history.json")
     history_file = os.path.join(tmp_results,"history.json")

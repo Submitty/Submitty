@@ -118,6 +118,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
         $gradeable->method('getSubmissionOpenDate')->willReturn($now);
         $gradeable->method('getTaViewStartDate')->willReturn($now);
+        $gradeable->method('canStudentSubmit')->willReturn(true);
 
         $autograding_config = $this->createMockModel(AutogradingConfig::class);
         $autograding_config->method('getNumParts')->willReturn(intval($num_parts));
@@ -1319,23 +1320,45 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertRegExp('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][1]['time']);
     }
 
-    public function testCheckRefreshSuccess() {
+    /*
+     * Test should fail with no results.json
+     */
+    public function testCheckRefreshFailed1() {
+        $_REQUEST['action'] = 'check_refresh';
+        $_REQUEST['gradeable_version'] = 1;
+        $return = $this->runController();
+        $this->assertFalse($return['refresh']);
+        $this->assertEquals("NO_REFRESH", $return['string']);
+    }
+
+    /*
+     * Test should fail with no database data
+     */
+    public function testCheckRefreshFailed2() {
         $_REQUEST['action'] = 'check_refresh';
         $_REQUEST['gradeable_version'] = 1;
         $tmp = FileUtils::joinPaths($this->config['course_path'], "results", "test", "testUser", "1");
         FileUtils::createDir($tmp, null, true);
         touch(FileUtils::joinPaths($tmp, "results.json"));
         $return = $this->runController();
-        $this->assertTrue($return['refresh']);
-        $this->assertEquals("REFRESH_ME", $return['string']);
-    }
-
-    public function testCheckRefreshFailed() {
-        $_REQUEST['action'] = 'check_refresh';
-        $_REQUEST['gradeable_version'] = 1;
-        $return = $this->runController();
         $this->assertFalse($return['refresh']);
         $this->assertEquals("NO_REFRESH", $return['string']);
+    }
+
+
+    /*
+     * Test should pass with database data and results.json
+     */
+    public function testCheckRefreshSuccess() {
+        $_REQUEST['action'] = 'check_refresh';
+        $_REQUEST['gradeable_version'] = 1;
+        $tmp = FileUtils::joinPaths($this->config['course_path'], "results", "test", "testUser", "1");
+        FileUtils::createDir($tmp, null, true);
+        touch(FileUtils::joinPaths($tmp, "results.json"));
+        $this->core->getQueries()->method('getGradeableVersionHasAutogradingResults')->willReturn(true);
+        $return = $this->runController();
+        $this->assertTrue($return['refresh']);
+        $this->assertEquals("REFRESH_ME", $return['string']);
     }
 
 }

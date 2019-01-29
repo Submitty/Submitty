@@ -113,11 +113,11 @@ HTML;
                 }
                 
                 $return .= <<<HTML
-            <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 'edit_plagiarism_saved_config', 'gradeable_id' => $id))}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+            <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 'edit_plagiarism_saved_config', 'gradeable_id' => $id))}"><i class="fas fa-pencil-alt" aria-hidden="true"></i></a>
             </td>
-            <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 're_run_plagiarism', 'gradeable_id' => $id))}"><i class="fa fa-refresh" aria-hidden="true"></i></a>
+            <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 're_run_plagiarism', 'gradeable_id' => $id))}"><i class="fas fa-sync" aria-hidden="true"></i></a>
             </td>
-            <td><a onclick="deletePlagiarismResultAndConfigForm('{$delete_form_action}', '{$title}');"><i class="fa fa-trash" aria-hidden="true"></i></a>
+            <td><a onclick="deletePlagiarismResultAndConfigForm('{$delete_form_action}', '{$title}');"><i class="fas fa-trash" aria-hidden="true"></i></a>
             </td>
             <td>
                 Last run: $timestamp
@@ -163,24 +163,14 @@ HTML;
     public function showPlagiarismResult($semester, $course, $gradeable_id, $gradeable_title , $rankings) {
         $return = "";
         $return .= <<<HTML
-<div class="content">
-<h1>Plagiarism Detection -- WORK IN PROGRESS</h1>
-<br>
+<div style="padding:5px 5px 0px 5px;" class="content forum_content forum_show_threads">
 HTML;
 
+        $return .= $this->core->getOutput()->renderTwigTemplate("admin/PlagiarismHighlightingKey.twig");
+
         $return .= <<<HTML
-        <div class="sub">
-        <div style="float:right;">
-            <i style="color:white;" class="fa fa-square" aria-hidden="true"></i> Unique <br />
-            <i style="color:#cccccc;" class="fa fa-square" aria-hidden="true"></i> Common (matches many/all students) <br />
-            <i style="color:#b5e3b5;" class="fa fa-square" aria-hidden="true"></i> Matches instructor provided file <br />
-            <i style="color:yellow;" class="fa fa-square" aria-hidden="true"></i> Matches other student(s) <br />
-            <i style="color:#ffa500;" class="fa fa-square" aria-hidden="true"></i> General match between selected users <br />
-            <i style="color:red;" class="fa fa-square" aria-hidden="true"></i> Specific match between selected users <br />
-        </div>
-        <br><br><br><br><br><br><br>
-        Gradeable: <b>$gradeable_title</b><br />
-        <br>
+        <span style="line-height: 2">Gradeable: <b>$gradeable_title</b> <a style="float:right;" class="btn btn-primary" title="View Key" onclick="$('#Plagiarism-Highlighting-Key').css('display', 'block');">View Key</a></span>
+        <hr style="margin-top: 10px;margin-bottom: 10px;" />
         <form id="users_with_plagiarism">
             User 1 (sorted by %match): 
             <select name="user_id_1">
@@ -205,11 +195,15 @@ HTML;
                 <a name="toggle" class="btn btn-primary" onclick="toggleUsersPlagiarism('{$gradeable_id}');">Toggle</a>
             </span>   
         </form><br />
-        <div name="code_box_1" style="float:left;width:48%;height:1000px;line-height:1.5em;overflow:scroll;padding:5px;border: solid 1px #555;background:white;border-width: 2px;">
+        <div style="position:relative; height:100%; overflow-y:hidden;" class="row">
+        <div style="max-height: 100%; width:100%;" class="sub">
+        <div id="" name="code_box_1" style="float:left;width:48%;height:100%;line-height:1.5em;overflow:auto;padding:5px;border: solid 1px #555;background:white;border-width: 2px;">
         </div>
-        <div name="code_box_2" style="float:right;width:48%;height:1000px;line-height:1.5em;overflow:scroll;padding:5px;border: solid 1px #555;background:white;border-width: 2px;">
+        <div name="code_box_2" style="float:right;width:48%;height:100%;line-height:1.5em;overflow:auto;padding:5px;border: solid 1px #555;background:white;border-width: 2px;">
         </div>
         </div>
+        </div>
+
 HTML;
         $return .= <<<HTML
 </div>
@@ -284,8 +278,8 @@ HTML;
         $all_version="checked";
         $active_version=""; 
         $all_files="checked";
-        $regrex_matching_files="";
-        $regrex="";
+        $regex_matching_files="";
+        $regex="";
         $language =["python"=>"selected", "java"=>"", "plaintext"=>"", "cpp"=>""];
         $provided_code="";
         $no_provided_code="checked";
@@ -303,10 +297,10 @@ HTML;
             $gradeable_id = $saved_config['gradeable'];
             $all_version = ($saved_config['version'] == "all_version")?"checked":"";
             $active_version = ($saved_config['version'] == "active_version")?"checked":"";
-            if($saved_config['file_option'] == "matching_regrex") {
+            if($saved_config['file_option'] == "matching_regex") {
                 $all_files="";
-                $regrex_matching_files="checked";
-                $regrex=$saved_config['regrex'];
+                $regex_matching_files="checked";
+                $regex=$saved_config['regex'];
             }
             $language[$saved_config['language']] = "selected";
 
@@ -409,9 +403,9 @@ HTML;
         $return .= <<<HTML
                     <input type="radio" id="all_files_id" value="all_files" name="file_option" {$all_files}>
                     <label for="all_files_id">All Files</label>
-                    <input type="radio" id="regrex_matching_files_id" value="regrex_matching_files" name="file_option" {$regrex_matching_files}>
-                    <label for="regrex_matching_files_id">Regrex matching files</label><br />
-                    <input type="text" name="regrex_to_select_files" value="{$regrex}"/>
+                    <input type="radio" id="regex_matching_files_id" value="regex_matching_files" name="file_option" {$regex_matching_files}>
+                    <label for="regex_matching_files_id">Regex matching files</label><br />
+                    <input type="text" name="regex_to_select_files" value="{$regex}"/>
                 </div>
             </div><br /><br /><br /><br /><br />
             <div style="width:100%;">
@@ -526,7 +520,7 @@ HTML;
                 </div><br />
                 <div style="width:70%;float:right">
                     <span name="add_more_prev_gradeable">
-                        <i class="fa fa-plus-square" aria-hidden="true" ></i>Add more
+                        <i class="fas fa-plus-square" aria-hidden="true" ></i>Add more
                     </span>
                 </div>
             </div><br /><br /><br /><br /><br /> 
@@ -555,7 +549,7 @@ HTML;
                 </div><br />
                 <div style="width:70%;float:right">
                     <span name="add_more_ignore">
-                        <i class="fa fa-plus-square" aria-hidden="true" ></i>Add more
+                        <i class="fas fa-plus-square" aria-hidden="true" ></i>Add more
                     </span>     
                 </div>    
             </div><br /><br />

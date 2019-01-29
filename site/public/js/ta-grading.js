@@ -171,11 +171,11 @@ function readCookies(){
     // (pdf_annotation_bar_top) ? $("#pdf_annotation_bar").css("top", pdf_annotation_bar_top):{};
     // (pdf_annotation_bar_left) ? $("#pdf_annotation_bar").css("left", pdf_annotation_bar_left):{};
 
-    (output_visible) ? ((output_visible) == "none" ? $(".fa-list-alt").removeClass("icon-selected") : $(".fa-list-alt").addClass("icon-selected")) : {};
+    (output_visible) ? ((output_visible) == "none" ? $(".fa-list").removeClass("icon-selected") : $(".fa-list").addClass("icon-selected")) : {};
     (files_visible) ? ((files_visible) == "none" ? $(".fa-folder-open").removeClass("icon-selected") : $(".fa-folder-open").addClass("icon-selected")) : {};
-    (rubric_visible) ? ((rubric_visible) == "none" ? $(".fa-pencil-square-o").removeClass("icon-selected") : $(".fa-pencil-square-o").addClass("icon-selected")) : {};
+    (rubric_visible) ? ((rubric_visible) == "none" ? $(".fa-edit").removeClass("icon-selected") : $(".fa-edit").addClass("icon-selected")) : {};
     (status_visible) ? ((status_visible) == "none" ? $(".fa-user").removeClass("icon-selected") : $(".fa-user").addClass("icon-selected")) : {};
-    (regrade_visible) ? ((regrade_visible) == "none" ? $(".fa-hand-paper-o").removeClass("icon-selected") : $(".fa-hand-paper-o").addClass("icon-selected")) : {};
+    (regrade_visible) ? ((regrade_visible) == "none" ? $(".fa-hand-paper").removeClass("icon-selected") : $(".fa-hand-paper").addClass("icon-selected")) : {};
 
     (autoscroll) ? ((autoscroll) == "on" ? $('#autoscroll_id').prop('checked', true) : $('#autoscroll_id').prop('checked', false)) : {};
 
@@ -353,13 +353,13 @@ function isRegradeVisible(){
 }
 
 function setAutogradingVisible(visible) {
-    $('.fa-list-alt').toggleClass('icon-selected', visible);
+    $('.fa-list').toggleClass('icon-selected', visible);
     $("#autograding_results").toggle(visible);
     hideIfEmpty("#autograding_results");
 }
 
 function setRubricVisible(visible) {
-    $('.fa-pencil-square-o').toggleClass('icon-selected', visible);
+    $('.fa-edit').toggleClass('icon-selected', visible);
     $("#grading_rubric").toggle(visible);
 }
 
@@ -376,7 +376,7 @@ function setInfoVisible(visible) {
 }
 
 function setRegradeVisible(visible) {
-    $('.fa-hand-paper-o').toggleClass('icon-selected', visible);
+    $('.fa-hand-paper').toggleClass('icon-selected', visible);
     $("#regrade_info").toggle(visible);
     hideIfEmpty("#regrade_info");
 }
@@ -404,16 +404,16 @@ function resetModules() {
     var width = $("#nav-positioner").width();
     var height = $("#nav-positioner").height();
 
-    $('.fa-list-alt').addClass('icon-selected');
+    $('.fa-list').addClass('icon-selected');
     $("#autograding_results").attr("style", "z-index:30; left:0; top:60%; width:48%; height:40%; display:block;");
-    $('.fa-pencil-square-o').addClass('icon-selected');
+    $('.fa-edit').addClass('icon-selected');
     $("#grading_rubric").attr("style", "left: 50%; z-index:30; top:10%; width:48%; height:68%; display:block;");
     $('.fa-folder-open').addClass('icon-selected');
     $("#submission_browser").attr("style", "left:0; z-index:30; top:10%; width:48%; height:48%; display:block;");
     $('.fa-user').addClass('icon-selected');
     $('#bar_wrapper').attr("style", "top: 0; left: " + ((width - $('#bar_wrapper').width()) / 2) + "; z-index:40;");
     $("#student_info").attr("style", "left: 50%; top: 80%; z-index:30; width:48%; height:20%; display:block;");
-    $('.fa-hand-paper-o').addClass('icon-selected');
+    $('.fa-hand-paper').addClass('icon-selected');
     $("#regrade_info").attr("style", "bottom:30px; z-index:30; right:15px; width:48%; height:37%; display:block;");
     // $("#pdf_annotation_bar").attr("style", "left: 58%, z-index:40; top:307px");
     deleteCookies();
@@ -441,7 +441,7 @@ registerKeyHandler({name: "Toggle Student Information Panel", code: "KeyS"}, fun
     toggleInfo();
     updateCookies();
 });
-registerKeyHandler({name: "Toggle Regrade Requests Panel", code: "KeyX"}, function() {
+registerKeyHandler({name: "Toggle Grade Inquiry Panel", code: "KeyX"}, function() {
     toggleRegrade();
     updateCookies();
 });
@@ -461,18 +461,18 @@ registerKeyHandler({name: "Open Next Component", code: 'ArrowDown'}, function(e)
         // No component is open, so open the first one
         let componentId = getComponentIdByOrder(0);
         toggleComponent(componentId, true).then(function () {
-            getComponentJQuery(componentId)[0].scrollIntoView();
+            scrollToComponent(componentId);
         });
     } else if (openComponentId === getComponentIdByOrder(numComponents - 1)) {
         // Last component is open, so open the general comment
         toggleOverallComment(true).then(function () {
-            getOverallCommentJQuery()[0].scrollIntoView();
+            scrollToOverallComment();
         });
     } else {
         // Any other case, open the next one
         let nextComponentId = getNextComponentId(openComponentId);
         toggleComponent(nextComponentId, true).then(function () {
-            getComponentJQuery(nextComponentId)[0].scrollIntoView();
+            scrollToComponent(nextComponentId);
         });
     }
     e.preventDefault();
@@ -488,13 +488,13 @@ registerKeyHandler({name: "Open Previous Component", code: 'ArrowUp'}, function(
         // Overall comment open, so open the last component
         let componentId = getComponentIdByOrder(numComponents - 1);
         toggleComponent(componentId, true).then(function () {
-            getComponentJQuery(componentId)[0].scrollIntoView();
+            scrollToComponent(componentId);
         });
     }
     else if (openComponentId === NO_COMPONENT_ID) {
         // No Component is open, so open the overall comment
         toggleOverallComment(true).then(function () {
-            getOverallCommentJQuery()[0].scrollIntoView();
+            scrollToOverallComment();
         });
     } else if (openComponentId === getComponentIdByOrder(0)) {
         // First component is open, so close it
@@ -503,7 +503,7 @@ registerKeyHandler({name: "Open Previous Component", code: 'ArrowUp'}, function(
         // Any other case, open the previous one
         let prevComponentId = getPrevComponentId(openComponentId);
         toggleComponent(prevComponentId, true).then(function () {
-            getComponentJQuery(prevComponentId)[0].scrollIntoView();
+            scrollToComponent(prevComponentId);
         });
     }
     e.preventDefault();

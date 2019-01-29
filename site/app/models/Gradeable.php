@@ -43,10 +43,6 @@ use app\libraries\Utils;
  * @method void setStudentView(bool $student_view)
  * @method bool getStudentSubmit()
  * @method void setStudentSubmit(bool $student_submit)
- * @method bool getStudentDownload()
- * @method void setStudentDownload(bool $student_download)
- * @method bool getStudentAnyVersion()
- * @method void setStudentAnyVersion(bool $student_any_version)
  * @method setTaViewDate(\DateTime $datetime)
  * @method \DateTime getOpenDate()
  * @method setOpenDate(\DateTime $datetime)
@@ -141,7 +137,7 @@ class Gradeable extends AbstractModel {
     /** @property @var \DateTime|null Date for when the grade will be released to students */
     protected $grade_released_date = null;
 
-    /** @property @var \DateTime|null Date by when regrade requests can be submitted */
+    /** @property @var \DateTime|null Date by when grade inquiries can be submitted */
     protected $regrade_request_date = null;
 
     /** @property @var bool */
@@ -195,10 +191,6 @@ class Gradeable extends AbstractModel {
     protected $student_view = true;
     /** @property @var bool Will students be able to make submissions? */
     protected $student_submit = true;
-    /** @property @var bool Will students be able to download submissions? */
-    protected $student_download = false;
-    /** @property @var bool Will students be able to view/download any version or just the active version? */
-    protected $student_any_version = true;
 
     /* Config variables for submission details for this gradeable */
     /** @property @var float Max size (in bytes) allowed for the submission */
@@ -361,8 +353,6 @@ class Gradeable extends AbstractModel {
             $this->ta_grading = $details['eg_use_ta_grading'] === true;
             $this->student_view = $details['eg_student_view'] === true;
             $this->student_submit = $details['eg_student_submit'] === true;
-            $this->student_download = $details['eg_student_download'] === true;
-            $this->student_any_version = $details['eg_student_any_version'] === true;
             $this->peer_grading = isset($details['eg_peer_grading']) ? $details['eg_peer_grading'] === true: false;
             $this->peer_grade_set = (isset($details['eg_peer_grade_set']) && $this->peer_grading) ? $details['eg_peer_grade_set']: 0;
             $this->config_path = $details['eg_config_path'];
@@ -511,8 +501,8 @@ class Gradeable extends AbstractModel {
             $this->late_status = "Bad (too many late days used this term)";
             $late_flag = false;
         }
-        
-        if ($this->getActiveVersion() == 0) {
+
+        if ($this->getActiveVersion() <= 0) {
             if ($this->hasSubmitted()) {
                 $this->late_status = "Cancelled Submission";
             }
@@ -557,7 +547,9 @@ class Gradeable extends AbstractModel {
             $this->max_submissions = intval($details['max_submissions']);
         }
 
-        if (isset($details['assignment_message'])) {
+        if (isset($details['gradeable_message'])) {
+            $this->message = Utils::prepareHtmlString($details['gradeable_message']);
+        } else if (isset($details['assignment_message'])) {
             $this->message = Utils::prepareHtmlString($details['assignment_message']);
         }
 
@@ -772,6 +764,7 @@ class Gradeable extends AbstractModel {
         $submission_path = $course_path."/submissions/".$this->id."/".$user_id;
         $vcs_path = $course_path."/checkout/".$this->id."/".$user_id;
         $results_path = $course_path."/results/".$this->id."/".$user_id;
+        $results_public_path = $course_path."/results_public/".$this->id."/".$user_id;
         $uploads_path = $course_path."/uploads/split_pdf/".$this->id;
 
         //$this->components = $this->core->getQueries()->getGradeableComponents($this->id, $this->gd_id);
@@ -851,7 +844,7 @@ class Gradeable extends AbstractModel {
                 $this->result_details['num_autogrades'] = count($history);
                 $this->early_total = 0;
                 for ($i = 0; $i < count($this->result_details['testcases']); $i++) {
-                    $this->testcases[$i]->addResultTestcase($this->result_details['testcases'][$i], FileUtils::joinPaths($results_path, $this->current_version));
+                    $this->testcases[$i]->addResultTestcase($this->result_details['testcases'][$i], FileUtils::joinPaths($results_path, $this->current_version), FileUtils::joinPaths($results_public_path, $this->current_version));
                     $pts = $this->testcases[$i]->getPointsAwarded();
                     if ( in_array ($i+1,$this->early_submission_test_cases) ) {
                         $this->early_total += $pts;
@@ -972,11 +965,11 @@ class Gradeable extends AbstractModel {
         return $this->result_details;
     }
 
-    public function hasAssignmentMessage() {
+    public function hasGradeableMessage() {
         return trim($this->message) !== "";
     }
 
-    public function getAssignmentMessage() {
+    public function getGradeableMessage() {
         return $this->message;
     }
 

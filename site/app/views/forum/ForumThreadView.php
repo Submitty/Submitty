@@ -121,7 +121,7 @@ HTML;
 				$return .= <<<HTML
 
 				<tr title="Go to post" style="cursor: pointer;" onclick="window.location = '{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id))}#{$post['p_id']}';" id="search-row-{$count}" class="hoverable">
-	                <td align="left"><pre><p class="post_content" style="white-space: pre-wrap; ">{$post_content}</p></pre></td>
+	                <td align="left"><pre class='pre_forum'><p class="post_content" style="white-space: pre-wrap; ">{$post_content}</p></pre></td>
 	                <td>{$visible_username}</td>
 	                <td>{$posted_on}</td>      
 
@@ -213,15 +213,15 @@ HTML;
 				function changeName(element, user, visible_username, anon){
 					var new_element = element.getElementsByTagName("strong")[0];
 					anon = (anon == 'true');
-					icon = element.getElementsByClassName("fa fa-eye")[0];
+					icon = element.getElementsByClassName("fas fa-eye")[0];
 					if(icon == undefined){
-						icon = element.getElementsByClassName("fa fa-eye-slash")[0];
+						icon = element.getElementsByClassName("fas fa-eye-slash")[0];
 						if(anon) {
 							new_element.style.color = "black";
 							new_element.style.fontStyle = "normal";
 						}
 						new_element.innerHTML = visible_username;
-						icon.className = "fa fa-eye";
+						icon.className = "fas fa-eye";
 						icon.title = "Show full user information";
 					} else {
 						if(anon) {
@@ -229,7 +229,7 @@ HTML;
 							new_element.style.fontStyle = "italic";
 						}
 						new_element.innerHTML = user;
-						icon.className = "fa fa-eye-slash";
+						icon.className = "fas fa-eye-slash";
 						icon.title = "Hide full user information";
 					} 									
 				}
@@ -359,8 +359,8 @@ HTML;
 					<div style="position:relative; height:100%; overflow-y:hidden;" class="row">
 
   						<div id="thread_list" style="max-height: 100%" class="col-3" prev_page="{$prev_page}" next_page="{$next_page}">
-						<i class="fa fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
-						<i class="fa fa-caret-up fa-2x fa-fw fill-available" style="color:gray;{$arrowup_visibility}" aria-hidden="true"></i>
+						<i class="fas fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
+						<i class="fas fa-caret-up fa-2x fa-fw fill-available" style="color:gray;{$arrowup_visibility}" aria-hidden="true"></i>
 HTML;
 						$activeThreadAnnouncement = false;
 						$activeThreadTitle = "";
@@ -378,8 +378,8 @@ HTML;
 						$title_html = '';
 
 						$return .= <<<HTML
-						<i class="fa fa-caret-down fa-2x fa-fw fill-available" style="color:gray;" aria-hidden="true"></i>
-						<i class="fa fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
+						<i class="fas fa-caret-down fa-2x fa-fw fill-available" style="color:gray;" aria-hidden="true"></i>
+						<i class="fas fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
 					</div>
 					<script type="text/javascript">
 						$(function(){
@@ -398,26 +398,26 @@ HTML;
 HTML;
 					if($this->core->getUser()->getGroup() <= 2 && $activeThreadAnnouncement){
                         $title_html .= <<<HTML
-							<a style="display:inline-block; color:orange; " onClick="alterAnnouncement({$activeThread['id']}, 'Are you sure you want to remove this thread as an announcement?', 'remove_announcement')" title="Remove thread from announcements"><i class="fa fa-star" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
+							<a style="display:inline-block; color:orange; " onClick="alterAnnouncement({$activeThread['id']}, 'Are you sure you want to remove this thread as an announcement?', 'remove_announcement')" title="Remove thread from announcements"><i class="fas fa-star" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
 HTML;
                     } else if($activeThreadAnnouncement){
                         $title_html .= <<<HTML
-						 <i class="fa fa-star" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px; -webkit-text-stroke-color: black;" aria-hidden="true"></i>
+						 <i class="fas fa-star" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px; -webkit-text-stroke-color: black;" aria-hidden="true"></i>
 HTML;
                     } else if($this->core->getUser()->getGroup() <= 2 && !$activeThreadAnnouncement){
                         $title_html .= <<<HTML
-							<a style="position:relative; display:inline-block; color:orange; " onClick="alterAnnouncement({$activeThread['id']}, 'Are you sure you want to make this thread an announcement?', 'make_announcement')" title="Make thread an announcement"><i class="fa fa-star" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'gold')" style="position:relative; display:inline-block; color:#e0e0e0; -webkit-text-stroke-width: 1px;
+							<a style="position:relative; display:inline-block; color:orange; " onClick="alterAnnouncement({$activeThread['id']}, 'Are you sure you want to make this thread an announcement?', 'make_announcement')" title="Make thread an announcement"><i class="fas fa-star" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'gold')" style="position:relative; display:inline-block; color:#e0e0e0; -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
 HTML;
                     }
                     if(isset($activeThread['favorite']) && $activeThread['favorite']) {
                     	$title_html .= <<<HTML
-							<a style="position:relative; display:inline-block; color:orange; " onClick="pinThread({$activeThread['id']}, 'unpin_thread');" title="Pin Thread"><i class="fa fa-thumb-tack" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;-webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
+							<a style="position:relative; display:inline-block; color:orange; " onClick="pinThread({$activeThread['id']}, 'unpin_thread');" title="Pin Thread"><i class="fas fa-thumbtack" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;-webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
 HTML;
 					} else {
                     	$title_html .= <<<HTML
-							<a style="position:relative; display:inline-block; color:orange; " onClick="pinThread({$activeThread['id']}, 'pin_thread');" title="Pin Thread"><i class="fa fa-thumb-tack" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'gold')" style="position:relative; display:inline-block; color:#e0e0e0; -webkit-text-stroke-width: 1px;-webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
+							<a style="position:relative; display:inline-block; color:orange; " onClick="pinThread({$activeThread['id']}, 'pin_thread');" title="Pin Thread"><i class="fas fa-thumbtack" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'gold')" style="position:relative; display:inline-block; color:#e0e0e0; -webkit-text-stroke-width: 1px;-webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
 HTML;
 					}
                     $title_html .= <<< HTML
@@ -486,7 +486,7 @@ HTML;
 
 			<hr style="border-top:1px solid #999;margin-bottom: 5px;" />
 			
-					<form style="margin-right:17px;" class="post_reply_from" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
+					<form style="margin-right:17px;" class="post_reply_from" method="POST" onsubmit="post.disabled=true; post.value='Submitting post...'; return true;" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
 						<input type="hidden" name="thread_id" value="{$thread_id}" />
 						<input type="hidden" name="parent_id" value="{$first_post_id}" />
 						<input type="hidden" name="display_option" value="{$display_option}" />
@@ -521,18 +521,15 @@ HTML;
 HTML;
 
         if($this->core->getUser()->getGroup() <= 2){
+        	$this->core->getOutput()->addInternalCss('chosen.min.css');
+        	$this->core->getOutput()->addInternalJs('chosen.jquery.min.js');
 			$current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
 			$current_thread_date = $current_thread_first_post["timestamp"];
 			$merge_thread_list = $this->core->getQueries()->getThreadsBefore($current_thread_date, 1);
-			$possibleMerges = json_encode(array_map(function(array $row) {
-						$temp_title = htmlentities($row['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-						return ['value' => "({$row['id']}) {$temp_title}",
-								'label' => "({$row['id']}) {$temp_title}"];
-						}, $merge_thread_list));
 			$return .= $this->core->getOutput()->renderTwigTemplate("forum/MergeThreadsForm.twig", [
 				"current_thread_date" => $current_thread_date,
 				"current_thread" => $currentThread,
-				"possibleMerges" => $possibleMerges
+				"possibleMerges" => $merge_thread_list
 			]);
 		}
 		$return .= $this->core->getOutput()->renderTwigTemplate("forum/EditPostForm.twig");
@@ -634,7 +631,7 @@ HTML;
 						$titleDisplay = ($display_thread_ids ? "({$thread['id']}) " : '') . $titleDisplay;
 						$titleDisplay = htmlentities($titleDisplay, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 						if($thread["current_user_posted"]) {
-							$icon = '<i class="fa fa-comments"></i> ';
+							$icon = '<i class="fas fa-comments"></i> ';
 							$titleDisplay = $icon . $titleDisplay;
 						}
 						$first_post_content = htmlentities($first_post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
@@ -644,19 +641,19 @@ HTML;
 HTML;
 						if($thread["pinned"] == true){
 							$return .= <<<HTML
-							<i class="fa fa-star" style="padding-left:3px;position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
+							<i class="fas fa-star" style="padding-left:3px;position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i>
 HTML;
 						}
 						if(isset($thread['favorite']) && $thread['favorite']) {
 							$return .= <<<HTML
-							<i class="fa fa-thumb-tack" style="padding-left:3px;position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
+							<i class="fas fa-thumbtack" style="padding-left:3px;position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i>
 HTML;
 						}
 						if($thread['merged_thread_id'] != -1) {
 							$return .= <<<HTML
-							<i class="fa fa-link" style="padding-left:3px;position:relative; float:right; display:inline-block; color: white; -webkit-text-stroke-width: 1px;
+							<i class="fas fa-link" style="padding-left:3px;position:relative; float:right; display:inline-block; color: white; -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;" title="Thread Merged" aria-hidden="true"></i>
 HTML;
 						}
@@ -811,7 +808,7 @@ HTML;
 
 		//end code segment handling
 		$return .= <<<HTML
-			<pre><p class="post_content" style="white-space: pre-wrap; ">{$post_content}</p></pre>		
+			<pre class='pre_forum'><p class="post_content" style="white-space: pre-wrap; ">{$post_content}</p></pre>		
 			<hr style="margin-bottom:3px;">
 HTML;
 		if($display_option == 'tree'){
@@ -841,7 +838,7 @@ HTML;
 HTML;
        if($this->core->getUser()->getGroup() <= 2 && $post["author_user_id"]!=$current_user){
             $return .= <<<HTML
-                <a style=" margin-right:2px;display:inline-block; color:black; " onClick='$(this).next().toggle();' title="Show/Hide email address"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+                <a style=" margin-right:2px;display:inline-block; color:black; " onClick='$(this).next().toggle();' title="Show/Hide email address"><i class="fas fa-envelope" aria-hidden="true"></i></a>
                 <a href="mailto:{$author_email}" style="display: none;">{$author_email}</a>
 HTML;
 }
@@ -852,7 +849,7 @@ HTML;
 			$jscriptAnonFix = $post['anonymous'] ? 'true' : 'false' ;
 			$jscriptAnonFix = json_encode($jscriptAnonFix);
 			$return .= <<<HTML
-				<a style=" margin-right:2px;display:inline-block; color:black; " onClick='changeName(this.parentNode, {$info_name}, {$visible_user_json}, {$jscriptAnonFix})' title="Show full user information"><i class="fa fa-eye" aria-hidden="true"></i></a>
+				<a style=" margin-right:2px;display:inline-block; color:black; " onClick='changeName(this.parentNode, {$info_name}, {$visible_user_json}, {$jscriptAnonFix})' title="Show full user information"><i class="fas fa-eye" aria-hidden="true"></i></a>
 HTML;
 }
 		if(!$first){
@@ -860,8 +857,8 @@ HTML;
 				<a class="expand btn btn-default btn-sm" style="float:right; text-decoration:none; margin-top: -8px" onClick="hidePosts(this, {$post['id']})"></a>
 HTML;
 		}
-		if($this->core->getUser()->getGroup() <= 2) {
-			if($deleted){
+		if($this->core->getUser()->getGroup() <= 2 || $post['author_user_id'] === $current_user) {
+			if($deleted && $this->core->getUser()->getGroup() <= 2){
 				$ud_toggle_status = "false";
 				$ud_button_title = "Undelete post";
 				$ud_button_icon = "fa-undo";
@@ -885,7 +882,7 @@ HTML;
 				$edit_button_title = "Edit post";
 			}
 			$return .= <<<HTML
-				<a class="post_button" style="position:relative; display:inline-block; color:black; float:right;" onClick="editPost({$post['id']}, {$post['thread_id']}, {$shouldEditThread})" title="{$edit_button_title}"><i class="fa fa-edit" aria-hidden="true"></i></a>
+				<a class="post_button" style="position:relative; display:inline-block; color:black; float:right;" onClick="editPost({$post['id']}, {$post['thread_id']}, {$shouldEditThread})" title="{$edit_button_title}"><i class="fas fa-edit" aria-hidden="true"></i></a>
 HTML;
 		} 
 
@@ -920,7 +917,7 @@ HTML;
 						$return .= <<<HTML
 </div>
 
-           	<form class="reply-box post_reply_from" id="$post_id-reply" style="margin-left:{$offset}px" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
+					<form class="reply-box post_reply_from" id="$post_id-reply" onsubmit="post.disabled=true; post.value='Submitting post...'; return true;" style="margin-left:{$offset}px" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
 						<input type="hidden" name="thread_id" value="{$thread_id}" />
 						<input type="hidden" name="parent_id" value="{$post_id}" />
 	            		<br/>
@@ -1149,7 +1146,7 @@ HTML;
 							post_string = escapeSpecialChars(post_string);
 							var thread_title = thread_titles[i]["title"];
 							thread_title = escapeSpecialChars(thread_title);
-							$(this).parent().parent().parent().append('<tr id="'+ids[i]+'"><td></td><td>'+timestamps[i]+'</td><td style = "cursor:pointer;" data-type = "thread" data-thread_id="'+thread_ids[i]+'"><pre style="white-space: pre-wrap;">'+thread_title+'</pre></td><td colspan = "2" style = "cursor:pointer;" align = "left" data-type = "post" data-thread_id="'+thread_ids[i]+'"><pre style="white-space: pre-wrap;">'+post_string+'</pre></td></tr> ');
+							$(this).parent().parent().parent().append('<tr id="'+ids[i]+'"><td></td><td>'+timestamps[i]+'</td><td style = "cursor:pointer;" data-type = "thread" data-thread_id="'+thread_ids[i]+'"><pre class="pre_forum" style="white-space: pre-wrap;">'+thread_title+'</pre></td><td colspan = "2" style = "cursor:pointer;" align = "left" data-type = "post" data-thread_id="'+thread_ids[i]+'"><pre class="pre_forum" style="white-space: pre-wrap;">'+post_string+'</pre></td></tr> ');
 							
 						}
 						$(this).html("Collapse");
