@@ -644,7 +644,11 @@ table tr.table-header {
 .deleted.active {
     background-color: #505050 !important;
 }
-
+.newpost {
+    border-style: solid;
+    border-width: 4px;
+    border-color: #0a6496; /* submitty blue */
+}
 .important {
     /* THIS IS WHERE THE BACKGROUND COLOR FOR POSTS IS */
     border-style: solid;

@@ -159,7 +159,7 @@ HTML;
 		that have been created after applying filter and to be
 		displayed in the left panel.
 	*/
-	public function showForumThreads($user, $posts, $threadsHead, $show_deleted, $show_merged_thread, $display_option, $max_thread, $initialPageNumber) {
+	public function showForumThreads($user, $posts, $unviewed_posts, $threadsHead, $show_deleted, $show_merged_thread, $display_option, $max_thread, $initialPageNumber) {
 		if(!$this->forumAccess()){
 			$this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
 			return;
@@ -466,7 +466,7 @@ HTML;
 										$reply_level = $reply_level_array[$i];
 									}
 										
-									$return .= $this->createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level, $display_option);
+									$return .= $this->createPost($thread_id, $post, $unviewed_posts, $function_date, $title_html, $first, $reply_level, $display_option);
 									break;
 								}						
 							}
@@ -481,7 +481,7 @@ HTML;
 								$thread_id = $post["thread_id"];
 							}
                             $first_post_id = $this->core->getQueries()->getFirstPostForThread($thread_id)['id'];
-							$return .= $this->createPost($thread_id, $post, $function_date, $title_html, $first, 1, $display_option);		
+							$return .= $this->createPost($thread_id, $post, $unviewed_posts, $function_date, $title_html, $first, 1, $display_option);		
 							if($first){
 								$first= false;
 							}			
@@ -755,7 +755,7 @@ HTML;
 		return $post_content;
 	}
 
-	public function createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level, $display_option){
+	public function createPost($thread_id, $post, $unviewed_posts, $function_date, $title_html, $first, $reply_level, $display_option){
 		$current_user = $this->core->getUser()->getId();
 		$post_html = "";
 		$post_id = $post["id"];
@@ -785,7 +785,17 @@ HTML;
 		if($first && $display_option != 'alpha'){
 			$classes .= " first_post";
 		}
-
+		//var_dump($unviewed_posts, gettype($unviewed_posts));
+		foreach($unviewed_posts as $unviewed_post){
+			//var_dump($unviewed_post, gettype($unviewed_post));
+			//var_dump(gettype($post["id"]));
+			if($post["id"] === $unviewed_post["id"]){
+				$classes .= " newpost";
+				break;
+				//var_dump($post["id"], $unviewed_post["id"]);
+			}
+		}
+		//$blblbbla.gweoijgweakjkaegrr();
 		if($this->core->getQueries()->isStaffPost($post["author_user_id"])){
 			$classes .= " important";
 		}
