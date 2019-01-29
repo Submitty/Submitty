@@ -49,6 +49,7 @@
                     {{ self.display_files(self, checkout, "c", 0, "checkout") }}
                 {% endif %}
                 {{ self.display_files(self, results, "r", 0, "results") }}
+                {{ self.display_files(self, results_public, "rp", 0, "results_public") }}
             </div>
             {# /Files #}
             <script type="text/javascript">
@@ -85,6 +86,9 @@
             var directory = "";
             if (url_file.includes("submissions")) {
                 directory = "submissions";
+            }
+            else if (url_file.includes("results_public")) {
+                directory = "results_public";
             }
             else if (url_file.includes("results")) {
                 directory = "results";
@@ -123,6 +127,9 @@
         var directory = "";
         if (url_file.includes("submissions")) {
             directory = "submissions";
+        }
+        else if (url_file.includes("results_public")) {
+            directory = "results_public";
         }
         else if (url_file.includes("results")) {
             directory = "results";

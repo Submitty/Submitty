@@ -16,6 +16,7 @@ use app\libraries\Utils;
  * @method DiffViewer getDiffViewer()
  * @method string getDescription()
  * @method array[] getMessages()
+ * @method boolean getPublic()
  */
 class GradeableAutocheck extends AbstractModel {
     
@@ -31,16 +32,20 @@ class GradeableAutocheck extends AbstractModel {
     /** @property @var array[] Message to show underneath the description for a diff */
     protected $messages = array();
 
+    /** @property @var boolean If this check's file is in results_public */
+    protected $public;
+
     /**
      * GradeableAutocheck constructor.
      *
-     * @param $core
+     * @param Core $core
      * @param $details
      * @param $course_path
-     * @param $result_path
+     * @param $results_path
+     * @param $results_public_path
      * @param $idx
      */
-    public function __construct(Core $core, $details, $course_path, $result_path, $idx) {
+    public function __construct(Core $core, $details, $course_path, $results_path, $results_public_path, $idx) {
         parent::__construct($core);
         $this->index = $idx;
 
@@ -57,8 +62,13 @@ class GradeableAutocheck extends AbstractModel {
         
         $actual_file = $expected_file = $difference_file = $image_difference ="";
 
-        if(isset($details["actual_file"]) && file_exists($result_path . "/details/" . $details["actual_file"])) {
-            $actual_file = $result_path . "/details/" . $details["actual_file"];
+        if(isset($details["actual_file"])) {
+            $this->public = (isset($details["results_public"]) && $details["results_public"]);
+            $path = ($this->public ? $results_public_path : $results_path) . "/details/" . $details["actual_file"];
+
+            if (file_exists($path)) {
+                $actual_file = $path;
+            }
         }
     
         
@@ -70,14 +80,14 @@ class GradeableAutocheck extends AbstractModel {
             !file_exists($course_path . "/" . $details["expected_file"])) {
             $this->core->addErrorMessage("Expected file not found.");
         }
-        if(isset($details["difference_file"]) && file_exists($result_path . "/details/" . $details["difference_file"])) {
-            $difference_file = $result_path . "/details/" . $details["difference_file"];
+        if(isset($details["difference_file"]) && file_exists($results_path . "/details/" . $details["difference_file"])) {
+            $difference_file = $results_path . "/details/" . $details["difference_file"];
         }
 
         if(isset($details["image_difference_file"]) &&
-            file_exists($result_path . "/details/" . $details["image_difference_file"])) {
+            file_exists($results_path . "/details/" . $details["image_difference_file"])) {
             $this->index = $idx;
-            $image_difference = $result_path . "/details/" . $details["image_difference_file"];
+            $image_difference = $results_path . "/details/" . $details["image_difference_file"];
         }
 
         $this->diff_viewer = new DiffViewer($actual_file, $expected_file, $difference_file, $image_difference, $this->index);
