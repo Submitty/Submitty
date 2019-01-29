@@ -830,6 +830,7 @@ function handleDownloadImages(csrf_token) {
     var return_url = buildUrl({'component': 'grading', 'page': 'images', 'action': 'view_images_page'});
     var formData = new FormData();
     formData.append('csrf_token', csrf_token);
+    formData.append('file_count', file_array.length);
 
 
     // Files selected
@@ -850,7 +851,7 @@ function handleDownloadImages(csrf_token) {
                 alert("ERROR! You may not use angle brackets in your filename: " + file_array[i][j].name);
                 return;
             }
-        formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);
+            formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);
         }
     }
 
