@@ -9,7 +9,10 @@ use app\libraries\Output;
 use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\models\User;
+
+//Enable us to catch and handle exceptions.
 use app\exceptions\ValidationException;
+use app\exceptions\DatabaseException;
 
 class UsersController extends AbstractController {
     public function run() {
@@ -634,7 +637,7 @@ class UsersController extends AbstractController {
                     $this->core->getQueries()->insertCourseUser($user, $semester, $course);
                     break;
                 case 'update':
-                    $this->core->getQueries()->updateUser($user);
+                    $this->core->getQueries()->updateUser($user, $semester, $course);
                     break;
                 default:
                     throw new ValidationException("Unknown DB operation", array($action, '$insert_or_update_user_function'));
