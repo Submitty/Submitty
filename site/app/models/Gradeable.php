@@ -764,6 +764,7 @@ class Gradeable extends AbstractModel {
         $submission_path = $course_path."/submissions/".$this->id."/".$user_id;
         $vcs_path = $course_path."/checkout/".$this->id."/".$user_id;
         $results_path = $course_path."/results/".$this->id."/".$user_id;
+        $results_public_path = $course_path."/results_public/".$this->id."/".$user_id;
         $uploads_path = $course_path."/uploads/split_pdf/".$this->id;
 
         //$this->components = $this->core->getQueries()->getGradeableComponents($this->id, $this->gd_id);
@@ -843,7 +844,7 @@ class Gradeable extends AbstractModel {
                 $this->result_details['num_autogrades'] = count($history);
                 $this->early_total = 0;
                 for ($i = 0; $i < count($this->result_details['testcases']); $i++) {
-                    $this->testcases[$i]->addResultTestcase($this->result_details['testcases'][$i], FileUtils::joinPaths($results_path, $this->current_version));
+                    $this->testcases[$i]->addResultTestcase($this->result_details['testcases'][$i], FileUtils::joinPaths($results_path, $this->current_version), FileUtils::joinPaths($results_public_path, $this->current_version));
                     $pts = $this->testcases[$i]->getPointsAwarded();
                     if ( in_array ($i+1,$this->early_submission_test_cases) ) {
                         $this->early_total += $pts;

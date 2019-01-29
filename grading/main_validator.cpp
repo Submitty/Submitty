@@ -124,6 +124,11 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
       if (studentFileExists) {
         if (show_actual) {
           autocheck_j["actual_file"] = actual_file;
+          // pdf files must be loaded from results public
+          // TODO: error checking, help debug if the config is missing the appropriate "work_to_public" statements
+          if (actual_file.substr(actual_file.size()-4,4) == ".pdf") {
+            autocheck_j["results_public"] = true;
+          }
         }
         expected = tcg.value("expected_file", "");
         if (expected != "") {
