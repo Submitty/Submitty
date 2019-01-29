@@ -357,7 +357,7 @@ class ForumController extends AbstractController {
                 $this->core->getQueries()->pushNotification($notification);
 
                 if($email_announcement) {
-                    $this->sendEmailAnnouncement($title, $thread_post_content, $post_id);
+                    $this->sendEmailAnnouncement($title, $thread_post_content);
                 }
                 $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $id));
             }
@@ -879,14 +879,17 @@ class ForumController extends AbstractController {
         $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
     }
 
-    private function sendEmailAnnouncement($thread_title, $thread_content, $post_id) {
+    private function sendEmailAnnouncement($thread_title, $thread_content) { 
+            $course = $this->core->getConfig()->getCourse();
+            $formatted_subject = "[$course]: $thread_title";
+
             $email_data = [
-                "subject" => $thread_title,
+                "subject" => $formatted_subject,
                 "body" => $thread_content
             ];
 
             $class_list = $this->core->getQueries()->getClassEmailList();
-             
+
             foreach($class_list as $student_email) {
                 $this->core->getQueries()->sendEmail($email_data, $student_email["user_email"]);
             }
