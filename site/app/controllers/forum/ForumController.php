@@ -881,7 +881,7 @@ class ForumController extends AbstractController {
 
     private function sendEmailAnnouncement($thread_title, $thread_content) { 
             $course = $this->core->getConfig()->getCourse();
-            $formatted_subject = "[$course]: $thread_title";
+            $formatted_subject = "[Submitty $course]: $thread_title";
 
             $email_data = [
                 "subject" => $formatted_subject,
