@@ -386,7 +386,7 @@ HTML;
 							dynamicScrollContentOnDemand($('#thread_list'), buildUrl({'component': 'forum', 'page': 'get_threads', 'page_number':'{{#}}'}), {$currentThread}, '', '{$currentCourse}');
 							var active_thread = $('#thread_list .active');
 							if(active_thread.length > 0) {
-								active_thread[0].scrollIntoView(true); 
+								active_thread[0].scrollIntoViewIfNeeded(true); 
 							}
 						});
 					</script>
