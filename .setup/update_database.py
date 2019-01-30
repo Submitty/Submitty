@@ -139,4 +139,10 @@ for term in os.scandir(os.path.join(settings['submitty_data_dir'],"courses")):
         os.system("""PGPASSWORD='{1}' psql --host={2} --username={3} --dbname={4} -c '{0}'""".format(create_table.format('course'), *variables))
         os.system("""PGPASSWORD='{1}' psql --host={2} --username={3} --dbname={4} -c "{0}" """.format(insert_row.format('course'), *variables))
         # add user/database
+
+        # add verify grader columns
+        os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE gradeable_component_data ADD COLUMN gcd_verifier_id VARCHAR(255)'""".format(*variables))
+        os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE gradeable_component_data ADD COLUMN gcd_verify_time TIMESTAMP'""".format(*variables))
+        os.system("""PGPASSWORD='{}' psql --host={} --username={} --dbname={} -c 'ALTER TABLE gradeable_component_data ADD CONSTRAINT gradeable_component_data_verifier_id_fkey FOREIGN KEY (gcd_verifier_id) REFERENCES users(user_id)'""".format(*variables))
+       
         print("\n")
