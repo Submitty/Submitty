@@ -1389,10 +1389,12 @@ class SubmissionController extends AbstractController {
         $this->core->getOutput()->renderJson($return);
 
         if ($show_msg == true) {
-            if ($success)
+            if ($success) {
                 $this->core->addSuccessMessage($message);
-            else
+            }
+            else {
                 $this->core->addErrorMessage($message);
+            }
         }
         return $return;
     }
@@ -1638,8 +1640,18 @@ class SubmissionController extends AbstractController {
             }
         }
 
-        return $this->uploadResultMessage("Successfully uploaded!", true);
-
+        $total_count = intval($_POST['file_count']);
+        $uploaded_count = count($uploaded_files[1]['tmp_name']);
+        $remaining_count = $uploaded_count - $total_count;
+        $php_count = ini_get('max_file_uploads');
+        if ($total_count < $uploaded_count) {
+            $message = "Successfully uploaded {$uploaded_count} images. Could not upload remaining {$remaining_count} files.";
+            $message .= " The max number of files you can upload at once is set to {$php_count}.";
+        }
+        else {
+            $message = 'Successfully uploaded!';
+        }
+        return $this->uploadResultMessage($message, true);
     }
 
     private function ajaxUploadCourseMaterialsFiles() {
