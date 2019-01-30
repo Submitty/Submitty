@@ -220,6 +220,10 @@
                     {% endfor %}
                 </select>
             </div>
+
+            <div class="option-input col-md-4">
+                <input type="submit" id="email_seating_assignments" value="Email Seating Assignments" class="btn btn-primary">
+            </div>
         </div>
 
         <div class="option row">
@@ -234,3 +238,31 @@
 
     </div>
 </div>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+
+        var room_seating_gradeable_id = $('#room_seating_gradeable_id').val();
+             if(!room_seating_gradeable_id){
+                 $("#email_seating_assignments").hide();
+             }
+             else{
+                 $("#email_seating_assignments").show();
+
+             }
+
+       $(document).on('change', '#room_seating_gradeable_id', function(){
+
+             var room_seating_gradeable_id = $('#room_seating_gradeable_id').val();
+             if(!room_seating_gradeable_id){
+                 $("#email_seating_assignments").hide();
+             }
+             else{
+                 $("#email_seating_assignments").show();
+
+             }
+       });
+
+     });
+
+</script>
