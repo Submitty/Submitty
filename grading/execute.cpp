@@ -1244,6 +1244,7 @@ int execute(const std::string &cmd,
             if(windowName != ""){ //if we found information about the window
               delay_and_mem_check(100000, childPID, elapsed, next_checkpoint, seconds_to_run,
                                     rss_memory, allowed_rss_memory, memory_kill, time_kill, logfile);
+              moveMouseToOrigin(windowName);
               centerMouse(windowName); //center our mouse on its screen
             }
           }
