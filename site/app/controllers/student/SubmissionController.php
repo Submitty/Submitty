@@ -1645,7 +1645,7 @@ class SubmissionController extends AbstractController {
         $remaining_count = $uploaded_count - $total_count;
         $php_count = ini_get('max_file_uploads');
         if ($total_count < $uploaded_count) {
-            $message = "Successfully uploaded {$uploaded_count}. Could not upload remaining {$remaining_count} files.";
+            $message = "Successfully uploaded {$uploaded_count} images. Could not upload remaining {$remaining_count} files.";
             $message .= " The max number of files you can upload at once is set to {$php_count}.";
         }
         else {
