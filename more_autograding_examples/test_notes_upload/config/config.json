@@ -16,11 +16,12 @@
 	    "**/*.pdf", "*test_template.pdf", "*student_file.pdf" ]
     },
 
-    "assignment_message" : "Prepare a 2 page, black & white, 8.5x11”, portrait orientation, max size = 2MB .pdf of notes you would like to have during the test.<br>NOTE:  If you submit a 1 page .pdf, the attachment test below will fail.  Please make a 2 page pdf to ensure the test below will pass.<br>Be sure to inspect the produced sample test pdf to make sure that your notes are legible.",
+    "assignment_message" : "Prepare a 2 page, black & white, 8.5x11”, portrait orientation, max size = 2MB .pdf of notes you would like to have during the test.<br><br>Be sure to inspect the produced sample test pdf to make sure that your notes are successfully attached to the back and that they will be legible when printed.",
 
     "testcases" : [
 	{
 	    "title" : "Did you submit .pdf file?",
+            // NOTE: This command will fail if the student no .pdf files or submits multiple .pdf files.
 	    "command" : [ "mv *.pdf student_file.pdf" ],
 	    "points" : 1,
 	    "validation": [
@@ -35,7 +36,7 @@
 	    ]
 	},
         {
-	    "title" : "Can we attach your notes page to a sample test?",
+	    "title" : "Can we attach your notes page(s) to a sample test?",
 	    "pre_commands" : [
 		{
 		    "command" : "cp",
@@ -44,7 +45,19 @@
 		    "destination" : "."
 		}
 	    ],
-	    "command" : [ "pdflatex test_template.tex" ],
+	    "command" : [
+                // BUILD the simple blank page latex file
+                "pdflatex blank_page.tex",
+                // SEPARATE the pages of the students submitted .pdf
+                // file.  If the student submitted fewer than the
+                // allowed number of pages, substitute the blank page
+                // above for the missing pages.  The command line
+                // argument is the maximum number of pages that will
+                // be attached.
+                "python3 separate_pages.py 2",
+                // BUILD the test template, which attaches the
+                // separated student pages to the back.
+                "pdflatex test_template.tex" ],
 	    "points" : 1,
 	    "validation": [
                 {
@@ -55,12 +68,12 @@
                     "show_actual": "always",
                     "show_message": "always"
                 },
-                {
-                    "actual_file": "STDOUT.txt",
-                    "method": "fileExists",
-                    "show_actual": "never",
-                    "show_message": "never"
-                }
+                { "actual_file": "STDOUT_0.txt", "method": "fileExists", "show_actual": "never", "show_message": "never" },
+                { "actual_file": "STDERR_0.txt", "method": "fileExists", "show_actual": "never", "show_message": "never" },
+                { "actual_file": "STDOUT_1.txt", "method": "fileExists", "show_actual": "never", "show_message": "never" },
+                { "actual_file": "STDERR_1.txt", "method": "fileExists", "show_actual": "never", "show_message": "never" },
+                { "actual_file": "STDOUT_2.txt", "method": "fileExists", "show_actual": "never", "show_message": "never" },
+                { "actual_file": "STDERR_2.txt", "method": "fileExists", "show_actual": "never", "show_message": "never" }
 	    ]
 	}
     ] 
