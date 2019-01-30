@@ -653,7 +653,7 @@ bool clickAndDragDelta(std::string window_name, nlohmann::json action){
   //delta version, 2 values movement x and movement y.
   int amt_x_movement_remaining = action.value("x_distance", 0);
   int amt_y_movement_remaining = action.value("y_distance", 0);
-  std::string start_location   = action.value("start_location", "current");
+  std::string start_location   = action.value("start_location", "center");
 
   //This shouldn't fail unless there isn't a mouse.
   std::string mouse_location_string = output_of_system_command("xdotool getmouselocation"); 
