@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
 """
-Handles general sending of emails in Submitty. This is done by polling the emails table 
-for queued emails and properly formatting/sending an email programmatically. 
+Handles general sending of emails in Submitty.
+
+This is done by polling the emails table for queued emails and
+properly formatting/sending an email programmatically.
 """
 
 import smtplib
@@ -30,16 +32,16 @@ try:
     DB_PASSWORD = CONFIG['database_password']
 
     TODAY = datetime.datetime.now()
-    LOG_FILE = open(os.path.join(EMAIL_LOG_PATH, 
-        "{}{}{}.txt".format(TODAY.year, TODAY.month, TODAY.day)), 'a')
+    LOG_FILE = open(os.path.join(
+        EMAIL_LOG_PATH, "{}{}{}.txt".format(TODAY.year, TODAY.month, TODAY.day)), 'a')
 except Exception as config_fail_error:
-    print("[{}] Error: Email/Database Configuration Failed {}".format(str(datetime.datetime.now()), str(config_fail_error)))
+    print("[{}] Error: Email/Database Configuration Failed {}".format(
+        str(datetime.datetime.now()), str(config_fail_error)))
     exit(-1)
 
+
 def setup_db():
-    """
-    sets up a connection with the submitty database
-    """
+    """Set up a connection with the submitty database."""
     db_name = "submitty"
     # If using a UNIX socket, have to specify a slightly different connection string
     if os.path.isdir(DB_HOST):
@@ -59,10 +61,7 @@ db = setup_db()
 
 
 def construct_mail_client():
-    """
-    authenticates with an SMTP server and returns a reference to the connection object
-
-    """
+    """Authenticate with an SMTP server and return a reference to the connection."""
     client = smtplib.SMTP(EMAIL_HOSTNAME, EMAIL_PORT)
     client.starttls()
     client.ehlo()
@@ -72,7 +71,7 @@ def construct_mail_client():
 
 
 def get_email_queue():
-    """gets active queue of emails waiting to be sent"""
+    """Get an active queue of emails waiting to be sent."""
     result = db.execute(
         "SELECT * FROM emails WHERE sent IS NULL ORDER BY id LIMIT 100;")
     queued_emails = []
@@ -89,19 +88,19 @@ def get_email_queue():
 
 
 def mark_sent(email_id):
-    """marks queued email as sent via timestamp in the database"""
+    """Mark an email as sent in the database."""
     query_string = "UPDATE emails SET sent=NOW() WHERE id = {};".format(email_id)
     db.execute(query_string)
 
 
 def construct_mail_string(send_to, subject, body):
-    """formats an email string"""
-    return "TO:%s\nFrom: %s\nSubject:  %s \n\n\n %s \n\n" % (send_to, 
-        EMAIL_SENDER, subject, body)
+    """Format an email string."""
+    return "TO:%s\nFrom: %s\nSubject:  %s \n\n\n %s \n\n" % (
+        send_to, EMAIL_SENDER, subject, body)
 
 
 def send_email():
-    """sends queued emails"""
+    """Send queued emails."""
     queued_emails = get_email_queue()
     mail_client = construct_mail_client()
 
@@ -109,8 +108,8 @@ def send_email():
         return
 
     for email_data in queued_emails:
-        email = construct_mail_string(email_data["send_to"], 
-            email_data["subject"], email_data["body"])
+        email = construct_mail_string(
+            email_data["send_to"], email_data["subject"], email_data["body"])
         mail_client.sendmail(EMAIL_SENDER, email_data["send_to"], email)
         mark_sent(email_data["id"])
 
@@ -119,15 +118,12 @@ def send_email():
 
 
 def main():
-    """
-    Main program execution. Tries to send queued emails.
-    Logs any errors that come up. 
-    """
+    """Send queued Submitty emails and log any errors."""
     try:
         send_email()
     except Exception as email_send_error:
         LOG_FILE.write("[{}] Error Sending Email: {}\n".format(
-            str(datetime.datetime.now()),str(email_send_error)))
+            str(datetime.datetime.now()), str(email_send_error)))
 
 
 if __name__ == "__main__":
