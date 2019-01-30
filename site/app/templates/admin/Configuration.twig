@@ -219,6 +219,9 @@
                         </option>
                     {% endfor %}
                 </select>
+                <br>
+                <p style = "display: inline;" class="option-alt">Visible only to Instructors? </p>
+                <input type="checkbox" name="seating_only_for_instructor" id="seating_only_for_instructor" value="true"{{ fields['seating_only_for_instructor'] ? 'checked' : '' }} />
             </div>
         </div>
 

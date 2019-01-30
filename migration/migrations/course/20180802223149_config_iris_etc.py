@@ -25,6 +25,8 @@ def up(config, conn, semester, course):
         if not config.has_option('course_details','private_repository'):
             config.set('course_details','private_repository','""')
         # the newest default
+        if not config.has_option('course_details','seating_only_for_instructor'):
+            config.set('course_details','seating_only_for_instructor','false')
         if not config.has_option('course_details','room_seating_gradeable_id'):
             config.set('course_details','room_seating_gradeable_id','""')
 

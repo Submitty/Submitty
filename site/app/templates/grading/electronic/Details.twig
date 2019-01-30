@@ -356,6 +356,16 @@
                 {{ member.getDisplayedLastName() -}}
             {%- endfor -%}
         {% endif %}
+    <div style="font-style: italic; display: inline; color: grey;">
+        {% if graded_gradeable.getGradeable().isTeamAssignment() %}
+            {%- for member in graded_gradeable.getSubmitter().getTeam().getInvitedUsers() -%}
+                {%- if loop.index == 1 -%}Pending: {% endif -%}
+                {%- if loop.index != 1 -%}, {% endif -%}
+                {{- member.getDisplayedFirstName() }}
+                {{ member.getDisplayedLastName() -}}
+            {%- endfor -%}
+        {% endif %}
+    </div>
     </td>
 {% endmacro %}
 
