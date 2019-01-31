@@ -302,33 +302,34 @@ class GradedComponentContainer extends AbstractModel {
 
     /**
      * Gets all of the graders for this component
-     * If a verifier exists return that instead
      * @return User[] indexed by user id
      */
     public function getGraders() {
         $graders = [];
         /** @var GradedComponent $graded_component */
         foreach ($this->graded_components as $graded_component) {
-            $verifier_id = $graded_component->getVerifierId();
-            if($verifier_id == ''){
-                $grader = $graded_component->getGrader();
-                $graders[$grader->getId()] = $grader;
-            }else{
-                $grader = $this->core->getQueries()->getUserById($graded_component->getVerifierId());
-                $graders[$verifier_id] = $grader; 
-            }
+            $grader = $graded_component->getGrader();
+            $graders[$grader->getId()] = $grader;
         }
         return $graders;
     }
 
     /**
      * Gets all user-visible graders for this component
+     * If a verifier exists for a limited access grader, gets that instead
      * @return User[] indexed by user id
      */
     public function getVisibleGraders() {
-        return array_filter($this->getGraders(), function (User $grader) {
-            return $grader->accessFullGrading();
-        });
+        $visible_graders = [];
+        foreach ($this->graded_components as $graded_component) {
+            $grader = $graded_component->getGrader();
+            $verifier_id = $graded_component->getVerifierId();
+            if($grader->accessFullGrading())
+                $visible_graders[$grader->getId()] = $grader;
+            else if($verifier_id != '')
+                $visible_graders[$verifier_id] = $this->core->getQueries()->getUserById($verifier_id);
+        }
+        return $visible_graders;
     }
 
     /**
