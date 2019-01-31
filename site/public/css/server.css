@@ -1710,18 +1710,3 @@ end of styles used in the admin gradeable page
 .courses-table .btn {
     margin-bottom: 3px;
 }
-
-.noscript {
-    width: 100%;
-    text-align: center;
-    background: #f2dede;
-    color: #b94a48;
-    height: 2em;
-}
-
-.noscript span {
-    text-align: center;
-    margin: auto;
-    font-size: 1.5em;
-    font-weight: bold;
-}
