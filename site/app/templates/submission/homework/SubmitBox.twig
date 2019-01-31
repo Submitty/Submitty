@@ -54,15 +54,29 @@
 
         <script type="text/javascript">
             $(function() {
-                var cookie = document.cookie;
                 students_full = {{ students_full|json_encode|raw }};
                 $('#qr_prefix').prop('hidden', true);
                 $('#prefix_prompt').prop('hidden', true);
-                if (cookie.indexOf("student_checked=") !== -1) {
-                    var cookieValue = cookie.substring(cookie.indexOf("student_checked=")+16, cookie.indexOf("student_checked=")+17);
-                    $("#radio_student").prop("checked", cookieValue==1);
-                    $("#radio_bulk").prop("checked", cookieValue==2);
-                    document.cookie="student_checked="+0;
+                
+                //load what upload mode the user selected (if any)
+                if(sessionStorage.getItem('radio_bulk')){
+                    $('#radio_bulk').prop('checked', true);
+                }else if(sessionStorage.getItem('radio_student')){
+                    $('#radio_student').prop('checked',true);
+                }else{
+                    $('#radio_normal').prop('checked',true);
+                }
+                //load if bulkupload with qr codes selected or not
+                if(sessionStorage.getItem('use_qr')){
+                    $('#qr_prefix').prop('hidden',false)
+                    $('#prefix_prompt').prop('hidden', false);
+                    $('#pages_prompt').prop('hidden', true);
+                    $('#num_pages').prop('hidden', true);
+                    $('#use_qr').prop('checked',true);
+                    //populate prefix textarea
+                    if(sessionStorage.getItem('qr_prefix')){
+                        $('#qr_prefix').val(sessionStorage.getItem('qr_prefix'));
+                    }
                 }
                 if ($("#radio_student").is(":checked")) {
                     $('#user_id_input').show();
@@ -70,21 +84,38 @@
                 if ($("#radio_bulk").is(":checked")) {
                     $('#pdf_submit_button').show();
                 }
+                if($('#use_qr').is(':checked')){
+                    //save qr_code prefix on textarea change
+                    $('#qr_prefix').change(function(){
+                        sessionStorage.setItem('qr_prefix', $('#qr_prefix').val());
+                    });
+                }
                 $('#radio_normal').click(function() {
+                    sessionStorage.setItem('radio_normal', true);
+                    sessionStorage.removeItem('radio_student');
+                    sessionStorage.removeItem('radio_bulk');
+                    $('#pdf_submit_button').hide();
                     $('#user_id_input').hide();
                     $('#pdf_submit_button').hide();
                     $('#user_id').val('');
                 });
                 $('#radio_student').click(function() {
+                    sessionStorage.setItem('radio_student', true);
+                    sessionStorage.removeItem('radio_bulk');
+                    sessionStorage.removeItem('radio_normal');
                     $('#pdf_submit_button').hide();
                     $('#user_id_input').show();
                 });
                 $('#radio_bulk').click(function()  {
+                    sessionStorage.setItem('radio_bulk', true);
+                    sessionStorage.removeItem('radio_student');
+                    sessionStorage.removeItem('radio_normal');
                     $('#user_id_input').hide();
                     $('#pdf_submit_button').show();
                     $('#user_id').val('');
                 });
                 $('#use_qr').click(function(){
+                    (sessionStorage.getItem('use_qr')) ? sessionStorage.removeItem('use_qr') : sessionStorage.setItem('use_qr', true);
                     $('#num_pages').prop('hidden', !$('#num_pages').is(':hidden'));
                     $('#qr_prefix').prop('hidden', !$('#qr_prefix').is(':hidden'));
                     $('#prefix_prompt').prop('hidden', !$('#prefix_prompt').is(':hidden'));
@@ -277,19 +308,15 @@
             var user_id = "";
             var repo_id = "";
             var num_pages = 0;
-            // depending on which is checked, update cookie
-            if ($('#radio_normal').is(':checked')) {
-                document.cookie="student_checked="+0;
-            };
             if ($('#radio_student').is(':checked')) {
-                document.cookie="student_checked="+1;
                 user_id = $("#user_id").val();
             };
             if ($('#radio_bulk').is(':checked')) {
-                document.cookie="student_checked="+2;
                 num_pages = $("#num_pages").val();
                 use_qr = $("#use_qr").is(":checked");
                 qr_prefix = $('#qr_prefix').val();
+                if($('#use_qr').is(':checked') && !sessionStorage.getItem('qr_prefix'))
+                    sessionStorage.setItem('qr_prefix', qr_prefix );
             };
             // vcs upload
             if ({{ is_vcs ? "true" : "false" }}) {

@@ -639,6 +639,14 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     patterns_work_to_details = complete_config_obj["autograding"]["work_to_details"]
     pattern_copy("work_to_details",patterns_work_to_details,tmp_work,os.path.join(tmp_results,"details"),tmp_logs)
 
+    if ("work_to_public" in complete_config_obj["autograding"] and
+        len(complete_config_obj["autograding"]["work_to_public"]) > 0):
+        # create the directory
+        os.makedirs(os.path.join(tmp_results,"results_public"))
+        # copy the files
+        patterns_work_to_public = complete_config_obj["autograding"]["work_to_public"]
+        pattern_copy("work_to_public",patterns_work_to_public,tmp_work,os.path.join(tmp_results,"results_public"),tmp_logs)
+
     history_file_tmp = os.path.join(tmp_submission,"history.json")
     history_file = os.path.join(tmp_results,"history.json")
     if os.path.isfile(history_file_tmp):

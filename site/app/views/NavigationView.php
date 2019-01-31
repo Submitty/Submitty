@@ -530,7 +530,7 @@ class NavigationView extends AbstractView {
             }
 
             if ($gradeable->anyActiveRegradeRequests()) {
-                //Open regrade requests
+                //Open grade inquiries
                 $button = new Button($this->core, [
                     "title" => "REGRADE",
                     "class" => "btn btn-danger btn-nav btn-nav-grade",
@@ -607,7 +607,7 @@ class NavigationView extends AbstractView {
         $button = new Button($this->core, [
             "title" => "Edit Gradeable Configuration",
             "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'edit_gradeable_page', 'id' => $gradeable->getId())),
-            "class" => "fa fa-pencil",
+            "class" => "fas fa-pencil-alt",
             "title_on_hover" => true,
             "aria_label" => "edit gradeable {$gradeable->getId()}"
         ]);

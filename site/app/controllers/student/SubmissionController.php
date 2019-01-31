@@ -112,7 +112,7 @@ class SubmissionController extends AbstractController {
         }
 
         if(!$gradeable->isRegradeAllowed()) {
-            $this->core->getOutput()->renderJsonFail('Regrade requests not enabled for this gradeable');
+            $this->core->getOutput()->renderJsonFail('Grade inquiries are not enabled for this gradeable');
             return;
         }
 
@@ -156,13 +156,13 @@ class SubmissionController extends AbstractController {
         }
 
         if (!$graded_gradeable->hasRegradeRequest()) {
-            $this->core->getOutput()->renderJsonFail('Submitter has no regrade request');
+            $this->core->getOutput()->renderJsonFail('Submitter has not made a grade inquiry');
             return;
         }
 
         // TODO: add to access control method
         if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$user->accessFullGrading()) {
-            $this->core->getOutput()->renderJsonFail('Insufficient permissions to make regrade post');
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to make grade inquiry post');
             return;
         }
 
@@ -195,13 +195,13 @@ class SubmissionController extends AbstractController {
         }
 
         if (!$graded_gradeable->hasRegradeRequest()) {
-            $this->core->getOutput()->renderJsonFail('Submitter has no regrade request');
+            $this->core->getOutput()->renderJsonFail('Submitter has not made a grade inquiry');
             return;
         }
 
         // TODO: add to access control method
         if (!$user->accessFullGrading()) {
-            $this->core->getOutput()->renderJsonFail('Insufficient permissions to delete regrade request');
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to delete grade inquiry');
             return;
         }
 
@@ -238,13 +238,13 @@ class SubmissionController extends AbstractController {
         }
 
         if (!$graded_gradeable->hasRegradeRequest()) {
-            $this->core->getOutput()->renderJsonFail('Submitter has no regrade request');
+            $this->core->getOutput()->renderJsonFail('Submitter has not made a grade inquiry');
             return;
         }
 
         // TODO: add to access control method
         if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$user->accessFullGrading()) {
-            $this->core->getOutput()->renderJsonFail('Insufficient permissions to change regrade request status');
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to change grade inquiry status');
             return;
         }
 
@@ -394,13 +394,18 @@ class SubmissionController extends AbstractController {
             $graded_gradeables[] = $gg;
         }
 
-        if (count($graded_gradeables) === 0) {
-            // No user was on a team
-            $msg = 'No user on a team';
-            $return = array('success' => false, 'message' => $msg);
-            $this->core->getOutput()->renderJson($return);
-            return $return;
-        } else if (count($graded_gradeables) > 1) {
+        // Below is true if no users are on a team. In this case, we later make the team automatically,
+        //   so this should not return a failure.
+        // if (count($graded_gradeables) === 0) {
+        //     // No user was on a team
+        //     $msg = 'No user on a team';
+        //     $return = array('success' => false, 'message' => $msg);
+        //     $this->core->getOutput()->renderJson($return);
+        //     return $return;
+        // } else 
+
+        //If the users are on multiple teams.
+        if (count($graded_gradeables) > 1) {
             // Not all users were on the same team
             $msg = "Inconsistent teams. One or more users are on different teams.";
             $return = array('success' => false, 'message' => $msg);
@@ -408,8 +413,11 @@ class SubmissionController extends AbstractController {
             return $return;
         }
 
-        $graded_gradeable = $graded_gradeables[0];
-        $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
+        $highest_version = -1;
+        if(count($graded_gradeables) > 0){
+            $graded_gradeable = $graded_gradeables[0];
+            $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
+        }
 
         //If there has been a previous submission, we tag it so that we can pop up a warning.
         $return = array('success' => true, 'highest_version' => $highest_version, 'previous_submission' => $highest_version > 0);
@@ -654,7 +662,15 @@ class SubmissionController extends AbstractController {
             else{
                 //If the team doesn't exist yet, we need to build a new one. (Note, we have already checked in ajaxvalidgradeable
                 //that all users are either on the same team or no team).
-                $members = $this->core->getQueries()->getUsersById($user_ids);
+
+                $leaderless = array();
+                foreach($user_ids as $i => $member){
+                    if($member !== $leader){
+                        $leaderless[] = $member;
+                    }
+                }
+
+                $members = $this->core->getQueries()->getUsersById($leaderless);
                 $leader_user = $this->core->getQueries()->getUserById($leader);
                 try {
                     $gradeable->createTeam($leader_user, $members);
@@ -1373,10 +1389,12 @@ class SubmissionController extends AbstractController {
         $this->core->getOutput()->renderJson($return);
 
         if ($show_msg == true) {
-            if ($success)
+            if ($success) {
                 $this->core->addSuccessMessage($message);
-            else
+            }
+            else {
                 $this->core->addErrorMessage($message);
+            }
         }
         return $return;
     }
@@ -1622,8 +1640,18 @@ class SubmissionController extends AbstractController {
             }
         }
 
-        return $this->uploadResultMessage("Successfully uploaded!", true);
-
+        $total_count = intval($_POST['file_count']);
+        $uploaded_count = count($uploaded_files[1]['tmp_name']);
+        $remaining_count = $uploaded_count - $total_count;
+        $php_count = ini_get('max_file_uploads');
+        if ($total_count < $uploaded_count) {
+            $message = "Successfully uploaded {$uploaded_count} images. Could not upload remaining {$remaining_count} files.";
+            $message .= " The max number of files you can upload at once is set to {$php_count}.";
+        }
+        else {
+            $message = 'Successfully uploaded!';
+        }
+        return $this->uploadResultMessage($message, true);
     }
 
     private function ajaxUploadCourseMaterialsFiles() {

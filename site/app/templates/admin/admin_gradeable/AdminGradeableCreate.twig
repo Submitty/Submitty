@@ -99,7 +99,7 @@
     </div>
     {% if regrade_enabled %}
         <div id="regrade_request_enable_container">
-            Will regrade requests be enabled for this assignment?
+            Will grade inquiries be enabled for this assignment?
             <br />
             <input type="radio" id="yes_regrade_allowed" name="regrade_allowed" value="true" class="bool_val auto_save date-related"
                     {{ action != 'new' and gradeable.isRegradeAllowed() ? 'checked' : '' }} /> Yes
@@ -229,7 +229,7 @@
             $('#date_team_lock').prop('disabled', {{ gradeable.isTeamAssignment() ? 'false' : 'true' }});
             $('#late_days').prop('disabled', $('#no_late_submission').is(':checked'));
 
-            {# Use this 'each' trick since 'no_regrade_allowed' may not be defined if regrade requests not enabled #}
+            {# Use this 'each' trick since 'no_regrade_allowed' may not be defined if grade inquiries are not enabled #}
             let regradeReqDate = $('#date_regrade_request');
             regradeReqDate.prop('disabled', true);
             $('#no_regrade_allowed').each(function () {
@@ -426,7 +426,7 @@
         $('#subdirectory').keypress(onVcsSubdirChange);
         $('#subdirectory').keyup(onVcsSubdirChange);
 
-        //Hide Regrade Request Date if Regrade Requests are not enabled
+        //Hide Grade Inquiry Date if Grade Inquiries are not enabled
         onIsRegradeAllowedChange();
         $('[name="regrade_allowed"]').change(onIsRegradeAllowedChange);
 

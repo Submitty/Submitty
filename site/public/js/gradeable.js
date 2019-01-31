@@ -210,7 +210,8 @@ function renderInstructorEditGradeable(gradeable) {
     return Twig.twig({ref: "EditGradeable"}).render({
         'gradeable': gradeable,
         'edit_marks_enabled': true,
-        'decimal_precision': DECIMAL_PRECISION
+        'decimal_precision': DECIMAL_PRECISION,
+        'export_components_url': buildUrl({'component': 'admin', 'page': 'admin_gradeable', 'action': 'export_components', 'gradeable_id': gradeable.id})
     });
 }
 
