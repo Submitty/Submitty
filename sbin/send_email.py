@@ -57,9 +57,6 @@ def setup_db():
     return db
 
 
-db = setup_db()
-
-
 def construct_mail_client():
     """Authenticate with an SMTP server and return a reference to the connection."""
     client = smtplib.SMTP(EMAIL_HOSTNAME, EMAIL_PORT)
@@ -70,24 +67,24 @@ def construct_mail_client():
     return client
 
 
-def get_email_queue():
+def get_email_queue(db):
     """Get an active queue of emails waiting to be sent."""
     result = db.execute(
         "SELECT * FROM emails WHERE sent IS NULL ORDER BY id LIMIT 100;")
+
     queued_emails = []
     for row in result:
-        email_data = {}
-        email_data["id"] = row[0]
-        email_data["send_to"] = row[1]
-        email_data["subject"] = row[2]
-        email_data["body"] = row[3]
-
-        queued_emails.append(email_data)
+        queued_emails.append({
+            'id': row[0],
+            'send_to': row[1],
+            'subject': row[2],
+            'body': row[3]
+            })
 
     return queued_emails
 
 
-def mark_sent(email_id):
+def mark_sent(email_id, db):
     """Mark an email as sent in the database."""
     query_string = "UPDATE emails SET sent=NOW() WHERE id = {};".format(email_id)
     db.execute(query_string)
@@ -101,7 +98,8 @@ def construct_mail_string(send_to, subject, body):
 
 def send_email():
     """Send queued emails."""
-    queued_emails = get_email_queue()
+    db = setup_db()
+    queued_emails = get_email_queue(db)
     mail_client = construct_mail_client()
 
     if len(queued_emails) == 0:
@@ -111,7 +109,7 @@ def send_email():
         email = construct_mail_string(
             email_data["send_to"], email_data["subject"], email_data["body"])
         mail_client.sendmail(EMAIL_SENDER, email_data["send_to"], email)
-        mark_sent(email_data["id"])
+        mark_sent(email_data["id"], db)
 
     LOG_FILE.write("[{}] Sucessfully Emailed {} Users\n".format(
         str(datetime.datetime.now()), len(queued_emails)))

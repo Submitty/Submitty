@@ -262,8 +262,6 @@ chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/auto
 chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/emails
 chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/emails
 
-
-
 #Set up shipper grading directories if not in worker mode.
 if [ "${WORKER}" == 0 ]; then
     # remove the old versions of the queues

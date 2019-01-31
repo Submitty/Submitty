@@ -79,7 +79,6 @@ done
 
 #Setup Cron Jobs
 crontab -r -u submitty_daemon
-crontab -l > cron_jobs -u submitty_daemon
 echo "* * * * * python3 /usr/local/submitty/sbin/send_email.py" >> cron_jobs
 crontab cron_jobs -u submitty_daemon
 rm cron_jobs
