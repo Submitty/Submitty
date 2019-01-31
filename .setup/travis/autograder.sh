@@ -69,9 +69,9 @@ popd
 echo -e "Build the junit test runner"
 
 # copy the file from the repo
-cp junit_test_runner/TestRunner.java $SUBMITTY_INSTALL_DIR/JUnit/TestRunner.java
+cp junit_test_runner/TestRunner.java $SUBMITTY_INSTALL_DIR/java_tools/JUnit/TestRunner.java
 
-pushd $SUBMITTY_INSTALL_DIR/JUnit
+pushd $SUBMITTY_INSTALL_DIR/java_tools/JUnit
 # root will be owner & group of the source file
 chown  root:root  TestRunner.java
 # everyone can read this file
