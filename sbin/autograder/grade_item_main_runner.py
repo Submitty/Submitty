@@ -151,8 +151,10 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                         first_testcase = False
 
                 except Exception as e:
-                    grade_items_logging.log_message(job_id, message="ERROR while grading by docker:\n {0}".format(traceback.format_exc()))
+                    grade_items_logging.log_message(job_id, message="ERROR while grading by docker. See traces entry for more details")
                     traceback.print_exc()
+                    grade_items_logging.log_stack_trace(job_id,trace=traceback.format_exc())
+
                 finally:
                     clean_up_containers(container_info,job_id,is_batch_job,which_untrusted,item_name,grading_began,use_router)
                     print("CLEANED UP CONTAINERS")
@@ -171,8 +173,9 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                                                       str(testcase_num)],
                                                       stdout=logfile)
                 except Exception as e:
+                    grade_items_logging.log_message(job_id, message="ERROR thrown by main runner. See traces entry for more details.")
                     print ("ERROR caught runner.out exception={0}".format(str(e.args[0])).encode("utf-8"),file=logfile)
-                    traceback.print_exc()
+                    grade_items_logging.log_stack_trace(job_id,trace=traceback.format_exc())
             logfile.flush()
             os.chdir(tmp_work)
 
@@ -245,16 +248,19 @@ def setup_folder_for_grading(target_folder, tmp_work, job_id, tmp_logs, testcase
           try:
             shutil.copy(os.path.join(tmp_work,source),os.path.join(target_folder,destination))
           except Exception as e:
-            print("encountered a copy error")
             traceback.print_exc()
+            grade_items_logging.log_message(job_id, message="Encountered an error while processing pre-command. See traces entry for more details.")
+            grade_items_logging.log_stack_trace(job_id,trace=traceback.format_exc())
+
             #TODO: can we pass something useful to students?
             pass
         else:
           try:
             grade_item.copy_contents_into(job_id,os.path.join(tmp_work,source),os.path.join(target_folder,destination),tmp_logs)
           except Exception as e:
-            print("encountered a copy error")
             traceback.print_exc()
+            grade_items_logging.log_message(job_id, message="Encountered an error while processing pre-command. See traces entry for more details.")
+            grade_items_logging.log_stack_trace(job_id,trace=traceback.format_exc())
             #TODO: can we pass something useful to students?
             pass
       else:
