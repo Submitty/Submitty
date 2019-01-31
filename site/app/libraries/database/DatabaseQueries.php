@@ -3773,12 +3773,13 @@ AND gc_id IN (
 
         return $this->course_db->rows();
     }
+    
     /**
      * Queues an email to be sent by email job
      * @param array $email_data
      * @param string $recipient  
      */ 
-    public function sendEmail($email_data, $recipient){
+    public function createEmail($email_data, $recipient){
         $parameters = array($recipient, $email_data["subject"], $email_data["body"]);
 
         $this->submitty_db->query("

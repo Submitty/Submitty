@@ -283,18 +283,27 @@ def unpack_grading_results_zip(which_machine,which_untrusted,my_results_zip_file
     if queue_obj is None:
         return False
 
-
     job_id = queue_obj["job_id"]
     partial_path = os.path.join(queue_obj["gradeable"],queue_obj["who"],str(queue_obj["version"]))
     item_name = os.path.join(queue_obj["semester"],queue_obj["course"],"submissions",partial_path)
     results_path = os.path.join(SUBMITTY_DATA_DIR,"courses",queue_obj["semester"],queue_obj["course"],"results",partial_path)
+    results_public_path = os.path.join(SUBMITTY_DATA_DIR,"courses",queue_obj["semester"],queue_obj["course"],"results_public",partial_path)
 
     # clean out all of the old files if this is a re-run
     shutil.rmtree(results_path,ignore_errors=True)
+    shutil.rmtree(results_public_path,ignore_errors=True)
     # create the directory (and the full path if it doesn't already exist)
     os.makedirs(results_path)
+
     # unzip the file & clean up
     grade_item.unzip_this_file(my_results_zip_file,results_path)
+
+    # if there are files for the public results folder, create the directory and move them out
+    if (os.path.isdir(os.path.join(os.path.join(results_path,"results_public")))):
+        os.makedirs(results_public_path,exist_ok=True)
+        os.rename(os.path.join(results_path,"results_public"),
+                  os.path.join(results_public_path,"details"))
+
     os.remove(my_results_zip_file)
 
     # add information to the database

@@ -219,6 +219,7 @@ create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/custo
 #               drwxr-s---       $PHP_USER        ta_www_group    config_upload/
 #               drwxr-s---       $PHP_USER        ta_www_group    site/
 #               drwxr-s---       $DAEMON_USER     ta_www_group    results/
+#               drwxr-s---       $DAEMON_USER     ta_www_group    results_public/
 #               drwxr-s---       $DAEMON_USER     ta_www_group    checkout/
 #               drwxr-s---       $DAEMON_USER     ta_www_group    uploads/
 #               drwxr-s---       $PHP_USER        ta_www_group    uploads/bulk_pdf/
@@ -235,6 +236,7 @@ create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/an
 create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/config_upload
 create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/site
 create_and_set  u=rwx,g=rxs,o=   $DAEMON_USER     $ta_www_group   $course_dir/results
+create_and_set  u=rwx,g=rxs,o=   $DAEMON_USER     $ta_www_group   $course_dir/results_public
 create_and_set  u=rwx,g=rxs,o=   $DAEMON_USER     $ta_www_group   $course_dir/checkout
 create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/uploads
 create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/uploads/bulk_pdf
