@@ -10,7 +10,7 @@ use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\models\User;
 
-//Enable us to catch and handle exceptions.
+//Enable us to throw, catch, and handle exceptions as needed.
 use app\exceptions\ValidationException;
 use app\exceptions\DatabaseException;
 
@@ -547,8 +547,24 @@ class UsersController extends AbstractController {
         // Set environment config to allow '\r' EOL encoding. (Used by Microsoft Excel on Macintosh)
         ini_set("auto_detect_line_endings", true);
 
-        // Parse user data (should be in CSV form by now)
-        $user_data = array_map('str_getcsv', file($csv_file, FILE_SKIP_EMPTY_LINES));
+        // Parse user data (should be a CSV file either uploaded or converted from XLSX).
+        // Remove UTF-8 BOM, if it exists.
+
+        // define BOM (byte order mark)
+        $bom = pack('H*','EFBBBF');
+
+        // read csv file as an entire string
+        $user_data = file_get_contents($csv_file);
+
+        // filter out BOM (otherwise, could cause data upsert to fail)
+        $user_data = preg_replace("~^{$bom}~", '', $user_data);
+
+        // convert csv data string to array of rows and columns
+        $user_data = str_getcsv($user_data);
+
+        // remove empty rows
+        $user_data = array_filter($user_data);
+
         if (is_null($user_data)) {
             $this->core->addErrorMessage("File was not properly uploaded. Contact your sysadmin.");
             $this->core->redirect($return_url);
@@ -558,6 +574,8 @@ class UsersController extends AbstractController {
         array_walk_recursive($user_data, function(&$val) {
             $val = trim($val);
         });
+
+        print nl2br(str_replace(" ", "&nbsp;", print_r($user_data, true))); die;
 
         return $user_data;
     }
@@ -626,7 +644,7 @@ class UsersController extends AbstractController {
         };
 
         $insert_or_update_user_function = function($action) use (&$user, &$semester, &$course, &$user_data, &$return_url) {
-            try {
+//            try {
                 switch($action) {
                 case 'insert':
                     //User must first exist in Submitty before being enrolled to a course.
@@ -643,11 +661,11 @@ class UsersController extends AbstractController {
                     throw new ValidationException("Unknown DB operation", array($action, '$insert_or_update_user_function'));
                     break;
                 }
-            }
-            catch (DatabaseException $e) {
-                $this->core->addErrorMessage("Database Exception.  Please contact your sysadmin.");
-                $this->core->redirect($return_url);
-            }
+//            }
+//             catch (DatabaseException $e) {
+//                 $this->core->addErrorMessage("Database Exception.  Please contact your sysadmin.");
+//                 $this->core->redirect($return_url);
+//             }
         };
 
         $return_url = $this->core->buildUrl(array('component'=>'admin', 'page'=>'users', 'action'=>'students'));
@@ -675,29 +693,29 @@ class UsersController extends AbstractController {
             $row_num++;
 
             //Username must contain only lowercase alpha, numbers, underscores, hyphens
-            $error_message .= User::validateUserData('user_id', $vals[0]) ? "" : "ERROR on row {$row_num}, User Name \"".strip_tags($vals[0])."\"<br>";
+            $error_message .= User::validateUserData('user_id', $vals[0]) ? "" : "ERROR on row {$row_num}, User Name \"".strip_tags($vals[0])."\"";
 
             //First and Last name must be alpha characters, white-space, or certain punctuation.
-            $error_message .= User::validateUserData('user_legal_firstname', $vals[1]) ? "" : "ERROR on row {$row_num}, First Name \"{$vals[1]}\"<br>";
-            $error_message .= User::validateUserData('user_legal_lastname', $vals[2]) ? "" : "ERROR on row {$row_num}, Last Name \"".strip_tags($vals[2])."\"<br>";
+            $error_message .= User::validateUserData('user_legal_firstname', $vals[1]) ? "" : "ERROR on row {$row_num}, First Name \"".strip_tags($vals[1])."\"";
+            $error_message .= User::validateUserData('user_legal_lastname', $vals[2]) ? "" : "ERROR on row {$row_num}, Last Name \"".strip_tags($vals[2])."\"";
 
             //Check email address for appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.
-            $error_message .= User::validateUserData('user_email', $vals[3]) ? "" : "ERROR on row {$row_num}, email \"".strip_tags($vals[3])."\"<br>";
+            $error_message .= User::validateUserData('user_email', $vals[3]) ? "" : "ERROR on row {$row_num}, email \"".strip_tags($vals[3])."\"";
 
             //$row[4] validation varies by $list_type
             $error_message .= $row4_validation_function();
 
             //Preferred first and last name must be alpha characters, white-space, or certain punctuation.
             if (isset($vals[$pref_firstname_idx]) && ($vals[$pref_firstname_idx] !== "")) {
-                $error_message .= User::validateUserData('user_preferred_firstname', $row[$pref_firstname_idx]) ? "" : "ERROR on row {$row_num}, Preferred First Name \"".strip_tags($vals[$pref_firstname_idx])."\"<br>";
+                $error_message .= User::validateUserData('user_preferred_firstname', $vals[$pref_firstname_idx]) ? "" : "ERROR on row {$row_num}, Preferred First Name \"".strip_tags($vals[$pref_firstname_idx])."\"";
             }
             if (isset($vals[$pref_lastname_idx]) && ($vals[$pref_lastname_idx] !== "")) {
-                $error_message .= User::validateUserData('user_preferred_lastname', $row[$pref_lastname_idx]) ? "" : "ERROR on row {$row_num}, Preferred Last Name \"".strip_tags($vals[$pref_lastname_idx])."\"<br>";
+                $error_message .= User::validateUserData('user_preferred_lastname', $vals[$pref_lastname_idx]) ? "" : "ERROR on row {$row_num}, Preferred Last Name \"".strip_tags($vals[$pref_lastname_idx])."\"";
             }
 
             //Database password cannot be blank, no check on format
             if ($use_database) {
-                $error_message .= User::validateUserData('user_password', $row[5]) ? "" : "ERROR on row {$row_num}, password cannot be blank<br>";
+                $error_message .= User::validateUserData('user_password', $row[5]) ? "" : "ERROR on row {$row_num}, password cannot be blank";
             }
         }
 

@@ -478,7 +478,7 @@ class FileUtils {
                 break;
             default:
                 $content_type = 'text/x-sh';
-                break;$gradeable_ids = array_diff(scandir("/var/local/submitty/courses/$semester/$course/submissions/"), array('.', '..'));
+                break;
         }
         return $content_type;
     }
