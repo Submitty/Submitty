@@ -180,7 +180,6 @@ class Config extends AbstractModel {
     protected $seating_only_for_instructor;
     /** @property @var string|null */
     protected $room_seating_gradeable_id;
-    
 
     /**
      * Config constructor.
