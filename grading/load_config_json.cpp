@@ -99,7 +99,14 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
     whole_config["docker_enabled"] = false;
   }
 
+  if(!whole_config["default_container_image"].is_string()){
+    whole_config["default_container_image"] = "ubuntu:custom";
+  }
+
+  std::string default_container_image = whole_config["default_container_image"];
   bool docker_enabled = whole_config["docker_enabled"];
+
+
 
   if (!whole_config["use_router"].is_boolean()){
     whole_config["use_router"] = false;
@@ -198,7 +205,7 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
 
       if(this_testcase["containers"][container_num]["container_image"].is_null()){
         //TODO: store the default system image somewhere and fill it in here.
-        this_testcase["containers"][container_num]["container_image"] = "ubuntu:custom";
+        this_testcase["containers"][container_num]["container_image"] = default_container_image;
       }    
     }
 
@@ -209,7 +216,7 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
       insert_router["commands"].push_back("python3 submitty_router.py");
       insert_router["container_name"] = "router";
       insert_router["import_default_router"] = true;
-      insert_router["container_image"] = "ubuntu:custom";
+      insert_router["container_image"] = default_container_image;
       this_testcase["containers"].push_back(insert_router);
     }
 
