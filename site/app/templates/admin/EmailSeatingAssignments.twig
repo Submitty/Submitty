@@ -1,0 +1,35 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}seating-assignment-email{% endblock %}
+{% block title %}Send Seating Assignments{% endblock %}
+{% block body %}
+<div id="config">
+	<p>Customize your message or leave blank to send this default message</p>
+	<div class="option-input col-md-4"><textarea style="height: 200px; width: 600px" name="regrade_message" id="regrade_message" rows="4"/>
+Hello {student_name},
+
+Listed below is seating information information for your upcoming exam in {course_name} scheduled on {exam_date}. 
+
+{gradeable_name}:
+Your room assignment: {room_assignment}	
+Your zone assignment: {zone_assignment}
+Your row assignment: {row_assignment}
+Your seat assignment: {seat_assignment}
+
+- Submitty
+	</textarea>		
+	</div>
+	<p><b>NOTE:</b> clicking send will email each student their seating assignment.</p>
+</div>
+{% endblock %}
+{# 
+{% block form %}
+	
+    <form method="post" action="{{ core.buildUrl({'component': 'notification_settings', 'page': 'alter_notifcation_settings'}) }}" id="form_notification_settings">
+        {{ parent() }}
+    </form>
+{% endblock %} #}
+{% block buttons %}
+
+    {{ block('close_button') }}
+    <input class="btn btn-primary" type="submit" value="Send" />
+{% endblock %}

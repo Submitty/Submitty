@@ -209,6 +209,7 @@
                 <label for="room_seating_gradeable_id">
                     <div class="option-title">Display Room Seating Guide</div>
                     <div class="option-alt">Pick a gradeable for which seating will be shown to students. Select --None-- to hide seating guide.</div>
+                     <div class="option-alt" style="margin-top: 15px" id="email_seating_assignment_label">Customize an email to send to each students.</div>
                 </label>
             </div>
             <div class="option-input col-md-4">
@@ -219,11 +220,10 @@
                         </option>
                     {% endfor %}
                 </select>
+
+                 <a onclick="$('#seating-assignment-email').css('display', 'block');" href="#" class="btn btn-primary" id="email_seating_assignment" style="margin-top: 25px">Email Seating Assignments</a>
             </div>
 
-            <div class="option-input col-md-4">
-                <input type="submit" id="email_seating_assignments" value="Email Seating Assignments" class="btn btn-primary">
-            </div>
         </div>
 
         <div class="option row">
@@ -239,29 +239,32 @@
     </div>
 </div>
 
+{% include 'admin/EmailSeatingAssignments.twig' %}
+
+
 <script type="text/javascript">
+
+    var selected_seating_gradeable = $('#room_seating_gradeable_id').val();
+    if(!selected_seating_gradeable) {
+        $('#email_seating_assignment').hide();
+        $('#email_seating_assignment_label').hide();
+    }
+
     $(document).ready(function() {
 
-        var room_seating_gradeable_id = $('#room_seating_gradeable_id').val();
-             if(!room_seating_gradeable_id){
-                 $("#email_seating_assignments").hide();
+         $(document).on('change', '#room_seating_gradeable_id', function(){
+             var selected_seating_gradeable = $('#room_seating_gradeable_id').val();
+             
+             if(!selected_seating_gradeable){
+                $('#email_seating_assignment').hide();
+                $('#email_seating_assignment_label').hide();
              }
              else{
-                 $("#email_seating_assignments").show();
+                $('#email_seating_assignment').show();
+                $('#email_seating_assignment_label').show();
 
-             }
-
-       $(document).on('change', '#room_seating_gradeable_id', function(){
-
-             var room_seating_gradeable_id = $('#room_seating_gradeable_id').val();
-             if(!room_seating_gradeable_id){
-                 $("#email_seating_assignments").hide();
-             }
-             else{
-                 $("#email_seating_assignments").show();
-
-             }
-       });
+            }
+        });
 
      });
 
