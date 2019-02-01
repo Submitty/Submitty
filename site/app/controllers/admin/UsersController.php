@@ -544,38 +544,40 @@ class UsersController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
+        // Parse user data (should be a CSV file either uploaded or converted from XLSX).
         // Set environment config to allow '\r' EOL encoding. (Used by Microsoft Excel on Macintosh)
         ini_set("auto_detect_line_endings", true);
 
-        // Parse user data (should be a CSV file either uploaded or converted from XLSX).
-        // Remove UTF-8 BOM, if it exists.
-
-        // define BOM (byte order mark)
-        $bom = pack('H*','EFBBBF');
-
-        // read csv file as an entire string
+        // Read csv file as an entire string.
         $user_data = file_get_contents($csv_file);
 
-        // filter out BOM (otherwise, could cause data upsert to fail)
-        $user_data = preg_replace("~^{$bom}~", '', $user_data);
-
-        // convert csv data string to array of rows and columns
-        $user_data = str_getcsv($user_data);
-
-        // remove empty rows
-        $user_data = array_filter($user_data);
-
-        if (is_null($user_data)) {
+        // Make sure read was successful.
+        if ($user_data === false) {
             $this->core->addErrorMessage("File was not properly uploaded. Contact your sysadmin.");
             $this->core->redirect($return_url);
         }
+
+        // Remove UTF-8 BOM, if it exists.
+        // Define BOM (byte order mark).  Always hexadecimal EFBBBF.
+        $bom = hex2bin('EFBBBF');
+
+        // Filter out BOM (otherwise, could cause data upsert to fail)
+        $user_data = preg_replace("~^{$bom}~", "", $user_data);
+
+        // convert csv data string to array of [rows][columns].
+        $user_data = array_map('str_getcsv', str_getcsv($user_data, PHP_EOL));
+
+        // Remove all empty-data rows (initially read as a row of commas from CSV file)
+        $user_data = array_filter($user_data, function($row) {
+            return !empty(array_filter($row, function($val) {
+                return !empty($val);
+            }));
+        });
 
         //Apply trim() to all data values.
         array_walk_recursive($user_data, function(&$val) {
             $val = trim($val);
         });
-
-        print nl2br(str_replace(" ", "&nbsp;", print_r($user_data, true))); die;
 
         return $user_data;
     }
@@ -603,14 +605,14 @@ class UsersController extends AbstractController {
                     $vals[4] = null;
                 }
                 //Check registration for appropriate format. Allowed characters - A-Z,a-z,_,-
-                return User::validateUserData('registration_section', $vals[4]) ? "" : "ERROR on row {$row_num}, Registration Section \"".strip_tags($vals[4])."\"<br>";
+                return User::validateUserData('registration_section', $vals[4]) ? "" : "ERROR on row {$row_num}, Registration Section \"".strip_tags($vals[4])."\"";
             case "graderlist":
                 //grader
                 if (isset($vals[4]) && is_numeric($vals[4])) {
                     $vals[4] = intval($vals[4]); //change float read from xlsx to int
                 }
                 //grader-level check is a digit between 1 - 4.
-                return User::validateUserData('user_group', $vals[4]) ? "" : "ERROR on row {$row_num}, Grader Group \"".strip_tags($vals[4])."\"<br>";
+                return User::validateUserData('user_group', $vals[4]) ? "" : "ERROR on row {$row_num}, Grader Group \"".strip_tags($vals[4])."\"";
             default:
                 throw new ValidationException("Unknown classlist", array($list_type, '$row4_validation_function'));
             }
@@ -644,7 +646,7 @@ class UsersController extends AbstractController {
         };
 
         $insert_or_update_user_function = function($action) use (&$user, &$semester, &$course, &$user_data, &$return_url) {
-//            try {
+            try {
                 switch($action) {
                 case 'insert':
                     //User must first exist in Submitty before being enrolled to a course.
@@ -661,11 +663,11 @@ class UsersController extends AbstractController {
                     throw new ValidationException("Unknown DB operation", array($action, '$insert_or_update_user_function'));
                     break;
                 }
-//            }
-//             catch (DatabaseException $e) {
-//                 $this->core->addErrorMessage("Database Exception.  Please contact your sysadmin.");
-//                 $this->core->redirect($return_url);
-//             }
+            }
+            catch (DatabaseException $e) {
+                $this->core->addErrorMessage("Database Exception.  Please contact your sysadmin.");
+                $this->core->redirect($return_url);
+            }
         };
 
         $return_url = $this->core->buildUrl(array('component'=>'admin', 'page'=>'users', 'action'=>'students'));
@@ -684,12 +686,11 @@ class UsersController extends AbstractController {
         $user_data = $this->getUserDataFromUpload($_FILES['upload']['name'], $_FILES['upload']['tmp_name'], $return_url);
 
         //Validation and error checking.
-        $num_reg_sections = count($this->core->getQueries()->getRegistrationSections());
         $pref_firstname_idx = $use_database ? 6 : 5;
         $pref_lastname_idx = $pref_firstname_idx + 1;
         $error_message = "";
-        $row_num = 0;
-        foreach($user_data as $vals) {
+        foreach($user_data as $row_num => $vals) {
+            //Count $row_num starting as 1 instead of 0 (offset by +1).
             $row_num++;
 
             //Username must contain only lowercase alpha, numbers, underscores, hyphens
