@@ -364,6 +364,7 @@ class HomeworkView extends AbstractView {
         $all_directories = $gradeable->getSplitPdfFiles();
 
         $files = [];
+        $cover_images = [];
         $count = 1;
         $count_array = array();
         $use_qr_codes = false;
@@ -376,7 +377,24 @@ class HomeworkView extends AbstractView {
                 }
                 $clean_timestamp = str_replace('_', ' ', $timestamp);
                 $path = rawurlencode(htmlspecialchars($details['path']));
-                if (strpos($filename, 'cover') === false || pathinfo($filename)['extension'] === '.json') {
+                //get the cover image if it exists
+                if(strpos($filename, '_cover.jpg') && pathinfo($filename)['extension'] === 'jpg'){
+                    $corrected_filename = rawurlencode(htmlspecialchars($filename));
+                    $url = $this->core->buildUrl([
+                        'component' => 'misc',
+                        'page' => 'display_file',
+                        'dir' => 'split_pdf',
+                        'file' => $corrected_filename,
+                        'path' => $path,
+                        'ta_grading' => 'false'
+                    ]);
+                    $cover_images[] = [
+                        'filename' => $corrected_filename,
+                        'url' => $url,
+                    ];
+                }
+                if (strpos($filename, 'cover') === false || pathinfo($filename)['extension'] === 'json' || 
+                    pathinfo($filename)['extension'] === "jpg") {
                     continue;
                 }
                 // get the full filename for PDF popout
@@ -403,11 +421,19 @@ class HomeworkView extends AbstractView {
                 $count_array[$count] = FileUtils::joinPaths($timestamp, rawurlencode($filename_full));
                 //decode the filename after to display correctly for users
                 $filename_full = rawurldecode($filename_full);
+                $cover_image_name = substr($filename,0,-3) . "jpg";
+                $cover_image = [];
+                foreach ($cover_images as $img) {
+                    if($img['filename'] === $cover_image_name)
+                        $cover_image = $img;
+                }
                 $files[] = [
                     'clean_timestamp' => $clean_timestamp,
                     'filename_full' => $filename_full,
+                    'filename' => $filename,
                     'url' => $url,
                     'url_full' => $url_full,
+                    'cover_image' => $cover_image
                 ];
                 $count++;
             }
@@ -437,6 +463,7 @@ class HomeworkView extends AbstractView {
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         $current_time = $this->core->getDateTimeNow()->format("m-d-Y_H:i:sO");
         $ch = curl_init();
+        $use_images = !$use_qr_codes && sizeof($cover_images) != 0;
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/BulkUploadBox.twig', [
             'gradeable_id' => $gradeable->getId(),
             'team_assignment' => $gradeable->isTeamAssignment(),
@@ -444,6 +471,7 @@ class HomeworkView extends AbstractView {
             'count_array' => $count_array,
             'files' => $files,
             'use_qr_codes' => $use_qr_codes,
+            'use_images' => $use_images
         ]);
     }
 

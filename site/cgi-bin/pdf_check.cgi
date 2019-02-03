@@ -108,7 +108,7 @@ try:
 
         div = total_pages // num
         
-        split_index = i = 0
+        i = 0
         while i < total_pages:
             cover_writer = PdfFileWriter()
             cover_writer.addPage(pdfReader.getPage(i)) 
@@ -125,11 +125,14 @@ try:
             #save pdfs as images
             pdf_images = convert_from_bytes(open(output_filename, 'rb').read())
             for k in range(len(pdf_images)):
-                page.save(str(filename[:-4] + "-" + str(split_index) + "-" + str(k) + ".jpg"), "JPEG", quality = 100);
+                pdf_images[k].save('{}.jpg'.format(output_filename[:-4]), "JPEG", quality = 100);
 
             with open(cover_filename, 'wb') as out:
                 cover_writer.write(out)
-                split_index = i
+
+            #save cover as image
+            pdf_images = convert_from_bytes(open(cover_filename, 'rb').read())
+            pdf_images[0].save('{}.jpg'.format(cover_filename[:-4]), "JPEG", quality = 100);
 
     message += "=> finished PyPDF2"
     # get rid of unnecessary copies
