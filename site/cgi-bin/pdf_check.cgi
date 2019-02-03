@@ -18,7 +18,7 @@ import subprocess
 import shutil
 import stat
 import PyPDF2
-import tempfile
+import sys
 from PyPDF2 import PdfFileReader, PdfFileWriter
 
 try:
