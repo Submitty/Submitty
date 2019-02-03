@@ -19,6 +19,7 @@ import shutil
 import stat
 import PyPDF2
 import sys
+import traceback
 from PyPDF2 import PdfFileReader, PdfFileWriter
 
 try:
