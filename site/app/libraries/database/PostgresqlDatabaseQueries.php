@@ -1461,9 +1461,6 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             // Get the submitter
             $submitter = null;
             if ($gradeable->isTeamAssignment()) {
-                if (!isset($row['team_id'])) {
-                    $x = 0;
-                }
                 // Get the user data for the team
                 $team_users = json_decode($row["array_team_users"], true);
 
