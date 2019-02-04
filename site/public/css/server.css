@@ -647,6 +647,16 @@ table tr.table-header {
 .newpost {
     border-left: 5px solid #0a6496 !important;
 }
+.fa-post_seen {
+    color: #a7a7a7;
+    vertical-align: middle;
+    padding-right: 8px;
+}
+.fa-post_new {
+    color: #0a6496;
+    vertical-align: middle;
+    padding-right: 8px;
+}
 .important {
     /* THIS IS WHERE THE BACKGROUND COLOR FOR POSTS IS */
     border-style: solid !important;

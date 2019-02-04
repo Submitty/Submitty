@@ -700,7 +700,10 @@ class ForumController extends AbstractController {
         if(!empty($_REQUEST["thread_id"])){
             $thread_id = (int)$_REQUEST["thread_id"];
             $this->core->getQueries()->markNotificationAsSeen($user, -2, (string)$thread_id);
-            $new_posts = $this->core->getQueries()->getUnviewedPosts($thread_id, $current_user);
+            $unread_p = $this->core->getQueries()->getUnviewedPosts($thread_id, $current_user);
+            foreach ($unread_p as $up) {
+                $new_posts[] = $up["id"];
+            }
             $thread = $this->core->getQueries()->getThread($thread_id);
             if(!empty($thread)) {
                 $thread = $thread[0];

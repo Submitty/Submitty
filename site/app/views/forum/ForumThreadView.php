@@ -786,13 +786,9 @@ HTML;
 		if($first && $display_option != 'alpha'){
 			$classes .= " first_post";
 		}
-		foreach($unviewed_posts as $unviewed_post){
-			if($post["id"] === $unviewed_post["id"]){
-				$classes .= " newpost";
-				break;
-			}
+		if(in_array($post_id, $unviewed_posts)){
+			$classes .= " newpost";
 		}
-
 		if($this->core->getQueries()->isStaffPost($post["author_user_id"])){
 			$classes .= " important";
 		}
@@ -824,6 +820,15 @@ HTML;
 			<pre><p class="post_content" style="white-space: pre-wrap; ">{$post_content}</p></pre>		
 			<hr style="margin-bottom:3px;">
 HTML;
+		if(in_array($post_id, $unviewed_posts)){
+				$return .= <<<HTML
+					<i class="fa fa-circle fa-post_new" title="New Post"></i>
+HTML;
+			} else {
+				$return .= <<<HTML
+					<i class="fa fa-check-circle fa-post_seen" title="Seen Post"></i>
+HTML;
+			}
 		if($display_option == 'tree'){
 			if(!$first){
 				$return .= <<<HTML
