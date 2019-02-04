@@ -472,14 +472,10 @@ class UsersController extends AbstractController {
     private function getUserDataFromUpload($filename, $tmp_name, $return_url) {
         // Data is confidential, and therefore must be deleted immediately after
         // this process ends, regardless if process completes successfully or not.
-        // Vars must be declared before shutdown callback.
-        $xlsx_file = null;
-        $csv_file = null;
-
         register_shutdown_function(
             function() use (&$csv_file, &$xlsx_file) {
                 foreach (array($csv_file, $xlsx_file) as $file) {
-                    if (!is_null($file) && file_exists($file)) {
+                    if (isset($file) && file_exists($file)) {
                         unlink($file);
                     }
                 }
@@ -593,7 +589,8 @@ class UsersController extends AbstractController {
         // $list_type dictates behavior.
 
         /**
-         * Validate $vals[4] depending on $list_type
+         * Closure to validate $vals[4] depending on $list_type
+         *
          * @return string "" on successful validation, an error message otherwise
          */
         $row4_validation_function = function() use ($list_type, &$vals) {
@@ -618,6 +615,11 @@ class UsersController extends AbstractController {
             }
         };
 
+        /**
+         * Closure to get (as return) either user's registration_section or group_id, based on $list-type
+         *
+         * @return string
+         */
         $get_user_registration_or_group_function = function() use ($list_type, &$existing_user) {
             switch($list_type) {
             case "classlist":
@@ -629,6 +631,9 @@ class UsersController extends AbstractController {
             }
         };
 
+        /**
+         * Closure to set either registration_section or group_id based on $list_type)
+         */
         $set_user_registration_or_group_function = function() use ($list_type, &$user, &$user_data) {
             switch($list_type) {
             case "classlist":
@@ -644,6 +649,12 @@ class UsersController extends AbstractController {
                 throw new ValidationException("Unknown classlist", array($list_type, '$set_user_registration_or_group_function'));
             }
         };
+
+        /**
+         * Closure to INSERT or UPDATE user data based on $action
+         *
+         * @param string $action "insert" or "update"
+         */
 
         $insert_or_update_user_function = function($action) use (&$user, &$semester, &$course, &$user_data, &$return_url) {
             try {
@@ -688,41 +699,40 @@ class UsersController extends AbstractController {
         //Validation and error checking.
         $pref_firstname_idx = $use_database ? 6 : 5;
         $pref_lastname_idx = $pref_firstname_idx + 1;
-        $error_message = "";
+        $bad_rows = array();
         foreach($user_data as $row_num => $vals) {
-            //Count $row_num starting as 1 instead of 0 (offset by +1).
-            $row_num++;
-
-            //Username must contain only lowercase alpha, numbers, underscores, hyphens
-            $error_message .= User::validateUserData('user_id', $vals[0]) ? "" : "ERROR on row {$row_num}, User Name \"".strip_tags($vals[0])."\"";
-
-            //First and Last name must be alpha characters, white-space, or certain punctuation.
-            $error_message .= User::validateUserData('user_legal_firstname', $vals[1]) ? "" : "ERROR on row {$row_num}, First Name \"".strip_tags($vals[1])."\"";
-            $error_message .= User::validateUserData('user_legal_lastname', $vals[2]) ? "" : "ERROR on row {$row_num}, Last Name \"".strip_tags($vals[2])."\"";
-
-            //Check email address for appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.
-            $error_message .= User::validateUserData('user_email', $vals[3]) ? "" : "ERROR on row {$row_num}, email \"".strip_tags($vals[3])."\"";
-
-            //$row[4] validation varies by $list_type
-            $error_message .= $row4_validation_function();
-
-            //Preferred first and last name must be alpha characters, white-space, or certain punctuation.
-            if (isset($vals[$pref_firstname_idx]) && ($vals[$pref_firstname_idx] !== "")) {
-                $error_message .= User::validateUserData('user_preferred_firstname', $vals[$pref_firstname_idx]) ? "" : "ERROR on row {$row_num}, Preferred First Name \"".strip_tags($vals[$pref_firstname_idx])."\"";
-            }
-            if (isset($vals[$pref_lastname_idx]) && ($vals[$pref_lastname_idx] !== "")) {
-                $error_message .= User::validateUserData('user_preferred_lastname', $vals[$pref_lastname_idx]) ? "" : "ERROR on row {$row_num}, Preferred Last Name \"".strip_tags($vals[$pref_lastname_idx])."\"";
-            }
-
-            //Database password cannot be blank, no check on format
-            if ($use_database) {
-                $error_message .= User::validateUserData('user_password', $row[5]) ? "" : "ERROR on row {$row_num}, password cannot be blank";
+            // Blacklist validation.  Validation fails if any test resolves as false.
+            switch(false) {
+            // Username must contain only lowercase alpha, numbers, underscores, hyphens
+            case User::validateUserData('user_id', $vals[0]):
+            // First and Last name must be alpha characters, white-space, or certain punctuation.
+            case User::validateUserData('user_legal_firstname', $vals[1]):
+            case User::validateUserData('user_legal_lastname', $vals[2]):
+            // Check email address for appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.
+            case User::validateUserData('user_email', $vals[3]):
+            // $row[4] validation varies by $list_type
+            case $row4_validation_function():
+            // Database password cannot be blank, no check on format.
+            // Automatically validate if NOT using database authentication (e.g. using PAM authentication).
+            case !$use_database || User::validateUserData('user_password', $row[5]):
+            // Preferred first and last name must be alpha characters, white-space, or certain punctuation.
+            // Automatically validate if not set (this field is optional).
+            case !isset($vals[$pref_firstname_idx]) || User::validateUserData('user_preferred_firstname', $vals[$pref_firstname_idx]):
+            case !isset($vals[$pref_lastname_idx])  || User::validateUserData('user_preferred_lastname',  $vals[$pref_lastname_idx] ):
+                // Validation failed somewhere.  Record which row failed.
+                // $row_num is zero based.  ($row_num+1) will better match spreadsheet labeling.
+                $bad_rows[] = ($row_num+1);
+                break;
             }
         }
 
-        //Display any accumulated errors.  Quit on errors, otherwise continue.
-        if (!empty($error_message)) {
-            $this->core->addErrorMessage($error_message." Contact your sysadmin if this should not cause an error.");
+        // $bad_rows will contain rows with errors.  No errors to report when empty.
+        if (!empty($bad_rows)) {
+            $msg = "Error(s) on row(s) ";
+            $msg .= array_walk($bad_rows, function($row_num) {
+                $msg .= sprintf(" %d", $row_num);
+            });
+            $this->core->addErrorMessage($msg);
             $this->core->redirect($return_url);
         }
 
