@@ -645,15 +645,13 @@ table tr.table-header {
     background-color: #505050 !important;
 }
 .newpost {
-    border-style: solid;
-    border-width: 4px;
-    border-color: #0a6496; /* submitty blue */
+    border-left: 5px solid #0a6496 !important;
 }
 .important {
     /* THIS IS WHERE THE BACKGROUND COLOR FOR POSTS IS */
-    border-style: solid;
-    border-width: 4px;
-    border-color: #ffd700; /* gold */
+    border-style: solid !important;
+    border-width: 4px !important;
+    border-color: #ffd700 !important; /* gold */
 }
 
 .viewed {
@@ -849,10 +847,11 @@ table tr.table-header {
 .post_box {
     position: relative;
     box-shadow: 0 2px 15px -5px #888888;
-    padding:5px;
+    padding:7px;
     margin-top: 20px;
     word-wrap: break-word;
     border-radius: 3px;
+    border-left: 5px solid #a7a7a7;
     background-color:white;
     overflow-y: auto;
     overflow-x: hidden;
@@ -865,7 +864,7 @@ table tr.table-header {
 .first_post{
     padding-left: 10px !important;
     margin-top: 0px !important;
-    border-radius: 0 !important;
+    border-radius: 3px !important;
 }
 
 .thread_box {

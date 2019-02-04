@@ -786,17 +786,13 @@ HTML;
 		if($first && $display_option != 'alpha'){
 			$classes .= " first_post";
 		}
-		//var_dump($unviewed_posts, gettype($unviewed_posts));
 		foreach($unviewed_posts as $unviewed_post){
-			//var_dump($unviewed_post, gettype($unviewed_post));
-			//var_dump(gettype($post["id"]));
 			if($post["id"] === $unviewed_post["id"]){
 				$classes .= " newpost";
 				break;
-				//var_dump($post["id"], $unviewed_post["id"]);
 			}
 		}
-		//$blblbbla.gweoijgweakjkaegrr();
+
 		if($this->core->getQueries()->isStaffPost($post["author_user_id"])){
 			$classes .= " important";
 		}
