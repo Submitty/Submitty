@@ -591,7 +591,7 @@ class UsersController extends AbstractController {
         /**
          * Closure to validate $vals[4] depending on $list_type
          *
-         * @return string "" on successful validation, an error message otherwise
+         * @return boolean true on successful validation, false otherwise.
          */
         $row4_validation_function = function() use ($list_type, &$vals) {
             //$row[4] is different based on classlist vs graderlist
@@ -602,14 +602,14 @@ class UsersController extends AbstractController {
                     $vals[4] = null;
                 }
                 //Check registration for appropriate format. Allowed characters - A-Z,a-z,_,-
-                return User::validateUserData('registration_section', $vals[4]) ? "" : "ERROR on row {$row_num}, Registration Section \"".strip_tags($vals[4])."\"";
+                return User::validateUserData('registration_section', $vals[4]);
             case "graderlist":
                 //grader
                 if (isset($vals[4]) && is_numeric($vals[4])) {
                     $vals[4] = intval($vals[4]); //change float read from xlsx to int
                 }
                 //grader-level check is a digit between 1 - 4.
-                return User::validateUserData('user_group', $vals[4]) ? "" : "ERROR on row {$row_num}, Grader Group \"".strip_tags($vals[4])."\"";
+                return User::validateUserData('user_group', $vals[4]);
             default:
                 throw new ValidationException("Unknown classlist", array($list_type, '$row4_validation_function'));
             }
