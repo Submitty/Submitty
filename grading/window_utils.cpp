@@ -653,6 +653,7 @@ bool clickAndDragDelta(std::string window_name, nlohmann::json action){
   //delta version, 2 values movement x and movement y.
   int amt_x_movement_remaining = action.value("x_distance", 0);
   int amt_y_movement_remaining = action.value("y_distance", 0);
+  std::string start_location   = action.value("start_location", "center");
 
   //This shouldn't fail unless there isn't a mouse.
   std::string mouse_location_string = output_of_system_command("xdotool getmouselocation"); 
@@ -664,11 +665,18 @@ bool clickAndDragDelta(std::string window_name, nlohmann::json action){
                 << std::endl;
     return false;
   }
-  int mouse_x = xy[0];
-  int mouse_y = xy[1];
+  //get the current mouse location
+  int start_mouse_x = xy[0];
+  int start_mouse_y = xy[1];
   //clamp the mouse within the screen (and move in by a pixel).
-  clamp(mouse_x, x_start+1, x_end-1); 
-  clamp(mouse_y, y_start+1, y_end-1);
+  clamp(start_mouse_x, x_start+1, x_end-1); 
+  clamp(start_mouse_y, y_start+1, y_end-1);
+
+  //get the center of the window
+  int width  = x_end - x_start;
+  int height = y_end - y_start;
+  int x_middle = x_start + (width/2);
+  int y_middle = y_start+(height/2);
 
   //NOTE: check my arithmetic. 
   /**
@@ -693,21 +701,27 @@ bool clickAndDragDelta(std::string window_name, nlohmann::json action){
   //remaining distance needed.
   float remaining_distance_needed = total_distance_needed; 
 
+  int action_start_x = (start_location == "current") ? start_mouse_x : x_middle;
+  int action_start_y = (start_location == "current") ? start_mouse_y : y_middle;
+
+  std::cout << "start x " << start_mouse_x << " our x " << action_start_x;
+  std::cout << "start y " << start_mouse_y << " our y " << action_start_y;
+
   //The functions called within this loop will not fire if the window doesn't 
   // exist. This check just short circuits to avoid additional printing.
   while(remaining_distance_needed >= 1 && windowExists(window_name)){ 
-    int curr_x = mouse_x;                                             
-    int curr_y = mouse_y;                                              
+    int curr_x = action_start_x;                                             
+    int curr_y = action_start_y;                                              
     int moved_mouse_x, moved_mouse_y;
     //reset the mouse to the start location.
-    mouse_move(window_name, mouse_x, mouse_y, x_start, x_end, y_start, y_end,
+    mouse_move(window_name, action_start_x, action_start_y, x_start, x_end, y_start, y_end,
                                                                         false); 
     //determine how far we've come.
     float fraction_of_distance_remaining = remaining_distance_needed 
                                             / total_distance_needed; 
     //project in the direction of the move to find the end of our line segment.
-    float projected_x = mouse_x + (amt_x_movement_remaining * fraction_of_distance_remaining); 
-    float projected_y = mouse_y + (amt_y_movement_remaining * fraction_of_distance_remaining);  
+    float projected_x = action_start_x + (amt_x_movement_remaining * fraction_of_distance_remaining); 
+    float projected_y = action_start_y + (amt_y_movement_remaining * fraction_of_distance_remaining);  
 
     //we are using vectors as 2d points.
     std::vector<int> current_point, projected_point;  
@@ -781,8 +795,8 @@ bool clickAndDragDelta(std::string window_name, nlohmann::json action){
     }
 
     //the distance we can move
-    float distance_of_move = sqrt(pow(moved_mouse_x - mouse_x, 2) 
-                                    + pow (moved_mouse_y - mouse_y, 2)); 
+    float distance_of_move = sqrt(pow(moved_mouse_x - action_start_x, 2) 
+                                    + pow (moved_mouse_y - action_start_y, 2)); 
     //we are moving distance_of_move
     remaining_distance_needed -= distance_of_move; 
     std::cout << "after the move, we had " << remaining_distance_needed 
@@ -792,6 +806,13 @@ bool clickAndDragDelta(std::string window_name, nlohmann::json action){
                                                         y_start, y_end, false); 
     mouseUp(window_name,mouse_button); //release
   } //end loop.
+
+  //to preserve backwards compatibility.
+  if(start_location != "current"){
+    //put the mouse back where we found it.
+    mouse_move(window_name, start_mouse_x, start_mouse_y, x_start, x_end, y_start, y_end,false);
+  }
+
   return true;
 }
 
