@@ -2623,9 +2623,10 @@ AND gc_id IN (
       }
 
       $result_rows = $this->course_db->rows();
-      if(count($result_rows) > 0){ // insert only on first thread visit
+      if(count($result_rows) > 0){ // insert only on first thread visit update otherwise
         $this->course_db->query("INSERT INTO viewed_responses(thread_id,user_id,timestamp) SELECT ?, ?, current_timestamp WHERE NOT EXISTS(SELECT * FROM viewed_responses WHERE thread_id = ? AND user_id = ?)", array($thread_id, $current_user, $thread_id, $current_user));
-      }
+        $this->course_db->query("UPDATE viewed_responses SET timestamp = current_timestamp WHERE thread_id = ? AND user_id = ?", array($thread_id, $current_user));
+      };
       return $result_rows;
     }
 
