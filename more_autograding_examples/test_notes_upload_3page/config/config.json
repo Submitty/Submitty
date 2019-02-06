@@ -11,16 +11,16 @@
 	"submission_to_runner" : [ "*.pdf" ],
 	"submission_to_validation" : [ "*.pdf" ],
 	"work_to_details" : [
-	    "**/*.pdf", "*test_template.pdf", "*student_file.pdf" ],
+            "test01/student_file.pdf", "test02/test_template.pdf" ],
         "work_to_public" : [
-	    "**/*.pdf", "*test_template.pdf", "*student_file.pdf" ]
+            "test01/student_file.pdf", "test02/test_template.pdf" ]
     },
 
     "assignment_message" : "Prepare a 3 page, black & white, 8.5x11”, portrait orientation, max size = 3MB .pdf of notes you would like to have during the test.<br><br>Be sure to inspect the produced sample test pdf to make sure that your notes are successfully attached to the back and that they will be legible when printed.",
 
     "testcases" : [
 	{
-	    "title" : "Did you submit .pdf file?",
+	    "title" : "Did you submit a .pdf file?",
             // NOTE: This command will fail if the student no .pdf files or submits multiple .pdf files.
 	    "command" : [ "mv *.pdf student_file.pdf" ],
 	    "points" : 1,
@@ -28,11 +28,15 @@
 		{
                     "actual_file": "student_file.pdf",
                     "deduction": 1.0,
-                    "description": "uploaded file",
+                    "description": "Student's uploaded .pdf file",
                     "method": "fileExists",
                     "show_actual": "always",
-                    "show_message": "always"
-                }
+                    "show_message": "on_failure",
+		    "failure_message": "Looks like you either did not submit a .pdf file or you submitted multiple .pdf files. Please submit exactly one PDF file."
+                },
+                { "actual_file": "STDOUT.txt", "method": "fileExists", "show_actual": "never", "show_message": "never" },
+                { "actual_file": "STDERR.txt", "method": "fileExists", "show_actual": "never", "show_message": "never" },
+                { "actual_file": "execute_logfile.txt", "method": "fileExists", "show_actual": "never", "show_message": "never" }
 	    ]
 	},
         {
@@ -46,6 +50,8 @@
 		}
 	    ],
 	    "command" : [
+                // Just in case the student named a submission file 'test_template.pdf'
+                "mv test_template.pdf student_test_template.pdf",
                 // BUILD the simple blank page latex file
                 "pdflatex blank_page.tex",
                 // SEPARATE the pages of the students submitted .pdf
@@ -63,17 +69,22 @@
                 {
                     "actual_file": "test_template.pdf",
                     "deduction": 1.0,
-                    "description": "Test with your notes attached at the back",
+                    "description": "Test template with student notes attached at the back",
                     "method": "fileExists",
                     "show_actual": "always",
-                    "show_message": "always"
+                    "show_message": "on_failure",
+		    "failure_message": "We failed to attach your .pdf submission to the sample test. This could be because the .pdf file you submitted was not a valid PDF.  This could happen if you renamed another file type (such as .txt, .odt, .docx, .jpg) to .pdf instead of saving/exporting a file in PDF format."
                 },
                 { "actual_file": "STDOUT_0.txt", "method": "fileExists", "show_actual": "never", "show_message": "never" },
                 { "actual_file": "STDERR_0.txt", "method": "fileExists", "show_actual": "never", "show_message": "never" },
                 { "actual_file": "STDOUT_1.txt", "method": "fileExists", "show_actual": "never", "show_message": "never" },
                 { "actual_file": "STDERR_1.txt", "method": "fileExists", "show_actual": "never", "show_message": "never" },
                 { "actual_file": "STDOUT_2.txt", "method": "fileExists", "show_actual": "never", "show_message": "never" },
-                { "actual_file": "STDERR_2.txt", "method": "fileExists", "show_actual": "never", "show_message": "never" }
+                { "actual_file": "STDERR_2.txt", "method": "fileExists", "show_actual": "never", "show_message": "never" },
+                { "actual_file": "STDOUT_3.txt", "method": "fileExists", "show_actual": "never", "show_message": "never" },
+                { "actual_file": "STDERR_3.txt", "method": "fileExists", "show_actual": "never", "show_message": "never" },
+                { "actual_file": "execute_logfile.txt", "method": "fileExists", "show_actual": "never", "show_message": "never" }
+
 	    ]
 	}
     ] 
