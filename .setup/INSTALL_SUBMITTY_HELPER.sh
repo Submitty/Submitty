@@ -783,7 +783,7 @@ else
         chmod -R g+r ${SUBMITTY_REPOSITORY}
 
         # Update any foreign worker machines
-        echo -e Updating worker machines
+        echo -e -n "Updating worker machines\n\n"
         sudo -H -u ${DAEMON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py
     fi
 fi

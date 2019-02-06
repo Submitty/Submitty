@@ -4,7 +4,7 @@ import sys
 from PyPDF2 import PdfFileWriter, PdfFileReader
 from shutil import copyfile
 
-inputpdf = PdfFileReader(open("student_file.pdf", "rb"))
+inputpdf = PdfFileReader(open("student_file.pdf", "rb"), strict=False)
 
 # separate the pages of the student input file
 for i in range(inputpdf.numPages):
