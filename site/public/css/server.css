@@ -1011,7 +1011,6 @@ table .instructor .two-options{
 #nav-body {
     margin-top: 15px;
     margin-left: 30px;
-    width: 0px;
     display: flex;
     flex-direction: column;
 }
