@@ -95,7 +95,8 @@ function prepGradedComponent(component, graded_component) {
         graded_component.grader_id = undefined;
     }
 
-    if (graded_component.verifier_id == '') {
+    // Check if verifier exists
+    if (graded_component.verifier_id === '') {
         graded_component.verifier_id = undefined;
     }
 

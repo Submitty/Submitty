@@ -225,6 +225,9 @@ class ElectronicGraderController extends GradingController {
         }
         // Get user id from the anon id
         $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id);
+        if ($submitter_id === false) {
+            return;
+        }
         // Get the graded gradeable
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
         if ($graded_gradeable === false) {
@@ -237,9 +240,6 @@ class ElectronicGraderController extends GradingController {
             // get the component
             $component = $this->tryGetComponent($gradeable, $component_id);
             if ($component === false) {
-                return;
-            }
-            if ($submitter_id === false) {
                 return;
             }
 
@@ -257,12 +257,12 @@ class ElectronicGraderController extends GradingController {
                 foreach ($gradeable->getComponents() as $comp) {
                     $graded_component = $ta_graded_gradeable->getGradedComponent($comp);
                     if ($graded_component !== null && $graded_component->getGraderId() != $grader->getId()){
-                        $graded_component->setVerifier($grader->getId());
+                        $graded_component->setVerifier($grader);
                         $graded_component->setVerifyTime($this->core->getDateTimeNow());
                     }
                 }
             }else{
-                $graded_component->setVerifier($grader->getId());
+                $graded_component->setVerifier($grader);
                 $graded_component->setVerifyTime($this->core->getDateTimeNow());
             }
             $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
@@ -1375,6 +1375,11 @@ class ElectronicGraderController extends GradingController {
         // Reset the user viewed date since we updated the grade
         $ta_graded_gradeable->resetUserViewedDate();
 
+        //change the component to be unverified after changing a mark
+        if($graded_component->isMarksModified()){
+            $graded_component->setVerifier(null);
+            $graded_component->setVerifyTime(null);
+        }
         // Finally, save the changes to the database
         $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
     }

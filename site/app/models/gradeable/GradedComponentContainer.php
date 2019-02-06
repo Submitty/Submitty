@@ -327,7 +327,7 @@ class GradedComponentContainer extends AbstractModel {
             if($grader->accessFullGrading())
                 $visible_graders[$grader->getId()] = $grader;
             else if($verifier_id != '')
-                $visible_graders[$verifier_id] = $this->core->getQueries()->getUserById($verifier_id);
+                $visible_graders[$verifier_id] = $graded_component->getVerifier();
         }
         return $visible_graders;
     }

@@ -55,6 +55,8 @@ class GradedComponent extends AbstractModel {
     protected $graded_version = 0;
     /** @property @var \DateTime The time which this grade was most recently updated */
     protected $grade_time = null;
+    /** @var User The verifier of this component */
+    protected $verifier = null;
     /** @property @var string The Id of the verifier who verified the grade */
     protected $verifier_id = "";
     /** @property @var \DateTime The time which this grade was verified */
@@ -303,15 +305,32 @@ class GradedComponent extends AbstractModel {
         $this->modified = true;
     }
 
-    public function setVerifier($verifier_id){
-        $this->verifier_id = $verifier_id !== null ? $verifier_id : '';
+    public function setVerifier(User $verifier){
+        $this->verifier = $verifier;
+        $this->verifier_id = $verifier !== null ? $verifier->getId() : '';
         $this->modified = true;    
     }
 
+    /**
+     * Gets the id of the verifier or '' if none exist
+     * @return string
+     */
     public function getVerifierId(){
         return $this->verifier_id;
     }
 
+    /**
+     * Gets the verifier 
+     * @return User
+     */
+    public function getVerifier(){
+        return $this->verifier;
+    }
+
+    /**
+     * Sets the time for when this component was verified
+     * @param string $verify_time
+     */
     public function setVerifyTime($verify_time){
         if ($verify_time === null) {
             $this->verify_time = null;
@@ -325,6 +344,10 @@ class GradedComponent extends AbstractModel {
         $this->modified = true;
     }
 
+    /**
+     * Gets the time when this component was verified
+     * @return \DateTime
+     */
     public function getVerifyTime(){
         return $this->verify_time;
     }

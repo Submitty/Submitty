@@ -3661,10 +3661,6 @@ AND gc_id IN (
                     $deleted_marks = array_diff($component_grade->getDbMarkIds() ?? [], $component_grade->getMarkIds());
                     $this->deleteGradedComponentMarks($component_grade, $deleted_marks);
                     $this->createGradedComponentMarks($component_grade, $new_marks);
-
-                    //change the component to be unverified after changing a mark
-                    $component_grade->setVerifier(null);
-                    $component_grade->setVerifyTime(null);
                     $this->updateGradedComponent($component_grade);
                 }
             }
