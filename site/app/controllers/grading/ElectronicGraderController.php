@@ -9,6 +9,7 @@ use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Mark;
+use app\models\gradeable\Submitter;
 use app\models\gradeable\TaGradedGradeable;
 use app\models\GradeableAutocheck;
 use app\libraries\Logger;
@@ -499,39 +500,19 @@ class ElectronicGraderController extends GradingController {
         $can_show_all = $this->core->getAccess()->canI("grading.electronic.details.show_all");
         $show_all = isset($_GET['view']) && $_GET['view'] === "all" && $can_show_all;
 
-        $students = array();
-        //If we are peer grading, load in all students to be graded by this peer.
-        if ($peer) {
-            $student_ids = $this->core->getQueries()->getPeerAssignment($gradeable->getId(), $this->core->getUser()->getId());
-            $graders = array();
-            $section_key = "registration_section";
+        $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), $show_all);
+
+        $section_submitters = $order->getSectionSubmitters();
+        $section_key = $order->getSectionKey();
+        $graders = $order->getSectionGraders();
+        $sections = $order->getSectionNames();
+
+        $student_ids = [];
+        foreach ($section_submitters as $section) {
+            $student_ids = array_merge($student_ids, array_map(function(Submitter $submitter) { return $submitter->getId(); }, $section));
         }
-        else if ($gradeable->isGradeByRegistration()) {
-            $section_key = "registration_section";
-            $sections = $this->core->getUser()->getGradingRegistrationSections();
-            if (!$show_all) {
-                $students = $this->core->getQueries()->getUsersByRegistrationSections($sections);
-            }
-            $graders = $this->core->getQueries()->getGradersForRegistrationSections($sections);
-        }
-        else {
-            $section_key = "rotating_section";
-            if (!$show_all) {
-                $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id,
-                    $this->core->getUser()->getId());
-                $students = $this->core->getQueries()->getUsersByRotatingSections($sections);
-            }
-            else {
-                $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id);
-            }
-            $graders = $this->core->getQueries()->getGradersForRotatingSections($gradeable->getId(), $sections);
-        }
-        if ($show_all) {
-            $students = $this->core->getQueries()->getAllUsers($section_key);
-        }
-        if(!$peer) {
-            $student_ids = array_map(function(User $student) { return $student->getId(); }, $students);
-        }
+
+        //TODO: Clean this up
 
         $show_empty_teams = $this->core->getAccess()->canI("grading.electronic.details.show_empty_teams");
         $empty_teams = array();

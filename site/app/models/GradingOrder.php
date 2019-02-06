@@ -9,6 +9,21 @@ use app\models\gradeable\Gradeable;
 class GradingOrder extends AbstractModel {
 
     /**
+     * @var Gradeable $gradeable
+     */
+    protected $gradeable;
+
+    /**
+     * @var User $user
+     */
+    protected $user;
+
+    /**
+     * @var boolean $all
+     */
+    protected $all;
+
+    /**
      * @var Submitter[][] $section_submitters
      */
     protected $section_submitters;
@@ -23,23 +38,32 @@ class GradingOrder extends AbstractModel {
      * @param Core $core
      * @param Gradeable $gradeable
      * @param User $user
+     * @param boolean $all
      */
-    public function __construct(Core $core, Gradeable $gradeable, User $user) {
+    public function __construct(Core $core, Gradeable $gradeable, User $user, $all = false) {
         parent::__construct($core);
+
+        $this->gradeable = $gradeable;
+        $this->user = $user;
+        $this->all = $all;
 
         //Get that user's grading sections
 
         $this->section_submitters = [];
-        $this->sections = $gradeable->getGradingSectionsForUser($user);
+        if ($all) {
+            $this->sections = $gradeable->getAllGradingSections();
+        } else {
+            $this->sections = $gradeable->getGradingSectionsForUser($user);
+        }
         foreach ($this->sections as $section) {
-            $this->section_submitters[] = $section->getSubmitters();
+            $this->section_submitters[$section->getName()] = $section->getSubmitters();
         }
 
         $this->sort();
     }
 
     public function sort() {
-        foreach ($this->section_submitters as &$section) {
+        foreach ($this->section_submitters as $name => &$section) {
             usort($section, function(Submitter $a, Submitter $b) {
                 return ($a->getId() < $b->getId()) ? -1 : 1;
             });
@@ -90,11 +114,9 @@ class GradingOrder extends AbstractModel {
         $count = 0;
 
         //Iterate through all sections and their submitters to find this one
-        for ($i = 0; $i < count($this->section_submitters); $i ++) {
-            $section = $this->section_submitters[$i];
-
-            for ($j = 0; $j < count($section); $j ++) {
-                $testSub = $section[$j];
+        foreach ($this->section_submitters as $name => $section) {
+            for ($i = 0; $i < count($section); $i ++) {
+                $testSub = $section[$i];
 
                 //Found them
                 if ($testSub->getId() === $submitter->getId()) {
@@ -119,9 +141,7 @@ class GradingOrder extends AbstractModel {
         }
 
         //Iterate through all sections and their submitters to find this one
-        for ($i = 0; $i < count($this->section_submitters); $i ++) {
-            $section = $this->section_submitters[$i];
-
+        foreach ($this->section_submitters as $name => $section) {
             //Easy skip
             if (count($section) <= $index) {
                 $index -= count($section);
@@ -140,7 +160,7 @@ class GradingOrder extends AbstractModel {
      * @return boolean True if we have them
      */
     public function containsSubmitter(Submitter $submitter) {
-        foreach ($this->section_submitters as $section) {
+        foreach ($this->section_submitters as $name => $section) {
             foreach ($section as $section_sub) {
                 if ($submitter->getId() === $section_sub->getId()) {
                     return true;
@@ -156,6 +176,34 @@ class GradingOrder extends AbstractModel {
      */
     public function getSectionSubmitters() {
         return $this->section_submitters;
+    }
+
+    /**
+     * Get a list of all graders for all sections
+     * @return User[][]
+     */
+    public function getSectionGraders() {
+        return array_map(function (GradingSection $section) {
+            return $section->getGraders();
+        }, $this->sections);
+    }
+
+    /**
+     * Get a list of all section names
+     * @return string[]
+     */
+    public function getSectionNames() {
+        return array_map(function (GradingSection $section) {
+            return $section->getName();
+        }, $this->sections);
+    }
+
+    /**
+     * Get name of column for section
+     * @return string
+     */
+    public function getSectionKey() {
+        return $this->gradeable->isGradeByRegistration() ? "registration_section" : "rotating_section";
     }
 }
 
