@@ -44,7 +44,10 @@ def main():
         return
 
     # XLSX to CSV conversion
-    xlsx2csv.Xlsx2csv(xlsx_file, outputencoding='utf-8', skip_empty_lines=True).convert(csv_file)
+    # We are not going to skip empty lines, as to do so would reorder row
+    # numbering.  We want to preserve row numbering for error messaging.
+    # The calling PHP script will appropriately handle empty rows.
+    xlsx2csv.Xlsx2csv(xlsx_file, outputencoding='utf-8', skip_empty_lines=False).convert(csv_file)
 
     # Validate result after conversion
     with open(csv_file, "r") as read_file:

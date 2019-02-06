@@ -493,8 +493,6 @@ class UsersController extends AbstractController {
 
             // This is to create tmp files and set permissions to RW-RW----
             // chmod() is disabled by security policy, so we are using umask().
-            // NOTE: php.net recommends against using umask() and instead suggests using chmod().
-            // q.v. https://secure.php.net/manual/en/function.umask.php
             $old_umask = umask(0117);
             file_put_contents($csv_file, "");
             $did_move = move_uploaded_file($tmp_name, $xlsx_file);
@@ -541,7 +539,7 @@ class UsersController extends AbstractController {
         }
 
         // Parse user data (should be a CSV file either uploaded or converted from XLSX).
-        // Set environment config to allow '\r' EOL encoding. (Used by Microsoft Excel on Macintosh)
+        // First, set environment config to allow '\r' EOL encoding. (Used by Microsoft Excel on Macintosh)
         ini_set("auto_detect_line_endings", true);
 
         // Read csv file as an entire string.
@@ -553,17 +551,20 @@ class UsersController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        // Remove UTF-8 BOM, if it exists.
-        // Define BOM (byte order mark).  Always hexadecimal EFBBBF.
+        // Remove UTF-8 BOM, if it exists.  Otherwise, it will cause a validation error on row 1, $val[0].
+        // First, define BOM (byte order mark).  Always hexadecimal EFBBBF.
+        // (note that EFBBBF is not printable)
         $bom = hex2bin('EFBBBF');
 
-        // Filter out BOM (otherwise, could cause data upsert to fail)
+        // Remove BOM from $user_data.
         $user_data = preg_replace("~^{$bom}~", "", $user_data);
 
-        // convert csv data string to array of [rows][columns].
+        // convert csv data string to array of $user_data[$rows][$vals].
         $user_data = array_map('str_getcsv', str_getcsv($user_data, PHP_EOL));
 
-        // Remove all empty-data rows (initially read as a row of commas from CSV file)
+        // Remove all empty-data rows.  This should preserve original row number
+        // ordering, so error messaging refers to appropriately labeled row(s)
+        // in the spreadsheet / csv upload.
         $user_data = array_filter($user_data, function($row) {
             return !empty(array_filter($row, function($val) {
                 return !empty($val);
@@ -632,7 +633,7 @@ class UsersController extends AbstractController {
         };
 
         /**
-         * Closure to set either registration_section or group_id based on $list_type)
+         * Closure to set a user's registration_section or group_id based on $list_type)
          */
         $set_user_registration_or_group_function = function() use ($list_type, &$user, &$user_data) {
             switch($list_type) {
@@ -655,7 +656,6 @@ class UsersController extends AbstractController {
          *
          * @param string $action "insert" or "update"
          */
-
         $insert_or_update_user_function = function($action) use (&$user, &$semester, &$course, &$user_data, &$return_url) {
             try {
                 switch($action) {
@@ -696,7 +696,7 @@ class UsersController extends AbstractController {
 
         $user_data = $this->getUserDataFromUpload($_FILES['upload']['name'], $_FILES['upload']['tmp_name'], $return_url);
 
-        //Validation and error checking.
+        // Validation and error checking.
         $pref_firstname_idx = $use_database ? 6 : 5;
         $pref_lastname_idx = $pref_firstname_idx + 1;
         $bad_rows = array();
@@ -711,6 +711,7 @@ class UsersController extends AbstractController {
             // Check email address for appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.
             case User::validateUserData('user_email', $vals[3]):
             // $row[4] validation varies by $list_type
+            // "classlist" validates registration_section, and "graderlist" validates user_group
             case $row4_validation_function():
             // Database password cannot be blank, no check on format.
             // Automatically validate if NOT using database authentication (e.g. using PAM authentication).
@@ -729,15 +730,14 @@ class UsersController extends AbstractController {
         // $bad_rows will contain rows with errors.  No errors to report when empty.
         if (!empty($bad_rows)) {
             $msg = "Error(s) on row(s) ";
-            $msg .= array_walk($bad_rows, function($row_num) {
+            array_walk($bad_rows, function($row_num) use (&$msg) {
                 $msg .= sprintf(" %d", $row_num);
             });
             $this->core->addErrorMessage($msg);
             $this->core->redirect($return_url);
         }
 
-        /* NOTE: Determining if a user already exists is better processed on the database side using SQL */
-        //Existing students are not updated.
+        // Isolate existing users ($users_to_update[]) and new users ($users_to_add[])
         $existing_users = $this->core->getQueries()->getAllUsers();
         $users_to_add = array();
         $users_to_update = array();
@@ -758,7 +758,7 @@ class UsersController extends AbstractController {
             }
         }
 
-        //Insert new students to database
+        // Insert new students to database
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         foreach($users_to_add as $user_data) {
@@ -779,6 +779,8 @@ class UsersController extends AbstractController {
             }
             $insert_or_update_user_function('insert');
         }
+
+        // Existing users are only updated for registration_section ("classlist") or user_group ("graderlist")
         foreach($users_to_update as $user_data) {
             $user = $this->core->getQueries()->getUserById($user_data[0]);
             $set_user_registration_or_group_function();
@@ -787,6 +789,7 @@ class UsersController extends AbstractController {
         $added = count($users_to_add);
         $updated = count($users_to_update);
 
+        // Special case to move students to the NULL section with a classlist upload.
         if ($list_type === "classlist" && isset($_POST['move_missing'])) {
             foreach($existing_users as $user) {
                 if (!is_null($user->getRegistrationSection())) {
