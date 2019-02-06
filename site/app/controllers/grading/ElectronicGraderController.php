@@ -953,7 +953,7 @@ class ElectronicGraderController extends GradingController {
                 //order teams first by rotating section, then by leader id.
                 usort($teams_to_grade, function(Team $a, Team $b) {
                     if($a->getRotatingSection() == $b->getRotatingSection())
-                        return $a->getMembers()[0] < $b->getMembers()[0] ? -1 : 1;
+                        return $a->getLeaderId() < $b->getLeaderId() ? -1 : 1;
                     return $a->getRotatingSection() < $b->getRotatingSection() ? -1 : 1;
                 });
                 //$total = array_sum($this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections, 'rotating_section'));
