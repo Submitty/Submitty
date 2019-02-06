@@ -527,7 +527,7 @@ class UsersController extends AbstractController {
 
                 curl_close($ch);
             } else {
-                $this->core->addErrorMessage("Did not properly recieve spredsheet. Contact your sysadmin.");
+                $this->core->addErrorMessage("Did not properly recieve spreadsheet. Contact your sysadmin.");
                 $this->core->redirect($return_url);
             }
 
