@@ -1377,7 +1377,7 @@ class ElectronicGraderController extends GradingController {
 
         //change the component to be unverified after changing a mark
         if($graded_component->isMarksModified()){
-            $graded_component->setVerifier(null);
+            $graded_component->setVerifier();
             $graded_component->setVerifyTime(null);
         }
         // Finally, save the changes to the database
