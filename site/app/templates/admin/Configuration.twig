@@ -221,6 +221,8 @@
                     {% endfor %}
                 </select>
 
+                {# <input type="submit" id="email_seating_assignment" name="email_seating_assignment" class="btn btn-primary" value="Email Seating Assignments" style="margin-top: 25px">
+ #}
                  <a onclick="$('#seating-assignment-email').css('display', 'block');" href="#" class="btn btn-primary" id="email_seating_assignment" style="margin-top: 25px">Email Seating Assignments</a>
             </div>
 
@@ -244,10 +246,22 @@
 
 <script type="text/javascript">
 
-    var selected_seating_gradeable = $('#room_seating_gradeable_id').val();
-    if(!selected_seating_gradeable) {
+
+    function showEmailSeatingOption() {
+        $('#email_seating_assignment').show();
+        $('#email_seating_assignment_label').show();
+    }
+
+    function hideEmailSeatingOption() {
         $('#email_seating_assignment').hide();
         $('#email_seating_assignment_label').hide();
+    }
+
+
+
+    var selected_seating_gradeable = $('#room_seating_gradeable_id').val();
+    if(!selected_seating_gradeable) {
+       hideEmailSeatingOption(); 
     }
 
     $(document).ready(function() {
@@ -256,13 +270,10 @@
              var selected_seating_gradeable = $('#room_seating_gradeable_id').val();
              
              if(!selected_seating_gradeable){
-                $('#email_seating_assignment').hide();
-                $('#email_seating_assignment_label').hide();
+                 hideEmailSeatingOption();
              }
              else{
-                $('#email_seating_assignment').show();
-                $('#email_seating_assignment_label').show();
-
+                showEmailSeatingOption();
             }
         });
 

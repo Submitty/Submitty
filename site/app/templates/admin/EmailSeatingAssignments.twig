@@ -3,33 +3,41 @@
 {% block title %}Send Seating Assignments{% endblock %}
 {% block body %}
 <div id="config">
-	<p>Customize your message or leave blank to send this default message</p>
-	<div class="option-input col-md-4"><textarea style="height: 200px; width: 600px" name="regrade_message" id="regrade_message" rows="4"/>
-Hello {student_name},
+{# 	<h3>Customize your message or leave blank to send this default message</h3>
+ #}
 
-Listed below is seating information information for your upcoming exam in {course_name} scheduled on {exam_date}. 
-
-{gradeable_name}:
-Your room assignment: {room_assignment}	
-Your zone assignment: {zone_assignment}
-Your row assignment: {row_assignment}
-Your seat assignment: {seat_assignment}
-
-- Submitty
-	</textarea>		
+	<p><b>Email Subject</b></p>
+	<div class="option-input">
+	<textarea name="room_seating_email_subject" id="room_seating_email_subject" rows="4">[Submitty {course_name}]: Seating Assignment for {gradeable_id}</textarea>
 	</div>
+
+	<p><b>Email Body</b></p>
+	<div class="option-input"><textarea style="height: 200px" name="room_seating_email_body" id="room_seating_email_body" rows="4"/>
+Hello,
+
+Listed below is your seating assignment for the upcoming exam {gradeable_id} on {exam_date} at {exam_time}.
+
+Location: {exam_building}
+Exam Room: {exam_room}
+Zone: {exam_zone}
+Row: {exam_room}
+Seat: {exam_seat}
+
+Please email your instructor with any questions or concerns.
+
+- Submitty</textarea>		
+	</div>
+	
+    <input class="btn btn-primary" value="Preview" />
 	<p><b>NOTE:</b> clicking send will email each student their seating assignment.</p>
 </div>
 {% endblock %}
-{# 
 {% block form %}
-	
-    <form method="post" action="{{ core.buildUrl({'component': 'notification_settings', 'page': 'alter_notifcation_settings'}) }}" id="form_notification_settings">
-        {{ parent() }}
+    <form method="post" action="{{ core.buildUrl({'component': 'seating_assignment_email', 'page': 'edit_seating_assignment_email'}) }}" id="form_seating_assignment_email">
+    {{ parent() }}
     </form>
-{% endblock %} #}
+{% endblock %}
 {% block buttons %}
-
     {{ block('close_button') }}
     <input class="btn btn-primary" type="submit" value="Send" />
 {% endblock %}
