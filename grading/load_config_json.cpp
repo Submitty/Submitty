@@ -14,33 +14,46 @@
 extern const char *GLOBAL_config_json_string;  // defined in json_generated.cpp
 
 void AddAutogradingConfiguration(nlohmann::json &whole_config) {
-  whole_config["autograding"]["submission_to_compilation"].push_back("**/*.cpp");
-  whole_config["autograding"]["submission_to_compilation"].push_back("**/*.cxx");
-  whole_config["autograding"]["submission_to_compilation"].push_back("**/*.c");
-  whole_config["autograding"]["submission_to_compilation"].push_back("**/*.h");
-  whole_config["autograding"]["submission_to_compilation"].push_back("**/*.hpp");
-  whole_config["autograding"]["submission_to_compilation"].push_back("**/*.hxx");
-  whole_config["autograding"]["submission_to_compilation"].push_back("**/*.java");
 
-  whole_config["autograding"]["submission_to_runner"].push_back("**/*.py");
-  whole_config["autograding"]["submission_to_runner"].push_back("**/*.pdf");
+  if (whole_config["autograding"].find("submission_to_compilation") == whole_config["autograding"].end()) {
+    whole_config["autograding"]["submission_to_compilation"].push_back("**/*.cpp");
+    whole_config["autograding"]["submission_to_compilation"].push_back("**/*.cxx");
+    whole_config["autograding"]["submission_to_compilation"].push_back("**/*.c");
+    whole_config["autograding"]["submission_to_compilation"].push_back("**/*.h");
+    whole_config["autograding"]["submission_to_compilation"].push_back("**/*.hpp");
+    whole_config["autograding"]["submission_to_compilation"].push_back("**/*.hxx");
+    whole_config["autograding"]["submission_to_compilation"].push_back("**/*.java");
+  }
 
-  whole_config["autograding"]["compilation_to_runner"].push_back("**/*.out");
-  whole_config["autograding"]["compilation_to_runner"].push_back("**/*.class");
+  if (whole_config["autograding"].find("submission_to_runner") == whole_config["autograding"].end()) {
+    whole_config["autograding"]["submission_to_runner"].push_back("**/*.py");
+    whole_config["autograding"]["submission_to_runner"].push_back("**/*.pdf");
+  }
 
-  whole_config["autograding"]["compilation_to_validation"].push_back("test*/STDOUT*.txt");
-  whole_config["autograding"]["compilation_to_validation"].push_back("test*/STDERR*.txt");
+  if (whole_config["autograding"].find("compilation_to_runner") == whole_config["autograding"].end()) {
+    whole_config["autograding"]["compilation_to_runner"].push_back("**/*.out");
+    whole_config["autograding"]["compilation_to_runner"].push_back("**/*.class");
+  }
 
-  whole_config["autograding"]["submission_to_validation"].push_back("**/README.txt");
-  whole_config["autograding"]["submission_to_validation"].push_back("textbox_*.txt");
-  whole_config["autograding"]["submission_to_validation"].push_back("**/*.pdf");
+  if (whole_config["autograding"].find("compilation_to_validation") == whole_config["autograding"].end()) {
+    whole_config["autograding"]["compilation_to_validation"].push_back("test*/STDOUT*.txt");
+    whole_config["autograding"]["compilation_to_validation"].push_back("test*/STDERR*.txt");
+  }
 
-  whole_config["autograding"]["work_to_details"].push_back("test*/*.txt");
-  whole_config["autograding"]["work_to_details"].push_back("test*/*_diff.json");
-  whole_config["autograding"]["work_to_details"].push_back("**/README.txt");
-  whole_config["autograding"]["work_to_details"].push_back("textbox_*.txt");
-  //todo check up on how this works.
-  whole_config["autograding"]["work_to_details"].push_back("test*/textbox_*.txt");
+  if (whole_config["autograding"].find("submission_to_validation") == whole_config["autograding"].end()) {
+    whole_config["autograding"]["submission_to_validation"].push_back("**/README.txt");
+    whole_config["autograding"]["submission_to_validation"].push_back("textbox_*.txt");
+    whole_config["autograding"]["submission_to_validation"].push_back("**/*.pdf");
+  }
+
+  if (whole_config["autograding"].find("work_to_details") == whole_config["autograding"].end()) {
+    whole_config["autograding"]["work_to_details"].push_back("test*/*.txt");
+    whole_config["autograding"]["work_to_details"].push_back("test*/*_diff.json");
+    whole_config["autograding"]["work_to_details"].push_back("**/README.txt");
+    whole_config["autograding"]["work_to_details"].push_back("textbox_*.txt");
+    //todo check up on how this works.
+    whole_config["autograding"]["work_to_details"].push_back("test*/textbox_*.txt");
+  }
 
   if (whole_config["autograding"].find("use_checkout_subdirectory") == whole_config["autograding"].end()) {
     whole_config["autograding"]["use_checkout_subdirectory"] = "";
