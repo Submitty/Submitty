@@ -1724,11 +1724,8 @@ end of styles used in the admin gradeable page
 }
 
 .noscript {
-    width: 100%;
-    text-align: center;
     background: #f2dede;
     color: #b94a48;
-    height: 2em;
 }
 
 .noscript span,
