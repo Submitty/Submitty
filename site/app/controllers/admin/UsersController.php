@@ -638,12 +638,13 @@ class UsersController extends AbstractController {
         $set_user_registration_or_group_function = function() use ($list_type, &$user, &$user_data) {
             switch($list_type) {
             case "classlist":
-                //student
+                // Registration section has to exist, or a DB exception gets thrown on INSERT or UPDATE.
+                // ON CONFLICT clause in DB query prevents thrown exceptions when registration section already exists.
+                $this->core->getQueries()->insertNewRegistrationSection($user_data[4]);
                 $user->setRegistrationSection($user_data[4]);
                 $user->setGroup(4);
                 break;
             case "graderlist":
-                //grader
                 $user->setGroup($user_data[4]);
                 break;
             default:
@@ -681,7 +682,23 @@ class UsersController extends AbstractController {
             }
         };
 
-        $return_url = $this->core->buildUrl(array('component'=>'admin', 'page'=>'users', 'action'=>'students'));
+        /**
+         * Closure to determine $return_url action ("students" or "graders").
+         *
+         * @return string
+         */
+        $set_return_url_action_function = function() use ($list_type) {
+            switch($list_type) {
+            case "classlist":
+                return "students";
+            case "graderlist":
+                return "graders";
+            default:
+                throw new ValidationException("Unknown classlist", array($list_type, '$set_return_url_action_function'));
+            }
+        };
+
+        $return_url = $this->core->buildUrl(array('component'=>'admin', 'page'=>'users', 'action'=>$set_return_url_action_function()));
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
 
         if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
@@ -768,10 +785,10 @@ class UsersController extends AbstractController {
             $user->setLegalLastName($user_data[2]);
             $user->setEmail($user_data[3]);
             $set_user_registration_or_group_function();
-            if (isset($student_data[$pref_firstname_idx]) && ($student_data[$pref_firstname_idx] !== "")) {
+            if (isset($user_data[$pref_firstname_idx]) && ($user_data[$pref_firstname_idx] !== "")) {
                 $user->setPreferredFirstName($user_data[$pref_firstname_idx]);
             }
-            if (isset($student_data[$pref_lastname_idx]) && ($student_data[$pref_lastname_idx] !== "")) {
+            if (isset($user_data[$pref_lastname_idx]) && ($user_data[$pref_lastname_idx] !== "")) {
                 $user->setPreferredLastName($user_data[$pref_lastname_idx]);
             }
             if ($use_database) {
