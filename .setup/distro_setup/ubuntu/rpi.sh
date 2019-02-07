@@ -92,8 +92,15 @@ mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/soot
 
 pushd ${SUBMITTY_INSTALL_DIR}/java_tools/soot > /dev/null
 rm -rf soot*jar
-wget https://soot-build.cs.uni-paderborn.de/public/origin/develop/soot/soot-develop/build/sootclasses-trunk.jar -o /dev/null > /dev/null 2>&1
-wget https://soot-build.cs.uni-paderborn.de/public/origin/develop/soot/soot-develop/build/sootclasses-trunk-jar-with-dependencies.jar -o /dev/null > /dev/null 2>&1
+# older, requested version:
+curl http://www.cs.rpi.edu/~milanova/soot-develop.jar > soot-develop.jar
+curl http://www.cs.rpi.edu/~milanova/rt.jar > rt.jar
+# most recent libraries:
+curl https://soot-build.cs.uni-paderborn.de/public/origin/develop/soot/soot-develop/build/sootclasses-trunk.jar > sootclasses-trunk.jar
+curl https://soot-build.cs.uni-paderborn.de/public/origin/develop/soot/soot-develop/build/sootclasses-trunk-jar-with-dependencies.jar > sootclasses-trunk-jar-with-dependencies.jar
+
+#
+-o /dev/null > /dev/null 2>&1
 popd > /dev/null
 
 chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/java_tools
@@ -101,6 +108,7 @@ chmod -R 751 ${SUBMITTY_INSTALL_DIR}/java_tools
 
 
 # install haskell
+echo "Getting Haskell... "
 apt-get install -qqy haskell-platform
 apt-get install -qqy ocaml
 
@@ -112,6 +120,7 @@ apt-get install -qqy ocaml
 
 ##################################################
 # Used by Network Programming class
+echo "Getting tools for NetProg... "
 apt-get install -qqy libssl-dev
 
 # don't install these...
@@ -156,6 +165,7 @@ rm glfw-3.2.1.zip
 
 ##################################################
 # Used by Computational Vision course
+echo "installing vision libraries"
 apt-get install -qqy python3-tk
 
 pip3 install numpy
@@ -182,3 +192,6 @@ apt-get install -qqy wamerican
 
 # attempt to correct a system with broken dependencies in place
 apt-get -f -qqy install
+
+
+echo "done with RPI specific installs"
