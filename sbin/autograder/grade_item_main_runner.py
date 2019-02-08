@@ -74,7 +74,6 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                     # Networks containers together if there are more than one of them. Modifies container_info to store 'network'
                     #   The name of the docker network it is connected to.
                     network_containers(container_info,os.path.join(tmp_work, "test_input"),which_untrusted,use_router,single_port_per_container)
-                    print('NETWORKED CONTAINERS')
                     #The containers are now ready to execute.
 
                     processes = dict()
@@ -157,7 +156,6 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
 
                 finally:
                     clean_up_containers(container_info,job_id,is_batch_job,which_untrusted,item_name,grading_began,use_router)
-                    print("CLEANED UP CONTAINERS")
             else:
                 try:
                     # Move the files necessary for grading (runner, inputs, etc.) into the testcase folder.
@@ -206,7 +204,6 @@ def at_least_one_alive(processes):
 
 #targets must hold names/keys for the processes dictionary
 def send_message_to_processes(message, processes, targets):
-    print("sending {0} to {1}".format(message, targets))
     for target in targets:
         p = processes[target]
         # poll returns None if the process is still running.
@@ -421,7 +418,6 @@ def network_containers_routerless(container_info,which_untrusted):
   for name, info in sorted(container_info.items()):
       my_full_name = "{0}_{1}".format(which_untrusted, name)
       #container_info[name]['network'] = network_name
-      print('adding {0} to network {1}'.format(name,network_name))
       subprocess.check_output(['docker', 'network', 'connect', '--alias', name, network_name, my_full_name]).decode('utf8').strip()
 
 #Connect dockers in a network, updates the container_info with network names, and creates knownhosts.csv
@@ -439,7 +435,6 @@ def network_containers_with_router(container_info,which_untrusted):
 
       container_info[name]['network'] = network_name
       actual_name  = '{0}_Actual'.format(name)
-      print('adding {0} to network {1} with actual name {2}'.format(name,network_name, actual_name))
       subprocess.check_output(['docker', 'network', 'create', '--internal', '--driver', 'bridge', network_name]).decode('utf8').strip()
       subprocess.check_output(['docker', 'network', 'connect', '--alias', actual_name, network_name, my_name]).decode('utf8').strip()
 
@@ -469,7 +464,6 @@ def network_containers_with_router(container_info,which_untrusted):
           aliases.append('--alias')
           aliases.append(endpoint)
 
-      print('adding router to {0} with aliases {1}'.format(network_name, aliases))
       subprocess.check_output(['docker', 'network', 'connect'] + aliases + [network_name, router_name]).decode('utf8').strip()
 
 
