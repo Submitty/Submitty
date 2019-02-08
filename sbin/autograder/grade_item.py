@@ -281,7 +281,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         complete_config_obj = json.load(infile)
 
     # intentionally fragile to avoid redundancy
-    USE_DOCKER = complete_config_obj['docker_enabled']
+    USE_DOCKER = True if complete_config_obj["autograding_method"] == "docker" else False
 
     # --------------------------------------------------------------------
     # COMPILE THE SUBMITTED CODE

@@ -108,48 +108,50 @@ void ArchiveValidatedFiles(nlohmann::json &whole_config) {
 
 void AddDockerConfiguration(nlohmann::json &whole_config) {
 
-  if (!whole_config["docker_enabled"].is_boolean()){
-    whole_config["docker_enabled"] = false;
+  //check if docker is globally enabled.
+  if (!whole_config["autograding_method"].is_string()) {
+    whole_config["autograding_method"] = "jailed sandbox";
+  }else{
+    assert(whole_config["autograding_method"] == "docker"
+        || whole_config["autograding_method"]  == "jailed sandbox");
   }
 
-  if(!whole_config["default_container_image"].is_string()){
-    whole_config["default_container_image"] = "ubuntu:custom";
+  //check if there are global container defaults present. If not, add an empty object.
+  if(whole_config["container_options"].is_null()){
+    whole_config["container_options"] = nlohmann::json::object();
   }
 
-  std::string default_container_image = whole_config["default_container_image"];
-  bool docker_enabled = whole_config["docker_enabled"];
-
-
-
-  if (!whole_config["use_router"].is_boolean()){
-    whole_config["use_router"] = false;
+  //Fill in the defaults.
+  if(!whole_config["container_options"]["container_image"].is_string()){
+    whole_config["container_options"]["container_image"] = "ubuntu:custom";
   }
 
-  if (!whole_config["single_port_per_container"].is_boolean()){
-    whole_config["single_port_per_container"] = false; // connection
+  if (!whole_config["container_options"]["use_router"].is_boolean()){
+    whole_config["container_options"]["use_router"] = false;
   }
 
-  bool use_router = whole_config["use_router"];
-  bool single_port_per_container = whole_config["single_port_per_container"];
+  if (!whole_config["container_options"]["single_port_per_container"].is_boolean()){
+    whole_config["container_options"]["single_port_per_container"] = false; // connection
+  }
 
   nlohmann::json::iterator tc = whole_config.find("testcases");
   assert (tc != whole_config.end());
   
   int testcase_num = 0;
-  for (typename nlohmann::json::iterator itr = tc->begin(); itr != tc->end(); itr++,testcase_num++){
+  for (typename nlohmann::json::iterator itr = tc->begin(); itr != tc->end(); itr++,testcase_num++)
+  {
     std::string title = whole_config["testcases"][testcase_num].value("title","BAD_TITLE");
 
     nlohmann::json this_testcase = whole_config["testcases"][testcase_num];
-
     if (!this_testcase["use_router"].is_boolean()){
-      this_testcase["use_router"] = use_router;
+      this_testcase["use_router"] = whole_config["container_options"]["use_router"];
     }
 
     if (!this_testcase["single_port_per_container"].is_boolean()){
-      this_testcase["single_port_per_container"] = single_port_per_container;
+      this_testcase["single_port_per_container"] = whole_config["container_options"]["single_port_per_container"];
     }
 
-    assert(!(single_port_per_container && use_router));
+    assert(!(this_testcase["single_port_per_container"] && this_testcase["use_router"]));
 
     nlohmann::json commands = nlohmann::json::array();
     // if "command" exists in whole_config, we must wrap it in a container.
@@ -170,9 +172,7 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
 
     if(!this_testcase["containers"].is_null()){
       assert(this_testcase["containers"].is_array());
-    }
-
-    if(this_testcase["containers"].is_null()){
+    }else{
       this_testcase["containers"] = nlohmann::json::array();
       //commands may have to be a json::array();
       this_testcase["containers"][0] = nlohmann::json::object();
@@ -186,7 +186,7 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
     }
 
     if(this_testcase["containers"].size() > 1){
-      assert(this_testcase["containers"].size() == 1 || docker_enabled == true);
+      assert(whole_config["autograding_method"] == "docker");
     }
 
     bool found_router = false;
@@ -200,7 +200,6 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
       }
 
       if(this_testcase["containers"][container_num]["container_name"].is_null()){
-        //pad this out correctly?
         this_testcase["containers"][container_num]["container_name"] = "container" + std::to_string(container_num); 
       }
 
@@ -218,7 +217,7 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
 
       if(this_testcase["containers"][container_num]["container_image"].is_null()){
         //TODO: store the default system image somewhere and fill it in here.
-        this_testcase["containers"][container_num]["container_image"] = default_container_image;
+        this_testcase["containers"][container_num]["container_image"] = whole_config["container_options"]["container_image"];
       }    
     }
 
@@ -229,7 +228,7 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
       insert_router["commands"].push_back("python3 submitty_router.py");
       insert_router["container_name"] = "router";
       insert_router["import_default_router"] = true;
-      insert_router["container_image"] = default_container_image;
+      insert_router["container_image"] = "ubuntu:custom";
       this_testcase["containers"].push_back(insert_router);
     }
 
@@ -237,11 +236,12 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
     assert(!whole_config["testcases"][testcase_num]["title"].is_null());
     assert(!whole_config["testcases"][testcase_num]["containers"].is_null());
   }
+  return;
 }
 
 void FormatDispatcherActions(nlohmann::json &whole_config) {
 
-  bool docker_enabled = whole_config["docker_enabled"];
+  bool docker_enabled = (whole_config["autograding_method"] == "docker") ? true : false;
 
   nlohmann::json::iterator tc = whole_config.find("testcases");
   assert (tc != whole_config.end());
@@ -266,7 +266,6 @@ void FormatDispatcherActions(nlohmann::json &whole_config) {
       nlohmann::json dispatcher_action = dispatcher_actions[i];
 
       std::string action = dispatcher_action.value("action","");
-      std::cout << "we just got action " << action << std::endl;
       assert(action != "");
 
       if(action == "delay"){
@@ -540,7 +539,6 @@ nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid) {
   nlohmann::json answer;
   std::stringstream sstr(GLOBAL_config_json_string);
   sstr >> answer;
-  
   AddDockerConfiguration(answer);
   FormatDispatcherActions(answer);
   formatPreActions(answer);
