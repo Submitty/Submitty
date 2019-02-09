@@ -10,7 +10,6 @@ import sys
 import pwd
 import time
 import subprocess
-from submitty_utils import glob
 import json
 
 

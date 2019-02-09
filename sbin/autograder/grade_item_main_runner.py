@@ -18,7 +18,7 @@ import csv
 import json
 from pwd import getpwnam
 
-from submitty_utils import dateutils, glob
+from submitty_utils import dateutils
 from . import grade_item, grade_items_logging, write_grade_history, CONFIG_PATH
 
 with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
