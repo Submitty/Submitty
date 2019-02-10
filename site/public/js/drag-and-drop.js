@@ -276,7 +276,7 @@ function addLabel(filename, filesize, part, previous){
     var tmp = document.createElement('label');
     tmp.setAttribute("class", "mylabel");
     tmp.setAttribute("fname", filename);
-    tmp.innerHTML =  filename + " " + filesize + "kb <i class='fa fa-trash-o'></i><br />";
+    tmp.innerHTML =  filename + " " + filesize + "kb <i class='fas fa-trash'></i><br />";
     // styling
     tmp.children[0].onmouseover = function(e){
         e.stopPropagation();
@@ -365,6 +365,22 @@ function isValidSubmission(){
     return false;
 }
 
+function checkForPreviousSubmissions(csrf_token, gradeable_id, user_id){
+    var formData = new FormData();
+    formData.append('csrf_token', csrf_token);
+    formData.append('user_id', user_id);
+    var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'verify', 'gradeable_id': gradeable_id});
+
+    return $.ajax({
+        async: false,
+        url: url,
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+    });  
+}
+
 /**
  * @param csrf_token
  * @param gradeable_id
@@ -374,7 +390,7 @@ function isValidSubmission(){
  * @param count
  * @param makeSubmission, a callback function
  */
-function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, repo_id, makeSubmission) {
+function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, repo_id, makeSubmission, qr_bulk_upload = false) {
 
     var formData = new FormData();
     formData.append('csrf_token', csrf_token);
@@ -391,7 +407,7 @@ function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, 
             try {
                 data = JSON.parse(data);
                 if (data['success']) {
-                    if(data['previous_submission']) { // if there is a previous submission, give the user merge options
+                    if(data['previous_submission'] && !qr_bulk_upload) { // if there is a previous submission, give the user merge options
                         var form = $("#previous-submission-form");
                         var submitter = form.find(".submit-button");
                         var closer = form.find(".close-button");
@@ -493,7 +509,7 @@ function submitSplitItem(csrf_token, gradeable_id, user_id, path, count, merge_p
                     $("#bulk_submit_" + count).prop("disabled", true);
                     $("#bulk_delete_" + count).prop("disabled", true);
                     $("#users_" + count + " :input").prop("disabled", true);
-                    var message ='<div id="submit_' + count +  '" class="inner-message alert alert-success"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'submit_' + count +'\');"></a><i class="fa fa-times-circle"></i>' + data['message'] + '</div>';
+                    var message ='<div id="submit_' + count +  '" class="inner-message alert alert-success"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'submit_' + count +'\');"></a><i class="fas fa-times-circle"></i>' + data['message'] + '</div>';
                     $('#messages').append(message);
                     setTimeout(function() {
                         $('#submit_' + count).fadeOut();
@@ -555,7 +571,7 @@ function deleteSplitItem(csrf_token, gradeable_id, path, count) {
                     $("#bulk_delete_" + count).prop("disabled", true);
                     $("#bulk_user_id_" + count).val("");
                     $("#bulk_user_id_" + count).prop("disabled", true);
-                    var message ='<div id="delete_' + count + '" class="inner-message alert alert-success"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'delete_' + count + '\');"></a><i class="fa fa-times-circle"></i>' + data['message'] + '</div>';
+                    var message ='<div id="delete_' + count + '" class="inner-message alert alert-success"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'delete_' + count + '\');"></a><i class="fas fa-times-circle"></i>' + data['message'] + '</div>';
                     $('#messages').append(message);
                     setTimeout(function() {
                         $('#delete_' + count).fadeOut();
@@ -814,6 +830,7 @@ function handleDownloadImages(csrf_token) {
     var return_url = buildUrl({'component': 'grading', 'page': 'images', 'action': 'view_images_page'});
     var formData = new FormData();
     formData.append('csrf_token', csrf_token);
+    formData.append('file_count', file_array.length);
 
 
     // Files selected
@@ -834,7 +851,7 @@ function handleDownloadImages(csrf_token) {
                 alert("ERROR! You may not use angle brackets in your filename: " + file_array[i][j].name);
                 return;
             }
-        formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);
+            formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);
         }
     }
 

@@ -1801,6 +1801,47 @@ function onAddComponent() {
 }
 
 /**
+ * Called when the 'Import Components' button is pressed
+ */
+function importComponentsFromFile() {
+    let submit_url = buildUrl({'component': 'admin', 'page': 'admin_gradeable', 'action': 'import_components', 'gradeable_id': getGradeableId()});
+    let formData = new FormData();
+
+    let files = $('#import-components-file')[0].files;
+
+    if (files.length === 0) {
+        return;
+    }
+
+    // Files selected
+    for (let i = 0; i < files.length; i++) {
+        formData.append('files' + i, files[i], files[i].name);
+    }
+
+    formData.append('csrf_token', csrfToken);
+
+    $.getJSON({
+        url: submit_url,
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function (response) {
+            if (response.status !== 'success') {
+                console.error('Something went wrong importing components: ' + response.message);
+                reject(new Error(response.message));
+            } else {
+                location.reload();
+            }
+        },
+        error: function (e) {
+            alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
+                "send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadGradeableComponents]");
+        }
+    });
+}
+
+/**
  * Called when the point value of a common mark changes
  * @param me DOM Element of the mark point entry
  */

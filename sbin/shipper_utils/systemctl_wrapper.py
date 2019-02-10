@@ -54,7 +54,7 @@ def print_status_message(status_code, mode, daemon, machine):
 
 # A wrapper for perform_systemctl_command_on_worker that iterates over all workers.
 def perform_systemctl_command_on_all_workers(daemon, mode):
-  # Right now, this script returns the greatesr (worst) status it receives from a worker.
+  # Right now, this script returns the greatest (worst) status it receives from a worker.
   greatest_status = 0
 
   for target in WORKERS.keys():

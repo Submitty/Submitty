@@ -43,11 +43,11 @@
                             {{ g_info.name }}
                             {% if g_info.url|trim != "" %}
                                 <a class="external" href="{{ g_info.url }}" target="_blank">
-                                    <i style="margin-left: 10px;" class="fa fa-external-link"></i>
+                                    <i style="margin-left: 10px;" class="fas fa-external-link-alt"></i>
                                 </a>
                             {% endif %}
                             {% if g_info.can_delete %}
-                                <i class="fa fa-trash fa-fw" style="cursor:pointer;" aria-hidden="true" title="Delete Gradeable" onclick='newDeleteGradeableForm("{{ core.buildUrl({'component': 'admin', 'page': 'admin_gradeable', 'action': 'delete_gradeable', 'id': g_info.id}) }}","{{ g_info.name }}");'></i>
+                                <i class="fas fa-trash fa-fw" style="cursor:pointer;" aria-hidden="true" title="Delete Gradeable" onclick='newDeleteGradeableForm("{{ core.buildUrl({'component': 'admin', 'page': 'admin_gradeable', 'action': 'delete_gradeable', 'id': g_info.id}) }}","{{ g_info.name }}");'></i>
                             {% endif %}
                         </td>
                         {% for button in g_info.buttons %}
