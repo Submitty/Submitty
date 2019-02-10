@@ -189,7 +189,7 @@ class NavigationView extends AbstractView {
             "course_name" => $this->core->getConfig()->getCourseName(),
             "course_id" => $this->core->getConfig()->getCourse(),
             "sections" => $render_sections,
-            "message_file_contents" => $message_file_details,
+            "message_file_details" => $message_file_details,
             "display_custom_message" => $display_custom_message,
             "user_seating_details" => $user_seating_details,
             "display_room_seating" => $display_room_seating,
