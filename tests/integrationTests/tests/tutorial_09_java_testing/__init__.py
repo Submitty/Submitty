@@ -3,7 +3,7 @@ from lib import prebuild, testcase, SUBMITTY_TUTORIAL_DIR
 
 import subprocess
 import os
-import glob
+from pathlib import Path
 import shutil
 
 
@@ -41,17 +41,17 @@ def initialize(test):
 def cleanup(test):
     # seem to need to cleanup this class file, otherwise it doesn't recompile
     subprocess.call(["rm"] + ["-f"] +
-                    glob.glob(os.path.join(test.testcase_path, "data/", "*.zip")))
+                    Path(os.path.join(test.testcase_path, "data/")).glob( "*.zip"))
     subprocess.call(["rm"] + ["-f"] +
-                    glob.glob(os.path.join(test.testcase_path, "data/", "Factorial.class")))
+                    Path(os.path.join(test.testcase_path, "data/")).glob( "Factorial.class"))
     subprocess.call(["rm"] + ["-f"] +
-                    glob.glob(os.path.join(test.testcase_path, "data/", "Factorial.java")))
+                    Path(os.path.join(test.testcase_path, "data/")).glob( "Factorial.java"))
     subprocess.call(["rm"] + ["-rf"] +
-                    glob.glob(os.path.join(test.testcase_path, "data/", "test*")))
+                    Path(os.path.join(test.testcase_path, "data/")).glob( "test*"))
     subprocess.call(["rm"] + ["-f"] +
-                    glob.glob(os.path.join(test.testcase_path, "data/grade.txt")))
+                    Path(os.path.join(test.testcase_path, "data/")).glob( "grade.txt"))
     subprocess.call(["rm"] + ["-f"] +
-                    glob.glob(os.path.join(test.testcase_path, "data/results.json")))
+                    Path(os.path.join(test.testcase_path, "data/")).glob( "results.json"))
 
 
 @testcase

@@ -3,7 +3,7 @@ from lib import prebuild, testcase, SUBMITTY_TUTORIAL_DIR
 
 import subprocess
 import os
-import glob
+from pathlib import Path
 import shutil
 
 
@@ -38,7 +38,7 @@ def cleanup(test):
         os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_input"),
         os.path.join(data_path)])
     subprocess.call(["cp"] +
-                     glob.glob(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output","*")) +
+                     Path(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output")).glob("*") +
                      [os.path.join(test.testcase_path, "data")])
 
 

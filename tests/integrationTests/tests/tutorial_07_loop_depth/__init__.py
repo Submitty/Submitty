@@ -3,7 +3,7 @@ from lib import prebuild, testcase, SUBMITTY_TUTORIAL_DIR
 
 import subprocess
 import os
-import glob
+from pathlib import Path
 import shutil
 
 ############################################################################
@@ -33,7 +33,7 @@ def initialize(test):
 
 def cleanup(test):
     subprocess.call(["rm"] + ["-rf"] +
-            glob.glob(os.path.join(test.testcase_path, "data", "*")))
+            Path(os.path.join(test.testcase_path, "data")).glob( "*"))
 
 
 @testcase

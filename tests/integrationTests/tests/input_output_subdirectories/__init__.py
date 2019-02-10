@@ -32,22 +32,22 @@ def initialize(test):
         os.path.join(test.testcase_path, "assignment_config")])
 
     subprocess.call(["cp"] + ["-r"] +
-        glob.glob(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_input", "*")) +
+        Path(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_input")).glob( "*") +
         [data_path])
 
     subprocess.call(["cp"] + ["-r"] +
-        glob.glob(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "*")) +
+        Path(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output" )).glob("*") +
         [data_path])
 
     
 ############################################################################
 def cleanup(test):
     subprocess.call(["rm"] + ["-rf"] +
-                    glob.glob(os.path.join(test.testcase_path, "data", "test*")))
+                    Path(os.path.join(test.testcase_path, "data")).glob("test*"))
     subprocess.call(["rm"] + ["-f"] +
-                    glob.glob(os.path.join(test.testcase_path, "data", "results*")))
+                    Path(os.path.join(test.testcase_path, "data")).glob("results*"))
     subprocess.call(["rm"] + ["-f"] +
-                    glob.glob(os.path.join(test.testcase_path, "data", "*.cpp")))
+                    Path(os.path.join(test.testcase_path, "data")).glob("*.cpp"))
 
 
 @testcase

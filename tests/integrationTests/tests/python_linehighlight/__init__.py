@@ -3,7 +3,7 @@ from lib import prebuild, testcase, SUBMITTY_INSTALL_DIR
 
 import subprocess
 import os
-import glob
+from pathlib import Path
 import shutil
 
 
@@ -42,7 +42,7 @@ def initialize(test):
         os.path.join(test.testcase_path, "data")])
 
     subprocess.call(["cp"] +
-            glob.glob(os.path.join(SAMPLE_SUBMISSIONS, "*.py")) +
+            Path(os.path.join(SAMPLE_SUBMISSIONS)).glob( "*.py") +
             [os.path.join(test.testcase_path, "data")])
 
 

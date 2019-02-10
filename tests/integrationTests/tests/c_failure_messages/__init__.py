@@ -3,7 +3,7 @@ from lib import prebuild, testcase, SUBMITTY_INSTALL_DIR
 
 import subprocess
 import os
-import glob
+from pathlib import Path
 import shutil
 
 ############################################################################
@@ -28,7 +28,7 @@ def cleanup(test):
                      os.path.join(test.testcase_path, "data")])
     os.mkdir(os.path.join(test.testcase_path, "data"))
     subprocess.call(["cp"] +
-                     glob.glob(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output","*.txt")) +
+                     Path(os.path.join(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output")).glob("*.txt") +
                      [os.path.join(test.testcase_path, "data")])
 
 
