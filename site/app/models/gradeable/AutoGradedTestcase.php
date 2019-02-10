@@ -30,7 +30,7 @@ class AutoGradedTestcase extends AbstractModel {
     /** @property @var GradeableAutocheck[] */
     protected $autochecks = [];
 
-    public function __construct(Core $core, AutogradingTestcase $testcase, $result_path, array $details) {
+    public function __construct(Core $core, AutogradingTestcase $testcase, $results_path, $results_public_path, array $details) {
         parent::__construct($core);
 
         if ($testcase === null) {
@@ -49,7 +49,7 @@ class AutoGradedTestcase extends AbstractModel {
                 $this->autochecks[$idx] = new GradeableAutocheck(
                     $this->core, $autocheck,
                     $this->core->getConfig()->getCoursePath(),
-                    $result_path, $index
+                    $results_path, $results_public_path, $index
                 );
             }
         }
