@@ -259,7 +259,7 @@ std::string validate_option(const std::string &program, const std::string &optio
         { "submitty_hamcrest.jar",            SUBMITTY_INSTALL_DIRECTORY+"/java_tools/hamcrest/hamcrest-core-1.3.jar" },
         { "submitty_junit/",                  SUBMITTY_INSTALL_DIRECTORY+"/java_tools/JUnit/" },
         // older, requested version:
-        { "submitty_soot.jar",                SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/soot.jar" },
+        { "submitty_soot.jar",                SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/soot-develop.jar" },
         { "submitty_rt.jar",                  SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/rt.jar" }
         // most recent libraries:
         //{ "submitty_soot.jar",                SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/sootclasses-trunk.jar" },
@@ -275,7 +275,7 @@ std::string validate_option(const std::string &program, const std::string &optio
         { "submitty_hamcrest.jar",            SUBMITTY_INSTALL_DIRECTORY+"/java_tools/hamcrest/hamcrest-core-1.3.jar" },
         { "submitty_junit/",                  SUBMITTY_INSTALL_DIRECTORY+"/java_tools/JUnit/" },
         // older, requested version:
-        { "submitty_soot.jar",                SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/soot.jar" },
+        { "submitty_soot.jar",                SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/soot-develop.jar" },
         { "submitty_rt.jar",                  SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/rt.jar" }
         // most recent libraries:
         //{ "submitty_soot.jar",                SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/sootclasses-trunk.jar" },
