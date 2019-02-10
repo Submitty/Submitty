@@ -712,18 +712,7 @@ table tr.table-header {
     background-color: #505050 !important;
 }
 .newpost {
-    border-left: 5px solid #0a6496 !important;
-}
-.fa-post_seen {
-    color: #a7a7a7;
-    vertical-align: -3px;
-    padding-right: 5px;
-}
-.fa-post_new {
-    color: #0c7dbb;
-    font-size: 12px;
-    vertical-align: -2px;
-    padding-right: 5px;
+    background-color: white !important;
 }
 .important {
     /* THIS IS WHERE THE BACKGROUND COLOR FOR POSTS IS */
@@ -733,7 +722,8 @@ table tr.table-header {
 }
 
 .viewed {
-    color: #888888;
+    color: #4a4a4a;
+    background-color: #dcdcdcb5
 }
 
 .box-title > h4 {
@@ -908,6 +898,9 @@ table tr.table-header {
 .post_content {
     margin-right: 5px;
 }
+.post_viewed_btn {
+    background-color: #dcdcdcb5 !important;
+}
 
 .first_post .post_button {
 }
@@ -929,8 +922,7 @@ table tr.table-header {
     margin-top: 20px;
     word-wrap: break-word;
     border-radius: 3px;
-    border-left: 5px solid #a7a7a7;
-    background-color:white;
+    background-color: #dcdcdcb5;
     overflow-y: auto;
     overflow-x: hidden;
 }
