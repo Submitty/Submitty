@@ -250,35 +250,37 @@ void validate_filename(const std::string &filename) {
 
 std::string validate_option(const std::string &program, const std::string &option) {
 
-  // TODO: update this with the option to junit5
-
-  //{ "submitty_junit.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4xx.jar" },
-  //{ "submitty_junit_5.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-5xx.jar" },
-  //{ "submitty_junit_4.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4xx.jar" },
-
-  // also for hamcrest 2.0
-
   const std::map<std::string,std::map<std::string,std::string> > option_replacements = {
     { "/usr/bin/javac",
-      { { "submitty_emma.jar",      SUBMITTY_INSTALL_DIRECTORY+"/JUnit/emma.jar" },
-        { "submitty_jacocoagent.jar", SUBMITTY_INSTALL_DIRECTORY+"/JUnit/jacocoagent.jar" },
-        { "submitty_jacococli.jar",   SUBMITTY_INSTALL_DIRECTORY+"/JUnit/jacococli.jar" },
-        { "submitty_junit.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4.12.jar" },
-        { "submitty_hamcrest.jar",  SUBMITTY_INSTALL_DIRECTORY+"/JUnit/hamcrest-core-1.3.jar" },
-        { "submitty_junit/",        SUBMITTY_INSTALL_DIRECTORY+"/JUnit/" },
-        { "submitty_soot.jar",      SUBMITTY_INSTALL_DIRECTORY+"/tools/soot/soot-develop.jar" },
-        { "submitty_rt.jar",        SUBMITTY_INSTALL_DIRECTORY+"/tools/soot/rt.jar" }
+      { { "submitty_emma.jar",                SUBMITTY_INSTALL_DIRECTORY+"/java_tools/emma/emma.jar" },
+        { "submitty_jacocoagent.jar",         SUBMITTY_INSTALL_DIRECTORY+"/java_tools/jacoco/jacocoagent.jar" },
+        { "submitty_jacococli.jar",           SUBMITTY_INSTALL_DIRECTORY+"/java_tools/jacoco/jacococli.jar" },
+        { "submitty_junit.jar",               SUBMITTY_INSTALL_DIRECTORY+"/java_tools/JUnit/junit-4.12.jar" },
+        { "submitty_hamcrest.jar",            SUBMITTY_INSTALL_DIRECTORY+"/java_tools/hamcrest/hamcrest-core-1.3.jar" },
+        { "submitty_junit/",                  SUBMITTY_INSTALL_DIRECTORY+"/java_tools/JUnit/" },
+        // older, requested version:
+        { "submitty_soot.jar",                SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/soot.jar" },
+        { "submitty_rt.jar",                  SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/rt.jar" }
+        // most recent libraries:
+        //{ "submitty_soot.jar",                SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/sootclasses-trunk.jar" },
+        //{ "submitty_soot_dependencies.jar",   SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/sootclasses-trunk-jar-with-dependencies.jar" },
+        //{ "submitty_rt.jar",                  "/usr/lib/jvm/java-8-oracle/jre/lib/rt.jar" }
       }
     },
     { "/usr/bin/java",
-      { { "submitty_emma.jar",      SUBMITTY_INSTALL_DIRECTORY+"/JUnit/emma.jar" },
-        { "submitty_jacocoagent.jar", SUBMITTY_INSTALL_DIRECTORY+"/JUnit/jacocoagent.jar" },
-        { "submitty_jacococli.jar",   SUBMITTY_INSTALL_DIRECTORY+"/JUnit/jacococli.jar" },
-        { "submitty_junit.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4.12.jar" },
-        { "submitty_hamcrest.jar",  SUBMITTY_INSTALL_DIRECTORY+"/JUnit/hamcrest-core-1.3.jar" },
-        { "submitty_junit/",        SUBMITTY_INSTALL_DIRECTORY+"/JUnit/" },
-        { "submitty_soot.jar",      SUBMITTY_INSTALL_DIRECTORY+"/tools/soot/soot-develop.jar" },
-        { "submitty_rt.jar",        SUBMITTY_INSTALL_DIRECTORY+"/tools/soot/rt.jar" }
+      { { "submitty_emma.jar",                SUBMITTY_INSTALL_DIRECTORY+"/java_tools/emma/emma.jar" },
+        { "submitty_jacocoagent.jar",         SUBMITTY_INSTALL_DIRECTORY+"/java_tools/jacoco/jacocoagent.jar" },
+        { "submitty_jacococli.jar",           SUBMITTY_INSTALL_DIRECTORY+"/java_tools/jacoco/jacococli.jar" },
+        { "submitty_junit.jar",               SUBMITTY_INSTALL_DIRECTORY+"/java_tools/JUnit/junit-4.12.jar" },
+        { "submitty_hamcrest.jar",            SUBMITTY_INSTALL_DIRECTORY+"/java_tools/hamcrest/hamcrest-core-1.3.jar" },
+        { "submitty_junit/",                  SUBMITTY_INSTALL_DIRECTORY+"/java_tools/JUnit/" },
+        // older, requested version:
+        { "submitty_soot.jar",                SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/soot.jar" },
+        { "submitty_rt.jar",                  SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/rt.jar" }
+        // most recent libraries:
+        //{ "submitty_soot.jar",                SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/sootclasses-trunk.jar" },
+        //{ "submitty_soot_dependencies.jar",   SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/sootclasses-trunk-jar-with-dependencies.jar" },
+        //{ "submitty_rt.jar",                  "/usr/lib/jvm/java-8-oracle/jre/lib/rt.jar" }
       }
     },
     { "/usr/bin/mono",
