@@ -6,7 +6,7 @@ namespace app\models\gradeable;
 use app\libraries\Core;
 use app\libraries\Utils;
 use app\models\AbstractModel;
-use app\models\GradeableTestcase;
+use app\models\gradeable\AutogradingTestcase;
 
 /**
  * Class AutogradingConfig
@@ -23,7 +23,7 @@ use app\models\GradeableTestcase;
  * @method string getEarlySubmissionMessage()
  * @method int getEarlySubmissionMinimumDaysEarly()
  * @method int getEarlySubmissionMinimumPoints()
- * @method GradeableTestcase[] getEarlySubmissionTestCases()
+ * @method AutogradingTestcase[] getEarlySubmissionTestCases()
  * @method int getTotalNonHiddenNonExtraCredit()
  * @method int getTotalNonHiddenExtraCredit()
  * @method int getTotalHiddenNonExtraCredit()
