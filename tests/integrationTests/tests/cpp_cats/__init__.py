@@ -45,9 +45,9 @@ def initialize(test):
 ############################################################################
 def cleanup(test):
     subprocess.call(["rm"] + ["-rf"] +
-                    Path(os.path.join(test.testcase_path, "data")).glob("test*"))
+                    Path(test.testcase_path, "data").glob("test*"))
     subprocess.call(["rm"] + ["-f"] +
-                    Path(os.path.join(test.testcase_path, "data")).glob("results*"))
+                    Path(test.testcase_path, "data").glob("results*"))
 
 @testcase
 def allCorrect(test):

@@ -41,17 +41,17 @@ def initialize(test):
 def cleanup(test):
     # seem to need to cleanup this class file, otherwise it doesn't recompile
     subprocess.call(["rm"] + ["-f"] +
-                    Path(os.path.join(test.testcase_path, "data/")).glob( "*.zip"))
+                    Path(test.testcase_path, "data/").glob( "*.zip"))
     subprocess.call(["rm"] + ["-f"] +
-                    Path(os.path.join(test.testcase_path, "data/")).glob( "Factorial.class"))
+                    Path(test.testcase_path, "data/").glob( "Factorial.class"))
     subprocess.call(["rm"] + ["-f"] +
-                    Path(os.path.join(test.testcase_path, "data/")).glob( "Factorial.java"))
+                    Path(test.testcase_path, "data/").glob( "Factorial.java"))
     subprocess.call(["rm"] + ["-rf"] +
-                    Path(os.path.join(test.testcase_path, "data/")).glob( "test*"))
+                    Path(test.testcase_path, "data/").glob( "test*"))
     subprocess.call(["rm"] + ["-f"] +
-                    Path(os.path.join(test.testcase_path, "data/")).glob( "grade.txt"))
+                    Path(test.testcase_path, "data/").glob( "grade.txt"))
     subprocess.call(["rm"] + ["-f"] +
-                    Path(os.path.join(test.testcase_path, "data/")).glob( "results.json"))
+                    Path(test.testcase_path, "data/").glob( "results.json"))
 
 
 @testcase

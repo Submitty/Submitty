@@ -31,7 +31,7 @@ def initialize(test):
                      os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
                      os.path.join(test.testcase_path, "assignment_config")])
     subprocess.call(["cp"] +
-                    Path(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output")).glob( "*.txt") +
+                    Path(SAMPLE_ASSIGNMENT_CONFIG, "test_output").glob( "*.txt") +
                     [os.path.join(test.testcase_path, "data")])
 
 
@@ -40,11 +40,11 @@ def initialize(test):
 
 def cleanup(test):
     subprocess.call(["rm"] + ["-f"] +
-                    Path(os.path.join(test.testcase_path, "data")).glob( "*cpp"))
+                    Path(test.testcase_path, "data").glob( "*cpp"))
     subprocess.call(["rm"] + ["-rf"] +
-                    Path(os.path.join(test.testcase_path, "data")).glob( "test*"))
+                    Path(test.testcase_path, "data").glob( "test*"))
     subprocess.call(["rm"] + ["-f"] +
-                    Path(os.path.join(test.testcase_path, "data")).glob( "results*"))
+                    Path(test.testcase_path, "data").glob( "results*"))
 
 
 

@@ -38,7 +38,7 @@ def cleanup(test):
         os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_input"),
         os.path.join(data_path)])
     subprocess.call(["cp"] +
-                     Path(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output")).glob("*") +
+                     Path(SAMPLE_ASSIGNMENT_CONFIG, "test_output").glob("*") +
                      [os.path.join(test.testcase_path, "data")])
 
 

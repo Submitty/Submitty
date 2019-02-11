@@ -3,7 +3,7 @@ from lib import prebuild, testcase, SUBMITTY_INSTALL_DIR
 
 import subprocess
 import os
-import glob
+from pathlib import Path
 import shutil
 
 
@@ -32,22 +32,22 @@ def initialize(test):
         os.path.join(test.testcase_path, "assignment_config")])
 
     subprocess.call(["cp"] + ["-r"] +
-        Path(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_input")).glob( "*") +
+        Path(SAMPLE_ASSIGNMENT_CONFIG, "test_input").glob( "*") +
         [data_path])
 
     subprocess.call(["cp"] + ["-r"] +
-        Path(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output" )).glob("*") +
+        Path(SAMPLE_ASSIGNMENT_CONFIG, "test_output").glob("*") +
         [data_path])
 
     
 ############################################################################
 def cleanup(test):
     subprocess.call(["rm"] + ["-rf"] +
-                    Path(os.path.join(test.testcase_path, "data")).glob("test*"))
+                    Path(test.testcase_path).glob("test*"))
     subprocess.call(["rm"] + ["-f"] +
-                    Path(os.path.join(test.testcase_path, "data")).glob("results*"))
+                    Path(test.testcase_path).glob("results*"))
     subprocess.call(["rm"] + ["-f"] +
-                    Path(os.path.join(test.testcase_path, "data")).glob("*.cpp"))
+                    Path(test.testcase_path, "data").glob("*.cpp"))
 
 
 @testcase

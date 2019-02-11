@@ -87,7 +87,7 @@ def pattern_copy(what,patterns,source,target,tmp_logs):
     with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
         print (what," pattern copy ", patterns, " from ", source, " -> ", target, file=f)
         for pattern in patterns:
-            for my_file in Path(os.path.join(source,**)).glob(pattern):
+            for my_file in Path(source,**).glob(pattern):
                 if (os.path.isfile(my_file)):
                     # grab the matched name
                     relpath = os.path.relpath(my_file,source)

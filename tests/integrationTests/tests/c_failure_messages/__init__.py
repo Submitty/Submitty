@@ -28,7 +28,7 @@ def cleanup(test):
                      os.path.join(test.testcase_path, "data")])
     os.mkdir(os.path.join(test.testcase_path, "data"))
     subprocess.call(["cp"] +
-                     Path(os.path.join(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output")).glob("*.txt") +
+                     Path(SAMPLE_ASSIGNMENT_CONFIG,"test_output").glob("*.txt") +
                      [os.path.join(test.testcase_path, "data")])
 
 
