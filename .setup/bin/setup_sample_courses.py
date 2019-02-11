@@ -98,8 +98,7 @@ def main():
 <<<<<<< HEAD
     for course_file in sorted(Path(args.courses_path).glob('*.yml')):
 =======
-    for course_file in sorted(Path(args.courses_path).glob( '*.yml')):
->>>>>>> 2eab0cf44967c957c78bdd028ed4211039446001
+    >>>>>>> 2eab0cf44967c957c78bdd028ed4211039446001
         course_json = load_data_yaml(course_file)
         if len(use_courses) == 0 or course_json['code'] in use_courses:
             course = Course(course_json)
@@ -111,8 +110,7 @@ def main():
 <<<<<<< HEAD
     for user_file in sorted(Path(args.users_path).glob('*.yml')):
 =======
-    for user_file in sorted(Path(args.users_path)).glob( '*.yml')):
->>>>>>> 2eab0cf44967c957c78bdd028ed4211039446001
+    >>>>>>> 2eab0cf44967c957c78bdd028ed4211039446001
         user = User(load_data_yaml(user_file))
         if user.id in ['submitty_php', 'submitty_daemon', 'submitty_cgi', 'submitty_dbuser', 'vagrant', 'postgres'] or \
                 user.id.startswith("untrusted"):
