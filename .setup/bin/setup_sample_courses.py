@@ -18,7 +18,11 @@ import argparse
 from collections import OrderedDict
 from datetime import datetime, timedelta
 from shutil import copyfile
+<<<<<<< HEAD
 from pathlib import Path
+=======
+from pathlibs import Path
+>>>>>>> dbd03723f23c5e4582bfac14f973a26147dc2ce3
 import grp
 import hashlib
 import json
@@ -95,10 +99,15 @@ def main():
 
     courses = {}  # dict[str, Course]
     users = {}  # dict[str, User]
+<<<<<<< HEAD
 
 
     for course_file in sorted(Path(args.courses_path).glob('*.yml')):
         course_json = load_data_yaml(course_file)
+=======
+    for course_file in sorted(Path(args.courses_path).glob('*.yml')):
+       course_json = load_data_yaml(course_file)
+>>>>>>> dbd03723f23c5e4582bfac14f973a26147dc2ce3
         if len(use_courses) == 0 or course_json['code'] in use_courses:
             course = Course(course_json)
             courses[course.code] = course
@@ -106,9 +115,14 @@ def main():
     create_group("submitty_course_builders")
 
 
+<<<<<<< HEAD
 
     for user_file in sorted(Path(args.users_path).glob('*.yml')):
         user = User(load_data_yaml(user_file))
+=======
+    for user_file in sorted(Path(args.users_path).glob('*.yml')):
+       user = User(load_data_yaml(user_file))
+>>>>>>> dbd03723f23c5e4582bfac14f973a26147dc2ce3
         if user.id in ['submitty_php', 'submitty_daemon', 'submitty_cgi', 'submitty_dbuser', 'vagrant', 'postgres'] or \
                 user.id.startswith("untrusted"):
             continue
