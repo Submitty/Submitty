@@ -8,6 +8,7 @@ use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
 use app\models\gradeable\GradedGradeable;
+use app\models\gradeable\LateDays;
 use app\models\gradeable\Mark;
 use app\models\gradeable\TaGradedGradeable;
 use app\models\GradeableAutocheck;
@@ -1106,15 +1107,14 @@ class ElectronicGraderController extends GradingController {
             $display_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         }
 
-        // TODO: delete this once late days are using new model
-        $old_gradeable = null;
-        if($graded_gradeable->getSubmitter()->isTeam()) {
-            $old_gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $graded_gradeable->getSubmitter()->getTeam()->getLeaderId());
+        $late_days_user = null;
+        if ($gradeable->isTeamAssignment()) {
+            // If its a team assignment, use the leader for late days...
+            $late_days_user = $this->core->getQueries()->getUserById($graded_gradeable->getSubmitter()->getTeam()->getLeaderId());
         } else {
-            $old_gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $submitter_id);
+            $late_days_user = $graded_gradeable->getSubmitter()->getUser();
         }
-        $late_status = $old_gradeable->calculateLateStatus();
-        // TODO: End region
+        $late_status = LateDays::fromUser($this->core, $late_days_user)->getLateDayInfoByGradeable($gradeable)->getStatus();
 
         $logger_params = array(
             "course_semester" => $this->core->getConfig()->getSemester(),
