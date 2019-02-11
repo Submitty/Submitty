@@ -18,7 +18,7 @@ import argparse
 from collections import OrderedDict
 from datetime import datetime, timedelta
 from shutil import copyfile
-from pathlibs import Path
+from pathlib import Path
 import grp
 import hashlib
 import json
