@@ -575,10 +575,6 @@ class DatabaseQueries {
         return intval($this->submitty_db->row()['user_group']);
     }
 
-    public function getAllGradeables($user_id = null) {
-        return $this->getGradeables(null, $user_id);
-    }
-
     /**
      * @param $g_id
      * @param $user_id
