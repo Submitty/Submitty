@@ -1053,7 +1053,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             'u.rotating_section',
         ],
         'team_id' => [
-            'user_id'
+            'u.user_id'
         ]
     ];
     const graded_gradeable_key_map_team = [
@@ -1066,6 +1066,9 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             'team.rotating_section'
         ],
         'team_id' => [
+            'team.team_id'
+        ],
+        'user_id' => [
             'team.team_id'
         ]
     ];
