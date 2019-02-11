@@ -3,7 +3,7 @@ from lib import prebuild, testcase, SUBMITTY_INSTALL_DIR
 
 import subprocess
 import os
-import glob
+from pathlib import Path
 import shutil
 
 
@@ -38,11 +38,11 @@ def initialize(test):
             pass
 
     subprocess.call(["cp"] +
-        glob.glob(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_input", "*.txt")) +
+        Path(SAMPLE_ASSIGNMENT_CONFIG, "test_input").glob( "*.txt") +
         [os.path.join(test.testcase_path, "data")])
 
     subprocess.call(["cp"] +
-        glob.glob(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "*.txt")) +
+        Path(SAMPLE_ASSIGNMENT_CONFIG, "test_output").glob( "*.txt") +
         [os.path.join(test.testcase_path, "data")])
 
 
@@ -50,13 +50,13 @@ def initialize(test):
 
 def cleanup(test):
     subprocess.call(["rm"] + ["-f"] +
-        glob.glob(os.path.join(test.testcase_path, "data", "result*")))
+        Path(test.testcase_path, "data").glob( "result*"))
     subprocess.call(["rm"] + ["-rf"] +
-        glob.glob(os.path.join(test.testcase_path, "data", "test*")))
+        Path(test.testcase_path, "data").glob( "test*"))
     subprocess.call(["rm"] + ["-f"] +
-        glob.glob(os.path.join(test.testcase_path, "data", "part*", "*")))
+        Path(test.testcase_path, "data", "part*").glob( "*"))
     subprocess.call(["rm"] + ["-f"] +
-        glob.glob(os.path.join(test.testcase_path, "data", "*out")))
+        Path(test.testcase_path, "data").glob( "*out"))
 
 @testcase
 def full_credit(test):

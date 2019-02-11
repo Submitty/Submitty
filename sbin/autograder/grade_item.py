@@ -16,6 +16,7 @@ import zipfile
 import sys
 import traceback
 from pwd import getpwnam
+from pathlib import Path
 
 from submitty_utils import dateutils, glob
 from . import grade_items_logging, grade_item_main_runner, write_grade_history, CONFIG_PATH
@@ -86,7 +87,7 @@ def pattern_copy(what,patterns,source,target,tmp_logs):
     with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
         print (what," pattern copy ", patterns, " from ", source, " -> ", target, file=f)
         for pattern in patterns:
-            for my_file in glob.glob(os.path.join(source,pattern),recursive=True):
+            for my_file in Path(source,**).glob(pattern):
                 if (os.path.isfile(my_file)):
                     # grab the matched name
                     relpath = os.path.relpath(my_file,source)

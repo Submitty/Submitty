@@ -3,7 +3,7 @@ from lib import prebuild, testcase, SUBMITTY_INSTALL_DIR
 
 import subprocess
 import os
-import glob
+from pathlib import Path
 import shutil
 
 
@@ -37,11 +37,11 @@ def initialize(test):
 
 def cleanup(test):
     subprocess.call(["rm"] + ["-f"] +
-                    glob.glob(os.path.join(test.testcase_path, "data", "*pdf")))
+                    Path(test.testcase_path, "data").glob("*pdf"))
     subprocess.call(["rm"] + ["-rf"] +
-                    glob.glob(os.path.join(test.testcase_path, "data", "test*")))
+                    Path(test.testcase_path, "data").glob( "test*"))
     subprocess.call(["rm"] + ["-f"] +
-                    glob.glob(os.path.join(test.testcase_path, "data", "results*")))
+                    Path(test.testcase_path, "data").glob( "results*"))
 
 
 
