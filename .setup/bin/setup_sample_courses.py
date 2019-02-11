@@ -95,11 +95,8 @@ def main():
 
     courses = {}  # dict[str, Course]
     users = {}  # dict[str, User]
-<<<<<<< HEAD
     for course_file in sorted(Path(args.courses_path).glob('*.yml')):
-=======
-    >>>>>>> 2eab0cf44967c957c78bdd028ed4211039446001
-        course_json = load_data_yaml(course_file)
+       course_json = load_data_yaml(course_file)
         if len(use_courses) == 0 or course_json['code'] in use_courses:
             course = Course(course_json)
             courses[course.code] = course
@@ -107,11 +104,8 @@ def main():
     create_group("submitty_course_builders")
 
 
-<<<<<<< HEAD
     for user_file in sorted(Path(args.users_path).glob('*.yml')):
-=======
-    >>>>>>> 2eab0cf44967c957c78bdd028ed4211039446001
-        user = User(load_data_yaml(user_file))
+       user = User(load_data_yaml(user_file))
         if user.id in ['submitty_php', 'submitty_daemon', 'submitty_cgi', 'submitty_dbuser', 'vagrant', 'postgres'] or \
                 user.id.startswith("untrusted"):
             continue
