@@ -83,8 +83,15 @@ class MiscController extends AbstractController {
         $path = $this->core->getAccess()->resolveDirPath($dir, $_REQUEST["path"]);
 
         if (array_key_exists('gradeable_id', $_REQUEST)) {
-            $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['gradeable_id'], $_REQUEST['user_id']);
-            if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path, "gradeable" => $gradeable])) {
+            $gradeable = $this->tryGetGradeable($_REQUEST['gradeable_id'], false);
+            if ($gradeable === false) {
+                return false;
+            }
+            $graded_gradeable =  $this->tryGetGradedGradeable($gradeable, $_REQUEST['user_id'], false);
+            if ($graded_gradeable === false) {
+                return false;
+            }
+            if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path, "gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
                 $this->core->getOutput()->showError("You do not have access to this file");
                 return false;
             }
@@ -228,8 +235,15 @@ class MiscController extends AbstractController {
         $path = $this->core->getAccess()->resolveDirPath($dir, $_REQUEST["path"]);
 
         if (array_key_exists('gradeable_id', $_REQUEST)) {
-            $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['gradeable_id'], $_REQUEST['user_id']);
-            if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path, "gradeable" => $gradeable])) {
+            $gradeable = $this->tryGetGradeable($_REQUEST['gradeable_id']);
+            if ($gradeable === false) {
+                return false;
+            }
+            $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $_REQUEST['user_id']);
+            if ($graded_gradeable === false) {
+                return false;
+            }
+            if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path, "gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
                 $this->core->getOutput()->showError("You do not have access to this file");
                 return false;
             }
@@ -372,9 +386,12 @@ class MiscController extends AbstractController {
         //makes a random zip file name on the server
         $temp_name = uniqid($this->core->getUser()->getId(), true);
         $zip_name = $temp_dir . "/" . $temp_name . ".zip";
-        $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['gradeable_id']);
+        $gradeable = $this->tryGetGradeable($_REQUEST['gradeable_id']);
+        if ($gradeable === false) {
+            return;
+        }
         $paths = ['submissions'];
-        if ($gradeable->useVcsCheckout()) {
+        if ($gradeable->isVcs()) {
             //VCS submissions are stored in the checkout directory
             $paths[] = 'checkout';
         }
@@ -410,7 +427,7 @@ class MiscController extends AbstractController {
                }
                else {
                    $section_key = "rotating_section";
-                   $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id,
+                   $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable->getId(),
                        $this->core->getUser()->getId());
                    $students = $this->core->getQueries()->getUsersByRotatingSections($sections);
                }
