@@ -1869,6 +1869,7 @@ function generateCodeMirrorBlocks(container_element) {
         lineWrapping: true
     });
 
+    editor0.setSize("100%", "max-content")
     editor0.setOption("theme", "eclipse");
     editor0.refresh();
 
