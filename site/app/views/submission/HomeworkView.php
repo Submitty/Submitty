@@ -257,11 +257,10 @@ class HomeworkView extends AbstractView {
                 $student_ids[] = $student->getId();
             }
 
-            // FIXME: this works, but does not really use new model.  We don't need all that much of the info anyway
-            $gradeables = $this->core->getQueries()->getGradeables($gradeable->getId(), $student_ids);
             $students_version = array();
-            foreach ($gradeables as $g) {
-                $students_version[] = array($g->getUser(), $g->getHighestVersion());
+            foreach ($this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids) as $gg) {
+                /** @var GradedGradeable $gg */
+                $students_version[] = array($gg->getSubmitter()->getId(), $gg->getAutoGradedGradeable()->getHighestVersion());
             }
             $students_full = json_decode(Utils::getAutoFillData($students, $students_version));
         }
