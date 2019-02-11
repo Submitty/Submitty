@@ -18,7 +18,7 @@ import argparse
 from collections import OrderedDict
 from datetime import datetime, timedelta
 from shutil import copyfile
-import glob
+from pathlibs import Path
 import grp
 import hashlib
 import json
@@ -95,7 +95,7 @@ def main():
 
     courses = {}  # dict[str, Course]
     users = {}  # dict[str, User]
-    for course_file in sorted(glob.iglob(os.path.join(args.courses_path, '*.yml'))):
+    for course_file in sorted(Path(args.courses_path).glob( '*.yml')):
         course_json = load_data_yaml(course_file)
         if len(use_courses) == 0 or course_json['code'] in use_courses:
             course = Course(course_json)
@@ -103,7 +103,8 @@ def main():
 
     create_group("submitty_course_builders")
 
-    for user_file in sorted(glob.iglob(os.path.join(args.users_path, '*.yml'))):
+
+    for user_file in sorted(Path(args.users_path)).glob( '*.yml')):
         user = User(load_data_yaml(user_file))
         if user.id in ['submitty_php', 'submitty_daemon', 'submitty_cgi', 'submitty_dbuser', 'vagrant', 'postgres'] or \
                 user.id.startswith("untrusted"):

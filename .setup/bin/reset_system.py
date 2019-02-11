@@ -8,7 +8,7 @@ in configuration files or pre-existing databses.
 """
 
 from __future__ import print_function
-import glob
+from pathlib import Path
 import os
 import pwd
 import shutil
@@ -145,7 +145,7 @@ def main():
 
     shutil.rmtree('/root/bin', True)
 
-    for user_file in glob.iglob(os.path.join(SETUP_DATA_PATH, "users", "*.yml")):
+    for user_file in Path(os.path.join(SETUP_DATA_PATH, "users")).glob( "*.yml"):
         user = load_data_yaml(user_file)
         delete_user(user['user_id'])
 
@@ -154,7 +154,7 @@ def main():
         delete_user(user)
 
     groups = ["submitty_daemonphp", "submitty_course_builders"]
-    for course_file in glob.iglob(os.path.join(SETUP_DATA_PATH, "courses", "*.yml")):
+    for course_file in Path(os.path.join(SETUP_DATA_PATH, "courses")).glob( "*.yml"):
         course = load_data_yaml(course_file)
         groups.append(course['code'])
         groups.append(course['code'] + "_archive")

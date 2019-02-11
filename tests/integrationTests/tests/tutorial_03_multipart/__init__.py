@@ -1,9 +1,8 @@
 # Necessary imports. Provides library functions to ease writing tests.
 from lib import prebuild, testcase, SUBMITTY_TUTORIAL_DIR
-
+from pathlib import Path
 import subprocess
 import os
-import glob
 import shutil
 
 ############################################################################
@@ -44,11 +43,11 @@ def initialize(test):
 
 def cleanup(test):
     subprocess.call(["rm"] + ["-f"] +
-            glob.glob(os.path.join(test.testcase_path, "data", "part*", "*")))
+            Path(os.path.join(test.testcase_path, "data", "part*")).glob( "*"))
     subprocess.call(["rm"] + ["-rf"] +
-            glob.glob(os.path.join(test.testcase_path, "data", "test*")))
+            Path(os.path.join(test.testcase_path, "data")).glob("test*"))
     subprocess.call(["cp"] +
-                     glob.glob(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output","*")) +
+                     Path(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output")).glob("*") +
                      [os.path.join(test.testcase_path, "data")])
 
 
