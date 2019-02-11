@@ -28,7 +28,7 @@ class PlagiarismController extends AbstractController {
                 break;
             case 'edit_plagiarism_saved_config':
                 $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildUrl(array('component' => 'admin', 'semester' => $_REQUEST['semester'] , 'course'=> $_REQUEST['course'],'page' => 'plagiarism')));
-                $this->core->getOutput()->addBreadcrumb('Configure '.($this->core->getQueries()->getGradeable($_REQUEST['gradeable_id']))->getName());
+                $this->core->getOutput()->addBreadcrumb('Configure '.($this->core->getQueries()->getGradeableConfig($_REQUEST['gradeable_id']))->getTitle());
                 $this->editPlagiarismSavedConfig();
                 break;
             case 're_run_plagiarism':
@@ -123,7 +123,7 @@ class PlagiarismController extends AbstractController {
         $semester = $_REQUEST['semester'];
         $course = $_REQUEST['course'];
         $gradeable_id= $_REQUEST['gradeable_id'];
-        $gradeable_title= ($this->core->getQueries()->getGradeable($gradeable_id))->getName();
+        $gradeable_title= ($this->core->getQueries()->getGradeableConfig($gradeable_id))->getTitle();
         $return_url= $this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course,'page' => 'plagiarism'));
         if(!$this->core->getUser()->accessAdmin()) {
             die("Don't have permission to access page.");
@@ -493,8 +493,17 @@ class PlagiarismController extends AbstractController {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
 
+        $gradeable = $this->tryGetGradeable($_REQUEST['gradeable_id']);
+        if($gradeable === false) {
+            return;
+        }
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id_1);
+        if ($graded_gradeable === false) {
+            return;
+        }
+
         $return="";
-        $active_version_user_1 = (string)$this->core->getQueries()->getGradeable($gradeable_id, $user_id_1)->getActiveVersion();
+        $active_version_user_1 =  (string)$graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $file_path= $course_path."/lichen/ranking/".$gradeable_id.".txt";
         if(!file_exists($file_path)) {
 			$return = array('error' => 'Ranking file not exists.');
