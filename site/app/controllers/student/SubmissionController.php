@@ -547,12 +547,12 @@ class SubmissionController extends AbstractController {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $qr_prefix = $_POST['qr_prefix'];
-
+        $qr_suffix = $_POST['qr_suffix'];
         $ch = curl_init();
         if($_POST['use_qr_codes'] === "false"){
             curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."pdf_check.cgi?&num={$num_pages}&sem={$semester}&course={$course}&g_id={$gradeable_id}&ver={$current_time}");
         }else{
-            curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."pdf_check_qr.cgi?&sem={$semester}&course={$course}&g_id={$gradeable_id}&ver={$current_time}&qr_prefix={$qr_prefix}");
+            curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."pdf_check_qr.cgi?&sem={$semester}&course={$course}&g_id={$gradeable_id}&ver={$current_time}&qr_prefix={$qr_prefix}&qr_suffix={$qr_suffix}");
         }
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $output = curl_exec($ch);

@@ -600,7 +600,7 @@ function deleteSplitItem(csrf_token, gradeable_id, path, count) {
  * @param use_qr_codes
  * @param qr_prefix
  */
-function handleBulk(gradeable_id, num_pages, use_qr_codes = false, qr_prefix = "") {
+function handleBulk(gradeable_id, num_pages, use_qr_codes = false, qr_prefix = "", qr_suffix="") {
     $("#submit").prop("disabled", true);
 
     var formData = new FormData();
@@ -620,6 +620,7 @@ function handleBulk(gradeable_id, num_pages, use_qr_codes = false, qr_prefix = "
     formData.append('num_pages', num_pages);
     formData.append('use_qr_codes', use_qr_codes);
     formData.append('qr_prefix', qr_prefix);
+    formData.append('qr_suffix', qr_suffix);
 
     for (var i = 0; i < file_array.length; i++) {
         for (var j = 0; j < file_array[i].length; j++) {
