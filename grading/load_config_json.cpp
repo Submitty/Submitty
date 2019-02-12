@@ -110,10 +110,10 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
 
   //check if docker is globally enabled.
   if (!whole_config["autograding_method"].is_string()) {
-    whole_config["autograding_method"] = "jailed sandbox";
+    whole_config["autograding_method"] = "jailed_sandbox";
   }else{
     assert(whole_config["autograding_method"] == "docker"
-        || whole_config["autograding_method"]  == "jailed sandbox");
+        || whole_config["autograding_method"]  == "jailed_sandbox");
   }
 
   //check if there are global container defaults present. If not, add an empty object.
