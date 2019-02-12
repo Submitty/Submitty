@@ -224,6 +224,7 @@ fi
 
 mkdir -p ${SUBMITTY_DATA_DIR}/logs
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding
+mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding/stack_traces
 
 #Make site logging directories if not in worker mode.
 if [ "${WORKER}" == 0 ]; then
