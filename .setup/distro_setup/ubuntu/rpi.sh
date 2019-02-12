@@ -104,7 +104,7 @@ curl https://soot-build.cs.uni-paderborn.de/public/origin/develop/soot/soot-deve
 popd > /dev/null
 
 chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/java_tools
-chmod -R 751 ${SUBMITTY_INSTALL_DIR}/java_tools
+chmod -R 755 ${SUBMITTY_INSTALL_DIR}/java_tools
 
 
 # install haskell
