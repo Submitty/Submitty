@@ -18,6 +18,7 @@ try:
     from PyPDF2 import PdfFileReader, PdfFileWriter
     from pdf2image import convert_from_bytes
     import pyzbar.pyzbar as pyzbar
+    import urllib.parse
 except ImportError as e:
     print("Content-type: application/json")
     print()
@@ -62,12 +63,12 @@ try:
     #check if qr_prefix or qr_suffix is passed in, an empty string since is not considered a valid CGI arg
     for arg in cgi.parse(arguments):
         if arg == 'qr_prefix':
-            qr_prefix = os.path.basename(arguments['qr_prefix'].value)
+            qr_prefix = urllib.parse.unquote(os.path.basename(arguments['qr_prefix'].value))
             break
 
     for arg in cgi.parse(arguments):
         if arg == 'qr_suffix':
-            qr_suffix = os.path.basename(arguments['qr_suffix'].value)
+            qr_suffix = urllib.parse.unquote(os.path.basename(arguments['qr_suffix'].value))
             break
 
     with open("/usr/local/submitty/config/submitty.json", encoding='utf-8') as data_file:
@@ -128,10 +129,11 @@ try:
                 data = val[0][0].decode("utf-8")
                 if data == "none":  # blank exam with 'none' qr code
                     data = "BLANK EXAM"
-                elif qr_prefix != '' and data[0:len(qr_prefix)] == qr_prefix:
-                    data = data[len(qr_prefix):]
-                elif qr_suffix != '' and data[len(qr_suffix):len(data)] == qr_suffix :
-                    data = data[:-len(qr_suffix)]
+                else:
+                    if qr_prefix != '' and data[0:len(qr_prefix)] == qr_prefix:
+                        data = data[len(qr_prefix):]
+                    if qr_suffix != '' and data[(len(data)-len(qr_suffix)):len(data)] == qr_suffix :
+                        data = data[:-len(qr_suffix)]
                 cover_index = i
                 cover_filename = '{}_{}_cover.pdf'.format(filename[:-4], i)
                 output_filename = '{}_{}.pdf'.format(filename[:-4], cover_index)

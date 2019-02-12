@@ -546,8 +546,8 @@ class SubmissionController extends AbstractController {
         // Open a cURL connection
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        $qr_prefix = $_POST['qr_prefix'];
-        $qr_suffix = $_POST['qr_suffix'];
+        $qr_prefix = rawurlencode($_POST['qr_prefix']);
+        $qr_suffix = rawurlencode($_POST['qr_suffix']);
         $ch = curl_init();
         if($_POST['use_qr_codes'] === "false"){
             curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."pdf_check.cgi?&num={$num_pages}&sem={$semester}&course={$course}&g_id={$gradeable_id}&ver={$current_time}");

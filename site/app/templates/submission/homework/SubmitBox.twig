@@ -43,16 +43,17 @@
             </div>
             <div class = "sub" id="pdf_submit_button" style="display: none">
                 <div class="sub">
+                    Split by QR code? 
+                    <input type="checkbox" id="use_qr">
                     <span id="pages_prompt"># of page(s) per PDF:</span> 
                     <span id="prefix_prompt">QR code prefix/suffix: 
-                        <a style="text-decoration:none;" href = "https://submitty.org/instructor/exams#bulk-upload-and-split-with-qr-codes" target="_none">
-                            <i title="Bulk Upload Help" class="far fa-question-circle"></i>
-                        </a>
+                    <a style="text-decoration:none;" href = "https://submitty.org/instructor/exams#bulk-upload-and-split-with-qr-codes" target="_none">
+                        <i title="Bulk Upload QR Help" class="far fa-question-circle"></i>
+                    </a>
                     </span>
                     <input type="number" id= "num_pages" placeholder="required"/>
                     <input type="text" id="qr_prefix" placeholder="Prefix (optional)" />
-                    <input type="text" id="qr_suffix" placeholder="Suffix (optional)" />
-                    Split by QR code? <input type="checkbox" id="use_qr">
+                     <input type="text" id="qr_suffix" placeholder="Suffix (optional)" />
                 </div>
             </div>
         </form>
