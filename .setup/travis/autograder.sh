@@ -1,5 +1,24 @@
 #!/usr/bin/env bash
 
+travis_retry() {
+  local result=0
+  local count=1
+  while [[ "${count}" -le 3 ]]; do
+    [[ "${result}" -ne 0 ]] && {
+      echo -e "\\n${ANSI_RED}The command \"${*}\" failed. Retrying, ${count} of 3.${ANSI_RESET}\\n" >&2
+    }
+    "${@}" && { result=0 && break; } || result="${?}"
+    count="$((count + 1))"
+    sleep 1
+  done
+
+  [[ "${count}" -gt 3 ]] && {
+    echo -e "\\n${ANSI_RED}The command \"${*}\" failed 3 times.${ANSI_RESET}\\n" >&2
+  }
+
+  return "${result}"
+}
+
 # this script must be run by root or sudo
 if [[ "$UID" -ne "0" ]] ; then
     echo "ERROR: This script must be run by root or sudo"
