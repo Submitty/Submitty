@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+# This function is from https://github.com/travis-ci/travis-build/blob/master/lib/travis/build/bash/travis_retry.bash
 travis_retry() {
   local result=0
   local count=1
