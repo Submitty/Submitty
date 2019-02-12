@@ -24,7 +24,7 @@ mkdir -p ${SUBMITTY_INSTALL_DIR}/DrMemory
 pushd /tmp
 DRMEM_TAG=release_2.0.1
 DRMEM_VER=2.0.1-2
-wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEM_TAG}/DrMemory-Linux-${DRMEM_VER}.tar.gz -o /dev/null > /dev/null 2>&1
+travis_retry wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEM_TAG}/DrMemory-Linux-${DRMEM_VER}.tar.gz -o /dev/null > /dev/null 2>&1
 tar -xpzf DrMemory-Linux-${DRMEM_VER}.tar.gz -C ${SUBMITTY_INSTALL_DIR}/DrMemory
 ln -s ${SUBMITTY_INSTALL_DIR}/DrMemory/DrMemory-Linux-${DRMEM_VER} ${SUBMITTY_INSTALL_DIR}/drmemory
 rm DrMemory-Linux-${DRMEM_VER}.tar.gz
@@ -42,12 +42,12 @@ JUNIT_VER=4.12
 HAMCREST_VER=1.3
 
 pushd ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit
-wget http://repo1.maven.org/maven2/junit/junit/${JUNIT_VER}/junit-${JUNIT_VER}.jar -o /dev/null > /dev/null 2>&1
+travis_retry wget http://repo1.maven.org/maven2/junit/junit/${JUNIT_VER}/junit-${JUNIT_VER}.jar -o /dev/null > /dev/null 2>&1
 chmod o+r . *.jar
 popd
 
 pushd ${SUBMITTY_INSTALL_DIR}/java_tools/hamcrest
-wget http://repo1.maven.org/maven2/org/hamcrest/hamcrest-core/${HAMCREST_VER}/hamcrest-core-${HAMCREST_VER}.jar -o /dev/null > /dev/null 2>&1
+travis_retry wget http://repo1.maven.org/maven2/org/hamcrest/hamcrest-core/${HAMCREST_VER}/hamcrest-core-${HAMCREST_VER}.jar -o /dev/null > /dev/null 2>&1
 chmod o+r . *.jar
 popd
 
@@ -55,7 +55,7 @@ popd
 echo "Getting emma..."
 EMMA_VER=2.0.5312
 pushd ${SUBMITTY_INSTALL_DIR}/java_tools/emma
-wget https://github.com/Submitty/emma/archive/${EMMA_VER}.zip -O emma-${EMMA_VER}.zip -o /dev/null > /dev/null 2>&1
+travis_retry wget https://github.com/Submitty/emma/archive/${EMMA_VER}.zip -O emma-${EMMA_VER}.zip -o /dev/null > /dev/null 2>&1
 unzip emma-${EMMA_VER}.zip > /dev/null
 mv emma-${EMMA_VER}/lib/emma.jar emma.jar
 rm -rf emma-${EMMA_VER}*
@@ -66,7 +66,7 @@ popd
 echo "Getting JaCoCo..."
 JACOCO_VER=0.8.0
 pushd ${SUBMITTY_INSTALL_DIR}/java_tools/jacoco
-wget https://github.com/jacoco/jacoco/releases/download/v${JACOCO_VER}/jacoco-${JACOCO_VER}.zip -o /dev/null > /dev/null 2>&1
+travis_retry wget https://github.com/jacoco/jacoco/releases/download/v${JACOCO_VER}/jacoco-${JACOCO_VER}.zip -o /dev/null > /dev/null 2>&1
 mkdir jacoco-${JACOCO_VER}
 unzip jacoco-${JACOCO_VER}.zip -d jacoco-${JACOCO_VER} > /dev/null
 mv jacoco-${JACOCO_VER}/lib/jacococli.jar jacococli.jar
