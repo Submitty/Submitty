@@ -795,7 +795,7 @@ class SubmissionController extends AbstractController {
         
         $bulk_upload_data_json = json_encode($bulk_upload_data, JSON_PRETTY_PRINT);
         
-        if (!@file_put_contents(FileUtils::joinPaths($version_path, "bulk_upload_data.json"), $bulk_upload_data_json."\n")) { 
+        if (!@file_put_contents(FileUtils::joinPaths($version_path, "bulk_upload_data.json"), $bulk_upload_data_json)) { 
 
             return $this->uploadResult("Failed to create bulk upload file for this submission.", false);
         }
