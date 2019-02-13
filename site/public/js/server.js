@@ -1868,15 +1868,17 @@ function generateCodeMirrorBlocks(container_element) {
         cursorHeight: 0.0,
         lineWrapping: true
     });
+
     var lineCount = editor0.lineCount();
     if (lineCount == 1) {
         editor0.setSize("100%", (editor0.defaultTextHeight() * 2) + "px");
+    } else {
+        editor0.setSize("100%", "max-content");
     }
-    else {
-        editor0.setSize("100%", "auto");
-    }
+
     editor0.setOption("theme", "eclipse");
     editor0.refresh();
+
     }
 }
 

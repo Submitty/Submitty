@@ -810,7 +810,7 @@ function ajaxVerifyAllComponents(gradeable_id, anon_id) {
             data: {
                 'csrf_token': csrfToken,
                 'gradeable_id': gradeable_id,
-                'anon_id': anon_id,
+                'anon_id': anon_id
             },
             success: function (response) {
                 if (response.status !== "success") {
