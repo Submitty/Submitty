@@ -1052,9 +1052,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         'rotating_section' => [
             'u.rotating_section',
         ],
-        'team_id' => [
-            'user_id'
-        ]
+        'team_id' => []
     ];
     const graded_gradeable_key_map_team = [
         'registration_section' => [
@@ -1067,7 +1065,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         ],
         'team_id' => [
             'team.team_id'
-        ]
+        ],
+        'user_id' => []
     ];
 
     /**
@@ -1089,16 +1088,19 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             if (empty($key_map)) {
                 return 'ORDER BY ' . implode(',', $sort_keys);
             }
-            return 'ORDER BY ' . implode(',', array_map(function ($key_ext) use ($key_map) {
+            return 'ORDER BY ' . implode(',', array_filter(array_map(function ($key_ext) use ($key_map) {
                     $split_key = explode(' ', $key_ext);
                     $key = $split_key[0];
                     $order = '';
                     if (count($split_key) > 1) {
                         $order = $split_key[1];
                     }
+                    if (isset($key_map[$key]) && count($key_map[$key]) === 0) {
+                        return '';
+                    }
                     // Map any keys with special requirements to the proper statements and preserve specified order
                     return implode(" $order,", $key_map[$key] ?? [$key]) . " $order";
-                }, $sort_keys));
+                }, $sort_keys), function($a) { return $a !== ''; }));
         }
         return '';
     }
