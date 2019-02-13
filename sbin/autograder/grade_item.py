@@ -77,6 +77,7 @@ def copy_contents_into(job_id,source,target,tmp_logs):
                 try:
                     shutil.copy(os.path.join(source,item),target)
                 except:
+                    grade_items_logging.log_stack_trace(job_id=job_id,trace=traceback.format_exc())
                     raise RuntimeError("ERROR COPYING FILE: " +  os.path.join(source,item) + " -> " + os.path.join(target,item))
 
 
@@ -217,8 +218,11 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     # unzip autograding and submission folders
     tmp_autograding = os.path.join(tmp,"TMP_AUTOGRADING")
     tmp_submission = os.path.join(tmp,"TMP_SUBMISSION")
-    unzip_this_file(my_autograding_zip_file,tmp_autograding)
-    unzip_this_file(my_submission_zip_file,tmp_submission)
+    try:
+        unzip_this_file(my_autograding_zip_file,tmp_autograding)
+        unzip_this_file(my_submission_zip_file,tmp_submission)
+    except:
+        raise
     os.remove(my_autograding_zip_file)
     os.remove(my_submission_zip_file)
 
@@ -401,7 +405,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                                                    cwd=testcase_folder)
                 except Exception as e:
                     print('An error occurred when compiling with docker.')
-                    traceback.print_exc()
+                    grade_items_logging.log_stack_trace(job_id,is_batch_job,which_untrusted,item_name,trace=traceback.format_exc())
                 finally:
                     if compilation_container != None:
                         subprocess.call(['docker', 'rm', '-f', compilation_container])
@@ -616,6 +620,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
             print ("\n\nERROR: Grading incomplete -- Could not open ",os.path.join(tmp_work,"grade.txt"))
             grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,message="ERROR: grade.txt does not exist")
+            grade_items_logging.log_stack_trace(job_id,is_batch_job,which_untrusted,item_name,trace=traceback.format_exc())
 
     # --------------------------------------------------------------------
     # MAKE RESULTS DIRECTORY & COPY ALL THE FILES THERE
@@ -663,6 +668,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
             print ("\n\nERROR: Grading incomplete -- Could not copy ",os.path.join(tmp_work,"grade.txt"))
         grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,message="ERROR: grade.txt does not exist")
+        grade_items_logging.log_stack_trace(job_id,is_batch_job,which_untrusted,item_name,trace=traceback.format_exc())
 
     # -------------------------------------------------------------
     # create/append to the results history
@@ -703,6 +709,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
             print ("\n\nERROR: Grading incomplete -- Could not open/write ",os.path.join(tmp_work,"results.json"))
             grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,message="ERROR: results.json read/write error")
+            grade_items_logging.log_stack_trace(job_id,is_batch_job,which_untrusted,item_name,trace=traceback.format_exc())
 
     write_grade_history.just_write_grade_history(history_file,
                                                  gradeable_deadline_longstring,
