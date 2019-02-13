@@ -48,15 +48,15 @@ def initialize(test):
 ############################################################################
 def cleanup(test):
     subprocess.call(["rm"] + ["-rf"] +
-                    Path(test.testcase_path, "data").glob( "test*"))
+                    list(Path(test.testcase_path, "data").glob( "test*")))
     subprocess.call(["rm"] + ["-f"] +
-                    Path(test.testcase_path, "data").glob( "results*"))
+                    list(Path(test.testcase_path, "data").glob( "results*")))
 
 @testcase
 def correct(test):
     cleanup(test)
     subprocess.call(["rm"] + ["-f"] +
-                    Path(test.testcase_path, "data/").glob( "*.cpp"))
+                    list(Path(test.testcase_path, "data/").glob( "*.cpp")))
     subprocess.call(["cp",
                      os.path.join(SAMPLE_SUBMISSIONS, "correct.cpp"),
                      os.path.join(test.testcase_path, "data/")])
@@ -71,7 +71,7 @@ def correct(test):
 def missing_label(test):
     cleanup(test)
     subprocess.call(["rm"] + ["-f"] +
-                    Path(test.testcase_path, "data/").glob("*.cpp"))
+                    list(Path(test.testcase_path, "data/").glob("*.cpp")))
     subprocess.call(["cp",
                      os.path.join(SAMPLE_SUBMISSIONS, "missing_label.cpp"),
                      os.path.join(test.testcase_path, "data/")])
@@ -86,7 +86,7 @@ def missing_label(test):
 def wrong_num(test):
     cleanup(test)
     subprocess.call(["rm"] + ["-f"] +
-                    Path(test.testcase_path, "data/").glob( "*.cpp"))
+                    list(Path(test.testcase_path, "data/").glob( "*.cpp")))
     subprocess.call(["cp",
                      os.path.join(SAMPLE_SUBMISSIONS, "wrong_num.cpp"),
                      os.path.join(test.testcase_path, "data/")])
@@ -101,7 +101,7 @@ def wrong_num(test):
 def wrong_total(test):
     cleanup(test)
     subprocess.call(["rm"] + ["-f"] +
-                    Path(test.testcase_path, "data/").glob( "*.cpp"))
+                    list(Path(test.testcase_path, "data/").glob( "*.cpp")))
     subprocess.call(["cp",
                      os.path.join(SAMPLE_SUBMISSIONS, "wrong_total.cpp"),
                      os.path.join(test.testcase_path, "data/")])
@@ -116,7 +116,7 @@ def wrong_total(test):
 def not_random(test):
     cleanup(test)
     subprocess.call(["rm"] + ["-f"] +
-                    Path(test.testcase_path, "data/").glob( "*.cpp"))
+                    list(Path(test.testcase_path, "data/").glob( "*.cpp")))
     subprocess.call(["cp",
                      os.path.join(SAMPLE_SUBMISSIONS, "not_random.cpp"),
                      os.path.join(test.testcase_path, "data/")])
@@ -131,7 +131,7 @@ def not_random(test):
 def all_bugs(test):
     cleanup(test)
     subprocess.call(["rm"] + ["-f"] +
-                    Path(test.testcase_path, "data/").glob( "*.cpp"))
+                    list(Path(test.testcase_path, "data/").glob( "*.cpp")))
     subprocess.call(["cp",
                      os.path.join(SAMPLE_SUBMISSIONS, "all_bugs.cpp"),
                      os.path.join(test.testcase_path, "data/")])

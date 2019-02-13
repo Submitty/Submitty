@@ -43,11 +43,11 @@ def initialize(test):
 
 def cleanup(test):
     subprocess.call(["rm"] + ["-f"] +
-            Path(test.testcase_path, "data", "part*").glob( "*"))
+            list(Path(test.testcase_path, "data", "part*").glob( "*")))
     subprocess.call(["rm"] + ["-rf"] +
-            Path(test.testcase_path, "data").glob("test*"))
+            list(Path(test.testcase_path, "data").glob("test*")))
     subprocess.call(["cp"] +
-                     Path(SAMPLE_ASSIGNMENT_CONFIG, "test_output").glob("*") +
+                     list(Path(SAMPLE_ASSIGNMENT_CONFIG, "test_output").glob("*")) +
                      [os.path.join(test.testcase_path, "data")])
 
 

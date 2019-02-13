@@ -42,13 +42,13 @@ def cleanup(test):
     subprocess.call(["rm","-f",
         os.path.join(test.testcase_path, "data/", "test01/execute_logfile.txt")])
     subprocess.call(["rm"] + ["-rf"] +
-            Path(test.testcase_path, "data").glob("test*"))
+            list(Path(test.testcase_path, "data").glob("test*")))
 
 @testcase
 def correct(test):
     cleanup(test)
     subprocess.call(["rm"] + ["-f"] +
-            Path(test.testcase_path, "data").glob( "*.py"))
+            list(Path(test.testcase_path, "data").glob( "*.py")))
     subprocess.call(["cp",
         os.path.join(SAMPLE_SUBMISSIONS, "part1.py"),
         os.path.join(test.testcase_path, "data")])
@@ -65,7 +65,7 @@ def correct(test):
 def buggy(test):
     cleanup(test)
     subprocess.call(["rm"] + ["-f"] +
-            Path(test.testcase_path, "data/").glob( "*.py"))
+            list(Path(test.testcase_path, "data/").glob( "*.py")))
     subprocess.call(["cp",
         os.path.join(SAMPLE_SUBMISSIONS, "part1_buggy.py"),
         os.path.join(test.testcase_path, "data")])
@@ -82,7 +82,7 @@ def buggy(test):
 def buggy2(test):
     cleanup(test)
     subprocess.call(["rm"] + ["-f"] +
-            Path(test.testcase_path, "data/").glob( "*.py"))
+            list(Path(test.testcase_path, "data/").glob( "*.py")))
     subprocess.call(["cp",
         os.path.join(SAMPLE_SUBMISSIONS, "part1_buggy2.py"),
         os.path.join(test.testcase_path, "data")])
@@ -99,7 +99,7 @@ def buggy2(test):
 def syntax_error(test):
     cleanup(test)
     subprocess.call(["rm"] + ["-f"] +
-            Path(test.testcase_path, "data/").glob("*.py"))
+            list(Path(test.testcase_path, "data/").glob("*.py")))
     subprocess.call(["cp",
         os.path.join(SAMPLE_SUBMISSIONS, "syntax_error.py"),
         os.path.join(test.testcase_path, "data")])
@@ -117,9 +117,9 @@ def syntax_error(test):
 def infinite_loop_too_much_output(test):
     cleanup(test)
     subprocess.call(["rm"] + ["-f"] +
-            Path(test.testcase_path, "data/").glob("*.py"))
+            list(Path(test.testcase_path, "data/").glob("*.py")))
     subprocess.call(["rm"] + ["-f"] +
-            Path(test.testcase_path, "data/").glob("test01*.txt"))
+            list(Path(test.testcase_path, "data/").glob("test01*.txt")))
     subprocess.call(["cp",
         os.path.join(SAMPLE_SUBMISSIONS, "infinite_loop_too_much_output.py"),
         os.path.join(test.testcase_path, "data")])
@@ -137,9 +137,9 @@ def infinite_loop_too_much_output(test):
 def infinite_loop_time_cutoff(test):
     cleanup(test)
     subprocess.call(["rm"] + ["-f"] +
-            Path(test.testcase_path, "data/").glob("*.py"))
+            list(Path(test.testcase_path, "data/").glob("*.py")))
     subprocess.call(["rm"] + ["-f"] +
-            Path(test.testcase_path, "data/").glob("test01*.txt"))
+            list(Path(test.testcase_path, "data/").glob("test01*.txt")))
     subprocess.call(["cp",
         os.path.join(SAMPLE_SUBMISSIONS, "infinite_loop_time_cutoff.py"),
         os.path.join(test.testcase_path, "data")])

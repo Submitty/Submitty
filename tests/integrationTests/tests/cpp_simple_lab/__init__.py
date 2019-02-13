@@ -38,11 +38,11 @@ def initialize(test):
             pass
 
     subprocess.call(["cp"] +
-        Path(SAMPLE_ASSIGNMENT_CONFIG, "test_input").glob( "*.txt") +
+        list(Path(SAMPLE_ASSIGNMENT_CONFIG, "test_input").glob( "*.txt")) +
         [os.path.join(test.testcase_path, "data")])
 
     subprocess.call(["cp"] +
-        Path(SAMPLE_ASSIGNMENT_CONFIG, "test_output").glob( "*.txt") +
+        list(Path(SAMPLE_ASSIGNMENT_CONFIG, "test_output").glob( "*.txt")) +
         [os.path.join(test.testcase_path, "data")])
 
 
@@ -50,13 +50,13 @@ def initialize(test):
 
 def cleanup(test):
     subprocess.call(["rm"] + ["-f"] +
-        Path(test.testcase_path, "data").glob( "result*"))
+        list(Path(test.testcase_path, "data").glob( "result*")))
     subprocess.call(["rm"] + ["-rf"] +
-        Path(test.testcase_path, "data").glob( "test*"))
+        list(Path(test.testcase_path, "data").glob( "test*")))
     subprocess.call(["rm"] + ["-f"] +
-        Path(test.testcase_path, "data", "part*").glob( "*"))
+        list(Path(test.testcase_path, "data", "part*").glob( "*")))
     subprocess.call(["rm"] + ["-f"] +
-        Path(test.testcase_path, "data").glob( "*out"))
+        list(Path(test.testcase_path, "data").glob( "*out")))
 
 @testcase
 def full_credit(test):

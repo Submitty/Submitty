@@ -33,7 +33,7 @@ def initialize(test):
 
 def cleanup(test):
     subprocess.call(["rm"] + ["-rf"] +
-            Path(test.testcase_path, "data").glob( "*"))
+            list(Path(test.testcase_path, "data").glob( "*")))
 
 
 @testcase

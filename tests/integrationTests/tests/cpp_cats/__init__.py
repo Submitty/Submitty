@@ -38,16 +38,16 @@ def initialize(test):
         os.path.join(test.testcase_path, "data")])
 
     subprocess.call(["cp"] +
-            Path(SAMPLE_SUBMISSIONS).glob("*.zip") +
+            list(Path(SAMPLE_SUBMISSIONS).glob("*.zip")) +
             [os.path.join(test.testcase_path, "data")])
 
 
 ############################################################################
 def cleanup(test):
     subprocess.call(["rm"] + ["-rf"] +
-                    Path(test.testcase_path, "data").glob("test*"))
+                    list(Path(test.testcase_path, "data").glob("test*")))
     subprocess.call(["rm"] + ["-f"] +
-                    Path(test.testcase_path, "data").glob("results*"))
+                    list(Path(test.testcase_path, "data").glob("results*")))
 
 @testcase
 def allCorrect(test):

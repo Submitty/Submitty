@@ -42,7 +42,7 @@ def initialize(test):
         os.path.join(test.testcase_path, "data")])
 
     subprocess.call(["cp"] +
-            Path(SAMPLE_SUBMISSIONS).glob( "*.py") +
+            list(Path(SAMPLE_SUBMISSIONS).glob( "*.py")) +
             [os.path.join(test.testcase_path, "data")])
 
 

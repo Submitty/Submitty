@@ -31,11 +31,11 @@ def initialize(test):
 
 def cleanup(test):
     subprocess.call(["rm"] + ["-f"] +
-                    Path(test.testcase_path, "data").glob( "*cpp"))
+                    list(Path(test.testcase_path, "data").glob( "*cpp")))
     subprocess.call(["rm"] + ["-rf"] +
-                    Path(test.testcase_path, "data").glob( "test*"))
+                    list(Path(test.testcase_path, "data").glob( "test*")))
     subprocess.call(["rm"] + ["-f"] +
-                    Path(test.testcase_path, "data").glob( "results*"))
+                    list(Path(test.testcase_path, "data").glob( "results*")))
 
 @testcase
 def solution(test):

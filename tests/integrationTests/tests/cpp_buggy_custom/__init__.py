@@ -47,17 +47,19 @@ def initialize(test):
 
 ############################################################################
 
+#Converting generator into list using list()
+
 def cleanup(test):
     subprocess.call(["rm"] + ["-rf"] +
-                    Path(test.testcase_path, "data").glob( "test*"))
+                    list(Path(test.testcase_path, "data").glob( "test*")))
     subprocess.call(["rm"] + ["-f"] +
-                    Path(test.testcase_path, "data").glob( "results*"))
+                    list(Path(test.testcase_path, "data").glob( "results*")))
 
 @testcase
 def correct(test):
     cleanup(test)
     subprocess.call(["rm"] + ["-f"] +
-                    Path(test.testcase_path, "data/").glob("*.cpp"))
+                    list(Path(test.testcase_path, "data/").glob("*.cpp")))
     subprocess.call(["cp",
                      os.path.join(SAMPLE_SUBMISSIONS, "correct.cpp"),
                      os.path.join(test.testcase_path, "data/")])
