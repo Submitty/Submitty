@@ -246,6 +246,9 @@ HTML;
         cursorHeight: 0.0,
         lineWrapping: true
     });
+
+    code_user_2.setSize("100%", "100%");
+    code_user_1.setSize("100%", "100%");
     $('[name="user_id_1"]', form).change(function(){
         setUserSubmittedCode('{$gradeable_id}','user_id_1');
     });
