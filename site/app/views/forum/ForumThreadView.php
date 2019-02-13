@@ -398,16 +398,16 @@ HTML;
 HTML;
 					if($this->core->getUser()->getGroup() <= 2 && $activeThreadAnnouncement){
                         $title_html .= <<<HTML
-							<a style="display:inline-block; color:orange; " onClick="alterAnnouncement({$activeThread['id']}, 'Are you sure you want to remove this thread as an announcement?', 'remove_announcement')" title="Remove thread from announcements"><i class="fas fa-star" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
+							<a style="display:inline-block; color:orange; " onClick="alterAnnouncement({$activeThread['id']}, 'Are you sure you want to remove this thread as an announcement?', 'remove_announcement')" title="Remove Announcement"><i class="fas fa-star" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
 HTML;
                     } else if($activeThreadAnnouncement){
                         $title_html .= <<<HTML
-						 <i class="fas fa-star" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px; -webkit-text-stroke-color: black;" aria-hidden="true"></i>
+						 <i class="fas fa-star" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px; -webkit-text-stroke-color: black;" title = "Announcement" aria-hidden="true"></i>
 HTML;
                     } else if($this->core->getUser()->getGroup() <= 2 && !$activeThreadAnnouncement){
                         $title_html .= <<<HTML
-							<a style="position:relative; display:inline-block; color:orange; " onClick="alterAnnouncement({$activeThread['id']}, 'Are you sure you want to make this thread an announcement?', 'make_announcement')" title="Make thread an announcement"><i class="fas fa-star" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'gold')" style="position:relative; display:inline-block; color:#e0e0e0; -webkit-text-stroke-width: 1px;
+							<a style="position:relative; display:inline-block; color:orange; " onClick="alterAnnouncement({$activeThread['id']}, 'Are you sure you want to make this thread an announcement?', 'make_announcement')" title="Make thread an announcement"><i class="fas fa-star" title = "Make Announcement" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'gold')" style="position:relative; display:inline-block; color:#e0e0e0; -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
 HTML;
                     }
@@ -641,8 +641,9 @@ HTML;
 HTML;
 						if($thread["pinned"] == true){
 							$return .= <<<HTML
+
 							<i class="fas fa-star" style="padding-left:3px;position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
-    -webkit-text-stroke-color: black;" aria-hidden="true"></i>
+    -webkit-text-stroke-color: black;" title = "Announcement" aria-hidden="true"></i>
 HTML;
 						}
 						if(isset($thread['favorite']) && $thread['favorite']) {
@@ -666,15 +667,16 @@ HTML;
 								$fa_color = "#5cb85c";
 								$fa_margin_right = "0px";
 								$fa_font_size = "1.5em";
-
+								$tooltip = "Thread Resolved";
 							} else {
 								$fa_icon = "fa-question";
 								$fa_color = "#ffcc00";
 								$fa_margin_right = "5px";
 								$fa_font_size = "1.8em";
+								$tooltip = "Thread Unresolved";
 							}
 							$return .= <<<HTML
-							<i class="fa ${fa_icon}" style="margin-right:${fa_margin_right}; padding-left:3px; position:relative; float:right; display:inline-block; color:${fa_color}; font-size:${fa_font_size};" aria-hidden="true"></i>
+							<i class="fa ${fa_icon}" style="margin-right:${fa_margin_right}; padding-left:3px; position:relative; float:right; display:inline-block; color:${fa_color}; font-size:${fa_font_size};" title = "${tooltip}" aria-hidden="true"></i>
 HTML;
 						}
 						$categories_content = array();

@@ -267,7 +267,9 @@ CREATE TABLE gradeable_component_data (
     gcd_component_comment character varying NOT NULL,
     gcd_grader_id character varying(255) NOT NULL,
     gcd_graded_version integer,
-    gcd_grade_time timestamp(6) with time zone NOT NULL
+    gcd_grade_time timestamp(6) with time zone NOT NULL,
+    gcd_verifier_id character varying(255),
+    gcd_verify_time TIMESTAMP
     -- CONSTRAINT gradeable_component_data_check CHECK (check_valid_score(gcd_score, gc_id)) -
 );
 
@@ -882,6 +884,12 @@ ALTER TABLE ONLY gradeable_component_data
 ALTER TABLE ONLY gradeable_component_data
   ADD CONSTRAINT gradeable_component_data_gcd_grader_id_fkey FOREIGN KEY (gcd_grader_id) REFERENCES users(user_id) ON UPDATE CASCADE;
 
+--
+-- Name: gradeable_component_data_verifier_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gradeable_component_data
+  ADD CONSTRAINT gradeable_component_data_verifier_id_fkey FOREIGN KEY (gcd_verifier_id) REFERENCES users(user_id);
 --
 -- Name: gradeable_component_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --

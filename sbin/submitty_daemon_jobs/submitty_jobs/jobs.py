@@ -156,21 +156,3 @@ class DeleteLichenResult(CourseGradeableJob):
                 shutil.rmtree(str(Path(lichen_dir, folder, gradeable)), ignore_errors=True)
             msg = 'Deleted lichen plagiarism results and saved config for {}'.format(gradeable)
             open_file.write(msg)
-
-
-class SendEmail(CourseJob):
-    def run_job(self):
-        email_type = self.job_details['email_type']
-        semester = self.job_details['semester']
-        course = self.job_details['course']
-
-        email_script = str(Path(INSTALL_DIR, 'sbin', 'sendEmail.py'))
-
-        thread_title = self.job_details['thread_title']
-        thread_content = self.job_details['thread_content']
-
-        try:
-            with open('email_job_logs.txt', "a") as output_file:
-                subprocess.call([email_script, email_type, semester, course, thread_title, thread_content], stdout=output_file)
-        except PermissionError:
-            print ("error, could not open "+output_file+" for writing")
