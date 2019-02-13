@@ -1325,6 +1325,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               gcd.array_graded_version,
               gcd.array_grade_time,
               gcd.array_mark_id,
+              gcd.array_verifier_id,
+              gcd.array_verify_time,
 
               /* Aggregate Gradeable Component Grader Data */
               gcd.array_grader_user_id,
@@ -1388,6 +1390,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   json_agg(gcd_graded_version) AS array_graded_version,
                   json_agg(gcd_grade_time) AS array_grade_time,
                   json_agg(string_mark_id) AS array_mark_id,
+                  json_agg(gcd_verifier_id) AS array_verifier_id,
+                  json_agg(gcd_verify_time) AS array_verify_time,
 
                   json_agg(ug.user_id) AS array_grader_user_id,
                   json_agg(ug.anon_id) AS array_grader_anon_id,
@@ -1550,6 +1554,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 'graded_version',
                 'grade_time',
                 'mark_id',
+                'verifier_id',
+                'verify_time'
             ];
             $version_array_properties = [
                 'version',

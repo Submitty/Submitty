@@ -339,8 +339,10 @@ class ElectronicGraderView extends AbstractView {
                 $graded_component = $row->getOrCreateTaGradedGradeable()->getGradedComponent($component);
                 if ($graded_component === null) {
                     $info["graded_groups"][] = "NULL";
-                } else {
+                } else if(!$graded_component->getVerifier()){
                     $info["graded_groups"][] = $graded_component->getGrader()->getGroup();
+                } else{
+                    $info["graded_groups"][] = $graded_component->getVerifier()->getGroup();
                 }
             }
 
@@ -426,7 +428,6 @@ class ElectronicGraderView extends AbstractView {
                 "team_edit_onclick" => "adminTeamForm(false, '{$team->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, [], [],{$gradeable->getTeamSizeMax()});"
             ];
         }
-
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
             "gradeable" => $gradeable,
             "sections" => $sections,
