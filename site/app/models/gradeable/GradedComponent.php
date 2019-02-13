@@ -55,6 +55,12 @@ class GradedComponent extends AbstractModel {
     protected $graded_version = 0;
     /** @property @var \DateTime The time which this grade was most recently updated */
     protected $grade_time = null;
+    /** @var User The verifier of this component */
+    protected $verifier = null;
+    /** @property @var string The Id of the verifier who verified the grade */
+    protected $verifier_id = "";
+    /** @property @var \DateTime The time which this grade was verified */
+    protected $verify_time = null;
 
     /**
      * GradedComponent constructor.
@@ -79,7 +85,10 @@ class GradedComponent extends AbstractModel {
         $this->setComment($details['comment'] ?? '');
         $this->setGradedVersion($details['graded_version'] ?? 0);
         $this->setGradeTime($details['grade_time'] ?? $this->core->getDateTimeNow());
-
+        $this->verifier_id = $details['verifier_id'] ?? '';
+        if($this->verifier_id !== '')
+            $this->verifier = $this->core->getQueries()->getUserById($this->verifier_id);
+        $this->setVerifyTime($details['verify_time'] ?? '');
         // assign the default score if its not electronic (or rather not a custom mark)
         if ($component->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {
             $score = $details['score'] ?? 0;
@@ -87,7 +96,6 @@ class GradedComponent extends AbstractModel {
             $score = $details['score'] ?? $component->getDefault();
         }
         $this->setScore($score);
-
         $this->modified = false;
     }
 
@@ -96,7 +104,7 @@ class GradedComponent extends AbstractModel {
 
         // Make sure to convert the date into a string
         $details['grade_time'] = DateUtils::dateTimeToString($this->grade_time);
-
+        $details['verify_time'] = DateUtils::dateTimeToString($this->verify_time);
         return $details;
     }
 
@@ -299,6 +307,52 @@ class GradedComponent extends AbstractModel {
         $this->modified = true;
     }
 
+    public function setVerifier(User $verifier = null){
+        $this->verifier = $verifier;
+        $this->verifier_id = $verifier !== null ? $verifier->getId() : '';
+        $this->modified = true;    
+    }
+
+    /**
+     * Gets the id of the verifier or '' if none exist
+     * @return string
+     */
+    public function getVerifierId(){
+        return $this->verifier_id;
+    }
+
+    /**
+     * Gets the verifier 
+     * @return User
+     */
+    public function getVerifier(){
+        return $this->verifier;
+    }
+
+    /**
+     * Sets the time for when this component was verified
+     * @param string $verify_time
+     */
+    public function setVerifyTime($verify_time){
+        if ($verify_time === null) {
+            $this->verify_time = null;
+        } else {
+            try {
+                $this->verify_time = DateUtils::parseDateTime($verify_time, $this->core->getConfig()->getTimezone());
+            } catch (\Exception $e) {
+                throw new \InvalidArgumentException('Invalid date string format');
+            }
+        }
+        $this->modified = true;
+    }
+
+    /**
+     * Gets the time when this component was verified
+     * @return \DateTime
+     */
+    public function getVerifyTime(){
+        return $this->verify_time;
+    }
     /* Intentionally Unimplemented accessor methods */
 
     /** @internal */
