@@ -72,7 +72,7 @@ bool windowExists(std::string window_name);
 * uses number_of_screenshots to title the image (submitty prepends it with the test #)
 * updates the number of screenshots taken. 
 */
-bool screenshot(std::string window_name, int& number_of_screenshots);
+bool screenshot(std::string window_name, std::string screenshot_name);
 
 /**
 * This function uses xdotool to put the mouse button associated with int button into the 'down' state
@@ -165,7 +165,7 @@ bool isWindowedAction(const nlohmann::json action);
 * NOTE TO DEVLOPERS: If you want to add a new action, also modify the preprocessing script for config.json to 
 * include your new action as valid.
 */
-void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken, int& number_of_screenshots, 
+void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken, 
                 std::string window_name, int childPID, float &elapsed, float& next_checkpoint, 
                 float seconds_to_run, int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill, 
                 std::ostream &logfile);
