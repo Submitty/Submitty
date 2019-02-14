@@ -649,7 +649,7 @@ HTML;
 						if(isset($thread['favorite']) && $thread['favorite']) {
 							$return .= <<<HTML
 							<i class="fas fa-thumbtack" style="padding-left:3px;position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
-    -webkit-text-stroke-color: black;" aria-hidden="true"></i>
+    -webkit-text-stroke-color: black;" title="Pinned as my favorite" aria-hidden="true"></i>
 HTML;
 						}
 						if($thread['merged_thread_id'] != -1) {
