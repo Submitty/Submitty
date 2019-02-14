@@ -1710,15 +1710,25 @@ end of styles used in the admin gradeable page
     margin-bottom: 3px;
 }
 
-.noscript {
+.noscript,
+.system_message {
     width: 100%;
-    text-align: center;
-    background: #f2dede;
-    color: #b94a48;
     height: 2em;
 }
 
-.noscript span {
+.system_message {
+    background: #fff3cd;
+    color: #856404;
+    height: 2em;
+}
+
+.noscript {
+    background: #f2dede;
+    color: #b94a48;
+}
+
+.noscript span,
+.system_message span {
     text-align: center;
     margin: auto;
     font-size: 1.5em;

@@ -75,8 +75,9 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             "vcs_url" => "",
             "cgi_url" => "http://example.com/cgi-bin",
             "institution_name" => "RPI",
-            "username_change_text" => "Submitty welcomes individuals of all ages, backgrounds, citizenships, disabilities, sex, education, ethnicities, family statuses, genders, gender identities, geographical locations, languages, military experience, political views, races, religions, sexual orientations, socioeconomic statuses, and work experiences. In an effort to create an inclusive environment, you may specify a preferred name to be used instead of what was provided on the registration roster.",
+            "username_change_text" => "Submitty welcomes all students.",
             "institution_homepage" => "https://rpi.edu",
+            'system_message' => "Some system message"
         ];
         $config = array_replace($config, $extra);
         FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "submitty.json"), $config);
@@ -149,6 +150,10 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($db_params, $config->getSubmittyDatabaseParams());
         $this->assertEquals("PamAuthentication", $config->getAuthentication());
         $this->assertEquals("America/Chicago", $config->getTimezone()->getName());
+        $this->assertEquals("RPI", $config->getInstitutionName());
+        $this->assertEquals("https://rpi.edu", $config->getInstitutionHomepage());
+        $this->assertEquals("Submitty welcomes all students.", $config->getUsernameChangeText());
+        $this->assertEquals("Some system message", $config->getSystemMessage());
 
         $config->loadCourseIni($this->course_ini_path);
         $this->assertEquals(array_merge($db_params, array('dbname' => 'submitty_s17_csci0000')), $config->getCourseDatabaseParams());
@@ -233,9 +238,10 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'private_repository' => '',
             'regrade_enabled' => false,
             'room_seating_gradeable_id' => '',
-            'username_change_text' => 'Submitty welcomes individuals of all ages, backgrounds, citizenships, disabilities, sex, education, ethnicities, family statuses, genders, gender identities, geographical locations, languages, military experience, political views, races, religions, sexual orientations, socioeconomic statuses, and work experiences. In an effort to create an inclusive environment, you may specify a preferred name to be used instead of what was provided on the registration roster.',
+            'username_change_text' => 'Submitty welcomes all students.',
             'vcs_url' => 'http://example.com/{$vcs_type}/',
-            'wrapper_files' => []
+            'wrapper_files' => [],
+            'system_message' => 'Some system message'
         );
         $actual = $config->toArray();
 
