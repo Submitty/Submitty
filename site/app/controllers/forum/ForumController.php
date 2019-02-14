@@ -607,7 +607,7 @@ class ForumController extends AbstractController {
         }
 
         $thread_block = $this->core->getQueries()->loadThreadBlock($categories_ids, $thread_status, $unread_threads, $show_deleted, $show_merged_thread, $current_user, $blockNumber, $thread_id);
-        // $this->core->getOutput()->renderJson($thread_block);
+
         $ordered_threads = $thread_block['threads'];
         $blockNumber = $thread_block['block_number'];
 
