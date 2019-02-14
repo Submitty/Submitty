@@ -294,6 +294,128 @@ void FormatDispatcherActions(nlohmann::json &whole_config) {
   }
 }
 
+void validate_mouse_button(nlohmann::json& action){
+  if(action["mouse_button"].is_null()){
+    action["mouse_button"] = "left";
+  }else{
+    assert(action["mouse_button"].is_string());
+    assert(action["mouse_button"] == "left" || action["mouse_button"] == "middle" || action["mouse_button"] == "right")
+  }
+}
+
+void validate_integer(nlohmann::json& action, std::string& field, bool populate_default, int min_val, int default_value){
+  if(!action[field].is_null()){
+    assert(action[field].is_number_integer());
+    assert(action[field] >= min_val);
+  } else{
+    if(populate_default){
+      action["end_x"] = default_value;
+    }
+  }
+}
+
+void FormatGraphicsActions(nlohmann::json &whole_config) {
+
+  nlohmann::json::iterator tc = whole_config.find("testcases");
+  assert (tc != whole_config.end());
+
+  int testcase_num = 0;
+  int number_of_screenshots = 1;
+  for (typename nlohmann::json::iterator itr = tc->begin(); itr != tc->end(); itr++,testcase_num++){
+
+    nlohmann::json this_testcase = whole_config["testcases"][testcase_num];
+
+    if(this_testcase["actions"].is_null()){
+      continue;
+    }
+
+    std::vector<nlohmann::json> actions = mapOrArrayOfMaps(this_testcase, "actions");
+
+    /*
+    TODO: lowercase conversions.
+    */
+
+    for (int i = 0; i < actions.size(); i++){
+      nlohmann::json action = actions[i];
+
+      std::string action_name = action.value("action","");
+      assert(action != "");
+
+      if(action_name == "origin" || action_name == "center"){
+        continue;
+      }else if(action_name == "delay"){
+
+        assert(!action["seconds"].is_null());
+        assert(action["seconds"].is_number_float());
+
+        float delay_time_in_seconds = float(action.value("seconds",1.0));
+
+        assert(delay_time_in_seconds > 0);
+        action["seconds"] = delay_time_in_seconds;
+
+      }else if(action_name == "screenshot"){
+        
+        if(action["name"].is_null()){
+          action["name"] = "screenshot" + number_of_screenshots + ".png";
+          number_of_screenshots++;
+        }else{
+          assert(action["name"].is_string());
+          assert(action["name"] != "");
+        }
+      }else if(action_name == "type"){
+        float delay_time_in_seconds = float(action.value("delay_in_seconds",1.0));
+        action["delay_in_seconds"] = delay_time_in_seconds;
+
+        validate_integer(action, "presses", true, 1, 1);
+
+        assert(!action["string"].is_null());
+        assert( action["string"].is_string());
+        assert( action["string"] != "");
+
+      }else if(action_name == "key"){
+        float delay_time_in_seconds = float(action.value("delay_in_seconds",1.0));
+        action["delay_in_seconds"] = delay_time_in_seconds;
+
+        validate_integer(action, "presses", true, 1, 1);
+
+        assert(!action["key_combination"].is_null());
+        assert( action["key_combination"].is_string());
+        assert( action["key_combination"] != "");
+      }else if(action_name == "click and drag"){
+        
+        validate_mouse_button(action);
+
+        validate_integer(action, "start_x", false, 0, 0);
+        validate_integer(action, "start_y", false, 0, 0);
+        validate_integer(action, "end_x",   true,  0, 0);
+        validate_integer(action, "end_y",   true,  0, 0);
+
+        assert(action["end_x"] != 0 || action["end_y"] != 0);
+
+      }else if(action_name == "click and drag delta"){
+       
+        validate_mouse_button(action);
+
+        validate_integer(action, "end_x",   true,  0, 0);
+        validate_integer(action, "end_y",   true,  0, 0);
+
+        assert(action["end_x"] != 0 || action["end_y"] != 0);
+
+      }else if(action_name == "click"){
+        validate_mouse_button(action);
+        validate_integer(action, "repetitions", true, 1, 1);        
+      }else if(action_name == "mouse move"){
+        validate_integer(action, "end_x", true, 0, 0);
+        validate_integer(action, "end_y", true, 0, 0);
+      }
+      else{
+        bool valid_action_type = false;
+        assert(valid_action_type == true);
+      }
+    }
+  }
+}
+
 void formatPreActions(nlohmann::json &whole_config) {
   nlohmann::json::iterator tc = whole_config.find("testcases");
   if (tc == whole_config.end()) { /* no testcases */ return; }
