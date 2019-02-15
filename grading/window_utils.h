@@ -74,7 +74,12 @@ bool windowExists(std::string window_name);
 */
 bool screenshot(std::string window_name, std::string screenshot_name);
 
-bool make_gif(std::string window_name, std::string gif_name, float duration_in_seconds,
+/**
+* A quick helper function which pads an integer with leading zeroes.
+*/
+std::string pad_integer(int number, int padding);
+
+bool make_gif(std::string window_name, std::string gif_name, float duration_in_seconds, int fps, bool save_pngs,
   int childPID, float &elapsed, float& next_checkpoint, float seconds_to_run, 
   int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill,
   std::ostream &logfile);

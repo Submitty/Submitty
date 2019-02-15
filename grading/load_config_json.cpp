@@ -520,7 +520,6 @@ void FormatGraphicsActions(nlohmann::json &whole_config) {
         assert(action["seconds"].is_number());
 
         float gif_duration = float(action.value("seconds",1.0));
-
         assert(gif_duration > 0);
         action["seconds"] = gif_duration;
         
@@ -536,6 +535,20 @@ void FormatGraphicsActions(nlohmann::json &whole_config) {
           std::string gif_name = action["name"];
           validate_gif_or_screenshot_name(gif_name);
         }
+
+        if(action["preserve_individual_frames"].is_null()){
+          action["preserve_individual_frames"] = false;
+        }else{
+          assert(action["preserve_individual_frames"].is_boolean());
+        }
+        //minimum frames_per_second is 1, default is 10.
+        validate_integer(action, "frames_per_second", true, 1, 10);
+
+        if(action["frames_per_second"] > 30){
+          std::cout << "ERROR: Submitty does not allow gifs with an fps greater than 30." << std::endl;
+          assert(action["frames_per_second"] <= 30);
+        }
+
         number_of_gifs++;
       }
       //Fail if the action is not valid.
@@ -814,22 +827,8 @@ nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid) {
 
 
 
-
-
 /*
 * Start
-
-
-
-
-
-
-
-
-
-
-
-
 */
 
 // Every command sends standard output and standard error to two
