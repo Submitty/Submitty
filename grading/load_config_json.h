@@ -19,6 +19,8 @@ void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_conf
 
 nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid);
 
+void AddDefaultGraphicsChecks(nlohmann::json &json_graders, const nlohmann::json &testcase);
+
 void AddDefaultGrader(const std::string &command,
                       const std::set<std::string> &files_covered,
                       nlohmann::json& json_graders,

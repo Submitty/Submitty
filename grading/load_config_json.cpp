@@ -751,6 +751,7 @@ void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_conf
     assert (itr->is_array());
     VerifyGraderDeductions(*itr);
     std::vector<nlohmann::json> containers = mapOrArrayOfMaps(single_testcase, "containers");
+    AddDefaultGraphicsChecks(*itr,single_testcase);
     AddDefaultGraders(containers,*itr,whole_config);
 
      for (int i = 0; i < (*itr).size(); i++) {
@@ -825,7 +826,36 @@ nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid) {
   return answer;
 }
 
+/**
+* Add automatic GIF filechecks.
+*/
+void AddDefaultGraphicsChecks(nlohmann::json &json_graders, const nlohmann::json &testcase){
+  if(testcase.find("actions") == testcase.end()){
+    return;
+  }
+  
+  std::vector<nlohmann::json> actions = mapOrArrayOfMaps(testcase, "actions");
 
+  for (int action_num = 0; action_num < actions.size(); action_num++){
+    nlohmann::json action = actions[action_num];
+    std::string action_name = action.value("action","");
+    if(action_name != "gif"){
+      continue;
+    }
+    //We found a gif! Add a filecheck for it.
+    nlohmann::json j;
+    std::string gif_name = action["name"];
+    std::string full_gif_name = gif_name + ".gif";
+
+    j["actual_file"] = full_gif_name;
+    j["deduction"]   = 0;
+    j["description"] = "Student GIF: " + gif_name;
+    j["method"]      = "warnIfEmpty";
+    j["show_actual"] = "always";
+    j["show_message"]= "never";
+    json_graders.push_back(j);
+  }
+}
 
 /*
 * Start
