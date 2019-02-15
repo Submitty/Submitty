@@ -53,4 +53,6 @@ void validate_mouse_button(nlohmann::json& action);
 
 void validate_integer(nlohmann::json& action, std::string field, bool populate_default, int min_val, int default_value);
 
+void validate_gif_or_screenshot_name(std::string filename);
+
 #endif

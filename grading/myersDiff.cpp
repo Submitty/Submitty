@@ -198,7 +198,7 @@ TestResults* ImageDiff_doit(const TestCase &tc, const nlohmann::json& j, int aut
 
   if (access(expected_file.c_str(), F_OK|R_OK ) == -1)
   {
-        return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: The instructor's image was not found. Please notify your instructor")});
+    return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: The instructor's image was not found. Please notify your instructor")});
   }
 
   float acceptable_threshold = stringToFloat(acceptable_threshold_str,6); //window_utils function.

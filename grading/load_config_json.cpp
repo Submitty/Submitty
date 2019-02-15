@@ -338,6 +338,31 @@ void validate_integer(nlohmann::json& action, std::string field, bool populate_d
   }
 }
 
+void validate_gif_or_screenshot_name(std::string filename){
+
+  if(filename.find(".") != std::string::npos){
+    std::cout << "ERROR: screenshot and gif names should not contain file extensions. File extensions will be added automatically." << std::endl;
+  }
+  if(filename.find(" ") != std::string::npos){
+    std::cout << "ERROR: screenshot and gif names should not contain spaces." << std::endl;
+  }
+  if(filename.find("/") != std::string::npos||
+     filename.find("$") != std::string::npos||
+     filename.find("'") != std::string::npos||
+     filename.find("\"") != std::string::npos||
+     filename.find("\\") != std::string::npos){
+    std::cout << "ERROR: screenshot and gif names should not contain special characters." << std::endl;
+  }
+  assert(filename.find(" ") == std::string::npos);
+  assert(filename.find(".") == std::string::npos);
+  assert(filename.find("/") == std::string::npos);
+  assert(filename.find("$") == std::string::npos);
+  assert(filename.find("'") == std::string::npos);
+  assert(filename.find("\"") == std::string::npos);
+  assert(filename.find("\\") == std::string::npos);
+  assert(filename.find("*") == std::string::npos);
+}
+
 void FormatGraphicsActions(nlohmann::json &whole_config) {
 
   nlohmann::json::iterator tc = whole_config.find("testcases");
@@ -347,7 +372,8 @@ void FormatGraphicsActions(nlohmann::json &whole_config) {
   for (typename nlohmann::json::iterator itr = tc->begin(); itr != tc->end(); itr++,testcase_num++){
     //screenshot number resets per testcase.
     int number_of_screenshots = 0;
-    
+    int number_of_gifs = 0;
+
     nlohmann::json this_testcase = whole_config["testcases"][testcase_num];
 
     if(this_testcase["actions"].is_null()){
@@ -396,28 +422,7 @@ void FormatGraphicsActions(nlohmann::json &whole_config) {
           assert(action["name"].is_string());
           assert(action["name"] != "");
           std::string screenshot_name = action["name"];
-
-          if(screenshot_name.find(".") != std::string::npos){
-            std::cout << "ERROR: screenshot names should not contain file extensions. File extensions will be added automatically." << std::endl;
-          }
-          if(screenshot_name.find(" ") != std::string::npos){
-            std::cout << "ERROR: screenshot names should not contain spaces." << std::endl;
-          }
-          if(screenshot_name.find("/") != std::string::npos||
-             screenshot_name.find("$") != std::string::npos||
-             screenshot_name.find("'") != std::string::npos||
-             screenshot_name.find("\"") != std::string::npos||
-             screenshot_name.find("\\") != std::string::npos){
-            std::cout << "ERROR: screenshot names should not contain special characters." << std::endl;
-          }
-          assert(screenshot_name.find(" ") == std::string::npos);
-          assert(screenshot_name.find(".") == std::string::npos);
-          assert(screenshot_name.find("/") == std::string::npos);
-          assert(screenshot_name.find("$") == std::string::npos);
-          assert(screenshot_name.find("'") == std::string::npos);
-          assert(screenshot_name.find("\"") == std::string::npos);
-          assert(screenshot_name.find("\\") == std::string::npos);
-          assert(screenshot_name.find("*") == std::string::npos);
+          validate_gif_or_screenshot_name(screenshot_name);
           action["name"] = screenshot_name + ".png";
         }
         number_of_screenshots++;
@@ -500,6 +505,38 @@ void FormatGraphicsActions(nlohmann::json &whole_config) {
       else if(action_name == "mouse move"){
         validate_integer(action, "end_x", true, 0, 0);
         validate_integer(action, "end_y", true, 0, 0);
+      }
+      //gif requires a duration and can optionally have a name.
+      else if(action_name == "gif"){
+
+        if(action["seconds"].is_null()){
+          std::cout << "ERROR: all delay actions must have a number of seconds specified." << std::endl;
+        }
+        assert(!action["seconds"].is_null());
+
+        if(!action["seconds"].is_number()){
+          std::cout << "ERROR: all delay actions must have a number of seconds specified." << std::endl;
+        }
+        assert(action["seconds"].is_number());
+
+        float gif_duration = float(action.value("seconds",1.0));
+
+        assert(gif_duration > 0);
+        action["seconds"] = gif_duration;
+        
+        if(action["name"].is_null()){
+          action["name"] = "gif_" + std::to_string(number_of_gifs);
+        }
+        else{
+          if(!action["name"].is_string()){
+            std::cout << "ERROR: if a screenshot name is specified, it must be a string." << std::endl;
+          }
+          assert(action["name"].is_string());
+          assert(action["name"] != "");
+          std::string gif_name = action["name"];
+          validate_gif_or_screenshot_name(gif_name);
+        }
+        number_of_gifs++;
       }
       //Fail if the action is not valid.
       else{

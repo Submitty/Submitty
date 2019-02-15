@@ -385,6 +385,46 @@ bool screenshot(std::string window_name, std::string screenshot_name){
   }
 }
 
+/*
+* Take the screenshots neccessary to later compile a gif.
+*/
+bool make_gif(std::string window_name, std::string gif_name, float duration_in_seconds,
+              int childPID, float &elapsed, float& next_checkpoint, float seconds_to_run, 
+              int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill,
+              std::ostream &logfile){
+
+  int iterations = duration_in_seconds / 0.1f;
+  bool killed = false;
+  for(int i = 0; i < iterations; i++){ 
+    
+    std::string iterative_gif_name = gif_name + "_" + std::to_string(i) + ".png";
+    bool successful_screenshot = screenshot(window_name, iterative_gif_name);
+
+    if(!successful_screenshot){
+      return false;
+    }
+
+    //add a 1/10th second delay between each image capture.
+    if(i != iterations-1){ 
+      killed = delay_and_mem_check(100000, childPID, elapsed, next_checkpoint, 
+        seconds_to_run, rss_memory, allowed_rss_memory, memory_kill,time_kill, logfile);
+    }
+    if(killed){
+      return false;
+    }
+  }
+
+  //let's just test the cost of this
+  std::string target_gif_name = gif_name + "*.png";
+  std::string outfile_name = gif_name + ".gif";
+
+  std::string command = "convert -delay 20 -loop 0 " + target_gif_name + " " + outfile_name;// + " NULL: 2>&1";
+  std::string output = output_of_system_command(command.c_str()); //get the string
+
+  return true;
+}
+
+
 /**
 * This function uses xdotool to put the mouse button associated with int button
 * into the 'down' state. Checks to see if the window exists so that we don't 
@@ -962,6 +1002,9 @@ bool type(std::string toType, float delay, int presses, std::string window_name,
   //get window focus then type the string toType.
   std::string internal_command = "wmctrl -R " + window_name 
                                     +" &&  xdotool type " + toType; 
+  
+  bool killed = false;
+
   //for number of presses requested, check that the window exists and that we 
   //have something to type.
   for(int i = 0; i < presses; i++){ 
@@ -974,8 +1017,11 @@ bool type(std::string toType, float delay, int presses, std::string window_name,
     }
     //allow this to run so that delays occur as expected.
     if(i != presses-1){ 
-      delay_and_mem_check(delay, childPID, elapsed, next_checkpoint, 
+      killed = delay_and_mem_check(delay, childPID, elapsed, next_checkpoint, 
         seconds_to_run, rss_memory, allowed_rss_memory, memory_kill,time_kill, logfile);
+    }
+    if(killed){
+      return false;
     }
   }
   return true;
@@ -1070,7 +1116,7 @@ void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken,
     success = true;
   }
   //SCREENSHOT
-  else if(action_name.find("screenshot") != std::string::npos){ 
+  else if(action_name == "screenshot"){ 
     std::string screenshot_name = action["name"];
     success = screenshot(window_name, screenshot_name);
   }
@@ -1135,6 +1181,14 @@ void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken,
   //ORIGIN
   else if(action_name == "origin"){ 
     success = moveMouseToOrigin(window_name);
+  }
+  else if(action_name == "gif"){ 
+    std::string gif_name = action["name"];
+    float duration_in_seconds = action["seconds"];
+    success = make_gif(window_name, gif_name, duration_in_seconds,
+                        childPID, elapsed, next_checkpoint, seconds_to_run, 
+                        rss_memory, allowed_rss_memory, memory_kill, time_kill,
+                        logfile);
   }
    //BAD COMMAND
   else{

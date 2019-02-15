@@ -74,6 +74,11 @@ bool windowExists(std::string window_name);
 */
 bool screenshot(std::string window_name, std::string screenshot_name);
 
+bool make_gif(std::string window_name, std::string gif_name, float duration_in_seconds,
+  int childPID, float &elapsed, float& next_checkpoint, float seconds_to_run, 
+  int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill,
+  std::ostream &logfile);
+
 /**
 * This function uses xdotool to put the mouse button associated with int button into the 'down' state
 * Checks to see if the window exists so that we don't click on anything that doesn't belong to us.
