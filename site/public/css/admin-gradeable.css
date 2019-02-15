@@ -122,3 +122,23 @@ div.btn-container {
 #team-settings-container {
     margin-top: 10px
 }
+
+.disabledBtn{
+    background-color:#d0d0d0 ;
+    color: #909090 ;
+    cursor: default;
+}
+.normalBtn{
+    background-color: #d0d0d0 ;
+    color: #111111 ;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.75);
+}
+.normalBtn:hover{
+    box-shadow: none;
+}
+
+.activeBtn{
+    background-color: green;
+    color: white;
+    box-shadow: none;
+}
