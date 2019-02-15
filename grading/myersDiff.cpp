@@ -207,6 +207,17 @@ TestResults* ImageDiff_doit(const TestCase &tc, const nlohmann::json& j, int aut
   actual_file = tc.getPrefix() + actual_file;
   std::cout << "About to compare " << actual_file << " and " << expected_file << std::endl;
 
+  //Check existence. File is closed by destructor.
+  std::ifstream img_file_actual(actual_file);
+  if(!img_file_actual.good()){
+    return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "Image comparison failed; student file does not exist.")});
+  }
+
+  //Check existence. File is closed by destructor.
+  std::ifstream img_file_expected(expected_file);
+  if(!img_file_expected.good()){
+    return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "Image comparison failed; expected file does not exist.")});
+  }
 
   std::string command = "compare -metric RMSE " + actual_file + " " + expected_file + " NULL: 2>&1";
   std::string output = output_of_system_command(command.c_str()); //get the string

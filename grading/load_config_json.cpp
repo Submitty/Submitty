@@ -319,7 +319,7 @@ void validate_mouse_button(nlohmann::json& action){
 * if the field doesn't exist and populate_default is true, the field is set to default_value.
 */
 void validate_integer(nlohmann::json& action, std::string field, bool populate_default, int min_val, int default_value){
-  if(!action[field].is_null()){
+  if(action.find(field) != action.end()){
     std::string action_name = action["action"];
 
     if(!action[field].is_number_integer()){
@@ -333,7 +333,7 @@ void validate_integer(nlohmann::json& action, std::string field, bool populate_d
     assert(action[field] >= min_val);
   } else{
     if(populate_default){
-      action["end_x"] = default_value;
+      action[field] = default_value;
     }
   }
 }
@@ -344,9 +344,10 @@ void FormatGraphicsActions(nlohmann::json &whole_config) {
   assert (tc != whole_config.end());
 
   int testcase_num = 0;
-  int number_of_screenshots = 0;
   for (typename nlohmann::json::iterator itr = tc->begin(); itr != tc->end(); itr++,testcase_num++){
-
+    //screenshot number resets per testcase.
+    int number_of_screenshots = 0;
+    
     nlohmann::json this_testcase = whole_config["testcases"][testcase_num];
 
     if(this_testcase["actions"].is_null()){
@@ -355,12 +356,8 @@ void FormatGraphicsActions(nlohmann::json &whole_config) {
 
     std::vector<nlohmann::json> actions = mapOrArrayOfMaps(this_testcase, "actions");
 
-    /*
-    TODO: lowercase conversions.
-    */
-
-    for (int i = 0; i < actions.size(); i++){
-      nlohmann::json action = actions[i];
+    for (int action_num = 0; action_num < actions.size(); action_num++){
+      nlohmann::json action = actions[action_num];
 
       std::string action_name = action.value("action","");
       assert(action != "");
@@ -390,9 +387,8 @@ void FormatGraphicsActions(nlohmann::json &whole_config) {
       }
       //screenshot can contain an optional name. Otherwise, it is labeled in numerical order.
       else if(action_name == "screenshot"){
-        number_of_screenshots++;
         if(action["name"].is_null()){
-          action["name"] = "screenshot" + std::to_string(number_of_screenshots) + ".png";
+          action["name"] = "screenshot_" + std::to_string(number_of_screenshots) + ".png";
         }else{
           if(!action["name"].is_string()){
             std::cout << "ERROR: if a screenshot name is specified, it must be a string." << std::endl;
@@ -424,10 +420,11 @@ void FormatGraphicsActions(nlohmann::json &whole_config) {
           assert(screenshot_name.find("*") == std::string::npos);
           action["name"] = screenshot_name + ".png";
         }
+        number_of_screenshots++;
       }
       //Type requires a string to type and can have an optional "delay_in_seconds" and "presses"
       else if(action_name == "type"){
-        float delay_time_in_seconds = float(action.value("delay_in_seconds",.1));
+        float delay_time_in_seconds = action.value("delay_in_seconds",0.1);
         if(delay_time_in_seconds <= 0){
           std::cout << "ERROR: In the type command, delay must be greater than zero." << std::endl;
         }
@@ -446,7 +443,7 @@ void FormatGraphicsActions(nlohmann::json &whole_config) {
       }
       //Type requires a key_combination to press and can have an optional "delay_in_seconds" and "presses"
       else if(action_name == "key"){
-        float delay_time_in_seconds = float(action.value("delay_in_seconds",.1));
+        float delay_time_in_seconds = action.value("delay_in_seconds",0.1);
         
         if(delay_time_in_seconds <= 0){
           std::cout << "ERROR: In the key command, delay must be greater than zero." << std::endl;
@@ -514,6 +511,7 @@ void FormatGraphicsActions(nlohmann::json &whole_config) {
         }
         assert(valid_action_type == true);
       }
+      whole_config["testcases"][testcase_num]["actions"][action_num] = action;
     }
   }
 }
