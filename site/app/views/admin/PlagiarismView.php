@@ -168,18 +168,36 @@ HTML;
 
             $(document).ready(function() {
                 var editor0 = $('.CodeMirror')[0].CodeMirror;
+                var editor1 = $('.CodeMirror')[1].CodeMirror;
 
-                console.log('hello');
+                //console.log('hello');
 
                 editor0.getWrapperElement().onmousedown = function(e) {
                     var lineCh = editor0.coordsChar({ left: e.clientX, top: e.clientY });
                     var markers = editor0.findMarksAt(lineCh);
                     if (markers.length === 0) { return; }
                     var lineData = markers[0].find();
-                    console.log(lineData);
+                    
                     if(markers[0].css.toLowerCase().indexOf("#ffff00") != -1) { //Can be used to determine click
                         editor0.markText(lineData.from, lineData.to, {'className': 'red_plag', 'css': 'background: #FF0000;'});
                         getMatchesForClickedMatch("{$gradeable_id}", event, lineData.from, lineData.to, "code_box_1", "orange", null, "", "");
+                    }
+                    if(markers[0].css.toLowerCase().indexOf("#ffa500") != -1) { //Can be used to determine click
+                        editor0.markText(lineData.from, lineData.to, {'className': 'red_plag', 'css': 'background: #FF0000;'});
+                        var marks_editor2 = editor1.getAllMarks();
+                        marks_editor2.forEach(mark => {
+                            if(mark.attributes.data_start == markers[0].attributes.data_start && mark.attributes.data_end == markers[0].attributes.data_end) {
+                                //mark.className = 'red_plag';
+                                var marker_linedata = mark.find();
+                                //mark.css = "border: 1px solid black; border-right:1px solid red;background: #FF0000";
+                                console.log(mark);
+                                console.log(marker_linedata);
+                                mark.clear();
+                                editor1.markText(marker_linedata.from, marker_linedata.to, {'className': 'red_plag', 'css': 'background: #FF0000;'});
+                                //editor1.refresh();
+                            }
+                        });
+                        //getMatchesForClickedMatch("{$gradeable_id}", event, lineData.from, lineData.to, "code_box_2", "orange", markers[0].attributes, "", "");
                     }
                 }
             });

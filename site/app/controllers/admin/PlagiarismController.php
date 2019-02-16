@@ -606,7 +606,7 @@ class PlagiarismController extends AbstractController {
                             $end_line_2 = $tokens_user_2[$user_2_matchingposition["end"]-1]["line"]-1;
                             $start_value_2 = $tokens_user_2[$user_2_matchingposition["start"]-1]["value"];
                             $end_value_2 =$tokens_user_2[$user_2_matchingposition["end"]-1]["value"];
-                            $color_info[2][] = [$start_pos_2, $start_line_2, $end_pos_2, $end_line_2, '#ffa500', $start_value_2, $end_value_2];
+                            $color_info[2][] = [$start_pos_2, $start_line_2, $end_pos_2, $end_line_2, '#ffa500', $start_value_2, $end_value_2, $user_2_matchingposition["start"], $user_2_matchingposition["end"]];
 
                 }
                 
@@ -624,7 +624,7 @@ class PlagiarismController extends AbstractController {
 
              
 
-            array_push($color_info[1], [$start_pos, $start_line, $end_pos, $end_line, $color, $start_value, $end_value]);
+            array_push($color_info[1], [$start_pos, $start_line, $end_pos, $end_line, $color, $start_value, $end_value, $match["start"], $match["end"]]);
             
         
     	// foreach($color_info as $i=>$color_info_for_line) {
