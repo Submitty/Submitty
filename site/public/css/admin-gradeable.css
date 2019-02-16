@@ -124,8 +124,8 @@ div.btn-container {
 }
 
 .disabledBtn{
-    background-color:#d0d0d0 ;
-    color: #909090 ;
+    background-color:#d4d4d4 ;
+    color: #5a5a5a ;
     cursor: default;
 }
 .normalBtn{
@@ -138,7 +138,8 @@ div.btn-container {
 }
 
 .activeBtn{
-    background-color: green;
-    color: white;
+    background-color: #008000;
+    color: #ffffff;
     border: none;
 }
+
