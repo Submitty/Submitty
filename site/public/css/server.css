@@ -1546,8 +1546,8 @@ end of styles used in the admin gradeable page
     1px 1px 0 #000;
 }
 
-/* color for verifiers */
-.grader-5{
+/* color for limited access graders who were verifed */
+.grader-verified{
                                           /* green       yellow  */
     background: linear-gradient(to right, #33cc33 50%, #ffcc33 50%);
     background-clip : text;
