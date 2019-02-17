@@ -1548,8 +1548,8 @@ end of styles used in the admin gradeable page
 
 /* color for limited access graders who were verifed */
 .grader-verified{
-                                          /* green       yellow  */
-    background: linear-gradient(to right, #33cc33 50%, #ffcc33 50%);
+                                        /* yellow       green   */
+    background: linear-gradient(to right, #ffcc33 50%, #33cc33 50%);
     background-clip : text;
     color: transparent;
     /* chrome & safari */
