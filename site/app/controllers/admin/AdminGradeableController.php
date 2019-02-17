@@ -822,7 +822,7 @@ class AdminGradeableController extends AbstractController {
         }
 
         // Trigger a rebuild if the config changes
-        $trigger_rebuild_props = ['autograding_config_path'];
+        $trigger_rebuild_props = ['autograding_config_path', 'vcs_subdirectory'];
         $trigger_rebuild = count(array_intersect($trigger_rebuild_props, array_keys($details))) > 0;
 
         $boolean_properties = [
