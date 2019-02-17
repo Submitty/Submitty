@@ -49,4 +49,8 @@ void VerifyGraderDeductions(nlohmann::json &json_graders);
 
 bool validShowValue(const nlohmann::json& v);
 
+void validate_mouse_button(nlohmann::json& action);
+
+void validate_integer(nlohmann::json& action, std::string field, bool populate_default, int min_val, int default_value);
+
 #endif

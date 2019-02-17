@@ -300,6 +300,222 @@ void FormatDispatcherActions(nlohmann::json &whole_config) {
   }
 }
 
+
+/*
+* Given an action, makes sure that the mouse button in the action is valid (left, right, middle).
+* If there is no mouse button specified, "left" is added.
+*/
+void validate_mouse_button(nlohmann::json& action){
+  if(action["mouse_button"].is_null()){
+    action["mouse_button"] = "left";
+  }else{
+    assert(action["mouse_button"].is_string());
+    assert(action["mouse_button"] == "left" || action["mouse_button"] == "middle" || action["mouse_button"] == "right");
+  }
+}
+
+/*
+* Given an action and a field, makes certain that the value in the field is an integer greater than min_val.
+* if the field doesn't exist and populate_default is true, the field is set to default_value.
+*/
+void validate_integer(nlohmann::json& action, std::string field, bool populate_default, int min_val, int default_value){
+  if(action.find(field) != action.end()){
+    std::string action_name = action["action"];
+
+    if(!action[field].is_number_integer()){
+      std::cout << "ERROR: For the " << action_name << " action, " << field << " must be an integer." << std::endl;
+    }
+    assert(action[field].is_number_integer());
+
+    if(action[field] < min_val){
+      std::cout << "ERROR: For the " << action_name << " action, " << field << " must be greater than " << min_val << "." << std::endl;
+    }
+    assert(action[field] >= min_val);
+  } else{
+    if(populate_default){
+      action[field] = default_value;
+    }
+  }
+}
+
+void FormatGraphicsActions(nlohmann::json &whole_config) {
+
+  nlohmann::json::iterator tc = whole_config.find("testcases");
+  assert (tc != whole_config.end());
+
+  int testcase_num = 0;
+  for (typename nlohmann::json::iterator itr = tc->begin(); itr != tc->end(); itr++,testcase_num++){
+    //screenshot number resets per testcase.
+    int number_of_screenshots = 0;
+    
+    nlohmann::json this_testcase = whole_config["testcases"][testcase_num];
+
+    if(this_testcase["actions"].is_null()){
+      continue;
+    }
+
+    std::vector<nlohmann::json> actions = mapOrArrayOfMaps(this_testcase, "actions");
+
+    for (int action_num = 0; action_num < actions.size(); action_num++){
+      nlohmann::json action = actions[action_num];
+
+      std::string action_name = action.value("action","");
+      assert(action != "");
+
+      //Origin and center have no additional fields.
+      if(action_name == "origin" || action_name == "center"){
+        continue;
+      }
+      // Delay requires a float number of seconds, which must be greater than 0
+      // and defaults to 1.
+      else if(action_name == "delay"){
+
+        if(action["seconds"].is_null()){
+          std::cout << "ERROR: all delay actions must have a number of seconds specified." << std::endl;
+        }
+        assert(!action["seconds"].is_null());
+
+        if(!action["seconds"].is_number()){
+          std::cout << "ERROR: all delay actions must have a number of seconds specified." << std::endl;
+        }
+        assert(action["seconds"].is_number());
+
+        float delay_time_in_seconds = float(action.value("seconds",1.0));
+
+        assert(delay_time_in_seconds > 0);
+        action["seconds"] = delay_time_in_seconds;
+      }
+      //screenshot can contain an optional name. Otherwise, it is labeled in numerical order.
+      else if(action_name == "screenshot"){
+        if(action["name"].is_null()){
+          action["name"] = "screenshot_" + std::to_string(number_of_screenshots) + ".png";
+        }else{
+          if(!action["name"].is_string()){
+            std::cout << "ERROR: if a screenshot name is specified, it must be a string." << std::endl;
+          }
+          assert(action["name"].is_string());
+          assert(action["name"] != "");
+          std::string screenshot_name = action["name"];
+
+          if(screenshot_name.find(".") != std::string::npos){
+            std::cout << "ERROR: screenshot names should not contain file extensions. File extensions will be added automatically." << std::endl;
+          }
+          if(screenshot_name.find(" ") != std::string::npos){
+            std::cout << "ERROR: screenshot names should not contain spaces." << std::endl;
+          }
+          if(screenshot_name.find("/") != std::string::npos||
+             screenshot_name.find("$") != std::string::npos||
+             screenshot_name.find("'") != std::string::npos||
+             screenshot_name.find("\"") != std::string::npos||
+             screenshot_name.find("\\") != std::string::npos){
+            std::cout << "ERROR: screenshot names should not contain special characters." << std::endl;
+          }
+          assert(screenshot_name.find(" ") == std::string::npos);
+          assert(screenshot_name.find(".") == std::string::npos);
+          assert(screenshot_name.find("/") == std::string::npos);
+          assert(screenshot_name.find("$") == std::string::npos);
+          assert(screenshot_name.find("'") == std::string::npos);
+          assert(screenshot_name.find("\"") == std::string::npos);
+          assert(screenshot_name.find("\\") == std::string::npos);
+          assert(screenshot_name.find("*") == std::string::npos);
+          action["name"] = screenshot_name + ".png";
+        }
+        number_of_screenshots++;
+      }
+      //Type requires a string to type and can have an optional "delay_in_seconds" and "presses"
+      else if(action_name == "type"){
+        float delay_time_in_seconds = action.value("delay_in_seconds",0.1);
+        if(delay_time_in_seconds <= 0){
+          std::cout << "ERROR: In the type command, delay must be greater than zero." << std::endl;
+        }
+        assert(delay_time_in_seconds > 0);
+        action["delay_in_seconds"] = delay_time_in_seconds;
+
+        validate_integer(action, "presses", true, 1, 1);
+
+        if(action["string"].is_null()){
+          std::cout << "ERROR: an output string must be specified in the type command." << std::endl;
+        }
+        assert(!action["string"].is_null());
+        assert( action["string"].is_string());
+        assert( action["string"] != "");
+
+      }
+      //Type requires a key_combination to press and can have an optional "delay_in_seconds" and "presses"
+      else if(action_name == "key"){
+        float delay_time_in_seconds = action.value("delay_in_seconds",0.1);
+        
+        if(delay_time_in_seconds <= 0){
+          std::cout << "ERROR: In the key command, delay must be greater than zero." << std::endl;
+        }
+        assert(delay_time_in_seconds > 0);
+        action["delay_in_seconds"] = delay_time_in_seconds;
+
+        validate_integer(action, "presses", true, 1, 1);
+        
+        if(action["key_combination"].is_null()){
+          std::cout << "ERROR: key combination to be pressed must be specified in the key command." << std::endl;
+        }
+        assert(!action["key_combination"].is_null());
+        assert( action["key_combination"].is_string());
+        assert( action["key_combination"] != "");
+      }
+      //Click and drag can have an optional start_x and start_y, and must have an end_x and end_y
+      // which are greater than 0.
+      else if(action_name == "click and drag"){
+        
+        validate_mouse_button(action);
+
+        validate_integer(action, "start_x", false, 0, 0);
+        validate_integer(action, "start_y", false, 0, 0);
+        validate_integer(action, "end_x",   true,  0, 0);
+        validate_integer(action, "end_y",   true,  0, 0);
+
+        if(action["end_x"] == 0 && action["end_y"] == 0){
+          std::cout << "ERROR: some movement must be specified in click and drag" << std::endl;
+        }
+        assert(action["end_x"] != 0 || action["end_y"] != 0);
+
+      }
+      //Click and drag delta can have an optional mouse button, and must have and end_x and end_y.
+      else if(action_name == "click and drag delta"){
+       
+        validate_mouse_button(action);
+
+        validate_integer(action, "end_x",   true,  0, 0);
+        validate_integer(action, "end_y",   true,  0, 0);
+
+        if(action["end_x"] == 0 && action["end_y"] == 0){
+          std::cout << "ERROR: some movement must be specified in click and drag" << std::endl;
+        }
+
+        assert(action["end_x"] != 0 || action["end_y"] != 0);
+
+      }
+      //Click has an optional mouse button.
+      else if(action_name == "click"){
+        validate_mouse_button(action);
+      }
+      //Mouse move has an optional end_x and end_y.
+      else if(action_name == "mouse move"){
+        validate_integer(action, "end_x", true, 0, 0);
+        validate_integer(action, "end_y", true, 0, 0);
+      }
+      //Fail if the action is not valid.
+      else{
+        bool valid_action_type = false;
+        if(action_name == ""){
+          std::cout << "ERROR: no 'action' feild defined." << std::endl;
+        }else{
+          std::cout << "ERROR: Could not recognize action " << action_name << std::endl;
+        }
+        assert(valid_action_type == true);
+      }
+      whole_config["testcases"][testcase_num]["actions"][action_num] = action;
+    }
+  }
+}
+
 void formatPreActions(nlohmann::json &whole_config) {
   nlohmann::json::iterator tc = whole_config.find("testcases");
   if (tc == whole_config.end()) { /* no testcases */ return; }
@@ -542,6 +758,7 @@ nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid) {
   AddDockerConfiguration(answer);
   FormatDispatcherActions(answer);
   formatPreActions(answer);
+  FormatGraphicsActions(answer);
   AddSubmissionLimitTestCase(answer);
   AddAutogradingConfiguration(answer);
 

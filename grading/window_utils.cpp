@@ -369,16 +369,14 @@ bool windowExists(std::string window_name){
 
 /**
 * Given a window name, this function takes a screenshot of it if it exists. 
-* uses number_of_screenshots to title the image (submitty prepends it with the
-*  test #) updates the number of screenshots taken. 
+* uses screenshot_name to title the image.
 */
-bool screenshot(std::string window_name, int& number_of_screenshots){
+bool screenshot(std::string window_name, std::string screenshot_name){
   if(windowExists(window_name)){ 
     //if the window hasn't crashed, bring it into focus and screenshot it
     std::string command = "wmctrl -R " + window_name + " && scrot "  
-                      + std::to_string(number_of_screenshots) + ".png -u";
+                      + screenshot_name + " -u";
     system(command.c_str());
-    number_of_screenshots = number_of_screenshots + 1;
     return true;
   }
   else{
@@ -1035,7 +1033,7 @@ bool isWindowedAction(const nlohmann::json action){
 * function. 
 */
 void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken, 
-  int& number_of_screenshots, std::string window_name, int childPID, 
+  std::string window_name, int childPID, 
   float &elapsed, float& next_checkpoint, float seconds_to_run, 
   int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill,
   std::ostream &logfile){
@@ -1073,27 +1071,23 @@ void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken,
   }
   //SCREENSHOT
   else if(action_name.find("screenshot") != std::string::npos){ 
-    success = screenshot(window_name, number_of_screenshots);
+    std::string screenshot_name = action["name"];
+    success = screenshot(window_name, screenshot_name);
   }
   //TYPE
   else if(action_name == "type"){ 
 
-    float delay_in_secs = action.value("delay_in_seconds", .1);
-    int presses = action.value("presses", 1);
-    std::string string_to_type = action.value("string", "");
+    float delay_in_secs = action["delay_in_seconds"];
+    int presses = action["presses"];
+    std::string string_to_type = action["string"];
 
     success = type(string_to_type, delay_in_secs, presses, window_name,childPID,elapsed, next_checkpoint, 
       seconds_to_run, rss_memory, allowed_rss_memory, memory_kill, time_kill, logfile);
   }
   //KEY
-  else if(action_name.find("key") != std::string::npos){
-    std::string key_to_type = action.value("key_combination", "INVALID_COMBINATION");
-    if (key_to_type != "INVALID_COMBINATION"){
-      success = key(key_to_type, window_name);
-    }
-    else{
-      std::cout << "ERROR: ill formatted key command. No key to type found." << std::endl;
-    }
+  else if(action_name == "key"){
+    std::string key_to_type = action["key_combination"];
+    success = key(key_to_type, window_name);
   }
   //CLICK AND DRAG    
   else if(action_name == "click and drag"){ 
@@ -1103,8 +1097,8 @@ void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken,
     success = clickAndDragDelta(window_name,action);
   }
   //CLICK
-  else if(action_name.find("click") != std::string::npos){ 
-    std::string mouse_button = action.value("mouse_button", "left");
+  else if(action_name == "click"){ 
+    std::string mouse_button = action["mouse_button"];
     if(mouse_button == "left"){
       success = click(window_name, 1);
     }
@@ -1119,33 +1113,27 @@ void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken,
     }
   }
   //MOUSE MOVE
-  else if(action_name.find("move mouse") != std::string::npos){
+  else if(action_name == "move mouse"){
     //TODO: implement later if deemed prudent.
     bool no_clamp = false;
     
-    int moved_x = action.value("end_x", -1);
-    int moved_y = action.value("end_y", -1);
+    int moved_x = action["end_x"];
+    int moved_y = action["end_y"];
 
-
-    if(moved_x >=0 && moved_y >= 0){
-      int height, width, x_start, x_end, y_start, y_end;
-      bool corr = populateWindowData(window_name, height, width, x_start, x_end, y_start, y_end);
-      if(corr){
-          moved_x += x_start;
-          moved_y += y_start;
-          success = mouse_move(window_name, moved_x, moved_y, x_start, x_end, y_start, y_end, no_clamp);
-      }
-      else{
-        std::cout << "No mouse move due to unsuccessful data population." << std::endl;
-      }
+    int height, width, x_start, x_end, y_start, y_end;
+    bool populated = populateWindowData(window_name, height, width, x_start, x_end, y_start, y_end);
+    if(populated){
+        moved_x += x_start;
+        moved_y += y_start;
+        success = mouse_move(window_name, moved_x, moved_y, x_start, x_end, y_start, y_end, no_clamp);
     }
   }
   //CENTER
-  else if(action_name.find("center") != std::string::npos){ 
+  else if(action_name == "center"){ 
     success = centerMouse(window_name);
   }
   //ORIGIN
-  else if(action_name.find("origin") != std::string::npos){ 
+  else if(action_name == "origin"){ 
     success = moveMouseToOrigin(window_name);
   }
    //BAD COMMAND
