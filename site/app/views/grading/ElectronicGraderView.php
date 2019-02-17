@@ -342,7 +342,8 @@ class ElectronicGraderView extends AbstractView {
                 } else if(!$graded_component->getVerifier()){
                     $info["graded_groups"][] = $graded_component->getGrader()->getGroup();
                 } else{
-                    $info["graded_groups"][] = $graded_component->getVerifier()->getGroup();
+                    //change group for verifiers manually to display differently on details page
+                    $info["graded_groups"][] = 5;
                 }
             }
 
