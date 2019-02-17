@@ -1546,6 +1546,17 @@ end of styles used in the admin gradeable page
     1px 1px 0 #000;
 }
 
+/* color for limited access graders who were verifed */
+.grader-verified{
+                                        /* yellow       green   */
+    background: linear-gradient(to right, #ffcc33 50%, #33cc33 50%);
+    background-clip : text;
+    color: transparent;
+    /* chrome & safari */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
 /* color for student/peer grading */
 .grader-4 {
     color: #cc66ff; /* purple */
