@@ -12,11 +12,13 @@ import shutil
 import stat
 import traceback
 import sys
+import time
 #try importing required modules
 try:
     from PyPDF2 import PdfFileReader, PdfFileWriter
     from pdf2image import convert_from_bytes
     import pyzbar.pyzbar as pyzbar
+    import urllib.parse
 except ImportError as e:
     print("Content-type: application/json")
     print()
@@ -25,7 +27,7 @@ except ImportError as e:
     message += traceback.format_exc() 
     print(json.dumps({"valid" : False, "message" : message}))
     sys.exit(1)
-
+start_time = time.time()
 #from grade_item.py
 def add_permissions(item,perms):
     if os.getuid() == os.stat(item).st_uid:
@@ -51,18 +53,23 @@ try:
     course = os.path.basename(arguments['course'].value)
     g_id = os.path.basename(arguments['g_id'].value)
     ver = os.path.basename(arguments['ver'].value)
-    qr_prefix = ''
+    qr_prefix = qr_suffix = ''
+    #check inputs for URL spoofing
     for key in ['sem', 'course', 'g_id', 'ver']:
         if os.path.basename(arguments[key].value) in ['.', '..']:
             message += '. Invalid value for ' + key + '.'
             print(json.dumps({"valid" : False, "message" : message}))
             sys.exit(1)
-    #check if qr_prefix is passed in, an empty string since is not considered a valid CGI arg
+    #check if qr_prefix or qr_suffix is passed in, an empty string since is not considered a valid CGI arg
     for arg in cgi.parse(arguments):
         if arg == 'qr_prefix':
-            qr_prefix = os.path.basename(arguments['qr_prefix'].value)
+            qr_prefix = urllib.parse.unquote(os.path.basename(arguments['qr_prefix'].value))
             break
-        qr_prefix = ""
+
+    for arg in cgi.parse(arguments):
+        if arg == 'qr_suffix':
+            qr_suffix = urllib.parse.unquote(os.path.basename(arguments['qr_suffix'].value))
+            break
 
     with open("/usr/local/submitty/config/submitty.json", encoding='utf-8') as data_file:
         data = json.loads(data_file.read())
@@ -71,11 +78,13 @@ try:
     uploads_path = os.path.join(data["submitty_data_dir"],"courses",sem,course,"uploads")
     bulk_path = os.path.join(data["submitty_data_dir"],"courses",sem,course,"uploads/bulk_pdf",g_id,ver)
     split_path = os.path.join(data["submitty_data_dir"],"courses",sem,course,"uploads/split_pdf",g_id,ver)
+
 except Exception as e:
-    message += "Failed after parsing args and creating paths\n"
+    message = "Failed after parsing args and creating paths\n"
     message += traceback.format_exc()
     print(json.dumps({"valid" : False, "message" : message}))
     sys.exit(1)
+
 try:
     # copy folder
     if not os.path.exists(split_path):
@@ -91,8 +100,7 @@ try:
     # move to copy folder
     os.chdir(split_path)
 except Exception as e:
-    valid = False
-    message += "Failed after adding permissions and copying files\n"
+    message = "Failed after adding permissions and copying files\n"
     message += traceback.format_exc()
     #cleanup
     if os.path.exists(split_path):
@@ -100,6 +108,7 @@ except Exception as e:
     print(json.dumps({"valid" : False, "message" : message}))
     sys.exit(1)
 try:
+    valid = True
     json_data = {}
     #split pdfs
     for filename in os.listdir(bulk_path):
@@ -113,7 +122,6 @@ try:
         data = []
         output = {}
         for page in pages:
-        #    i += 1
             val = pyzbar.decode(page)
             if val != []:
                 #found a new qr code, split here
@@ -121,19 +129,21 @@ try:
                 data = val[0][0].decode("utf-8")
                 if data == "none":  # blank exam with 'none' qr code
                     data = "BLANK EXAM"
-                elif qr_prefix != "" and data[0:len(qr_prefix)] == qr_prefix:
-                    data = data[len(qr_prefix):]
-
+                else:
+                    if qr_prefix != '' and data[0:len(qr_prefix)] == qr_prefix:
+                        data = data[len(qr_prefix):]
+                    if qr_suffix != '' and data[(len(data)-len(qr_suffix)):len(data)] == qr_suffix :
+                        data = data[:-len(qr_suffix)]
                 cover_index = i
                 cover_filename = '{}_{}_cover.pdf'.format(filename[:-4], i)
                 output_filename = '{}_{}.pdf'.format(filename[:-4], cover_index)
 
                 output[id_index] = {}
                 output[id_index]['id'] = data
-                output[id_index]['page_count'] = page_count
                 output[id_index]['pdf_name'] = output_filename
                 #save pdf
                 if i != 0:
+                    output[id_index-1]['page_count'] = page_count
                     with open(output[id_index-1]['pdf_name'], 'wb') as out:
                         pdf_writer.write(out)
                 else:
@@ -164,20 +174,19 @@ try:
             i += 1
 
         if len(output) == 0:
-            message = "Could not find any QR codes!\n"
-            for filename in os.listdir(bulk_path):
-                os.remove(filename)
-            os.chdir(current_path)
-            print(json.dumps({"valid" : False, "message" : message}))
-            sys.exit(1)
-
-        #save whatever is left
-        output_filename = '{}_{}.pdf'.format(filename[:-4], cover_index)
-        output[id_index-1]['id'] = data
-        output[id_index-1]['page_count'] = page_count
-        output[id_index-1]['pdf_name'] = output_filename
-        with open(output_filename,'wb') as out:
-            pdf_writer.write(out)
+            message = "Warning Could not find any QR codes in : " + str(filename) + " !\n"
+            #This doesn't actually invalidate the process but forces an error message to show
+            #to let the user know one of their files had no qr codes
+            valid = False
+            continue
+        else:
+             #save whatever is left
+            output_filename = '{}_{}.pdf'.format(filename[:-4], cover_index)
+            output[id_index-1]['id'] = data
+            output[id_index-1]['page_count'] = page_count
+            output[id_index-1]['pdf_name'] = output_filename
+            with open(output_filename,'wb') as out:
+                pdf_writer.write(out)
 
         #combine all json data
         json_data[filename] = output
@@ -190,13 +199,13 @@ try:
         os.remove(filename)
 
     os.chdir(current_path)
-    message = "finished splitting qr codes normally\n"
+    message += "finished splitting qr codes in : " + str("{0:.3f}".format(time.time() - start_time) ) + " seconds\n"
 except Exception as e:
     if os.path.exists(split_path):
         shutil.rmtree(split_path)
-    message += "Failed when splitting PDFs\n"
+    message = "Failed when splitting PDFs\n"
     message += traceback.format_exc()
     print(json.dumps({"valid" : False, "message" : message}))
     sys.exit(1)
 
-print(json.dumps({"valid" : True, "message" : message}))
+print(json.dumps({"valid" : valid, "message" : message}))

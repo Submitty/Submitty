@@ -59,6 +59,7 @@ def add_fields_to_autograding_worker_json(autograding_worker_json, entry):
             installed_commit = submitty_details['installed_commit']
             most_recent_tag  = submitty_details['most_recent_git_tag']
     except FileNotFoundError as e:
+        grade_items_logging.log_stack_trace(trace=traceback.format_exc())
         raise SystemExit("ERROR, could not locate the submitty.json:", e)
 
     autograding_worker_json[entry]['server_name']     = socket.getfqdn()
@@ -74,6 +75,7 @@ def update_all_foreign_autograding_workers():
         with open(all_workers_json, 'r') as infile:
             autograding_workers = json.load(infile)
     except FileNotFoundError as e:
+        grade_items_logging.log_stack_trace(trace=traceback.format_exc())
         raise SystemExit("ERROR, could not locate autograding_workers_json :", e)
 
     for key, value in autograding_workers.items():
@@ -97,7 +99,8 @@ def update_worker_json(name, entry):
         host = autograding_worker_to_ship[name]['address']
     except Exception as e:
         print("ERROR: autograding_workers.json entry for {0} is malformatted. {1}".format(e, name))
-        grade_items_logging.log_message(JOB_ID, message="ERROR: autograding_workers.json entry for {0} is malformatted. {1}".format(e, name))
+        grade_items_logging.log_message(JOB_ID, message="ERROR: autograding_workers.json entry for {0} is malformed. {1}".format(e, name))
+        grade_items_logging.log_stack_trace(job_id=JOB_ID, trace=traceback.format_exc())
         return False
 
     #create a new temporary json with only the entry for the current machine.
@@ -111,6 +114,7 @@ def update_worker_json(name, entry):
             grade_items_logging.log_message(JOB_ID, message="Successfully updated local autograding_TODO/autograding_worker.json")
             return True
         except Exception as e:
+            grade_items_logging.log_stack_trace(job_id=JOB_ID, trace=traceback.format_exc())
             grade_items_logging.log_message(JOB_ID, message="ERROR: could not mv to local autograding_TODO/autograding_worker.json due to the following error: "+str(e))
             print("ERROR: could not mv to local autograding_worker.json due to the following error: {0}".format(e))
             return False
@@ -125,6 +129,7 @@ def update_worker_json(name, entry):
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             ssh.connect(hostname = host, username = user)
         except Exception as e:
+            grade_items_logging.log_stack_trace(job_id=JOB_ID, trace=traceback.format_exc())
             grade_items_logging.log_message(JOB_ID, message="ERROR: could not ssh to {0}@{1} due to following error: {2}".format(user, host,str(e)))
             print("ERROR: could not ssh to {0}@{1} due to following error: {2}".format(user, host,str(e)))
             return False
@@ -139,6 +144,7 @@ def update_worker_json(name, entry):
             grade_items_logging.log_message(JOB_ID, message="Successfully forwarded autograding_worker.json to {0}".format(name))
             success = True
         except Exception as e:
+            grade_items_logging.log_stack_trace(job_id=JOB_ID, trace=traceback.format_exc())
             grade_items_logging.log_message(JOB_ID, message="ERROR: could not sftp to foreign autograding_TODO/autograding_worker.json due to the following error: "+str(e))
             print("ERROR: could sftp to foreign autograding_TODO/autograding_worker.json due to the following error: {0}".format(e))
             success = False
@@ -176,6 +182,7 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
             queue_obj["which_machine"] = which_machine
             queue_obj["ship_time"] = dateutils.write_submitty_date(microseconds=True)
     except Exception as e:
+        grade_items_logging.log_stack_trace(job_id=JOB_ID, trace=traceback.format_exc())
         grade_items_logging.log_message(JOB_ID, message="ERROR: failed preparing submission zip or accessing next to grade "+str(e))
         print("ERROR: failed preparing submission zip or accessing next to grade ", e)
         return False
@@ -187,6 +194,7 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
             with open(todo_queue_file, 'w') as outfile:
                 json.dump(queue_obj, outfile, sort_keys=True, indent=4)
         except Exception as e:
+            grade_items_logging.log_stack_trace(job_id=JOB_ID, trace=traceback.format_exc())
             grade_items_logging.log_message(JOB_ID, message="ERROR: could not move files due to the following error: "+str(e))
             print("ERROR: could not move files due to the following error: {0}".format(e))
             return False
@@ -209,6 +217,7 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
             print("Successfully forwarded files to {0}".format(my_name))
             success = True
         except Exception as e:
+            grade_items_logging.log_stack_trace(job_id=JOB_ID, trace=traceback.format_exc())
             grade_items_logging.log_message(JOB_ID, message="ERROR: could not move files due to the following error: "+str(e))
             print("Could not move files due to the following error: {0}".format(e))
             success = False
@@ -281,12 +290,14 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
             success = True
         #This is the normal case (still grading on the other end) so we don't need to print anything.
         except FileNotFoundError:
+            grade_items_logging.log_stack_trace(job_id=JOB_ID, trace=traceback.format_exc())
             os.remove(local_results_zip)
             os.remove(local_done_queue_file)
             success = False
         #In this more general case, we do want to print what the error was.
         #TODO catch other types of exception as we identify them.
         except Exception as e:
+            grade_items_logging.log_stack_trace(job_id=JOB_ID, trace=traceback.format_exc())
             grade_items_logging.log_message(JOB_ID, message="ERROR: Could not retrieve the file from the foreign machine "+str(e))
             print("ERROR: Could not retrieve the file from the foreign machine.\nERROR: {0}".format(e))
             os.remove(local_results_zip)
@@ -303,7 +314,8 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
     try:
         success = packer_unpacker.unpack_grading_results_zip(which_machine,which_untrusted,local_results_zip)
     except:
-        grade_items_logging.log_message(JOB_ID,jobname=item_name,message="ERROR: Exception when unpacking zip")
+        grade_items_logging.log_stack_trace(job_id=JOB_ID, trace=traceback.format_exc())
+        grade_items_logging.log_message(JOB_ID,jobname=item_name,message="ERROR: Exception when unpacking zip. For more details, see traces entry.")
         with contextlib.suppress(FileNotFoundError):
             os.remove(local_results_zip)
         success = False
@@ -355,6 +367,7 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
                     shipper_counter=0
 
     except Exception as e:
+        grade_items_logging.log_stack_trace(job_id=JOB_ID, trace=traceback.format_exc())
         print (my_name, " ERROR attempting to grade item: ", queue_file, " exception=",str(e))
         grade_items_logging.log_message(JOB_ID, message=str(my_name)+" ERROR attempting to grade item: " + queue_file + " exception " + repr(e))
 
@@ -363,11 +376,13 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
     try:
         os.remove(queue_file)
     except Exception as e:
+        grade_items_logging.log_stack_trace(job_id=JOB_ID, trace=traceback.format_exc())
         print (my_name, " ERROR attempting to remove queue file: ", queue_file, " exception=",str(e))
         grade_items_logging.log_message(JOB_ID, message=str(my_name)+" ERROR attempting to remove queue file: " + queue_file + " exception=" + str(e))
     try:
         os.remove(grading_file)
     except Exception as e:
+        grade_items_logging.log_stack_trace(job_id=JOB_ID, trace=traceback.format_exc())
         print (my_name, " ERROR attempting to remove grading file: ", grading_file, " exception=",str(e))
         grade_items_logging.log_message(JOB_ID, message=str(my_name)+" ERROR attempting to remove grading file: " + grading_file + " exception=" + str(e))
 
@@ -484,7 +499,8 @@ def shipper_process(my_name,my_data,full_address,which_untrusted,overall_lock):
                 time.sleep(1)
 
         except Exception as e:
-            my_message = "ERROR in get_job " + which_machine + " " + which_untrusted + " " + str(e)
+            grade_items_logging.log_stack_trace(job_id=JOB_ID, trace=traceback.format_exc())
+            my_message = "ERROR in get_job {0} {1} {2}. For more details, see traces entry".format(which_machine,which_untrusted,str(e))
             print (my_message)
             grade_items_logging.log_message(JOB_ID, message=my_message)
             time.sleep(1)
@@ -523,6 +539,7 @@ def launch_shippers(worker_status_map):
         with open(autograding_workers_path, 'r') as infile:
             autograding_workers = json.load(infile)
     except Exception as e:
+        grade_items_logging.log_stack_trace(job_id=JOB_ID, trace=traceback.format_exc())
         raise SystemExit("ERROR: could not locate the autograding workers json: {0}".format(e))
 
     # There must always be a primary machine, it may or may not have
@@ -569,8 +586,9 @@ def launch_shippers(worker_status_map):
             single_machine_data = {name : machine}
             single_machine_data = add_fields_to_autograding_worker_json(single_machine_data, name)
         except Exception as e:
-            print("ERROR: autograding_workers.json entry for {0} contains an error: {1}".format(name, e))
-            grade_items_logging.log_message(JOB_ID, message="ERROR: autograding_workers.json entry for {0} contains an error: {1}".format(name,e))
+            grade_items_logging.log_stack_trace(job_id=JOB_ID, trace=traceback.format_exc())
+            print("ERROR: autograding_workers.json entry for {0} contains an error: {1}. For more details, see trace entry.".format(name, e))
+            grade_items_logging.log_message(JOB_ID, message="ERROR: autograding_workers.json entry for {0} contains an error: {1} For more details, see trace entry.".format(name,e))
             continue
         # launch the shipper threads
         for i in range(0,num_workers_on_machine):

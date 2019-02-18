@@ -338,9 +338,17 @@ class ElectronicGraderView extends AbstractView {
             foreach ($gradeable->getComponents() as $component) {
                 $graded_component = $row->getOrCreateTaGradedGradeable()->getGradedComponent($component);
                 if ($graded_component === null) {
+                    //not graded
                     $info["graded_groups"][] = "NULL";
-                } else {
+                } else if(!$graded_component->getVerifier()){
+                    //no verifier exists, show the grader group
                     $info["graded_groups"][] = $graded_component->getGrader()->getGroup();
+                } else if($graded_component->getGrader()->accessFullGrading()){
+                    //verifier exists and original grader is full access, show verifier grader group
+                    $info["graded_groups"][] = $graded_component->getVerifier()->getGroup();
+                } else{
+                    //verifier exists and limited access grader, change the group to show semicircle on the details page
+                    $info["graded_groups"][] = "verified";
                 }
             }
 
@@ -426,7 +434,6 @@ class ElectronicGraderView extends AbstractView {
                 "team_edit_onclick" => "adminTeamForm(false, '{$team->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, [], [],{$gradeable->getTeamSizeMax()});"
             ];
         }
-
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
             "gradeable" => $gradeable,
             "sections" => $sections,
@@ -568,6 +575,7 @@ class ElectronicGraderView extends AbstractView {
         }
         $submissions = array();
         $results = array();
+        $results_public = array();
         $checkout = array();
 
         // NOTE TO FUTURE DEVS: There is code around line 830 (ctrl-f openAll) which depends on these names,
@@ -583,6 +591,7 @@ class ElectronicGraderView extends AbstractView {
             add_files($submissions, array_merge($meta_files['submissions'], $files['submissions']), 'submissions');
             add_files($checkout, array_merge($meta_files['checkout'], $files['checkout']), 'checkout');
             add_files($results, $display_version_instance->getResultsFiles(), 'results');
+            add_files($results_public, $display_version_instance->getResultsPublicFiles(), 'results_public');
         }
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
@@ -592,6 +601,7 @@ class ElectronicGraderView extends AbstractView {
             "submissions" => $submissions,
             "checkout" => $checkout,
             "results" => $results,
+            "results_public" => $results_public,
             "site_url" => $this->core->getConfig()->getSiteUrl()
         ]);
     }
@@ -674,7 +684,6 @@ class ElectronicGraderView extends AbstractView {
         $this->core->getOutput()->addInternalJs('ta-grading-rubric-conflict.js');
         $this->core->getOutput()->addInternalJs('ta-grading-rubric.js');
         $this->core->getOutput()->addInternalJs('gradeable.js');
-
         $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/RubricPanel.twig", [
             "gradeable_id" => $gradeable->getId(),
             "is_ta_grading" => $gradeable->isTaGrading(),

@@ -14,10 +14,10 @@ fi
 # PACKAGE SETUP
 #################
 
+apt-get -qqy update
+
 apt-get install -qqy apt-transport-https ca-certificates curl software-properties-common
 apt-get install -qqy python python-dev python3 python3-dev libpython3.6
-
-apt-get -qqy update
 
 ############################
 # NTP: Network Time Protocol
@@ -98,7 +98,7 @@ if [ ${VAGRANT} == 1 ]; then
     if [ "$NPIO_MAJOR" -eq 0 -a "$NPIO_MINOR" -lt 40 ]; then
         # Update netplan.io
         echo "Detected old version of netplan.io (${NETPLANIO_VERSION})... updating it automatically"
-        apt install -y netplan.io=0.40.1~18.04.3
+        apt-get install -y netplan.io=0.40.1~18.04.4
     fi
 fi
 
