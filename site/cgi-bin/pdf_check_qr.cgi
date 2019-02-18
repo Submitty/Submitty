@@ -18,6 +18,7 @@ try:
     from PyPDF2 import PdfFileReader, PdfFileWriter
     from pdf2image import convert_from_bytes
     import pyzbar.pyzbar as pyzbar
+    import urllib.parse
 except ImportError as e:
     print("Content-type: application/json")
     print()
@@ -52,24 +53,23 @@ try:
     course = os.path.basename(arguments['course'].value)
     g_id = os.path.basename(arguments['g_id'].value)
     ver = os.path.basename(arguments['ver'].value)
-    qr_prefix = ''
+    qr_prefix = qr_suffix = ''
     #check inputs for URL spoofing
     for key in ['sem', 'course', 'g_id', 'ver']:
         if os.path.basename(arguments[key].value) in ['.', '..']:
             message += '. Invalid value for ' + key + '.'
             print(json.dumps({"valid" : False, "message" : message}))
             sys.exit(1)
-    #check if qr_prefix is passed in, an empty string since is not considered a valid CGI arg
-    #make sure qr_prefix is a valid string
+    #check if qr_prefix or qr_suffix is passed in, an empty string since is not considered a valid CGI arg
     for arg in cgi.parse(arguments):
         if arg == 'qr_prefix':
-            qr_prefix = os.path.basename(arguments['qr_prefix'].value)
-            if qr_prefix == '.' or qr_prefix == '..' :
-                message += " Invalid QR prefix"
-                print(json.dumps({"valid" : False, "message" : message}))
-                sys.exit(1)
+            qr_prefix = urllib.parse.unquote(os.path.basename(arguments['qr_prefix'].value))
             break
-        qr_prefix = ""
+
+    for arg in cgi.parse(arguments):
+        if arg == 'qr_suffix':
+            qr_suffix = urllib.parse.unquote(os.path.basename(arguments['qr_suffix'].value))
+            break
 
     with open("/usr/local/submitty/config/submitty.json", encoding='utf-8') as data_file:
         data = json.loads(data_file.read())
@@ -129,9 +129,11 @@ try:
                 data = val[0][0].decode("utf-8")
                 if data == "none":  # blank exam with 'none' qr code
                     data = "BLANK EXAM"
-                elif qr_prefix != "" and data[0:len(qr_prefix)] == qr_prefix:
-                    data = data[len(qr_prefix):]
-
+                else:
+                    if qr_prefix != '' and data[0:len(qr_prefix)] == qr_prefix:
+                        data = data[len(qr_prefix):]
+                    if qr_suffix != '' and data[(len(data)-len(qr_suffix)):len(data)] == qr_suffix :
+                        data = data[:-len(qr_suffix)]
                 cover_index = i
                 cover_filename = '{}_{}_cover.pdf'.format(filename[:-4], i)
                 output_filename = '{}_{}.pdf'.format(filename[:-4], cover_index)

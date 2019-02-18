@@ -259,7 +259,7 @@ std::string validate_option(const std::string &program, const std::string &optio
         { "submitty_hamcrest.jar",            SUBMITTY_INSTALL_DIRECTORY+"/java_tools/hamcrest/hamcrest-core-1.3.jar" },
         { "submitty_junit/",                  SUBMITTY_INSTALL_DIRECTORY+"/java_tools/JUnit/" },
         // older, requested version:
-        { "submitty_soot.jar",                SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/soot.jar" },
+        { "submitty_soot.jar",                SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/soot-develop.jar" },
         { "submitty_rt.jar",                  SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/rt.jar" }
         // most recent libraries:
         //{ "submitty_soot.jar",                SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/sootclasses-trunk.jar" },
@@ -275,7 +275,7 @@ std::string validate_option(const std::string &program, const std::string &optio
         { "submitty_hamcrest.jar",            SUBMITTY_INSTALL_DIRECTORY+"/java_tools/hamcrest/hamcrest-core-1.3.jar" },
         { "submitty_junit/",                  SUBMITTY_INSTALL_DIRECTORY+"/java_tools/JUnit/" },
         // older, requested version:
-        { "submitty_soot.jar",                SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/soot.jar" },
+        { "submitty_soot.jar",                SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/soot-develop.jar" },
         { "submitty_rt.jar",                  SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/rt.jar" }
         // most recent libraries:
         //{ "submitty_soot.jar",                SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/sootclasses-trunk.jar" },
@@ -1172,7 +1172,6 @@ int execute(const std::string &cmd,
       std::string windowName; 
       int rss_memory = 0;
       int actions_taken = 0;   
-      int number_of_screenshots = 0;
       do {
           //dispatcher actions
           if(!input_queue.empty()){
@@ -1264,13 +1263,13 @@ int execute(const std::string &cmd,
             if (!time_kill && !memory_kill){
               //if we expect a window, and the window exists, and we still have actions to take
               if(window_mode && windowName != "" && windowExists(windowName) && actions_taken < actions.size()){ 
-                takeAction(actions, actions_taken, number_of_screenshots, windowName, 
+                takeAction(actions, actions_taken, windowName, 
                   childPID, elapsed, next_checkpoint, seconds_to_run, rss_memory, allowed_rss_memory, 
                   memory_kill, time_kill, logfile); //Takes each action on the window. Requires delay parameters to do delays.
               }
               //If we do not expect a window and we still have actions to take
               else if(!window_mode && actions_taken < actions.size()){ 
-                takeAction(actions, actions_taken, number_of_screenshots, windowName, 
+                takeAction(actions, actions_taken, windowName, 
                   childPID, elapsed, next_checkpoint, seconds_to_run, rss_memory, allowed_rss_memory, 
                   memory_kill, time_kill, logfile); //Takes each action on the window. Requires delay parameters to do delays.
               }
