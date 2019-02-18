@@ -124,7 +124,8 @@ class AdminGradeableController extends AbstractController {
             'action' => 'upload_new_gradeable'
         ]);
         $vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
-
+        $this->core->getOutput()->addInternalJs('flatpickr.js');
+        $this->core->getOutput()->addInternalCss('flatpickr.min.css');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'submit_url' => $submit_url,
