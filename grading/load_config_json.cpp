@@ -551,6 +551,7 @@ void FormatGraphicsActions(nlohmann::json &whole_config) {
 
         number_of_gifs++;
       }
+
       //Fail if the action is not valid.
       else{
         bool valid_action_type = false;
