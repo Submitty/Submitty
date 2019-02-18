@@ -259,6 +259,8 @@ class AdminGradeableController extends AbstractController {
             $this->core->getOutput()->addInternalJs('gradeable.js');
             $this->core->getOutput()->addInternalCss('ta-grading.css');
         }
+        $this->core->getOutput()->addInternalJs('flatpickr.js');
+        $this->core->getOutput()->addInternalCss('flatpickr.min.css');
         $this->core->getOutput()->addInternalJs('admin-gradeable-updates.js');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
