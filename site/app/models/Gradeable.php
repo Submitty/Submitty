@@ -88,22 +88,22 @@ use app\libraries\Utils;
  * @method getHasDueDate()
  */
 class Gradeable extends AbstractModel {
-    
+
     /** @property @var string Id of the gradeable (must be unique) */
     protected $id;
 
     /** @property @var int  */
     protected $gd_id;
-    
+
     /** @property @var string Name of the gradeable */
     protected $name;
-    
+
     /** @property @var int GradeableType set for this Gradeable */
     protected $type;
-    
+
     /** @property @var string Instructions to give to TA for grading */
     protected $ta_instructions = "";
-    
+
     /** @property @var bool Is this a team assignment */
     protected $team_assignment = false;
 
@@ -115,16 +115,16 @@ class Gradeable extends AbstractModel {
 
     /** @property @var \DateTime|null Date when students cannot create/leave/join teams without instructor's help */
     protected $team_lock_date = null;
-    
+
     /** @property @var bool Does this assignment use peer grading*/
     protected $peer_grading = false;
-    
+
     /** @property @var int How many people should each person grade*/
     protected $peer_grade_set = 0;
-    
+
     /** @property @var string Rainbow Grades Bucket to place gradeable */
     protected $bucket = null;
-    
+
     /** @property @var int Minimum group that's allowed to submit grades for this gradeable */
     protected $minimum_grading_group = 1;
 
@@ -155,7 +155,7 @@ class Gradeable extends AbstractModel {
     /* Config variables that are only for electronic submissions */
     /** @property @var bool */
     protected $has_config = false;
-    
+
     /** @property @var \DateTime|null When is an electronic submission open to students */
     protected $open_date = null;
 
@@ -288,7 +288,7 @@ class Gradeable extends AbstractModel {
     protected $been_tagraded = false;
 
     protected $total_ta_grading_points = 0;
-    
+
     protected $total_peer_grading_points = 0;
 
     /** @property @var \app\models\User|null */
@@ -315,7 +315,7 @@ class Gradeable extends AbstractModel {
     protected $student_allowed_late_days = 0;
 
     /** @property @var str */
-    protected $late_status = "Good";    
+    protected $late_status = "Good";
 
     /** @property @var int */
     protected $curr_late_charged = 0;
@@ -379,9 +379,9 @@ class Gradeable extends AbstractModel {
                 $this->late_day_exceptions = $details['late_day_exceptions'];
                 $this->late_days = $details['days_late'];
             }
-            
+
             if (isset($details['highest_version']) && $details['highest_version']!== null) {
-               $this->highest_version = $details['highest_version']; 
+               $this->highest_version = $details['highest_version'];
             }
             $this->loadGradeableConfig();
         }
@@ -393,7 +393,7 @@ class Gradeable extends AbstractModel {
 
         if (isset($details['array_gc_id'])) {
             $component_fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment', 'gc_lower_clamp',
-                                      'gc_default', 'gc_max_value', 'gc_upper_clamp', 'gc_is_peer', 'gc_is_text', 'gc_order', 'gc_page', 'array_gcm_id', 
+                                      'gc_default', 'gc_max_value', 'gc_upper_clamp', 'gc_is_peer', 'gc_is_text', 'gc_order', 'gc_page', 'array_gcm_id',
                                       'array_gc_id', 'array_gcm_points', 'array_gcm_note', 'array_gcm_publish', 'array_gcm_order');
             $user_fields = array('user_id', 'anon_id', 'user_firstname', 'user_preferred_firstname', 'user_lastname',
                                  'user_email', 'user_group');
@@ -403,7 +403,7 @@ class Gradeable extends AbstractModel {
                 foreach ($component_fields as $key) {
                     if (isset($details["array_{$key}"][$i])) {
                         $component_details[$key] = $details["array_{$key}"][$i];
-                    }             
+                    }
                 }
 
 
@@ -417,7 +417,7 @@ class Gradeable extends AbstractModel {
                             $grade_details[$j]['array_gcm_mark'] = $details['array_array_gcm_mark'][$j];
                             $grade_details[$j]['gcd_score'] = $details['array_gcd_score'][$j];
                             $grade_details[$j]['gcd_component_comment'] = $details['array_gcd_component_comment'][$j];
-                            $grade_details[$j]['gcd_graded_version'] = $details['array_gcd_graded_version'][$j];                            
+                            $grade_details[$j]['gcd_graded_version'] = $details['array_gcd_graded_version'][$j];
                             $grade_details[$j]['gcd_grade_time'] = $details['array_gcd_grade_time'][$j];
 
                             if (isset($details['array_gcd_user_id'][$j])) {
@@ -757,7 +757,7 @@ class Gradeable extends AbstractModel {
         else {
             $this->versions = $this->core->getQueries()->getGradeableVersions($this->id, $user_id, null, $this->getDueDate());
         }
-        
+
 
         $course_path = $this->core->getConfig()->getCoursePath();
 
@@ -888,7 +888,7 @@ class Gradeable extends AbstractModel {
     public function getSubmissionCount() {
         return $this->submissions;
     }
-    
+
     public function hasSubmitted() {
         return $this->getHighestVersion() > 0;
     }
@@ -1090,7 +1090,7 @@ class Gradeable extends AbstractModel {
             }
             return true;
         }
-        
+
     }
 
     public function isFullyGraded()
@@ -1157,11 +1157,11 @@ class Gradeable extends AbstractModel {
         }
         $this->core->getCourseDB()->commit();
     }
-      
+
     public function getSyllabusBucket() {
         return $this->bucket;
     }
-    
+
     public function getNumPeerComponents() {
         $count = 0;
         foreach($this->components as $cmpt) {
@@ -1171,7 +1171,7 @@ class Gradeable extends AbstractModel {
         }
         return $count;
     }
-    
+
     public function getNumTAComponents() {
         if(!$this->peer_grading) {
             return count($this->components);
@@ -1186,7 +1186,7 @@ class Gradeable extends AbstractModel {
         }
         return $count;
     }
-    
+
     public function getComponentsGradedBy($grader_id) {
         $return = array();
         foreach($this->components as $cmpt) {

@@ -149,7 +149,7 @@
                 moveNextInput(count);
                 show_alert = true;
             } else {
-                validateUserId("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_ids, true, path, count, "", makeSubmission);
+                validateUserId("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_ids, true, path, count, "", "", makeSubmission);
                 btn.attr('disabled', false);
             }
             e.preventDefault();
@@ -166,7 +166,7 @@
                 $("input[id^='"+name+"']").each(function(){ user_ids.push(this.value); });
                 var js_count_array = {{ count_array|json_encode|raw }};
                 var path = js_count_array[count];
-                validateUserId("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_ids, true, path, count, "", makeSubmission);
+                validateUserId("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_ids, true, path, count, "", "", makeSubmission);
                 e.preventDefault();
                 e.stopPropagation();
             }

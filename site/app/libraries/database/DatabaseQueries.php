@@ -296,8 +296,8 @@ class DatabaseQueries {
         $values = implode(', ', array_fill(0, count($results)+1, '?'));
         $keys = implode(', ', array_keys($results));
         $updates = '';
-        
-        foreach($results as $key => $value) { 
+
+        foreach($results as $key => $value) {
             if($value != 'false') {
                 $results[$key] = 'true';
             }
@@ -311,8 +311,8 @@ class DatabaseQueries {
                                     VALUES
                                      (
                                         $values
-                                     ) 
-                                    ON CONFLICT (user_id) 
+                                     )
+                                    ON CONFLICT (user_id)
                                     DO
                                      UPDATE
                                         SET $updates", $test);
@@ -2734,12 +2734,12 @@ AND gc_id IN (
         if($notification->getNotifyNotToSource()){
             $not_send_users[] = $notification->getNotifySource();
         }
-        
+
         $restrict = count($not_send_users);
         if($restrict > 0) {
         	$ignore_self_query = "WHERE user_id NOT IN (" . implode(',', array_fill(0, $restrict, '?')) . ')';
         }
-        
+
         $column = '';
         if($type === 'reply') {
         	$post_thread_id = json_decode($params[1], true)[0]['thread_id'];
@@ -3306,6 +3306,7 @@ AND gc_id IN (
                 DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()),
                 $this->course_db->convertBoolean($gradeable->isVcs()),
                 $gradeable->getVcsSubdirectory(),
+                $gradeable->getVcsHostType(),
                 $this->course_db->convertBoolean($gradeable->isTeamAssignment()),
                 $gradeable->getTeamSizeMax(),
                 DateUtils::dateTimeToString($gradeable->getTeamLockDate()),
@@ -3331,6 +3332,7 @@ AND gc_id IN (
                   eg_submission_due_date,
                   eg_is_repository,
                   eg_subdirectory,
+                  eg_vcs_host_type,
                   eg_team_assignment,
                   eg_max_team_size,
                   eg_team_lock_date,
@@ -3348,7 +3350,7 @@ AND gc_id IN (
                   eg_peer_grade_set,
                   eg_regrade_request_date,
                   eg_regrade_allowed)
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
         }
 
         // Make sure to create the rotating sections
@@ -3434,6 +3436,7 @@ AND gc_id IN (
                     DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()),
                     $this->course_db->convertBoolean($gradeable->isVcs()),
                     $gradeable->getVcsSubdirectory(),
+                    $gradeable->getVcsHostType(),
                     $this->course_db->convertBoolean($gradeable->isTeamAssignment()),
                     $gradeable->getTeamSizeMax(),
                     DateUtils::dateTimeToString($gradeable->getTeamLockDate()),
@@ -3459,6 +3462,7 @@ AND gc_id IN (
                       eg_submission_due_date=?,
                       eg_is_repository=?,
                       eg_subdirectory=?,
+                      eg_vcs_host_type=?,
                       eg_team_assignment=?,
                       eg_max_team_size=?,
                       eg_team_lock_date=?,
