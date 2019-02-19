@@ -1172,7 +1172,6 @@ int execute(const std::string &cmd,
       std::string windowName; 
       int rss_memory = 0;
       int actions_taken = 0;   
-      int number_of_screenshots = 0;
       do {
           //dispatcher actions
           if(!input_queue.empty()){
@@ -1264,13 +1263,13 @@ int execute(const std::string &cmd,
             if (!time_kill && !memory_kill){
               //if we expect a window, and the window exists, and we still have actions to take
               if(window_mode && windowName != "" && windowExists(windowName) && actions_taken < actions.size()){ 
-                takeAction(actions, actions_taken, number_of_screenshots, windowName, 
+                takeAction(actions, actions_taken, windowName, 
                   childPID, elapsed, next_checkpoint, seconds_to_run, rss_memory, allowed_rss_memory, 
                   memory_kill, time_kill, logfile); //Takes each action on the window. Requires delay parameters to do delays.
               }
               //If we do not expect a window and we still have actions to take
               else if(!window_mode && actions_taken < actions.size()){ 
-                takeAction(actions, actions_taken, number_of_screenshots, windowName, 
+                takeAction(actions, actions_taken, windowName, 
                   childPID, elapsed, next_checkpoint, seconds_to_run, rss_memory, allowed_rss_memory, 
                   memory_kill, time_kill, logfile); //Takes each action on the window. Requires delay parameters to do delays.
               }

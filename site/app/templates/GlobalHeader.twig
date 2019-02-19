@@ -80,6 +80,11 @@
                     <span>You must have JavaScript enabled for Submitty to function properly. Please re-enable it when browsing this site.</span>
                 </div>
             </noscript>
+            {% if system_message is not null and system_message|length > 0 %}
+            <div class="row system_message">
+                <span>{{ system_message }}</span>
+            </div>
+            {% endif %}
             <div class="row" id="push" {{ row_height }}>
                 {% if sidebar_buttons|length > 0 %}
                     <div class="col-md-auto" id="sidebar">
