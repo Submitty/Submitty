@@ -554,7 +554,7 @@ class NavigationView extends AbstractView {
         if ($list_section === GradeableList::GRADING || $list_section === GradeableList::GRADED) {
             if ($list_section === GradeableList::GRADING) {
                 $title = 'GRADE';
-                $date_text = '(grades due ' . $gradeable->getGradeReleasedDate()->format(self::DATE_FORMAT) . ')';
+                $date_text = '(grades due ' . $gradeable->getGradeDueDate()->format(self::DATE_FORMAT) . ')';
             } else {
                 $title = 'REGRADE';
             }
