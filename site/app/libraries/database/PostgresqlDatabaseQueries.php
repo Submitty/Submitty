@@ -1052,9 +1052,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         'rotating_section' => [
             'u.rotating_section',
         ],
-        'team_id' => [
-            'user_id'
-        ]
+        'team_id' => []
     ];
     const graded_gradeable_key_map_team = [
         'registration_section' => [
@@ -1067,7 +1065,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         ],
         'team_id' => [
             'team.team_id'
-        ]
+        ],
+        'user_id' => []
     ];
 
     /**
@@ -1089,16 +1088,19 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             if (empty($key_map)) {
                 return 'ORDER BY ' . implode(',', $sort_keys);
             }
-            return 'ORDER BY ' . implode(',', array_map(function ($key_ext) use ($key_map) {
+            return 'ORDER BY ' . implode(',', array_filter(array_map(function ($key_ext) use ($key_map) {
                     $split_key = explode(' ', $key_ext);
                     $key = $split_key[0];
                     $order = '';
                     if (count($split_key) > 1) {
                         $order = $split_key[1];
                     }
+                    if (isset($key_map[$key]) && count($key_map[$key]) === 0) {
+                        return '';
+                    }
                     // Map any keys with special requirements to the proper statements and preserve specified order
                     return implode(" $order,", $key_map[$key] ?? [$key]) . " $order";
-                }, $sort_keys));
+                }, $sort_keys), function($a) { return $a !== ''; }));
         }
         return '';
     }
@@ -1212,20 +1214,20 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             }
         }
 
-        $team_data_inject = 'u.registration_section, u.rotating_section,';
-        $team_inject = '';
+        $submitter_inject = 'ERROR ERROR';
+        $submitter_data_inject = 'ERROR ERROR';
         if ($team) {
-            $team_data_inject =
+            $submitter_data_inject =
               'ldet.array_late_day_exceptions,
                ldet.array_late_day_user_ids,
                /* Aggregate Team User Data */
                team.team_id,
                team.array_team_users,
                team.registration_section,
-               team.rotating_section,';
+               team.rotating_section';
 
-            $team_inject ='
-              LEFT JOIN (
+            $submitter_inject ='
+              JOIN (
                 SELECT gt.team_id,
                   gt.registration_section,
                   gt.rotating_section,
@@ -1256,6 +1258,36 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 LEFT JOIN teams t ON e.user_id=t.user_id AND t.state=1
                 GROUP BY team_id, g_id
               ) AS ldet ON g.g_id=ldet.g_id AND ldet.team_id=team.team_id';
+        } else {
+            $submitter_data_inject = '
+              u.user_id,
+              u.anon_id,
+              u.user_firstname,
+              u.user_preferred_firstname,
+              u.user_lastname,
+              u.user_preferred_lastname,
+              u.user_email,
+              u.user_group,
+              u.manual_registration,
+              u.last_updated,
+              u.grading_registration_sections,
+              u.registration_section, u.rotating_section,
+              ldeu.late_day_exceptions';
+            $submitter_inject = '
+            JOIN (
+                SELECT u.*, sr.grading_registration_sections
+                FROM users u
+                LEFT JOIN (
+                    SELECT
+                        json_agg(sections_registration_id) AS grading_registration_sections,
+                        user_id
+                    FROM grading_registration
+                    GROUP BY user_id
+                ) AS sr ON u.user_id=sr.user_id
+            ) AS u ON eg IS NULL OR NOT eg.team_assignment
+            
+            /* Join user late day exceptions */
+            LEFT JOIN late_day_exceptions ldeu ON g.g_id=ldeu.g_id AND u.user_id=ldeu.user_id';
         }
         if ($team && count($teams) > 0) {
             $team_placeholders = implode(',', array_fill(0, count($teams), '?'));
@@ -1295,6 +1327,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               gcd.array_graded_version,
               gcd.array_grade_time,
               gcd.array_mark_id,
+              gcd.array_verifier_id,
+              gcd.array_verify_time,
 
               /* Aggregate Gradeable Component Grader Data */
               gcd.array_grader_user_id,
@@ -1322,28 +1356,12 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               /* Active Submission Version */
               egv.active_version,
 
-              /* Late day exception data */
-              ldeu.late_day_exceptions,
-
               /* Grade inquiry data */
               rr.id AS regrade_request_id,
               rr.status AS regrade_request_status,
               rr.timestamp AS regrade_request_timestamp,
 
-              {$team_data_inject}
-
-              /* User Submitter Data */
-              u.user_id,
-              u.anon_id,
-              u.user_firstname,
-              u.user_preferred_firstname,
-              u.user_lastname,
-              u.user_preferred_lastname,
-              u.user_email,
-              u.user_group,
-              u.manual_registration,
-              u.last_updated,
-              u.grading_registration_sections
+              {$submitter_data_inject}
 
             FROM gradeable g
 
@@ -1355,20 +1373,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 FROM electronic_gradeable
               ) AS eg ON eg.g_id=g.g_id
 
-              /* Join user data */
-              LEFT JOIN (
-                SELECT u.*, sr.grading_registration_sections
-                FROM users u
-                LEFT JOIN (
-                  SELECT
-                    json_agg(sections_registration_id) AS grading_registration_sections,
-                    user_id
-                  FROM grading_registration
-                  GROUP BY user_id
-                ) AS sr ON u.user_id=sr.user_id
-              ) AS u ON eg IS NULL OR NOT eg.team_assignment
-
-              {$team_inject}
+              /* Join submitter data */
+              {$submitter_inject}
 
               /* Join manual grading data */
               LEFT JOIN (
@@ -1386,6 +1392,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   json_agg(gcd_graded_version) AS array_graded_version,
                   json_agg(gcd_grade_time) AS array_grade_time,
                   json_agg(string_mark_id) AS array_mark_id,
+                  json_agg(gcd_verifier_id) AS array_verifier_id,
+                  json_agg(gcd_verify_time) AS array_verify_time,
 
                   json_agg(ug.user_id) AS array_grader_user_id,
                   json_agg(ug.anon_id) AS array_grader_anon_id,
@@ -1446,9 +1454,6 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 FROM electronic_gradeable_version
               ) AS egv ON egv.{$submitter_type}=egd.{$submitter_type} AND egv.g_id=egd.g_id
 
-              /* Join user late day exceptions */
-              LEFT JOIN late_day_exceptions ldeu ON g.g_id=ldeu.g_id AND u.user_id=ldeu.user_id
-
               /* Join grade inquiry */
               LEFT JOIN regrade_requests AS rr ON rr.{$submitter_type}=gd.gd_{$submitter_type} AND rr.g_id=g.g_id
             WHERE $selector
@@ -1461,7 +1466,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
             // Get the submitter
             $submitter = null;
-            if (isset($row['team_id'])) {
+            if ($gradeable->isTeamAssignment()) {
                 // Get the user data for the team
                 $team_users = json_decode($row["array_team_users"], true);
 
@@ -1551,6 +1556,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 'graded_version',
                 'grade_time',
                 'mark_id',
+                'verifier_id',
+                'verify_time'
             ];
             $version_array_properties = [
                 'version',
