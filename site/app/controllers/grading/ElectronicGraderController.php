@@ -541,9 +541,17 @@ class ElectronicGraderController extends GradingController {
             }
         }
         $teamless_users = [];
-        if ($show_all && $gradeable->isTeamAssignment()) {
+        if ($gradeable->isTeamAssignment()) {
             //Find teamless users
-            $students = $this->core->getQueries()->getAllUsers();
+            if ($show_all) {
+                $students = $this->core->getQueries()->getAllUsers();
+            } else {
+                if ($gradeable->isGradeByRegistration()) {
+                    $students = $this->core->getQueries()->getUsersByRegistrationSections($order->getSectionNames());
+                } else {
+                    $students = $this->core->getQueries()->getUsersByRotatingSections($order->getSectionNames());
+                }
+            }
             foreach ($students as $user) {
                 if (!in_array($user->getId(), $user_ids)) {
                     $teamless_users[] = $user;
