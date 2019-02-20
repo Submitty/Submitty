@@ -100,7 +100,8 @@ class GradingOrder extends AbstractModel {
     }
 
     /**
-     * Given the current submitter, get the previous submitter to grade
+     * Given the current submitter, get the previous submitter to grade.
+     * Will skip students that do not need to be graded (eg no submission)
      * @param Submitter $submitter Current grading submitter
      * @return Submitter Previous submitter to grade
      */
@@ -123,7 +124,8 @@ class GradingOrder extends AbstractModel {
     }
 
     /**
-     * Given the current submitter, get the next submitter to grade
+     * Given the current submitter, get the next submitter to grade.
+     * Will skip students that do not need to be graded (eg no submission)
      * @param Submitter $submitter Current grading submitter
      * @return Submitter Next submitter to grade
      */
