@@ -541,11 +541,9 @@ class ElectronicGraderController extends GradingController {
             }
         }
         $teamless_users = [];
-        if ($gradeable->isTeamAssignment()) {
-            // Get al users and separate by section (registration or rotating)
-            $get_user_section = function (User $user) use ($gradeable) {
-                return $gradeable->isGradeByRegistration() ? $user->getRegistrationSection() ?? 'NULL' : $user->getRotatingSection();
-            };
+        if ($show_all && $gradeable->isTeamAssignment()) {
+            //Find teamless users
+            $students = $this->core->getQueries()->getAllUsers();
             foreach ($students as $user) {
                 if (!in_array($user->getId(), $user_ids)) {
                     $teamless_users[] = $user;
