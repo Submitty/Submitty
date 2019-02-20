@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\libraries\Core;
+use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Submitter;
 use app\models\gradeable\Gradeable;
 
@@ -27,6 +28,11 @@ class GradingOrder extends AbstractModel {
      * @var Submitter[][] $section_submitters
      */
     protected $section_submitters;
+
+    /**
+     * @var bool[] $has_submission
+     */
+    protected $has_submission;
 
     /**
      * @var GradingSection[] $sections
@@ -55,8 +61,46 @@ class GradingOrder extends AbstractModel {
         } else {
             $this->sections = $gradeable->getGradingSectionsForUser($user);
         }
+
+        $user_ids = [];
+        $team_ids = [];
+
         foreach ($this->sections as $section) {
-            $this->section_submitters[$section->getName()] = $section->getSubmitters();
+            $submitters = $section->getSubmitters();
+            $this->section_submitters[$section->getName()] = $submitters;
+
+            //Collect all team/user ids
+            if ($gradeable->isTeamAssignment()) {
+                foreach ($submitters as $submitter) {
+                    $team_ids[] = $submitter->getId();
+                }
+            } else {
+                foreach ($submitters as $submitter) {
+                    $user_ids[] = $submitter->getId();
+                }
+            }
+        }
+
+        //TODO: Make faster
+        $section_key = $this->getSectionKey();
+        $graded_gradeables = $this->core->getQueries()->getGradedGradeables([$gradeable], $user_ids, $team_ids, [$section_key, 'team_id', 'user_id']);
+
+        $found = [];
+        $ggs = [];
+        foreach ($graded_gradeables as $graded_gradeable) {
+            /* @var GradedGradeable $graded_gradeable */
+            if ($graded_gradeable->getAutoGradedGradeable()->getActiveVersion() > 0) {
+                $found[] = $graded_gradeable->getSubmitter()->getId();
+            }
+            $ggs[] = $graded_gradeable;
+        }
+
+        //Find which submitters have no submission
+        $this->has_submission = [];
+        foreach ($this->section_submitters as $section) {
+            foreach ($section as $submitter) {
+                $this->has_submission[$submitter->getId()] = in_array($submitter->getId(), $found, true);
+            }
         }
 
         $this->sort();
@@ -81,10 +125,16 @@ class GradingOrder extends AbstractModel {
         if ($index === false) {
             return null;
         }
-        $sub = $this->getSubmitterByIndex($index - 1);
-        if ($sub === false) {
-            return null;
-        }
+
+        do {
+            $index--;
+            $sub = $this->getSubmitterByIndex($index);
+            if ($sub === false) {
+                return null;
+            }
+            //Repeat until we find one that exists
+        } while (!$this->has_submission[$sub->getId()]);
+
         return $sub;
     }
 
@@ -98,10 +148,16 @@ class GradingOrder extends AbstractModel {
         if ($index === false) {
             return null;
         }
-        $sub = $this->getSubmitterByIndex($index + 1);
-        if ($sub === false) {
-            return null;
-        }
+
+        do {
+            $index++;
+            $sub = $this->getSubmitterByIndex($index);
+            if ($sub === false) {
+                return null;
+            }
+            //Repeat until we find one that exists
+        } while (!$this->has_submission[$sub->getId()]);
+
         return $sub;
     }
 

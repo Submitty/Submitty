@@ -553,14 +553,6 @@ class ElectronicGraderController extends GradingController {
             }
         }
 
-        if ($peer) {
-            $grading_count = $gradeable->getPeerGradeSet();
-        } else if ($gradeable->isGradeByRegistration()) {
-            $grading_count = count($this->core->getUser()->getGradingRegistrationSections());
-        } else {
-            $grading_count = count($this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable->getId(), $this->core->getUser()->getId()));
-        }
-
         $show_all_sections_button = $can_show_all;
         $show_edit_teams = $this->core->getAccess()->canI("grading.electronic.show_edit_teams") && $gradeable->isTeamAssignment();
         $show_import_teams_button = $show_edit_teams && (count($all_teams) > count($empty_teams));
