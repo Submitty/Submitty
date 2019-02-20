@@ -81,26 +81,10 @@ class GradingOrder extends AbstractModel {
             }
         }
 
-        //TODO: Make faster
-        $section_key = $this->getSectionKey();
-        $graded_gradeables = $this->core->getQueries()->getGradedGradeables([$gradeable], $user_ids, $team_ids, [$section_key, 'team_id', 'user_id']);
-
-        $found = [];
-        $ggs = [];
-        foreach ($graded_gradeables as $graded_gradeable) {
+        $versions = $this->core->getQueries()->getActiveVersions($gradeable, array_merge($user_ids, $team_ids));
+        foreach ($versions as $id => $version) {
             /* @var GradedGradeable $graded_gradeable */
-            if ($graded_gradeable->getAutoGradedGradeable()->getActiveVersion() > 0) {
-                $found[] = $graded_gradeable->getSubmitter()->getId();
-            }
-            $ggs[] = $graded_gradeable;
-        }
-
-        //Find which submitters have no submission
-        $this->has_submission = [];
-        foreach ($this->section_submitters as $section) {
-            foreach ($section as $submitter) {
-                $this->has_submission[$submitter->getId()] = in_array($submitter->getId(), $found, true);
-            }
+            $this->has_submission[$id] = $version > 0;
         }
 
         $this->sort();
@@ -133,7 +117,7 @@ class GradingOrder extends AbstractModel {
                 return null;
             }
             //Repeat until we find one that exists
-        } while (!$this->has_submission[$sub->getId()]);
+        } while (!$this->getHasSubmission($sub));
 
         return $sub;
     }
@@ -156,7 +140,7 @@ class GradingOrder extends AbstractModel {
                 return null;
             }
             //Repeat until we find one that exists
-        } while (!$this->has_submission[$sub->getId()]);
+        } while (!$this->getHasSubmission($sub));
 
         return $sub;
     }
@@ -206,6 +190,13 @@ class GradingOrder extends AbstractModel {
 
             //Found them
             return $section[$index];
+        }
+        return false;
+    }
+
+    public function getHasSubmission(Submitter $submitter) {
+        if (array_key_exists($submitter->getId(), $this->has_submission)) {
+            return $this->has_submission[$submitter->getId()];
         }
         return false;
     }

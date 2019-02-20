@@ -3773,6 +3773,17 @@ AND gc_id IN (
     }
 
     /**
+     * Get the active version for all given submitter ids. If they do not have an active version,
+     * their version will be zero.
+     * @param \app\models\gradeable\Gradeable $gradeable
+     * @param string[] $submitter_ids
+     * @return bool[] Map of id=>version
+     */
+    public function getActiveVersions(gradeable\Gradeable $gradeable, array $submitter_ids) {
+        throw new NotImplementedException();
+    }
+
+    /**
      * Gets a list of emails for all active particpants in a course  
      */
     public function getClassEmailList(){
