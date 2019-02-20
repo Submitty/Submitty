@@ -512,8 +512,6 @@ class ElectronicGraderController extends GradingController {
             $student_ids = array_merge($student_ids, array_map(function(Submitter $submitter) { return $submitter->getId(); }, $section));
         }
 
-        //TODO: Clean this up
-
         $show_empty_teams = $this->core->getAccess()->canI("grading.electronic.details.show_empty_teams");
         $empty_teams = array();
         if ($gradeable->isTeamAssignment()) {

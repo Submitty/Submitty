@@ -111,6 +111,33 @@ class GradingOrder extends AbstractModel {
      * @return Submitter Previous submitter to grade
      */
     public function getPrevSubmitter(Submitter $submitter) {
+        return $this->getPrevSubmitterMatching($submitter, function(Submitter $sub) {
+            return $this->getHasSubmission($sub);
+        });
+    }
+
+    /**
+     * Given the current submitter, get the next submitter to grade.
+     * Will skip students that do not need to be graded (eg no submission)
+     * @param Submitter $submitter Current grading submitter
+     * @return Submitter Next submitter to grade
+     */
+    public function getNextSubmitter(Submitter $submitter) {
+        return $this->getNextSubmitterMatching($submitter, function(Submitter $sub) {
+            return $this->getHasSubmission($sub);
+        });
+
+    }
+
+
+    /**
+     * Given the current submitter, get the previous submitter to grade.
+     * Will only include students that cause $fn to return true
+     * @param Submitter $submitter Current grading submitter
+     * @param callable $fn Args: (Submitter) Returns: bool, true if the submitter should be included
+     * @return Submitter Previous submitter to grade
+     */
+    public function getPrevSubmitterMatching(Submitter $submitter, callable $fn) {
         $index = $this->getSubmitterIndex($submitter);
         if ($index === false) {
             return null;
@@ -122,19 +149,20 @@ class GradingOrder extends AbstractModel {
             if ($sub === false) {
                 return null;
             }
-            //Repeat until we find one that exists
-        } while (!$this->getHasSubmission($sub));
+            //Repeat until we find one that works
+        } while (!$fn($sub));
 
         return $sub;
     }
 
     /**
      * Given the current submitter, get the next submitter to grade.
-     * Will skip students that do not need to be graded (eg no submission)
+     * Will only include students that cause $fn to return true
      * @param Submitter $submitter Current grading submitter
+     * @param callable $fn Args: (Submitter) Returns: bool, true if the submitter should be included
      * @return Submitter Next submitter to grade
      */
-    public function getNextSubmitter(Submitter $submitter) {
+    public function getNextSubmitterMatching(Submitter $submitter, callable $fn) {
         $index = $this->getSubmitterIndex($submitter);
         if ($index === false) {
             return null;
@@ -146,8 +174,8 @@ class GradingOrder extends AbstractModel {
             if ($sub === false) {
                 return null;
             }
-            //Repeat until we find one that exists
-        } while (!$this->getHasSubmission($sub));
+            //Repeat until we find one that works
+        } while (!$fn($sub));
 
         return $sub;
     }
