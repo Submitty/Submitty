@@ -532,7 +532,7 @@ class ElectronicGraderController extends GradingController {
         $graded_gradeables = [];
         $user_ids = []; // Collect user ids so we know who isn't on a team
         /** @var GradedGradeable $g */
-        foreach ($this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids, null, [$section_key, 'user_id', 'team_id']) as $g) {
+        foreach ($order->getSortedGradedGradeables() as $g) {
             $graded_gradeables[] = $g;
             if($gradeable->isTeamAssignment()) {
                 $user_ids = array_merge($user_ids, $g->getSubmitter()->getTeam()->getMemberUserIds());

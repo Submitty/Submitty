@@ -40,6 +40,16 @@ class GradingOrder extends AbstractModel {
     protected $sections;
 
     /**
+     * @var string[] $all_user_ids
+     */
+    protected $all_user_ids;
+
+    /**
+     * @var string[] $all_team_ids
+     */
+    protected $all_team_ids;
+
+    /**
      * GradingOrder constructor.
      * @param Core $core
      * @param Gradeable $gradeable
@@ -60,8 +70,8 @@ class GradingOrder extends AbstractModel {
             $this->sections = $gradeable->getGradingSectionsForUser($user);
         }
 
-        $user_ids = [];
-        $team_ids = [];
+        $this->all_user_ids = [];
+        $this->all_team_ids = [];
 
         //Collect all submitters by section
         $this->section_submitters = [];
@@ -72,17 +82,17 @@ class GradingOrder extends AbstractModel {
             //Collect all team/user ids
             if ($gradeable->isTeamAssignment()) {
                 foreach ($submitters as $submitter) {
-                    $team_ids[] = $submitter->getId();
+                    $this->all_team_ids[] = $submitter->getId();
                 }
             } else {
                 foreach ($submitters as $submitter) {
-                    $user_ids[] = $submitter->getId();
+                    $this->all_user_ids[] = $submitter->getId();
                 }
             }
         }
 
         //Find which submitters have submitted
-        $versions = $this->core->getQueries()->getActiveVersions($gradeable, array_merge($user_ids, $team_ids));
+        $versions = $this->core->getQueries()->getActiveVersions($gradeable, array_merge($this->all_user_ids, $this->all_team_ids));
         foreach ($versions as $id => $version) {
             /* @var GradedGradeable $graded_gradeable */
             $this->has_submission[$id] = $version > 0;
@@ -294,6 +304,30 @@ class GradingOrder extends AbstractModel {
      */
     public function getSectionKey() {
         return $this->gradeable->isGradeByRegistration() ? "registration_section" : "rotating_section";
+    }
+
+    /**
+     * Get graded gradeables for all students, in the correct order.
+     * Note: This calls core->getQueries()->getGradedGradeables() so it's likely very slow. Use with caution.
+     * @return GradedGradeable[] All graded gradeables for students, in the correct order
+     */
+    public function getSortedGradedGradeables() {
+        $iter = $this->core->getQueries()->getGradedGradeables([$this->gradeable],
+            $this->all_user_ids, $this->all_team_ids, [$this->getSectionKey(), 'team_id', 'user_id']);
+
+        $gg_idx = [];
+        $unsorted = [];
+        foreach ($iter as $gg) {
+            $idx = $this->getSubmitterIndex($gg->getSubmitter());
+            //Should never happen, but better to be safe
+            if ($idx === false) {
+                $unsorted[] = $gg;
+            } else {
+                $gg_idx[$idx] = $gg;
+            }
+        }
+
+        return array_merge($gg_idx, $unsorted);
     }
 }
 
