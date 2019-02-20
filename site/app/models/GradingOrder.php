@@ -25,12 +25,12 @@ class GradingOrder extends AbstractModel {
     protected $all;
 
     /**
-     * @var Submitter[][] $section_submitters
+     * @var Submitter[][] $section_submitters Section name => Submitter[]
      */
     protected $section_submitters;
 
     /**
-     * @var bool[] $has_submission
+     * @var bool[] $has_submission Submitter id => bool
      */
     protected $has_submission;
 
@@ -54,8 +54,6 @@ class GradingOrder extends AbstractModel {
         $this->all = $all;
 
         //Get that user's grading sections
-
-        $this->section_submitters = [];
         if ($all) {
             $this->sections = $gradeable->getAllGradingSections();
         } else {
@@ -65,6 +63,8 @@ class GradingOrder extends AbstractModel {
         $user_ids = [];
         $team_ids = [];
 
+        //Collect all submitters by section
+        $this->section_submitters = [];
         foreach ($this->sections as $section) {
             $submitters = $section->getSubmitters();
             $this->section_submitters[$section->getName()] = $submitters;
@@ -81,6 +81,7 @@ class GradingOrder extends AbstractModel {
             }
         }
 
+        //Find which submitters have submitted
         $versions = $this->core->getQueries()->getActiveVersions($gradeable, array_merge($user_ids, $team_ids));
         foreach ($versions as $id => $version) {
             /* @var GradedGradeable $graded_gradeable */
@@ -90,7 +91,11 @@ class GradingOrder extends AbstractModel {
         $this->sort();
     }
 
+    /**
+     * Sort grading order.
+     */
     public function sort() {
+        //TODO: More sort criteria
         foreach ($this->section_submitters as $name => &$section) {
             usort($section, function(Submitter $a, Submitter $b) {
                 return ($a->getId() < $b->getId()) ? -1 : 1;
@@ -196,6 +201,11 @@ class GradingOrder extends AbstractModel {
         return false;
     }
 
+    /**
+     * Determine if a given submitter has submitted, or false if they are not in any of these sections
+     * @param Submitter $submitter
+     * @return bool
+     */
     public function getHasSubmission(Submitter $submitter) {
         if (array_key_exists($submitter->getId(), $this->has_submission)) {
             return $this->has_submission[$submitter->getId()];
@@ -221,7 +231,7 @@ class GradingOrder extends AbstractModel {
 
     /**
      * Get a list of all submitters, split into sections
-     * @return Submitter[][]
+     * @return Submitter[][] Map of section name => Submitter[]
      */
     public function getSectionSubmitters() {
         return $this->section_submitters;
@@ -229,17 +239,20 @@ class GradingOrder extends AbstractModel {
 
     /**
      * Get a list of all graders for all sections
-     * @return User[][]
+     * @return User[][] Map of section name => User[]
      */
     public function getSectionGraders() {
-        return array_map(function (GradingSection $section) {
-            return $section->getGraders();
-        }, $this->sections);
+        return array_combine(
+            $this->getSectionNames(),
+            array_map(function (GradingSection $section) {
+                return $section->getGraders();
+            }, $this->sections)
+        );
     }
 
     /**
      * Get a list of all section names
-     * @return string[]
+     * @return string[] List of section names
      */
     public function getSectionNames() {
         return array_map(function (GradingSection $section) {
