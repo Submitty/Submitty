@@ -1857,6 +1857,10 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
     }
 
     public function getActiveVersions(Gradeable\Gradeable $gradeable, array $submitter_ids) {
+        if (count($submitter_ids) === 0) {
+            return [];
+        }
+
         // (?), (?), (?)
         $id_placeholders = implode(',', array_fill(0, count($submitter_ids), '(?)'));
 
