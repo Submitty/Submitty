@@ -1090,7 +1090,8 @@ int execute(const std::string &cmd,
     std::cout <<"Window mode activated." << std::endl;
     char* my_display = getenv("DISPLAY"); //The display environment variable is unset. This sets it for child and parent.
     if (my_display == NULL) {
-      setenv("DISPLAY", ":0", 1);
+      // Hardcoded for now, future PR will detect this automatically
+      setenv("DISPLAY", ":1", 1);
     }
     window_mode = true;
     invalid_windows = snapshotOfActiveWindows();
