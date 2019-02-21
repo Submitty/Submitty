@@ -123,21 +123,21 @@ div.btn-container {
     margin-top: 10px
 }
 
-.disabledBtn{
+.disabled-btn{
     background-color:#d4d4d4 ;
     color: #5a5a5a ;
     cursor: default;
 }
-.normalBtn{
+.normal-btn{
     background-color: #d0d0d0 ;
     color: #111111 ;
     border:solid 1px rgba(0,0,0,0.75);
 }
-.normalBtn:hover{
+.normal-btn:hover{
     border: none;
 }
 
-.activeBtn{
+.active-btn{
     background-color: #008000;
     color: #ffffff;
     border: none;

@@ -27,7 +27,7 @@ chmod 755 ${SUBMITTY_INSTALL_DIR}/bin
 rsync -rtz  ${SUBMITTY_REPOSITORY}/bin/*   ${SUBMITTY_INSTALL_DIR}/bin/
 
 # all course builders (instructors & head TAs) need read/execute access to these scripts
-array=( grading_done.py left_right_parse.py read_iclicker_ids.py regrade.py )
+array=( grading_done.py left_right_parse.py read_iclicker_ids.py regrade.py extract_notes_page.py )
 for i in "${array[@]}"; do
     chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/${i}
     chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/${i}

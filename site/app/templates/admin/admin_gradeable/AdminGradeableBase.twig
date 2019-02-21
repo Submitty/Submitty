@@ -82,7 +82,7 @@
             }
             else {
 
-                $(this).addClass("{{ action != 'edit' ? "disabledBtn" : "normalBtn" }}")
+                $(this).addClass("{{ action != 'edit' ? "disabled-btn" : "normal-btn" }}")
             }
         });
 
@@ -90,9 +90,9 @@
         $('#page_' + tab + '_content').show();
         for (var i =0 ; i<5 ;i++)
         {
-            $('#page_' + i + '_nav').removeClass('activeBtn');
+            $('#page_' + i + '_nav').removeClass('active-btn');
         }
-        $('#page_' + tab + '_nav').addClass('activeBtn');
+        $('#page_' + tab + '_nav').addClass('active-btn');
     }
 
     function updateNavItemsStatus() {
