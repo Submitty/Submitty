@@ -21,6 +21,8 @@ class CourseMaterialsController extends AbstractController {
     }
 
     public function viewCourseMaterialsPage() {
+        $this->core->getOutput()->addInternalJs('flatpickr.js');
+        $this->core->getOutput()->addInternalCss('flatpickr.min.css');
         $user_group = $this->core->getUser()->getGroup();
         $this->core->getOutput()->renderOutput(array('course', 'CourseMaterials'), 'listCourseMaterials', $user_group);
     }

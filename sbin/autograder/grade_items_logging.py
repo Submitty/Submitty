@@ -26,12 +26,15 @@ def log_message(job_id="UNKNOWN", is_batch=False, which_untrusted="", jobname=""
     elapsed_time_string = "" if elapsed_time < 0 else '{:9.3f}'.format(elapsed_time)
     time_unit = "" if elapsed_time < 0 else "sec"
     with open(autograding_log_file, 'a') as myfile:
-        fcntl.flock(myfile,fcntl.LOCK_EX | fcntl.LOCK_NB)
-        print("%s | %6s | %5s | %11s | %-75s | %-6s %9s %3s | %s"
-              % (easy_to_read_date, job_id, batch_string, which_untrusted,
-                 jobname, timelabel, elapsed_time_string, time_unit, message),
-              file=myfile)
-        fcntl.flock(myfile, fcntl.LOCK_UN)
+        try:
+            fcntl.flock(myfile,fcntl.LOCK_EX | fcntl.LOCK_NB)
+            print("%s | %6s | %5s | %11s | %-75s | %-6s %9s %3s | %s"
+                  % (easy_to_read_date, job_id, batch_string, which_untrusted,
+                     jobname, timelabel, elapsed_time_string, time_unit, message),
+                  file=myfile)
+            fcntl.flock(myfile, fcntl.LOCK_UN)
+        except:
+            print("Could not gain a lock on the log file.")
 
 def log_stack_trace(job_id="UNKNOWN", is_batch=False, which_untrusted="", jobname="", timelabel="", elapsed_time=-1, trace=""):
     now = dateutils.get_current_time()
@@ -44,9 +47,12 @@ def log_stack_trace(job_id="UNKNOWN", is_batch=False, which_untrusted="", jobnam
     elapsed_time_string = "" if elapsed_time < 0 else '{:9.3f}'.format(elapsed_time)
     time_unit = "" if elapsed_time < 0 else "sec"
     with open(autograding_log_file, 'a') as myfile:
-        fcntl.flock(myfile,fcntl.LOCK_EX | fcntl.LOCK_NB)
-        print("%s | %6s | %5s | %11s | %-75s | %-6s %9s %3s |\n%s"
-              % (easy_to_read_date, job_id, batch_string, which_untrusted,
-                 jobname, timelabel, elapsed_time_string, time_unit, trace),
-              file=myfile)
-        fcntl.flock(myfile, fcntl.LOCK_UN)
+        try:
+            fcntl.flock(myfile,fcntl.LOCK_EX | fcntl.LOCK_NB)
+            print("%s | %6s | %5s | %11s | %-75s | %-6s %9s %3s |\n%s"
+                  % (easy_to_read_date, job_id, batch_string, which_untrusted,
+                     jobname, timelabel, elapsed_time_string, time_unit, trace),
+                  file=myfile)
+            fcntl.flock(myfile, fcntl.LOCK_UN)
+        except:
+            print("Could not gain a lock on the log file.")
