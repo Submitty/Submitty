@@ -843,7 +843,9 @@ void AddDefaultGraphicsChecks(nlohmann::json &json_graders, const nlohmann::json
     if(action_name != "gif"){
       continue;
     }
+    /*
     //We found a gif! Add a filecheck for it.
+    // let's not add it automatically right now, more useful to leave it to configuration to specify the description etc.
     nlohmann::json j;
     std::string gif_name = action["name"];
     std::string full_gif_name = gif_name + ".gif";
@@ -855,6 +857,7 @@ void AddDefaultGraphicsChecks(nlohmann::json &json_graders, const nlohmann::json
     j["show_actual"] = "always";
     j["show_message"]= "never";
     json_graders.push_back(j);
+    */
   }
 }
 
