@@ -445,8 +445,8 @@ class ForumController extends AbstractController {
     }
 
     private function checkPostEditAccess($post_id) {
-        if($this->core->getUser()->getGroup() <= 2){
-                // Instructor/full access ta
+        if($this->core->getUser()->getGroup() <= 3){
+                // Instructor/full access ta/mentor
                 return true;
         } else {
             $post = $this->core->getQueries()->getPost($post_id);
@@ -459,8 +459,8 @@ class ForumController extends AbstractController {
     }
 
     private function checkThreadEditAccess($thread_id) {
-        if($this->core->getUser()->getGroup() <= 2){
-                // Instructor/full access ta
+        if($this->core->getUser()->getGroup() <= 3){
+                // Instructor/full access ta/mentor
                 return true;
         } else {
             $post = $this->core->getQueries()->getThread($thread_id)[0];
