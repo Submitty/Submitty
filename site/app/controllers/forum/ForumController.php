@@ -423,7 +423,7 @@ class ForumController extends AbstractController {
     }
 
     public function alterAnnouncement($type){
-        if($this->core->getUser()->getGroup() <= 2){
+        if($this->core->getUser()->getGroup() <= 3){
             $thread_id = $_POST["thread_id"];
             $this->core->getQueries()->setAnnouncement($thread_id, $type);
             if($type) {
