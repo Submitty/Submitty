@@ -190,6 +190,7 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
     }
 
     bool found_router = false;
+    bool found_non_server = false;
 
     for (int container_num = 0; container_num < this_testcase["containers"].size(); container_num++){
       if(this_testcase["containers"][container_num]["commands"].is_string()){
@@ -199,12 +200,26 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
         this_testcase["containers"][container_num]["commands"].push_back(this_command);
       }
 
+      if(!this_testcase["containers"][container_num]["commands"].is_array()){
+        this_testcase["containers"][container_num]["commands"] = nlohmann::json::array();
+      }
+
       if(this_testcase["containers"][container_num]["container_name"].is_null()){
         this_testcase["containers"][container_num]["container_name"] = "container" + std::to_string(container_num); 
       }
 
       if (this_testcase["containers"][container_num]["container_name"] == "router"){
         found_router = true;
+      }
+
+      if(!this_testcase["containers"][container_num]["server"].is_boolean()){
+        this_testcase["containers"][container_num]["server"] = false;
+      }
+
+      if(this_testcase["containers"][container_num]["server"] == true){
+        assert(!this_testcase["containers"][container_num]["commands"].size() > 0);
+      }else{
+        found_non_server = true;
       }
 
       std::string container_name = this_testcase["containers"][container_num]["container_name"];
@@ -231,7 +246,7 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
       insert_router["container_image"] = "ubuntu:custom";
       this_testcase["containers"].push_back(insert_router);
     }
-
+    assert(found_non_server == true);
     whole_config["testcases"][testcase_num] = this_testcase;
     assert(!whole_config["testcases"][testcase_num]["title"].is_null());
     assert(!whole_config["testcases"][testcase_num]["containers"].is_null());
@@ -883,6 +898,11 @@ void AddDefaultGraders(const std::vector<nlohmann::json> &containers,
 
   //For every container, for every command, we want to add default graders for the appropriate files.
   for (int i = 0; i < containers.size(); i++) {
+
+    if(containers[i]["server"] == true){
+      continue;
+    }
+
     std::string prefix = "";
     //If there are more than one containers, we do need to prepend its directory (e.g. container1/).
     if(containers.size() > 1){
