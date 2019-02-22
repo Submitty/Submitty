@@ -3,6 +3,7 @@ max-line-length = 88
 exclude=
     .git,
     .setup,
+    bin/extract_notes_page.py,
     bin/generate_repos.py,
     bin/grading_done.py,
     bin/left_right_parse.py,
