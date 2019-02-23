@@ -63,6 +63,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "grep",                    "/bin/grep" },
     { "sed",                     "/bin/sed" },
     { "pwd",                     "/bin/pwd" },
+    { "env",                     "/usr/bin/env" },
     { "pdftotext",               "/usr/bin/pdftotext" },
     { "pdflatex",                "/usr/bin/pdflatex" },
     { "wc",                      "/usr/bin/wc" },
