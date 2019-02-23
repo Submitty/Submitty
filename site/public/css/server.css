@@ -1588,10 +1588,15 @@ end of styles used in the admin gradeable page
     color: red;
 }
 
-.required::-webkit-input-placeholder { color: red; }
-.required:-moz-placeholder { color: red; }
-.required::-moz-placeholder { color: red; }
-.required:-ms-input-placeholder { color: red; }
+.required::-webkit-input-placeholder { color: #cc0000; }
+.required:-moz-placeholder { color: #cc0000; }
+.required::-moz-placeholder { color: #cc0000; }
+.required:-ms-input-placeholder { color: #cc0000; }
+
+#required_type{
+    color: #cc0000;
+    display: inline;
+}
 
 .modal{
     display: none;
