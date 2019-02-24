@@ -390,10 +390,31 @@ HTML;
 							}
 						});
 					</script>
-					<div id="posts_list" style="max-height: 100%" class="col-9">
+					
+HTML;
+		$return .= $this->generatePostList($currentThread);
+
+		}
+          
+
+		return $return;
+	}
+
+	public function generatePostList($currentThread) {
+
+		$return = '';
+		$title_html = '';
+
+		$activeThread = $this->core->getQueries()->getThread($currentThread)[0];
+
+		$activeThreadTitle = $activeThread['title'];
+		$activeThreadAnnouncement = $activeThread['pinned'];
+
+		$return .= <<<HTML
+			<div id="posts_list" style="max-height: 100%" class="col-9">
 HTML;
 
-            $title_html .= <<<HTML
+		  $title_html .= <<<HTML
             <h3 style="max-width: 95%; display:inline-block;word-wrap: break-word;margin-top:10px; margin-left: 5px;">
 HTML;
 					if($this->core->getUser()->getGroup() <= 2 && $activeThreadAnnouncement){
@@ -510,7 +531,7 @@ HTML;
 				</div>
 				</div>
 HTML;
-		}
+		
 
 		$return .= <<<HTML
 		<script>
