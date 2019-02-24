@@ -392,7 +392,7 @@ HTML;
 					</script>
 					
 HTML;
-		$return .= $this->generatePostList($currentThread);
+		$return .= $this->generatePostList($currentThread, $posts, $currentCourse, true, $threadExists, $display_option, $categories, $cookieSelectedCategories, $cookieSelectedThreadStatus, $currentCategoriesIds);
 
 		}
           
@@ -400,7 +400,7 @@ HTML;
 		return $return;
 	}
 
-	public function generatePostList($currentThread, $display_option = 'time') {
+	public function generatePostList($currentThread, $posts, $currentCourse, $includeReply = false, $threadExists = false, $display_option = 'time', $categories = [], $cookieSelectedCategories = [], $cookieSelectedThreadStatus = [], $currentCategoriesIds = []) {
 
 		$return = '';
 		$title_html = '';
@@ -409,9 +409,11 @@ HTML;
 
 		$activeThreadTitle = $activeThread['title'];
 		$activeThreadAnnouncement = $activeThread['pinned'];
+		$thread_id = $activeThread['id'];
+		$function_date = 'date_format';
 
 		$return .= <<<HTML
-			<div id="posts_list" style="max-height: 100%" class="col-9">
+			<div id="posts_list" style="margin-top:10px;max-height: 100%" class="col-9">
 HTML;
 
 		  $title_html .= <<<HTML
@@ -514,15 +516,19 @@ HTML;
 HTML;
 						$GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id'])?$GLOBALS['post_box_id']+1:1;
 
-						$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig", [
-							"show_post" => true,
-							"post_content_placeholder" => "Enter your reply to all here...",
-							"show_merge_thread_button" => true,
-							"post_box_id" => $post_box_id,
-							"attachment_script" => true,
-							"show_anon" => true,
-							"submit_label" => "Submit Reply to All",
-						]);
+
+						if($includeReply) {
+							$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig", [
+								"show_post" => true,
+								"post_content_placeholder" => "Enter your reply to all here...",
+								"show_merge_thread_button" => true,
+								"post_box_id" => $post_box_id,
+								"attachment_script" => true,
+								"show_anon" => true,
+								"submit_label" => "Submit Reply to All",
+							]);
+						}
+						
 						$return .= <<<HTML
 	            	</form>
 	            	<br/>

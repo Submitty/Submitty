@@ -2567,8 +2567,14 @@ AND gc_id IN (
         return $this->course_db->rows();
     }
 
-    public function getPostsForThread($current_user, $thread_id, $show_deleted = false, $option = "tree"){
+    public function getPostsForThread($current_user, $thread_id, $show_deleted = false, $option = "tree", $filterOnUser = NULL){
       $query_delete = $show_deleted?"true":"deleted = false";
+      $query_filter_on_user = '';
+      $param_list = array($thread_id);
+      if(!empty($filterOnUser)) {
+        $query_filter_on_user = ' and author_user_id = ? ';
+        $param_list[] = $filterOnUser;
+      }
       if($thread_id == -1) {
         $this->course_db->query("SELECT MAX(id) as max from threads WHERE deleted = false and merged_thread_id = -1 GROUP BY pinned ORDER BY pinned DESC");
         $rows = $this->course_db->rows();
@@ -2583,7 +2589,7 @@ AND gc_id IN (
       if($option == 'alpha'){
         $this->course_db->query("SELECT posts.*, fph.edit_timestamp, users.user_lastname FROM posts INNER JOIN users ON posts.author_user_id=users.user_id {$history_query} WHERE thread_id=? AND {$query_delete} ORDER BY user_lastname, posts.timestamp;", array($thread_id));
       } else {
-        $this->course_db->query("SELECT posts.*, fph.edit_timestamp FROM posts {$history_query} WHERE thread_id=? AND {$query_delete} ORDER BY timestamp ASC", array($thread_id));
+        $this->course_db->query("SELECT posts.*, fph.edit_timestamp FROM posts {$history_query} WHERE thread_id=? AND {$query_delete} {$query_filter_on_user} ORDER BY timestamp ASC", $param_list);
       }
 
       $result_rows = $this->course_db->rows();
