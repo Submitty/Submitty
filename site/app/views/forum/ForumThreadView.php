@@ -400,7 +400,7 @@ HTML;
 		return $return;
 	}
 
-	public function generatePostList($currentThread) {
+	public function generatePostList($currentThread, $display_option = 'time') {
 
 		$return = '';
 		$title_html = '';
