@@ -26,7 +26,7 @@ def main():
     print()
 	# Do a localhost check
 	ip_addr = cgi.escape(os.environ["REMOTE_ADDR"])
-	if(ip_addr != "127.0.0.1" && ip_addr != "localhost"):
+	if ip_addr != "127.0.0.1" and ip_addr != "localhost":
 		print_error("Cannot be called from external host")
 		return
 
