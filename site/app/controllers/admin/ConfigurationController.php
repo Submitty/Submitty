@@ -16,7 +16,7 @@ class ConfigurationController extends AbstractController {
                 break;
             case 'emailSeatingAssignments':
                 $this->emailSeatingAssignments();
-                break; 
+                break;
             default:
                 $this->core->getOutput()->showError("Invalid page request for controller");
                 break;
@@ -70,8 +70,9 @@ class ConfigurationController extends AbstractController {
 
         $gradeable_seating_options = $this->getGradeableSeatingOptions();
         $config_url = $this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper'));
+        $email_room_seating_url = $this->core->buildUrl(array('component' => 'admin', 'page' => 'email_room_seating'));
 
-        $this->core->getOutput()->renderOutput(array('admin', 'Configuration'), 'viewConfig', $fields, $gradeable_seating_options, $config_url);
+        $this->core->getOutput()->renderOutput(array('admin', 'Configuration'), 'viewConfig', $fields, $gradeable_seating_options, $config_url, $email_room_seating_url);
     }
 
     public function updateConfiguration() {
@@ -141,7 +142,7 @@ class ConfigurationController extends AbstractController {
     }
         public function emailSeatingAssignments() {
         $seating_email_data = $_POST;
-        //TODO: construct validation/error checking 
+        //TODO: construct validation/error checking
 
         $gradeable_id = $this->core->getConfig()->getRoomSeatingGradeableId();
         $course =  $this->core->getConfig()->getCourse();

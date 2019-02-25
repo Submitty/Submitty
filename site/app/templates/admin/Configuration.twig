@@ -223,7 +223,8 @@
 
                 {# <input type="submit" id="email_seating_assignment" name="email_seating_assignment" class="btn btn-primary" value="Email Seating Assignments" style="margin-top: 25px">
  #}
-                 <a onclick="$('#seating-assignment-email').css('display', 'block');" href="#" class="btn btn-primary" id="email_seating_assignment" style="margin-top: 25px">Email Seating Assignments</a>
+                 <a href="{{ email_room_seating_url }}" class="btn btn-primary" id="email_seating_assignment" style="margin-top: 25px">Email Seating Assignments</a>
+
             </div>
 
         </div>
@@ -261,14 +262,14 @@
 
     var selected_seating_gradeable = $('#room_seating_gradeable_id').val();
     if(!selected_seating_gradeable) {
-       hideEmailSeatingOption(); 
+       hideEmailSeatingOption();
     }
 
     $(document).ready(function() {
 
          $(document).on('change', '#room_seating_gradeable_id', function(){
              var selected_seating_gradeable = $('#room_seating_gradeable_id').val();
-             
+
              if(!selected_seating_gradeable){
                  hideEmailSeatingOption();
              }
