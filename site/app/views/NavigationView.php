@@ -99,9 +99,12 @@ class NavigationView extends AbstractView {
         // ======================================================================================
         // DISPLAY ROOM SEATING (used to display room seating assignments)
         // ======================================================================================
-        $display_room_seating = $this->core->getConfig()->displayRoomSeating();
-        $seating_only_for_instructor = $this->core->getConfig()->isSeatingOnlyForInstructor();
-        if(!$this->core->getUser()->accessAdmin() and $seating_only_for_instructor) $display_room_seating = false;
+        if ($seating_only_for_instructor && !$this->core->getUser()->accessAdmin()) {
+            $display_room_seating = false;
+        }
+        else {
+            $display_room_seating = $this->core->getConfig()->displayRoomSeating();
+        }
         $user_seating_details = null;
         $gradeable_title = null;
         $seating_config = null;
