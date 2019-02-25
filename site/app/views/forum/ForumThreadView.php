@@ -484,7 +484,7 @@ HTML;
 										$reply_level = $reply_level_array[$i];
 									}
 										
-									$return .= $this->createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level, $display_option);
+									$return .= $this->createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level, $display_option, $includeReply);
 									break;
 								}						
 							}
@@ -499,7 +499,7 @@ HTML;
 								$thread_id = $post["thread_id"];
 							}
                             $first_post_id = $this->core->getQueries()->getFirstPostForThread($thread_id)['id'];
-							$return .= $this->createPost($thread_id, $post, $function_date, $title_html, $first, 1, $display_option);		
+							$return .= $this->createPost($thread_id, $post, $function_date, $title_html, $first, 1, $display_option, $includeReply);		
 							if($first){
 								$first= false;
 							}			
@@ -778,7 +778,7 @@ HTML;
 		return $post_content;
 	}
 
-	public function createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level, $display_option){
+	public function createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level, $display_option, $includeReply){
 		$current_user = $this->core->getUser()->getId();
 		$post_html = "";
 		$post_id = $post["id"];
@@ -856,7 +856,7 @@ HTML;
 HTML;
 			}
 		}
-		if(($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) && $first && $thread_resolve_state == -1) {
+		if($includeReply && ($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) && $first && $thread_resolve_state == -1) {
 			//resolve button
 			$return .= <<<HTML
 				<a class="btn btn-default btn-sm" style="text-decoration: none;" onClick="changeThreadStatus({$post['thread_id']})" title="Mark thread as resolved">Mark as resolved</a>
