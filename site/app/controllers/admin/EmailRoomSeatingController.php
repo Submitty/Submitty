@@ -38,16 +38,6 @@ Please email your instructor with any questions or concerns.';
 						$this->renderEmailTemplate();
 						break;
 		}
-		//TODO: check access here
-	    // switch ($_REQUEST['page']) {
-	    // 	case 'edit_seating_assignment_email':
-	    // 		$this->emailSeatingAssignments();
-	    // 		break;
-			//
-			//
-	    // }
-
-
 	}
 
 	private function renderEmailTemplate(){
@@ -58,7 +48,7 @@ Please email your instructor with any questions or concerns.';
 	public function emailSeatingAssignments() {
 		$seating_assignment_subject = $_POST["room_seating_email_subject"];
 		$seating_assignment_body = $_POST["room_seating_email_body"];
-		
+
 		try {
 			$gradeable_id = $this->core->getConfig()->getRoomSeatingGradeableId();
 			$course =  $this->core->getConfig()->getCourse();

@@ -14,9 +14,6 @@ class ConfigurationController extends AbstractController {
             case 'update':
                 $this->updateConfiguration();
                 break;
-            case 'emailSeatingAssignments':
-                $this->emailSeatingAssignments();
-                break;
             default:
                 $this->core->getOutput()->showError("Invalid page request for controller");
                 break;
@@ -70,9 +67,8 @@ class ConfigurationController extends AbstractController {
 
         $gradeable_seating_options = $this->getGradeableSeatingOptions();
         $config_url = $this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper'));
-        $email_room_seating_url = $this->core->buildUrl(array('component' => 'admin', 'page' => 'email_room_seating'));
 
-        $this->core->getOutput()->renderOutput(array('admin', 'Configuration'), 'viewConfig', $fields, $gradeable_seating_options, $config_url, $email_room_seating_url);
+        $this->core->getOutput()->renderOutput(array('admin', 'Configuration'), 'viewConfig', $fields, $gradeable_seating_options, $config_url);
     }
 
     public function updateConfiguration() {
@@ -140,50 +136,4 @@ class ConfigurationController extends AbstractController {
 
         return $empty_option + $gradeable_seating_options;
     }
-        public function emailSeatingAssignments() {
-        $seating_email_data = $_POST;
-        //TODO: construct validation/error checking
-
-        $gradeable_id = $this->core->getConfig()->getRoomSeatingGradeableId();
-        $course =  $this->core->getConfig()->getCourse();
-
-
-
-        $seating_assignments_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "reports", "seating", $gradeable_id);
-
-        $seating_dir = new \DirectoryIterator($seating_assignments_path);
-        foreach ($seating_dir as $seatingAssignmentFile) {
-
-            if (!$seatingAssignmentFile->isDot() && $seatingAssignmentFile->getExtension() === "json") {
-                $seatingAssignment = FileUtils::readJsonFile($seatingAssignmentFile->getPathname());
-
-                $email_data = [
-                    "subject" => "[Submitty $course] Your Seating Assignment",
-                    "body" => $this->constructSeatingAssignmentEmail($seatingAssignment)
-                ];
-
-                $recipient = $seatingAssignmentFile->getBasename('.json');
-
-                $this->core->getQueries()->createEmail($email_data, $recipient);
-            }
-        }
-
-    }
-
-    private function constructSeatingAssignmentEmail($seatingAssignment) {
-        $gradeable_name = $seatingAssignment["gradeable"];
-        $date = $seatingAssignment["date"];
-        $time = $seatingAssignment["time"];
-        $building = $seatingAssignment["building"];
-        $room = $seatingAssignment["room"];
-        $zone = $seatingAssignment["zone"];
-        $row = $seatingAssignment["row"];
-        $seat = $seatingAssignment["seat"];
-
-        return "Hello,\n\nListed below is your seating assignment for the upcoming exam $gradeable_name\n on $date at $time.\nLocation: $building $room\nzone: $zone\nrow: $row\nseat: $seat\n\nPlease email your instructor with any questions or concerns.\n - Submitty";
-
-    }
-
-
-
 }

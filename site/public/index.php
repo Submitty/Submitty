@@ -277,10 +277,6 @@ switch($_REQUEST['component']) {
         $control = new app\controllers\pdf\PDFController($core);
         $control->run();
         break;
-    case 'seating_assignment_email':
-        $control = new app\controllers\admin\SeatingAssignmentEmail($core);
-        $control->run();
-        break;
     default:
         $control = new app\controllers\AuthenticationController($core, $logged_in);
         $control->run();
