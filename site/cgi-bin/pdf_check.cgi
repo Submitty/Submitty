@@ -18,7 +18,21 @@ import subprocess
 import shutil
 import stat
 import PyPDF2
+import sys
+import traceback
 from PyPDF2 import PdfFileReader, PdfFileWriter
+
+try:
+    from pdf2image import convert_from_bytes
+    from PIL import Image
+except ImportError as e:
+    print("Content-type: application/json")
+    print()
+    message = "Error from pdf_check_.cgi:\n"
+    message += "One or more required python modules not installed correctly\n"
+    message += traceback.format_exc() 
+    print(json.dumps({"valid" : False, "message" : message}))
+    sys.exit(1)
 # from grade_item.py
 def add_permissions(item,perms):
     if os.getuid() == os.stat(item).st_uid:
@@ -95,7 +109,6 @@ try:
 
         div = total_pages // num
         
-        # pdf = PdfFileReader(path)
         i = 0
         while i < total_pages:
             cover_writer = PdfFileWriter()
@@ -109,8 +122,19 @@ try:
                 i+=1
             with open(output_filename, 'wb') as out:
                 pdf_writer.write(out)
+
+            #save pdfs as images
+            pdf_images = convert_from_bytes(open(output_filename, 'rb').read())
+            for k in range(len(pdf_images)):
+                pdf_images[k].save('{}.jpg'.format(output_filename[:-4]), "JPEG", quality = 100);
+
             with open(cover_filename, 'wb') as out:
                 cover_writer.write(out)
+
+            #save cover as image
+            pdf_images = convert_from_bytes(open(cover_filename, 'rb').read())
+            pdf_images[0].save('{}.jpg'.format(cover_filename[:-4]), "JPEG", quality = 100);
+
     message += "=> finished PyPDF2"
     # get rid of unnecessary copies
     for filename in os.listdir(bulk_path):
@@ -120,13 +144,13 @@ try:
     message += ",and finished"
 except ValueError as e:
     valid = False
-    message += str(e)
+    message += traceback.format_exc()
 except Exception as e:
     valid = False
     # if copy exists, delete it... but relies on the fact that copy_path exists :(
     if os.path.exists(split_path):
         shutil.rmtree(split_path)
-    message += str(e)
+    message += traceback.format_exc()
         
 
 print(json.dumps({"valid": valid, "message": message}))
