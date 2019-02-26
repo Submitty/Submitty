@@ -2580,9 +2580,17 @@ function toggleSidebar() {
 }
 
 $(document).ready(function() {
-    //Collapsed sidebar tooltips
+    //Collapsed sidebar tooltips with content depending on state of sidebar
     $('[data-toggle="tooltip"]').tooltip({
-        position: { my: "right+0 bottom+0" }
+        position: { my: "right+0 bottom+0" },
+        content: function () {
+            if($("#sidebar").hasClass("collapsed")) {
+                return $(this).attr("title")
+            }
+            else {
+                return ""
+            }
+        }
     });
     $("#nav-sidebar-collapse.collapse-icon").attr("title", "Expand Sidebar");
 
