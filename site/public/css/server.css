@@ -1750,3 +1750,9 @@ end of styles used in the admin gradeable page
     font-size: 1.5em;
     font-weight: bold;
 }
+
+.scrollable-image{
+    overflow: auto; 
+    width: 100%;
+    max-height: 300px;
+}
