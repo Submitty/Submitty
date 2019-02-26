@@ -296,8 +296,8 @@ class DatabaseQueries {
         $values = implode(', ', array_fill(0, count($results)+1, '?'));
         $keys = implode(', ', array_keys($results));
         $updates = '';
-        
-        foreach($results as $key => $value) { 
+
+        foreach($results as $key => $value) {
             if($value != 'false') {
                 $results[$key] = 'true';
             }
@@ -311,8 +311,8 @@ class DatabaseQueries {
                                     VALUES
                                      (
                                         $values
-                                     ) 
-                                    ON CONFLICT (user_id) 
+                                     )
+                                    ON CONFLICT (user_id)
                                     DO
                                      UPDATE
                                         SET $updates", $test);
@@ -2734,12 +2734,12 @@ AND gc_id IN (
         if($notification->getNotifyNotToSource()){
             $not_send_users[] = $notification->getNotifySource();
         }
-        
+
         $restrict = count($not_send_users);
         if($restrict > 0) {
         	$ignore_self_query = "WHERE user_id NOT IN (" . implode(',', array_fill(0, $restrict, '?')) . ')';
         }
-        
+
         $column = '';
         if($type === 'reply') {
         	$post_thread_id = json_decode($params[1], true)[0]['thread_id'];
@@ -3773,7 +3773,16 @@ AND gc_id IN (
     }
 
     /**
-     * Gets a list of emails for all active particpants in a course  
+      * Retruns true if a given student has a null registration for a course_email
+      *@param $user_id associated user id of the given user
+      */
+    public function hasDroppedCourse($user_id){
+      $this->course_db->query('SELECT registration_section from users WHERE user_id=?', [$user_id]);
+      return $this->course_db->row()['registration_section'] == null;
+    }
+
+    /**
+     * Gets a list of emails for all active particpants in a course
      */
     public function getClassEmailList(){
         $parameters = array();
@@ -3781,12 +3790,12 @@ AND gc_id IN (
 
         return $this->course_db->rows();
     }
-    
+
     /**
      * Queues an email to be sent by email job
      * @param array $email_data
-     * @param string $recipient  
-     */ 
+     * @param string $recipient
+     */
     public function createEmail($email_data, $recipient){
         $parameters = array($recipient, $email_data["subject"], $email_data["body"]);
 
