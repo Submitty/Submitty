@@ -417,18 +417,18 @@ class HomeworkView extends AbstractView {
                 $use_qr_codes = true;
                 for($i = 0; $i < count($files); $i++){
                     $filename = rawurldecode($files[$i]['filename_full']);
-                    foreach($json_data as $decoded_data){
-                        //compare each file name in json data with ones split
-                        foreach ($decoded_data as $qr_file) {
-                            if($qr_file['pdf_name'] === $filename){
-                                $files[$i]['page_count'] = $qr_file['page_count'];
-                                $files[$i]['user_id']['id'] = $qr_file['id'];
-                                $files[$i]['user_id']['valid'] = ($this->core->getQueries()->getUserById($qr_file['id']) === null) ? false:true;
-                                goto end;
-                            }
+                    foreach ($json_data as $qr_file) {
+                        if($qr_file['pdf_name'] === $filename){
+                            $is_valid = !$this->core->getQueries()->getUserById($qr_file['id']) ? false:true;
+                            $files[$i] += [
+                                'page_count' => $qr_file['page_count'],
+                                'user_id'    => [
+                                    'id' => $qr_file['id'], 
+                                    'valid' => $is_valid
+                                ]
+                            ];
                         }
                     }
-                    end:;
                 }
             }
         }

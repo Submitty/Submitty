@@ -7,6 +7,8 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+import json
+import urllib.parse
 
 from . import INSTALL_DIR, DATA_DIR
 
@@ -155,4 +157,63 @@ class DeleteLichenResult(CourseGradeableJob):
             for folder in ['provided_code', 'tokenized', 'concatenated', 'hashes', 'matches']:
                 shutil.rmtree(str(Path(lichen_dir, folder, gradeable)), ignore_errors=True)
             msg = 'Deleted lichen plagiarism results and saved config for {}'.format(gradeable)
-            open_file.write(msg)
+            open_file.write(msg) 
+
+class BulkQRSplit(CourseJob):
+    required_keys = CourseJob.required_keys + ['timestamp', 'g_id']
+    def run_job(self):
+        semester = self.job_details['semester']
+        course = self.job_details['course']
+        timestamp = self.job_details['timestamp']
+        gradeable_id = self.job_details['g_id']
+
+        qr_prefix = urllib.parse.unquote(self.job_details['qr_prefix'])
+        qr_suffix = urllib.parse.unquote(self.job_details['qr_suffix'])
+
+        qr_script = Path(INSTALL_DIR, 'sbin', 'bulk_qr_split.py')
+        #create paths
+        try:
+            with open("/usr/local/submitty/config/submitty.json", encoding='utf-8') as data_file:
+                CONFIG = json.loads(data_file.read())
+
+            current_path = os.path.dirname(os.path.realpath(__file__))
+            uploads_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads")
+            bulk_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads/bulk_pdf",gradeable_id,timestamp)
+            split_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads/split_pdf",gradeable_id,timestamp)
+        except Exception as err:
+            print("Failed while parsing args and creating paths")
+            print(err)
+            sys.exit(1)
+
+        #copy files over to correct folders
+        try:
+            if not os.path.exists(split_path):
+                os.makedirs(split_path)
+
+            # copy over files to new directory
+            for filename in os.listdir(bulk_path):
+                shutil.copyfile(os.path.join(bulk_path, filename), os.path.join(split_path, filename))
+
+            # move to copy folder
+            os.chdir(split_path)
+        except Exception as err:
+             #cleanup
+            if os.path.exists(split_path):
+                shutil.rmtree(split_path)
+            print("Failed while copying files")
+            print(err)
+            sys.exit(1)
+
+        try:
+            for filename in os.listdir(bulk_path):
+                subprocess.call([str(qr_script), filename, split_path, qr_prefix, qr_suffix])
+
+            for filename in os.listdir(bulk_path):
+                os.remove(filename)
+
+            os.chdir(current_path)
+        except Exception as err:
+            print("Failed to launch bulk_qr_split subprocess!")
+            print(err)
+            sys.exit(1)
+        
