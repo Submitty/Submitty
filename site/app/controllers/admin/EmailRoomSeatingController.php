@@ -23,8 +23,7 @@ Seat: {$exam_seat}
 
 Please email your instructor with any questions or concerns.';
 
-
-	public function __construct(Core $core) {
+ public function __construct(Core $core) {
         parent::__construct($core);
     }
 
@@ -62,13 +61,20 @@ Please email your instructor with any questions or concerns.';
 		        	$seating_assignment_data = FileUtils::readJsonFile($seatingAssignmentFile->getPathname());
 
 		        	$email_data = [
-		                "subject" => $this->replaceSeatingAssignmentDataPlaceholders($seating_assignment_subject, $seating_assignment_data),
-		                "body" => $this->replaceSeatingAssignmentDataPlaceholders($seating_assignment_body, $seating_assignment_data)
+		                "subject" => $this->replaceSeatingAssignmentMessagePlaceholders($seating_assignment_subject, $seating_assignment_data),
+		                "body" => $this->replaceSeatingAssignmentMessagePlaceholders($seating_assignment_body, $seating_assignment_data)
 		            ];
 
-		            $recipient = $seatingAssignmentFile->getBasename('.json');
 
-		        	$this->core->getQueries()->createEmail($email_data, $recipient);
+							$recipient_id = $seatingAssignmentFile->getBasename('.json');
+							$recipient = $this->core->getQueries()->getSubmittyUser($recipient_id);
+
+							if($recipient == null || $this->core->getQueries()->hasDroppedCourse($recipient_id)){
+								continue;
+							}
+
+							$this->core->getQueries()->createEmail($email_data, $recipient->getEmail());
+
 	        	}
 	    	}
 				$this->core->addSuccessMessage("Seating assignments have been sucessfully emailed!");
@@ -80,18 +86,33 @@ Please email your instructor with any questions or concerns.';
 
 	}
 
-	private function replaceSeatingAssignmentDataPlaceholders($seatingAssignmentMessage, $seatingAssignmentData) {
+	private function replaceSeatingAssignmentMessagePlaceholders($seatingAssignmentMessage, $seatingAssignmentData) {
+		if(array_key_exists("gradeable", $seatingAssignmentData)){
+			$seatingAssignmentMessage = str_replace('{$gradeable_id}', $seatingAssignmentData["gradeable"], $seatingAssignmentMessage);
+		}
+		if(array_key_exists("date", $seatingAssignmentData)){
+			$seatingAssignmentMessage = str_replace('{$exam_date}', $seatingAssignmentData["date"], $seatingAssignmentMessage);
+		}
+		if(array_key_exists("time", $seatingAssignmentData)){
+			$seatingAssignmentMessage = str_replace('{$exam_time}', $seatingAssignmentData["time"], $seatingAssignmentMessage);
+		}
+		if(array_key_exists("building", $seatingAssignmentData)){
+			$seatingAssignmentMessage = str_replace('{$exam_building}', $seatingAssignmentData["building"], $seatingAssignmentMessage);
+		}
+		if(array_key_exists("room", $seatingAssignmentData)){
+			$seatingAssignmentMessage = str_replace('{$exam_room}', $seatingAssignmentData["room"], $seatingAssignmentMessage);
+		}
+		if(array_key_exists("zone", $seatingAssignmentData)){
+			$seatingAssignmentMessage = str_replace('{$exam_zone}', $seatingAssignmentData["zone"], $seatingAssignmentMessage);
+		}
+		if(array_key_exists("row", $seatingAssignmentData)){
+			$seatingAssignmentMessage = str_replace('{$exam_row}', $seatingAssignmentData["row"], $seatingAssignmentMessage);
+		}
+		if(array_key_exists("seat", $seatingAssignmentData)){
+			$seatingAssignmentMessage = str_replace('{$exam_seat}', $seatingAssignmentData["seat"], $seatingAssignmentMessage);
+		}
 
-		$seatingAssignmentMessage = str_replace('{$gradeable_id}', $seatingAssignmentData["gradeable"], $seatingAssignmentMessage);
 		$seatingAssignmentMessage = str_replace('{$course_name}', $this->core->getConfig()->getCourse(), $seatingAssignmentMessage);
-		$seatingAssignmentMessage = str_replace('{$exam_date}', $seatingAssignmentData["date"], $seatingAssignmentMessage);
-		$seatingAssignmentMessage = str_replace('{$exam_time}', $seatingAssignmentData["time"], $seatingAssignmentMessage);
-		$seatingAssignmentMessage = str_replace('{$exam_building}', $seatingAssignmentData["building"], $seatingAssignmentMessage);
-		$seatingAssignmentMessage = str_replace('{$exam_room}', $seatingAssignmentData["room"], $seatingAssignmentMessage);
-		$seatingAssignmentMessage = str_replace('{$exam_zone}', $seatingAssignmentData["zone"], $seatingAssignmentMessage);
-		$seatingAssignmentMessage = str_replace('{$exam_row}', $seatingAssignmentData["row"], $seatingAssignmentMessage);
-		$seatingAssignmentMessage = str_replace('{$exam_seat}', $seatingAssignmentData["seat"], $seatingAssignmentMessage);
-
 		return $seatingAssignmentMessage;
 	}
 

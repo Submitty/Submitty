@@ -296,8 +296,8 @@ class DatabaseQueries {
         $values = implode(', ', array_fill(0, count($results)+1, '?'));
         $keys = implode(', ', array_keys($results));
         $updates = '';
-        
-        foreach($results as $key => $value) { 
+
+        foreach($results as $key => $value) {
             if($value != 'false') {
                 $results[$key] = 'true';
             }
@@ -311,8 +311,8 @@ class DatabaseQueries {
                                     VALUES
                                      (
                                         $values
-                                     ) 
-                                    ON CONFLICT (user_id) 
+                                     )
+                                    ON CONFLICT (user_id)
                                     DO
                                      UPDATE
                                         SET $updates", $test);
@@ -2734,12 +2734,12 @@ AND gc_id IN (
         if($notification->getNotifyNotToSource()){
             $not_send_users[] = $notification->getNotifySource();
         }
-        
+
         $restrict = count($not_send_users);
         if($restrict > 0) {
         	$ignore_self_query = "WHERE user_id NOT IN (" . implode(',', array_fill(0, $restrict, '?')) . ')';
         }
-        
+
         $column = '';
         if($type === 'reply') {
         	$post_thread_id = json_decode($params[1], true)[0]['thread_id'];
@@ -3554,7 +3554,9 @@ AND gc_id IN (
             $graded_component->getComment(),
             $graded_component->getGraderId(),
             $graded_component->getGradedVersion(),
-            DateUtils::dateTimeToString($graded_component->getGradeTime())
+            DateUtils::dateTimeToString($graded_component->getGradeTime()),
+            $graded_component->getVerifierId() !== '' ? $graded_component->getVerifierId() : null,
+            !is_null($graded_component->getVerifyTime()) ? DateUtils::dateTimeToString($graded_component->getVerifyTime()) : null
         ];
         $query = "
             INSERT INTO gradeable_component_data(
@@ -3564,8 +3566,10 @@ AND gc_id IN (
               gcd_component_comment,
               gcd_grader_id,
               gcd_graded_version,
-              gcd_grade_time)
-            VALUES(?, ?, ?, ?, ?, ?, ?)";
+              gcd_grade_time,
+              gcd_verifier_id,
+              gcd_verify_time)
+            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $this->course_db->query($query, $param);
     }
 
@@ -3582,6 +3586,8 @@ AND gc_id IN (
                     $graded_component->getGradedVersion(),
                     DateUtils::dateTimeToString($graded_component->getGradeTime()),
                     $graded_component->getGraderId(),
+                    $graded_component->getVerifierId() !== '' ? $graded_component->getVerifierId() : null,
+                    !is_null($graded_component->getVerifyTime()) ? DateUtils::dateTimeToString($graded_component->getVerifyTime()) : null,
                     $graded_component->getTaGradedGradeable()->getId(),
                     $graded_component->getComponentId()
                 ];
@@ -3591,7 +3597,9 @@ AND gc_id IN (
                       gcd_component_comment=?,
                       gcd_graded_version=?,
                       gcd_grade_time=?,
-                      gcd_grader_id=?
+                      gcd_grader_id=?,
+                      gcd_verifier_id=?,
+                      gcd_verify_time = ?
                     WHERE gd_id=? AND gc_id=?";
             }
             else {
@@ -3765,7 +3773,16 @@ AND gc_id IN (
     }
 
     /**
-     * Gets a list of emails for all active particpants in a course  
+      * Retruns true if a given student has a null registration for a course_email
+      *@param $user_id associated user id of the given user
+      */
+    public function hasDroppedCourse($user_id){
+      $this->course_db->query('SELECT registration_section from users WHERE user_id=?', [$user_id]);
+      return $this->course_db->row()['registration_section'] == null;
+    }
+
+    /**
+     * Gets a list of emails for all active particpants in a course
      */
     public function getClassEmailList(){
         $parameters = array();
@@ -3773,12 +3790,12 @@ AND gc_id IN (
 
         return $this->course_db->rows();
     }
-    
+
     /**
      * Queues an email to be sent by email job
      * @param array $email_data
-     * @param string $recipient  
-     */ 
+     * @param string $recipient
+     */
     public function createEmail($email_data, $recipient){
         $parameters = array($recipient, $email_data["subject"], $email_data["body"]);
 

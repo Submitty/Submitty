@@ -3,16 +3,19 @@
 [Matthew Peveler](http://mpeveler.com/)  
 
 ## Developers
-John (Jack) Hulton 2018-current  
+
+Matthew Garber 2019-current  
+Matthew Raneri 2019-current  
+Thomas Shweh 2019-current  
+Kasra Sheik 2018-current  
+Ryan Waddell 2018-current  
+Victor Li 2018-current  
+Eric Tran 2018-current  
 Kevin Mackenzie 2018-current  
-Victor Nazzaro 2018-current  
-Joanna Ng 2018-current  
-Nick Roper 2018-current  
 Glenn Smith 2018-current  
-Tushar Gurjar 2018-current, Google Summer of Code 2018  
-Gagan Kumar  2018-current, Google Summer of Code 2018  
 Andrew Aikens 2017-current  
-Timothy Cyrus 2017-current  
+Shail Patel 2018-current  
+Leon Montealegre 2017-current  
 Buster Holzbauer 2017-current  
 Evan Maicus 2016-current  
 Ana Milanova 2016-current  
@@ -20,9 +23,14 @@ Steven Lindsey 2014-current
 Peter Bailie 2014-current  
 David Goldschmidt 2014-current  
 Konstantin Kuzmin 2018-current  
-Rylan O'Connell 2018-current  
-Shail Patel 2018-current  
-Leon Montealegre 2017-current  
+John (Jack) Hulton 2018  
+Victor Nazzaro 2018  
+Joanna Ng 2018  
+Nick Roper 2018  
+Tushar Gurjar 2018-current, Google Summer of Code 2018  
+Gagan Kumar  2018-current, Google Summer of Code 2018  
+Timothy Cyrus 2017-2018  
+Rylan O'Connell 2018  
 Salles Viana Gomes de Magalhaes 2018  
 Alex Belsten 2018  
 Richard Collins 2018  
@@ -65,4 +73,4 @@ Aidan Noll
 Toshi Piazza  
 Matt Raneri  
 Zachary Wimer  
-For their bug reports of specific security vulnerabilities :)
+For their bug reports of specific security vulnerabilities :)  

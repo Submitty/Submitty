@@ -338,9 +338,17 @@ class ElectronicGraderView extends AbstractView {
             foreach ($gradeable->getComponents() as $component) {
                 $graded_component = $row->getOrCreateTaGradedGradeable()->getGradedComponent($component);
                 if ($graded_component === null) {
+                    //not graded
                     $info["graded_groups"][] = "NULL";
-                } else {
+                } else if(!$graded_component->getVerifier()){
+                    //no verifier exists, show the grader group
                     $info["graded_groups"][] = $graded_component->getGrader()->getGroup();
+                } else if($graded_component->getGrader()->accessFullGrading()){
+                    //verifier exists and original grader is full access, show verifier grader group
+                    $info["graded_groups"][] = $graded_component->getVerifier()->getGroup();
+                } else{
+                    //verifier exists and limited access grader, change the group to show semicircle on the details page
+                    $info["graded_groups"][] = "verified";
                 }
             }
 
@@ -426,7 +434,6 @@ class ElectronicGraderView extends AbstractView {
                 "team_edit_onclick" => "adminTeamForm(false, '{$team->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, [], [],{$gradeable->getTeamSizeMax()});"
             ];
         }
-
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
             "gradeable" => $gradeable,
             "sections" => $sections,
@@ -677,7 +684,6 @@ class ElectronicGraderView extends AbstractView {
         $this->core->getOutput()->addInternalJs('ta-grading-rubric-conflict.js');
         $this->core->getOutput()->addInternalJs('ta-grading-rubric.js');
         $this->core->getOutput()->addInternalJs('gradeable.js');
-
         $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/RubricPanel.twig", [
             "gradeable_id" => $gradeable->getId(),
             "is_ta_grading" => $gradeable->isTaGrading(),
