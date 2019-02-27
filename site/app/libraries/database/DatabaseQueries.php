@@ -2570,7 +2570,7 @@ AND gc_id IN (
     public function getPostsForThread($current_user, $thread_id, $show_deleted = false, $option = "tree", $filterOnUser = NULL){
       $query_delete = $show_deleted?"true":"deleted = false";
       $query_filter_on_user = '';
-      $param_list = array($thread_id);
+      $param_list = array();
       if(!empty($filterOnUser)) {
         $query_filter_on_user = ' and author_user_id = ? ';
         $param_list[] = $filterOnUser;
@@ -2585,6 +2585,7 @@ AND gc_id IN (
             return array();
         }
       }
+      $param_list[] = $thread_id;
       $history_query = "LEFT JOIN forum_posts_history fph ON (fph.post_id is NULL OR (fph.post_id = posts.id and NOT EXISTS (SELECT 1 from forum_posts_history WHERE post_id = fph.post_id and edit_timestamp > fph.edit_timestamp )))";
       if($option == 'alpha'){
         $this->course_db->query("SELECT posts.*, fph.edit_timestamp, users.user_lastname FROM posts INNER JOIN users ON posts.author_user_id=users.user_id {$history_query} WHERE thread_id=? AND {$query_delete} ORDER BY user_lastname, posts.timestamp;", array($thread_id));
@@ -2593,6 +2594,7 @@ AND gc_id IN (
       }
 
       $result_rows = $this->course_db->rows();
+
       if(count($result_rows) > 0){
         $this->course_db->query("INSERT INTO viewed_responses(thread_id,user_id,timestamp) SELECT ?, ?, current_timestamp WHERE NOT EXISTS (SELECT 1 FROM viewed_responses WHERE thread_id=? AND user_id=?)", array($thread_id, $current_user, $thread_id, $current_user));
       }
