@@ -1082,8 +1082,7 @@ table .instructor .two-options{
 }
 
 #sidebar.collapsed #nav-buttons ul li .nav-row .fa{
-    padding: 0.5px 15px;
-    font-size: 20px;
+    padding: 0.5px 17.5px;
 }
 
 
@@ -1203,6 +1202,7 @@ table .instructor .two-options{
 
 #sidebar.collapsed #nav-buttons ul li.short-line {
     margin-left: -30px;
+    width: 100px
 }
 
 #nav-buttons ul li.heading {
