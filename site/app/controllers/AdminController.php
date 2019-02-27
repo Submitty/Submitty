@@ -11,7 +11,6 @@ use app\controllers\admin\UsersController;
 use app\controllers\admin\LateController;
 use app\controllers\admin\PlagiarismController;
 use app\controllers\admin\WrapperController;
-use app\controllers\admin\EmailRoomSeatingController;
 use app\libraries\Core;
 use app\libraries\Output;
 use app\models\User;
@@ -51,10 +50,6 @@ class AdminController extends AbstractController {
             case 'wrapper':
                 $this->core->getOutput()->addBreadcrumb("Customize Website Theme");
                 $controller = new WrapperController($this->core);
-                break;
-            case 'email_room_seating':
-                $this->core->getOutput()->addBreadcrumb("Email Room Seating");
-                $controller = new EmailRoomSeatingController($this->core);
                 break;
             default:
                 $this->core->getOutput()->showError("Invalid page request for controller ".get_class($this));
