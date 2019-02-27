@@ -40,53 +40,56 @@
         {{ action == 'edit' ? 'readonly' : 'required' }} />
 
 <br />
+<fieldset>
+    <legend>
+        {% if action == 'new' or action == 'template' %}
+            <!-- Gradeable Type radio buttons (readonly in edit mode) -->
+            What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">type of the gradeable</a>?:
 
-{% if action == 'new' or action == 'template' %}
-    <!-- Gradeable Type radio buttons (readonly in edit mode) -->
-    What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">type of the gradeable</a>?:
+            <span id="required_type" >(Required)</span>
+        {% else %}
+            Gradeable type: <span id="gradeable-type-string">{{ type_string }}</span>
+            <br />
+        {% endif %}
+    </legend>
+    <div>
+        <div id="gradeable_type_container" {{ action == 'edit' ? 'hidden' : '' }}>
+            <div>
+                <input type='radio' id="radio_checkpoints" name="type" value="Checkpoints"
+                    {{ action != 'new' and gradeable.getType() == 1 ? 'checked' : '' }}> {{ gradeable_type_strings['checkpoint'] }}
+            </div>
 
-    <span id="required_type" >(Required)</span>
-{% else %}
-    Gradeable type: <span id="gradeable-type-string">{{ type_string }}</span>
-    <br />
-{% endif %}
-<div>
-    <div id="gradeable_type_container" {{ action == 'edit' ? 'hidden' : '' }}>
-        <div>
-            <input type='radio' id="radio_checkpoints" name="type" value="Checkpoints"
-                {{ action != 'new' and gradeable.getType() == 1 ? 'checked' : '' }}> {{ gradeable_type_strings['checkpoint'] }}
-        </div>
+            <div>
+                <input type='radio' id="radio_numeric" name="type" value="Numeric"
+                    {{ action != 'new' and gradeable.getType() == 2 ? 'checked' : '' }}> {{ gradeable_type_strings['numeric'] }}
+            </div>
 
-        <div>
-            <input type='radio' id="radio_numeric" name="type" value="Numeric"
-                {{ action != 'new' and gradeable.getType() == 2 ? 'checked' : '' }}> {{ gradeable_type_strings['numeric'] }}
-        </div>
+            <div hidden>
+                <input type='radio' id="radio_electronic_file" name="type" value="Electronic File"
+                        {{ action != 'new' and gradeable.getType() == 0 ? 'checked' : '' }}> Electronic File (multiple types)
+            </div>
 
-        <div hidden>
-            <input type='radio' id="radio_electronic_file" name="type" value="Electronic File"
-                    {{ action != 'new' and gradeable.getType() == 0 ? 'checked' : '' }}> Electronic File (multiple types)
-        </div>
+            {# Real input fields to back the exposed configurations options #}
+            <input name="scanned_exam" value="{{ action != 'new' and gradeable.isScannedExam() ? 'true' : 'false' }}" hidden>
+            <input name="vcs" value="{{ action != 'new' and gradeable.isVcs() ? 'true' : 'false' }}" hidden>
 
-        {# Real input fields to back the exposed configurations options #}
-        <input name="scanned_exam" value="{{ action != 'new' and gradeable.isScannedExam() ? 'true' : 'false' }}" hidden>
-        <input name="vcs" value="{{ action != 'new' and gradeable.isVcs() ? 'true' : 'false' }}" hidden>
+            <div>
+                <input class="ignore" type="radio" id="radio_ef_student_upload" name="electronic_gradeable_presets" value="normal"
+                        {{ action != 'new' and not gradeable.isScannedExam() and not gradeable.isVcs() ? 'checked' : ''}}> {{ gradeable_type_strings['electronic_hw'] }}
+            </div>
 
-        <div>
-            <input class="ignore" type="radio" id="radio_ef_student_upload" name="electronic_gradeable_presets" value="normal"
-                    {{ action != 'new' and not gradeable.isScannedExam() and not gradeable.isVcs() ? 'checked' : ''}}> {{ gradeable_type_strings['electronic_hw'] }}
-        </div>
+            <div>
+                <input class="ignore" type="radio" id="radio_ef_vcs_upload" name="electronic_gradeable_presets" value="vcs"
+                        {{ action != 'new' and not gradeable.isScannedExam() and gradeable.isVcs() ? 'checked' : ''}}> {{ gradeable_type_strings['electronic_hw_vcs'] }}
+            </div>
 
-        <div>
-            <input class="ignore" type="radio" id="radio_ef_vcs_upload" name="electronic_gradeable_presets" value="vcs"
-                    {{ action != 'new' and not gradeable.isScannedExam() and gradeable.isVcs() ? 'checked' : ''}}> {{ gradeable_type_strings['electronic_hw_vcs'] }}
-        </div>
-
-        <div>
-            <input class="ignore" type="radio" id="radio_ef_scanned_exam" name="electronic_gradeable_presets" value="scanned_exam"
-                    {{ action != 'new' and gradeable.isScannedExam() ? 'checked' : '' }}> {{ gradeable_type_strings['electronic_exam'] }}
+            <div>
+                <input class="ignore" type="radio" id="radio_ef_scanned_exam" name="electronic_gradeable_presets" value="scanned_exam"
+                        {{ action != 'new' and gradeable.isScannedExam() ? 'checked' : '' }}> {{ gradeable_type_strings['electronic_exam'] }}
+            </div>
         </div>
     </div>
-</div>
+</fieldset>
 
 <!-- This is only relevant to Electronic Files -->
 <fieldset class="gradeable_type_options electronic_file" id="electronic_file">
