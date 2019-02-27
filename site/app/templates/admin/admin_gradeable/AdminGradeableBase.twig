@@ -81,13 +81,18 @@
                 $(this).hide();
             }
             else {
-                $(this).attr('style', '{{ action != 'edit' ? 'background-color: #F0F0F0; cursor: default;' : 'background-color: #999999;' }}');
+
+                $(this).addClass("{{ action != 'edit' ? "disabled-btn" : "normal-btn" }}")
             }
         });
 
         $('.page-content').hide();
         $('#page_' + tab + '_content').show();
-        $('#page_' + tab + '_nav').attr('style', 'background-color: green');
+        for (var i =0 ; i<5 ;i++)
+        {
+            $('#page_' + i + '_nav').removeClass('active-btn');
+        }
+        $('#page_' + tab + '_nav').addClass('active-btn');
     }
 
     function updateNavItemsStatus() {

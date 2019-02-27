@@ -546,13 +546,13 @@ class SubmissionController extends AbstractController {
         // Open a cURL connection
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        $qr_prefix = $_POST['qr_prefix'];
-
+        $qr_prefix = rawurlencode($_POST['qr_prefix']);
+        $qr_suffix = rawurlencode($_POST['qr_suffix']);
         $ch = curl_init();
         if($_POST['use_qr_codes'] === "false"){
             curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."pdf_check.cgi?&num={$num_pages}&sem={$semester}&course={$course}&g_id={$gradeable_id}&ver={$current_time}");
         }else{
-            curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."pdf_check_qr.cgi?&sem={$semester}&course={$course}&g_id={$gradeable_id}&ver={$current_time}&qr_prefix={$qr_prefix}");
+            curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."pdf_check_qr.cgi?&sem={$semester}&course={$course}&g_id={$gradeable_id}&ver={$current_time}&qr_prefix={$qr_prefix}&qr_suffix={$qr_suffix}");
         }
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $output = curl_exec($ch);
@@ -786,13 +786,17 @@ class SubmissionController extends AbstractController {
         if (!@file_put_contents(FileUtils::joinPaths($version_path, ".submit.timestamp"), $current_time_string_tz."\n")) {
             return $this->uploadResult("Failed to save timestamp file for this submission.", false);
         }
-        $upload_time_string_tz = $timestamp . " " . $this->core->getConfig()->getTimezone()->getName() . "\n";
-       
-        $bulk_upload_data_json = array("submit_timestamp" =>  $current_time_string_tz,
-                                       "upload_timestamp" =>  $upload_time_string_tz,
-                                       "filepath" => $uploaded_file);
+
+        $upload_time_string_tz = $timestamp . " " . $this->core->getConfig()->getTimezone()->getName();
         
-        if (!@file_put_contents(FileUtils::joinPaths($version_path, "bulk_upload_data.json"), serialize($bulk_upload_data_json)."\n")) {
+        $bulk_upload_data = [
+            "submit_timestamp" =>  $current_time_string_tz,
+            "upload_timestamp" =>  $upload_time_string_tz,
+            "filepath" => $uploaded_file
+        ];
+
+        #writeJsonFile returns false on failure.
+        if (FileUtils::writeJsonFile(FileUtils::joinPaths($version_path, "bulk_upload_data.json"), $bulk_upload_data) === false) {
             return $this->uploadResult("Failed to create bulk upload file for this submission.", false);
         }
         
@@ -879,7 +883,17 @@ class SubmissionController extends AbstractController {
         $timestamp_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
             $gradeable->getId(), $timestamp);
         $files = FileUtils::getAllFiles($timestamp_path);
-        if (count($files) == 0 || (count($files) == 1 && array_key_exists('decoded.json', $files)  )) {
+        
+        //check if there are any pdfs left to assign to students, otherwise delete the folder
+        $any_pdfs_left = false;
+        foreach ($files as $file){
+            if(strpos($file['name'], ".pdf") !== false){
+                $any_pdfs_left = true;
+                break;
+            }
+        }
+
+        if (count($files) == 0 || !$any_pdfs_left   ) {
             if (!FileUtils::recursiveRmdir($timestamp_path)) {
                 return $this->uploadResult("Failed to remove the empty timestamp directory {$timestamp} from the split_pdf directory.", false);
             }
