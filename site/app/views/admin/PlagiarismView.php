@@ -288,7 +288,7 @@ HTML;
 
                                 //var top = editor1.charCoords(marker_linedata.from.line).top;
 
-                                //editor1.scrollIntoView(marker_linedata.from);
+                                editor1.scrollIntoView(marker_linedata.to);
                                 // 
                                 
                             }
