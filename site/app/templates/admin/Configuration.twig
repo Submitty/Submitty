@@ -209,7 +209,6 @@
                 <label for="room_seating_gradeable_id">
                     <div class="option-title">Display Room Seating Guide</div>
                     <div class="option-alt">Pick a gradeable for which seating will be shown to students. Select --None-- to hide seating guide.</div>
-                     <div class="option-alt" style="margin-top: 15px" id="email_seating_assignment_label">Customize an email to send to each students.</div>
                 </label>
             </div>
             <div class="option-input col-md-4">
@@ -220,9 +219,7 @@
                         </option>
                     {% endfor %}
                 </select>
-                 <a href="{{ email_room_seating_url }}" class="btn btn-primary" id="email_seating_assignment" style="margin-top: 25px">Email Seating Assignments</a>
             </div>
-
         </div>
 
         <div class="option row">
@@ -237,43 +234,3 @@
 
     </div>
 </div>
-
-{% include 'admin/EmailSeatingAssignments.twig' %}
-
-
-<script type="text/javascript">
-
-
-    function showEmailSeatingOption() {
-        $('#email_seating_assignment').show();
-        $('#email_seating_assignment_label').show();
-    }
-
-    function hideEmailSeatingOption() {
-        $('#email_seating_assignment').hide();
-        $('#email_seating_assignment_label').hide();
-    }
-
-
-
-    var selected_seating_gradeable = $('#room_seating_gradeable_id').val();
-    if(!selected_seating_gradeable) {
-       hideEmailSeatingOption();
-    }
-
-    $(document).ready(function() {
-
-         $(document).on('change', '#room_seating_gradeable_id', function(){
-             var selected_seating_gradeable = $('#room_seating_gradeable_id').val();
-
-             if(!selected_seating_gradeable){
-                 hideEmailSeatingOption();
-             }
-             else{
-                showEmailSeatingOption();
-            }
-        });
-
-     });
-
-</script>
