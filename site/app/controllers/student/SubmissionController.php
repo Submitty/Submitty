@@ -129,6 +129,7 @@ class SubmissionController extends AbstractController {
 
         try {
             $this->core->getQueries()->insertNewRegradeRequest($graded_gradeable, $user, $content);
+            $this->createRegradeRequestNotification($graded_gradeable, $user, $content);
             $this->core->getOutput()->renderJsonSuccess();
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
@@ -259,6 +260,30 @@ class SubmissionController extends AbstractController {
         }
     }
 
+    private function createRegradeRequestNotification($graded_gradeable, $user, $content) {
+        $course = $this->core->getConfig()->getCourse();
+        $gradeable_name = $graded_gradeable->getGradeable()->getName();
+
+        $notification_subject = "[Submitty $course] New Regrade Request";
+        $notification_body = "A student has submitted a grade inquiry for gradeable $gradeable_name.\nStudent writes:\n $content";
+
+        $regrade_email_data = [
+          "subject" => $notification_subject,
+          "body" => $notification_body
+        ];
+
+        //for now, we don't have a way to capture grader by component.. just grab all graders associated with the gradeable
+        if($graded_gradeable->hasTaGradingInfo()){
+          $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+          $graders = $ta_graded_gradeable->getGraders();
+
+          foreach($graders as $grader){
+            $grader_email = $grader->getEmail();
+            $this->core->getQueries()->createEmail($regrade_email_data, $grader_email);
+          }
+        }
+
+    }
     private function showHomeworkPage() {
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
@@ -402,7 +427,7 @@ class SubmissionController extends AbstractController {
         //     $return = array('success' => false, 'message' => $msg);
         //     $this->core->getOutput()->renderJson($return);
         //     return $return;
-        // } else 
+        // } else
 
         //If the users are on multiple teams.
         if (count($graded_gradeables) > 1) {
@@ -537,7 +562,7 @@ class SubmissionController extends AbstractController {
                 if (!@unlink($uploaded_file["tmp_name"][$j])) {
                     return $this->uploadResult("Failed to delete the uploaded file {$uploaded_file["name"][$j]} from temporary storage.", false);
                 }
-            } 
+            }
         }
 
         // use pdf_check.cgi to check that # of pages is valid and split
@@ -788,7 +813,7 @@ class SubmissionController extends AbstractController {
         }
 
         $upload_time_string_tz = $timestamp . " " . $this->core->getConfig()->getTimezone()->getName();
-        
+
         $bulk_upload_data = [
             "submit_timestamp" =>  $current_time_string_tz,
             "upload_timestamp" =>  $upload_time_string_tz,
@@ -799,7 +824,7 @@ class SubmissionController extends AbstractController {
         if (FileUtils::writeJsonFile(FileUtils::joinPaths($version_path, "bulk_upload_data.json"), $bulk_upload_data) === false) {
             return $this->uploadResult("Failed to create bulk upload file for this submission.", false);
         }
-        
+
         $queue_file = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
             $gradeable->getId(), $who_id, $new_version);
         $queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_queue",
@@ -883,7 +908,7 @@ class SubmissionController extends AbstractController {
         $timestamp_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
             $gradeable->getId(), $timestamp);
         $files = FileUtils::getAllFiles($timestamp_path);
-        
+
         //check if there are any pdfs left to assign to students, otherwise delete the folder
         $any_pdfs_left = false;
         foreach ($files as $file){
