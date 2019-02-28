@@ -120,6 +120,13 @@
                 cont1.show();
             }
         });
+        flatpickr(".date_picker", {
+            allowInput: true,
+            enableTime: true,
+            enableSeconds: true,
+            time_24hr: true,
+            dateFormat: "Y-m-d H:i:S",
+        });
     });
 
 </script>

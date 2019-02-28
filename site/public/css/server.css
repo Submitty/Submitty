@@ -1546,6 +1546,17 @@ end of styles used in the admin gradeable page
     1px 1px 0 #000;
 }
 
+/* color for limited access graders who were verifed */
+.grader-verified{
+                                        /* yellow       green   */
+    background: linear-gradient(to right, #ffcc33 50%, #33cc33 50%);
+    background-clip : text;
+    color: transparent;
+    /* chrome & safari */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
 /* color for student/peer grading */
 .grader-4 {
     color: #cc66ff; /* purple */
@@ -1577,10 +1588,15 @@ end of styles used in the admin gradeable page
     color: red;
 }
 
-.required::-webkit-input-placeholder { color: red; }
-.required:-moz-placeholder { color: red; }
-.required::-moz-placeholder { color: red; }
-.required:-ms-input-placeholder { color: red; }
+.required::-webkit-input-placeholder { color: #cc0000; }
+.required:-moz-placeholder { color: #cc0000; }
+.required::-moz-placeholder { color: #cc0000; }
+.required:-ms-input-placeholder { color: #cc0000; }
+
+#required_type{
+    color: #cc0000;
+    display: inline;
+}
 
 .modal{
     display: none;
@@ -1710,17 +1726,33 @@ end of styles used in the admin gradeable page
     margin-bottom: 3px;
 }
 
-.noscript {
+.noscript,
+.system_message {
     width: 100%;
-    text-align: center;
-    background: #f2dede;
-    color: #b94a48;
     height: 2em;
 }
 
-.noscript span {
+.system_message {
+    background: #fff3cd;
+    color: #856404;
+    height: 2em;
+}
+
+.noscript {
+    background: #f2dede;
+    color: #b94a48;
+}
+
+.noscript span,
+.system_message span {
     text-align: center;
     margin: auto;
     font-size: 1.5em;
     font-weight: bold;
+}
+
+.scrollable-image{
+    overflow: auto; 
+    width: 100%;
+    max-height: 300px;
 }
