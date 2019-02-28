@@ -448,7 +448,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                                 var element = data.ci[users_color][pos];
                                 console.log(element[5]);
                                 console.log(element[6]);
-                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; background: " + element[4]});   
+                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_prev_color": element[4], "data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; background: " + element[4]});   
                             }
                         }
                         $('.CodeMirror')[0].CodeMirror.refresh();
