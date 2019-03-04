@@ -108,22 +108,6 @@
         <li class="short-line"></li>
     {% else %}
         <li>
-            {% if button.getIcon() != null %}
-                <a
-                    class="collapse-icon {{ button.getClass() }}"
-                    href="{{ button.getHref() }}"
-                    data-toggle="tooltip"
-                    title="{{ button.getTitle() }}"
-                    {% if button.getId() != "" %}
-                        id="{{ button.getId() }}"
-                    {% endif %}
-                >
-                    <i class="fa {{ button.getIcon() }}"></i>
-                    {% if button.getBadge() > 0 %}
-                        <span class="notification_badge">{{  button.getBadge() }} </span>
-                    {% endif %}
-                </a>
-            {% endif %}
             {% if button.getHref() == null %}
                 <span
                     {% if button.getClass() != "" %}
@@ -144,6 +128,8 @@
                 </span>
             {% else %}
                 <a href="{{ button.getHref() }}"
+                    data-toggle="tooltip"
+                    title="{{ button.getTitle() }}"
                     {% if button.getClass() != "" %}
                         class="{{ button.getClass() }}"
                     {% endif %}
@@ -155,11 +141,12 @@
                         <i class="fa {{ button.getIcon() }}"></i>
                     {% endif %}
 
-                    {{ button.getTitle() }}
+                    <span class="iconTitle"> {{ button.getTitle() }} </span>
                     {% if button.getBadge() > 0 %}
                         <span class="notification_badge">{{  button.getBadge() }} </span>
                     {% endif %}
                 </a>
+
             {% endif %}
         </li>
     {% endif %}
