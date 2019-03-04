@@ -5,7 +5,7 @@
     <div class='content gradeable_message'><p>{{ gradeable_message|raw }}</p></div>
 {% endif %}
 
-<div class="content">    
+<div class="content">
     <div class="upperinfo">
         <h1 class="upperinfo-left">New submission for: {{ gradeable_name }}</h1>
         {% if has_due_date %}
@@ -43,10 +43,10 @@
             </div>
             <div class = "sub" id="pdf_submit_button" style="display: none">
                 <div class="sub">
-                    Split by QR code? 
+                    Split by QR code?
                     <input type="checkbox" id="use_qr">
-                    <span id="pages_prompt"># of page(s) per PDF:</span> 
-                    <span id="prefix_prompt">QR code prefix/suffix: 
+                    <span id="pages_prompt"># of page(s) per PDF:</span>
+                    <span id="prefix_prompt">QR code prefix/suffix:
                     <a style="text-decoration:none;" href = "https://submitty.org/instructor/exams#bulk-upload-and-split-with-qr-codes" target="_none">
                         <i title="Bulk Upload QR Help" class="far fa-question-circle"></i>
                     </a>
@@ -383,7 +383,10 @@
             #}
             <script>
                 $("#textbox_{{ index }}").keydown(function(e) {
-                    if(e.keyCode === 9) { // tab was pressed
+                    if (e.which == 27) {  //ESC was pressed
+                        $(this).next().focus();
+                        e.preventDefault();
+                    } else if (!e.shiftKey && e.keyCode == 9) { //ESC was pressed without SHIFT
                         // get caret position/selection
                         var start = this.selectionStart;
                         var end = this.selectionEnd;
@@ -395,13 +398,11 @@
                             + value.substring(end));
                         // put caret at right position again (add one for the tab)
                         this.selectionStart = this.selectionEnd = start + 1;
-                        // prevent the focus lose
+                        // prevent focus loss
                         e.preventDefault();
-                        e.stopPropagation();
-                        return false;
                     }
                 });
-            </script>
+           </script>
         {% endif %}
     </p>
     <br>
