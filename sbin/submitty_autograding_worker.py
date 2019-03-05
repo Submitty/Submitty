@@ -67,8 +67,8 @@ def worker_process(which_machine,address,which_untrusted,my_server):
                 with open(done_queue_file, 'w') as outfile:
                     json.dump(queue_obj, outfile, sort_keys=True, indent=4)        
             except Exception as e:
-                traceback.print_exc()
-                grade_items_logging.log_message(JOB_ID, message="ERROR attempting to unzip graded item: " + which_machine + " " + which_untrusted + " exception: " + traceback.format_exc())
+                grade_items_logging.log_message(JOB_ID, message="ERROR attempting to unzip graded item: " + which_machine + " " + which_untrusted + ". for more details, see traces entry.")
+                grade_items_logging.log_stack_trace(JOB_ID,trace=traceback.format_exc())
                 with contextlib.suppress(FileNotFoundError):
                     os.remove(autograding_zip)
                 with contextlib.suppress(FileNotFoundError):
@@ -179,6 +179,7 @@ def read_autograding_worker_json():
             name = list(name_and_stats.keys())[0]
             stats = name_and_stats[name]
     except Exception as e:
+        grade_items_logging.log_stack_trace(trace=traceback.format_exc())
         raise SystemExit("ERROR loading autograding_worker.json file: {0}".format(e))
     return name, stats
 # ==================================================================================

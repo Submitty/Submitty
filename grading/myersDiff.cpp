@@ -198,7 +198,7 @@ TestResults* ImageDiff_doit(const TestCase &tc, const nlohmann::json& j, int aut
 
   if (access(expected_file.c_str(), F_OK|R_OK ) == -1)
   {
-        return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: The instructor's image was not found. Please notify your instructor")});
+    return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: The instructor's image was not found. Please notify your instructor")});
   }
 
   float acceptable_threshold = stringToFloat(acceptable_threshold_str,6); //window_utils function.
@@ -207,18 +207,46 @@ TestResults* ImageDiff_doit(const TestCase &tc, const nlohmann::json& j, int aut
   actual_file = tc.getPrefix() + actual_file;
   std::cout << "About to compare " << actual_file << " and " << expected_file << std::endl;
 
+  //Check existence. File is closed by destructor.
+  std::ifstream img_file_actual(actual_file);
+  if(!img_file_actual.good()){
+    return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "Image comparison failed; student file does not exist.")});
+  }
+
+  //Check existence. File is closed by destructor.
+  std::ifstream img_file_expected(expected_file);
+  if(!img_file_expected.good()){
+    return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "Image comparison failed; expected file does not exist.")});
+  }
 
   std::string command = "compare -metric RMSE " + actual_file + " " + expected_file + " NULL: 2>&1";
   std::string output = output_of_system_command(command.c_str()); //get the string
   std::cout << "captured the following:\n" << output << "\n" <<std::endl;
 
-  std::vector<float> values = extractFloatsFromString(output); //window_utils function.
-  if(values.size() < 2){
+  std::istringstream buffer(output);
+  //Split on whitespace.
+  std::vector<std::string> strings(std::istream_iterator<std::string>{buffer}, std::istream_iterator<std::string>());
+
+  if(strings.size() < 2){
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "Image comparison failed; Images are incomparable.")});
   }
 
-  float difference = values[1];
-  float similarity = 1 - difference;
+  std::string difference_str = strings[1];
+  std::cout << "The images had a difference of " << difference_str << std::endl;
+
+  //Remove start and end parens.
+  if(difference_str.front() == '('){
+    difference_str.erase(0,1);
+  }
+
+  if(difference_str.back() == ')'){
+    difference_str.pop_back();
+  }
+
+  //convert resulting string to double.
+  std::string::size_type sz;
+  double difference = std::stod(difference_str, &sz);
+  double similarity = 1 - difference;
 
   std::string diff_file_name = tc.getPrefix() + std::to_string(autocheck_number) + "_difference.png";
 

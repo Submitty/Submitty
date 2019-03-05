@@ -131,6 +131,9 @@ class Config extends AbstractModel {
      */
     protected $username_change_text = "";
 
+    /** @property @var string Text shown to all users for system announcement */
+    protected $system_message = '';
+
     /** @property @var array */
     protected $submitty_database_params = array();
 
@@ -246,6 +249,10 @@ class Config extends AbstractModel {
 
         if (isset($submitty_json['username_change_text'])) {
             $this->username_change_text = $submitty_json['username_change_text'];
+        }
+
+        if (isset($submitty_json['system_message'])) {
+            $this->system_message = strval($submitty_json['system_message']);
         }
 
         $this->timezone = new \DateTimeZone($this->timezone);

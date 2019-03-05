@@ -272,33 +272,38 @@ fi
 # JAR SETUP
 #################
 
-pushd /tmp > /dev/null
-
 # -----------------------------------------
 echo "Getting JUnit & Hamcrest..."
 
-mkdir -p ${SUBMITTY_INSTALL_DIR}/JUnit
+mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit
+mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/hamcrest
+mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/emma
+mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/jacoco
 
 if [ ${WORKER} == 0 ]; then
-    chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/JUnit
+    chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/java_tools
 fi
+chmod -R 751 ${SUBMITTY_INSTALL_DIR}/java_tools
 
-chmod 751 ${SUBMITTY_INSTALL_DIR}/JUnit
-cd ${SUBMITTY_INSTALL_DIR}/JUnit
-
+pushd ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit > /dev/null
+rm -rf junit*jar
 wget http://repo1.maven.org/maven2/junit/junit/${JUNIT_VERSION}/junit-${JUNIT_VERSION}.jar -o /dev/null > /dev/null 2>&1
+popd > /dev/null
+
+pushd ${SUBMITTY_INSTALL_DIR}/java_tools/hamcrest > /dev/null
+rm -rf hamcrest*.jar
 wget http://repo1.maven.org/maven2/org/hamcrest/hamcrest-core/${HAMCREST_VERSION}/hamcrest-core-${HAMCREST_VERSION}.jar -o /dev/null > /dev/null 2>&1
+popd > /dev/null
 
 # TODO:  Want to Install JUnit 5.0
 # And maybe also Hamcrest 2.0 (or maybe that piece isn't needed anymore)
-
-popd > /dev/null
 
 
 # EMMA is a tool for computing code coverage of Java programs
 echo "Getting emma..."
 
-pushd ${SUBMITTY_INSTALL_DIR}/JUnit > /dev/null
+
+pushd ${SUBMITTY_INSTALL_DIR}/java_tools/emma > /dev/null
 wget https://github.com/Submitty/emma/archive/${EMMA_VERSION}.zip -O emma-${EMMA_VERSION}.zip -o /dev/null > /dev/null 2>&1
 unzip emma-${EMMA_VERSION}.zip > /dev/null
 mv emma-${EMMA_VERSION}/lib/emma.jar emma.jar
@@ -306,11 +311,12 @@ rm -rf emma-${EMMA_VERSION}*
 chmod o+r . *.jar
 popd > /dev/null
 
-# JaCoCo is a potential replacement for EMMA
+
+# JaCoCo is a replacement for EMMA
 
 echo "Getting JaCoCo..."
 
-pushd ${SUBMITTY_INSTALL_DIR}/JUnit > /dev/null
+pushd ${SUBMITTY_INSTALL_DIR}/java_tools/jacoco > /dev/null
 wget https://github.com/jacoco/jacoco/releases/download/v${JACOCO_VERSION}/jacoco-${JACOCO_VERSION}.zip -o /dev/null > /dev/null 2>&1
 mkdir jacoco-${JACOCO_VERSION}
 unzip jacoco-${JACOCO_VERSION}.zip -d jacoco-${JACOCO_VERSION} > /dev/null
@@ -320,6 +326,8 @@ rm -rf jacoco-${JACOCO_VERSION}
 rm -f jacoco-${JACOCO_VERSION}.zip
 chmod o+r . *.jar
 popd > /dev/null
+
+
 
 
 #################################################################
