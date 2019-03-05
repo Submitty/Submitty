@@ -35,6 +35,6 @@ $$ LANGUAGE plpgsql;""")
 
 
 def down(config, database):
-    database.execute('DROP TRIGGER registration_sync_registration_id;')
+    database.execute('DROP TRIGGER IF EXISTS registration_sync_registration_id ON courses_registration_sections;')
     database.execute('DROP FUNCTION sync_registration_section();')
     database.execute('DROP TABLE courses_registration_sections;')

@@ -55,8 +55,8 @@ $$ LANGUAGE plpgsql;""")
     database.execute("CREATE TRIGGER delete_sync_registration_id BEFORE DELETE ON courses_registration_sections FOR EACH ROW EXECUTE PROCEDURE sync_delete_registration_section();")
 
 def down(config, database):
-    database.execute("DROP TRIGGER IF EXISTS insert_registration_sync_registration_id ON courses_registration_sections;")
-    database.execute("DROP TRIGGER IF EXISTS delete_registration_sync_registration_id ON courses_registration_sections;")
+    database.execute("DROP TRIGGER IF EXISTS insert_sync_registration_id ON courses_registration_sections;")
+    database.execute("DROP TRIGGER IF EXISTS delete_sync_registration_id ON courses_registration_sections;")
     database.execute("DROP FUNCTION IF EXISTS sync_insert_registration_section();")
     database.execute("DROP FUNCTION IF EXISTS sync_delete_registration_section();")
     database.execute("""

@@ -356,10 +356,12 @@ def run_migration(database, migration, environment, args):
         database.session.commit()
 
     status = 1 if args.direction == 'up' else 0
-    if migration['table'] is not None:
-        migration['table'].status = status
-    else:
-        database.session.add(
-            database.migration_table(id=migration['id'], status=status)
-        )
-    database.session.commit()
+    # The migration table may not exist if we rollback the initial migration
+    if database.has_table(database.migration_table.__tablename__):
+        if migration['table'] is not None:
+            migration['table'].status = status
+        else:
+            database.session.add(
+                database.migration_table(id=migration['id'], status=status)
+            )
+        database.session.commit()
