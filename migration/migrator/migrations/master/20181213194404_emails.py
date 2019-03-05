@@ -1,6 +1,5 @@
-def up(config, conn):
-    with conn.cursor() as cursor:
-        cursor.execute("""
+def up(config, database):
+    database.execute("""
 CREATE TABLE IF NOT EXISTS emails (
     id serial NOT NULL PRIMARY KEY,
     recipient  varchar(255) NOT NULL,
@@ -8,6 +7,3 @@ CREATE TABLE IF NOT EXISTS emails (
     body TEXT NOT NULL,
     created TIMESTAMP WITHOUT TIME zone NOT NULL,
     sent TIMESTAMP WITHOUT TIME zone)""")
-        
-def down(config, conn):
-    pass
