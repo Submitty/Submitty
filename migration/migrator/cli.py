@@ -28,7 +28,8 @@ def parse_args():
     )
     parser.add_argument(
         '-e', '--environment', dest='environments',
-        choices=get_environments(), action='append'
+        choices=get_environments(), action='append',
+        required=True
     )
     parser.add_argument(
         '--course', dest='choose_course', nargs=2,

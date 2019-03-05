@@ -297,8 +297,12 @@ def migrate_environment(database, environment, args):
                 if args.single:
                     break
     else:
-        for key in reversed(list(migrations.keys())):
-            if migrations[key]['status'] == 1:
+        migration_list = list(migrations.keys())
+        for key in reversed(migration_list):
+            if key == migration_list[0]:
+                print("  Cannot rollback {}".format(migrations[key]['id']))
+                break
+            elif migrations[key]['status'] == 1:
                 run_migration(database, migrations[key], environment, args)
                 break
 

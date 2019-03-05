@@ -114,6 +114,24 @@ DONE
 
 """, sys.stdout.getvalue())
 
+    def test_cannot_rollback_first_migration(self):
+        environment = 'master'
+        self.setup_test(environment)
+        args = Namespace()
+        args.direction = 'down'
+        args.config = SimpleNamespace()
+        install_path = Path(self.dir, 'migrations', environment)
+        install_path.mkdir(parents=True)
+        args.config.submitty = {
+            'submitty_install_dir': str(install_path)
+        }
+
+        create_migration(self.database, self.dir, environment, '01_test.py', status=1)
+        migrator.main.migrate_environment(self.database, environment, args)
+        self.assertEqual("""Running down migrations for master...  Cannot rollback 01_test
+DONE
+""", sys.stdout.getvalue())
+
 
 if __name__ == '__main__':
     unittest.main()
