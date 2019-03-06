@@ -48,6 +48,16 @@ CREATE TABLE courses (
 );
 
 
+CREATE TABLE emails (
+    id serial NOT NULL,
+    recipient  varchar(255) NOT NULL,
+    subject TEXT NOT NULL,
+    body TEXT NOT NULL,
+    created TIMESTAMP WITHOUT TIME zone NOT NULL,
+    sent TIMESTAMP WITHOUT TIME zone
+);
+
+
 CREATE TABLE mapped_courses (
     semester character varying(255) NOT NULL,
     course character varying(255) NOT NULL,
@@ -131,6 +141,9 @@ CREATE TABLE courses_registration_sections (
 
 ALTER TABLE ONLY courses
     ADD CONSTRAINT courses_pkey PRIMARY KEY (semester, course);
+
+ALTER TABLE ONLY emails
+    ADD CONSTRAINT emails_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY mapped_courses
     ADD CONSTRAINT mapped_courses_pkey PRIMARY KEY (semester, course, registration_section);

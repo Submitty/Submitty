@@ -290,7 +290,6 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
             success = True
         #This is the normal case (still grading on the other end) so we don't need to print anything.
         except FileNotFoundError:
-            grade_items_logging.log_stack_trace(job_id=JOB_ID, trace=traceback.format_exc())
             os.remove(local_results_zip)
             os.remove(local_done_queue_file)
             success = False

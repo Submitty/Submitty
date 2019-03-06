@@ -19,6 +19,8 @@ void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_conf
 
 nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid);
 
+void AddDefaultGraphicsChecks(nlohmann::json &json_graders, const nlohmann::json &testcase);
+
 void AddDefaultGrader(const std::string &command,
                       const std::set<std::string> &files_covered,
                       nlohmann::json& json_graders,
@@ -52,5 +54,7 @@ bool validShowValue(const nlohmann::json& v);
 void validate_mouse_button(nlohmann::json& action);
 
 void validate_integer(nlohmann::json& action, std::string field, bool populate_default, int min_val, int default_value);
+
+void validate_gif_or_screenshot_name(std::string filename);
 
 #endif

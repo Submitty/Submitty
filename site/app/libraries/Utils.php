@@ -168,7 +168,8 @@ class Utils {
     public static function isImage($filename) {
         return (substr($filename,strlen($filename)-4,4) == ".png") ||
             (substr($filename,strlen($filename)-4,4) == ".jpg") ||
-            (substr($filename,strlen($filename)-4,4) == ".jpeg");
+            (substr($filename,strlen($filename)-4,4) == ".jpeg")||
+            (substr($filename,strlen($filename)-4,4) == ".gif");
     }
 
     public static function checkUploadedImageFile($id){
