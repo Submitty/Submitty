@@ -16,11 +16,11 @@ selenium*.jar
 *.out
 *.synctex.gz
 
+/site/vendor/
 /site/config/*
 !/site/config/master_template.ini
 !/site/config/course_template.ini
 
-vendor/
 
 db_update.php
 .setup/data/random_users.txt
