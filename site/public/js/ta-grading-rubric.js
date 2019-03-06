@@ -1722,17 +1722,6 @@ function setCustomMarkError(component_id, show_error) {
     }
 }
 
-/**
- * Sets the 'noscroll' textareas to have the correct height
- */
-function resizeMarkTitleTextareas() {
-    // Make sure textareas resize correctly
-    $('.mark-title textarea.noscroll').each(function() {
-        console.log(this.style.height);
-        auto_grow(this);
-    })
-}
-
 
 /**
  * DOM Callback methods
@@ -2515,7 +2504,7 @@ function openComponent(component_id) {
     setComponentInProgress(component_id);
     // Achieve polymorphism in the interface using this `isInstructorEditEnabled` flag
     return (isInstructorEditEnabled() ? openComponentInstructorEdit(component_id) : openComponentGrading(component_id))
-        .then(resizeMarkTitleTextareas);
+        .then(resizeNoScrollTextareas);
 }
 
 /**

@@ -2613,3 +2613,13 @@ function auto_grow(element) {
     element.style.height = "5px";
     element.style.height = (element.scrollHeight + 5)+"px";
 }
+
+/**
+ * Sets the 'noscroll' textareas to have the correct height
+ */
+function resizeNoScrollTextareas() {
+    // Make sure textareas resize correctly
+    $('textarea.noscroll').each(function() {
+        auto_grow(this);
+    })
+}
