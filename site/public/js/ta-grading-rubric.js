@@ -1444,7 +1444,7 @@ function getOverallCommentFromDOM() {
 function getOpenComponentIds() {
     let component_ids = [];
     $('.ta-rubric-table:visible').each(function () {
-        component_ids.push($(this).attr('data-component_id'));
+        component_ids.push(parseInt($(this).attr('data-component_id')));
     });
     return component_ids;
 }
@@ -2015,21 +2015,25 @@ function onToggleEditMode(me) {
         reopen_component_id = open_component_ids[0];
     }
 
-    closeAllComponents(true)
-        .catch(function (err) {
+    // Build a sequence to save open component
+    let sequence = Promise.resolve();
+    sequence = sequence.then(function () {
+        return saveComponent(reopen_component_id);
+    });
+    // Once components are saved, reload the component in edit mode
+    sequence.catch(function (err) {
             console.error(err);
-            alert('Error closing component! ' + err.message);
+            alert('Error saving component! ' + err.message);
         })
         .then(function () {
-            // Only update edit mode once the open components are all closed
             updateEditModeEnabled();
             if (reopen_component_id !== NO_COMPONENT_ID) {
-                return openComponent(reopen_component_id);
+                return reloadGradingComponent(reopen_component_id, isEditModeEnabled(), true);
             }
         })
         .catch(function (err) {
             console.error(err);
-            alert('Error re-opening component! ' + err.message);
+            alert('Error reloading component! ' + err.message);
         });
 }
 
@@ -2241,11 +2245,13 @@ function reloadInstructorEditRubric(gradeable_id) {
 }
 
 /**
- * Reloads the provided component in grade mode
+ * Reloads the provided component with the grader view
  * @param {int} component_id
+ * @param {boolean} editable True to load component in edit mode
+ * @param {boolean} showMarkList True to show mark list as open
  * @returns {Promise}
  */
-function reloadGradingComponent(component_id) {
+function reloadGradingComponent(component_id, editable = false, showMarkList = false) {
     let component_tmp = null;
     let gradeable_id = getGradeableId();
     return ajaxGetComponentRubric(gradeable_id, component_id)
@@ -2254,7 +2260,7 @@ function reloadGradingComponent(component_id) {
             return ajaxGetGradedComponent(gradeable_id, component_id, getAnonId());
         })
         .then(function (graded_component) {
-            return injectGradingComponent(component_tmp, graded_component, false, false);
+            return injectGradingComponent(component_tmp, graded_component, editable, showMarkList);
         })
 }
 
@@ -2560,57 +2566,24 @@ function closeComponentGrading(component_id, saveChanges) {
     let anon_id = getAnonId();
     let component_tmp = null;
 
-    if (!saveChanges) {
-        // We aren't saving changes, so fetch the up-to-date grade / rubric data
-        sequence = sequence
-            .then(function () {
-                return ajaxGetComponentRubric(gradeable_id, component_id);
-            })
-            .then(function (component) {
-                component_tmp = component;
-            });
-    } else {
-        // We are saving changes...
-        if (isEditModeEnabled()) {
-            // We're in edit mode, so save the component and fetch the up-to-date grade / rubric data
-            sequence = sequence
-                .then(function () {
-                    return saveMarkList(component_id);
-                })
-                .then(function () {
-                    return ajaxGetComponentRubric(gradeable_id, component_id);
-                })
-                .then(function (component) {
-                    component_tmp = component;
-                });
-        } else {
-            // The grader unchecked the custom mark, but didn't delete the text.  This shouldn't happen too often,
-            //  so prompt the grader if this is what they really want since it will delete the text / score.
-            let gradedComponent = getGradedComponentFromDOM(component_id);
-            if (gradedComponent.comment !== '' && !gradedComponent.custom_mark_selected) {
-                if (!confirm("Are you sure you want to delete the custom mark?")) {
-                    return sequence;
-                }
-            }
-            // We're in grade mode, so save the graded component
-            sequence = sequence
-                .then(function () {
-                    return saveGradedComponent(component_id);
-                });
-        }
+    if (saveChanges) {
+        sequence = sequence.then(function () {
+            return saveComponent(component_id);
+        });
     }
 
     // Finally, render the graded component in non-edit mode with the mark list hidden
     return sequence
         .then(function () {
+            return ajaxGetComponentRubric(gradeable_id, component_id);
+        })
+        .then(function (component) {
+            component_tmp = component;
+        })
+        .then(function () {
             return ajaxGetGradedComponent(gradeable_id, component_id, anon_id);
         })
         .then(function (graded_component) {
-            // If this wasn't set (fetched from the remote), just load it from the DOM
-            if (component_tmp === null) {
-                component_tmp = getComponentFromDOM(component_id);
-            }
-
             return injectGradingComponent(component_tmp, graded_component, false, false);
         });
 }
@@ -2910,6 +2883,25 @@ function gradedComponentsEqual(gcDOM, gcOLD) {
         return gcDOM.score === gcOLD.score && gcDOM.comment === gcOLD.comment;
     } else {
         return gcOLD.score === 0.0 && gcOLD.comment === '';
+    }
+}
+
+function saveComponent(component_id) {
+    // We are saving changes...
+    if (isEditModeEnabled()) {
+        // We're in edit mode, so save the component and fetch the up-to-date grade / rubric data
+        return saveMarkList(component_id);
+    } else {
+        // The grader unchecked the custom mark, but didn't delete the text.  This shouldn't happen too often,
+        //  so prompt the grader if this is what they really want since it will delete the text / score.
+        let gradedComponent = getGradedComponentFromDOM(component_id);
+        if (gradedComponent.comment !== '' && !gradedComponent.custom_mark_selected) {
+            if (!confirm("Are you sure you want to delete the custom mark?")) {
+                return promise.reject();
+            }
+        }
+        // We're in grade mode, so save the graded component
+        return saveGradedComponent(component_id);
     }
 }
 
