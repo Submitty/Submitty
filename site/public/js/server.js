@@ -2606,3 +2606,10 @@ $(document).ready(function() {
     });
     checkSidebarCollapse();
 });
+
+// Credit to https://stackoverflow.com/a/24676492/2972004
+//      Solution to autoexpand the height of a textarea
+function auto_grow(element) {
+    element.style.height = "5px";
+    element.style.height = (element.scrollHeight + 5)+"px";
+}
