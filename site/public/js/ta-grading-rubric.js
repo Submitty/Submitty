@@ -2013,6 +2013,9 @@ function onToggleEditMode(me) {
     let reopen_component_id = NO_COMPONENT_ID;
     if (open_component_ids.length !== 0) {
         reopen_component_id = open_component_ids[0];
+    } else {
+        updateEditModeEnabled();
+        return;
     }
 
     // Build a sequence to save open component
