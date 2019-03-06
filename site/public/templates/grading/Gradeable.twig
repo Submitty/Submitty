@@ -23,15 +23,24 @@
     //    https://stackoverflow.com/questions/4945932/window-onbeforeunload-ajax-request-in-chrome
     //
     var __unloadRequestSent = false;
+    var __unloadRequestComplete = false;
     function unloadSave() {
         if (!__unloadRequestSent) {
-            __unloadRequestSent = true;
-            AJAX_USE_ASYNC = false;
-            closeAllComponents(true)
-                .catch(function () {
-                    // Unable to save so try saving at a different time
-                    __unloadRequestSent = false;
-                });
+            if (getOpenComponentIds().length > 0) {
+                __unloadRequestSent = true;
+                __unloadRequestComplete = false;
+                AJAX_USE_ASYNC = false;
+                closeAllComponents(true)
+                    .then(function() {
+                        __unloadRequestComplete = true;
+                    })
+                    .catch(function () {})
+                    .then(function () {
+                        // Unable to save so try saving at a different time
+                        __unloadRequestSent = false;
+                    });
+                return __unloadRequestComplete ? null : "Your changes may not be saved.  Close all open Components";
+            }
         }
     }
     // Will work for Chrome
