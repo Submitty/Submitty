@@ -382,11 +382,19 @@
                 http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
             #}
             <script>
+                // VPAT requires that the TAB key not be trapped inside a control, but allowing TAB
+                // to indent code/text can be useful.  As a compromise, ESC will be used in place of
+                // TAB to proceed to the next control element.  SHIFT+TAB is also preserved to go
+                // back to the previous control element.
                 $("#textbox_{{ index }}").keydown(function(e) {
-                    if (e.which == 27) {  //ESC was pressed
-                        $(this).next().focus();
+                    if (e.which == 27) {  //ESC was pressed, proceed to next control element.
+                        // Next control element may not be a sibling, so .next().focus() is not guaranteed
+                        // to work.  Instead, retrieve a master list of all controls and switch focus to
+                        // the next control in the list.
+                        var controls = $(':input');
+                        controls.eq(controls.index(this) + 1).focus();
                         e.preventDefault();
-                    } else if (!e.shiftKey && e.keyCode == 9) { //ESC was pressed without SHIFT
+                    } else if (!e.shiftKey && e.keyCode == 9) { //TAB was pressed without SHIFT, insert TAB char.
                         // get caret position/selection
                         var start = this.selectionStart;
                         var end = this.selectionEnd;
