@@ -15,13 +15,6 @@ def up(config):
     # python tokenzier
     os.system("sudo pip3 install parso")
 
-    # permissions on pip
-    os.system("sudo chmod -R 555 /usr/local/lib/python*/*")
-    os.system("sudo chmod 555 /usr/lib/python*/dist-packages")
-    os.system("sudo chmod 500 /usr/local/lib/python*/dist-packages/pam.py*")
-
-    pass
-
 
 def down(config):
     pass
