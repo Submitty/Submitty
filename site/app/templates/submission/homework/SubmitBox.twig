@@ -24,12 +24,12 @@
         <form id="submissionForm" method="post" style="text-align: center; margin: 0 auto; width: 100%; ">
             <div >
                 <input type='radio' id="radio_normal" name="submission_type" checked="true">
-                Normal Submission
+                <label for="radio_normal">Normal Submission</label>
                 <input type='radio' id="radio_student" name="submission_type">
-                Make Submission for a Student
+                <label for="radio_student">Make Submission for a Student</label>
                 {% if part_names|length == 1 and not is_vcs %}
                     <input type='radio' id="radio_bulk" name="submission_type">
-                    Bulk Upload
+                    <label for="radio_bulk">Bulk Upload</label>
                 {% endif %}
             </div>
             <div id="user_id_input" style="display: none">
@@ -360,7 +360,7 @@
 
 {% macro render_textbox(textbox, images, index) %}
     {% for image in textbox.images %}
-        <img src="{{ attribute(images, image.name) }}"
+        <img src="{{ attribute(images, image.name) }}" alt=""
         {% if image.width > 0 %}
             width="{{ image.width }}"
         {% endif %}
@@ -371,27 +371,30 @@
     {% endfor %}
 
     <p style="max-width: 50em;">
-        {{ textbox.label }}
+        <label for="textbox_{{ index }}">{{ textbox.label }}
         <br>
         {% if textbox.row_count == 0 %}
+            </label>
             <input type="text" name="textbox_{{ index }}" id="textbox_{{ index }}" onKeyPress="handle_textbox_keypress();">
         {% else %}
+            <kbd>TAB</kbd> may be used to indent.  Press <kbd>ESC</kbd> to leave textarea.</label>
             <textarea rows="{{ textbox.row_count }}" cols="50"  style="width:60em; height:100%;" name="textbox_{{ index }}" id="textbox_{{ index }}" onKeyPress="handle_textbox_keypress();"></textarea>
             {#
                 Allow tab in the larger text boxes (normally tab moves to the next textbox)
                 http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
+
+                VPAT requires that keyboard navigation through all controls is always available.
+                Since TAB is being redefined to indent code/text, ESC will be defined, in place
+                of TAB, to proceed to the next control element.  SHIFT+TAB is being preserved
+                to go back to the previous control element.
             #}
             <script>
-                // VPAT requires that the TAB key not be trapped inside a control, but allowing TAB
-                // to indent code/text can be useful.  As a compromise, ESC will be used in place of
-                // TAB to proceed to the next control element.  SHIFT+TAB is also preserved to go
-                // back to the previous control element.
                 $("#textbox_{{ index }}").keydown(function(e) {
                     if (e.which == 27) {  //ESC was pressed, proceed to next control element.
                         // Next control element may not be a sibling, so .next().focus() is not guaranteed
-                        // to work.  Instead, retrieve a master list of all controls and switch focus to
-                        // the next control in the list.
-                        var controls = $(':input');
+                        // to work.  Instead, retrieve a master list of all visible controls and switch
+                        // focus to the next control in the list.
+                        var controls = $(":input").filter(":visible");
                         controls.eq(controls.index(this) + 1).focus();
                         e.preventDefault();
                     } else if (!e.shiftKey && e.keyCode == 9) { //TAB was pressed without SHIFT, insert TAB char.
