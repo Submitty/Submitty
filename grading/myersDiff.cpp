@@ -187,6 +187,46 @@ TestResults* errorIfEmpty_doit (const TestCase &tc, const nlohmann::json& j) {
 // ==============================================================================
 // ==============================================================================
 
+
+
+TestResults* custom_doit(const TestCase &tc, const nlohmann::json& j, const nlohmann::json& whole_config){
+  std::string output_file = j.value("output_file","");
+
+  if(output_file == ""){
+    return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: output file not specified.")});
+  }
+
+  std::string command = j["command"];
+  std::vector<nlohmann::json> actions;
+  std::vector<nlohmann::json> dispatcher_actions;
+  std::string execute_logfile = "/dev/null";
+  nlohmann::json test_case_limits = tc.get_test_case_limits();
+  nlohmann::json assignment_limits = j.value("resource_limits",nlohmann::json());
+  bool windowed = false;
+
+  int ret = execute(command, actions, dispatcher_actions, execute_logfile, test_case_limits,
+                     assignment_limits, whole_config, windowed);
+
+  if(ret != 0){
+      std::cout << "FAILURE" << std::endl;
+      return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "A stunning failure.")});
+  }
+
+
+  std::cout << "OPENING " << output_file << std::endl;
+  std::ifstream ifs(output_file);
+  nlohmann::json result = nlohmann::json::parse(ifs);
+  float score = result["score"];
+  std::string message = result["message"];
+  int color_int = result["color"];
+  TEST_RESULTS_MESSAGE_TYPE color = static_cast<TEST_RESULTS_MESSAGE_TYPE>(color_int);
+  std::cout << "returning testresult " << score << color << message << std::endl;
+  return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "HELLO OUT THERE!")});
+}
+
+// ==============================================================================
+// ==============================================================================
+
 TestResults* ImageDiff_doit(const TestCase &tc, const nlohmann::json& j, int autocheck_number) {
   std::string actual_file = j.value("actual_file","");
   std::string expected_file = j.value("expected_file","");
