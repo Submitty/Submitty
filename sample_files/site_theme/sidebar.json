@@ -1,37 +1,37 @@
 [
     {
-	"icon": "university",
-	"link": "http://www.cs.rpi.edu/academics/courses/fall18/csci1200/syllabus.php",
-	"title": "Syllabus"
+        "icon": "university",
+        "link": "http://www.cs.rpi.edu/academics/courses/fall18/csci1200/syllabus.php",
+        "title": "Syllabus"
     },
     {
-	"icon": "calendar",
-	"link": "http://www.cs.rpi.edu/academics/courses/fall18/csci1200/calendar.php",
-	"title": "Calendar"
+        "icon": "calendar",
+        "link": "http://www.cs.rpi.edu/academics/courses/fall18/csci1200/calendar.php",
+        "title": "Calendar"
     },
     {
-	"icon": "briefcase",
-	"link": "http://www.cs.rpi.edu/academics/courses/fall18/csci1200/schedule.php",
-	"title": "Weekly Office Hours and Lab Schedule"
+        "icon": "briefcase",
+        "link": "http://www.cs.rpi.edu/academics/courses/fall18/csci1200/schedule.php",
+        "title": "Weekly Office Hours and Lab Schedule"
     },
     {
-	"icon": "bug",
-	"link": "http://www.cs.rpi.edu/academics/courses/fall18/csci1200/development_environment.php",
-	"title": "C++ Development"
+        "icon": "bug",
+        "link": "http://www.cs.rpi.edu/academics/courses/fall18/csci1200/development_environment.php",
+        "title": "C++ Development"
     },
     {
-	"icon": "laptop",
-	"link": "http://www.cs.rpi.edu/academics/courses/fall18/csci1200/homework.php",
-	"title": "Homework Information"
+        "icon": "laptop",
+        "link": "http://www.cs.rpi.edu/academics/courses/fall18/csci1200/homework.php",
+        "title": "Homework Information"
     },
     {
-	"icon": "flag",
-	"link": "http://www.cs.rpi.edu/academics/courses/fall18/csci1200/academic_integrity.php",
-	"title": "Collaboration Policy & Academic Integrity"
+        "icon": "flag",
+        "link": "http://www.cs.rpi.edu/academics/courses/fall18/csci1200/academic_integrity.php",
+        "title": "Collaboration Policy & Academic Integrity"
     },
     {
-	"icon": "book",
-	"link": "http://www.cs.rpi.edu/academics/courses/fall18/csci1200/getting_help.php",
-	"title": "Getting Help"
+        "icon": "book",
+        "link": "http://www.cs.rpi.edu/academics/courses/fall18/csci1200/getting_help.php",
+        "title": "Getting Help"
     }
 ]

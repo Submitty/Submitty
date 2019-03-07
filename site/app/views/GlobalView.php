@@ -32,7 +32,8 @@ class GlobalView extends AbstractView {
             "notifications_info" => $notifications_info,
             "wrapper_enabled" => $this->core->getConfig()->wrapperEnabled(),
             "wrapper_urls" => $wrapper_urls,
-            "fixed_height" => $fixed_height
+            "fixed_height" => $fixed_height,
+            "system_message" => $this->core->getConfig()->getSystemMessage()
         ]);
      }
 

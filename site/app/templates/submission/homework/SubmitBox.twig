@@ -43,11 +43,17 @@
             </div>
             <div class = "sub" id="pdf_submit_button" style="display: none">
                 <div class="sub">
+                    Split by QR code? 
+                    <input type="checkbox" id="use_qr">
                     <span id="pages_prompt"># of page(s) per PDF:</span> 
-                    <span id="prefix_prompt">QR code prefix:</span>
+                    <span id="prefix_prompt">QR code prefix/suffix: 
+                    <a style="text-decoration:none;" href = "https://submitty.org/instructor/exams#bulk-upload-and-split-with-qr-codes" target="_none">
+                        <i title="Bulk Upload QR Help" class="far fa-question-circle"></i>
+                    </a>
+                    </span>
                     <input type="number" id= "num_pages" placeholder="required"/>
-                    <input type="text" id="qr_prefix" placeholder="optional" />
-                    Split by QR code? <input type="checkbox" id="use_qr">
+                    <input type="text" id="qr_prefix" placeholder="Prefix (optional)" />
+                     <input type="text" id="qr_suffix" placeholder="Suffix (optional)" />
                 </div>
             </div>
         </form>
@@ -56,8 +62,8 @@
             $(function() {
                 students_full = {{ students_full|json_encode|raw }};
                 $('#qr_prefix').prop('hidden', true);
+                $('#qr_suffix').prop('hidden', true);
                 $('#prefix_prompt').prop('hidden', true);
-                
                 //load what upload mode the user selected (if any)
                 if(sessionStorage.getItem('radio_bulk')){
                     $('#radio_bulk').prop('checked', true);
@@ -69,6 +75,7 @@
                 //load if bulkupload with qr codes selected or not
                 if(sessionStorage.getItem('use_qr')){
                     $('#qr_prefix').prop('hidden',false)
+                    $('#qr_suffix').prop('hidden',false)
                     $('#prefix_prompt').prop('hidden', false);
                     $('#pages_prompt').prop('hidden', true);
                     $('#num_pages').prop('hidden', true);
@@ -76,6 +83,9 @@
                     //populate prefix textarea
                     if(sessionStorage.getItem('qr_prefix')){
                         $('#qr_prefix').val(sessionStorage.getItem('qr_prefix'));
+                    }
+                    if(sessionStorage.getItem('qr_suffix')){
+                        $('#qr_suffix').val(sessionStorage.getItem('qr_suffix'));
                     }
                 }
                 if ($("#radio_student").is(":checked")) {
@@ -88,6 +98,9 @@
                     //save qr_code prefix on textarea change
                     $('#qr_prefix').change(function(){
                         sessionStorage.setItem('qr_prefix', $('#qr_prefix').val());
+                    });
+                    $('#qr_suffix').change(function(){
+                        sessionStorage.setItem('qr_suffix', $('#qr_suffix').val());
                     });
                 }
                 $('#radio_normal').click(function() {
@@ -118,6 +131,7 @@
                     (sessionStorage.getItem('use_qr')) ? sessionStorage.removeItem('use_qr') : sessionStorage.setItem('use_qr', true);
                     $('#num_pages').prop('hidden', !$('#num_pages').is(':hidden'));
                     $('#qr_prefix').prop('hidden', !$('#qr_prefix').is(':hidden'));
+                    $('#qr_suffix').prop('hidden', !$('#qr_suffix').is(':hidden'));
                     $('#prefix_prompt').prop('hidden', !$('#prefix_prompt').is(':hidden'));
                     $('#pages_prompt').prop('hidden', !$('#pages_prompt').is(':hidden'));
                 });
@@ -315,8 +329,13 @@
                 num_pages = $("#num_pages").val();
                 use_qr = $("#use_qr").is(":checked");
                 qr_prefix = $('#qr_prefix').val();
-                if($('#use_qr').is(':checked') && !sessionStorage.getItem('qr_prefix'))
-                    sessionStorage.setItem('qr_prefix', qr_prefix );
+                qr_suffix = $('#qr_suffix').val();
+                if($('#use_qr').is(':checked')){
+                    if(!sessionStorage.getItem('qr_prefix'))
+                        sessionStorage.setItem('qr_prefix', qr_prefix );
+                    if(!sessionStorage.getItem('qr_suffix'))
+                        sessionStorage.setItem('qr_suffix', qr_suffix );
+                }
             };
             // vcs upload
             if ({{ is_vcs ? "true" : "false" }}) {
@@ -324,7 +343,7 @@
             }
             // bulk upload
             if ($("#radio_bulk").is(":checked")) {
-                handleBulk("{{ gradeable_id }}", num_pages, use_qr, qr_prefix );
+                handleBulk("{{ gradeable_id }}", num_pages, use_qr, qr_prefix, qr_suffix );
             }
             // no user id entered, upload for whoever is logged in
             else if (user_id == ""){

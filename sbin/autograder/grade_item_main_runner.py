@@ -69,12 +69,11 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                     create_container_subfolders(container_info, testcase_folder, which_untrusted)
                     # Launches containers with the -d option. Gives them the names specified in container_info. Updates container info
                     #    to store container_ids.
-                    launch_containers(container_info, testcase_folder, job_id,is_batch_job,which_untrusted,
+                    create_containers(container_info, testcase_folder, job_id,is_batch_job,which_untrusted,
                                          item_name,grading_began, queue_obj,submission_string,testcase_num)
                     # Networks containers together if there are more than one of them. Modifies container_info to store 'network'
                     #   The name of the docker network it is connected to.
                     network_containers(container_info,os.path.join(tmp_work, "test_input"),which_untrusted,use_router,single_port_per_container)
-                    print('NETWORKED CONTAINERS')
                     #The containers are now ready to execute.
 
                     processes = dict()
@@ -83,7 +82,6 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                     for name, info in container_info.items():
                         mounted_directory = info['mounted_directory']
                         #Copies the code needed to run into mounted_directory
-                        #TODO this can eventually be extended so that only the needed code is copied in.
                         setup_folder_for_grading(mounted_directory, tmp_work, job_id, tmp_logs,testcases[testcase_num-1])
 
 
@@ -99,13 +97,22 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                       processes['router'] = p
                       time.sleep(1)
 
+                    #spin up any 'server containers'
                     for name, info in container_info.items():
-                        if name == 'router' and use_router:
+                      if info['server'] == False or (name == 'router' and use_router):
+                        continue
+                      found_server = True
+                      c_id = info['container_id']
+                      p = subprocess.Popen(['docker', 'start', '-i', '--attach', c_id], stdout=logfile,stdin=subprocess.PIPE)
+
+                    #spin up any non server containers
+                    for name, info in container_info.items():
+                        if (name == 'router' and use_router) or info['server'] == True:
                           continue
+
                         c_id = info['container_id']
                         mounted_directory = info['mounted_directory']
                         full_name = '{0}_{1}'.format(which_untrusted, name)
-                        print('spinning up docker {0} with c_id {1}'.format(full_name, c_id))
                         p = subprocess.Popen(['docker', 'start', '-i', '--attach', c_id], stdout=logfile,stdin=subprocess.PIPE)
                         processes[name] = p
                     # Handle the dispatcher actions
@@ -151,11 +158,12 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                         first_testcase = False
 
                 except Exception as e:
-                    grade_items_logging.log_message(job_id, message="ERROR while grading by docker:\n {0}".format(traceback.format_exc()))
+                    grade_items_logging.log_message(job_id, message="ERROR while grading by docker. See traces entry for more details")
                     traceback.print_exc()
+                    grade_items_logging.log_stack_trace(job_id,trace=traceback.format_exc())
+
                 finally:
                     clean_up_containers(container_info,job_id,is_batch_job,which_untrusted,item_name,grading_began,use_router)
-                    print("CLEANED UP CONTAINERS")
             else:
                 try:
                     # Move the files necessary for grading (runner, inputs, etc.) into the testcase folder.
@@ -172,8 +180,9 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                                                       '--display', str(os.environ['DISPLAY'])],
                                                       stdout=logfile)
                 except Exception as e:
+                    grade_items_logging.log_message(job_id, message="ERROR thrown by main runner. See traces entry for more details.")
                     print ("ERROR caught runner.out exception={0}".format(str(e.args[0])).encode("utf-8"),file=logfile)
-                    traceback.print_exc()
+                    grade_items_logging.log_stack_trace(job_id,trace=traceback.format_exc())
             logfile.flush()
             os.chdir(tmp_work)
 
@@ -204,7 +213,6 @@ def at_least_one_alive(processes):
 
 #targets must hold names/keys for the processes dictionary
 def send_message_to_processes(message, processes, targets):
-    print("sending {0} to {1}".format(message, targets))
     for target in targets:
         p = processes[target]
         # poll returns None if the process is still running.
@@ -246,16 +254,19 @@ def setup_folder_for_grading(target_folder, tmp_work, job_id, tmp_logs, testcase
           try:
             shutil.copy(os.path.join(tmp_work,source),os.path.join(target_folder,destination))
           except Exception as e:
-            print("encountered a copy error")
             traceback.print_exc()
+            grade_items_logging.log_message(job_id, message="Encountered an error while processing pre-command. See traces entry for more details.")
+            grade_items_logging.log_stack_trace(job_id,trace=traceback.format_exc())
+
             #TODO: can we pass something useful to students?
             pass
         else:
           try:
             grade_item.copy_contents_into(job_id,os.path.join(tmp_work,source),os.path.join(target_folder,destination),tmp_logs)
           except Exception as e:
-            print("encountered a copy error")
             traceback.print_exc()
+            grade_items_logging.log_message(job_id, message="Encountered an error while processing pre-command. See traces entry for more details.")
+            grade_items_logging.log_stack_trace(job_id,trace=traceback.format_exc())
             #TODO: can we pass something useful to students?
             pass
       else:
@@ -301,8 +312,9 @@ def find_container_information(testcase, testcase_num, use_router, tmp_work):
 
     container_image = container_spec['container_image']
     outgoing_conns  = container_spec['outgoing_connections']
+    server = container_spec['server']
 
-    container_info_element = create_container_info_element(container_image, outgoing_conns)
+    container_info_element = create_container_info_element(container_image, outgoing_conns, server)
     container_info[container_name] = container_info_element
     num += 1
 
@@ -319,8 +331,13 @@ def find_container_information(testcase, testcase_num, use_router, tmp_work):
   return container_info
 
 #Create an element to add to the container_information dictionary
-def create_container_info_element(container_image, outgoing_connections, container_id=''):
-  element = {'outgoing_connections' : outgoing_connections, 'container_image' : container_image}
+def create_container_info_element(container_image, outgoing_connections, server, container_id=''):
+  element = {
+    'outgoing_connections' : outgoing_connections, 
+    'container_image' : container_image,
+    'server' : server
+  }
+  
   if container_id != '':
     element['container_id'] = container_id
   return element
@@ -342,7 +359,7 @@ def create_container_subfolders(container_info, target_folder, which_untrusted):
       grade_item.untrusted_grant_rwx_access(which_untrusted, mounted_directory)
       container_info[name]['mounted_directory'] = mounted_directory
 
-def launch_containers(container_info, target_folder, job_id,is_batch_job,which_untrusted,submission_path,grading_began,
+def create_containers(container_info, target_folder, job_id,is_batch_job,which_untrusted,submission_path,grading_began,
                                                                                 queue_obj,submission_string,testcase_num):
   #We must construct every container requested in container_info.
   for name in container_info:
@@ -355,24 +372,33 @@ def launch_containers(container_info, target_folder, job_id,is_batch_job,which_u
     #container_name is used only at the system level, and is used to ensure uniqueness.
     container_name = "{0}_{1}".format(which_untrusted, name)
     container_image = container_info[name]['container_image']
-    # Launch the requeseted container
-    container_id = launch_container(container_name, container_image, mounted_directory, job_id, is_batch_job, which_untrusted,
+    server_container = container_info[name]['server']
+    # Create the requeseted container
+    container_id = create_container(container_name, container_image, server_container, mounted_directory, job_id, is_batch_job, which_untrusted,
                                     submission_path,grading_began,queue_obj,submission_string,testcase_num,name)
     #add the container_id to the container info for use later.
     container_info[name]['container_id'] = container_id
 
 #Launch a single docker.
-def launch_container(container_name, container_image, mounted_directory,job_id,is_batch_job,which_untrusted,submission_path,
-                                                                  grading_began,queue_obj,submission_string,testcase_num,name):
-  #TODO error handling.
+def create_container(container_name, container_image, server_container, mounted_directory,job_id,
+                      is_batch_job,which_untrusted,submission_path, grading_began,queue_obj,submission_string,testcase_num,name):
+
   untrusted_uid = str(getpwnam(which_untrusted).pw_uid)
-  this_container = subprocess.check_output(['docker', 'create', '-i', '-u', untrusted_uid, '--network', 'none',
+
+  if server_container:
+    this_container = subprocess.check_output(['docker', 'create', '-i', '--network', 'none',
+                                         '-v', mounted_directory + ':' + mounted_directory,
+                                         '-w', mounted_directory,
+                                         '--name', container_name,
+                                         container_image
+                                         ]).decode('utf8').strip()
+  else:
+    this_container = subprocess.check_output(['docker', 'create', '-i', '-u', untrusted_uid, '--network', 'none',
                                            '-v', mounted_directory + ':' + mounted_directory,
                                            '-w', mounted_directory,
                                            '--hostname', name,
                                            '--name', container_name,
                                            container_image,
-                                           #The command to be run.
                                            os.path.join(mounted_directory, 'my_runner.out'),
                                              queue_obj['gradeable'],
                                              queue_obj['who'],
@@ -417,7 +443,6 @@ def network_containers_routerless(container_info,which_untrusted):
   for name, info in sorted(container_info.items()):
       my_full_name = "{0}_{1}".format(which_untrusted, name)
       #container_info[name]['network'] = network_name
-      print('adding {0} to network {1}'.format(name,network_name))
       subprocess.check_output(['docker', 'network', 'connect', '--alias', name, network_name, my_full_name]).decode('utf8').strip()
 
 #Connect dockers in a network, updates the container_info with network names, and creates knownhosts.csv
@@ -435,7 +460,6 @@ def network_containers_with_router(container_info,which_untrusted):
 
       container_info[name]['network'] = network_name
       actual_name  = '{0}_Actual'.format(name)
-      print('adding {0} to network {1} with actual name {2}'.format(name,network_name, actual_name))
       subprocess.check_output(['docker', 'network', 'create', '--internal', '--driver', 'bridge', network_name]).decode('utf8').strip()
       subprocess.check_output(['docker', 'network', 'connect', '--alias', actual_name, network_name, my_name]).decode('utf8').strip()
 
@@ -465,7 +489,6 @@ def network_containers_with_router(container_info,which_untrusted):
           aliases.append('--alias')
           aliases.append(endpoint)
 
-      print('adding router to {0} with aliases {1}'.format(network_name, aliases))
       subprocess.check_output(['docker', 'network', 'connect'] + aliases + [network_name, router_name]).decode('utf8').strip()
 
 

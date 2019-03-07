@@ -140,7 +140,7 @@ class Access {
         $this->permissions["grading.electronic.import_teams"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_CSRF;
         $this->permissions["grading.electronic.export_teams"] = self::ALLOW_MIN_INSTRUCTOR;
         $this->permissions["grading.electronic.submit_team_form"] = self::ALLOW_MIN_INSTRUCTOR;
-        $this->permissions["grading.electronic.verify_grader"] = self::CHECK_CSRF | self::ALLOW_MIN_FULL_ACCESS_GRADER;
+        $this->permissions["grading.electronic.verify_grader"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
         $this->permissions["grading.electronic.verify_all"] = self::CHECK_CSRF | self::ALLOW_MIN_FULL_ACCESS_GRADER;
         $this->permissions["grading.electronic.silent_edit"] = self::ALLOW_MIN_INSTRUCTOR;
         $this->permissions["grading.electronic.export_components"] = self::ALLOW_MIN_INSTRUCTOR; // this doesn't need to be instructor, but they're the only ones who will do this

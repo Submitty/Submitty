@@ -224,6 +224,8 @@ fi
 
 mkdir -p ${SUBMITTY_DATA_DIR}/logs
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding
+mkdir -p ${SUBMITTY_DATA_DIR}/logs/emails
+mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding/stack_traces
 
 #Make site logging directories if not in worker mode.
 if [ "${WORKER}" == 0 ]; then
@@ -257,6 +259,9 @@ fi
 
 chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
 chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/autograding
+
+chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/emails
+chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/emails
 
 #Set up shipper grading directories if not in worker mode.
 if [ "${WORKER}" == 0 ]; then
@@ -357,9 +362,9 @@ fi
 echo -e "Build the junit test runner"
 
 # copy the file from the repo
-rsync -rtz ${SUBMITTY_REPOSITORY}/junit_test_runner/TestRunner.java ${SUBMITTY_INSTALL_DIR}/JUnit/TestRunner.java
+rsync -rtz ${SUBMITTY_REPOSITORY}/junit_test_runner/TestRunner.java ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit/TestRunner.java
 
-pushd ${SUBMITTY_INSTALL_DIR}/JUnit > /dev/null
+pushd ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit > /dev/null
 # root will be owner & group of the source file
 chown  root:root  TestRunner.java
 # everyone can read this file
@@ -783,7 +788,7 @@ else
         chmod -R g+r ${SUBMITTY_REPOSITORY}
 
         # Update any foreign worker machines
-        echo -e Updating worker machines
+        echo -e -n "Updating worker machines\n\n"
         sudo -H -u ${DAEMON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py
     fi
 fi

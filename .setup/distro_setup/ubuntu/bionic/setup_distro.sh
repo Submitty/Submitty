@@ -98,7 +98,7 @@ if [ ${VAGRANT} == 1 ]; then
     if [ "$NPIO_MAJOR" -eq 0 -a "$NPIO_MINOR" -lt 40 ]; then
         # Update netplan.io
         echo "Detected old version of netplan.io (${NETPLANIO_VERSION})... updating it automatically"
-        apt install -y netplan.io=0.40.1~18.04.3
+        apt-get install -y netplan.io=0.40.1~18.04.4
     fi
 fi
 
