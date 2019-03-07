@@ -170,9 +170,7 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                     setup_folder_for_grading(testcase_folder, tmp_work, job_id, tmp_logs,testcases[testcase_num-1])
                     my_testcase_runner = os.path.join(testcase_folder, 'my_runner.out')
 
-                    my_display="0"
-                    if "DISPLAY" in os.environ.keys():
-                        my_display = str(os.environ['DISPLAY'])
+                    my_display = str(os.environ.get('DISPLAY', ':0'))
                                                       
                     runner_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                                                       which_untrusted,
@@ -390,9 +388,7 @@ def create_container(container_name, container_image, server_container, mounted_
 
   untrusted_uid = str(getpwnam(which_untrusted).pw_uid)
 
-  my_display="0"
-  if "DISPLAY" in os.environ.keys():
-      my_display = str(os.environ['DISPLAY'])
+  my_display = str(os.environ.get('DISPLAY', ':0'))
   
   if server_container:
     this_container = subprocess.check_output(['docker', 'create', '-i', '--network', 'none',
