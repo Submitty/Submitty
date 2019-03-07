@@ -93,7 +93,8 @@ def main():
             regrade_grading_count = 0
 
             for full_path_file in Path(GRADING_QUEUE).glob("*"):
-                json_file = str(full_path_file)
+                full_path_file = str(full_path_file)
+                json_file = full_path_file
 
                 # get the file name (without the path)
                 just_file = full_path_file[len(GRADING_QUEUE)+1:]
