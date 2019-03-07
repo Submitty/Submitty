@@ -260,14 +260,6 @@ apt-get install libzbar0 --yes
 pip3 install pyzbar
 pip3 install pdf2image
 
-sudo chmod -R 555 /usr/local/lib/python*/*
-sudo chmod 555 /usr/lib/python*/dist-packages
-sudo chmod 500 /usr/local/lib/python*/dist-packages/pam.py*
-
-if [ ${WORKER} == 0 ]; then
-    sudo chown ${CGI_USER} /usr/local/lib/python*/dist-packages/pam.py*
-fi
-
 #################################################################
 # JAR SETUP
 #################
@@ -347,6 +339,24 @@ rm -rf /tmp/DrMemory*
 
 chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/drmemory
 chmod -R 755 ${SUBMITTY_INSTALL_DIR}/drmemory
+
+popd > /dev/null
+
+#################################################################
+# TCLAPP SETUP
+#################
+pushd /tmp > /dev/null
+
+echo "Getting TCLAPP"
+wget https://sourceforge.net/projects/tclap/files/tclap-1.2.2.tar.gz -o /dev/null > /dev/null 2>&1
+tar -xpzf tclap-1.2.2.tar.gz
+rm /tmp/tclap-1.2.2.tar.gz
+cd tclap-1.2.2/
+bash configure
+make
+make install
+cd /tmp
+rm -rf /tmp/tclap-1.2.2
 
 popd > /dev/null
 
