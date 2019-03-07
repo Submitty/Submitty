@@ -415,7 +415,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                 $.ajax({
                     url: url,
                     success: function(data) {
-                    	
+
                         data = JSON.parse(data);
                         console.log(data.ci);
 
@@ -446,7 +446,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                             //console.log(data.ci[users_color]);
                             for(var pos in data.ci[users_color]) {
                                 var element = data.ci[users_color][pos];
-                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {css: "border: 1px solid black; background: " + element[4]});   
+                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {css: "border: 1px solid black; background: " + element[4]});
                             }
                         }
                         $('.CodeMirror')[0].CodeMirror.refresh();
@@ -503,7 +503,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                             //console.log(data.ci[users_color]);
                             for(var pos in data.ci[users_color]) {
                                 var element = data.ci[users_color][pos];
-                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});   
+                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});
                             }
                         }
                         	$('.CodeMirror')[0].CodeMirror.refresh();
@@ -535,11 +535,11 @@ function setUserSubmittedCode(gradeable_id, changed) {
                             for(var users_color in data.ci) {
                             for(var pos in data.ci[users_color]) {
                                 var element = data.ci[users_color][pos];
-                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});   
+                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});
                             }
-                        }   
+                        }
                         	$('.CodeMirror')[0].CodeMirror.refresh();
-                        	
+
                         	$('.CodeMirror')[1].CodeMirror.refresh();
                             // $('[name="code_box_1"]').empty().append(data.display_code1);
                             // $('[name="code_box_2"]').empty().append(data.display_code2);
@@ -1610,14 +1610,32 @@ function editPost(post_id, thread_id, shouldEditThread) {
         });
 }
 
-function enableTabsInTextArea(jQuerySelector){
+/**
+ * Enables the use of TAB key to indent within a textarea control.
+ *
+ * VPAT requires that keyboard navigation through all controls is always available.
+ * Since TAB is being redefined to indent code/text, ESC will be defined, in place
+ * of TAB, to proceed to the next control element.  SHIFT+TAB  shall be preserved
+ * with its default behavior of returning to the previous control element.
+ *
+ * @param string jQuerySelector
+ */
+function enableTabsInTextArea(jQuerySelector) {
     var t = $(jQuerySelector);
     t.on('input', function() {
         $(this).outerHeight(38).outerHeight(this.scrollHeight);
     });
     t.trigger('input');
-    t.keydown(function(t){
-        if(t.keyCode == 9){
+    t.keydown(function(t) {
+        if (t.which == 27) {  //ESC was pressed, proceed to next control element.
+            // Next control element may not be a sibling, so .next().focus() is not guaranteed
+            // to work.  There is also no guarantee that controls are properly wrapped within
+            // a <form>.  Therefore, retrieve a master list of all visible controls and switch
+            // focus to the next control in the list.
+            var controls = $(":input").filter(":visible");
+            controls.eq(controls.index(this) + 1).focus();
+            return false;
+        } else if (!t.shiftKey && t.keyCode == 9) { //TAB was pressed without SHIFT, text indent
             var text = this.value;
             var beforeCurse = this.selectionStart;
             var afterCurse = this.selectionEnd;
@@ -1625,6 +1643,7 @@ function enableTabsInTextArea(jQuerySelector){
             this.selectionStart = this.selectionEnd = beforeCurse+1;
             return false;
         }
+        // No need to test for SHIFT+TAB as it is not being redefined.
     });
 }
 
