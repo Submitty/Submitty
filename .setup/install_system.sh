@@ -351,6 +351,24 @@ chmod -R 755 ${SUBMITTY_INSTALL_DIR}/drmemory
 popd > /dev/null
 
 #################################################################
+# TCLAPP SETUP
+#################
+pushd /tmp > /dev/null
+
+echo "Getting TCLAPP"
+wget https://sourceforge.net/projects/tclap/files/tclap-1.2.2.tar.gz -o /dev/null > /dev/null 2>&1
+tar -xpzf tclap-1.2.2.tar.gz
+rm /tmp/tclap-1.2.2.tar.gz
+cd tclap-1.2.2/
+bash configure
+make
+make install
+cd /tmp
+rm -rf /tmp/tclap-1.2.2
+
+popd > /dev/null
+
+#################################################################
 # APACHE SETUP
 #################
 

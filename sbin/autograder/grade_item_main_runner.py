@@ -176,7 +176,8 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                                                       queue_obj["who"],
                                                       str(queue_obj["version"]),
                                                       submission_string,
-                                                      str(testcase_num)],
+                                                      '--testcase', str(testcase_num),
+                                                      '--display', str(os.environ['DISPLAY'])],
                                                       stdout=logfile)
                 except Exception as e:
                     grade_items_logging.log_message(job_id, message="ERROR thrown by main runner. See traces entry for more details.")
@@ -403,8 +404,9 @@ def create_container(container_name, container_image, server_container, mounted_
                                              queue_obj['who'],
                                              str(queue_obj['version']),
                                              submission_string,
-                                             str(testcase_num),
-                                             name
+                                             '--testcase', str(testcase_num),
+                                             '--display', str(os.environ['DISPLAY']),
+                                             '--container_name', name
                                            ]).decode('utf8').strip()
 
   dockerlaunch_done =dateutils.get_current_time()
