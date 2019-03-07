@@ -12,11 +12,11 @@ USAGE:
 
 import argparse
 import os
+from pathlib import Path
 import subprocess
 import time
 import psutil
 import json
-from submitty_utils import glob
 
 CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
 with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
@@ -87,15 +87,13 @@ def main():
 
         if os.access(GRADING_QUEUE, os.R_OK):
             # most instructors do not have read access to the interactive queue
-
-            files = glob.glob(os.path.join(GRADING_QUEUE, "*"))
             interactive_count = 0
             interactive_grading_count = 0
             regrade_count = 0
             regrade_grading_count = 0
 
-            for full_path_file in files:
-                json_file = full_path_file
+            for full_path_file in Path(GRADING_QUEUE).glob("*"):
+                json_file = str(full_path_file)
 
                 # get the file name (without the path)
                 just_file = full_path_file[len(GRADING_QUEUE)+1:]

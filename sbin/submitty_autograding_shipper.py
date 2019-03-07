@@ -9,7 +9,8 @@ import shutil
 import contextlib
 import datetime
 import multiprocessing
-from submitty_utils import dateutils, glob
+from pathlib import Path
+from submitty_utils import dateutils
 import operator
 import paramiko
 import tempfile
@@ -401,9 +402,10 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
 
     # Grab all the files currently in the folder, sorted by creation
     # time, and put them in the queue to be graded
-    files = glob.glob(os.path.join(folder, "*"))
+    files = sorted(Path(folder).glob('*'))
     files_and_times = list()
     for f in files:
+        f = str(f)
         try:
             my_time = os.path.getctime(f)
         except:
@@ -516,14 +518,17 @@ def launch_shippers(worker_status_map):
 
     # Clean up old files from previous shipping/autograding (any
     # partially completed work will be re-done)
-    for file_path in glob.glob(os.path.join(INTERACTIVE_QUEUE, "GRADING_*")):
+    for file_path in Path(INTERACTIVE_QUEUE).glob("GRADING_*")):
+        file_path = str(file_path)
         grade_items_logging.log_message(JOB_ID, message="Remove old queue file: " + file_path)
         os.remove(file_path)
 
-    for file_path in glob.glob(os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO","unstrusted*")):
+    for file_path in Path(SUBMITTY_DATA_DIR, "autograding_TODO").glob("untrusted*"):
+        file_path = str(file_path)
         grade_items_logging.log_message(JOB_ID, message="Remove autograding TODO file: " + file_path)
         os.remove(file_path)
-    for file_path in glob.glob(os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE","*")):
+    for file_path in Path(SUBMITTY_DATA_DIR, "autograding_DONE").glob("*"):
+        file_path = str(file_path)
         grade_items_logging.log_message(JOB_ID, message="Remove autograding DONE file: " + file_path)
         os.remove(file_path)
 
