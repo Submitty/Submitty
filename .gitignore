@@ -10,11 +10,13 @@ selenium*.jar
 *~
 *.o
 
+__pycache__/
 *.pyc
 *.aux
 *.log
 *.out
 *.synctex.gz
+.coverage
 
 /site/config/*
 !/site/config/master_template.ini

@@ -84,11 +84,11 @@ if [ ${WORKER} == 0 ]; then
 
     mkdir -p ${SUBMITTY_INSTALL_DIR}/migrations
 
-    rsync -rtz ${SUBMITTY_REPOSITORY}/migration/migrations ${SUBMITTY_INSTALL_DIR}
+    rsync -rtz ${SUBMITTY_REPOSITORY}/migration/migrator/migrations ${SUBMITTY_INSTALL_DIR}
     chown root:root ${SUBMITTY_INSTALL_DIR}/migrations
     chmod 550 -R ${SUBMITTY_INSTALL_DIR}/migrations
 
-    python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py migrate
+    python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -e system -e master -e course migrate
 fi
 
 
