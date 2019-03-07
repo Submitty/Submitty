@@ -91,6 +91,24 @@ if [ ${WORKER} == 0 ]; then
     python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -e system -e master -e course migrate
 fi
 
+################################################################################################################
+################################################################################################################
+# INSTALL PYTHON SUBMITTY UTILS AND SET PYTHON PACKAGE PERMISSIONS
+
+echo -e "Install python_submitty_utils"
+
+pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
+pip3 install .
+# Setting the permissions are necessary as pip uses the umask of the user/system, which
+# affects the other permissions (which ideally should be o+rx, but Submitty sets it to o-rwx).
+# This gets run here in case we make any python package changes.
+find /usr/local/lib/python*/dist-packages -type d -exec chmod 755 {} +
+find /usr/local/lib/python*/dist-packages -type f -exec chmod 755 {} +
+find /usr/local/lib/python*/dist-packages -type f -name '*.py*' -exec chmod 644 {} +
+find /usr/local/lib/python*/dist-packages -type f -name '*.pth' -exec chmod 644 {} +
+
+popd > /dev/null
+
 
 #############################################################
 # Re-Read other variables from submitty.json and submitty_users.json
@@ -538,18 +556,6 @@ fi
 # Build & Install Lichen Modules
 
 /bin/bash ${SUBMITTY_REPOSITORY}/../Lichen/install_lichen.sh
-
-
-################################################################################################################
-################################################################################################################
-# INSTALL PYTHON SUBMITTY UTILS
-
-echo -e "Install python_submitty_utils"
-
-pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
-pip3 install .
-
-popd > /dev/null
 
 
 ################################################################################################################

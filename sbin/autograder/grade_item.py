@@ -17,7 +17,7 @@ import sys
 import traceback
 from pwd import getpwnam
 
-from submitty_utils import dateutils
+from submitty_utils import dateutils, glob
 from . import grade_items_logging, grade_item_main_runner, write_grade_history, CONFIG_PATH
 
 with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
