@@ -189,8 +189,8 @@ apt-get -f -qqy install
 
 ### Fix Python Package Permissions (should always run at the end of this)
 # Setting the permissions are necessary as pip uses the umask of the user/system, which
-# affects the other permissions (which ideally should be o+rx, but Submitty sets it to o-rwx)
-# This gets run here in case we make any python package changes to
+# affects the other permissions (which ideally should be o+rx, but Submitty sets it to o-rwx).
+# This gets run here in case we make any python package changes.
 find /usr/local/lib/python*/dist-packages -type d -exec chmod 755 {} +
 find /usr/local/lib/python*/dist-packages -type f -exec chmod 755 {} +
 find /usr/local/lib/python*/dist-packages -type f -name '*.py*' -exec chmod 644 {} +
