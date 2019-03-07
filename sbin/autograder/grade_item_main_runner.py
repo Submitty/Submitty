@@ -170,7 +170,7 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                     setup_folder_for_grading(testcase_folder, tmp_work, job_id, tmp_logs,testcases[testcase_num-1])
                     my_testcase_runner = os.path.join(testcase_folder, 'my_runner.out')
 
-                    my_display="0"
+                    my_display=":1"
                     if "DISPLAY" in os.environ.keys():
                         my_display = str(os.environ['DISPLAY'])
                                                       
@@ -390,7 +390,7 @@ def create_container(container_name, container_image, server_container, mounted_
 
   untrusted_uid = str(getpwnam(which_untrusted).pw_uid)
 
-  my_display="0"
+  my_display=":1"
   if "DISPLAY" in os.environ.keys():
       my_display = str(os.environ['DISPLAY'])
   
