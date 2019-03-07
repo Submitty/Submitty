@@ -100,8 +100,8 @@ echo -e "Install python_submitty_utils"
 pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
 pip3 install .
 # Setting the permissions are necessary as pip uses the umask of the user/system, which
-# affects the other permissions (which ideally should be o+rx, but Submitty sets it to o-rwx)
-# This gets run here in case we make any python package changes to
+# affects the other permissions (which ideally should be o+rx, but Submitty sets it to o-rwx).
+# This gets run here in case we make any python package changes.
 find /usr/local/lib/python*/dist-packages -type d -exec chmod 755 {} +
 find /usr/local/lib/python*/dist-packages -type f -exec chmod 755 {} +
 find /usr/local/lib/python*/dist-packages -type f -name '*.py*' -exec chmod 644 {} +
