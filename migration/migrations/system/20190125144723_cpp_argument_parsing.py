@@ -12,6 +12,7 @@ def up(config):
     os.system("tar -xpzf {0}".format(TCLAP_TAR))
     os.remove(TCLAP_TAR)
     os.chdir(TCLAP_DIR)
+    os.system("sed -i 's/SUBDIRS = include examples docs tests msc config/SUBDIRS = include docs msc config/' Makefile.in")
     os.system("bash configure")
     os.system("make")
     os.system("make install")

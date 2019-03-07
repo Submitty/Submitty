@@ -1086,7 +1086,18 @@ int execute(const std::string &cmd,
         break;
       }
     }
+  }
 
+  std::cout << "IN EXECUTE:  '" << cmd << "'" << std::endl;
+  std::cout << "identified " << dispatcher_actions.size() << " dispatcher actions" << std::endl;
+
+  std::ofstream logfile(execute_logfile.c_str(), std::ofstream::out | std::ofstream::app);
+
+  //If we want windowed mode, but there is no display set.
+  if(window_mode && display_variable == "NO_DISPLAY_SET"){
+    std::cout << "ERROR: Attempting to grade a windowed gradeable with no display variable set." << std::endl;
+    logfile << "ERROR: Attempting to grade a windowed gradeable with no display variable set." << std::endl;
+    return -1;
   }
 
   if(window_mode){
@@ -1094,12 +1105,6 @@ int execute(const std::string &cmd,
     setenv("DISPLAY", display_variable.c_str(), 1);
     invalid_windows = snapshotOfActiveWindows();
   }
-
-
-  std::cout << "IN EXECUTE:  '" << cmd << "'" << std::endl;
-  std::cout << "identified " << dispatcher_actions.size() << " dispatcher actions" << std::endl;
-
-  std::ofstream logfile(execute_logfile.c_str(), std::ofstream::out | std::ofstream::app);
 
   // Forking to allow the setting of limits of RLIMITS on the command
   int result = -1;
