@@ -2606,3 +2606,22 @@ $(document).ready(function() {
     });
     checkSidebarCollapse();
 });
+
+function checkQRProgress(){
+    var url = buildUrl({'component': 'misc', 'page': 'check_qr_upload_progress'});
+    $.ajax({
+        url: url,
+        success: function(data) {
+            alert(data);
+            data = JSON.parse(data);
+            if(data['found'] === false) {
+                alert("NO QR JOB FOUND");
+            }else {
+                alert("FOUND QR JOB")
+            }
+        },
+        error: function(e) {
+            alert("Failed to check job queue");
+        }
+    })
+}

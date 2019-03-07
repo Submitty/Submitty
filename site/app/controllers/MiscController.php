@@ -49,6 +49,9 @@ class MiscController extends AbstractController {
             case 'modify_course_materials_file_time_stamp':
                 $this->modifyCourseMaterialsFileTimeStamp();
                 break;
+            case 'check_qr_upload_progress':
+                $this->checkQRUploadProgress();
+                break;
         }
     }
 
@@ -534,5 +537,25 @@ class MiscController extends AbstractController {
         if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
             return "Failed to write to file {$fp}";
         }
+    }
+
+    public function checkQRUploadProgress(){
+        $job_path = "/var/local/submitty/daemon_job_queue/";
+        $result = [];
+        $found = false;
+        try{
+            foreach(scandir($job_path) as $job){
+                //check if qr job by the file name since we don't have permission to parse the json
+                if(strpos($job, 'qr_upload') !== false){
+                    $result[] = $job;
+                }
+            }
+
+            $result = ['success' => true, 'found' => $found, 'job_data' => $result ];
+        }catch(Exception $e){
+            $result = ['error' => $e->getMessage()];
+        }
+        $this->core->getOutput()->renderJson($result);
+        return $this->core->getOutput()->getOutput();
     }
 }
