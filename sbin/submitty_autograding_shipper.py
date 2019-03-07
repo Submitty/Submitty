@@ -518,7 +518,7 @@ def launch_shippers(worker_status_map):
 
     # Clean up old files from previous shipping/autograding (any
     # partially completed work will be re-done)
-    for file_path in Path(INTERACTIVE_QUEUE).glob("GRADING_*")):
+    for file_path in Path(INTERACTIVE_QUEUE).glob("GRADING_*"):
         file_path = str(file_path)
         grade_items_logging.log_message(JOB_ID, message="Remove old queue file: " + file_path)
         os.remove(file_path)
