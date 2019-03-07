@@ -402,10 +402,9 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
 
     # Grab all the files currently in the folder, sorted by creation
     # time, and put them in the queue to be graded
-    files = sorted(Path(folder).glob('*'))
+    files = [str(f) for f in Path(folder).glob('*')]
     files_and_times = list()
     for f in files:
-        f = str(f)
         try:
             my_time = os.path.getctime(f)
         except:
