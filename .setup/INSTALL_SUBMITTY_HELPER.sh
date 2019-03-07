@@ -549,18 +549,6 @@ echo -e "Install python_submitty_utils"
 pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
 pip3 install .
 
-# fix permissions
-chmod -R 555 /usr/local/lib/python*/*
-chmod 555 /usr/lib/python*/dist-packages
-
-#Set up pam if not in worker mode.
-if [ "${WORKER}" == 0 ]; then
-    sudo chmod 500   /usr/local/lib/python*/dist-packages/pam.py*
-    sudo chown ${CGI_USER} /usr/local/lib/python*/dist-packages/pam.py*
-fi
-sudo chmod o+r /usr/local/lib/python*/dist-packages/submitty_utils*.egg
-sudo chmod o+r /usr/local/lib/python*/dist-packages/easy-install.pth
-
 popd > /dev/null
 
 

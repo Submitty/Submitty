@@ -260,14 +260,6 @@ apt-get install libzbar0 --yes
 pip3 install pyzbar
 pip3 install pdf2image
 
-sudo chmod -R 555 /usr/local/lib/python*/*
-sudo chmod 555 /usr/lib/python*/dist-packages
-sudo chmod 500 /usr/local/lib/python*/dist-packages/pam.py*
-
-if [ ${WORKER} == 0 ]; then
-    sudo chown ${CGI_USER} /usr/local/lib/python*/dist-packages/pam.py*
-fi
-
 #################################################################
 # JAR SETUP
 #################
