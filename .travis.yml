@@ -1,6 +1,6 @@
 language: php
 sudo: true
-dist: trusty
+dist: xenial
 
 cache:
   pip: true
