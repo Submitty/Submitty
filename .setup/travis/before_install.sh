@@ -1,9 +1,21 @@
 #!/usr/bin/env bash
 
+set -ev
+
 # Execute this script using source so that PATH is updated for the rest of the build
+# and that we have access to the variables
+
+# If jdk_switcher exists, use it to set our JVM version, else assume the machine has a sane default
+if [[ $(command -v jdk_switcher) ]]; then
+    # If we ever needed to get the source for enabling jdk_switcher
+    #wget https://raw.githubusercontent.com/michaelklishin/jdk_switcher/master/jdk_switcher.sh -O /tmp/jdk_switcher.sh
+    #source /tmp/jdk_switcher.sh
+    jdk_switcher use default
+fi
+
 
 # Set the Java version
-jdk_switcher use default
+
 # we have to unset this as the JVM will print a message on STDERR on any execution if this is set because somehow that makes sense I guess
 unset _JAVA_OPTIONS
 
