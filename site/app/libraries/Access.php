@@ -396,8 +396,12 @@ class Access {
                         $grading_checks = false;
                     }
                 } else {
-                    if (!$this->isGradedGradeableInGradingSections($graded_gradeable, $user)) {
-                        $grading_checks = false;
+                    //If graded gradeable is null then we're asking if we can grade anything in this gradeable, which we can.
+                    // If a graded gradeable is passed then we need to make sure we can grade that specific graded gradeable.
+                    if ($graded_gradeable !== null) {
+                        if (!$this->isGradedGradeableInGradingSections($graded_gradeable, $user)) {
+                            $grading_checks = false;
+                        }
                     }
                 }
             }
@@ -529,17 +533,12 @@ class Access {
 
     /**
      * Check if a Graded Gradeable's submitter is in a user's grading sections
-     * @param GradedGradeable|null $graded_gradeable
+     * @param GradedGradeable $graded_gradeable
      * @param User $user
      * @return bool If they are
      */
     public function isGradedGradeableInGradingSections($graded_gradeable, User $user) {
         $now = $this->core->getDateTimeNow();
-
-        //If it's not a user's gradeable then you can't check grading section
-        if ($graded_gradeable === null) {
-            return true; // TODO: this seems wrong
-        }
 
         $gradeable = $graded_gradeable->getGradeable();
 
