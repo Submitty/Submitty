@@ -23,7 +23,7 @@ fi
 # copy the website from the repo. We don't need the tests directory in production and then
 # we don't want vendor as if it exists, it was generated locally for testing purposes, so
 # we don't want it
-rsync -rtz --exclude 'tests' --exclude 'vendor' ${SUBMITTY_REPOSITORY}/site   ${SUBMITTY_INSTALL_DIR}
+rsync -rtz --exclude 'tests' --exclude '/site/vendor' ${SUBMITTY_REPOSITORY}/site   ${SUBMITTY_INSTALL_DIR}
 
 # clear old twig cache
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/twig" ]; then
@@ -85,6 +85,12 @@ crontab -u submitty_daemon /tmp/cron_jobs
 rm -f /tmp/cron_jobs
 
 # "other" can read & execute these files
+find ${SUBMITTY_INSTALL_DIR}/site/public/vendor -type f -name \*.ttf -exec chmod o+rx {} \;
+find ${SUBMITTY_INSTALL_DIR}/site/public/vendor -type f -name \*.eot -exec chmod o+rx {} \;
+find ${SUBMITTY_INSTALL_DIR}/site/public/vendor -type f -name \*.svg -exec chmod o+rx {} \;
+find ${SUBMITTY_INSTALL_DIR}/site/public/vendor -type f -name \*.woff -exec chmod o+rx {} \;
+find ${SUBMITTY_INSTALL_DIR}/site/public/vendor -type f -name \*.woff2 -exec chmod o+rx {} \;
+
 find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.js -exec chmod o+rx {} \;
 find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -type f -name \*.cgi -exec chmod u+x {} \;
 
