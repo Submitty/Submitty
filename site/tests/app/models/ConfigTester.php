@@ -207,7 +207,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'vcs_type' => 'git',
             'modified' => false,
             'hidden_details' => null,
-            'regrade_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
+            'regrade_message' => 'Warning: Frivolous regrade requests may lead to grade deductions or lost late days',
             'course_ini' => [
                 'database_details' => [
                     'dbname' => 'submitty_s17_csci0000'
