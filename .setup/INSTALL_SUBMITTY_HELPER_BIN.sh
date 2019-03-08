@@ -27,7 +27,7 @@ chmod 755 ${SUBMITTY_INSTALL_DIR}/bin
 rsync -rtz  ${SUBMITTY_REPOSITORY}/bin/*   ${SUBMITTY_INSTALL_DIR}/bin/
 
 # all course builders (instructors & head TAs) need read/execute access to these scripts
-array=( grading_done.py left_right_parse.py read_iclicker_ids.py regrade.py )
+array=( grading_done.py left_right_parse.py read_iclicker_ids.py regrade.py extract_notes_page.py )
 for i in "${array[@]}"; do
     chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/${i}
     chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/${i}
@@ -70,7 +70,7 @@ chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/authentication.py
 chmod 555 ${SUBMITTY_INSTALL_DIR}/sbin/killall.py
 
 # DAEMON_USER only things
-array=( build_config_upload.py run_lichen_plagiarism.py sendEmail.py submitty_autograding_shipper.py submitty_autograding_worker.py submitty_daemon_jobs autograder)
+array=( build_config_upload.py run_lichen_plagiarism.py send_email.py submitty_autograding_shipper.py submitty_autograding_worker.py submitty_daemon_jobs autograder )
 for i in "${array[@]}"; do
     chown -R root:"${DAEMON_GROUP}" ${SUBMITTY_INSTALL_DIR}/sbin/${i}
     chmod -R 750 ${SUBMITTY_INSTALL_DIR}/sbin/${i}

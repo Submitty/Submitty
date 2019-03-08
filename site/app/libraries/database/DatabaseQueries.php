@@ -3302,7 +3302,9 @@ AND gc_id IN (
             $graded_component->getComment(),
             $graded_component->getGraderId(),
             $graded_component->getGradedVersion(),
-            DateUtils::dateTimeToString($graded_component->getGradeTime())
+            DateUtils::dateTimeToString($graded_component->getGradeTime()),
+            $graded_component->getVerifierId() !== '' ? $graded_component->getVerifierId() : null,
+            !is_null($graded_component->getVerifyTime()) ? DateUtils::dateTimeToString($graded_component->getVerifyTime()) : null
         ];
         $query = "
             INSERT INTO gradeable_component_data(
@@ -3312,8 +3314,10 @@ AND gc_id IN (
               gcd_component_comment,
               gcd_grader_id,
               gcd_graded_version,
-              gcd_grade_time)
-            VALUES(?, ?, ?, ?, ?, ?, ?)";
+              gcd_grade_time,
+              gcd_verifier_id,
+              gcd_verify_time)
+            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $this->course_db->query($query, $param);
     }
 
@@ -3330,6 +3334,8 @@ AND gc_id IN (
                     $graded_component->getGradedVersion(),
                     DateUtils::dateTimeToString($graded_component->getGradeTime()),
                     $graded_component->getGraderId(),
+                    $graded_component->getVerifierId() !== '' ? $graded_component->getVerifierId() : null,
+                    !is_null($graded_component->getVerifyTime()) ? DateUtils::dateTimeToString($graded_component->getVerifyTime()) : null,
                     $graded_component->getTaGradedGradeable()->getId(),
                     $graded_component->getComponentId()
                 ];
@@ -3339,7 +3345,9 @@ AND gc_id IN (
                       gcd_component_comment=?,
                       gcd_graded_version=?,
                       gcd_grade_time=?,
-                      gcd_grader_id=?
+                      gcd_grader_id=?,
+                      gcd_verifier_id=?,
+                      gcd_verify_time = ?
                     WHERE gd_id=? AND gc_id=?";
             }
             else {
@@ -3510,5 +3518,32 @@ AND gc_id IN (
         $this->course_db->query('SELECT EXISTS (SELECT g_id FROM electronic_gradeable_data WHERE g_id=? AND (user_id=? OR team_id=?))',
             [$gradeable->getId(), $submitter->getId(), $submitter->getId()]);
         return $this->course_db->row()['exists'] ?? false;
+    }
+
+    /**
+     * Gets a list of emails for all active particpants in a course  
+     */
+    public function getClassEmailList(){
+        $parameters = array();
+        $this->course_db->query('SELECT user_email FROM users WHERE user_group != 4 OR registration_section IS NOT null', $parameters);
+
+        return $this->course_db->rows();
+    }
+    
+    /**
+     * Queues an email to be sent by email job
+     * @param array $email_data
+     * @param string $recipient  
+     */ 
+    public function createEmail($email_data, $recipient){
+        $parameters = array($recipient, $email_data["subject"], $email_data["body"]);
+
+        $this->submitty_db->query("
+            INSERT INTO emails(
+              recipient,
+              subject,
+              body,
+              created)
+            VALUES(?, ?, ?, NOW())", $parameters);
     }
 }

@@ -5,7 +5,7 @@
       data-graded_version="{{ graded_component.graded_version }}"
       data-grade_time="{{ graded_component.grade_time }}"
       data-grader_id="{{ graded_component.grader_id }}"
-      data-verifier_id="" hidden></span>
+      data-verifier_id="{{ graded_component.verifier_id }}" hidden></span>
 
 {# Note: the ternery operator cannot consistently be used to insert the result of a macro into the output,
     so we need to use the long-form {% if <condition> %}{{ call_macro() }}{% endif %} #}
@@ -52,7 +52,7 @@
     {% if graded_component.grader_id is defined %}
         Graded by {{ graded_component.grader_id }}
         {% if graded_component.verifier_id is defined %}
-            / {{ graded_component.verifier_id }}
+           <br> Verified by {{ graded_component.verifier_id }}
         {% endif %}
     {% else %}
         Ungraded!

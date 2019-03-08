@@ -13,7 +13,7 @@ import random
 import socket
 import zipfile
 
-from submitty_utils import dateutils, glob
+from submitty_utils import dateutils
 
 from . import grade_item, insert_database_version_data, grade_items_logging, write_grade_history, CONFIG_PATH
 

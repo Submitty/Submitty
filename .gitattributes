@@ -51,3 +51,7 @@ setcsvfields eol=lf
 *.cls binary
 *.tex binary
 *.out binary
+*.eot binary
+*.ttf binary
+*.woff binary
+*.woff2 binary

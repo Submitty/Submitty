@@ -131,6 +131,39 @@ DATABASE_PASSWORD=submitty_dbuser
 source ${CURRENT_DIR}/distro_setup/setup_distro.sh
 
 #################################################################
+# PYTHON PACKAGE SETUP
+#########################
+
+pip3 install -U pip
+pip3 install python-pam
+pip3 install PyYAML
+pip3 install psycopg2-binary
+pip3 install sqlalchemy
+pip3 install pylint
+pip3 install psutil
+pip3 install python-dateutil
+pip3 install watchdog
+pip3 install xlsx2csv
+pip3 install pause
+pip3 install paramiko
+pip3 install tzlocal
+pip3 install PyPDF2
+pip3 install distro
+
+# for Lichen / Plagiarism Detection
+pip3 install parso
+
+# Python3 implementation of python-clang bindings (may not work < 6.0)
+pip3 install clang
+
+#libraries for QR code processing:
+#install DLL for zbar
+apt-get install libzbar0 --yes
+
+pip3 install pyzbar
+pip3 install pdf2image
+
+#################################################################
 # STACK SETUP
 #################
 
@@ -231,43 +264,6 @@ fi
 
 usermod -a -G docker "${DAEMON_USER}"
 
-pip3 install -U pip
-pip3 install python-pam
-pip3 install PyYAML
-pip3 install psycopg2-binary
-pip3 install sqlalchemy
-pip3 install pylint
-pip3 install psutil
-pip3 install python-dateutil
-pip3 install watchdog
-pip3 install xlsx2csv
-pip3 install pause
-pip3 install paramiko
-pip3 install tzlocal
-pip3 install PyPDF2
-pip3 install distro
-
-# for Lichen / Plagiarism Detection
-pip3 install parso
-
-# Python3 implementation of python-clang bindings (may not work < 6.0)
-pip3 install clang
-
-#libraries for QR code processing:
-#install DLL for zbar
-apt-get install libzbar0 --yes
-
-pip3 install pyzbar
-pip3 install pdf2image
-
-sudo chmod -R 555 /usr/local/lib/python*/*
-sudo chmod 555 /usr/lib/python*/dist-packages
-sudo chmod 500 /usr/local/lib/python*/dist-packages/pam.py*
-
-if [ ${WORKER} == 0 ]; then
-    sudo chown ${CGI_USER} /usr/local/lib/python*/dist-packages/pam.py*
-fi
-
 #################################################################
 # JAR SETUP
 #################
@@ -347,6 +343,24 @@ rm -rf /tmp/DrMemory*
 
 chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/drmemory
 chmod -R 755 ${SUBMITTY_INSTALL_DIR}/drmemory
+
+popd > /dev/null
+
+#################################################################
+# TCLAPP SETUP
+#################
+pushd /tmp > /dev/null
+
+echo "Getting TCLAPP"
+wget https://sourceforge.net/projects/tclap/files/tclap-1.2.2.tar.gz -o /dev/null > /dev/null 2>&1
+tar -xpzf tclap-1.2.2.tar.gz
+rm /tmp/tclap-1.2.2.tar.gz
+cd tclap-1.2.2/
+bash configure
+make
+make install
+cd /tmp
+rm -rf /tmp/tclap-1.2.2
 
 popd > /dev/null
 
@@ -591,7 +605,7 @@ if [ ${WORKER} == 0 ]; then
         echo "Creating submitty master database"
         su postgres -c "psql -c \"CREATE DATABASE submitty WITH OWNER ${DB_USER}\""
         su postgres -c "psql submitty -c \"ALTER SCHEMA public OWNER TO ${DB_USER}\""
-        python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
+        python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -e master -e system migrate --initial
     else
         echo "Submitty master database already exists"
     fi
