@@ -711,31 +711,33 @@ class Access {
                                 return false;
                             }
                         }
+                    } else {
+                        $args["gradeable"] = $this->core->getQueries()->getGradeableConfig($value);
                     }
-                    // TODO: is this redundant?
-                    $args["gradeable"] = $this->core->getQueries()->getGradeableConfig($value);
                     break;
                 case "submitter":
                     $submitter = $this->core->getQueries()->getSubmitterById($value);
                     if ($submitter !== null) {
                         $args["submitter"] = $submitter;
-                        if (array_key_exists("gradeable", $subparts)) {
+                        if (array_key_exists("graded_gradeable", $subparts)) {
                             //If we already have a graded gradeable in the args, make sure this file
                             // actually belongs to it
-                            $graded_gradeable = $args["graded_gradeable"] ?? $args["gradeable"] ?? null;
-                            if ($graded_gradeable === null || !($graded_gradeable instanceof GradedGradeable)) {
-                                return false;
-                            }
+                            $graded_gradeable = $args["graded_gradeable"];
+                        } else if (array_key_exists("gradeable", $args)) {
+                            $gradeable = $args["gradeable"];
+                            $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($gradeable, $submitter);
+                            $args["graded_gradeable"] = $graded_gradeable;
+                        } else {
+                            return false;
+                        }
+                        if ($graded_gradeable === null || !($graded_gradeable instanceof GradedGradeable)) {
+                            return false;
+                        }
 
-                            //Check that the given graded gradeable is the same as the
-                            // one that this file is part of.
-                            if (!$this->isGradedGradeableBySubmitter($graded_gradeable, $submitter)) {
-                                return false;
-                            }
-
-                            // TODO: this also seems weird and redundant
-                            $args["graded_gradeable"] = $this->core->getQueries()->getGradedGradeableForSubmitter($graded_gradeable->getGradeable(), $submitter);
-                            $args["gradeable"] = $graded_gradeable->getGradeable();
+                        //Check that the given graded gradeable is the same as the
+                        // one that this file is part of.
+                        if (!$this->isGradedGradeableBySubmitter($graded_gradeable, $submitter)) {
+                            return false;
                         }
                     }
                     break;
