@@ -124,12 +124,16 @@ class GradingQueueTester extends BaseUnitTest {
 
     public function testReloadQueue() {
         $queue = new GradingQueue('s18', 'csci1100', $this->path);
-        $this->createAutogradedVersion();
+        $autograded_version1 = $this->createAutogradedVersion();
         $this->assertEquals(1, $queue->getQueueCount());
+        $this->assertEquals(1, $queue->getQueueStatus($autograded_version1));
         $this->assertEquals(0, $queue->getGradingCount());
-        $this->createAutogradedVersion();
+        $autograded_version2 = $this->createAutogradedVersion();
         $this->assertEquals(1, $queue->getQueueCount());
+        $this->assertEquals(1, $queue->getQueueStatus($autograded_version1));
         $queue->reloadQueue();
         $this->assertEquals(2, $queue->getQueueCount());
+        $this->assertEquals(1, $queue->getQueueStatus($autograded_version1));
+        $this->assertEquals(2, $queue->getQueueStatus($autograded_version2));
     }
 }
