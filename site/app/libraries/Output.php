@@ -77,14 +77,10 @@ class Output {
     }
 
     public function setInternalResources() {
-        $this->addCss('https://use.fontawesome.com/releases/v5.6.3/css/solid.css');
-        $this->addCss('https://use.fontawesome.com/releases/v5.6.3/css/regular.css');
-        $this->addCss('https://use.fontawesome.com/releases/v5.6.3/css/brands.css');
-        $this->addCss('https://use.fontawesome.com/releases/v5.6.3/css/fontawesome.css');
-
-        $this->addCss("https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic,700italic");
-        $this->addCss("https://fonts.googleapis.com/css?family=PT+Sans:700,700italic");
-        $this->addCss("https://fonts.googleapis.com/css?family=Inconsolata");
+        $this->addInternalCss('all.min.css', FileUtils::joinPaths('vendor', 'fontawesome', 'css'));
+        $this->addInternalCss('inconsolata.css', FileUtils::joinPaths('vendor', 'google'));
+        $this->addInternalCss('pt_sans.css', FileUtils::joinPaths('vendor', 'google'));
+        $this->addInternalCss('source_sans_pro.css', FileUtils::joinPaths('vendor', 'google'));
 
         $this->addInternalCss('jquery-ui.min.css');
         $this->addInternalCss('server.css');
@@ -389,10 +385,11 @@ class Output {
         return $errorPage;
     }
     
-    public function addInternalCss($file) {
-        $timestamp = filemtime(FileUtils::joinPaths(__DIR__, '..', '..', 'public', 'css', $file));
-        $this->addCss($this->core->getConfig()->getBaseUrl()."css/".$file, $timestamp);
+    public function addInternalCss($file, $folder='css') {
+        $timestamp = filemtime(FileUtils::joinPaths(__DIR__, '..', '..', 'public', $folder, $file));
+        $this->addCss($this->core->getConfig()->getBaseUrl().$folder."/".$file, $timestamp);
     }
+    
  
     public function addCss($url, $timestamp=0) {
         $this->css[] = $url.(($timestamp !== 0) ? "?v={$timestamp}" : '');
