@@ -62,6 +62,8 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "sort",                    "/usr/bin/sort" },
     { "grep",                    "/bin/grep" },
     { "sed",                     "/bin/sed" },
+    { "pwd",                     "/bin/pwd" },
+    { "env",                     "/usr/bin/env" },
     { "pdftotext",               "/usr/bin/pdftotext" },
     { "pdflatex",                "/usr/bin/pdflatex" },
     { "wc",                      "/usr/bin/wc" },
@@ -1062,7 +1064,8 @@ int execute(const std::string &cmd,
       const nlohmann::json &test_case_limits,
       const nlohmann::json &assignment_limits,
       const nlohmann::json &whole_config,
-      const bool windowed) {
+      const bool windowed,
+      const std::string display_variable) {
 
   std::set<std::string> invalid_windows;
   bool window_mode = windowed; //Tells us if the process is expected to spawn a window. (additional support later) 
@@ -1090,7 +1093,7 @@ int execute(const std::string &cmd,
     std::cout <<"Window mode activated." << std::endl;
     char* my_display = getenv("DISPLAY"); //The display environment variable is unset. This sets it for child and parent.
     if (my_display == NULL) {
-      setenv("DISPLAY", ":0", 1);
+      setenv("DISPLAY", display_variable.c_str(), 1);
     }
     window_mode = true;
     invalid_windows = snapshotOfActiveWindows();
@@ -1172,7 +1175,6 @@ int execute(const std::string &cmd,
       std::string windowName; 
       int rss_memory = 0;
       int actions_taken = 0;   
-      int number_of_screenshots = 0;
       do {
           //dispatcher actions
           if(!input_queue.empty()){
@@ -1264,13 +1266,13 @@ int execute(const std::string &cmd,
             if (!time_kill && !memory_kill){
               //if we expect a window, and the window exists, and we still have actions to take
               if(window_mode && windowName != "" && windowExists(windowName) && actions_taken < actions.size()){ 
-                takeAction(actions, actions_taken, number_of_screenshots, windowName, 
+                takeAction(actions, actions_taken, windowName, 
                   childPID, elapsed, next_checkpoint, seconds_to_run, rss_memory, allowed_rss_memory, 
                   memory_kill, time_kill, logfile); //Takes each action on the window. Requires delay parameters to do delays.
               }
               //If we do not expect a window and we still have actions to take
               else if(!window_mode && actions_taken < actions.size()){ 
-                takeAction(actions, actions_taken, number_of_screenshots, windowName, 
+                takeAction(actions, actions_taken, windowName, 
                   childPID, elapsed, next_checkpoint, seconds_to_run, rss_memory, allowed_rss_memory, 
                   memory_kill, time_kill, logfile); //Takes each action on the window. Requires delay parameters to do delays.
               }

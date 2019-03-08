@@ -213,6 +213,10 @@ class ElectronicGraderController extends GradingController {
      * @param bool verify all components or not 
      */
     private function ajaxVerifyComponent($verify_all = false) {
+        if(!$this->core->getAccess()->canI("grading.electronic.verify_grader")){
+            $this->core->getOutput()->renderJsonFail('You do not have permission to verify marks');
+            return;
+        }
         $gradeable_id = $_POST['gradeable_id'] ?? '';
         $anon_id = $_POST['anon_id'] ?? '';
 
@@ -1025,7 +1029,7 @@ class ElectronicGraderController extends GradingController {
             if ($graded_component === null) {
                 continue;
             }
-            if ($graded_component->getGrader()->getId() !== $this->core->getUser()->getId() && $graded_component->getVerifierId() == '') {
+            if ($graded_component->getGrader()->getId() !== $this->core->getUser()->getId() && $graded_component->getVerifierId() === '') {
                 $show_verify_all = true;
                 break;
             }
