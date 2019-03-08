@@ -14,5 +14,5 @@ def up(config, database, semester, course):
         if not config.has_option('course_details', 'seating_only_for_instructor'):
             config.set('course_details', 'seating_only_for_instructor', 'false')
 
-        with open(str(config_file), 'w') as configfile:
+        with config_file.open('w') as configfile:
             config.write(configfile)
