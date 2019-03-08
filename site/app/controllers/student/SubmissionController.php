@@ -10,6 +10,7 @@ use app\libraries\GradeableType;
 use app\libraries\Logger;
 use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
+use app\models\Notification;
 use app\controllers\grading\ElectronicGraderController;
 
 
@@ -129,7 +130,7 @@ class SubmissionController extends AbstractController {
 
         try {
             $this->core->getQueries()->insertNewRegradeRequest($graded_gradeable, $user, $content);
-            $this->createRegradeRequestNotification($graded_gradeable, $user, $content);
+            $this->createRegradeRequestNotification("creation", $graded_gradeable, $user, $content);
             $this->core->getOutput()->renderJsonSuccess();
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
@@ -170,6 +171,7 @@ class SubmissionController extends AbstractController {
         try {
             $this->core->getQueries()->insertNewRegradePost($graded_gradeable->getRegradeRequest()->getId(), $user->getId(), $content);
             $graded_gradeable->getRegradeRequest()->setStatus($status);
+            $this->createRegradeRequestNotification("response", $graded_gradeable, $user, $content);
             $this->core->getQueries()->saveRegradeRequest($graded_gradeable->getRegradeRequest());
             $this->core->getOutput()->renderJsonSuccess();
         } catch (\InvalidArgumentException $e) {
@@ -260,30 +262,71 @@ class SubmissionController extends AbstractController {
         }
     }
 
-    private function createRegradeRequestNotification($graded_gradeable, $user, $content) {
+    private function createRegradeRequestNotification($request_type, $graded_gradeable, $user, $content) {
         $course = $this->core->getConfig()->getCourse();
         $gradeable_name = $graded_gradeable->getGradeable()->getName();
 
-        $notification_subject = "[Submitty $course] New Regrade Request";
-        $notification_body = "A student has submitted a grade inquiry for gradeable $gradeable_name.\nStudent writes:\n $content";
-
-        $regrade_email_data = [
-          "subject" => $notification_subject,
-          "body" => $notification_body
-        ];
-
-        //for now, we don't have a way to capture grader by component.. just grab all graders associated with the gradeable
+        //TODO: in the future, send notification to grader per component
         if($graded_gradeable->hasTaGradingInfo()){
           $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
           $graders = $ta_graded_gradeable->getGraders();
 
-          foreach($graders as $grader){
-            $grader_email = $grader->getEmail();
-            $this->core->getQueries()->createEmail($regrade_email_data, $grader_email);
-          }
-        }
+          if($request_type == "creation") {
+            $notification_subject = "[Submitty $course] New Regrade Request";
+            $notification_body = "A student has submitted a grade inquiry for gradeable $gradeable_name.\nStudent writes:\n $content";
 
+            $regrade_email_data = [
+              "subject" => $notification_subject,
+              "body" => $notification_body
+            ];
+
+            foreach($graders as $grader){
+              $grader_email = $grader->getEmail();
+              $this->core->getQueries()->createEmail($regrade_email_data, $grader_email);
+            }
+
+        }
+        else if($request_type == "response"){
+          foreach($graders as $grader) {
+            if($grader->getId() === $user->getId()){
+
+                $notification_subject = "[Submitty $course] Grade Inquiry Reply";
+                $notification_body = "A grader has reponded to your grade inquiry.\n$content";
+
+                $regrade_email_data = [
+                  "subject" => $notification_subject,
+                  "body" => $notification_body
+                ];
+
+
+                $submitter = $graded_gradeable->getSubmitter();
+                if($submitter->isTeam()){
+                  $submitting_team = $submitter->getTeam()->getMemberUsers();
+                  foreach($submitting_user as $submitting_team){
+                    $this->core->addErrorMessage("yooooooo");
+                    $user_email = $submitting_user->getEmail();
+                    $this->core->getQueries()->createEmail($regrade_email_data, $user_email);
+                  }
+                }
+                else{
+                  $user_email = $submitter->getUser()->getEmail();
+                  $this->core->getQueries()->createEmail($regrade_email_data, $user_email);
+
+                  //TODO: create push notification as well
+                  $notification = new Notification($this->core, array('component' => 'student', 'type' => $announcment ? 'new_announcement' : 'new_thread', 'thread_id' => $id));
+                  $this->core->getQueries()->pushNotification($notification);
+                }
+
+
+                break;
+            }
+          }
+
+
+        }
+      }
     }
+
     private function showHomeworkPage() {
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
