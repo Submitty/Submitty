@@ -123,6 +123,19 @@
                  $(this).closest('form').trigger('reinitialize.areYouSure');"
                      class="btn btn-default close-button">Cancel</a>
         {% endif %}
+        {% if show_submit_unresolve %}
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $("#submit_resolve").on('click', function(){
+                    var form_action = $(this).closest('form').attr('action');
+                    $(this).closest('form').attr('action', form_action + "_unresolve");
+                    $(this).closest('form').submit();
+                    $(this).closest('form').attr('action', form_action);
+                });
+            });
+        </script>
+            <input type="button" style="display:inline-block;" name="post" id="submit_resolve" value="Submit Reply to All & Mark as Unresolved" class="btn btn-primary" />
+        {% endif %}
         <input type="submit" style="display:inline-block;" name="post" value="{{ submit_label }}" class="btn btn-primary" />
     </span>
 </div>

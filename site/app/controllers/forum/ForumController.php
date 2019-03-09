@@ -41,6 +41,10 @@ class ForumController extends AbstractController {
             case 'publish_post':
                 $this->publishPost();
                 break;
+            case 'publish_post_unresolve':
+                $this->changeThreadStatus(-1);
+                $this->publishPost();
+                break;
             case 'delete_post':
                 $this->alterPost(0);
                 break;

@@ -501,6 +501,7 @@ HTML;
 							"attachment_script" => true,
 							"show_anon" => true,
 							"submit_label" => "Submit Reply to All",
+							"show_submit_unresolve" => ($this->core->getQueries()->getResolveState($thread_id)[0]['status'] == 1),
 						]);
 						$return .= <<<HTML
 	            	</form>
@@ -932,6 +933,7 @@ HTML;
 							"post_box_id" => $post_box_id,
 							"show_anon" => true,
 							"submit_label" => "Submit Reply to {$visible_username}",
+							"show_submit_unresolve" => false,
 						]);
 						$return .= <<<HTML
 	            	</form>
@@ -1029,6 +1031,7 @@ HTML;
 					"show_announcement" => true,
 					"show_editcat" => true,
 					"submit_label" => "Submit Post",
+					"show_submit_unresolve" => false,
 				]);
 			$return .= <<<HTML
 			</form>
