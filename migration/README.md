@@ -12,6 +12,8 @@ distinct environments:
 
 where each environment has its own set of migration files.
 
+See https://submitty.org/developer/migrations for high-level developer usage documentation.
+
 Requirements
 ------------
 * Python 3.4+
