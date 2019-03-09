@@ -35,6 +35,7 @@ def create_folder(folder):
         os.makedirs(folder, mode=0o770)
         os.chdir(folder)
         os.system('git init --bare --shared')
+        os.system('git config --file config http.receivepack true')
         for root, dirs, files in os.walk(folder):
             for entry in files + dirs:
                 shutil.chown(os.path.join(root, entry), group=DAEMONCGI_GROUP)
