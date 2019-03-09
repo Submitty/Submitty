@@ -39,6 +39,17 @@
 			</button>
 		</form>
 	{% endif %}
+		<label>Unread Only <input type="checkbox" id="unreadToggle" checked></label>
 
 </div>
+<script>
+	$('#unreadToggle').on('change',function () {
+		if($(this).prop("checked")==true){
+			$('.viewed').css({"display":"none"});
+		}
+		else{
+			$('.viewed').css({"display":"block"});
+		}
+	})
+</script>
 <hr/>
