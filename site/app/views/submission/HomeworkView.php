@@ -368,12 +368,13 @@ class HomeworkView extends AbstractView {
         $count = 1;
         $count_array = array();
         $use_qr_codes = false;
+        $json_file = '';
         foreach ($all_directories as $timestamp => $content) {
             $dir_files = $content['files'];
-            $json_file = '';
             foreach ($dir_files as $filename => $details) {
                 if($filename === 'decoded.json'){
                     $json_file = $details['path'];
+                    $use_qr_codes = true;
                 }
                 $clean_timestamp = str_replace('_', ' ', $timestamp);
                 $path = rawurlencode(htmlspecialchars($details['path']));
@@ -437,23 +438,22 @@ class HomeworkView extends AbstractView {
                 ];
                 $count++;
             }
-            $json_data = ($json_file !== '') ? FileUtils::readJsonFile($json_file) : '';
-            //check for invalid ID's if using bulk upload with QR codes
-            if($json_data != ''){
-                $use_qr_codes = true;
-                for($i = 0; $i < count($files); $i++){
-                    $filename = rawurldecode($files[$i]['filename_full']);
-                    foreach ($json_data as $qr_file) {
-                        if($qr_file['pdf_name'] === $filename){
-                            $is_valid = !$this->core->getQueries()->getUserById($qr_file['id']) ? false:true;
-                            $files[$i] += [
-                                'page_count' => $qr_file['page_count'],
-                                'user_id'    => [
-                                    'id' => $qr_file['id'], 
-                                    'valid' => $is_valid
-                                ]
-                            ];
-                        }
+        }
+        //check for invalid ID's if using bulk upload with QR codes
+        if($use_qr_codes){
+            $json_data = FileUtils::readJsonFile($json_file);
+            for($i = 0; $i < count($files); $i++){
+                $filename = rawurldecode($files[$i]['filename_full']);
+                foreach ($json_data as $qr_file) {
+                    if($qr_file['pdf_name'] === $filename){
+                        $is_valid = !$this->core->getQueries()->getUserById($qr_file['id']) ? false:true;
+                        $files[$i] += [
+                            'page_count' => $qr_file['page_count'],
+                            'user_id'    => [
+                                'id' => $qr_file['id'], 
+                                'valid' => $is_valid
+                            ]
+                        ];
                     }
                 }
             }

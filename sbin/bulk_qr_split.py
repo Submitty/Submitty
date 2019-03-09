@@ -97,11 +97,16 @@ def main():
         output[id_index-1]['id'] = data
         output[id_index-1]['page_count'] = page_count
         output[id_index-1]['pdf_name'] = output_filename
+
+        write_mode = 'wb'
+        if os.path.exists('decoded.json'):
+            write_mode = 'a'
+
         with open(output_filename,'wb') as out:
                 pdf_writer.write(out)
 
-            #write json to file for parsing page counts and decoded ids later
-        with open('decoded.json', 'w') as out:
+        #write json to file for parsing page counts and decoded ids later
+        with open('decoded.json', write_mode) as out:
             json.dump(output, out)
 
     except Exception:

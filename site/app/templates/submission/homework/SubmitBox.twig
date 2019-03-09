@@ -269,7 +269,8 @@
 </div>
 
 {% if core.getUser().accessFullGrading() %}
-    {% include 'submission/homework/PreviousSubmissionForm.twig' %}
+    {% include 'submission/homework/PreviousSubmissionForm.twig' %}            
+    {% include 'submission/homework/QRProgressBox.twig' %}
 {% endif %}
 
 <script type="text/javascript">

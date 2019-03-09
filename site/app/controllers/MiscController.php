@@ -547,6 +547,7 @@ class MiscController extends AbstractController {
             foreach(scandir($job_path) as $job){
                 //check if qr job by the file name since we don't have permission to parse the json
                 if(strpos($job, 'qr_upload') !== false){
+                    $found = true;
                     $result[] = $job;
                 }
             }

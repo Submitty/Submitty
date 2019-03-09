@@ -2612,16 +2612,17 @@ function checkQRProgress(){
     $.ajax({
         url: url,
         success: function(data) {
-            alert(data);
             data = JSON.parse(data);
+            console.log(data);
+            var result = {};
             if(data['found'] === false) {
-                alert("NO QR JOB FOUND");
+                //
             }else {
-                alert("FOUND QR JOB")
+                updateQRProgress(data['job_data']);
             }
         },
         error: function(e) {
-            alert("Failed to check job queue");
+            console.log("Failed to check job queue");
         }
     })
 }

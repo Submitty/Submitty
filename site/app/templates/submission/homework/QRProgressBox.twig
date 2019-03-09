@@ -1,0 +1,28 @@
+<div class="content">
+	<h3>QR processing progress</h3>
+	<h4 style="float:left;">Processing</h4>
+	<h4 style="float:right;">Ready to assign</h4>
+	<br>
+	<div class="box col-md-6" id = "processing_box">
+
+	</div>
+
+	<div class="box col-md-6" id = "assign_box">
+
+	</div>
+</div>
+<script type="text/javascript">
+	var processing_box, assign_box;
+	window.onload = function() {
+		processing_box = document.getElementById("processing_box");
+		assign_box = document.getElementById("assign_box");
+
+		checkQRProgress();
+    }
+    function updateQRProgress(files){
+    	for (var i = files.length - 1; i >= 0; i--) {
+    		var new_file = document.createTextNode(files[i]);
+    		processing_box.appendChild(new_file);
+    	}
+    }
+</script>
