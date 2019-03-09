@@ -102,7 +102,7 @@ popd
 
 # JaCoCo is a potential replacement for EMMA
 echo "Getting JaCoCo..."
-JACOCO_VER=0.8.3
+JACOCO_VER=0.8.0
 pushd ${SUBMITTY_INSTALL_DIR}/java_tools/jacoco
 travis_retry wget https://github.com/jacoco/jacoco/releases/download/v${JACOCO_VER}/jacoco-${JACOCO_VER}.zip
 mkdir jacoco-${JACOCO_VER}
