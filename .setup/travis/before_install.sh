@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -ev
-
 # Execute this script using source so that PATH is updated for the rest of the build
 # and that we have access to the variables
 
@@ -12,7 +10,6 @@ if [[ $(command -v jdk_switcher) ]]; then
     #source /tmp/jdk_switcher.sh
     jdk_switcher use default
 fi
-
 
 # Set the Java version
 
