@@ -100,7 +100,7 @@ ${DISTRO_LINE}
 ##    ${SUBMISSION_URL}/git (git)                     ##
 ##                                                        ##
 ##  The database can be accessed on the host machine at   ##
-##   localhost:15432                                      ##
+##   localhost:16432                                      ##
 ##                                                        ##
 ##  Happy developing!                                     ##
 ############################################################
