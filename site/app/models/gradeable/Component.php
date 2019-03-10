@@ -237,7 +237,7 @@ class Component extends AbstractModel {
     /**
      * Asserts that the point values are valid.  See `setPoints` docs for details
      *
-     * @param array $points An complete array of floats (or nulls) indexed by component point property
+     * @param array $points A complete array of floats (or nulls) indexed by component point property
      */
     private function assertPoints(array $points) {
         $errors = array();

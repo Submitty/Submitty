@@ -2055,15 +2055,47 @@ function onClickCountDown(me) {
 
 /**
  * Callback for changing on the point values for a component
+ * Does not change point value if not divisible by precision
  * @param me DOM element of the input box
  */
 function onComponentPointsChange(me) {
-    refreshInstructorEditComponentHeader(getComponentIdFromDOMElement(me), true)
-        .catch(function (err) {
-            console.error(err);
-            alert('Failed to refresh component! ' + err.message);
-        });
+    if (dividesEvenly($(me).val(), getPointPrecision())) {
+        $(me).css("background-color", "#ffffff");
+        refreshInstructorEditComponentHeader(getComponentIdFromDOMElement(me), true)
+            .catch(function (err) {
+                console.error(err);
+                alert('Failed to refresh component! ' + err.message);
+            });
+    } else {
+
+        // Make box red to indicate error
+        $(me).css("background-color", "#ff7777");
+    }
 }
+
+/**
+ * Returns true if dividend is evenly divisible by divisor, false otherwise
+ * @param {number} dividend
+ * @param {number} divisor
+ * @returns {boolean}
+ */
+function dividesEvenly(dividend, divisor) {
+    var mult = Math.max(multiplier(dividend), multiplier(divisor));
+    return ((dividend * mult) % (divisor * mult) === 0);
+}
+
+/**
+ * Returns power of ten to multiply by to make num an integer
+ * @param {number} num
+ * @returns {int}
+ */
+function multiplier(num) {
+    var parts = num.toString().split('.');
+    if (parts.length < 2) { // not a decimal
+      return 1;
+    }
+    return Math.pow(10, parts[1].length);
+  }
 
 /**
  * Callback for changing the title for a component
