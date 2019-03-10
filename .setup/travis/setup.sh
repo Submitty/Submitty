@@ -49,6 +49,7 @@ adduser ${PHP_USER} submitty_daemonphp
 adduser submitty_daemon submitty_daemonphp
 adduser ${CGI_USER} submitty_daemoncgi
 adduser submitty_daemon submitty_daemoncgi
+adduser submitty_daemon docker
 useradd -p $(openssl passwd -1 submitty_dbuser) submitty_dbuser
 
 chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}
