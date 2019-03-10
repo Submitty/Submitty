@@ -31,3 +31,6 @@ mkdir -p ~/.local/bin
 # refer to the same thing when doing "python3", "pip3", "composer", etc.
 sudo sed -i -e "s/env_reset/\!env_reset/g" /etc/sudoers
 sudo sed -i -e "s?secure_path=\"?secure_path=\"${PATH}:?g" /etc/sudoers
+
+ln -s $(which python3) /usr/local/bin/python
+ln -s $(which python3) /usr/local/bin/python3
