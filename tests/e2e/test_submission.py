@@ -7,22 +7,17 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 
-
-
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
-
 
 
 class TestSubmission(BaseTestCase):
     def __init__(self, testname):
         super().__init__(testname, log_in=False)
 
-
-    def setup_test_start(self, gradeable_category="open", gradeable_id="open_homework", button_name="submit", loaded_selector=(By.XPATH, "//div[@class='content']/div[1]/h2[1][normalize-space(text())='New submission for: Open Homework']")):
+    def setup_test_start(self, gradeable_category="open", gradeable_id="open_homework", button_name="submit", loaded_selector=(By.XPATH, "//div[@class='content']/div[1]/h1[1][normalize-space(text())='New submission for: Open Homework']")):
         self.log_in()
         self.click_class("sample", "SAMPLE")
         self.click_nav_submit_button(gradeable_category, gradeable_id, button_name, loaded_selector)
-
 
     def create_file_paths(self, multiple=False, autograding=False):
         examples_path = os.path.abspath(os.path.join(CURRENT_PATH, "..", "..", "more_autograding_examples"))
@@ -39,7 +34,6 @@ class TestSubmission(BaseTestCase):
             else:
                 return file_paths
 
-
     # drag and drop script inspired by https://stackoverflow.com/a/11203629
     def input_files(self, file_paths=[], drag_and_drop=False, target_id="upload1"):
         if drag_and_drop:
@@ -54,11 +48,9 @@ class TestSubmission(BaseTestCase):
             # simulate the drop event for the files
             self.driver.execute_script("e = document.createEvent('HTMLEvents'); e.initEvent('drop', true, true); e.dataTransfer = {{files: seleniumUpload.get(0).files }}; document.getElementById('{}').dispatchEvent(e);".format(target_id))
 
-
     # returns the number of submissions
     def get_submission_count(self, include_zero=False):
         return len(self.driver.find_elements_by_xpath("//div[@class='content']/select/option"+(""if include_zero else"[not(@value='0')]")))
-
 
     def accept_alerts(self, num_alerts):
         try:
@@ -67,7 +59,6 @@ class TestSubmission(BaseTestCase):
                 self.driver.switch_to.alert.accept()
         except TimeoutException as ex:
             pass
-
 
     def make_submission(self, file_paths=[], drag_and_drop=False, target_id="upload1", autograding=False):
         # get the starting submission count
@@ -87,12 +78,12 @@ class TestSubmission(BaseTestCase):
         self.assertEqual(submission_count+1, self.get_submission_count())
 
         # create a set of file names and compare them to the displayed submitted files
-        file_names = { os.path.basename(file_path) for file_path in file_paths }
-        submitted_files_text = self.driver.find_element_by_xpath("//div[@id='submitted-files']").text
-        for submitted_file_text in submitted_files_text.split("\n"):
+        file_names = {os.path.basename(file_path) for file_path in file_paths}
+        submitted_files_text = self.driver.find_element_by_id('submitted-files').text
+        for submitted_file_text in submitted_files_text.strip().split("\n"):
             idx = submitted_file_text.rfind('(')
-            file_name = submitted_file_text[:idx-1]
-            file_names.remove(file_name)
+            file_name = submitted_file_text[:idx-1].strip()
+            file_names.discard(file_name)
         self.assertEqual(0, len(file_names))
 
         # wait for the autograding results to finish. Refresh the page intermittently to (hopefully) load autograding results
@@ -105,8 +96,7 @@ class TestSubmission(BaseTestCase):
                 except TimeoutException as ex:
                     self.driver.refresh()
             self.assertTrue(autograding_done)
-            
-    
+
     def change_submission_version(self):
         # find the version selection dropdown and click
         version_select_elem = self.driver.find_element_by_xpath("//div[@class='content']/select")
@@ -126,7 +116,6 @@ class TestSubmission(BaseTestCase):
 
         # wait until the page reloads to change the active version, completing the test
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[@class='content']/select/option[@value='{}' and @selected and substring(text(), string-length(text())-17)='GRADE THIS VERSION']".format(new_version))))        
-    
 
     # for test cases that require switching versions, make submissions to ensure they will
     def ensure_multiple_versions(self):
@@ -134,7 +123,6 @@ class TestSubmission(BaseTestCase):
             self.make_submission(self.create_file_paths())
         if self.get_submission_count() < 2:
             self.make_submission(self.create_file_paths(True))
-
 
     # ========================================== #
     # ============== TEST CASES ================ #
@@ -146,10 +134,9 @@ class TestSubmission(BaseTestCase):
         self.setup_test_start(gradeable_category="graded",
                               gradeable_id="grades_released_homework_autohiddenEC",
                               button_name="submit",
-                              loaded_selector=(By.XPATH, "//div[@class='content']/div[1]/h2[1][normalize-space(text())='New submission for: Autograder Hidden and Extra Credit (C++ Hidden Tests)']")
+                              loaded_selector=(By.XPATH, "//div[@class='content']/div[1]/h1[1][normalize-space(text())='New submission for: Autograder Hidden and Extra Credit (C++ Hidden Tests)']")
                               )
         self.make_submission(self.create_file_paths(autograding=True), autograding=True)
-
 
     # test a drag and drop upload of a single file
     @skipIf('TRAVIS' in os.environ, "TODO: fix test running on travis")
@@ -157,10 +144,9 @@ class TestSubmission(BaseTestCase):
         self.setup_test_start(gradeable_category="graded",
                               gradeable_id="grades_released_homework_autohiddenEC",
                               button_name="submit",
-                              loaded_selector=(By.XPATH, "//div[@class='content']/div[1]/h2[1][normalize-space(text())='New submission for: Autograder Hidden and Extra Credit (C++ Hidden Tests)']")
+                              loaded_selector=(By.XPATH, "//div[@class='content']/div[1]/h1[1][normalize-space(text())='New submission for: Autograder Hidden and Extra Credit (C++ Hidden Tests)']")
                               )
         self.make_submission(self.create_file_paths(autograding=True), drag_and_drop=True, autograding=True)
-
 
     # test a normal upload of multiple files
     @skipIf('TRAVIS' in os.environ, "TODO: fix test running on travis")
@@ -168,10 +154,9 @@ class TestSubmission(BaseTestCase):
         self.setup_test_start(gradeable_category="graded",
                               gradeable_id="grades_released_homework_autohiddenEC",
                               button_name="submit",
-                              loaded_selector=(By.XPATH, "//div[@class='content']/div[1]/h2[1][normalize-space(text())='New submission for: Autograder Hidden and Extra Credit (C++ Hidden Tests)']")
+                              loaded_selector=(By.XPATH, "//div[@class='content']/div[1]/h1[1][normalize-space(text())='New submission for: Autograder Hidden and Extra Credit (C++ Hidden Tests)']")
                               )
         self.make_submission(self.create_file_paths(multiple=True, autograding=True), autograding=True)
-
 
     # test a drag and drop upload of multiple files
     @skipIf('TRAVIS' in os.environ, "TODO: fix test running on travis")
@@ -179,10 +164,9 @@ class TestSubmission(BaseTestCase):
         self.setup_test_start(gradeable_category="graded",
                               gradeable_id="grades_released_homework_autohiddenEC",
                               button_name="submit",
-                              loaded_selector=(By.XPATH, "//div[@class='content']/div[1]/h2[1][normalize-space(text())='New submission for: Autograder Hidden and Extra Credit (C++ Hidden Tests)']")
+                              loaded_selector=(By.XPATH, "//div[@class='content']/div[1]/h1[1][normalize-space(text())='New submission for: Autograder Hidden and Extra Credit (C++ Hidden Tests)']")
                               )
         self.make_submission(self.create_file_paths(multiple=True, autograding=True), drag_and_drop=True, autograding=True)
-
 
     # test changing the submission version
     @skipIf('TRAVIS' in os.environ, "TODO: fix test running on travis")
@@ -195,7 +179,6 @@ class TestSubmission(BaseTestCase):
         # test changing the submission version
         self.change_submission_version()
 
-
     # test cancelling the submission version
     @skipIf('TRAVIS' in os.environ, "TODO: fix test running on travis")
     def test_cancel_submission_version(self):
@@ -207,7 +190,7 @@ class TestSubmission(BaseTestCase):
         # click button and wait until page reloads to cancel version
         self.driver.find_element_by_xpath("//div[@class='content']/form/input[@type='submit' and @id='do_not_grade']").click()
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[@class='content']/select/option[@value='0' and @selected]")))
-        
+
         # change back to a valid submission version
         self.change_submission_version()
 
