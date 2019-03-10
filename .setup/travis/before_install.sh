@@ -32,5 +32,5 @@ mkdir -p ~/.local/bin
 sudo sed -i -e "s/env_reset/\!env_reset/g" /etc/sudoers
 sudo sed -i -e "s?secure_path=\"?secure_path=\"${PATH}:?g" /etc/sudoers
 
-ln -s $(which python3) /usr/local/bin/python
-ln -s $(which python3) /usr/local/bin/python3
+sudo ln -s $(which python3) /usr/local/bin/python
+sudo ln -s $(which python3) /usr/local/bin/python3
