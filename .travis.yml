@@ -138,6 +138,7 @@ jobs:
       env: AUTH_METHOD=1
       services:
         - xvfb
+        - docker
       addons:
         chrome: stable
         postgresql: "9.5"
