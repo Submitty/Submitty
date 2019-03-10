@@ -71,7 +71,11 @@ if [ ${VAGRANT} == 1 ]; then
 
     # ${x^^} gives capitalized string
     DISTRO_LINE=$(printf "##  RUNNING: %-44s ##" "${DISTRO^^} ${VERSION^^}")
-    # set our cool MOTD here, we expect
+    SUBMISSION_LINE=$(printf "##    %-51s ##" "${SUBMISSION_URL} (submission)")
+    CGI_LINE=$(printf "##    %-51s ##" "${SUBMISSION_URL}/cgi-bin (cgi-bin scripts)")
+    GIT_LINE=$(printf "##    %-51s ##" "${SUBMISSION_URL}/git (git)")
+    DATABASE_LINE=$(printf "##    %-51s ##" "localhost:${DATABASE_PORT}")
+    # Set our cool MOTD to help people get started
     echo -e "
  _______  __   __  _______  __   __  ___   _______  _______  __   __
 |       ||  | |  ||  _    ||  |_|  ||   | |       ||       ||  | |  |
@@ -95,12 +99,15 @@ ${DISTRO_LINE}
 ##    submitty_dbuser, postgres, root, vagrant            ##
 ##                                                        ##
 ##  The VM can be accessed with the following urls:       ##
-##    ${SUBMISSION_URL} (submission)                  ##
-##    ${SUBMISSION_URL}/cgi-bin (cgi-bin scripts)     ##
-##    ${SUBMISSION_URL}/git (git)                     ##
+${SUBMISSION_LINE}
+${CGI_LINE}
+${GIT_LINE}
 ##                                                        ##
 ##  The database can be accessed on the host machine at   ##
-##   localhost:15432                                      ##
+${DATABASE_LINE}
+##                                                        ##
+##  Checkout https://submitty.org/developer for helpful   ##
+##  information on getting started and developing.        ##
 ##                                                        ##
 ##  Happy developing!                                     ##
 ############################################################
