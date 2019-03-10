@@ -141,7 +141,6 @@ class TestSubmission(BaseTestCase):
     # ========================================== #
 
     # test a normal upload of a single file
-    @skipIf('TRAVIS' in os.environ, "TODO: fix test running on travis")
     def test_normal_upload(self):
         self.setup_test_start(gradeable_category="graded",
                               gradeable_id="grades_released_homework_autohiddenEC",
@@ -152,7 +151,6 @@ class TestSubmission(BaseTestCase):
 
 
     # test a drag and drop upload of a single file
-    @skipIf('TRAVIS' in os.environ, "TODO: fix test running on travis")
     def test_drag_and_drop_upload(self):
         self.setup_test_start(gradeable_category="graded",
                               gradeable_id="grades_released_homework_autohiddenEC",
@@ -163,7 +161,6 @@ class TestSubmission(BaseTestCase):
 
 
     # test a normal upload of multiple files
-    @skipIf('TRAVIS' in os.environ, "TODO: fix test running on travis")
     def test_normal_upload_multiple(self):
         self.setup_test_start(gradeable_category="graded",
                               gradeable_id="grades_released_homework_autohiddenEC",
@@ -174,7 +171,6 @@ class TestSubmission(BaseTestCase):
 
 
     # test a drag and drop upload of multiple files
-    @skipIf('TRAVIS' in os.environ, "TODO: fix test running on travis")
     def test_drag_and_drop_upload_multiple(self):
         self.setup_test_start(gradeable_category="graded",
                               gradeable_id="grades_released_homework_autohiddenEC",
@@ -185,7 +181,6 @@ class TestSubmission(BaseTestCase):
 
 
     # test changing the submission version
-    @skipIf('TRAVIS' in os.environ, "TODO: fix test running on travis")
     def test_change_submission_version(self):
         self.setup_test_start()
 
@@ -197,7 +192,6 @@ class TestSubmission(BaseTestCase):
 
 
     # test cancelling the submission version
-    @skipIf('TRAVIS' in os.environ, "TODO: fix test running on travis")
     def test_cancel_submission_version(self):
         self.setup_test_start()
 
