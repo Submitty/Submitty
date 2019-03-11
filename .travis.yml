@@ -214,8 +214,12 @@ jobs:
         - sudo cp -f .setup/travis/apache.conf /etc/apache2/sites-available/submitty.conf
         - sudo a2ensite submitty
         - sudo chown -R submitty_php:submitty_php /var/lib/apache2/fastcgi
-        #- sudo chmod -R 755 /usr/local/submitty
-        #- sudo chmod -R 777 /usr/local/submitty/test_suite
+        # TODO: Figure out why these chmod's are necessary and fix whatever has
+        #       bad permission (https://github.com/Submitty/Submitty/issues/1040)
+        - sudo chmod -R 755 /usr/local/submitty
+        - sudo chmod -R 777 /usr/local/submitty/test_suite
+        - chown root:submitty_daemon  /usr/local/submitty/sbin/untrusted_execute
+        - chmod 4550 /usr/local/submitty/sbin/untrusted_execute
         - sudo bash -c 'echo "export PATH=$PATH" >> /etc/apache2/envvars'
         - sudo service apache2 restart
       script:
