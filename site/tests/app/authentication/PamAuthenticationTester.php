@@ -63,11 +63,28 @@ class PamAuthenticationTester extends BaseUnitTest {
         $this->assertFalse($pam->authenticate());
     }
 
+    public function testEmptyUserId() {
+        $core = $this->createMock(Core::class);
+        /** @noinspection PhpParamsInspection */
+        $pam = new PamAuthentication($core);
+        $pam->setUserId('');
+        $this->assertFalse($pam->authenticate());
+    }
+
     public function testNoPassword() {
         $core = $this->createMock(Core::class);
         /** @noinspection PhpParamsInspection */
         $pam = new PamAuthentication($core);
         $pam->setUserId('test');
+        $this->assertFalse($pam->authenticate());
+    }
+
+    public function testEmptyPassword() {
+        $core = $this->createMock(Core::class);
+        /** @noinspection PhpParamsInspection */
+        $pam = new PamAuthentication($core);
+        $pam->setUserId('test');
+        $pam->setPassword('');
         $this->assertFalse($pam->authenticate());
     }
 

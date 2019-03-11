@@ -8,7 +8,7 @@
 
     "autograding" : {
 	"submission_to_compilation" : [ ],
-	"submission_to_runner" : [ *.pdf ],
+	"submission_to_runner" : [ "*.pdf" ],
 	"submission_to_validation" : [ ],
 	"work_to_details" : [
             "test01/student_file.pdf", "test02/test_template.pdf" ],
