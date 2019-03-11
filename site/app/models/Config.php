@@ -292,6 +292,9 @@ class Config extends AbstractModel {
         }
         $this->course_json_path = $course_json_path;
         $this->course_json = json_decode(file_get_contents($course_json_path), true);
+        if ($this->course_json === null) {
+            throw new ConfigException("Error parsing the config file: ".json_last_error_msg());
+        }
 
         if (!isset($this->course_json['database_details']) || !is_array($this->course_json['database_details'])) {
             throw new ConfigException("Missing config section 'database_details' in ini file");

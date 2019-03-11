@@ -358,13 +358,14 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
     }
 
     /**
-     * @expectedException \app\exceptions\IniException
-     * @expectedExceptionMessageRegExp /Error reading ini file 'database\.json': syntax error, unexpected '\{' in .*\/database\.json on line 1/
+     * @expectedException \app\exceptions\ConfigException
+     * @expectedExceptionMessageRegExp /Error parsing the config file: Syntax error/
      */
-    public function testInvalidCourseConfigIni() {
+    public function testInvalidCourseConfigJson() {
         $this->createConfigFile();
         $config = new Config($this->core, "s17", "csci1000");
-        $config->loadCourseJson(FileUtils::joinPaths($this->config_path, "database.json"));
+        file_put_contents(FileUtils::joinPaths($this->temp_dir, "test.txt"), "afds{}fasdf");
+        $config->loadCourseJson(FileUtils::joinPaths($this->temp_dir, "test.txt"));
     }
 
     public function getRequiredSections() {
