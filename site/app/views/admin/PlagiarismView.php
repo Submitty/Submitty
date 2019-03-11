@@ -326,8 +326,8 @@ HTML;
         $provided_code_filename="";
         $threshold="5";
         $sequence_length="10";
-        $prior_term_gradeables_number = count($saved_config['prev_term_gradeables'])+1;
-        $ignore_submission_number = count($saved_config['ignore_submissions'])+1;
+        $prior_term_gradeables_number = $saved_config['prev_term_gradeables'] ? count($saved_config['prev_term_gradeables'])+1 : 1;
+        $ignore_submission_number = $saved_config['ignore_submissions'] ? count($saved_config['ignore_submissions'])+1 : 1;
         $ignore="";
         $no_ignore="checked";
 
