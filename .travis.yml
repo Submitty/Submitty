@@ -224,8 +224,6 @@ jobs:
         - sudo service apache2 restart
       script:
         - TEST_URL="http://localhost" python -m unittest discover -v --start-directory tests
-        - sudo systemctl status submitty_autograding_shipper -l
-        - sudo systemctl status submitty_autograding_worker -l
     - <<: *03-e2e
       php: 7.1
       if: branch = master OR type = pull_request
