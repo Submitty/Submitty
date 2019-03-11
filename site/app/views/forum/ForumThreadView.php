@@ -196,6 +196,10 @@ HTML;
 		}
 
 			$( document ).ready(function() {
+			    $('.post_content').each(function(){
+                    var pdata = $(this);
+                    pdata.html( pdata.text().replace(/(@\w+)/g,'<strong>$1</strong>') );
+                });
 			    enableTabsInTextArea('.post_content_reply');
 				saveScrollLocationOnRefresh('posts_list');
 				addCollapsable();

@@ -313,6 +313,7 @@ class ForumController extends AbstractController {
         $result = array();
         $title = $_POST["title"];
         $thread_post_content = str_replace("\r", "", $_POST["thread_post_content"]);
+
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
         $thread_status = $_POST["thread_status"];
         $announcment = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->getGroup() < 3) ? 1 : 0 ;
@@ -415,6 +416,14 @@ class ForumController extends AbstractController {
                 $notification_anonymous = ($anon == 1) ? true : false;
                 $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'reply', 'thread_id' => $thread_id, 'post_id' => $parent_id, 'post_content' => $post['content'], 'reply_to' => $post_author, 'child_id' => $post_id, 'anonymous' => $notification_anonymous));
                 $this->core->getQueries()->pushNotification($notification);
+                foreach($this->taggedPeople($_POST['thread_post_content']) as $names)
+                {
+                    foreach ($this->core->getQueries()->getUserIdByUsername($names,3) as $usernames)
+                    {
+                        $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'reply', 'thread_id' => $thread_id, 'post_id' => $parent_id, 'post_content' => $post['content'], 'reply_to' => $usernames['user_id'], 'child_id' => $post_id, 'anonymous' => $notification_anonymous));
+                        $this->core->getQueries()->pushNotification($notification);
+                    }
+                }
                 $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'option' => $display_option, 'thread_id' => $thread_id));
             }
         }
@@ -585,7 +594,7 @@ class ForumController extends AbstractController {
 
     private function editPost(){
         // Ensure authentication before call
-        $new_post_content = $_POST["thread_post_content"];
+        $new_post_content = $_POST["thread_post_content"] ;
         if(!empty($new_post_content)) {
             $post_id = $_POST["edit_post_id"];
             $original_creator = $this->core->getQueries()->getPost($post_id);
@@ -895,5 +904,9 @@ class ForumController extends AbstractController {
             }
 
         } 
-
+    public function taggedPeople($post_content){
+        $taggingRegex = "/[\s,;.]+@(\w+)/";
+        preg_match_all($taggingRegex,$post_content,$taggedPeople);
+        return $taggedPeople[1];
+    }
 }

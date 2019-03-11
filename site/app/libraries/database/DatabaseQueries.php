@@ -3798,4 +3798,15 @@ AND gc_id IN (
               created)
             VALUES(?, ?, ?, NOW())", $parameters);
     }
+
+    /**
+     * Get userid by giving userfirsrname and usergroup
+     * @param number $user_group
+     * @param string $user_firstname
+     */
+    public function getUserIdByUsername($user_firstname,$user_group){
+        $this->course_db->query('SELECT user_id FROM users WHERE user_group <= ? AND user_firstname = ?',[$user_group,$user_firstname]);
+
+        return $this->course_db->rows();
+    }
 }
