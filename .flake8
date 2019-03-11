@@ -3,6 +3,7 @@ max-line-length = 88
 exclude=
     .git,
     .setup,
+    bin/extract_notes_page.py,
     bin/generate_repos.py,
     bin/grading_done.py,
     bin/left_right_parse.py,
@@ -12,7 +13,8 @@ exclude=
     grading/python/submitty_router.py,
     grading/json_syntax_checker.py
     junit_test_runner,
-    migration/migrations,
+    migration/test,
+    migration/migrator/migrations,
     more_autograding_examples,
     ParseLogFiles,
     python_submitty_utils/setup.py,

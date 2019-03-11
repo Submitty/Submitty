@@ -316,13 +316,6 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     
     patterns_submission_to_compilation = complete_config_obj["autograding"]["submission_to_compilation"]
 
-    # give the untrusted user read/write/execute permissions on the tmp directory & files
-    # add_permissions_recursive(tmp_compilation,
-    #                   stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-    #                   stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-    #                   stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
-
-    # add_permissions(tmp,stat.S_IROTH | stat.S_IXOTH) #stat.S_ISGID
     add_permissions(tmp_logs,stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
 
     if USE_DOCKER:
@@ -397,8 +390,12 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                                                '-w', testcase_folder,
                                                container_image,
                                                #The command to be run.
-                                               os.path.join(testcase_folder, 'my_compile.out'), queue_obj['gradeable'],
-                                               queue_obj['who'], str(queue_obj['version']), submission_string, str(testcase_num)
+                                               os.path.join(testcase_folder, 'my_compile.out'), 
+                                               queue_obj['gradeable'],
+                                               queue_obj['who'], 
+                                               str(queue_obj['version']), 
+                                               submission_string, 
+                                               '--testcase', str(testcase_num)
                                                ]).decode('utf8').strip()
                     print("starting container")
                     compile_success = subprocess.call(['docker', 'start', '-i', compilation_container],
@@ -419,7 +416,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                                                    queue_obj["who"],
                                                    str(queue_obj["version"]),
                                                    submission_string,
-                                                   str(testcase_num)],
+                                                   '--testcase', str(testcase_num)],
                                                    stdout=logfile, 
                                                    cwd=testcase_folder)
             # remove the compilation program

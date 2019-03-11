@@ -13,9 +13,9 @@
 #include <set>
 #include <cstdlib>
 #include <string>
-#include <iostream>
 #include <sstream>
 #include <regex>
+#include <iomanip>
 
 #include "window_utils.h"
 #include "execute.h"
@@ -369,16 +369,14 @@ bool windowExists(std::string window_name){
 
 /**
 * Given a window name, this function takes a screenshot of it if it exists. 
-* uses number_of_screenshots to title the image (submitty prepends it with the
-*  test #) updates the number of screenshots taken. 
+* uses screenshot_name to title the image.
 */
-bool screenshot(std::string window_name, int& number_of_screenshots){
+bool screenshot(std::string window_name, std::string screenshot_name){
   if(windowExists(window_name)){ 
     //if the window hasn't crashed, bring it into focus and screenshot it
     std::string command = "wmctrl -R " + window_name + " && scrot "  
-                      + std::to_string(number_of_screenshots) + ".png -u";
+                      + screenshot_name + " -u";
     system(command.c_str());
-    number_of_screenshots = number_of_screenshots + 1;
     return true;
   }
   else{
@@ -386,6 +384,76 @@ bool screenshot(std::string window_name, int& number_of_screenshots){
     return false;
   }
 }
+
+std::string pad_integer(int number, int padding) {
+  std::ostringstream out;
+  out << std::internal << std::setfill('0') << std::setw(padding) << number;
+  return out.str();
+}
+
+/*
+* Take the screenshots neccessary to later compile a gif.
+*/
+bool make_gif(std::string window_name, std::string gif_name, float duration_in_seconds, int fps, bool save_pngs,
+              int childPID, float &elapsed, float& next_checkpoint, float seconds_to_run, 
+              int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill,
+              std::ostream &logfile){
+
+  //iterations is seconds*fps. 
+  int iterations = duration_in_seconds * fps;
+  //delay is 1 second/fps
+  float delay    = (1000000.0f/fps);
+ 
+  std::vector<std::string> png_names;
+
+  bool killed = false;
+  for(int i = 0; i < iterations; i++){ 
+    
+
+
+    std::string iterative_gif_name = gif_name + "_" + pad_integer(i, 4) + ".png";
+    std::cout << "taking gif screenshot " << iterative_gif_name << std::endl;
+    bool successful_screenshot = screenshot(window_name, iterative_gif_name);
+
+    if(!successful_screenshot){
+      return false;
+    }
+
+    png_names.push_back(iterative_gif_name);
+
+    //add a 1/10th second delay between each image capture.
+    if(i != iterations-1){ 
+      killed = delay_and_mem_check(delay, childPID, elapsed, next_checkpoint, 
+        seconds_to_run, rss_memory, allowed_rss_memory, memory_kill,time_kill, logfile);
+    }
+    if(killed){
+      return false;
+    }
+  }
+
+  //let's just test the cost of this
+  std::string target_gif_name = gif_name + "*.png";
+  std::string outfile_name = gif_name + ".gif";
+
+  //create a gif
+  int refresh_rate_in_hundredths = (1.0f / fps) * 100.0f;
+  std::string command = "convert -delay "+std::to_string(refresh_rate_in_hundredths)+" -loop 0 " + target_gif_name + " " + outfile_name;
+  std::string output = output_of_system_command(command.c_str()); //get the string
+
+  //If we are supposed to remove the png files, do so.
+  // Do not use wildcards, only remove files we explicitly created.
+  if(!save_pngs){
+    for(int i = 0; i < png_names.size(); i++){
+      std::string remove_png_name = png_names[i];
+      std::string rm_command = "rm " + remove_png_name + " NULL: 2>&1";
+      std::cout << rm_command << std::endl;
+      std::string output = output_of_system_command(rm_command.c_str()); //get the string
+    }
+  }
+
+  return true;
+}
+
 
 /**
 * This function uses xdotool to put the mouse button associated with int button
@@ -964,6 +1032,9 @@ bool type(std::string toType, float delay, int presses, std::string window_name,
   //get window focus then type the string toType.
   std::string internal_command = "wmctrl -R " + window_name 
                                     +" &&  xdotool type " + toType; 
+  
+  bool killed = false;
+
   //for number of presses requested, check that the window exists and that we 
   //have something to type.
   for(int i = 0; i < presses; i++){ 
@@ -976,8 +1047,11 @@ bool type(std::string toType, float delay, int presses, std::string window_name,
     }
     //allow this to run so that delays occur as expected.
     if(i != presses-1){ 
-      delay_and_mem_check(delay, childPID, elapsed, next_checkpoint, 
+      killed = delay_and_mem_check(delay, childPID, elapsed, next_checkpoint, 
         seconds_to_run, rss_memory, allowed_rss_memory, memory_kill,time_kill, logfile);
+    }
+    if(killed){
+      return false;
     }
   }
   return true;
@@ -1035,7 +1109,7 @@ bool isWindowedAction(const nlohmann::json action){
 * function. 
 */
 void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken, 
-  int& number_of_screenshots, std::string window_name, int childPID, 
+  std::string window_name, int childPID, 
   float &elapsed, float& next_checkpoint, float seconds_to_run, 
   int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill,
   std::ostream &logfile){
@@ -1072,28 +1146,24 @@ void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken,
     success = true;
   }
   //SCREENSHOT
-  else if(action_name.find("screenshot") != std::string::npos){ 
-    success = screenshot(window_name, number_of_screenshots);
+  else if(action_name == "screenshot"){ 
+    std::string screenshot_name = action["name"];
+    success = screenshot(window_name, screenshot_name);
   }
   //TYPE
   else if(action_name == "type"){ 
 
-    float delay_in_secs = action.value("delay_in_seconds", .1);
-    int presses = action.value("presses", 1);
-    std::string string_to_type = action.value("string", "");
+    float delay_in_secs = action["delay_in_seconds"];
+    int presses = action["presses"];
+    std::string string_to_type = action["string"];
 
     success = type(string_to_type, delay_in_secs, presses, window_name,childPID,elapsed, next_checkpoint, 
       seconds_to_run, rss_memory, allowed_rss_memory, memory_kill, time_kill, logfile);
   }
   //KEY
-  else if(action_name.find("key") != std::string::npos){
-    std::string key_to_type = action.value("key_combination", "INVALID_COMBINATION");
-    if (key_to_type != "INVALID_COMBINATION"){
-      success = key(key_to_type, window_name);
-    }
-    else{
-      std::cout << "ERROR: ill formatted key command. No key to type found." << std::endl;
-    }
+  else if(action_name == "key"){
+    std::string key_to_type = action["key_combination"];
+    success = key(key_to_type, window_name);
   }
   //CLICK AND DRAG    
   else if(action_name == "click and drag"){ 
@@ -1103,8 +1173,8 @@ void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken,
     success = clickAndDragDelta(window_name,action);
   }
   //CLICK
-  else if(action_name.find("click") != std::string::npos){ 
-    std::string mouse_button = action.value("mouse_button", "left");
+  else if(action_name == "click"){ 
+    std::string mouse_button = action["mouse_button"];
     if(mouse_button == "left"){
       success = click(window_name, 1);
     }
@@ -1119,34 +1189,39 @@ void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken,
     }
   }
   //MOUSE MOVE
-  else if(action_name.find("move mouse") != std::string::npos){
+  else if(action_name == "move mouse"){
     //TODO: implement later if deemed prudent.
     bool no_clamp = false;
     
-    int moved_x = action.value("end_x", -1);
-    int moved_y = action.value("end_y", -1);
+    int moved_x = action["end_x"];
+    int moved_y = action["end_y"];
 
-
-    if(moved_x >=0 && moved_y >= 0){
-      int height, width, x_start, x_end, y_start, y_end;
-      bool corr = populateWindowData(window_name, height, width, x_start, x_end, y_start, y_end);
-      if(corr){
-          moved_x += x_start;
-          moved_y += y_start;
-          success = mouse_move(window_name, moved_x, moved_y, x_start, x_end, y_start, y_end, no_clamp);
-      }
-      else{
-        std::cout << "No mouse move due to unsuccessful data population." << std::endl;
-      }
+    int height, width, x_start, x_end, y_start, y_end;
+    bool populated = populateWindowData(window_name, height, width, x_start, x_end, y_start, y_end);
+    if(populated){
+        moved_x += x_start;
+        moved_y += y_start;
+        success = mouse_move(window_name, moved_x, moved_y, x_start, x_end, y_start, y_end, no_clamp);
     }
   }
   //CENTER
-  else if(action_name.find("center") != std::string::npos){ 
+  else if(action_name == "center"){ 
     success = centerMouse(window_name);
   }
   //ORIGIN
-  else if(action_name.find("origin") != std::string::npos){ 
+  else if(action_name == "origin"){ 
     success = moveMouseToOrigin(window_name);
+  }
+  else if(action_name == "gif"){ 
+    std::string gif_name = action["name"];
+    float duration_in_seconds = action["seconds"];
+    int fps = action["frames_per_second"];
+    bool save_pngs = action["preserve_individual_frames"];
+
+    success = make_gif(window_name, gif_name, duration_in_seconds, fps, save_pngs,
+                        childPID, elapsed, next_checkpoint, seconds_to_run, 
+                        rss_memory, allowed_rss_memory, memory_kill, time_kill,
+                        logfile);
   }
    //BAD COMMAND
   else{
