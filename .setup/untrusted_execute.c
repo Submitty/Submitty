@@ -79,7 +79,7 @@ int main(int argc, char* argv[]) {
      effective uid root (suid root bit must be set) */
   if (geteuid() != ROOT_UID || getuid() != DAEMON_UID) {
     fprintf(stderr,"INTERNAL ERROR: BAD USER\n");
-    fprintf(stderr,"DAEMON_UID:%d uid:%d ROOT_UID:%d euid:%d",DAEMON_UID,getuid(),ROOT_UID,geteuid());
+    fprintf(stderr,"uid:%d euid:%d",getuid(),geteuid());
     exit(1);
   }
 
