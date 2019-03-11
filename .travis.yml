@@ -116,9 +116,14 @@ jobs:
       install:
         - pip3 install -U pip
         - pip3 install tzlocal
+        - pip3 install sqlalchemy
       script:
         - pushd python_submitty_utils
         - python3 setup.py test
+        - popd
+
+        - pushd migration
+        - python3 -m unittest discover
         - popd
     - <<: *02-python-unit
       python: 3.5
@@ -271,6 +276,7 @@ jobs:
         - pip3 install python-dateutil
         - pip3 install paramiko
         - pip3 install psycopg2-binary
+        - pip3 install sqlalchemy
         - pushd ${TRAVIS_BUILD_DIR}/python_submitty_utils
         - pip3 install .
         - popd

@@ -84,12 +84,30 @@ if [ ${WORKER} == 0 ]; then
 
     mkdir -p ${SUBMITTY_INSTALL_DIR}/migrations
 
-    rsync -rtz ${SUBMITTY_REPOSITORY}/migration/migrations ${SUBMITTY_INSTALL_DIR}
+    rsync -rtz ${SUBMITTY_REPOSITORY}/migration/migrator/migrations ${SUBMITTY_INSTALL_DIR}
     chown root:root ${SUBMITTY_INSTALL_DIR}/migrations
     chmod 550 -R ${SUBMITTY_INSTALL_DIR}/migrations
 
-    python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py migrate
+    python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -e system -e master -e course migrate
 fi
+
+################################################################################################################
+################################################################################################################
+# INSTALL PYTHON SUBMITTY UTILS AND SET PYTHON PACKAGE PERMISSIONS
+
+echo -e "Install python_submitty_utils"
+
+pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
+pip3 install .
+# Setting the permissions are necessary as pip uses the umask of the user/system, which
+# affects the other permissions (which ideally should be o+rx, but Submitty sets it to o-rwx).
+# This gets run here in case we make any python package changes.
+find /usr/local/lib/python*/dist-packages -type d -exec chmod 755 {} +
+find /usr/local/lib/python*/dist-packages -type f -exec chmod 755 {} +
+find /usr/local/lib/python*/dist-packages -type f -name '*.py*' -exec chmod 644 {} +
+find /usr/local/lib/python*/dist-packages -type f -name '*.pth' -exec chmod 644 {} +
+
+popd > /dev/null
 
 
 #############################################################
@@ -538,30 +556,6 @@ fi
 # Build & Install Lichen Modules
 
 /bin/bash ${SUBMITTY_REPOSITORY}/../Lichen/install_lichen.sh
-
-
-################################################################################################################
-################################################################################################################
-# INSTALL PYTHON SUBMITTY UTILS
-
-echo -e "Install python_submitty_utils"
-
-pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
-pip3 install .
-
-# fix permissions
-chmod -R 555 /usr/local/lib/python*/*
-chmod 555 /usr/lib/python*/dist-packages
-
-#Set up pam if not in worker mode.
-if [ "${WORKER}" == 0 ]; then
-    sudo chmod 500   /usr/local/lib/python*/dist-packages/pam.py*
-    sudo chown ${CGI_USER} /usr/local/lib/python*/dist-packages/pam.py*
-fi
-sudo chmod o+r /usr/local/lib/python*/dist-packages/submitty_utils*.egg
-sudo chmod o+r /usr/local/lib/python*/dist-packages/easy-install.pth
-
-popd > /dev/null
 
 
 ################################################################################################################
