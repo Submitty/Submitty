@@ -105,7 +105,7 @@ class BaseTestCase(unittest.TestCase):
             user_name = self.user_name
 
         self.get(url)
-        print(self.driver.page_source)
+        # print(self.driver.page_source)
         self.assertIn(title, self.driver.title)
         self.driver.find_element_by_name('user_id').send_keys(user_id)
         self.driver.find_element_by_name('password').send_keys(user_password)
@@ -131,7 +131,6 @@ class BaseTestCase(unittest.TestCase):
         if course_name is None:
             course_name = course.upper()
         self.driver.find_element_by_id(self.get_current_semester() + '_' + course).click()
-        print(self.driver.page_source)
         WebDriverWait(self.driver, BaseTestCase.WAIT_TIME).until(EC.title_is(course_name))
 
     # see Navigation.twig for html attributes to use as arguments

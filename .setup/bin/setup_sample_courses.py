@@ -1070,6 +1070,7 @@ class Course(object):
             course_json = json.load(open_file)
             course_json['course_details']['forum_enabled'] = True
             open_file.seek(0)
+            open_file.truncate()
             json.dump(course_json, open_file, indent=2)
 
         f_data = (self.getForumDataFromFile('posts.txt'), self.getForumDataFromFile('threads.txt'), self.getForumDataFromFile('categories.txt'))
