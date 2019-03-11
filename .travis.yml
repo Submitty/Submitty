@@ -218,8 +218,8 @@ jobs:
         #       bad permission (https://github.com/Submitty/Submitty/issues/1040)
         - sudo chmod -R 755 /usr/local/submitty
         - sudo chmod -R 777 /usr/local/submitty/test_suite
-        - chown root:submitty_daemon  /usr/local/submitty/sbin/untrusted_execute
-        - chmod 4550 /usr/local/submitty/sbin/untrusted_execute
+        - sudo chown root:submitty_daemon  /usr/local/submitty/sbin/untrusted_execute
+        - sudo chmod 4550 /usr/local/submitty/sbin/untrusted_execute
         - sudo bash -c 'echo "export PATH=$PATH" >> /etc/apache2/envvars'
         - sudo service apache2 restart
       script:
