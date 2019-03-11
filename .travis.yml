@@ -192,6 +192,10 @@ jobs:
         - pip3 install .
         - popd
       before_script:
+        # Need to make this a full repo so that we can get the tag information
+        # when we're installing
+        - git fetch --unshallow
+        - git fetch
         # Doing this helps chromedriver from hanging for some mysterious reason
         # https://github.com/SeleniumHQ/docker-selenium/issues/87
         - export DBUS_SESSION_BUS_ADDRESS=/dev/null
