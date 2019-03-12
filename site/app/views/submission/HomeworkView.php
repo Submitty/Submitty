@@ -440,24 +440,24 @@ class HomeworkView extends AbstractView {
             }
         }
         //check for invalid ID's if using bulk upload with QR codes
-        if($use_qr_codes){
-            $json_data = FileUtils::readJsonFile($json_file);
-            for($i = 0; $i < count($files); $i++){
-                $filename = rawurldecode($files[$i]['filename_full']);
-                foreach ($json_data as $qr_file) {
-                    if($qr_file['pdf_name'] === $filename){
-                        $is_valid = !$this->core->getQueries()->getUserById($qr_file['id']) ? false:true;
-                        $files[$i] += [
-                            'page_count' => $qr_file['page_count'],
-                            'user_id'    => [
-                                'id' => $qr_file['id'], 
-                                'valid' => $is_valid
-                            ]
-                        ];
-                    }
-                }
-            }
-        }
+        // if($use_qr_codes){
+        //     $json_data = FileUtils::readJsonFile($json_file);
+        //     for($i = 0; $i < count($files); $i++){
+        //         $filename = rawurldecode($files[$i]['filename_full']);
+        //         foreach ($json_data as $qr_file) {
+        //             if($qr_file['pdf_name'] === $filename){
+        //                 $is_valid = !$this->core->getQueries()->getUserById($qr_file['id']) ? false:true;
+        //                 $files[$i] += [
+        //                     'page_count' => $qr_file['page_count'],
+        //                     'user_id'    => [
+        //                         'id' => $qr_file['id'], 
+        //                         'valid' => $is_valid
+        //                     ]
+        //                 ];
+        //             }
+        //         }
+        //     }
+        // }
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';

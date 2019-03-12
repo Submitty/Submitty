@@ -551,23 +551,26 @@ class SubmissionController extends AbstractController {
 
             $config_data = json_decode(file_get_contents("/usr/local/submitty/config/submitty.json"));
             //create a new job to split but uploads via QR
-            $qr_upload_data = [
-                "job"       => "BulkQRSplit",
-                "semester"  => $semester,
-                "course"    => $course,
-                "g_id"      => $gradeable_id,
-                "timestamp" => $current_time,
-                "qr_prefix" => $qr_prefix,
-                "qr_suffix" => $qr_suffix
-            ];
+            for($i = 0; $i < $count; $i++){
+                $qr_upload_data = [
+                    "job"       => "BulkQRSplit",
+                    "semester"  => $semester,
+                    "course"    => $course,
+                    "g_id"      => $gradeable_id,
+                    "timestamp" => $current_time,
+                    "qr_prefix" => $qr_prefix,
+                    "qr_suffix" => $qr_suffix,
+                    "filename"  => $uploaded_file["name"][$i]
+                ];
 
-            $qr_upload_job  = "/var/local/submitty/daemon_job_queue/qr_upload_" . $semester . "_" . $course . "_" . $current_time . ".json"; 
+                $qr_upload_job  = "/var/local/submitty/daemon_job_queue/qr_upload_" . $uploaded_file["name"][$i] . ".json"; 
 
-            if(!file_put_contents($qr_upload_job, json_encode($qr_upload_data, JSON_PRETTY_PRINT)) ){
-                $this->core->getOutput()->renderJsonFail("Failed to write BulkQRSplit job");
-                return $this->uploadResult("Failed to write BulkQRSplit job", false);
+                //add new job to queue
+                if(!file_put_contents($qr_upload_job, json_encode($qr_upload_data, JSON_PRETTY_PRINT)) ){
+                    $this->core->getOutput()->renderJsonFail("Failed to write BulkQRSplit job");
+                    return $this->uploadResult("Failed to write BulkQRSplit job", false);
+                }
             }
-
             $return = array('success' => true);
             $this->core->getOutput()->renderJson($return);
             return $return;

@@ -2607,19 +2607,19 @@ $(document).ready(function() {
     checkSidebarCollapse();
 });
 
-function checkQRProgress(){
+function checkQRProgress(gradeable_id){
     var url = buildUrl({'component': 'misc', 'page': 'check_qr_upload_progress'});
     $.ajax({
         url: url,
+        data: {
+            gradeable_id : gradeable_id
+        },
+        type: "POST",
         success: function(data) {
-            data = JSON.parse(data);
             console.log(data);
+            data = JSON.parse(data);
             var result = {};
-            if(data['found'] === false) {
-                //
-            }else {
-                updateQRProgress(data['job_data']);
-            }
+            updateQRProgress(data['job_data'], data['count']);
         },
         error: function(e) {
             console.log("Failed to check job queue");

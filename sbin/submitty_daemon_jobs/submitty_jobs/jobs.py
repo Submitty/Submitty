@@ -8,6 +8,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import json
+import stat
 import urllib.parse
 
 from . import INSTALL_DIR, DATA_DIR
@@ -160,12 +161,26 @@ class DeleteLichenResult(CourseGradeableJob):
             open_file.write(msg) 
 
 class BulkQRSplit(CourseJob):
-    required_keys = CourseJob.required_keys + ['timestamp', 'g_id']
+    required_keys = CourseJob.required_keys + ['timestamp', 'g_id', 'filename']
+
+    def add_permissions(self,item,perms):
+        if os.getuid() == os.stat(item).st_uid:
+            os.chmod(item,os.stat(item).st_mode | perms)
+
+    def add_permissions_recursive(self,top_dir,root_perms,dir_perms,file_perms):
+        for root, dirs, files in os.walk(top_dir):
+            self.add_permissions(root,root_perms)
+        for d in dirs:
+            self.add_permissions(os.path.join(root, d),dir_perms)
+        for f in files:
+            self.add_permissions(os.path.join(root, f),file_perms)
+
     def run_job(self):
         semester = self.job_details['semester']
         course = self.job_details['course']
         timestamp = self.job_details['timestamp']
         gradeable_id = self.job_details['g_id']
+        filename = self.job_details['filename']
 
         qr_prefix = urllib.parse.unquote(self.job_details['qr_prefix'])
         qr_suffix = urllib.parse.unquote(self.job_details['qr_suffix'])
@@ -185,32 +200,27 @@ class BulkQRSplit(CourseJob):
             print(err)
             sys.exit(1)
 
-        #copy files over to correct folders
+        #copy file over to correct folders
         try:
             if not os.path.exists(split_path):
                 os.makedirs(split_path)
 
-            # copy over files to new directory
-            for filename in os.listdir(bulk_path):
-                shutil.copyfile(os.path.join(bulk_path, filename), os.path.join(split_path, filename))
+            # adding write permissions for PHP
+            self.add_permissions_recursive(uploads_path, stat.S_IWGRP | stat.S_IXGRP, stat.S_IWGRP | stat.S_IXGRP, stat.S_IWGRP)
+
+            # copy over file to new directory
+            shutil.copyfile(os.path.join(bulk_path, filename), os.path.join(split_path, filename))
 
             # move to copy folder
             os.chdir(split_path)
         except Exception as err:
-             #cleanup
-            if os.path.exists(split_path):
-                shutil.rmtree(split_path)
             print("Failed while copying files")
             print(err)
             sys.exit(1)
 
         try:
-            for filename in os.listdir(bulk_path):
-                subprocess.call([str(qr_script), filename, split_path, qr_prefix, qr_suffix])
-
-            for filename in os.listdir(bulk_path):
-                os.remove(filename)
-
+            subprocess.call([str(qr_script), filename, split_path, qr_prefix, qr_suffix])
+            
             os.chdir(current_path)
         except Exception as err:
             print("Failed to launch bulk_qr_split subprocess!")
