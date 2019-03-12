@@ -598,8 +598,7 @@ HTML;
 								$activeThreadAnnouncement = true;
 							if($thread_id_p == -1)
 								$thread_id_p = $thread["id"];
-						}
-						if($this->core->getQueries()->viewedThread($current_user, $thread["id"])){
+						}else if($this->core->getQueries()->viewedThread($current_user, $thread["id"])){
 							$class .= " viewed";
 						}
 						if($thread["deleted"]) {
@@ -758,7 +757,7 @@ HTML;
 		$current_user = $this->core->getUser()->getId();
 		$post_html = "";
 		$post_id = $post["id"];
-		$post_btn_color = "";
+
 		$thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
 
 		$date = DateUtils::parseDateTime($post["timestamp"], $this->core->getConfig()->getTimezone());
@@ -786,9 +785,9 @@ HTML;
 			$classes .= " first_post";
 		}
 		if(in_array($post_id, $unviewed_posts)){
-			$classes .= " newpost";
+			$classes .= " new_post";
 		} else {
-			$post_btn_color .= " post_viewed_btn";
+			$classes .= " viewed_post";
 		}
 		if($this->core->getQueries()->isStaffPost($post["author_user_id"])){
 			$classes .= " important";
@@ -824,23 +823,23 @@ HTML;
 		if($display_option == 'tree'){
 			if(!$first){
 				$return .= <<<HTML
-					<a class="btn btn-default btn-sm {$post_btn_color}" style=" text-decoration: none;" onClick="replyPost({$post['id']})"> Reply</a>
+					<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="replyPost({$post['id']})"> Reply</a>
 HTML;
 			} else {
 				$return .= <<<HTML
-					<a class="btn btn-default btn-sm {$post_btn_color}" style=" text-decoration: none;" onClick="$('html, #posts_list').animate({ scrollTop: document.getElementById('posts_list').scrollHeight }, 'slow');"> Reply</a>
+					<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="$('html, #posts_list').animate({ scrollTop: document.getElementById('posts_list').scrollHeight }, 'slow');"> Reply</a>
 HTML;
 			}
 			if($this->core->getUser()->getGroup() <= 2) {
 				$return .= <<<HTML
-					<a class="btn btn-default btn-sm {$post_btn_color}" style=" text-decoration: none;" onClick="showHistory({$post['id']})">Show History</a>
+					<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="showHistory({$post['id']})">Show History</a>
 HTML;
 			}
 		}
 		if(($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) && $first && $thread_resolve_state == -1) {
 			//resolve button
 			$return .= <<<HTML
-				<a class="btn btn-default btn-sm {$post_btn_color}" style="text-decoration: none;" onClick="changeThreadStatus({$post['thread_id']})" title="Mark thread as resolved">Mark as resolved</a>
+				<a class="btn btn-default btn-sm" style="text-decoration: none;" onClick="changeThreadStatus({$post['thread_id']})" title="Mark thread as resolved">Mark as resolved</a>
 HTML;
 		}
 		$return .= <<<HTML
