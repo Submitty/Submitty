@@ -205,7 +205,7 @@ TestResults* custom_doit(const TestCase &tc, const nlohmann::json& j, const nloh
   bool windowed = false;
 
   int ret = execute(command, actions, dispatcher_actions, execute_logfile, test_case_limits,
-                     assignment_limits, whole_config, windowed);
+                     assignment_limits, whole_config, windowed, "NOT_A_WINDOWED_ASSIGNMENT");
 
   if(ret != 0){
       std::cout << "FAILURE" << std::endl;
@@ -221,7 +221,7 @@ TestResults* custom_doit(const TestCase &tc, const nlohmann::json& j, const nloh
   int color_int = result["color"];
   TEST_RESULTS_MESSAGE_TYPE color = static_cast<TEST_RESULTS_MESSAGE_TYPE>(color_int);
   std::cout << "returning testresult " << score << color << message << std::endl;
-  return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "HELLO OUT THERE!")});
+  return new TestResults(score, {std::make_pair(MESSAGE_FAILURE, message)});
 }
 
 // ==============================================================================
