@@ -61,7 +61,7 @@ class GradingQueue {
         }
 
         // Sort files by last modified time (descending)
-        array_multisort($times, SORT_DESC, $queue_files);
+        array_multisort($times, SORT_ASC, $queue_files);
 
         // Finally, set the member variables
         $this->queue_files = $queue_files;
