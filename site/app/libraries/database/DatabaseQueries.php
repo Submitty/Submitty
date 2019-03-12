@@ -149,8 +149,13 @@ class DatabaseQueries {
             }
             $query_raw_select[]     = "t.*";
             $query_raw_select[]     = "({$query_favorite}) as favorite";
-            $query_raw_select[]     = "(case when exists(select 1 from posts p where p.author_user_id = sf.user_id and p.thread_id = t.id) then true else false end) as current_user_posted";
+            $query_raw_select[]     = "CASE
+                                        WHEN EXISTS(SELECT * FROM (posts p LEFT JOIN forum_posts_history fp ON p.id = fp.post_id AND p.author_user_id != fp.edit_author) AS pfp WHERE (pfp.author_user_id = ? OR pfp.edit_author = ?) AND pfp.thread_id = t.id) THEN true 
+                                        ELSE false 
+                                        END as current_user_posted";
 
+            $query_parameters[]     = $current_user;
+            $query_parameters[]     = $current_user;
             $query_raw_join[]       = "LEFT JOIN student_favorites sf ON sf.thread_id = t.id and sf.user_id = ?";
             $query_parameters[]     = $current_user;
 
