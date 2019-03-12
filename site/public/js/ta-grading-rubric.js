@@ -2080,22 +2080,18 @@ function onComponentPointsChange(me) {
  * @returns {boolean}
  */
 function dividesEvenly(dividend, divisor) {
-    var mult = Math.max(multiplier(dividend), multiplier(divisor));
-    return ((dividend * mult) % (divisor * mult) === 0);
+    var multiplier = Math.pow(10, Math.max(decimalLength(dividend), decimalLength(divisor)));
+    return ((dividend * multiplier) % (divisor * multiplier) === 0);
 }
 
 /**
- * Returns power of ten to multiply by to make num an integer
+ * Returns number of digits after decimal point
  * @param {number} num
  * @returns {int}
  */
-function multiplier(num) {
-    var parts = num.toString().split('.');
-    if (parts.length < 2) { // not a decimal
-      return 1;
-    }
-    return Math.pow(10, parts[1].length);
-  }
+function decimalLength(num) {
+    return (num.toString().split('.')[1] || '').length;
+}
 
 /**
  * Callback for changing the title for a component
