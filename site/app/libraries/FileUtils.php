@@ -454,6 +454,10 @@ class FileUtils {
             case 'c':
                 $content_type = 'text/x-csrc';
                 break;
+            // case 'html':
+            //     $content_type = 'text/html';
+            // case 'css': 
+            //     $content_type = 'text/css';
             case 'cpp':
             case 'cxx':
             case 'h':
