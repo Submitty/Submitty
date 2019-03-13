@@ -10,10 +10,6 @@ def up(config, conn, semester, course):
     new_config_file = Path(course_dir, 'config', 'config.json')
 
     if old_config_file.is_file():
-        # Remove the config.json if we're migrating up
-        # a second time (i.e. after rolling back once)
-        if new_config_file.is_file():
-            new_config_file.unlink()
         config = configparser.ConfigParser()
         config.read(str(old_config_file))
         config_obj = dict()
