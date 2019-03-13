@@ -313,7 +313,7 @@ class SubmissionController extends AbstractController {
                   $this->core->getQueries()->createEmail($regrade_email_data, $user_email);
 
                   //TODO: create push notification as well
-                  $notification = new Notification($this->core, array('component' => 'student', 'type' => $announcment ? 'new_announcement' : 'new_thread', 'thread_id' => $id));
+                  $notification = new Notification($this->core, array('component' => 'student', 'type' => 'grade_inquiry_response', 'gradeble_id' => $graded_gradeable->getGradeable()->getId(), 'replier' => $user->getId()));
                   $this->core->getQueries()->pushNotification($notification);
                 }
 

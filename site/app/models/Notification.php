@@ -96,6 +96,8 @@ class Notification extends AbstractModel {
                 case 'forum':
                     $this->handleForum($details);
                     break;
+                case 'student':
+                    $this->handleStudent($details);
                 default:
                     // Prevent notification to be pushed in database
                     $this->setComponent("invalid");
@@ -167,6 +169,16 @@ class Notification extends AbstractModel {
         }
     }
 
+    private function handleStudent($details) {
+      $this->setType($details['type']);
+
+      switch ($details['type']) {
+        case 'grade_inquiry_response':
+          $this->actAsGradeInquiryResponse($details['gradeable_id'], $details['replier']);
+      }
+
+    }
+
     private function actAsNewForumThread($thread_id, $thread_title) {
         $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id))));
         $this->setNotifyContent("New Thread: ".$thread_title);
@@ -223,6 +235,13 @@ class Notification extends AbstractModel {
         $this->setNotifyTarget($target);
     }
 
+    private function actAsGradeInquiryResponse($gradeable_id, $replier, $target) {
+        $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'gradeable_id' => $gradeable_id)));
+        $this->setNotifyContent("New Grade Inquiry Reply");
+        $this->setNotifySource($replier);
+        $this->setNotifyTarget($target);
+
+    }
     /**
      * Trim long $message upto 40 character and filter newline
      *
