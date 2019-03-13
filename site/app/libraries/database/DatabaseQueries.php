@@ -3792,6 +3792,17 @@ AND gc_id IN (
     }
 
     /**
+    * Gets a list of emails for all active particpants in a course
+    */
+
+    public function getClassEmailListWithIds() {
+      $parameters = array();
+      $this->course_db->query('SELECT user_id, user_email FROM users WHERE registration_section IS NOT null', $parameters);
+
+      return $this->course_db->rows();
+    }
+
+    /**
      * Queues an email to be sent by email job
      * @param array $email_data
      * @param string $recipient
