@@ -455,6 +455,7 @@ class FileUtils {
                 $content_type = 'text/x-csrc';
                 break;
 <<<<<<< HEAD
+<<<<<<< HEAD
             case 'html':
                 $content_type = 'text/html';
                 break;
@@ -464,6 +465,8 @@ class FileUtils {
             case 'json':
                 $content_type = 'application/json';
                 break;                
+=======
+>>>>>>> parent of 10fe478... fixed customize web theme file upload bug
 =======
 >>>>>>> parent of 10fe478... fixed customize web theme file upload bug
             case 'cpp':

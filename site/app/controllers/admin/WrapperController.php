@@ -41,46 +41,6 @@ class WrapperController extends AbstractController {
 
     private function processUploadHTML() {
         $filename = $_REQUEST['location'];
-<<<<<<< HEAD
-        $uploadName = $_FILES['wrapper_upload']['name'];
-        
-        $uploadNameExt = strtolower(pathinfo($uploadName, PATHINFO_EXTENSION));
-        $filenameExt = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-
-        if ($uploadNameExt != $filenameExt ) {
-            $this->core->addErrorMessage("Upload failed: File Type must ".$filenameExt);
-            $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper',
-                'action' => 'show_page')));
-        } else {
-            $location = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site', $filename);
-
-            if (!$this->core->getAccess()->canI("path.write.site", ["dir" => "site", "path" => $location])) {
-                $this->core->getOutput()->showError("You do not have permission to do this.");
-            }
-
-            if (empty($_FILES) || !isset($_FILES['wrapper_upload'])) {
-                $this->core->addErrorMessage("Upload failed: No file to upload");
-                $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper',
-                    'action' => 'show_page')));
-            }
-            $upload = $_FILES['wrapper_upload'];
-
-            if(!isset($_REQUEST['location']) || !in_array($_REQUEST['location'], WrapperController::WRAPPER_FILES)) {
-                $this->core->addErrorMessage("Upload failed: Invalid location");
-                $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper',
-                    'action' => 'show_page')));
-            }
-
-            if (!@copy($upload['tmp_name'], $location)) {
-                $this->core->addErrorMessage("Upload failed: Could not copy file");
-                $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper',
-                    'action' => 'show_page')));
-            }
-
-            $this->core->addSuccessMessage("Uploaded ".$upload['name']." as ".$filename);
-            $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper',
-                'action' => 'show_page')));
-=======
         $location = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site', $filename);
 
         if (!$this->core->getAccess()->canI("path.write.site", ["dir" => "site", "path" => $location])) {
@@ -104,7 +64,6 @@ class WrapperController extends AbstractController {
             $this->core->addErrorMessage("Upload failed: Could not copy file");
             $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper',
                 'action' => 'show_page')));
->>>>>>> parent of 10fe478... fixed customize web theme file upload bug
         }
 
         $this->core->addSuccessMessage("Uploaded ".$upload['name']." as ".$filename);
