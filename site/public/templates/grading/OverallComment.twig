@@ -24,12 +24,13 @@ Required Parameters:
         {% if editable %}
             <textarea id="overall-comment"
                       rows="5"
-                      class="general-comment-entry"
+                      class="general-comment-entry noscroll"
                       onclick="event.stopPropagation()"
+                      onkeyup="auto_grow(this)"
                       placeholder="Overall message for student about the gradeable..."
             >{{ overall_comment|escape }}</textarea>
         {% else %}
-            <span id="overall-comment-collapsed">{{ overall_comment|escape }}</span>
+            <span id="overall-comment-collapsed">{{ overall_comment|nl2br }}</span>
         {% endif %}
     </div>
 </div>

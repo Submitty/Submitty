@@ -2580,9 +2580,17 @@ function toggleSidebar() {
 }
 
 $(document).ready(function() {
-    //Collapsed sidebar tooltips
+    //Collapsed sidebar tooltips with content depending on state of sidebar
     $('[data-toggle="tooltip"]').tooltip({
-        position: { my: "right+0 bottom+0" }
+        position: { my: "right+0 bottom+0" },
+        content: function () {
+            if($("#sidebar").hasClass("collapsed")) {
+                return $(this).attr("title")
+            }
+            else {
+                return ""
+            }
+        }
     });
     $("#nav-sidebar-collapse.collapse-icon").attr("title", "Expand Sidebar");
 
@@ -2598,3 +2606,20 @@ $(document).ready(function() {
     });
     checkSidebarCollapse();
 });
+
+// Credit to https://stackoverflow.com/a/24676492/2972004
+//      Solution to autoexpand the height of a textarea
+function auto_grow(element) {
+    element.style.height = "5px";
+    element.style.height = (element.scrollHeight + 5)+"px";
+}
+
+/**
+ * Sets the 'noscroll' textareas to have the correct height
+ */
+function resizeNoScrollTextareas() {
+    // Make sure textareas resize correctly
+    $('textarea.noscroll').each(function() {
+        auto_grow(this);
+    })
+}

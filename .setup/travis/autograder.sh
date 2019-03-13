@@ -51,6 +51,24 @@ rm DrMemory-Linux-${DRMEM_VER}.tar.gz
 popd
 
 # --------------------------------------
+pushd /tmp
+
+echo "Getting TCLAPP"
+wget https://sourceforge.net/projects/tclap/files/tclap-1.2.2.tar.gz -o /dev/null > /dev/null 2>&1
+tar -xpzf tclap-1.2.2.tar.gz
+rm /tmp/tclap-1.2.2.tar.gz
+cd tclap-1.2.2/
+sed -i 's/SUBDIRS = include examples docs tests msc config/SUBDIRS = include docs msc config/' Makefile.in
+bash configure
+make
+make install
+cd /tmp
+rm -rf /tmp/tclap-1.2.2
+
+popd > /dev/null
+
+
+# --------------------------------------
 echo "Getting JUnit..."
 mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit
 mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/hamcrest
@@ -110,8 +128,8 @@ chown  root:root  TestRunner.java
 # everyone can read this file
 chmod  444 TestRunner.java
 
-# compile the executable
-javac -cp ./junit-4.12.jar TestRunner.java
+# compile the executable using the javac we use in the execute.cpp whitelist
+/usr/bin/javac -cp ./junit-4.12.jar TestRunner.java
 
 # everyone can read the compiled file
 chown root:root TestRunner.class

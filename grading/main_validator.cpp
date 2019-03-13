@@ -16,6 +16,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <tclap/CmdLine.h>
 
 #include "TestCase.h"
 #include "default_config.h"
@@ -29,17 +30,37 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
 int main(int argc, char *argv[]) {
 
-  // PARSE ARGUMENTS
-  if (argc != 5) {
-    std::cerr << "VALIDATOR USAGE: validator <hw_id> <rcsid> <submission#> <time-of-submission>" << std::endl;
+  std::string hw_id;
+  std::string rcsid;
+  int subnum;
+  std::string time_of_submission;
+
+
+  TCLAP::CmdLine cmd("Submitty's assignment validation program.", ' ', "0.9");
+  TCLAP::UnlabeledValueArg<std::string> homework_id_argument("homework_id", "The unique id for this gradeable", true, "", "string" , cmd);
+  TCLAP::UnlabeledValueArg<std::string> student_id_argument("student_id", "The unique id for this student", true, "", "string" , cmd);
+  TCLAP::UnlabeledValueArg<int> submission_number_argument("submission_number", "The numeric value for this assignment attempt", true, -1, "integer" , cmd);
+  TCLAP::UnlabeledValueArg<std::string> submission_time_argument("submission_time", "The time at which this submissionw as made", true, "", "string" , cmd);
+
+  //parse arguments.
+  try {
+    cmd.parse(argc, argv);
+    hw_id = homework_id_argument.getValue();
+    rcsid = student_id_argument.getValue();
+    subnum = submission_number_argument.getValue();
+    time_of_submission = submission_time_argument.getValue();
+
+    std::cout << "hw_id " << hw_id << std::endl;
+    std::cout << "rcsid " << rcsid << std::endl;
+    std::cout << "subnum " << subnum << std::endl;
+    std::cout << "time_of_submission " << time_of_submission << std::endl;
+  }
+  catch (TCLAP::ArgException &e)  // catch any exceptions
+  { 
+    std::cerr << "INCORRECT ARGUMENTS TO Validator" << std::endl;
+    std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl; 
     return 1;
   }
-  std::string hw_id = argv[1];
-  std::string rcsid = argv[2];
-  int subnum = atoi(argv[3]);
-  std::string time_of_submission = argv[4];
-
-  // TODO: add more error checking of arguments
 
   int rc = validateTestCases(hw_id,rcsid,subnum,time_of_submission);
   if (rc > 0) {
