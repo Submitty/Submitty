@@ -49,7 +49,7 @@ HTML;
 			array(
 				"required_rank" => 4,
 				"display_text" => 'Back to Threads',
-				"id" => 'back_thread_button',
+				"id" => 'back_thread_primary_button',
 				"style" => 'position:relative;top:3px;',
 				"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))),
 				"optional_class" => '',
@@ -985,7 +985,7 @@ HTML;
 		array(
 			"required_rank" => 4,
 			"display_text" => 'Back to Threads',
-			"id" => 'back_thread_button',
+			"id" => 'back_thread_primary_button',
 			"style" => 'position:relative;top:3px;',
 			"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))),
 			"optional_class" => '',
@@ -1066,7 +1066,7 @@ HTML;
 			array(
 				"required_rank" => 4,
 				"display_text" => 'Back to Threads',
-				"id" => 'back_thread_button',
+				"id" => 'back_thread_primary_button',
 				"style" => 'position:relative;top:3px;',
 				"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))),
 				"optional_class" => '',

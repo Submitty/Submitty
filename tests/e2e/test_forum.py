@@ -15,8 +15,7 @@ class TestForum(BaseTestCase):
         if len(self.driver.find_elements_by_id('nav-sidebar-forum')) == 0:
             self.driver.find_element_by_id('nav-sidebar-course-settings').click()
             self.driver.find_element_by_name("forum_enabled").click()
-            self.driver.find_element_by_xpath("//a[contains(text(),'sample')]").click() 
-
+            self.driver.find_element_by_xpath("//a[contains(text(),'sample')]").click()
         self.driver.find_element_by_id('nav-sidebar-forum').click()
         self.forum_page_url = self.driver.current_url
 
@@ -33,7 +32,7 @@ class TestForum(BaseTestCase):
         if 'page=view_thread' in self.driver.current_url:
             pass
         elif 'page=create_thread' in self.driver.current_url:
-            self.driver.find_element_by_id('back_thread_button').click()
+            self.driver.find_element_by_id('back_thread_primary_button').click()
         else:
             assert False
         assert 'page=view_thread' in self.driver.current_url
@@ -61,19 +60,17 @@ class TestForum(BaseTestCase):
         upload_button = self.driver.find_element_by_id('input_file1')
         self.select_categories(categories_list)
         if upload_attachment:
-            attachment_file = self.upload_attachment(upload_button)
-                
+            attachment_file = self.upload_attachment(upload_button)                
         self.driver.find_element_by_id("submit_thread").click()
         if len([cat for cat in categories_list if cat[1]]) == 0:
             # Test thread should not be created
-            self.driver.switch_to.alert.accept();
+            self.driver.switch_to.alert.accept()
             self.switch_to_page_view_thread()
             assert not self.thread_exists(title)
             return None
         self.wait_after_ajax()
         assert 'page=view_thread' in self.driver.current_url
         return attachment_file
-
 
     def thread_exists(self, title):
         assert 'page=view_thread' in self.driver.current_url
@@ -233,7 +230,7 @@ class TestForum(BaseTestCase):
         self.find_posts(reply2, must_exists = True, move_to_thread = title2, check_attachment = reply2_attachment)
         self.find_posts(reply3, must_exists = True, move_to_thread = title3)
 
-        # # Merging success
+        # Merging success
         self.merge_threads(title2, title1, press_cancel = False)
 
         self.find_posts(content1, must_exists = True, move_to_thread = title1, check_attachment = content1_attachment)
