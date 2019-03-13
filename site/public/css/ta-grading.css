@@ -615,7 +615,7 @@ tr.is_publish {
 
 .gradeable .mark-container span.mark-title textarea {
     width: 100%;
-    resize: vertical;
+    resize: none;
     min-height: 20px;
 }
 
