@@ -43,47 +43,37 @@ Please email your instructor with any questions or concerns.';
 		$this->core->getOutput()->renderOutput(array('admin', 'EmailRoomSeating'), 'displayPage', EmailRoomSeatingController::DEFAULT_EMAIL_SUBJECT, EmailRoomSeatingController::DEFAULT_EMAIL_BODY);
 	}
 
-
 	public function emailSeatingAssignments() {
 		$seating_assignment_subject = $_POST["room_seating_email_subject"];
 		$seating_assignment_body = $_POST["room_seating_email_body"];
 
-		try {
-			$gradeable_id = $this->core->getConfig()->getRoomSeatingGradeableId();
-			$course =  $this->core->getConfig()->getCourse();
+		$gradeable_id = $this->core->getConfig()->getRoomSeatingGradeableId();
+		$course =  $this->core->getConfig()->getCourse();
+		$seating_assignments_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "reports", "seating", $gradeable_id);
 
-			$seating_assignments_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "reports", "seating", $gradeable_id);
+		$classList = $this->core->getQueries()->getClassEmailListWithIds();
 
-			$seating_dir = new \DirectoryIterator($seating_assignments_path);
-	        foreach ($seating_dir as $seatingAssignmentFile) {
+		foreach($classList as $user) {
+			$user_id = $user['user_id'];
+			$user_email = $user['user_email'];
 
-	        	if (!$seatingAssignmentFile->isDot() && $seatingAssignmentFile->getExtension() === "json") {
-		        	$seating_assignment_data = FileUtils::readJsonFile($seatingAssignmentFile->getPathname());
+			$room_seating_file = FileUtils::joinPaths($seating_assignments_path, "$user_id.json");
+			$room_seating_json = FileUtils::readJsonFile($room_seating_file);
 
-		        	$email_data = [
-		                "subject" => $this->replaceSeatingAssignmentMessagePlaceholders($seating_assignment_subject, $seating_assignment_data),
-		                "body" => $this->replaceSeatingAssignmentMessagePlaceholders($seating_assignment_body, $seating_assignment_data)
-		            ];
+			if($room_seating_json === false){
+				continue;
+			}
 
+			$email_data = [
+						"subject" => $this->replaceSeatingAssignmentMessagePlaceholders($seating_assignment_subject, $room_seating_json),
+						"body" => $this->replaceSeatingAssignmentMessagePlaceholders($seating_assignment_body, $room_seating_json)
+				];
 
-							$recipient_id = $seatingAssignmentFile->getBasename('.json');
-							$recipient = $this->core->getQueries()->getSubmittyUser($recipient_id);
-
-							if($recipient == null || $this->core->getQueries()->hasDroppedCourse($recipient_id)){
-								continue;
-							}
-
-							$this->core->getQueries()->createEmail($email_data, $recipient->getEmail());
-
-	        	}
-	    	}
-				$this->core->addSuccessMessage("Seating assignments have been sucessfully emailed!");
-
-		} catch (\Exception $e) {
-			$this->core->getOutput()->renderJsonError($e->getMessage());
+				$this->core->getQueries()->createEmail($email_data, $user_email);
 		}
-			return $this->core->redirect($this->core->buildUrl());
 
+			$this->core->addSuccessMessage("Seating assignments have been sucessfully emailed!");
+			return $this->core->redirect($this->core->buildUrl());
 	}
 
 	private function replaceSeatingAssignmentMessagePlaceholders($seatingAssignmentMessage, $seatingAssignmentData) {
