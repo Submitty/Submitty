@@ -108,7 +108,7 @@ try:
         total_pages = pdfReader.numPages
 
         div = total_pages // num
-        div_length = len(str(div))
+        div_length = len(str(div-1))
         
         i = 0
         while i < total_pages:
