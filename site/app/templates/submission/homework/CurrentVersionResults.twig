@@ -33,7 +33,7 @@
             {% if num_autogrades > 1 %}
                 <br />
                 number of re-autogrades: {{ num_autogrades - 1 }}<br />
-                last re-autograde finished: {{ grading_finished }}<br />
+                last re-autograde finished: {{ grading_finished|date('m/d/Y h:i:s A') }}<br />
             {% else %}
                 queue wait time: {{ wait_time }} seconds<br />
             {% endif %}
