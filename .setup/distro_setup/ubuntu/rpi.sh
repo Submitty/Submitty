@@ -174,13 +174,6 @@ pip3 install opencv-python
 pip3 install scipy
 
 ##################################################
-# Fixup the permissions
-chmod -R 555 /usr/local/lib/python*/*
-chmod 555 /usr/lib/python*/dist-packages
-sudo chmod 500   /usr/local/lib/python*/dist-packages/pam.py*
-sudo chown ${CGI_USER} /usr/local/lib/python*/dist-packages/pam.py*
-
-##################################################
 #install some pdflatex packages
 apt-get install -qqy texlive-latex-base texlive-extra-utils texlive-latex-recommended
 apt-get install -qqy texlive-generic-recommended
@@ -193,5 +186,14 @@ apt-get install -qqy wamerican
 # attempt to correct a system with broken dependencies in place
 apt-get -f -qqy install
 
+
+### Fix Python Package Permissions (should always run at the end of this)
+# Setting the permissions are necessary as pip uses the umask of the user/system, which
+# affects the other permissions (which ideally should be o+rx, but Submitty sets it to o-rwx).
+# This gets run here in case we make any python package changes.
+find /usr/local/lib/python*/dist-packages -type d -exec chmod 755 {} +
+find /usr/local/lib/python*/dist-packages -type f -exec chmod 755 {} +
+find /usr/local/lib/python*/dist-packages -type f -name '*.py*' -exec chmod 644 {} +
+find /usr/local/lib/python*/dist-packages -type f -name '*.pth' -exec chmod 644 {} +
 
 echo "done with RPI specific installs"

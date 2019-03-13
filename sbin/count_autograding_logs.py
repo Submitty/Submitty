@@ -8,7 +8,7 @@ python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/sbin/count_autograding_logs.py
 
 import sys
 import os
-from submitty_utils import dateutils, glob
+from submitty_utils import dateutils
 
 #import path
 

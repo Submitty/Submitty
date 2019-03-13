@@ -6,12 +6,16 @@
 #
 
 import os
+from pathlib import Path
 import pwd
 import time
 import subprocess
-from submitty_utils import glob
 import json
 
+CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
+with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
+    JSON = json.load(open_file)
+DATA_DIR = JSON['submitty_data_dir']
 
 # ------------------------------------------------------------------------
 def build_one(data):
@@ -19,8 +23,8 @@ def build_one(data):
     course = data["course"]
 
     # construct the paths for this course
-    build_script = "/var/local/submitty/courses/" + semester + "/" + course + "/BUILD_" + course + ".sh"
-    build_output = "/var/local/submitty/courses/" + semester + "/" + course + "/build_script_output.txt"
+    build_script = os.path.join(DATA_DIR, "courses", semester, course, "BUILD_" + course + ".sh")
+    build_output = os.path.join(DATA_DIR, "courses", semester, course, "build_script_output.txt")
 
     # construct the command line to build/rebuild/clean/delete the gradeable
     build_args = [build_script]
@@ -37,7 +41,7 @@ def build_one(data):
 
 # ------------------------------------------------------------------------
 def build_all():
-    for filename in glob.iglob("/var/local/submitty/to_be_built/*.json"):
+    for filename in Path(DATA_DIR, "to_be_built").glob("*.json"):
         with open(filename) as data_file:
             print("going to process: " + filename)
             data = json.load(data_file)
@@ -62,7 +66,7 @@ def main():
         raise SystemError("ERROR!  This script must be run by submitty_daemon")
 
     # ensure future pushd & popd commands don't complain
-    os.chdir("/var/local/submitty/to_be_built/")
+    os.chdir(os.path.join(DATA_DIR, "to_be_built"))
 
     start = time.time()
     count = 0
