@@ -4,7 +4,7 @@
 		{% if user_group <= button.required_rank %}
 			{% set link = (button.link[0]) ? 'href=' ~ button.link[1] %}
 			{% set onclick = (button.onclick[0]) ? 'onclick=' ~ button.onclick[1] %}
-			<a class="btn btn-primary {{ button.optional_class }}" style="{{ button.style }}" {{ link }} title="{{ button.title }}" {{ onclick }} >
+			<a id="{{ button.id }}" class="btn btn-primary {{ button.optional_class }}" style="{{ button.style }}" {{ link }} title="{{ button.title }}" {{ onclick }} >
 				{{ button.display_text }}
 			</a>
 		{% endif %}

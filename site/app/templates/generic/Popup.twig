@@ -22,7 +22,7 @@
                         <div class="form-button-container">
                             {% block buttons %}
                                 {% block close_button %}
-                                   <a onclick="$('#{{ block('popup_id') }}').css('display', 'none'); event.stopPropagation();" class="btn btn-default close-button">Close</a>
+                                   <a id="merge_close_button" onclick="$('#{{ block('popup_id') }}').css('display', 'none'); event.stopPropagation();" class="btn btn-default close-button">Close</a>
                                 {% endblock %}
                             {% endblock %}
                         </div>

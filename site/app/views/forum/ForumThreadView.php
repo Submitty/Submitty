@@ -43,11 +43,13 @@ HTML;
 			"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))),
 			"optional_class" => '',
 			"title" => 'Create Thread',
+			"id" => 'create_thread_primary_button',
 			"onclick" => array(false)
 			),
 			array(
 				"required_rank" => 4,
 				"display_text" => 'Back to Threads',
+				"id" => 'back_thread_button',
 				"style" => 'position:relative;top:3px;',
 				"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))),
 				"optional_class" => '',
@@ -287,6 +289,7 @@ HTML;
 		array(
 			"required_rank" => 4,
 			"display_text" => 'Create Thread',
+			"id" => 'create_thread_primary_button',
 			"style" => 'position:relative;top:3px;',
 			"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))),
 			"optional_class" => '',
@@ -529,7 +532,8 @@ HTML;
 			$return .= $this->core->getOutput()->renderTwigTemplate("forum/MergeThreadsForm.twig", [
 				"current_thread_date" => $current_thread_date,
 				"current_thread" => $currentThread,
-				"possibleMerges" => $merge_thread_list
+				"possibleMerges" => $merge_thread_list,
+				"id" => 'merge_thread_button'
 			]);
 		}
 		$return .= $this->core->getOutput()->renderTwigTemplate("forum/EditPostForm.twig");
@@ -981,6 +985,7 @@ HTML;
 		array(
 			"required_rank" => 4,
 			"display_text" => 'Back to Threads',
+			"id" => 'back_thread_button',
 			"style" => 'position:relative;top:3px;',
 			"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))),
 			"optional_class" => '',
@@ -1027,8 +1032,9 @@ HTML;
 					"show_anon" => true,
 					"show_thread_status" => true,
 					"show_announcement" => true,
-					"show_editcat" => true,
+					"show_editcat" => true,					
 					"submit_label" => "Submit Post",
+					"id" => "submit_thread",
 				]);
 			$return .= <<<HTML
 			</form>
@@ -1060,6 +1066,7 @@ HTML;
 			array(
 				"required_rank" => 4,
 				"display_text" => 'Back to Threads',
+				"id" => 'back_thread_button',
 				"style" => 'position:relative;top:3px;',
 				"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))),
 				"optional_class" => '',

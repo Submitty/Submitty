@@ -1,4 +1,4 @@
-from .base_testcase import BaseTestCase
+from base_testcase import BaseTestCase
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
@@ -18,8 +18,7 @@ class TestSimpleGrader(BaseTestCase):
             return "0.5"
         else:
             return "0"
-            
-    
+                
     # remove the need to pass pesky arguments from func
     # simplifies the writing of test cases, as variable names can be used instead of accessing kwargs
     def insert_kwargs(self, func, **kwargs):
@@ -36,8 +35,8 @@ class TestSimpleGrader(BaseTestCase):
         def func_wrapper(func):
             def wrapped_func(gradeable_id, gradeable_name):
                 self.click_nav_grade_button("items_being_graded", gradeable_id, "grade", (By.XPATH, "//div[@class='content']/h1[1][normalize-space(text())='{}']".format(gradeable_name)))
-                func()
-                self.click_header_link_text("sample", (By.XPATH, "//table[@class='gradeable_list']"))
+                func()                
+                self.click_header_link_text("sample", (By.CLASS_NAME, "gradeable_list"))
             return wrapped_func if func is not None else lambda *args: None
         
         for user in users:

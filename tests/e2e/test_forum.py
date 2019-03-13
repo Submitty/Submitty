@@ -5,33 +5,35 @@ from selenium.webdriver.common.by import By
 from .base_testcase import BaseTestCase
 import time
 
+
 class TestForum(BaseTestCase):
     def __init__(self,testname):
         super().__init__(testname,user_id="instructor", user_password="instructor", user_name="Quinn")
-
+    
     def init_and_enable_discussion(self):
         self.click_class('sample')
-        if len(self.driver.find_elements_by_xpath("//a[@id='nav-sidebar-forum']")) == 0:
-            self.driver.find_element_by_xpath("//a[@id='nav-sidebar-course-settings']").click()
+        if len(self.driver.find_elements_by_id('nav-sidebar-forum')) == 0:
+            self.driver.find_element_by_id('nav-sidebar-course-settings').click()
             self.driver.find_element_by_name("forum_enabled").click()
-            self.driver.find_element_by_xpath("//a[contains(text(),'sample')]").click()
-        self.driver.find_element_by_xpath("//a[@id='nav-sidebar-forum']").click()
+            self.driver.find_element_by_xpath("//a[contains(text(),'sample')]").click() 
+
+        self.driver.find_element_by_id('nav-sidebar-forum').click()
         self.forum_page_url = self.driver.current_url
 
     def switch_to_page_create_thread(self):
-        if 'page=create_thread' in self.driver.current_url:
+        if 'page=create_thread' in self.driver.current_url: 
             pass
         elif 'page=view_thread' in self.driver.current_url:
-            self.driver.find_element_by_xpath("//a[contains(text(),'Create Thread')]").click()
+            self.driver.find_element_by_id('create_thread_primary_button').click()
         else:
-            assert False
+            assert False        
         assert 'page=create_thread' in self.driver.current_url
 
     def switch_to_page_view_thread(self):
         if 'page=view_thread' in self.driver.current_url:
             pass
         elif 'page=create_thread' in self.driver.current_url:
-            self.driver.find_element_by_xpath("//a[contains(text(),'Back to Threads')]").click()
+            self.driver.find_element_by_id('back_thread_button').click()
         else:
             assert False
         assert 'page=view_thread' in self.driver.current_url
@@ -55,12 +57,13 @@ class TestForum(BaseTestCase):
         attachment_file = None
         self.switch_to_page_create_thread()
         self.driver.find_element_by_id("title").send_keys(title)
-        self.driver.find_element_by_id("thread_post_content").send_keys(first_post)
-        upload_button = self.driver.find_element_by_xpath("//input[@type='file']")
+        self.driver.find_element_by_id("thread_post_content").send_keys(first_post)        
+        upload_button = self.driver.find_element_by_id('input_file1')
         self.select_categories(categories_list)
         if upload_attachment:
             attachment_file = self.upload_attachment(upload_button)
-        self.driver.find_element_by_xpath("//input[@value='Submit Post']").click()
+                
+        self.driver.find_element_by_id("submit_thread").click()
         if len([cat for cat in categories_list if cat[1]]) == 0:
             # Test thread should not be created
             self.driver.switch_to.alert.accept();
@@ -70,6 +73,7 @@ class TestForum(BaseTestCase):
         self.wait_after_ajax()
         assert 'page=view_thread' in self.driver.current_url
         return attachment_file
+
 
     def thread_exists(self, title):
         assert 'page=view_thread' in self.driver.current_url
@@ -159,14 +163,16 @@ class TestForum(BaseTestCase):
     def merge_threads(self, child_thread_title, parent_thread_title, press_cancel = False):
         self.view_thread(child_thread_title)
         merge_threads_div = self.driver.find_element_by_id("merge-threads")
-        self.driver.find_element_by_xpath("//a[contains(text(),'Merge Threads')]").click()
+        
+        self.driver.find_element_by_id('primary_merge_thread_button').click()
+
         cancel_button = merge_threads_div.find_element(By.XPATH, ".//a[contains(normalize-space(.), 'Close')]")
         assert merge_threads_div.value_of_css_property("display") == "block"
         if parent_thread_title is None:
             cancel_button.click()
             assert merge_threads_div.value_of_css_property("display") == "none"
         else:
-            submit_button = merge_threads_div.find_element(By.XPATH, ".//input[@value='Merge Thread']")
+            submit_button = merge_threads_div.find_element_by_id('merge_thread_button')
             possible_parents = merge_threads_div.find_element(By.XPATH, ".//a[@class='chosen-single']").click()
             self.driver.find_element(By.XPATH, ".//li[contains(normalize-space(.), '{}')]".format(parent_thread_title)).click()
             if press_cancel:
@@ -227,7 +233,7 @@ class TestForum(BaseTestCase):
         self.find_posts(reply2, must_exists = True, move_to_thread = title2, check_attachment = reply2_attachment)
         self.find_posts(reply3, must_exists = True, move_to_thread = title3)
 
-        # Merging success
+        # # Merging success
         self.merge_threads(title2, title1, press_cancel = False)
 
         self.find_posts(content1, must_exists = True, move_to_thread = title1, check_attachment = content1_attachment)
