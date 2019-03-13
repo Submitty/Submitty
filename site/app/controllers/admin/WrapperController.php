@@ -41,10 +41,16 @@ class WrapperController extends AbstractController {
 
     private function processUploadHTML() {
         $filename = $_REQUEST['location'];
-        $mimeType = FileUtils::getMimeType($filename);
-        $mimeTypeAllowed = array('text/html', 'text/css', 'application/json');
+        $uploadName = $_FILES['wrapper_upload']['name'];
+        
+        $uploadNameExt = strtolower(pathinfo($uploadName, PATHINFO_EXTENSION));
+        $filenameExt = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
 
-        if (in_array($mimeType, $mimeTypeAllowed)) {
+        if ($uploadNameExt != $filenameExt ) {
+            $this->core->addErrorMessage("Upload failed: File Type must ".$filenameExt);
+            $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper',
+                'action' => 'show_page')));
+        } else {
             $location = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site', $filename);
 
             if (!$this->core->getAccess()->canI("path.write.site", ["dir" => "site", "path" => $location])) {
@@ -71,10 +77,6 @@ class WrapperController extends AbstractController {
             }
 
             $this->core->addSuccessMessage("Uploaded ".$upload['name']." as ".$filename);
-            $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper',
-                'action' => 'show_page')));
-        } else {
-            $this->core->addErrorMessage("Upload failed: File Type must be either html, css, or json");
             $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper',
                 'action' => 'show_page')));
         }
