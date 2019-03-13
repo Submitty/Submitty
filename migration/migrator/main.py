@@ -8,7 +8,7 @@ import re
 
 from sqlalchemy.exc import OperationalError
 
-from . import db, get_dir_path, get_migrations_path
+from . import db, get_dir_path, get_migrations_path, get_environments
 from .loader import load_module, load_migrations
 
 
@@ -29,15 +29,16 @@ def create(args):
     now = datetime.now()
     date_args = [now.year, now.month, now.day, now.hour, now.minute, now.second]
     ver = "{:04}{:02}{:02}{:02}{:02}{:02}".format(*date_args)
-    filename = "{}_{}".format(ver, args.name)
-    check = re.search(r'[^A-Za-z0-9_\-]', filename)
-    if check is not None:
-        raise ValueError("Name '{}' contains invalid character '{}'".format(
-            filename,
-            check.group(0)
-        ))
-    filename += '.py'
-    for environment in args.environments:
+
+    check = re.match(r'^[A-Za-z0-9_]+$', args.name)
+    if check is None:
+        raise ValueError(
+            "Invalid migration name (must only contain alphanumeric and _): {}".format(
+                args.name
+            )
+        )
+    filename = "{}_{}.py".format(ver, args.name)
+    for environment in get_environments(args.environments):
         new_file = Path(get_migrations_path(), environment, filename)
         base_file = Path(
             get_dir_path(),
@@ -46,6 +47,7 @@ def create(args):
         )
         with new_file.open('w') as open_file, base_file.open() as template_file:
             open_file.write(template_file.read())
+        print('Created migration: {}/{}'.format(environment, new_file.name))
 
 
 def status(args):
@@ -62,7 +64,7 @@ def status(args):
     """
     args.config.database['dbname'] = 'submitty'
 
-    for environment in args.environments:
+    for environment in get_environments(args.environments):
         if environment in ['master', 'system']:
             try:
                 database = db.Database(args.config.database, environment)
@@ -177,7 +179,7 @@ def handle_migration(args):
     """
     args.config.database['dbname'] = 'submitty'
 
-    for environment in args.environments:
+    for environment in get_environments(args.environments):
         args.course = None
         args.semester = None
         if environment in ['master', 'system']:

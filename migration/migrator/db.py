@@ -24,13 +24,38 @@ class Database:
         self.DynamicBase = declarative_base(class_registry=dict())
         if 'database_driver' not in params:
             raise RuntimeError('Need to supply a driver')
+        connection_string = Database.get_connection_string(params)
+
+        self.engine = create_engine(connection_string)
+        self.engine.connect()
+        self.inspector = reflection.Inspector.from_engine(self.engine)
+        self.Session = sessionmaker()
+        self.Session.configure(bind=self.engine)
+        self.session = self.Session()
+
+        self.migration_table = get_migration_table(environment, self.DynamicBase)
+
+    @staticmethod
+    def get_connection_string(params):
+        """
+        Get connection string for SQLAlchemy.
+
+        :param params: Dictionary containg database connection details
+        :type params: dict
+        :return: The connection string
+        :rtype: str
+        """
+        # We only support sqlite in-memory as it's only used for testing
+        # at the moment
         if params['database_driver'] == 'sqlite':
             connection_string = 'sqlite://'
         else:
             if params['database_driver'] == 'psql':
                 connection_string = 'postgresql+psycopg2://'
             else:
-                raise RuntimeError('Invalid driver')
+                raise RuntimeError(
+                    'Invalid driver: {}'.format(params['database_driver'])
+                )
 
             host = params['database_host']
             connection_string += '{}:{}@{}/{}'.format(
@@ -43,14 +68,7 @@ class Database:
             if Path(host).exists():
                 connection_string += '?host={}'.format(host)
 
-        self.engine = create_engine(connection_string)
-        self.engine.connect()
-        self.inspector = reflection.Inspector.from_engine(self.engine)
-        self.Session = sessionmaker()
-        self.Session.configure(bind=self.engine)
-        self.session = self.Session()
-
-        self.migration_table = get_migration_table(environment, self.DynamicBase)
+        return connection_string
 
     def execute(self, query):
         """

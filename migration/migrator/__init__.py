@@ -19,6 +19,20 @@ def get_migrations_path():
     return MIGRATIONS_PATH
 
 
-def get_environments():
+def get_all_environments():
     """Return the set environments."""
     return ENVIRONMENTS
+
+
+def get_environments(candidates=None):
+    # make sure the order is of 'master', 'system', 'course' depending on what
+    # environments have been selected system must be run after master initially
+    # as system relies on master DB being setup for migration table
+    if candidates is None:
+        return []
+    candidates = [str(candidate).lower() for candidate in candidates]
+    environments = []
+    for env in get_all_environments():
+        if env in candidates:
+            environments.append(env)
+    return environments

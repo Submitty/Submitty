@@ -12,6 +12,8 @@ import migrator
 
 class TestMigrate(unittest.TestCase):
     def setUp(self):
+        self.stdout = sys.stdout
+        sys.stdout = StringIO()
         self.dir = tempfile.mkdtemp()
         self.old_migrations_path = migrator.MIGRATIONS_PATH
         migrator.MIGRATIONS_PATH = Path(self.dir)
@@ -21,10 +23,8 @@ class TestMigrate(unittest.TestCase):
         shutil.rmtree(self.dir)
         migrator.MIGRATIONS_PATH = self.old_migrations_path
 
-    def setup_test(self, environment):
+    def setup_test(self, environment):   
         Path(self.dir, environment).mkdir()
-        self.stdout = sys.stdout
-        sys.stdout = StringIO()
         self.database = migrator.db.Database({'database_driver': 'sqlite'}, environment)
         self.database.DynamicBase.metadata.create_all(self.database.engine)
 
@@ -42,8 +42,8 @@ class TestMigrate(unittest.TestCase):
             'submitty_install_dir': str(install_path)
         }
 
-        create_migration(self.database, self.dir, environment, '01_test.py', status=0)
-        create_migration(self.database, self.dir, environment, '02_test.py', status=0)
+        create_migration(None, self.dir, environment, '01_test.py', status=0)
+        create_migration(None, self.dir, environment, '02_test.py', status=0)
         migrator.main.migrate_environment(self.database, environment, args)
         self.assertEqual("""Running up migrations for system...  01_test
   02_test
