@@ -135,6 +135,7 @@ class AdminGradeableController extends AbstractController {
             'syllabus_buckets' => self::syllabus_buckets,
             'vcs_base_url' => $vcs_base_url,
             'regrade_enabled' => $this->core->getConfig()->isRegradeEnabled(),
+            'forum_enabled' => $this->core->getConfig()->isForumEnabled(),
             'gradeable_type_strings' => self::gradeable_type_strings
         ]);
     }

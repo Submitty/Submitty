@@ -97,6 +97,26 @@
         <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val auto_save date-related"
                 {{ not (action != 'new' and gradeable.getTaGrading()) ? 'checked' : '' }} /> <label for="no_ta_grade">No</label>
     </div>
+    {% if forum_enabled %}
+
+    <div id="discussion_grading_enable_container">
+            Is there a discussion component for this assignment?
+            <br />
+            <input type="radio" id="yes_discussion" name="discussion" value="true" class="bool_val auto_save date-related"
+                    {{ action != 'new' and gradeable.isDiscussionBased() ? 'checked' : '' }} /> Yes
+            <input type="radio" id="no_discussion" name="discussion" value="false" class="bool_val auto_save date-related"
+                    {{ not (action != 'new' and gradeable.isDiscussionBased()) ? 'checked' : '' }} /> No
+      
+        <div class="discussion_id_wrapper">
+        <label for="discussion_thread_id">What is the thread id?</label>
+            <input style="width: 50px" name="team_size_max" id="discussion_thread_id" class="int_val auto_save" type="text"
+                   value="{{ action != 'new' ? gradeable.getDiscussionThreadId() : '0' }}"/>
+           </div>
+
+        </div>
+
+    {% endif %}
+
     {% if regrade_enabled %}
         <div id="regrade_request_enable_container">
             Will grade inquiries be enabled for this assignment?
@@ -291,6 +311,15 @@
         }
     }
 
+    function onDiscussionChange() {
+    	if($('#yes_discussion').is(':checked')) {
+            disableElementChildren('.discussion_id_wrapper', false);
+        }
+        else {
+            disableElementChildren('.discussion_id_wrapper', true);
+        }
+    }
+
     function onManualGradingChange() {
         if($('#yes_ta_grade').is(':checked') || !$('#radio_electronic_file').is(':checked')) {
             // $('.manual_grading').show();
@@ -395,6 +424,9 @@
         // Hide team settings if team's are not the selected option
         onTeamAssignmentChange();
         $('[name="team_assignment"]').change(onTeamAssignmentChange);
+
+        onDiscussionChange();
+        $('[name="discussion"]').change(onDiscussionChange);
 
         disableElementChildren('#repository', $('input[name=vcs]').val() === 'false');
 

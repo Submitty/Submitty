@@ -69,6 +69,8 @@ use app\models\User;
  * @method float getPrecision()
  * @method Component[] getComponents()
  * @method bool isRegradeAllowed()
+ * @method bool isDiscussionBased()
+ * @method int  getDiscussionThreadId()
  * @method int getActiveRegradeRequestCount()
  * @method void setHasDueDate($has_due_date)
  */
@@ -186,6 +188,12 @@ class Gradeable extends AbstractModel {
     protected $regrade_request_date = null;
     /** @property @var boolean are grade inquiries enabled for this assignment*/
     protected $regrade_allowed = true;
+    /** @property @var boolean does this assignmennt have a discussion component*/
+    protected $discussion_based = true;
+    /** @property @var int thread id for cooresponding to discussion forum thread*/
+    protected $discussion_thread_id = -1;
+
+
     /**
      * Gradeable constructor.
      * @param Core $core
