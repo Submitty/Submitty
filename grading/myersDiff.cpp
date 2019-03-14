@@ -190,7 +190,6 @@ TestResults* errorIfEmpty_doit (const TestCase &tc, const nlohmann::json& j) {
 
 
 TestResults* custom_doit(const TestCase &tc, const nlohmann::json& j, const nlohmann::json& whole_config){
-  std::string output_file = j.value("output_file","");
 
   if(output_file == ""){
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: output file not specified.")});
@@ -203,25 +202,59 @@ TestResults* custom_doit(const TestCase &tc, const nlohmann::json& j, const nloh
   nlohmann::json test_case_limits = tc.get_test_case_limits();
   nlohmann::json assignment_limits = j.value("resource_limits",nlohmann::json());
   bool windowed = false;
+  std::string output_file_name = "temporary_custom_validator_output.json";
 
-  int ret = execute(command, actions, dispatcher_actions, execute_logfile, test_case_limits,
-                     assignment_limits, whole_config, windowed, "NOT_A_WINDOWED_ASSIGNMENT");
+  int ret = execute(command+
+                            " 1>"+output_file_name, 
+                            actions, dispatcher_actions, execute_logfile, test_case_limits,
+                            assignment_limits, whole_config, windowed, "NOT_A_WINDOWED_ASSIGNMENT");
 
   if(ret != 0){
       std::cout << "FAILURE" << std::endl;
       return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "A stunning failure.")});
   }
 
+  std::ifstream ifs(output_file_name);
 
-  std::cout << "OPENING " << output_file << std::endl;
-  std::ifstream ifs(output_file);
-  nlohmann::json result = nlohmann::json::parse(ifs);
+  if(!ifs.good()){
+    return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "Custom validation did not return a result. Please contact your instructor.")});
+  }
+
+  try{
+    nlohmann::json result = nlohmann::json::parse(ifs);
+  }catch(const std::exception& e){
+    return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "Could not parse the custom validator's output. Please contact your instructor.")});
+  }
+  
+  if(!result["score"].is_number()){
+    return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "A custom validator must return score as a number between 0 and 1. Please contact your instructor.")});
+  }
   float score = result["score"];
-  std::string message = result["message"];
-  int color_int = result["color"];
-  TEST_RESULTS_MESSAGE_TYPE color = static_cast<TEST_RESULTS_MESSAGE_TYPE>(color_int);
-  std::cout << "returning testresult " << score << color << message << std::endl;
-  return new TestResults(score, {std::make_pair(MESSAGE_FAILURE, message)});
+
+  std::string message = "";
+  if(result["message"].is_string()){
+      std::string message = result["message"];
+  }
+
+  std::status_string = "";
+  if(result["status"].is_string()){
+    std::string status_string = result["status"];
+  }
+
+  TEST_RESULTS_MESSAGE_TYPE status = MESSAGE_INFORMATION;
+
+  if(status_string == "failure"){
+    status = MESSAGE_FAILURE;
+  }else if(status_string == "warning"){
+    status = MESSAGE_WARNING;
+  }else if(status_string == "success"){
+    status = MESSAGE_SUCCESS;
+  }//else it stays information.
+
+  execute("rm " +output_file_name,actions, dispatcher_actions, execute_logfile, test_case_limits,
+                          assignment_limits, whole_config, windowed, "NOT_A_WINDOWED_ASSIGNMENT");
+
+  return new TestResults(score, {std::make_pair(status, message)});
 }
 
 // ==============================================================================

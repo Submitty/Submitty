@@ -171,13 +171,8 @@ bool system_program(const std::string &program, std::string &full_path_executabl
 
 
 std::set<std::string> get_compiled_executables(const nlohmann::json &whole_config) {
-  std::cout << "Hello World" << std::endl;
   std::set<std::string> answer;
   assert (whole_config != nlohmann::json());
-
-  std::string outstrtmp = whole_config.dump(4);
-  std::cout << "PRINTING THING" << std::endl;
-  std::cout << outstrtmp << std::endl;
 
   nlohmann::json testcases = whole_config.value("testcases",nlohmann::json());
   for (nlohmann::json::iterator itr = testcases.begin(); itr != testcases.end(); itr++) {
@@ -190,16 +185,6 @@ std::set<std::string> get_compiled_executables(const nlohmann::json &whole_confi
       }
     }
   }
-
-  nlohmann::json validators = whole_config.value("validator_compilation_commands", nlohmann::json());
-  //debug line!
-  assert(validators != nlohmann::json());
-  for(nlohmann::json::iterator v_itr = validators.begin(); v_itr != validators.end(); v_itr++){
-    std::string executable = (*v_itr)["executable"];
-    std::cout << "inserting " << executable << std::endl;
-    answer.insert(executable);
-  }
-
   return answer;
 }
 
@@ -209,11 +194,6 @@ bool local_executable (const std::string &program, const nlohmann::json &whole_c
   assert (program.substr(0,2) == "./");
 
   std::set<std::string> executables = get_compiled_executables(whole_config);
-
-  std::cout << "ABOUT TO PRINT OUT THE EXECUTABLES!" << std::endl;
-  for(std::set<std::string>::iterator itr = executables.begin(); itr != executables.end(); itr++){
-    std::cout << *itr << std::endl;
-  }
 
   if (executables.find(program.substr(2,program.size())) != executables.end()) {
     return true;

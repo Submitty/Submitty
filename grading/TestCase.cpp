@@ -252,13 +252,6 @@ TestResults* TestCase::dispatch(const nlohmann::json& grader, int autocheck_numb
 // =================================================================================
 // =================================================================================
 // CONSTRUCTOR
-  
-//Useful when creating a temporary testcase
-TestCase* Compilation_Testcase_Factory(){
-  nlohmann::json dict = nlohmann::json();
-  dict["type"] = "Compilation";
-  return new TestCase(dict, -1, "");
-}
 
 TestCase::TestCase(nlohmann::json &whole_config, int which_testcase, std::string docker_name) :
   _json((*whole_config.find("testcases"))[which_testcase]), CONTAINER_NAME(docker_name) {

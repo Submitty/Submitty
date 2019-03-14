@@ -229,64 +229,6 @@ int main(int argc, char *argv[]) {
     complete_config.open(complete_config_file, std::ios::out);
     complete_config << config_json.dump(4) << std::endl;
   }
-  int exit_no = -1;
-  //Now compile all of the custom validators.
-  std::cout << "Compiling Custom Validators" << std::endl;
-  if(config_json["validator_compilation_commands"].is_array()){
-    std::cout << "Found " << config_json["validator_compilation_commands"].size() << " commands." << std::endl;
-    nlohmann::json::iterator comp_commands = config_json.find("validator_compilation_commands");
-    int i = 0;
-    // std::cout << "Trying something stupid" << std::endl;
-    // TestCase* tmp = Compilation_Testcase_Factory();
-    // std::cout << "constructed" << std::endl;
-    nlohmann::json limits;// = tmp->get_test_case_limits();
-    
-    std::cout << "that worked." << std::endl;
-    for(nlohmann::json::iterator itr = comp_commands->begin(); itr != comp_commands->end(); itr++){
-
-      std::string command = (*itr)["command"];
-      std::cout << "RUNNING "   << command    << std::endl;
-      std::string executable = (*itr)["executable"];
-      std::cout << "EXPECTING " << executable << std::endl;
-
-      exit_no = system(command.c_str());
-      // //compile.
-      // exit_no = execute(command,
-      //                         nlohmann::json(),
-      //                         nlohmann::json(),
-      //                         "/dev/null",//"validator_compilation_log_" + std::to_string(i)+".txt",
-      //                         nlohmann::json(),
-      //                         nlohmann::json(),
-      //                         config_json,
-      //                         false);
-      if(exit_no != 0){
-        std::cout << "ERROR: Could not compile custom validator " << i << ". Ran command " << command << std::endl;
-        return exit_no;
-      }
-
-      // complete_config_file = argv[1];
-      // int c_pos = complete_config_file.find("/config");
-      // std::string new_filename = complete_config_file.substr(0,b_pos) + "/custom_validator_code/" + executable;
-
-
-      // //move the executable 
-      // exit_no = execute("/bin/mv "+executable+" "+new_filename,
-      //                 nlohmann::json(),
-      //                 nlohmann::json(),
-      //                 "/dev/null",
-      //                 limits,
-      //                 nlohmann::json(),
-      //                 config_json,
-      //                 false);
-
-      // if(exit_no != 0){
-      //   std::cout << "ERROR: Could not perform /bin/mv " + executable + " " + new_filename << std::endl;;
-      //   return exit_no;
-      // }
-
-    }
-  }
-
 
   return 0;
 }

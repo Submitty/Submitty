@@ -136,8 +136,6 @@ private:
 
 // NON MEMBER  HELPER FUNCTIONS
 
-TestCase* Compilation_Testcase_Factory();
-
 void adjust_test_case_limits(nlohmann::json &modified_test_case_limits, int rlimit_name, rlim_t value);
 
 std::string getAssignmentIdFromCurrentDirectory(std::string);
