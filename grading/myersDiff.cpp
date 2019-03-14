@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <algorithm>
 #include <sstream>
+#include <cstdio>
 
 #include "myersDiff.h"
 #include "json.hpp"
@@ -191,10 +192,6 @@ TestResults* errorIfEmpty_doit (const TestCase &tc, const nlohmann::json& j) {
 
 TestResults* custom_doit(const TestCase &tc, const nlohmann::json& j, const nlohmann::json& whole_config){
 
-  if(output_file == ""){
-    return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: output file not specified.")});
-  }
-
   std::string command = j["command"];
   std::vector<nlohmann::json> actions;
   std::vector<nlohmann::json> dispatcher_actions;
@@ -220,8 +217,9 @@ TestResults* custom_doit(const TestCase &tc, const nlohmann::json& j, const nloh
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "Custom validation did not return a result. Please contact your instructor.")});
   }
 
+  nlohmann::json result;
   try{
-    nlohmann::json result = nlohmann::json::parse(ifs);
+    result = nlohmann::json::parse(ifs);
   }catch(const std::exception& e){
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "Could not parse the custom validator's output. Please contact your instructor.")});
   }
@@ -233,12 +231,16 @@ TestResults* custom_doit(const TestCase &tc, const nlohmann::json& j, const nloh
 
   std::string message = "";
   if(result["message"].is_string()){
-      std::string message = result["message"];
+      message = result["message"];
+  }else{
+    std::cout << "Message was not a string or was not found." << std::endl;
   }
 
-  std::status_string = "";
+  std::string status_string = "";
   if(result["status"].is_string()){
-    std::string status_string = result["status"];
+    status_string = result["status"];
+  }else{
+    std::cout << "Status was not a string or was not found." << std::endl;
   }
 
   TEST_RESULTS_MESSAGE_TYPE status = MESSAGE_INFORMATION;
@@ -251,8 +253,8 @@ TestResults* custom_doit(const TestCase &tc, const nlohmann::json& j, const nloh
     status = MESSAGE_SUCCESS;
   }//else it stays information.
 
-  execute("rm " +output_file_name,actions, dispatcher_actions, execute_logfile, test_case_limits,
-                          assignment_limits, whole_config, windowed, "NOT_A_WINDOWED_ASSIGNMENT");
+  //Remove is safe, as we named and created the file.
+  std::remove(output_file_name.c_str());
 
   return new TestResults(score, {std::make_pair(status, message)});
 }
