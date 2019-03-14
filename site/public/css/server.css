@@ -1758,17 +1758,7 @@ end of styles used in the admin gradeable page
     width: 100%;
     max-height: 300px;
 }
-
-#details-legend{
-    list-style: none;
-    width: 100%;
-    padding-left: 15px;
-
-}
 #details-legend > li{
-    align-items: center;
-    display: flex;
+    list-style: none;
+    padding-left: 15px;
 }
- #details-legend > li > .fas{
-     padding-right: 5px;
- }
