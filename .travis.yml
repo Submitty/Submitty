@@ -1,6 +1,6 @@
 language: php
 sudo: true
-dist: trusty
+dist: xenial
 
 cache:
   pip: true
@@ -136,6 +136,9 @@ jobs:
       stage: 03 e2e test
       php: 7.0
       env: AUTH_METHOD=1
+      services:
+        - xvfb
+        - docker
       addons:
         chrome: stable
         postgresql: "9.5"
@@ -189,6 +192,10 @@ jobs:
         - pip3 install .
         - popd
       before_script:
+        # Need to make this a full repo so that we can get the tag information
+        # when we're installing
+        - git fetch --unshallow
+        - git fetch
         # Doing this helps chromedriver from hanging for some mysterious reason
         # https://github.com/SeleniumHQ/docker-selenium/issues/87
         - export DBUS_SESSION_BUS_ADDRESS=/dev/null
@@ -207,13 +214,14 @@ jobs:
         - sudo cp -f .setup/travis/apache.conf /etc/apache2/sites-available/submitty.conf
         - sudo a2ensite submitty
         - sudo chown -R submitty_php:submitty_php /var/lib/apache2/fastcgi
+        # TODO: Figure out why these chmod's are necessary and fix whatever has
+        #       bad permission (https://github.com/Submitty/Submitty/issues/1040)
         - sudo chmod -R 755 /usr/local/submitty
         - sudo chmod -R 777 /usr/local/submitty/test_suite
+        - sudo chown root:submitty_daemon  /usr/local/submitty/sbin/untrusted_execute
+        - sudo chmod 4550 /usr/local/submitty/sbin/untrusted_execute
         - sudo bash -c 'echo "export PATH=$PATH" >> /etc/apache2/envvars'
         - sudo service apache2 restart
-        - "export DISPLAY=:99.0"
-        - "sh -e /etc/init.d/xvfb start"
-        - sleep 3 # give xvfb some time to start
       script:
         - TEST_URL="http://localhost" python -m unittest discover -v --start-directory tests
     - <<: *03-e2e

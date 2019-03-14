@@ -49,6 +49,7 @@ adduser ${PHP_USER} submitty_daemonphp
 adduser submitty_daemon submitty_daemonphp
 adduser ${CGI_USER} submitty_daemoncgi
 adduser submitty_daemon submitty_daemoncgi
+adduser submitty_daemon docker
 useradd -p $(openssl passwd -1 submitty_dbuser) submitty_dbuser
 
 chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}
@@ -78,11 +79,7 @@ python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -e master -e system mig
 
 bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
 
-# TODO: get this to work properly and tests to pass
-#sudo -u submitty_daemon /usr/local/submitty/sbin/submitty_autograding_shipper.py > /dev/null &
-#sleep 1
-#sudo -u submitty_daemon /usr/local/submitty/sbin/submitty_autograding_worker.py > /dev/null &
-#sleep 1
-#/usr/local/submitty/bin/grading_done.py
+systemctl start submitty_autograding_shipper
+systemctl start submitty_autograding_worker
 
 echo 'Finished setup.'
