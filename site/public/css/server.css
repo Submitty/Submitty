@@ -1762,14 +1762,13 @@ end of styles used in the admin gradeable page
 #details-legend{
     list-style: none;
     width: 100%;
-    padding-left: 10px;
+    padding-left: 15px;
 
 }
 #details-legend > li{
     align-items: center;
     display: flex;
-    margin:4px;
 }
- #details-legend > li > p{
-     padding-left: 5px;
+ #details-legend > li > .fas{
+     padding-right: 5px;
  }
