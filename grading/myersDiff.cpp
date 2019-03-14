@@ -207,25 +207,24 @@ TestResults* custom_doit(const TestCase &tc, const nlohmann::json& j, const nloh
                             assignment_limits, whole_config, windowed, "NOT_A_WINDOWED_ASSIGNMENT");
 
   if(ret != 0){
-      std::cout << "FAILURE" << std::endl;
-      return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "A stunning failure.")});
+      return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: A custom validator did not terminate successfully.")});
   }
 
   std::ifstream ifs(output_file_name);
 
   if(!ifs.good()){
-    return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "Custom validation did not return a result. Please contact your instructor.")});
+    return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: Custom validation did not return a result.")});
   }
 
   nlohmann::json result;
   try{
     result = nlohmann::json::parse(ifs);
   }catch(const std::exception& e){
-    return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "Could not parse the custom validator's output. Please contact your instructor.")});
+    return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: Could not parse the custom validator's output.")});
   }
   
   if(!result["score"].is_number()){
-    return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "A custom validator must return score as a number between 0 and 1. Please contact your instructor.")});
+    return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: A custom validator must return score as a number between 0 and 1.")});
   }
   float score = result["score"];
 
