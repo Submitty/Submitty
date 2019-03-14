@@ -159,7 +159,7 @@ class TestForum(BaseTestCase):
 
     def merge_threads(self, child_thread_title, parent_thread_title, press_cancel = False):
         self.view_thread(child_thread_title)
-        merge_threads_div = self.driver.find_element_by_id("merge-threads")        
+        merge_threads_div = self.driver.find_element_by_id("merge-threads")  
         self.driver.find_element_by_id('merge_thread_primary_button').click()
         cancel_button = merge_threads_div.find_element(By.XPATH, ".//a[contains(normalize-space(.), 'Close')]")
         assert merge_threads_div.value_of_css_property("display") == "block"
