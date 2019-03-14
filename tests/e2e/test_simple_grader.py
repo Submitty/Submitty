@@ -1,4 +1,4 @@
-from base_testcase import BaseTestCase
+from .base_testcase import BaseTestCase
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
