@@ -29,12 +29,14 @@
     <br />
     <br />
     <br />
+    {# This is a data table #}
     <table class="table table-striped table-bordered persist-area">
+        <caption />
         {# Table header #}
         <thead class="persist-thead">
             <tr>
                 {% for column in columns %}
-                    <td width="{{ column.width }}">{{ column.title }}</td>
+                    <th width="{{ column.width }}">{{ column.title }}</th>
                 {% endfor %}
             </tr>
         </thead>

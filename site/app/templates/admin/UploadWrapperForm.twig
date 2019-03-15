@@ -22,14 +22,18 @@
             <div class="wrapper-bottom">Bottom Bar</div>
         </div>
     </div>
-	<br>
+    <br>
+    {# This is a data table #}
     <table class="wrapper-upload">
-        <tr>
-            <th>Panel</th>
-            <th>File Type</th>
-            <th>Upload</th>
-            <th>Current File</th>
-        </tr>
+        <caption />
+        <thead>
+            <tr>
+                <th>Panel</th>
+                <th>File Type</th>
+                <th>Upload</th>
+                <th>Current File</th>
+            </tr>
+        </thead>
         {{ self.table_file(wrapper_files, "top_bar.html", "Top Bar", "HTML", "wrapper-top", "top_bar") }}
         {{ self.table_file(wrapper_files, "left_sidebar.html", "Left Sidebar", "HTML", "wrapper-left", "left_sidebar") }}
         {{ self.table_file(wrapper_files, "right_sidebar.html", "Right Sidebar", "HTML", "wrapper-right", "right_sidebar") }}

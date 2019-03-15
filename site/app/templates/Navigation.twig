@@ -2,13 +2,14 @@
 
 {% if display_custom_message %}
     <div class="content">
+        {# This is a layout table #}
         <table border=1 cellpadding=5 cellspacing=0 style="background-color:#ddffdd; width:auto;">
-        <tr><td>
-        <table border=0 cellpadding=5 cellspacing=0>
-        <h3>{{ message_file_details.title }}</h3>
-        <tr><td><a href="{{ message_file_details.filename }}" download="provided_files.zip">{{ message_file_details.description }}</a></td></tr>
-        </table>
-        </tr></td>
+            <tr><td>
+                <table border=0 cellpadding=5 cellspacing=0>
+                    <h3>{{ message_file_details.title }}</h3>
+                    <tr><td><a href="{{ message_file_details.filename }}" download="provided_files.zip">{{ message_file_details.description }}</a></td></tr>
+                </table>
+            </td></tr>
         </table>
     </div>
 {% endif %}
@@ -22,7 +23,7 @@
 
 <div class="content">
     <h1>Gradeables</h1>
-
+    {# This is a layout table #}
     <table class="gradeable_list" style="width:100%;">
         {% if sections|length > 0 %}
             {% for list_section, info in sections %}
