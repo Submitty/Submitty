@@ -29,7 +29,6 @@ def load_file(file, number_of_numbers):
     elif len(numbers[:-1]) != number_of_numbers:
       return_result(score=0, message="ERROR: Incorrect number of numbers ({0} instead of {1})".format(len(numbers[:-1]), number_of_numbers), status='failure')
   except Exception as e:
-    traceback.print_exc()
     return_result(score=0, message="ERROR: Could not open output file.",status='failure')
   return numbers
 

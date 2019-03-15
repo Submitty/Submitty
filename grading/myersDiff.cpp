@@ -218,11 +218,13 @@ TestResults* custom_doit(const TestCase &tc, const nlohmann::json& j, const nloh
   if(expected_filenames.size() > 0){
     expected_file_argument = "--expected_files";
     for(int i=0; i< expected_filenames.size(); i++){
-      expected_file_argument += " " + tc.getPrefix() + expected_filenames[i]; 
+      //For the moment, expected files get no prefix, as they are stored
+      // one level above the testcase directory.
+      expected_file_argument += " " + expected_filenames[i]; 
     }
   }
 
-  command = command + " " + actual_file_argument + " " + expected_file_argument + "1>"+output_file_name;
+  command = command + " " + actual_file_argument + " " + expected_file_argument + " 1>"+output_file_name;
   int ret = execute(command, 
                     actions, dispatcher_actions, execute_logfile, test_case_limits,
                     assignment_limits, whole_config, windowed, "NOT_A_WINDOWED_ASSIGNMENT");
