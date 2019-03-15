@@ -201,10 +201,31 @@ TestResults* custom_doit(const TestCase &tc, const nlohmann::json& j, const nloh
   bool windowed = false;
   std::string output_file_name = "temporary_custom_validator_output.json";
 
-  int ret = execute(command+
-                            " 1>"+output_file_name, 
-                            actions, dispatcher_actions, execute_logfile, test_case_limits,
-                            assignment_limits, whole_config, windowed, "NOT_A_WINDOWED_ASSIGNMENT");
+  std::vector<std::string> actual_filenames   = stringOrArrayOfStrings(j,"actual_file");
+  std::vector<std::string> expected_filenames = stringOrArrayOfStrings(j,"expected_file");
+
+  //grab the actual files.
+  std::string actual_file_argument = "";
+  if(actual_filenames.size() > 0){
+    actual_file_argument = "--actual_files";
+    for(int i=0; i< actual_filenames.size(); i++){
+      actual_file_argument += " " + tc.getPrefix() + actual_filenames[i]; 
+    }
+  }
+
+  //grab the expected files
+  std::string expected_file_argument  = "";
+  if(expected_filenames.size() > 0){
+    expected_file_argument = "--expected_files";
+    for(int i=0; i< expected_filenames.size(); i++){
+      expected_file_argument += " " + tc.getPrefix() + expected_filenames[i]; 
+    }
+  }
+
+  command = command + " " + actual_file_argument + " " + expected_file_argument + "1>"+output_file_name;
+  int ret = execute(command, 
+                    actions, dispatcher_actions, execute_logfile, test_case_limits,
+                    assignment_limits, whole_config, windowed, "NOT_A_WINDOWED_ASSIGNMENT");
 
   if(ret != 0){
       return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: A custom validator did not terminate successfully.")});
