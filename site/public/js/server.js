@@ -107,19 +107,25 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
 }
 
 function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = ''){
-    orig_div_name = div_name
+    let orig_div_name = div_name;
     div_name = "#" + div_name;
-    var isVisible = $( div_name ).is( " :visible" );
 
-    if(isVisible){
-        toggleDiv(orig_div_name);
+    let loadingTools = $("#tc_" + index).find(".loading-tools");
+
+    if($(div_name).is(":visible")){
         $("#show_char_"+index).toggle();
         $(div_name).empty();
+        toggleDiv(orig_div_name);
+
+        loadingTools.find("span").hide();
+        loadingTools.find(".loading-tools-show").show();
     }else{
         $("#show_char_"+index).toggle();
         var url = buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'load_student_file',
             'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index, 'version' : version});
 
+        loadingTools.find("span").hide();
+        loadingTools.find(".loading-tools-in-progress").show();
         $.getJSON({
             url: url,
             success: function(response) {
@@ -130,6 +136,9 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
                 $(div_name).empty();
                 $(div_name).html(response.data);
                 toggleDiv(orig_div_name);
+
+                loadingTools.find("span").hide();
+                loadingTools.find(".loading-tools-hide").show();
             },
             error: function(e) {
                 alert("Could not load diff, please refresh the page and try again.");
