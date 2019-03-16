@@ -85,7 +85,7 @@
                 <span>{{ system_message }}</span>
             </div>
             {% endif %}
-            <div class="row" id="push" {{ row_height }}>
+            <div class="row" id="push">
                 {% if sidebar_buttons|length > 0 %}
                     <div class="col-md-auto" id="sidebar">
                         <div id="nav-buttons-visible">
@@ -100,7 +100,7 @@
                     </div>
                 {% endif %}
                 <div class="col-md" id="nav-body">
-                    <div id="nav-positioner" {{ nav_pos }}>
+                    <div id="nav-positioner">
 {# Looks mismatched because this lines up with GlobalFooter.twig #}
 
 {% macro render_sidebar_button(button) %}
