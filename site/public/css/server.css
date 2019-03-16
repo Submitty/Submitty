@@ -434,7 +434,6 @@ table tr.table-header {
 
 .forum_content {
     flex-grow: 1;
-    max-height: 98vh;
     padding: 0px;
 }
 
@@ -1034,9 +1033,10 @@ table .instructor .two-options{
     padding-top: 30px;
 }
 
-div.sticky {
+div.full_height {
     position: -webkit-sticky; /* Safari */
     position: sticky;
+    max-height: 96vh;
     top: 10px;
 }
 
