@@ -1072,7 +1072,7 @@ table .instructor .two-options{
 
 #nav-buttons ul li .nav-row {
     padding: 6px;
-    padding-left: 36px;
+    padding-left: 48px;
     width: 100%;
     display: block;
 }
@@ -1082,7 +1082,7 @@ table .instructor .two-options{
 }
 
 #sidebar.collapsed #nav-buttons ul li .nav-row .fa{
-    padding: 2px 17.5px;
+    padding: 2px 0px;
 }
 
 
