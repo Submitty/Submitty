@@ -194,8 +194,16 @@ HTML;
 		function openFile(directory, file, path ){
 			window.open("{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + file + "&path=" + path,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
 		}
-
+            
 			$( document ).ready(function() {
+			    $('.post_content').each(function(){
+                    var pdata = $(this);
+                    pdata.html( pdata.text().replace(/\*(.*?)\*/gi,'<strong>$1</strong>') 
+                                            .replace(/\~(.*?)\~/gi,'<strike>$1</strike>')
+                                            .replace(/\_(.*?)\_/gi,'<em>$1</em>')
+                                            .replace(/\`(.*?)\`/g,'<mark>$1</mark>') );
+                });
+
 			    enableTabsInTextArea('.post_content_reply');
 				saveScrollLocationOnRefresh('posts_list');
 				addCollapsable();

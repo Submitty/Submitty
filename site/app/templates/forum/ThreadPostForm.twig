@@ -29,7 +29,9 @@
         {% set min_height = (post_textarea_large?"40vmin":"100px") %} 
         <textarea name="thread_post_content" id="thread_post_content" class="fill-available post_content_reply" style="resize:none;min-height:{{ min_height }};overflow:hidden;" rows="10" cols="30" placeholder="{{ post_content_placeholder }}" required></textarea>
     </div>
-<br/>
+    <div class="row" style="color: #666666;font-size: .75em ">
+         <strong> *bold* </strong> <strike> ~strikethrough~ </strike> <em> _italics_ </em> <mark>`Highlight Text`</mark>
+    </div>
 {% endif %}
 {% if show_categories %}
     {% set categories = core.getQueries().getCategories() %}
