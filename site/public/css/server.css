@@ -1758,3 +1758,9 @@ end of styles used in the admin gradeable page
     width: 100%;
     max-height: 300px;
 }
+/*Layout of tables*/
+
+th,td{
+    text-align: left;
+    padding: 10px;
+}

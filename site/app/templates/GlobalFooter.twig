@@ -42,20 +42,26 @@
 </html>
 
 {% macro query_list(queries) %}
+    {# This is a data table #}
     <table>
-        <tr>
-            <td class="query-list"></td>
-            <td></td>
-        </tr>
-        {% for query in queries %}
+        <caption />
+        <thead>
             <tr>
-                <td class="index">
-                    {{ loop.index }}&nbsp;&nbsp;
-                </td>
-                <td>
-                    <pre>{{ query }}</pre>
-                </td>
+                <th class="query-list">Index</th>
+                <th>Queries</th>
             </tr>
-        {% endfor %}
+        </thead>
+        <tbody>
+            {% for query in queries %}
+                <tr>
+                    <td class="index">
+                        {{ loop.index }}&nbsp;&nbsp;
+                    </td>
+                    <td>
+                        <pre>{{ query }}</pre>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
     </table>
 {% endmacro %}
