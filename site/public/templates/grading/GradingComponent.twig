@@ -71,10 +71,9 @@ Required inputs:
             <span class="col-sm mark-title">
                 Custom:
                 <textarea onchange="onCustomMarkChange(this)"
-                          onkeyup="auto_grow(this)"
                           rows="1"
                           placeholder="Custom message for student..."
-                          class="mark-note-custom noscroll"
+                          class="mark-note-custom"
                 >{{ graded_component.comment|escape }}</textarea>
             </span>
         </div>
@@ -105,7 +104,7 @@ Required inputs:
                             <span>{{ mark.points }}</span>
                         </div>
                         <div class="col">
-                            <span>{{ mark.title|nl2br }}</span>
+                            <span>{{ mark.title|escape }}</span>
                         </div>
                     </div>
                 {% endif %}
@@ -120,7 +119,7 @@ Required inputs:
                         <span>{{ graded_component.score }}</span>
                     </div>
                     <div class="col">
-                        <span>{{ graded_component.comment|nl2br }}</span>
+                        <span>{{ graded_component.comment|escape }}</span>
                     </div>
                 </div>
             {% endif %}

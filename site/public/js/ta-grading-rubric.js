@@ -1253,7 +1253,7 @@ function getMarkFromDOM(mark_id) {
         return {
             id: parseInt(domElement.attr('data-mark_id')),
             points: parseFloat(domElement.find('input[type=number]').val()),
-            title: domElement.find('textarea').val(),
+            title: domElement.find('input[type=text]').val(),
             deleted: domElement.hasClass('mark-deleted'),
             publish: domElement.find('.mark-publish-container input[type=checkbox]').is(':checked')
         };
@@ -2531,8 +2531,7 @@ function scrollToPage(page_num){
 function openComponent(component_id) {
     setComponentInProgress(component_id);
     // Achieve polymorphism in the interface using this `isInstructorEditEnabled` flag
-    return (isInstructorEditEnabled() ? openComponentInstructorEdit(component_id) : openComponentGrading(component_id))
-        .then(resizeNoScrollTextareas);
+    return isInstructorEditEnabled() ? openComponentInstructorEdit(component_id) : openComponentGrading(component_id);
 }
 
 /**
