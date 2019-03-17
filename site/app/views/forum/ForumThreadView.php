@@ -250,7 +250,7 @@ HTML;
 		$show_merged_thread_title = "Show Merged Threads";
 	}
 	$return .= <<<HTML
-		<div class="content forum_content forum_show_threads">
+		<div class="full_height content forum_content forum_show_threads">
 HTML;
 	$show_deleted_class = '';
 	$show_deleted_action = '';

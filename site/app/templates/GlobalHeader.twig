@@ -1,17 +1,5 @@
 {% import _self as self %}
 
-{% set container_class = '' %}
-{% set header_class = '' %}
-{% set nav_pos = '' %}
-{% set row_height = '' %}
-{% if fixed_height %}
-    {% set container_class = 'class=full_height' %}
-    {% set header_class = 'full_height' %}
-    {% set nav_pos = 'class=full_height' %}
-    {% set row_height = 'style=height:0px' %}
-{% endif %}
-
-
 <html lang="en">
 <head>
     <title>{{ page_title }}</title>
@@ -32,7 +20,7 @@
 </head>
 <script>var onAjaxInit;</script>
 <body data-site-url="{{ site_url }}" data-csrf-token="{{ core.getCsrfToken() }}" onload="if (onAjaxInit) { onAjaxInit(); }">
-<div id="container" {{ container_class }}>
+<div id="container">
     {% if wrapper_urls['top_bar.html'] != null %}
         {# uploaded homepage redirect can go here? #}
         <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="top_bar" src="{{ wrapper_urls['top_bar.html'] }}" frameborder="0"></iframe>
@@ -51,7 +39,7 @@
                     </div>
                 {% endfor %}
             </div>
-            <div id="header" class="row {{ header_class }}">
+            <div id="header" class="row">
                 <div class="col-12 col-sm" id="header-text">
                     <div>
                         <h2>
@@ -85,7 +73,7 @@
                 <span>{{ system_message }}</span>
             </div>
             {% endif %}
-            <div class="row" id="push" {{ row_height }}>
+            <div class="row" id="push">
                 {% if sidebar_buttons|length > 0 %}
                     <div class="col-md-auto" id="sidebar">
                         <div id="nav-buttons-visible">
@@ -100,7 +88,7 @@
                     </div>
                 {% endif %}
                 <div class="col-md" id="nav-body">
-                    <div id="nav-positioner" {{ nav_pos }}>
+                    <div id="nav-positioner">
 {# Looks mismatched because this lines up with GlobalFooter.twig #}
 
 {% macro render_sidebar_button(button) %}

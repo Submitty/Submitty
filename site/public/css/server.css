@@ -1033,6 +1033,13 @@ table .instructor .two-options{
     padding-top: 30px;
 }
 
+div.full_height {
+    position: -webkit-sticky; /* Safari */
+    position: sticky;
+    max-height: 95vh;
+    top: 10px;
+}
+
 #sidebar.collapsed #nav-buttons {
     width: 30px;
 }

@@ -186,7 +186,7 @@ HTML;
 
         </script>
         <link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}css/iframe/codemirror.css" />
-<div style="padding:5px 5px 0px 5px;" class="content forum_content forum_show_threads">
+<div style="padding:5px 5px 0px 5px;" class="full_height content forum_content forum_show_threads">
 HTML;
 
         $return .= $this->core->getOutput()->renderTwigTemplate("admin/PlagiarismHighlightingKey.twig");
