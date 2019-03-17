@@ -324,7 +324,7 @@ class DatabaseQueries {
 	}
 
     public function getPosts(){
-        $this->course_db->query("SELECT * FROM posts where deleted = false");
+        $this->course_db->query("SELECT * FROM posts where deleted = false ORDER BY timestamp ASC");
         return $this->course_db->rows();
     }
 
