@@ -2055,14 +2055,42 @@ function onClickCountDown(me) {
 
 /**
  * Callback for changing on the point values for a component
+ * Does not change point value if not divisible by precision
  * @param me DOM element of the input box
  */
 function onComponentPointsChange(me) {
-    refreshInstructorEditComponentHeader(getComponentIdFromDOMElement(me), true)
-        .catch(function (err) {
-            console.error(err);
-            alert('Failed to refresh component! ' + err.message);
-        });
+    if (dividesEvenly($(me).val(), getPointPrecision())) {
+        $(me).css("background-color", "#ffffff");
+        refreshInstructorEditComponentHeader(getComponentIdFromDOMElement(me), true)
+            .catch(function (err) {
+                console.error(err);
+                alert('Failed to refresh component! ' + err.message);
+            });
+    } else {
+
+        // Make box red to indicate error
+        $(me).css("background-color", "#ff7777");
+    }
+}
+
+/**
+ * Returns true if dividend is evenly divisible by divisor, false otherwise
+ * @param {number} dividend
+ * @param {number} divisor
+ * @returns {boolean}
+ */
+function dividesEvenly(dividend, divisor) {
+    var multiplier = Math.pow(10, Math.max(decimalLength(dividend), decimalLength(divisor)));
+    return ((dividend * multiplier) % (divisor * multiplier) === 0);
+}
+
+/**
+ * Returns number of digits after decimal point
+ * @param {number} num
+ * @returns {int}
+ */
+function decimalLength(num) {
+    return (num.toString().split('.')[1] || '').length;
 }
 
 /**

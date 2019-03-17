@@ -1079,7 +1079,7 @@ div.full_height {
 
 #nav-buttons ul li .nav-row {
     padding: 6px;
-    padding-left: 36px;
+    padding-left: 48px;
     width: 100%;
     display: block;
 }
@@ -1089,7 +1089,7 @@ div.full_height {
 }
 
 #sidebar.collapsed #nav-buttons ul li .nav-row .fa{
-    padding: 2px 17.5px;
+    padding: 2px 0px;
 }
 
 
@@ -1764,4 +1764,10 @@ end of styles used in the admin gradeable page
     overflow: auto; 
     width: 100%;
     max-height: 300px;
+}
+/*Layout of tables*/
+
+th,td{
+    text-align: left;
+    padding: 10px;
 }
