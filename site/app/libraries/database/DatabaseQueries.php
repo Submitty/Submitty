@@ -1881,8 +1881,8 @@ WHERE gcm_id=?", $params);
         $this->course_db->query(
           "SELECT g_id, g_title " .
           "FROM gradeable INNER JOIN electronic_gradeable USING (g_id) " .
-          "WHERE eg_scanned_exam=FALSE " .
-          "ORDER BY g_grade_released_date DESC"
+          "WHERE eg_scanned_exam=FALSE and eg_has_due_date=TRUE " .
+          "ORDER BY eg_submission_due_date ASC"
         );
         return $this->course_db->rows();
     }
