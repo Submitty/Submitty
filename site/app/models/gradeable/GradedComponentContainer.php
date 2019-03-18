@@ -316,12 +316,20 @@ class GradedComponentContainer extends AbstractModel {
 
     /**
      * Gets all user-visible graders for this component
+     * If a verifier exists for a limited access grader, gets that instead
      * @return User[] indexed by user id
      */
     public function getVisibleGraders() {
-        return array_filter($this->getGraders(), function (User $grader) {
-            return $grader->accessFullGrading();
-        });
+        $visible_graders = [];
+        foreach ($this->graded_components as $graded_component) {
+            $grader = $graded_component->getGrader();
+            $verifier_id = $graded_component->getVerifierId();
+            if($grader->accessFullGrading())
+                $visible_graders[$grader->getId()] = $grader;
+            else if($verifier_id != '')
+                $visible_graders[$verifier_id] = $graded_component->getVerifier();
+        }
+        return $visible_graders;
     }
 
     /**

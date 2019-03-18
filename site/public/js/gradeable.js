@@ -94,6 +94,8 @@ function prepGradedComponent(component, graded_component) {
     if (graded_component.grader_id === '') {
         graded_component.grader_id = undefined;
     }
+
+    // Check if verifier exists
     if (graded_component.verifier_id === '') {
         graded_component.verifier_id = undefined;
     }
@@ -122,7 +124,6 @@ function renderGradingGradeable(grader_id, gradeable, graded_gradeable, grading_
         graded_gradeable.graded_components[component.id]
             = prepGradedComponent(component, graded_gradeable.graded_components[component.id]);
     });
-
     // TODO: i don't think this is async
     return Twig.twig({ref: "GradingGradeable"}).render({
         'gradeable': gradeable,
@@ -186,7 +187,6 @@ function renderGradingComponentHeader(grader_id, component, graded_component, gr
     return new Promise(function (resolve, reject) {
         // Make sure we prep the graded component before rendering
         graded_component = prepGradedComponent(component, graded_component);
-
         // TODO: i don't think this is async
         resolve(Twig.twig({ref: "GradingComponentHeader"}).render({
             'component': component,
