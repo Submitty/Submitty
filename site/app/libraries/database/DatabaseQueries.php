@@ -1872,7 +1872,10 @@ WHERE gcm_id=?", $params);
     }
 
     /**
-     * gets ids of all electronic gradeables
+     * gets ids of all electronic gradeables excluding assignments that will be bulk
+     * uploaded by TA or instructor.
+     *
+     * @return array
      */
     public function getAllElectronicGradeablesIds() {
         $this->course_db->query(
