@@ -1875,7 +1875,12 @@ WHERE gcm_id=?", $params);
      * gets ids of all electronic gradeables
      */
     public function getAllElectronicGradeablesIds() {
-        $this->course_db->query("SELECT g_id, g_title FROM gradeable WHERE g_gradeable_type=0 ORDER BY g_grade_released_date DESC");
+        $this->course_db->query(
+          "SELECT g_id, g_title " .
+          "FROM gradeable INNER JOIN electronic_gradeable USING (g_id) " .
+          "WHERE eg_scanned_exam=FALSE " .
+          "ORDER BY g_grade_released_date DESC"
+        );
         return $this->course_db->rows();
     }
 
