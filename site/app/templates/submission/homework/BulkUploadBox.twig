@@ -39,9 +39,15 @@
                         <td>
                             {{ file.filename_full }}
                             <br>
-                            <object data="{{ file.url }}" type="application/pdf" width="100%" height="300">
-                                alt : <a href="{{ file.url }}">pdf.pdf</a>
-                            </object>
+                            {% if not use_images %}
+                                <object data="{{ file.url }}" type="application/pdf" width="100%" height="300">
+                                    alt : <a href="{{ file.url }}">pdf.pdf</a>
+                                </object>
+                            {% else %}
+                                <div class="scrollable-image" >
+                                    <img src="{{ file.cover_image.url }}" width="100%"/>
+                                </div>
+                            {% endif %}
                         </td>
                         <td>
                             <a onclick="openFile('{{ file.url_full }}')"><i class="fas fa-window-restore" aria-hidden="true" title="Pop out the full PDF in a new window"></i></a>

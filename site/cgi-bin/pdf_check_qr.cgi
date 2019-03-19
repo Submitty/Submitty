@@ -171,8 +171,8 @@ try:
                 #add pages to current split_pdf
                 page_count += 1
                 pdf_writer.addPage(pdfPages.getPage(i))
-            i += 1
 
+            i += 1
         if len(output) == 0:
             message = "Warning Could not find any QR codes in : " + str(filename) + " !\n"
             #This doesn't actually invalidate the process but forces an error message to show

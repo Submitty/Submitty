@@ -6,7 +6,7 @@
         <input type="hidden" name="option" value="-1" />
         <div class="option">
             <p> Use this form to grant an extension (e.g., for an excused absence) to a user on a specific assignment.<br><br><br></p>
-            <div class="option"><label for="g_id">Select Rubric:</label><br>
+            <div class="option"><label for="g_id">Select Gradeable:</label><br>
                 <select name="g_id" id="g_id" onchange="loadHomeworkExtensions($(this).val());" style="margin-top: 10px; width: 50%">
                     <option disabled selected value> -- select an option -- </option>
                     {% for index, value in gradeable_ids %}

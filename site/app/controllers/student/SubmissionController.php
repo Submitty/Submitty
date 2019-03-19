@@ -795,7 +795,8 @@ class SubmissionController extends AbstractController {
             "filepath" => $uploaded_file
         ];
 
-        if (FileUtils::writeJsonFile(FileUtils::joinPaths($version_path, "bulk_upload_data.json"), $bulk_upload_data)) {
+        #writeJsonFile returns false on failure.
+        if (FileUtils::writeJsonFile(FileUtils::joinPaths($version_path, "bulk_upload_data.json"), $bulk_upload_data) === false) {
             return $this->uploadResult("Failed to create bulk upload file for this submission.", false);
         }
 
@@ -882,7 +883,17 @@ class SubmissionController extends AbstractController {
         $timestamp_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
             $gradeable->getId(), $timestamp);
         $files = FileUtils::getAllFiles($timestamp_path);
-        if (count($files) == 0 || (count($files) == 1 && array_key_exists('decoded.json', $files)  )) {
+        
+        //check if there are any pdfs left to assign to students, otherwise delete the folder
+        $any_pdfs_left = false;
+        foreach ($files as $file){
+            if(strpos($file['name'], ".pdf") !== false){
+                $any_pdfs_left = true;
+                break;
+            }
+        }
+
+        if (count($files) == 0 || !$any_pdfs_left   ) {
             if (!FileUtils::recursiveRmdir($timestamp_path)) {
                 return $this->uploadResult("Failed to remove the empty timestamp directory {$timestamp} from the split_pdf directory.", false);
             }

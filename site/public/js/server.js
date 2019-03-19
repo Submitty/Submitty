@@ -107,19 +107,25 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
 }
 
 function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = ''){
-    orig_div_name = div_name
+    let orig_div_name = div_name;
     div_name = "#" + div_name;
-    var isVisible = $( div_name ).is( " :visible" );
 
-    if(isVisible){
-        toggleDiv(orig_div_name);
+    let loadingTools = $("#tc_" + index).find(".loading-tools");
+
+    if($(div_name).is(":visible")){
         $("#show_char_"+index).toggle();
         $(div_name).empty();
+        toggleDiv(orig_div_name);
+
+        loadingTools.find("span").hide();
+        loadingTools.find(".loading-tools-show").show();
     }else{
         $("#show_char_"+index).toggle();
         var url = buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'load_student_file',
             'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index, 'version' : version});
 
+        loadingTools.find("span").hide();
+        loadingTools.find(".loading-tools-in-progress").show();
         $.getJSON({
             url: url,
             success: function(response) {
@@ -130,6 +136,9 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
                 $(div_name).empty();
                 $(div_name).html(response.data);
                 toggleDiv(orig_div_name);
+
+                loadingTools.find("span").hide();
+                loadingTools.find(".loading-tools-hide").show();
             },
             error: function(e) {
                 alert("Could not load diff, please refresh the page and try again.");
@@ -2407,7 +2416,7 @@ function refreshOnResponseLateDays(json) {
         $('#late_day_table').append('<tr><td colspan="6">No late days are currently entered.</td></tr>');
     }
     json['users'].forEach(function(elem){
-        elem_delete = "<a onclick=\"deleteLateDays('"+elem['user_id']+"', '"+elem['datestamp']+"');\"><i class='fas fa-close'></i></a>";
+        elem_delete = "<a onclick=\"deleteLateDays('"+elem['user_id']+"', '"+elem['datestamp']+"');\"><i class='fas fa-trash'></i></a>";
         var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_days'], elem['datestamp'], elem_delete + '</td></tr>'];
         $('#late_day_table').append(bits.join('</td><td>'));
     });
@@ -2580,9 +2589,17 @@ function toggleSidebar() {
 }
 
 $(document).ready(function() {
-    //Collapsed sidebar tooltips
+    //Collapsed sidebar tooltips with content depending on state of sidebar
     $('[data-toggle="tooltip"]').tooltip({
-        position: { my: "right+0 bottom+0" }
+        position: { my: "right+0 bottom+0" },
+        content: function () {
+            if($("#sidebar").hasClass("collapsed")) {
+                return $(this).attr("title")
+            }
+            else {
+                return ""
+            }
+        }
     });
     $("#nav-sidebar-collapse.collapse-icon").attr("title", "Expand Sidebar");
 

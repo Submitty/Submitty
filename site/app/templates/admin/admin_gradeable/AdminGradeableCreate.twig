@@ -40,159 +40,160 @@
         {{ action == 'edit' ? 'readonly' : 'required' }} />
 
 <br />
-
-{% if action == 'new' or action == 'template' %}
-    <!-- Gradeable Type radio buttons (readonly in edit mode) -->
-    What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">type of the gradeable</a>?:
-
-    <span id="required_type" style="color:red; display:inline;">(Required)</span>
-{% else %}
-    Gradeable type: <span id="gradeable-type-string">{{ type_string }}</span>
-    <br />
-{% endif %}
-<div>
-    <div id="gradeable_type_container" {{ action == 'edit' ? 'hidden' : '' }}>
-        <div>
-            <input type='radio' id="radio_checkpoints" name="type" value="Checkpoints"
-                {{ action != 'new' and gradeable.getType() == 1 ? 'checked' : '' }}> {{ gradeable_type_strings['checkpoint'] }}
-        </div>
-
-        <div>
-            <input type='radio' id="radio_numeric" name="type" value="Numeric"
-                {{ action != 'new' and gradeable.getType() == 2 ? 'checked' : '' }}> {{ gradeable_type_strings['numeric'] }}
-        </div>
-
-        <div hidden>
-            <input type='radio' id="radio_electronic_file" name="type" value="Electronic File"
-                    {{ action != 'new' and gradeable.getType() == 0 ? 'checked' : '' }}> Electronic File (multiple types)
-        </div>
-
-        {# Real input fields to back the exposed configurations options #}
-        <input name="scanned_exam" value="{{ action != 'new' and gradeable.isScannedExam() ? 'true' : 'false' }}" hidden>
-        <input name="vcs" value="{{ action != 'new' and gradeable.isVcs() ? 'true' : 'false' }}" hidden>
-
-        <div>
-            <input class="ignore" type="radio" id="radio_ef_student_upload" name="electronic_gradeable_presets" value="normal"
-                    {{ action != 'new' and not gradeable.isScannedExam() and not gradeable.isVcs() ? 'checked' : ''}}> {{ gradeable_type_strings['electronic_hw'] }}
-        </div>
-
-        <div>
-            <input class="ignore" type="radio" id="radio_ef_vcs_upload" name="electronic_gradeable_presets" value="vcs"
-                    {{ action != 'new' and not gradeable.isScannedExam() and gradeable.isVcs() ? 'checked' : ''}}> {{ gradeable_type_strings['electronic_hw_vcs'] }}
-        </div>
-
-        <div>
-            <input class="ignore" type="radio" id="radio_ef_scanned_exam" name="electronic_gradeable_presets" value="scanned_exam"
-                    {{ action != 'new' and gradeable.isScannedExam() ? 'checked' : '' }}> {{ gradeable_type_strings['electronic_exam'] }}
-        </div>
-    </div>
-</div>
-
-<!-- This is only relevant to Electronic Files -->
-<fieldset class="gradeable_type_options electronic_file" id="electronic_file">
-    <div><legend>Will any or all of this assignment be manually graded (e.g., by the TAs or the instructor)?</legend></div>
-    <div>
-        <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val auto_save date-related"
-                {{ action != 'new' and gradeable.getTaGrading() ? 'checked' : '' }} /> <label for="yes_ta_grade">Yes</label>
-        <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val auto_save date-related"
-                {{ not (action != 'new' and gradeable.getTaGrading()) ? 'checked' : '' }} /> <label for="no_ta_grade">No</label>
-    </div>
-    {% if regrade_enabled %}
-        <div id="regrade_request_enable_container">
-            Will grade inquiries be enabled for this assignment?
-            <br />
-            <input type="radio" id="yes_regrade_allowed" name="regrade_allowed" value="true" class="bool_val auto_save date-related"
-                    {{ action != 'new' and gradeable.isRegradeAllowed() ? 'checked' : '' }} /> Yes
-            <input type="radio" id="no_regrade_allowed" name="regrade_allowed" value="false" class="bool_val auto_save date-related"
-                    {{ not (action != 'new' and gradeable.isRegradeAllowed()) ? 'checked' : '' }} /> No
-        </div>
-    {% endif %}
-
-    <div id="team-settings-container">
+<fieldset>
+    <legend>
         {% if action == 'new' or action == 'template' %}
-            Is this a team assignment?
-        {% else %}
-            Team Settings:
-            {{ gradeable.isTeamAssignment() ? '' : ' This is an individual assignment' }}
-        {% endif %}
-        <div style="{{ action == 'edit' ? 'display:none' : '' }}">
-            <input type="radio" id = "team_yes_radio" name="team_assignment" value="true"
-                    {{ action != 'new' and gradeable.isTeamAssignment() ? 'checked' : '' }}> <label for="team_yes_radio">Yes</label>
+            <!-- Gradeable Type radio buttons (readonly in edit mode) -->
+            What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">type of the gradeable</a>?:
 
-            <input type="radio" id = "team_no_radio" name="team_assignment" value ="false"
-                    {{ not (action != 'new' and gradeable.isTeamAssignment()) ? 'checked' :  '' }}> <label for="team_no_radio">No</label>
+            <span id="required_type" >(Required)</span>
+        {% else %}
+            Gradeable type: <span id="gradeable-type-string">{{ type_string }}</span>
+            <br />
+        {% endif %}
+    </legend>
+    <div>
+        <div id="gradeable_type_container" {{ action == 'edit' ? 'hidden' : '' }}>
+            <div>
+                <input type='radio' id="radio_checkpoints" name="type" value="Checkpoints"
+                    {{ action != 'new' and gradeable.getType() == 1 ? 'checked' : '' }}> {{ gradeable_type_strings['checkpoint'] }}
+            </div>
+
+            <div>
+                <input type='radio' id="radio_numeric" name="type" value="Numeric"
+                    {{ action != 'new' and gradeable.getType() == 2 ? 'checked' : '' }}> {{ gradeable_type_strings['numeric'] }}
+            </div>
+
+            <div hidden>
+                <input type='radio' id="radio_electronic_file" name="type" value="Electronic File"
+                        {{ action != 'new' and gradeable.getType() == 0 ? 'checked' : '' }}> Electronic File (multiple types)
+            </div>
+
+            {# Real input fields to back the exposed configurations options #}
+            <input name="scanned_exam" value="{{ action != 'new' and gradeable.isScannedExam() ? 'true' : 'false' }}" hidden>
+            <input name="vcs" value="{{ action != 'new' and gradeable.isVcs() ? 'true' : 'false' }}" hidden>
+
+            <div>
+                <input class="ignore" type="radio" id="radio_ef_student_upload" name="electronic_gradeable_presets" value="normal"
+                        {{ action != 'new' and not gradeable.isScannedExam() and not gradeable.isVcs() ? 'checked' : ''}}> {{ gradeable_type_strings['electronic_hw'] }}
+            </div>
+
+            <div>
+                <input class="ignore" type="radio" id="radio_ef_vcs_upload" name="electronic_gradeable_presets" value="vcs"
+                        {{ action != 'new' and not gradeable.isScannedExam() and gradeable.isVcs() ? 'checked' : ''}}> {{ gradeable_type_strings['electronic_hw_vcs'] }}
+            </div>
+
+            <div>
+                <input class="ignore" type="radio" id="radio_ef_scanned_exam" name="electronic_gradeable_presets" value="scanned_exam"
+                        {{ action != 'new' and gradeable.isScannedExam() ? 'checked' : '' }}> {{ gradeable_type_strings['electronic_exam'] }}
+            </div>
         </div>
     </div>
 
-    <!-- Team settings (read only in edit mode) -->
-    <div class="team_assignment team_yes" id="team_yes">
-
-        <label for="team_size_max">What is the maximum team size?</label>
-            <input style="width: 50px" name="team_size_max" id="team_size_max" class="int_val auto_save" type="text"
-                   value="{{ action != 'new' ? gradeable.getTeamSizeMax() : '3' }}"/>
-
-        {#Use teams from a previous gradeable:
-        <!-- Inherit teams from another gradeable? -->
-        <br />
-
-            <!--Use a combo box if we can edit the value, otherwise show a text box (readonly)-->
-
-        {% if action == 'new' %}
-            <select id='gradeable_teams' name="eg_inherit_teams_from" style='width: 170px;'
-                value='{{ admin_gradeable.getEgInheritTeamsFrom() }}'>
-                <option value=''>--None--</option>
-
-                {% for parent in inherit_teams_list %}
-                    <option {{ admin_gradeable.getEgInheritTeamsFrom() == parent.g_id ? 'selected' : '' }}
-                        value="{{ parent.g_id }}">{{ parent.g_title }}</option>
-                {% endfor %}
-            </select>
-        {% else %}
-            <input id='gradeable_teams_read' name='gradeable_teams_read' style='width=170px'
-                value='{{ admin_gradeable.getEgInheritTeamsFrom() }}' readonly/>
-        {% endif %}
-        #}
-    </div>
-
-    <div id="repository">
+    <!-- This is only relevant to Electronic Files -->
+    <fieldset class="gradeable_type_options electronic_file" id="electronic_file">
+        <div><legend>Will any or all of this assignment be manually graded (e.g., by the TAs or the instructor)?</legend></div>
         <div>
-            <input type='radio' id="vcs_radio_submitty_hosted" name="vcs_radio_buttons" value="submitty-hosted"
-                {{ action != 'new' and gradeable.getVcsHostType() == 0 ? 'checked' : '' }}
-                {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> Submitty Hosted – This gradeable
+            <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val auto_save date-related"
+                    {{ action != 'new' and gradeable.getTaGrading() ? 'checked' : '' }} /> <label for="yes_ta_grade">Yes</label>
+            <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val auto_save date-related"
+                    {{ not (action != 'new' and gradeable.getTaGrading()) ? 'checked' : '' }} /> <label for="no_ta_grade">No</label>
+        </div>
+        {% if regrade_enabled %}
+            <div id="regrade_request_enable_container">
+                Will grade inquiries be enabled for this assignment?
+                <br />
+                <input type="radio" id="yes_regrade_allowed" name="regrade_allowed" value="true" class="bool_val auto_save date-related"
+                        {{ action != 'new' and gradeable.isRegradeAllowed() ? 'checked' : '' }} /> Yes
+                <input type="radio" id="no_regrade_allowed" name="regrade_allowed" value="false" class="bool_val auto_save date-related"
+                        {{ not (action != 'new' and gradeable.isRegradeAllowed()) ? 'checked' : '' }} /> No
+            </div>
+        {% endif %}
 
-            <div id="vcs_submitty_url_content" name="vcs_content" style="margin-left: 5%">
-                <kbd id="vcs_url">{{ vcs_base_url }}&#123;&#36;gradeable_id&#125;&#47;</kbd>
-                <kbd class="team_no">&#123;&#36;user_id&#125;</kbd>
-                <kbd class="team_yes">&#123;&#36;team_id&#125;</kbd>
+        <div id="team-settings-container">
+            {% if action == 'new' or action == 'template' %}
+                Is this a team assignment?
+            {% else %}
+                Team Settings:
+                {{ gradeable.isTeamAssignment() ? '' : ' This is an individual assignment' }}
+            {% endif %}
+            <div style="{{ action == 'edit' ? 'display:none' : '' }}">
+                <input type="radio" id = "team_yes_radio" name="team_assignment" value="true"
+                        {{ action != 'new' and gradeable.isTeamAssignment() ? 'checked' : '' }}> <label for="team_yes_radio">Yes</label>
+
+                <input type="radio" id = "team_no_radio" name="team_assignment" value ="false"
+                        {{ not (action != 'new' and gradeable.isTeamAssignment()) ? 'checked' :  '' }}> <label for="team_no_radio">No</label>
             </div>
         </div>
-        <div class="team_no">
-            <input type='radio' id="vcs_radio_submitty_hosted_set_url" name="vcs_radio_buttons" value="submitty-hosted-url"
-                {{ action != 'new' and gradeable.getVcsHostType() == 1 ? 'checked' : '' }}
-                {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> Submitty Hosted – Set URL
 
-            <div id="vcs_submitty_set_url_content" name="vcs_content" style="margin-left: 5%">
-                {% if action == 'new' or action == 'template' %}
-                    <kbd id="vcs_url">{{ vcs_base_url }}</kbd>
-                    <input style='width: 16%' type='text' name="vcs_url" id="vcs_submitty_url" class="auto_save" placeholder="a_project"
-                            value="" required />
-                    <kbd id="vcs_url2">&#47;&#123;&#36;user_id&#125;</kbd>
-                {% else %}
-                    <kbd id="vcs_url">{{ gradeable.getVcsSubdirectory() }}</kbd>
-                {% endif %}
-            </div>
+        <!-- Team settings (read only in edit mode) -->
+        <div class="team_assignment team_yes" id="team_yes">
+
+            <label for="team_size_max">What is the maximum team size?</label>
+                <input style="width: 50px" name="team_size_max" id="team_size_max" class="int_val auto_save" type="text"
+                       value="{{ action != 'new' ? gradeable.getTeamSizeMax() : '3' }}"/>
+
+            {#Use teams from a previous gradeable:
+            <!-- Inherit teams from another gradeable? -->
+            <br />
+
+                <!--Use a combo box if we can edit the value, otherwise show a text box (readonly)-->
+
+            {% if action == 'new' %}
+                <select id='gradeable_teams' name="eg_inherit_teams_from" style='width: 170px;'
+                    value='{{ admin_gradeable.getEgInheritTeamsFrom() }}'>
+                    <option value=''>--None--</option>
+
+                    {% for parent in inherit_teams_list %}
+                        <option {{ admin_gradeable.getEgInheritTeamsFrom() == parent.g_id ? 'selected' : '' }}
+                            value="{{ parent.g_id }}">{{ parent.g_title }}</option>
+                    {% endfor %}
+                </select>
+            {% else %}
+                <input id='gradeable_teams_read' name='gradeable_teams_read' style='width=170px'
+                    value='{{ admin_gradeable.getEgInheritTeamsFrom() }}' readonly/>
+            {% endif %}
+            #}
         </div>
 
-        <input type='radio' id="vcs_radio_public_github" name="vcs_radio_buttons" value="public-github"
-            {{ action != 'new' and gradeable.getVcsHostType() == 2 ? 'checked' : '' }}
-            {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> Public Github </br>
+        <div id="repository">
+            <div>
+                <input type='radio' id="vcs_radio_submitty_hosted" name="vcs_radio_buttons" value="submitty-hosted"
+                    {{ action != 'new' and gradeable.getVcsHostType() == 0 ? 'checked' : '' }}
+                    {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> Submitty Hosted – This gradeable
 
-        <input type='radio' id="vcs_radio_private_github" name="vcs_radio_buttons" value="private-github"
-            {{ action != 'new' and gradeable.getVcsHostType() == 3 ? 'checked' : '' }}
-            {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> Private Github
-    </div>
-</fieldset>
+                <div id="vcs_submitty_url_content" name="vcs_content" style="margin-left: 5%">
+                    <kbd id="vcs_url">{{ vcs_base_url }}&#123;&#36;gradeable_id&#125;&#47;</kbd>
+                    <kbd class="team_no">&#123;&#36;user_id&#125;</kbd>
+                    <kbd class="team_yes">&#123;&#36;team_id&#125;</kbd>
+                </div>
+            </div>
+            <div class="team_no">
+                <input type='radio' id="vcs_radio_submitty_hosted_set_url" name="vcs_radio_buttons" value="submitty-hosted-url"
+                    {{ action != 'new' and gradeable.getVcsHostType() == 1 ? 'checked' : '' }}
+                    {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> Submitty Hosted – Set URL
 
+                <div id="vcs_submitty_set_url_content" name="vcs_content" style="margin-left: 5%">
+                    {% if action == 'new' or action == 'template' %}
+                        <kbd id="vcs_url">{{ vcs_base_url }}</kbd>
+                        <input style='width: 16%' type='text' name="vcs_url" id="vcs_submitty_url" class="auto_save" placeholder="a_project"
+                                value="" required />
+                        <kbd id="vcs_url2">&#47;&#123;&#36;user_id&#125;</kbd>
+                    {% else %}
+                        <kbd id="vcs_url">{{ gradeable.getVcsSubdirectory() }}</kbd>
+                    {% endif %}
+                </div>
+            </div>
+
+            <input type='radio' id="vcs_radio_public_github" name="vcs_radio_buttons" value="public-github"
+                {{ action != 'new' and gradeable.getVcsHostType() == 2 ? 'checked' : '' }}
+                {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> Public Github </br>
+
+            <input type='radio' id="vcs_radio_private_github" name="vcs_radio_buttons" value="private-github"
+                {{ action != 'new' and gradeable.getVcsHostType() == 3 ? 'checked' : '' }}
+                {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> Private Github
+        </div>
+    </fieldset>
 <!-- Gradeable bucket (read/write in all modes) -->
 <label for="syllabus_bucket">What <a target=_blank href="http://submitty.org/instructor/rainbow_grades">syllabus category</a> does this item belong to?:</label>
 
