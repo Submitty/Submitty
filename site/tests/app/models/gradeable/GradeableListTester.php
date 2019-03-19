@@ -2,13 +2,9 @@
 
 namespace tests\app\models\gradeable;
 
-use app\libraries\Core;
-use app\libraries\database\DatabaseQueries;
 use app\libraries\GradeableType;
-use app\models\Config;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradeableList;
-use app\models\User;
 use tests\BaseUnitTest;
 
 class GradeableListTester extends BaseUnitTest {
@@ -371,28 +367,11 @@ class GradeableListTester extends BaseUnitTest {
     }
 
     private function mockCore($gradeables, $access_admin = true, $access_grading = true) {
-        // TODO: rewrite this to use BaseUnitTest::createMockCore
-        $core = $this->createMock(Core::class);
-        $config = $this->createMockModel(Config::class);
-        $config->method('getTimezone')->willReturn(new \DateTimeZone('America/New_York'));
-        $core->method('getDateTimeNow')->willReturnCallback(function() use($config) {
-            return new \DateTime('now', $config->getTimezone());
-        });
-        $core->method('getConfig')->willReturn($config);
+        $config_values = array();
+        $user_config = array('access_admin'=>$access_admin, 'access_grading'=>$access_grading);
+        $queries = array('getGradeableConfigs'=>$gradeables);
 
-        $queries = $this->createMock(DatabaseQueries::class);
-
-        $queries->method('getGradeableConfigs')->willReturn($gradeables);
-        $core->method('getQueries')->willReturn($queries);
-
-        $user = $this->createMockModel(User::class);
-        $user->method('getId')->willReturn("testUser");
-        $user->method('accessGrading')->willReturn($access_grading);
-        $user->method('accessAdmin')->willReturn($access_admin);
-
-        $core->method('getUser')->willReturn($user);
-
-        return $core;
+        return $this->createMockCore($config_values, $user_config, $queries);
     }
 
     /**
