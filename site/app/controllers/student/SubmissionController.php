@@ -949,7 +949,7 @@ class SubmissionController extends AbstractController {
         $original_user_id = $this->core->getUser()->getId();
         $user_id = $_POST['user_id'];
         // repo_id for VCS use
-        $repo_id = (isset($_POST['git_repo_id']) ? $_POST['git_repo_id'] : "");
+        $repo_id = ($vcs_checkout ? $_POST['git_repo_id'] : "");
 
         // make sure is full grader if the two ids do not match
         if ($original_user_id !== $user_id && !$this->core->getUser()->accessFullGrading()) {

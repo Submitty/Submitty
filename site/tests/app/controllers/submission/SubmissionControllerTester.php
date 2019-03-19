@@ -750,6 +750,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     public function testVcsUpload() {
         $_REQUEST['vcs_checkout'] = "true";
+        $_REQUEST['git_repo_id'] = "some_repo_id";
         $return = $this->runController();
         $this->assertFalse($return['error'], "Error: {$return['message']}");
         $this->assertTrue($return['success']);
@@ -1058,6 +1059,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     public function testErrorCreateVcsFile() {
         $_REQUEST['vcs_checkout'] = "true";
+        $_REQUEST['git_repo_id'] = "some_repo_id";
         FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), null, true);
         FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1"), 0444);
         $return = $this->runController();
@@ -1162,7 +1164,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $_REQUEST['action'] = 'display';
         $core = $this->createMockCore();
         $now = new \DateTime("now", $core->getConfig()->getTimezone());
-        
+
         $gradeable = $this->createMockGradeable();
         $gradeable->method('hasAutogradingConfig')->willReturn(true);
         $gradeable->method('getSubmissionOpenDate')->willReturn($now);
