@@ -368,12 +368,12 @@ class HomeworkView extends AbstractView {
         $count = 1;
         $count_array = array();
         $use_qr_codes = false;
-        $json_file = '';
+        $qr_file = null;
         foreach ($all_directories as $timestamp => $content) {
             $dir_files = $content['files'];
             foreach ($dir_files as $filename => $details) {
                 if($filename === 'decoded.json'){
-                    $json_file = $details['path'];
+                    $qr_file = FileUtils::readJsonFile($details['path']);
                     $use_qr_codes = true;
                 }
                 $clean_timestamp = str_replace('_', ' ', $timestamp);
@@ -436,28 +436,17 @@ class HomeworkView extends AbstractView {
                     'url_full' => $url_full,
                     'cover_image' => $cover_image
                 ];
+                if($use_qr_codes){
+                    $is_valid = $this->core->getQueries()->getUserById($qr_file[$filename_full]['id']) !== null;
+                    $files[$count-1] += [
+                        'page_count' => $qr_file[$filename_full]['page_count'],
+                        'id' => $qr_file[$filename_full]['id'],
+                        'valid' => $is_valid
+                    ];
+                }
                 $count++;
             }
         }
-        //check for invalid ID's if using bulk upload with QR codes
-        // if($use_qr_codes){
-        //     $json_data = FileUtils::readJsonFile($json_file);
-        //     for($i = 0; $i < count($files); $i++){
-        //         $filename = rawurldecode($files[$i]['filename_full']);
-        //         foreach ($json_data as $qr_file) {
-        //             if($qr_file['pdf_name'] === $filename){
-        //                 $is_valid = !$this->core->getQueries()->getUserById($qr_file['id']) ? false:true;
-        //                 $files[$i] += [
-        //                     'page_count' => $qr_file['page_count'],
-        //                     'user_id'    => [
-        //                         'id' => $qr_file['id'], 
-        //                         'valid' => $is_valid
-        //                     ]
-        //                 ];
-        //             }
-        //         }
-        //     }
-        // }
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';

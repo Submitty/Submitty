@@ -37,7 +37,7 @@ def main():
         pdf_writer = PdfFileWriter()
         i = cover_index = id_index = 0
         page_count = 1
-        first_file = ''
+        prev_file = ''
         data = []
         output = {}
         for page in pages:
@@ -57,22 +57,18 @@ def main():
                 cover_filename = '{}_{}_cover.pdf'.format(filename[:-4], i)
                 output_filename = '{}_{}.pdf'.format(filename[:-4], cover_index)
 
-                output[id_index] = {}
-                output[id_index]['id'] = data
-                output[id_index]['pdf_name'] = output_filename
+                output[output_filename] = {}
+                output[output_filename]['id'] = data
                 #save pdf
                 if i != 0:
-                    pass
-                    #output[id_index-1]['page_count'] = page_count
-                    #with open(output[id_index-1]['pdf_name'], 'wb') as out:
-                        #pdf_writer.write(out)
-                else:
-                    first_file = output_filename
+                    output[prev_file]['page_count'] = page_count
+                    with open(prev_file, 'wb') as out:
+                        pdf_writer.write(out)
 
                 if id_index == 1:
                     #correct first pdf's page count and print file
-                    output[0]['page_count'] = page_count
-                    with open(first_file, 'wb') as out:
+                    output[prev_file]['page_count'] = page_count
+                    with open(prev_file, 'wb') as out:
                         pdf_writer.write(out)
 
                 #start a new pdf and grab the cover
@@ -87,6 +83,7 @@ def main():
 
                 id_index += 1
                 page_count = 1
+                prev_file = output_filename
             else:
                 #add pages to current split_pdf
                 page_count += 1
@@ -95,11 +92,8 @@ def main():
 
         #save whatever is left
         output_filename = '{}_{}.pdf'.format(filename[:-4], cover_index)
-        output[id_index-1]['id'] = data
-        output[id_index-1]['page_count'] = page_count
-        output[id_index-1]['pdf_name'] = output_filename
-
-        json_data = {"filename" : output}
+        output[output_filename]['id'] = data
+        output[output_filename]['page_count'] = page_count
 
         write_mode = 'w'
         if os.path.exists('decoded.json'):
@@ -110,7 +104,7 @@ def main():
 
         #write json to file for parsing page counts and decoded ids later
         with open('decoded.json', write_mode) as out:
-            json.dump(json_data, out)
+            json.dump(output, out, sort_keys=True, indent=4)
 
         #remove original, unsplit file
         os.remove(filename)
