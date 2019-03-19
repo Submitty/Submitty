@@ -10,8 +10,7 @@ class TestInit(unittest.TestCase):
         self.assertEqual(migrator.ENVIRONMENTS, migrator.get_all_environments())
 
     def test_get_environments_empty(self):
-        expected = []
-        self.assertEqual(expected, migrator.get_environments(expected))
+        self.assertEqual([], migrator.get_environments([]))
 
     def test_get_environments_all(self):
         self.assertEqual(

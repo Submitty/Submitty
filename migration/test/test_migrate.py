@@ -49,6 +49,14 @@ class TestMigrate(unittest.TestCase):
   02_test
 DONE
 """, sys.stdout.getvalue())
+        rows = self.database.session.query(self.database.migration_table).all()
+        expected_rows = ['01_test', '02_test']
+        self.assertEqual(len(rows), len(expected_rows))
+        for i in range(len(rows)):
+            row = rows[i]
+            self.assertEqual(expected_rows[i], row.id)
+            self.assertEqual(1, row.status)
+            self.assertIsNotNone(row.commit_time)
 
     def test_migrate_master(self):
         environment = 'master'
@@ -71,6 +79,14 @@ DONE
   02_test
 DONE
 """, sys.stdout.getvalue())
+        rows = self.database.session.query(self.database.migration_table).all()
+        expected_rows = ['01_test', '02_test']
+        self.assertEqual(len(rows), len(expected_rows))
+        for i in range(len(rows)):
+            row = rows[i]
+            self.assertEqual(expected_rows[i], row.id)
+            self.assertEqual(1, row.status)
+            self.assertIsNotNone(row.commit_time)
 
     def test_migrate_course(self):
         environment = 'course'
@@ -95,6 +111,14 @@ DONE
   02_test
 DONE
 """, sys.stdout.getvalue())
+        rows = self.database.session.query(self.database.migration_table).all()
+        expected_rows = ['01_test', '02_test']
+        self.assertEqual(len(rows), len(expected_rows))
+        for i in range(len(rows)):
+            row = rows[i]
+            self.assertEqual(expected_rows[i], row.id)
+            self.assertEqual(1, row.status)
+            self.assertIsNotNone(row.commit_time)
 
     def test_missing_migrations(self):
         environment = 'master'
@@ -124,6 +148,14 @@ Removing 1 missing migrations:
 DONE
 
 """, sys.stdout.getvalue())
+        rows = self.database.session.query(self.database.migration_table).all()
+        expected_rows = ['01_test', '03_test', '04_test']
+        self.assertEqual(len(rows), len(expected_rows))
+        for i in range(len(rows)):
+            row = rows[i]
+            self.assertEqual(expected_rows[i], row.id)
+            self.assertEqual(1, row.status)
+            self.assertIsNotNone(row.commit_time)
 
     def test_fake_migrations(self):
         environment = 'master'
@@ -148,6 +180,14 @@ DONE
   03_test (FAKE)
 DONE
 """, sys.stdout.getvalue())
+        rows = self.database.session.query(self.database.migration_table).all()
+        expected_rows = ['01_test', '02_test', '03_test']
+        self.assertEqual(len(rows), len(expected_rows))
+        for i in range(len(rows)):
+            row = rows[i]
+            self.assertEqual(expected_rows[i], row.id)
+            self.assertEqual(1, row.status)
+            self.assertIsNotNone(row.commit_time)
 
     def test_single_migration(self):
         environment = 'master'
@@ -170,6 +210,14 @@ DONE
         self.assertEqual("""Running up migrations for master...  02_test
 DONE
 """, sys.stdout.getvalue())
+        rows = self.database.session.query(self.database.migration_table).all()
+        expected_rows = ['01_test', '02_test', '03_test']
+        self.assertEqual(len(rows), len(expected_rows))
+        for i in range(len(rows)):
+            row = rows[i]
+            self.assertEqual(expected_rows[i], row.id)
+            self.assertEqual(1 if i < 2 else 0, row.status)
+            self.assertIsNotNone(row.commit_time)
 
     def test_single_fake_migration(self):
         environment = 'master'
@@ -193,6 +241,14 @@ DONE
         self.assertEqual("""Running up migrations for master...  02_test (FAKE)
 DONE
 """, sys.stdout.getvalue())
+        rows = self.database.session.query(self.database.migration_table).all()
+        expected_rows = ['01_test', '02_test', '03_test']
+        self.assertEqual(len(rows), len(expected_rows))
+        for i in range(len(rows)):
+            row = rows[i]
+            self.assertEqual(expected_rows[i], row.id)
+            self.assertEqual(1 if i < 2 else 0, row.status)
+            self.assertIsNotNone(row.commit_time)
 
     def test_initial_migration(self):
         environment = 'master'
@@ -219,6 +275,14 @@ DONE
 DONE
 
 """, sys.stdout.getvalue())
+        rows = self.database.session.query(self.database.migration_table).all()
+        expected_rows = ['01_test', '02_test', '03_test']
+        self.assertEqual(len(rows), len(expected_rows))
+        for i in range(len(rows)):
+            row = rows[i]
+            self.assertEqual(expected_rows[i], row.id)
+            self.assertEqual(1, row.status)
+            self.assertIsNotNone(row.commit_time)
 
 
 if __name__ == '__main__':
