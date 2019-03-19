@@ -701,7 +701,7 @@ table tr.table-header {
 }
 
 .active {
-    background-color: #d8eef6;
+    background-color: white;
     color: #4a4a4a;
 }
 
@@ -714,11 +714,23 @@ table tr.table-header {
     background-color: #505050;
 }
 .new_post {
-    border-left: 5px solid #0a6496;
+    background-color: #d8eef6;
 }
 .viewed_post{
-    border-left: 5px solid #a7a7a7;
+    
 }
+
+.fa-post_seen {
+    color: #a7a7a7;
+    vertical-align: middle;
+    padding-right: 8px;
+}
+.fa-post_new {
+    color: #0a6496;
+    vertical-align: middle;
+    padding-right: 8px;
+}
+
 .important {
     /* THIS IS WHERE THE BACKGROUND COLOR FOR POSTS IS */
     border-style: solid;
@@ -727,8 +739,11 @@ table tr.table-header {
 }
 
 .viewed {
-    color: #4a4a4a;
-    background-color: #dcdcdcb5
+
+}
+
+.new_thread{
+    background-color: #d8eef6;
 }
 
 .box-title > h4 {
@@ -926,7 +941,6 @@ table tr.table-header {
     padding:7px;
     margin-top: 20px;
     word-wrap: break-word;
-    border-radius: 3px;
     overflow-y: auto;
     overflow-x: hidden;
 }
@@ -938,7 +952,6 @@ table tr.table-header {
 .first_post{
     padding-left: 10px !important;
     margin-top: 0px !important;
-    border-radius: 3px;
 }
 
 .thread_box {

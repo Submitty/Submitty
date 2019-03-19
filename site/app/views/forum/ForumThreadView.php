@@ -600,6 +600,8 @@ HTML;
 								$thread_id_p = $thread["id"];
 						}else if($this->core->getQueries()->viewedThread($current_user, $thread["id"])){
 							$class .= " viewed";
+						}else{
+							$class .= " new_thread";
 						}
 						if($thread["deleted"]) {
 							$class .= " deleted";
