@@ -1878,12 +1878,12 @@ WHERE gcm_id=?", $params);
      * @return array
      */
     public function getAllElectronicGradeablesIds() {
-        $this->course_db->query(
-          "SELECT g_id, g_title 
+        $this->course_db->query("
+          SELECT g_id, g_title 
           FROM gradeable INNER JOIN electronic_gradeable USING (g_id)
           WHERE eg_scanned_exam=FALSE and eg_has_due_date=TRUE
-          ORDER BY eg_submission_due_date ASC"
-        );
+          ORDER BY eg_submission_due_date ASC
+        ");
         return $this->course_db->rows();
     }
 
