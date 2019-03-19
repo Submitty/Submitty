@@ -1149,7 +1149,7 @@ function getCountDirection(component_id) {
  * @param {string} title
  */
 function setMarkTitle(mark_id, title) {
-    getMarkJQuery(mark_id).find('.mark-title input').val(title);
+    getMarkJQuery(mark_id).find('.mark-title textarea').val(title);
 }
 
 /**
