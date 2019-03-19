@@ -788,7 +788,7 @@ class SubmissionController extends AbstractController {
         }
 
         $upload_time_string_tz = $timestamp . " " . $this->core->getConfig()->getTimezone()->getName();
-        
+
         $bulk_upload_data = [
             "submit_timestamp" =>  $current_time_string_tz,
             "upload_timestamp" =>  $upload_time_string_tz,
@@ -883,7 +883,7 @@ class SubmissionController extends AbstractController {
         $timestamp_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
             $gradeable->getId(), $timestamp);
         $files = FileUtils::getAllFiles($timestamp_path);
-        
+
         //check if there are any pdfs left to assign to students, otherwise delete the folder
         $any_pdfs_left = false;
         foreach ($files as $file){
@@ -949,7 +949,7 @@ class SubmissionController extends AbstractController {
         $original_user_id = $this->core->getUser()->getId();
         $user_id = $_POST['user_id'];
         // repo_id for VCS use
-        $repo_id = $_POST['git_repo_id'];
+        $repo_id = (isset($_POST['git_repo_id']) ? $_POST['git_repo_id'] : "");
 
         // make sure is full grader if the two ids do not match
         if ($original_user_id !== $user_id && !$this->core->getUser()->accessFullGrading()) {
