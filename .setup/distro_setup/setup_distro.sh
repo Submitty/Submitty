@@ -112,5 +112,5 @@ ${DATABASE_LINE}
 ##  Happy developing!                                     ##
 ############################################################
 " > /etc/motd
-    chmod +rx /etc/motd
+    chmod 644 /etc/motd
 fi

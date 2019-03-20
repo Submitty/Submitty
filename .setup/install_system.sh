@@ -163,6 +163,11 @@ apt-get install libzbar0 --yes
 pip3 install pyzbar
 pip3 install pdf2image
 
+# Install an email catcher
+if [ ${VAGRANT} == 1 ]; then
+    pip3 install nullsmtpd
+fi
+
 #################################################################
 # STACK SETUP
 #################
@@ -652,25 +657,32 @@ if [ ${WORKER} == 0 ]; then
         rm -rf ${SUBMITTY_DATA_DIR}/logs/*
         rm -rf ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty
+
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding
         ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding ${SUBMITTY_DATA_DIR}/logs/autograding
-        chown ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding
         chown ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
         chmod 770 ${SUBMITTY_DATA_DIR}/logs/autograding
 
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/access
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/site_errors
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/ta_grading
         ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/access ${SUBMITTY_DATA_DIR}/logs/access
-        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/site_errors ${SUBMITTY_DATA_DIR}/logs/site_errors
-        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/ta_grading ${SUBMITTY_DATA_DIR}/logs/ta_grading
         chown -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/access
         chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/access
+
+        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/site_errors
+        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/site_errors ${SUBMITTY_DATA_DIR}/logs/site_errors
         chown -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/site_errors
         chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/site_errors
+
+        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/ta_grading
+        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/ta_grading ${SUBMITTY_DATA_DIR}/logs/ta_grading
         chown -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/ta_grading
         chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/ta_grading
+
+        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/emails
+        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/emails/mailboxes
+        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/emails ${SUBMITTY_DATA_DIR}/logs/emails
+        chown -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/emails
+        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/emails
 
         # Call helper script that makes the courses and refreshes the database
         if [ ${NO_SUBMISSIONS} == 1 ]; then
@@ -688,6 +700,21 @@ if [ ${WORKER} == 0 ]; then
         # classlist csv data.  See wiki for details.
         ${SUBMITTY_INSTALL_DIR}/sbin/setcsvfields.py 13 12 15 7
     fi
+fi
+
+if [[ ${VAGRANT} == 1 ]]; then
+    # add email configuration stuff to database.json
+    jq '.email_sender |= "submitty@vagrant"' ${SUBMITTY_INSTALL_DIR}/config/database.json > ${SUBMITTY_INSTALL_DIR}/config/database.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/database.tmp ${SUBMITTY_INSTALL_DIR}/config/database.json
+    jq '.email_server_hostname |= "localhost"' ${SUBMITTY_INSTALL_DIR}/config/database.json > ${SUBMITTY_INSTALL_DIR}/config/database.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/database.tmp ${SUBMITTY_INSTALL_DIR}/config/database.json
+    jq '.email_server_port |= 25' ${SUBMITTY_INSTALL_DIR}/config/database.json > ${SUBMITTY_INSTALL_DIR}/config/database.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/database.tmp ${SUBMITTY_INSTALL_DIR}/config/database.json
+    jq '.email_logs_path |= "/var/local/submitty/logs/emails/"' ${SUBMITTY_INSTALL_DIR}/config/database.json > ${SUBMITTY_INSTALL_DIR}/config/database.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/database.tmp ${SUBMITTY_INSTALL_DIR}/config/database.json
+    chown root:${DAEMON_USER} ${SUBMITTY_INSTALL_DIR}/config/database.json
+    rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/vagrant/nullsmtpd.service  /etc/systemd/system/nullsmtpd.service
+    chown -R root:root /etc/systemd/system/nullsmtpd.service
+    chmod 444 /etc/systemd/system/nullsmtpd.service
+    systemctl restart nullsmtpd
+    # also, set it to automatically start on boot
+    systemctl enable nullsmtpd
 fi
 
 #################################################################
