@@ -410,9 +410,10 @@ function ajaxSaveOverallComment(gradeable_id, anon_id, overall_comment) {
  * @param {int} component_id
  * @param {string} title
  * @param {number} points
+ * @param {boolean} publish
  * @return {Promise} Rejects except when the response returns status 'success'
  */
-function ajaxAddNewMark(gradeable_id, component_id, title, points) {
+function ajaxAddNewMark(gradeable_id, component_id, title, points, publish) {
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "POST",
@@ -427,7 +428,8 @@ function ajaxAddNewMark(gradeable_id, component_id, title, points) {
                 'gradeable_id': gradeable_id,
                 'component_id': component_id,
                 'title': title,
-                'points': points
+                'points': points,
+                'publish': publish
             },
             success: function (response) {
                 if (response.status !== 'success') {
@@ -2887,7 +2889,7 @@ function tryResolveMarkSave(gradeable_id, component_id, domMark, serverMark, old
             return Promise.resolve(true);
         } else {
             // The mark never existed and isn't deleted, so its new
-            return ajaxAddNewMark(gradeable_id, component_id, domMark.title, domMark.points)
+            return ajaxAddNewMark(gradeable_id, component_id, domMark.title, domMark.points, domMark.publish)
                 .then(function (data) {
                     // Success, then resolve true
                     domMark.id = data.mark_id;
@@ -2976,7 +2978,7 @@ function saveGradedComponent(component_id) {
             missingMarks.forEach(function (mark) {
                 sequence = sequence
                     .then(function () {
-                        return ajaxAddNewMark(gradeable_id, component_id, mark.title, mark.points);
+                        return ajaxAddNewMark(gradeable_id, component_id, mark.title, mark.points, mark.publish);
                     })
                     .then(function (data) {
                         // Make sure to add it to the grade.  We don't bother removing the deleted mark ids
