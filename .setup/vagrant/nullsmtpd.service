@@ -1,0 +1,14 @@
+[Unit]
+Description=nullsmtpd
+Documentation=http://github.com/MasterOdin/nullsmtpd
+
+[Service]
+User=root
+Restart=always
+Type=simple
+ExecStart=/usr/local/bin/nullsmtpd --no-fork --mail-dir /var/local/submitty/logs/emails/mailboxes
+TimeoutSec=1min
+RuntimeMaxSec=infinity
+
+[Install]
+WantedBy=multi-user.target
