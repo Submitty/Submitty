@@ -41,10 +41,12 @@ class HomePageController extends AbstractController {
 
     public function changePassword(){
         $user = $this->core->getUser();
+        //Who is logged in to issue this change.
+        $auth = $this->getUser()->getId();
         if(!empty($_POST['new_password']) && !empty($_POST['confirm_new_password'])
             && $_POST['new_password'] == $_POST['confirm_new_password']) {
             $user->setPassword($_POST['new_password']);
-            $this->core->getQueries()->updateUser($user);
+            $this->core->getQueries()->updateUser($user, null, null, $auth);
             $this->core->addSuccessMessage("Updated password");
         }
         else {
@@ -57,6 +59,8 @@ class HomePageController extends AbstractController {
 	 */
     public function changeUserName(){
         $user = $this->core->getUser();
+        //Who is logged in to issue this change.
+        $auth = $this->getUser()->getId();
         if(isset($_POST['user_firstname_change']) && isset($_POST['user_lastname_change'])) {
             $newFirstName = trim($_POST['user_firstname_change']);
             $newLastName = trim($_POST['user_lastname_change']);
@@ -66,7 +70,7 @@ class HomePageController extends AbstractController {
 				$user->setPreferredLastName($newLastName);
 				//User updated flag tells auto feed to not clobber some of the user's data.
 				$user->setUserUpdated(true);
-				$this->core->getQueries()->updateUser($user);
+				$this->core->getQueries()->updateUser($user, null, null, $auth);
             }
             else {
                 $this->core->addErrorMessage("Preferred names must not exceed 30 chars.  Letters, spaces, hyphens, apostrophes, periods, parentheses, and backquotes permitted.");

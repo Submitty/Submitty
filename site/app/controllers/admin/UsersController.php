@@ -196,7 +196,7 @@ class UsersController extends AbstractController {
         }
 
         if ($_POST['edit_user'] == "true") {
-            $this->core->getQueries()->updateUser($user, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
+            $this->core->getQueries()->updateUser($user, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(), $this->core->getUser()->getId());
             $this->core->addSuccessMessage("User '{$user->getId()}' updated");
         }
         else {
@@ -620,6 +620,8 @@ class UsersController extends AbstractController {
         //Insert new graders to database
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
+        //Who is logged in to issue this change.
+        $auth = $this->getUser()->getId();
         foreach($graders_to_add as $grader_data) {
             $grader = new User($this->core);
             $grader->setId($grader_data[0]);
@@ -640,12 +642,12 @@ class UsersController extends AbstractController {
             if ($this->core->getQueries()->getSubmittyUser($grader_data[0]) === null) {
                 $this->core->getQueries()->insertSubmittyUser($grader);
             }
-            $this->core->getQueries()->insertCourseUser($grader, $semester, $course);
+            $this->core->getQueries()->insertCourseUser($grader, $semester, $course, $auth);
         }
         foreach($graders_to_update as $grader_data) {
             $grader = $this->core->getQueries()->getUserById($grader_data[0]);
             $grader->setGroup($grader_data[4]);
-            $this->core->getQueries()->updateUser($grader, $semester, $course);
+            $this->core->getQueries()->updateUser($grader, $semester, $course, $auth);
         }
 
         $added = count($graders_to_add);
@@ -747,6 +749,8 @@ class UsersController extends AbstractController {
         //Insert new students to database
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
+        //Who is logged in to issue this change.
+        $auth = $this->getUser()->getId();
         foreach($students_to_add as $student_data) {
             $student = new User($this->core);
             $student->setId($student_data[0]);
@@ -767,12 +771,12 @@ class UsersController extends AbstractController {
             if ($this->core->getQueries()->getSubmittyUser($student_data[0]) === null) {
                 $this->core->getQueries()->insertSubmittyUser($student);
             }
-            $this->core->getQueries()->insertCourseUser($student, $semester, $course);
+            $this->core->getQueries()->insertCourseUser($student, $semester, $course, $auth);
         }
         foreach($students_to_update as $student_data) {
             $student = $this->core->getQueries()->getUserById($student_data[0]);
             $student->setRegistrationSection($student_data[4]);
-            $this->core->getQueries()->updateUser($student, $semester, $course);
+            $this->core->getQueries()->updateUser($student, $semester, $course, $auth);
         }
 
         $added = count($students_to_add);

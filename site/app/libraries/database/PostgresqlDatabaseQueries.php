@@ -26,7 +26,7 @@ class PostgresqlDatabaseQueries extends DatabaseQueries{
 
     public function getUserById($user_id) {
         $this->course_db->query("
-SELECT u.*, ns.merge_threads, ns.all_new_threads, 
+SELECT u.*, ns.merge_threads, ns.all_new_threads,
         ns.all_new_posts, ns.all_modifications_forum,
         ns.reply_in_post_thread, sr.grading_registration_sections
 FROM users u
@@ -132,13 +132,27 @@ VALUES (?,?,?,?,?,?)", $params);
         $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
     }
 
-    public function updateUser(User $user, $semester=null, $course=null) {
+    /**
+     * Update user record in database
+     *
+     * Note that users UPDATE table has a query comment.  This is will get logged
+     * with the query and is used to help track changes in preferred name.
+     * q.v. Github Issue #3273
+     *
+     * @link https://github.com/Submitty/Submitty/issues/3273
+     * @param object $user User data object
+     * @param string $semester
+     * @param string $course
+     * @param string $auth User ID of who issued this update.
+     */
+    public function updateUser(User $user, $semester=null, $course=null, $auth="_NOT_LOGGED") {
         $params = array($user->getLegalFirstName(), $user->getPreferredFirstName(),
                        $user->getLegalLastName(), $user->getPreferredLastName(), $user->getEmail(),
                        $this->submitty_db->convertBoolean($user->isUserUpdated()),
                        $this->submitty_db->convertBoolean($user->isInstructorUpdated()));
         $extra = "";
         if (!empty($user->getPassword())) {
+            //Needed when using database authentication
             $params[] = $user->getPassword();
             $extra = ", user_password=?";
         }
@@ -147,16 +161,19 @@ VALUES (?,?,?,?,?,?)", $params);
         $this->submitty_db->query("
 UPDATE users
 SET
-  user_firstname=?, user_preferred_firstname=?, user_lastname=?, user_preferred_lastname=?,
-  user_email=?, user_updated=?, instructor_updated=?{$extra}
-WHERE user_id=?", $params);
+    user_firstname=?, user_preferred_firstname=?, user_lastname=?, user_preferred_lastname=?,
+    user_email=?, user_updated=?, instructor_updated=?{$extra}
+WHERE user_id=?
+/* AUTH: {$auth} */", $params);
 
         if (!empty($semester) && !empty($course)) {
             $params = array($user->getGroup(), $user->getRegistrationSection(),
                             $this->submitty_db->convertBoolean($user->isManualRegistration()), $semester, $course,
                             $user->getId());
             $this->submitty_db->query("
-UPDATE courses_users SET user_group=?, registration_section=?, manual_registration=?
+UPDATE courses_users
+SET
+    user_group=?, registration_section=?, manual_registration=?
 WHERE semester=? AND course=? AND user_id=?", $params);
 
             $params = array($user->getAnonId(), $user->getRotatingSection(), $user->getId());
@@ -1285,7 +1302,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                     GROUP BY user_id
                 ) AS sr ON u.user_id=sr.user_id
             ) AS u ON eg IS NULL OR NOT eg.team_assignment
-            
+
             /* Join user late day exceptions */
             LEFT JOIN late_day_exceptions ldeu ON g.g_id=ldeu.g_id AND u.user_id=ldeu.user_id';
         }
@@ -1871,9 +1888,9 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               (SELECT user_id AS id, active_version as m
               FROM electronic_gradeable_version
               WHERE g_id = ? AND user_id IS NOT NULL)
-            
+
               UNION
-            
+
               (SELECT team_id AS id, active_version as m
               FROM electronic_gradeable_version
               WHERE g_id = ? AND team_id IS NOT NULL)
