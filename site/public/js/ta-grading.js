@@ -26,6 +26,7 @@ $(function() {
         setSubmissionsVisible(true);
         setInfoVisible(true);
         setRegradeVisible(true);
+        setDiscussionVisible(true);
         resetModules();
         updateCookies();
     }
@@ -352,6 +353,10 @@ function isRegradeVisible(){
     return $("#regrade_info").is(":visible");
 }
 
+function isDiscussionVisible() {
+    return $("#discussion_browser").is(":visible");
+}
+
 function setAutogradingVisible(visible) {
     $('.fa-list').toggleClass('icon-selected', visible);
     $("#autograding_results").toggle(visible);
@@ -381,6 +386,12 @@ function setRegradeVisible(visible) {
     hideIfEmpty("#regrade_info");
 }
 
+function setDiscussionVisible(visible) {
+    $('.fa-hand-paper').toggleClass('icon-selected', visible);
+    $("#discussion_browser").toggle(visible);
+    hideIfEmpty("#discussion_browser");
+}
+
 function toggleAutograding() {
     setAutogradingVisible(!isAutogradingVisible());
 }
@@ -398,6 +409,10 @@ function toggleInfo() {
 }
 function toggleRegrade() {
     setRegradeVisible(!isRegradeVisible());
+}
+
+function toggleDiscussion() {
+    setDiscussionVisible(!isDiscussionVisible());
 }
 
 function resetModules() {

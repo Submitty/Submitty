@@ -486,7 +486,9 @@ class ElectronicGraderView extends AbstractView {
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit);
 
-        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderDiscussionForum', 9, $graded_gradeable->getSubmitter()->getId());
+        if($graded_gradeable->isDiscussionBased()) {
+            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderDiscussionForum', 9, $graded_gradeable->getSubmitter()->getId());
+        }
 
         $return .= <<<HTML
             <link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}css/iframe/codemirror.css" />
@@ -542,6 +544,7 @@ HTML;
             "next_student_url" => $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $graded_gradeable->getGradeableId(), 'who_id' => $next_id]),
             "home_url" => $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'details', 'gradeable_id' => $graded_gradeable->getGradeableId(), 'view' => (count($this->core->getUser()->getGradingRegistrationSections()) == 0) ? 'all' : null]),
             'regrade_panel_available' => $this->core->getConfig()->isRegradeEnabled(),
+            'discussion_based' => $graded_gradeable->isDiscussionBased()
         ]);
     }
 
