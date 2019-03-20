@@ -229,10 +229,6 @@ TestResults* custom_doit(const TestCase &tc, const nlohmann::json& j, const nloh
                     actions, dispatcher_actions, execute_logfile, test_case_limits,
                     assignment_limits, whole_config, windowed, "NOT_A_WINDOWED_ASSIGNMENT");
 
-  if(ret != 0){
-      return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: A custom validator did not terminate successfully.")});
-  }
-
   std::ifstream ifs(output_file_name);
 
   if(!ifs.good()){
@@ -241,38 +237,46 @@ TestResults* custom_doit(const TestCase &tc, const nlohmann::json& j, const nloh
   }
 
   nlohmann::json result;
+
   try{
     result = nlohmann::json::parse(ifs);
   }catch(const std::exception& e){
+    std::remove(output_file_name.c_str());
     std::cout << "ERROR: Could not parse the custom validator's output." << std::endl;
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: Could not parse a custom validator's output.")});
   }
 
-  bool success = false;
-  if(result["success"].is_boolean()){
-    success = result["success"];
+  std::string validator_status = "fail";
+  if(result["status"].is_string()){
+    if(result["status"] == "success"){
+      validator_status = "success";
+    }
   }else{
+    std::remove(output_file_name.c_str());
     std::cout << "ERROR: A custom validator did not return success or failure" << std::endl;
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: A custom validator did not return success or failure")});
   }
 
-  if(!success){
+  if(validator_status != "success"){
     std::string error_message = "";
     if(result["message"].is_string()){
-      error_message = result["success"];
+      error_message = result["message"];
     }
     //logs to validator_log
     std::cout << error_message << std::endl;
+    std::remove(output_file_name.c_str());
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: Custom validation failed.")});
   }
 
   if(!result["data"].is_object()){
+    std::remove(output_file_name.c_str());
     std::cout << "ERROR: The custom validator did not return a 'data' subdictionary." << std::endl;
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: A custom validator did not return a result.")});
   }
   
   if(!result["data"]["score"].is_number()){
     std::cout << "ERROR: A custom validator must return score as a number between 0 and 1" << std::endl;
+    std::remove(output_file_name.c_str());
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: A custom validator did not return a score.")});
   }
   float score = result["data"]["score"];
