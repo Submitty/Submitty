@@ -191,9 +191,6 @@ HTML;
 
 
 		<script>
-		function openFile(directory, file, path ){
-			window.open("{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + file + "&path=" + path,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
-		}
 
 			$( document ).ready(function() {
 			    enableTabsInTextArea('.post_content_reply');
@@ -938,7 +935,7 @@ HTML;
 				$name = rawurlencode($file['name']);
 				$name_display = htmlentities(rawurldecode($file['name']), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 				$return .= <<<HTML
-					<a href="#" style="text-decoration:none;display:inline-block;white-space: nowrap;" class="btn-default btn-sm" onclick="openFile('forum_attachments', '{$name}', '{$path}')" > {$name_display} </a>
+					<a href="#" style="text-decoration:none;display:inline-block;white-space: nowrap;" class="btn-default btn-sm" onclick="openFileForum('forum_attachments', '{$name}', '{$path}')" > {$name_display} </a>
 HTML;
 			}					
 		}

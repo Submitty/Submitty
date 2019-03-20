@@ -1266,6 +1266,11 @@ function openUrl(url) {
     return false;
 }
 
+function openFileForum(directory, file, path ){
+    var url = buildUrl({'component': 'misc', 'page': 'display_file', 'dir': directory, 'file': file, 'path': path});
+    window.open(url,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+}
+
 function openFrame(url, id, filename) {
     var iframe = $('#file_viewer_' + id);
     if (!iframe.hasClass('open')) {
