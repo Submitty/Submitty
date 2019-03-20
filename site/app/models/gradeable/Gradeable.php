@@ -70,7 +70,9 @@ use app\models\User;
  * @method Component[] getComponents()
  * @method bool isRegradeAllowed()
  * @method bool isDiscussionBased()
- * @method int  getDiscussionThreadId()
+ * @method string  getDiscussionThreadId()
+ * @method void setDiscussionThreadId($discussion_thread_id)
+ * @method void setDiscussionBased($discussion_based)
  * @method int getActiveRegradeRequestCount()
  * @method void setHasDueDate($has_due_date)
  */
@@ -189,9 +191,9 @@ class Gradeable extends AbstractModel {
     /** @property @var boolean are grade inquiries enabled for this assignment*/
     protected $regrade_allowed = true;
     /** @property @var boolean does this assignmennt have a discussion component*/
-    protected $discussion_based = true;
+    protected $discussion_based = false;
     /** @property @var int thread id for cooresponding to discussion forum thread*/
-    protected $discussion_thread_id = -1;
+    protected $discussion_thread_id = '';
 
 
     /**
@@ -230,6 +232,8 @@ class Gradeable extends AbstractModel {
             $this->setLateSubmissionAllowed($details['late_submission_allowed']);
             $this->setPrecision($details['precision']);
             $this->setRegradeAllowedInternal($details['regrade_allowed']);
+            $this->setDiscussionBased($details['has_discussion']);
+            $this->setDiscussionThreadId($details['discussion_thread_id']);
         }
 
         $this->setActiveRegradeRequestCount($details['active_regrade_request_count'] ?? 0);
