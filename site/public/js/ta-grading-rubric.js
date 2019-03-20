@@ -1151,7 +1151,7 @@ function getCountDirection(component_id) {
  * @param {string} title
  */
 function setMarkTitle(mark_id, title) {
-    getMarkJQuery(mark_id).find('.mark-title input').val(title);
+    getMarkJQuery(mark_id).find('.mark-title textarea').val(title);
 }
 
 /**
@@ -1255,7 +1255,7 @@ function getMarkFromDOM(mark_id) {
         return {
             id: parseInt(domElement.attr('data-mark_id')),
             points: parseFloat(domElement.find('input[type=number]').val()),
-            title: domElement.find('input[type=text]').val(),
+            title: domElement.find('textarea').val(),
             deleted: domElement.hasClass('mark-deleted'),
             publish: domElement.find('.mark-publish-container input[type=checkbox]').is(':checked')
         };
@@ -2533,7 +2533,8 @@ function scrollToPage(page_num){
 function openComponent(component_id) {
     setComponentInProgress(component_id);
     // Achieve polymorphism in the interface using this `isInstructorEditEnabled` flag
-    return isInstructorEditEnabled() ? openComponentInstructorEdit(component_id) : openComponentGrading(component_id);
+    return (isInstructorEditEnabled() ? openComponentInstructorEdit(component_id) : openComponentGrading(component_id))
+        .then(resizeNoScrollTextareas);
 }
 
 /**
