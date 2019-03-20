@@ -110,12 +110,12 @@ class ConfigurationController extends AbstractController {
             $entry = nl2br($entry);
         }
 
-        $config_ini = $this->core->getConfig()->getCourseIni();
+        $config_ini = $this->core->getConfig()->getCourseJson();
         if(!isset($config_ini['course_details'][$name])) {
             return $this->core->getOutput()->renderJsonFail('Not a valid config name');
         }
         $config_ini['course_details'][$name] = $entry;
-        $this->core->getConfig()->saveCourseIni(['course_details' => $config_ini['course_details']]);
+        $this->core->getConfig()->saveCourseJson(['course_details' => $config_ini['course_details']]);
 
         return $this->core->getOutput()->renderJsonSuccess();
     }
