@@ -204,35 +204,6 @@ HTML;
 		</script>
 
 HTML;
-	if($this->core->getUser()->getGroup() <= 2){
-		$return .= <<<HTML
-			<script>
-				function changeName(element, user, visible_username, anon){
-					var new_element = element.getElementsByTagName("strong")[0];
-					anon = (anon == 'true');
-					icon = element.getElementsByClassName("fas fa-eye")[0];
-					if(icon == undefined){
-						icon = element.getElementsByClassName("fas fa-eye-slash")[0];
-						if(anon) {
-							new_element.style.color = "black";
-							new_element.style.fontStyle = "normal";
-						}
-						new_element.innerHTML = visible_username;
-						icon.className = "fas fa-eye";
-						icon.title = "Show full user information";
-					} else {
-						if(anon) {
-							new_element.style.color = "grey";
-							new_element.style.fontStyle = "italic";
-						}
-						new_element.innerHTML = user;
-						icon.className = "fas fa-eye-slash";
-						icon.title = "Hide full user information";
-					} 									
-				}
-			</script>
-HTML;
-	}
 	if($filteredThreadExists || $threadFiltering) {
 		$currentThread = isset($_GET["thread_id"]) && is_numeric($_GET["thread_id"]) && (int)$_GET["thread_id"] < $max_thread && (int)$_GET["thread_id"] > 0 ? (int)$_GET["thread_id"] : $posts[0]["thread_id"];
 		$currentCategoriesIds = $this->core->getQueries()->getCategoriesIdForThread($currentThread);
