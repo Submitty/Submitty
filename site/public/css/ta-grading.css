@@ -78,6 +78,11 @@
     background-color: #00e08e;
 }
 
+.icon-selected.fa-comment-alt {
+    box-shadow: 0px 0px 3px 3px #72518a;
+    background-color: #72518a;
+}
+
 .icon-files {
     background: url('../img/glyphicons-145-folder-open.png') no-repeat;
     display: inline-block;

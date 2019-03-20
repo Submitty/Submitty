@@ -117,6 +117,12 @@ function readCookies(){
     var regrade_height = document.cookie.replace(/(?:(?:^|.*;\s*)regrade_height\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var regrade_visible = document.cookie.replace(/(?:(?:^|.*;\s*)regrade_visible\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
+    var discussion_top = document.cookie.replace(/(?:(?:^|.*;\s*)discussion_top\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    var discussion_left = document.cookie.replace(/(?:(?:^|.*;\s*)discussion_left\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    var discussion_width = document.cookie.replace(/(?:(?:^|.*;\s*)discussion_width\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    var discussion_height = document.cookie.replace(/(?:(?:^|.*;\s*)discussion_height\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    var discussion_visible = document.cookie.replace(/(?:(?:^|.*;\s*)discussion_visible\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+
     var bar_wrapper_top = document.cookie.replace(/(?:(?:^|.*;\s*)bar_wrapper_top\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var bar_wrapper_left = document.cookie.replace(/(?:(?:^|.*;\s*)bar_wrapper_left\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var bar_wrapper_visible = document.cookie.replace(/(?:(?:^|.*;\s*)bar_wrapper_visible\s*\=\s*([^;]*).*$)|^.*$/, "$1");
@@ -163,6 +169,12 @@ function readCookies(){
     (regrade_height) ? $("#regrade_info").css("height", regrade_height):{};
     (regrade_visible) ? $("#regrade_info").css("display", regrade_visible):{};
 
+    (discussion_top) ? $("#discussion_browser").css("top", discussion_top):{};
+    (discussion_left) ? $("#discussion_browser").css("left", discussion_left):{};
+    (discussion_width) ? $("#discussion_browser").css("width", discussion_width):{};
+    (discussion_height) ? $("#discussion_browser").css("height", discussion_height):{};
+    (discussion_visible) ? $("#discussion_browser").css("display", discussion_visible):{};
+
     (bar_wrapper_top) ? $("#bar_wrapper").css("top", bar_wrapper_top):{};
     (bar_wrapper_left) ? $("#bar_wrapper").css("left", bar_wrapper_left):{};
     (bar_wrapper_visible) ? $("#bar_wrapper").css("display", bar_wrapper_visible):{};
@@ -177,6 +189,7 @@ function readCookies(){
     (rubric_visible) ? ((rubric_visible) == "none" ? $(".fa-edit").removeClass("icon-selected") : $(".fa-edit").addClass("icon-selected")) : {};
     (status_visible) ? ((status_visible) == "none" ? $(".fa-user").removeClass("icon-selected") : $(".fa-user").addClass("icon-selected")) : {};
     (regrade_visible) ? ((regrade_visible) == "none" ? $(".fa-hand-paper").removeClass("icon-selected") : $(".fa-hand-paper").addClass("icon-selected")) : {};
+    (discussion_visible) ? ((discussion_visible) == "none" ? $(".fa-comment-alt").removeClass("icon-selected") : $(".fa-comment-alt").addClass("icon-selected")) : {};
 
     (autoscroll) ? ((autoscroll) == "on" ? $('#autoscroll_id').prop('checked', true) : $('#autoscroll_id').prop('checked', false)) : {};
 
@@ -253,6 +266,12 @@ function updateCookies(){
     document.cookie = "regrade_width=" + $("#regrade_info").css("width") + "; path=/;";
     document.cookie = "regrade_height=" + $("#regrade_info").css("height") + "; path=/;";
     document.cookie = "regrade_visible=" + $("#regrade_info").css("display") + "; path=/;";
+
+    document.cookie = "discussion_top=" + $("#discussion_browser").css("top") + "; path=/;";
+    document.cookie = "discussion_left=" + $("#discussion_browser").css("left") + "; path=/;";
+    document.cookie = "discussion_width=" + $("#discussion_browser").css("width") + "; path=/;";
+    document.cookie = "discussion_height=" + $("#discussion_browser").css("height") + "; path=/;";
+    document.cookie = "discussion_visible=" + $("#discussion_browser").css("display") + "; path=/;";
 
     document.cookie = "bar_wrapper_top=" + $("#bar_wrapper").css("top") + "; path=/;";
     document.cookie = "bar_wrapper_left=" + $("#bar_wrapper").css("left") + "; path=/;";
@@ -387,7 +406,7 @@ function setRegradeVisible(visible) {
 }
 
 function setDiscussionVisible(visible) {
-    $('.fa-hand-paper').toggleClass('icon-selected', visible);
+    $('.fa-comment-alt').toggleClass('icon-selected', visible);
     $("#discussion_browser").toggle(visible);
     hideIfEmpty("#discussion_browser");
 }
@@ -430,6 +449,8 @@ function resetModules() {
     $("#student_info").attr("style", "left: 50%; top: 80%; z-index:30; width:48%; height:20%; display:block;");
     $('.fa-hand-paper').addClass('icon-selected');
     $("#regrade_info").attr("style", "bottom:30px; z-index:30; right:15px; width:48%; height:37%; display:block;");
+    $('.fa-comment-alt').addClass('icon-selected');
+    $("#discussion_browser").attr("style", "bottom:30px; z-index:30; right:15px; width:48%; height:37%; display:block;");
     // $("#pdf_annotation_bar").attr("style", "left: 58%, z-index:40; top:307px");
     deleteCookies();
     updateCookies();
