@@ -102,14 +102,14 @@
     <div id="discussion_grading_enable_container">
             Is there a discussion component for this assignment?
             <br />
-            <input type="radio" id="yes_discussion" name="discussion" value="true" class="bool_val auto_save date-related"
+            <input type="radio" id="yes_discussion" name="has_discussion" value="true" class="bool_val auto_save date-related"
                     {{ action != 'new' and gradeable.isDiscussionBased() ? 'checked' : '' }} /> Yes
-            <input type="radio" id="no_discussion" name="discussion" value="false" class="bool_val auto_save date-related"
+            <input type="radio" id="no_discussion" name="has_discussion" value="false" class="bool_val auto_save date-related"
                     {{ not (action != 'new' and gradeable.isDiscussionBased()) ? 'checked' : '' }} /> No
       
         <div class="discussion_id_wrapper">
         <label for="discussion_thread_id">What is the thread id?</label>
-            <input style="width: 50px" name="team_size_max" id="discussion_thread_id" class="int_val auto_save" type="text"
+            <input style="width: 50px" name="discussion_thread_id" id="discussion_thread_id" class="int_val auto_save" type="text"
                    value="{{ action != 'new' ? gradeable.getDiscussionThreadId() : '0' }}"/>
            </div>
 
@@ -426,7 +426,7 @@
         $('[name="team_assignment"]').change(onTeamAssignmentChange);
 
         onDiscussionChange();
-        $('[name="discussion"]').change(onDiscussionChange);
+        $('[name="has_discussion"]').change(onDiscussionChange);
 
         disableElementChildren('#repository', $('input[name=vcs]').val() === 'false');
 

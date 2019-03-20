@@ -728,6 +728,15 @@ class AdminGradeableController extends AbstractController {
 
         // Electronic-only values
         if ($gradeable_type === GradeableType::ELECTRONIC_FILE) {
+
+            $jsonThreads = array_map('intval', explode(',', $details['discussion_thread_id']));
+            foreach($jsonThreads as $thread) {
+                if(!$this->core->getQueries()->existsThread($thread)) {
+                    throw new \InvalidArgumentException('Invalid thread id specified.');
+                }
+            }
+            $jsonThreads = json_encode($jsonThreads);
+
             $gradeable_create_data = array_merge($gradeable_create_data, [
                 'team_assignment' => $details['team_assignment'] === 'true',
                 'vcs' => $details['vcs'] === 'true',
@@ -738,6 +747,10 @@ class AdminGradeableController extends AbstractController {
                 'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/upload_only/config',
                 'scanned_exam' => $details['scanned_exam'] === 'true',
                 'has_due_date' => true,
+                
+                //For discussion component 
+                'has_discussion' => $details['has_discussion'],
+                'discussion_thread_ids' => $details['discussion_thread_id'],
 
                 // TODO: properties that aren't supported yet
                 'peer_grading' => false,
