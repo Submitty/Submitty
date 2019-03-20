@@ -90,7 +90,7 @@
         </div>
     </div>
 
-    <!-- This is only relevant to Electronic Files -->
+  <!-- This is only relevant to Electronic Files -->
     <fieldset class="gradeable_type_options electronic_file" id="electronic_file">
         <div><legend>Will any or all of this assignment be manually graded (e.g., by the TAs or the instructor)?</legend></div>
         <div>
@@ -108,6 +108,26 @@
                 <input type="radio" id="no_regrade_allowed" name="regrade_allowed" value="false" class="bool_val auto_save date-related"
                         {{ not (action != 'new' and gradeable.isRegradeAllowed()) ? 'checked' : '' }} /> No
             </div>
+        {% endif %}
+
+        {% if forum_enabled %}
+
+            <div id="discussion_grading_enable_container">
+                Is there a discussion component for this assignment?
+                <br />
+                <input type="radio" id="yes_discussion" name="discussion_based" value="true" class="bool_val auto_save date-related"
+                        {{ action != 'new' and gradeable.isDiscussionBased() ? 'checked' : '' }} /> Yes
+                <input type="radio" id="no_discussion" name="discussion_based" value="false" class="bool_val auto_save date-related"
+                        {{ not (action != 'new' and gradeable.isDiscussionBased()) ? 'checked' : '' }} /> No
+          
+                <div class="discussion_id_wrapper">
+                    <label for="discussion_thread_id">What thread id(s) should be included?</label>
+                        <input style="width: 70px" name="discussion_thread_id" id="discussion_thread_id" class="int_val auto_save" type="text"
+                               value="{{ action != 'new' ? gradeable.getStringThreadIds() : '' }}"/>
+                </div>
+
+            </div>
+
         {% endif %}
 
         <div id="team-settings-container">
@@ -133,50 +153,14 @@
                 <input style="width: 50px" name="team_size_max" id="team_size_max" class="int_val auto_save" type="text"
                        value="{{ action != 'new' ? gradeable.getTeamSizeMax() : '3' }}"/>
 
-<!-- This is only relevant to Electronic Files -->
-<fieldset class="gradeable_type_options electronic_file" id="electronic_file">
-    <div><legend>Will any or all of this assignment be manually graded (e.g., by the TAs or the instructor)?</legend></div>
-    <div>
-        <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val auto_save date-related"
-                {{ action != 'new' and gradeable.getTaGrading() ? 'checked' : '' }} /> <label for="yes_ta_grade">Yes</label>
-        <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val auto_save date-related"
-                {{ not (action != 'new' and gradeable.getTaGrading()) ? 'checked' : '' }} /> <label for="no_ta_grade">No</label>
-    </div>
-    {% if forum_enabled %}
-
-    <div id="discussion_grading_enable_container">
-            Is there a discussion component for this assignment?
-            <br />
-            <input type="radio" id="yes_discussion" name="has_discussion" value="true" class="bool_val auto_save date-related"
-                    {{ action != 'new' and gradeable.isDiscussionBased() ? 'checked' : '' }} /> Yes
-            <input type="radio" id="no_discussion" name="has_discussion" value="false" class="bool_val auto_save date-related"
-                    {{ not (action != 'new' and gradeable.isDiscussionBased()) ? 'checked' : '' }} /> No
-      
-        <div class="discussion_id_wrapper">
-        <label for="discussion_thread_id">What is the thread id?</label>
-            <input style="width: 50px" name="discussion_thread_id" id="discussion_thread_id" class="int_val auto_save" type="text"
-                   value="{{ action != 'new' ? gradeable.getDiscussionThreadId() : '0' }}"/>
-           </div>
-
-        </div>
-
-    {% endif %}
-
-    {% if regrade_enabled %}
-        <div id="regrade_request_enable_container">
-            Will grade inquiries be enabled for this assignment?
-
             {#Use teams from a previous gradeable:
             <!-- Inherit teams from another gradeable? -->
             <br />
-
                 <!--Use a combo box if we can edit the value, otherwise show a text box (readonly)-->
-
             {% if action == 'new' %}
                 <select id='gradeable_teams' name="eg_inherit_teams_from" style='width: 170px;'
                     value='{{ admin_gradeable.getEgInheritTeamsFrom() }}'>
                     <option value=''>--None--</option>
-
                     {% for parent in inherit_teams_list %}
                         <option {{ admin_gradeable.getEgInheritTeamsFrom() == parent.g_id ? 'selected' : '' }}
                             value="{{ parent.g_id }}">{{ parent.g_title }}</option>
@@ -441,7 +425,7 @@
         $('[name="team_assignment"]').change(onTeamAssignmentChange);
 
         onDiscussionChange();
-        $('[name="has_discussion"]').change(onDiscussionChange);
+        $('[name="discussion_based"]').change(onDiscussionChange);
 
         disableElementChildren('#repository', $('input[name=vcs]').val() === 'false');
 
