@@ -523,16 +523,6 @@ tr.is_publish {
 .gradeable .component .content-block {
 }
 
-/* Save tools */
-
-.save-tools-cancel:hover {
-    background-color: #FCC;
-}
-
-.save-tools-save:hover {
-    background-color: #CFC;
-}
-
 .gradeable .ta-rubric-table,
 .gradeable .received-marks-list {
     padding: 8px 0px;

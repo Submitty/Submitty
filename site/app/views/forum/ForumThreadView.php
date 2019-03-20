@@ -185,7 +185,7 @@ HTML;
 		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/python.js"></script>
 		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/shell.js"></script>
 		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
-		<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.AreYouSure/1.9.0/jquery.are-you-sure.min.js"></script>
+		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/jquery.are-you-sure.min.js"></script>
 		<style>body {min-width: 925px;}</style>
 
 
@@ -250,7 +250,7 @@ HTML;
 		$show_merged_thread_title = "Show Merged Threads";
 	}
 	$return .= <<<HTML
-		<div class="content forum_content forum_show_threads">
+		<div class="full_height content forum_content forum_show_threads">
 HTML;
 	$show_deleted_class = '';
 	$show_deleted_action = '';
@@ -676,7 +676,7 @@ HTML;
 						if(isset($thread['favorite']) && $thread['favorite']) {
 							$return .= <<<HTML
 							<i class="fas fa-thumbtack" style="padding-left:3px;position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
-    -webkit-text-stroke-color: black;" aria-hidden="true"></i>
+    -webkit-text-stroke-color: black;" title="Pinned as my favorite" aria-hidden="true"></i>
 HTML;
 						}
 						if($thread['merged_thread_id'] != -1) {
@@ -977,7 +977,7 @@ HTML;
 		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
 		$this->core->getOutput()->addBreadcrumb("Create Thread", $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
 		$return = <<<HTML
-		<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.AreYouSure/1.9.0/jquery.are-you-sure.min.js"></script>
+		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/jquery.are-you-sure.min.js"></script>
 		<script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 		<script> 
 			$( document ).ready(function() {

@@ -1,5 +1,5 @@
 @import url("reset.css");
-@import url("https://fonts.googleapis.com/css?family=Inconsolata");
+@import url("../vendor/google/inconsolata.css");
 
 html {
     height: 100%;
@@ -479,7 +479,7 @@ table tr.table-header {
 }
 
 #footer a:hover {
-    color: #4078c0;
+    color: #405E90;
 }
 
 #footer #copyright {
@@ -491,7 +491,7 @@ table tr.table-header {
 }
 
 #copyright > a {
-    color: #4078c0;
+    color: #405E90;
 }
 
 #copyright > a:hover {
@@ -1033,8 +1033,15 @@ table .instructor .two-options{
     padding-top: 30px;
 }
 
+div.full_height {
+    position: -webkit-sticky; /* Safari */
+    position: sticky;
+    max-height: 95vh;
+    top: 10px;
+}
+
 #sidebar.collapsed #nav-buttons {
-    width: 240px;
+    width: 30px;
 }
 
 #sidebar.collapsed #nav-buttons-visible {
@@ -1050,7 +1057,7 @@ table .instructor .two-options{
 }
 
 #sidebar.animate {
-    transition: 0.25s ease-out;
+    transition: 0.3s ease-out;
 }
 
 #sidebar.collapsed {
@@ -1072,18 +1079,19 @@ table .instructor .two-options{
 
 #nav-buttons ul li .nav-row {
     padding: 6px;
-    padding-left: 36px;
+    padding-left: 48px;
     width: 100%;
     display: block;
 }
 
-#sidebar.collapsed #nav-buttons ul li .nav-row {
+#sidebar.collapsed #nav-buttons ul li .nav-row .iconTitle{
     display: none;
 }
 
-#nav-buttons ul li .collapse-icon {
-    display: none;
+#sidebar.collapsed #nav-buttons ul li .nav-row .fa{
+    padding: 2px 0px;
 }
+
 
 #sidebar.collapsed #nav-buttons ul li .collapse-icon {
     display: inline-block;
@@ -1201,6 +1209,7 @@ table .instructor .two-options{
 
 #sidebar.collapsed #nav-buttons ul li.short-line {
     margin-left: -30px;
+    width: 100px
 }
 
 #nav-buttons ul li.heading {
@@ -1749,4 +1758,10 @@ end of styles used in the admin gradeable page
     margin: auto;
     font-size: 1.5em;
     font-weight: bold;
+}
+
+.scrollable-image{
+    overflow: auto; 
+    width: 100%;
+    max-height: 300px;
 }

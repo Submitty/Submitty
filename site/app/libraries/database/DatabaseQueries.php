@@ -324,7 +324,7 @@ class DatabaseQueries {
 	}
 
     public function getPosts(){
-        $this->course_db->query("SELECT * FROM posts where deleted = false");
+        $this->course_db->query("SELECT * FROM posts where deleted = false ORDER BY timestamp ASC");
         return $this->course_db->rows();
     }
 
@@ -3778,6 +3778,17 @@ AND gc_id IN (
         $this->course_db->query('SELECT EXISTS (SELECT g_id FROM electronic_gradeable_data WHERE g_id=? AND (user_id=? OR team_id=?))',
             [$gradeable->getId(), $submitter->getId(), $submitter->getId()]);
         return $this->course_db->row()['exists'] ?? false;
+    }
+
+    /**
+     * Get the active version for all given submitter ids. If they do not have an active version,
+     * their version will be zero.
+     * @param \app\models\gradeable\Gradeable $gradeable
+     * @param string[] $submitter_ids
+     * @return bool[] Map of id=>version
+     */
+    public function getActiveVersions(gradeable\Gradeable $gradeable, array $submitter_ids) {
+        throw new NotImplementedException();
     }
 
     /**
