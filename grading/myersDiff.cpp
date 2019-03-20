@@ -236,6 +236,7 @@ TestResults* custom_doit(const TestCase &tc, const nlohmann::json& j, const nloh
   std::ifstream ifs(output_file_name);
 
   if(!ifs.good()){
+    std::cout << "ERROR: Could not open the JSON output by the validator to stdout" <<std::endl;
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: Custom validation did not return a result.")});
   }
 
@@ -243,24 +244,49 @@ TestResults* custom_doit(const TestCase &tc, const nlohmann::json& j, const nloh
   try{
     result = nlohmann::json::parse(ifs);
   }catch(const std::exception& e){
-    return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: Could not parse the custom validator's output.")});
+    std::cout << "ERROR: Could not parse the custom validator's output." << std::endl;
+    return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: Could not parse a custom validator's output.")});
+  }
+
+  bool success = false;
+  if(result["success"].is_boolean()){
+    success = result["success"];
+  }else{
+    std::cout << "ERROR: A custom validator did not return success or failure" << std::endl;
+    return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: A custom validator did not return success or failure")});
+  }
+
+  if(!success){
+    std::string error_message = "";
+    if(result["message"].is_string()){
+      error_message = result["success"];
+    }
+    //logs to validator_log
+    std::cout << error_message << std::endl;
+    return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: Custom validation failed.")});
+  }
+
+  if(!result["data"].is_object()){
+    std::cout << "ERROR: The custom validator did not return a 'data' subdictionary." << std::endl;
+    return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: A custom validator did not return a result.")});
   }
   
-  if(!result["score"].is_number()){
-    return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: A custom validator must return score as a number between 0 and 1.")});
+  if(!result["data"]["score"].is_number()){
+    std::cout << "ERROR: A custom validator must return score as a number between 0 and 1" << std::endl;
+    return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: A custom validator did not return a score.")});
   }
-  float score = result["score"];
+  float score = result["data"]["score"];
 
   std::string message = "";
-  if(result["message"].is_string()){
-      message = result["message"];
+  if(result["data"]["message"].is_string()){
+      message = result["data"]["message"];
   }else{
     std::cout << "Message was not a string or was not found." << std::endl;
   }
 
   std::string status_string = "";
-  if(result["status"].is_string()){
-    status_string = result["status"];
+  if(result["data"]["status"].is_string()){
+    status_string = result["data"]["status"];
   }else{
     std::cout << "Status was not a string or was not found." << std::endl;
   }

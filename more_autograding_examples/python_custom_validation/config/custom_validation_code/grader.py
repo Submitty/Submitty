@@ -33,14 +33,18 @@ def load_file(file, number_of_numbers):
   return numbers
 
 def return_result(score,message,status):
-  print(json.dumps({'score':score, 'message':message,'status':status}, indent=4))
+  print(json.dumps({'success':True,'data':{'score':score, 'message':message,'status':status}}, indent=4))
+  sys.exit(0)
+
+def return_error(error_message):
+  print(json.dumps({'success':False,'message':'error_message'}, indent=4))
   sys.exit(0)
 
 def main():
   try:
     args = parse_args()
   except Exception as e:
-    return_result(score=0, message='ERROR: Incorrect arguments to custom validator', status='failure')
+    return_error(message='ERROR: Incorrect arguments to custom validator')
 
   actual_files = args.actual_files
   number_of_numbers = args.numbers
