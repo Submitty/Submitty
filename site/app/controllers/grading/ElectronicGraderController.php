@@ -1798,6 +1798,7 @@ class ElectronicGraderController extends GradingController {
         $component_id = $_POST['component_id'] ?? '';
         $points = $_POST['points'] ?? '';
         $title = $_POST['title'] ?? null;
+        $publish = ($_POST['publish'] ?? 'false') === 'true';
 
         // Validate required parameters
         if ($title === null) {
@@ -1833,7 +1834,7 @@ class ElectronicGraderController extends GradingController {
 
         try {
             // Once we've parsed the inputs and checked permissions, perform the operation
-            $mark = $this->addNewMark($component, $title, $points);
+            $mark = $this->addNewMark($component, $title, $points, $publish);
             $this->core->getOutput()->renderJsonSuccess(['mark_id' => $mark->getId()]);
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
@@ -1842,8 +1843,8 @@ class ElectronicGraderController extends GradingController {
         }
     }
 
-    public function addNewMark(Component $component, string $title, float $points) {
-        $mark = $component->addMark($title, $points, false);
+    public function addNewMark(Component $component, string $title, float $points, bool $publish) {
+        $mark = $component->addMark($title, $points, $publish);
         $this->core->getQueries()->saveComponent($component);
         return $mark;
     }
