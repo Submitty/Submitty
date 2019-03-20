@@ -387,9 +387,15 @@ HTML;
 							}
 						});
 					</script>
-					
+					<div id="posts_list" style="margin-top:10px;max-height: 100%" class="col-9">
 HTML;
 		$return .= $this->generatePostList($currentThread, $posts, $currentCourse, true, $threadExists, $display_option, $categories, $cookieSelectedCategories, $cookieSelectedThreadStatus, $currentCategoriesIds);
+
+		$return .= <<<HTML
+			</div>
+			</div>
+			</div>
+HTML;
 
 		}
           
@@ -410,7 +416,7 @@ HTML;
 		$function_date = 'date_format';
 
 		$return .= <<<HTML
-			<div id="posts_list" style="margin-top:10px;max-height: 100%" class="col-9">
+			
 HTML;
 
 		  $title_html .= <<<HTML
@@ -502,6 +508,7 @@ HTML;
 							}			
 						}
 					}
+			if($includeReply) {
 			$return .= <<<HTML
 
 			<hr style="border-top:1px solid #999;margin-bottom: 5px;" />
@@ -514,7 +521,6 @@ HTML;
 						$GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id'])?$GLOBALS['post_box_id']+1:1;
 
 
-						if($includeReply) {
 							$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig", [
 								"show_post" => true,
 								"post_content_placeholder" => "Enter your reply to all here...",
@@ -529,10 +535,6 @@ HTML;
 						$return .= <<<HTML
 	            	</form>
 	            	<br/>
-
-					</div>
-				</div>
-				</div>
 HTML;
 		
 

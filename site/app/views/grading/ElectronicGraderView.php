@@ -487,7 +487,7 @@ class ElectronicGraderView extends AbstractView {
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit);
 
         if($graded_gradeable->getGradeable()->isDiscussionBased()) {
-            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderDiscussionForum', 9, $graded_gradeable->getSubmitter()->getId());
+            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderDiscussionForum', json_decode($graded_gradeable->getGradeable()->getDiscussionThreadId()), $graded_gradeable->getSubmitter()->getId());
         }
 
         $return .= <<<HTML
@@ -561,11 +561,24 @@ HTML;
         ]);
     }
 
-    public function renderDiscussionForum($threadId, $submitter_id) {
-        $posts = $this->core->getQueries()->getPostsForThread($this->core->getUser()->getId(), $threadId, false, 'time', $submitter_id);
+    public function renderDiscussionForum($threadIds, $submitter_id) {
+        $posts_view = <<<HTML
+            <span class="col grading_label">Discussion Posts</span>
+HTML;
+            
         $currentCourse = $this->core->getConfig()->getCourse();
 
-        $posts_view = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'generatePostList', $threadId, $posts, $currentCourse, false, true, $submitter_id);
+        foreach($threadIds as $threadId) {
+            $posts = $this->core->getQueries()->getPostsForThread($this->core->getUser()->getId(), $threadId, false, 'time', $submitter_id);
+            if(count($posts) > 0) {
+                $posts_view .= $this->core->getOutput()->renderTemplate('forum\ForumThread', 'generatePostList', $threadId, $posts, $currentCourse, false, true, $submitter_id);
+                $posts_view .= <<<HTML
+                    <a href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $threadId))}" target="_blank" rel="noopener nofollow" class="btn btn-default btn-sm" style=" text-decoration: none;" onClick=""> Go to thread</a>
+                    <hr style="border-top:1px solid #999;margin-bottom: 5px;" /> <br/>
+HTML;
+            }
+
+        }
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/DiscussionForumPanel.twig", [
             "discussion_forum_content" => $posts_view
