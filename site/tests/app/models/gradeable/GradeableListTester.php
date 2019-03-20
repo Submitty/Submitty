@@ -195,48 +195,6 @@ class GradeableListTester extends BaseUnitTest {
         $this->assertCount(4, $list->getSubmittableElectronicGradeables());
     }
 
-    public function testSubmittableNoDueAdmin() {
-        $gradeables = array();
-        $gradeables['01_future_no_due'] = $this->mockGradeable("01_future_no_due",
-            GradeableType::ELECTRONIC_FILE, '1000-01-01', '1001-01-01', '9997-01-01', '9998-01-01',
-            '9999-01-01', true, true, false, false);
-        $gradeables['02_grading_no_due'] = $this->mockGradeable("02_grading_no_due",
-            GradeableType::ELECTRONIC_FILE, '1000-01-01', '1001-01-01', '9997-01-01', '1003-02-01',
-            '9999-01-01', true, true, false, false);
-        $gradeables['03_ta_submit_no_due'] = $this->mockGradeable("03_ta_submit_no_due",
-            GradeableType::ELECTRONIC_FILE, '1000-01-01', '1001-01-01', '9997-01-01', '1003-02-01',
-            '9999-01-01', true, false, false, false);
-
-        $core = $this->mockCore($gradeables, true, true);
-        $list = new GradeableList($core);
-        $this->assertCount(3, $list->getSubmittableElectronicGradeables());
-
-        $actual = $list->getFutureGradeables();
-        $this->assertCount(0, $actual);
-
-        $actual = $list->getBetaGradeables();
-        $this->assertCount(0, $actual);
-
-        $actual = $list->getOpenGradeables();
-        $this->assertCount(1, $actual);
-        $this->assertArrayHasKey('01_future_no_due', $actual);
-        $this->assertEquals($gradeables['01_future_no_due'], $actual['01_future_no_due']);
-
-        $actual = $list->getClosedGradeables();
-        $this->assertCount(0, $actual);
-
-        $expected = array('02_grading_no_due', '03_ta_submit_no_due');
-        $actual = $list->getGradingGradeables();
-        $this->assertCount(count($expected), $actual);
-        $this->assertEquals($expected, array_keys($actual));
-        foreach ($expected as $key) {
-            $this->assertEquals($gradeables[$key], $actual[$key]);
-        }
-
-        $actual = $list->getGradedGradeables();
-        $this->assertCount(0, $actual);
-    }
-
     public function testSubmittableNoDueGrader() {
         $gradeables = array();
         $gradeables['01_future_no_due'] = $this->mockGradeable("01_future_no_due",
