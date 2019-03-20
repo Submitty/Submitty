@@ -3330,7 +3330,9 @@ AND gc_id IN (
                 $this->course_db->convertBoolean($gradeable->isPeerGrading()),
                 $gradeable->getPeerGradeSet(),
                 DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
-                $this->course_db->convertBoolean($gradeable->isRegradeAllowed())
+                $this->course_db->convertBoolean($gradeable->isRegradeAllowed()),
+                $gradeable->getDiscussionThreadId(),
+                $this->course_db->convertBoolean($gradeable->isDiscussionBased())
             ];
             $this->course_db->query("
                 INSERT INTO electronic_gradeable(
@@ -3355,8 +3357,12 @@ AND gc_id IN (
                   eg_peer_grading,
                   eg_peer_grade_set,
                   eg_regrade_request_date,
-                  eg_regrade_allowed)
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
+                  eg_regrade_allowed,
+                  eg_thread_ids,
+                  eg_has_discussion
+                  )
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
+            //throw new Exception();
         }
 
         // Make sure to create the rotating sections
@@ -3459,6 +3465,8 @@ AND gc_id IN (
                     $gradeable->getPeerGradeSet(),
                     DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
                     $this->course_db->convertBoolean($gradeable->isRegradeAllowed()),
+                    $gradeable->getDiscussionThreadId(),
+                    $this->course_db->convertBoolean($gradeable->isDiscussionBased()),
                     $gradeable->getId()
                 ];
                 $this->course_db->query("
@@ -3483,7 +3491,9 @@ AND gc_id IN (
                       eg_peer_grading=?,
                       eg_peer_grade_set=?,
                       eg_regrade_request_date=?,
-                      eg_regrade_allowed=?
+                      eg_regrade_allowed=?,
+                      eg_thread_ids=?,
+                      eg_has_discussion=?
                     WHERE g_id=?", $params);
             }
         }
