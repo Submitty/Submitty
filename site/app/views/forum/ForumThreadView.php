@@ -392,6 +392,12 @@ HTML;
 		$return .= $this->generatePostList($currentThread, $posts, $currentCourse, true, $threadExists, $display_option, $categories, $cookieSelectedCategories, $cookieSelectedThreadStatus, $currentCategoriesIds);
 
 		$return .= <<<HTML
+			<script>
+				$(function() {
+					generateCodeMirrorBlocks(document);
+				});
+			</script>
+
 			</div>
 			</div>
 			</div>
@@ -535,15 +541,6 @@ HTML;
 						$return .= <<<HTML
 	            	</form>
 	            	<br/>
-HTML;
-		
-
-		$return .= <<<HTML
-		<script>
-			$(function() {
-				generateCodeMirrorBlocks(document);
-			});
-		</script>
 HTML;
 
         if($this->core->getUser()->getGroup() <= 2){
