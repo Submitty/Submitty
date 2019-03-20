@@ -20,10 +20,8 @@ try:
     with open(os.path.join(CONFIG_PATH, 'database.json')) as open_file:
         CONFIG = json.load(open_file)
 
-    EMAIL_USER = EMAIL_PASSWORD = None
-    if 'email_user' in CONFIG:
-        EMAIL_USER = CONFIG['email_user']
-        EMAIL_PASSWORD = CONFIG['email_password']
+    EMAIL_USER = CONFIG.get('email_user', None)
+    EMAIL_PASSWORD = CONFIG.get('email_password', None)
     EMAIL_SENDER = CONFIG['email_sender']
     EMAIL_HOSTNAME = CONFIG['email_server_hostname']
     EMAIL_PORT = int(CONFIG['email_server_port'])
