@@ -156,7 +156,7 @@ VALUES (?,?,?,?,?,?)", $params);
             $extra = ", user_password=?";
         }
         $params[] = $user->getId();
-        //Who ius logged in when issuing this DB upate.
+        //Who is logged in when issuing this DB upate.
         $logged_in = $this->core->getUser()->getId();
 
         $this->submitty_db->query("

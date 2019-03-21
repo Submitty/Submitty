@@ -263,30 +263,44 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION sync_user() RETURNS trigger AS
--- TRIGGER function to sync users data on INSERT or UPDATE of user_record in
--- table users.  NOTE: INSERT should not trigger this function as function
--- sync_courses_users will also sync users -- but only on INSERT.
+-- TRIGGER function to sync users data on UPDATE of user_record in table users.
+-- NOTE: INSERT should not trigger this function as function sync_courses_users
+-- will also sync users -- but only on INSERT.
 $$
 DECLARE
-  course_row RECORD;
-  db_conn VARCHAR;
-  query_string TEXT;
+    course_row RECORD;
+    db_conn VARCHAR;
+    query_string TEXT;
+    preferred_name_change_details TEXT;
 BEGIN
-  FOR course_row IN SELECT semester, course FROM courses_users WHERE user_id=NEW.user_id LOOP
-    RAISE NOTICE 'Semester: %, Course: %', course_row.semester, course_row.course;
-    db_conn := format('dbname=submitty_%s_%s', course_row.semester, course_row.course);
-    query_string := 'UPDATE users SET user_firstname=' || quote_literal(NEW.user_firstname) || ', user_preferred_firstname=' || quote_nullable(NEW.user_preferred_firstname) || ', user_lastname=' || quote_literal(NEW.user_lastname) || ', user_preferred_lastname=' || quote_nullable(NEW.user_preferred_lastname) || ', user_email=' || quote_literal(NEW.user_email) || ' WHERE user_id=' || quote_literal(NEW.user_id);
-    -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
-    IF query_string IS NULL THEN
-      RAISE EXCEPTION 'query_string error in trigger function sync_user()';
+    -- Check for changes in users.user_preferred_firstname and users.user_preferred_lastname.
+    IF OLD.user_preferred_firstname <> NEW.user_preferred_firstname THEN
+        preferred_name_change_details := format('PREFERRED_FIRSTNAME OLD:%s NEW:%s ', OLD.user_preferred_firstname, NEW.user_preferred_firstname);
     END IF;
-    PERFORM dblink_exec(db_conn, query_string);
-  END LOOP;
+    IF OLD.user_preferred_lastname <> NEW.user_preferred_lastname THEN
+        preferred_name_change_details := format('%sPREFERRED_LASTNAME OLD:%s NEW:%s', preferred_name_change_details, OLD.user_preferred_lastname, NEW.user_preferred_lastname);
+    END IF;
+    -- If any preferred_name data has changed, preferred_name_change_details will not be NULL.
+    IF preferred_name_change_details IS NOT NULL THEN
+        RAISE LOG USING MESSAGE = 'PREFERRED_NAME DATA UPDATE', DETAIL = preferred_name_change_details;
+    END IF;
+    -- Propagate UPDATE to course DBs
+    FOR course_row IN SELECT semester, course FROM courses_users WHERE user_id=NEW.user_id LOOP
+        RAISE NOTICE 'Semester: %, Course: %', course_row.semester, course_row.course;
+        db_conn := format('dbname=submitty_%s_%s', course_row.semester, course_row.course);
+        query_string := 'UPDATE users SET user_firstname=' || quote_literal(NEW.user_firstname) || ', user_preferred_firstname=' || quote_nullable(NEW.user_preferred_firstname) || ', user_lastname=' || quote_literal(NEW.user_lastname) || ', user_preferred_lastname=' || quote_nullable(NEW.user_preferred_lastname) || ', user_email=' || quote_literal(NEW.user_email) || ' WHERE user_id=' || quote_literal(NEW.user_id);
+        -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
+        IF query_string IS NULL THEN
+            RAISE EXCEPTION 'query_string error in trigger function sync_user()';
+        END IF;
+        PERFORM dblink_exec(db_conn, query_string);
+    END LOOP;
 
-  -- All done.
-  RETURN NULL;
+    -- All done.
+    RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
+
 
 CREATE OR REPLACE FUNCTION sync_insert_registration_section() RETURNS trigger AS $$
 -- AFTER INSERT trigger function to INSERT registration sections to course DB, as needed.
