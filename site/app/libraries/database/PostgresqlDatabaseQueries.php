@@ -135,17 +135,16 @@ VALUES (?,?,?,?,?,?)", $params);
     /**
      * Update user record in database
      *
-     * Note that users UPDATE table has a query comment.  This is will get logged
-     * with the query and is used to help track changes in preferred name.
+     * Note that users table UPDATE query has a block comment.  This will get
+     * logged with the query and is used to help track changes in preferred name.
      * q.v. Github Issue #3273
      *
      * @link https://github.com/Submitty/Submitty/issues/3273
      * @param object $user User data object
      * @param string $semester
      * @param string $course
-     * @param string $auth User ID of who issued this update.
      */
-    public function updateUser(User $user, $semester=null, $course=null, $auth="_NOT_LOGGED") {
+    public function updateUser(User $user, $semester=null, $course=null) {
         $params = array($user->getLegalFirstName(), $user->getPreferredFirstName(),
                        $user->getLegalLastName(), $user->getPreferredLastName(), $user->getEmail(),
                        $this->submitty_db->convertBoolean($user->isUserUpdated()),
@@ -157,6 +156,8 @@ VALUES (?,?,?,?,?,?)", $params);
             $extra = ", user_password=?";
         }
         $params[] = $user->getId();
+        //Who ius logged in when issuing this DB upate.
+        $logged_in = $this->core->getUser()->getId();
 
         $this->submitty_db->query("
 UPDATE users
@@ -164,7 +165,7 @@ SET
     user_firstname=?, user_preferred_firstname=?, user_lastname=?, user_preferred_lastname=?,
     user_email=?, user_updated=?, instructor_updated=?{$extra}
 WHERE user_id=?
-/* AUTH: {$auth} */", $params);
+/* AUTH: {$logged_in} */", $params);
 
         if (!empty($semester) && !empty($course)) {
             $params = array($user->getGroup(), $user->getRegistrationSection(),

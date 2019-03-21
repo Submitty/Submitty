@@ -284,7 +284,7 @@ class User extends AbstractModel {
                 }
             } while(in_array($random, $anon_ids));
             $this->anon_id = $random;
-            $this->core->getQueries()->updateUser($this, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(), $this->getUser()->getId());
+            $this->core->getQueries()->updateUser($this, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
         }
         return $this->anon_id;
     }
