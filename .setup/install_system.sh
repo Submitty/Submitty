@@ -98,10 +98,7 @@ if [ ${VAGRANT} == 1 ]; then
 
     # Set up some convinence stuff for the root user on ssh
 
-    echo -e '
-
-# Convinence stuff for Submitty
-INSTALL_HELP=$(cat <<'EOF'
+    INSTALL_HELP=$(cat <<'EOF'
 The vagrant box comes with some handy aliases:
     submitty_help                - show this message
     submitty_install             - run INSTALL_SUBMITTY.sh
@@ -119,9 +116,10 @@ Saved variables:
     CGI_GROUP, DAEMONPHP_GROUP, DAEMONCGI_GROUP
 EOF
 )
-' >> /root/.bashrc
 
 echo -e "
+
+# Convinence stuff for Submitty
 export SUBMITTY_REPOSITORY=${SUBMITTY_REPOSITORY}
 export SUBMITTY_INSTALL_DIR=${SUBMITTY_INSTALL_DIR}
 export SUBMITTY_DATA_DIR=${SUBMITTY_DATA_DIR}
