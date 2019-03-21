@@ -19,7 +19,7 @@ as root.
 
 if [ $UID -ne 0 ]; then
     echo "This script requires root to run. Restarting the script under root."
-    sudo bash $0 "$@"
+    exec sudo $0 "$@"
     exit $?
 fi
 
