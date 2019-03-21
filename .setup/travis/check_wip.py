@@ -7,9 +7,9 @@ import time
 
 def parse_args():
     """Parse command line arguments."""
-    parser = ArgumentParser(help='Checks if a Github PR is a WIP')
-    parser.add_argument('slug')
-    parser.add_argument('pr')
+    parser = ArgumentParser(description='Checks if a Github PR is a WIP')
+    parser.add_argument('slug', help='Slug for repo to check (e.g. Submitty/Submitty')
+    parser.add_argument('pr', help='PR number to check')
     return parser.parse_args()
 
 
