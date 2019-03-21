@@ -20,7 +20,7 @@ jobs:
     # Test if the name of the PR starts with [WIP] and fail at this stage if it does
     - if: type = pull_request
       stage: pr test for wip
-      php: 7.0
+      python: 3.6
       script:
         - echo "Checking title for ${TRAVIS_REPO_SLUG}/pulls/${TRAVIS_PULL_REQUEST}"
         - python3 ${TRAVIS_BUILD_DIR}/.setup/travis/check_wip.py ${TRAVIS_REPO_SLUG} ${TRAVIS_PULL_REQUEST}
