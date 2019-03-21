@@ -22,9 +22,10 @@ jobs:
       stage: pr test for wip
       language: python
       python: 3.6
+      install:
+        - pip3 install requests
       script:
         - echo "Checking title for ${TRAVIS_REPO_SLUG}/pulls/${TRAVIS_PULL_REQUEST}"
-        - pip3 install requests
         - python3 ${TRAVIS_BUILD_DIR}/.setup/travis/check_wip.py ${TRAVIS_REPO_SLUG} ${TRAVIS_PULL_REQUEST}
 
     # Warm up the pip and composer caches to use it for the rest of the build stages
