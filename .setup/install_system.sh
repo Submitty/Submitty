@@ -101,7 +101,7 @@ if [ ${VAGRANT} == 1 ]; then
     INSTALL_HELP=$(cat <<'EOF'
 The vagrant box comes with some handy aliases:
     submitty_help                - show this message
-    submitty_install             - run INSTALL_SUBMITTY.sh
+    submitty_install             - runs INSTALL_SUBMITTY.sh
     submitty_install_site        - runs .setup/INSTALL_SUBMITTY_HELPER_SITE.sh
     submitty_install_bin         - runs .setup/INSTALL_SUBMITTY_HELPER_BIN.sh
     submitty_code_watcher        - runs .setup/bin/code_watcher.py
