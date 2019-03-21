@@ -30,10 +30,10 @@ if [ ! $(command -v git ) ]; then
     apt-get install -y git
 fi
 
-if [ ! -d /usr/local/submitty/GIT_CHECKOUT/Submitty_tmp ]; then
+if [ ! -d /usr/local/submitty/GIT_CHECKOUT/Submitty ]; then
     echo "Cloning Submitty..."
     mkdir -p /usr/local/submitty/GIT_CHECKOUT
-    git clone https://github.com/Submitty/Submitty /usr/local/submitty/GIT_CHECKOUT/Submitty_tmp
+    git clone https://github.com/Submitty/Submitty /usr/local/submitty/GIT_CHECKOUT/Submitty
 fi
 
 if [ ! $(command -v lsb_release) ]; then
@@ -42,4 +42,4 @@ if [ ! $(command -v lsb_release) ]; then
 fi
 
 echo "Running install_system.sh..."
-bash /usr/local/submitty/GIT_CHECKOUT/Submitty_tmp/.setup/install_system.sh
+bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/install_system.sh
