@@ -1,8 +1,8 @@
 """Utility script to more reliably check for PR title for Travis WIP check."""
 from argparse import ArgumentParser
-import requests
 import sys
 import time
+import requests
 
 
 def parse_args():
@@ -28,13 +28,13 @@ def main():
                 if title is None or title == 'null':
                     continue
                 print('Title => {}'.format(json['title']))
-                check = title.startswith('[wip]') or title.startswith('wip:')
+                check = title.startswith('[wip]') or title.startswith('wip')
                 if check:
                     print("[WIP] tag detected, build failed. Remove [WIP] "
                           "tag and re-run build when ready for merging.",
                           file=sys.stderr)
                 sys.exit(check)
-        finally:
+        except (requests.RequestException, KeyError):
             tries += 1
             time.sleep(1)
     raise SystemExit('Could not get title of PR for repo')
