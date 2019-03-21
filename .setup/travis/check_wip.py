@@ -1,3 +1,4 @@
+"""Utility script to more reliably check for PR title for Travis WIP check."""
 from argparse import ArgumentParser
 import requests
 import sys
@@ -13,7 +14,7 @@ def parse_args():
 
 
 def main():
-    """Check if title of PR starts with [wip] or wip:"""
+    """Check if title of PR starts with [wip] or wip."""
     args = parse_args()
     url = "https://api.github.com/repos/{0}/pulls/{1}".format(args.slug, args.pr)
     print('URL => {}'.format(url))
@@ -26,17 +27,17 @@ def main():
                 title = json['title'].lower()
                 if title is None or title == 'null':
                     continue
-                print('Title => {}'.format(title))
+                print('Title => {}'.format(json['title']))
                 check = title.startswith('[wip]') or title.startswith('wip:')
                 if check:
                     print("[WIP] tag detected, build failed. Remove [WIP] "
-                          "tag and re-run build when ready for merging.")
+                          "tag and re-run build when ready for merging.",
+                          file=sys.stderr)
                 sys.exit(check)
         finally:
             tries += 1
             time.sleep(1)
-    print('Could not get title of PR for repo')
-    sys.exit(1)
+    raise SystemExit('Could not get title of PR for repo')
 
 
 if __name__ == '__main__':
