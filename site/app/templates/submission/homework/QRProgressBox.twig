@@ -1,7 +1,9 @@
 <div class="content" id="qr_progress_box">
-	<h3>QR processing progress</h3>
-	<h4 style="float:left;">Processing</h4>
-	<h4 style="float:right;">Ready to assign</h4>
+	<h3>QR processing progress <button onClick="window.location.reload()" id="refresh_btn" style="margin:15px;" class="btn btn-default" disabled>Refresh</button></h3>
+	<div>
+		<h4 style="float:left;">Processing</h4>
+		<h4 style="float:right;">Files ready to assign <span class="green-message">Note: please refresh too see newly added files</span></h4>
+	</div>
 	<br>
 	<div class="box col-md-6" id = "processing_box">
 		<ol id="processing_list">
@@ -36,6 +38,8 @@
     		node.appendChild(new_file);
     		processing_list.appendChild(node);
     	}
+    	if(completed_count > 0)
+    		document.getElementById("refresh_btn").disabled = false;
     	var message = document.createTextNode(completed_count.toString() + " files ready to assign"); 
     	assign_box.appendChild(message);
     }

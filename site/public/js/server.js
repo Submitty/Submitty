@@ -2616,7 +2616,6 @@ function checkQRProgress(gradeable_id){
         },
         type: "POST",
         success: function(data) {
-            console.log(data);
             data = JSON.parse(data);
             var result = {};
             updateQRProgress(data['job_data'], data['count']);
