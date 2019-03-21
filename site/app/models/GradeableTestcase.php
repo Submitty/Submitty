@@ -86,13 +86,13 @@ class GradeableTestcase extends AbstractModel {
         }
     }
     
-    public function addResultTestcase($testcase, $result_path) {
+    public function addResultTestcase($testcase, $results_path, $results_public_path) {
         if (isset($testcase['autochecks'])) {
             foreach ($testcase['autochecks'] as $idx => $autocheck) {
                 $index = "id_{$this->index}_{$idx}";
                 $this->autochecks[] = new GradeableAutocheck($this->core, $autocheck,
                                                              $this->core->getConfig()->getCoursePath(),
-                                                             $result_path, $index);
+                                                             $results_path, $results_public_path, $index);
             }
         }
         

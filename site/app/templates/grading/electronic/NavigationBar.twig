@@ -5,35 +5,35 @@
 
         {# If the student is in our section, add a clickable previous arrow, else add a grayed out one. #}
         {% if studentNotInSection %}
-            <i title="Go to the previous student" class="fa fa-chevron-left icon-header" style="color:grey"></i>
+            <i title="Go to the previous student" class="fas fa-chevron-left icon-header" style="color:grey"></i>
         {% else %}
-            <a href="javascript:void(0);" onclick="gotoPrevStudent();" data-href="{{ prev_student_url }}" id="prev-student"><i title="Go to the previous student" class="fa fa-chevron-left icon-header"></i></a>
+            <a href="javascript:void(0);" onclick="gotoPrevStudent();" data-href="{{ prev_student_url }}" id="prev-student"><i title="Go to the previous student" class="fas fa-chevron-left icon-header"></i></a>
         {% endif %}
 
         {# Back to list button #}
-        <a href="{{ home_url }}"><i title="Go to the main page" class="fa fa-home icon-header" ></i></a>
+        <a href="{{ home_url }}"><i title="Go to the main page" class="fas fa-home icon-header" ></i></a>
 
         {# If the student is in our section, add a clickable next arrow, else add a grayed out one. #}
         {% if studentNotInSection %}
-            <i title="Go to the next student" class="fa fa-chevron-right icon-header" style="color:grey"></i>
+            <i title="Go to the next student" class="fas fa-chevron-right icon-header" style="color:grey"></i>
         {% else %}
-            <a href="javascript:void(0);" onclick="gotoNextStudent();" data-href="{{ next_student_url }}" id="next-student"><i title="Go to the next student" class="fa fa-chevron-right icon-header"></i></a>
+            <a href="javascript:void(0);" onclick="gotoNextStudent();" data-href="{{ next_student_url }}" id="next-student"><i title="Go to the next student" class="fas fa-chevron-right icon-header"></i></a>
         {% endif %}
 
         {# /Nav buttons #}
 
         {# Panel buttons #}
-        <i title="Reset Rubric Panel Positions (Press R)" class="fa fa-refresh icon-header" onclick="resetModules(); updateCookies();"></i>
-        <i title="Show/Hide Autograding Testcases (Press A)" class="fa fa-list-alt icon-header" onclick="toggleAutograding(); updateCookies();"></i>
-        <i title="Show/Hide Grading Rubric (Press G)" class="fa fa fa-pencil-square-o icon-header" onclick="toggleRubric(); updateCookies();"></i>
-        <i title="Show/Hide Submission and Results Browser (Press O)" class="fa fa-folder-open icon-header" onclick="toggleSubmissions(); updateCookies();"></i>
+        <i title="Reset Rubric Panel Positions (Press R)" class="fas fa-redo icon-header" onclick="resetModules(); updateCookies();"></i>
+        <i title="Show/Hide Autograding Testcases (Press A)" class="fas fa-list icon-header" onclick="toggleAutograding(); updateCookies();"></i>
+        <i title="Show/Hide Grading Rubric (Press G)" class="fas fa-edit icon-header" onclick="toggleRubric(); updateCookies();"></i>
+        <i title="Show/Hide Submission and Results Browser (Press O)" class="fas fa-folder-open icon-header" onclick="toggleSubmissions(); updateCookies();"></i>
         {% if not peer %}
-            <i title="Show/Hide Student Information (Press S)" class="fa fa-user icon-header" onclick="toggleInfo(); updateCookies();"></i>
+            <i title="Show/Hide Student Information (Press S)" class="fas fa-user icon-header" onclick="toggleInfo(); updateCookies();"></i>
         {% endif %}
         {% if regrade_panel_available %}
-            <i title="Show/Hide Regrade Information (Press X)" class="fa fa-hand-paper-o icon-header" onclick="toggleRegrade(); updateCookies();"></i>
+            <i title="Show/Hide Regrade Information (Press X)" class="fas fa-hand-paper icon-header" onclick="toggleRegrade(); updateCookies();"></i>
         {% endif %}
-        <i title="Show Grading Settings" class="fa fa-wrench icon-header" onclick="showSettings();"></i>
+        <i title="Show Grading Settings" class="fas fa-wrench icon-header" onclick="showSettings();"></i>
         {# /Panel buttons #}
     </div>
 

@@ -143,6 +143,7 @@ function ajaxSaveComponent(gradeable_id, component_id, title, ta_comment, studen
                 'action': 'save_component'
             }),
             data: {
+                'csrf_token': csrfToken,
                 'gradeable_id': gradeable_id,
                 'component_id': component_id,
                 'title': title,
@@ -302,6 +303,7 @@ function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, graded_ver
                 'action': 'save_graded_component'
             }),
             data: {
+                'csrf_token': csrfToken,
                 'gradeable_id': gradeable_id,
                 'component_id': component_id,
                 'anon_id': anon_id,
@@ -381,6 +383,7 @@ function ajaxSaveOverallComment(gradeable_id, anon_id, overall_comment) {
                 'action': 'save_overall_comment'
             }),
             data: {
+                'csrf_token': csrfToken,
                 'gradeable_id': gradeable_id,
                 'anon_id': anon_id,
                 'overall_comment': overall_comment
@@ -407,9 +410,10 @@ function ajaxSaveOverallComment(gradeable_id, anon_id, overall_comment) {
  * @param {int} component_id
  * @param {string} title
  * @param {number} points
+ * @param {boolean} publish
  * @return {Promise} Rejects except when the response returns status 'success'
  */
-function ajaxAddNewMark(gradeable_id, component_id, title, points) {
+function ajaxAddNewMark(gradeable_id, component_id, title, points, publish) {
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "POST",
@@ -420,10 +424,12 @@ function ajaxAddNewMark(gradeable_id, component_id, title, points) {
                 'action': 'add_new_mark'
             }),
             data: {
+                'csrf_token': csrfToken,
                 'gradeable_id': gradeable_id,
                 'component_id': component_id,
                 'title': title,
-                'points': points
+                'points': points,
+                'publish': publish
             },
             success: function (response) {
                 if (response.status !== 'success') {
@@ -459,6 +465,7 @@ function ajaxDeleteMark(gradeable_id, component_id, mark_id) {
                 'action': 'delete_mark'
             }),
             data: {
+                'csrf_token': csrfToken,
                 'gradeable_id': gradeable_id,
                 'component_id': component_id,
                 'mark_id': mark_id
@@ -500,6 +507,7 @@ function ajaxSaveMark(gradeable_id, component_id, mark_id, title, points, publis
                 'action': 'save_mark'
             }),
             data: {
+                'csrf_token': csrfToken,
                 'gradeable_id': gradeable_id,
                 'component_id': component_id,
                 'mark_id': mark_id,
@@ -579,6 +587,7 @@ function ajaxSaveMarkOrder(gradeable_id, component_id, order) {
                 'action': 'save_mark_order'
             }),
             data: {
+                'csrf_token': csrfToken,
                 'gradeable_id': gradeable_id,
                 'component_id': component_id,
                 'order': JSON.stringify(order)
@@ -616,6 +625,7 @@ function ajaxSaveComponentPages(gradeable_id, pages) {
                 'action': 'save_component_pages'
             }),
             data: {
+                'csrf_token': csrfToken,
                 'gradeable_id': gradeable_id,
                 'pages': JSON.stringify(pages)
             },
@@ -652,6 +662,7 @@ function ajaxSaveComponentOrder(gradeable_id, order) {
                 'action': 'save_component_order'
             }),
             data: {
+                'csrf_token': csrfToken,
                 'gradeable_id': gradeable_id,
                 'order': JSON.stringify(order)
             },
@@ -687,6 +698,7 @@ function ajaxAddComponent(gradeable_id) {
                 'action': 'add_component'
             }),
             data: {
+                'csrf_token': csrfToken,
                 'gradeable_id': gradeable_id,
             },
             success: function (response) {
@@ -722,6 +734,7 @@ function ajaxDeleteComponent(gradeable_id, component_id) {
                 'action': 'delete_component'
             }),
             data: {
+                'csrf_token': csrfToken,
                 'gradeable_id': gradeable_id,
                 'component_id': component_id
             },
@@ -759,6 +772,7 @@ function ajaxVerifyComponent(gradeable_id, component_id, anon_id) {
                 'action': 'verify_component'
             }),
             data: {
+                'csrf_token': csrfToken,
                 'gradeable_id': gradeable_id,
                 'component_id': component_id,
                 'anon_id': anon_id,
@@ -796,8 +810,9 @@ function ajaxVerifyAllComponents(gradeable_id, anon_id) {
                 'action': 'verify_all_components'
             }),
             data: {
+                'csrf_token': csrfToken,
                 'gradeable_id': gradeable_id,
-                'anon_id': anon_id,
+                'anon_id': anon_id
             },
             success: function (response) {
                 if (response.status !== "success") {
@@ -1136,7 +1151,7 @@ function getCountDirection(component_id) {
  * @param {string} title
  */
 function setMarkTitle(mark_id, title) {
-    getMarkJQuery(mark_id).find('.mark-title input').val(title);
+    getMarkJQuery(mark_id).find('.mark-title textarea').val(title);
 }
 
 /**
@@ -1240,7 +1255,7 @@ function getMarkFromDOM(mark_id) {
         return {
             id: parseInt(domElement.attr('data-mark_id')),
             points: parseFloat(domElement.find('input[type=number]').val()),
-            title: domElement.find('input[type=text]').val(),
+            title: domElement.find('textarea').val(),
             deleted: domElement.hasClass('mark-deleted'),
             publish: domElement.find('.mark-publish-container input[type=checkbox]').is(':checked')
         };
@@ -1788,6 +1803,47 @@ function onAddComponent() {
 }
 
 /**
+ * Called when the 'Import Components' button is pressed
+ */
+function importComponentsFromFile() {
+    let submit_url = buildUrl({'component': 'admin', 'page': 'admin_gradeable', 'action': 'import_components', 'gradeable_id': getGradeableId()});
+    let formData = new FormData();
+
+    let files = $('#import-components-file')[0].files;
+
+    if (files.length === 0) {
+        return;
+    }
+
+    // Files selected
+    for (let i = 0; i < files.length; i++) {
+        formData.append('files' + i, files[i], files[i].name);
+    }
+
+    formData.append('csrf_token', csrfToken);
+
+    $.getJSON({
+        url: submit_url,
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function (response) {
+            if (response.status !== 'success') {
+                console.error('Something went wrong importing components: ' + response.message);
+                reject(new Error(response.message));
+            } else {
+                location.reload();
+            }
+        },
+        error: function (e) {
+            alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
+                "send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadGradeableComponents]");
+        }
+    });
+}
+
+/**
  * Called when the point value of a common mark changes
  * @param me DOM Element of the mark point entry
  */
@@ -2001,14 +2057,42 @@ function onClickCountDown(me) {
 
 /**
  * Callback for changing on the point values for a component
+ * Does not change point value if not divisible by precision
  * @param me DOM element of the input box
  */
 function onComponentPointsChange(me) {
-    refreshInstructorEditComponentHeader(getComponentIdFromDOMElement(me), true)
-        .catch(function (err) {
-            console.error(err);
-            alert('Failed to refresh component! ' + err.message);
-        });
+    if (dividesEvenly($(me).val(), getPointPrecision())) {
+        $(me).css("background-color", "#ffffff");
+        refreshInstructorEditComponentHeader(getComponentIdFromDOMElement(me), true)
+            .catch(function (err) {
+                console.error(err);
+                alert('Failed to refresh component! ' + err.message);
+            });
+    } else {
+
+        // Make box red to indicate error
+        $(me).css("background-color", "#ff7777");
+    }
+}
+
+/**
+ * Returns true if dividend is evenly divisible by divisor, false otherwise
+ * @param {number} dividend
+ * @param {number} divisor
+ * @returns {boolean}
+ */
+function dividesEvenly(dividend, divisor) {
+    var multiplier = Math.pow(10, Math.max(decimalLength(dividend), decimalLength(divisor)));
+    return ((dividend * multiplier) % (divisor * multiplier) === 0);
+}
+
+/**
+ * Returns number of digits after decimal point
+ * @param {number} num
+ * @returns {int}
+ */
+function decimalLength(num) {
+    return (num.toString().split('.')[1] || '').length;
 }
 
 /**
@@ -2449,7 +2533,8 @@ function scrollToPage(page_num){
 function openComponent(component_id) {
     setComponentInProgress(component_id);
     // Achieve polymorphism in the interface using this `isInstructorEditEnabled` flag
-    return isInstructorEditEnabled() ? openComponentInstructorEdit(component_id) : openComponentGrading(component_id);
+    return (isInstructorEditEnabled() ? openComponentInstructorEdit(component_id) : openComponentGrading(component_id))
+        .then(resizeNoScrollTextareas);
 }
 
 /**
@@ -2805,7 +2890,7 @@ function tryResolveMarkSave(gradeable_id, component_id, domMark, serverMark, old
             return Promise.resolve(true);
         } else {
             // The mark never existed and isn't deleted, so its new
-            return ajaxAddNewMark(gradeable_id, component_id, domMark.title, domMark.points)
+            return ajaxAddNewMark(gradeable_id, component_id, domMark.title, domMark.points, domMark.publish)
                 .then(function (data) {
                     // Success, then resolve true
                     domMark.id = data.mark_id;
@@ -2894,7 +2979,7 @@ function saveGradedComponent(component_id) {
             missingMarks.forEach(function (mark) {
                 sequence = sequence
                     .then(function () {
-                        return ajaxAddNewMark(gradeable_id, component_id, mark.title, mark.points);
+                        return ajaxAddNewMark(gradeable_id, component_id, mark.title, mark.points, mark.publish);
                     })
                     .then(function (data) {
                         // Make sure to add it to the grade.  We don't bother removing the deleted mark ids

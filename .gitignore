@@ -10,17 +10,18 @@ selenium*.jar
 *~
 *.o
 
+__pycache__/
 *.pyc
 *.aux
 *.log
 *.out
 *.synctex.gz
+.coverage
 
+/site/vendor/
 /site/config/*
-!/site/config/master_template.ini
-!/site/config/course_template.ini
+!/site/config/course_template.json
 
-vendor/
 
 db_update.php
 .setup/data/random_users.txt

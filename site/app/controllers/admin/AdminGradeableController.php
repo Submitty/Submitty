@@ -51,6 +51,12 @@ class AdminGradeableController extends AbstractController {
             case 'check_refresh':
                 $this->checkRefresh();
                 break;
+            case 'export_components':
+                $this->exportComponentsRequest();
+                break;
+            case 'import_components':
+                $this->importComponents();
+                break;
             default:
                 $this->newPage();
                 break;
@@ -118,7 +124,8 @@ class AdminGradeableController extends AbstractController {
             'action' => 'upload_new_gradeable'
         ]);
         $vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
-
+        $this->core->getOutput()->addInternalJs('flatpickr.js');
+        $this->core->getOutput()->addInternalCss('flatpickr.min.css');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'submit_url' => $submit_url,
@@ -253,6 +260,8 @@ class AdminGradeableController extends AbstractController {
             $this->core->getOutput()->addInternalJs('gradeable.js');
             $this->core->getOutput()->addInternalCss('ta-grading.css');
         }
+        $this->core->getOutput()->addInternalJs('flatpickr.js');
+        $this->core->getOutput()->addInternalCss('flatpickr.min.css');
         $this->core->getOutput()->addInternalJs('admin-gradeable-updates.js');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
@@ -816,7 +825,7 @@ class AdminGradeableController extends AbstractController {
         }
 
         // Trigger a rebuild if the config changes
-        $trigger_rebuild_props = ['autograding_config_path'];
+        $trigger_rebuild_props = ['autograding_config_path', 'vcs_subdirectory'];
         $trigger_rebuild = count(array_intersect($trigger_rebuild_props, array_keys($details))) > 0;
 
         $boolean_properties = [
@@ -1117,5 +1126,72 @@ class AdminGradeableController extends AbstractController {
         $rebuild_filename = 'PROCESSING_'.$this->core->getConfig()->getSemester().'__'.$this->core->getConfig()->getCourse().'__'.$gradeable_id.'.json';
         $daemon_queue_dir = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $rebuild_filename);
         return is_file($daemon_queue_dir);
+    }
+
+    /**
+     * Exports components to json and downloads for user
+     */
+    private function exportComponentsRequest() {
+        $url = $this->core->buildUrl([]);
+
+        $gradeable_id = $_GET['gradeable_id'] ?? '';
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
+            $this->core->addErrorMessage("Invalid gradeable id");
+            $this->core->redirect($url);
+        }
+
+        // Permission checks
+        if (!$this->core->getAccess()->canI("grading.electronic.export_components", ["gradeable" => $gradeable])) {
+            $this->core->addErrorMessage("Insufficient permissions to export components");
+            $this->core->redirect($url);
+        }
+
+        try {
+            $arrs = $gradeable->exportComponents();
+            $this->core->getOutput()->renderFile(json_encode($arrs, JSON_PRETTY_PRINT), $gradeable->getId() . '_components.json');
+        } catch (\Exception $e) {
+            $this->core->addErrorMessage($e->getMessage());
+            $this->core->redirect($url);
+        }
+    }
+
+    /**
+     * Imports components from uploaded files into gradeable (single-depth array)
+     */
+    private function importComponents() {
+        $gradeable_id = $_GET['gradeable_id'] ?? '';
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+
+        // Permission checks
+        if (!$this->core->getAccess()->canI("grading.electronic.add_component", ["gradeable" => $gradeable])) {
+            $this->core->getOutput()->renderJsonFail("Insufficient permissions to import components");
+            return;
+        }
+
+        try {
+            // decode file to array
+            foreach ($_FILES as $f) {
+                $comp_arrs = json_decode(file_get_contents($f['tmp_name']), true);
+                foreach ($comp_arrs as $comp_arr) {
+                    $gradeable->importComponent($comp_arr);
+                }
+            }
+
+            // Save to the database
+            $this->core->getQueries()->updateGradeable($gradeable);
+            $this->core->getOutput()->renderJsonSuccess();
+        } catch (\InvalidArgumentException $e) {
+            $this->core->getOutput()->renderJsonFail($e->getMessage());
+        } catch (\Exception $e) {
+            $this->core->getOutput()->renderJsonError($e->getMessage());
+        }
     }
 }

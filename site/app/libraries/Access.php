@@ -124,16 +124,16 @@ class Access {
         $this->permissions["grading.electronic.details.show_empty_teams"] = self::ALLOW_MIN_INSTRUCTOR;
         $this->permissions["grading.electronic.grade"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT;
         $this->permissions["grading.electronic.grade.if_no_sections_exist"] = self::ALLOW_MIN_INSTRUCTOR;
-        $this->permissions["grading.electronic.save_mark"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_GRADEABLE_MIN_GROUP;
-        $this->permissions["grading.electronic.save_component"] = self::ALLOW_MIN_INSTRUCTOR;
-        $this->permissions["grading.electronic.add_component"] = self::ALLOW_MIN_INSTRUCTOR;
-        $this->permissions["grading.electronic.delete_component"] = self::ALLOW_MIN_INSTRUCTOR;
-        $this->permissions["grading.electronic.save_graded_component"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::CHECK_HAS_SUBMISSION | self::CHECK_COMPONENT_PEER_STUDENT;
-        $this->permissions["grading.electronic.save_general_comment"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::CHECK_HAS_SUBMISSION;
+        $this->permissions["grading.electronic.save_mark"] = self::CHECK_CSRF | self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_GRADEABLE_MIN_GROUP;
+        $this->permissions["grading.electronic.save_component"] = self::CHECK_CSRF | self::ALLOW_MIN_INSTRUCTOR;
+        $this->permissions["grading.electronic.add_component"] = self::CHECK_CSRF | self::ALLOW_MIN_INSTRUCTOR;
+        $this->permissions["grading.electronic.delete_component"] = self::CHECK_CSRF | self::ALLOW_MIN_INSTRUCTOR;
+        $this->permissions["grading.electronic.save_graded_component"] = self::CHECK_CSRF | self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::CHECK_HAS_SUBMISSION | self::CHECK_COMPONENT_PEER_STUDENT;
+        $this->permissions["grading.electronic.save_general_comment"] = self::CHECK_CSRF | self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::CHECK_HAS_SUBMISSION;
         $this->permissions["grading.electronic.view_component_grade"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::CHECK_COMPONENT_PEER_STUDENT;
         $this->permissions["grading.electronic.get_gradeable_comment"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT;
-        $this->permissions["grading.electronic.add_new_mark"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER;
-        $this->permissions["grading.electronic.delete_mark"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER;
+        $this->permissions["grading.electronic.add_new_mark"] = self::CHECK_CSRF | self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER;
+        $this->permissions["grading.electronic.delete_mark"] = self::CHECK_CSRF | self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER;
         $this->permissions["grading.electronic.get_marked_users"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP;
         $this->permissions["grading.electronic.get_marked_users.full_stats"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
         $this->permissions["grading.electronic.show_edit_teams"] = self::ALLOW_MIN_INSTRUCTOR;
@@ -141,8 +141,9 @@ class Access {
         $this->permissions["grading.electronic.export_teams"] = self::ALLOW_MIN_INSTRUCTOR;
         $this->permissions["grading.electronic.submit_team_form"] = self::ALLOW_MIN_INSTRUCTOR;
         $this->permissions["grading.electronic.verify_grader"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
-        $this->permissions["grading.electronic.verify_all"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
+        $this->permissions["grading.electronic.verify_all"] = self::CHECK_CSRF | self::ALLOW_MIN_FULL_ACCESS_GRADER;
         $this->permissions["grading.electronic.silent_edit"] = self::ALLOW_MIN_INSTRUCTOR;
+        $this->permissions["grading.electronic.export_components"] = self::ALLOW_MIN_INSTRUCTOR; // this doesn't need to be instructor, but they're the only ones who will do this
 
         $this->permissions["autograding.load_checks"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE;
         $this->permissions["autograding.show_hidden_cases"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER;
@@ -171,8 +172,8 @@ class Access {
         $this->permissions["path.read.course_materials"] = self::ALLOW_MIN_STUDENT;
         //TODO: Check deleted posts
         $this->permissions["path.read.forum_attachments"] = self::ALLOW_MIN_STUDENT;
-        //TODO: Can students see their results?
         $this->permissions["path.read.results"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_HAS_SUBMISSION;
+        $this->permissions["path.read.results_public"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_STUDENT_VIEW | self::CHECK_STUDENT_SUBMIT;
         $this->permissions["path.read.submissions"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_STUDENT_VIEW | self::CHECK_STUDENT_SUBMIT;
 
         $this->permissions["path.write.submissions"] = self::ALLOW_MIN_STUDENT | self::ALLOW_ONLY_SELF_GRADEABLE | self::CHECK_CSRF;
@@ -181,6 +182,7 @@ class Access {
         $this->permissions["path.write.site"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_CSRF;
         $this->permissions["path.write.checkout"] = self::DENY_ALL | self::CHECK_CSRF;
         $this->permissions["path.write.results"] = self::DENY_ALL | self::CHECK_CSRF;
+        $this->permissions["path.write.results_public"] = self::DENY_ALL | self::CHECK_CSRF;
         $this->permissions["path.write.course_materials"] = self::ALLOW_MIN_INSTRUCTOR  | self::CHECK_CSRF| self::CHECK_FILE_DIRECTORY;
         $this->permissions["path.write.forum_attachments"] = self::ALLOW_MIN_STUDENT | self::CHECK_CSRF;
 
@@ -231,6 +233,14 @@ class Access {
             "permissions" => [
                 "path.read" => "path.read.results",
                 "path.write" => "path.write.results",
+            ]
+        ];
+        $this->directories["results_public"] = [
+            "base" => $this->core->getConfig()->getCoursePath() . "/results_public",
+            "subparts" => ["gradeable", "submitter", "version"],
+            "permissions" => [
+                "path.read" => "path.read.results_public",
+                "path.write" => "path.write.results_public",
             ]
         ];
         $this->directories["config_upload"] = [

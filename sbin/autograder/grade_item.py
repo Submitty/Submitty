@@ -77,6 +77,7 @@ def copy_contents_into(job_id,source,target,tmp_logs):
                 try:
                     shutil.copy(os.path.join(source,item),target)
                 except:
+                    grade_items_logging.log_stack_trace(job_id=job_id,trace=traceback.format_exc())
                     raise RuntimeError("ERROR COPYING FILE: " +  os.path.join(source,item) + " -> " + os.path.join(target,item))
 
 
@@ -217,8 +218,11 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     # unzip autograding and submission folders
     tmp_autograding = os.path.join(tmp,"TMP_AUTOGRADING")
     tmp_submission = os.path.join(tmp,"TMP_SUBMISSION")
-    unzip_this_file(my_autograding_zip_file,tmp_autograding)
-    unzip_this_file(my_submission_zip_file,tmp_submission)
+    try:
+        unzip_this_file(my_autograding_zip_file,tmp_autograding)
+        unzip_this_file(my_submission_zip_file,tmp_submission)
+    except:
+        raise
     os.remove(my_autograding_zip_file)
     os.remove(my_submission_zip_file)
 
@@ -280,8 +284,9 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     with open(complete_config, 'r') as infile:
         complete_config_obj = json.load(infile)
 
-    # intentionally fragile to avoid redundancy
-    USE_DOCKER = complete_config_obj['docker_enabled']
+    # Save ourselves if autograding_method is None.
+    autograding_method = complete_config_obj.get("autograding_method", "")
+    USE_DOCKER = True if autograding_method == "docker" else False
 
     # --------------------------------------------------------------------
     # COMPILE THE SUBMITTED CODE
@@ -311,13 +316,6 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     
     patterns_submission_to_compilation = complete_config_obj["autograding"]["submission_to_compilation"]
 
-    # give the untrusted user read/write/execute permissions on the tmp directory & files
-    # add_permissions_recursive(tmp_compilation,
-    #                   stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-    #                   stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-    #                   stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
-
-    # add_permissions(tmp,stat.S_IROTH | stat.S_IXOTH) #stat.S_ISGID
     add_permissions(tmp_logs,stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
 
     if USE_DOCKER:
@@ -392,8 +390,12 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                                                '-w', testcase_folder,
                                                container_image,
                                                #The command to be run.
-                                               os.path.join(testcase_folder, 'my_compile.out'), queue_obj['gradeable'],
-                                               queue_obj['who'], str(queue_obj['version']), submission_string, str(testcase_num)
+                                               os.path.join(testcase_folder, 'my_compile.out'), 
+                                               queue_obj['gradeable'],
+                                               queue_obj['who'], 
+                                               str(queue_obj['version']), 
+                                               submission_string, 
+                                               '--testcase', str(testcase_num)
                                                ]).decode('utf8').strip()
                     print("starting container")
                     compile_success = subprocess.call(['docker', 'start', '-i', compilation_container],
@@ -401,7 +403,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                                                    cwd=testcase_folder)
                 except Exception as e:
                     print('An error occurred when compiling with docker.')
-                    traceback.print_exc()
+                    grade_items_logging.log_stack_trace(job_id,is_batch_job,which_untrusted,item_name,trace=traceback.format_exc())
                 finally:
                     if compilation_container != None:
                         subprocess.call(['docker', 'rm', '-f', compilation_container])
@@ -414,7 +416,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                                                    queue_obj["who"],
                                                    str(queue_obj["version"]),
                                                    submission_string,
-                                                   str(testcase_num)],
+                                                   '--testcase', str(testcase_num)],
                                                    stdout=logfile, 
                                                    cwd=testcase_folder)
             # remove the compilation program
@@ -616,6 +618,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
             print ("\n\nERROR: Grading incomplete -- Could not open ",os.path.join(tmp_work,"grade.txt"))
             grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,message="ERROR: grade.txt does not exist")
+            grade_items_logging.log_stack_trace(job_id,is_batch_job,which_untrusted,item_name,trace=traceback.format_exc())
 
     # --------------------------------------------------------------------
     # MAKE RESULTS DIRECTORY & COPY ALL THE FILES THERE
@@ -639,6 +642,14 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     patterns_work_to_details = complete_config_obj["autograding"]["work_to_details"]
     pattern_copy("work_to_details",patterns_work_to_details,tmp_work,os.path.join(tmp_results,"details"),tmp_logs)
 
+    if ("work_to_public" in complete_config_obj["autograding"] and
+        len(complete_config_obj["autograding"]["work_to_public"]) > 0):
+        # create the directory
+        os.makedirs(os.path.join(tmp_results,"results_public"))
+        # copy the files
+        patterns_work_to_public = complete_config_obj["autograding"]["work_to_public"]
+        pattern_copy("work_to_public",patterns_work_to_public,tmp_work,os.path.join(tmp_results,"results_public"),tmp_logs)
+
     history_file_tmp = os.path.join(tmp_submission,"history.json")
     history_file = os.path.join(tmp_results,"history.json")
     if os.path.isfile(history_file_tmp):
@@ -655,6 +666,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
             print ("\n\nERROR: Grading incomplete -- Could not copy ",os.path.join(tmp_work,"grade.txt"))
         grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,message="ERROR: grade.txt does not exist")
+        grade_items_logging.log_stack_trace(job_id,is_batch_job,which_untrusted,item_name,trace=traceback.format_exc())
 
     # -------------------------------------------------------------
     # create/append to the results history
@@ -695,6 +707,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
             print ("\n\nERROR: Grading incomplete -- Could not open/write ",os.path.join(tmp_work,"results.json"))
             grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,message="ERROR: results.json read/write error")
+            grade_items_logging.log_stack_trace(job_id,is_batch_job,which_untrusted,item_name,trace=traceback.format_exc())
 
     write_grade_history.just_write_grade_history(history_file,
                                                  gradeable_deadline_longstring,

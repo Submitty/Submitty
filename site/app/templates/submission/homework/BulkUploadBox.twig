@@ -39,12 +39,18 @@
                         <td>
                             {{ file.filename_full }}
                             <br>
-                            <object data="{{ file.url }}" type="application/pdf" width="100%" height="300">
-                                alt : <a href="{{ file.url }}">pdf.pdf</a>
-                            </object>
+                            {% if not use_images %}
+                                <object data="{{ file.url }}" type="application/pdf" width="100%" height="300">
+                                    alt : <a href="{{ file.url }}">pdf.pdf</a>
+                                </object>
+                            {% else %}
+                                <div class="scrollable-image" >
+                                    <img src="{{ file.cover_image.url }}" width="100%"/>
+                                </div>
+                            {% endif %}
                         </td>
                         <td>
-                            <a onclick="openFile('{{ file.url_full }}')"><i class="fa fa-window-restore" aria-hidden="true" title="Pop out the full PDF in a new window"></i></a>
+                            <a onclick="openFile('{{ file.url_full }}')"><i class="fas fa-window-restore" aria-hidden="true" title="Pop out the full PDF in a new window"></i></a>
                         </td>
                         <td>
                             <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
@@ -56,8 +62,9 @@
                                 {% endif %}
                                 {% if team_assignment %}
                                     {# (size - 1) because twig loops are range inclusive #}
+                                    {% set outer_loop = loop %}
                                     {% for i in 1..(max_team_size - 1) %}
-                                        <input type="text" id="bulk_user_id_{{ loop.index }}[{{ i }}]" value =""/>
+                                        <input type="text" id="bulk_user_id_{{ outer_loop.index }}[{{ i }}]" value =""/>
                                     {% endfor %}
                                 {% endif %}
                             </div>
@@ -88,7 +95,26 @@
         });
         $('#bulk_submit_all').click(function(e){
             var submit_buttons = $(".tr-vertically-centered > td > .btn-success");
+            //check if there are any previous submissions first
+            var prev_submissions = []
             for(var i = 0; i < submit_buttons.length;i++){
+                id = "users_" + (i + 1);
+                user_id = $('#' + id).find('input').val();
+                checkForPreviousSubmissions("{{ core.getCsrfToken }}", "{{gradeable_id}}", user_id).done(function(data){
+                     data = JSON.parse(data);
+                     if(data['success'] && data['previous_submission'])
+                        prev_submissions.push(i);
+                });
+            }
+            for(var i = 0; i < submit_buttons.length;i++){
+                var skip = false;
+                for(var j = 0; j < prev_submissions.length; j++){
+                    if(i == prev_submissions[j]){
+                        skip = true;
+                        break;
+                    }
+                }
+                if(skip) continue;
                 $("#" +  submit_buttons[i].id).focus();
                 $("#" +  submit_buttons[i].id).click();
             }

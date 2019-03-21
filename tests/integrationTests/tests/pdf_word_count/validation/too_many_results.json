@@ -4,7 +4,8 @@
             "autochecks": [
                 {
                     "actual_file": "test01/words_1463.pdf",
-                    "description": "*.pdf"
+                    "description": "*.pdf",
+                    "results_public": true
                 }
             ],
             "points_awarded": 1,

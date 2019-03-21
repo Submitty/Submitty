@@ -155,6 +155,40 @@ class GradedGradeable extends AbstractModel {
         return $this->late_day_exceptions[$user->getId()] ?? 0;
     }
 
+    /**
+     * Gets the auto grading score for the active version, or 0 if none
+     * @return int
+     */
+    public function getAutoGradingScore() {
+        if ($this->getAutoGradedGradeable()->hasActiveVersion()) {
+            return $this->getAutoGradedGradeable()->getActiveVersionInstance()->getTotalPoints();
+        }
+        return 0;
+    }
+
+    /**
+     * Gets the ta grading score
+     * Note: This does not check any consistency with submission version
+     *  and graded version
+     * @return float
+     */
+    public function getTaGradingScore() {
+        if ($this->hasTaGradingInfo()) {
+            return $this->getTaGradedGradeable()->getTotalScore();
+        }
+        return 0.0;
+    }
+
+    /**
+     * Gets the total score for this student's active submission
+     * Note: This does not check that the graded version matches
+     *      the active version or any other consistency checking
+     * @return float max(0.0, auto_score + ta_score)
+     */
+    public function getTotalScore() {
+        return floatval(max(0.0, $this->getTaGradingScore() + $this->getAutoGradingScore()));
+    }
+
     /* Intentionally Unimplemented accessor methods */
 
     /** @internal */

@@ -66,17 +66,17 @@
                 <td width="70">Section</td>
                 <td width="90" style="text-align: left">
                     <a href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': action, 'g_id': gradeable.getId(), 'sort': 'id', 'view': view}) }}">
-                        <span class="tooltiptext" title="sort by ID" aria-hidden="true">User ID </span><i class="fa fa-sort"></i>
+                        <span class="tooltiptext" title="sort by ID" aria-hidden="true">User ID </span><i class="fas fa-sort"></i>
                     </a>
                 </td>
                 <td width="110" style="text-align: left">
                     <a href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': action, 'g_id': gradeable.getId(), 'sort': 'first', 'view': view}) }}">
-                        <span class="tooltiptext" title="sort by First Name" aria-hidden="true">First Name </span><i class="fa fa-sort"></i>
+                        <span class="tooltiptext" title="sort by First Name" aria-hidden="true">First Name </span><i class="fas fa-sort"></i>
                     </a>
                 </td>
                 <td width="110" style="text-align: left">
                     <a href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': action, 'g_id': gradeable.getId(), 'sort': 'last', 'view': view}) }}">
-                        <span class="tooltiptext" title="sort by Last Name" aria-hidden="true">Last Name </span><i class="fa fa-sort"></i>
+                        <span class="tooltiptext" title="sort by Last Name" aria-hidden="true">Last Name </span><i class="fas fa-sort"></i>
                     </a>
                 </td>
 
@@ -128,7 +128,7 @@
                             {# Print button #}
                             {% if action == 'lab' %}
                                 <a target=_blank href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': 'print_lab', 'sort': sort, 'section': section_id, 'sectionType': section_type, 'g_id': gradeable.getId()}) }}">
-                                    <i class="fa fa-print"></i>
+                                    <i class="fas fa-print"></i>
                                 </a>
                             {% endif %}
                         </td>

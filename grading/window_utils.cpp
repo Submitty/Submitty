@@ -13,9 +13,9 @@
 #include <set>
 #include <cstdlib>
 #include <string>
-#include <iostream>
 #include <sstream>
 #include <regex>
+#include <iomanip>
 
 #include "window_utils.h"
 #include "execute.h"
@@ -81,8 +81,7 @@ std::vector<int> extractIntsFromString(std::string input){
     return ints;
 }
 
-std::vector<int> getPidsAssociatedWithPid(int pid)
-{
+std::vector<int> getPidsAssociatedWithPid(int pid){
   std::string pidQuery = "pgrep -P ";
   pidQuery +=  std::to_string(pid);
   std::string children = output_of_system_command(pidQuery.c_str());
@@ -103,9 +102,9 @@ std::vector<int> getPidsAssociatedWithPid(int pid)
 * of the wmctrl -lp system command using a regex, which simply strips away 
 * anything before one or more tabs or spaces. Runs in O(number_of_windows)
 */
-std::vector<std::string> getWindowNameAssociatedWithPid(int pid)
-{
-  getPidsAssociatedWithPid(pid);
+std::vector<std::string> getWindowNameAssociatedWithPid(int pid){
+  //The below call is currently unused, but will be helpful when detecting multiwindow apps.
+  // getPidsAssociatedWithPid(pid);
   //This vector will contain any windows associated with our child's pid.
   std::vector<std::string> associatedWindows; 
   //returns list of active windows with pid.
@@ -191,8 +190,7 @@ std::vector<int> getWindowData(std::string data_string,
   }  
 }
 
-std::set<std::string> snapshotOfActiveWindows()
-{
+std::set<std::string> snapshotOfActiveWindows(){
   std::set<std::string> activeWindowSet; 
   //returns list of active windows with pid.
   //Example wmctrl -lp output (labels added:) 
@@ -248,11 +246,10 @@ std::set<std::string> snapshotOfActiveWindows()
 void initializeWindow(std::string& window_name, int pid, std::set<std::string>& invalid_windows, float elapsed){
   
   //for the first two seconds, only try to init via pid.
-  std::cout << "Elapsed is " << elapsed << std::endl;
   if (elapsed < 2)
   {
     //get the window names associated with our pid.
-     std::vector<std::string> windows = getWindowNameAssociatedWithPid(pid);
+    std::vector<std::string> windows = getWindowNameAssociatedWithPid(pid);
     if(windows.size() == 0){
       return;
     }
@@ -372,43 +369,116 @@ bool windowExists(std::string window_name){
 
 /**
 * Given a window name, this function takes a screenshot of it if it exists. 
-* uses number_of_screenshots to title the image (submitty prepends it with the
-*  test #) updates the number of screenshots taken. 
+* uses screenshot_name to title the image.
 */
-void screenshot(std::string window_name, int& number_of_screenshots){
+bool screenshot(std::string window_name, std::string screenshot_name){
   if(windowExists(window_name)){ 
     //if the window hasn't crashed, bring it into focus and screenshot it
     std::string command = "wmctrl -R " + window_name + " && scrot "  
-                      + std::to_string(number_of_screenshots) + ".png -u";
+                      + screenshot_name + " -u";
     system(command.c_str());
-    number_of_screenshots = number_of_screenshots + 1;
+    return true;
   }
   else{
     std::cout << "Attempted to screenshot a closed window." << std::endl;
+    return false;
   }
 }
+
+std::string pad_integer(int number, int padding) {
+  std::ostringstream out;
+  out << std::internal << std::setfill('0') << std::setw(padding) << number;
+  return out.str();
+}
+
+/*
+* Take the screenshots neccessary to later compile a gif.
+*/
+bool make_gif(std::string window_name, std::string gif_name, float duration_in_seconds, int fps, bool save_pngs,
+              int childPID, float &elapsed, float& next_checkpoint, float seconds_to_run, 
+              int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill,
+              std::ostream &logfile){
+
+  //iterations is seconds*fps. 
+  int iterations = duration_in_seconds * fps;
+  //delay is 1 second/fps
+  float delay    = (1000000.0f/fps);
+ 
+  std::vector<std::string> png_names;
+
+  bool killed = false;
+  for(int i = 0; i < iterations; i++){ 
+    
+
+
+    std::string iterative_gif_name = gif_name + "_" + pad_integer(i, 4) + ".png";
+    std::cout << "taking gif screenshot " << iterative_gif_name << std::endl;
+    bool successful_screenshot = screenshot(window_name, iterative_gif_name);
+
+    if(!successful_screenshot){
+      return false;
+    }
+
+    png_names.push_back(iterative_gif_name);
+
+    //add a 1/10th second delay between each image capture.
+    if(i != iterations-1){ 
+      killed = delay_and_mem_check(delay, childPID, elapsed, next_checkpoint, 
+        seconds_to_run, rss_memory, allowed_rss_memory, memory_kill,time_kill, logfile);
+    }
+    if(killed){
+      return false;
+    }
+  }
+
+  //let's just test the cost of this
+  std::string target_gif_name = gif_name + "*.png";
+  std::string outfile_name = gif_name + ".gif";
+
+  //create a gif
+  int refresh_rate_in_hundredths = (1.0f / fps) * 100.0f;
+  std::string command = "convert -delay "+std::to_string(refresh_rate_in_hundredths)+" -loop 0 " + target_gif_name + " " + outfile_name;
+  std::string output = output_of_system_command(command.c_str()); //get the string
+
+  //If we are supposed to remove the png files, do so.
+  // Do not use wildcards, only remove files we explicitly created.
+  if(!save_pngs){
+    for(int i = 0; i < png_names.size(); i++){
+      std::string remove_png_name = png_names[i];
+      std::string rm_command = "rm " + remove_png_name + " NULL: 2>&1";
+      std::cout << rm_command << std::endl;
+      std::string output = output_of_system_command(rm_command.c_str()); //get the string
+    }
+  }
+
+  return true;
+}
+
 
 /**
 * This function uses xdotool to put the mouse button associated with int button
 * into the 'down' state. Checks to see if the window exists so that we don't 
 * click on anything that doesn't belong to us.
 */
-void mouseDown(std::string window_name, int button){ 
+bool mouseDown(std::string window_name, int button){ 
   //only mouse down button 1, 2, or 3.
   if(button == 1 || button == 2 || button == 3){ 
     //only mouse down if the window exists (bring into focus and mousedown)
     if(windowExists(window_name)){ 
       std::string command = "wmctrl -R " + window_name  
                       + " &&  xdotool mousedown " + std::to_string(button);
-      system(command.c_str());  
+      system(command.c_str());
+      return true;
     }
     else{
       std::cout << "Tried to mouse down on a nonexistent window." << std::endl;
+      return false;
     }
   }
   else{
       std::cout << "ERROR: tried to click nonexistent mouse button " 
                 << button << std::endl;
+      return false;
   }
 }
 
@@ -417,30 +487,37 @@ void mouseDown(std::string window_name, int button){
 * button into the 'up' state. Checks to see if the window exists so that we 
 * don't click on anything that doesn't belong to us.
 */
-void mouseUp(std::string window_name, int button){
+bool mouseUp(std::string window_name, int button){
   //only mouseup on buttons 1,2,3
   if(button == 1 || button == 2 || button == 3){
     //Only mouse up if the window exists (give the window focus and mouseup) 
     if(windowExists(window_name)){ 
       std::string command = "wmctrl -R " + window_name 
                 + " &&  xdotool mouseup " + std::to_string(button);
-      system(command.c_str());  
+      system(command.c_str()); 
+      return true; 
     }
     else{
       std::cout << "Tried to mouse up on a nonexistent window" << std::endl;
+      return false;
     }
   }
   else{
     std::cout << "ERROR: tried to click mouse button " << button << std::endl;
+    return false;
   }
 }
 
 /**
 * This function mousedowns then mouseups to simulate a click. 
 */
-void click(std::string window_name, int button){
-  mouseDown(window_name, button);
-  mouseUp(window_name, button);
+bool click(std::string window_name, int button){
+  bool success = mouseDown(window_name, button);
+  if(!success){
+    return false;
+  }
+  success = mouseUp(window_name, button);
+  return success;
 }
 
 /**
@@ -449,19 +526,44 @@ void click(std::string window_name, int button){
 * NOTE: EXPECTS MOVED VARIALBES ALREADY IN WINDOW COORDINATES
 * This is done in the takeAction function
 */
-void mouse_move(std::string window_name, int moved_mouse_x, int moved_mouse_y, 
+bool mouse_move(std::string window_name, int moved_mouse_x, int moved_mouse_y, 
                  int x_start, int x_end, int y_start, int y_end, bool no_clamp){
 
   //only move the mouse if the window exists. (get focus and mousemove.)
   if(windowExists(window_name)){
-    std::string command = "wmctrl -R " + window_name + 
-    " &&  xdotool mousemove --sync " + std::to_string(moved_mouse_x) + " " 
-                                            + std::to_string(moved_mouse_y);  
-    system(command.c_str());
+    std::vector<int> current_mouse_position = getMouseLocation();
+
+    if(current_mouse_position.size() < 2){
+      return false;
+    }
+
+    //Explicit clamping.
+    if(moved_mouse_x > x_end || moved_mouse_x < x_start){
+      std::cout << "Attempted to move outside of the window bounds." << std::endl;
+      return false;
+    }
+    //Explicit clamping
+    if(moved_mouse_y > y_end || moved_mouse_y < y_start){
+      std::cout << "Attempted to move outside of the window bounds." << std::endl;
+      return false;
+    }
+
+    if(current_mouse_position[0] == moved_mouse_x && current_mouse_position[1] == moved_mouse_y){
+      std::cout << "mouse was already in position. Skipping movement." << std::endl;
+    }
+    else{
+      std::string command = "wmctrl -R " + window_name +
+      " &&  xdotool mousemove --sync " + std::to_string(moved_mouse_x) + " "
+                                              + std::to_string(moved_mouse_y);
+        system(command.c_str());
+    }
+
+    return true;
   }
   else{
     std::cout << "Attempted to move mouse on a nonexistent window." 
                 << std::endl;
+    return false;
   }  
 }
 /**
@@ -572,7 +674,21 @@ std::vector<float> getLineIntersectionPoint(std::vector<int> p1,
   return answer;
 }
 
+/**
+ *  Returns the location of the mouse as an x, y vector.
+ *  Returns empty vector on failure.
+ */
+std::vector<int> getMouseLocation(){
+  std::string mouse_location_string = output_of_system_command("xdotool getmouselocation");
+  std::vector<int> xy = extractIntsFromString(mouse_location_string);
 
+  if(xy.size() < 2){
+    std::vector<int> empty;
+    return empty;
+  }
+
+  return xy;
+}
 
 /**
 * The 'delta' version of the click and drag command. This function moves an xy
@@ -581,7 +697,7 @@ std::vector<float> getLineIntersectionPoint(std::vector<int> p1,
 * move again. We give a one pixel border at each side of the window and clamp 
 * using that value to avoid accidental resizing.
 */
-void clickAndDragDelta(std::string window_name, nlohmann::json action){
+bool clickAndDragDelta(std::string window_name, nlohmann::json action){
   //get the values of the student's window.
   int x_start, x_end, y_start, y_end, mouse_button; 
   bool no_clamp = false; 
@@ -591,7 +707,7 @@ void clickAndDragDelta(std::string window_name, nlohmann::json action){
   //if we can't populate the click and drag values, do nothing.
   if(!success){ 
     std::cout << "Could not populate the click and drag values."<< std::endl;
-    return;
+    return false;
   }
   
   //Define the corners of our window. (We use vectors as 2d points.)
@@ -605,6 +721,7 @@ void clickAndDragDelta(std::string window_name, nlohmann::json action){
   //delta version, 2 values movement x and movement y.
   int amt_x_movement_remaining = action.value("x_distance", 0);
   int amt_y_movement_remaining = action.value("y_distance", 0);
+  std::string start_location   = action.value("start_location", "center");
 
   //This shouldn't fail unless there isn't a mouse.
   std::string mouse_location_string = output_of_system_command("xdotool getmouselocation"); 
@@ -614,13 +731,20 @@ void clickAndDragDelta(std::string window_name, nlohmann::json action){
   if(xy.size() < 2){ 
     std::cout << "Mouse coordinates couldn't be found. Mouse undetected." 
                 << std::endl;
-    return;
+    return false;
   }
-  int mouse_x = xy[0];
-  int mouse_y = xy[1];
+  //get the current mouse location
+  int start_mouse_x = xy[0];
+  int start_mouse_y = xy[1];
   //clamp the mouse within the screen (and move in by a pixel).
-  clamp(mouse_x, x_start+1, x_end-1); 
-  clamp(mouse_y, y_start+1, y_end-1);
+  clamp(start_mouse_x, x_start+1, x_end-1); 
+  clamp(start_mouse_y, y_start+1, y_end-1);
+
+  //get the center of the window
+  int width  = x_end - x_start;
+  int height = y_end - y_start;
+  int x_middle = x_start + (width/2);
+  int y_middle = y_start+(height/2);
 
   //NOTE: check my arithmetic. 
   /**
@@ -645,21 +769,27 @@ void clickAndDragDelta(std::string window_name, nlohmann::json action){
   //remaining distance needed.
   float remaining_distance_needed = total_distance_needed; 
 
+  int action_start_x = (start_location == "current") ? start_mouse_x : x_middle;
+  int action_start_y = (start_location == "current") ? start_mouse_y : y_middle;
+
+  std::cout << "start x " << start_mouse_x << " our x " << action_start_x;
+  std::cout << "start y " << start_mouse_y << " our y " << action_start_y;
+
   //The functions called within this loop will not fire if the window doesn't 
   // exist. This check just short circuits to avoid additional printing.
   while(remaining_distance_needed >= 1 && windowExists(window_name)){ 
-    int curr_x = mouse_x;                                             
-    int curr_y = mouse_y;                                              
+    int curr_x = action_start_x;                                             
+    int curr_y = action_start_y;                                              
     int moved_mouse_x, moved_mouse_y;
     //reset the mouse to the start location.
-    mouse_move(window_name, mouse_x, mouse_y, x_start, x_end, y_start, y_end,
+    mouse_move(window_name, action_start_x, action_start_y, x_start, x_end, y_start, y_end,
                                                                         false); 
     //determine how far we've come.
     float fraction_of_distance_remaining = remaining_distance_needed 
                                             / total_distance_needed; 
     //project in the direction of the move to find the end of our line segment.
-    float projected_x = mouse_x + (amt_x_movement_remaining * fraction_of_distance_remaining); 
-    float projected_y = mouse_y + (amt_y_movement_remaining * fraction_of_distance_remaining);  
+    float projected_x = action_start_x + (amt_x_movement_remaining * fraction_of_distance_remaining); 
+    float projected_y = action_start_y + (amt_y_movement_remaining * fraction_of_distance_remaining);  
 
     //we are using vectors as 2d points.
     std::vector<int> current_point, projected_point;  
@@ -733,8 +863,8 @@ void clickAndDragDelta(std::string window_name, nlohmann::json action){
     }
 
     //the distance we can move
-    float distance_of_move = sqrt(pow(moved_mouse_x - mouse_x, 2) 
-                                    + pow (moved_mouse_y - mouse_y, 2)); 
+    float distance_of_move = sqrt(pow(moved_mouse_x - action_start_x, 2) 
+                                    + pow (moved_mouse_y - action_start_y, 2)); 
     //we are moving distance_of_move
     remaining_distance_needed -= distance_of_move; 
     std::cout << "after the move, we had " << remaining_distance_needed 
@@ -744,13 +874,21 @@ void clickAndDragDelta(std::string window_name, nlohmann::json action){
                                                         y_start, y_end, false); 
     mouseUp(window_name,mouse_button); //release
   } //end loop.
+
+  //to preserve backwards compatibility.
+  if(start_location != "current"){
+    //put the mouse back where we found it.
+    mouse_move(window_name, start_mouse_x, start_mouse_y, x_start, x_end, y_start, y_end,false);
+  }
+
+  return true;
 }
 
 /**
 * Click and drag absolute: move to a relative coordinate within the window
 * windowname, clamped.
 */
-void clickAndDragAbsolute(std::string window_name, nlohmann::json action){
+bool clickAndDragAbsolute(std::string window_name, nlohmann::json action){
    //populate the window variables. 
   int x_start, x_end, y_start, y_end, mouse_button;
   bool no_clamp = false; 
@@ -759,8 +897,8 @@ void clickAndDragAbsolute(std::string window_name, nlohmann::json action){
   
   //if we couldn't populate the values, do nothing (window doesn't exist)
   if(!success){ 
-    std::cout << "Click and drag unsuccessful due to failure to " << "populate click and drag values." << std::endl;
-    return;
+    std::cout << "Click and drag unsuccessful due to failure to populate click and drag values." << std::endl;
+    return false;
   }
 
 
@@ -772,12 +910,12 @@ void clickAndDragAbsolute(std::string window_name, nlohmann::json action){
 
   if (start_x_position == end_x_position && start_y_position == end_y_position){
     std::cout << "Error, the click and drag action did not specify movement." << std::endl;
-    return;
+    return false;
   }
 
   if(end_x_position == -1 || end_y_position == -1){
     std::cout << "ERROR: the click and drag action must include an ending position" << std::endl;
-    return;
+    return false;
   }
   
 
@@ -806,28 +944,30 @@ void clickAndDragAbsolute(std::string window_name, nlohmann::json action){
   mouse_move(window_name, end_x_position, end_y_position,x_start, x_end, 
                                                   y_start, y_end, false);
   mouseUp(window_name,mouse_button);  
+
+  return true;
 }
 
 /**
 * Centers the mouse on the window associated with windowname if it exists.
 */
-void centerMouse(std::string window_name){
+bool centerMouse(std::string window_name){
   //populate the window vals to get the center.
   int height, width, x_start, x_end, y_start, y_end; 
   bool success = populateWindowData(window_name, height, width, x_start,x_end,
                                                                 y_start,y_end);
-  int x_middle = x_start + width/2;
-  int y_middle = y_start+height/2;
+  int x_middle = x_start + (width/2);
+  int y_middle = y_start+(height/2);
 
   //wait until the last moment to check window existence.
   if(success && windowExists(window_name)){ 
-    std::string command = "wmctrl -R " + window_name + " &&  xdotool mousemove"
-      + " --sync " + std::to_string(x_middle) + " " + std::to_string(y_middle); 
-    system(command.c_str());
+    success = mouse_move(window_name, x_middle, y_middle, x_start, x_end, y_start, y_end, false);
+    return success;
   }
   else{
     std::cout << "Attempted to center mouse on a nonexistent window" 
                 << std::endl;
+    return false;
   }
 }
 
@@ -835,7 +975,7 @@ void centerMouse(std::string window_name){
 * Moves the mouse to the upper left of the window associated with windowname 
 * if it exists.
 */
-void moveMouseToOrigin(std::string window_name){
+bool moveMouseToOrigin(std::string window_name){
   //populate the window vals to get the center.
   int height, width, x_start, x_end, y_start, y_end; 
   bool success = populateWindowData(window_name, height, width, x_start,x_end,
@@ -843,14 +983,14 @@ void moveMouseToOrigin(std::string window_name){
 
   //wait until the last moment to check window existence.
   if(success&& windowExists(window_name)){ 
-    std::string command = "wmctrl -R " + window_name + " &&  xdotool" 
-             +" mousemove --sync " + std::to_string(x_start) + " " + 
-                                              std::to_string(y_start); 
-    system(command.c_str());
+
+    success = mouse_move(window_name, x_start, y_start, x_start, x_end, y_start, y_end, false);
+    return success;
   }
   else{
     std::cout << "Attempted to move mouse to origin of nonexistent window" 
                 << std::endl;
+    return false;
   }
 }
 
@@ -859,7 +999,7 @@ void moveMouseToOrigin(std::string window_name){
 * The function wraps the xdotool key command, which can multipress
 * keys. (e.g. ctrl+alt+del)
 */
-void key(std::string toType, std::string window_name)
+bool key(std::string toType, std::string window_name)
 {
   //get window focus then type the string toType.
   std::string internal_command = "wmctrl -R " + window_name
@@ -868,6 +1008,9 @@ void key(std::string toType, std::string window_name)
   //have something to type.
   if(windowExists(window_name) && toType != ""){
     system(internal_command.c_str());
+    return true;
+  } else{
+    return false;
   }
 }
 
@@ -877,7 +1020,7 @@ void key(std::string toType, std::string window_name)
 * between repetitions. Because of the delay, we need all parameters necessary 
 * for a call to execute.cpp's delayAndMemCheck.
 */
-void type(std::string toType, float delay, int presses, std::string window_name, int childPID, 
+bool type(std::string toType, float delay, int presses, std::string window_name, int childPID, 
   float &elapsed, float& next_checkpoint, float seconds_to_run, 
   int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill,
   std::ostream &logfile){
@@ -889,6 +1032,9 @@ void type(std::string toType, float delay, int presses, std::string window_name,
   //get window focus then type the string toType.
   std::string internal_command = "wmctrl -R " + window_name 
                                     +" &&  xdotool type " + toType; 
+  
+  bool killed = false;
+
   //for number of presses requested, check that the window exists and that we 
   //have something to type.
   for(int i = 0; i < presses; i++){ 
@@ -897,13 +1043,18 @@ void type(std::string toType, float delay, int presses, std::string window_name,
     }
     else{
       std::cout << "Attempted to type on nonexistent window" << std::endl;
+      return false;
     }
     //allow this to run so that delays occur as expected.
     if(i != presses-1){ 
-      delay_and_mem_check(delay, childPID, elapsed, next_checkpoint, 
+      killed = delay_and_mem_check(delay, childPID, elapsed, next_checkpoint, 
         seconds_to_run, rss_memory, allowed_rss_memory, memory_kill,time_kill, logfile);
     }
+    if(killed){
+      return false;
+    }
   }
+  return true;
 }
 
 /**
@@ -958,7 +1109,7 @@ bool isWindowedAction(const nlohmann::json action){
 * function. 
 */
 void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken, 
-  int& number_of_screenshots, std::string window_name, int childPID, 
+  std::string window_name, int childPID, 
   float &elapsed, float& next_checkpoint, float seconds_to_run, 
   int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill,
   std::ostream &logfile){
@@ -987,96 +1138,103 @@ void takeAction(const std::vector<nlohmann::json>& actions, int& actions_taken,
   std::cout <<"Taking action "<<actions_taken+1<<" of "<<actions.size() <<": "<< action_name<< std::endl;
 
   float delay_time = 0;
+  bool success = false;
   //DELAY            
   if(action_name == "delay"){
     float time_in_secs = action.value("seconds", 0);
     delay_time = delay(time_in_secs);
+    success = true;
   }
   //SCREENSHOT
-  else if(action_name.find("screenshot") != std::string::npos){ 
-    screenshot(window_name, number_of_screenshots);
+  else if(action_name == "screenshot"){ 
+    std::string screenshot_name = action["name"];
+    success = screenshot(window_name, screenshot_name);
   }
   //TYPE
   else if(action_name == "type"){ 
 
-    float delay_in_secs = action.value("delay_in_seconds", .1);
-    int presses = action.value("presses", 1);
-    std::string string_to_type = action.value("string", "");
+    float delay_in_secs = action["delay_in_seconds"];
+    int presses = action["presses"];
+    std::string string_to_type = action["string"];
 
-    type(string_to_type, delay_in_secs, presses, window_name,childPID,elapsed, next_checkpoint, 
+    success = type(string_to_type, delay_in_secs, presses, window_name,childPID,elapsed, next_checkpoint, 
       seconds_to_run, rss_memory, allowed_rss_memory, memory_kill, time_kill, logfile);
-
-
   }
   //KEY
-  else if(action_name.find("key") != std::string::npos)
-  {
-    std::string key_to_type = action.value("key_combination", "INVALID_COMBINATION");
-    if (key_to_type != "INVALID_COMBINATION"){
-      key(key_to_type, window_name);
-    }
-    else{
-      std::cout << "ERROR: ill formatted key command. No key to type found." << std::endl;
-    }
+  else if(action_name == "key"){
+    std::string key_to_type = action["key_combination"];
+    success = key(key_to_type, window_name);
   }
   //CLICK AND DRAG    
   else if(action_name == "click and drag"){ 
-    clickAndDragAbsolute(window_name,action);
+    success = clickAndDragAbsolute(window_name,action);
   }
   else if(action_name == "click and drag delta"){
-    clickAndDragDelta(window_name,action);
+    success = clickAndDragDelta(window_name,action);
   }
   //CLICK
-  else if(action_name.find("click") != std::string::npos){ 
-    std::string mouse_button = action.value("mouse_button", "left");
+  else if(action_name == "click"){ 
+    std::string mouse_button = action["mouse_button"];
     if(mouse_button == "left"){
-      click(window_name, 1);
+      success = click(window_name, 1);
     }
     else if(mouse_button == "middle"){
-      click(window_name, 2);
+      success = click(window_name, 2);
     }
     else if(mouse_button == "right"){
-      click(window_name, 3);
+      success = click(window_name, 3);
     }
     else{
-      click(window_name, 1);
+      success = click(window_name, 1);
     }
   }
   //MOUSE MOVE
-  else if(action_name.find("move mouse") != std::string::npos){
+  else if(action_name == "move mouse"){
     //TODO: implement later if deemed prudent.
     bool no_clamp = false;
     
-    int moved_x = action.value("end_x", -1);
-    int moved_y = action.value("end_y", -1);
+    int moved_x = action["end_x"];
+    int moved_y = action["end_y"];
 
-
-    if(moved_x >=0 && moved_y >= 0){
-      int height, width, x_start, x_end, y_start, y_end;
-      bool success = populateWindowData(window_name, height, width, x_start, x_end, y_start, y_end);
-      if(success){
-          moved_x += x_start;
-          moved_y += y_start;
-          mouse_move(window_name, moved_x, moved_y, x_start, x_end, y_start, y_end, no_clamp);
-      }
-      else{
-        std::cout << "No mouse move due to unsuccessful data population." << std::endl;
-      }
+    int height, width, x_start, x_end, y_start, y_end;
+    bool populated = populateWindowData(window_name, height, width, x_start, x_end, y_start, y_end);
+    if(populated){
+        moved_x += x_start;
+        moved_y += y_start;
+        success = mouse_move(window_name, moved_x, moved_y, x_start, x_end, y_start, y_end, no_clamp);
     }
   }
   //CENTER
-  else if(action_name.find("center") != std::string::npos){ 
-    centerMouse(window_name);
+  else if(action_name == "center"){ 
+    success = centerMouse(window_name);
   }
   //ORIGIN
-  else if(action_name.find("origin") != std::string::npos){ 
-    moveMouseToOrigin(window_name);
+  else if(action_name == "origin"){ 
+    success = moveMouseToOrigin(window_name);
+  }
+  else if(action_name == "gif"){ 
+    std::string gif_name = action["name"];
+    float duration_in_seconds = action["seconds"];
+    int fps = action["frames_per_second"];
+    bool save_pngs = action["preserve_individual_frames"];
+
+    success = make_gif(window_name, gif_name, duration_in_seconds, fps, save_pngs,
+                        childPID, elapsed, next_checkpoint, seconds_to_run, 
+                        rss_memory, allowed_rss_memory, memory_kill, time_kill,
+                        logfile);
   }
    //BAD COMMAND
   else{
     std::cout << "ERROR: ill formatted action: " << actions[actions_taken] << std::endl;
   }
-  actions_taken++;
+
+  if(success){
+    std::cout << "The action was successful" << std::endl;
+    actions_taken++;
+  }else{
+    std::cout << "The action was unsuccessful" << std::endl;
+  }
+
   delay_and_mem_check(delay_time, childPID, elapsed, next_checkpoint, 
     seconds_to_run, rss_memory, allowed_rss_memory, memory_kill, time_kill,logfile);   
 }

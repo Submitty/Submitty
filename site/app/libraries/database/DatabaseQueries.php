@@ -324,7 +324,7 @@ class DatabaseQueries {
 	}
 
     public function getPosts(){
-        $this->course_db->query("SELECT * FROM posts where deleted = false");
+        $this->course_db->query("SELECT * FROM posts where deleted = false ORDER BY timestamp ASC");
         return $this->course_db->rows();
     }
 
@@ -750,13 +750,17 @@ ORDER BY egd.g_version", array($g_id, $user_id));
         return count($this->course_db->rows()) > 0 && $this->course_db->rows()[0]['autograding_complete'] === true;
     }
 
+    protected function createParamaterList($len) {
+        return '(' . implode(',', array_fill(0, $len, '?')) . ')';
+    }
+
 
     // Moved from class LateDaysCalculation on port from TAGrading server.  May want to incorporate late day information into gradeable object rather than having a separate query
     public function getLateDayUpdates($user_id) {
         if($user_id != null) {
             $query = "SELECT * FROM late_days WHERE user_id";
             if (is_array($user_id)) {
-                $query .= ' IN ('.implode(',', array_fill(0, count($user_id), '?')).')';
+                $query .= ' IN ' . $this->createParamaterList(count($user_id));
                 $params = $user_id;
             }
             else {
@@ -784,8 +788,8 @@ ORDER BY egd.g_version", array($g_id, $user_id));
         $return = array();
         if (count($sections) > 0) {
         	$orderBy = str_replace("registration_section","SUBSTRING(registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(registration_section, '[0-9]+')::INT, -1), SUBSTRING(registration_section, '[^0-9]*$')",$orderBy);
-            $query = implode(",", array_fill(0, count($sections), "?"));
-            $this->course_db->query("SELECT * FROM users AS u WHERE registration_section IN ({$query}) ORDER BY {$orderBy}", $sections);
+            $values = $this->createParamaterList(count($sections));
+            $this->course_db->query("SELECT * FROM users AS u WHERE registration_section IN {$values} ORDER BY {$orderBy}", $sections);
             foreach ($this->course_db->rows() as $row) {
                 $return[] = new User($this->core, $row);
             }
@@ -807,7 +811,7 @@ ORDER BY egd.g_version", array($g_id, $user_id));
         $params = array();
         $where = "";
         if (count($sections) > 0) {
-            $where = "WHERE {$section_key} IN (".implode(",", array_fill(0, count($sections), "?")).")";
+            $where = "WHERE {$section_key} IN " . $this->createParamaterList(count($sections));
             $params = $sections;
         }
         if ($section_key === 'registration_section') {
@@ -838,8 +842,8 @@ ORDER BY {$orderby}", $params);
         if (count($sections) > 0) {
             // Expand out where clause
             $sections_keys = array_values($sections);
-            $placeholders = implode(",", array_fill(0, count($sections_keys), "?"));
-            $where = "WHERE {$section_key} IN ($placeholders)";
+            $placeholders = $this->createParamaterList(count($sections_keys));
+            $where = "WHERE {$section_key} IN {$placeholders}";
             $params = array_merge($params, $sections_keys);
         }
         if ($section_key === 'registration_section') {
@@ -875,8 +879,8 @@ ORDER BY {$orderby}", $params);
         if (count($sections) > 0) {
             // Expand out where clause
             $sections_keys = array_values($sections);
-            $placeholders = implode(",", array_fill(0, count($sections_keys), "?"));
-            $where = "WHERE {$section_key} IN ($placeholders)";
+            $placeholders = $this->createParamaterList(count($sections_keys));
+            $where = "WHERE {$section_key} IN {$placeholders}";
             $params = array_merge($params, $sections_keys);
         }
         if ($section_key === 'registration_section') {
@@ -945,7 +949,7 @@ ORDER BY {$orderby}", $params);
         $params = array($g_id);
         $where = "";
         if (count($sections) > 0) {
-            $where = "WHERE {$section_key} IN (".implode(",", array_fill(0, count($sections), "?")).")";
+            $where = "WHERE {$section_key} IN " . $this->createParamaterList(count($sections));
             $params = array_merge($params, $sections);
         }
         $this->course_db->query("
@@ -1161,7 +1165,7 @@ AND rotating_section IS NOT NULL;");
         $params = array();
         $where = "";
         if (count($sections) > 0) {
-            $where = "WHERE sections_registration_id IN (" . implode(",", array_fill(0, count($sections), "?")) . ")";
+            $where = "WHERE sections_registration_id IN " . $this->createParamaterList(count($sections));
             $params = $sections;
         }
         $this->course_db->query("
@@ -1196,7 +1200,7 @@ ORDER BY SUBSTRING(g.sections_registration_id, '^[^0-9]*'), COALESCE(SUBSTRING(g
         $params = array($g_id);
         $where = "";
         if (count($sections) > 0) {
-            $where = " AND sections_rotating_id IN (" . implode(",", array_fill(0, count($sections), "?")) . ")";
+            $where = " AND sections_rotating_id IN " . $this->createParamaterList(count($sections));
             $params = array_merge($params, $sections);
         }
         $this->course_db->query("
@@ -1246,8 +1250,8 @@ ORDER BY g.sections_rotating_id, g.user_id", $params);
     public function getUsersByRotatingSections($sections, $orderBy="rotating_section") {
         $return = array();
         if (count($sections) > 0) {
-            $query = implode(",", array_fill(0, count($sections), "?"));
-            $this->course_db->query("SELECT * FROM users AS u WHERE rotating_section IN ({$query}) ORDER BY {$orderBy}", $sections);
+            $placeholders = $this->createParamaterList(count($sections));
+            $this->course_db->query("SELECT * FROM users AS u WHERE rotating_section IN {$placeholders} ORDER BY {$orderBy}", $sections);
             foreach ($this->course_db->rows() as $row) {
                 $return[] = new User($this->core, $row);
             }
@@ -1462,8 +1466,8 @@ ORDER BY user_id ASC");
 
     public function updateUsersRotatingSection($section, $users) {
         $update_array = array_merge(array($section), $users);
-        $update_string = implode(',', array_pad(array(), count($users), '?'));
-        $this->course_db->query("UPDATE users SET rotating_section=? WHERE user_id IN ({$update_string})", $update_array);
+        $update_string = $this->createParamaterList(count($users));
+        $this->course_db->query("UPDATE users SET rotating_section=? WHERE user_id IN {$update_string}", $update_array);
     }
 
     /**
@@ -2051,7 +2055,7 @@ WHERE gcm_id=?", $params);
         $params = array($g_id);
         $sections_query = "";
         if (count($sections) > 0) {
-            $sections_query = "{$section_key} IN (".implode(",", array_fill(0, count($sections), "?")).") AND";
+            $sections_query = "{$section_key} IN " . $this->createParamaterList(count($sections)) . " AND";
             $params = array_merge($sections, $params);
         }
         $this->course_db->query("
@@ -2079,8 +2083,8 @@ public function getSubmittedTeamCountByGradingSections($g_id, $sections, $sectio
         if (count($sections) > 0) {
             // Expand out where clause
             $sections_keys = array_values($sections);
-            $placeholders = implode(",", array_fill(0, count($sections_keys), "?"));
-            $where = "WHERE {$section_key} IN ($placeholders)";
+            $placeholders = $this->createParamaterList(count($sections_keys));
+            $where = "WHERE {$section_key} IN {$placeholders}";
             $params = array_merge($params, $sections_keys);
         }
         $this->course_db->query("
@@ -2107,7 +2111,7 @@ ORDER BY {$section_key}", $params);
         $params = array($g_id);
         $sections_query = "";
         if (count($sections) > 0) {
-            $sections_query= "{$section_key} IN (".implode(",", array_fill(0, count($sections), "?")).") AND";
+            $sections_query= "{$section_key} IN " . $this->createParamaterList(count($sections)) . " AND";
             $params = array_merge($sections, $params);
         }
         $orderBy="";
@@ -2144,7 +2148,7 @@ ORDER BY {$orderBy}", $params);
         $params = array($g_id);
         $sections_query = "";
         if (count($sections) > 0) {
-            $sections_query= "{$section_key} IN (".implode(",", array_fill(0, count($sections), "?")).") AND";
+            $sections_query= "{$section_key} IN " . $this->createParamaterList(count($sections)) . " AND";
             $params = array_merge($sections, $params);
         }
         $orderBy="";
@@ -2182,7 +2186,7 @@ ORDER BY {$orderBy}", $params);
         $params = array($g_id);
         $where = "";
         if (count($sections) > 0) {
-            $where = "WHERE {$section_key} IN (".implode(",", array_fill(0, count($sections), "?")).")";
+            $where = "WHERE {$section_key} IN " . $this->createParamaterList(count($sections));
             $params = array_merge($params, $sections);
         }
         $this->course_db->query("
@@ -2405,11 +2409,11 @@ ORDER BY u.user_group ASC,
         else {
             $params = $grader;
         }
-        $grader_list = implode(",", array_fill(0, count($params), "?"));
+        $grader_list = $this->createParamaterList(count($params));
         $params[] = $gradeable_id;
         $this->course_db->query("SELECT COUNT(*) as cnt
 FROM gradeable_component_data as gcd
-WHERE gcd.gcd_grader_id IN ({$grader_list})
+WHERE gcd.gcd_grader_id IN {$grader_list}
 AND gc_id IN (
   SELECT gc_id
   FROM gradeable_component
@@ -2423,7 +2427,7 @@ AND gc_id IN (
         $where = "";
         $params = array();
         if(count($sections) > 0) {
-            $where = "WHERE registration_section IN (".implode(",", arrayfill(0,count($sections),"?"));
+            $where = "WHERE registration_section IN " . $this->createParamaterList(count($sections));
             $params = $sections;
         }
         $params[] = $gradeable_id;
@@ -2455,7 +2459,7 @@ AND gc_id IN (
         $where = "";
         $params = array();
         if(count($sections) > 0) {
-            $where = "WHERE rotating_section IN (".implode(",", arrayfill(0,count($sections),"?"));
+            $where = "WHERE rotating_section IN " . $this->createParamaterList(count($sections));
             $params = $sections;
         }
         $params[] = $gradeable_id;
@@ -2643,8 +2647,8 @@ AND gc_id IN (
     public function getAnonId($user_id) {
         $params = (is_array($user_id)) ? $user_id : array($user_id);
 
-        $question_marks = implode(",", array_fill(0, count($params), "?"));
-        $this->course_db->query("SELECT user_id, anon_id FROM users WHERE user_id IN({$question_marks})", $params);
+        $question_marks = $this->createParamaterList(count($params));
+        $this->course_db->query("SELECT user_id, anon_id FROM users WHERE user_id IN {$question_marks}", $params);
         $return = array();
         foreach($this->course_db->rows() as $id_map) {
             $return[$id_map['user_id']] = $id_map['anon_id'];
@@ -2655,8 +2659,8 @@ AND gc_id IN (
     public function getUserFromAnon($anon_id) {
         $params = is_array($anon_id) ? $anon_id : array($anon_id);
 
-        $question_marks = implode(",", array_fill(0, count($params), "?"));
-        $this->course_db->query("SELECT anon_id, user_id FROM users WHERE anon_id IN ({$question_marks})", $params);
+        $question_marks = $this->createParamaterList(count($params));
+        $this->course_db->query("SELECT anon_id, user_id FROM users WHERE anon_id IN {$question_marks}", $params);
         $return = array();
         foreach($this->course_db->rows() as $id_map) {
             $return[$id_map['anon_id']] = $id_map['user_id'];
@@ -2677,8 +2681,8 @@ AND gc_id IN (
      */
     public function getTeamIdsFromAnonIds(array $anon_ids) {
         /*
-        $placeholders = implode(",", array_fill(0, count($anon_ids), "?"));
-        $this->course_db->query("SELECT anon_id, team_id FROM gradeable_teams WHERE anon_id IN ({$placeholders})", $anon_ids);
+        $placeholders = $this->createParamaterList(count($anon_ids));
+        $this->course_db->query("SELECT anon_id, team_id FROM gradeable_teams WHERE anon_id IN {$placeholders}", $anon_ids);
 
         $team_ids = [];
         foreach ($this->course_db->row() as $row) {
@@ -3105,10 +3109,10 @@ AND gc_id IN (
         $mark_ids = array_values(array_map(function (Mark $mark) {
             return $mark->getId();
         }, $marks));
-        $place_holders = implode(',', array_fill(0, count($marks), '?'));
+        $place_holders = $this->createParamaterList(count($marks));
 
-        $this->course_db->query("DELETE FROM gradeable_component_mark_data WHERE gcm_id IN ($place_holders)", $mark_ids);
-        $this->course_db->query("DELETE FROM gradeable_component_mark WHERE gcm_id IN ($place_holders)", $mark_ids);
+        $this->course_db->query("DELETE FROM gradeable_component_mark_data WHERE gcm_id IN {$place_holders}", $mark_ids);
+        $this->course_db->query("DELETE FROM gradeable_component_mark WHERE gcm_id IN {$place_holders}", $mark_ids);
     }
 
     /**
@@ -3236,10 +3240,10 @@ AND gc_id IN (
         $component_ids = array_values(array_map(function (Component $component) {
             return $component->getId();
         }, $components));
-        $place_holders = implode(',', array_fill(0, count($components), '?'));
+        $place_holders = $this->createParamaterList(count($components));
 
-        $this->course_db->query("DELETE FROM gradeable_component_data WHERE gc_id IN ($place_holders)", $component_ids);
-        $this->course_db->query("DELETE FROM gradeable_component WHERE gc_id IN ($place_holders)", $component_ids);
+        $this->course_db->query("DELETE FROM gradeable_component_data WHERE gc_id IN {$place_holders}", $component_ids);
+        $this->course_db->query("DELETE FROM gradeable_component WHERE gc_id IN {$place_holders}", $component_ids);
     }
 
     /**
@@ -3501,10 +3505,10 @@ AND gc_id IN (
             $graded_component->getComponentId(),
             $graded_component->getGraderId(),
         ], $mark_ids);
-        $place_holders = implode(',', array_fill(0, count($mark_ids), '?'));
+        $place_holders = $this->createParamaterList(count($mark_ids));
         $this->course_db->query("
             DELETE FROM gradeable_component_mark_data
-            WHERE gd_id=? AND gc_id=? AND gcd_grader_id=? AND gcm_id IN ($place_holders)",
+            WHERE gd_id=? AND gc_id=? AND gcd_grader_id=? AND gcm_id IN {$place_holders}",
             $param);
     }
 
@@ -3550,7 +3554,9 @@ AND gc_id IN (
             $graded_component->getComment(),
             $graded_component->getGraderId(),
             $graded_component->getGradedVersion(),
-            DateUtils::dateTimeToString($graded_component->getGradeTime())
+            DateUtils::dateTimeToString($graded_component->getGradeTime()),
+            $graded_component->getVerifierId() !== '' ? $graded_component->getVerifierId() : null,
+            !is_null($graded_component->getVerifyTime()) ? DateUtils::dateTimeToString($graded_component->getVerifyTime()) : null
         ];
         $query = "
             INSERT INTO gradeable_component_data(
@@ -3560,8 +3566,10 @@ AND gc_id IN (
               gcd_component_comment,
               gcd_grader_id,
               gcd_graded_version,
-              gcd_grade_time)
-            VALUES(?, ?, ?, ?, ?, ?, ?)";
+              gcd_grade_time,
+              gcd_verifier_id,
+              gcd_verify_time)
+            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $this->course_db->query($query, $param);
     }
 
@@ -3578,6 +3586,8 @@ AND gc_id IN (
                     $graded_component->getGradedVersion(),
                     DateUtils::dateTimeToString($graded_component->getGradeTime()),
                     $graded_component->getGraderId(),
+                    $graded_component->getVerifierId() !== '' ? $graded_component->getVerifierId() : null,
+                    !is_null($graded_component->getVerifyTime()) ? DateUtils::dateTimeToString($graded_component->getVerifyTime()) : null,
                     $graded_component->getTaGradedGradeable()->getId(),
                     $graded_component->getComponentId()
                 ];
@@ -3587,7 +3597,9 @@ AND gc_id IN (
                       gcd_component_comment=?,
                       gcd_graded_version=?,
                       gcd_grade_time=?,
-                      gcd_grader_id=?
+                      gcd_grader_id=?,
+                      gcd_verifier_id=?,
+                      gcd_verify_time = ?
                     WHERE gd_id=? AND gc_id=?";
             }
             else {
@@ -3758,5 +3770,43 @@ AND gc_id IN (
         $this->course_db->query('SELECT EXISTS (SELECT g_id FROM electronic_gradeable_data WHERE g_id=? AND (user_id=? OR team_id=?))',
             [$gradeable->getId(), $submitter->getId(), $submitter->getId()]);
         return $this->course_db->row()['exists'] ?? false;
+    }
+
+    /**
+     * Get the active version for all given submitter ids. If they do not have an active version,
+     * their version will be zero.
+     * @param \app\models\gradeable\Gradeable $gradeable
+     * @param string[] $submitter_ids
+     * @return bool[] Map of id=>version
+     */
+    public function getActiveVersions(gradeable\Gradeable $gradeable, array $submitter_ids) {
+        throw new NotImplementedException();
+    }
+
+    /**
+     * Gets a list of emails for all active particpants in a course  
+     */
+    public function getClassEmailList(){
+        $parameters = array();
+        $this->course_db->query('SELECT user_email FROM users WHERE user_group != 4 OR registration_section IS NOT null', $parameters);
+
+        return $this->course_db->rows();
+    }
+    
+    /**
+     * Queues an email to be sent by email job
+     * @param array $email_data
+     * @param string $recipient  
+     */ 
+    public function createEmail($email_data, $recipient){
+        $parameters = array($recipient, $email_data["subject"], $email_data["body"]);
+
+        $this->submitty_db->query("
+            INSERT INTO emails(
+              recipient,
+              subject,
+              body,
+              created)
+            VALUES(?, ?, ?, NOW())", $parameters);
     }
 }

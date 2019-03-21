@@ -60,7 +60,9 @@ class AutoGradedVersion extends AbstractModel {
     private $files = null;
     /** @property @var array[] An array of all the autograded results files  */
     private $results_files = null;
-    
+    /** @property @var array[] An array of all the autograded results public files  */
+    private $results_public_files = null;
+
     /** @property @var int The position of the submission in the queue (0 if being graded, -1 if not in queue)
      *      Note: null default value used to indicate that no queue status data has been loaded
      */
@@ -162,18 +164,22 @@ class AutoGradedVersion extends AbstractModel {
         $course_path = $this->core->getConfig()->getCoursePath();
         $config = $gradeable->getAutogradingConfig();
 
-        $path = FileUtils::joinPaths($course_path, 'results', $gradeable->getId(), $submitter_id, $this->version);
+        $results_path = FileUtils::joinPaths($course_path, 'results', $gradeable->getId(), $submitter_id, $this->version);
+        $results_public_path = FileUtils::joinPaths($course_path, 'results_public', $gradeable->getId(), $submitter_id, $this->version);
 
         // Load files produced by autograding
-        $result_files = FileUtils::getAllFiles($path, [], true);
-        $result_file_info = [];
+        $result_files = FileUtils::getAllFiles($results_path, [], true);
         foreach ($result_files as $file => $details) {
-            $result_file_info[$file] = $details;
             $this->results_files[$file] = $details;
         }
 
+        $result_public_files = FileUtils::getAllFiles($results_public_path, [], true);
+        foreach ($result_public_files as $file => $details) {
+            $this->results_public_files[$file] = $details;
+        }
+
         // Load file that contains numeric results
-        $result_details = FileUtils::readJsonFile(FileUtils::joinPaths($path, 'results.json'));
+        $result_details = FileUtils::readJsonFile(FileUtils::joinPaths($results_path, 'results.json'));
         if ($result_details === false) {
             // Couldn't find the file, so grading hasn't happened yet...
             $this->graded_testcases = [];
@@ -181,7 +187,7 @@ class AutoGradedVersion extends AbstractModel {
         }
 
         // Load the historical results (for early submission incentive)
-        $history = FileUtils::readJsonFile(FileUtils::joinPaths($path, 'history.json'));
+        $history = FileUtils::readJsonFile(FileUtils::joinPaths($results_path, 'history.json'));
         if ($history !== false) {
             $this->history = array_map(function ($data) {
                 return new AutoGradedVersionHistory($this->core, $data);
@@ -198,7 +204,7 @@ class AutoGradedVersion extends AbstractModel {
                 count($result_details['testcases']) > $testcase->getIndex() &&
                 $result_details['testcases'][$testcase->getIndex()] != null) {
               $graded_testcase = new AutoGradedTestcase
-                ($this->core, $testcase, $path, $result_details['testcases'][$testcase->getIndex()]);
+                ($this->core, $testcase, $results_path, $results_public_path, $result_details['testcases'][$testcase->getIndex()]);
               $this->graded_testcases[$testcase->getIndex()] = $graded_testcase;
               if (in_array($testcase, $config->getEarlySubmissionTestCases())) {
                 $this->early_incentive_points += $graded_testcase->getPoints();
@@ -260,7 +266,7 @@ class AutoGradedVersion extends AbstractModel {
         }
         return array('submissions' => $this->meta_files['submissions'], 'checkout' => ($this->graded_gradeable->getGradeable()->isVcs()) ? $this->meta_files['checkout'] : []);
     }
-    
+
     /**
      * Gets an array of file details (indexed by file name) for all autograded results files
      * @return array
@@ -270,6 +276,17 @@ class AutoGradedVersion extends AbstractModel {
             $this->loadTestcases();
         }
         return $this->results_files;
+    }
+
+    /**
+     * Gets an array of file details (indexed by file name) for all autograded results public files
+     * @return array
+     */
+    public function getResultsPublicFiles() {
+        if($this->results_public_files === null) {
+            $this->loadTestcases();
+        }
+        return $this->results_public_files;
     }
 
     /**

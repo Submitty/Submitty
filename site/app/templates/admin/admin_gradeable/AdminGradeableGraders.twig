@@ -40,9 +40,12 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
     {% endfor %}
 </select>
 <br />
-<a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section">How should graders be assigned</a> to grade this item?:
-<br />
+
 <fieldset>
+    <legend>
+        <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section">How should graders be assigned</a> to grade this item?:
+        <br />
+    </legend>
     <input type="radio" name="grade_by_registration" value="true" id="registration_section"
         {{ (gradeable.isGradeByRegistration() == true or action == "new") ? 'checked' : '' }}> Registration Section
 

@@ -22,7 +22,7 @@
                 {% if overall_comment|length != 0 %}
             <hr>
             Overall note from Grader:
-            <span class='gradeable_comment'>{{ overall_comment|escape }}</span>
+            <span class='gradeable_comment'>{{ overall_comment|nl2br }}</span>
             {% endif %}
             </p>
         </div>
@@ -35,8 +35,8 @@
             <br />
             {% for file in uploaded_pdfs %}
                 {{ file.name }}
-                {#<a class="btn btn-primary" onclick="openUrl('{{ core.buildUrl({'component':'student', 'page':'PDF', 'action':'download_annotated_pdf', 'gradeable_id': gradeable_id, 'file_name': file.name}) }}')">Download <i class="fa fa-download"></i></a>#}
-                <a class="btn btn-primary" onclick="openUrl('{{ core.buildUrl({'component':'pdf', 'page':'student_pdf_view', 'gradeable_id': gradeable_id, 'file_name': file.name}) }}')">View Popup <i class="fa fa-window-restore"></i></a>
+                {#<a class="btn btn-primary" onclick="openUrl('{{ core.buildUrl({'component':'student', 'page':'PDF', 'action':'download_annotated_pdf', 'gradeable_id': gradeable_id, 'file_name': file.name}) }}')">Download <i class="fas fa-download"></i></a>#}
+                <a class="btn btn-primary" onclick="openUrl('{{ core.buildUrl({'component':'pdf', 'page':'student_pdf_view', 'gradeable_id': gradeable_id, 'file_name': file.name}) }}')">View Popup <i class="fas fa-window-restore"></i></a>
             {% endfor %}
         </div>
         {% endif %}
@@ -71,29 +71,29 @@
                                 <tr>
                                     <td>
                                         {% if mark.earned %}
-                                            <i class="fa fa-check-square-o fa-1g"></i>
+                                            <i class="far fa-check-square fa-1g"></i>
                                         {% else %}
-                                            <i class="fa fa-square-o fa-1g"></i>
+                                            <i class="far fa-square fa-1g"></i>
                                         {% endif %}
                                     </td>
                                     <td class="mark-score">
                                         {{ mark.points|number_format(num_decimals) }}
                                     </td>
                                     <td>
-                                        {{ mark.title|escape }}
+                                        {{ mark.title|nl2br }}
                                     </td>
                                 </tr>
                             {% endfor %}
                             {% if component.custom_mark_score != 0 or component.comment != '' %}
                                 <tr>
                                     <td>
-                                        <i class="fa fa-check-square-o fa-1g"></i>
+                                        <i class="far fa-check-square fa-1g"></i>
                                     </td>
                                     <td class="mark-score">
                                         {{ component.custom_mark_score|number_format(num_decimals) }}
                                     </td>
                                     <td>
-                                        {{ component.comment|escape }}
+                                        {{ component.comment|nl2br }}
                                     </td>
                                 </tr>
                             {% endif %}

@@ -1,5 +1,5 @@
 @import url("reset.css");
-@import url("https://fonts.googleapis.com/css?family=Inconsolata");
+@import url("../vendor/google/inconsolata.css");
 
 html {
     height: 100%;
@@ -8,6 +8,7 @@ html {
 body {
     font-family: 'Source Sans Pro', sans-serif;
     height: 100%;
+    width: 100%;
     position: relative;
 }
 
@@ -18,6 +19,7 @@ body {
     /* Submitty Logo blue */
     background-color: #f6fbfe;
 
+    width: 100%;
     /* A lighter shade of blue grey */
     /* background: #b8d5e5; */
     /* a gradient! */
@@ -39,6 +41,26 @@ a.fa:hover,
 a > i.fa:hover {
     color: #2627ee;
 }
+a,
+a:visited,
+a:link,
+a.external,
+a.external:visited,
+a.external:link,
+a.fas:hover,
+a > i.fas:hover {
+    color: #2627ee;
+}
+a,
+a:visited,
+a:link,
+a.external,
+a.external:visited,
+a.external:link,
+a.far:hover,
+a > i.far:hover {
+    color: #2627ee;
+}
 
 a:hover,
 a.external:hover {
@@ -54,11 +76,33 @@ a.fa.btn-success, a.btn-primary, a.btn-danger,
 a.btn-success > i.fa, a.btn-primary > i.fa, a.btn-danger > i.fa {
     color: #ffffff;
 }
+a.btn-success, a.btn-primary, a.btn-danger,
+a.fas.btn-success, a.btn-primary, a.btn-danger,
+a.btn-success > i.fas, a.btn-primary > i.fas, a.btn-danger > i.fas {
+    color: #ffffff;
+}
+a.btn-success, a.btn-primary, a.btn-danger,
+a.far.btn-success, a.btn-primary, a.btn-danger,
+a.btn-success > i.far, a.btn-primary > i.far, a.btn-danger > i.far {
+    color: #ffffff;
+}
 
 a.btn-default,
 a.fa.btn-default,
 a.fa,
 a > i.fa {
+    color: #000000;
+}
+a.btn-default,
+a.fas.btn-default,
+a.fas,
+a > i.fas {
+    color: #000000;
+}
+a.btn-default,
+a.far.btn-default,
+a.far,
+a > i.far {
     color: #000000;
 }
 
@@ -135,10 +179,11 @@ input[type="checkbox"]:checked{
 
 /* this requires loading the FontAwesome CSS from the CDN before loading the server.css */
 input[type="checkbox"]:checked:before {
-    font-family: FontAwesome;
+    font-family: 'Font Awesome\ 5 Free';
     content: "\f00c";
     color: #FFF;
-    font-size: 18px
+    font-size: 18px;
+    font-weight: 900
 }
 
 input[type="checkbox"]:focus{
@@ -333,6 +378,12 @@ table tr.table-header {
 #header a > i.fa {
     font-size: 20px;
 }
+#header a > i.fas {
+    font-size: 20px;
+}
+#header a > i.far {
+    font-size: 20px;
+}
 
 #header-text>h2:nth-child(2) {
     padding-top: 25px;
@@ -392,6 +443,10 @@ table tr.table-header {
     display: flex;
 }
 
+.pre_forum {
+    font-family: inherit;
+}
+
 .content h1 {
     margin-bottom: 20px;
 }
@@ -424,7 +479,7 @@ table tr.table-header {
 }
 
 #footer a:hover {
-    color: #4078c0;
+    color: #405E90;
 }
 
 #footer #copyright {
@@ -436,7 +491,7 @@ table tr.table-header {
 }
 
 #copyright > a {
-    color: #4078c0;
+    color: #405E90;
 }
 
 #copyright > a:hover {
@@ -487,8 +542,20 @@ table tr.table-header {
 .fa-green {
     color: green;
 }
+.fas-green {
+    color: green;
+}
+.far-green {
+    color: green;
+}
 
 .fa-red {
+    color: red;
+}
+.fas-red {
+    color: red;
+}
+.far-red {
     color: red;
 }
 
@@ -826,7 +893,7 @@ table tr.table-header {
 }
 
 .post_content {
-    margin-right: 40px;
+    margin-right: 5px;
 }
 
 .first_post .post_button {
@@ -966,8 +1033,15 @@ table .instructor .two-options{
     padding-top: 30px;
 }
 
+div.full_height {
+    position: -webkit-sticky; /* Safari */
+    position: sticky;
+    max-height: 95vh;
+    top: 10px;
+}
+
 #sidebar.collapsed #nav-buttons {
-    width: 240px;
+    width: 30px;
 }
 
 #sidebar.collapsed #nav-buttons-visible {
@@ -983,7 +1057,7 @@ table .instructor .two-options{
 }
 
 #sidebar.animate {
-    transition: 0.25s ease-out;
+    transition: 0.3s ease-out;
 }
 
 #sidebar.collapsed {
@@ -1005,18 +1079,19 @@ table .instructor .two-options{
 
 #nav-buttons ul li .nav-row {
     padding: 6px;
-    padding-left: 36px;
+    padding-left: 48px;
     width: 100%;
     display: block;
 }
 
-#sidebar.collapsed #nav-buttons ul li .nav-row {
+#sidebar.collapsed #nav-buttons ul li .nav-row .iconTitle{
     display: none;
 }
 
-#nav-buttons ul li .collapse-icon {
-    display: none;
+#sidebar.collapsed #nav-buttons ul li .nav-row .fa{
+    padding: 2px 0px;
 }
+
 
 #sidebar.collapsed #nav-buttons ul li .collapse-icon {
     display: inline-block;
@@ -1033,6 +1108,14 @@ table .instructor .two-options{
 }
 
 #nav-buttons ul li .nav-row.collapse-icon i.fa {
+    margin-left: 0;
+    width: 48px;
+}
+#nav-buttons ul li .nav-row.collapse-icon i.fas {
+    margin-left: 0;
+    width: 48px;
+}
+#nav-buttons ul li .nav-row.collapse-icon i.far {
     margin-left: 0;
     width: 48px;
 }
@@ -1053,20 +1136,54 @@ table .instructor .two-options{
 #nav-buttons ul li a.nav-row i.fa {
     color: #000000;
 }
+#nav-buttons ul li a.nav-row i.fas {
+    color: #000000;
+}
+#nav-buttons ul li a.nav-row i.far {
+    color: #000000;
+}
 
 #nav-buttons ul li a.collapse-icon i.fa {
+    color: #000000;
+}
+#nav-buttons ul li a.collapse-icon i.fas {
+    color: #000000;
+}
+#nav-buttons ul li a.collapse-icon i.far {
     color: #000000;
 }
 
 #nav-buttons ul li a.collapse-icon:hover i.fa {
     color: #006398;
 }
+#nav-buttons ul li a.collapse-icon:hover i.fas {
+    color: #006398;
+}
+#nav-buttons ul li a.collapse-icon:hover i.far {
+    color: #006398;
+}
 
 #nav-buttons ul li a.collapse-icon:active i.fa {
     color: #790000;
 }
+#nav-buttons ul li a.collapse-icon:active i.fas {
+    color: #790000;
+}
+#nav-buttons ul li a.collapse-icon:active i.far {
+    color: #790000;
+}
 
 #nav-buttons ul li .nav-row i.fa {
+    margin-left: -33px;
+    width: 30px;
+    text-align: center;
+}
+#nav-buttons ul li .nav-row i.fas {
+    margin-left: -33px;
+    width: 30px;
+    text-align: center;
+}
+#nav-buttons ul li .nav-row i.far {
     margin-left: -33px;
     width: 30px;
     text-align: center;
@@ -1092,6 +1209,7 @@ table .instructor .two-options{
 
 #sidebar.collapsed #nav-buttons ul li.short-line {
     margin-left: -30px;
+    width: 100px
 }
 
 #nav-buttons ul li.heading {
@@ -1437,6 +1555,17 @@ end of styles used in the admin gradeable page
     1px 1px 0 #000;
 }
 
+/* color for limited access graders who were verifed */
+.grader-verified{
+                                        /* yellow       green   */
+    background: linear-gradient(to right, #ffcc33 50%, #33cc33 50%);
+    background-clip : text;
+    color: transparent;
+    /* chrome & safari */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
 /* color for student/peer grading */
 .grader-4 {
     color: #cc66ff; /* purple */
@@ -1468,10 +1597,15 @@ end of styles used in the admin gradeable page
     color: red;
 }
 
-.required::-webkit-input-placeholder { color: red; }
-.required:-moz-placeholder { color: red; }
-.required::-moz-placeholder { color: red; }
-.required:-ms-input-placeholder { color: red; }
+.required::-webkit-input-placeholder { color: #cc0000; }
+.required:-moz-placeholder { color: #cc0000; }
+.required::-moz-placeholder { color: #cc0000; }
+.required:-ms-input-placeholder { color: #cc0000; }
+
+#required_type{
+    color: #cc0000;
+    display: inline;
+}
 
 .modal{
     display: none;
@@ -1599,4 +1733,35 @@ end of styles used in the admin gradeable page
 
 .courses-table .btn {
     margin-bottom: 3px;
+}
+
+.noscript,
+.system_message {
+    width: 100%;
+    height: 2em;
+}
+
+.system_message {
+    background: #fff3cd;
+    color: #856404;
+    height: 2em;
+}
+
+.noscript {
+    background: #f2dede;
+    color: #b94a48;
+}
+
+.noscript span,
+.system_message span {
+    text-align: center;
+    margin: auto;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.scrollable-image{
+    overflow: auto; 
+    width: 100%;
+    max-height: 300px;
 }

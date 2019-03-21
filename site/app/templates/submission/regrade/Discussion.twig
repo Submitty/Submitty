@@ -11,7 +11,7 @@
     <div>
         <h3>Grade Inquiry
             <span>
-                <span class="fa fa-hourglass" style="font-size: 16px; color: #af0000"></span> 
+                <span class="fas fa-hourglass" style="font-size: 16px; color: #af0000"></span> 
                 <span class="red-message">Unresolved Grade Inquiry</span>
             </span> 
         </h3>
@@ -22,7 +22,7 @@
     <div>
         <h3>Grade Inquiry
             <span>
-                <span class="fa fa-check" style="font-size: 16px; color: #008800"></span>  
+                <span class="fas fa-check" style="font-size: 16px; color: #008800"></span>  
                 <span class="green-message">Grade Inquiry Has Been Resolved</span>
             </span>
         </h3>
@@ -37,7 +37,7 @@
                 document.getElementById("ShowRegradeRequestButton").style.display = 'none';
             </script>
         <span>
-            <span class="fa fa-hourglass" style="font-size: 16px; color: #af0000"></span> 
+            <span class="fas fa-hourglass" style="font-size: 16px; color: #af0000"></span> 
             <span class="red-message">Grade Inquiry Under Review</span>
         </span> 
         </h3>
@@ -55,7 +55,7 @@
                 document.getElementById("ShowRegradeRequestButton").style.display = 'none';
             </script>
         <span>
-            <span class="fa fa-check" style="font-size: 16px; color: #008800"></span>  
+            <span class="fas fa-check" style="font-size: 16px; color: #008800"></span>  
             <span class="green-message">Grade Inquiry has been Resolved</span>
         </span>
         </h3>
@@ -129,9 +129,9 @@
 
 {% macro bbcode_buttons() %}
     <button type="button" title="Insert a link" onclick="addBBCode(1, '#replyTextArea')" style="margin-right:10px;" class="btn btn-default">
-        Link <i class="fa fa-link fa-1x"></i>
+        Link <i class="fas fa-link fa-1x"></i>
     </button>
     <button title="Insert a code segment" type="button" onclick="addBBCode(0, '#replyTextArea')" class="btn btn-default">
-        Code <i class="fa fa-code fa-1x"></i>
+        Code <i class="fas fa-code fa-1x"></i>
     </button>
 {% endmacro %}

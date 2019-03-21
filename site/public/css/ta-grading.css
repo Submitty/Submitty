@@ -61,7 +61,7 @@
     width: 22px;
     margin: 5px;
 }
-.icon-selected.fa-list-alt {
+.icon-selected.fa-list {
     box-shadow: 0px 0px 3px 3px #fd4472;
     background-color: #fd4472;
 }
@@ -73,7 +73,7 @@
     width: 22px;
     margin: 5px;
 }
-.icon-selected.fa-pencil-square-o {
+.icon-selected.fa-edit {
     box-shadow: 0px 0px 3px 3px #00e08e;
     background-color: #00e08e;
 }
@@ -101,7 +101,7 @@
     box-shadow: 0px 0px 3px 3px rgba(0, 0, 0, 0.4);
     background-color: rgba(0, 0, 0, 0.4);
 }
-.icon-selected.fa-hand-paper-o {
+.icon-selected.fa-hand-paper {
     box-shadow: 0px 0px 3px 3px #ffa500;
     background-color: #ffa500;
 }
@@ -523,16 +523,6 @@ tr.is_publish {
 .gradeable .component .content-block {
 }
 
-/* Save tools */
-
-.save-tools-cancel:hover {
-    background-color: #FCC;
-}
-
-.save-tools-save:hover {
-    background-color: #CFC;
-}
-
 .gradeable .ta-rubric-table,
 .gradeable .received-marks-list {
     padding: 8px 0px;
@@ -625,7 +615,7 @@ tr.is_publish {
 
 .gradeable .mark-container span.mark-title textarea {
     width: 100%;
-    resize: vertical;
+    resize: none;
     min-height: 20px;
 }
 

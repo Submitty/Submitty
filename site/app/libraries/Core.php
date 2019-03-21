@@ -84,7 +84,7 @@ class Core {
 
     /**
      * Load the config details for the application. This takes in a file from the ../../../config as well as
-     * then a config.ini contained in {$SUBMITTY_DATA_DIR}/courses/{$SEMESTER}/{$COURSE}/config directory. These
+     * then a config.json contained in {$SUBMITTY_DATA_DIR}/courses/{$SEMESTER}/{$COURSE}/config directory. These
      * files contain details about how the database, location of files, late days settings, etc.
      *
      * Config model will throw exceptions if we cannot find a given $semester or $course on the filesystem.
@@ -100,12 +100,12 @@ class Core {
         $this->config->loadMasterConfigs($conf_path);
 
         if (!empty($semester) && !empty($course)) {
-            $course_ini_path = FileUtils::joinPaths($this->config->getCoursePath(), "config", "config.ini");
-            if (file_exists($course_ini_path) && is_readable ($course_ini_path)) {
-                $this->config->loadCourseIni($course_ini_path);
+            $course_json_path = FileUtils::joinPaths($this->config->getCoursePath(), "config", "config.json");
+            if (file_exists($course_json_path) && is_readable ($course_json_path)) {
+                $this->config->loadCourseJson($course_json_path);
             }
             else{
-              $message = "Unable to access configuration file " . $course_ini_path . " for " . $semester . " " . $course . " please contact your system administrator.";
+              $message = "Unable to access configuration file " . $course_json_path . " for " . $semester . " " . $course . " please contact your system administrator.";
                 $this->addErrorMessage($message);
             }
         }

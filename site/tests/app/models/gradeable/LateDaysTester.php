@@ -2,6 +2,7 @@
 
 use app\libraries\Core;
 use app\libraries\DateUtils;
+use app\libraries\GradeableType;
 use app\models\Config;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\AutoGradedVersion;
@@ -20,6 +21,7 @@ class LateDaysTester extends BaseUnitTest {
         $gradeable->method('getSubmissionDueDate')->willReturn(new \DateTime($due_date));
         $gradeable->method('getLateDays')->willReturn($late_days);
         $gradeable->method('getId')->willReturn($gradeable_id);
+        $gradeable->method('getType')->willReturn(GradeableType::ELECTRONIC_FILE);
 
         $auto_graded_gradeable = $this->createMockModel(AutoGradedGradeable::class);
         if ($submission_date !== '') {

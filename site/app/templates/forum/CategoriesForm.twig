@@ -5,7 +5,7 @@
     <span  style="float: right;">
         <input id="new_category_text" placeholder="New Category" style="resize:none;" rows="1" type="text" name="new_category" id="new_category" />
         <button type="button" title="Add new category" onclick="addNewCategory();" style="margin-left:10px;" class="btn btn-primary btn-sm">
-            <i class="fa fa-plus-circle fa-1x"></i> Add category
+            <i class="fas fa-plus-circle fa-1x"></i> Add category
         </button>
     </span>
     <pre>(Drag to re-order)</pre><br>
@@ -19,15 +19,15 @@
         {# TODO: scrollbar #}
         {% for category in categories %}
             <li id="categorylistitem-{{ category.category_id }}" {% if loop.index != 1 %} class="category-sortable"{% endif %} style="color: {{ category.color }}; {% if loop.index == 1 %}display: none;{% endif %}">
-                <i class="fa fa-bars handle" aria-hidden="true" title="Drag to reorder"></i>
+                <i class="fas fa-bars handle" aria-hidden="true" title="Drag to reorder"></i>
                 <span class="categorylistitem-desc">
                     <span>{{ category.category_desc }}</span>
-                    <a class="post_button" title="Edit Category Description"><i class="fa fa-edit" aria-hidden="true"></i></a>
+                    <a class="post_button" title="Edit Category Description"><i class="fas fa-edit" aria-hidden="true"></i></a>
                 </span>
                 <span class="categorylistitem-editdesc" style="display: none;">
                     <input type="text" placeholder="New Description of Category" style="padding: 0;">
-                    <a class="post_button" title="Save Changes"><i class="fa fa-check" aria-hidden="true"></i></a>
-                    <a class="post_button" title="Cancel Changes"><i class="fa fa-times" aria-hidden="true"></i></a>
+                    <a class="post_button" title="Save Changes"><i class="fas fa-check" aria-hidden="true"></i></a>
+                    <a class="post_button" title="Cancel Changes"><i class="fas fa-times" aria-hidden="true"></i></a>
                 </span>
                 <div style="float: right;width: auto;">
                     <select class='category-color-picker' style="color: white;font-size: 14px;height: 18px;padding: 0px;">
@@ -36,7 +36,7 @@
                         {% endfor %}
                     </select>
                     &nbsp;
-                    <a class="post_button" title="Delete Category"><i class="fa fa-trash" aria-hidden="true"></i></a>
+                    <a class="post_button" title="Delete Category"><i class="fas fa-trash" aria-hidden="true"></i></a>
                 </div>
             </li>
         {% endfor %}
