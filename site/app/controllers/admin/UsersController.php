@@ -645,7 +645,7 @@ class UsersController extends AbstractController {
         foreach($graders_to_update as $grader_data) {
             $grader = $this->core->getQueries()->getUserById($grader_data[0]);
             $grader->setGroup($grader_data[4]);
-            $this->core->getQueries()->updateUser($grader, $semester, $course, $auth);
+            $this->core->getQueries()->updateUser($grader, $semester, $course);
         }
 
         $added = count($graders_to_add);
