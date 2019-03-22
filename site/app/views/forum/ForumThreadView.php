@@ -523,6 +523,8 @@ HTML;
         if($this->core->getUser()->getGroup() <= 2){
         	$this->core->getOutput()->addInternalCss('chosen.min.css');
         	$this->core->getOutput()->addInternalJs('chosen.jquery.min.js');
+        	$this->core->getOutput()->addInternalCss('flatpickr.min.css');
+        	$this->core->getOutput()->addInternalJs('flatpickr.js');
 			$current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
 			$current_thread_date = $current_thread_first_post["timestamp"];
 			$merge_thread_list = $this->core->getQueries()->getThreadsBefore($current_thread_date, 1);
@@ -679,6 +681,14 @@ HTML;
 							<i class="fa ${fa_icon}" style="margin-right:${fa_margin_right}; padding-left:3px; position:relative; float:right; display:inline-block; color:${fa_color}; font-size:${fa_font_size};" title = "${tooltip}" aria-hidden="true"></i>
 HTML;
 						}
+						if($this->core->getQueries()->isThreadLocked($thread['id']))
+                        {
+                            $return .= <<<HTML
+                            <i class="fas fa-lock" style="padding-left:3px;position:relative; float:right; display:inline-block; color: white; -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: black;" title="Locked" aria-hidden="true"></i>
+HTML;
+
+                        }
 						$categories_content = array();
 						foreach ($thread["categories_desc"] as $category_desc) {
 							$categories_content[] = array(htmlentities($category_desc, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
@@ -754,6 +764,7 @@ HTML;
 	public function createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level, $display_option){
 		$current_user = $this->core->getUser()->getId();
 		$post_html = "";
+		$locked_thread = $this->core->getQueries()->isThreadLocked($thread_id);
 		$post_id = $post["id"];
 		$thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
 
@@ -931,6 +942,7 @@ HTML;
 							"show_merge_thread_button" => false,
 							"post_box_id" => $post_box_id,
 							"show_anon" => true,
+                            "locked_thread" => $locked_thread,
 							"submit_label" => "Submit Reply to {$visible_username}",
 						]);
 						$return .= <<<HTML
@@ -1015,11 +1027,13 @@ HTML;
 			<form style="margin-right: 15px; margin-left:15px;" id="thread_form" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread'))}" enctype="multipart/form-data">
 			<h3 style="margin-bottom:10px;"> Create Thread </h3>
 HTML;
-
+                $this->core->getOutput()->addInternalJs("flatpickr.js");
+                $this->core->getOutput()->addInternalCss('flatpickr.min.css');
 				$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig", [
 					"show_title" => true,
 					"show_post" => true,
 					"post_textarea_large" => true,
+                    "show_lock_date" => true,
 					"post_content_placeholder" => "Enter your post here...",
 					"show_categories" => true,
 					"post_box_id" => 1,

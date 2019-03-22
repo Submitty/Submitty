@@ -314,6 +314,7 @@ class ForumController extends AbstractController {
         $title = $_POST["title"];
         $thread_post_content = str_replace("\r", "", $_POST["thread_post_content"]);
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
+        $lock_thread_date = $_POST['lock_thread_date'];
         $thread_status = $_POST["thread_status"];
         $announcment = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->getGroup() < 3) ? 1 : 0 ;
         $email_announcement = (isset($_POST["EmailAnnouncement"]) && $_POST["EmailAnnouncement"] == "EmailAnnouncement" && $this->core->getUser()->getGroup() < 3) ? 1 : 0 ;
@@ -334,7 +335,7 @@ class ForumController extends AbstractController {
                 $result['next_page'] = $hasGoodAttachment[1];
             } else {
                 // Good Attachment
-                $result = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_post_content, $anon, $announcment, $thread_status, $hasGoodAttachment[0], $categories_ids);
+                $result = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_post_content, $anon, $announcment, $thread_status, $hasGoodAttachment[0], $categories_ids, $lock_thread_date);
                 $id = $result["thread_id"];
                 $post_id = $result["post_id"];
 
@@ -389,6 +390,9 @@ class ForumController extends AbstractController {
         } else if(!$this->core->getQueries()->existsPost($thread_id, $parent_id)) {
             $this->core->addErrorMessage("There was an error submitting your post. Parent post doesn't exist in given thread.");
             $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'));
+        } else if($this->core->getQueries()->isThreadLocked($thread_id) and $this->core->getUser()->getGroup() > 1 ) {
+            $this->core->addErrorMessage("Thread is locked.");
+            $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', "thread_id" => $thread_id));
         } else {
             $hasGoodAttachment = $this->checkGoodAttachment(false, $thread_id, $file_post);
             if($hasGoodAttachment[0] == -1){
@@ -485,7 +489,11 @@ class ForumController extends AbstractController {
                 $this->core->addErrorMessage("You do not have permissions to do that.");
                 return;
         }
-        if($modifyType == 0) { //delete post or thread
+        if($this->core->getQueries()->isThreadLocked($_POST['edit_thread_id']) and $this->core->getUser()->getGroup() > 1 ){
+            $this->core->addErrorMessage("Thread is locked");
+            $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $_POST['edit_thread_id'])));
+        }
+        else if($modifyType == 0) { //delete post or thread
             $thread_id = $_POST["thread_id"];
             $type = "";
             if($this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 1)){
@@ -567,6 +575,12 @@ class ForumController extends AbstractController {
             if(!$this->checkThreadEditAccess($thread_id)) {
                 return false;
             }
+            if(empty($_POST['lock_thread_date'])){
+                $lock_thread_date = null;
+            }
+            else{
+                $lock_thread_date = $_POST['lock_thread_date'];
+            }
             $thread_title = $_POST["title"];
             $status = $_POST["thread_status"];
             $categories_ids  = array();
@@ -578,7 +592,7 @@ class ForumController extends AbstractController {
             if(!$this->isValidCategories($categories_ids)) {
                 return false;
             }
-            return $this->core->getQueries()->editThread($thread_id, $thread_title, $categories_ids, $status);
+            return $this->core->getQueries()->editThread($thread_id, $thread_title, $categories_ids, $status, $lock_thread_date);
         }
         return null;
     }
@@ -796,6 +810,7 @@ class ForumController extends AbstractController {
 
     private function getThreadContent($thread_id, &$output){
         $result = $this->core->getQueries()->getThread($thread_id)[0];
+        $output['lock_thread_date'] = $result['lock_thread_date'];
         $output['title'] = $result["title"];
         $output['categories_ids'] = $this->core->getQueries()->getCategoriesIdForThread($thread_id);
         $output['thread_status'] = $result["status"];
