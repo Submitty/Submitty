@@ -2,7 +2,9 @@
 max-line-length = 88
 exclude=
     .git,
-    .setup,
+    .setup/bin,
+    .setup/CONFIGURE_SUBMITTY.py,
+    .setup/update_database.py,
     bin/extract_notes_page.py,
     bin/generate_repos.py,
     bin/grading_done.py,

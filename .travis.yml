@@ -20,13 +20,13 @@ jobs:
     # Test if the name of the PR starts with [WIP] and fail at this stage if it does
     - if: type = pull_request
       stage: pr test for wip
-      php: 7.0
+      language: python
+      python: 3.6
+      install:
+        - pip3 install requests
       script:
-        - echo "Getting title for ${TRAVIS_REPO_SLUG}/pulls/${TRAVIS_PULL_REQUEST}"
-        - TITLE=$(curl -s https://api.github.com/repos/${TRAVIS_REPO_SLUG}/pulls/${TRAVIS_PULL_REQUEST} | jq -r '.title' | tr '[:upper:]' '[:lower:]')
-        - echo "PR Title => ${TITLE}"
-        # We just output false instead of doing "exit 1" or "travis_terminate 1" so that Travis can do any post-script steps
-        - if [ "${TITLE:0:4}" = "wip:" ] || [ "${TITLE:0:5}" = "[wip]" ]; then echo "[WIP] tag detected, build failed. Remove [WIP] tag and re-run build when ready for merging."; false; fi
+        - echo "Checking title for ${TRAVIS_REPO_SLUG}/pulls/${TRAVIS_PULL_REQUEST}"
+        - python3 ${TRAVIS_BUILD_DIR}/.setup/travis/check_wip.py ${TRAVIS_REPO_SLUG} ${TRAVIS_PULL_REQUEST}
 
     # Warm up the pip and composer caches to use it for the rest of the build stages
     - &00-cache
