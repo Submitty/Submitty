@@ -698,10 +698,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         json.dump(queue_obj,outfile,sort_keys=True,indent=4,separators=(',', ': '))
 
     try:
-        with open(os.path.join(tmp_work,"results.json"), 'r') as read_file:
-            results_obj = json.load(read_file)
-        with open(os.path.join(tmp_results,"results.json"), 'w') as outfile:
-            json.dump(results_obj,outfile,sort_keys=True,indent=4,separators=(',', ': '))
+        shutil.move(os.path.join(tmp_work, "results.json"), os.path.join(tmp_results, "results.json"))
     except:
         with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
             print ("\n\nERROR: Grading incomplete -- Could not open/write ",os.path.join(tmp_work,"results.json"))
