@@ -314,7 +314,11 @@ class ForumController extends AbstractController {
         $title = $_POST["title"];
         $thread_post_content = str_replace("\r", "", $_POST["thread_post_content"]);
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
-        $lock_thread_date = $_POST['lock_thread_date'];
+        if(empty($_POST['lock_thread_date'] and !DateUtils::validateTimestamp($_POST['lock_thread_date']))){
+            $lock_thread_date = null;
+        } else {
+            $lock_thread_date = $_POST['lock_thread_date'];
+        }
         $thread_status = $_POST["thread_status"];
         $announcment = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->getGroup() < 3) ? 1 : 0 ;
         $email_announcement = (isset($_POST["EmailAnnouncement"]) && $_POST["EmailAnnouncement"] == "EmailAnnouncement" && $this->core->getUser()->getGroup() < 3) ? 1 : 0 ;
@@ -390,7 +394,7 @@ class ForumController extends AbstractController {
         } else if(!$this->core->getQueries()->existsPost($thread_id, $parent_id)) {
             $this->core->addErrorMessage("There was an error submitting your post. Parent post doesn't exist in given thread.");
             $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'));
-        } else if($this->core->getQueries()->isThreadLocked($thread_id) and $this->core->getUser()->getGroup() > 1 ) {
+        } else if($this->core->getQueries()->isThreadLocked($thread_id) and !$this->core->getUser()->accessAdmin() ) {
             $this->core->addErrorMessage("Thread is locked.");
             $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', "thread_id" => $thread_id));
         } else {
@@ -489,7 +493,7 @@ class ForumController extends AbstractController {
                 $this->core->addErrorMessage("You do not have permissions to do that.");
                 return;
         }
-        if($this->core->getQueries()->isThreadLocked($_POST['edit_thread_id']) and $this->core->getUser()->getGroup() > 1 ){
+        if($this->core->getQueries()->isThreadLocked($_POST['edit_thread_id']) and !$this->core->getUser()->accessAdmin() ){
             $this->core->addErrorMessage("Thread is locked");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $_POST['edit_thread_id'])));
         }
@@ -575,7 +579,7 @@ class ForumController extends AbstractController {
             if(!$this->checkThreadEditAccess($thread_id)) {
                 return false;
             }
-            if(empty($_POST['lock_thread_date'])){
+            if(empty($_POST['lock_thread_date']) and !DateUtils::validateTimestamp($_POST['lock_thread_date'])){
                 $lock_thread_date = null;
             }
             else{
