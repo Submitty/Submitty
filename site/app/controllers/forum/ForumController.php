@@ -315,7 +315,7 @@ class ForumController extends AbstractController {
         $thread_post_content = str_replace("\r", "", $_POST["thread_post_content"]);
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
         $thread_status = $_POST["thread_status"];
-        $announcment = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->getGroup() < 3) ? 1 : 0 ;
+        $announcement = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->getGroup() < 3) ? 1 : 0 ;
         $email_announcement = (isset($_POST["EmailAnnouncement"]) && $_POST["EmailAnnouncement"] == "EmailAnnouncement" && $this->core->getUser()->getGroup() < 3) ? 1 : 0 ;
 
         $categories_ids  = array();
@@ -334,7 +334,7 @@ class ForumController extends AbstractController {
                 $result['next_page'] = $hasGoodAttachment[1];
             } else {
                 // Good Attachment
-                $result = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_post_content, $anon, $announcment, $thread_status, $hasGoodAttachment[0], $categories_ids);
+                $result = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_post_content, $anon, $announcement, $thread_status, $hasGoodAttachment[0], $categories_ids);
                 $id = $result["thread_id"];
                 $post_id = $result["post_id"];
 
@@ -353,7 +353,7 @@ class ForumController extends AbstractController {
 
                 }
 
-                $notification = new Notification($this->core, array('component' => 'forum', 'type' => $announcment ? 'new_announcement' : 'new_thread', 'thread_id' => $id, 'thread_title' => $title));
+                $notification = new Notification($this->core, array('component' => 'forum', 'type' => $announcement ? 'new_announcement' : 'new_thread', 'thread_id' => $id, 'thread_title' => $title));
                 $this->core->getQueries()->pushNotification($notification);
 
                 if($email_announcement) {
