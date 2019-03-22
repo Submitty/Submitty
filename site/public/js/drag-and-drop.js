@@ -767,7 +767,19 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
 
     var textbox_answers = [];
     for (var i = 0; i < num_textboxes; i++) {
-        textbox_answers[i] = $("#textbox_"+i).val();
+        var textbox = $("#textbox_"+i);
+        if(textbox.attr('type') === 'text'){
+            textbox_answers[i] = textbox.val();
+        }
+        else if(textbox.attr('type') === 'radio'){
+            textbox_answers[i] = $("input[name='textbox_"+i+"']:checked").val();
+        }else if(textbox.attr('type') === 'checkbox'){
+            textbox_answers[i] = "";
+            $("input[name='textbox_"+i+"']:checked").each(function(j){
+                textbox_answers[i] += $(this).val()+',';
+            });
+            textbox_answers[i] = textbox_answers[i].slice(0,-1);
+        }
     }
     formData.append('textbox_answers', JSON.stringify(textbox_answers));
 

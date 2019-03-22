@@ -2,11 +2,12 @@
 
     "autograding" : {
         "submission_to_validation" : [ "*.txt", "*.png" ],
-        "work_to_details" : [ "*.txt", "*.png" ]
+        "work_to_details" : [ "*.txt", "*.png" ],
+        "submission_to_runner": ["*.txt"]
     },
     "textboxes" : [
         { 
-            "label": "The above animal:",
+            "label": "The below animal:",
             "images": [
                 {
                     "image_name" : "image1.png"
@@ -20,7 +21,7 @@
             "filename" : "description.txt"
         },
         {    
-            "label": "Write a haiku about one of the above images:",
+            "label": "Write a haiku about one of the below images:",
             "images": [
                 {
                     "image_name" : "image2.png",
@@ -43,7 +44,31 @@
         { 
             "label": "Number of hours spent on this assignment:",
             "filename" : "hours.txt"
+        },
+        {
+            "label": "Which pink floyd song is your favourite?",
+            "filename": "fav_song.txt",
+            "type": "radio",
+            "options": [
+                "Hey You",
+                "Welcome To The Machine",
+                "Shine On You Crazy Diamond",
+                "Have A Cigar",
+                "All of the above"
+            ]
+        },
+        {
+            "label": "Trump nicknames?",
+            "filename": "nicknames.txt",
+            "type": "checkbox",
+            "options": [
+                "Drumpf",
+                "Mr. Trump",
+                "Trumpet",
+                "President Trump"
+            ]
         }
+
     ],
     "testcases" : [ 
         {
@@ -69,6 +94,40 @@
             "title" : "Review Hours",
             "actual_file" : "hours.txt",
             "points" : 0
+        },
+        {
+            "type" : "FileCheck",
+            "title" : "Review Favourite Song",
+            "actual_file" : "fav_song.txt",
+            "points" : 0
+        },
+        {
+            "type" : "FileCheck",
+            "title" : "Review Nick Names",
+            "actual_file" : "nicknames.txt",
+            "points" : 0
+        },
+        {
+            "title": "Fav Song Check",
+            "points": 5,
+            "validation": [
+                {
+                    "method": "diff",
+                    "actual_file": "fav_song.txt",
+                    "expected_file": "fav_song_ans.txt"
+                }
+            ]
+        },
+        {
+            "title": "Nicknames Check",
+            "points": 5,
+            "validation": [
+                {
+                    "method": "diff",
+                    "actual_file": "nicknames.txt",
+                    "expected_file": "nicknames_ans.txt"
+                }
+            ]
         }
     ]
 }

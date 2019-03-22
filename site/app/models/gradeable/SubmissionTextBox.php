@@ -27,6 +27,10 @@ class SubmissionTextBox extends AbstractModel {
     protected $label;
     /** @property @var int The row height for the text box */
     protected $row_count;
+    /** @property @var type of the textbox('radio', 'textbox', 'checkbox')*/
+    protected  $type;
+    /** @property @var options available for checkbox and radio type*/
+    protected  $options;
 
     public function __construct(Core $core, array $details) {
         parent::__construct($core);
@@ -45,6 +49,12 @@ class SubmissionTextBox extends AbstractModel {
                 'name' => $image_details['image_name']
             ];
         }, $details['images'] ?? []);
+
+        $this->type = $details['type'];
+        $this->options=NULL;
+        if($this->type == 'radio' || $this->type == 'checkbox') {
+            $this->options = $details['options'];
+        }
     }
 
     public function setFileName() {

@@ -176,6 +176,11 @@ int main(int argc, char *argv[]) {
       // default #rows = 0 => single row, non resizeable, textbox
       textbox["rows"]  = (*textboxes)[i].value("rows",0);
       assert (int(textbox["rows"]) >= 0);
+      textbox["type"] = (*textboxes)[i].value("type", "textbox");
+      if(textbox["type"] == "radio" || textbox["type"] == "checkbox"){
+        textbox["options"] = (*textboxes)[i].value("options", nlohmann::json::array({}));
+        assert(textbox["options"].size() >= 1   );
+      }
       textbox["filename"] = (*textboxes)[i].value("filename","textbox_"+std::to_string(i)+".txt");
       //list of images to display above the text box
       textbox["images"] = (*textboxes)[i].value("images", nlohmann::json::array({}));
