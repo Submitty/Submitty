@@ -20,8 +20,8 @@ try:
     with open(os.path.join(CONFIG_PATH, 'database.json')) as open_file:
         CONFIG = json.load(open_file)
 
-    EMAIL_USER = CONFIG['email_user']
-    EMAIL_PASSWORD = CONFIG['email_password']
+    EMAIL_USER = CONFIG.get('email_user', None)
+    EMAIL_PASSWORD = CONFIG.get('email_password', None)
     EMAIL_SENDER = CONFIG['email_sender']
     EMAIL_HOSTNAME = CONFIG['email_server_hostname']
     EMAIL_PORT = int(CONFIG['email_server_port'])
@@ -60,9 +60,15 @@ def setup_db():
 def construct_mail_client():
     """Authenticate with an SMTP server and return a reference to the connection."""
     client = smtplib.SMTP(EMAIL_HOSTNAME, EMAIL_PORT)
-    client.starttls()
+    # attempt to use TLS for connection, but don't require it
+    try:
+        client.starttls()
+    except smtplib.SMTPNotSupportedError:
+        pass
     client.ehlo()
-    client.login(EMAIL_USER, EMAIL_PASSWORD)
+
+    if EMAIL_USER is not None:
+        client.login(EMAIL_USER, EMAIL_PASSWORD)
 
     return client
 

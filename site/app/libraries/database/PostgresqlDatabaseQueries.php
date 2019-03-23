@@ -1855,5 +1855,41 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             $ids,
             $gradeable_constructor);
     }
+
+    public function getActiveVersions(Gradeable\Gradeable $gradeable, array $submitter_ids) {
+        if (count($submitter_ids) === 0) {
+            return [];
+        }
+
+        // (?), (?), (?)
+        $id_placeholders = implode(',', array_fill(0, count($submitter_ids), '(?)'));
+
+        $query = "
+            SELECT ids.id, (CASE WHEN m IS NULL THEN 0 ELSE m END) AS max
+            FROM (VALUES $id_placeholders) ids(id)
+            LEFT JOIN (
+              (SELECT user_id AS id, active_version as m
+              FROM electronic_gradeable_version
+              WHERE g_id = ? AND user_id IS NOT NULL)
+            
+              UNION
+            
+              (SELECT team_id AS id, active_version as m
+              FROM electronic_gradeable_version
+              WHERE g_id = ? AND team_id IS NOT NULL)
+            ) AS versions
+            ON versions.id = ids.id
+        ";
+
+        $params = array_merge($submitter_ids, [$gradeable->getId(), $gradeable->getId()]);
+
+        $this->course_db->query($query, $params);
+        $versions = [];
+        foreach ($this->course_db->rows() as $row) {
+            $versions[$row["id"]] = $row["max"];
+        }
+        return $versions;
+    }
+
 }
 
