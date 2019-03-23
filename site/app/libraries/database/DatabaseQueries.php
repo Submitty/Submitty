@@ -3362,7 +3362,6 @@ AND gc_id IN (
                   eg_has_discussion
                   )
                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
-            //throw new Exception();
         }
 
         // Make sure to create the rotating sections
