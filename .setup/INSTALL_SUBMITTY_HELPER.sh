@@ -561,6 +561,10 @@ fi
 ################################################################################################################
 ################################################################################################################
 
+# Obtains the current git hash and tag and stores them in the appropriate jsons.
+python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py
+chmod o+r ${SUBMITTY_INSTALL_DIR}/config/version.json
+
 installed_commit=$(jq '.installed_commit' /usr/local/submitty/config/version.json)
 most_recent_git_tag=$(jq '.most_recent_git_tag' /usr/local/submitty/config/version.json)
 echo -e "Completed installation of the Submitty version ${most_recent_git_tag//\"/}, commit ${installed_commit//\"/}\n"
@@ -643,10 +647,6 @@ do
     chown ${DAEMON_USER}:$myuser $mydir
     chmod 770 $mydir
 done
-
-#Obtains the current git hash and tag and stores them in the appropriate jsons.
-python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py
-chmod o+r ${SUBMITTY_INSTALL_DIR}/config/version.json
 
 
 #############################################################################
