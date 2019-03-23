@@ -1,5 +1,4 @@
 {% import _self as self %}
-<script type="text/javascript" language="javascript" src="js/jquery-ui-timepicker-addon.js"></script>
 
 <div class="content">
     {% if userGroup == 1 %}
@@ -140,29 +139,12 @@
     }
 
     $(document).ready(function() {
-        $(function() {
-            $( ".date_picker" ).datetimepicker({
-                dateFormat: 'yy-mm-dd',
-                timeFormat: "HH:mm:ssz",
-                showButtonPanel: true,
-                showTimezone: false,
-                showMillisec: false,
-                showMicrosec: false,
-                beforeShow: function( input ) {
-                    setTimeout(function() {
-                        var buttonPane = $( input )
-                            .datepicker( "widget" )
-                            .find( ".ui-datepicker-buttonpane" );
-
-                        $( "<button>", {
-                            text: "Infinity",
-                            click: function() {
-                                $.datepicker._curInst.input.datepicker('setDate', "9999-12-31 23:59:59-0400").datepicker('hide');
-                            }
-                        }).appendTo( buttonPane ).addClass("ui-datepicker-clear ui-state-default ui-priority-primary ui-corner-all");
-                    }, 1 );
-                }
-            });
+        flatpickr(".date_picker", {
+            allowInput: true,
+            enableTime: true,
+            enableSeconds: true,
+            time_24hr: true,
+            dateFormat: "Y-m-d H:i:S",
         });
     });
 </script>

@@ -107,19 +107,25 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
 }
 
 function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = ''){
-    orig_div_name = div_name
+    let orig_div_name = div_name;
     div_name = "#" + div_name;
-    var isVisible = $( div_name ).is( " :visible" );
 
-    if(isVisible){
-        toggleDiv(orig_div_name);
+    let loadingTools = $("#tc_" + index).find(".loading-tools");
+
+    if($(div_name).is(":visible")){
         $("#show_char_"+index).toggle();
         $(div_name).empty();
+        toggleDiv(orig_div_name);
+
+        loadingTools.find("span").hide();
+        loadingTools.find(".loading-tools-show").show();
     }else{
         $("#show_char_"+index).toggle();
         var url = buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'load_student_file',
             'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index, 'version' : version});
 
+        loadingTools.find("span").hide();
+        loadingTools.find(".loading-tools-in-progress").show();
         $.getJSON({
             url: url,
             success: function(response) {
@@ -130,6 +136,9 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
                 $(div_name).empty();
                 $(div_name).html(response.data);
                 toggleDiv(orig_div_name);
+
+                loadingTools.find("span").hide();
+                loadingTools.find(".loading-tools-hide").show();
             },
             error: function(e) {
                 alert("Could not load diff, please refresh the page and try again.");
@@ -1522,7 +1531,7 @@ function changeThreadStatus(thread_id) {
 					return;
 				}
 				window.location.reload();
-				var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Thread marked as resolved.</div>';
+				var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Thread marked as resolved.</div>';
 					$('#messages').append(message);
 			},
 			error: function() {
@@ -1959,7 +1968,7 @@ function addNewCategory(){
                     $('#messages').append(message);
                     return;
                 }
-                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Successfully created category "'+ escapeSpecialChars(newCategory) +'".</div>';
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Successfully created category "'+ escapeSpecialChars(newCategory) +'".</div>';
                 $('#messages').append(message);
                 $('#new_category_text').val("");
                 // Create new item in #ui-category-list using dummy category
@@ -2006,7 +2015,7 @@ function deleteCategory(category_id, category_desc){
                     $('#messages').append(message);
                     return;
                 }
-                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Successfully deleted category "'+ escapeSpecialChars(category_desc) +'"</div>';
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Successfully deleted category "'+ escapeSpecialChars(category_desc) +'"</div>';
                 $('#messages').append(message);
                 $('#categorylistitem-'+category_id).remove();
                 refreshCategories();
@@ -2046,7 +2055,7 @@ function editCategory(category_id, category_desc, category_color) {
                     $('#messages').append(message);
                     return;
                 }
-                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Successfully updated!</div>';
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Successfully updated!</div>';
                 $('#messages').append(message);
                 setTimeout(function() {removeMessagePopup('theid');}, 1000);
                 if(category_color !== null) {
@@ -2163,7 +2172,7 @@ function reorderCategories(){
                     $('#messages').append(message);
                     return;
                 }
-                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Successfully reordered categories.';
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Successfully reordered categories.';
                 $('#messages').append(message);
                 setTimeout(function() {removeMessagePopup('theid');}, 1000);
                 refreshCategories();
@@ -2355,7 +2364,7 @@ function updateHomeworkExtensions(data) {
             $('#user_id').val(this.defaultValue);
             $('#late_days').val(this.defaultValue);
             $('#csv_upload').val(this.defaultValue);
-            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Updated exceptions for ' + json['gradeable_id'] + '.</div>';
+            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Updated exceptions for ' + json['gradeable_id'] + '.</div>';
             $('#messages').append(message);
         },
         error: function() {
@@ -2407,7 +2416,7 @@ function refreshOnResponseLateDays(json) {
         $('#late_day_table').append('<tr><td colspan="6">No late days are currently entered.</td></tr>');
     }
     json['users'].forEach(function(elem){
-        elem_delete = "<a onclick=\"deleteLateDays('"+elem['user_id']+"', '"+elem['datestamp']+"');\"><i class='fas fa-close'></i></a>";
+        elem_delete = "<a onclick=\"deleteLateDays('"+elem['user_id']+"', '"+elem['datestamp']+"');\"><i class='fas fa-trash'></i></a>";
         var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_days'], elem['datestamp'], elem_delete + '</td></tr>'];
         $('#late_day_table').append(bits.join('</td><td>'));
     });
@@ -2439,7 +2448,7 @@ function updateLateDays(data) {
             $('#csv_upload').val(this.defaultValue);
             $('#csv_option_overwrite_all').prop('checked',true);
             //Display confirmation message
-            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Late days have been updated.</div>';
+            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Late days have been updated.</div>';
             $('#messages').append(message);
         },
         error: function() {
@@ -2471,7 +2480,7 @@ function deleteLateDays(user_id, datestamp) {
                     return;
                 }
                 refreshOnResponseLateDays(json);
-                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Late days entry removed.</div>';
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Late days entry removed.</div>';
                 $('#messages').append(message);
             },
             error: function() {
@@ -2580,9 +2589,17 @@ function toggleSidebar() {
 }
 
 $(document).ready(function() {
-    //Collapsed sidebar tooltips
+    //Collapsed sidebar tooltips with content depending on state of sidebar
     $('[data-toggle="tooltip"]').tooltip({
-        position: { my: "right+0 bottom+0" }
+        position: { my: "right+0 bottom+0" },
+        content: function () {
+            if($("#sidebar").hasClass("collapsed")) {
+                return $(this).attr("title")
+            }
+            else {
+                return ""
+            }
+        }
     });
     $("#nav-sidebar-collapse.collapse-icon").attr("title", "Expand Sidebar");
 
@@ -2598,3 +2615,20 @@ $(document).ready(function() {
     });
     checkSidebarCollapse();
 });
+
+// Credit to https://stackoverflow.com/a/24676492/2972004
+//      Solution to autoexpand the height of a textarea
+function auto_grow(element) {
+    element.style.height = "5px";
+    element.style.height = (element.scrollHeight + 5)+"px";
+}
+
+/**
+ * Sets the 'noscroll' textareas to have the correct height
+ */
+function resizeNoScrollTextareas() {
+    // Make sure textareas resize correctly
+    $('textarea.noscroll').each(function() {
+        auto_grow(this);
+    })
+}

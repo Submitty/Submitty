@@ -22,7 +22,7 @@
                 {% if overall_comment|length != 0 %}
             <hr>
             Overall note from Grader:
-            <span class='gradeable_comment'>{{ overall_comment|escape }}</span>
+            <span class='gradeable_comment'>{{ overall_comment|nl2br }}</span>
             {% endif %}
             </p>
         </div>
@@ -80,7 +80,7 @@
                                         {{ mark.points|number_format(num_decimals) }}
                                     </td>
                                     <td>
-                                        {{ mark.title|escape }}
+                                        {{ mark.title|nl2br }}
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -93,7 +93,7 @@
                                         {{ component.custom_mark_score|number_format(num_decimals) }}
                                     </td>
                                     <td>
-                                        {{ component.comment|escape }}
+                                        {{ component.comment|nl2br }}
                                     </td>
                                 </tr>
                             {% endif %}

@@ -22,6 +22,7 @@ apt-get install -qy python python-dev python3 python3-dev libpython3.4
 
 if [ ${VAGRANT} == 1 ]; then
     export SUBMISSION_URL='http://192.168.56.201'
+    export DATABASE_PORT=25432
 fi
 
 ############################

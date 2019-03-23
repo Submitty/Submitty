@@ -186,7 +186,7 @@ HTML;
 
         </script>
         <link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}css/iframe/codemirror.css" />
-<div style="padding:5px 5px 0px 5px;" class="content forum_content forum_show_threads">
+<div style="padding:5px 5px 0px 5px;" class="full_height content forum_content forum_show_threads">
 HTML;
 
         $return .= $this->core->getOutput()->renderTwigTemplate("admin/PlagiarismHighlightingKey.twig");
@@ -326,8 +326,8 @@ HTML;
         $provided_code_filename="";
         $threshold="5";
         $sequence_length="10";
-        $prior_term_gradeables_number = count($saved_config['prev_term_gradeables'])+1;
-        $ignore_submission_number = count($saved_config['ignore_submissions'])+1;
+        $prior_term_gradeables_number = $saved_config['prev_term_gradeables'] ? count($saved_config['prev_term_gradeables'])+1 : 1;
+        $ignore_submission_number = $saved_config['ignore_submissions'] ? count($saved_config['ignore_submissions'])+1 : 1;
         $ignore="";
         $no_ignore="checked";
 
