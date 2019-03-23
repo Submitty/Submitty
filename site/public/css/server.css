@@ -11,7 +11,9 @@ body {
     width: 100%;
     position: relative;
 }
-
+:root {
+    --viewed_content: #e8f1f8;
+}
 #site-body {
     /* OLD SEAFOAM GREEN COLOR */
     /* background-color: #B6CECE; */
@@ -109,6 +111,7 @@ a > i.far {
 a.btn {
     text-decoration: none;
 }
+
 
 /****************************
  * INPUT STYLES
@@ -715,7 +718,8 @@ table tr.table-header {
     background-color: #505050;
 }
 .new_post {
-    background-color: #e8eff8;
+    background-color: var(--viewed_content);
+    /*background-color: #d4e1f2;*/
 }
 .viewed_post{
     background-color: white;
@@ -744,19 +748,15 @@ table tr.table-header {
 }
 
 .new_thread{
-    background-color: #d8eef6;
+    /*background-color: #d8eef6;*/
+    background-color: var(--viewed_content);
+    /*background-color: #d4e1f2;*/
 }
-.forum_bar{ 
-    width: 4px; 
-    height: 104px; 
-    background-color: #f6fbfe; 
-    position: relative; 
-    left: -6px; 
-    top: -2px; 
+.btn-default.post_button_color{
+    background-color: inherit;
 }
-.new_post_bar:hover{ 
-    background-color: green; 
-}
+
+#bar{ width: 4px; height: 104px; background-color: blue; position: relative; left: -6px; top: -2px; }
 .box-title > h4 {
     margin-left: 20px;
 }

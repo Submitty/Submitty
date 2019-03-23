@@ -825,23 +825,23 @@ HTML;
 		if($display_option == 'tree'){
 			if(!$first){
 				$return .= <<<HTML
-					<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="replyPost({$post['id']})"> Reply</a>
+					<a class="btn btn-default btn-sm post_button_color" style=" text-decoration: none;" onClick="replyPost({$post['id']})"> Reply</a>
 HTML;
 			} else {
 				$return .= <<<HTML
-					<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="$('html, #posts_list').animate({ scrollTop: document.getElementById('posts_list').scrollHeight }, 'slow');"> Reply</a>
+					<a class="btn btn-default btn-sm post_button_color" style=" text-decoration: none;" onClick="$('html, #posts_list').animate({ scrollTop: document.getElementById('posts_list').scrollHeight }, 'slow');"> Reply</a>
 HTML;
 			}
 			if($this->core->getUser()->getGroup() <= 2) {
 				$return .= <<<HTML
-					<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="showHistory({$post['id']})">Show History</a>
+					<a class="btn btn-default btn-sm post_button_color" style=" text-decoration: none;" onClick="showHistory({$post['id']})">Show History</a>
 HTML;
 			}
 		}
 		if(($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) && $first && $thread_resolve_state == -1) {
 			//resolve button
 			$return .= <<<HTML
-				<a class="btn btn-default btn-sm" style="text-decoration: none;" onClick="changeThreadStatus({$post['thread_id']})" title="Mark thread as resolved">Mark as resolved</a>
+				<a class="btn btn-default btn-sm post_button_color" style="text-decoration: none;" onClick="changeThreadStatus({$post['thread_id']})" title="Mark thread as resolved">Mark as resolved</a>
 HTML;
 		}
 		$return .= <<<HTML
@@ -865,7 +865,7 @@ HTML;
 }
 		if(!$first){
 			$return .= <<<HTML
-				<a class="expand btn btn-default btn-sm" style="float:right; text-decoration:none; margin-top: -8px" onClick="hidePosts(this, {$post['id']})"></a>
+				<a class="expand btn btn-default btn-sm post_button_color" style="float:right; text-decoration:none; margin-top: -8px" onClick="hidePosts(this, {$post['id']})"></a>
 HTML;
 		}
 		if($this->core->getUser()->getGroup() <= 2 || $post['author_user_id'] === $current_user) {
