@@ -436,15 +436,19 @@ class HomeworkView extends AbstractView {
                     'url_full' => $url_full,
                     'cover_image' => $cover_image
                 ];
-                if($use_qr_codes){
-                    $is_valid = $this->core->getQueries()->getUserById($qr_file[$filename_full]['id']) !== null;
-                    $files[$count-1] += [
-                        'page_count' => $qr_file[$filename_full]['page_count'],
-                        'id' => $qr_file[$filename_full]['id'],
-                        'valid' => $is_valid
-                    ];
-                }
                 $count++;
+            }
+        }
+        if($use_qr_codes){
+            for ($i = 0; $i < count($files); $i++) {
+                if(!array_key_exists($files[$i]['filename_full'], $qr_file))
+                    continue;
+                $data = $qr_file[$files[$i]['filename_full']];
+                $is_valid = $this->core->getQueries()->getUserById($data['id']) !== null;
+                $files[$i] += ['page_count' => $data['page_count'],
+                               'id' => $data['id'],
+                               'valid' => $is_valid
+                              ];
             }
         }
         $semester = $this->core->getConfig()->getSemester();
@@ -452,15 +456,13 @@ class HomeworkView extends AbstractView {
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         $current_time = $this->core->getDateTimeNow()->format("m-d-Y_H:i:sO");
         $ch = curl_init();
-        $use_images = !$use_qr_codes && sizeof($cover_images) != 0;
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/BulkUploadBox.twig', [
             'gradeable_id' => $gradeable->getId(),
             'team_assignment' => $gradeable->isTeamAssignment(),
             'max_team_size' => $gradeable->getTeamSizeMax(),
             'count_array' => $count_array,
             'files' => $files,
-            'use_qr_codes' => $use_qr_codes,
-            'use_images' => $use_images
+            'use_qr_codes' => $use_qr_codes
         ]);
     }
 
