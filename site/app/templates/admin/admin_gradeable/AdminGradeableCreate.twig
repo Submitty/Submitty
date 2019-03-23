@@ -448,7 +448,9 @@
             },
             success:function (r){
                 var json = JSON.parse(r);
-                new_gradeable_id += json.count;
+                if(json.count!=0) {
+                    new_gradeable_id += json.count;
+                }
                 $('#g_id').val(new_gradeable_id);
             }
         });
