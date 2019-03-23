@@ -1722,6 +1722,14 @@ function setCustomMarkError(component_id, show_error) {
     }
 }
 
+/**
+ * Changes the disabled state of the edit mode box
+ * @param disabled
+ */
+function disableEditModeBox(disabled) {
+    $('#edit-mode-enabled').prop('disabled', disabled);
+}
+
 
 /**
  * DOM Callback methods
@@ -2011,10 +2019,15 @@ function onToggleEditMode(me) {
     // Get the open components so we know which one to open once they're all saved
     let open_component_ids = getOpenComponentIds();
     let reopen_component_id = NO_COMPONENT_ID;
+
+    // This prevents multiple sequential toggles from screwing things up
+    disableEditModeBox(true);
+
     if (open_component_ids.length !== 0) {
         reopen_component_id = open_component_ids[0];
     } else {
         updateEditModeEnabled();
+        disableEditModeBox(false);
         return;
     }
 
@@ -2037,6 +2050,9 @@ function onToggleEditMode(me) {
         .catch(function (err) {
             console.error(err);
             alert('Error reloading component! ' + err.message);
+        })
+        .then(function () {
+            disableEditModeBox(false);
         });
 }
 
