@@ -75,6 +75,7 @@ class Notification extends AbstractModel {
      */
     public function __construct(Core $core, $details=array()) {
         parent::__construct($core);
+        $this->core->addErrorMessage($details);
         if (count($details) == 0) {
             return;
         }
@@ -92,12 +93,14 @@ class Notification extends AbstractModel {
             $this->setNotifyNotToSource(true);
             $this->setCurrentUser($this->core->getUser()->getId());
             $this->setComponent($details['component']);
+            $this->core->addErrorMessage($details['component']);
             switch ($this->getComponent()) {
                 case 'forum':
                     $this->handleForum($details);
                     break;
-                case 'student':
+                case 'grading':
                     $this->handleStudent($details);
+                    break;
                 default:
                     // Prevent notification to be pushed in database
                     $this->setComponent("invalid");
@@ -173,8 +176,14 @@ class Notification extends AbstractModel {
       $this->setType($details['type']);
 
       switch ($details['type']) {
+        case 'grade_inquiry_creation':
+          $this->actAsGradeInquiryCreation($details['gradeable_id'], $details['grader_id']);
+          break;
         case 'grade_inquiry_response':
-          $this->actAsGradeInquiryResponse($details['gradeable_id'], $details['replier']);
+          $this->actAsGradeInquiryReply($details['gradeable_id'], $details['replier']);
+          break;
+        default:
+          return;
       }
 
     }
@@ -235,11 +244,21 @@ class Notification extends AbstractModel {
         $this->setNotifyTarget($target);
     }
 
-    private function actAsGradeInquiryResponse($gradeable_id, $replier, $target) {
-        $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'gradeable_id' => $gradeable_id)));
-        $this->setNotifyContent("New Grade Inquiry Reply");
-        $this->setNotifySource($replier);
-        $this->setNotifyTarget($target);
+
+    private function actAsGradeInquiryCreation($gradeable_id, $grader_id){
+      //for now, lets just assume one grader id
+      $this->core->addErrorMessage("in notification model..\n");
+      $this->setNotifyMetadata(json_encode(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable_id, 'who_id' => $user_id)));
+      $this->setNotifyContent("New Grade Inquiry");
+      $this->setNotifySource($grader_id);
+      $this->setNotifyTarget('student');
+    }
+
+    private function actAsGradeInquiryReply($gradeable_id, $replier, $target) {
+        // $this->setNotifyMetadata(json_encode(array('component' => 'grading', 'page' => 'electronic', 'action' = 'grade', 'gradeable_id' => $gradeable_id, 'who_id' => $user_id)));
+        // $this->setNotifyContent("New Grade Inquiry");
+        // // $this->setNotifySource();
+        // $this->setNotifyTarget($target);
 
     }
     /**
