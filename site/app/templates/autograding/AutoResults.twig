@@ -50,9 +50,17 @@
 
                 {# Details button #}
                 {% if testcase.has_extra_results and can_view_details %}
-                    <div style="float:right; color: #0000EE; text-decoration: underline">
-                        Details
-                    </div>
+                    <span class="loading-tools" style="float:right">
+                        <span class="loading-tools-hide" style="color: #0000EE; text-decoration: underline;" hidden>
+                            Hide Details
+                        </span>
+                        <span class="loading-tools-show" style="color: #0000EE; text-decoration: underline;">
+                            Show Details
+                        </span>
+                        <span class="loading-tools-in-progress" hidden>
+                            <i class="fas fa-circle-notch fa-spin save-button" aria-hidden="true"></i>Loading...
+                        </span>
+                    </span>
                 {% endif %}
                 {# /Details button #}
 
