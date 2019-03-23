@@ -3809,4 +3809,14 @@ AND gc_id IN (
               created)
             VALUES(?, ?, ?, NOW())", $parameters);
     }
+
+    /**
+     * @param $g_id
+     * @return array
+     */
+    public function getNumberWithGId($g_id){
+        $g_id .= '%';
+        $this->course_db->query('SELECT COUNT(*) FROM gradeable WHERE g_id LIKE ?', [$g_id]);
+        return $this->course_db->row();
+    }
 }

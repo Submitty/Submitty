@@ -57,6 +57,9 @@ class AdminGradeableController extends AbstractController {
             case 'import_components':
                 $this->importComponents();
                 break;
+            case 'number_g_id':
+                $this->numberWithGId();
+                break;
             default:
                 $this->newPage();
                 break;
@@ -967,6 +970,7 @@ class AdminGradeableController extends AbstractController {
         return null;
     }
 
+
     private function enqueueBuildFile($g_id) {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
@@ -1128,6 +1132,7 @@ class AdminGradeableController extends AbstractController {
         return is_file($daemon_queue_dir);
     }
 
+
     /**
      * Exports components to json and downloads for user
      */
@@ -1194,4 +1199,12 @@ class AdminGradeableController extends AbstractController {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
+
+    private function numberWithGId() {
+        $g_id = $_POST['g_id'];
+        $result = $this->core->getQueries()->getNumberWithGId($g_id);
+        $this->core->getOutput()->renderJson($result);
+        return $this->core->getOutput()->getOutput();
+    }
+
 }

@@ -439,7 +439,19 @@
     function checkGradeableId() {
         var gradeable_id = $('#g_id').val();
         var new_gradeable_id = gradeable_id.replace(/[^a-zA-Z0-9_\-]/g,'_');
-        $('#g_id').val(new_gradeable_id);
+        var url = buildUrl({'component': 'admin', 'page': 'admin_gradeable', "action": 'number_g_id'});
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: {
+                g_id: new_gradeable_id,
+            },
+            success:function (r){
+                var json = JSON.parse(r);
+                new_gradeable_id += json.count;
+                $('#g_id').val(new_gradeable_id);
+            }
+        });
     }
 
     function checkForm() {
