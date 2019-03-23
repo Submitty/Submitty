@@ -207,7 +207,7 @@ HTML;
 		</script>
 
 HTML;
-	if($this->core->getUser()->getGroup() <= 2){
+	if($this->core->getUser()->accessFullGrading()){
 		$return .= <<<HTML
 			<script>
 				function changeName(element, user, visible_username, anon){
@@ -255,7 +255,7 @@ HTML;
 	$show_deleted_class = '';
 	$show_deleted_action = '';
 	$show_deleted_title = '';
-	if($this->core->getUser()->getGroup() <= 2){
+	if($this->core->getUser()->accessFullGrading()){
 		if($show_deleted) {
 			$show_deleted_class = "active";
 			$show_deleted_action = "alterShowDeletedStatus(0);";
