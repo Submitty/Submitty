@@ -1,17 +1,5 @@
 {% import _self as self %}
 
-{% set container_class = '' %}
-{% set header_class = '' %}
-{% set nav_pos = '' %}
-{% set row_height = '' %}
-{% if fixed_height %}
-    {% set container_class = 'class=full_height' %}
-    {% set header_class = 'full_height' %}
-    {% set nav_pos = 'class=full_height' %}
-    {% set row_height = 'style=height:0px' %}
-{% endif %}
-
-
 <html lang="en">
 <head>
     <title>{{ page_title }}</title>
@@ -32,7 +20,7 @@
 </head>
 <script>var onAjaxInit;</script>
 <body data-site-url="{{ site_url }}" data-csrf-token="{{ core.getCsrfToken() }}" onload="if (onAjaxInit) { onAjaxInit(); }">
-<div id="container" {{ container_class }}>
+<div id="container">
     {% if wrapper_urls['top_bar.html'] != null %}
         {# uploaded homepage redirect can go here? #}
         <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="top_bar" src="{{ wrapper_urls['top_bar.html'] }}" frameborder="0"></iframe>
@@ -47,11 +35,16 @@
                 {% for message in messages %}
                     <div id='{{ message.type }}-{{ message.key }}' class="inner-message alert alert-{{ message.type }}">
                         <a class="fas fa-times message-close" onClick="removeMessagePopup('{{ message.type }}-{{ message.key }}');"></a>
-                        <i class="fas fa-times-circle"></i> {{ message.error }}
+                        {% if message.type == "error" %}
+                        <i class="fas fa-times-circle"></i> 
+                        {% else %}
+                        <i class="fas fa-check-circle"></i> 
+                        {% endif %}
+                        {{ message.error }}
                     </div>
                 {% endfor %}
             </div>
-            <div id="header" class="row {{ header_class }}">
+            <div id="header" class="row">
                 <div class="col-12 col-sm" id="header-text">
                     <div>
                         <h2>
@@ -85,7 +78,7 @@
                 <span>{{ system_message }}</span>
             </div>
             {% endif %}
-            <div class="row" id="push" {{ row_height }}>
+            <div class="row" id="push">
                 {% if sidebar_buttons|length > 0 %}
                     <div class="col-md-auto" id="sidebar">
                         <div id="nav-buttons-visible">
@@ -100,7 +93,7 @@
                     </div>
                 {% endif %}
                 <div class="col-md" id="nav-body">
-                    <div id="nav-positioner" {{ nav_pos }}>
+                    <div id="nav-positioner">
 {# Looks mismatched because this lines up with GlobalFooter.twig #}
 
 {% macro render_sidebar_button(button) %}
@@ -108,22 +101,6 @@
         <li class="short-line"></li>
     {% else %}
         <li>
-            {% if button.getIcon() != null %}
-                <a
-                    class="collapse-icon {{ button.getClass() }}"
-                    href="{{ button.getHref() }}"
-                    data-toggle="tooltip"
-                    title="{{ button.getTitle() }}"
-                    {% if button.getId() != "" %}
-                        id="{{ button.getId() }}"
-                    {% endif %}
-                >
-                    <i class="fa {{ button.getIcon() }}"></i>
-                    {% if button.getBadge() > 0 %}
-                        <span class="notification_badge">{{  button.getBadge() }} </span>
-                    {% endif %}
-                </a>
-            {% endif %}
             {% if button.getHref() == null %}
                 <span
                     {% if button.getClass() != "" %}
@@ -144,6 +121,8 @@
                 </span>
             {% else %}
                 <a href="{{ button.getHref() }}"
+                    data-toggle="tooltip"
+                    title="{{ button.getTitle() }}"
                     {% if button.getClass() != "" %}
                         class="{{ button.getClass() }}"
                     {% endif %}
@@ -155,11 +134,12 @@
                         <i class="fa {{ button.getIcon() }}"></i>
                     {% endif %}
 
-                    {{ button.getTitle() }}
+                    <span class="iconTitle"> {{ button.getTitle() }} </span>
                     {% if button.getBadge() > 0 %}
                         <span class="notification_badge">{{  button.getBadge() }} </span>
                     {% endif %}
                 </a>
+
             {% endif %}
         </li>
     {% endif %}
