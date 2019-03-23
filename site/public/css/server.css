@@ -702,7 +702,8 @@ table tr.table-header {
 
 .active {
     background-color: white;
-    color: #4a4a4a;
+    /*    color: #4a4a4a;*/
+    border: 3px solid #276394;
 }
 
 .deleted {
@@ -714,10 +715,10 @@ table tr.table-header {
     background-color: #505050;
 }
 .new_post {
-    background-color: #d8eef6;
+    background-color: #e8eff8;
 }
 .viewed_post{
-    
+    background-color: white;
 }
 
 .fa-post_seen {
@@ -739,13 +740,23 @@ table tr.table-header {
 }
 
 .viewed {
-
+    background-color: white;
 }
 
 .new_thread{
     background-color: #d8eef6;
 }
-
+.forum_bar{ 
+    width: 4px; 
+    height: 104px; 
+    background-color: #f6fbfe; 
+    position: relative; 
+    left: -6px; 
+    top: -2px; 
+}
+.new_post_bar:hover{ 
+    background-color: green; 
+}
 .box-title > h4 {
     margin-left: 20px;
 }
