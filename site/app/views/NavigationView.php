@@ -579,6 +579,9 @@ class NavigationView extends AbstractView {
                             //You forgot somebody
                             $class = 'btn-danger';
                             $title = 'GRADE';
+                        } else if(!is_nan($TA_percent) && $list_section === GradeableList::GRADING && $grades_due < $date && $date < $grades_released){
+                            $class = 'btn-danger';
+                            $title = 'GRADE';
                         }
                     }
 
