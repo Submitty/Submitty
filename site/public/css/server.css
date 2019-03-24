@@ -745,6 +745,7 @@ table tr.table-header {
 
 .viewed {
     background-color: white;
+    color: #6f6f6f;
 }
 
 .new_thread{
