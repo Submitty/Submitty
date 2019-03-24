@@ -169,6 +169,7 @@ HTML;
 		$filteredThreadExists = (count($threadsHead)>0);
 		$currentThread = -1;
 		$currentCategoriesIds = array();
+		$show_deleted_thread_title = null;
 		$currentCourse = $this->core->getConfig()->getCourse();
 		$threadFiltering = $threadExists && !$filteredThreadExists && !(empty($_COOKIE[$currentCourse . '_forum_categories']) && empty($_COOKIE['forum_thread_status']) && empty($_COOKIE['unread_select_value']) === 'false');
 
@@ -223,17 +224,6 @@ HTML;
 	$show_deleted_class = '';
 	$show_deleted_action = '';
 
-	if($this->core->getUser()->getGroup() <= 3){
-		if($show_deleted) {
-			$show_deleted_class = "active";
-			$show_deleted_action = "alterShowDeletedStatus(0);";
-      $show_deleted_thread_title = "Hide Deleted Threads";
-		} else {
-			$show_deleted_class = "";
-			$show_deleted_action = "alterShowDeletedStatus(1);";
-      $show_deleted_thread_title = "Show Deleted Threads";
-		}
-	}
 	$categories = $this->core->getQueries()->getCategories();
 
 	$cookieSelectedCategories = array();
@@ -278,7 +268,17 @@ HTML;
 								"show_threads" => true,
 								"thread_exists" => true
 	];
-
+		if($this->core->getUser()->getGroup() <= 3){
+			if($show_deleted) {
+				$show_deleted_class = "active";
+				$show_deleted_action = "alterShowDeletedStatus(0);";
+      			$show_deleted_thread_title = "Hide Deleted Threads";
+			} else {
+				$show_deleted_class = "";
+				$show_deleted_action = "alterShowDeletedStatus(1);";
+      			$show_deleted_thread_title = "Show Deleted Threads";
+			}
+		}
         if(!$threadExists){
         $button_params["show_threads"] = false;
         $button_params["thread_exists"] = false;
@@ -369,7 +369,7 @@ HTML;
 					</script>
 					<div id="posts_list" style="margin-top:10px;max-height: 100%" class="col-9">
 HTML;
-		$return .= $this->generatePostList($currentThread, $posts, $currentCourse, true, $threadExists, $display_option, $categories, $cookieSelectedCategories, $cookieSelectedThreadStatus, $currentCategoriesIds);
+		$return .= $this->generatePostList($currentThread, $posts, $unviewed_posts, $currentCourse, true, $threadExists, $display_option, $categories, $cookieSelectedCategories, $cookieSelectedThreadStatus, $cookieSelectedUnread, $currentCategoriesIds);
 
 		$return .= <<<HTML
 			<script>
@@ -385,11 +385,11 @@ HTML;
 
 		}
           
-
+		$this->core->getQueries()->visitThread($user, $activeThread['id']);
 		return $return;
 	}
 
-	public function generatePostList($currentThread, $posts, $currentCourse, $includeReply = false, $threadExists = false, $display_option = 'time', $categories = [], $cookieSelectedCategories = [], $cookieSelectedThreadStatus = [], $currentCategoriesIds = []) {
+	public function generatePostList($currentThread, $posts, $unviewed_posts, $currentCourse, $includeReply = false, $threadExists = false, $display_option = 'time', $categories = [], $cookieSelectedCategories = [], $cookieSelectedThreadStatus = [], $cookieSelectedUnread = false, $currentCategoriesIds = []) {
 
 		$return = '';
 		$title_html = '';
@@ -549,7 +549,6 @@ HTML;
 			"display_option" => $display_option,
 			"thread_exists" => $threadExists
 		]);
-		$this->core->getQueries()->visitThread($user, $activeThread['id']);
 		return $return;
 	}
 
