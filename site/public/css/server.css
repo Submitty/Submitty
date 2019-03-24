@@ -1260,7 +1260,7 @@ div.full_height {
     list-style-type: none;
     margin: 0;
     padding: 0;
-    width: 60%;
+    width: 65%;
 }
 
 #ui-category-list li {
@@ -1270,7 +1270,6 @@ div.full_height {
     border-radius: 0.3em;
     margin: 0.3em 0.1em 0.3em 0.1em;
     padding: 0.2em;
-    width:400px;
 }
 
 #ui-category-list .handle {
