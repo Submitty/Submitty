@@ -34,7 +34,7 @@
 <br />
 
 <!-- Gradeable ID (readonly in edit mode, required) -->
-<label for="g_id">>What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>):</label>
+<label for="g_id">What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>):</label>
 <input style='width: 350px' type='text' name='id' id="g_id" class="required"
        value="{{ action != 'new' ? gradeable.getId() : '' }}" placeholder="(Required)"
         {{ action == 'edit' ? 'readonly' : 'required' }} />

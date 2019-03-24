@@ -8,6 +8,7 @@ fi
 
 if [ ${VAGRANT} == 1 ]; then
     export SUBMISSION_URL='http://192.168.56.111'
+    export DATABASE_PORT=16432
 fi
 
 #################################################################

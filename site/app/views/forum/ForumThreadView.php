@@ -250,17 +250,20 @@ HTML;
 		$show_merged_thread_title = "Show Merged Threads";
 	}
 	$return .= <<<HTML
-		<div class="content forum_content forum_show_threads">
+		<div class="full_height content forum_content forum_show_threads">
 HTML;
 	$show_deleted_class = '';
 	$show_deleted_action = '';
+	$show_deleted_title = '';
 	if($this->core->getUser()->getGroup() <= 2){
 		if($show_deleted) {
 			$show_deleted_class = "active";
 			$show_deleted_action = "alterShowDeletedStatus(0);";
+            $show_deleted_title = "Hide Deleted Threads";
 		} else {
 			$show_deleted_class = "";
 			$show_deleted_action = "alterShowDeletedStatus(1);";
+            $show_deleted_title = "Show Deleted Threads";
 		}
 	}
 	$categories = $this->core->getQueries()->getCategories();
@@ -324,11 +327,11 @@ HTML;
 						),
 						array(
 							"required_rank" => 2,
-							"display_text" => 'Show Deleted Threads',
+							"display_text" => $show_deleted_title,
 							"style" => 'position:relative;top:3px;display:inline-block;',
 							"link" => array(false),
 							"optional_class" => $show_deleted_class,
-							"title" => 'Show Deleted Threads',
+							"title" => $show_deleted_title,
 							"onclick" => array(true, $show_deleted_action)
 						),
 						array(
@@ -649,7 +652,7 @@ HTML;
 						if(isset($thread['favorite']) && $thread['favorite']) {
 							$return .= <<<HTML
 							<i class="fas fa-thumbtack" style="padding-left:3px;position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
-    -webkit-text-stroke-color: black;" aria-hidden="true"></i>
+    -webkit-text-stroke-color: black;" title="Pinned as my favorite" aria-hidden="true"></i>
 HTML;
 						}
 						if($thread['merged_thread_id'] != -1) {
