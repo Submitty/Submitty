@@ -2616,6 +2616,24 @@ $(document).ready(function() {
     checkSidebarCollapse();
 });
 
+function checkQRProgress(gradeable_id){
+    var url = buildUrl({'component': 'misc', 'page': 'check_qr_upload_progress'});
+    $.ajax({
+        url: url,
+        data: {
+            gradeable_id : gradeable_id
+        },
+        type: "POST",
+        success: function(data) {
+            data = JSON.parse(data);
+            var result = {};
+            updateQRProgress(data['job_data'], data['count']);
+        },
+        error: function(e) {
+            console.log("Failed to check job queue");
+        }
+    })
+}
 // Credit to https://stackoverflow.com/a/24676492/2972004
 //      Solution to autoexpand the height of a textarea
 function auto_grow(element) {

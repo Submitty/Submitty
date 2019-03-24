@@ -49,6 +49,9 @@ class MiscController extends AbstractController {
             case 'modify_course_materials_file_time_stamp':
                 $this->modifyCourseMaterialsFileTimeStamp();
                 break;
+            case 'check_qr_upload_progress':
+                $this->checkQRUploadProgress();
+                break;
         }
     }
 
@@ -551,5 +554,47 @@ class MiscController extends AbstractController {
         if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
             return "Failed to write to file {$fp}";
         }
+    }
+
+    public function checkQRUploadProgress(){
+        $gradeable_id = $_POST['gradeable_id'] ?? NULL;
+        if($gradeable_id === NULL){
+            $result = ['error' => "gradeable_id cannot be null"];
+            $this->core->getOutput()->renderJson($result);
+            return $this->core->getOutput()->getOutput();
+        }
+
+        $job_path = "/var/local/submitty/daemon_job_queue/";
+        $result = [];
+        $found = false;
+        $job_data = NULL;
+        $complete_count = 0;
+        try{
+            foreach(scandir($job_path) as $job){
+                if(strpos($job, 'qr_upload_') !== false)
+                    $found = true;
+                else
+                    continue;
+                //remove 'qr_upload_' and '.json' from job file name
+                $result[] = substr($job,11,-5);
+            }
+            //look in the split upload folder to see what is complete
+            $split_uploads = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf", $_POST['gradeable_id']);
+            $sub_dirs = array_filter(glob($split_uploads . '/*'), 'is_dir');
+            foreach ($sub_dirs as $dir) {
+                foreach (scandir($dir) as $file) {
+                    if(pathinfo($file)['extension'] !== "pdf")
+                        continue;
+
+                    if(strpos($file, "_cover"))
+                        $complete_count++;
+                }
+            }
+            $result = ['success' => true, 'found' => $found, 'job_data' => $result, 'count' => $complete_count];
+        }catch(Exception $e){
+            $result = ['error' => $e->getMessage()];
+        }
+        $this->core->getOutput()->renderJson($result);
+        return $this->core->getOutput()->getOutput();
     }
 }

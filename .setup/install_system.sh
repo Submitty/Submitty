@@ -196,8 +196,11 @@ pip3 install clang
 #install DLL for zbar
 apt-get install libzbar0 --yes
 
+#python libraries for QR bulk upload
 pip3 install pyzbar
 pip3 install pdf2image
+pip3 install opencv-python
+pip3 install numpy
 
 # Install an email catcher
 if [ ${VAGRANT} == 1 ]; then

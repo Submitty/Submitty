@@ -367,12 +367,13 @@ class HomeworkView extends AbstractView {
         $count = 1;
         $count_array = array();
         $use_qr_codes = false;
+        $qr_file = [];
         foreach ($all_directories as $timestamp => $content) {
             $dir_files = $content['files'];
-            $json_file = '';
             foreach ($dir_files as $filename => $details) {
                 if($filename === 'decoded.json'){
-                    $json_file = $details['path'];
+                    $qr_file +=  FileUtils::readJsonFile($details['path']);
+                    $use_qr_codes = true;
                 }
                 $clean_timestamp = str_replace('_', ' ', $timestamp);
                 $path = rawurlencode(htmlspecialchars($details['path']));
@@ -436,25 +437,17 @@ class HomeworkView extends AbstractView {
                 ];
                 $count++;
             }
-            $json_data = ($json_file !== '') ? FileUtils::readJsonFile($json_file) : '';
-            //check for invalid ID's if using bulk upload with QR codes
-            if($json_data != ''){
-                $use_qr_codes = true;
-                for($i = 0; $i < count($files); $i++){
-                    $filename = rawurldecode($files[$i]['filename_full']);
-                    foreach($json_data as $decoded_data){
-                        //compare each file name in json data with ones split
-                        foreach ($decoded_data as $qr_file) {
-                            if($qr_file['pdf_name'] === $filename){
-                                $files[$i]['page_count'] = $qr_file['page_count'];
-                                $files[$i]['user_id']['id'] = $qr_file['id'];
-                                $files[$i]['user_id']['valid'] = ($this->core->getQueries()->getUserById($qr_file['id']) === null) ? false:true;
-                                goto end;
-                            }
-                        }
-                    }
-                    end:;
-                }
+        }
+        if($use_qr_codes){
+            for ($i = 0; $i < count($files); $i++) {
+                if(!array_key_exists($files[$i]['filename_full'], $qr_file))
+                    continue;
+                $data = $qr_file[$files[$i]['filename_full']];
+                $is_valid = $this->core->getQueries()->getUserById($data['id']) !== null;
+                $files[$i] += ['page_count' => $data['page_count'],
+                               'id' => $data['id'],
+                               'valid' => $is_valid
+                              ];
             }
         }
         $semester = $this->core->getConfig()->getSemester();
@@ -462,15 +455,13 @@ class HomeworkView extends AbstractView {
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         $current_time = $this->core->getDateTimeNow()->format("m-d-Y_H:i:sO");
         $ch = curl_init();
-        $use_images = !$use_qr_codes && sizeof($cover_images) != 0;
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/BulkUploadBox.twig', [
             'gradeable_id' => $gradeable->getId(),
             'team_assignment' => $gradeable->isTeamAssignment(),
             'max_team_size' => $gradeable->getTeamSizeMax(),
             'count_array' => $count_array,
             'files' => $files,
-            'use_qr_codes' => $use_qr_codes,
-            'use_images' => $use_images
+            'use_qr_codes' => $use_qr_codes
         ]);
     }
 

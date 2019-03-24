@@ -64,6 +64,7 @@
                 $('#qr_prefix').prop('hidden', true);
                 $('#qr_suffix').prop('hidden', true);
                 $('#prefix_prompt').prop('hidden', true);
+                $('#qr_progress_box').prop('hidden', true);
                 //load what upload mode the user selected (if any)
                 if(sessionStorage.getItem('radio_bulk')){
                     $('#radio_bulk').prop('checked', true);
@@ -80,6 +81,7 @@
                     $('#pages_prompt').prop('hidden', true);
                     $('#num_pages').prop('hidden', true);
                     $('#use_qr').prop('checked',true);
+                    $('#qr_progress_box').prop('hidden', false);
                     //populate prefix textarea
                     if(sessionStorage.getItem('qr_prefix')){
                         $('#qr_prefix').val(sessionStorage.getItem('qr_prefix'));
@@ -134,6 +136,7 @@
                     $('#qr_suffix').prop('hidden', !$('#qr_suffix').is(':hidden'));
                     $('#prefix_prompt').prop('hidden', !$('#prefix_prompt').is(':hidden'));
                     $('#pages_prompt').prop('hidden', !$('#pages_prompt').is(':hidden'));
+                    $('#qr_progress_box').prop('hidden', !$('#qr_progress_box').is(':hidden'));
                 });
                 $("#user_id").autocomplete({
                     source: students_full
@@ -269,7 +272,8 @@
 </div>
 
 {% if core.getUser().accessFullGrading() %}
-    {% include 'submission/homework/PreviousSubmissionForm.twig' %}
+    {% include 'submission/homework/PreviousSubmissionForm.twig' %}            
+    {% include 'submission/homework/QRProgressBox.twig' %}
 {% endif %}
 
 <script type="text/javascript">
