@@ -365,13 +365,13 @@ class DatabaseQueries {
         return intval($this->course_db->rows()[0]['user_group']) <= 3;
     }
 
-    public function createThread($user, $title, $content, $anon, $prof_pinned, $status, $hasAttachment, $categories_ids,$lock_thread_date){
+    public function createThread($user, $title, $content, $anon, $prof_pinned, $status, $hasAttachment, $categories_ids, $lock_thread_date){
 
         $this->course_db->beginTransaction();
 
         try {
         //insert data
-        $this->course_db->query("INSERT INTO threads (title, created_by, pinned, status, deleted, merged_thread_id, merged_post_id, is_visible,lock_thread_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)", array($title, $user, $prof_pinned, $status, 0, -1, -1, true, $lock_thread_date));
+        $this->course_db->query("INSERT INTO threads (title, created_by, pinned, status, deleted, merged_thread_id, merged_post_id, is_visible, lock_thread_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)", array($title, $user, $prof_pinned, $status, 0, -1, -1, true, $lock_thread_date));
 
         //retrieve generated thread_id
         $this->course_db->query("SELECT MAX(id) as max_id from threads where title=? and created_by=?", array($title, $user));

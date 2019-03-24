@@ -1593,6 +1593,7 @@ function editPost(post_id, thread_id, shouldEditThread) {
                     var thread_status = json.thread_status;
                     $("#title").prop('disabled', false);
                     $(".edit_thread").show();
+                    $('#label_lock_thread').show();
                     $("#title").val(thread_title);
                     $("#thread_status").val(thread_status);
                     $('#lock_thread_date').val(thread_lock_date);
@@ -1610,6 +1611,7 @@ function editPost(post_id, thread_id, shouldEditThread) {
                 } else {
                     $("#title").prop('disabled', true);
                     $(".edit_thread").hide();
+                    $('#label_lock_thread').hide();
                     $("#thread_form").prop("ignore-cat",true);
                     $("#category-selection-container").hide();
                     $("#thread_status").hide();
