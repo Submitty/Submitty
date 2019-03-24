@@ -523,7 +523,7 @@ CREATE TABLE regrade_discussion (
 --
 -- Name: notifications_component_enum; Type: ENUM; Schema: public; Owner: -
 --
-CREATE TYPE notifications_component AS ENUM ('forum');
+CREATE TYPE notifications_component AS ENUM ('forum', 'student', 'grading');
 
 --
 -- Name: notifications; Type: TABLE; Schema: public; Owner: -
@@ -1161,4 +1161,3 @@ ALTER TABLE ONLY regrade_requests
 --
 -- PostgreSQL database dump complete
 --
-
