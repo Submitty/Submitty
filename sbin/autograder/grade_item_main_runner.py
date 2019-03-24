@@ -232,8 +232,6 @@ def pre_command_copy_file(tmp_work, source_testcase, source_directory, destinati
 
   source_testcase = os.path.join(str(os.getcwd()), '..',source_testcase)
   destination_testcase = os.path.join(str(os.getcwd()), '..',destination_testcase)
-  print(source_testcase)
-  print(destination_testcase)
 
   if not os.path.isdir(source_testcase):
     raise RuntimeError("ERROR: The directory {0} does not exist.".format(source_testcase))
@@ -241,50 +239,43 @@ def pre_command_copy_file(tmp_work, source_testcase, source_directory, destinati
   if not os.path.isdir(destination_testcase):
     raise RuntimeError("ERROR: The directory {0} does not exist.".format(destination_testcase))
 
-  print(source_directory)
-  print(destination)
   source = os.path.join(source_testcase, source_directory)
   target = os.path.join(destination_testcase,destination)
-  print('source {0}'.format(source))
-  print('target {0}'.format(target))
 
   #the target without the potential executable.
   target_base = '/'.join(target.split('/')[:-1])
-  print('target_base {0}'.format(target_base))
 
   #If the source is a directory, we copy the entire thing into the
   # target.
   if os.path.isdir(source):
-    print('path1')
     #We must copy from directory to directory 
     grade_item.copy_contents_into(job_id,source,target,tmp_logs)
 
   # Separate ** and * for simplicity.
   elif not '**' in source:
-    print('path2')
     #Grab all of the files that match the pattern
-    print('running glob on {0}.'.format(source))
     files = glob.glob(source, recursive=True)
-    print('found: {0}'.format(files))
     
     #The target base must exist in order for a copy to occur
     if target_base != '' and not os.path.isdir(target_base):
       raise RuntimeError("ERROR: The directory {0} does not exist.".format(target_base))
     #Copy every file. This works whether target exists (is a directory) or does not (is a target file)
     for file in files:
-      shutil.copy(file, target)
+      try:
+        shutil.copy(file, target)
+      except Exception as e:
+        traceback.print_exc()
+        grade_items_logging.log_message(job_id, message="Pre Command could not perform copy: {0} -> {1}".format(file, target))
+
   else:
-    print('path3')
     #Everything after the first **. 
     source_base = source[:source.find('**')]
-    print('source_base {0}'.format(source_base))
     #The full target must exist (we must be moving to a directory.)
     if not os.path.isdir(target):
       raise RuntimeError("ERROR: The directory {0} does not exist.".format(target))
 
     #Grab all of the files that match the pattern.
     files = glob.glob(source, recursive=True)
-    print('files {0}'.format(files))
 
 
     #For every file matched
@@ -296,8 +287,13 @@ def pre_command_copy_file(tmp_work, source_testcase, source_directory, destinati
       if not os.path.isdir(file_target_dir):
         os.makedirs(file_target_dir)
       #Copy.
-      print('cp {0} {1}'.format(file_source, file_target))
-      shutil.copy(file_source, file_target)
+      try:
+        shutil.copy(file_source, file_target)
+      except Exception as e:
+        traceback.print_exc()
+        grade_items_logging.log_message(job_id, message="Pre Command could not perform copy: {0} -> {1}".format(file_source, file_target))
+
+
 
 def setup_folder_for_grading(target_folder, tmp_work, job_id, tmp_logs, testcase):
     #The paths to the important folders.
