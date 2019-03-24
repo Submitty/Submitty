@@ -487,7 +487,7 @@ class ElectronicGraderView extends AbstractView {
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit);
 
         if($graded_gradeable->getGradeable()->isDiscussionBased()) {
-            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderDiscussionForum', json_decode($graded_gradeable->getGradeable()->getDiscussionThreadId()), $graded_gradeable->getSubmitter()->getId());
+            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderDiscussionForum', json_decode($graded_gradeable->getGradeable()->getDiscussionThreadId(), true), $graded_gradeable->getSubmitter()->getId());
         }
 
         $return .= <<<HTML
@@ -585,9 +585,9 @@ HTML;
 
         }
 
-        if(count($threadIds) == 0) {
+        if(empty($threadIds)) {
             $posts_view .= <<<HTML
-                <h3 style="text-align: center;">No thread id provided.</h3> <br/>
+                <h3 style="text-align: center;">No thread id specified.</h3> <br/>
 HTML;
         }
 
