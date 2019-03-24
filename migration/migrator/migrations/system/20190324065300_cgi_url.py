@@ -8,7 +8,10 @@ def up(config):
   with open(SUBMITTY_JSON_PATH,'r') as infile:
     data = json.load(infile)
 
-  data.pop("cgi_url")
+  try:
+    data.pop("cgi_url")
+  except Exception as e:
+    pass
 
   with open(SUBMITTY_JSON_PATH,'w') as outfile:
     json.dump(data, outfile, indent=4)
