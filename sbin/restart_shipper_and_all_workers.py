@@ -1,8 +1,9 @@
-'''
+"""
 A utility to quickly reset all workers and shippers in a system.
 This script must be run as root, and it restarts all workers and
 shippers in the correct order.
-'''
+"""
+
 import time
 import subprocess
 import os
@@ -10,7 +11,7 @@ from os import path
 import sys
 
 SYSTEMCTL_WRAPPER_SCRIPT = path.join(path.dirname(path.realpath(__file__)),
-                            'shipper_utils', 'systemctl_wrapper.py')
+                                    'shipper_utils', 'systemctl_wrapper.py')
 
 if __name__ == '__main__':
 
