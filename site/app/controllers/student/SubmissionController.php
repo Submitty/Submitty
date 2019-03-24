@@ -1855,6 +1855,9 @@ class SubmissionController extends AbstractController {
         $json_path = $course_path . "/submissions/" . $gradeable_id . "/";
         $path_reset = $json_path;
         $users = array();
+        if(!file_exists($json_path)) {
+            return;   
+        }
         $user_id_arr = array_slice(scandir($json_path), 2);
         $user = $user_id_arr[0];
         $users[$user] = array();
