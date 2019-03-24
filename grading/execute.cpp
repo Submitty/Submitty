@@ -1,5 +1,4 @@
 #include <sys/time.h>
-#include <sys/resource.h>
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -62,6 +61,8 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "sort",                    "/usr/bin/sort" },
     { "grep",                    "/bin/grep" },
     { "sed",                     "/bin/sed" },
+    { "pwd",                     "/bin/pwd" },
+    { "env",                     "/usr/bin/env" },
     { "pdftotext",               "/usr/bin/pdftotext" },
     { "pdflatex",                "/usr/bin/pdflatex" },
     { "wc",                      "/usr/bin/wc" },
@@ -193,6 +194,7 @@ bool local_executable (const std::string &program, const nlohmann::json &whole_c
   assert (program.substr(0,2) == "./");
 
   std::set<std::string> executables = get_compiled_executables(whole_config);
+
   if (executables.find(program.substr(2,program.size())) != executables.end()) {
     return true;
   }
@@ -1062,7 +1064,8 @@ int execute(const std::string &cmd,
       const nlohmann::json &test_case_limits,
       const nlohmann::json &assignment_limits,
       const nlohmann::json &whole_config,
-      const bool windowed) {
+      const bool windowed,
+      const std::string display_variable) {
 
   std::set<std::string> invalid_windows;
   bool window_mode = windowed; //Tells us if the process is expected to spawn a window. (additional support later) 
@@ -1083,24 +1086,25 @@ int execute(const std::string &cmd,
         break;
       }
     }
-
   }
-
-  if(window_mode){
-    std::cout <<"Window mode activated." << std::endl;
-    char* my_display = getenv("DISPLAY"); //The display environment variable is unset. This sets it for child and parent.
-    if (my_display == NULL) {
-      setenv("DISPLAY", ":0", 1);
-    }
-    window_mode = true;
-    invalid_windows = snapshotOfActiveWindows();
-  }
-
 
   std::cout << "IN EXECUTE:  '" << cmd << "'" << std::endl;
   std::cout << "identified " << dispatcher_actions.size() << " dispatcher actions" << std::endl;
 
   std::ofstream logfile(execute_logfile.c_str(), std::ofstream::out | std::ofstream::app);
+
+  //If we want windowed mode, but there is no display set.
+  if(window_mode && display_variable == "NO_DISPLAY_SET"){
+    std::cout << "ERROR: Attempting to grade a windowed gradeable with no display variable set." << std::endl;
+    logfile << "ERROR: Attempting to grade a windowed gradeable with no display variable set." << std::endl;
+    return -1;
+  }
+
+  if(window_mode){
+    std::cout <<"Window mode activated." << std::endl;
+    setenv("DISPLAY", display_variable.c_str(), 1);
+    invalid_windows = snapshotOfActiveWindows();
+  }
 
   // Forking to allow the setting of limits of RLIMITS on the command
   int result = -1;
@@ -1172,7 +1176,6 @@ int execute(const std::string &cmd,
       std::string windowName; 
       int rss_memory = 0;
       int actions_taken = 0;   
-      int number_of_screenshots = 0;
       do {
           //dispatcher actions
           if(!input_queue.empty()){
@@ -1264,13 +1267,13 @@ int execute(const std::string &cmd,
             if (!time_kill && !memory_kill){
               //if we expect a window, and the window exists, and we still have actions to take
               if(window_mode && windowName != "" && windowExists(windowName) && actions_taken < actions.size()){ 
-                takeAction(actions, actions_taken, number_of_screenshots, windowName, 
+                takeAction(actions, actions_taken, windowName, 
                   childPID, elapsed, next_checkpoint, seconds_to_run, rss_memory, allowed_rss_memory, 
                   memory_kill, time_kill, logfile); //Takes each action on the window. Requires delay parameters to do delays.
               }
               //If we do not expect a window and we still have actions to take
               else if(!window_mode && actions_taken < actions.size()){ 
-                takeAction(actions, actions_taken, number_of_screenshots, windowName, 
+                takeAction(actions, actions_taken, windowName, 
                   childPID, elapsed, next_checkpoint, seconds_to_run, rss_memory, allowed_rss_memory, 
                   memory_kill, time_kill, logfile); //Takes each action on the window. Requires delay parameters to do delays.
               }

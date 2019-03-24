@@ -7,6 +7,7 @@ use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\GradedGradeable;
+use app\models\gradeable\LateDayInfo;
 use app\models\SimpleStat;
 use app\models\Team;
 use app\models\User;
@@ -338,9 +339,17 @@ class ElectronicGraderView extends AbstractView {
             foreach ($gradeable->getComponents() as $component) {
                 $graded_component = $row->getOrCreateTaGradedGradeable()->getGradedComponent($component);
                 if ($graded_component === null) {
+                    //not graded
                     $info["graded_groups"][] = "NULL";
-                } else {
+                } else if(!$graded_component->getVerifier()){
+                    //no verifier exists, show the grader group
                     $info["graded_groups"][] = $graded_component->getGrader()->getGroup();
+                } else if($graded_component->getGrader()->accessFullGrading()){
+                    //verifier exists and original grader is full access, show verifier grader group
+                    $info["graded_groups"][] = $graded_component->getVerifier()->getGroup();
+                } else{
+                    //verifier exists and limited access grader, change the group to show semicircle on the details page
+                    $info["graded_groups"][] = "verified";
                 }
             }
 
@@ -426,7 +435,6 @@ class ElectronicGraderView extends AbstractView {
                 "team_edit_onclick" => "adminTeamForm(false, '{$team->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, [], [],{$gradeable->getTeamSizeMax()});"
             ];
         }
-
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
             "gradeable" => $gradeable,
             "sections" => $sections,
@@ -478,6 +486,17 @@ class ElectronicGraderView extends AbstractView {
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderSubmissionPanel', $graded_gradeable, $display_version);
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit);
+
+        if($graded_gradeable->getGradeable()->isDiscussionBased()) {
+            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderDiscussionForum', json_decode($graded_gradeable->getGradeable()->getDiscussionThreadId(), true), $graded_gradeable->getSubmitter()->getId());
+        }
+
+        $return .= <<<HTML
+            <link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}css/iframe/codemirror.css" />
+        <link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}css/iframe/eclipse.css" />
+        <script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/codemirror.js"></script>
+HTML;
+
         if(!$peer) {
             $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderInformationPanel', $graded_gradeable, $display_version_instance);
         }
@@ -497,7 +516,7 @@ class ElectronicGraderView extends AbstractView {
                 ]);
             }
         } else {
-            if ($late_status != "Good" && $late_status != "Late") {
+            if ($late_status != LateDayInfo::STATUS_GOOD && $late_status != LateDayInfo::STATUS_LATE) {
                 $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
                     "color" => "#F62817", // fire engine red
                     "message" => "Late Submission"
@@ -526,6 +545,7 @@ class ElectronicGraderView extends AbstractView {
             "next_student_url" => $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $graded_gradeable->getGradeableId(), 'who_id' => $next_id]),
             "home_url" => $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'details', 'gradeable_id' => $graded_gradeable->getGradeableId(), 'view' => (count($this->core->getUser()->getGradingRegistrationSections()) == 0) ? 'all' : null]),
             'regrade_panel_available' => $this->core->getConfig()->isRegradeEnabled(),
+            'discussion_based' => $graded_gradeable->getGradeable()->isDiscussionBased()
         ]);
     }
 
@@ -539,6 +559,41 @@ class ElectronicGraderView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/AutogradingPanel.twig", [
             "version_instance" => $version_instance,
             "show_hidden_cases" => $show_hidden_cases,
+        ]);
+    }
+
+    public function renderDiscussionForum($threadIds, $submitter_id) {
+        $posts_view = <<<HTML
+            <span class="col grading_label">Discussion Posts</span>
+HTML;
+            
+        $currentCourse = $this->core->getConfig()->getCourse();
+
+        foreach($threadIds as $threadId) {
+            $posts = $this->core->getQueries()->getPostsForThread($this->core->getUser()->getId(), $threadId, false, 'time', $submitter_id);
+            if(count($posts) > 0) {
+                $posts_view .= $this->core->getOutput()->renderTemplate('forum\ForumThread', 'generatePostList', $threadId, $posts, $currentCourse, false, true, $submitter_id);
+            } else {
+                $posts_view .= <<<HTML
+                    <h3 style="text-align: center;">No posts for thread id: {$threadId}</h3> <br/>
+HTML;
+            }
+
+            $posts_view .= <<<HTML
+                    <a href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $threadId))}" target="_blank" rel="noopener nofollow" class="btn btn-default btn-sm" style=" text-decoration: none;" onClick=""> Go to thread</a>
+                    <hr style="border-top:1px solid #999;margin-bottom: 5px;" /> <br/>
+HTML;
+
+        }
+
+        if(empty($threadIds)) {
+            $posts_view .= <<<HTML
+                <h3 style="text-align: center;">No thread id specified.</h3> <br/>
+HTML;
+        }
+
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/DiscussionForumPanel.twig", [
+            "discussion_forum_content" => $posts_view
         ]);
     }
 
@@ -677,7 +732,6 @@ class ElectronicGraderView extends AbstractView {
         $this->core->getOutput()->addInternalJs('ta-grading-rubric-conflict.js');
         $this->core->getOutput()->addInternalJs('ta-grading-rubric.js');
         $this->core->getOutput()->addInternalJs('gradeable.js');
-
         $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/RubricPanel.twig", [
             "gradeable_id" => $gradeable->getId(),
             "is_ta_grading" => $gradeable->isTaGrading(),

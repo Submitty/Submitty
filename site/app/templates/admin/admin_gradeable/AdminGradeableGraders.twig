@@ -40,10 +40,12 @@ What is the lowest privileged user group that can grade this?
     {% endfor %}
 </select>
 <br />
-How should graders be assigned to grade this item?
-    <a class="helpicon" target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section"></a>
-<br />
 <fieldset>
+    <legend>
+        How should graders be assigned to grade this item?
+        <a class="helpicon" target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section"></a>
+        <br />
+    </legend>
     <input type="radio" name="grade_by_registration" value="true" id="registration_section"
         {{ (gradeable.isGradeByRegistration() == true or action == "new") ? 'checked' : '' }}> Registration Section
 

@@ -315,7 +315,7 @@ class ForumController extends AbstractController {
         $thread_post_content = str_replace("\r", "", $_POST["thread_post_content"]);
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
         $thread_status = $_POST["thread_status"];
-        $announcment = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->getGroup() < 3) ? 1 : 0 ;
+        $announcement = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->getGroup() < 3) ? 1 : 0 ;
         $email_announcement = (isset($_POST["EmailAnnouncement"]) && $_POST["EmailAnnouncement"] == "EmailAnnouncement" && $this->core->getUser()->getGroup() < 3) ? 1 : 0 ;
 
         $categories_ids  = array();
@@ -334,7 +334,7 @@ class ForumController extends AbstractController {
                 $result['next_page'] = $hasGoodAttachment[1];
             } else {
                 // Good Attachment
-                $result = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_post_content, $anon, $announcment, $thread_status, $hasGoodAttachment[0], $categories_ids);
+                $result = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_post_content, $anon, $announcement, $thread_status, $hasGoodAttachment[0], $categories_ids);
                 $id = $result["thread_id"];
                 $post_id = $result["post_id"];
 
@@ -353,11 +353,11 @@ class ForumController extends AbstractController {
 
                 }
 
-                $notification = new Notification($this->core, array('component' => 'forum', 'type' => $announcment ? 'new_announcement' : 'new_thread', 'thread_id' => $id, 'thread_title' => $title));
+                $notification = new Notification($this->core, array('component' => 'forum', 'type' => $announcement ? 'new_announcement' : 'new_thread', 'thread_id' => $id, 'thread_title' => $title));
                 $this->core->getQueries()->pushNotification($notification);
 
                 if($email_announcement) {
-                    $this->sendEmailAnnouncement($title, $thread_post_content, $post_id);
+                    $this->sendEmailAnnouncement($title, $thread_post_content);
                 }
                 $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $id));
             }
@@ -879,29 +879,21 @@ class ForumController extends AbstractController {
         $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
     }
 
-    private function sendEmailAnnouncement($thread_title, $thread_content, $post_id) {
-            $course = urlencode($this->core->getConfig()->getCourse());
-            $semester = urlencode($this->core->getConfig()->getSemester());
+    private function sendEmailAnnouncement($thread_title, $thread_content) { 
+            $course = $this->core->getConfig()->getCourse();
+            $formatted_subject = "[Submitty $course]: $thread_title";
 
-
-            $email_job_data = [
-                "job" => "SendEmail",
-                "email_type" => "announce",
-                "semester" => $semester,
-                "course" => $course,
-                "thread_title" => $thread_title,
-                "thread_content" => $thread_content
+            $email_data = [
+                "subject" => $formatted_subject,
+                "body" => $thread_content
             ];
 
-            $email_job_file = "/var/local/submitty/daemon_job_queue/email__" . $semester . "__" . $course . "__" . $post_id . ".json";
+            $class_list = $this->core->getQueries()->getClassEmailList();
 
-            if(file_exists($email_job_file) && !is_writable($email_job_file)) {
-                return "Failed to create email job. Try again";
+            foreach($class_list as $student_email) {
+                $this->core->getQueries()->createEmail($email_data, $student_email["user_email"]);
             }
 
-            if(file_put_contents($email_job_file, json_encode($email_job_data, JSON_PRETTY_PRINT)) === false) {
-                return "Failed to write email job file. Try again";
-            }
-            return null;
-    }
+        } 
+
 }
