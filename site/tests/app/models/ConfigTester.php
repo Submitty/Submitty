@@ -27,7 +27,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
     
     /**
      * This test ensures that the default value of the DEBUG flag within the config model is always false. This
-     * means that if the value is not found within the ini file, we don't have to worry about accidently
+     * means that if the value is not found within the json file, we don't have to worry about accidently
      * exposing things to students.
      */
     public function testClassProperties() {
@@ -206,13 +206,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'vcs_type' => 'git',
             'modified' => false,
             'hidden_details' => null,
-<<<<<<< HEAD
-            'regrade_message' => 'Warning: Frivolous regrade requests may lead to grade deductions or lost late days',
-            'course_ini' => [
-=======
             'regrade_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
             'course_json' => [
->>>>>>> eb59f91c1452481afc1a1d442c09ce0a597a6639
                 'database_details' => [
                     'dbname' => 'submitty_s17_csci0000'
                 ],
@@ -398,7 +393,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             $this->fail("Should have thrown ConfigException");
         }
         catch (ConfigException $exception) {
-            $this->assertEquals("Missing config section '{$section}' in ini file", $exception->getMessage());
+            $this->assertEquals("Missing config section '{$section}' in json file", $exception->getMessage());
         }
     }
 
@@ -437,7 +432,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         }
         catch (ConfigException $exception) {
             $this->assertEquals(
-                "Missing config setting '{$section}.{$setting}' in configuration ini file",
+                "Missing config setting '{$section}.{$setting}' in configuration json file",
                 $exception->getMessage()
             );
         }
