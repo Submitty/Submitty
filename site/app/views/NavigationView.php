@@ -112,6 +112,7 @@ class NavigationView extends AbstractView {
         // ======================================================================================
         // DISPLAY ROOM SEATING (used to display room seating assignments)
         // ======================================================================================
+	$seating_only_for_instructor = $this->core->getConfig()->isSeatingOnlyForInstructor();
         if ($seating_only_for_instructor && !$this->core->getUser()->accessAdmin()) {
             $display_room_seating = false;
         }
@@ -198,7 +199,7 @@ class NavigationView extends AbstractView {
             "display_custom_message" => $display_custom_message,
             "user_seating_details" => $user_seating_details,
             "display_room_seating" => $display_room_seating,
-            "seating_only_for_instructor" => $seating_only_for_instructor,
+            "seating_only_for_instructor" => $this->core->getConfig()->isSeatingOnlyForInstructor(),
             "gradeable_title" => $gradeable_title,
             "seating_config" => $seating_config
         ]);
