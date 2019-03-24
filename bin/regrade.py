@@ -14,10 +14,12 @@ USAGE:
 import argparse
 import json
 import os
-from submitty_utils import glob, dateutils
+from pathlib import Path
 import time
 import datetime
 import pause
+
+from submitty_utils import dateutils
 
 CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
 with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
@@ -173,12 +175,13 @@ def main():
             pattern_version=dirs[len(data_dirs)+5]
 
         # full pattern may include wildcards!
-        pattern = os.path.join(data_dir,pattern_semester,pattern_course,"submissions",pattern_gradeable,pattern_who,pattern_version)
+        pattern = os.path.join(pattern_semester,pattern_course,"submissions",pattern_gradeable,pattern_who,pattern_version)
 
         print("pattern: ",pattern)
 
         # Find all matching submissions
-        for d in glob.glob(pattern):
+        for d in Path(data_dir).glob(pattern):
+            d = str(d)
             if os.path.isdir(d):
                 my_dirs = d.split(os.sep)
                 if len(my_dirs) != len(data_dirs)+6:

@@ -3,7 +3,6 @@
 namespace tests\app\models;
 
 use app\libraries\FileUtils;
-use app\libraries\IniParser;
 use app\libraries\Utils;
 use app\models\Course;
 use tests\BaseUnitTest;
@@ -70,7 +69,7 @@ class CourseTester extends BaseUnitTest {
                 'course_name' => 'Test Course',
             ]
         ];
-        IniParser::writeFile(FileUtils::joinPaths($config_path, 'config.ini'), $config);
+        FileUtils::writeJsonFile(FileUtils::joinPaths($config_path, 'config.json'), $config);
         $details = ['semester' => 's18', 'course' => 'csci1000'];
         try {
             $course = new Course($this->createMockCore(['tmp_path' => $temp_dir]), $details);
@@ -101,7 +100,7 @@ class CourseTester extends BaseUnitTest {
         $config_path = FileUtils::joinPaths($temp_dir, 'courses', 's18', 'csci1000', 'config');
         FileUtils::createDir($config_path, null, true);
         $config = [];
-        IniParser::writeFile(FileUtils::joinPaths($config_path, 'config.ini'), $config);
+        FileUtils::writeJsonFile(FileUtils::joinPaths($config_path, 'config.json'), $config);
         $details = ['semester' => 's18', 'course' => 'csci1000'];
         try {
             $course = new Course($this->createMockCore(['tmp_path' => $temp_dir]), $details);
@@ -118,7 +117,7 @@ class CourseTester extends BaseUnitTest {
         $config_path = FileUtils::joinPaths($temp_dir, 'courses', 's18', 'csci1000', 'config');
         FileUtils::createDir($config_path, null, true);
         $config = ['course_details' => []];
-        IniParser::writeFile(FileUtils::joinPaths($config_path, 'config.ini'), $config);
+        FileUtils::writeJsonFile(FileUtils::joinPaths($config_path, 'config.json'), $config);
         $details = ['semester' => 's18', 'course' => 'csci1000'];
         try {
             $course = new Course($this->createMockCore(['tmp_path' => $temp_dir]), $details);

@@ -324,7 +324,7 @@ class DatabaseQueries {
 	}
 
     public function getPosts(){
-        $this->course_db->query("SELECT * FROM posts where deleted = false");
+        $this->course_db->query("SELECT * FROM posts where deleted = false ORDER BY timestamp ASC");
         return $this->course_db->rows();
     }
 
@@ -575,20 +575,6 @@ class DatabaseQueries {
         return intval($this->submitty_db->row()['user_group']);
     }
 
-    public function getAllGradeables($user_id = null) {
-        return $this->getGradeables(null, $user_id);
-    }
-
-    /**
-     * @param $g_id
-     * @param $user_id
-     *
-     * @return Gradeable
-     */
-    public function getGradeable($g_id = null, $user_id = null) {
-        return $this->getGradeables($g_id, $user_id)[0];
-    }
-
     /**
      * Gets whether a gradeable exists already
      *
@@ -601,140 +587,6 @@ class DatabaseQueries {
         return $this->course_db->row()['exists'] ?? false; // This shouldn't happen, but let's assume false
     }
 
-    /**
-     * Gets array of all gradeables ids in the database returning it in a list sorted alphabetically
-     *
-     * @param string|string[]|null  $g_ids
-     * @param string|string[]|null  $user_ids
-     * @param string                $section_key
-     * @param string                $sort_key
-     * @param                       $g_type
-     *
-     * @return Gradeable[]
-     */
-    public function getGradeables($g_ids = null, $user_ids = null, $section_key="registration_section", $sort_key="u.user_id", $g_type = null) {
-        $return = array();
-        foreach ($this->getGradeablesIterator($g_ids, $user_ids, $section_key, $sort_key, $g_type) as $row) {
-            $return[] = $row;
-        }
-
-        return $return;
-    }
-
-    /** @noinspection PhpDocSignatureInspection */
-    /**
-     * @param null   $g_ids
-     * @param null   $user_ids
-     * @param string $section_key
-     * @param string $sort_key
-     * @param null   $g_type
-     * @parma array  $extra_order_by
-     *
-     * @return DatabaseRowIterator
-     */
-    public function getGradeablesIterator($g_ids = null, $user_ids = null, $section_key="registration_section", $sort_key="u.user_id", $g_type = null, $extra_order_by = []) {
-        throw new NotImplementedException();
-    }
-
-    /**
-     * @param $g_id
-     * @param $gd_id
-     *
-     * @return GradeableComponent[]
-     */
-    public function getGradeableComponents($g_id, $gd_id=null) {
-        $left_join = "";
-        $gcd = "";
-
-        $params = array();
-        if($gd_id != null) {
-            $params[] = $gd_id;
-            $left_join = "LEFT JOIN (
-  SELECT *
-  FROM gradeable_component_data
-  WHERE gd_id = ?
-) as gcd ON gc.gc_id = gcd.gc_id";
-            $gcd = ', gcd.*';
-        }
-
-        $params[] = $g_id;
-        $this->course_db->query("
-SELECT gc.*{$gcd}
-FROM gradeable_component AS gc
-{$left_join}
-WHERE gc.g_id=?
-", $params);
-
-        $return = array();
-        foreach ($this->course_db->rows() as $row) {
-            $return[$row['gc_id']] = new GradeableComponent($this->core, $row);
-        }
-        return $return;
-    }
-
-    public function getGradeableComponentsMarks($gc_id) {
-        $this->course_db->query("
-SELECT *
-FROM gradeable_component_mark
-WHERE gc_id=?
-ORDER BY gcm_order ASC", array($gc_id));
-        $return = array();
-        foreach ($this->course_db->rows() as $row) {
-            $return[$row['gcm_id']] = new GradeableComponentMark($this->core, $row);
-        }
-        return $return;
-    }
-
-    public function getGradeableComponentMarksData($gc_id, $gd_id, $gcd_grader_id="") {
-        $params = array($gc_id, $gd_id);
-        $and = "";
-        if($gcd_grader_id != "") {
-            $and = " AND gcd_grader_id = {$gcd_grader_id}";
-            $params[] = $gcd_grader_id;
-        }
-        $this->course_db->query("SELECT gcm_id FROM gradeable_component_mark_data WHERE gc_id = ? AND gd_id=?{$and}", $params);
-        return $this->course_db->rows();
-    }
-
-    /**
-     * @param string   $g_id
-     * @param string   $user_id
-     * @param string   $team_id
-     * @param \DateTime $due_date
-     * @return GradeableVersion[]
-     */
-    public function getGradeableVersions($g_id, $user_id, $team_id, $due_date) {
-        if ($user_id === null) {
-            $this->course_db->query("
-SELECT egd.*, egv.active_version = egd.g_version as active_version
-FROM electronic_gradeable_data AS egd
-LEFT JOIN (
-  SELECT *
-  FROM electronic_gradeable_version
-) AS egv ON egv.active_version = egd.g_version AND egv.team_id = egd.team_id AND egv.g_id = egd.g_id
-WHERE egd.g_id=? AND egd.team_id=?
-ORDER BY egd.g_version", array($g_id, $team_id));
-        }
-        else {
-            $this->course_db->query("
-SELECT egd.*, egv.active_version = egd.g_version as active_version
-FROM electronic_gradeable_data AS egd
-LEFT JOIN (
-  SELECT *
-  FROM electronic_gradeable_version
-) AS egv ON egv.active_version = egd.g_version AND egv.user_id = egd.user_id AND egv.g_id = egd.g_id
-WHERE egd.g_id=? AND egd.user_id=?
-ORDER BY egd.g_version", array($g_id, $user_id));
-        }
-
-        $return = array();
-        foreach ($this->course_db->rows() as $row) {
-            $row['submission_time'] = DateUtils::parseDateTime($row['submission_time'], $this->core->getConfig()->getTimezone());
-            $return[$row['g_version']] = new GradeableVersion($this->core, $row, $due_date);
-        }
-
-        return $return;
-    }
 
     public function getGradeableVersionHasAutogradingResults($g_id, $version, $user_id, $team_id) {
         $query = "SELECT * FROM electronic_gradeable_data WHERE g_id=? AND g_version=? AND ";
@@ -1531,110 +1383,6 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)", array($g_id, $user_id, $team_id, $version, $
         }
     }
 
-    /**
-     * @param Gradeable $gradeable
-     * @return int ID of the inserted row
-     */
-    public function insertGradeableData(Gradeable $gradeable) {
-        if ($gradeable->isTeamAssignment()) {
-            $params = array($gradeable->getId(), $gradeable->getTeam()->getId(),
-                            $gradeable->getOverallComment());
-            $this->course_db->query("INSERT INTO
-gradeable_data (g_id, gd_team_id, gd_overall_comment)
-VALUES (?, ?, ?)", $params);
-        }
-        else {
-            $params = array($gradeable->getId(), $gradeable->getUser()->getId(),
-                            $gradeable->getOverallComment());
-            $this->course_db->query("INSERT INTO
-gradeable_data (g_id, gd_user_id, gd_overall_comment)
-VALUES (?, ?, ?)", $params);
-        }
-        return $this->course_db->getLastInsertId("gradeable_data_gd_id_seq");
-    }
-
-    /**
-     * @param Gradeable $gradeable
-     */
-    public function updateGradeableData(Gradeable $gradeable) {
-        $params = array($gradeable->getOverallComment(), $gradeable->getGdId());
-        $this->course_db->query("UPDATE gradeable_data SET gd_overall_comment=? WHERE gd_id=?", $params);
-    }
-
-    /**
-     * @param string             $gd_id
-     * @param GradeableComponent $component
-     */
-    public function insertGradeableComponentData($gd_id, GradeableComponent $component) {
-        $params = array($component->getId(), $gd_id, $component->getScore(), $component->getComment(), $component->getGrader()->getId(), $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"));
-        $this->course_db->query("
-INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment, gcd_grader_id, gcd_graded_version, gcd_grade_time)
-VALUES (?, ?, ?, ?, ?, ?, ?)", $params);
-    }
-
-    // FIXME
-    //
-    //public function updateGradeableComponentData($gd_id, $grader_id, GradeableComponent $component) {
-    //    $params = array($component->getScore(), $component->getComment(), $component->getGradedVersion(), $component->getGradeTime()->format("Y-m-d H:i:s"), $grader_id, $component->getId(), $gd_id);
-    //    $this->course_db->query("
-//UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=?, gcd_graded_version=?, gcd_grade_time=?, gcd_grader_id=? WHERE gc_id=? AND gd_id=?", $params);
-    //}
-
-    /**
-     * @param string             $gd_id
-     * @param string             $grader_id
-     * @param GradeableComponent $component
-     */
-    public function updateGradeableComponentData($gd_id, $grader_id, GradeableComponent $component) {
-        $params = array($component->getScore(), $component->getComment(), $component->getGradedVersion(),
-                        $component->getGradeTime()->format("Y-m-d H:i:s"), $grader_id, $component->getId(), $gd_id);
-        $this->course_db->query("
-UPDATE gradeable_component_data
-SET
-  gcd_score=?, gcd_component_comment=?, gcd_graded_version=?, gcd_grade_time=?,
-  gcd_grader_id=?
-WHERE gc_id=? AND gd_id=?", $params);
-    }
-
-
-    // END FIXME
-
-    public function replaceGradeableComponentData($gd_id, GradeableComponent $component) {
-        $params = array($component->getId(), $gd_id);
-        $this->course_db->query("DELETE FROM gradeable_component_data WHERE gc_id=? AND gd_id=?", $params);
-        $this->insertGradeableComponentData($gd_id, $component);
-    }
-
-    /**
-     * TODO: is this actually used somewhere?
-     * @param                                $gd_id
-     * @param                                $grader_id
-     * @param \app\models\GradeableComponent $component
-     */
-    public function deleteGradeableComponentData($gd_id, $grader_id, GradeableComponent $component) {
-        $params = array($component->getId(), $gd_id);
-        $this->course_db->query("
-DELETE FROM gradeable_component_data WHERE gc_id=? AND gd_id=?", $params);
-    }
-
-
-
-// FIXME: THIS CODE REQUIRING GRADER_IDS MATCH FOR PEER GRADING BREAKS REGULAR GRADING
-//
-//    public function deleteGradeableComponentMarkData($gd_id, $gc_id, $grader_id, GradeableComponentMark $mark) {
-//        $params = array($gc_id, $gd_id, $grader_id, $mark->getId());
-//        $this->course_db->query("
-//DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcd_grader_id=? AND gcm_id=?", $params);
-//    }
-//
-
-   public function deleteGradeableComponentMarkData($gd_id, $gc_id, $grader_id, GradeableComponentMark $mark) {
-           $params = array($gc_id, $gd_id, $mark->getId());
-	           $this->course_db->query("
-DELETE FROM gradeable_component_mark_data WHERE gc_id=? AND gd_id=? AND gcm_id=?", $params);
-    }
-
-// END FIXME
 
     public function getAllSectionsForGradeable($gradeable) {
          $grade_type = $gradeable->isGradeByRegistration() ? 'registration' : 'rotating';
@@ -3554,7 +3302,9 @@ AND gc_id IN (
             $graded_component->getComment(),
             $graded_component->getGraderId(),
             $graded_component->getGradedVersion(),
-            DateUtils::dateTimeToString($graded_component->getGradeTime())
+            DateUtils::dateTimeToString($graded_component->getGradeTime()),
+            $graded_component->getVerifierId() !== '' ? $graded_component->getVerifierId() : null,
+            !is_null($graded_component->getVerifyTime()) ? DateUtils::dateTimeToString($graded_component->getVerifyTime()) : null
         ];
         $query = "
             INSERT INTO gradeable_component_data(
@@ -3564,8 +3314,10 @@ AND gc_id IN (
               gcd_component_comment,
               gcd_grader_id,
               gcd_graded_version,
-              gcd_grade_time)
-            VALUES(?, ?, ?, ?, ?, ?, ?)";
+              gcd_grade_time,
+              gcd_verifier_id,
+              gcd_verify_time)
+            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $this->course_db->query($query, $param);
     }
 
@@ -3582,6 +3334,8 @@ AND gc_id IN (
                     $graded_component->getGradedVersion(),
                     DateUtils::dateTimeToString($graded_component->getGradeTime()),
                     $graded_component->getGraderId(),
+                    $graded_component->getVerifierId() !== '' ? $graded_component->getVerifierId() : null,
+                    !is_null($graded_component->getVerifyTime()) ? DateUtils::dateTimeToString($graded_component->getVerifyTime()) : null,
                     $graded_component->getTaGradedGradeable()->getId(),
                     $graded_component->getComponentId()
                 ];
@@ -3591,7 +3345,9 @@ AND gc_id IN (
                       gcd_component_comment=?,
                       gcd_graded_version=?,
                       gcd_grade_time=?,
-                      gcd_grader_id=?
+                      gcd_grader_id=?,
+                      gcd_verifier_id=?,
+                      gcd_verify_time = ?
                     WHERE gd_id=? AND gc_id=?";
             }
             else {
@@ -3762,5 +3518,43 @@ AND gc_id IN (
         $this->course_db->query('SELECT EXISTS (SELECT g_id FROM electronic_gradeable_data WHERE g_id=? AND (user_id=? OR team_id=?))',
             [$gradeable->getId(), $submitter->getId(), $submitter->getId()]);
         return $this->course_db->row()['exists'] ?? false;
+    }
+
+    /**
+     * Get the active version for all given submitter ids. If they do not have an active version,
+     * their version will be zero.
+     * @param \app\models\gradeable\Gradeable $gradeable
+     * @param string[] $submitter_ids
+     * @return bool[] Map of id=>version
+     */
+    public function getActiveVersions(gradeable\Gradeable $gradeable, array $submitter_ids) {
+        throw new NotImplementedException();
+    }
+
+    /**
+     * Gets a list of emails for all active particpants in a course  
+     */
+    public function getClassEmailList(){
+        $parameters = array();
+        $this->course_db->query('SELECT user_email FROM users WHERE user_group != 4 OR registration_section IS NOT null', $parameters);
+
+        return $this->course_db->rows();
+    }
+    
+    /**
+     * Queues an email to be sent by email job
+     * @param array $email_data
+     * @param string $recipient  
+     */ 
+    public function createEmail($email_data, $recipient){
+        $parameters = array($recipient, $email_data["subject"], $email_data["body"]);
+
+        $this->submitty_db->query("
+            INSERT INTO emails(
+              recipient,
+              subject,
+              body,
+              created)
+            VALUES(?, ?, ?, NOW())", $parameters);
     }
 }

@@ -549,13 +549,13 @@ class SubmissionController extends AbstractController {
         // Open a cURL connection
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        $qr_prefix = $_POST['qr_prefix'];
-
+        $qr_prefix = rawurlencode($_POST['qr_prefix']);
+        $qr_suffix = rawurlencode($_POST['qr_suffix']);
         $ch = curl_init();
         if($_POST['use_qr_codes'] === "false"){
             curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."pdf_check.cgi?&num={$num_pages}&sem={$semester}&course={$course}&g_id={$gradeable_id}&ver={$current_time}");
         }else{
-            curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."pdf_check_qr.cgi?&sem={$semester}&course={$course}&g_id={$gradeable_id}&ver={$current_time}&qr_prefix={$qr_prefix}");
+            curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."pdf_check_qr.cgi?&sem={$semester}&course={$course}&g_id={$gradeable_id}&ver={$current_time}&qr_prefix={$qr_prefix}&qr_suffix={$qr_suffix}");
         }
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $output = curl_exec($ch);
@@ -791,7 +791,7 @@ class SubmissionController extends AbstractController {
         }
         
         $upload_time_string_tz = $timestamp . " " . $this->core->getConfig()->getTimezone()->getName();
-        
+
         $bulk_upload_data = [
             "submit_timestamp" =>  $current_time_string_tz,
             "upload_timestamp" =>  $upload_time_string_tz,
@@ -885,7 +885,17 @@ class SubmissionController extends AbstractController {
         $timestamp_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
             $gradeable->getId(), $timestamp);
         $files = FileUtils::getAllFiles($timestamp_path);
-        if (count($files) == 0 || (count($files) == 1 && array_key_exists('decoded.json', $files)  )) {
+        
+        //check if there are any pdfs left to assign to students, otherwise delete the folder
+        $any_pdfs_left = false;
+        foreach ($files as $file){
+            if(strpos($file['name'], ".pdf") !== false){
+                $any_pdfs_left = true;
+                break;
+            }
+        }
+
+        if (count($files) == 0 || !$any_pdfs_left   ) {
             if (!FileUtils::recursiveRmdir($timestamp_path)) {
                 return $this->uploadResult("Failed to remove the empty timestamp directory {$timestamp} from the split_pdf directory.", false);
             }
@@ -1395,10 +1405,12 @@ class SubmissionController extends AbstractController {
         $this->core->getOutput()->renderJson($return);
 
         if ($show_msg == true) {
-            if ($success)
+            if ($success) {
                 $this->core->addSuccessMessage($message);
-            else
+            }
+            else {
                 $this->core->addErrorMessage($message);
+            }
         }
         return $return;
     }
@@ -1644,8 +1656,18 @@ class SubmissionController extends AbstractController {
             }
         }
 
-        return $this->uploadResultMessage("Successfully uploaded!", true);
-
+        $total_count = intval($_POST['file_count']);
+        $uploaded_count = count($uploaded_files[1]['tmp_name']);
+        $remaining_count = $uploaded_count - $total_count;
+        $php_count = ini_get('max_file_uploads');
+        if ($total_count < $uploaded_count) {
+            $message = "Successfully uploaded {$uploaded_count} images. Could not upload remaining {$remaining_count} files.";
+            $message .= " The max number of files you can upload at once is set to {$php_count}.";
+        }
+        else {
+            $message = 'Successfully uploaded!';
+        }
+        return $this->uploadResultMessage($message, true);
     }
 
     private function ajaxUploadCourseMaterialsFiles() {

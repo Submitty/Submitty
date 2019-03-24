@@ -107,19 +107,25 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
 }
 
 function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = ''){
-    orig_div_name = div_name
+    let orig_div_name = div_name;
     div_name = "#" + div_name;
-    var isVisible = $( div_name ).is( " :visible" );
 
-    if(isVisible){
-        toggleDiv(orig_div_name);
+    let loadingTools = $("#tc_" + index).find(".loading-tools");
+
+    if($(div_name).is(":visible")){
         $("#show_char_"+index).toggle();
         $(div_name).empty();
+        toggleDiv(orig_div_name);
+
+        loadingTools.find("span").hide();
+        loadingTools.find(".loading-tools-show").show();
     }else{
         $("#show_char_"+index).toggle();
         var url = buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'load_student_file',
             'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index, 'version' : version});
 
+        loadingTools.find("span").hide();
+        loadingTools.find(".loading-tools-in-progress").show();
         $.getJSON({
             url: url,
             success: function(response) {
@@ -130,6 +136,9 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
                 $(div_name).empty();
                 $(div_name).html(response.data);
                 toggleDiv(orig_div_name);
+
+                loadingTools.find("span").hide();
+                loadingTools.find(".loading-tools-hide").show();
             },
             error: function(e) {
                 alert("Could not load diff, please refresh the page and try again.");
@@ -415,7 +424,10 @@ function setUserSubmittedCode(gradeable_id, changed) {
                 $.ajax({
                     url: url,
                     success: function(data) {
+                    	
                         data = JSON.parse(data);
+                        console.log(data.ci);
+
                         if(data.error){
                             alert(data.error);
                             return;
@@ -437,7 +449,17 @@ function setUserSubmittedCode(gradeable_id, changed) {
                             }
                         });
                         $('[name="version_user_1"]', form).find('option').remove().end().append(append_options).val(data.code_version_user_1);
-                        $('[name="code_box_1"]').empty().append($('<textarea/>').html(data.display_code1).text());
+
+                        $('.CodeMirror')[0].CodeMirror.getDoc().setValue(data.display_code1);
+                        for(var users_color in data.ci) {
+                            //console.log(data.ci[users_color]);
+                            for(var pos in data.ci[users_color]) {
+                                var element = data.ci[users_color][pos];
+                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {css: "border: 1px solid black; background: " + element[4]});   
+                            }
+                        }
+                        $('.CodeMirror')[0].CodeMirror.refresh();
+                        //$('[name="code_box_1"]').empty().append(data.display_code1);
                     },
                     error: function(e) {
                         alert("Could not load submitted code, please refresh the page and try again.");
@@ -485,7 +507,16 @@ function setUserSubmittedCode(gradeable_id, changed) {
                                 alert(data.error);
                                 return;
                             }
-                            $('[name="code_box_1"]').empty().append($('<textarea/>').html(data.display_code1).text());
+                            $('.CodeMirror')[0].CodeMirror.getDoc().setValue(data.display_code1);
+                            for(var users_color in data.ci) {
+                            //console.log(data.ci[users_color]);
+                            for(var pos in data.ci[users_color]) {
+                                var element = data.ci[users_color][pos];
+                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});   
+                            }
+                        }
+                        	$('.CodeMirror')[0].CodeMirror.refresh();
+                            //$('[name="code_box_1"]').empty().append(data.display_code1);
                         },
                         error: function(e) {
                             alert("Could not load submitted code, please refresh the page and try again.");
@@ -506,8 +537,21 @@ function setUserSubmittedCode(gradeable_id, changed) {
                                 alert(data.error);
                                 return;
                             }
-                            $('[name="code_box_1"]').empty().append($('<textarea/>').html(data.display_code1).text());
-                            $('[name="code_box_2"]').empty().append($('<textarea/>').html(data.display_code2).text());
+                            $('.CodeMirror')[0].CodeMirror.getDoc().setValue(data.display_code1);
+                            $('.CodeMirror')[1].CodeMirror.getDoc().setValue(data.display_code2);
+                            var code_mirror = 0;
+                            console.log(data.ci);
+                            for(var users_color in data.ci) {
+                            for(var pos in data.ci[users_color]) {
+                                var element = data.ci[users_color][pos];
+                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});   
+                            }
+                        }   
+                        	$('.CodeMirror')[0].CodeMirror.refresh();
+                        	
+                        	$('.CodeMirror')[1].CodeMirror.refresh();
+                            // $('[name="code_box_1"]').empty().append(data.display_code1);
+                            // $('[name="code_box_2"]').empty().append(data.display_code2);
                         },
                         error: function(e) {
                             alert("Could not load submitted code, please refresh the page and try again.");
@@ -521,6 +565,8 @@ function setUserSubmittedCode(gradeable_id, changed) {
 }
 
 function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user_1_match_end, where, color , span_clicked, popup_user_2, popup_version_user_2) {
+    console.log(user_1_match_start);
+    console.log(user_1_match_end);
     var form = $("#users_with_plagiarism");
     var user_id_1 = $('[name="user_id_1"]', form).val();
     var version_user_1 = $('[name="version_user_1"]', form).val();
@@ -543,10 +589,14 @@ function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user
         }
     });
     var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_matches_for_clicked_match',
-                        'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'start':user_1_match_start, 'end': user_1_match_end});
+                        'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'start':user_1_match_start.line, 'end': user_1_match_end.line});
+
+    console.log(user_1_match_start.line);
+
     $.ajax({
         url: url,
         success: function(data) {
+            console.log(data);
             data = JSON.parse(data);
             if(data.error){
                 alert(data.error);
@@ -584,8 +634,10 @@ function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user
 
             else if(where == 'code_box_1') {
                 var to_append='';
+
                 $.each(data, function(i,match){
-                    to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick=getMatchesForClickedMatch("'+gradeable_id+'",event,'+user_1_match_start+','+ user_1_match_end+',"popup","'+ color+ '","","'+match[0]+'",'+match[1]+');>'+ match[3]+' '+match[4]+' &lt;'+match[0]+'&gt; (version:'+match[1]+')</div></li>';
+                    console.log(match);
+                    to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick=getMatchesForClickedMatch("'+gradeable_id+'",event,'+user_1_match_start.line+','+ user_1_match_end.line+',"popup","'+ color+ '","","'+match[0]+'",'+match[1]+');>'+ match[3]+' '+match[4]+' &lt;'+match[0]+'&gt; (version:'+match[1]+')</div></li>';
                 });
                 to_append = $.parseHTML(to_append);
                 $("#popup_to_show_matches_id").empty().append(to_append);
@@ -1479,7 +1531,7 @@ function changeThreadStatus(thread_id) {
 					return;
 				}
 				window.location.reload();
-				var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Thread marked as resolved.</div>';
+				var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Thread marked as resolved.</div>';
 					$('#messages').append(message);
 			},
 			error: function() {
@@ -1825,15 +1877,17 @@ function generateCodeMirrorBlocks(container_element) {
         cursorHeight: 0.0,
         lineWrapping: true
     });
+
     var lineCount = editor0.lineCount();
     if (lineCount == 1) {
         editor0.setSize("100%", (editor0.defaultTextHeight() * 2) + "px");
+    } else {
+        editor0.setSize("100%", "max-content");
     }
-    else {
-        editor0.setSize("100%", "auto");
-    }
+
     editor0.setOption("theme", "eclipse");
     editor0.refresh();
+
     }
 }
 
@@ -1914,7 +1968,7 @@ function addNewCategory(){
                     $('#messages').append(message);
                     return;
                 }
-                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Successfully created category "'+ escapeSpecialChars(newCategory) +'".</div>';
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Successfully created category "'+ escapeSpecialChars(newCategory) +'".</div>';
                 $('#messages').append(message);
                 $('#new_category_text').val("");
                 // Create new item in #ui-category-list using dummy category
@@ -1961,7 +2015,7 @@ function deleteCategory(category_id, category_desc){
                     $('#messages').append(message);
                     return;
                 }
-                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Successfully deleted category "'+ escapeSpecialChars(category_desc) +'"</div>';
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Successfully deleted category "'+ escapeSpecialChars(category_desc) +'"</div>';
                 $('#messages').append(message);
                 $('#categorylistitem-'+category_id).remove();
                 refreshCategories();
@@ -2001,7 +2055,7 @@ function editCategory(category_id, category_desc, category_color) {
                     $('#messages').append(message);
                     return;
                 }
-                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Successfully updated!</div>';
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Successfully updated!</div>';
                 $('#messages').append(message);
                 setTimeout(function() {removeMessagePopup('theid');}, 1000);
                 if(category_color !== null) {
@@ -2118,7 +2172,7 @@ function reorderCategories(){
                     $('#messages').append(message);
                     return;
                 }
-                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Successfully reordered categories.';
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Successfully reordered categories.';
                 $('#messages').append(message);
                 setTimeout(function() {removeMessagePopup('theid');}, 1000);
                 refreshCategories();
@@ -2310,7 +2364,7 @@ function updateHomeworkExtensions(data) {
             $('#user_id').val(this.defaultValue);
             $('#late_days').val(this.defaultValue);
             $('#csv_upload').val(this.defaultValue);
-            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Updated exceptions for ' + json['gradeable_id'] + '.</div>';
+            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Updated exceptions for ' + json['gradeable_id'] + '.</div>';
             $('#messages').append(message);
         },
         error: function() {
@@ -2362,7 +2416,7 @@ function refreshOnResponseLateDays(json) {
         $('#late_day_table').append('<tr><td colspan="6">No late days are currently entered.</td></tr>');
     }
     json['users'].forEach(function(elem){
-        elem_delete = "<a onclick=\"deleteLateDays('"+elem['user_id']+"', '"+elem['datestamp']+"');\"><i class='fas fa-close'></i></a>";
+        elem_delete = "<a onclick=\"deleteLateDays('"+elem['user_id']+"', '"+elem['datestamp']+"');\"><i class='fas fa-trash'></i></a>";
         var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_days'], elem['datestamp'], elem_delete + '</td></tr>'];
         $('#late_day_table').append(bits.join('</td><td>'));
     });
@@ -2394,7 +2448,7 @@ function updateLateDays(data) {
             $('#csv_upload').val(this.defaultValue);
             $('#csv_option_overwrite_all').prop('checked',true);
             //Display confirmation message
-            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Late days have been updated.</div>';
+            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Late days have been updated.</div>';
             $('#messages').append(message);
         },
         error: function() {
@@ -2426,7 +2480,7 @@ function deleteLateDays(user_id, datestamp) {
                     return;
                 }
                 refreshOnResponseLateDays(json);
-                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Late days entry removed.</div>';
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Late days entry removed.</div>';
                 $('#messages').append(message);
             },
             error: function() {
@@ -2535,9 +2589,17 @@ function toggleSidebar() {
 }
 
 $(document).ready(function() {
-    //Collapsed sidebar tooltips
+    //Collapsed sidebar tooltips with content depending on state of sidebar
     $('[data-toggle="tooltip"]').tooltip({
-        position: { my: "right+0 bottom+0" }
+        position: { my: "right+0 bottom+0" },
+        content: function () {
+            if($("#sidebar").hasClass("collapsed")) {
+                return $(this).attr("title")
+            }
+            else {
+                return ""
+            }
+        }
     });
     $("#nav-sidebar-collapse.collapse-icon").attr("title", "Expand Sidebar");
 
@@ -2553,3 +2615,20 @@ $(document).ready(function() {
     });
     checkSidebarCollapse();
 });
+
+// Credit to https://stackoverflow.com/a/24676492/2972004
+//      Solution to autoexpand the height of a textarea
+function auto_grow(element) {
+    element.style.height = "5px";
+    element.style.height = (element.scrollHeight + 5)+"px";
+}
+
+/**
+ * Sets the 'noscroll' textareas to have the correct height
+ */
+function resizeNoScrollTextareas() {
+    // Make sure textareas resize correctly
+    $('textarea.noscroll').each(function() {
+        auto_grow(this);
+    })
+}
