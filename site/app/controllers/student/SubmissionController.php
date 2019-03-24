@@ -797,7 +797,7 @@ class SubmissionController extends AbstractController {
             "upload_timestamp" =>  $upload_time_string_tz,
             "filepath" => $uploaded_file
         ];
-        #writeJsonFile returns false on failure.
+
         if (FileUtils::writeJsonFile(FileUtils::joinPaths($version_path, "bulk_upload_data.json"), $bulk_upload_data) === false) {
             return $this->uploadResult("Failed to create bulk upload file for this submission.", false);
         }
