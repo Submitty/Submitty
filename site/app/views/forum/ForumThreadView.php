@@ -254,7 +254,7 @@ HTML;
 HTML;
 	$show_deleted_class = '';
 	$show_deleted_action = '';
-	if($this->core->getUser()->getGroup() <= 2){
+	if($this->core->getUser()->getGroup() <= 3){
 		if($show_deleted) {
 			$show_deleted_class = "active";
 			$show_deleted_action = "alterShowDeletedStatus(0);";
@@ -323,7 +323,7 @@ HTML;
 							"onclick" => array(true, $show_merged_thread_action)
 						),
 						array(
-							"required_rank" => 2,
+							"required_rank" => 3,
 							"display_text" => 'Show Deleted Threads',
 							"style" => 'position:relative;top:3px;display:inline-block;',
 							"link" => array(false),
@@ -332,7 +332,7 @@ HTML;
 							"onclick" => array(true, $show_deleted_action)
 						),
 						array(
-							"required_rank" => 2,
+							"required_rank" => 3,
 							"display_text" => 'Stats',
 							"style" => 'position:relative;top:3px;display:inline-block;',
 							"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))),
@@ -396,7 +396,7 @@ HTML;
             $title_html .= <<<HTML
             <h3 style="max-width: 95%; display:inline-block;word-wrap: break-word;margin-top:10px; margin-left: 5px;">
 HTML;
-					if($this->core->getUser()->getGroup() <= 3 && $activeThreadAnnouncement){
+					if($this->core->getUser()->getGroup() <= 2 && $activeThreadAnnouncement){
                         $title_html .= <<<HTML
 							<a style="display:inline-block; color:orange; " onClick="alterAnnouncement({$activeThread['id']}, 'Are you sure you want to remove this thread as an announcement?', 'remove_announcement')" title="Remove Announcement"><i class="fas fa-star" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
@@ -405,7 +405,7 @@ HTML;
                         $title_html .= <<<HTML
 						 <i class="fas fa-star" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px; -webkit-text-stroke-color: black;" title = "Announcement" aria-hidden="true"></i>
 HTML;
-                    } else if($this->core->getUser()->getGroup() <= 3 && !$activeThreadAnnouncement){
+                    } else if($this->core->getUser()->getGroup() <= 2 && !$activeThreadAnnouncement){
                         $title_html .= <<<HTML
 							<a style="position:relative; display:inline-block; color:orange; " onClick="alterAnnouncement({$activeThread['id']}, 'Are you sure you want to make this thread an announcement?', 'make_announcement')" title="Make thread an announcement"><i class="fas fa-star" title = "Make Announcement" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'gold')" style="position:relative; display:inline-block; color:#e0e0e0; -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
@@ -520,7 +520,7 @@ HTML;
 		</script>
 HTML;
 
-        if($this->core->getUser()->getGroup() <= 2){
+        if($this->core->getUser()->getGroup() <= 3){
         	$this->core->getOutput()->addInternalCss('chosen.min.css');
         	$this->core->getOutput()->addInternalJs('chosen.jquery.min.js');
 			$current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
@@ -823,7 +823,7 @@ HTML;
 					<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="$('html, #posts_list').animate({ scrollTop: document.getElementById('posts_list').scrollHeight }, 'slow');"> Reply</a>
 HTML;
 			}
-			if($this->core->getUser()->getGroup() <= 2) {
+			if($this->core->getUser()->getGroup() <= 3) {
 				$return .= <<<HTML
 					<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="showHistory({$post['id']})">Show History</a>
 HTML;
@@ -859,8 +859,8 @@ HTML;
 				<a class="expand btn btn-default btn-sm" style="float:right; text-decoration:none; margin-top: -8px" onClick="hidePosts(this, {$post['id']})"></a>
 HTML;
 		}
-		if($this->core->getUser()->getGroup() <= 2 || $post['author_user_id'] === $current_user) {
-			if($deleted && $this->core->getUser()->getGroup() <= 2){
+		if($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) {
+			if($deleted && $this->core->getUser()->getGroup() <= 3){
 				$ud_toggle_status = "false";
 				$ud_button_title = "Undelete post";
 				$ud_button_icon = "fa-undo";
@@ -960,7 +960,7 @@ HTML;
 			});
 		 </script>
 HTML;
-        if($this->core->getUser()->getGroup() <= 2){
+        if($this->core->getUser()->getGroup() <= 3){
             $categories = $this->core->getQueries()->getCategories();
 
             $dummy_category = array('color' => '#000000', 'category_desc' => 'dummy', 'category_id' => "dummy");
@@ -993,7 +993,7 @@ HTML;
 
 	if($thread_exists) {
 		$buttons = array_merge($buttons, array(
-			"required_rank" => 2,
+			"required_rank" => 3,
 			"display_text" => 'Stats',
 			"style" => 'position:relative;top:3px;display:inline-block;',
 			"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))),
@@ -1042,7 +1042,7 @@ HTML;
 
 	public function statPage($users) {
 
-		if(!$this->forumAccess() || $this->core->getUser()->getGroup() > 2){
+		if(!$this->forumAccess() || $this->core->getUser()->getGroup() > 3){
 			$this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
 			return;
 		}

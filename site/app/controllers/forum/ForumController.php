@@ -100,7 +100,7 @@ class ForumController extends AbstractController {
     }
 
     private function showDeleted() {
-        return ($this->core->getUser()->getGroup() <= 2 && isset($_COOKIE['show_deleted']) && $_COOKIE['show_deleted'] == "1");
+        return ($this->core->getUser()->getGroup() <= 3 && isset($_COOKIE['show_deleted']) && $_COOKIE['show_deleted'] == "1");
     }
 
     private function showMergedThreads($currentCourse) {
@@ -200,7 +200,7 @@ class ForumController extends AbstractController {
 
     public function addNewCategory(){
         $result = array();
-        if($this->core->getUser()->getGroup() <= 2){
+        if($this->core->getUser()->getGroup() <= 3){
             if(!empty($_REQUEST["newCategory"])) {
                 $category = $_REQUEST["newCategory"];
                 if($this->isValidCategories(-1, array($category))) {
@@ -221,7 +221,7 @@ class ForumController extends AbstractController {
 
     public function deleteCategory(){
         $result = array();
-        if($this->core->getUser()->getGroup() <= 2){
+        if($this->core->getUser()->getGroup() <= 3){
             if(!empty($_REQUEST["deleteCategory"])) {
                 $category = (int)$_REQUEST["deleteCategory"];
                 if(!$this->isValidCategories(array($category))) {
@@ -247,7 +247,7 @@ class ForumController extends AbstractController {
 
     public function editCategory(){
         $result = array();
-        if($this->core->getUser()->getGroup() <= 2){
+        if($this->core->getUser()->getGroup() <= 3){
             $category_id = $_REQUEST["category_id"];
             $category_desc = null;
             $category_color = null;
@@ -282,7 +282,7 @@ class ForumController extends AbstractController {
 
     public function reorderCategories(){
         $result = array();
-        if($this->core->getUser()->getGroup() <= 2){
+        if($this->core->getUser()->getGroup() <= 3){
             $rows = $this->core->getQueries()->getCategories();
 
             $current_order = array();
@@ -423,7 +423,7 @@ class ForumController extends AbstractController {
     }
 
     public function alterAnnouncement($type){
-        if($this->core->getUser()->getGroup() <= 3){
+        if($this->core->getUser()->getGroup() <= 2){
             $thread_id = $_POST["thread_id"];
             $this->core->getQueries()->setAnnouncement($thread_id, $type);
             if($type) {
@@ -689,7 +689,7 @@ class ForumController extends AbstractController {
         } else if(!empty($_COOKIE['forum_display_option'])) {
            $option = $_COOKIE['forum_display_option'];
         }
-        $option = ($this->core->getUser()->getGroup() <= 2 || $option != 'alpha') ? $option : 'tree';
+        $option = ($this->core->getUser()->getGroup() <= 3 || $option != 'alpha') ? $option : 'tree';
         if(!empty($_REQUEST["thread_id"])){
             $thread_id = (int)$_REQUEST["thread_id"];
             $this->core->getQueries()->markNotificationAsSeen($user, -2, (string)$thread_id);
@@ -746,7 +746,7 @@ class ForumController extends AbstractController {
     public function getHistory(){
         $post_id = $_POST["post_id"];
         $output = array();
-        if($this->core->getUser()->getGroup() <= 2){
+        if($this->core->getUser()->getGroup() <= 3){
             $_post = array();
             $older_posts = $this->core->getQueries()->getPostHistory($post_id);
             foreach ($older_posts as $post) {
@@ -842,7 +842,7 @@ class ForumController extends AbstractController {
         preg_match('/\((.*?)\)/', $parent_thread_id, $result);
         $parent_thread_id = $result[1];
         $thread_id = $child_thread_id;
-        if($this->core->getUser()->getGroup() <= 2){
+        if($this->core->getUser()->getGroup() <= 3){
             if(is_numeric($parent_thread_id) && is_numeric($child_thread_id)) {
                 $message = "";
                 $child_root_post = -1;
