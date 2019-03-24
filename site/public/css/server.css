@@ -186,6 +186,14 @@ input[type="checkbox"]:checked:before {
     font-weight: 900
 }
 
+.helpicon::before {
+  font-family: 'Font Awesome 5 Free';
+  content: "\f059";
+  color: #1E90FF;
+  font-weight: 300;
+  display: inline-block;
+}
+
 input[type="checkbox"]:focus{
     outline: 0 none;
     box-shadow: none;
