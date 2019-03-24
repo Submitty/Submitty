@@ -1257,6 +1257,35 @@ function openUrl(url) {
     return false;
 }
 
+function changeName(element, user, visible_username, anon){
+    var new_element = element.getElementsByTagName("strong")[0];
+    anon = (anon == 'true');
+    icon = element.getElementsByClassName("fas fa-eye")[0];
+    if(icon == undefined){
+        icon = element.getElementsByClassName("fas fa-eye-slash")[0];
+        if(anon) {
+            new_element.style.color = "black";
+            new_element.style.fontStyle = "normal";
+        }
+        new_element.innerHTML = visible_username;
+        icon.className = "fas fa-eye";
+        icon.title = "Show full user information";
+    } else {
+        if(anon) {
+            new_element.style.color = "grey";
+            new_element.style.fontStyle = "italic";
+        }
+        new_element.innerHTML = user;
+        icon.className = "fas fa-eye-slash";
+        icon.title = "Hide full user information";
+    }
+}
+
+function openFileForum(directory, file, path ){
+    var url = buildUrl({'component': 'misc', 'page': 'display_file', 'dir': directory, 'file': file, 'path': path});
+    window.open(url,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+}
+
 function openFrame(url, id, filename) {
     var iframe = $('#file_viewer_' + id);
     if (!iframe.hasClass('open')) {
@@ -2607,6 +2636,24 @@ $(document).ready(function() {
     checkSidebarCollapse();
 });
 
+function checkQRProgress(gradeable_id){
+    var url = buildUrl({'component': 'misc', 'page': 'check_qr_upload_progress'});
+    $.ajax({
+        url: url,
+        data: {
+            gradeable_id : gradeable_id
+        },
+        type: "POST",
+        success: function(data) {
+            data = JSON.parse(data);
+            var result = {};
+            updateQRProgress(data['job_data'], data['count']);
+        },
+        error: function(e) {
+            console.log("Failed to check job queue");
+        }
+    })
+}
 // Credit to https://stackoverflow.com/a/24676492/2972004
 //      Solution to autoexpand the height of a textarea
 function auto_grow(element) {
