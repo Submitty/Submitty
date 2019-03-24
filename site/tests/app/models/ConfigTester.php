@@ -72,7 +72,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             "site_log_path" => $log_path,
             "submission_url" => "http://example.com",
             "vcs_url" => "",
-            "cgi_url" => "http://example.com/cgi-bin",
+            "cgi_url" => "",
             "institution_name" => "RPI",
             "username_change_text" => "Submitty welcomes all students.",
             "institution_homepage" => "https://rpi.edu",
@@ -295,13 +295,22 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals("sqlite", $config->getDatabaseDriver());
     }
 
-    public function testVcsUrl() {
+    public function testNonEmptyVcsUrl() {
         $extra = ['vcs_url' => 'https://some.vcs.url.com'];
         $this->createConfigFile($extra);
 
         $config = new Config($this->core, "s17", "config");
         $config->loadMasterConfigs($this->config_path);
         $this->assertEquals("https://some.vcs.url.com/", $config->getVcsUrl());
+    }
+
+    public function testNonEmptyCgiUrl() {
+        $extra = ['cgi_url' => 'https://some.cgi.url.com'];
+        $this->createConfigFile($extra);
+
+        $config = new Config($this->core, "s19", "config");
+        $config->loadMasterConfigs($this->config_path);
+        $this->assertEquals("https://some.cgi.url.com/", $config->getCgiUrl());
     }
 
     public function testCourseSeating() {

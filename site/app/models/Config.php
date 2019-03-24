@@ -258,9 +258,14 @@ class Config extends AbstractModel {
         }
 
         $this->timezone = new \DateTimeZone($this->timezone);
-
         $this->base_url = rtrim($this->base_url, "/")."/";
-        $this->cgi_url = $this->base_url."cgi-bin/";
+
+        if (!empty($submitty_json['cgi_url'])){
+            $this->cgi_url = rtrim($submitty_json['cgi_url'], "/")."/";
+        }
+        else {
+            $this->cgi_url = $this->base_url."cgi-bin/";
+        }
 
         if (empty($submitty_json['vcs_url'])) {
             $this->vcs_url = $this->base_url . '{$vcs_type}/';
