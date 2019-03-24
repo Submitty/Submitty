@@ -1785,7 +1785,7 @@ function dynamicScrollContentOnDemand(jElement, urlPattern, currentThreadId, cur
     dynamicScrollLoadIfScrollVisible(jElement);
     $(jElement).scroll(function(){
         var element = $(this)[0];
-        var sensitivity = 0.9;
+        var sensitivity = 1.5;
         var isTop = element.scrollTop < sensitivity;
         var isBottom = (element.scrollHeight - element.offsetHeight - element.scrollTop) < sensitivity;
         if(isTop) {
