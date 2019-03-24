@@ -10,7 +10,7 @@ from os import path
 import sys
 
 SYSTEMCTL_WRAPPER_SCRIPT = path.join(path.dirname(path.realpath(__file__)),
-  'shipper_utils', 'systemctl_wrapper.py')
+                            'shipper_utils', 'systemctl_wrapper.py')
 
 if __name__ == '__main__':
 
@@ -29,7 +29,7 @@ if __name__ == '__main__':
 
     print('Stopping all remote worker daemons...')
     cmd = 'python3 {0} stop --daemon worker --target perform_on_all_workers'
-          .format(SYSTEMCTL_WRAPPER_SCRIPT)
+    cmd = cmd.format(SYSTEMCTL_WRAPPER_SCRIPT)
 
     subprocess.call(["su", "-", "submitty_daemon", "-c",  cmd])
 
@@ -47,7 +47,7 @@ if __name__ == '__main__':
 
     print('Starting all worker daemons...')
     cmd = 'python3 {0} start --daemon worker --target perform_on_all_workers'
-          .format(SYSTEMCTL_WRAPPER_SCRIPT)
+    cmd = cmd.format(SYSTEMCTL_WRAPPER_SCRIPT)
 
     subprocess.call(["su", "-", "submitty_daemon", "-c", cmd])
 
