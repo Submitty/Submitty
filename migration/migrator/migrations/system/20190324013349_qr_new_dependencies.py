@@ -1,5 +1,5 @@
 """Migration for the Submitty system."""
-
+import os
 
 def up(config):
     """
