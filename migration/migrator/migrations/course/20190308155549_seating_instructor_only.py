@@ -1,18 +1,19 @@
 import os
 from pathlib import Path
-import configparser
+import json
 
 
 def up(config, database, semester, course):
     course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
-    config_file = Path(course_dir, 'config', 'config.ini')
+    config_file = Path(course_dir, 'config', 'config.json')
 
     if config_file.is_file():
-        config = configparser.ConfigParser()
-        config.read(str(config_file))
+        j = json.load(open(config_file,'r'))
 
-        if not config.has_option('course_details', 'seating_only_for_instructor'):
-            config.set('course_details', 'seating_only_for_instructor', 'false')
+        if 1 or not 'seating_only_for_instructor' in j['course_details']:
+            j['course_details']['seating_only_for_instructor'] = False
 
-        with config_file.open('w') as configfile:
-            config.write(configfile)
+        json.dump(j,open(config_file,'w'))
+
+def down(config, database, semester, course):
+    pass

@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\libraries\Core;
+use app\models\gradeable\Submitter;
 
 /**
  * Represents a single section of students or teams, and their graders
@@ -75,5 +76,24 @@ class GradingSection extends AbstractModel {
             }
         }
         return false;
+    }
+
+    /**
+     * Get an array of all Submitters for this section
+     * @return Submitter[] All Submitters
+     */
+    public function getSubmitters() {
+        if ($this->users !== null) {
+            return array_map(function(User $user) {
+                return new Submitter($this->core, $user);
+            }, $this->users);
+        } else if ($this->teams !== null) {
+            return array_map(function(Team $team) {
+                return new Submitter($this->core, $team);
+            }, $this->teams);
+        } else {
+            //No users, no teams, this section is empty!
+            return [];
+        }
     }
 }
