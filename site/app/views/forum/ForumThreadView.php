@@ -1080,10 +1080,10 @@ HTML;
 			<div style="padding-left:20px;padding-bottom: 10px;border-radius:3px;padding-right:20px;">
 				<table class="table table-striped table-bordered persist-area" id="forum_stats_table">
 					<tr>			
-				        <td style = "cursor:pointer;" width="15%" id="user_sort">User</td>
-				        <td style = "cursor:pointer;" width="15%" id="total_posts_sort">Total Posts (not deleted)</td>
-				        <td style = "cursor:pointer;" width="15%" id="total_threads_sort">Total Threads</td>
-				        <td style = "cursor:pointer;" width="15%" id="total_deleted_sort">Total Deleted Posts</td>
+				        <td style = "cursor:pointer;" width="15%" id="user_sort"><a href="javascript:void(0)">User</a></td>
+				        <td style = "cursor:pointer;" width="15%" id="total_posts_sort"><a href="javascript:void(0)">Total Posts (not deleted)</a></td>
+				        <td style = "cursor:pointer;" width="15%" id="total_threads_sort"><a href="javascript:void(0)">Total Threads</a></td>
+				        <td style = "cursor:pointer;" width="15%" id="total_deleted_sort"><a href="javascript:void(0)">Total Deleted Posts</a></td>
 				        <td width="40%">Show Posts</td>
 					</tr>
 HTML;
