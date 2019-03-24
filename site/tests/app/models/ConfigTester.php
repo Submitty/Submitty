@@ -72,7 +72,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             "site_log_path" => $log_path,
             "submission_url" => "http://example.com",
             "vcs_url" => "",
-            "cgi_url" => "http://example.com/cgi-bin",
+            "cgi_url" => "",
             "institution_name" => "RPI",
             "username_change_text" => "Submitty welcomes all students.",
             "institution_homepage" => "https://rpi.edu",
@@ -102,7 +102,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'private_repository' => '',
                 'forum_enabled' => true,
                 'regrade_enabled' => false,
-                'regrade_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
+                'seating_only_for_instructor' => false,
+                'regrade_message' => 'Warning: Frivolous regrade requests may lead to grade deductions or lost late days',
                 'room_seating_gradeable_id' => ""
             )
         );
@@ -205,8 +206,13 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'vcs_type' => 'git',
             'modified' => false,
             'hidden_details' => null,
+<<<<<<< HEAD
+            'regrade_message' => 'Warning: Frivolous regrade requests may lead to grade deductions or lost late days',
+            'course_ini' => [
+=======
             'regrade_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
             'course_json' => [
+>>>>>>> eb59f91c1452481afc1a1d442c09ce0a597a6639
                 'database_details' => [
                     'dbname' => 'submitty_s17_csci0000'
                 ],
@@ -226,7 +232,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                     'private_repository' => '',
                     'forum_enabled' => true,
                     'regrade_enabled' => false,
-                    'regrade_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
+                    'seating_only_for_instructor' => false,
+                    'regrade_message' => 'Warning: Frivolous regrade requests may lead to grade deductions or lost late days',
                     'room_seating_gradeable_id' => ""
                 ]
             ],
@@ -236,6 +243,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'institution_name' => 'RPI',
             'private_repository' => '',
             'regrade_enabled' => false,
+            'seating_only_for_instructor' => false,
             'room_seating_gradeable_id' => '',
             'username_change_text' => 'Submitty welcomes all students.',
             'vcs_url' => 'http://example.com/{$vcs_type}/',
@@ -287,13 +295,22 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals("sqlite", $config->getDatabaseDriver());
     }
 
-    public function testVcsUrl() {
+    public function testNonEmptyVcsUrl() {
         $extra = ['vcs_url' => 'https://some.vcs.url.com'];
         $this->createConfigFile($extra);
 
         $config = new Config($this->core, "s17", "config");
         $config->loadMasterConfigs($this->config_path);
         $this->assertEquals("https://some.vcs.url.com/", $config->getVcsUrl());
+    }
+
+    public function testNonEmptyCgiUrl() {
+        $extra = ['cgi_url' => 'https://some.cgi.url.com'];
+        $this->createConfigFile($extra);
+
+        $config = new Config($this->core, "s19", "config");
+        $config->loadMasterConfigs($this->config_path);
+        $this->assertEquals("https://some.cgi.url.com/", $config->getCgiUrl());
     }
 
     public function testCourseSeating() {
@@ -400,7 +417,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
                 'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_rainbow_grades_summary',
                 'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type', 'private_repository',
-                'forum_enabled', 'regrade_enabled', 'regrade_message', 'room_seating_gradeable_id',
+                'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor', 'regrade_message', 'room_seating_gradeable_id',
             ],
         ];
         $return = array();

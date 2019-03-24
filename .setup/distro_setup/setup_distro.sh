@@ -106,7 +106,11 @@ ${GIT_LINE}
 ##  The database can be accessed on the host machine at   ##
 ${DATABASE_LINE}
 ##                                                        ##
-##  Checkout https://submitty.org/developer for helpful   ##
+##  The vagrant box comes with some helpful commands,     ##
+##  which can be shown by doing:                          ##
+##    submitty_help                                       ##
+##                                                        ##
+##  Check out https://submitty.org/developer for helpful  ##
 ##  information on getting started and developing.        ##
 ##                                                        ##
 ##  Happy developing!                                     ##
