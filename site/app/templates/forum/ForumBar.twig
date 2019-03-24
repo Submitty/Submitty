@@ -1,59 +1,94 @@
 {% set user_group = core.getUser().getGroup() %}
+
+<script>
+
+console.log('{{ more_data[0]["filter_option"] }}');
+
+$(document).ready(function() { 
+
+	$('#{{ more_data[0]["filter_option"] }}').parent().removeClass("active");
+	$('#{{ more_data[0]["filter_option"] }}').addClass("active");
+
+	if('{{ more_data[0]["filter_option"] }}' === 'tree' && !$('#delete').attr('class').includes("active")) {
+		$('#dLabel').removeClass("active");
+	} else {
+		$('#dLabel').addClass("active");
+	}
+
+ });
+
+</script>
+
 <div id="forum_bar">
 
-	{% if thread_exists %}
-		<form id="search_block" style="position:relative;top:3px;right:5px;" method="post" action="{{ core.buildUrl({'component':'forum', 'page':'search_threads'}) }}">
-			<input type="text" size="35" placeholder="search" name="search_content" id="search_content"/>
+	<div class="row">
 
-			<button type="submit" name="search" title="Submit search" class="btn btn-primary">
-	  			Search
-			</button>
-		</form>
-	{% endif %}
+	<div style="padding:0px;" class="col-6">
 
-	{% for button in forum_bar_buttons %}
-		{% if user_group <= button.required_rank %}
-			{% set link = (button.link[0]) ? 'href=' ~ button.link[1] %}
-			{% set onclick = (button.onclick[0]) ? 'onclick=' ~ button.onclick[1] %}
-			<a class="btn btn-primary {{ button.optional_class }}" style="{{ button.style }}" {{ link }} title="{{ button.title }}" {{ onclick }} >
-				{{ button.display_text }}
-			</a>
+
+		{% if thread_exists %}
+
+
+			<form id="search_block" method="post" action="{{ core.buildUrl({'component':'forum', 'page':'search_threads'}) }}">
+			<div class="row">
+				<div style="padding:0px;" class="col-8">
+					<input style="width:100%;" type="text" placeholder="Search here..." name="search_content" id="search_content"/>
+				</div>
+				<div style="padding:0px;" class="col-4">
+					<button type="submit" name="search" title="Submit search" class="btn btn-primary">
+		  				Search <i class="fas fa-search"></i>
+					</button>
+					{% for button in forum_bar_buttons_left %}
+						{% if user_group <= button.required_rank %}
+							{% set link = (button.link[0]) ? 'href=' ~ button.link[1] %}
+							{% set onclick = (button.onclick[0]) ? 'onclick=' ~ button.onclick[1] %}
+							<a class="btn btn-primary {{ button.optional_class }}" style="{{ button.style }}" {{ link }} title="{{ button.title }}" {{ onclick }} >
+								{{ button.display_text|raw }}
+							</a>
+						{% endif %}
+					{% endfor %}
+				</div>
+			</form>
+			</div>
 		{% endif %}
-	{% endfor %}
+		
+		</div>
+		
+<div style="padding:0px;" class="col-6">
 
-	{% if show_threads %}
+	{% for button in forum_bar_buttons_right %}
+						{% if user_group <= button.required_rank %}
+							{% set link = (button.link[0]) ? 'href=' ~ button.link[1] %}
+							{% set onclick = (button.onclick[0]) ? 'onclick=' ~ button.onclick[1] %}
+							<a class="btn btn-primary {{ button.optional_class }}" style="{{ button.style }}" {{ link }} title="{{ button.title }}" {{ onclick }} >
+								{{ button.display_text|raw }}
+							</a>
+						{% endif %}
+					{% endfor %}
 
-		<div class="dropdown">
-  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-    Dropdown
-    <span class="caret"></span>
-  </button>
-  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-    <li><a href="#">Action</a></li>
-    <li><a href="#">Another action</a></li>
-    <li><a href="#">Something else here</a></li>
-    <li role="separator" class="divider"></li>
-    <li><a href="#">Separated link</a></li>
-  </ul>
-</div>
+{% if user_group <= 2 %}
+        <div class="dropdown">
+            <a id="dLabel" role="button" data-toggle="dropdown" class="btn btn-default" data-target="#" href="#">
+                More <span class="caret"></span>
+            </a>
+    		<ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu">
+              <li><a id="delete" class="{{ more_data[1]["optional_class"] }}" href="#" onclick="{{ more_data[1]["onclick"] }}">Show Deleted Threads</a></li>
+              <li><a href="{{ core.buildUrl({'component': 'forum', 'page': 'show_stats'}) }}">Stats</a></li>
+              <li class="divider"></li>
+              <li class="dropdown-submenu">
+                <a tabindex="-1" href="#">Sort posts by</a>
+                <ul class="dropdown-menu">
+                  <li id="tree"><a tabindex="-1" onclick="changeDisplayOptions('tree', {{ current_thread }})" href="#">Hierarchical</a></li>
+                  <li id="time"><a href="#" onclick="changeDisplayOptions('time', {{ current_thread }})">Chronological</a></li>
+                  <li id="alpha"><a href="#" onclick="changeDisplayOptions('alpha', {{ current_thread }})">Alphabetical</a></li>
+                </ul>
+              </li>
+            </ul>
+        </div>
+{% endif %}
 
-		{#
-		<div style="margin-left:10px;display:inline-block;position:relative;top:3px;" class="btn-group btn-group-toggle" data-toggle="buttons">
-  			<label id="tree_label" for="radio" onclick="changeDisplayOptions('tree', {{ current_thread }})" class="btn btn-secondary">
-    			<input type="radio" name="selectOption" id="tree" value="tree"> Hierarchical
-  			</label>
-  			<label id="time_label" for="radio2" onclick="changeDisplayOptions('time', {{ current_thread }})" class="btn btn-secondary">
-    			<input type="radio" name="selectOption" id="time" value="time"> Chronological
-  			</label>
-		{% if user_group <= 2 %}
-			<label id="alpha_label" for="radio3" onclick="changeDisplayOptions('alpha', {{ current_thread }})" class="btn btn-secondary">
-    			<input type="radio" name="selectOption" id="alpha" value="alpha"> Alphabetical
-  			</label>
-  		{% endif %}
-  		</div>
-  		#}
-	{% endif %}
-
+		</div>
+		</div>
 
 </div>
 <hr/>

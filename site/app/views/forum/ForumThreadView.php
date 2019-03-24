@@ -186,6 +186,7 @@ HTML;
 		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/shell.js"></script>
 		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/jquery.are-you-sure.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 		<style>body {min-width: 925px;}</style>
 
 
@@ -298,7 +299,7 @@ HTML;
 
 	$button_params = [
 								"current_thread" => $currentThread,
-								"forum_bar_buttons" => $default_button,
+								"forum_bar_buttons_right" => $default_button,
 								"show_threads" => true,
 								"thread_exists" => true
 	];
@@ -312,16 +313,19 @@ HTML;
 				</div>
 HTML;
 		} else {
+			$more_data = array(
+					array(
+							"filter_option" => $display_option
+					),
+					array(
+							"display_text" => 'Show Deleted Threads',
+							"optional_class" => $show_deleted_class,
+							"title" => 'Show Deleted Threads',
+							"onclick" => $show_deleted_action
+						)
+			);
+
 			$other_buttons = array(
-						// array(
-						// 	"required_rank" => 4,
-						// 	"display_text" => $show_merged_thread_title,
-						// 	"style" => 'position:relative;top:3px;display:inline-block;',
-						// 	"link" => array(false),
-						// 	"optional_class" => $show_merged_thread_class,
-						// 	"title" => $show_merged_thread_title,
-						// 	"onclick" => array(true, $show_merged_thread_action)
-						// ),
 						// array(
 						// 	"required_rank" => 2,
 						// 	"display_text" => 'Show Deleted Threads',
@@ -342,15 +346,16 @@ HTML;
 						// ),
 						array(
 							"required_rank" => 4,
-							"display_text" => 'Filter',
-							"style" => 'position:relative;top:3px;display:inline-block;',
+							"display_text" => 'Filter <i class="fas fa-filter"></i>',
+							"style" => 'display:inline-block;',
 							"link" => array(false),
 							"optional_class" => '',
 							"title" => 'Filter Threads based on Categories',
 							"onclick" => array(true, "$('#category_wrapper').css('display','block');")
 						)
 			);
-					$button_params["forum_bar_buttons"] = array_merge($default_button, $other_buttons);
+					$button_params["more_data"] = $more_data;
+					$button_params["forum_bar_buttons_left"] = $other_buttons;
 					$return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", $button_params);
 					$next_page = $initialPageNumber + 1;
 					$prev_page = ($initialPageNumber == 1)?0:($initialPageNumber - 1);
