@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 
+#include "execute.h"
 #include "TestCase.h"
 #include "default_config.h"
 
@@ -228,5 +229,6 @@ int main(int argc, char *argv[]) {
     complete_config.open(complete_config_file, std::ios::out);
     complete_config << config_json.dump(4) << std::endl;
   }
+
   return 0;
 }
