@@ -2,15 +2,11 @@
 
 namespace app\libraries;
 
-use app\models\Gradeable;
-use app\models\gradeable\AutoGradedGradeable;
+use app\models\gradeable\Gradeable;
 use app\models\gradeable\Component;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Submitter;
-use app\models\gradeable\TaGradedGradeable;
-use app\models\GradeableComponent;
 use app\models\GradingSection;
-use app\models\Team;
 use app\models\User;
 use InvalidArgumentException;
 
@@ -350,21 +346,20 @@ class Access {
             }
         }
 
+        /** @var GradedGradeable|null $graded_gradeable */
+        $graded_gradeable = null;
+        /** @var Gradeable|null $gradeable */
+        $gradeable = null;
         if (self::checkBits($checks, self::REQUIRE_ARG_GRADEABLE)) {
             if (array_key_exists("graded_gradeable", $args)) {
-                $g = $args["graded_gradeable"];
+                $graded_gradeable = $args["graded_gradeable"];
+                $gradeable = $graded_gradeable->getGradeable();
             } else {
-                $g = $this->requireArg($args, "gradeable");
-                if ($g === null) {
+                $gradeable = $this->requireArg($args, "gradeable");
+                if ($gradeable === null) {
                     return false;
                 }
             }
-
-            /* @var Gradeable|null $gradeable */
-            /* @var Gradeable|null $graded_gradeable */
-            /* @var \app\models\gradeable\Gradeable|null $new_gradeable */
-            /* @var GradedGradeable|null $new_graded_gradeable */
-            list($gradeable, $graded_gradeable, $new_gradeable, $new_graded_gradeable) = $this->resolveNewGradeable($g);
 
             //Check if they pass the grading-related checks. There are overrides at the end so
             // we can't just immediately return false.
@@ -372,15 +367,14 @@ class Access {
 
             if ($grading_checks && self::checkBits($checks, self::CHECK_GRADEABLE_MIN_GROUP)) {
                 //Make sure they meet the minimum requirements
-                $minimum = $new_gradeable ? $new_gradeable->getMinGradingGroup() : $gradeable->getMinimumGradingGroup();
-                if (!$this->checkGroupPrivilege($group, $minimum)) {
+                if (!$this->checkGroupPrivilege($group, $gradeable->getMinGradingGroup())) {
 
                     if (
                         //Full access graders are allowed to view submissions if there is no manual grading
-                        !($group === User::GROUP_FULL_ACCESS_GRADER && !($new_gradeable ?? $gradeable)->isTaGrading())
+                        !($group === User::GROUP_FULL_ACCESS_GRADER && !$gradeable->isTaGrading())
                         &&
                         //Students are allowed to see this if its a peer graded assignment
-                        !($group === User::GROUP_STUDENT && ($new_gradeable ?? $gradeable)->isPeerGrading())
+                        !($group === User::GROUP_STUDENT && $gradeable->isPeerGrading())
                        ) {
 
                         //Otherwise, you're not allowed
@@ -390,7 +384,7 @@ class Access {
             }
 
             if ($grading_checks && self::checkBits($checks, self::CHECK_HAS_SUBMISSION)) {
-                if (($new_graded_gradeable ? $new_graded_gradeable->getAutoGradedGradeable()->getActiveVersion() : $graded_gradeable->getActiveVersion()) <= 0) {
+                if ($graded_gradeable !== null && $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() <= 0) {
                     $grading_checks = false;
                 }
             }
@@ -398,30 +392,34 @@ class Access {
             if ($grading_checks && self::checkBits($checks, self::CHECK_GRADING_SECTION_GRADER) && $group === User::GROUP_LIMITED_ACCESS_GRADER) {
                 //Check their grading section
                 if (array_key_exists("section", $args)) {
-                    if (!$this->isSectionInGradingSections($new_gradeable ?? $gradeable, $args["section"], $user)) {
+                    if (!$this->isSectionInGradingSections($gradeable, $args["section"], $user)) {
                         $grading_checks = false;
                     }
                 } else {
-                    if (!$this->isGradedGradeableInGradingSections($new_graded_gradeable ?? $graded_gradeable, $user)) {
-                        $grading_checks = false;
+                    //If graded gradeable is null then we're asking if we can grade anything in this gradeable, which we can.
+                    // If a graded gradeable is passed then we need to make sure we can grade that specific graded gradeable.
+                    if ($graded_gradeable !== null) {
+                        if (!$this->isGradedGradeableInGradingSections($graded_gradeable, $user)) {
+                            $grading_checks = false;
+                        }
                     }
                 }
             }
 
             if ($grading_checks && self::checkBits($checks, self::CHECK_PEER_ASSIGNMENT_STUDENT) && $group === User::GROUP_STUDENT) {
                 //Check their peer assignment
-                if (!$this->isGradedGradeableInPeerAssignment($new_graded_gradeable ?? $graded_gradeable, $user)) {
+                if (!$this->isGradedGradeableInPeerAssignment($graded_gradeable, $user)) {
                     $grading_checks = false;
                 }
             }
 
             //Sometimes they're allowed to view their own even if the other checks fail
-            if (!$grading_checks && self::checkBits($checks, self::ALLOW_SELF_GRADEABLE) && $this->isGradedGradeableByUser($new_graded_gradeable ?? $graded_gradeable, $user)) {
+            if (!$grading_checks && self::checkBits($checks, self::ALLOW_SELF_GRADEABLE) && $this->isGradedGradeableByUser($graded_gradeable, $user)) {
                 $grading_checks = true;
             }
             //Sometimes they're only allowed to access their own gradeable, even if they are able to
             // grade another (eg students cannot edit others' files during peer grading)
-            if ($grading_checks && self::checkBits($checks, self::ALLOW_ONLY_SELF_GRADEABLE) && !$this->isGradedGradeableByUser($new_graded_gradeable ?? $graded_gradeable, $user)) {
+            if ($grading_checks && self::checkBits($checks, self::ALLOW_ONLY_SELF_GRADEABLE) && !$this->isGradedGradeableByUser($graded_gradeable, $user)) {
                 $grading_checks = false;
             }
 
@@ -433,8 +431,7 @@ class Access {
             //As these are not grading-related they can return false immediately
             if ($group === User::GROUP_STUDENT) {
                 if (self::checkBits($checks, self::CHECK_STUDENT_VIEW)) {
-                    $can_view = ($new_gradeable ? $new_gradeable->isStudentView() : $gradeable->getStudentView());
-                    if (!$can_view) {
+                    if (!$gradeable->isStudentView()) {
                         return false;
                     }
                 }
@@ -444,11 +441,10 @@ class Access {
             if (self::checkBits($checks, self::REQUIRE_ARG_VERSION)) {
                 /* @var int $version */
                 $version = $this->requireArg($args, "gradeable_version");
-                $can_submit = ($new_gradeable ? $new_gradeable->isStudentSubmit() : $gradeable->getStudentSubmit());
+                $can_submit = $gradeable->isStudentSubmit();
                 // Can only view active version for non-student-submit assignment
                 if ($group === User::GROUP_STUDENT && !$can_submit) {
-                    $active = ($new_graded_gradeable ? $new_graded_gradeable->getAutoGradedGradeable()->getActiveVersion() : $graded_gradeable->getActiveVersion());
-                    if ($version !== $active) {
+                    if ($graded_gradeable !== null && $version !== $graded_gradeable->getAutoGradedGradeable()->getActiveVersion()) {
                         return false;
                     }
                 }
@@ -456,20 +452,15 @@ class Access {
         }
 
         if (self::checkBits($checks, self::REQUIRE_ARG_COMPONENT)) {
-            /* @var GradeableComponent|Component|null $component */
+            /* @var Component|null $component */
             $component = $this->requireArg($args, "component");
             if ($component === null) {
                 return false;
             }
 
             if (self::checkBits($checks, self::CHECK_COMPONENT_PEER_STUDENT) && $group === User::GROUP_STUDENT) {
-                // TODO: Remove once new model is fully integrated
-                $condition = $component instanceof GradeableComponent
-                    ? !$component->getIsPeer()
-                    : !$component->isPeer();
-
                 //Make sure a component allows students to access it via peer grading
-                if ($condition) {
+                if (!$component->isPeer()) {
                     return false;
                 }
             }
@@ -542,38 +533,29 @@ class Access {
 
     /**
      * Check if a Graded Gradeable's submitter is in a user's grading sections
-     * @param Gradeable|GradedGradeable $g
+     * @param GradedGradeable $graded_gradeable
      * @param User $user
      * @return bool If they are
      */
-    public function isGradedGradeableInGradingSections($g, User $user) {
+    public function isGradedGradeableInGradingSections($graded_gradeable, User $user) {
         $now = $this->core->getDateTimeNow();
 
-        /* @var Gradeable|null $gradeable */
-        /* @var Gradeable|null $graded_gradeable */
-        /* @var \app\models\gradeable\Gradeable|null $new_gradeable */
-        /* @var GradedGradeable|null $new_graded_gradeable */
-        list($gradeable, $graded_gradeable, $new_gradeable, $new_graded_gradeable) = $this->resolveNewGradeable($g);
-
-        //If it's not a user's gradeable then you can't check grading section
-        if (($new_graded_gradeable ?? $graded_gradeable) === null) {
-            return true;
-        }
+        $gradeable = $graded_gradeable->getGradeable();
 
         //If a user is a limited access grader, and the gradeable is being graded, and the
         // gradeable can be viewed by limited access graders.
-        if (($new_gradeable ?? $gradeable)->getGradeStartDate() <= $now) {
+        if ($gradeable->getGradeStartDate() <= $now) {
             //Check to see if the requested user is assigned to this grader.
-            $sections = ($new_gradeable ?? $gradeable)->getGradingSectionsForUser($user);
+            $sections = $gradeable->getGradingSectionsForUser($user);
 
             foreach ($sections as $section) {
                 /** @var GradingSection $section */
-                if (($new_gradeable ?? $gradeable)->isTeamAssignment()) {
-                    if ($section->containsTeam(($new_graded_gradeable ? $new_graded_gradeable->getSubmitter() : $graded_gradeable)->getTeam())) {
+                if ($gradeable->isTeamAssignment()) {
+                    if ($section->containsTeam($graded_gradeable->getSubmitter()->getTeam())) {
                         return true;
                     }
                 } else {
-                    if ($section->containsUser(($new_graded_gradeable ? $new_graded_gradeable->getSubmitter() : $graded_gradeable)->getUser())) {
+                    if ($section->containsUser($graded_gradeable->getSubmitter()->getUser())) {
                         return true;
                     }
                 }
@@ -585,17 +567,13 @@ class Access {
 
     /**
      * Check if a section (by name) is one of the user's grading sections for a gradeable
-     * @param Gradeable|\app\models\gradeable\Gradeable $g
+     * @param Gradeable $gradeable
      * @param string $section Section name
      * @param User $user
      * @return bool
      */
-    public function isSectionInGradingSections($g, string $section, User $user) {
-        /* @var Gradeable|null $gradeable */
-        /* @var \app\models\gradeable\Gradeable|null $new_gradeable */
-        list($gradeable,, $new_gradeable,) = $this->resolveNewGradeable($g);
-
-        $sections = ($new_gradeable ?? $gradeable)->getGradingSectionsForUser($user);
+    public function isSectionInGradingSections($gradeable, string $section, User $user) {
+        $sections = $gradeable->getGradingSectionsForUser($user);
         foreach ($sections as $check_section) {
             /** @var GradingSection $check_section */
             if ($check_section->getName() === $section) {
@@ -607,22 +585,21 @@ class Access {
 
     /**
      * Check if a Graded Gradeable is in a user's peer grading assignment
-     * @param mixed $g Graded Gradeable to be peer graded
+     * @param GradedGradeable $graded_gradeable Graded Gradeable to be peer graded
      * @param User $user User doing the peer grading
      * @return bool
      */
-    public function isGradedGradeableInPeerAssignment($g, User $user) {
-        /* @var Gradeable|null $gradeable */
-        /* @var Gradeable|null $graded_gradeable */
-        /* @var \app\models\gradeable\Gradeable|null $new_gradeable */
-        /* @var GradedGradeable|null $new_graded_gradeable */
-        list($gradeable, $graded_gradeable, $new_gradeable, $new_graded_gradeable) = $this->resolveNewGradeable($g);
+    public function isGradedGradeableInPeerAssignment($graded_gradeable, User $user) {
+        if ($graded_gradeable === null) {
+            return false;
+        }
+        $gradeable = $graded_gradeable->getGradeable();
 
-        if (!($new_gradeable ? $new_gradeable->isPeerGrading() : $gradeable->getPeerGrading())) {
+        if (!$gradeable->isPeerGrading()) {
             return false;
         } else {
-            $user_ids_to_grade = $this->core->getQueries()->getPeerAssignment(($new_gradeable ?? $gradeable)->getId(), $user->getId());
-            return in_array(($new_graded_gradeable ? $new_graded_gradeable->getSubmitter() : $graded_gradeable)->getUser()->getId(), $user_ids_to_grade);
+            $user_ids_to_grade = $this->core->getQueries()->getPeerAssignment($gradeable->getId(), $user->getId());
+            return in_array($graded_gradeable->getSubmitter()->getId(), $user_ids_to_grade);
         }
     }
 
@@ -640,127 +617,38 @@ class Access {
 
     /**
      * Check if a User is one of the submitters of a Graded Gradeable
-     * @param mixed $g Graded Gradeable object
+     * @param GradedGradeable $graded_gradeable Graded Gradeable object
      * @param User $user User to check
      * @return bool True if this is their Graded Gradeable or if they are on the team of this Graded Gradeable
      */
-    public function isGradedGradeableByUser($g, User $user) {
-        /* @var Gradeable|null $graded_gradeable */
-        /* @var GradedGradeable|null $new_graded_gradeable */
-        list(, $graded_gradeable,, $new_graded_gradeable) = $this->resolveNewGradeable($g);
-
+    public function isGradedGradeableByUser($graded_gradeable, User $user) {
         if ($graded_gradeable !== null) {
-            if ($graded_gradeable->getTeam() !== null) {
-                return $graded_gradeable->getTeam()->hasMember($user->getId());
+            if ($graded_gradeable->getSubmitter()->getTeam() !== null) {
+                return $graded_gradeable->getSubmitter()->getTeam()->hasMember($user->getId());
             }
-            return $graded_gradeable->getUser()->getId() === $user->getId();
-        } else if ($new_graded_gradeable !== null) {
-            if ($new_graded_gradeable->getSubmitter()->getTeam() !== null) {
-                return $new_graded_gradeable->getSubmitter()->getTeam()->hasMember($user->getId());
-            }
-            return $new_graded_gradeable->getSubmitter()->getUser()->getId() === $user->getId();
+            return $graded_gradeable->getSubmitter()->getUser()->getId() === $user->getId();
         }
         return false;
     }
 
     /**
      * Check if a Submitter is one of the submitters of a Graded Gradeable
-     * @param mixed $g Graded Gradeable object
+     * @param GradedGradeable $graded_gradeable Graded Gradeable object
      * @param Submitter $submitter Submitter to check
      * @return bool True if this is their Graded Gradeable or if they are on the team of this Graded Gradeable
      */
-    public function isGradedGradeableBySubmitter($g, Submitter $submitter) {
-        /* @var Gradeable|null $graded_gradeable */
-        /* @var GradedGradeable|null $new_graded_gradeable */
-        list(, $graded_gradeable,, $new_graded_gradeable) = $this->resolveNewGradeable($g);
-
+    public function isGradedGradeableBySubmitter($graded_gradeable, Submitter $submitter) {
         if ($graded_gradeable !== null) {
-            if ($graded_gradeable->getTeam() !== null) {
+            if ($graded_gradeable->getSubmitter()->isTeam()) {
                 if ($submitter->isTeam()) {
-                    return $graded_gradeable->getTeam()->getId() === $submitter->getId();
+                    return $graded_gradeable->getSubmitter()->getId() === $submitter->getId();
                 } else {
-                    return $graded_gradeable->getTeam()->hasMember($submitter->getId());
+                    return $graded_gradeable->getSubmitter()->getTeam()->hasMember($submitter->getId());
                 }
             }
-            if ($submitter->isTeam()) {
-                //Team submitter for a non-team submission is not a thing
-                return false;
-            }
-            //Just in case this ever happens
-            if ($graded_gradeable->getUser() === null) {
-                return false;
-            }
-            return $graded_gradeable->getUser()->getId() === $submitter->getId();
-        } else if ($new_graded_gradeable !== null) {
-            if ($new_graded_gradeable->getSubmitter()->isTeam()) {
-                if ($submitter->isTeam()) {
-                    return $new_graded_gradeable->getSubmitter()->getId() === $submitter->getId();
-                } else {
-                    return $new_graded_gradeable->getSubmitter()->getTeam()->hasMember($submitter->getId());
-                }
-            }
-            return $new_graded_gradeable->getSubmitter()->getId() === $submitter->getId();
+            return $graded_gradeable->getSubmitter()->getId() === $submitter->getId();
         }
         return false;
-    }
-
-    /**
-     * TODO: Remove this enormous hack when Kevin does the everything
-     * Get all the permutations of [Graded]Gradeables from an unknown type gradeable-like object.
-     *
-     * Here are the classes that are currently supported:
-     * \app\models\Gradeable
-     * \app\models\gradeable\Gradeable
-     * \app\models\gradeable\GradedGradeable
-     * \app\models\gradeable\TaGradedGradeable
-     * \app\models\gradeable\AutoGradedGradeable
-     *
-     * @param mixed|null $g
-     * @return array [Gradeable|null, Gradeable|null, \app\models\gradeable\Gradeable|null, GradedGradeable|null]
-     */
-    private function resolveNewGradeable($g) {
-        $gradeable = null;
-        $graded_gradeable = null;
-        $new_gradeable = null;
-        $new_graded_gradeable = null;
-        if ($g !== null) {
-            if ($g instanceof GradedGradeable) {
-                $gradeable = null;
-                $graded_gradeable = null;
-                $new_gradeable = $g->getGradeable();
-                $new_graded_gradeable = $g;
-            } else if ($g instanceof \app\models\gradeable\Gradeable) {
-                $gradeable = null;
-                $graded_gradeable = null;
-                $new_gradeable = $g;
-                $new_graded_gradeable = null;
-            } else if ($g instanceof Gradeable) {
-                $gradeable = $g;
-                //Only counts as graded if it has a grade...
-                // If neither of these is true then it's just a generic Gradeable for no user
-                if ($g->beenTAgraded() || $g->beenAutograded()) {
-                    $graded_gradeable = $g;
-                }
-                $new_gradeable = null;
-                $new_graded_gradeable = null;
-            } else if ($g instanceof TaGradedGradeable) {
-                $gradeable = null;
-                $graded_gradeable = null;
-                $new_gradeable = $g->getGradedGradeable()->getGradeable();
-                $new_graded_gradeable = $g->getGradedGradeable();
-            } else if ($g instanceof AutoGradedGradeable) {
-                $gradeable = null;
-                $graded_gradeable = null;
-                $new_gradeable = $g->getGradedGradeable()->getGradeable();
-                $new_graded_gradeable = $g->getGradedGradeable();
-            }
-        }
-
-        /* @var Gradeable|null $gradeable */
-        /* @var Gradeable|null $graded_gradeable */
-        /* @var \app\models\gradeable\Gradeable|null $new_gradeable */
-        /* @var GradedGradeable|null $new_graded_gradeable */
-        return [$gradeable, $graded_gradeable, $new_gradeable, $new_graded_gradeable];
     }
 
     /**
@@ -815,43 +703,40 @@ class Access {
                 case "gradeable":
                     //If we already have a gradeable in the args, make sure this file actually belongs to it
                     if (array_key_exists("gradeable", $args)) {
-                        //Check if the gradeable matches
-
-                        /* @var Gradeable|null $gradeable */
-                        /* @var \app\models\gradeable\Gradeable|null $new_gradeable */
-                        list($gradeable, , $new_gradeable,) = $this->resolveNewGradeable($args["gradeable"]);
-                        if (($new_gradeable ?? $gradeable)->getId() !== $value) {
-                            return false;
+                        $gradeable = $args["gradeable"];
+                        if ($gradeable instanceof Gradeable) {
+                            //Check if the gradeable matches
+                            if ($gradeable->getId() !== $value) {
+                                return false;
+                            }
                         }
+                    } else {
+                        $args["gradeable"] = $this->core->getQueries()->getGradeableConfig($value);
                     }
-                    $args["gradeable"] = $this->core->getQueries()->getGradeableConfig($value);
                     break;
                 case "submitter":
                     $submitter = $this->core->getQueries()->getSubmitterById($value);
                     if ($submitter !== null) {
                         $args["submitter"] = $submitter;
-                        if (array_key_exists("gradeable", $subparts)) {
+                        if (array_key_exists("graded_gradeable", $subparts)) {
                             //If we already have a graded gradeable in the args, make sure this file
                             // actually belongs to it
-                            if (array_key_exists("graded_gradeable", $args)) {
-                                /* @var Gradeable|null $graded_gradeable */
-                                /* @var GradedGradeable|null $new_graded_gradeable */
-                                list(, $graded_gradeable, , $new_graded_gradeable) = $this->resolveNewGradeable($args["graded_gradeable"]);
-                            } else {
-                                /* @var Gradeable|null $graded_gradeable */
-                                /* @var GradedGradeable|null $new_graded_gradeable */
-                                list(, $graded_gradeable, , $new_graded_gradeable) = $this->resolveNewGradeable($args["gradeable"]);
-                            }
+                            $graded_gradeable = $args["graded_gradeable"];
+                        } else if (array_key_exists("gradeable", $args)) {
+                            $gradeable = $args["gradeable"];
+                            $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($gradeable, $submitter);
+                            $args["graded_gradeable"] = $graded_gradeable;
+                        } else {
+                            return false;
+                        }
+                        if ($graded_gradeable === null || !($graded_gradeable instanceof GradedGradeable)) {
+                            return false;
+                        }
 
-                            //Check that the given graded gradeable is the same as the
-                            // one that this file is part of.
-                            if ($graded_gradeable ?? $new_graded_gradeable) {
-                                if (!$this->isGradedGradeableBySubmitter($new_graded_gradeable ?? $graded_gradeable, $submitter)) {
-                                    return false;
-                                }
-                            }
-
-                            $args["graded_gradeable"] = $this->core->getQueries()->getGradedGradeableForSubmitter($args["gradeable"], $submitter);
+                        //Check that the given graded gradeable is the same as the
+                        // one that this file is part of.
+                        if (!$this->isGradedGradeableBySubmitter($graded_gradeable, $submitter)) {
+                            return false;
                         }
                     }
                     break;
