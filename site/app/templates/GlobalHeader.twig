@@ -35,7 +35,12 @@
                 {% for message in messages %}
                     <div id='{{ message.type }}-{{ message.key }}' class="inner-message alert alert-{{ message.type }}">
                         <a class="fas fa-times message-close" onClick="removeMessagePopup('{{ message.type }}-{{ message.key }}');"></a>
-                        <i class="fas fa-times-circle"></i> {{ message.error }}
+                        {% if message.type == "error" %}
+                        <i class="fas fa-times-circle"></i> 
+                        {% else %}
+                        <i class="fas fa-check-circle"></i> 
+                        {% endif %}
+                        {{ message.error }}
                     </div>
                 {% endfor %}
             </div>

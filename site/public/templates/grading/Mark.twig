@@ -43,11 +43,10 @@ Required Input:
     <span class="col-sm mark-title"
           data-title="{{ mark.title|escape }}">
         {% if edit_marks_enabled %}
-            <input type="text"
-                   value="{{ mark.title|escape }}"
-                   {{ first_mark ? 'disabled' : '' }}/>
+            <textarea onkeyup="auto_grow(this)" class="noscroll"
+                    {{ first_mark ? 'disabled' : '' }}>{{ mark.title|escape }}</textarea>
         {% else %}
-            {{ mark.title|escape }}
+            {{ mark.title|nl2br }}
         {% endif %}
     </span>
     {% if show_publish %}

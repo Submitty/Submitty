@@ -543,17 +543,43 @@ class SubmissionController extends AbstractController {
         // use pdf_check.cgi to check that # of pages is valid and split
         // also get the cover image and name for each pdf appropriately
 
-        // Open a cURL connection
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        $qr_prefix = rawurlencode($_POST['qr_prefix']);
-        $qr_suffix = rawurlencode($_POST['qr_suffix']);
-        $ch = curl_init();
-        if($_POST['use_qr_codes'] === "false"){
-            curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."pdf_check.cgi?&num={$num_pages}&sem={$semester}&course={$course}&g_id={$gradeable_id}&ver={$current_time}");
-        }else{
-            curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."pdf_check_qr.cgi?&sem={$semester}&course={$course}&g_id={$gradeable_id}&ver={$current_time}&qr_prefix={$qr_prefix}&qr_suffix={$qr_suffix}");
+        if($_POST['use_qr_codes'] === "true"){
+            $qr_prefix = rawurlencode($_POST['qr_prefix']);
+            $qr_suffix = rawurlencode($_POST['qr_suffix']);
+
+            $config_data = json_decode(file_get_contents("/usr/local/submitty/config/submitty.json"));
+            //create a new job to split but uploads via QR
+            for($i = 0; $i < $count; $i++){
+                $qr_upload_data = [
+                    "job"       => "BulkQRSplit",
+                    "semester"  => $semester,
+                    "course"    => $course,
+                    "g_id"      => $gradeable_id,
+                    "timestamp" => $current_time,
+                    "qr_prefix" => $qr_prefix,
+                    "qr_suffix" => $qr_suffix,
+                    "filename"  => $uploaded_file["name"][$i]
+                ];
+
+                $qr_upload_job  = "/var/local/submitty/daemon_job_queue/qr_upload_" . $uploaded_file["name"][$i] . ".json"; 
+
+                //add new job to queue
+                if(!file_put_contents($qr_upload_job, json_encode($qr_upload_data, JSON_PRETTY_PRINT)) ){
+                    $this->core->getOutput()->renderJsonFail("Failed to write BulkQRSplit job");
+                    return $this->uploadResult("Failed to write BulkQRSplit job", false);
+                }
+            }
+            $return = array('success' => true);
+            $this->core->getOutput()->renderJson($return);
+            return $return;
         }
+
+        // Open a cURL connection
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."pdf_check.cgi?&num={$num_pages}&sem={$semester}&course={$course}&g_id={$gradeable_id}&ver={$current_time}");
+
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $output = curl_exec($ch);
 

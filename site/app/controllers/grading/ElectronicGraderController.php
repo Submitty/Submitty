@@ -8,6 +8,8 @@ use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
 use app\models\gradeable\GradedGradeable;
+use app\models\gradeable\LateDayInfo;
+use app\models\gradeable\LateDays;
 use app\models\gradeable\Mark;
 use app\models\gradeable\Submitter;
 use app\models\gradeable\TaGradedGradeable;
@@ -970,15 +972,20 @@ class ElectronicGraderController extends GradingController {
             $display_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         }
 
-        // TODO: delete this once late days are using new model
-        $old_gradeable = null;
-        if($graded_gradeable->getSubmitter()->isTeam()) {
-            $old_gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $graded_gradeable->getSubmitter()->getTeam()->getLeaderId());
+        $late_days_user = null;
+        if ($gradeable->isTeamAssignment()) {
+            // If its a team assignment, use the leader for late days...
+            $late_days_user = $this->core->getQueries()->getUserById($graded_gradeable->getSubmitter()->getTeam()->getLeaderId());
         } else {
-            $old_gradeable = $this->core->getQueries()->getGradeable($gradeable_id, $submitter_id);
+            $late_days_user = $graded_gradeable->getSubmitter()->getUser();
         }
-        $late_status = $old_gradeable->calculateLateStatus();
-        // TODO: End region
+
+        $ldi = LateDays::fromUser($this->core, $late_days_user)->getLateDayInfoByGradeable($gradeable);
+        if ($ldi === null) {
+            $late_status = LateDayInfo::STATUS_GOOD;  // Assume its good
+        } else {
+            $late_status = $ldi->getStatus();
+        }
 
         $logger_params = array(
             "course_semester" => $this->core->getConfig()->getSemester(),
@@ -1109,7 +1116,7 @@ class ElectronicGraderController extends GradingController {
         }
 
         // checks if user has permission
-        if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $graded_gradeable])) {
+        if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to get graded gradeable');
             return;
         }
@@ -1238,7 +1245,7 @@ class ElectronicGraderController extends GradingController {
         }
 
         // checks if user has permission
-        if (!$this->core->getAccess()->canI("grading.electronic.save_graded_component", ["gradeable" => $graded_gradeable, "component" => $component])) {
+        if (!$this->core->getAccess()->canI("grading.electronic.save_graded_component", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "component" => $component])) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to save component/marks');
             return;
         }
@@ -1770,7 +1777,7 @@ class ElectronicGraderController extends GradingController {
         }
 
         // Check access
-        if (!$this->core->getAccess()->canI("autograding.load_checks", ["gradeable" => $graded_gradeable])) {
+        if (!$this->core->getAccess()->canI("autograding.load_checks", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
             // TODO: streamline permission error strings
             $this->core->getOutput()->renderJsonFail('You have insufficient permissions to access this command');
             return;
@@ -1778,7 +1785,7 @@ class ElectronicGraderController extends GradingController {
 
         try {
             //display hidden testcases only if the user can view the entirety of this gradeable.
-            $can_view_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $graded_gradeable]);
+            $can_view_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable]);
             $popup_css = "{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css";
             $this->core->getOutput()->renderJsonSuccess(
                 $this->core->getOutput()->renderTemplate('AutoGrading', 'loadAutoChecks',
@@ -1798,6 +1805,7 @@ class ElectronicGraderController extends GradingController {
         $component_id = $_POST['component_id'] ?? '';
         $points = $_POST['points'] ?? '';
         $title = $_POST['title'] ?? null;
+        $publish = ($_POST['publish'] ?? 'false') === 'true';
 
         // Validate required parameters
         if ($title === null) {
@@ -1833,7 +1841,7 @@ class ElectronicGraderController extends GradingController {
 
         try {
             // Once we've parsed the inputs and checked permissions, perform the operation
-            $mark = $this->addNewMark($component, $title, $points);
+            $mark = $this->addNewMark($component, $title, $points, $publish);
             $this->core->getOutput()->renderJsonSuccess(['mark_id' => $mark->getId()]);
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
@@ -1842,8 +1850,8 @@ class ElectronicGraderController extends GradingController {
         }
     }
 
-    public function addNewMark(Component $component, string $title, float $points) {
-        $mark = $component->addMark($title, $points, false);
+    public function addNewMark(Component $component, string $title, float $points, bool $publish) {
+        $mark = $component->addMark($title, $points, $publish);
         $this->core->getQueries()->saveComponent($component);
         return $mark;
     }
@@ -1924,7 +1932,7 @@ class ElectronicGraderController extends GradingController {
         }
 
         // Check access
-        if (!$this->core->getAccess()->canI("grading.electronic.save_general_comment", ["gradeable" => $graded_gradeable])) {
+        if (!$this->core->getAccess()->canI("grading.electronic.save_general_comment", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to save component general comment');
             return;
         }
@@ -1989,7 +1997,7 @@ class ElectronicGraderController extends GradingController {
         }
 
         // checks if user has permission
-        if (!$this->core->getAccess()->canI("grading.electronic.view_component_grade", ["gradeable" => $graded_gradeable, "component" => $component])) {
+        if (!$this->core->getAccess()->canI("grading.electronic.view_component_grade", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "component" => $component])) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to get component data');
             return;
         }
@@ -2051,7 +2059,7 @@ class ElectronicGraderController extends GradingController {
         }
 
         // checks if user has permission
-        if (!$this->core->getAccess()->canI("grading.electronic.get_gradeable_comment", ["gradeable" => $graded_gradeable])) {
+        if (!$this->core->getAccess()->canI("grading.electronic.get_gradeable_comment", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to save gradeable comment');
             return;
         }
