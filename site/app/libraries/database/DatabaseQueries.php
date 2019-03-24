@@ -1620,10 +1620,18 @@ WHERE gcm_id=?", $params);
     }
 
     /**
-     * gets ids of all electronic gradeables
+     * gets ids of all electronic gradeables excluding assignments that will be bulk
+     * uploaded by TA or instructor.
+     *
+     * @return array
      */
     public function getAllElectronicGradeablesIds() {
-        $this->course_db->query("SELECT g_id, g_title FROM gradeable WHERE g_gradeable_type=0 ORDER BY g_grade_released_date DESC");
+        $this->course_db->query("
+          SELECT g_id, g_title 
+          FROM gradeable INNER JOIN electronic_gradeable USING (g_id)
+          WHERE eg_scanned_exam=FALSE and eg_has_due_date=TRUE
+          ORDER BY eg_submission_due_date ASC
+        ");
         return $this->course_db->rows();
     }
 
