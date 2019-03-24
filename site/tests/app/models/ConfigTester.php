@@ -103,7 +103,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'forum_enabled' => true,
                 'regrade_enabled' => false,
                 'seating_only_for_instructor' => false,
-                'regrade_message' => 'Warning: Frivolous regrade requests may lead to grade deductions or lost late days',
+                'regrade_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
                 'room_seating_gradeable_id' => ""
             )
         );
@@ -228,7 +228,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                     'forum_enabled' => true,
                     'regrade_enabled' => false,
                     'seating_only_for_instructor' => false,
-                    'regrade_message' => 'Warning: Frivolous regrade requests may lead to grade deductions or lost late days',
+                    'regrade_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
                     'room_seating_gradeable_id' => ""
                 ]
             ],
