@@ -31,15 +31,15 @@ def main():
     try:
         os.chdir(split_path)
         pdfPages = PdfFileReader(filename)
-        # convert pdf to series of images for scanning
-        pages = convert_from_bytes(open(filename, 'rb').read())
         pdf_writer = PdfFileWriter()
         i = cover_index = id_index = 0
         page_count = 1
         prev_file = ''
         data = []
         output = {}
-        for page in pages:
+        for page_number in range(pdfPages.numPages):
+            # convert pdf to series of images for scanning
+            page = convert_from_bytes(open(filename, 'rb').read(), first_page=page_number+1, last_page=page_number+2)[0]
             # increase contrast of image for better QR decoding
             cv_img = numpy.array(page)
             mask = cv2.inRange(cv_img, (0, 0, 0), (200, 200, 200))
