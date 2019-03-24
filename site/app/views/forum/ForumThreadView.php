@@ -363,7 +363,7 @@ HTML;
 					$return .= <<<HTML
 					<div style="position:relative; height:100%; overflow-y:hidden;" class="row">
 
-  						<div id="thread_list" style="max-height: 100%" class="col-3" prev_page="{$prev_page}" next_page="{$next_page}">
+  						<div id="thread_list" style="max-height: 100%;" class="col-3" prev_page="{$prev_page}" next_page="{$next_page}">
 						<i class="fas fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
 						<i class="fas fa-caret-up fa-2x fa-fw fill-available" style="color:gray;{$arrowup_visibility}" aria-hidden="true"></i>
 HTML;
@@ -599,15 +599,12 @@ HTML;
 							if($thread_id_p == -1)
 								$thread_id_p = $thread["id"];
 						}
-						if($this->core->getQueries()->viewedThread($current_user, $thread["id"])){
-							$class .= " viewed";
-						}else{
+						if(!$this->core->getQueries()->viewedThread($current_user, $thread["id"])){
 							$class .= " new_thread";
 						}
 						if($thread["deleted"]) {
 							$class .= " deleted";
 						}
-
 						//fix legacy code
 						$titleDisplay = html_entity_decode($thread['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
 						$first_post_content = html_entity_decode($first_post['content'], ENT_QUOTES | ENT_HTML5, 'UTF-8');

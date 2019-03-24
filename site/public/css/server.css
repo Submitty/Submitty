@@ -706,9 +706,9 @@ table tr.table-header {
 .active {
     background-color: white;
     /*    color: #4a4a4a;*/
-    border: 3px solid #276394;
+    border: 4px solid #276394;
 }
-
+/* TODO: MAKE THIS CASCADE */
 .deleted {
     background-color: #A9A9A9;
     color: #4a4a4a;
@@ -725,17 +725,6 @@ table tr.table-header {
     background-color: white;
 }
 
-.fa-post_seen {
-    color: #a7a7a7;
-    vertical-align: middle;
-    padding-right: 8px;
-}
-.fa-post_new {
-    color: #0a6496;
-    vertical-align: middle;
-    padding-right: 8px;
-}
-
 .important {
     /* THIS IS WHERE THE BACKGROUND COLOR FOR POSTS IS */
     border-style: solid;
@@ -743,21 +732,13 @@ table tr.table-header {
     border-color: #ffd700; /* gold */
 }
 
-.viewed {
-    background-color: white;
-    color: #6f6f6f;
-}
-
 .new_thread{
-    /*background-color: #d8eef6;*/
     background-color: var(--viewed_content);
-    /*background-color: #d4e1f2;*/
 }
 .btn-default.post_button_color{
     background-color: inherit;
 }
 
-#bar{ width: 4px; height: 104px; background-color: blue; position: relative; left: -6px; top: -2px; }
 .box-title > h4 {
     margin-left: 20px;
 }

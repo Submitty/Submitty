@@ -1712,7 +1712,6 @@ function dynamicScrollLoadPage(element, atEnd) {
     var unread_select_value = $("#unread").is(':checked');
     categories_value = (categories_value == null)?"":categories_value.join("|");
     thread_status_value = (thread_status_value == null)?"":thread_status_value.join("|");
-    console.log(next_url);
     $.ajax({
             url: next_url,
             type: "POST",
@@ -1724,7 +1723,6 @@ function dynamicScrollLoadPage(element, atEnd) {
                 currentCategoriesId: currentCategoriesId,
             },
             success: function(r){
-                console.log(r);
                 var x = JSON.parse(r);
                 var content = x.html;
                 var count = x.count;
@@ -1758,7 +1756,7 @@ function dynamicScrollContentOnDemand(jElement, urlPattern, currentThreadId, cur
     dynamicScrollLoadIfScrollVisible(jElement);
     $(jElement).scroll(function(){
         var element = $(this)[0];
-        var sensitivity = 3;
+        var sensitivity = 0.9;
         var isTop = element.scrollTop < sensitivity;
         var isBottom = (element.scrollHeight - element.offsetHeight - element.scrollTop) < sensitivity;
         if(isTop) {
