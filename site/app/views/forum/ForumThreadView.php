@@ -387,7 +387,9 @@ HTML;
 
 		$activeThread = $this->core->getQueries()->getThread($currentThread)[0];
 
-		$activeThreadTitle = $activeThread['title'];
+
+
+		$activeThreadTitle = ($this->core->getUser()->getGroup() <= 2 ? "({$activeThread['id']}) " : '') . $activeThread['title'];
 		$activeThreadAnnouncement = $activeThread['pinned'];
 		$thread_id = $activeThread['id'];
 		$function_date = 'date_format';
