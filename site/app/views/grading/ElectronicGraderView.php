@@ -7,6 +7,7 @@ use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\GradedGradeable;
+use app\models\gradeable\LateDayInfo;
 use app\models\SimpleStat;
 use app\models\Team;
 use app\models\User;
@@ -504,7 +505,7 @@ class ElectronicGraderView extends AbstractView {
                 ]);
             }
         } else {
-            if ($late_status != "Good" && $late_status != "Late") {
+            if ($late_status != LateDayInfo::STATUS_GOOD && $late_status != LateDayInfo::STATUS_LATE) {
                 $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
                     "color" => "#F62817", // fire engine red
                     "message" => "Late Submission"
