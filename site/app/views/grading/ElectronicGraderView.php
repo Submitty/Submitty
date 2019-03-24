@@ -585,6 +585,12 @@ HTML;
 
         }
 
+        if(count($threadIds) == 0) {
+            $posts_view .= <<<HTML
+                <h3 style="text-align: center;">No thread id provided.</h3> <br/>
+HTML;
+        }
+
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/DiscussionForumPanel.twig", [
             "discussion_forum_content" => $posts_view
         ]);
