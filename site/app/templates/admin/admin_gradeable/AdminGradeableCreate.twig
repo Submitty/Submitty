@@ -44,7 +44,7 @@
     <legend>
 {% if action == 'new' or action == 'template' %}
     <!-- Gradeable Type radio buttons (readonly in edit mode) -->
-   <a class="helpicon" target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">What is the type of the gradeable <i style="font-style:normal;" class="helpicon"></i></a>
+   <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">What is the type of the gradeable <i style="font-style:normal;" class="helpicon"></i></a>
             <span id="required_type" >(Required)</span>
         {% else %}
             Gradeable type: <span id="gradeable-type-string">{{ type_string }}</span>
@@ -207,9 +207,9 @@
     </fieldset>
 </fieldset>
 <!-- Gradeable bucket (read/write in all modes) -->
-<label for="syllabus_bucket">What syllabus category does this item belong to? 
+<label for="syllabus_bucket">
+<a target=_blank href="https://submitty.org/instructor/rainbow_grades/gradeables">What syllabus category does this item belong to? <i style="font-style:normal;" class="helpicon"></i></a>
 </label>
-<a class="helpicon" target=_blank href="https://submitty.org/instructor/rainbow_grades/gradeables"></a>
 
 <select name="syllabus_bucket" id="syllabus_bucket" class="auto_save" style="width: 170px;">
     {% for bucket in syllabus_buckets %}
