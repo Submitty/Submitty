@@ -50,6 +50,7 @@ use app\libraries\Utils;
  * @method string getVcsType()
  * @method string getPrivateRepository()
  * @method string getRoomSeatingGradeableId()
+ * @method bool isSeatingOnlyForInstructor()
  * @method array getCourseJson()
  */
 
@@ -177,6 +178,8 @@ class Config extends AbstractModel {
     protected $regrade_enabled;
     /** @property @var string */
     protected $regrade_message;
+    /** @property @var bool*/
+    protected $seating_only_for_instructor;
     /** @property @var string|null */
     protected $room_seating_gradeable_id;
 
@@ -306,7 +309,7 @@ class Config extends AbstractModel {
             'course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
             'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_rainbow_grades_summary',
             'display_custom_message', 'room_seating_gradeable_id', 'course_email', 'vcs_base_url', 'vcs_type',
-            'private_repository', 'forum_enabled', 'regrade_enabled', 'regrade_message'
+            'private_repository', 'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor', 'regrade_message'
         ];
         $this->setConfigValues($this->course_json, 'course_details', $array);
 
@@ -330,7 +333,7 @@ class Config extends AbstractModel {
         }
 
         $array = array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary',
-            'display_custom_message', 'forum_enabled', 'regrade_enabled');
+            'display_custom_message', 'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor');
         foreach ($array as $key) {
             $this->$key = ($this->$key == true) ? true : false;
         }
@@ -415,6 +418,7 @@ class Config extends AbstractModel {
     public function displayRoomSeating() {
         return $this->room_seating_gradeable_id !== "";
     }
+
 
     public function getLogPath() {
         return $this->submitty_log_path;
