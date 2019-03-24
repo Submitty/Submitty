@@ -125,6 +125,9 @@ class AdminGradeableController extends AbstractController {
         ]);
         $vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
         $this->core->getOutput()->addInternalJs('flatpickr.js');
+        $this->core->getOutput()->addInternalJs('jquery.min.js');
+        $this->core->getOutput()->addInternalJs('jquery-ui.min.js');
+        $this->core->getOutput()->addInternalJs('jquery-ui-timepicker-addon.js');
         $this->core->getOutput()->addInternalCss('flatpickr.min.css');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
