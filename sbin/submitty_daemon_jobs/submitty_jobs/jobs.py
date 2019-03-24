@@ -209,7 +209,8 @@ class BulkQRSplit(CourseJob):
             self.add_permissions_recursive(uploads_path, stat.S_IWGRP | stat.S_IXGRP, stat.S_IWGRP | stat.S_IXGRP, stat.S_IWGRP)
 
             # copy over file to new directory
-            shutil.copyfile(os.path.join(bulk_path, filename), os.path.join(split_path, filename))
+            if not os.path.isfile(os.path.join(split_path, filename)):
+                shutil.copyfile(os.path.join(bulk_path, filename), os.path.join(split_path, filename))
 
             # move to copy folder
             os.chdir(split_path)

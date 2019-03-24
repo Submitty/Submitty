@@ -200,6 +200,7 @@ apt-get install libzbar0 --yes
 pip3 install pyzbar
 pip3 install pdf2image
 pip3 install opencv-python
+pip3 install numpy
 
 # Install an email catcher
 if [ ${VAGRANT} == 1 ]; then

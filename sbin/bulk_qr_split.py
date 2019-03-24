@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
 
-"""
-Given a semester, course, gradeable id, version, and qr_code prefix per pdf,
-splits by QR code. The split pdf items are placed
-in the split pdf directory.
-"""
+"""Split PDFS by QR code and move images and PDFs to correct folder."""
+
 import json
 import os
 import traceback
@@ -26,6 +23,7 @@ except ImportError:
 
 
 def main():
+    """Scan through PDF and split PDF and images."""
     filename = sys.argv[1]
     split_path = sys.argv[2]
     qr_prefix = sys.argv[3]

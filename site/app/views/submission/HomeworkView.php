@@ -368,12 +368,12 @@ class HomeworkView extends AbstractView {
         $count = 1;
         $count_array = array();
         $use_qr_codes = false;
-        $qr_file = null;
+        $qr_file = [];
         foreach ($all_directories as $timestamp => $content) {
             $dir_files = $content['files'];
             foreach ($dir_files as $filename => $details) {
                 if($filename === 'decoded.json'){
-                    $qr_file = FileUtils::readJsonFile($details['path']);
+                    $qr_file +=  FileUtils::readJsonFile($details['path']);
                     $use_qr_codes = true;
                 }
                 $clean_timestamp = str_replace('_', ' ', $timestamp);
