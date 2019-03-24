@@ -93,6 +93,9 @@ class SubmissionController extends AbstractController {
             case 'change_request_status':
                 return $this->changeRequestStatus();
                 break;
+            case 'stat_page':
+                return $this->showStats();
+                break;
             case 'display':
             default:
                 return $this->showHomeworkPage();
@@ -1820,4 +1823,19 @@ class SubmissionController extends AbstractController {
         $this->core->getOutput()->renderString($refresh_string);
         return array('refresh' => $refresh_bool, 'string' => $refresh_string);
     }
+
+    public function showStats(){
+        
+        $users = array();
+        $user_id = $this->core->getUser()->getId();
+        $users[$user_id]["first_name"] = $this->core->getUser()->getDisplayedFirstName();
+        $users[$user_id]["last_name"] = $this->core->getUser()->getDisplayedLastName();
+        //$users["upload_time"] = $upload_timestamp;
+        //$users["submit_time"] = $submit_timestamp;
+        //$users["file"] = $filepath;
+        ksort($users);
+        $this->core->getOutput()->renderOutput('grading\ElectronicGrader', 'statPage', $users);
+        //var_dump($users);
+    }
+
 }

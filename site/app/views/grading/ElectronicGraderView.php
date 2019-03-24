@@ -209,6 +209,157 @@ class ElectronicGraderView extends AbstractView {
         ]);
     }
 
+    public function statPage($users) {
+
+		$return = <<<HTML
+        
+		<div class="content upload_content">
+
+HTML;
+        $this->core->getOutput()->addBreadcrumb("Statistics", $this->core->buildUrl(array('component' => 'submission', 'page' => 'statPage')));
+        
+		$return .= <<<HTML
+			<div style="padding-left:20px;padding-bottom: 10px;border-radius:3px;padding-right:20px;">
+				<table class="table table-striped table-bordered persist-area" id="forum_stats_table">
+					<tr>			
+				        <td style = "cursor:pointer;" width="25%" id="user_down">User &darr;</td>
+				        <td style = "cursor:pointer;" width="25%" id="total_posts_down">Upload Timestamp</td>
+				        <td style = "cursor:pointer;" width="25%" id="total_threads_down">Submission Timestamp</td>
+				        <td style = "cursor:pointer;" width="25%" id="total_deleted_down">Filepath</td>
+					</tr>
+HTML;
+		foreach($users as $user => $details){
+			$first_name = $details["first_name"];
+			$last_name = $details["last_name"];
+            //$upload_timestamp = $details["upload_time"];
+            //$submit_timestamp = $details["submit_time"];
+            //$filepath = $details["file"];
+            
+			$return .= <<<HTML
+			<tbody>
+				<tr>
+					<td>{$last_name}, {$first_name}</td>
+
+				</tr>
+			</tbody>
+HTML;
+			
+		}
+		
+		$return .= <<<HTML
+				</table>
+			</div>
+			</div>
+
+			<script>
+				$("td").click(function(){
+					if($(this).attr('id')=="user_down"){
+						sortTable(0);
+					}
+					if($(this).attr('id')=="total_posts_down"){
+						sortTable(1);
+					}
+					if($(this).attr('id')=="total_threads_down"){
+						sortTable(2);
+					}
+					if($(this).attr('id')=="total_deleted_down"){
+						sortTable(3);
+					}
+					
+				});
+				$("button").click(function(){
+					
+					var action = $(this).data('action');
+					var posts = $(this).data('posts');
+					var ids = $(this).data('id');
+					var timestamps = $(this).data('timestamps');
+					var thread_ids = $(this).data('thread_id');
+					var thread_titles = $(this).data('thread_titles');
+					if(action=="expand"){
+						
+						
+						for(var i=0;i<posts.length;i++){
+							var post_string = posts[i];
+							post_string = escapeSpecialChars(post_string);
+							var thread_title = thread_titles[i]["title"];
+							thread_title = escapeSpecialChars(thread_title);
+							$(this).parent().parent().parent().append('<tr id="'+ids[i]+'"><td></td><td>'+timestamps[i]+'</td><td style = "cursor:pointer;" data-type = "thread" data-thread_id="'+thread_ids[i]+'"><pre class="pre_forum" style="white-space: pre-wrap;">'+thread_title+'</pre></td><td colspan = "2" style = "cursor:pointer;" align = "left" data-type = "post" data-thread_id="'+thread_ids[i]+'"><pre class="pre_forum" style="white-space: pre-wrap;">'+post_string+'</pre></td></tr> ');
+							
+						}
+						$(this).html("Collapse");
+						$(this).data('action',"collapse");
+						$("td").click(function(){
+						
+							if($(this).data('type')=="post" || $(this).data('type')=="thread"){
+			
+								var id = $(this).data('thread_id');
+								var url = buildUrl({'component' : 'forum', 'page' : 'view_thread', 'thread_id' : id});
+								window.open(url);
+							}
+						
+					});
+					}
+					else{
+						for(var i=0;i<ids.length;i++){
+							var item = document.getElementById(ids[i]);
+							item.remove();
+						}
+						
+						$(this).html("Expand");
+						$(this).data('action',"expand");
+					}
+					
+					
+					return false;
+				});
+
+
+				
+
+				function sortTable(sort_element_index){
+					var table = document.getElementById("forum_stats_table");
+					var switching = true;
+					while(switching){
+						switching=false;
+						var rows = table.getElementsByTagName("TBODY");
+						for(var i=1;i<rows.length-1;i++){
+
+							var a = rows[i].getElementsByTagName("TR")[0].getElementsByTagName("TD")[sort_element_index];
+							var b = rows[i+1].getElementsByTagName("TR")[0].getElementsByTagName("TD")[sort_element_index];
+							if(sort_element_index == 0 ? a.innerHTML>b.innerHTML : parseInt(a.innerHTML) < parseInt(b.innerHTML)){
+								rows[i].parentNode.insertBefore(rows[i+1],rows[i]);
+								switching=true;
+							}
+						}
+
+					}
+
+					var row0 = table.getElementsByTagName("TBODY")[0].getElementsByTagName("TR")[0];
+					var headers = row0.getElementsByTagName("TD");
+					
+					for(var i = 0;i<headers.length;i++){
+						var index = headers[i].innerHTML.indexOf(' ↓');
+						
+						if(index> -1){
+
+							headers[i].innerHTML = headers[i].innerHTML.substr(0, index);
+							break;
+						}
+					}
+
+					headers[sort_element_index].innerHTML = headers[sort_element_index].innerHTML + ' ↓';
+
+				}
+
+
+			</script>
+HTML;
+		return $return;
+
+	}
+
+    
+
     /**
      * @param Gradeable $gradeable
      * @param GradedGradeable[] $graded_gradeables,
