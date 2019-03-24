@@ -108,13 +108,13 @@ try:
         total_pages = pdfReader.numPages
 
         div = total_pages // num
-        div_length = len(str(div-1))
+        max_length = len(str(total_pages - num))
         
         i = 0
         while i < total_pages:
             cover_writer = PdfFileWriter()
             cover_writer.addPage(pdfReader.getPage(i))
-            prepended_index = str(i).zfill(div_length)
+            prepended_index = str(i).zfill(max_length)
             cover_filename = '{}_{}_cover.pdf'.format(filename[:-4], prepended_index)
             output_filename = '{}_{}.pdf'.format(filename[:-4], prepended_index)
             pdf_writer = PdfFileWriter()
