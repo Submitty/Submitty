@@ -14,7 +14,7 @@ from os import path
 import sys
 
 SYSTEMCTL_WRAPPER_SCRIPT = path.join(path.dirname(path.realpath(__file__)),
-                                    'shipper_utils', 'systemctl_wrapper.py')
+                                     'shipper_utils', 'systemctl_wrapper.py')
 
 if __name__ == '__main__':
 
