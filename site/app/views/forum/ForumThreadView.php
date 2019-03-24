@@ -550,7 +550,7 @@ HTML;
 			"display_option" => $display_option,
 			"thread_exists" => $threadExists
 		]);
-
+		$this->core->getQueries()->visitThread($user, $activeThread['id']);
 		return $return;
 	}
 
@@ -598,7 +598,8 @@ HTML;
 								$activeThreadAnnouncement = true;
 							if($thread_id_p == -1)
 								$thread_id_p = $thread["id"];
-						}else if($this->core->getQueries()->viewedThread($current_user, $thread["id"])){
+						}
+						if($this->core->getQueries()->viewedThread($current_user, $thread["id"])){
 							$class .= " viewed";
 						}else{
 							$class .= " new_thread";

@@ -286,7 +286,6 @@ class DatabaseQueries {
 
         try {
             $this->course_db->query("INSERT INTO posts (thread_id, parent_id, author_user_id, content, timestamp, anonymous, deleted, endorsed_by, type, has_attachment) VALUES (?, ?, ?, ?, current_timestamp, ?, ?, ?, ?, ?)", array($thread_id, $parent_post, $user, $content, $anonymous, 0, NULL, $type, $hasAttachment));
-            $this->course_db->query("UPDATE viewed_responses SET timestamp = current_timestamp WHERE thread_id = ? AND user_id = ?", array($thread_id, $user));
             $this->course_db->query("SELECT MAX(id) as max_id from posts where thread_id=? and author_user_id=?", array($thread_id, $user));
         } catch (DatabaseException $dbException){
             if($this->course_db->inTransaction()){
@@ -394,7 +393,7 @@ class DatabaseQueries {
                 return array();
             }
         } 
-        $this->course_db->query("SELECT DISTINCT id FROM (posts LEFT JOIN forum_posts_history ON posts.id = forum_posts_history.post_id) AS pfph WHERE pfph.thread_id = ? AND ((pfph.author_user_id != ? AND pfph.edit_author IS NULL) OR (pfph.edit_author IS NOT NULL AND pfph.edit_author != ?))AND NOT EXISTS(SELECT * FROM viewed_responses v WHERE v.thread_id = ? AND v.user_id = ? AND (v.timestamp >= pfph.timestamp AND (pfph.edit_timestamp IS NULL OR (pfph.edit_timestamp IS NOT NULL AND v.timestamp >= pfph.edit_timestamp))))", array($thread_id, $user_id, $user_id, $thread_id, $user_id));
+        $this->course_db->query("SELECT DISTINCT id FROM (posts LEFT JOIN forum_posts_history ON posts.id = forum_posts_history.post_id) AS pfph WHERE pfph.thread_id = ? AND NOT EXISTS(SELECT * FROM viewed_responses v WHERE v.thread_id = ? AND v.user_id = ? AND (v.timestamp >= pfph.timestamp AND (pfph.edit_timestamp IS NULL OR (pfph.edit_timestamp IS NOT NULL AND v.timestamp >= pfph.edit_timestamp))))", array($thread_id, $thread_id, $user_id));
         $rows = $this->course_db->rows();
         if(empty($rows)){
             $rows = array();
@@ -488,6 +487,10 @@ class DatabaseQueries {
 		return count($this->course_db->rows()) == 1;
     }
 
+    public function visitThread($current_user, $thread_id){
+        $this->course_db->query("INSERT INTO viewed_responses(thread_id,user_id,timestamp) SELECT ?, ?, current_timestamp WHERE NOT EXISTS(SELECT 1 FROM viewed_responses WHERE thread_id = ? AND user_id = ?)", array($thread_id, $current_user, $thread_id, $current_user));
+        $this->course_db->query("UPDATE viewed_responses SET timestamp = current_timestamp WHERE thread_id = ? AND user_id = ?", array($thread_id, $current_user));
+    }
     /**
      * Set delete status for given post and all descendant
      *
@@ -541,7 +544,6 @@ class DatabaseQueries {
             // Insert latest version of post into forum_posts_history
             $this->course_db->query("INSERT INTO forum_posts_history(post_id, edit_author, content, edit_timestamp) SELECT id, ?, content, current_timestamp FROM posts WHERE id = ?", array($user, $post_id));
             $this->course_db->query("UPDATE notifications SET content = substring(content from '.+?(?=from)') || 'from ' || ? where metadata::json->>1 = ? and metadata::json->>2 = ?", array(Utils::getDisplayNameForum($anon, $this->getDisplayUserInfoFromUserId($original_creator)), $this->getParentPostId($post_id), $post_id));
-            $this->course_db->query("UPDATE viewed_responses SET timestamp = current_timestamp WHERE thread_id = (SELECT thread_id FROM posts WHERE id = ?) AND user_id = ?", array($post_id, $user));
             $this->course_db->commit();
         } catch(DatabaseException $dbException) {
             $this->course_db->rollback();
@@ -2624,10 +2626,10 @@ AND gc_id IN (
       }
 
       $result_rows = $this->course_db->rows();
-      if(count($result_rows) > 0){ // insert only on first thread visit update otherwise
-        $this->course_db->query("INSERT INTO viewed_responses(thread_id,user_id,timestamp) SELECT ?, ?, current_timestamp WHERE NOT EXISTS(SELECT 1 FROM viewed_responses WHERE thread_id = ? AND user_id = ?)", array($thread_id, $current_user, $thread_id, $current_user));
-        $this->course_db->query("UPDATE viewed_responses SET timestamp = current_timestamp WHERE thread_id = ? AND user_id = ?", array($thread_id, $current_user));
-      };
+      // if(count($result_rows) > 0){ // insert only on first thread visit update otherwise
+      //   $this->course_db->query("INSERT INTO viewed_responses(thread_id,user_id,timestamp) SELECT ?, ?, current_timestamp WHERE NOT EXISTS(SELECT 1 FROM viewed_responses WHERE thread_id = ? AND user_id = ?)", array($thread_id, $current_user, $thread_id, $current_user));
+      //   $this->course_db->query("UPDATE viewed_responses SET timestamp = current_timestamp WHERE thread_id = ? AND user_id = ?", array($thread_id, $current_user));
+      // };
       return $result_rows;
     }
 
