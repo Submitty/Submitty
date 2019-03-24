@@ -258,9 +258,11 @@ HTML;
 		if($show_deleted) {
 			$show_deleted_class = "active";
 			$show_deleted_action = "alterShowDeletedStatus(0);";
+            $show_deleted_thread_title = "Hide Deleted Threads";
 		} else {
 			$show_deleted_class = "";
 			$show_deleted_action = "alterShowDeletedStatus(1);";
+            $show_deleted_thread_title = "Show Deleted Threads";
 		}
 	}
 	$categories = $this->core->getQueries()->getCategories();
@@ -328,7 +330,7 @@ HTML;
 							"style" => 'position:relative;top:3px;display:inline-block;',
 							"link" => array(false),
 							"optional_class" => $show_deleted_class,
-							"title" => 'Show Deleted Threads',
+							"title" => $show_deleted_thread_title,
 							"onclick" => array(true, $show_deleted_action)
 						),
 						array(
