@@ -271,7 +271,6 @@ HTML;
 					
 				});
 				
-
 				function sortTable(sort_element_index){
 					var table = document.getElementById("content_upload_table");
 					var switching = true;
@@ -288,7 +287,6 @@ HTML;
 								switching=true;
 							}
 						}
-
 					}
 
 					var row0 = table.getElementsByTagName("TBODY")[0].getElementsByTagName("TR")[0];
@@ -307,7 +305,6 @@ HTML;
 					headers[sort_element_index].innerHTML = headers[sort_element_index].innerHTML + ' ↓';
 
 				}
-
 
 			</script>
 HTML;

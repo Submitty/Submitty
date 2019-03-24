@@ -164,11 +164,10 @@
                     Download Zip of All Students
                 </a>
             {% endif %}
-	      {# *************************************************** #}
 	    {% if core.getUser().accessFullGrading() %}
                 <a class="btn btn-primary"
                    href="{{ core.buildUrl({'component': 'submission', 'action': 'stat_page', 'gradeable_id': gradeable_id}) }}">
-                    Bulk Upload Records
+                    Bulk Upload Forensics
                 </a>
             {% endif %}
         {% endif %}
