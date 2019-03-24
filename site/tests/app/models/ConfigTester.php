@@ -122,7 +122,6 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
     }
 
     public function testConfig() {
-        return;
         $this->createConfigFile();
 
         $config = new Config($this->core, "s17", "csci0000");
