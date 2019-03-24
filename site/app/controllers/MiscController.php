@@ -49,6 +49,9 @@ class MiscController extends AbstractController {
             case 'modify_course_materials_file_time_stamp':
                 $this->modifyCourseMaterialsFileTimeStamp();
                 break;
+            case 'check_qr_upload_progress':
+                $this->checkQRUploadProgress();
+                break;
         }
     }
 
@@ -83,8 +86,15 @@ class MiscController extends AbstractController {
         $path = $this->core->getAccess()->resolveDirPath($dir, $_REQUEST["path"]);
 
         if (array_key_exists('gradeable_id', $_REQUEST)) {
-            $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['gradeable_id'], $_REQUEST['user_id']);
-            if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path, "gradeable" => $gradeable])) {
+            $gradeable = $this->tryGetGradeable($_REQUEST['gradeable_id'], false);
+            if ($gradeable === false) {
+                return false;
+            }
+            $graded_gradeable =  $this->tryGetGradedGradeable($gradeable, $_REQUEST['user_id'], false);
+            if ($graded_gradeable === false) {
+                return false;
+            }
+            if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path, "gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
                 $this->core->getOutput()->showError("You do not have access to this file");
                 return false;
             }
@@ -228,8 +238,15 @@ class MiscController extends AbstractController {
         $path = $this->core->getAccess()->resolveDirPath($dir, $_REQUEST["path"]);
 
         if (array_key_exists('gradeable_id', $_REQUEST)) {
-            $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['gradeable_id'], $_REQUEST['user_id']);
-            if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path, "gradeable" => $gradeable])) {
+            $gradeable = $this->tryGetGradeable($_REQUEST['gradeable_id']);
+            if ($gradeable === false) {
+                return false;
+            }
+            $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $_REQUEST['user_id']);
+            if ($graded_gradeable === false) {
+                return false;
+            }
+            if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path, "gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
                 $this->core->getOutput()->showError("You do not have access to this file");
                 return false;
             }
@@ -372,9 +389,12 @@ class MiscController extends AbstractController {
         //makes a random zip file name on the server
         $temp_name = uniqid($this->core->getUser()->getId(), true);
         $zip_name = $temp_dir . "/" . $temp_name . ".zip";
-        $gradeable = $this->core->getQueries()->getGradeable($_REQUEST['gradeable_id']);
+        $gradeable = $this->tryGetGradeable($_REQUEST['gradeable_id']);
+        if ($gradeable === false) {
+            return;
+        }
         $paths = ['submissions'];
-        if ($gradeable->useVcsCheckout()) {
+        if ($gradeable->isVcs()) {
             //VCS submissions are stored in the checkout directory
             $paths[] = 'checkout';
         }
@@ -410,7 +430,7 @@ class MiscController extends AbstractController {
                }
                else {
                    $section_key = "rotating_section";
-                   $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id,
+                   $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable->getId(),
                        $this->core->getUser()->getId());
                    $students = $this->core->getQueries()->getUsersByRotatingSections($sections);
                }
@@ -534,5 +554,47 @@ class MiscController extends AbstractController {
         if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
             return "Failed to write to file {$fp}";
         }
+    }
+
+    public function checkQRUploadProgress(){
+        $gradeable_id = $_POST['gradeable_id'] ?? NULL;
+        if($gradeable_id === NULL){
+            $result = ['error' => "gradeable_id cannot be null"];
+            $this->core->getOutput()->renderJson($result);
+            return $this->core->getOutput()->getOutput();
+        }
+
+        $job_path = "/var/local/submitty/daemon_job_queue/";
+        $result = [];
+        $found = false;
+        $job_data = NULL;
+        $complete_count = 0;
+        try{
+            foreach(scandir($job_path) as $job){
+                if(strpos($job, 'qr_upload_') !== false)
+                    $found = true;
+                else
+                    continue;
+                //remove 'qr_upload_' and '.json' from job file name
+                $result[] = substr($job,11,-5);
+            }
+            //look in the split upload folder to see what is complete
+            $split_uploads = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf", $_POST['gradeable_id']);
+            $sub_dirs = array_filter(glob($split_uploads . '/*'), 'is_dir');
+            foreach ($sub_dirs as $dir) {
+                foreach (scandir($dir) as $file) {
+                    if(pathinfo($file)['extension'] !== "pdf")
+                        continue;
+
+                    if(strpos($file, "_cover"))
+                        $complete_count++;
+                }
+            }
+            $result = ['success' => true, 'found' => $found, 'job_data' => $result, 'count' => $complete_count];
+        }catch(Exception $e){
+            $result = ['error' => $e->getMessage()];
+        }
+        $this->core->getOutput()->renderJson($result);
+        return $this->core->getOutput()->getOutput();
     }
 }

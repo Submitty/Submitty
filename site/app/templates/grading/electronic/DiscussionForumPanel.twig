@@ -1,0 +1,19 @@
+{% import _self as self %}
+<div id="discussion_browser" class="draggable rubric_panel" style="display:block;">
+        <div class="draggable_content" style="width:100%">
+        	<div id="posts_list" style="margin-top:10px;max-height: 100%; overflow: initial;" class="col-9">
+            	{{ discussion_forum_content|raw }}
+            </div>
+        </div>
+    
+</div>
+
+<script>
+
+	
+		$('#posts_list').css('min-width', '-webkit-fill-available');
+		$(function() {
+			generateCodeMirrorBlocks(document);
+		});
+
+</script>

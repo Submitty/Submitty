@@ -69,6 +69,10 @@ use app\models\User;
  * @method float getPrecision()
  * @method Component[] getComponents()
  * @method bool isRegradeAllowed()
+ * @method bool isDiscussionBased()
+ * @method void setDiscussionBased($discussion_based)
+ * @method string  getDiscussionThreadId()
+ * @method void setDiscussionThreadId($discussion_thread_id)
  * @method int getActiveRegradeRequestCount()
  * @method void setHasDueDate($has_due_date)
  */
@@ -184,8 +188,14 @@ class Gradeable extends AbstractModel {
     protected $late_days = 0;
     /** @property @var \DateTime The deadline for submitting a grade inquiry */
     protected $regrade_request_date = null;
-    /** @property @var boolean are grade inquiries enabled for this assignment*/
+    /** @property @var bool are grade inquiries enabled for this assignment*/
     protected $regrade_allowed = true;
+    /** @property @var bool does this assignmennt have a discussion component*/
+    protected $discussion_based = false;
+    /** @property @var string thread id for cooresponding to discussion forum thread*/
+    protected $discussion_thread_id = '';
+
+
     /**
      * Gradeable constructor.
      * @param Core $core
@@ -222,6 +232,8 @@ class Gradeable extends AbstractModel {
             $this->setLateSubmissionAllowed($details['late_submission_allowed']);
             $this->setPrecision($details['precision']);
             $this->setRegradeAllowedInternal($details['regrade_allowed']);
+            $this->setDiscussionBased((boolean)$details['discussion_based']);
+            $this->setDiscussionThreadId($details['discussion_thread_ids']);
         }
 
         $this->setActiveRegradeRequestCount($details['active_regrade_request_count'] ?? 0);
@@ -619,6 +631,10 @@ class Gradeable extends AbstractModel {
         }
         $dates['late_days'] = $this->late_days;
         return $dates;
+    }
+
+    public function getStringThreadIds() {
+        return $this->isDiscussionBased() ? implode(',', json_decode($this->getDiscussionThreadId())) : '';
     }
 
     /**
