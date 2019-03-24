@@ -12,8 +12,7 @@ body {
     position: relative;
 }
 :root {
-    /*--viewed_content: #e8f1f8;*/
-    --viewed_content: #606060;
+    --viewed_content: #e8f1f8;
 }
 #site-body {
     /* OLD SEAFOAM GREEN COLOR */
