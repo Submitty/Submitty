@@ -10,7 +10,7 @@ def up(config, database, semester, course):
     if config_file.is_file():
         j = json.load(open(config_file,'r'))
 
-        if 1 or not 'seating_only_for_instructor' in j['course_details']:
+        if not 'seating_only_for_instructor' in j['course_details']:
             j['course_details']['seating_only_for_instructor'] = False
 
         json.dump(j,open(config_file,'w'))
