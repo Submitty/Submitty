@@ -60,25 +60,21 @@ def print_helper(label,label_width,value,value_width):
 
 def main():
     args = parse_args()
-
     while True:
 
         epoch_time = int(time.time())
-        
         machine_grading_counts = {}
         for machine in OPEN_AUTOGRADING_WORKERS_JSON:
             machine_grading_counts[machine] = 0
         machine_grading_counts["NO MACHINE MATCH"] = 0
-
         machine_queue_counts = {}
         for machine in OPEN_AUTOGRADING_WORKERS_JSON:
             machine_queue_counts[machine] = 0
         machine_queue_counts["NO MACHINE MATCH"] = 0
-
         machine_stale_job = {}
         for machine in OPEN_AUTOGRADING_WORKERS_JSON:
             machine_stale_job[machine] = False
-        
+
         # count the processes
         pid_list = psutil.pids()
         num_shippers=0
@@ -115,7 +111,7 @@ def main():
         interactive_grading_count = 0
         regrade_count = 0
         regrade_grading_count = 0
-        
+
         for full_path_file in Path(GRADING_QUEUE).glob("*"):
             full_path_file = str(full_path_file)
             json_file = full_path_file
@@ -127,7 +123,7 @@ def main():
             is_regrade = False
 
             if is_grading:
-                json_file = os.path.join(GRADING_QUEUE,just_file[8:])                    
+                json_file = os.path.join(GRADING_QUEUE,just_file[8:])
             try:
                 start_time = os.path.getmtime(json_file)
                 elapsed_time = epoch_time-start_time
@@ -138,7 +134,7 @@ def main():
             except:
                 print ("whoops",json_file,end="")
                 elapsed_time = 0
-                
+
             if is_grading:
                 if is_regrade:
                     regrade_grading_count+=1
@@ -152,9 +148,9 @@ def main():
 
             capability = queue_obj["required_capabilities"]
             max_time = queue_obj["max_possible_grading_time"]
-                            
+
             match = False
-                
+
             for machine in OPEN_AUTOGRADING_WORKERS_JSON:
                 if capability in OPEN_AUTOGRADING_WORKERS_JSON[machine]["capabilities"]:
                     if is_grading:
@@ -194,11 +190,8 @@ def main():
             else:
                 print ("   ",end="")
             print ("{:s}{:4s} ".format(machine.upper(),"["+str(num)+"]"),end="")
-            #print ("/{:d} ".format(num),end="")
             print_helper("g",1,machine_grading_counts[machine],3)
             print_helper("q",1,machine_queue_counts[machine]-machine_grading_counts[machine],3)
-
-            
 
         print()
 
