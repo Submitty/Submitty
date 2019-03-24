@@ -83,7 +83,7 @@ bool ShowHelper(const std::string& when, bool success) {
 
 
 double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohmann::json &autocheck_js,
-                         const std::string &hw_id, std::string &testcase_message) {
+                         const std::string &hw_id, std::string &testcase_message, nlohmann::json complete_config) {
 
   std::cout << "\nAUTOCHECK #" << which_autocheck+1 << " / " << my_testcase.numFileGraders() << std::endl;
 
@@ -91,7 +91,7 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
   const nlohmann::json& tcg = my_testcase.getGrader(which_autocheck);
 
   // do the work
-  TestResultsFixedSize result = my_testcase.do_the_grading(which_autocheck);
+  TestResultsFixedSize result = my_testcase.do_the_grading(which_autocheck, complete_config);
 
   // calculations
   float grade = result.getGrade();
@@ -330,7 +330,7 @@ void ValidateATestCase(nlohmann::json config_json, int which_testcase,
       std::cout << "NUM AUTOCHECKS / FILE GRADERS " << my_testcase.numFileGraders() << std::endl;
       assert (my_testcase.numFileGraders() > 0);
       for (int which_autocheck = 0; which_autocheck < my_testcase.numFileGraders(); which_autocheck++) {
-        my_score -= ValidateAutoCheck(my_testcase, which_autocheck, autocheck_js, hw_id, testcase_message);
+        my_score -= ValidateAutoCheck(my_testcase, which_autocheck, autocheck_js, hw_id, testcase_message,config_json);
       }
       bool fileExists, fileEmpty;
       std::string execute_logfile = my_testcase.getPrefix() + "execute_logfile.txt";

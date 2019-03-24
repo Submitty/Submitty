@@ -1,5 +1,4 @@
 #include <sys/time.h>
-#include <sys/resource.h>
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -195,6 +194,7 @@ bool local_executable (const std::string &program, const nlohmann::json &whole_c
   assert (program.substr(0,2) == "./");
 
   std::set<std::string> executables = get_compiled_executables(whole_config);
+
   if (executables.find(program.substr(2,program.size())) != executables.end()) {
     return true;
   }
