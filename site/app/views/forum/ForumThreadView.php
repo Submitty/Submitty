@@ -287,7 +287,7 @@ HTML;
 		array(
 			"required_rank" => 4,
 			"display_text" => 'Create Thread',
-			"style" => 'position:relative;top:3px;',
+			"style" => 'float:right;position:relative;top:3px;',
 			"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))),
 			"optional_class" => '',
 			"title" => 'Create Thread',
@@ -313,33 +313,33 @@ HTML;
 HTML;
 		} else {
 			$other_buttons = array(
-						array(
-							"required_rank" => 4,
-							"display_text" => $show_merged_thread_title,
-							"style" => 'position:relative;top:3px;display:inline-block;',
-							"link" => array(false),
-							"optional_class" => $show_merged_thread_class,
-							"title" => $show_merged_thread_title,
-							"onclick" => array(true, $show_merged_thread_action)
-						),
-						array(
-							"required_rank" => 2,
-							"display_text" => 'Show Deleted Threads',
-							"style" => 'position:relative;top:3px;display:inline-block;',
-							"link" => array(false),
-							"optional_class" => $show_deleted_class,
-							"title" => 'Show Deleted Threads',
-							"onclick" => array(true, $show_deleted_action)
-						),
-						array(
-							"required_rank" => 2,
-							"display_text" => 'Stats',
-							"style" => 'position:relative;top:3px;display:inline-block;',
-							"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))),
-							"optional_class" => '',
-							"title" => 'Show Stats',
-							"onclick" => array(true, 'resetScrollPosition();')
-						),
+						// array(
+						// 	"required_rank" => 4,
+						// 	"display_text" => $show_merged_thread_title,
+						// 	"style" => 'position:relative;top:3px;display:inline-block;',
+						// 	"link" => array(false),
+						// 	"optional_class" => $show_merged_thread_class,
+						// 	"title" => $show_merged_thread_title,
+						// 	"onclick" => array(true, $show_merged_thread_action)
+						// ),
+						// array(
+						// 	"required_rank" => 2,
+						// 	"display_text" => 'Show Deleted Threads',
+						// 	"style" => 'position:relative;top:3px;display:inline-block;',
+						// 	"link" => array(false),
+						// 	"optional_class" => $show_deleted_class,
+						// 	"title" => 'Show Deleted Threads',
+						// 	"onclick" => array(true, $show_deleted_action)
+						// ),
+						// array(
+						// 	"required_rank" => 2,
+						// 	"display_text" => 'Stats',
+						// 	"style" => 'position:relative;top:3px;display:inline-block;',
+						// 	"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))),
+						// 	"optional_class" => '',
+						// 	"title" => 'Show Stats',
+						// 	"onclick" => array(true, 'resetScrollPosition();')
+						// ),
 						array(
 							"required_rank" => 4,
 							"display_text" => 'Filter',
@@ -992,15 +992,15 @@ HTML;
 	$thread_exists = $this->core->getQueries()->threadExists();
 
 	if($thread_exists) {
-		$buttons = array_merge($buttons, array(
-			"required_rank" => 2,
-			"display_text" => 'Stats',
-			"style" => 'position:relative;top:3px;display:inline-block;',
-			"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))),
-			"optional_class" => '',
-			"title" => 'Show Stats',
-			"onclick" => array(true, 'resetScrollPosition();')
-		));
+		// $buttons = array_merge($buttons, array(
+		// 	"required_rank" => 2,
+		// 	"display_text" => 'Stats',
+		// 	"style" => 'position:relative;top:3px;display:inline-block;',
+		// 	"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))),
+		// 	"optional_class" => '',
+		// 	"title" => 'Show Stats',
+		// 	"onclick" => array(true, 'resetScrollPosition();')
+		// ));
 	}
 
 	$return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", [
