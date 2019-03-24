@@ -191,9 +191,6 @@ HTML;
 
 
 		<script>
-		function openFile(directory, file, path ){
-			window.open("{$this->core->getConfig()->getSiteUrl()}&component=misc&page=display_file&dir=" + directory + "&file=" + file + "&path=" + path,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
-		}
 
 			$( document ).ready(function() {
 			    enableTabsInTextArea('.post_content_reply');
@@ -207,35 +204,6 @@ HTML;
 		</script>
 
 HTML;
-	if($this->core->getUser()->getGroup() <= 2){
-		$return .= <<<HTML
-			<script>
-				function changeName(element, user, visible_username, anon){
-					var new_element = element.getElementsByTagName("strong")[0];
-					anon = (anon == 'true');
-					icon = element.getElementsByClassName("fas fa-eye")[0];
-					if(icon == undefined){
-						icon = element.getElementsByClassName("fas fa-eye-slash")[0];
-						if(anon) {
-							new_element.style.color = "black";
-							new_element.style.fontStyle = "normal";
-						}
-						new_element.innerHTML = visible_username;
-						icon.className = "fas fa-eye";
-						icon.title = "Show full user information";
-					} else {
-						if(anon) {
-							new_element.style.color = "grey";
-							new_element.style.fontStyle = "italic";
-						}
-						new_element.innerHTML = user;
-						icon.className = "fas fa-eye-slash";
-						icon.title = "Hide full user information";
-					} 									
-				}
-			</script>
-HTML;
-	}
 	if($filteredThreadExists || $threadFiltering) {
 		$currentThread = isset($_GET["thread_id"]) && is_numeric($_GET["thread_id"]) && (int)$_GET["thread_id"] < $max_thread && (int)$_GET["thread_id"] > 0 ? (int)$_GET["thread_id"] : $posts[0]["thread_id"];
 		$currentCategoriesIds = $this->core->getQueries()->getCategoriesIdForThread($currentThread);
@@ -393,10 +361,47 @@ HTML;
 							}
 						});
 					</script>
-					<div id="posts_list" style="max-height: 100%" class="col-9">
+					<div id="posts_list" style="margin-top:10px;max-height: 100%" class="col-9">
+HTML;
+		$return .= $this->generatePostList($currentThread, $posts, $currentCourse, true, $threadExists, $display_option, $categories, $cookieSelectedCategories, $cookieSelectedThreadStatus, $currentCategoriesIds);
+
+		$return .= <<<HTML
+			<script>
+				$(function() {
+					generateCodeMirrorBlocks(document);
+				});
+			</script>
+
+			</div>
+			</div>
+			</div>
 HTML;
 
-            $title_html .= <<<HTML
+		}
+          
+
+		return $return;
+	}
+
+	public function generatePostList($currentThread, $posts, $currentCourse, $includeReply = false, $threadExists = false, $display_option = 'time', $categories = [], $cookieSelectedCategories = [], $cookieSelectedThreadStatus = [], $currentCategoriesIds = []) {
+
+		$return = '';
+		$title_html = '';
+
+		$activeThread = $this->core->getQueries()->getThread($currentThread)[0];
+
+
+
+		$activeThreadTitle = ($this->core->getUser()->getGroup() <= 2 ? "({$activeThread['id']}) " : '') . $activeThread['title'];
+		$activeThreadAnnouncement = $activeThread['pinned'];
+		$thread_id = $activeThread['id'];
+		$function_date = 'date_format';
+
+		$return .= <<<HTML
+			
+HTML;
+
+		  $title_html .= <<<HTML
             <h3 style="max-width: 95%; display:inline-block;word-wrap: break-word;margin-top:10px; margin-left: 5px;">
 HTML;
 					if($this->core->getUser()->getGroup() <= 2 && $activeThreadAnnouncement){
@@ -464,7 +469,7 @@ HTML;
 										$reply_level = $reply_level_array[$i];
 									}
 										
-									$return .= $this->createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level, $display_option);
+									$return .= $this->createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level, $display_option, $includeReply);
 									break;
 								}						
 							}
@@ -479,12 +484,13 @@ HTML;
 								$thread_id = $post["thread_id"];
 							}
                             $first_post_id = $this->core->getQueries()->getFirstPostForThread($thread_id)['id'];
-							$return .= $this->createPost($thread_id, $post, $function_date, $title_html, $first, 1, $display_option);		
+							$return .= $this->createPost($thread_id, $post, $function_date, $title_html, $first, 1, $display_option, $includeReply);		
 							if($first){
 								$first= false;
 							}			
 						}
 					}
+			if($includeReply) {
 			$return .= <<<HTML
 
 			<hr style="border-top:1px solid #999;margin-bottom: 5px;" />
@@ -496,31 +502,21 @@ HTML;
 HTML;
 						$GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id'])?$GLOBALS['post_box_id']+1:1;
 
-						$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig", [
-							"show_post" => true,
-							"post_content_placeholder" => "Enter your reply to all here...",
-							"show_merge_thread_button" => true,
-							"post_box_id" => $post_box_id,
-							"attachment_script" => true,
-							"show_anon" => true,
-							"submit_label" => "Submit Reply to All",
-						]);
+
+							$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig", [
+								"show_post" => true,
+								"post_content_placeholder" => "Enter your reply to all here...",
+								"show_merge_thread_button" => true,
+								"post_box_id" => $post_box_id,
+								"attachment_script" => true,
+								"show_anon" => true,
+								"submit_label" => "Submit Reply to All",
+							]);
+						}
+						
 						$return .= <<<HTML
 	            	</form>
 	            	<br/>
-
-					</div>
-				</div>
-				</div>
-HTML;
-		}
-
-		$return .= <<<HTML
-		<script>
-			$(function() {
-				generateCodeMirrorBlocks(document);
-			});
-		</script>
 HTML;
 
         if($this->core->getUser()->getGroup() <= 2){
@@ -754,7 +750,7 @@ HTML;
 		return $post_content;
 	}
 
-	public function createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level, $display_option){
+	public function createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level, $display_option, $includeReply){
 		$current_user = $this->core->getUser()->getId();
 		$post_html = "";
 		$post_id = $post["id"];
@@ -832,7 +828,7 @@ HTML;
 HTML;
 			}
 		}
-		if(($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) && $first && $thread_resolve_state == -1) {
+		if($includeReply && ($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) && $first && $thread_resolve_state == -1) {
 			//resolve button
 			$return .= <<<HTML
 				<a class="btn btn-default btn-sm" style="text-decoration: none;" onClick="changeThreadStatus({$post['thread_id']})" title="Mark thread as resolved">Mark as resolved</a>
@@ -914,7 +910,7 @@ HTML;
 				$name = rawurlencode($file['name']);
 				$name_display = htmlentities(rawurldecode($file['name']), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 				$return .= <<<HTML
-					<a href="#" style="text-decoration:none;display:inline-block;white-space: nowrap;" class="btn-default btn-sm" onclick="openFile('forum_attachments', '{$name}', '{$path}')" > {$name_display} </a>
+					<a href="#" style="text-decoration:none;display:inline-block;white-space: nowrap;" class="btn-default btn-sm" onclick="openFileForum('forum_attachments', '{$name}', '{$path}')" > {$name_display} </a>
 HTML;
 			}					
 		}
