@@ -384,7 +384,7 @@ HTML;
 		return $return;
 	}
 
-	public function generatePostList($currentThread, $posts, $currentCourse, $includeReply = false, $threadExists = false, $display_option = 'time', $categories = [], $cookieSelectedCategories = [], $cookieSelectedThreadStatus = [], $currentCategoriesIds = []) {
+	public function generatePostList($currentThread, $posts, $currentCourse, $includeReply = false, $threadExists = false, $show_title = true, $display_option = 'time', $categories = [], $cookieSelectedCategories = [], $cookieSelectedThreadStatus = [], $currentCategoriesIds = []) {
 
 		$return = '';
 		$title_html = '';
@@ -401,37 +401,38 @@ HTML;
 		$return .= <<<HTML
 			
 HTML;
-
-		  $title_html .= <<<HTML
+        if($show_title) {
+            $title_html .= <<<HTML
             <h3 style="max-width: 95%; display:inline-block;word-wrap: break-word;margin-top:10px; margin-left: 5px;">
 HTML;
-					if($this->core->getUser()->getGroup() <= 2 && $activeThreadAnnouncement){
-                        $title_html .= <<<HTML
+            if ($this->core->getUser()->getGroup() <= 2 && $activeThreadAnnouncement) {
+                $title_html .= <<<HTML
 							<a style="display:inline-block; color:orange; " onClick="alterAnnouncement({$activeThread['id']}, 'Are you sure you want to remove this thread as an announcement?', 'remove_announcement')" title="Remove Announcement"><i class="fas fa-star" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
 HTML;
-                    } else if($activeThreadAnnouncement){
-                        $title_html .= <<<HTML
+            } else if ($activeThreadAnnouncement) {
+                $title_html .= <<<HTML
 						 <i class="fas fa-star" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px; -webkit-text-stroke-color: black;" title = "Announcement" aria-hidden="true"></i>
 HTML;
-                    } else if($this->core->getUser()->getGroup() <= 2 && !$activeThreadAnnouncement){
-                        $title_html .= <<<HTML
+            } else if ($this->core->getUser()->getGroup() <= 2 && !$activeThreadAnnouncement) {
+                $title_html .= <<<HTML
 							<a style="position:relative; display:inline-block; color:orange; " onClick="alterAnnouncement({$activeThread['id']}, 'Are you sure you want to make this thread an announcement?', 'make_announcement')" title="Make thread an announcement"><i class="fas fa-star" title = "Make Announcement" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'gold')" style="position:relative; display:inline-block; color:#e0e0e0; -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
 HTML;
-                    }
-                    if(isset($activeThread['favorite']) && $activeThread['favorite']) {
-                    	$title_html .= <<<HTML
+            }
+            if (isset($activeThread['favorite']) && $activeThread['favorite']) {
+                $title_html .= <<<HTML
 							<a style="position:relative; display:inline-block; color:orange; " onClick="pinThread({$activeThread['id']}, 'unpin_thread');" title="Pin Thread"><i class="fas fa-thumbtack" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;-webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
 HTML;
-					} else {
-                    	$title_html .= <<<HTML
+            } else {
+                $title_html .= <<<HTML
 							<a style="position:relative; display:inline-block; color:orange; " onClick="pinThread({$activeThread['id']}, 'pin_thread');" title="Pin Thread"><i class="fas fa-thumbtack" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'gold')" style="position:relative; display:inline-block; color:#e0e0e0; -webkit-text-stroke-width: 1px;-webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
 HTML;
-					}
-                    $title_html .= <<< HTML
+            }
+            $title_html .= <<< HTML
 					{$activeThreadTitle}</h3>
 HTML;
+        }
 					$first = true;
 					$first_post_id = 1;
 					if($display_option == "tree"){

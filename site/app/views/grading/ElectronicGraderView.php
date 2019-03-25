@@ -575,9 +575,12 @@ HTML;
         }
 
         foreach($threadIds as $threadId) {
+            //$posts = $this->core->getQueries()->getPostsForThread($this->core->getUser()->getId(), $threadId, false, 'time');
+            $first_posts = $this->core->getQueries()->getPostsForThread($this->core->getUser()->getId(), $threadId, false, 'time');
             $posts = $this->core->getQueries()->getPostsForThread($this->core->getUser()->getId(), $threadId, false, 'time', $submitter_id);
-            if(count($posts) > 0) {
-                $posts_view .= $this->core->getOutput()->renderTemplate('forum\ForumThread', 'generatePostList', $threadId, $posts, $currentCourse, false, true, $submitter_id);
+            if(count($posts)) {
+                $posts_view .= $this->core->getOutput()->renderTemplate('forum\ForumThread', 'generatePostList', $threadId, array($first_posts[0]), $currentCourse, false, true, $submitter_id);
+                $posts_view .= $this->core->getOutput()->renderTemplate('forum\ForumThread', 'generatePostList', $threadId, $posts, $currentCourse, false, true, false, $submitter_id);
             } else {
                 $posts_view .= <<<HTML
                     <h3 style="text-align: center;">No posts for thread id: {$threadId}</h3> <br/>
