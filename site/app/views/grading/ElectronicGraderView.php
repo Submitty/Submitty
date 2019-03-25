@@ -575,7 +575,6 @@ HTML;
         }
 
         foreach($threadIds as $threadId) {
-            //$posts = $this->core->getQueries()->getPostsForThread($this->core->getUser()->getId(), $threadId, false, 'time');
             $first_posts = $this->core->getQueries()->getPostsForThread($this->core->getUser()->getId(), $threadId, false, 'time');
             $posts = $this->core->getQueries()->getPostsForThread($this->core->getUser()->getId(), $threadId, false, 'time', $submitter_id);
             if(count($posts)) {
