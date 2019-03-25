@@ -103,8 +103,8 @@
             <input type="button" class="btn btn-default" id="cancelRegrade" value="Resolve Grade Inquiry Without Response" style="margin-top: 15px; float: right" onclick="changeRegradeStatus({{ thread_id }}, '{{ gradeable_id}}', '{{ submitter_id }}', 0);">
         {% elseif btn_type == 'admin_closed' %}
             {# Admin, request is closed #}
-            <input type="submit" value="Post" class="btn btn-primary" style="margin-top: 15px; float: right" onclick="$('#status').val(0);">
-            <input type="button" class="btn btn-default" id="cancelRegrade" value="Submit Grade Inquiry" style="margin-top: 15px; float: right" onclick="changeRegradeStatus({{ thread_id }}, '{{ gradeable_id}}', '{{ submitter_id }}', -1);">
+            <input type="submit" value="Post" class="btn btn-default" style="margin-top: 15px; float: right" onclick="$('#status').val(0);">
+            <input type="submit" class="btn btn-primary" value="Submit Grade Inquiry" style="margin-top: 15px; float: right" onclick="$('#status').val(-1);">
             {{ self.bbcode_buttons() }}
         {% else %}
             {# No request yet #}
