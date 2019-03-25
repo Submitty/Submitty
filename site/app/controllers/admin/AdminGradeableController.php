@@ -736,6 +736,8 @@ class AdminGradeableController extends AbstractController {
 
             $jsonThreads = json_encode('{}');
             $discussion_clicked = $details['discussion_based'] === 'true';
+
+            //Validate user input for discussion threads
             if($discussion_clicked) {
                 $jsonThreads = array_map('intval', explode(',', $details['discussion_thread_id']));
                 foreach($jsonThreads as $thread) {
