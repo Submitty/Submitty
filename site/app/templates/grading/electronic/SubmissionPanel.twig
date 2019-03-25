@@ -176,6 +176,7 @@
                 },
                 success: function(data){
                     $('#file_content').append(data);
+                    $('#file_content').height("90%");
                 }
             });
         } else {
@@ -186,7 +187,9 @@
             $("#file_viewer_full_panel").attr("data-file_url", "");
             $("#file_viewer_full_panel").attr("data-file_name", name);
             $("#file_viewer_full_panel").attr("data-file_url", path);
+            $('#file_content').height("");
             openFrame(name, path, "full_panel");
+            $("#file_viewer_full_panel_iframe").height("90%");
         }
     }
 
