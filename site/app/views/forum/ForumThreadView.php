@@ -208,6 +208,9 @@ HTML;
 		$currentThread = isset($_GET["thread_id"]) && is_numeric($_GET["thread_id"]) && (int)$_GET["thread_id"] < $max_thread && (int)$_GET["thread_id"] > 0 ? (int)$_GET["thread_id"] : $posts[0]["thread_id"];
 		$currentCategoriesIds = $this->core->getQueries()->getCategoriesIdForThread($currentThread);
 	}
+	$currentThreadArr = array_filter($threadsHead, function($ar) use($currentThread) {
+									return ($ar['id'] == $currentThread);
+	});
 	if($show_merged_thread) {
 		$show_merged_thread_class = "active";
 		$show_merged_thread_action = "alterShowMergeThreadStatus(0,'" . $currentCourse . "');";
@@ -334,6 +337,7 @@ HTML;
 						<i class="fas fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
 						<i class="fas fa-caret-up fa-2x fa-fw fill-available" style="color:gray;{$arrowup_visibility}" aria-hidden="true"></i>
 HTML;
+
 						$activeThreadAnnouncement = false;
 						$activeThreadTitle = "";
 						$function_date = 'date_format';
@@ -364,7 +368,9 @@ HTML;
 					</script>
 					<div id="posts_list" style="margin-top:10px;max-height: 100%" class="col-9">
 HTML;
-		$return .= $this->generatePostList($currentThread, $posts, $currentCourse, true, $threadExists, $display_option, $categories, $cookieSelectedCategories, $cookieSelectedThreadStatus, $currentCategoriesIds);
+
+		$currentThreadFavorite = array_values($currentThreadArr)[0]['favorite'];
+		$return .= $this->generatePostList($currentThread, $posts, $currentCourse, true, $threadExists, $display_option, $categories, $cookieSelectedCategories, $cookieSelectedThreadStatus, $currentCategoriesIds, $currentThreadFavorite);
 
 		$return .= <<<HTML
 			<script>
@@ -384,17 +390,16 @@ HTML;
 		return $return;
 	}
 
-	public function generatePostList($currentThread, $posts, $currentCourse, $includeReply = false, $threadExists = false, $display_option = 'time', $categories = [], $cookieSelectedCategories = [], $cookieSelectedThreadStatus = [], $currentCategoriesIds = []) {
+	public function generatePostList($currentThread, $posts, $currentCourse, $includeReply = false, $threadExists = false, $display_option = 'time', $categories = [], $cookieSelectedCategories = [], $cookieSelectedThreadStatus = [], $currentCategoriesIds = [], $isCurrentFavorite = false) {
 
 		$return = '';
 		$title_html = '';
 
 		$activeThread = $this->core->getQueries()->getThread($currentThread)[0];
 
-
-
 		$activeThreadTitle = ($this->core->getUser()->getGroup() <= 2 ? "({$activeThread['id']}) " : '') . $activeThread['title'];
 		$activeThreadAnnouncement = $activeThread['pinned'];
+
 		$thread_id = $activeThread['id'];
 		$function_date = 'date_format';
 
@@ -420,7 +425,7 @@ HTML;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
 HTML;
                     }
-                    if(isset($activeThread['favorite']) && $activeThread['favorite']) {
+                    if($isCurrentFavorite) {
                     	$title_html .= <<<HTML
 							<a style="position:relative; display:inline-block; color:orange; " onClick="pinThread({$activeThread['id']}, 'unpin_thread');" title="Pin Thread"><i class="fas fa-thumbtack" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;-webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
 HTML;
