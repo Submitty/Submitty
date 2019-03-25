@@ -13,7 +13,6 @@
 #include <stdlib.h>
 #include <string>
 #include <algorithm>
-#include "STRutil.h"
 #include "difference.h"
 #include "tokens.h"
 
@@ -24,7 +23,7 @@
  * ARGS: token: string with token to search for, searchstring: string of where to search for token
  * RETURN: int
  * PURPOSE: Looks for a single token in a string using the Rabin-Karp rolling hash
- * method.  Returns starting index if found, -1 if not.  
+ * method.  Returns starting index if found, -1 if not.
  */
 int RabinKarpSingle ( std::string token, std::string searchstring );
 
