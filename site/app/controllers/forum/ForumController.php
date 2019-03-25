@@ -100,7 +100,7 @@ class ForumController extends AbstractController {
     }
 
     private function showDeleted() {
-        return ($this->core->getUser()->getGroup() <= 2 && isset($_COOKIE['show_deleted']) && $_COOKIE['show_deleted'] == "1");
+        return ($this->core->getUser()->accessGrading() && isset($_COOKIE['show_deleted']) && $_COOKIE['show_deleted'] == "1");
     }
 
     private function showMergedThreads($currentCourse) {
@@ -200,7 +200,7 @@ class ForumController extends AbstractController {
 
     public function addNewCategory(){
         $result = array();
-        if($this->core->getUser()->getGroup() <= 2){
+        if($this->core->getUser()->accessGrading()){
             if(!empty($_REQUEST["newCategory"])) {
                 $category = $_REQUEST["newCategory"];
                 if($this->isValidCategories(-1, array($category))) {
@@ -221,7 +221,7 @@ class ForumController extends AbstractController {
 
     public function deleteCategory(){
         $result = array();
-        if($this->core->getUser()->getGroup() <= 2){
+        if($this->core->getUser()->accessGrading()){
             if(!empty($_REQUEST["deleteCategory"])) {
                 $category = (int)$_REQUEST["deleteCategory"];
                 if(!$this->isValidCategories(array($category))) {
@@ -247,7 +247,7 @@ class ForumController extends AbstractController {
 
     public function editCategory(){
         $result = array();
-        if($this->core->getUser()->getGroup() <= 2){
+        if($this->core->getUser()->accessGrading()){
             $category_id = $_REQUEST["category_id"];
             $category_desc = null;
             $category_color = null;
@@ -282,7 +282,7 @@ class ForumController extends AbstractController {
 
     public function reorderCategories(){
         $result = array();
-        if($this->core->getUser()->getGroup() <= 2){
+        if($this->core->getUser()->accessGrading()){
             $rows = $this->core->getQueries()->getCategories();
 
             $current_order = array();
@@ -315,7 +315,7 @@ class ForumController extends AbstractController {
         $thread_post_content = str_replace("\r", "", $_POST["thread_post_content"]);
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
         $thread_status = $_POST["thread_status"];
-        $announcment = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->getGroup() < 3) ? 1 : 0 ;
+        $announcement = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->getGroup() < 3) ? 1 : 0 ;
         $email_announcement = (isset($_POST["EmailAnnouncement"]) && $_POST["EmailAnnouncement"] == "EmailAnnouncement" && $this->core->getUser()->getGroup() < 3) ? 1 : 0 ;
 
         $categories_ids  = array();
@@ -334,7 +334,7 @@ class ForumController extends AbstractController {
                 $result['next_page'] = $hasGoodAttachment[1];
             } else {
                 // Good Attachment
-                $result = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_post_content, $anon, $announcment, $thread_status, $hasGoodAttachment[0], $categories_ids);
+                $result = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_post_content, $anon, $announcement, $thread_status, $hasGoodAttachment[0], $categories_ids);
                 $id = $result["thread_id"];
                 $post_id = $result["post_id"];
 
@@ -353,7 +353,7 @@ class ForumController extends AbstractController {
 
                 }
 
-                $notification = new Notification($this->core, array('component' => 'forum', 'type' => $announcment ? 'new_announcement' : 'new_thread', 'thread_id' => $id, 'thread_title' => $title));
+                $notification = new Notification($this->core, array('component' => 'forum', 'type' => $announcement ? 'new_announcement' : 'new_thread', 'thread_id' => $id, 'thread_title' => $title));
                 $this->core->getQueries()->pushNotification($notification);
 
                 if($email_announcement) {
@@ -445,8 +445,8 @@ class ForumController extends AbstractController {
     }
 
     private function checkPostEditAccess($post_id) {
-        if($this->core->getUser()->getGroup() <= 2){
-                // Instructor/full access ta
+        if($this->core->getUser()->accessGrading()){
+                // Instructor/full access ta/mentor
                 return true;
         } else {
             $post = $this->core->getQueries()->getPost($post_id);
@@ -459,8 +459,8 @@ class ForumController extends AbstractController {
     }
 
     private function checkThreadEditAccess($thread_id) {
-        if($this->core->getUser()->getGroup() <= 2){
-                // Instructor/full access ta
+        if($this->core->getUser()->accessGrading()){
+                // Instructor/full access ta/mentor
                 return true;
         } else {
             $post = $this->core->getQueries()->getThread($thread_id)[0];
@@ -689,7 +689,7 @@ class ForumController extends AbstractController {
         } else if(!empty($_COOKIE['forum_display_option'])) {
            $option = $_COOKIE['forum_display_option'];
         }
-        $option = ($this->core->getUser()->getGroup() <= 2 || $option != 'alpha') ? $option : 'tree';
+        $option = ($this->core->getUser()->accessGrading() || $option != 'alpha') ? $option : 'tree';
         if(!empty($_REQUEST["thread_id"])){
             $thread_id = (int)$_REQUEST["thread_id"];
             $this->core->getQueries()->markNotificationAsSeen($user, -2, (string)$thread_id);
@@ -746,7 +746,7 @@ class ForumController extends AbstractController {
     public function getHistory(){
         $post_id = $_POST["post_id"];
         $output = array();
-        if($this->core->getUser()->getGroup() <= 2){
+        if($this->core->getUser()->accessGrading()){
             $_post = array();
             $older_posts = $this->core->getQueries()->getPostHistory($post_id);
             foreach ($older_posts as $post) {
@@ -842,7 +842,7 @@ class ForumController extends AbstractController {
         preg_match('/\((.*?)\)/', $parent_thread_id, $result);
         $parent_thread_id = $result[1];
         $thread_id = $child_thread_id;
-        if($this->core->getUser()->getGroup() <= 2){
+        if($this->core->getUser()->accessGrading()){
             if(is_numeric($parent_thread_id) && is_numeric($child_thread_id)) {
                 $message = "";
                 $child_root_post = -1;
