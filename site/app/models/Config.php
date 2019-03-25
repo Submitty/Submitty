@@ -72,7 +72,7 @@ class Config extends AbstractModel {
 
     /** @property @var string path on the filesystem that points to the course data directory */
     protected $config_path;
-    /** @property @var string path to the ini file that contains all the course specific settings */
+    /** @property @var string path to the json file that contains all the course specific settings */
     protected $course_json_path;
 
     /** @property @var array */
@@ -305,7 +305,7 @@ class Config extends AbstractModel {
         }
 
         if (!isset($this->course_json['database_details']) || !is_array($this->course_json['database_details'])) {
-            throw new ConfigException("Missing config section 'database_details' in ini file");
+            throw new ConfigException("Missing config section 'database_details' in json file");
         }
 
         $this->course_database_params = array_merge($this->submitty_database_params, $this->course_json['database_details']);
@@ -359,12 +359,12 @@ class Config extends AbstractModel {
 
     private function setConfigValues($config, $section, $keys) {
         if (!isset($config[$section]) || !is_array($config[$section])) {
-            throw new ConfigException("Missing config section '{$section}' in ini file");
+            throw new ConfigException("Missing config section '{$section}' in json file");
         }
 
         foreach ($keys as $key) {
             if (!isset($config[$section][$key])) {
-              throw new ConfigException("Missing config setting '{$section}.{$key}' in configuration ini file");
+              throw new ConfigException("Missing config setting '{$section}.{$key}' in configuration json file");
             }
             $this->$key = $config[$section][$key];
         }
