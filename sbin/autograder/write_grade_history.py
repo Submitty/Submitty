@@ -11,7 +11,8 @@ import collections
 
 def just_write_grade_history(json_file,assignment_deadline,submission_time,
                              seconds_late,queue_time,batch_regrade,grading_began,
-                             wait_time,grading_finished,grade_time,autograde_total):
+                             wait_time,grading_finished,grade_time,autograde_total,
+                             revision):
 
     #####################################
     # LOAD THE PREVIOUS HISTORY
@@ -44,6 +45,8 @@ def just_write_grade_history(json_file,assignment_deadline,submission_time,
         blob["autograde_total"] = int(autograde_array[3])
         if len(autograde_array) == 6:
             blob["autograde_max_possible"] = int(autograde_array[5])
+    if revision:
+        blob["revision"] = revision
 
 
     #####################################

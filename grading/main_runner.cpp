@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
   TCLAP::UnlabeledValueArg<std::string> submission_time_argument("submission_time", "The time at which this submissionw as made", true, "", "string" , cmd);
   TCLAP::ValueArg<int> testcase_to_run_argument("t", "testcase", "The testcase to run. Pass -1 to run all testcases.", false, -1, "int", cmd);
   TCLAP::ValueArg<std::string> docker_name_argument("c", "container_name", "The name of the container this attempt is being run in.", false, "", "string", cmd);
-  TCLAP::ValueArg<std::string> display_variable_argument("d", "display", "The display to be used for this testcase.", false, ":0", "string", cmd);
+  TCLAP::ValueArg<std::string> display_variable_argument("d", "display", "The display to be used for this testcase.", false, "NO_DISPLAY_SET", "string", cmd);
 
   //parse arguments.
   try {

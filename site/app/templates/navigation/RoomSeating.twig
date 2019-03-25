@@ -1,4 +1,7 @@
 <table style="border:1px solid yellowgreen; background-color:#ddffdd; width:auto;">
+    {% if seating_only_for_instructor %}
+        <div class="option-alt">Visible only to Instructors</div>
+    {% endif %}
     <tr><td>
         <table border=0 cellpadding=5 cellspacing=0>
             <tr><td colspan=2>{{ core.getDisplayedCourseName() }}{{ gradeable_title != null ? ': '~gradeable_title : ''}}</td></tr>
