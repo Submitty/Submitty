@@ -569,6 +569,11 @@ HTML;
             
         $currentCourse = $this->core->getConfig()->getCourse();
 
+        //Empty thread input
+        if($threadIds === "{}") {
+            $threadIds = array();
+        }
+
         foreach($threadIds as $threadId) {
             $posts = $this->core->getQueries()->getPostsForThread($this->core->getUser()->getId(), $threadId, false, 'time', $submitter_id);
             if(count($posts) > 0) {

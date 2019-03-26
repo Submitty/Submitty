@@ -208,6 +208,9 @@ HTML;
 		$currentThread = isset($_GET["thread_id"]) && is_numeric($_GET["thread_id"]) && (int)$_GET["thread_id"] < $max_thread && (int)$_GET["thread_id"] > 0 ? (int)$_GET["thread_id"] : $posts[0]["thread_id"];
 		$currentCategoriesIds = $this->core->getQueries()->getCategoriesIdForThread($currentThread);
 	}
+	$currentThreadArr = array_filter($threadsHead, function($ar) use($currentThread) {
+									return ($ar['id'] == $currentThread);
+	});
 	if($show_merged_thread) {
 		$show_merged_thread_class = "active";
 		$show_merged_thread_action = "alterShowMergeThreadStatus(0,'" . $currentCourse . "');";
@@ -222,16 +225,16 @@ HTML;
 HTML;
 	$show_deleted_class = '';
 	$show_deleted_action = '';
-	$show_deleted_title = '';
-	if($this->core->getUser()->getGroup() <= 2){
+
+	if($this->core->getUser()->getGroup() <= 3){
 		if($show_deleted) {
 			$show_deleted_class = "active";
 			$show_deleted_action = "alterShowDeletedStatus(0);";
-            $show_deleted_title = "Hide Deleted Threads";
+      $show_deleted_thread_title = "Hide Deleted Threads";
 		} else {
 			$show_deleted_class = "";
 			$show_deleted_action = "alterShowDeletedStatus(1);";
-            $show_deleted_title = "Show Deleted Threads";
+      $show_deleted_thread_title = "Show Deleted Threads";
 		}
 	}
 	$categories = $this->core->getQueries()->getCategories();
@@ -294,16 +297,17 @@ HTML;
 							"onclick" => array(true, $show_merged_thread_action)
 						),
 						array(
-							"required_rank" => 2,
-							"display_text" => $show_deleted_title,
+
+							"required_rank" => 3,
+							"display_text" => 'Show Deleted Threads',
 							"style" => 'position:relative;top:3px;display:inline-block;',
 							"link" => array(false),
 							"optional_class" => $show_deleted_class,
-							"title" => $show_deleted_title,
+							"title" => $show_deleted_thread_title,
 							"onclick" => array(true, $show_deleted_action)
 						),
 						array(
-							"required_rank" => 2,
+							"required_rank" => 3,
 							"display_text" => 'Stats',
 							"style" => 'position:relative;top:3px;display:inline-block;',
 							"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))),
@@ -333,6 +337,7 @@ HTML;
 						<i class="fas fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
 						<i class="fas fa-caret-up fa-2x fa-fw fill-available" style="color:gray;{$arrowup_visibility}" aria-hidden="true"></i>
 HTML;
+
 						$activeThreadAnnouncement = false;
 						$activeThreadTitle = "";
 						$function_date = 'date_format';
@@ -363,7 +368,9 @@ HTML;
 					</script>
 					<div id="posts_list" style="margin-top:10px;max-height: 100%" class="col-9">
 HTML;
-		$return .= $this->generatePostList($currentThread, $posts, $currentCourse, true, $threadExists, $display_option, $categories, $cookieSelectedCategories, $cookieSelectedThreadStatus, $currentCategoriesIds);
+
+		$currentThreadFavorite = array_values($currentThreadArr)[0]['favorite'];
+		$return .= $this->generatePostList($currentThread, $posts, $currentCourse, true, $threadExists, $display_option, $categories, $cookieSelectedCategories, $cookieSelectedThreadStatus, $currentCategoriesIds, $currentThreadFavorite);
 
 		$return .= <<<HTML
 			<script>
@@ -383,17 +390,16 @@ HTML;
 		return $return;
 	}
 
-	public function generatePostList($currentThread, $posts, $currentCourse, $includeReply = false, $threadExists = false, $display_option = 'time', $categories = [], $cookieSelectedCategories = [], $cookieSelectedThreadStatus = [], $currentCategoriesIds = []) {
+	public function generatePostList($currentThread, $posts, $currentCourse, $includeReply = false, $threadExists = false, $display_option = 'time', $categories = [], $cookieSelectedCategories = [], $cookieSelectedThreadStatus = [], $currentCategoriesIds = [], $isCurrentFavorite = false) {
 
 		$return = '';
 		$title_html = '';
 
 		$activeThread = $this->core->getQueries()->getThread($currentThread)[0];
 
-
-
 		$activeThreadTitle = ($this->core->getUser()->getGroup() <= 2 ? "({$activeThread['id']}) " : '') . $activeThread['title'];
 		$activeThreadAnnouncement = $activeThread['pinned'];
+
 		$thread_id = $activeThread['id'];
 		$function_date = 'date_format';
 
@@ -419,7 +425,7 @@ HTML;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
 HTML;
                     }
-                    if(isset($activeThread['favorite']) && $activeThread['favorite']) {
+                    if($isCurrentFavorite) {
                     	$title_html .= <<<HTML
 							<a style="position:relative; display:inline-block; color:orange; " onClick="pinThread({$activeThread['id']}, 'unpin_thread');" title="Pin Thread"><i class="fas fa-thumbtack" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;-webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
 HTML;
@@ -519,7 +525,7 @@ HTML;
 	            	<br/>
 HTML;
 
-        if($this->core->getUser()->getGroup() <= 2){
+        if($this->core->getUser()->getGroup() <= 3){
         	$this->core->getOutput()->addInternalCss('chosen.min.css');
         	$this->core->getOutput()->addInternalJs('chosen.jquery.min.js');
 			$current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
@@ -822,7 +828,7 @@ HTML;
 					<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="$('html, #posts_list').animate({ scrollTop: document.getElementById('posts_list').scrollHeight }, 'slow');"> Reply</a>
 HTML;
 			}
-			if($this->core->getUser()->getGroup() <= 2) {
+			if($this->core->getUser()->getGroup() <= 3) {
 				$return .= <<<HTML
 					<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="showHistory({$post['id']})">Show History</a>
 HTML;
@@ -858,8 +864,8 @@ HTML;
 				<a class="expand btn btn-default btn-sm" style="float:right; text-decoration:none; margin-top: -8px" onClick="hidePosts(this, {$post['id']})"></a>
 HTML;
 		}
-		if($this->core->getUser()->getGroup() <= 2 || $post['author_user_id'] === $current_user) {
-			if($deleted && $this->core->getUser()->getGroup() <= 2){
+		if($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) {
+			if($deleted && $this->core->getUser()->getGroup() <= 3){
 				$ud_toggle_status = "false";
 				$ud_button_title = "Undelete post";
 				$ud_button_icon = "fa-undo";
@@ -872,7 +878,7 @@ HTML;
 			<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; float:right;" onClick="deletePostToggle({$ud_toggle_status}, {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'n/j g:i A')}' )" title="{$ud_button_title}"><i class="fa {$ud_button_icon}" aria-hidden="true"></i></a>
 HTML;
 		}
-		if($this->core->getUser()->getGroup() <= 2 || $post['author_user_id'] === $current_user) {
+		if($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) {
 			$shouldEditThread = null;
 			$edit_button_title = "";
 			if($first) {
@@ -959,7 +965,7 @@ HTML;
 			});
 		 </script>
 HTML;
-        if($this->core->getUser()->getGroup() <= 2){
+        if($this->core->getUser()->getGroup() <= 3){
             $categories = $this->core->getQueries()->getCategories();
 
             $dummy_category = array('color' => '#000000', 'category_desc' => 'dummy', 'category_id' => "dummy");
@@ -992,7 +998,7 @@ HTML;
 
 	if($thread_exists) {
 		$buttons = array_merge($buttons, array(
-			"required_rank" => 2,
+			"required_rank" => 3,
 			"display_text" => 'Stats',
 			"style" => 'position:relative;top:3px;display:inline-block;',
 			"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))),
@@ -1041,7 +1047,7 @@ HTML;
 
 	public function statPage($users) {
 
-		if(!$this->forumAccess() || $this->core->getUser()->getGroup() > 2){
+		if(!$this->forumAccess() || $this->core->getUser()->getGroup() > 3){
 			$this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
 			return;
 		}
