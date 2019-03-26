@@ -15,13 +15,7 @@ use app\models\gradeable\LateDayInfo;
 use app\models\gradeable\LateDays;
 use app\models\gradeable\Mark;
 use app\models\gradeable\Submitter;
-use app\models\GradeSummary;
 use app\models\User;
-
-/*
-use app\report\CSVReportView;
-use app\report\GradeSummaryView;
-*/
 
 /**
  * Class ReportController
@@ -304,6 +298,12 @@ class ReportController extends AbstractController {
             'gradeable_type' => GradeableType::typeToString($g->getType()),
             'grade_released_date' => $g->getGradeReleasedDate()->format('Y-m-d H:i:s O'),
         ];
+
+        // Add team members to output
+        if ($g->isTeamAssignment()) {
+            $entry['team_members'] = $gg->getSubmitter()->isTeam() ? $gg->getSubmitter()->getTeam()->getMemberUserIds()
+                : $gg->getSubmitter()->getId(); // If the user isn't on a team, the only member is themselves
+        }
 
         $entry['score'] = $gg->getTotalScore();
 

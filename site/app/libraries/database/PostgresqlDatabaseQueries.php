@@ -165,332 +165,6 @@ WHERE semester=? AND course=? AND user_id=?", $params);
         }
     }
 
-    public function getGradeablesIterator($g_ids = null, $user_ids = null, $section_key="registration_section", $sort_key="u.user_id", $g_type = null, $extra_order_by = []) {
-        $return = array();
-        if (!is_array($extra_order_by)) {
-            $extra_order_by = [];
-        }
-        $g_ids_query = "";
-        $users_query = "";
-        $g_type_query = "";
-        $params = array();
-        if ($g_ids !== null) {
-            if (!is_array($g_ids)) {
-                $g_ids = array($g_ids);
-            }
-            if (count($g_ids) > 0) {
-                $g_ids_query = implode(",", array_fill(0, count($g_ids), "?"));
-                $params = $g_ids;
-            }
-            else {
-                return $return;
-            }
-        }
-        if ($user_ids !== null && $user_ids !== true) {
-            if (!is_array($user_ids)) {
-                $user_ids = array($user_ids);
-            }
-            if (count($user_ids) > 0) {
-                $users_query = implode(",", array_fill(0, count($user_ids), "?"));
-                $params = array_merge($params, $user_ids);
-            }
-            else {
-                return $return;
-            }
-        }
-        // added toggling of gradeable type to only grab Homeworks for HWReport generation
-        if ($g_type !== null) {
-            if (!is_array($g_type)) {
-                $g_type = array($g_type);
-            }
-            if (count($g_type) > 0) {
-                $g_type_query = implode(",", array_fill(0, count($g_type), "?"));
-                $params = array_merge($params, $g_type);
-            }
-            else {
-                return $return;
-            }
-        }
-        $section_keys = array("registration_section", "rotating_section");
-        $section_key = (in_array($section_key, $section_keys)) ? $section_key : "registration_section";
-        $sort_keys = array("u.user_firstname", "u.user_lastname", "u.user_id");
-        $sort_key = (in_array($sort_key, $sort_keys)) ? $sort_key : "u.user_id";
-        $sort = array();
-        switch ($sort_key) {
-            /** @noinspection PhpMissingBreakStatementInspection */
-            case 'u.user_firstname':
-                $sort[] = 'u.user_firstname';
-            /** @noinspection PhpMissingBreakStatementInspection */
-            case 'u.user_lastname':
-                $sort[] = 'u.user_lastname';
-            case 'u.user_id':
-                $sort[] = 'u.user_id';
-                break;
-            default:
-                $sort[] = 'u.user_firstname';
-        }
-        $sort_key = implode(', ', $sort);
-        $query = "
-SELECT";
-        if ($user_ids !== null) {
-            $query .= "
-  u.*,";
-        }
-        $query .= "
-  g.*,
-  eg.eg_config_path,
-  eg.eg_is_repository,
-  eg.eg_subdirectory,
-  eg.eg_team_assignment,
-  eg.eg_max_team_size,
-  eg.eg_team_lock_date,
-  eg.eg_regrade_request_date,
-  eg.eg_regrade_allowed,
-  eg.eg_use_ta_grading,
-  eg.eg_student_view,
-  eg.eg_student_submit,
-  eg.eg_peer_grading,
-  eg.eg_peer_grade_set,
-  eg.eg_submission_open_date,
-  eg.eg_submission_due_date,
-  eg.eg_has_due_date,
-  eg.eg_late_days,
-  eg.eg_precision,
-  gc.array_gc_id,
-  gc.array_gc_title,
-  gc.array_gc_ta_comment,
-  gc.array_gc_student_comment,
-  gc.array_gc_lower_clamp,
-  gc.array_gc_default,
-  gc.array_gc_max_value,
-  gc.array_gc_upper_clamp,
-  gc.array_gc_is_text,
-  gc.array_gc_is_peer,
-  gc.array_gc_order,
-  gc.array_gc_page,
-  gc.array_array_gcm_id,
-  gc.array_array_gc_id,
-  gc.array_array_gcm_points,
-  gc.array_array_gcm_note,
-  gc.array_array_gcm_publish,
-  gc.array_array_gcm_order";
-        if ($user_ids !== null) {
-            $query .= ",
-  gd.gd_id,
-  gd.gd_overall_comment,
-  gd.gd_user_viewed_date,
-  gd.array_array_gcm_mark,
-  gd.array_gcd_gc_id,
-  gd.array_gcd_score,
-  gd.array_gcd_component_comment,
-  gd.array_gcd_grader_id,
-  gd.array_gcd_graded_version,
-  gd.array_gcd_grade_time,
-  gd.array_gcd_user_id,
-  gd.array_gcd_anon_id,
-  gd.array_gcd_user_firstname,
-  gd.array_gcd_user_preferred_firstname,
-  gd.array_gcd_user_lastname,
-  gd.array_gcd_user_email,
-  gd.array_gcd_user_group,
-  CASE WHEN egd.active_version IS NULL THEN
-    0 ELSE
-    egd.active_version
-  END AS active_version,
-  egd.team_id,
-  egd.g_version,
-  egd.autograding_non_hidden_non_extra_credit,
-  egd.autograding_non_hidden_extra_credit,
-  egd.autograding_hidden_non_extra_credit,
-  egd.autograding_hidden_extra_credit,
-  egd.submission_time,
-  egv.highest_version,
-  COALESCE(lde.late_day_exceptions, 0) AS late_day_exceptions,
-  GREATEST(0, CEIL((EXTRACT(EPOCH FROM(COALESCE(egd.submission_time, eg.eg_submission_due_date) - eg.eg_submission_due_date)))/86400)::integer) AS days_late,
-  get_allowed_late_days(u.user_id, eg.eg_submission_due_date) AS student_allowed_late_days
-FROM users AS u
-NATURAL JOIN gradeable AS g";
-        }
-        else {
-            $query .= "
-FROM gradeable AS g";
-        }
-        $query .= "
-LEFT JOIN electronic_gradeable AS eg ON eg.g_id=g.g_id
-LEFT JOIN (
-  SELECT
-    g_id,
-    json_agg(gc_is_peer) as array_gc_is_peer,
-    json_agg(gc_id) as array_gc_id,
-    json_agg(gc_title) AS array_gc_title,
-    json_agg(gc_ta_comment) AS array_gc_ta_comment,
-    json_agg(gc_student_comment) AS array_gc_student_comment,
-    json_agg(gc_lower_clamp) AS array_gc_lower_clamp,
-    json_agg(gc_default) AS array_gc_default,
-    json_agg(gc_max_value) AS array_gc_max_value,
-    json_agg(gc_upper_clamp) AS array_gc_upper_clamp,
-    json_agg(gc_is_text) AS array_gc_is_text,
-    json_agg(gc_order) AS array_gc_order,
-    json_agg(gc_page) AS array_gc_page,
-    json_agg(array_gcm_id) AS array_array_gcm_id,
-    json_agg(array_gc_id) AS array_array_gc_id,
-    json_agg(array_gcm_points) AS array_array_gcm_points,
-    json_agg(array_gcm_note) AS array_array_gcm_note,
-    json_agg(array_gcm_publish) AS array_array_gcm_publish,
-    json_agg(array_gcm_order) AS array_array_gcm_order
-  FROM
-  (SELECT gc.*, gcm.array_gcm_id, gcm.array_gc_id, gcm.array_gcm_points, array_gcm_note, array_gcm_publish, array_gcm_order
-  FROM gradeable_component AS gc
-  LEFT JOIN(
-    SELECT
-      gc_id,
-      json_agg(gcm_id) as array_gcm_id,
-      json_agg(gc_id) as array_gc_id,
-      json_agg(gcm_points) as array_gcm_points,
-      json_agg(gcm_note) as array_gcm_note,
-      json_agg(gcm_publish) as array_gcm_publish,
-      json_agg(gcm_order) as array_gcm_order
-    FROM gradeable_component_mark
-    GROUP BY gc_id
-  ) AS gcm
-  ON gc.gc_id=gcm.gc_id) as gradeable_component
-  GROUP BY g_id
-) AS gc ON gc.g_id=g.g_id";
-        if ($user_ids !== null) {
-            $query .= "
-LEFT JOIN (
-  SELECT
-    in_gd.*,
-    in_gcd.array_gcd_gc_id,
-    in_gcd.array_gcd_score,
-    in_gcd.array_gcd_component_comment,
-    in_gcd.array_gcd_grader_id,
-    in_gcd.array_gcd_graded_version,
-    in_gcd.array_gcd_grade_time,
-    in_gcd.array_array_gcm_mark,
-    in_gcd.array_gcd_user_id,
-    in_gcd.array_gcd_anon_id,
-    in_gcd.array_gcd_user_firstname,
-    in_gcd.array_gcd_user_preferred_firstname,
-    in_gcd.array_gcd_user_lastname,
-    in_gcd.array_gcd_user_email,
-    in_gcd.array_gcd_user_group
-  FROM gradeable_data as in_gd
-  LEFT JOIN (
-    SELECT
-      gcd.gd_id,
-      json_agg(gc_id) AS array_gcd_gc_id,
-      json_agg(gcd_score) AS array_gcd_score,
-      json_agg(gcd_component_comment) AS array_gcd_component_comment,
-      json_agg(gcd_grader_id) AS array_gcd_grader_id,
-      json_agg(gcd_graded_version) AS array_gcd_graded_version,
-      json_agg(gcd_grade_time) AS array_gcd_grade_time,
-      json_agg(array_gcm_mark) AS array_array_gcm_mark,
-      json_agg(u.user_id) AS array_gcd_user_id,
-      json_agg(u.anon_id) AS array_gcd_anon_id,
-      json_agg(u.user_firstname) AS array_gcd_user_firstname,
-      json_agg(u.user_preferred_firstname) AS array_gcd_user_preferred_firstname,
-      json_agg(u.user_lastname) AS array_gcd_user_lastname,
-      json_agg(u.user_email) AS array_gcd_user_email,
-      json_agg(u.user_group) AS array_gcd_user_group
-    FROM(
-        SELECT gcd.* , gcmd.array_gcm_mark
-        FROM gradeable_component_data AS gcd
-        LEFT JOIN (
-          SELECT gc_id, gd_id, gcd_grader_id, json_agg(gcm_id) as array_gcm_mark
-          FROM gradeable_component_mark_data AS gcmd
-          GROUP BY gc_id, gd_id, gd_id, gcd_grader_id
-        ) as gcmd
-    ON gcd.gc_id=gcmd.gc_id AND gcd.gd_id=gcmd.gd_id AND gcmd.gcd_grader_id=gcd.gcd_grader_id
-    ) AS gcd
-    INNER JOIN users AS u ON gcd.gcd_grader_id = u.user_id
-    GROUP BY gcd.gd_id
-  ) AS in_gcd ON in_gd.gd_id = in_gcd.gd_id
-) AS gd ON g.g_id = gd.g_id AND (gd.gd_user_id = u.user_id OR u.user_id IN (
-    SELECT
-      t.user_id
-    FROM gradeable_teams AS gt, teams AS t
-    WHERE g.g_id = gt.g_id AND gt.team_id = t.team_id AND t.team_id = gd.gd_team_id AND t.state = 1)
-)
-LEFT JOIN (
-  SELECT
-    egd.*,
-    egv.active_version
-  FROM electronic_gradeable_version AS egv, electronic_gradeable_data AS egd
-  WHERE egv.active_version = egd.g_version AND egv.g_id = egd.g_id AND (egv.user_id = egd.user_id OR egv.team_id = egd.team_id)
-) AS egd ON g.g_id = egd.g_id AND (u.user_id = egd.user_id OR u.user_id IN (
-    SELECT
-      t.user_id
-    FROM gradeable_teams AS gt, teams AS t
-    WHERE g.g_id = gt.g_id AND gt.team_id = t.team_id AND t.team_id = egd.team_id AND t.state = 1)
-)
-LEFT JOIN (
-  SELECT
-    g_id,
-    user_id,
-    team_id,
-    count(*) as highest_version
-  FROM electronic_gradeable_data
-  GROUP BY g_id, user_id, team_id
-) AS egv ON g.g_id = egv.g_id AND (u.user_id = egv.user_id OR u.user_id IN (
-    SELECT
-      t.user_id
-    FROM gradeable_teams AS gt, teams AS t
-    WHERE g.g_id = gt.g_id AND gt.team_id = t.team_id AND t.team_id = egv.team_id AND t.state = 1)
-)
-LEFT JOIN late_day_exceptions AS lde ON g.g_id = lde.g_id AND u.user_id = lde.user_id";
-        }
-
-        $where = array();
-        if ($g_ids !== null) {
-            $where[] = "g.g_id IN ({$g_ids_query})";
-        }
-        if ($user_ids !== null && $user_ids !== true) {
-            $where[] = "u.user_id IN ({$users_query})";
-        }
-        if ($g_type !== null) {
-            $where[] = "g.g_gradeable_type IN ({$g_type_query})";
-        }
-        if (count($where) > 0) {
-            $query .= "
-WHERE ".implode(" AND ", $where);
-        }
-        $order_by = [];
-        if ($user_ids !== null) {
-            if ($section_key == "rotating_section") {
-              $order_by[] = "u.rotating_section";
-            }
-            else if ($section_key == "registration_section"){
-              $order_by[] = "SUBSTRING(u.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(u.registration_section, '[0-9]+')::INT, -1), SUBSTRING(u.registration_section, '[^0-9]*$')";
-            }
-            $order_by[] = $sort_key;
-        }
-        $order_by = array_merge($order_by, $extra_order_by);
-        if (count($order_by) > 0) {
-            $query .= "
-ORDER BY ".implode(", ", $order_by);
-        }
-
-        return $this->course_db->queryIterator($query, $params, function ($row) {
-            $user = (isset($row['user_id']) && $row['user_id'] !== null) ? new User($this->core, $row) : null;
-            if (isset($row['array_gc_id'])) {
-                $fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment', 'gc_lower_clamp',
-                                'gc_default', 'gc_max_value', 'gc_upper_clamp', 'gc_is_text', 'gc_is_peer',
-                                'gc_order', 'gc_page', 'array_gcm_mark', 'array_gcm_id', 'array_gc_id',
-                                'array_gcm_points', 'array_gcm_note', 'array_gcm_publish', 'array_gcm_order', 'gcd_gc_id', 'gcd_score',
-                                'gcd_component_comment', 'gcd_grader_id', 'gcd_graded_version', 'gcd_grade_time',
-                                'gcd_user_id', 'gcd_user_firstname', 'gcd_user_preferred_firstname',
-                                'gcd_user_lastname', 'gcd_user_email', 'gcd_user_group');
-                $bools = array('gc_is_text', 'gc_is_peer');
-                foreach ($fields as $key) {
-                    if (isset($row['array_' . $key])) {
-                        $row['array_' . $key] = json_decode($row['array_' . $key], true);
-                    }
-                }
-            }
-            return new Gradeable($this->core, $row, $user);
-        });
-    }
 
     // Moved from class LateDaysCalculation on port from TAGrading server.  May want to incorporate late day information into gradeable object rather than having a separate query
     public function getLateDayInformation($user_id) {
@@ -1052,9 +726,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         'rotating_section' => [
             'u.rotating_section',
         ],
-        'team_id' => [
-            'user_id'
-        ]
+        'team_id' => []
     ];
     const graded_gradeable_key_map_team = [
         'registration_section' => [
@@ -1067,7 +739,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         ],
         'team_id' => [
             'team.team_id'
-        ]
+        ],
+        'user_id' => []
     ];
 
     /**
@@ -1089,16 +762,19 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             if (empty($key_map)) {
                 return 'ORDER BY ' . implode(',', $sort_keys);
             }
-            return 'ORDER BY ' . implode(',', array_map(function ($key_ext) use ($key_map) {
+            return 'ORDER BY ' . implode(',', array_filter(array_map(function ($key_ext) use ($key_map) {
                     $split_key = explode(' ', $key_ext);
                     $key = $split_key[0];
                     $order = '';
                     if (count($split_key) > 1) {
                         $order = $split_key[1];
                     }
+                    if (isset($key_map[$key]) && count($key_map[$key]) === 0) {
+                        return '';
+                    }
                     // Map any keys with special requirements to the proper statements and preserve specified order
                     return implode(" $order,", $key_map[$key] ?? [$key]) . " $order";
-                }, $sort_keys));
+                }, $sort_keys), function($a) { return $a !== ''; }));
         }
         return '';
     }
@@ -1212,20 +888,20 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             }
         }
 
-        $team_data_inject = 'u.registration_section, u.rotating_section,';
-        $team_inject = '';
+        $submitter_inject = 'ERROR ERROR';
+        $submitter_data_inject = 'ERROR ERROR';
         if ($team) {
-            $team_data_inject =
+            $submitter_data_inject =
               'ldet.array_late_day_exceptions,
                ldet.array_late_day_user_ids,
                /* Aggregate Team User Data */
                team.team_id,
                team.array_team_users,
                team.registration_section,
-               team.rotating_section,';
+               team.rotating_section';
 
-            $team_inject ='
-              LEFT JOIN (
+            $submitter_inject ='
+              JOIN (
                 SELECT gt.team_id,
                   gt.registration_section,
                   gt.rotating_section,
@@ -1256,6 +932,36 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 LEFT JOIN teams t ON e.user_id=t.user_id AND t.state=1
                 GROUP BY team_id, g_id
               ) AS ldet ON g.g_id=ldet.g_id AND ldet.team_id=team.team_id';
+        } else {
+            $submitter_data_inject = '
+              u.user_id,
+              u.anon_id,
+              u.user_firstname,
+              u.user_preferred_firstname,
+              u.user_lastname,
+              u.user_preferred_lastname,
+              u.user_email,
+              u.user_group,
+              u.manual_registration,
+              u.last_updated,
+              u.grading_registration_sections,
+              u.registration_section, u.rotating_section,
+              ldeu.late_day_exceptions';
+            $submitter_inject = '
+            JOIN (
+                SELECT u.*, sr.grading_registration_sections
+                FROM users u
+                LEFT JOIN (
+                    SELECT
+                        json_agg(sections_registration_id) AS grading_registration_sections,
+                        user_id
+                    FROM grading_registration
+                    GROUP BY user_id
+                ) AS sr ON u.user_id=sr.user_id
+            ) AS u ON eg IS NULL OR NOT eg.team_assignment
+            
+            /* Join user late day exceptions */
+            LEFT JOIN late_day_exceptions ldeu ON g.g_id=ldeu.g_id AND u.user_id=ldeu.user_id';
         }
         if ($team && count($teams) > 0) {
             $team_placeholders = implode(',', array_fill(0, count($teams), '?'));
@@ -1295,6 +1001,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               gcd.array_graded_version,
               gcd.array_grade_time,
               gcd.array_mark_id,
+              gcd.array_verifier_id,
+              gcd.array_verify_time,
 
               /* Aggregate Gradeable Component Grader Data */
               gcd.array_grader_user_id,
@@ -1322,28 +1030,12 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               /* Active Submission Version */
               egv.active_version,
 
-              /* Late day exception data */
-              ldeu.late_day_exceptions,
-
               /* Grade inquiry data */
               rr.id AS regrade_request_id,
               rr.status AS regrade_request_status,
               rr.timestamp AS regrade_request_timestamp,
 
-              {$team_data_inject}
-
-              /* User Submitter Data */
-              u.user_id,
-              u.anon_id,
-              u.user_firstname,
-              u.user_preferred_firstname,
-              u.user_lastname,
-              u.user_preferred_lastname,
-              u.user_email,
-              u.user_group,
-              u.manual_registration,
-              u.last_updated,
-              u.grading_registration_sections
+              {$submitter_data_inject}
 
             FROM gradeable g
 
@@ -1355,20 +1047,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 FROM electronic_gradeable
               ) AS eg ON eg.g_id=g.g_id
 
-              /* Join user data */
-              LEFT JOIN (
-                SELECT u.*, sr.grading_registration_sections
-                FROM users u
-                LEFT JOIN (
-                  SELECT
-                    json_agg(sections_registration_id) AS grading_registration_sections,
-                    user_id
-                  FROM grading_registration
-                  GROUP BY user_id
-                ) AS sr ON u.user_id=sr.user_id
-              ) AS u ON eg IS NULL OR NOT eg.team_assignment
-
-              {$team_inject}
+              /* Join submitter data */
+              {$submitter_inject}
 
               /* Join manual grading data */
               LEFT JOIN (
@@ -1386,6 +1066,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   json_agg(gcd_graded_version) AS array_graded_version,
                   json_agg(gcd_grade_time) AS array_grade_time,
                   json_agg(string_mark_id) AS array_mark_id,
+                  json_agg(gcd_verifier_id) AS array_verifier_id,
+                  json_agg(gcd_verify_time) AS array_verify_time,
 
                   json_agg(ug.user_id) AS array_grader_user_id,
                   json_agg(ug.anon_id) AS array_grader_anon_id,
@@ -1446,9 +1128,6 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 FROM electronic_gradeable_version
               ) AS egv ON egv.{$submitter_type}=egd.{$submitter_type} AND egv.g_id=egd.g_id
 
-              /* Join user late day exceptions */
-              LEFT JOIN late_day_exceptions ldeu ON g.g_id=ldeu.g_id AND u.user_id=ldeu.user_id
-
               /* Join grade inquiry */
               LEFT JOIN regrade_requests AS rr ON rr.{$submitter_type}=gd.gd_{$submitter_type} AND rr.g_id=g.g_id
             WHERE $selector
@@ -1461,7 +1140,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
             // Get the submitter
             $submitter = null;
-            if (isset($row['team_id'])) {
+            if ($gradeable->isTeamAssignment()) {
                 // Get the user data for the team
                 $team_users = json_decode($row["array_team_users"], true);
 
@@ -1551,6 +1230,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 'graded_version',
                 'grade_time',
                 'mark_id',
+                'verifier_id',
+                'verify_time'
             ];
             $version_array_properties = [
                 'version',
@@ -1694,6 +1375,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   eg_team_lock_date AS team_lock_date,
                   eg_regrade_request_date AS regrade_request_date,
                   eg_regrade_allowed AS regrade_allowed,
+                  eg_thread_ids AS discussion_thread_ids,
+                  eg_has_discussion AS discussion_based,
                   eg_use_ta_grading AS ta_grading,
                   eg_scanned_exam AS scanned_exam,
                   eg_student_view AS student_view,
@@ -1848,5 +1531,41 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             $ids,
             $gradeable_constructor);
     }
+
+    public function getActiveVersions(Gradeable\Gradeable $gradeable, array $submitter_ids) {
+        if (count($submitter_ids) === 0) {
+            return [];
+        }
+
+        // (?), (?), (?)
+        $id_placeholders = implode(',', array_fill(0, count($submitter_ids), '(?)'));
+
+        $query = "
+            SELECT ids.id, (CASE WHEN m IS NULL THEN 0 ELSE m END) AS max
+            FROM (VALUES $id_placeholders) ids(id)
+            LEFT JOIN (
+              (SELECT user_id AS id, active_version as m
+              FROM electronic_gradeable_version
+              WHERE g_id = ? AND user_id IS NOT NULL)
+            
+              UNION
+            
+              (SELECT team_id AS id, active_version as m
+              FROM electronic_gradeable_version
+              WHERE g_id = ? AND team_id IS NOT NULL)
+            ) AS versions
+            ON versions.id = ids.id
+        ";
+
+        $params = array_merge($submitter_ids, [$gradeable->getId(), $gradeable->getId()]);
+
+        $this->course_db->query($query, $params);
+        $versions = [];
+        foreach ($this->course_db->rows() as $row) {
+            $versions[$row["id"]] = $row["max"];
+        }
+        return $versions;
+    }
+
 }
 

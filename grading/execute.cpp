@@ -1,5 +1,4 @@
 #include <sys/time.h>
-#include <sys/resource.h>
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -62,6 +61,8 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "sort",                    "/usr/bin/sort" },
     { "grep",                    "/bin/grep" },
     { "sed",                     "/bin/sed" },
+    { "pwd",                     "/bin/pwd" },
+    { "env",                     "/usr/bin/env" },
     { "pdftotext",               "/usr/bin/pdftotext" },
     { "pdflatex",                "/usr/bin/pdflatex" },
     { "wc",                      "/usr/bin/wc" },
@@ -193,6 +194,7 @@ bool local_executable (const std::string &program, const nlohmann::json &whole_c
   assert (program.substr(0,2) == "./");
 
   std::set<std::string> executables = get_compiled_executables(whole_config);
+
   if (executables.find(program.substr(2,program.size())) != executables.end()) {
     return true;
   }
@@ -250,35 +252,37 @@ void validate_filename(const std::string &filename) {
 
 std::string validate_option(const std::string &program, const std::string &option) {
 
-  // TODO: update this with the option to junit5
-
-  //{ "submitty_junit.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4xx.jar" },
-  //{ "submitty_junit_5.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-5xx.jar" },
-  //{ "submitty_junit_4.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4xx.jar" },
-
-  // also for hamcrest 2.0
-
   const std::map<std::string,std::map<std::string,std::string> > option_replacements = {
     { "/usr/bin/javac",
-      { { "submitty_emma.jar",      SUBMITTY_INSTALL_DIRECTORY+"/JUnit/emma.jar" },
-        { "submitty_jacocoagent.jar", SUBMITTY_INSTALL_DIRECTORY+"/JUnit/jacocoagent.jar" },
-        { "submitty_jacococli.jar",   SUBMITTY_INSTALL_DIRECTORY+"/JUnit/jacococli.jar" },
-        { "submitty_junit.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4.12.jar" },
-        { "submitty_hamcrest.jar",  SUBMITTY_INSTALL_DIRECTORY+"/JUnit/hamcrest-core-1.3.jar" },
-        { "submitty_junit/",        SUBMITTY_INSTALL_DIRECTORY+"/JUnit/" },
-        { "submitty_soot.jar",      SUBMITTY_INSTALL_DIRECTORY+"/tools/soot/soot-develop.jar" },
-        { "submitty_rt.jar",        SUBMITTY_INSTALL_DIRECTORY+"/tools/soot/rt.jar" }
+      { { "submitty_emma.jar",                SUBMITTY_INSTALL_DIRECTORY+"/java_tools/emma/emma.jar" },
+        { "submitty_jacocoagent.jar",         SUBMITTY_INSTALL_DIRECTORY+"/java_tools/jacoco/jacocoagent.jar" },
+        { "submitty_jacococli.jar",           SUBMITTY_INSTALL_DIRECTORY+"/java_tools/jacoco/jacococli.jar" },
+        { "submitty_junit.jar",               SUBMITTY_INSTALL_DIRECTORY+"/java_tools/JUnit/junit-4.12.jar" },
+        { "submitty_hamcrest.jar",            SUBMITTY_INSTALL_DIRECTORY+"/java_tools/hamcrest/hamcrest-core-1.3.jar" },
+        { "submitty_junit/",                  SUBMITTY_INSTALL_DIRECTORY+"/java_tools/JUnit/" },
+        // older, requested version:
+        { "submitty_soot.jar",                SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/soot-develop.jar" },
+        { "submitty_rt.jar",                  SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/rt.jar" }
+        // most recent libraries:
+        //{ "submitty_soot.jar",                SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/sootclasses-trunk.jar" },
+        //{ "submitty_soot_dependencies.jar",   SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/sootclasses-trunk-jar-with-dependencies.jar" },
+        //{ "submitty_rt.jar",                  "/usr/lib/jvm/java-8-oracle/jre/lib/rt.jar" }
       }
     },
     { "/usr/bin/java",
-      { { "submitty_emma.jar",      SUBMITTY_INSTALL_DIRECTORY+"/JUnit/emma.jar" },
-        { "submitty_jacocoagent.jar", SUBMITTY_INSTALL_DIRECTORY+"/JUnit/jacocoagent.jar" },
-        { "submitty_jacococli.jar",   SUBMITTY_INSTALL_DIRECTORY+"/JUnit/jacococli.jar" },
-        { "submitty_junit.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4.12.jar" },
-        { "submitty_hamcrest.jar",  SUBMITTY_INSTALL_DIRECTORY+"/JUnit/hamcrest-core-1.3.jar" },
-        { "submitty_junit/",        SUBMITTY_INSTALL_DIRECTORY+"/JUnit/" },
-        { "submitty_soot.jar",      SUBMITTY_INSTALL_DIRECTORY+"/tools/soot/soot-develop.jar" },
-        { "submitty_rt.jar",        SUBMITTY_INSTALL_DIRECTORY+"/tools/soot/rt.jar" }
+      { { "submitty_emma.jar",                SUBMITTY_INSTALL_DIRECTORY+"/java_tools/emma/emma.jar" },
+        { "submitty_jacocoagent.jar",         SUBMITTY_INSTALL_DIRECTORY+"/java_tools/jacoco/jacocoagent.jar" },
+        { "submitty_jacococli.jar",           SUBMITTY_INSTALL_DIRECTORY+"/java_tools/jacoco/jacococli.jar" },
+        { "submitty_junit.jar",               SUBMITTY_INSTALL_DIRECTORY+"/java_tools/JUnit/junit-4.12.jar" },
+        { "submitty_hamcrest.jar",            SUBMITTY_INSTALL_DIRECTORY+"/java_tools/hamcrest/hamcrest-core-1.3.jar" },
+        { "submitty_junit/",                  SUBMITTY_INSTALL_DIRECTORY+"/java_tools/JUnit/" },
+        // older, requested version:
+        { "submitty_soot.jar",                SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/soot-develop.jar" },
+        { "submitty_rt.jar",                  SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/rt.jar" }
+        // most recent libraries:
+        //{ "submitty_soot.jar",                SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/sootclasses-trunk.jar" },
+        //{ "submitty_soot_dependencies.jar",   SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/sootclasses-trunk-jar-with-dependencies.jar" },
+        //{ "submitty_rt.jar",                  "/usr/lib/jvm/java-8-oracle/jre/lib/rt.jar" }
       }
     },
     { "/usr/bin/mono",
@@ -1060,7 +1064,8 @@ int execute(const std::string &cmd,
       const nlohmann::json &test_case_limits,
       const nlohmann::json &assignment_limits,
       const nlohmann::json &whole_config,
-      const bool windowed) {
+      const bool windowed,
+      const std::string display_variable) {
 
   std::set<std::string> invalid_windows;
   bool window_mode = windowed; //Tells us if the process is expected to spawn a window. (additional support later) 
@@ -1081,24 +1086,25 @@ int execute(const std::string &cmd,
         break;
       }
     }
-
   }
-
-  if(window_mode){
-    std::cout <<"Window mode activated." << std::endl;
-    char* my_display = getenv("DISPLAY"); //The display environment variable is unset. This sets it for child and parent.
-    if (my_display == NULL) {
-      setenv("DISPLAY", ":0", 1);
-    }
-    window_mode = true;
-    invalid_windows = snapshotOfActiveWindows();
-  }
-
 
   std::cout << "IN EXECUTE:  '" << cmd << "'" << std::endl;
   std::cout << "identified " << dispatcher_actions.size() << " dispatcher actions" << std::endl;
 
   std::ofstream logfile(execute_logfile.c_str(), std::ofstream::out | std::ofstream::app);
+
+  //If we want windowed mode, but there is no display set.
+  if(window_mode && display_variable == "NO_DISPLAY_SET"){
+    std::cout << "ERROR: Attempting to grade a windowed gradeable with no display variable set." << std::endl;
+    logfile << "ERROR: Attempting to grade a windowed gradeable with no display variable set." << std::endl;
+    return -1;
+  }
+
+  if(window_mode){
+    std::cout <<"Window mode activated." << std::endl;
+    setenv("DISPLAY", display_variable.c_str(), 1);
+    invalid_windows = snapshotOfActiveWindows();
+  }
 
   // Forking to allow the setting of limits of RLIMITS on the command
   int result = -1;
@@ -1170,7 +1176,6 @@ int execute(const std::string &cmd,
       std::string windowName; 
       int rss_memory = 0;
       int actions_taken = 0;   
-      int number_of_screenshots = 0;
       do {
           //dispatcher actions
           if(!input_queue.empty()){
@@ -1262,13 +1267,13 @@ int execute(const std::string &cmd,
             if (!time_kill && !memory_kill){
               //if we expect a window, and the window exists, and we still have actions to take
               if(window_mode && windowName != "" && windowExists(windowName) && actions_taken < actions.size()){ 
-                takeAction(actions, actions_taken, number_of_screenshots, windowName, 
+                takeAction(actions, actions_taken, windowName, 
                   childPID, elapsed, next_checkpoint, seconds_to_run, rss_memory, allowed_rss_memory, 
                   memory_kill, time_kill, logfile); //Takes each action on the window. Requires delay parameters to do delays.
               }
               //If we do not expect a window and we still have actions to take
               else if(!window_mode && actions_taken < actions.size()){ 
-                takeAction(actions, actions_taken, number_of_screenshots, windowName, 
+                takeAction(actions, actions_taken, windowName, 
                   childPID, elapsed, next_checkpoint, seconds_to_run, rss_memory, allowed_rss_memory, 
                   memory_kill, time_kill, logfile); //Takes each action on the window. Requires delay parameters to do delays.
               }

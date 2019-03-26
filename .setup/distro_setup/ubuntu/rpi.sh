@@ -83,10 +83,32 @@ apt-get install -qqy swi-prolog > /dev/null 2>&1
 ##################################################
 # Used by Principles of Program Analysis
 
-# TODO: add download & install for soot-develop.jar & rt.jar
-# target:  /usr/local/submity/tools/soot/
+
+# Soot is a Java Bytecode Analysis and Transformation Framework
+
+echo "Getting Soot... "
+
+mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/soot
+
+pushd ${SUBMITTY_INSTALL_DIR}/java_tools/soot > /dev/null
+rm -rf soot*jar
+# older, requested version:
+curl http://www.cs.rpi.edu/~milanova/soot-develop.jar > soot-develop.jar
+curl http://www.cs.rpi.edu/~milanova/rt.jar > rt.jar
+# most recent libraries:
+curl https://soot-build.cs.uni-paderborn.de/public/origin/develop/soot/soot-develop/build/sootclasses-trunk.jar > sootclasses-trunk.jar
+curl https://soot-build.cs.uni-paderborn.de/public/origin/develop/soot/soot-develop/build/sootclasses-trunk-jar-with-dependencies.jar > sootclasses-trunk-jar-with-dependencies.jar
+
+#
+-o /dev/null > /dev/null 2>&1
+popd > /dev/null
+
+chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/java_tools
+chmod -R 755 ${SUBMITTY_INSTALL_DIR}/java_tools
+
 
 # install haskell
+echo "Getting Haskell... "
 apt-get install -qqy haskell-platform
 apt-get install -qqy ocaml
 
@@ -98,6 +120,7 @@ apt-get install -qqy ocaml
 
 ##################################################
 # Used by Network Programming class
+echo "Getting tools for NetProg... "
 apt-get install -qqy libssl-dev
 
 # don't install these...
@@ -142,19 +165,13 @@ rm glfw-3.2.1.zip
 
 ##################################################
 # Used by Computational Vision course
+echo "installing vision libraries"
 apt-get install -qqy python3-tk
 
 pip3 install numpy
 pip3 install matplotlib
 pip3 install opencv-python
 pip3 install scipy
-
-##################################################
-# Fixup the permissions
-chmod -R 555 /usr/local/lib/python*/*
-chmod 555 /usr/lib/python*/dist-packages
-sudo chmod 500   /usr/local/lib/python*/dist-packages/pam.py*
-sudo chown ${CGI_USER} /usr/local/lib/python*/dist-packages/pam.py*
 
 ##################################################
 #install some pdflatex packages
@@ -168,3 +185,15 @@ apt-get install -qqy wamerican
 
 # attempt to correct a system with broken dependencies in place
 apt-get -f -qqy install
+
+
+### Fix Python Package Permissions (should always run at the end of this)
+# Setting the permissions are necessary as pip uses the umask of the user/system, which
+# affects the other permissions (which ideally should be o+rx, but Submitty sets it to o-rwx).
+# This gets run here in case we make any python package changes.
+find /usr/local/lib/python*/dist-packages -type d -exec chmod 755 {} +
+find /usr/local/lib/python*/dist-packages -type f -exec chmod 755 {} +
+find /usr/local/lib/python*/dist-packages -type f -name '*.py*' -exec chmod 644 {} +
+find /usr/local/lib/python*/dist-packages -type f -name '*.pth' -exec chmod 644 {} +
+
+echo "done with RPI specific installs"

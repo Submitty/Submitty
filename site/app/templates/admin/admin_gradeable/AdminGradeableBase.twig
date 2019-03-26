@@ -1,7 +1,3 @@
-<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
-<script type="text/javascript" language="javascript" src="js/jquery.min.js"></script>
-<script type="text/javascript" language="javascript" src="js/jquery-ui.min.js"></script>
-<script type="text/javascript" language="javascript" src="js/jquery-ui-timepicker-addon.js"></script>
 
 <script type="text/javascript">
     function disableElementChildren(c, dis = true) {
@@ -19,7 +15,9 @@
                 <h1 id="myModalLabel">{{ action == 'edit' ? 'Edit Gradeable' : 'New Gradeable' }}<span id="modal_label_title"></span></h1>
             </div>
             <div>
-                <b>For Help, Read: <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable">Submitty Instructions on "Create or Edit a Gradeable"</a></b>
+                <b>                    
+                    <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable">Need help with creating/editing a gradeable? <i style="font-style:normal;" class="helpicon"></i></a>
+                    </b>
                 <div style="float: right" id="save_status"></div>
             </div>
         </div>
@@ -81,13 +79,18 @@
                 $(this).hide();
             }
             else {
-                $(this).attr('style', '{{ action != 'edit' ? 'background-color: #F0F0F0; cursor: default;' : 'background-color: #999999;' }}');
+                $(this).show();
+                $(this).addClass("{{ action != 'edit' ? "disabled-btn" : "normal-btn" }}")
             }
         });
 
         $('.page-content').hide();
         $('#page_' + tab + '_content').show();
-        $('#page_' + tab + '_nav').attr('style', 'background-color: green');
+        for (var i =0 ; i<5 ;i++)
+        {
+            $('#page_' + i + '_nav').removeClass('active-btn');
+        }
+        $('#page_' + tab + '_nav').addClass('active-btn');
     }
 
     function updateNavItemsStatus() {
@@ -138,6 +141,7 @@
         // update the title bar when the gradeable name changes
         onTitleChange();
         $('#g_title').change(onTitleChange);
+        $('#g_id').change(onTitleChange);
 
 
         // TODO: below is selectively copied from previous ui.  It updates various

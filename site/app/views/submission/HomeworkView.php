@@ -101,7 +101,7 @@ class HomeworkView extends AbstractView {
             && $active_version !== 0) {
             $return .= $this->renderTAResultsBox($graded_gradeable, $regrade_available);
         }
-        if ($regrade_available || $graded_gradeable->hasRegradeRequest()) {
+        if ($regrade_available || $graded_gradeable !== null && $graded_gradeable->hasRegradeRequest()) {
             $return .= $this->renderRegradeBox($graded_gradeable);
         }
         return $return;
@@ -257,11 +257,10 @@ class HomeworkView extends AbstractView {
                 $student_ids[] = $student->getId();
             }
 
-            // FIXME: this works, but does not really use new model.  We don't need all that much of the info anyway
-            $gradeables = $this->core->getQueries()->getGradeables($gradeable->getId(), $student_ids);
             $students_version = array();
-            foreach ($gradeables as $g) {
-                $students_version[] = array($g->getUser(), $g->getHighestVersion());
+            foreach ($this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids) as $gg) {
+                /** @var GradedGradeable $gg */
+                $students_version[] = array($gg->getSubmitter()->getId(), $gg->getAutoGradedGradeable()->getHighestVersion());
             }
             $students_full = json_decode(Utils::getAutoFillData($students, $students_version));
         }
@@ -364,19 +363,38 @@ class HomeworkView extends AbstractView {
         $all_directories = $gradeable->getSplitPdfFiles();
 
         $files = [];
+        $cover_images = [];
         $count = 1;
         $count_array = array();
         $use_qr_codes = false;
+        $qr_file = [];
         foreach ($all_directories as $timestamp => $content) {
             $dir_files = $content['files'];
-            $json_file = '';
             foreach ($dir_files as $filename => $details) {
                 if($filename === 'decoded.json'){
-                    $json_file = $details['path'];
+                    $qr_file +=  FileUtils::readJsonFile($details['path']);
+                    $use_qr_codes = true;
                 }
                 $clean_timestamp = str_replace('_', ' ', $timestamp);
                 $path = rawurlencode(htmlspecialchars($details['path']));
-                if (strpos($filename, 'cover') === false || pathinfo($filename)['extension'] === '.json') {
+                //get the cover image if it exists
+                if(strpos($filename, '_cover.jpg') && pathinfo($filename)['extension'] === 'jpg'){
+                    $corrected_filename = rawurlencode(htmlspecialchars($filename));
+                    $url = $this->core->buildUrl([
+                        'component' => 'misc',
+                        'page' => 'display_file',
+                        'dir' => 'split_pdf',
+                        'file' => $corrected_filename,
+                        'path' => $path,
+                        'ta_grading' => 'false'
+                    ]);
+                    $cover_images[] = [
+                        'filename' => $corrected_filename,
+                        'url' => $url,
+                    ];
+                }
+                if (strpos($filename, 'cover') === false || pathinfo($filename)['extension'] === 'json' || 
+                    pathinfo($filename)['extension'] === "jpg") {
                     continue;
                 }
                 // get the full filename for PDF popout
@@ -403,33 +421,33 @@ class HomeworkView extends AbstractView {
                 $count_array[$count] = FileUtils::joinPaths($timestamp, rawurlencode($filename_full));
                 //decode the filename after to display correctly for users
                 $filename_full = rawurldecode($filename_full);
+                $cover_image_name = substr($filename,0,-3) . "jpg";
+                $cover_image = [];
+                foreach ($cover_images as $img) {
+                    if($img['filename'] === $cover_image_name)
+                        $cover_image = $img;
+                }
                 $files[] = [
                     'clean_timestamp' => $clean_timestamp,
                     'filename_full' => $filename_full,
+                    'filename' => $filename,
                     'url' => $url,
                     'url_full' => $url_full,
+                    'cover_image' => $cover_image
                 ];
                 $count++;
             }
-            $json_data = ($json_file !== '') ? FileUtils::readJsonFile($json_file) : '';
-            //check for invalid ID's if using bulk upload with QR codes
-            if($json_data != ''){
-                $use_qr_codes = true;
-                for($i = 0; $i < count($files); $i++){
-                    $filename = rawurldecode($files[$i]['filename_full']);
-                    foreach($json_data as $decoded_data){
-                        //compare each file name in json data with ones split
-                        foreach ($decoded_data as $qr_file) {
-                            if($qr_file['pdf_name'] === $filename){
-                                $files[$i]['page_count'] = $qr_file['page_count'];
-                                $files[$i]['user_id']['id'] = $qr_file['id'];
-                                $files[$i]['user_id']['valid'] = ($this->core->getQueries()->getUserById($qr_file['id']) === null) ? false:true;
-                                goto end;
-                            }
-                        }
-                    }
-                    end:;
-                }
+        }
+        if($use_qr_codes){
+            for ($i = 0; $i < count($files); $i++) {
+                if(!array_key_exists($files[$i]['filename_full'], $qr_file))
+                    continue;
+                $data = $qr_file[$files[$i]['filename_full']];
+                $is_valid = $this->core->getQueries()->getUserById($data['id']) !== null;
+                $files[$i] += ['page_count' => $data['page_count'],
+                               'id' => $data['id'],
+                               'valid' => $is_valid
+                              ];
             }
         }
         $semester = $this->core->getConfig()->getSemester();
@@ -443,7 +461,7 @@ class HomeworkView extends AbstractView {
             'max_team_size' => $gradeable->getTeamSizeMax(),
             'count_array' => $count_array,
             'files' => $files,
-            'use_qr_codes' => $use_qr_codes,
+            'use_qr_codes' => $use_qr_codes
         ]);
     }
 
@@ -513,7 +531,7 @@ class HomeworkView extends AbstractView {
             $param = array_merge($param, [
                 'in_queue' => $version_instance->isQueued(),
                 'grading' => $version_instance->isGrading(),
-                'db_submission_time' => DateUtils::dateTimeToString($version_instance->getSubmissionTime()),
+                'submission_time' => DateUtils::dateTimeToString($version_instance->getSubmissionTime()),
                 'days_late' => $version_instance->getDaysLate(),
                 'num_autogrades' => $version_instance->getHistoryCount(),
                 'files' => array_merge($files['submissions'], $files['checkout']),
@@ -525,7 +543,6 @@ class HomeworkView extends AbstractView {
                 $param = array_merge($param, [
                     'results' => 0,
                     'grade_time' => $history->getGradeTime(),
-                    'history_submission_time' => DateUtils::dateTimeToString($history->getSubmissionTime()),
                     'grading_finished' => DateUtils::dateTimeToString($history->getGradingFinished()),
                     'wait_time' => $history->getWaitTime(),
                     'revision' => $history->getVcsRevision(),

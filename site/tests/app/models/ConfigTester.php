@@ -5,7 +5,6 @@ namespace tests\app\models;
 use app\exceptions\ConfigException;
 use app\libraries\Core;
 use app\libraries\FileUtils;
-use app\libraries\IniParser;
 use app\libraries\Utils;
 use app\models\Config;
 
@@ -14,7 +13,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
 
     private $temp_dir = null;
     private $config_path = null;
-    private $course_ini_path = null;
+    private $course_json_path = null;
 
     public function setUp() {
         $this->core = $this->createMock(Core::class);
@@ -28,7 +27,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
 
     /**
      * This test ensures that the default value of the DEBUG flag within the config model is always false. This
-     * means that if the value is not found within the ini file, we don't have to worry about accidently
+     * means that if the value is not found within the json file, we don't have to worry about accidently
      * exposing things to students.
      */
     public function testClassProperties() {
@@ -73,15 +72,16 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             "site_log_path" => $log_path,
             "submission_url" => "http://example.com",
             "vcs_url" => "",
-            "cgi_url" => "http://example.com/cgi-bin",
+            "cgi_url" => "",
             "institution_name" => "RPI",
-            "username_change_text" => "Submitty welcomes individuals of all ages, backgrounds, citizenships, disabilities, sex, education, ethnicities, family statuses, genders, gender identities, geographical locations, languages, military experience, political views, races, religions, sexual orientations, socioeconomic statuses, and work experiences. In an effort to create an inclusive environment, you may specify a preferred name to be used instead of what was provided on the registration roster.",
+            "username_change_text" => "Submitty welcomes all students.",
             "institution_homepage" => "https://rpi.edu",
+            'system_message' => "Some system message"
         ];
         $config = array_replace($config, $extra);
         FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "submitty.json"), $config);
 
-        $this->course_ini_path = FileUtils::joinPaths($course_path, "config", "config.ini");
+        $this->course_json_path = FileUtils::joinPaths($course_path, "config", "config.json");
         $config = array(
             'database_details' => array(
                 'dbname' => 'submitty_s17_csci0000'
@@ -102,6 +102,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'private_repository' => '',
                 'forum_enabled' => true,
                 'regrade_enabled' => false,
+                'seating_only_for_instructor' => false,
                 'regrade_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
                 'room_seating_gradeable_id' => ""
             )
@@ -117,7 +118,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 }
             }
         }
-        IniParser::writeFile($this->course_ini_path, $config);
+        FileUtils::writeJsonFile($this->course_json_path, $config);
     }
 
     public function testConfig() {
@@ -150,8 +151,12 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($db_params, $config->getSubmittyDatabaseParams());
         $this->assertEquals("PamAuthentication", $config->getAuthentication());
         $this->assertEquals("America/Chicago", $config->getTimezone()->getName());
+        $this->assertEquals("RPI", $config->getInstitutionName());
+        $this->assertEquals("https://rpi.edu", $config->getInstitutionHomepage());
+        $this->assertEquals("Submitty welcomes all students.", $config->getUsernameChangeText());
+        $this->assertEquals("Some system message", $config->getSystemMessage());
 
-        $config->loadCourseIni($this->course_ini_path);
+        $config->loadCourseJson($this->course_json_path);
         $this->assertEquals(array_merge($db_params, array('dbname' => 'submitty_s17_csci0000')), $config->getCourseDatabaseParams());
         $this->assertEquals("Test Course", $config->getCourseName());
         $this->assertEquals("http://example.com/index.php?semester=s17&course=csci0000", $config->getSiteUrl());
@@ -165,8 +170,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertFalse($config->displayCustomMessage());
         $this->assertFalse($config->keepPreviousFiles());
         $this->assertFalse($config->displayRainbowGradesSummary());
-        $this->assertEquals(FileUtils::joinPaths($this->temp_dir, "courses", "s17", "csci0000", "config", "config.ini"),
-            $config->getCourseIniPath());
+        $this->assertEquals(FileUtils::joinPaths($this->temp_dir, "courses", "s17", "csci0000", "config", "config.json"),
+            $config->getCourseJsonPath());
         $this->assertEquals('', $config->getRoomSeatingGradeableId());
         $this->assertFalse($config->displayRoomSeating());
 
@@ -187,7 +192,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'course_database_params' => array_merge($db_params, array('dbname' => 'submitty_s17_csci0000')),
             'course_name' => 'Test Course',
             'config_path' => FileUtils::joinPaths($this->temp_dir, 'config'),
-            'course_ini_path' => $this->temp_dir.'/courses/s17/csci0000/config/config.ini',
+            'course_json_path' => $this->temp_dir.'/courses/s17/csci0000/config/config.json',
             'authentication' => 'PamAuthentication',
             'timezone' => 'DateTimeZone',
             'course_home_url' => '',
@@ -204,7 +209,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'modified' => false,
             'hidden_details' => null,
             'regrade_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
-            'course_ini' => [
+            'course_json' => [
                 'database_details' => [
                     'dbname' => 'submitty_s17_csci0000'
                 ],
@@ -224,6 +229,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                     'private_repository' => '',
                     'forum_enabled' => true,
                     'regrade_enabled' => false,
+                    'seating_only_for_instructor' => false,
                     'regrade_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
                     'room_seating_gradeable_id' => ""
                 ]
@@ -234,10 +240,12 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'institution_name' => 'RPI',
             'private_repository' => '',
             'regrade_enabled' => false,
+            'seating_only_for_instructor' => false,
             'room_seating_gradeable_id' => '',
-            'username_change_text' => 'Submitty welcomes individuals of all ages, backgrounds, citizenships, disabilities, sex, education, ethnicities, family statuses, genders, gender identities, geographical locations, languages, military experience, political views, races, religions, sexual orientations, socioeconomic statuses, and work experiences. In an effort to create an inclusive environment, you may specify a preferred name to be used instead of what was provided on the registration roster.',
+            'username_change_text' => 'Submitty welcomes all students.',
             'vcs_url' => 'http://example.com/{$vcs_type}/',
-            'wrapper_files' => []
+            'wrapper_files' => [],
+            'system_message' => 'Some system message'
         );
         $actual = $config->toArray();
 
@@ -252,7 +260,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
 
         $config = new Config($this->core, "s17", "csci0000");
         $config->loadMasterConfigs($this->config_path);
-        $config->loadCourseIni($this->course_ini_path);
+        $config->loadCourseJson($this->course_json_path);
         $this->assertEquals("http://example.com/course/", $config->getBaseUrl());
         $this->assertEquals("http://example.com/course", $config->getHiddenDetails()['course_url']);
     }
@@ -280,11 +288,11 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
 
         $config = new Config($this->core, "s17", "csci0000");
         $config->loadMasterConfigs($this->config_path);
-        $config->loadCourseIni($this->course_ini_path);
+        $config->loadCourseJson($this->course_json_path);
         $this->assertEquals("sqlite", $config->getDatabaseDriver());
     }
 
-    public function testVcsUrl() {
+    public function testNonEmptyVcsUrl() {
         $extra = ['vcs_url' => 'https://some.vcs.url.com'];
         $this->createConfigFile($extra);
 
@@ -293,13 +301,22 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals("https://some.vcs.url.com/", $config->getVcsUrl());
     }
 
+    public function testNonEmptyCgiUrl() {
+        $extra = ['cgi_url' => 'https://some.cgi.url.com'];
+        $this->createConfigFile($extra);
+
+        $config = new Config($this->core, "s19", "config");
+        $config->loadMasterConfigs($this->config_path);
+        $this->assertEquals("https://some.cgi.url.com/", $config->getCgiUrl());
+    }
+
     public function testCourseSeating() {
         $extra = ['course_details' => ['room_seating_gradeable_id' => 'test_id']];
         $this->createConfigFile($extra);
 
         $config = new Config($this->core, "s17", "config");
         $config->loadMasterConfigs($this->config_path);
-        $config->loadCourseIni($this->course_ini_path);
+        $config->loadCourseJson($this->course_json_path);
         $this->assertEquals("test_id", $config->getRoomSeatingGradeableId());
         $this->assertTrue($config->displayRoomSeating());
     }
@@ -351,17 +368,18 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
      */
     public function testInvalidCourseConfigPath() {
         $config = new Config($this->core, "s17", "csci1000");
-        $config->loadCourseIni("/invalid/path");
+        $config->loadCourseJson("/invalid/path");
     }
 
     /**
-     * @expectedException \app\exceptions\IniException
-     * @expectedExceptionMessageRegExp /Error reading ini file 'database\.json': syntax error, unexpected '\{' in .*\/database\.json on line 1/
+     * @expectedException \app\exceptions\ConfigException
+     * @expectedExceptionMessageRegExp /Error parsing the config file: Syntax error/
      */
-    public function testInvalidCourseConfigIni() {
+    public function testInvalidCourseConfigJson() {
         $this->createConfigFile();
         $config = new Config($this->core, "s17", "csci1000");
-        $config->loadCourseIni(FileUtils::joinPaths($this->config_path, "database.json"));
+        file_put_contents(FileUtils::joinPaths($this->temp_dir, "test.txt"), "afds{}fasdf");
+        $config->loadCourseJson(FileUtils::joinPaths($this->temp_dir, "test.txt"));
     }
 
     public function getRequiredSections() {
@@ -382,11 +400,11 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             $this->createConfigFile($extra);
 
             $config = new Config($this->core, "s17", "csci0000");
-            $config->loadCourseIni($this->course_ini_path);
+            $config->loadCourseJson($this->course_json_path);
             $this->fail("Should have thrown ConfigException");
         }
         catch (ConfigException $exception) {
-            $this->assertEquals("Missing config section '{$section}' in ini file", $exception->getMessage());
+            $this->assertEquals("Missing config section '{$section}' in json file", $exception->getMessage());
         }
     }
 
@@ -396,7 +414,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
                 'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_rainbow_grades_summary',
                 'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type', 'private_repository',
-                'forum_enabled', 'regrade_enabled', 'regrade_message', 'room_seating_gradeable_id',
+                'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor', 'regrade_message', 'room_seating_gradeable_id',
             ],
         ];
         $return = array();
@@ -420,12 +438,12 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             $this->createConfigFile($extra);
 
             $config = new Config($this->core, "s17", "csci0000");
-            $config->loadCourseIni($this->course_ini_path);
+            $config->loadCourseJson($this->course_json_path);
             $this->fail("Should have thrown ConfigException for {$section}.{$setting}");
         }
         catch (ConfigException $exception) {
             $this->assertEquals(
-                "Missing config setting '{$section}.{$setting}' in configuration ini file",
+                "Missing config setting '{$section}.{$setting}' in configuration json file",
                 $exception->getMessage()
             );
         }

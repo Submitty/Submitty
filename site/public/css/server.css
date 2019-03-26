@@ -1,5 +1,5 @@
 @import url("reset.css");
-@import url("https://fonts.googleapis.com/css?family=Inconsolata");
+@import url("../vendor/google/inconsolata.css");
 
 html {
     height: 100%;
@@ -184,6 +184,14 @@ input[type="checkbox"]:checked:before {
     color: #FFF;
     font-size: 18px;
     font-weight: 900
+}
+
+.helpicon::before {
+  font-family: 'Font Awesome 5 Free';
+  content: "\f059";
+  color: #1E90FF;
+  font-weight: 300;
+  display: inline-block;
 }
 
 input[type="checkbox"]:focus{
@@ -479,7 +487,7 @@ table tr.table-header {
 }
 
 #footer a:hover {
-    color: #4078c0;
+    color: #405E90;
 }
 
 #footer #copyright {
@@ -491,7 +499,7 @@ table tr.table-header {
 }
 
 #copyright > a {
-    color: #4078c0;
+    color: #405E90;
 }
 
 #copyright > a:hover {
@@ -1011,7 +1019,6 @@ table .instructor .two-options{
 #nav-body {
     margin-top: 15px;
     margin-left: 30px;
-    width: 0px;
     display: flex;
     flex-direction: column;
 }
@@ -1034,8 +1041,15 @@ table .instructor .two-options{
     padding-top: 30px;
 }
 
+div.full_height {
+    position: -webkit-sticky; /* Safari */
+    position: sticky;
+    max-height: 95vh;
+    top: 10px;
+}
+
 #sidebar.collapsed #nav-buttons {
-    width: 240px;
+    width: 30px;
 }
 
 #sidebar.collapsed #nav-buttons-visible {
@@ -1051,7 +1065,7 @@ table .instructor .two-options{
 }
 
 #sidebar.animate {
-    transition: 0.25s ease-out;
+    transition: 0.3s ease-out;
 }
 
 #sidebar.collapsed {
@@ -1073,18 +1087,19 @@ table .instructor .two-options{
 
 #nav-buttons ul li .nav-row {
     padding: 6px;
-    padding-left: 36px;
+    padding-left: 48px;
     width: 100%;
     display: block;
 }
 
-#sidebar.collapsed #nav-buttons ul li .nav-row {
+#sidebar.collapsed #nav-buttons ul li .nav-row .iconTitle{
     display: none;
 }
 
-#nav-buttons ul li .collapse-icon {
-    display: none;
+#sidebar.collapsed #nav-buttons ul li .nav-row .fa{
+    padding: 2px 0px;
 }
+
 
 #sidebar.collapsed #nav-buttons ul li .collapse-icon {
     display: inline-block;
@@ -1202,6 +1217,7 @@ table .instructor .two-options{
 
 #sidebar.collapsed #nav-buttons ul li.short-line {
     margin-left: -30px;
+    width: 100px
 }
 
 #nav-buttons ul li.heading {
@@ -1547,6 +1563,17 @@ end of styles used in the admin gradeable page
     1px 1px 0 #000;
 }
 
+/* color for limited access graders who were verifed */
+.grader-verified{
+                                        /* yellow       green   */
+    background: linear-gradient(to right, #ffcc33 50%, #33cc33 50%);
+    background-clip : text;
+    color: transparent;
+    /* chrome & safari */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
 /* color for student/peer grading */
 .grader-4 {
     color: #cc66ff; /* purple */
@@ -1578,10 +1605,15 @@ end of styles used in the admin gradeable page
     color: red;
 }
 
-.required::-webkit-input-placeholder { color: red; }
-.required:-moz-placeholder { color: red; }
-.required::-moz-placeholder { color: red; }
-.required:-ms-input-placeholder { color: red; }
+.required::-webkit-input-placeholder { color: #cc0000; }
+.required:-moz-placeholder { color: #cc0000; }
+.required::-moz-placeholder { color: #cc0000; }
+.required:-ms-input-placeholder { color: #cc0000; }
+
+#required_type{
+    color: #cc0000;
+    display: inline;
+}
 
 .modal{
     display: none;
@@ -1710,3 +1742,40 @@ end of styles used in the admin gradeable page
 .courses-table .btn {
     margin-bottom: 3px;
 }
+
+.noscript,
+.system_message {
+    width: 100%;
+    height: 2em;
+}
+
+.system_message {
+    background: #fff3cd;
+    color: #856404;
+    height: 2em;
+}
+
+.noscript {
+    background: #f2dede;
+    color: #b94a48;
+}
+
+.noscript span,
+.system_message span {
+    text-align: center;
+    margin: auto;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.scrollable-image{
+    overflow: auto; 
+    width: 100%;
+    max-height: 300px;
+}
+#details-legend > li{
+    list-style: none;
+    padding-left: 15px;
+    font-size: 0.75em;
+}
+
