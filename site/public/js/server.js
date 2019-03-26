@@ -1266,6 +1266,35 @@ function openUrl(url) {
     return false;
 }
 
+function changeName(element, user, visible_username, anon){
+    var new_element = element.getElementsByTagName("strong")[0];
+    anon = (anon == 'true');
+    icon = element.getElementsByClassName("fas fa-eye")[0];
+    if(icon == undefined){
+        icon = element.getElementsByClassName("fas fa-eye-slash")[0];
+        if(anon) {
+            new_element.style.color = "black";
+            new_element.style.fontStyle = "normal";
+        }
+        new_element.innerHTML = visible_username;
+        icon.className = "fas fa-eye";
+        icon.title = "Show full user information";
+    } else {
+        if(anon) {
+            new_element.style.color = "grey";
+            new_element.style.fontStyle = "italic";
+        }
+        new_element.innerHTML = user;
+        icon.className = "fas fa-eye-slash";
+        icon.title = "Hide full user information";
+    }
+}
+
+function openFileForum(directory, file, path ){
+    var url = buildUrl({'component': 'misc', 'page': 'display_file', 'dir': directory, 'file': file, 'path': path});
+    window.open(url,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+}
+
 function openFrame(url, id, filename) {
     var iframe = $('#file_viewer_' + id);
     if (!iframe.hasClass('open')) {

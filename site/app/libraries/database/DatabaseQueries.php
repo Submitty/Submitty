@@ -1620,10 +1620,18 @@ WHERE gcm_id=?", $params);
     }
 
     /**
-     * gets ids of all electronic gradeables
+     * gets ids of all electronic gradeables excluding assignments that will be bulk
+     * uploaded by TA or instructor.
+     *
+     * @return array
      */
     public function getAllElectronicGradeablesIds() {
-        $this->course_db->query("SELECT g_id, g_title FROM gradeable WHERE g_gradeable_type=0 ORDER BY g_grade_released_date DESC");
+        $this->course_db->query("
+          SELECT g_id, g_title 
+          FROM gradeable INNER JOIN electronic_gradeable USING (g_id)
+          WHERE eg_scanned_exam=FALSE and eg_has_due_date=TRUE
+          ORDER BY eg_submission_due_date ASC
+        ");
         return $this->course_db->rows();
     }
 
@@ -2315,8 +2323,14 @@ AND gc_id IN (
         return $this->course_db->rows();
     }
 
-    public function getPostsForThread($current_user, $thread_id, $show_deleted = false, $option = "tree"){
+    public function getPostsForThread($current_user, $thread_id, $show_deleted = false, $option = "tree", $filterOnUser = NULL){
       $query_delete = $show_deleted?"true":"deleted = false";
+      $query_filter_on_user = '';
+      $param_list = array();
+      if(!empty($filterOnUser)) {
+        $query_filter_on_user = ' and author_user_id = ? ';
+        $param_list[] = $filterOnUser;
+      }
       if($thread_id == -1) {
         $this->course_db->query("SELECT MAX(id) as max from threads WHERE deleted = false and merged_thread_id = -1 GROUP BY pinned ORDER BY pinned DESC");
         $rows = $this->course_db->rows();
@@ -2327,14 +2341,16 @@ AND gc_id IN (
             return array();
         }
       }
+      $param_list[] = $thread_id;
       $history_query = "LEFT JOIN forum_posts_history fph ON (fph.post_id is NULL OR (fph.post_id = posts.id and NOT EXISTS (SELECT 1 from forum_posts_history WHERE post_id = fph.post_id and edit_timestamp > fph.edit_timestamp )))";
       if($option == 'alpha'){
         $this->course_db->query("SELECT posts.*, fph.edit_timestamp, users.user_lastname FROM posts INNER JOIN users ON posts.author_user_id=users.user_id {$history_query} WHERE thread_id=? AND {$query_delete} ORDER BY user_lastname, posts.timestamp;", array($thread_id));
       } else {
-        $this->course_db->query("SELECT posts.*, fph.edit_timestamp FROM posts {$history_query} WHERE thread_id=? AND {$query_delete} ORDER BY timestamp ASC", array($thread_id));
+        $this->course_db->query("SELECT posts.*, fph.edit_timestamp FROM posts {$history_query} WHERE thread_id=? AND {$query_delete} {$query_filter_on_user} ORDER BY timestamp ASC", array_reverse($param_list));
       }
 
       $result_rows = $this->course_db->rows();
+
       if(count($result_rows) > 0){
         $this->course_db->query("INSERT INTO viewed_responses(thread_id,user_id,timestamp) SELECT ?, ?, current_timestamp WHERE NOT EXISTS (SELECT 1 FROM viewed_responses WHERE thread_id=? AND user_id=?)", array($thread_id, $current_user, $thread_id, $current_user));
       }
@@ -3070,7 +3086,9 @@ AND gc_id IN (
                 $this->course_db->convertBoolean($gradeable->isPeerGrading()),
                 $gradeable->getPeerGradeSet(),
                 DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
-                $this->course_db->convertBoolean($gradeable->isRegradeAllowed())
+                $this->course_db->convertBoolean($gradeable->isRegradeAllowed()),
+                $gradeable->getDiscussionThreadId(),
+                $this->course_db->convertBoolean($gradeable->isDiscussionBased())
             ];
             $this->course_db->query("
                 INSERT INTO electronic_gradeable(
@@ -3095,8 +3113,11 @@ AND gc_id IN (
                   eg_peer_grading,
                   eg_peer_grade_set,
                   eg_regrade_request_date,
-                  eg_regrade_allowed)
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
+                  eg_regrade_allowed,
+                  eg_thread_ids,
+                  eg_has_discussion
+                  )
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
         }
 
         // Make sure to create the rotating sections
@@ -3199,6 +3220,8 @@ AND gc_id IN (
                     $gradeable->getPeerGradeSet(),
                     DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
                     $this->course_db->convertBoolean($gradeable->isRegradeAllowed()),
+                    $gradeable->getDiscussionThreadId(),
+                    $this->course_db->convertBoolean($gradeable->isDiscussionBased()),
                     $gradeable->getId()
                 ];
                 $this->course_db->query("
@@ -3223,7 +3246,9 @@ AND gc_id IN (
                       eg_peer_grading=?,
                       eg_peer_grade_set=?,
                       eg_regrade_request_date=?,
-                      eg_regrade_allowed=?
+                      eg_regrade_allowed=?,
+                      eg_thread_ids=?,
+                      eg_has_discussion=?
                     WHERE g_id=?", $params);
             }
         }

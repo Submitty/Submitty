@@ -20,7 +20,7 @@ def up(config, database, semester, course):
         if not config.has_option('course_details', 'regrade_enabled'):
             config.set('course_details', 'regrade_enabled', 'false')
         if not config.has_option('course_details', 'regrade_message'):
-            config.set('course_details', 'regrade_message', "Frivolous regrade requests may result in a grade deduction or loss of late days")
+            config.set('course_details', 'regrade_message', "Frivolous grade inquiries may result in a grade deduction or loss of late days")
         if not config.has_option('course_details', 'private_repository'):
             config.set('course_details', 'private_repository', '""')
         # the newest default
