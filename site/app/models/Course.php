@@ -3,7 +3,6 @@
 namespace app\models;
 use app\libraries\Core;
 use app\libraries\FileUtils;
-use app\libraries\IniParser;
 
 /**
  * Class Course
@@ -35,16 +34,16 @@ class Course extends AbstractModel {
     }
 
     public function loadDisplayName(){
-        $course_ini_path = FileUtils::joinPaths(
+        $course_json_path = FileUtils::joinPaths(
             $this->core->getConfig()->getSubmittyPath(),
             "courses",
             $this->semester,
             $this->title,
             "config",
-            "config.ini"
+            "config.json"
         );
-        if (file_exists($course_ini_path) && is_readable($course_ini_path)) {
-            $config = IniParser::readFile($course_ini_path);
+        if (file_exists($course_json_path) && is_readable($course_json_path)) {
+            $config = json_decode(file_get_contents($course_json_path), true);
             if (isset($config['course_details']) && isset($config['course_details']['course_name'])) {
                 $this->display_name = $config['course_details']['course_name'];
                 return true;

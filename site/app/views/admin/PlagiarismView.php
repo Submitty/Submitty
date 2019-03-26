@@ -395,7 +395,10 @@ HTML;
         }
 
         else if($new_or_edit == "edit") {
-            $title = $this->core->getQueries()->getGradeable($saved_config['gradeable'])->getName();
+            $title = '';
+            if (isset($saved_config['gradeable']) && $saved_config['gradeable'] !== null) {
+               $title = $this->core->getQueries()->getGradeableConfig($saved_config['gradeable'])->getTitle();
+            }
             $return .= <<<HTML
                     $title
 HTML;
