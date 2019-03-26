@@ -726,6 +726,8 @@ class UsersController extends AbstractController {
         foreach($user_data as $row_num => $vals) {
             // Blacklist validation.  Validation fails if any test resolves as false.
             switch(false) {
+            // Bounds check to ensure minimum required number of rows is present.
+            case count($vals) >= 5:
             // Username must contain only lowercase alpha, numbers, underscores, hyphens
             case User::validateUserData('user_id', $vals[0]):
             // First and Last name must be alpha characters, white-space, or certain punctuation.
@@ -754,7 +756,7 @@ class UsersController extends AbstractController {
         if (!empty($bad_rows)) {
             $msg = "Error(s) on row(s) ";
             array_walk($bad_rows, function($row_num) use (&$msg) {
-                $msg .= sprintf(" %d", $row_num);
+                $msg .= " {$row_num}";
             });
             $this->core->addErrorMessage($msg);
             $this->core->redirect($return_url);
@@ -764,10 +766,11 @@ class UsersController extends AbstractController {
         $existing_users = $this->core->getQueries()->getAllUsers();
         $users_to_add = array();
         $users_to_update = array();
-        foreach($user_data as $user) {
+        foreach($user_data as &$user) {
             $exists = false;
             foreach($existing_users as $i => $existing_user) {
                 if ($user[0] === $existing_user->getId()) {
+                    // Student registration section or grader group has changed.
                     if ($user[4] !== $get_user_registration_or_group_function()) {
                         $users_to_update[] = $user;
                     }
@@ -791,10 +794,10 @@ class UsersController extends AbstractController {
             $user->setLegalLastName($user_data[2]);
             $user->setEmail($user_data[3]);
             $set_user_registration_or_group_function();
-            if (isset($user_data[$pref_firstname_idx]) && ($user_data[$pref_firstname_idx] !== "")) {
+            if (isset($user_data[$pref_firstname_idx]) && !empty($user_data[$pref_firstname_idx])) {
                 $user->setPreferredFirstName($user_data[$pref_firstname_idx]);
             }
-            if (isset($user_data[$pref_lastname_idx]) && ($user_data[$pref_lastname_idx] !== "")) {
+            if (isset($user_data[$pref_lastname_idx]) && !empty($user_data[$pref_lastname_idx])) {
                 $user->setPreferredLastName($user_data[$pref_lastname_idx]);
             }
             if ($use_database) {
