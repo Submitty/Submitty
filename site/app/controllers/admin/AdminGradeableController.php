@@ -734,13 +734,19 @@ class AdminGradeableController extends AbstractController {
         // Electronic-only values
         if ($gradeable_type === GradeableType::ELECTRONIC_FILE) {
 
-            $jsonThreads = array_map('intval', explode(',', $details['discussion_thread_id']));
-            foreach($jsonThreads as $thread) {
-                if(!$this->core->getQueries()->existsThread($thread)) {
-                    throw new \InvalidArgumentException('Invalid thread id specified.');
+            $jsonThreads = json_encode('{}');
+            $discussion_clicked = $details['discussion_based'] === 'true';
+
+            //Validate user input for discussion threads
+            if($discussion_clicked) {
+                $jsonThreads = array_map('intval', explode(',', $details['discussion_thread_id']));
+                foreach($jsonThreads as $thread) {
+                    if(!$this->core->getQueries()->existsThread($thread)) {
+                        throw new \InvalidArgumentException('Invalid thread id specified.');
+                    }
                 }
+                $jsonThreads = json_encode($jsonThreads);
             }
-            $jsonThreads = json_encode($jsonThreads);
 
             $gradeable_create_data = array_merge($gradeable_create_data, [
                 'team_assignment' => $details['team_assignment'] === 'true',
@@ -754,7 +760,7 @@ class AdminGradeableController extends AbstractController {
                 'has_due_date' => true,
                 
                 //For discussion component 
-                'discussion_based' => $details['discussion_based'],
+                'discussion_based' => $discussion_clicked,
                 'discussion_thread_ids' => $jsonThreads,
 
                 // TODO: properties that aren't supported yet

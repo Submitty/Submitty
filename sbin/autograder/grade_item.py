@@ -237,6 +237,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     is_batch_job = queue_obj["regrade"]
     job_id = queue_obj["job_id"]
     is_batch_job_string = "BATCH" if is_batch_job else "INTERACTIVE"
+    revision = queue_obj.get("revision", None)
 
     partial_path = os.path.join(queue_obj["gradeable"],queue_obj["who"],str(queue_obj["version"]))
     item_name = os.path.join(queue_obj["semester"],queue_obj["course"],"submissions",partial_path)
@@ -697,12 +698,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         json.dump(queue_obj,outfile,sort_keys=True,indent=4,separators=(',', ': '))
 
     try:
-        with open(os.path.join(tmp_work,"results.json"), 'r') as read_file:
-            results_obj = json.load(read_file)
-        if 'revision' in queue_obj.keys():
-            results_obj['revision'] = queue_obj['revision']
-        with open(os.path.join(tmp_results,"results.json"), 'w') as outfile:
-            json.dump(results_obj,outfile,sort_keys=True,indent=4,separators=(',', ': '))
+        shutil.move(os.path.join(tmp_work, "results.json"), os.path.join(tmp_results, "results.json"))
     except:
         with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
             print ("\n\nERROR: Grading incomplete -- Could not open/write ",os.path.join(tmp_work,"results.json"))
@@ -719,7 +715,8 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                                                  int(waittime),
                                                  grading_finished_longstring,
                                                  int(gradingtime),
-                                                 grade_result)
+                                                 grade_result,
+                                                 revision)
 
     os.chdir(SUBMITTY_DATA_DIR)
 
