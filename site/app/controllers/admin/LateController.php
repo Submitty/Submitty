@@ -40,8 +40,8 @@ class LateController extends AbstractController {
     }
 
     public function viewExtensions() {
-        $g_ids = $this->core->getQueries()->getAllElectronicGradeablesIds();
-        $this->core->getOutput()->renderOutput(array('admin', 'Extensions'), 'displayExtensions', $g_ids);
+        $e_gradeables = $this->core->getQueries()->getAllElectronicGradeables();
+        $this->core->getOutput()->renderOutput(array('admin', 'Extensions'), 'displayExtensions', $e_gradeables);
     }
 
     public function update($type, $delete) {

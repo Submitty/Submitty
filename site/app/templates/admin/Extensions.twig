@@ -9,10 +9,11 @@
             <div class="option"><label for="g_id">Select Gradeable:</label><br>
                 <select name="g_id" id="g_id" onchange="loadHomeworkExtensions($(this).val());" style="margin-top: 10px; width: 50%">
                     <option disabled selected value> -- select an option -- </option>
-                    {% for index, value in gradeable_ids %}
-                        <option value="{{ value['g_id'] }}">{{ value['g_title'] }}</option>
+                    {% for index, value in gradeables %}
+                        <option value="{{value['g_id']}},{{value['eg_submission_due_date']}}">{{ value['g_title'] }}</option>
                     {% endfor %}
                 </select>
+                <p id ="due_date">Due Date: </p>
             </div>
         </div>
         <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
