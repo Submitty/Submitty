@@ -1779,3 +1779,8 @@ end of styles used in the admin gradeable page
     font-size: 0.75em;
 }
 
+.ui-autocomplete{
+    max-height: 300px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
