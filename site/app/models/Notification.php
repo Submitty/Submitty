@@ -193,6 +193,9 @@ class Notification extends AbstractModel {
       $this->setType($details['type']);
 
       switch ($details['type']) {
+          case 'grade_inquiry_creation':
+            $this->actAsGradeInquiryCreation($details['gradeable_id'], '', $details['submitter_id'], $details['who_id']);
+            break;
           case 'grade_inquiry_reply':
             $this->actAsGradeInquiryReply($details['gradeable_id'], $details['grader_id'], $details['submitter_id'], '');
             break;
@@ -258,23 +261,33 @@ class Notification extends AbstractModel {
         $this->setNotifyTarget($target);
     }
 
-
     private function actAsGradeInquiryCreation($gradeable_id, $grader_id, $submitter_id, $who_id){
-      $this->setNotifyMetadata(json_encode(array(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable_id, 'who_id' => $who_id))));
-      $this->setNotifyContent("New Grade Inquiry For ".$gradeable_id);
-      $this->setNotifySource($submitter_id);
-      $this->setNotifyTarget($grader_id);
+      //notify a team member
+      if($this->component == "student") {
+        $this->setNotifyMetadata(json_encode(array(array('component' => 'student','gradeable_id' => $gradeable_id))));
+        $this->setNotifyContent("A Member of your Team has Submitted a Grade Inquiry for ".$gradeable_id);
+        $this->setNotifySource($submitter_id);
+        $this->setNotifyTarget($who_id);
+      }
+      //notify a grader
+      else if($this->component == "grading") {
+        $this->setNotifyMetadata(json_encode(array(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable_id, 'who_id' => $who_id))));
+        $this->setNotifyContent("New Grade Inquiry for ".$gradeable_id);
+        $this->setNotifySource($submitter_id);
+        $this->setNotifyTarget($grader_id);
+
+      }
     }
 
     private function actAsGradeInquiryReply($gradeable_id, $grader_id, $submitter_id, $who_id) {
-      $this->setNotifyContent("New Grade Inquiry Reply For ".$gradeable_id);
-
-
+      $this->setNotifyContent("New Grade Inquiry Reply for ".$gradeable_id);
+      //notify a student
       if($this->component == "student") {
         $this->setNotifyMetadata(json_encode(array(array('component' => 'student','gradeable_id' => $gradeable_id))));
         $this->setNotifySource($grader_id);
         $this->setNotifyTarget($submitter_id);
       }
+      //notify a grader
       else if($this->component == "grading"){
         $this->setNotifyMetadata(json_encode(array(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable_id, 'who_id' => $who_id))));
         $this->setNotifySource($submitter_id);

@@ -275,9 +275,6 @@ class SubmissionController extends AbstractController {
         $submitter = $graded_gradeable->getSubmitter();
         $user_id = $this->core->getUser()->getId();
 
-
-        $this->core->addErrorMessage($user_id);
-
         //TODO: build link in notification body
         $notification_subject = "[Submitty $course] New Regrade Request";
         $notification_body = "A student has submitted a grade inquiry for the gradeable $gradeable_name.\nStudent ID $user_id writes:\n$content\n\nPlease visit Submitty to follow up on this request";
@@ -293,6 +290,18 @@ class SubmissionController extends AbstractController {
 
           $grader_email = $grader->getEmail();
           $this->core->getQueries()->createEmail($regrade_email_data, $grader->getEmail());
+        }
+
+        if($submitter->isTeam()){
+          $submitting_team = $submitter->getTeam()->getMemberUsers();
+          foreach($submitting_team as $submitting_user){
+            if($submitting_user->getId() == $user_id){
+              continue;
+            }
+
+            $new_grade_inquiry_notification = new Notification($this->core, array('component' => 'student', 'type' => 'grade_inquiry_creation', 'gradeable_id' => $gradeable_id, 'submitter_id' => $user_id, 'who_id' => $submitting_user->getId()));
+            $this->core->getQueries()->pushSingleNotification($new_grade_inquiry_notification);
+          }
         }
 
       }
