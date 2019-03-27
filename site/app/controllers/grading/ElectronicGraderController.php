@@ -502,7 +502,10 @@ class ElectronicGraderController extends GradingController {
         $can_show_all = $this->core->getAccess()->canI("grading.electronic.details.show_all");
         $show_all = isset($_GET['view']) && $_GET['view'] === "all" && $can_show_all;
 
+        $sort = $_GET['sort'] ?? "id";
+        $direction = $_GET['direction'] ?? "ASC";
         $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), $show_all);
+        $order->sort($sort, $direction);
 
         $section_submitters = $order->getSectionSubmitters();
         $section_key = $order->getSectionKey();
@@ -936,7 +939,11 @@ class ElectronicGraderController extends GradingController {
             $progress = round(($graded / $total_submitted) * 100, 1);
         }
 
+        $sort = $_GET['sort'] ?? "id";
+        $direction = $_GET['direction'] ?? "ASC";
         $order = new GradingOrder($this->core, $gradeable, $this->core->getUser());
+        $order->sort($sort, $direction);
+
         $prev = $order->getPrevSubmitter($graded_gradeable->getSubmitter());
         $next = $order->getNextSubmitter($graded_gradeable->getSubmitter());
 
