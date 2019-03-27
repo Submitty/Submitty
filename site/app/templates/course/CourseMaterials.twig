@@ -17,18 +17,18 @@
 
     {% for dir, path in files if path is not iterable %}
         {% if userGroup != 4 or fileShares[path] == "1" %}
-            {{ self.display_file(self, dir, fileShares, fileReleaseDates, path, id ~ "f" ~ loop.index, indent, title, userGroup) }}
+            {{ self.display_file(self, dir, fileShares, fileReleaseDates, path, id ~ "f" ~ loop.index, id, indent, title, userGroup) }}
         {% endif %}
     {% endfor %}
 
     {# Directories underneath #}
     {% for dir, path in files if path is iterable %}
-        {{ self.display_dir(self, dir, fileShares, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, userGroup, folderPath ~ '/' ~ dir) }}
+        {{ self.display_dir(self, dir, fileShares, fileReleaseDates, path, id ~ "d" ~ loop.index, id, indent, title, userGroup, folderPath ~ '/' ~ dir) }}
     {% endfor %}
 {% endmacro %}
 
 
-{% macro display_file(self, dir, fileShares, fileReleaseDates, path, id, indent, title, userGroup) %}
+{% macro display_file(self, dir, fileShares, fileReleaseDates, path, id, parentId, indent, title, userGroup) %}
     <div>
         <div class="file-viewer">
             <k class="fas fa-file" style='vertical-align:text-bottom;'></k>
@@ -40,7 +40,7 @@
             <a onclick='downloadFileWithAnyRole("{{ dir }}", "{{ path | url_encode }}")'><i class="fas fa-download" aria-hidden="true" title="Download the file"></i></a>
             {% if userGroup == 1 %}
                 <a onclick='newDeleteCourseMaterialForm("{{ core.buildUrl({'component': 'misc', 'page': 'delete_course_material_file', 'dir': 'course_materials', 'file': dir, 'path': path }) }}", "{{ dir }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-                <input id="share_checkbox_{{ id }}" type="checkbox"
+                <input id="share_checkbox_{{ id }}" class="{{ parentId }}" type="checkbox"
                 {% if ( (fileShares[path] == "1") )%}
                    checked="true"
                 {% endif %}
@@ -52,7 +52,7 @@
     </div>
 {% endmacro %}
 
-{% macro display_dir(self, dir, fileShares, fileReleaseDates, contents, id, indent, title, userGroup, folderPath) %}
+{% macro display_dir(self, dir, fileShares, fileReleaseDates, contents, id, parentId, indent, title, userGroup, folderPath) %}
     {% if indent == 0 %}
         {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, userGroup, folderPath) }}
     {% else %}
@@ -64,6 +64,11 @@
             </a>
             {% if userGroup == 1 %}
                 <a onclick='newDeleteCourseMaterialForm("{{ core.buildUrl({'component': 'misc', 'page': 'delete_course_material_folder', 'dir': 'course_materials', 'file': dir, 'path': folderPath }) }}", "{{ dir }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                <input id="share_all_checkbox_{{ id }}" class="{{ parentId }}" type="checkbox"
+                        {% if ( (fileShares[path] == "1") )%}
+                            checked="true"
+                        {% endif %}
+                       onclick="shareAllToOther('{{ id }}', '{{ path }}')"/><label for="latest-events">Share All to student on</label>
             {% endif %}
         </div>
         <div id='div_viewer_{{ id }}' style='margin-left:15px; display: none' data-file_name="{{ dir }}">
@@ -129,6 +134,16 @@
         else {
             changePermission(path, '0');
         }
+    }
+
+    function shareAllToOther(id) {
+        // pass folderid to the function
+        // this will find all elements with the classname same as the id and click their checkboxes
+        // this recursively sets the permissions for all files and folders
+
+        $('.'+id).each(function(){
+           $("#"+this.id).click();
+        });
     }
 
     function setNewDateTime(me, path) {
