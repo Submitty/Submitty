@@ -258,6 +258,11 @@ table tr.table-header {
     background-color: #d9edf7;
 }
 
+td>a.active-sort {
+    text-decoration: underline;
+    font-weight: bold;
+}
+
 .floating-thead,
 .floating-header {
     position: fixed;

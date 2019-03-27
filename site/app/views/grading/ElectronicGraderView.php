@@ -222,7 +222,7 @@ class ElectronicGraderView extends AbstractView {
      * @param bool $show_edit_teams
      * @return string
      */
-    public function detailsPage(Gradeable $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $view_all) {
+    public function detailsPage(Gradeable $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $view_all, $sort, $direction) {
 
         $peer = false;
         if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
@@ -254,7 +254,7 @@ class ElectronicGraderView extends AbstractView {
                     $columns[] = ["width" => "3%",  "title" => "",                 "function" => "index"];
                     $columns[] = ["width" => "5%",  "title" => "Section",          "function" => "section"];
                     $columns[] = ["width" => "6%",  "title" => "Edit Teams",       "function" => "team_edit"];
-                    $columns[] = ["width" => "12%", "title" => "Team Id",          "function" => "team_id"];
+                    $columns[] = ["width" => "12%", "title" => "Team Id",          "function" => "team_id", "sort_type" => "id"];
                     $columns[] = ["width" => "32%", "title" => "Team Members",     "function" => "team_members"];
                 } else {
                     $columns[] = ["width" => "3%",  "title" => "",                 "function" => "index"];
@@ -264,9 +264,9 @@ class ElectronicGraderView extends AbstractView {
             } else {
                 $columns[]     = ["width" => "3%",  "title" => "",                 "function" => "index"];
                 $columns[]     = ["width" => "5%",  "title" => "Section",          "function" => "section"];
-                $columns[]     = ["width" => "20%", "title" => "User ID",          "function" => "user_id"];
-                $columns[]     = ["width" => "15%", "title" => "First Name",       "function" => "user_first"];
-                $columns[]     = ["width" => "15%", "title" => "Last Name",        "function" => "user_last"];
+                $columns[]     = ["width" => "20%", "title" => "User ID",          "function" => "user_id", "sort_type" => "id"];
+                $columns[]     = ["width" => "15%", "title" => "First Name",       "function" => "user_first", "sort_type" => "first"];
+                $columns[]     = ["width" => "15%", "title" => "Last Name",        "function" => "user_last", "sort_type" => "last"];
             }
             if ($gradeable->getAutogradingConfig()->getTotalNonExtraCredit() !== 0) {
                 $columns[]     = ["width" => "9%",  "title" => "Autograding",      "function" => "autograding"];
@@ -446,7 +446,9 @@ class ElectronicGraderView extends AbstractView {
             "show_import_teams_button" => $show_import_teams_button,
             "show_export_teams_button" => $show_export_teams_button,
             "columns" => $columns,
-            "peer" => $peer
+            "peer" => $peer,
+            "sort" => $sort,
+            "direction" => $direction
         ]);
     }
 
