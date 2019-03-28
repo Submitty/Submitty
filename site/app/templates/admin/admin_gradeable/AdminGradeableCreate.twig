@@ -4,50 +4,88 @@
 #}
 {% if action == 'new' or action == 'template' %}
     <div>
-        <label for="gradeable_template">From Template:</label>
-        <select name="gradeable_template" id="gradeable_template" style='width: 400px;'>
-            <option>--None--</option>
-
-            {% for template in template_list %}
+        <div class="option row">
+            <div class="option-desc col-md-6">
+                <label for="gradeable_template">
+                    <div class="option-title">Template</div>
+                    <div class="option-alt">Select from one of the templates</div>
+                </label>
+            </div>
+            <div class="option-input col-md-6">
+                <select name="gradeable_template" id="gradeable_template" style='margin-right:30px'>
+                <option>--None--</option>
+                {% for template in template_list %}
                 <option {{ action != 'new' and gradeable.getId() == template.g_id ? 'selected' : '' }}
                     value="{{ template.g_id }}">{{ template.g_title }}</option>
-            {% endfor %}
-        </select>
+                {% endfor %}
+                </select>
+            </div>
+        </div>
     </div>
+
 {% endif %}
 
 {#
     Primary Form
 #}
 <!-- Gradeable Title (read/write in all modes) -->
-<label for="g_title">What is the title of this gradeable?:</label>
-    <input style='width: 350px' type='text' name='title' id='g_title' class="required auto_save"
-        value="{{ action != 'new' ? gradeable.getTitle() : '' }}" placeholder="(Required)" required/>
+    <div class="option row">
+        <div class="option-desc col-md-6">
+            <label for="g_title">
+                <div class="option-title">Title</div>
+                <div class="option-alt">What is the title of this gradable? <p style="color:red">(Required)</p></div>
+            </label>
+        </div>
+
+        <div class="option-input col-md-6">
+            <textarea onkeyup="textAreaAdjust(this)" name='title' id='g_title' class="required auto_save" style="overflow:hidden"
+            value="{{action != 'new' ? gradeable.getTitle() : '' }}" placeholder="(Required)" required></textarea>
+        </div>
+    </div>
 
 <br />
 
 <!-- Instruction URL (read/write in all modes) -->
-<label for="instructions_url">What is the URL to the assignment instructions? (shown to student)</label>
-    <input style='width: 350px' type='text' name='instructions_url' id='instructions_url' class="auto_save"
+<div class="option row">
+    <div class="option-desc col-md-6">
+        <label for="instructions_url">
+            <div class="option-title">Assignment URL</div>
+            <div class="option-alt">What is the URL to the assignment instructions? (shown to student)</div>
+        </label>
+    </div>
+    <div class="option-input col-md-6">
+        <input type='text' name='instructions_url' id='instructions_url' class="auto_save"
         value="{{ action != 'new' ? gradeable.getInstructionsUrl() : '' }}" placeholder="(Optional)" />
+    </div>
+</div>
 
 <br />
 
 <!-- Gradeable ID (readonly in edit mode, required) -->
-<label for="g_id">What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>):</label>
-<input style='width: 350px' type='text' name='id' id="g_id" class="required"
-       value="{{ action != 'new' ? gradeable.getId() : '' }}" placeholder="(Required)"
+<div class="option row">
+    <div class="option-desc col-md-6">
+        <label for="g_id">
+            <div class="option-title">Unique ID</div>
+            <div class="option-alt">What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>)</div>
+        </label>
+    </div>
+    <div class="option-input col-md-6">
+        <input type='text' name='id' id="g_id" class="required"
+        value="{{ action != 'new' ? gradeable.getId() : '' }}" placeholder="(Required)"
         {{ action == 'edit' ? 'readonly' : 'required' }} />
+    </div>
+</div>
 
 <br />
-<fieldset>
+<fieldset style="border:none">
     <legend>
-{% if action == 'new' or action == 'template' %}
-    <!-- Gradeable Type radio buttons (readonly in edit mode) -->
-   <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">What is the type of the gradeable <i style="font-style:normal;" class="helpicon"></i></a>
+        {% if action == 'new' or action == 'template' %}
+            <!-- Gradeable Type radio buttons (readonly in edit mode) -->
+            <div class="option-title">Gradable Type</div>
+            <div class="option-alt"><a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">What is the type of the gradeable <i style="font-style:normal;" class="helpicon"></i></a></div>    
             <span id="required_type" >(Required)</span>
         {% else %}
-            Gradeable type: <span id="gradeable-type-string">{{ type_string }}</span>
+            <b style='font-size:18px'>Gradeable type</b>: <span id="gradeable-type-string">{{ type_string }}</span>
             <br />
         {% endif %}
     </legend>
@@ -90,7 +128,7 @@
     </div>
 
   <!-- This is only relevant to Electronic Files -->
-    <fieldset class="gradeable_type_options electronic_file" id="electronic_file">
+    <fieldset class="gradeable_type_options electronic_file" id="electronic_file" style="margin-left:100px; border:none;">
         <div><legend>Will any or all of this assignment be manually graded (e.g., by the TAs or the instructor)?</legend></div>
         <div>
             <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val auto_save date-related"
@@ -207,17 +245,24 @@
     </fieldset>
 </fieldset>
 <!-- Gradeable bucket (read/write in all modes) -->
-<label for="syllabus_bucket">
-<a target=_blank href="https://submitty.org/instructor/rainbow_grades/gradeables">What syllabus category does this item belong to? <i style="font-style:normal;" class="helpicon"></i></a>
-</label>
+<div class="option row">
+    <div class="option-desc col-md-6">
+        <label for="syllabus_bucket">
+            <div class="option-title">Syllabus Category</div>
+            <div class="option-alt"><a target=_blank href="https://submitty.org/instructor/rainbow_grades/gradeables">What syllabus category does this item belong to? <i style="font-style:normal;" class="helpicon"></i></a></div>
+        </label>
+    </div>
 
-<select name="syllabus_bucket" id="syllabus_bucket" class="auto_save" style="width: 170px;">
-    {% for bucket in syllabus_buckets %}
+    <div class="option-input col-md-6">
+        <select name="syllabus_bucket" id="syllabus_bucket" class="auto_save">
+        {% for bucket in syllabus_buckets %}
         <option value="{{ bucket }}" {{ action != 'new' and gradeable.getSyllabusBucket() == bucket ? 'selected' : '' }}>
             {{ bucket | title }}
         </option>
-    {% endfor %}
-</select>
+        {% endfor %}
+        </select>
+    </div>
+</div>
 
 <br />
 {% if action == 'new' or action == 'template' %}
@@ -240,6 +285,15 @@
 </div>
 
 <script type="text/javascript">
+
+
+    /* Increasing Height of textarea*/
+    function textAreaAdjust(o) {
+        o.style.height = "1px"
+        o.style.height = (15+o.scrollHeight)+"px";
+    }
+
+
     function updateDateDisplay() {
         let elecDateBoxes = $('.electronic_file_dates input');
         elecDateBoxes.prop('disabled', true);
@@ -312,7 +366,7 @@
     }
 
     function onDiscussionChange() {
-    	if($('#yes_discussion').is(':checked')) {
+        if($('#yes_discussion').is(':checked')) {
             disableElementChildren('.discussion_id_wrapper', false);
         }
         else {

@@ -13,7 +13,9 @@ input[disabled] {
 
 select {
     margin-top:7px;
-    /* width: 60px; */
+    width: -webkit-fill-available;
+    width: -moz-available;
+    width:  fill-available;
     min-width: 60px;
 }
 
