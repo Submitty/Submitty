@@ -641,17 +641,17 @@ class UsersController extends AbstractController {
         /**
          * Closure to set a user's registration_section or group_id based on $list_type)
          */
-        $set_user_registration_or_group_function = function() use ($list_type, &$user, &$user_data) {
+        $set_user_registration_or_group_function = function(&$user) use ($list_type, &$row) {
             switch($list_type) {
             case "classlist":
                 // Registration section has to exist, or a DB exception gets thrown on INSERT or UPDATE.
                 // ON CONFLICT clause in DB query prevents thrown exceptions when registration section already exists.
-                $this->core->getQueries()->insertNewRegistrationSection($user_data[4]);
-                $user->setRegistrationSection($user_data[4]);
+                $this->core->getQueries()->insertNewRegistrationSection($row[4]);
+                $user->setRegistrationSection($row[4]);
                 $user->setGroup(4);
                 break;
             case "graderlist":
-                $user->setGroup($user_data[4]);
+                $user->setGroup($row[4]);
                 break;
             default:
                 throw new ValidationException("Unknown classlist", array($list_type, '$set_user_registration_or_group_function'));
@@ -663,13 +663,13 @@ class UsersController extends AbstractController {
          *
          * @param string $action "insert" or "update"
          */
-        $insert_or_update_user_function = function($action) use (&$user, &$semester, &$course, &$user_data, &$return_url) {
+        $insert_or_update_user_function = function($action, $user) use (&$semester, &$course, &$uploaded_data, &$return_url) {
             try {
                 switch($action) {
                 case 'insert':
                     //User must first exist in Submitty before being enrolled to a course.
-                    //$user_data[0] = authentication ID.
-                    if (is_null($this->core->getQueries()->getSubmittyUser($user_data[0]))) {
+                    //$uploaded_data[0] = authentication ID.
+                    if (is_null($this->core->getQueries()->getSubmittyUser($uploaded_data[0]))) {
                         $this->core->getQueries()->insertSubmittyUser($user);
                     }
                     $this->core->getQueries()->insertCourseUser($user, $semester, $course);
@@ -717,13 +717,13 @@ class UsersController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        $user_data = $this->getUserDataFromUpload($_FILES['upload']['name'], $_FILES['upload']['tmp_name'], $return_url);
+        $uploaded_data = $this->getUserDataFromUpload($_FILES['upload']['name'], $_FILES['upload']['tmp_name'], $return_url);
 
         // Validation and error checking.
         $pref_firstname_idx = $use_database ? 6 : 5;
         $pref_lastname_idx = $pref_firstname_idx + 1;
         $bad_rows = array();
-        foreach($user_data as $row_num => $vals) {
+        foreach($uploaded_data as $row_num => $vals) {
             // Blacklist validation.  Validation fails if any test resolves as false.
             switch(false) {
             // Bounds check to ensure minimum required number of rows is present.
@@ -766,61 +766,72 @@ class UsersController extends AbstractController {
         $existing_users = $this->core->getQueries()->getAllUsers();
         $users_to_add = array();
         $users_to_update = array();
-        foreach($user_data as &$user) {
+        foreach($uploaded_data as $row) {
             $exists = false;
             foreach($existing_users as $i => $existing_user) {
-                if ($user[0] === $existing_user->getId()) {
-                    // Student registration section or grader group has changed.
-                    if ($user[4] !== $get_user_registration_or_group_function()) {
-                        $users_to_update[] = $user;
+                if ($row[0] === $existing_user->getId()) {
+                    // Validate if this user has any data to update.
+                    switch (true) {
+                    // Did student registration section or grader group change?
+                    case $row[4] !== $get_user_registration_or_group_function():
+                    // Did preferred name change?  And is that change permitted?
+                    // IMPORTANT: $existing_user->isUserUpdated() must be false to permit updating a preferred name.
+                    case !$existing_user->isUserUpdated() && isset($row[$pref_firstname_idx]) && $existing_user->getPreferredFirstName() !== $row[$pref_firstname_idx]:
+                    case !$existing_user->isUserUpdated() && isset($row[$pref_lastname_idx]) && $existing_user->getPreferredLastName() !== $row[$pref_lastname_idx]:
+                        $users_to_update[] = $row;
                     }
-                    unset($existing_users[$i]);
                     $exists = true;
-                    break;
+                    //Unset this existing user.
+                    //Those that remain in this list are candidates to be moved to NULL reg section, later.
+                    unset($existing_user[$i]);
                 }
             }
             if (!$exists) {
-                $users_to_add[] = $user;
+                $users_to_add[] = $row;
             }
         }
 
         // Insert new students to database
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        foreach($users_to_add as $user_data) {
+        foreach($users_to_add as $uploaded_data) {
             $user = new User($this->core);
-            $user->setId($user_data[0]);
-            $user->setLegalFirstName($user_data[1]);
-            $user->setLegalLastName($user_data[2]);
-            $user->setEmail($user_data[3]);
-            $set_user_registration_or_group_function();
-            if (isset($user_data[$pref_firstname_idx]) && !empty($user_data[$pref_firstname_idx])) {
-                $user->setPreferredFirstName($user_data[$pref_firstname_idx]);
+            $user->setId($uploaded_data[0]);
+            $user->setLegalFirstName($uploaded_data[1]);
+            $user->setLegalLastName($uploaded_data[2]);
+            $user->setEmail($uploaded_data[3]);
+            $set_user_registration_or_group_function($user);
+            if (isset($uploaded_data[$pref_firstname_idx]) && !empty($uploaded_data[$pref_firstname_idx])) {
+                $user->setPreferredFirstName($uploaded_data[$pref_firstname_idx]);
             }
-            if (isset($user_data[$pref_lastname_idx]) && !empty($user_data[$pref_lastname_idx])) {
-                $user->setPreferredLastName($user_data[$pref_lastname_idx]);
+            if (isset($uploaded_data[$pref_lastname_idx]) && !empty($uploaded_data[$pref_lastname_idx])) {
+                $user->setPreferredLastName($uploaded_data[$pref_lastname_idx]);
             }
             if ($use_database) {
-                $user->setPassword($user_data[5]);
+                $user->setPassword($uploaded_data[5]);
             }
-            $insert_or_update_user_function('insert');
+            $insert_or_update_user_function('insert', $user);
         }
 
-        // Existing users are only updated for registration_section ("classlist") or user_group ("graderlist")
-        foreach($users_to_update as $user_data) {
-            $user = $this->core->getQueries()->getUserById($user_data[0]);
-            $set_user_registration_or_group_function();
-            $insert_or_update_user_function('update');
+        // Existing users update
+        foreach($users_to_update as $row) {
+            $user = $this->core->getQueries()->getUserById($row[0]);
+            //Update registration section (student) or group (grader)
+            $set_user_registration_or_group_function($user);
+            //Update preferred names
+            $user->setPreferredFirstName($row[$pref_firstname_idx]);
+            $user->setPreferredLastName($row[$pref_lastname_idx]);
+            $insert_or_update_user_function('update', $user);
         }
         $added = count($users_to_add);
         $updated = count($users_to_update);
 
-        // Special case to move students to the NULL section with a classlist upload.
+        //Special case to move students to the NULL section with a classlist upload.
         if ($list_type === "classlist" && isset($_POST['move_missing'])) {
-            foreach($existing_users as $user) {
-                if (!is_null($user->getRegistrationSection())) {
-                    $user->setRegistrationSection(null);
-                    $insert_or_update_user_function('update');
+            foreach($existing_users as $existing_user) {
+                if (!is_null($existing_user->getRegistrationSection())) {
+                    $existing_user->setRegistrationSection(null);
+                    $insert_or_update_user_function('update', $user);
                     $updated++;
                 }
             }
