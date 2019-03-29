@@ -326,6 +326,7 @@ class HomeworkView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
             'gradeable_id' => $gradeable->getId(),
             'gradeable_name' => $gradeable->getTitle(),
+            'formatted_current_time' => date($DATE_FORMAT, time()),
             'formatted_due_date' => $gradeable->getSubmissionDueDate()->format($DATE_FORMAT),
             'part_names' => $gradeable->getAutogradingConfig()->getPartNames(),
             'is_vcs' => $gradeable->isVcs(),

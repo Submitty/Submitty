@@ -9,7 +9,9 @@
     <div class="upperinfo">
         <h1 class="upperinfo-left">New submission for: {{ gradeable_name }}</h1>
         {% if has_due_date %}
-            <h3 class="upperinfo-right">Due: {{ formatted_due_date }}</h3>
+            <h3 class="upperinfo-right">Due: {{ formatted_due_date }} <br>
+                <span>Now: {{ formatted_current_time }}</span>
+            </h3>
         {% endif %}
     </div>
 

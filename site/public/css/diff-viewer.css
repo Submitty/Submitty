@@ -37,6 +37,10 @@
     margin-bottom: 0px !important;
 }
 
+.upperinfo-right span{
+    color: #777;
+}
+
 .highlight-hover {
     background-color: #ddf !important;
 }
