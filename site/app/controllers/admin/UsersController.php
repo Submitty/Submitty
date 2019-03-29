@@ -627,12 +627,12 @@ class UsersController extends AbstractController {
          *
          * @return string
          */
-        $get_user_registration_or_group_function = function() use ($list_type, &$existing_user) {
+        $get_user_registration_or_group_function = function($user) use ($list_type) {
             switch($list_type) {
             case "classlist":
-                return $existing_user->getRegistrationSection();
+                return $user->getRegistrationSection();
             case "graderlist":
-                return $existing_user->getGroup();
+                return (string)$user->getGroup();
             default:
                 throw new ValidationException("Unknown classlist", array($list_type, '$get_user_registration_or_group_function'));
             }
@@ -773,7 +773,7 @@ class UsersController extends AbstractController {
                     // Validate if this user has any data to update.
                     switch (true) {
                     // Did student registration section or grader group change?
-                    case $row[4] !== $get_user_registration_or_group_function():
+                    case $row[4] !== $get_user_registration_or_group_function($existing_user):
                     // Did preferred name change?  And is that change permitted?
                     // IMPORTANT: $existing_user->isUserUpdated() must be false to permit updating a preferred name.
                     case !$existing_user->isUserUpdated() && isset($row[$pref_firstname_idx]) && $existing_user->getPreferredFirstName() !== $row[$pref_firstname_idx]:
@@ -783,7 +783,8 @@ class UsersController extends AbstractController {
                     $exists = true;
                     //Unset this existing user.
                     //Those that remain in this list are candidates to be moved to NULL reg section, later.
-                    unset($existing_user[$i]);
+                    unset($existing_users[$i]);
+                    break;
                 }
             }
             if (!$exists) {
@@ -831,7 +832,7 @@ class UsersController extends AbstractController {
             foreach($existing_users as $existing_user) {
                 if (!is_null($existing_user->getRegistrationSection())) {
                     $existing_user->setRegistrationSection(null);
-                    $insert_or_update_user_function('update', $user);
+                    $insert_or_update_user_function('update', $existing_user);
                     $updated++;
                 }
             }
