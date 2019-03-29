@@ -675,7 +675,6 @@ class UsersController extends AbstractController {
                     $this->core->getQueries()->insertCourseUser($user, $semester, $course);
                     break;
                 case 'update':
-                    print nl2br(str_replace(" ", "&nbsp;", print_r($user, true))); die;
                     $this->core->getQueries()->updateUser($user, $semester, $course);
                     break;
                 default:
