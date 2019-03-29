@@ -675,6 +675,7 @@ class UsersController extends AbstractController {
                     $this->core->getQueries()->insertCourseUser($user, $semester, $course);
                     break;
                 case 'update':
+                    print nl2br(str_replace(" ", "&nbsp;", print_r($user, true))); die;
                     $this->core->getQueries()->updateUser($user, $semester, $course);
                     break;
                 default:
@@ -771,13 +772,8 @@ class UsersController extends AbstractController {
             foreach($existing_users as $i => $existing_user) {
                 if ($row[0] === $existing_user->getId()) {
                     // Validate if this user has any data to update.
-                    switch (true) {
                     // Did student registration section or grader group change?
-                    case $row[4] !== $get_user_registration_or_group_function($existing_user):
-                    // Did preferred name change?  And is that change permitted?
-                    // IMPORTANT: $existing_user->isUserUpdated() must be false to permit updating a preferred name.
-                    case !$existing_user->isUserUpdated() && isset($row[$pref_firstname_idx]) && $existing_user->getPreferredFirstName() !== $row[$pref_firstname_idx]:
-                    case !$existing_user->isUserUpdated() && isset($row[$pref_lastname_idx]) && $existing_user->getPreferredLastName() !== $row[$pref_lastname_idx]:
+                    if ($row[4] !== $get_user_registration_or_group_function($existing_user)) {
                         $users_to_update[] = $row;
                     }
                     $exists = true;
@@ -819,9 +815,6 @@ class UsersController extends AbstractController {
             $user = $this->core->getQueries()->getUserById($row[0]);
             //Update registration section (student) or group (grader)
             $set_user_registration_or_group_function($user);
-            //Update preferred names
-            $user->setPreferredFirstName($row[$pref_firstname_idx]);
-            $user->setPreferredLastName($row[$pref_lastname_idx]);
             $insert_or_update_user_function('update', $user);
         }
         $added = count($users_to_add);
