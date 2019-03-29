@@ -5,7 +5,7 @@
 {% if action == 'new' or action == 'template' %}
     <div>
         <label for="gradeable_template">From Template:</label>
-        <select name="gradeable_template" id="gradeable_template" style='width: 400px;'>
+        <select name="gradeable_template" class="full-length-input" id="gradeable_template">
             <option>--None--</option>
 
             {% for template in template_list %}
@@ -21,21 +21,20 @@
 #}
 <!-- Gradeable Title (read/write in all modes) -->
 <label for="g_title">What is the title of this gradeable?:</label>
-    <input style='width: 350px' type='text' name='title' id='g_title' class="required auto_save"
+    <input type='text' name='title' id='g_title' class="required auto_save full-length-input"
         value="{{ action != 'new' ? gradeable.getTitle() : '' }}" placeholder="(Required)" required/>
 
 <br />
 
 <!-- Instruction URL (read/write in all modes) -->
 <label for="instructions_url">What is the URL to the assignment instructions? (shown to student)</label>
-    <input style='width: 350px' type='text' name='instructions_url' id='instructions_url' class="auto_save"
-        value="{{ action != 'new' ? gradeable.getInstructionsUrl() : '' }}" placeholder="(Optional)" />
+    <input type='text' name='instructions_url' id='instructions_url' class="auto_save full-length-input" value="{{ action != 'new' ? gradeable.getInstructionsUrl() : '' }}" placeholder="(Optional)" />
 
 <br />
 
 <!-- Gradeable ID (readonly in edit mode, required) -->
 <label for="g_id">What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>):</label>
-<input style='width: 350px' type='text' name='id' id="g_id" class="required"
+<input type='text' name='id' id="g_id" class="required full-length-input"
        value="{{ action != 'new' ? gradeable.getId() : '' }}" placeholder="(Required)"
         {{ action == 'edit' ? 'readonly' : 'required' }} />
 
@@ -211,7 +210,7 @@
 <a target=_blank href="https://submitty.org/instructor/rainbow_grades/gradeables">What syllabus category does this item belong to? <i style="font-style:normal;" class="helpicon"></i></a>
 </label>
 
-<select name="syllabus_bucket" id="syllabus_bucket" class="auto_save" style="width: 170px;">
+<select name="syllabus_bucket" id="syllabus_bucket" class="auto_save full-length-input">
     {% for bucket in syllabus_buckets %}
         <option value="{{ bucket }}" {{ action != 'new' and gradeable.getSyllabusBucket() == bucket ? 'selected' : '' }}>
             {{ bucket | title }}

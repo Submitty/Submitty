@@ -34,7 +34,7 @@ Form
 #}
 What is the lowest privileged user group that can grade this?
     <a class="helpicon" target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-user-groups"></a>
-<select name="min_grading_group" id="minimum_grading_group" class="int_val" style="width:180px;">
+<select name="min_grading_group" id="minimum_grading_group" class="int_val full-length-input">
     {% for num, role in grading_groups %}
         <option value="{{ num }}" {{ gradeable.getMinGradingGroup() == num ? 'selected' : '' }}>{{ role }}</option>
     {% endfor %}

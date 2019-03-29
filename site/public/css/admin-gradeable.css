@@ -8,13 +8,23 @@ input[disabled] {
 }
 
 #gradeable-dates input[type="text"] {
-    width: 200px;
+    width: 50%;
+    height: 40px;
+    margin: 2px;
 }
 
 select {
     margin-top:7px;
     /* width: 60px; */
     min-width: 60px;
+}
+
+.full-length-input,
+input.full-length-input,
+textarea.full-length-input {
+    width: 100%;
+    margin-top: 2px;
+    height: 40px;
 }
 
 .question-icon {
