@@ -7,6 +7,9 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+import json
+import stat
+import urllib.parse
 
 from . import INSTALL_DIR, DATA_DIR
 
@@ -155,22 +158,73 @@ class DeleteLichenResult(CourseGradeableJob):
             for folder in ['provided_code', 'tokenized', 'concatenated', 'hashes', 'matches']:
                 shutil.rmtree(str(Path(lichen_dir, folder, gradeable)), ignore_errors=True)
             msg = 'Deleted lichen plagiarism results and saved config for {}'.format(gradeable)
-            open_file.write(msg)
+            open_file.write(msg) 
 
+class BulkQRSplit(CourseJob):
+    required_keys = CourseJob.required_keys + ['timestamp', 'g_id', 'filename']
 
-class SendEmail(CourseJob):
+    def add_permissions(self,item,perms):
+        if os.getuid() == os.stat(item).st_uid:
+            os.chmod(item,os.stat(item).st_mode | perms)
+
+    def add_permissions_recursive(self,top_dir,root_perms,dir_perms,file_perms):
+        for root, dirs, files in os.walk(top_dir):
+            self.add_permissions(root,root_perms)
+        for d in dirs:
+            self.add_permissions(os.path.join(root, d),dir_perms)
+        for f in files:
+            self.add_permissions(os.path.join(root, f),file_perms)
+
     def run_job(self):
-        email_type = self.job_details['email_type']
         semester = self.job_details['semester']
         course = self.job_details['course']
+        timestamp = self.job_details['timestamp']
+        gradeable_id = self.job_details['g_id']
+        filename = self.job_details['filename']
 
-        email_script = str(Path(INSTALL_DIR, 'sbin', 'sendEmail.py'))
+        qr_prefix = urllib.parse.unquote(self.job_details['qr_prefix'])
+        qr_suffix = urllib.parse.unquote(self.job_details['qr_suffix'])
 
-        thread_title = self.job_details['thread_title']
-        thread_content = self.job_details['thread_content']
+        qr_script = Path(INSTALL_DIR, 'sbin', 'bulk_qr_split.py')
+        #create paths
+        try:
+            with open("/usr/local/submitty/config/submitty.json", encoding='utf-8') as data_file:
+                CONFIG = json.loads(data_file.read())
+
+            current_path = os.path.dirname(os.path.realpath(__file__))
+            uploads_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads")
+            bulk_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads/bulk_pdf",gradeable_id,timestamp)
+            split_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads/split_pdf",gradeable_id,timestamp)
+        except Exception as err:
+            print("Failed while parsing args and creating paths")
+            print(err)
+            sys.exit(1)
+
+        #copy file over to correct folders
+        try:
+            if not os.path.exists(split_path):
+                os.makedirs(split_path)
+
+            # adding write permissions for PHP
+            self.add_permissions_recursive(uploads_path, stat.S_IWGRP | stat.S_IXGRP, stat.S_IWGRP | stat.S_IXGRP, stat.S_IWGRP)
+
+            # copy over file to new directory
+            if not os.path.isfile(os.path.join(split_path, filename)):
+                shutil.copyfile(os.path.join(bulk_path, filename), os.path.join(split_path, filename))
+
+            # move to copy folder
+            os.chdir(split_path)
+        except Exception as err:
+            print("Failed while copying files")
+            print(err)
+            sys.exit(1)
 
         try:
-            with open('email_job_logs.txt', "a") as output_file:
-                subprocess.call([email_script, email_type, semester, course, thread_title, thread_content], stdout=output_file)
-        except PermissionError:
-            print ("error, could not open "+output_file+" for writing")
+            subprocess.call([str(qr_script), filename, split_path, qr_prefix, qr_suffix])
+            
+            os.chdir(current_path)
+        except Exception as err:
+            print("Failed to launch bulk_qr_split subprocess!")
+            print(err)
+            sys.exit(1)
+        

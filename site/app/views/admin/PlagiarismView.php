@@ -163,7 +163,30 @@ HTML;
     public function showPlagiarismResult($semester, $course, $gradeable_id, $gradeable_title , $rankings) {
         $return = "";
         $return .= <<<HTML
-<div style="padding:5px 5px 0px 5px;" class="content forum_content forum_show_threads">
+        <script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/codemirror.js"></script>
+        <script>
+
+            $(document).ready(function() {
+                var editor0 = $('.CodeMirror')[0].CodeMirror;
+
+                console.log('hello');
+
+                editor0.getWrapperElement().onmousedown = function(e) {
+                    var lineCh = editor0.coordsChar({ left: e.clientX, top: e.clientY });
+                    var markers = editor0.findMarksAt(lineCh);
+                    if (markers.length === 0) { return; }
+                    var lineData = markers[0].find();
+                    console.log(lineData);
+                    if(markers[0].css.toLowerCase().indexOf("#ffff00") != -1) { //Can be used to determine click
+                        editor0.markText(lineData.from, lineData.to, {'className': 'red_plag', 'css': 'background: #FF0000;'});
+                        getMatchesForClickedMatch("{$gradeable_id}", event, lineData.from, lineData.to, "code_box_1", "orange", null, "", "");
+                    }
+                }
+            });
+
+        </script>
+        <link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}css/iframe/codemirror.css" />
+<div style="padding:5px 5px 0px 5px;" class="full_height content forum_content forum_show_threads">
 HTML;
 
         $return .= $this->core->getOutput()->renderTwigTemplate("admin/PlagiarismHighlightingKey.twig");
@@ -197,9 +220,11 @@ HTML;
         </form><br />
         <div style="position:relative; height:100%; overflow-y:hidden;" class="row">
         <div style="max-height: 100%; width:100%;" class="sub">
-        <div id="" name="code_box_1" style="float:left;width:48%;height:100%;line-height:1.5em;overflow:auto;padding:5px;border: solid 1px #555;background:white;border-width: 2px;">
+        <div style="float:left;width:48%;height:100%;line-height:1.5em;overflow:auto;padding:5px;border: solid 1px #555;background:white;border-width: 2px;">
+        <textarea id="code_box_1" name="code_box_1"></textarea>
         </div>
-        <div name="code_box_2" style="float:right;width:48%;height:100%;line-height:1.5em;overflow:auto;padding:5px;border: solid 1px #555;background:white;border-width: 2px;">
+        <div style="float:right;width:48%;height:100%;line-height:1.5em;overflow:auto;padding:5px;border: solid 1px #555;background:white;border-width: 2px;">
+        <textarea id="code_box_2" name="code_box_2"></textarea>
         </div>
         </div>
         </div>
@@ -209,6 +234,21 @@ HTML;
 </div>
 <script>
     var form = $("#users_with_plagiarism");
+    var code_user_1 = CodeMirror.fromTextArea(document.getElementById('code_box_1'), {
+        lineNumbers: true,
+        readOnly: true,
+        cursorHeight: 0.0,
+        lineWrapping: true
+    });
+    var code_user_2 = CodeMirror.fromTextArea(document.getElementById('code_box_2'), {
+        lineNumbers: true,
+        readOnly: true,
+        cursorHeight: 0.0,
+        lineWrapping: true
+    });
+
+    code_user_2.setSize("100%", "100%");
+    code_user_1.setSize("100%", "100%");
     $('[name="user_id_1"]', form).change(function(){
         setUserSubmittedCode('{$gradeable_id}','user_id_1');
     });
@@ -286,8 +326,8 @@ HTML;
         $provided_code_filename="";
         $threshold="5";
         $sequence_length="10";
-        $prior_term_gradeables_number = count($saved_config['prev_term_gradeables'])+1;
-        $ignore_submission_number = count($saved_config['ignore_submissions'])+1;
+        $prior_term_gradeables_number = $saved_config['prev_term_gradeables'] ? count($saved_config['prev_term_gradeables'])+1 : 1;
+        $ignore_submission_number = $saved_config['ignore_submissions'] ? count($saved_config['ignore_submissions'])+1 : 1;
         $ignore="";
         $no_ignore="checked";
 
@@ -355,7 +395,10 @@ HTML;
         }
 
         else if($new_or_edit == "edit") {
-            $title = $this->core->getQueries()->getGradeable($saved_config['gradeable'])->getName();
+            $title = '';
+            if (isset($saved_config['gradeable']) && $saved_config['gradeable'] !== null) {
+               $title = $this->core->getQueries()->getGradeableConfig($saved_config['gradeable'])->getTitle();
+            }
             $return .= <<<HTML
                     $title
 HTML;

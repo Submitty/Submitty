@@ -1,12 +1,23 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+# Usage:
+#   vagrant up
+#       or
+#   NO_SUBMISSIONS=1 vagrant up
+#       or
+#   EXTRA=rpi vagrant up
+#
+#
 # If you want to install extra packages (such as rpi or matlab), you need to have the environment
 # variable EXTRA set. The easiest way to do this is doing:
 #
 # EXTRA=rpi vagrant up
 #   or
 # EXTRA=rpi,matlab vagrant up
+#
+# If you don't want any submissions to be automatically generated for the courses created
+# by vagrant, you'll want to specify NO_SUBMISSIONS flag.
 
 extra_command = ''
 if ENV.has_key?('NO_SUBMISSIONS')

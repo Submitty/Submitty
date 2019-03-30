@@ -226,7 +226,7 @@ TestResults* intComparison_doit (const TestCase &tc, const nlohmann::json& j) {
 // =================================================================================
 // =================================================================================
 
-TestResults* TestCase::dispatch(const nlohmann::json& grader, int autocheck_number) const {
+TestResults* TestCase::dispatch(const nlohmann::json& grader, int autocheck_number, const nlohmann::json whole_config) const {
   std::string method = grader.value("method","");
   if      (method == "")                           { return NULL;                                           }
   else if (method == "JUnitTestGrader")            { return JUnitTestGrader_doit(*this,grader);             }
@@ -245,13 +245,13 @@ TestResults* TestCase::dispatch(const nlohmann::json& grader, int autocheck_numb
   else if (method == "errorIfNotEmpty")            { return errorIfNotEmpty_doit(*this,grader);             }
   else if (method == "errorIfEmpty")               { return errorIfEmpty_doit(*this,grader);                }
   else if (method == "ImageDiff")                  { return ImageDiff_doit(*this,grader, autocheck_number); }
+  else if (method == "custom_validator")           { return custom_doit(*this,grader,whole_config); }
   else                                             { return custom_dispatch(grader);                        }
 }
 
 // =================================================================================
 // =================================================================================
 // CONSTRUCTOR
-
 
 TestCase::TestCase(nlohmann::json &whole_config, int which_testcase, std::string docker_name) :
   _json((*whole_config.find("testcases"))[which_testcase]), CONTAINER_NAME(docker_name) {
@@ -392,7 +392,7 @@ bool TestCase::ShowExecuteLogfile(const std::string &execute_logfile) const {
 // =================================================================================
 
 
-TestResultsFixedSize TestCase::do_the_grading (int j) const {
+TestResultsFixedSize TestCase::do_the_grading (int j, nlohmann::json complete_config) const {
 
   // ALLOCATE SHARED MEMORY
   int memid;
@@ -420,7 +420,7 @@ TestResultsFixedSize TestCase::do_the_grading (int j) const {
     // perform the validation (this might hang or crash)
     assert (j >= 0 && j < numFileGraders());
     nlohmann::json tcg = getGrader(j);
-    TestResults* answer_ptr = this->dispatch(tcg, j);
+    TestResults* answer_ptr = this->dispatch(tcg, j, complete_config);
     assert (answer_ptr != NULL);
 
     // write answer to shared memory and terminate this process

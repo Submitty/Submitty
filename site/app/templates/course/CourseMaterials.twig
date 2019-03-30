@@ -1,5 +1,4 @@
 {% import _self as self %}
-<script type="text/javascript" language="javascript" src="js/jquery-ui-timepicker-addon.js"></script>
 
 <div class="content">
     {% if userGroup == 1 %}
@@ -34,9 +33,9 @@
         <div class="file-viewer">
             <k class="fas fa-file" style='vertical-align:text-bottom;'></k>
             {{ dir }}&nbsp;
-            {% set dirExtension = dir|split('.')|last %}
+            {% set dirExtension = dir|split('.')|last|lower %}
             {% if '.' ~ dirExtension in ['.pdf', '.jpg', '.jpeg', '.c', '.cpp', '.s', '.twig', '.py', '.java', '.png', '.txt', '.h', '.html', '.php', '.js', '.sql', '.sh', '.md', '.csv', '.salsa', '.erl', '.oz', '.pl', '.hs'] %}
-                 <a onclick='openFileCourseMaterial("{{ dir }}", "{{ path | url_encode }}")'><i class="fas fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
+                 <a target="_blank" href="{{ core.getConfig().getSiteUrl() }}&component=misc&page=display_file&dir=course_materials&file={{ dir }}&path={{ path | url_encode }}"><i class="fas fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
             {% endif %}
             <a onclick='downloadFileWithAnyRole("{{ dir }}", "{{ path | url_encode }}")'><i class="fas fa-download" aria-hidden="true" title="Download the file"></i></a>
             {% if userGroup == 1 %}
@@ -121,12 +120,6 @@
         }
     }
 
-    function openFileCourseMaterial(html_file, url_file) {
-        var win = window.open("{{ core.getConfig().getSiteUrl()|escape("js")}}&component=misc&page=display_file&dir=course_materials&file=" + html_file + "&path=" + url_file,'_blank');
-        win.focus();
-        return false;
-    }
-
     function shareToOther(id, path) {
         // pass filename to server to record the permission of the file
         var idName = "#share_checkbox_" + id;
@@ -146,29 +139,12 @@
     }
 
     $(document).ready(function() {
-        $(function() {
-            $( ".date_picker" ).datetimepicker({
-                dateFormat: 'yy-mm-dd',
-                timeFormat: "HH:mm:ssz",
-                showButtonPanel: true,
-                showTimezone: false,
-                showMillisec: false,
-                showMicrosec: false,
-                beforeShow: function( input ) {
-                    setTimeout(function() {
-                        var buttonPane = $( input )
-                            .datepicker( "widget" )
-                            .find( ".ui-datepicker-buttonpane" );
-
-                        $( "<button>", {
-                            text: "Infinity",
-                            click: function() {
-                                $.datepicker._curInst.input.datepicker('setDate', "9999-12-31 23:59:59-0400").datepicker('hide');
-                            }
-                        }).appendTo( buttonPane ).addClass("ui-datepicker-clear ui-state-default ui-priority-primary ui-corner-all");
-                    }, 1 );
-                }
-            });
+        flatpickr(".date_picker", {
+            allowInput: true,
+            enableTime: true,
+            enableSeconds: true,
+            time_24hr: true,
+            dateFormat: "Y-m-d H:i:S",
         });
     });
 </script>

@@ -13,7 +13,7 @@ import random
 import socket
 import zipfile
 
-from submitty_utils import dateutils, glob
+from submitty_utils import dateutils
 
 from . import grade_item, insert_database_version_data, grade_items_logging, write_grade_history, CONFIG_PATH
 
@@ -53,15 +53,14 @@ def get_vcs_info(top_dir, semester, course, gradeable, userid,  teamid):
     form_json_file = os.path.join(top_dir, 'courses', semester, course, 'config', 'form', 'form_'+gradeable+'.json')
     with open(form_json_file, 'r') as fj:
         form_json = json.load(fj)
-    course_ini_file = os.path.join(top_dir, 'courses', semester, course, 'config', 'config.ini')
-    with open(course_ini_file, 'r') as open_file:
-        course_ini = configparser.ConfigParser()
-        course_ini.read_file(open_file)
+    course_json_path = os.path.join(top_dir, 'courses', semester, course, 'config', 'config.json')
+    with open(course_json_path, 'r') as open_file:
+        course_json = json.load(open_file)
     is_vcs = form_json["upload_type"] == "repository"
     # PHP reads " as a character around the string, while Python reads it as part of the string
     # so we have to strip out the " in python
-    vcs_type = course_ini['course_details']['vcs_type'].strip('"')
-    vcs_base_url = course_ini['course_details']['vcs_base_url'].strip('"')
+    vcs_type = course_json['course_details']['vcs_type']
+    vcs_base_url = course_json['course_details']['vcs_base_url']
     if len(vcs_base_url) == 0:
         vcs_base_url = "/".join([VCS_URL, semester, course]).rstrip('/') + "/"
     vcs_base_url = vcs_base_url.replace(SUBMISSION_URL, os.path.join(SUBMITTY_DATA_DIR, 'vcs'))
@@ -283,18 +282,27 @@ def unpack_grading_results_zip(which_machine,which_untrusted,my_results_zip_file
     if queue_obj is None:
         return False
 
-
     job_id = queue_obj["job_id"]
     partial_path = os.path.join(queue_obj["gradeable"],queue_obj["who"],str(queue_obj["version"]))
     item_name = os.path.join(queue_obj["semester"],queue_obj["course"],"submissions",partial_path)
     results_path = os.path.join(SUBMITTY_DATA_DIR,"courses",queue_obj["semester"],queue_obj["course"],"results",partial_path)
+    results_public_path = os.path.join(SUBMITTY_DATA_DIR,"courses",queue_obj["semester"],queue_obj["course"],"results_public",partial_path)
 
     # clean out all of the old files if this is a re-run
     shutil.rmtree(results_path,ignore_errors=True)
+    shutil.rmtree(results_public_path,ignore_errors=True)
     # create the directory (and the full path if it doesn't already exist)
     os.makedirs(results_path)
+
     # unzip the file & clean up
     grade_item.unzip_this_file(my_results_zip_file,results_path)
+
+    # if there are files for the public results folder, create the directory and move them out
+    if (os.path.isdir(os.path.join(os.path.join(results_path,"results_public")))):
+        os.makedirs(results_public_path,exist_ok=True)
+        os.rename(os.path.join(results_path,"results_public"),
+                  os.path.join(results_public_path,"details"))
+
     os.remove(my_results_zip_file)
 
     # add information to the database
