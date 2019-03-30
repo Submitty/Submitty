@@ -299,7 +299,7 @@ HTML;
 						array(
 
 							"required_rank" => 3,
-							"display_text" => 'Show Deleted Threads',
+							"display_text" => $show_deleted_thread_title,
 							"style" => 'position:relative;top:3px;display:inline-block;',
 							"link" => array(false),
 							"optional_class" => $show_deleted_class,
