@@ -93,12 +93,22 @@ class SubmissionController extends AbstractController {
             case 'change_request_status':
                 return $this->changeRequestStatus();
                 break;
+            case 'fetch_time':
+                return $this->fetchTime();
+                break;
             case 'display':
             default:
                 return $this->showHomeworkPage();
                 break;
         }
     }
+
+    private function fetchTime(){
+        $DATE_FORMAT = "m/d/Y @ H:i";
+        $this->core->getOutput()->renderJsonSuccess(date($DATE_FORMAT, time()));
+        return;
+    }
+
     private function requestRegrade() {
         $content = $_POST['replyTextArea'] ?? '';
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
