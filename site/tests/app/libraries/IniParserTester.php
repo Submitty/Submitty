@@ -109,7 +109,7 @@ class IniParserTester extends \PHPUnit\Framework\TestCase {
                     // Pretty much directly from #2024
                     "course_details" => [
                         "zero_rubric_grades" => false,
-                        "upload_message" => "By clicking \"Submit\" you are confirming that you have read, understand, and agree to follow the Academic Integrity Policy.<br />\r\n<br />\r\nwhy",
+                        "upload_message" => "By clicking Submit you are confirming that you have read, understand, and agree to follow the Academic Integrity Policy.<br />\r\n<br />\r\nwhy",
                         "keep_previous_files" => false
                     ]
                 ]
