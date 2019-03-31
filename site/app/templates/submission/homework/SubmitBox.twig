@@ -362,24 +362,17 @@
             e.stopPropagation();
         });
 
-        var currentServerDateTime = $('#current-server-time').text();
-        var currentServerTime = currentServerDateTime.substr(currentServerDateTime.length - 5);
-        var currentHour = currentServerTime.substr(0, 2);
-        var currentMinute = currentServerTime.substr(3);
-
-        console.log(currentHour+":"+currentMinute);
-
         var currentDate = new Date();
         var currentSeconds = currentDate.getSeconds();
 
         var fetchTimeUrl = window.location.href + "&action=fetch_time";
 
-        console.log(fetchTimeUrl);
+        // console.log(fetchTimeUrl);
 
         var nextTimeFetch = 60 - currentSeconds;
 
         setTimeout(setTime, nextTimeFetch * 1000);
-        console.log("Next fetch in: "+nextTimeFetch);
+        // console.log("Next fetch in: "+nextTimeFetch);
 
         function setTime() {
             if(nextTimeFetch != 60) {
@@ -392,7 +385,7 @@
                 dataType: "json",
                 success: function(result){
                     $('#current-server-time').empty().text(result.data);
-                    console.log(result);
+                    // console.log(result);
                 }
             });
         }
