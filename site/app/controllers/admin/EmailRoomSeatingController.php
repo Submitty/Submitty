@@ -65,8 +65,8 @@ Please email your instructor with any questions or concerns.';
             }
 
             $email_data = [
-                "subject" => $this->replaceSeatingAssignmentMessagePlaceholders($seating_assignment_subject, $room_seating_json),
-						"body" => $this->replaceSeatingAssignmentMessagePlaceholders($seating_assignment_body, $room_seating_json)
+                "subject" => $this->replacePlaceholders($seating_assignment_subject, $room_seating_json),
+                "body" => $this->replacePlaceholders($seating_assignment_body, $room_seating_json)
             ];
 
             $this->core->getQueries()->createEmail($email_data, $user_email);
@@ -76,7 +76,7 @@ Please email your instructor with any questions or concerns.';
         return $this->core->redirect($this->core->buildUrl());
     }
 
-    private function replaceSeatingAssignmentMessagePlaceholders($seatingAssignmentMessage, $seatingAssignmentData) {
+    private function replacePlaceholders($message, $data) {
         
         $replaces = [
             'gradeable' => 'gradeable_id',
@@ -90,12 +90,12 @@ Please email your instructor with any questions or concerns.';
         ];   
 
         foreach($replaces as $key => $variable) {
-        	if(isset($seatingAssignmentData[$key])) {
-        		$seatingAssignmentMessage = str_replace('{$' . $variable . '}', $seatingAssignmentData[$key], $seatingAssignmentMessage); 
+        	if(isset($data[$key])) {
+        		$message = str_replace('{$' . $variable . '}', $data[$key], $message); 
         	}
         }
 
-        return $seatingAssignmentMessage; 
+        return $message; 
     }
 
 }

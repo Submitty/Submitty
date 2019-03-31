@@ -3771,16 +3771,7 @@ AND gc_id IN (
             [$gradeable->getId(), $submitter->getId(), $submitter->getId()]);
         return $this->course_db->row()['exists'] ?? false;
     }
-
-    /**
-      * Retruns true if a given student has a null registration for a course_email
-      *@param $user_id associated user id of the given user
-      */
-    public function hasDroppedCourse($user_id){
-      $this->course_db->query('SELECT registration_section from users WHERE user_id=?', [$user_id]);
-      return $this->course_db->row()['registration_section'] == null;
-    }
-
+    
     /**
      * Gets a list of emails for all active particpants in a course
      */
