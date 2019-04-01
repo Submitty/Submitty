@@ -14,16 +14,16 @@ function addConfetti(){
 
 	let ctx = canvas.getContext('2d');
 	let pieces = [];
-	let numberOfPieces = 1000;
+	let numberOfPieces = 2500;
 	let lastUpdateTime = Date.now();
 	let x_const = 0.25;
 	let max_times = 250;
 	let size_const = 10;
-	let gravity_const = 0.2;
+	let gravity_const = 0.25;
 
 	function randomColor () {
-				//    dark blue  sky blue   shail green navy blue  teal
-	    let colors = ['#0F47B6', '#8FD7FF', '#34CA34', '#FFFF40', '#FF2929', '#674EA7'];
+				//    dark blue  sky blue   shail green yellow    red      open-books purple
+	    let colors = ['#0F47B6', '#8FD7FF', '#34CA34', '#FFFF40', '#FF2929', '#9c84a4'];
 	    return colors[Math.floor(Math.random() * colors.length)];
 	}
 
