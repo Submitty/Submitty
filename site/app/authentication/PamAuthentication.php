@@ -18,7 +18,8 @@ use app\libraries\FileUtils;
  */
 class PamAuthentication extends AbstractAuthentication {
     public function authenticate() {
-        if ($this->user_id === null || $this->password === null ||
+        // Check for $this->user_id and $this->>password to be non empty
+        if ( empty($this->user_id)  || empty($this->password) ||
             $this->core->getQueries()->getSubmittyUser($this->user_id) === null) {
             return false;
         }

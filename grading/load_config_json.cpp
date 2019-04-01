@@ -517,9 +517,10 @@ void FormatGraphicsActions(nlohmann::json &whole_config) {
         validate_mouse_button(action);
       }
       //Mouse move has an optional end_x and end_y.
-      else if(action_name == "mouse move"){
+      else if(action_name == "mouse move" || action_name == "move mouse" || action_name == "move"){
         validate_integer(action, "end_x", true, 0, 0);
         validate_integer(action, "end_y", true, 0, 0);
+        action["action"] = "move mouse";
       }
       //gif requires a duration and can optionally have a name.
       else if(action_name == "gif"){

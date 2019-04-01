@@ -5,13 +5,34 @@ import sys
 import json
 from datetime import datetime
 
+def get_current_semester():
+	"""
+	Given today's date, generates a three character code that represents the semester to use for
+	courses such that the first half of the year is considered "Spring" and the last half is
+	considered "Fall". The "Spring" semester  gets an S as the first letter while "Fall" gets an
+	F. The next two characters are the last two digits in the current year.
+	:return:
+	"""
+	today = datetime.today()
+	semester = "f" + str(today.year)[-2:]
+	if today.month < 7:
+		semester = "s" + str(today.year)[-2:]
+	return semester
+
+def generatePossibleDatabases():
+	current = get_current_semester()
+	pre = 'submitty_' + current + '_'
+	path = "/var/local/submitty/courses/" + current
+	return [pre + name for name in sorted(os.listdir(path)) if os.path.isdir(path + "/" + name)]
 
 if(__name__ == "__main__"):
+
+
 	
 	num_args = len(sys.argv)
-	possible_databases = ['submitty_f18_blank', 'submitty_f18_development', 'submitty_f18_sample', 'submitty_f18_tutorial']
+	possible_databases = generatePossibleDatabases()
 
-	database = 'submitty_f18_blank'
+	database = possible_databases[0]
 
 	if(num_args > 2):
 		print('Too many arguments. Use --help for help.')
