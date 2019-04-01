@@ -622,6 +622,7 @@ class HomeworkView extends AbstractView {
             'show_incentive_message' => $show_incentive_message
         ]);
 
+        $this->core->getOutput()->addInternalJs('confetti.js');
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/CurrentVersionBox.twig', $param);
     }
 
