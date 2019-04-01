@@ -8,6 +8,7 @@ use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
 use app\models\gradeable\GradedGradeable;
+use app\models\gradeable\LateDayInfo;
 use app\models\gradeable\LateDays;
 use app\models\gradeable\Mark;
 use app\models\gradeable\Submitter;
@@ -978,7 +979,13 @@ class ElectronicGraderController extends GradingController {
         } else {
             $late_days_user = $graded_gradeable->getSubmitter()->getUser();
         }
-        $late_status = LateDays::fromUser($this->core, $late_days_user)->getLateDayInfoByGradeable($gradeable)->getStatus();
+
+        $ldi = LateDays::fromUser($this->core, $late_days_user)->getLateDayInfoByGradeable($gradeable);
+        if ($ldi === null) {
+            $late_status = LateDayInfo::STATUS_GOOD;  // Assume its good
+        } else {
+            $late_status = $ldi->getStatus();
+        }
 
         $logger_params = array(
             "course_semester" => $this->core->getConfig()->getSemester(),
