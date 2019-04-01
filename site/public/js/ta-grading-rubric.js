@@ -2033,6 +2033,8 @@ function onToggleEditMode(me) {
         return;
     }
 
+    setComponentInProgress(reopen_component_id);
+
     // Build a sequence to save open component
     let sequence = Promise.resolve();
     sequence = sequence.then(function () {
@@ -2305,12 +2307,20 @@ function reloadGradingComponent(component_id, editable = false, showMarkList = f
     let gradeable_id = getGradeableId();
     return ajaxGetComponentRubric(gradeable_id, component_id)
         .then(function (component) {
+            // Set the global mark list data for this component for conflict resolution
+            OLD_MARK_LIST[component_id] = component.marks;
+
             component_tmp = component;
             return ajaxGetGradedComponent(gradeable_id, component_id, getAnonId());
         })
         .then(function (graded_component) {
+            // Set the global graded component list data for this component to detect changes
+            OLD_GRADED_COMPONENT_LIST[component_id] = graded_component;
+
+            // Render the grading component with edit mode if enabled,
+            //  and 'true' to show the mark list
             return injectGradingComponent(component_tmp, graded_component, editable, showMarkList);
-        })
+        });
 }
 
 /**
@@ -2502,24 +2512,7 @@ function openComponentInstructorEdit(component_id) {
  * @return {Promise}
  */
 function openComponentGrading(component_id) {
-    let component_tmp = null;
-    let gradeable_id = getGradeableId();
-    return ajaxGetComponentRubric(gradeable_id, component_id)
-        .then(function (component) {
-            // Set the global mark list data for this component for conflict resolution
-            OLD_MARK_LIST[component_id] = component.marks;
-
-            component_tmp = component;
-            return ajaxGetGradedComponent(gradeable_id, component_id, getAnonId());
-        })
-        .then(function (graded_component) {
-            // Set the global graded component list data for this component to detect changes
-            OLD_GRADED_COMPONENT_LIST[component_id] = graded_component;
-            console.log()
-            // Render the grading component with edit mode if enabled,
-            //  and 'true' to show the mark list
-            return injectGradingComponent(component_tmp, graded_component, isEditModeEnabled(), true);
-        })
+    return reloadGradingComponent(component_id, isEditModeEnabled(), true)
         .then(function () {
             let page = getComponentPageNumber(component_id);
             if(page){
