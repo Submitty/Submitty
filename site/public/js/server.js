@@ -2618,11 +2618,6 @@ function toggleSidebar() {
 }
 
 $(document).ready(function() {
-    $("textarea, input[type='text']").change(function () {
-        if($.trim($(this).val()).length == 0){
-            $(this).val($.trim($(this).val()));
-        }
-    })
     //Collapsed sidebar tooltips with content depending on state of sidebar
     $('[data-toggle="tooltip"]').tooltip({
         position: { my: "right+0 bottom+0" },
