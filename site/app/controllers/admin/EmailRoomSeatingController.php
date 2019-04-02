@@ -42,7 +42,7 @@ Please email your instructor with any questions or concerns.';
     private function renderEmailTemplate(){
         $this->core->getOutput()->renderOutput(array('admin', 'EmailRoomSeating'), 'displayPage', EmailRoomSeatingController::DEFAULT_EMAIL_SUBJECT, EmailRoomSeatingController::DEFAULT_EMAIL_BODY);
     }
-    
+
     public function emailSeatingAssignments() {
         $seating_assignment_subject = $_POST["room_seating_email_subject"];
         $seating_assignment_body = $_POST["room_seating_email_body"];
@@ -77,7 +77,7 @@ Please email your instructor with any questions or concerns.';
     }
 
     private function replacePlaceholders($message, $data) {
-        
+
         $replaces = [
             'gradeable' => 'gradeable_id',
             'date' => 'exam_date',
@@ -87,14 +87,15 @@ Please email your instructor with any questions or concerns.';
             'zone' => 'exam_zone',
             'row' => 'exam_row',
             'seat' => 'exam_seat',
-        ];   
+        ];
 
         foreach($replaces as $key => $variable) {
         	if(isset($data[$key])) {
-        		$message = str_replace('{$' . $variable . '}', $data[$key], $message); 
+        		$message = str_replace('{$' . $variable . '}', $data[$key], $message);
         	}
         }
 
+				$message = str_replace('{$course_name}', $this->core->getConfig()->getCourse(), $message);
         return $message; 
     }
 
