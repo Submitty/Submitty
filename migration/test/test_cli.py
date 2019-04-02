@@ -193,7 +193,7 @@ class TestCli(unittest.TestCase):
             expected.config = 'config_object'
             self.assertEqual(expected, mock_method.call_args[0][0])
         finally:
-            shutil.rmtree(config_path)
+            shutil.rmtree(str(config_path))
 
     @patch('migrator.main.rollback')
     def test_run_rollback(self, mock_method):
