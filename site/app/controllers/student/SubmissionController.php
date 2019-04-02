@@ -265,19 +265,19 @@ class SubmissionController extends AbstractController {
     }
 
     private function notifyGradeInquiryOnCreate($graded_gradeable, $gradeable_id, $content){
-      //TODO: in the future, send notification to grader per component
+      //TODO: send notification to grader per component
       if($graded_gradeable->hasTaGradingInfo()){
         $course = $this->core->getConfig()->getCourse();
-        $gradeable_name = $graded_gradeable->getGradeable()->getName();
+        $gradeable_id = $graded_gradeable->getGradeable()->getId();
 
         $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
         $graders = $ta_graded_gradeable->getGraders();
         $submitter = $graded_gradeable->getSubmitter();
         $user_id = $this->core->getUser()->getId();
 
-        //TODO: build link in notification body
+        //TODO: build link in email body
         $notification_subject = "[Submitty $course] New Regrade Request";
-        $notification_body = "A student has submitted a grade inquiry for the gradeable $gradeable_name.\nStudent ID $user_id writes:\n$content\n\nPlease visit Submitty to follow up on this request";
+        $notification_body = "A student has submitted a grade inquiry for gradeable $gradeable_id.\nStudent ID $user_id writes:\n$content\n\nPlease visit Submitty to follow up on this request";
 
         $regrade_email_data = [
           "subject" => $notification_subject,
@@ -285,16 +285,19 @@ class SubmissionController extends AbstractController {
         ];
 
         foreach($graders as $grader){
+          if(!$grader->accessFullGrading()){
+            continue;
+          }
           $new_grade_inquiry_notification = new Notification($this->core, array('component' => 'grading', 'type' => 'grade_inquiry_creation', 'gradeable_id' => $gradeable_id, 'grader_id' => $grader->getId(), 'submitter_id' => $user_id, 'who_id' => $submitter->getId()));
           $this->core->getQueries()->pushSingleNotification($new_grade_inquiry_notification);
 
-          $grader_email = $grader->getEmail();
           $this->core->getQueries()->createEmail($regrade_email_data, $grader->getEmail());
         }
 
         if($submitter->isTeam()){
           $submitting_team = $submitter->getTeam()->getMemberUsers();
           foreach($submitting_team as $submitting_user){
+            $this->core->addErrorMessage($submitting_user->getId());
             if($submitting_user->getId() == $user_id){
               continue;
             }
@@ -312,7 +315,6 @@ class SubmissionController extends AbstractController {
 
       if($graded_gradeable->hasTaGradingInfo()){
         $course = $this->core->getConfig()->getCourse();
-        $gradeable_name = $graded_gradeable->getGradeable()->getName();
         $submitter = $graded_gradeable->getSubmitter();
         $user = $this->core->getUser();
 
@@ -373,6 +375,9 @@ class SubmissionController extends AbstractController {
 
           //TODO: only notify relevant graders
           foreach($graders as $grader){
+            if(!$grader->accessFullGrading()){
+              continue;
+            }
             $new_grade_inquiry_notification = new Notification($this->core, array('component' => 'grading', 'type' => 'grade_inquiry_reply', 'gradeable_id' => $gradeable_id, 'grader_id' => $grader->getId(), 'submitter_id' => $user->getId(), 'who_id' => $submitter->getId()));
             $this->core->getQueries()->pushSingleNotification($new_grade_inquiry_notification);
 
