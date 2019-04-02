@@ -118,7 +118,7 @@ class AuthenticationController extends AbstractController {
             }
             return false;
         }
-        $this->core->getAuthentication()->setUserId(trim($_POST['user_id'],' '));
+        $this->core->getAuthentication()->setUserId($_POST['user_id']);
         $this->core->getAuthentication()->setPassword($_POST['password']);
         if ($this->core->authenticate($_POST['stay_logged_in']) === true) {
             foreach ($_REQUEST as $key => $value) {
