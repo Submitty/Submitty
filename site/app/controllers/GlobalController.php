@@ -72,6 +72,13 @@ class GlobalController extends AbstractController {
                     "id" => "nav-sidebar-notifications",
                     "icon" => "fa-bell"
                 ]);
+                $sidebar_buttons[] = new Button($this->core, [
+                    "href" => $this->core->buildUrl(array('component' => 'navigation', 'page' => 'notification_settings')),
+                    "title" => "Notification Settings",
+                    "class" => "nav-row",
+                    "id" => "nav-sidebar-notifications-settings",
+                    "icon" => "fa-cogs"
+                ]);
             }
         }
 

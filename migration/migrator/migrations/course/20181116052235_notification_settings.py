@@ -11,3 +11,8 @@ def up(config, database, semester, course):
     database.execute("ALTER TABLE ONLY notification_settings ADD CONSTRAINT notification_settings_pkey PRIMARY KEY (user_id);")
     database.execute("ALTER TABLE ONLY notification_settings ADD CONSTRAINT notification_settings_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;")
     database.execute("INSERT INTO notification_settings SELECT user_id from users ON CONFLICT DO NOTHING")
+    database.execute("ALTER TABLE notification_settings ADD COLUMN IF NOT EXISTS merge_threads_email BOOLEAN;")
+    database.execute("ALTER TABLE notification_settings ADD COLUMN IF NOT EXISTS all_new_threads_email BOOLEAN;")
+    database.execute("ALTER TABLE notification_settings ADD COLUMN IF NOT EXISTS all_new_posts_email BOOLEAN;")
+    database.execute("ALTER TABLE notification_settings ADD COLUMN IF NOT EXISTS all_modifications_forum_email BOOLEAN;")
+    database.execute("ALTER TABLE notification_settings ADD COLUMN IF NOT EXISTS reply_in_post_thread_email BOOLEAN;")

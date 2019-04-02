@@ -228,10 +228,12 @@ if (empty($_REQUEST['component']) && $core->getUser() !== null) {
         $_REQUEST['component'] = 'home';
     }
 }
-
+//var_dump($_SESSION['1']);
 /********************************************
 * END LOGIN CODE
 *********************************************/
+//echo $core->getUser()->getId();
+//die();
 switch($_REQUEST['component']) {
     case 'admin':
         $control = new app\controllers\AdminController($core);

@@ -2467,12 +2467,85 @@ AND gc_id IN (
             $this->getTeamIdFromAnonId($anon_id);
     }
 
+
+    public function pushEmailNotification($notification) {
+
+        $post_content = "This thread was deleted already";
+        $url = "";
+        $course_name = "[Submitty ". $this->core->getConfig()->getCourse()." ".$this->core->getConfig()->getCourseName() . "]";
+        if ($notification->getType() != 'deleted') {
+            $id = json_decode($notification->getNotifyMetadata())[2];
+            $thread_id = Notification::getThreadIdIfExists($notification->getNotifyMetadata());
+            $post = $this->getPost($id);
+            $thread = $this->getThread($thread_id);
+
+            $url_object = json_decode($notification->getNotifyMetadata())[0];
+
+            $url = $this->core->buildUrl(json_decode(json_encode($url_object),true),true);
+
+            $post_content = "<h3>Thread ($thread_id) Title: {$thread[0]['title']}</h3><p>{$post['content']}</p> Click <a href='{$url}'>Here</a> to view it.";
+        }
+
+        $type = null;
+        $email_data = null;
+        $sql = null;
+        $param = array();
+        switch ($notification->getType()) {
+            case 'new_announcement':
+            case 'updated_announcement':
+                $sql = "SELECT user_email from users WHERE (user_group != 4 OR registration_section IS NOT null) and user_id !='{$notification->getNotifySource()}'";
+                break;
+            case 'reply':
+                $sql = "SELECT u.user_email from notification_settings n, posts p, users u where thread_id = {$thread_id} and 
+                        p.author_user_id = n.user_id and n.user_id = u.user_id and n.reply_in_post_thread_email = 'true' and
+                        u.user_id != '{$notification->getNotifySource()}' and (u.user_group != 4 OR u.registration_section IS NOT null) ";
+                $sql .= "UNION SELECT u.user_email from notification_settings n, users u where n.all_new_posts_email = 'true' and 
+                n.user_id = u.user_id and (u.user_group != 4 OR u.registration_section IS NOT null)";
+                break;
+
+            case 'new_thread':
+                $column = 'all_new_threads';//n.reply_in_post_email
+                //TODO: email notification for all_new_threads
+
+                break;
+            case 'merge_thread':
+                $column = 'merge_threads';
+                //TODO: email notificaiton for merge_thread
+                break;
+            case 'edited':
+            case 'deleted':
+            case 'undeleted':
+                $column = 'all_modifications_forum';
+                //TODO: email notificaiton for all_modifications_form
+                return;
+                break;
+        }
+        if (!empty($notification->getNotifyTarget())) {
+            if ($sql != NULL) {
+                $sql .= " UNION ";
+            }
+            $sql .= "SELECT user_email from users WHERE user_id = '{$notification->getNotifyTarget()}'";
+        }
+        if ($sql == null) {
+            return;
+        }
+        $email_data = [
+            "subject" => $course_name . " " . $notification->getNotifyContent(),
+            "body" => $post_content
+        ];
+        $this->course_db->query($sql,$param);
+
+        foreach($this->course_db->rows() as $student_email) {
+            $this->core->getQueries()->createEmail($email_data, $student_email["user_email"]);
+        }
+    }
     /**
      * Generate notifcation rows
      *
      * @param Notification $notification
      */
     public function pushNotification($notification){
+        $this->pushEmailNotification($notification);
         $params = array();
         $params[] = $notification->getComponent();
         $params[] = $notification->getNotifyMetadata();
@@ -2531,6 +2604,8 @@ AND gc_id IN (
         $this->course_db->query("INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id)
                     SELECT ?, ?, ?, current_timestamp, ?, user_id as to_user_id FROM ({$target_users_query}) as u {$ignore_self_query}",
                     array_merge($params, $not_send_users));
+
+
     }
 
     /**
