@@ -212,7 +212,7 @@ class TestCli(unittest.TestCase):
             expected.config = 'config_object'
             self.assertEqual(expected, mock_method.call_args[0][0])
         finally:
-            shutil.rmtree(config_path)
+            shutil.rmtree(str(config_path))
 
     @patch('migrator.main.status')
     def test_run_status(self, mock_method):
@@ -230,7 +230,7 @@ class TestCli(unittest.TestCase):
             expected.config = 'config_object'
             self.assertEqual(expected, mock_method.call_args[0][0])
         finally:
-            shutil.rmtree(config_path)
+            shutil.rmtree(str(config_path))
 
     @patch('migrator.main.create')
     def test_run_create(self, mock_method):
@@ -249,7 +249,7 @@ class TestCli(unittest.TestCase):
             expected.config = 'config_object'
             self.assertEqual(expected, mock_method.call_args[0][0])
         finally:
-            shutil.rmtree(config_path)
+            shutil.rmtree(str(config_path))
 
 
 if __name__ == '__main__':
