@@ -35,6 +35,8 @@ class Database:
 
         self.migration_table = get_migration_table(environment, self.DynamicBase)
 
+        self.open = True
+
     @staticmethod
     def get_connection_string(params):
         """
@@ -88,6 +90,7 @@ class Database:
         """Close the session and DB connnection."""
         self.session.close()
         self.engine.dispose()
+        self.open = False
 
     def has_table(self, table_name):
         """

@@ -73,11 +73,15 @@ def status(args):
                     database.migration_table.__tablename__
                 )
                 if not exists:
-                    print('Database for {} does not exist!'.format(environment))
+                    print('Could not find migration table for {}'.format(environment))
+                    database.close()
                     continue
                 print_status(database, environment, args)
+                database.close()
             except OperationalError:
-                print('Could not get status for migrations for {}'.format(environment))
+                print(
+                    'Could not get database for migrations for {}'.format(environment)
+                )
         else:
             course_dir = Path(args.config.submitty['submitty_data_dir'], 'courses')
             if not course_dir.exists():
@@ -97,7 +101,21 @@ def status(args):
                     )
                     try:
                         database = db.Database(args.config.database, environment)
+                        exists = database.engine.dialect.has_table(
+                            database.engine,
+                            database.migration_table.__tablename__
+                        )
+                        if not exists:
+                            print(
+                                'Could not find migration table for {}.{}'.format(
+                                    semester,
+                                    course
+                                )
+                            )
+                            database.close()
+                            continue
                         print_status(database, environment, args)
+                        database.close()
                     except OperationalError:
                         print('Could not get the status for the migrations '
                               'for {}.{}'.format(semester, course))
@@ -183,7 +201,11 @@ def handle_migration(args):
         args.course = None
         args.semester = None
         if environment in ['master', 'system']:
-            database = db.Database(args.config.database, environment)
+            try:
+                database = db.Database(args.config.database, environment)
+            except OperationalError:
+                print('Database does not exist for {}'.format(environment))
+                continue
             migrate_environment(database, environment, args)
             database.close()
 
@@ -191,26 +213,27 @@ def handle_migration(args):
             course_dir = Path(args.config.submitty['submitty_data_dir'], 'courses')
             if not course_dir.exists():
                 print("Could not find courses directory: {}".format(course_dir))
-            else:
-                for semester in os.listdir(str(course_dir)):
-                    for course in os.listdir(os.path.join(str(course_dir), semester)):
-                        if args.choose_course is not None and \
-                           [semester, course] != args.choose_course:
-                            continue
-                        args.semester = semester
-                        args.course = course
-                        args.config.database['dbname'] = 'submitty_{}_{}'.format(
-                            semester,
-                            course
-                        )
-                        try:
-                            database = db.Database(args.config.database, environment)
-                            migrate_environment(database, environment, args)
-                            database.close()
-                        except OperationalError:
-                            print("Submitty Database Migration Warning:  "
-                                  "Database does not exist for "
-                                  "semester={} course={}".format(semester, course))
+                continue
+            for semester in os.listdir(str(course_dir)):
+                for course in os.listdir(os.path.join(str(course_dir), semester)):
+                    cond1 = args.choose_course is not None
+                    cond2 = [semester, course] != args.choose_course
+                    if cond1 and cond2:
+                        continue
+                    args.semester = semester
+                    args.course = course
+                    args.config.database['dbname'] = 'submitty_{}_{}'.format(
+                        semester,
+                        course
+                    )
+                    try:
+                        database = db.Database(args.config.database, environment)
+                        migrate_environment(database, environment, args)
+                        database.close()
+                    except OperationalError:
+                        print("Submitty Database Migration Warning:  "
+                              "Database does not exist for "
+                              "semester={} course={}".format(semester, course))
 
 
 def migrate_environment(database, environment, args):
@@ -352,6 +375,7 @@ def noop(*_):
 def run_migration(database, migration, environment, args):
     """Run the actual migration/rollback function for the migration module."""
     print("  {}{}".format(migration['id'], ' (FAKE)' if args.fake else ''))
+
     if not args.fake:
         call_func(
             getattr(migration['module'], args.direction, noop),
