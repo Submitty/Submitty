@@ -211,6 +211,31 @@ DONE
             self.assertIsNotNone(row.commit_time)
             down_file = expected_rows[i] + '.py.down.txt'
             self.assertFalse(Path(self.dir, down_file).exists())
+    
+    def test_fake_rollback(self):
+        environment = 'system'
+        self.setup_test(environment)
+        args = Namespace()
+        args.direction = 'down'
+        args.config = None
+        args.set_fake = True
+
+        create_migration(self.database, self.dir, environment, '01_test1.py')
+        create_migration(self.database, self.dir, environment, '02_test1.py')
+        migrator.main.migrate_environment(self.database, environment, args)
+        self.assertEqual("""Running down migrations for system...  02_test1 (FAKE)
+DONE
+""", sys.stdout.getvalue())
+        rows = self.database.session.query(self.database.migration_table).all()
+        expected_rows = ['01_test1', '02_test1']
+        self.assertEqual(len(rows), len(expected_rows))
+        for i in range(len(rows)):
+            row = rows[i]
+            self.assertEqual(expected_rows[i], row.id)
+            self.assertEqual(1 if i < 1 else 0, row.status)
+            self.assertIsNotNone(row.commit_time)
+            down_file = expected_rows[i] + '.py.down.txt'
+            self.assertFalse(0, Path(self.dir, down_file).exists())
 
 
 if __name__ == '__main__':

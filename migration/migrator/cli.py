@@ -2,7 +2,7 @@
 
 from argparse import ArgumentParser
 from pathlib import Path
-from . import VERSION, get_all_environments, main
+from . import VERSION, get_all_environments, get_environments, main
 from .config import Config
 
 
@@ -73,11 +73,7 @@ def parse_args(argv, config_path=None):
     )
 
     args = parser.parse_args(argv)
-    environments = []
-    for env in get_all_environments():
-        if env in args.environments:
-            environments.append(env)
-    args.environments = environments
+    args.environments = get_environments(args.environments)
     return args
 
 
