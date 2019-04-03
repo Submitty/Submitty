@@ -210,6 +210,113 @@ class ElectronicGraderView extends AbstractView {
         ]);
     }
 
+    public function statPage($users) {
+        
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+
+        $return = <<<HTML
+        
+		<div class="content_upload_content">
+
+HTML;
+        $this->core->getOutput()->addBreadcrumb("Bulk Upload Forensics", $this->core->buildUrl(array('component' => 'submission', 'action' => 'stat_page', 'gradeable_id' => $gradeable_id)));
+        
+		$return .= <<<HTML
+			<div style="padding-left:20px;padding-bottom: 10px;border-radius:3px;padding-right:20px;">
+				<table class="table table-striped table-bordered persist-area" id="content_upload_table">
+					<tr>			
+				        <td style = "cursor:pointer;" width="25%" id="user_down">User &darr;</td>
+				        <td style = "cursor:pointer;" width="25%" id="upload_down">Upload Timestamp</td>
+				        <td style = "cursor:pointer;" width="25%" id="submission_down">Submission Timestamp</td>
+				        <td style = "cursor:pointer;" width="25%" id="filepath_down">Filepath</td>
+					</tr>
+HTML;
+
+		foreach($users as $user => $details){
+			$first_name = htmlspecialchars($details["first_name"]);
+			$last_name = htmlspecialchars($details["last_name"]);
+            $upload_timestamp = $details["upload_time"];
+            $submit_timestamp = $details["submit_time"];
+            $filepath = htmlspecialchars($details["file"]);
+            
+			$return .= <<<HTML
+			<tbody>
+				<tr>
+					<td>{$last_name}, {$first_name}</td>
+                    <td>{$upload_timestamp}</td>
+                    <td>{$submit_timestamp}</td>
+                    <td>{$filepath}</td>
+				</tr>
+			</tbody>
+HTML;
+			
+		}
+		
+		$return .= <<<HTML
+				</table>
+			</div>
+			</div>
+
+			<script>
+				$("td").click(function(){
+					if($(this).attr('id')=="user_down"){
+						sortTable(0);
+					}
+					if($(this).attr('id')=="upload_down"){
+						sortTable(1);
+					}
+					if($(this).attr('id')=="submission_down"){
+						sortTable(2);
+					}
+					if($(this).attr('id')=="filepath_down"){
+						sortTable(3);
+					}
+					
+				});
+				
+				function sortTable(sort_element_index){
+					var table = document.getElementById("content_upload_table");
+					var switching = true;
+					while(switching){
+						switching=false;
+						var rows = table.getElementsByTagName("TBODY");
+						for(var i=1;i<rows.length-1;i++){
+
+							var a = rows[i].getElementsByTagName("TR")[0].getElementsByTagName("TD")[sort_element_index];
+							var b = rows[i+1].getElementsByTagName("TR")[0].getElementsByTagName("TD")[sort_element_index];
+                            // sorted alphabetically by last name or by earliest time
+							if((sort_element_index >= 0 && sort_element_index <= 3) ? a.innerHTML>b.innerHTML : parseInt(a.innerHTML) < parseInt(b.innerHTML)){
+								rows[i].parentNode.insertBefore(rows[i+1],rows[i]);
+								switching=true;
+							}
+						}
+					}
+
+					var row0 = table.getElementsByTagName("TBODY")[0].getElementsByTagName("TR")[0];
+					var headers = row0.getElementsByTagName("TD");
+					
+					for(var i = 0;i<headers.length;i++){
+						var index = headers[i].innerHTML.indexOf(' ↓');
+						
+						if(index> -1){
+
+							headers[i].innerHTML = headers[i].innerHTML.substr(0, index);
+							break;
+						}
+					}
+
+					headers[sort_element_index].innerHTML = headers[sort_element_index].innerHTML + ' ↓';
+
+				}
+
+			</script>
+HTML;
+		return $return;
+
+	}
+
+    
+
     /**
      * @param Gradeable $gradeable
      * @param GradedGradeable[] $graded_gradeables,
