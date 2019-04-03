@@ -211,13 +211,15 @@ class ElectronicGraderView extends AbstractView {
     }
 
     public function statPage($users) {
+        
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
 
-		$return = <<<HTML
+        $return = <<<HTML
         
 		<div class="content_upload_content">
 
 HTML;
-        $this->core->getOutput()->addBreadcrumb("Bulk Upload Forensics", $this->core->buildUrl(array('component' => 'submission', 'page' => 'statPage')));
+        $this->core->getOutput()->addBreadcrumb("Bulk Upload Forensics", $this->core->buildUrl(array('component' => 'submission', 'action' => 'stat_page', 'gradeable_id' => $gradeable_id)));
         
 		$return .= <<<HTML
 			<div style="padding-left:20px;padding-bottom: 10px;border-radius:3px;padding-right:20px;">
@@ -231,7 +233,7 @@ HTML;
 HTML;
 
 		foreach($users as $user => $details){
-			$first_name = $details["first_name"];
+			$first_name = $details["first_name"]; //htmlspecialchars($details["first_name"];
 			$last_name = $details["last_name"];
             $upload_timestamp = $details["upload_time"];
             $submit_timestamp = $details["submit_time"];
