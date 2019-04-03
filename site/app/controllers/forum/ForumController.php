@@ -784,8 +784,9 @@ class ForumController extends AbstractController {
             }
             // Fetch additional information
             foreach ($output as &$_post) {
-                $_post['user_info'] = empty($_post['user']) ? array('first_name' => 'Anonymous', 'last_name' => '', 'email' => '') : $this->core->getQueries()->getDisplayUserInfoFromUserId($_post['user']);
-                $_post['is_staff_post'] = empty($_post['user']) ? false : $this->core->getQueries()->isStaffPost($_post['user']);
+                $emptyUser = empty($_post['user']);
+                $_post['user_info'] = $emptyUser ? array('first_name' => 'Anonymous', 'last_name' => '', 'email' => '') : $this->core->getQueries()->getDisplayUserInfoFromUserId($_post['user']);
+                $_post['is_staff_post'] = $emptyUser ? false : $this->core->getQueries()->isStaffPost($_post['user']);
             }
         } else {
             $output['error'] = "You do not have permissions to do that.";
