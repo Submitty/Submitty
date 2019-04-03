@@ -132,12 +132,11 @@ function openMarkConflictPopup(component_id, conflictMarks) {
                                     });
                             } else {
                                 // If the mark was deleted from the server, but we want to keep our changes,
-                                //  we need to re-add the mark, then save it to preserve the 'publish' setting
+                                //  we need to re-add the mark
                                 if (isMarkServerDeleted(id)) {
-                                    return ajaxAddNewMark(gradeable_id, component_id, mark.title, mark.points)
+                                    return ajaxAddNewMark(gradeable_id, component_id, mark.title, mark.points, mark.publish)
                                         .then(function (data) {
                                             mark.id = data.mark_id;
-                                            return ajaxSaveMark(gradeable_id, component_id, data.mark_id, mark.title, mark.points, mark.publish);
                                         });
                                 } else {
                                     return ajaxSaveMark(gradeable_id, component_id, id, mark.title, mark.points, mark.publish);

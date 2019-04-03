@@ -29,7 +29,7 @@
             </thead>
             <tbody>
                 {% for file in files %}
-                    {% if use_qr_codes and file["user_id"]["valid"] == false %}
+                    {% if use_qr_codes and file["valid"] == false %}
                         <tr class="tr tr-vertically-centered" style="background-color:pink;">
                     {% else %}
                         <tr class="tr tr-vertically-centered" >
@@ -39,15 +39,9 @@
                         <td>
                             {{ file.filename_full }}
                             <br>
-                            {% if not use_images %}
-                                <object data="{{ file.url }}" type="application/pdf" width="100%" height="300">
-                                    alt : <a href="{{ file.url }}">pdf.pdf</a>
-                                </object>
-                            {% else %}
-                                <div class="scrollable-image" >
-                                    <img src="{{ file.cover_image.url }}" width="100%"/>
-                                </div>
-                            {% endif %}
+                            <div class="scrollable-image" >
+                                <img src="{{ file.cover_image.url }}" width="100%"/>
+                            </div>
                         </td>
                         <td>
                             <a onclick="openFile('{{ file.url_full }}')"><i class="fas fa-window-restore" aria-hidden="true" title="Pop out the full PDF in a new window"></i></a>
@@ -56,7 +50,7 @@
                             <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
                             <div id="users_{{ loop.index }}">
                                 {% if use_qr_codes %}
-                                    <input type="text" id="bulk_user_id_{{ loop.index }}[0]" value ="{{ file["user_id"]["id"] }}"/>
+                                    <input type="text" id="bulk_user_id_{{ loop.index }}[0]" value ="{{ file["id"] }}"/>
                                 {% else %}
                                     <input type="text" id="bulk_user_id_{{ loop.index }}[0]" value =""/>
                                 {% endif %}
