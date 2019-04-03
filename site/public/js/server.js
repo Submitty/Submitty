@@ -1964,7 +1964,7 @@ function showHistory(post_id) {
                     var first_name = post['user_info']['first_name'].trim();
                     var last_name = post['user_info']['last_name'].trim();
                     var author_user_id = post['user'];
-                    var visible_username = first_name + " " + last_name.substr(0 , 1) + ".";
+                    var visible_username = first_name + " " + ((last_name.length == 0) ? '' : (last_name.substr(0 , 1) + "."));
                     var info_name = first_name + " " + last_name + " (" + author_user_id + ")";
                     var visible_user_json = JSON.stringify(visible_username);
                     info_name = JSON.stringify(info_name);
