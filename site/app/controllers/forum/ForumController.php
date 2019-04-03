@@ -522,6 +522,8 @@ class ForumController extends AbstractController {
             $status_edit_thread = $this->editThread();
             $status_edit_post   = $this->editPost();
             $any_changes = false;
+            $isError = false;
+            $messageString = '';
              // Author of first post and thread must be same
             if(is_null($status_edit_thread) && is_null($status_edit_post)) {
                 $this->core->addErrorMessage("No data submitted. Please try again.");
@@ -529,32 +531,44 @@ class ForumController extends AbstractController {
                 $type = is_null($status_edit_thread)?"Post":"Thread";
                 if($status_edit_thread || $status_edit_post) {
                     //$type is true
-                    $this->core->addSuccessMessage("{$type} updated successfully.");
+                    $messageString = "{$type} updated successfully.";
                     $any_changes = true;
                 } else {
-                    $this->core->addErrorMessage("{$type} updation failed. Please try again.");
+                    $isError = true;
+                    $messageString = "{$type} updation failed. Please try again.";
                 }
             } else {
                 if($status_edit_thread && $status_edit_post) {
-                    $this->core->addSuccessMessage("Thread and post updated successfully.");
+                    $messageString = "Thread and post updated successfully.";
                     $any_changes = true;
                 } else {
                     $type = ($status_edit_thread)?"Thread":"Post";
                     $type_opposite = (!$status_edit_thread)?"Thread":"Post";
+                    $isError = true;
                     if($status_edit_thread || $status_edit_post) {
                         //$type is true
-                        $this->core->addErrorMessage("{$type} updated successfully. {$type_opposite} updation failed. Please try again.");
+                        $messageString = "{$type} updated successfully. {$type_opposite} updation failed. Please try again.";
                         $any_changes = true;
                     } else {
-                        $this->core->addErrorMessage("Thread and Post updation failed. Please try again.");
+                        $messageString = "Thread and Post updation failed. Please try again.";
                     }
                 }
             }
             if($any_changes) {
                 $post = $this->core->getQueries()->getPost($post_id);
                 $post_author = $post['author_user_id'];
-                $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'edited', 'thread_id' => $thread_id, 'post_id' => $post_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
-                $this->core->getQueries()->pushNotification($notification);
+                if($post['anonymous'] && !$this->modifyAnonymous($post_author)) {
+                    $messageString = "You do not have permissions to do that.";
+                    $isError = true;
+                } else {
+                    $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'edited', 'thread_id' => $thread_id, 'post_id' => $post_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
+                    $this->core->getQueries()->pushNotification($notification);
+                }
+            }
+            if($isError) {
+                $this->core->addErrorMessage($messageString);
+            } else {
+                $this->core->addSuccessMessage($messageString);
             }
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
         }
@@ -775,15 +789,20 @@ class ForumController extends AbstractController {
         return $this->core->getOutput()->getOutput();
     }
 
+    public function modifyAnonymous($author) {
+        return $this->core->getUser()->accessFullGrading() || $this->core->getUser()->getId() === $author;
+    }
+
     public function getEditPostContent(){
         $post_id = $_POST["post_id"];
         if($this->checkPostEditAccess($post_id) && !empty($post_id)) {
             $result = $this->core->getQueries()->getPost($post_id);
             $output = array();
-            $output['user'] = $result["author_user_id"];
             $output['post'] = $result["content"];
             $output['post_time'] = $result['timestamp'];
             $output['anon'] = $result['anonymous'];
+            $output['change_anon'] = $this->modifyAnonymous($result["author_user_id"]);
+            $output['user'] = (($output['change_anon'] && $output['anon']) || !$output['anon']) ? $result["author_user_id"] : 'Anonymous';
             if(isset($_POST["thread_id"])) {
                 $this->getThreadContent($_POST["thread_id"], $output);
             }
@@ -793,6 +812,7 @@ class ForumController extends AbstractController {
         }
         return $this->core->getOutput()->getOutput();
     }
+
 
     private function getThreadContent($thread_id, &$output){
         $result = $this->core->getQueries()->getThread($thread_id)[0];

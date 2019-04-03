@@ -1593,9 +1593,10 @@ function editPost(post_id, thread_id, shouldEditThread) {
                     $('#messages').append(message);
                     return;
                 }
-                var user_id = escape(json.user);
                 var post_content = json.post;
                 var anon = json.anon;
+                var change_anon = json.change_anon;
+                var user_id = escapeSpecialChars(json.user);
                 var time = Date.parse(json.post_time);
                 if(!time) {
                     // Timezone suffix ":00" might be missing
@@ -1611,7 +1612,12 @@ function editPost(post_id, thread_id, shouldEditThread) {
                 contentBox.value = post_content;
                 document.getElementById('edit_post_id').value = post_id;
                 document.getElementById('edit_thread_id').value = thread_id;
-                $('#thread_post_anon_edit').prop('checked', anon);
+                if(change_anon) {
+                    $('#thread_post_anon_edit').prop('checked', anon);
+                } else {
+                    $('label[for=Anon]').remove();
+                    $('#thread_post_anon_edit').remove();
+                }
                 $('#edit-user-post').css('display', 'block');
 
                 $(".cat-buttons input").prop('checked', false);
