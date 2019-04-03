@@ -18,7 +18,7 @@ Listed below is your seating assignment for the upcoming exam {$gradeable_id} on
 Location: {$exam_building}
 Exam Room: {$exam_room}
 Zone: {$exam_zone}
-Row: {$exam_room}
+Row: {$exam_row}
 Seat: {$exam_seat}
 
 Please email your instructor with any questions or concerns.';
