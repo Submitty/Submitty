@@ -1,6 +1,6 @@
 ### Please check if the PR fulfills these requirements:
 
-* [ ] The PR title and message follows our guidelines
+* [ ] The PR title and message follows our [guidelines](https://submitty.org/developer/how_to_contribute)
 * [ ] Tests for the changes have been added/updated (if possible)
 * [ ] Documentation has been updated/added if relevant
 
