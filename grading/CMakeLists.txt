@@ -15,18 +15,17 @@ set (GRADINGCODE ${SUBMITTY_INSTALL_DIR}/src)
 
 add_library(submitty_grading
   ${GRADINGCODE}/grading/load_config_json.cpp
-  ${GRADINGCODE}/grading/TestCase.cpp 
+  ${GRADINGCODE}/grading/TestCase.cpp
   ${GRADINGCODE}/grading/JUnitGrader.cpp
   ${GRADINGCODE}/grading/DrMemoryGrader.cpp
   ${GRADINGCODE}/grading/PacmanGrader.cpp
-  ${GRADINGCODE}/grading/myersDiff.cpp 
-  ${GRADINGCODE}/grading/tokens.cpp 
-  ${GRADINGCODE}/grading/tokenSearch.cpp 
-  ${GRADINGCODE}/grading/diffNaive.cpp 
+  ${GRADINGCODE}/grading/myersDiff.cpp
+  ${GRADINGCODE}/grading/tokens.cpp
+  ${GRADINGCODE}/grading/tokenSearch.cpp
   ${GRADINGCODE}/grading/clean.cpp 
   ${GRADINGCODE}/grading/difference.cpp
-  ${GRADINGCODE}/grading/execute.cpp 
-  ${GRADINGCODE}/grading/execute_limits.cpp 
+  ${GRADINGCODE}/grading/execute.cpp
+  ${GRADINGCODE}/grading/execute_limits.cpp
   ${GRADINGCODE}/grading/error_message.cpp
   ${GRADINGCODE}/grading/window_utils.cpp
 )
@@ -43,5 +42,3 @@ set_property(TARGET submitty_grading APPEND_STRING PROPERTY COMPILE_FLAGS "-g -s
 include_directories(${GRADINGCODE})
 
 ###################################################################################
-
-

@@ -1911,7 +1911,9 @@ function generateCodeMirrorBlocks(container_element) {
     if (lineCount == 1) {
         editor0.setSize("100%", (editor0.defaultTextHeight() * 2) + "px");
     } else {
-        editor0.setSize("100%", "max-content");
+        //Default height for CodeMirror is 300px... 500px looks good
+        var h = (editor0.defaultTextHeight()) * lineCount + 15;
+        editor0.setSize("100%", (h > 500 ? 500 : h) + "px");
     }
 
     editor0.setOption("theme", "eclipse");
