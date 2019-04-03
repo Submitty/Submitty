@@ -455,7 +455,9 @@ function setUserSubmittedCode(gradeable_id, changed) {
                             //console.log(data.ci[users_color]);
                             for(var pos in data.ci[users_color]) {
                                 var element = data.ci[users_color][pos];
-                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {css: "border: 1px solid black; background: " + element[4]});   
+                                console.log(element[5]);
+                                console.log(element[6]);
+                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_prev_color": element[4], "data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; background: " + element[4]});   
                             }
                         }
                         $('.CodeMirror')[0].CodeMirror.refresh();
@@ -512,7 +514,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                             //console.log(data.ci[users_color]);
                             for(var pos in data.ci[users_color]) {
                                 var element = data.ci[users_color][pos];
-                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});   
+                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});   
                             }
                         }
                         	$('.CodeMirror')[0].CodeMirror.refresh();
@@ -544,7 +546,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                             for(var users_color in data.ci) {
                             for(var pos in data.ci[users_color]) {
                                 var element = data.ci[users_color][pos];
-                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});   
+                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});   
                             }
                         }   
                         	$('.CodeMirror')[0].CodeMirror.refresh();
@@ -565,8 +567,8 @@ function setUserSubmittedCode(gradeable_id, changed) {
 }
 
 function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user_1_match_end, where, color , span_clicked, popup_user_2, popup_version_user_2) {
-    console.log(user_1_match_start);
-    console.log(user_1_match_end);
+    //console.log(user_1_match_start);
+    //console.log(user_1_match_end);
     var form = $("#users_with_plagiarism");
     var user_id_1 = $('[name="user_id_1"]', form).val();
     var version_user_1 = $('[name="version_user_1"]', form).val();
@@ -576,27 +578,16 @@ function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user
         user_id_2 = JSON.parse($('[name="user_id_2"]', form).val())["user_id"];
         version_user_2 = JSON.parse($('[name="user_id_2"]', form).val())["version"];
     }
-    $('[name="code_box_1"]').find('span').each(function(){
-        var attr = $(this).css('background-color');
-        if (typeof attr !== typeof undefined && attr !== false && attr == "rgb(255, 0, 0)") {
-            $(this).css('background-color',"#ffa500");
-        }
-    });
-    $('[name="code_box_2"]').find('span').each(function(){
-        var attr = $(this).css('background-color');
-        if (typeof attr !== typeof undefined && attr !== false && attr == "rgb(255, 0, 0)") {
-            $(this).css('background-color',"#ffa500");
-        }
-    });
+    
     var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_matches_for_clicked_match',
                         'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'start':user_1_match_start.line, 'end': user_1_match_end.line});
 
-    console.log(user_1_match_start.line);
+    //console.log(user_1_match_start.line);
 
     $.ajax({
         url: url,
         success: function(data) {
-            console.log(data);
+            //console.log(data);
             data = JSON.parse(data);
             if(data.error){
                 alert(data.error);
@@ -636,7 +627,7 @@ function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user
                 var to_append='';
 
                 $.each(data, function(i,match){
-                    console.log(match);
+                    //console.log(match);
                     to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick=getMatchesForClickedMatch("'+gradeable_id+'",event,'+user_1_match_start.line+','+ user_1_match_end.line+',"popup","'+ color+ '","","'+match[0]+'",'+match[1]+');>'+ match[3]+' '+match[4]+' &lt;'+match[0]+'&gt; (version:'+match[1]+')</div></li>';
                 });
                 to_append = $.parseHTML(to_append);
