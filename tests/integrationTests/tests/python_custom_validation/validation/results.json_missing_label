@@ -1,0 +1,65 @@
+{
+    "testcases": [
+        {
+            "points_awarded": 2,
+            "test_name": "Test 1 Compilation"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test02/STDOUT.txt",
+                    "description": "STDOUT.txt",
+                    "messages": [
+                        {
+                            "message": "ERROR: total is not included",
+                            "type": "failure"
+                        }
+                    ]
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 2 Sum of 5 random numbers"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test03/STDOUT.txt",
+                    "description": "STDOUT.txt",
+                    "messages": [
+                        {
+                            "message": "ERROR: total is not included",
+                            "type": "failure"
+                        }
+                    ]
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 3 Sum of 10 random numbers"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test04/STDOUT_0.txt",
+                    "description": "STDOUT_0.txt",
+                    "messages": [
+                        {
+                            "message": "ERROR: total is not included",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "actual_file": "test04/STDOUT_1.txt",
+                    "description": "STDOUT_1.txt"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 4 Is it random?  (Is it different on each run?)"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Test 5 Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}

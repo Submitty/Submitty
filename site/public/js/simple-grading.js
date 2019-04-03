@@ -485,60 +485,62 @@ function setupSimpleGrading(action) {
         child.css("outline", "3px dashed " + highlight_color);
     }
 
-    // movement keybinds
+    // this is for unchanged key(movement in lab section, enter and tab & shift-tab)
     $(document).on("keydown", function(event) {
-        if(!$("#student-search-input").is(":focus")) {
-            // allow refocusing on the input field by pressing enter when it is not the focus
-            if(event.keyCode == 13) {
-                dont_focus = false;
-            }
-            // movement commands
-            else if([37,38,39,40,9].includes(event.keyCode)) { // Arrow keys/tab unselect, bounds check, then move and reselect
-                var child = $(child_elems[child_idx]);
-                if(action == 'lab') {
-                    child.css("outline", "");
+        if(action != "lab" || event.keyCode == 13 || event.keyCode == 9){
+            if(!$("#student-search-input").is(":focus")) {
+                // allow refocusing on the input field by pressing enter when it is not the focus
+                if(event.keyCode == 13) {
+                    dont_focus = false;
                 }
-                else {
-                    child.children("input").css("outline", "");
-                }
-                if(event.keyCode == 37 || (event.keyCode == 9 && event.shiftKey)) { // Left arrow/shift+tab
-                    if(event.keyCode == 9 && event.shiftKey) {
-                        event.preventDefault();
+                // movement commands
+                else if([37,38,39,40,9].includes(event.keyCode)) { // Arrow keys/tab unselect, bounds check, then move and reselect
+                    var child = $(child_elems[child_idx]);
+                    if(action == 'lab') {
+                        child.css("outline", "");
                     }
-                    if(child_idx > 0 && (action == 'lab' || (event.keyCode == 9 && event.shiftKey) || child.children("input")[0].selectionStart == 0)) {
-                        child_idx--;
+                    else {
+                        child.children("input").css("outline", "");
                     }
-                }
-                else if(event.keyCode == 39 || event.keyCode == 9) {                // Right arrow/tab
-                    if(event.keyCode == 9) {
-                        event.preventDefault();
-                    }
-                    if(child_idx < child_elems.length - 1 && (action == 'lab' || event.keyCode == 9 || child.children("input")[0].selectionEnd == child.children("input")[0].value.length)) {
-                        child_idx++;
-                    }
-                }
-                else {
-                    event.preventDefault();
-                    if(event.keyCode == 38) {               // Up arrow
-                        if(table_row > 0) {
-                            table_row--;
+                    if(event.keyCode == 37 || (event.keyCode == 9 && event.shiftKey)) { // Left arrow/shift+tab
+                        if(event.keyCode == 9 && event.shiftKey) {
+                            event.preventDefault();
+                        }
+                        if(child_idx > 0 && (action == 'lab' || (event.keyCode == 9 && event.shiftKey) || child.children("input")[0].selectionStart == 0)) {
+                            child_idx--;
                         }
                     }
-                    else if(table_row < num_rows - 1) {     // Down arrow
-                        table_row++;
+                    else if(event.keyCode == 39 || event.keyCode == 9) {                // Right arrow/tab
+                        if(event.keyCode == 9) {
+                            event.preventDefault();
+                        }
+                        if(child_idx < child_elems.length - 1 && (action == 'lab' || event.keyCode == 9 || child.children("input")[0].selectionEnd == child.children("input")[0].value.length)) {
+                            child_idx++;
+                        }
                     }
-                    child_elems = $("tr[data-row=" + table_row + "]").find(search_selector);
-                }
-                child = $(child_elems[child_idx]);
-                if(action == 'lab') {
-                    child.css("outline", "3px dashed " + highlight_color);
-                }
-                else {
-                    child.children("input").css("outline", "3px dashed " + highlight_color).focus();
-                }
+                    else {
+                        event.preventDefault();
+                        if(event.keyCode == 38) {               // Up arrow
+                            if(table_row > 0) {
+                                table_row--;
+                            }
+                        }
+                        else if(table_row < num_rows - 1) {     // Down arrow
+                            table_row++;
+                        }
+                        child_elems = $("tr[data-row=" + table_row + "]").find(search_selector);
+                    }
+                    child = $(child_elems[child_idx]);
+                    if(action == 'lab') {
+                        child.css("outline", "3px dashed " + highlight_color);
+                    }
+                    else {
+                        child.children("input").css("outline", "3px dashed " + highlight_color).focus();
+                    }
 
-                if((event.keyCode == 38 || event.keyCode == 40) && !child.isInViewport()) {
-                    $('html, body').animate( { scrollTop: child.offset().top - $(window).height()/2}, 50);
+                    if((event.keyCode == 38 || event.keyCode == 40) && !child.isInViewport()) {
+                        $('html, body').animate( { scrollTop: child.offset().top - $(window).height()/2}, 50);
+                    }
                 }
             }
         }
@@ -550,13 +552,83 @@ function setupSimpleGrading(action) {
             $("#student-search-input").focus();
         }
     });
+
+    //this is for changeable movement key in lab section
+    function movement(direction,isLab){
+        if(!$("#student-search-input").is(":focus")) {
+            // Arrow keys unselect, bounds check, then move and reselect
+            var child = $(child_elems[child_idx]);
+            if(isLab) {
+                child.css("outline", "");
+            }
+            else {
+                child.children("input").css("outline", "");
+            }
+            if(direction == "left" ) {                      // Left arrow
+                if(child_idx > 0 ) {
+                    child_idx--;
+                }
+            }
+            else if(direction == "right" ) {                // Right arrow
+                if(child_idx < child_elems.length - 1 ) {
+                    child_idx++;
+                }
+            }
+            else{
+                if(direction == "up"  ) {                   // Up arrow
+                    if(table_row > 0) {
+                        table_row--;
+                    }
+                }
+                else if(table_row < num_rows - 1) {         // Down arrow
+                    table_row++;
+                }
+                child_elems = $("tr[data-row=" + table_row + "]").find(search_selector);
+            }
+            child = $(child_elems[child_idx]);
+            if(isLab) {
+                child.css("outline", "3px dashed " + highlight_color);
+            }
+            else {
+                child.children("input").css("outline", "3px dashed " + highlight_color).focus();
+            }
+
+            if((direction == "up" || direction == "down") && !child.isInViewport()) {
+                $('html, body').animate( { scrollTop: child.offset().top - $(window).height()/2}, 50);
+            }
+            
+        }
+    }
     
-    // register empty function locked event handlers for movement keybinds so they show up in the hotkeys menu
+    // register empty function locked event handlers for "enter" so they show up in the hotkeys menu
     registerKeyHandler({name: "Search", code: "Enter", locked: true}, function() {});
-    registerKeyHandler({name: "Move Right", code: "ArrowRight", locked: true}, function() {});
-    registerKeyHandler({name: "Move Left", code: "ArrowLeft", locked: true}, function() {});
-    registerKeyHandler({name: "Move Up", code: "ArrowUp", locked: true}, function() {});
-    registerKeyHandler({name: "Move Down", code: "ArrowDown", locked: true}, function() {});
+    // make arrow keys in lab section changeable now
+    if(action == 'lab') {
+        registerKeyHandler({name: "Move Right", code: "ArrowRight", locked: false}, function(event) {
+            event.preventDefault();
+            movement("right",true);
+        });
+        registerKeyHandler({name: "Move Left", code: "ArrowLeft", locked: false}, function(event) {
+            event.preventDefault();
+            movement("left",true);
+        });
+        registerKeyHandler({name: "Move Up", code: "ArrowUp", locked: false}, function(event) {
+            event.preventDefault();
+            movement("up",true);
+        });
+        registerKeyHandler({name: "Move Down", code: "ArrowDown", locked: false}, function(event) {
+            event.preventDefault();
+            movement("down",true);
+        });
+    }
+    //the arrow keys in test section remain unchangeable as setting up other keys will disturb the input
+    else{
+        registerKeyHandler({name: "Move Right", code: "ArrowRight", locked: true}, function() {});
+        registerKeyHandler({name: "Move Left", code: "ArrowLeft", locked: true}, function() {});
+        registerKeyHandler({name: "Move Up", code: "ArrowUp", locked: true}, function() {});
+        registerKeyHandler({name: "Move Down", code: "ArrowDown", locked: true}, function(event) {});
+    }
+
 
     // register keybinds for grading controls
     if(action == 'lab') {

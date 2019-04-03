@@ -33,7 +33,7 @@ Required Input:
 
     {# Marks table #}
     <div class="ta-rubric-table" data-component_id="{{ component.id }}" {{ mark_list_visibility }}>
-        {# twig.js doens't support blocks inside of for loops ... ANNOYING #}
+        {# twig.js doesn't support blocks inside of for loops ... ANNOYING #}
         {% block marks_block %}
         {% endblock %}
         {% if edit_marks_enabled %}
