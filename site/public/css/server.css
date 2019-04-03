@@ -1787,3 +1787,8 @@ end of styles used in the admin gradeable page
     left: 0px;
 }
 
+.ui-autocomplete{
+    max-height: 300px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
