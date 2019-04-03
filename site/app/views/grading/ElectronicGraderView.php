@@ -233,11 +233,11 @@ HTML;
 HTML;
 
 		foreach($users as $user => $details){
-			$first_name = $details["first_name"]; //htmlspecialchars($details["first_name"];
-			$last_name = $details["last_name"];
+			$first_name = htmlspecialchars($details["first_name"]);
+			$last_name = htmlspecialchars($details["last_name"]);
             $upload_timestamp = $details["upload_time"];
             $submit_timestamp = $details["submit_time"];
-            $filepath = $details["file"];
+            $filepath = htmlspecialchars($details["file"]);
             
 			$return .= <<<HTML
 			<tbody>
