@@ -1085,10 +1085,10 @@ HTML;
 			<div style="padding-left:20px;padding-bottom: 10px;border-radius:3px;padding-right:20px;">
 				<table class="table table-striped table-bordered persist-area" id="forum_stats_table">
 					<tr>			
-				        <td style = "cursor:pointer;" width="15%" id="user_down">User &darr;</td>
-				        <td style = "cursor:pointer;" width="15%" id="total_posts_down">Total Posts (not deleted)</td>
-				        <td style = "cursor:pointer;" width="15%" id="total_threads_down">Total Threads</td>
-				        <td style = "cursor:pointer;" width="15%" id="total_deleted_down">Total Deleted Posts</td>
+				        <td style = "cursor:pointer;" width="15%" id="user_sort"><a href="javascript:void(0)">User</a></td>
+				        <td style = "cursor:pointer;" width="15%" id="total_posts_sort"><a href="javascript:void(0)">Total Posts (not deleted)</a></td>
+				        <td style = "cursor:pointer;" width="15%" id="total_threads_sort"><a href="javascript:void(0)">Total Threads</a></td>
+				        <td style = "cursor:pointer;" width="15%" id="total_deleted_sort"><a href="javascript:void(0)">Total Deleted Posts</a></td>
 				        <td width="40%">Show Posts</td>
 					</tr>
 HTML;
@@ -1123,20 +1123,31 @@ HTML;
 
 			<script>
 				$("td").click(function(){
-					if($(this).attr('id')=="user_down"){
-						sortTable(0);
-					}
-					if($(this).attr('id')=="total_posts_down"){
-						sortTable(1);
-					}
-					if($(this).attr('id')=="total_threads_down"){
-						sortTable(2);
-					}
-					if($(this).attr('id')=="total_deleted_down"){
-						sortTable(3);
-					}
-					
+				    var table_id = 0;
+				    switch ($(this).attr('id')) {
+				        case "user_sort":
+				            table_id = 0;
+				            break;
+                        case "total_posts_sort":
+                            table_id = 1;
+                            break;
+                        case "total_threads_sort":
+                            table_id = 2;
+                            break;
+                        case "total_deleted_sort":
+                            table_id = 3;
+                            break;
+                        default:
+                            table_id = 0;
+				    }
+				    
+                    if ($(this).html().indexOf(' ↓') > -1) {
+                        sortTable(table_id, true);
+                    } else {
+                        sortTable(table_id, false);
+                    }
 				});
+				
 				$("button").click(function(){
 					
 					var action = $(this).data('action');
@@ -1186,7 +1197,7 @@ HTML;
 
 				
 
-				function sortTable(sort_element_index){
+				function sortTable(sort_element_index, reverse=false){
 					var table = document.getElementById("forum_stats_table");
 					var switching = true;
 					while(switching){
@@ -1196,9 +1207,16 @@ HTML;
 
 							var a = rows[i].getElementsByTagName("TR")[0].getElementsByTagName("TD")[sort_element_index];
 							var b = rows[i+1].getElementsByTagName("TR")[0].getElementsByTagName("TD")[sort_element_index];
-							if(sort_element_index == 0 ? a.innerHTML>b.innerHTML : parseInt(a.innerHTML) < parseInt(b.innerHTML)){
-								rows[i].parentNode.insertBefore(rows[i+1],rows[i]);
-								switching=true;
+							if (reverse){
+							    if (sort_element_index == 0 ? a.innerHTML<b.innerHTML : parseInt(a.innerHTML) > parseInt(b.innerHTML)){
+                                    rows[i].parentNode.insertBefore(rows[i+1],rows[i]);
+                                    switching=true;
+							    } 
+							} else {
+                                if(sort_element_index == 0 ? a.innerHTML>b.innerHTML : parseInt(a.innerHTML) < parseInt(b.innerHTML)){
+                                    rows[i].parentNode.insertBefore(rows[i+1],rows[i]);
+                                    switching=true;
+                                }
 							}
 						}
 
@@ -1209,15 +1227,18 @@ HTML;
 					
 					for(var i = 0;i<headers.length;i++){
 						var index = headers[i].innerHTML.indexOf(' ↓');
+						var reverse_index = headers[i].innerHTML.indexOf(' ↑');
 						
-						if(index> -1){
-
-							headers[i].innerHTML = headers[i].innerHTML.substr(0, index);
-							break;
-						}
+						if(index > -1 || reverse_index > -1){
+							headers[i].innerHTML = headers[i].innerHTML.slice(0, -2);
+						} 
 					}
-
-					headers[sort_element_index].innerHTML = headers[sort_element_index].innerHTML + ' ↓';
+                    
+					if (reverse) {
+                        headers[sort_element_index].innerHTML = headers[sort_element_index].innerHTML + ' ↑';
+					} else {
+					    headers[sort_element_index].innerHTML = headers[sort_element_index].innerHTML + ' ↓';
+					}
 
 				}
 
