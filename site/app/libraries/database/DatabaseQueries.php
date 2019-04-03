@@ -488,8 +488,7 @@ class DatabaseQueries {
     }
 
     public function visitThread($current_user, $thread_id){
-        $this->course_db->query("INSERT INTO viewed_responses(thread_id,user_id,timestamp) SELECT ?, ?, current_timestamp WHERE NOT EXISTS(SELECT 1 FROM viewed_responses WHERE thread_id = ? AND user_id = ?)", array($thread_id, $current_user, $thread_id, $current_user));
-        $this->course_db->query("UPDATE viewed_responses SET timestamp = current_timestamp WHERE thread_id = ? AND user_id = ?", array($thread_id, $current_user));
+        $this->course_db->query("INSERT INTO viewed_responses(thread_id,user_id,timestamp) VALUES(?, ?, current_timestamp) ON CONFLICT (thread_id, user_id) DO UPDATE SET timestamp = current_timestamp", array($thread_id, $current_user));
     }
     /**
      * Set delete status for given post and all descendant
@@ -877,7 +876,7 @@ ORDER BY {$u_or_t}.{$section_key}", $params);
         $return = array();
         $this->course_db->query("
 SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_score),2) AS avg_comp_score, round(stddev_pop(comp_score),2) AS std_dev, COUNT(*) FROM(
-  SELECT gc_id, gc_title+, gc_max_value, gc_is_peer, gc_order,
+  SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order,
   CASE WHEN (gc_default + sum_points + gcd_score) > gc_upper_clamp THEN gc_upper_clamp
   WHEN (gc_default + sum_points + gcd_score) < gc_lower_clamp THEN gc_lower_clamp
   ELSE (gc_default + sum_points + gcd_score) END AS comp_score FROM(
