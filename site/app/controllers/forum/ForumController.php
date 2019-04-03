@@ -819,7 +819,6 @@ class ForumController extends AbstractController {
         return $this->core->getOutput()->getOutput();
     }
 
-
     private function getThreadContent($thread_id, &$output){
         $result = $this->core->getQueries()->getThread($thread_id)[0];
         $output['title'] = $result["title"];
