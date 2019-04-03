@@ -237,6 +237,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     is_batch_job = queue_obj["regrade"]
     job_id = queue_obj["job_id"]
     is_batch_job_string = "BATCH" if is_batch_job else "INTERACTIVE"
+    revision = queue_obj.get("revision", None)
 
     partial_path = os.path.join(queue_obj["gradeable"],queue_obj["who"],str(queue_obj["version"]))
     item_name = os.path.join(queue_obj["semester"],queue_obj["course"],"submissions",partial_path)
@@ -316,13 +317,6 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     
     patterns_submission_to_compilation = complete_config_obj["autograding"]["submission_to_compilation"]
 
-    # give the untrusted user read/write/execute permissions on the tmp directory & files
-    # add_permissions_recursive(tmp_compilation,
-    #                   stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-    #                   stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-    #                   stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
-
-    # add_permissions(tmp,stat.S_IROTH | stat.S_IXOTH) #stat.S_ISGID
     add_permissions(tmp_logs,stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
 
     if USE_DOCKER:
@@ -397,8 +391,12 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                                                '-w', testcase_folder,
                                                container_image,
                                                #The command to be run.
-                                               os.path.join(testcase_folder, 'my_compile.out'), queue_obj['gradeable'],
-                                               queue_obj['who'], str(queue_obj['version']), submission_string, str(testcase_num)
+                                               os.path.join(testcase_folder, 'my_compile.out'), 
+                                               queue_obj['gradeable'],
+                                               queue_obj['who'], 
+                                               str(queue_obj['version']), 
+                                               submission_string, 
+                                               '--testcase', str(testcase_num)
                                                ]).decode('utf8').strip()
                     print("starting container")
                     compile_success = subprocess.call(['docker', 'start', '-i', compilation_container],
@@ -419,7 +417,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                                                    queue_obj["who"],
                                                    str(queue_obj["version"]),
                                                    submission_string,
-                                                   str(testcase_num)],
+                                                   '--testcase', str(testcase_num)],
                                                    stdout=logfile, 
                                                    cwd=testcase_folder)
             # remove the compilation program
@@ -700,12 +698,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         json.dump(queue_obj,outfile,sort_keys=True,indent=4,separators=(',', ': '))
 
     try:
-        with open(os.path.join(tmp_work,"results.json"), 'r') as read_file:
-            results_obj = json.load(read_file)
-        if 'revision' in queue_obj.keys():
-            results_obj['revision'] = queue_obj['revision']
-        with open(os.path.join(tmp_results,"results.json"), 'w') as outfile:
-            json.dump(results_obj,outfile,sort_keys=True,indent=4,separators=(',', ': '))
+        shutil.move(os.path.join(tmp_work, "results.json"), os.path.join(tmp_results, "results.json"))
     except:
         with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
             print ("\n\nERROR: Grading incomplete -- Could not open/write ",os.path.join(tmp_work,"results.json"))
@@ -722,7 +715,8 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                                                  int(waittime),
                                                  grading_finished_longstring,
                                                  int(gradingtime),
-                                                 grade_result)
+                                                 grade_result,
+                                                 revision)
 
     os.chdir(SUBMITTY_DATA_DIR)
 

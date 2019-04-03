@@ -18,7 +18,7 @@ import csv
 import json
 from pwd import getpwnam
 
-from submitty_utils import dateutils, glob
+from submitty_utils import dateutils
 from . import grade_item, grade_items_logging, write_grade_history, CONFIG_PATH
 
 with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
@@ -169,6 +169,10 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                     # Move the files necessary for grading (runner, inputs, etc.) into the testcase folder.
                     setup_folder_for_grading(testcase_folder, tmp_work, job_id, tmp_logs,testcases[testcase_num-1])
                     my_testcase_runner = os.path.join(testcase_folder, 'my_runner.out')
+
+                    display_sys_variable = os.environ.get('DISPLAY', None)
+                    display_line = [] if display_sys_variable is None else ['--display', str(display_sys_variable)]
+
                     runner_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                                                       which_untrusted,
                                                       my_testcase_runner,
@@ -176,7 +180,8 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                                                       queue_obj["who"],
                                                       str(queue_obj["version"]),
                                                       submission_string,
-                                                      str(testcase_num)],
+                                                      '--testcase', str(testcase_num)]
+                                                      + display_line,
                                                       stdout=logfile)
                 except Exception as e:
                     grade_items_logging.log_message(job_id, message="ERROR thrown by main runner. See traces entry for more details.")
@@ -384,6 +389,9 @@ def create_container(container_name, container_image, server_container, mounted_
 
   untrusted_uid = str(getpwnam(which_untrusted).pw_uid)
 
+  display_sys_variable = str(os.environ.get('DISPLAY', None))
+  display_line = [] if display_sys_variable == None else ['--display', display_sys_variable]
+  
   if server_container:
     this_container = subprocess.check_output(['docker', 'create', '-i', '--network', 'none',
                                          '-v', mounted_directory + ':' + mounted_directory,
@@ -403,9 +411,10 @@ def create_container(container_name, container_image, server_container, mounted_
                                              queue_obj['who'],
                                              str(queue_obj['version']),
                                              submission_string,
-                                             str(testcase_num),
-                                             name
-                                           ]).decode('utf8').strip()
+                                             '--testcase', str(testcase_num),
+                                             '--container_name', name]
+                                             + display_line
+                                             ).decode('utf8').strip()
 
   dockerlaunch_done =dateutils.get_current_time()
   dockerlaunch_time = (dockerlaunch_done-grading_began).total_seconds()

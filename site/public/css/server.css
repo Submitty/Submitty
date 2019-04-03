@@ -1,5 +1,5 @@
 @import url("reset.css");
-@import url("https://fonts.googleapis.com/css?family=Inconsolata");
+@import url("../vendor/google/inconsolata.css");
 
 html {
     height: 100%;
@@ -184,6 +184,14 @@ input[type="checkbox"]:checked:before {
     color: #FFF;
     font-size: 18px;
     font-weight: 900
+}
+
+.helpicon::before {
+  font-family: 'Font Awesome 5 Free';
+  content: "\f059";
+  color: #1E90FF;
+  font-weight: 300;
+  display: inline-block;
 }
 
 input[type="checkbox"]:focus{
@@ -1033,6 +1041,13 @@ table .instructor .two-options{
     padding-top: 30px;
 }
 
+div.full_height {
+    position: -webkit-sticky; /* Safari */
+    position: sticky;
+    max-height: 95vh;
+    top: 10px;
+}
+
 #sidebar.collapsed #nav-buttons {
     width: 30px;
 }
@@ -1072,7 +1087,7 @@ table .instructor .two-options{
 
 #nav-buttons ul li .nav-row {
     padding: 6px;
-    padding-left: 36px;
+    padding-left: 48px;
     width: 100%;
     display: block;
 }
@@ -1082,7 +1097,7 @@ table .instructor .two-options{
 }
 
 #sidebar.collapsed #nav-buttons ul li .nav-row .fa{
-    padding: 2px 17.5px;
+    padding: 2px 0px;
 }
 
 
@@ -1758,9 +1773,15 @@ end of styles used in the admin gradeable page
     width: 100%;
     max-height: 300px;
 }
-/*Layout of tables*/
 
-th,td{
-    text-align: left;
-    padding: 10px;
+#details-legend > li{
+    list-style: none;
+    padding-left: 15px;
+    font-size: 0.75em;
+}
+
+.ui-autocomplete{
+    max-height: 300px;
+    overflow-y: scroll;
+    overflow-x: hidden;
 }

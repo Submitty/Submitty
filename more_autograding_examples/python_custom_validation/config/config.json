@@ -1,0 +1,62 @@
+{
+    "grading_parameters" : {
+        "AUTO_POINTS" : 20
+    },
+
+    "testcases" : [
+
+        // *************** COMPILATION *****************
+        {
+            "type" : "Compilation",
+            "title" : "Compilation",
+            "command" : "g++ -std=c++11 -Wall -o a.out *.cpp",
+            "executable_name" : "a.out",
+            "points" : 2
+        },
+
+        // *************** TEST CASES *****************
+        {
+            "title" : "Sum of 5 random numbers",
+            "command" : "./a.out 5",
+            "points" : 8,
+            "validation" : [
+                {
+                    "method" : "custom_validator",
+                    "command" : "python3 grader.py --numbers 5",
+            "actual_file" : "STDOUT.txt"
+                }
+            ]
+        },
+        {
+            "title" : "Sum of 10 random numbers",
+            "command" : "./a.out 10",
+            "points" : 6,
+            "validation" : [
+                {
+                    "method" : "custom_validator",
+                    "command" : "python3 grader.py --numbers 10",
+                    "actual_file" : "STDOUT.txt"
+                }
+            ]
+        },
+        {
+            "title" : "Is it random?  (Is it different on each run?)",
+            "command" : 
+            [
+                "./a.out 5",
+                "./a.out 5"
+            ],
+            "points" : 4,
+            "validation" : [
+                {
+                    "method" : "custom_validator",
+                    "command" : "python3 grader.py --numbers 5",
+                    "actual_file": [
+                        "STDOUT_0.txt",
+                        "STDOUT_1.txt"
+                    ]
+                }
+            ]
+        }
+    ]
+}

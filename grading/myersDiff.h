@@ -53,6 +53,7 @@ TestResults* warnIfEmpty_doit (const TestCase &tc, const nlohmann::json& j);
 TestResults* errorIfEmpty_doit (const TestCase &tc, const nlohmann::json& j);
 
 TestResults* ImageDiff_doit (const TestCase &tc, const nlohmann::json& j, int autocheck_num);
+TestResults* custom_doit(const TestCase &tc, const nlohmann::json& j, const nlohmann::json& whole_config);
 
 TestResults* diff_doit (const TestCase &tc, const nlohmann::json& j);
 
