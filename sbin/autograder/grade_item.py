@@ -78,8 +78,7 @@ def copy_contents_into(job_id,source,target,tmp_logs):
                     shutil.copy(os.path.join(source,item),target)
                 except:
                     grade_items_logging.log_stack_trace(job_id=job_id,trace=traceback.format_exc())
-                    raise RuntimeError("ERROR COPYING FILE: " +  os.path.join(source,item) + " -> " + os.path.join(target,item))
-
+                    return
 
 # copy files that match one of the patterns from the source directory
 # to the target directory.  
