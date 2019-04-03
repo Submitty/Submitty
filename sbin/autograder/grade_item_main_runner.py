@@ -17,8 +17,9 @@ import traceback
 import csv
 import json
 from pwd import getpwnam
+import glob
 
-from submitty_utils import dateutils, glob
+from submitty_utils import dateutils
 from . import grade_item, grade_items_logging, write_grade_history, CONFIG_PATH
 
 with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
@@ -169,6 +170,10 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                     # Move the files necessary for grading (runner, inputs, etc.) into the testcase folder.
                     setup_folder_for_grading(testcase_folder, tmp_work, job_id, tmp_logs,testcases[testcase_num-1])
                     my_testcase_runner = os.path.join(testcase_folder, 'my_runner.out')
+
+                    display_sys_variable = os.environ.get('DISPLAY', None)
+                    display_line = [] if display_sys_variable is None else ['--display', str(display_sys_variable)]
+
                     runner_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                                                       which_untrusted,
                                                       my_testcase_runner,
@@ -176,7 +181,8 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                                                       queue_obj["who"],
                                                       str(queue_obj["version"]),
                                                       submission_string,
-                                                      str(testcase_num)],
+                                                      '--testcase', str(testcase_num)]
+                                                      + display_line,
                                                       stdout=logfile)
                 except Exception as e:
                     grade_items_logging.log_message(job_id, message="ERROR thrown by main runner. See traces entry for more details.")
@@ -221,6 +227,73 @@ def send_message_to_processes(message, processes, targets):
         else:
             pass
 
+def pre_command_copy_file(tmp_work, source_testcase, source_directory, destination_testcase, destination,job_id,tmp_logs):
+
+  source_testcase = os.path.join(str(os.getcwd()), '..',source_testcase)
+  destination_testcase = os.path.join(str(os.getcwd()), '..',destination_testcase)
+
+  if not os.path.isdir(source_testcase):
+    raise RuntimeError("ERROR: The directory {0} does not exist.".format(source_testcase))
+
+  if not os.path.isdir(destination_testcase):
+    raise RuntimeError("ERROR: The directory {0} does not exist.".format(destination_testcase))
+
+  source = os.path.join(source_testcase, source_directory)
+  target = os.path.join(destination_testcase,destination)
+
+  #the target without the potential executable.
+  target_base = '/'.join(target.split('/')[:-1])
+
+  #If the source is a directory, we copy the entire thing into the
+  # target.
+  if os.path.isdir(source):
+    #We must copy from directory to directory 
+    grade_item.copy_contents_into(job_id,source,target,tmp_logs)
+
+  # Separate ** and * for simplicity.
+  elif not '**' in source:
+    #Grab all of the files that match the pattern
+    files = glob.glob(source, recursive=True)
+    
+    #The target base must exist in order for a copy to occur
+    if target_base != '' and not os.path.isdir(target_base):
+      raise RuntimeError("ERROR: The directory {0} does not exist.".format(target_base))
+    #Copy every file. This works whether target exists (is a directory) or does not (is a target file)
+    for file in files:
+      try:
+        shutil.copy(file, target)
+      except Exception as e:
+        traceback.print_exc()
+        grade_items_logging.log_message(job_id, message="Pre Command could not perform copy: {0} -> {1}".format(file, target))
+
+  else:
+    #Everything after the first **. 
+    source_base = source[:source.find('**')]
+    #The full target must exist (we must be moving to a directory.)
+    if not os.path.isdir(target):
+      raise RuntimeError("ERROR: The directory {0} does not exist.".format(target))
+
+    #Grab all of the files that match the pattern.
+    files = glob.glob(source, recursive=True)
+
+
+    #For every file matched
+    for file_source in files:
+      file_target = os.path.join(target, file_source.replace(source_base,''))
+      #Remove the file path.
+      file_target_dir = '/'.join(file_target.split('/')[:-1])
+      #If the target directory doesn't exist, create it.
+      if not os.path.isdir(file_target_dir):
+        os.makedirs(file_target_dir)
+      #Copy.
+      try:
+        shutil.copy(file_source, file_target)
+      except Exception as e:
+        traceback.print_exc()
+        grade_items_logging.log_message(job_id, message="Pre Command could not perform copy: {0} -> {1}".format(file_source, file_target))
+
+
+
 def setup_folder_for_grading(target_folder, tmp_work, job_id, tmp_logs, testcase):
     #The paths to the important folders.
     tmp_work_test_input = os.path.join(tmp_work, "test_input")
@@ -239,36 +312,18 @@ def setup_folder_for_grading(target_folder, tmp_work, job_id, tmp_logs, testcase
 
     for pre_command in pre_commands:
       command = pre_command['command']
-      option  = pre_command['option']
       source_testcase   = pre_command["testcase"]
       source_directory  = pre_command['source']
-      source = os.path.join(source_testcase,source_directory)
       destination = pre_command['destination']
-      # pattern is not currently in use.
-      #pattern    = pre_command['pattern']
 
       if command == 'cp':
-        #currently ignoring option
-        if not os.path.isdir(os.path.join(tmp_work,source)):
-          try:
-            shutil.copy(os.path.join(tmp_work,source),os.path.join(target_folder,destination))
-          except Exception as e:
-            traceback.print_exc()
-            grade_items_logging.log_message(job_id, message="Encountered an error while processing pre-command. See traces entry for more details.")
-            grade_items_logging.log_stack_trace(job_id,trace=traceback.format_exc())
-
-            #TODO: can we pass something useful to students?
-            pass
-        else:
-          try:
-            grade_item.copy_contents_into(job_id,os.path.join(tmp_work,source),os.path.join(target_folder,destination),tmp_logs)
-          except Exception as e:
-            traceback.print_exc()
-            grade_items_logging.log_message(job_id, message="Encountered an error while processing pre-command. See traces entry for more details.")
-            grade_items_logging.log_stack_trace(job_id,trace=traceback.format_exc())
-            #TODO: can we pass something useful to students?
-            pass
+        try:
+          pre_command_copy_file(tmp_work, source_testcase, source_directory, target_folder, destination,job_id,tmp_logs)
+        except Exception as e:
+          traceback.print_exc()
+          grade_items_logging.log_message(job_id, message="Encountered an error while processing pre-command. See traces entry for more details.")
       else:
+        grade_items_logging.log_message(job_id, message="Encountered an error while processing pre-command. See traces entry for more details.")
         print("Invalid pre-command '{0}'".format(command))
 
     #TODO: pre-commands may eventually wipe the following logic out.
@@ -384,6 +439,9 @@ def create_container(container_name, container_image, server_container, mounted_
 
   untrusted_uid = str(getpwnam(which_untrusted).pw_uid)
 
+  display_sys_variable = str(os.environ.get('DISPLAY', None))
+  display_line = [] if display_sys_variable == None else ['--display', display_sys_variable]
+  
   if server_container:
     this_container = subprocess.check_output(['docker', 'create', '-i', '--network', 'none',
                                          '-v', mounted_directory + ':' + mounted_directory,
@@ -403,9 +461,10 @@ def create_container(container_name, container_image, server_container, mounted_
                                              queue_obj['who'],
                                              str(queue_obj['version']),
                                              submission_string,
-                                             str(testcase_num),
-                                             name
-                                           ]).decode('utf8').strip()
+                                             '--testcase', str(testcase_num),
+                                             '--container_name', name]
+                                             + display_line
+                                             ).decode('utf8').strip()
 
   dockerlaunch_done =dateutils.get_current_time()
   dockerlaunch_time = (dockerlaunch_done-grading_began).total_seconds()

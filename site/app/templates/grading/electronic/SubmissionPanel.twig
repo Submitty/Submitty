@@ -180,13 +180,14 @@
             });
         } else {
             $('#save_status').hide();
-            $('#file_view').append("<div id=\"file_viewer_full_panel\" class=\"full_panel\" data-file_name=\"\" data-file_url=\"\"></div>");
+            $('#file_content').append("<div id=\"file_viewer_full_panel\" class=\"full_panel\" data-file_name=\"\" data-file_url=\"\"></div>");
             $("#file_viewer_full_panel").empty();
             $("#file_viewer_full_panel").attr("data-file_name", "");
             $("#file_viewer_full_panel").attr("data-file_url", "");
             $("#file_viewer_full_panel").attr("data-file_name", name);
             $("#file_viewer_full_panel").attr("data-file_url", path);
             openFrame(name, path, "full_panel");
+            $("#file_viewer_full_panel_iframe").height("100%");
         }
     }
 

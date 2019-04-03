@@ -30,6 +30,9 @@
         {% if not peer %}
             <i title="Show/Hide Student Information (Press S)" class="fas fa-user icon-header" onclick="toggleInfo(); updateCookies();"></i>
         {% endif %}
+        {% if discussion_based %}
+            <i title="Show/Hide Discussion Posts" class="fas fa-comment-alt icon-header" onclick="toggleDiscussion(); updateCookies();"></i>
+        {% endif %}
         {% if regrade_panel_available %}
             <i title="Show/Hide Regrade Information (Press X)" class="fas fa-hand-paper icon-header" onclick="toggleRegrade(); updateCookies();"></i>
         {% endif %}
