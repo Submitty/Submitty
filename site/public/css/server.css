@@ -1784,3 +1784,7 @@ end of styles used in the admin gradeable page
     overflow-y: scroll;
     overflow-x: hidden;
 }
+
+.checkbox-focus{
+    background-color: #00729E33;
+}

@@ -2672,3 +2672,17 @@ function resizeNoScrollTextareas() {
         auto_grow(this);
     })
 }
+// Highlighting selcted checkbox
+$(document).ready(function(){
+    // Add the "focus" value to class attribute
+    $('input[type="checkbox"]').focusin( function() {
+            $("label[for='" + $(this).attr("name") + "']").addClass('checkbox-focus');
+        }
+    );
+
+    // Remove the "focus" value to class attribute
+    $('input[type="checkbox"]').focusout( function() {
+            $("label[for='" + $(this).attr("name") + "']").removeClass('checkbox-focus');
+        }
+    );
+});
