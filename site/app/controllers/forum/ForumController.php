@@ -557,13 +557,8 @@ class ForumController extends AbstractController {
             if($any_changes) {
                 $post = $this->core->getQueries()->getPost($post_id);
                 $post_author = $post['author_user_id'];
-                if($post['anonymous'] && !$this->modifyAnonymous($post_author)) {
-                    $messageString = "You do not have permissions to do that.";
-                    $isError = true;
-                } else {
-                    $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'edited', 'thread_id' => $thread_id, 'post_id' => $post_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
-                    $this->core->getQueries()->pushNotification($notification);
-                }
+                $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'edited', 'thread_id' => $thread_id, 'post_id' => $post_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
+                $this->core->getQueries()->pushNotification($notification);
             }
             if($isError) {
                 $this->core->addErrorMessage($messageString);
@@ -602,14 +597,14 @@ class ForumController extends AbstractController {
         $new_post_content = $_POST["thread_post_content"];
         if(!empty($new_post_content)) {
             $post_id = $_POST["edit_post_id"];
-            $original_creator = $this->core->getQueries()->getPost($post_id);
-            if(!empty($original_creator)) {
-                $original_creator = $original_creator['author_user_id'];
+            $original_post = $this->core->getQueries()->getPost($post_id);
+            if(!empty($original_post)) {
+                $original_creator = $original_post['author_user_id'];
             }
             $anon = ($_POST["Anon"] == "Anon") ? 1 : 0;
             $current_user = $this->core->getUser()->getId();
-            if($anon && !$this->modifyAnonymous($current_user)) {
-                return false;
+            if(!$this->modifyAnonymous($original_creator)) {
+                $anon = $original_post["anonymous"] ? 1 : 0;
             }
             return $this->core->getQueries()->editPost($original_creator, $current_user, $post_id, $new_post_content, $anon);
         }
