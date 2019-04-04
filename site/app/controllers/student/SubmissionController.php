@@ -93,6 +93,9 @@ class SubmissionController extends AbstractController {
             case 'change_request_status':
                 return $this->changeRequestStatus();
                 break;
+            case 'stat_page':
+                return $this->showStats();
+                break;
             case 'display':
             default:
                 return $this->showHomeworkPage();
@@ -812,16 +815,15 @@ class SubmissionController extends AbstractController {
         if (!@file_put_contents(FileUtils::joinPaths($version_path, ".submit.timestamp"), $current_time_string_tz."\n")) {
             return $this->uploadResult("Failed to save timestamp file for this submission.", false);
         }
-
-        $upload_time_string_tz = $timestamp . " " . $this->core->getConfig()->getTimezone()->getName();
         
+        $upload_time_string_tz = $timestamp . " " . $this->core->getConfig()->getTimezone()->getName();
+
         $bulk_upload_data = [
             "submit_timestamp" =>  $current_time_string_tz,
             "upload_timestamp" =>  $upload_time_string_tz,
             "filepath" => $uploaded_file
         ];
 
-        #writeJsonFile returns false on failure.
         if (FileUtils::writeJsonFile(FileUtils::joinPaths($version_path, "bulk_upload_data.json"), $bulk_upload_data) === false) {
             return $this->uploadResult("Failed to create bulk upload file for this submission.", false);
         }
@@ -1872,4 +1874,31 @@ class SubmissionController extends AbstractController {
         $this->core->getOutput()->renderString($refresh_string);
         return array('refresh' => $refresh_bool, 'string' => $refresh_string);
     }
+
+    public function showStats() {
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+        $json_path = $course_path . "/submissions/" . $gradeable_id . "/";
+        $path_reset = $json_path;
+        $users = array();
+        if(!file_exists($json_path)) {
+            return;   
+        }
+        $user_id_arr = array_slice(scandir($json_path), 2);
+        $user = $user_id_arr[0];
+        $users[$user] = array();
+        for($i = 0; $i < count($user_id_arr); ++$i) {
+            $files = scandir($json_path . $user_id_arr[$i]);
+            $num_files = count($files) - 3;
+            $json_path = $json_path . $user_id_arr[$i] . "/" . $num_files . "/bulk_upload_data.json";
+            $users[$user_id_arr[$i]]["first_name"] = $this->core->getQueries()->getUserById($user_id_arr[$i])->getDisplayedFirstName();
+            $users[$user_id_arr[$i]]["last_name"] = $this->core->getQueries()->getUserById($user_id_arr[$i])->getDisplayedLastName();
+            $users[$user_id_arr[$i]]['upload_time'] = json_decode(file_get_contents($json_path), true)['upload_timestamp'];
+            $users[$user_id_arr[$i]]['submit_time'] = json_decode(file_get_contents($json_path), true)['submit_timestamp'];
+            $users[$user_id_arr[$i]]['file'] = json_decode(file_get_contents($json_path), true)['filepath'];
+            $json_path = $path_reset;
+        }
+        $this->core->getOutput()->renderOutput('grading\ElectronicGrader', 'statPage', $users);
+    }
+
 }
