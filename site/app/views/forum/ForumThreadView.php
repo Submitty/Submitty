@@ -208,6 +208,9 @@ HTML;
 		$currentThread = isset($_GET["thread_id"]) && is_numeric($_GET["thread_id"]) && (int)$_GET["thread_id"] < $max_thread && (int)$_GET["thread_id"] > 0 ? (int)$_GET["thread_id"] : $posts[0]["thread_id"];
 		$currentCategoriesIds = $this->core->getQueries()->getCategoriesIdForThread($currentThread);
 	}
+	$currentThreadArr = array_filter($threadsHead, function($ar) use($currentThread) {
+									return ($ar['id'] == $currentThread);
+	});
 	if($show_merged_thread) {
 		$show_merged_thread_class = "active";
 		$show_merged_thread_action = "alterShowMergeThreadStatus(0,'" . $currentCourse . "');";
@@ -222,16 +225,16 @@ HTML;
 HTML;
 	$show_deleted_class = '';
 	$show_deleted_action = '';
-
+    $show_deleted_thread_title = '';
 	if($this->core->getUser()->getGroup() <= 3){
 		if($show_deleted) {
 			$show_deleted_class = "active";
 			$show_deleted_action = "alterShowDeletedStatus(0);";
-      $show_deleted_thread_title = "Hide Deleted Threads";
+            $show_deleted_thread_title = "Hide Deleted Threads";
 		} else {
 			$show_deleted_class = "";
 			$show_deleted_action = "alterShowDeletedStatus(1);";
-      $show_deleted_thread_title = "Show Deleted Threads";
+            $show_deleted_thread_title = "Show Deleted Threads";
 		}
 	}
 	$categories = $this->core->getQueries()->getCategories();
@@ -296,7 +299,7 @@ HTML;
 						array(
 
 							"required_rank" => 3,
-							"display_text" => 'Show Deleted Threads',
+							"display_text" => $show_deleted_thread_title,
 							"style" => 'position:relative;top:3px;display:inline-block;',
 							"link" => array(false),
 							"optional_class" => $show_deleted_class,
@@ -334,6 +337,7 @@ HTML;
 						<i class="fas fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
 						<i class="fas fa-caret-up fa-2x fa-fw fill-available" style="color:gray;{$arrowup_visibility}" aria-hidden="true"></i>
 HTML;
+
 						$activeThreadAnnouncement = false;
 						$activeThreadTitle = "";
 						$function_date = 'date_format';
@@ -364,7 +368,9 @@ HTML;
 					</script>
 					<div id="posts_list" style="margin-top:10px;max-height: 100%" class="col-9">
 HTML;
-		$return .= $this->generatePostList($currentThread, $posts, $currentCourse, true, $threadExists, $display_option, $categories, $cookieSelectedCategories, $cookieSelectedThreadStatus, $currentCategoriesIds);
+
+		$currentThreadFavorite = array_values($currentThreadArr)[0]['favorite'];
+		$return .= $this->generatePostList($currentThread, $posts, $currentCourse, true, $threadExists, $display_option, $categories, $cookieSelectedCategories, $cookieSelectedThreadStatus, $currentCategoriesIds, $currentThreadFavorite);
 
 		$return .= <<<HTML
 			<script>
@@ -384,17 +390,16 @@ HTML;
 		return $return;
 	}
 
-	public function generatePostList($currentThread, $posts, $currentCourse, $includeReply = false, $threadExists = false, $display_option = 'time', $categories = [], $cookieSelectedCategories = [], $cookieSelectedThreadStatus = [], $currentCategoriesIds = []) {
+	public function generatePostList($currentThread, $posts, $currentCourse, $includeReply = false, $threadExists = false, $display_option = 'time', $categories = [], $cookieSelectedCategories = [], $cookieSelectedThreadStatus = [], $currentCategoriesIds = [], $isCurrentFavorite = false) {
 
 		$return = '';
 		$title_html = '';
 
 		$activeThread = $this->core->getQueries()->getThread($currentThread)[0];
 
-
-
 		$activeThreadTitle = ($this->core->getUser()->getGroup() <= 2 ? "({$activeThread['id']}) " : '') . $activeThread['title'];
 		$activeThreadAnnouncement = $activeThread['pinned'];
+
 		$thread_id = $activeThread['id'];
 		$function_date = 'date_format';
 
@@ -420,7 +425,7 @@ HTML;
     -webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
 HTML;
                     }
-                    if(isset($activeThread['favorite']) && $activeThread['favorite']) {
+                    if($isCurrentFavorite) {
                     	$title_html .= <<<HTML
 							<a style="position:relative; display:inline-block; color:orange; " onClick="pinThread({$activeThread['id']}, 'unpin_thread');" title="Pin Thread"><i class="fas fa-thumbtack" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;-webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
 HTML;
@@ -1080,10 +1085,10 @@ HTML;
 			<div style="padding-left:20px;padding-bottom: 10px;border-radius:3px;padding-right:20px;">
 				<table class="table table-striped table-bordered persist-area" id="forum_stats_table">
 					<tr>			
-				        <td style = "cursor:pointer;" width="15%" id="user_down">User &darr;</td>
-				        <td style = "cursor:pointer;" width="15%" id="total_posts_down">Total Posts (not deleted)</td>
-				        <td style = "cursor:pointer;" width="15%" id="total_threads_down">Total Threads</td>
-				        <td style = "cursor:pointer;" width="15%" id="total_deleted_down">Total Deleted Posts</td>
+				        <td style = "cursor:pointer;" width="15%" id="user_sort"><a href="javascript:void(0)">User</a></td>
+				        <td style = "cursor:pointer;" width="15%" id="total_posts_sort"><a href="javascript:void(0)">Total Posts (not deleted)</a></td>
+				        <td style = "cursor:pointer;" width="15%" id="total_threads_sort"><a href="javascript:void(0)">Total Threads</a></td>
+				        <td style = "cursor:pointer;" width="15%" id="total_deleted_sort"><a href="javascript:void(0)">Total Deleted Posts</a></td>
 				        <td width="40%">Show Posts</td>
 					</tr>
 HTML;
@@ -1118,20 +1123,31 @@ HTML;
 
 			<script>
 				$("td").click(function(){
-					if($(this).attr('id')=="user_down"){
-						sortTable(0);
-					}
-					if($(this).attr('id')=="total_posts_down"){
-						sortTable(1);
-					}
-					if($(this).attr('id')=="total_threads_down"){
-						sortTable(2);
-					}
-					if($(this).attr('id')=="total_deleted_down"){
-						sortTable(3);
-					}
-					
+				    var table_id = 0;
+				    switch ($(this).attr('id')) {
+				        case "user_sort":
+				            table_id = 0;
+				            break;
+                        case "total_posts_sort":
+                            table_id = 1;
+                            break;
+                        case "total_threads_sort":
+                            table_id = 2;
+                            break;
+                        case "total_deleted_sort":
+                            table_id = 3;
+                            break;
+                        default:
+                            table_id = 0;
+				    }
+				    
+                    if ($(this).html().indexOf(' ↓') > -1) {
+                        sortTable(table_id, true);
+                    } else {
+                        sortTable(table_id, false);
+                    }
 				});
+				
 				$("button").click(function(){
 					
 					var action = $(this).data('action');
@@ -1181,7 +1197,7 @@ HTML;
 
 				
 
-				function sortTable(sort_element_index){
+				function sortTable(sort_element_index, reverse=false){
 					var table = document.getElementById("forum_stats_table");
 					var switching = true;
 					while(switching){
@@ -1191,9 +1207,16 @@ HTML;
 
 							var a = rows[i].getElementsByTagName("TR")[0].getElementsByTagName("TD")[sort_element_index];
 							var b = rows[i+1].getElementsByTagName("TR")[0].getElementsByTagName("TD")[sort_element_index];
-							if(sort_element_index == 0 ? a.innerHTML>b.innerHTML : parseInt(a.innerHTML) < parseInt(b.innerHTML)){
-								rows[i].parentNode.insertBefore(rows[i+1],rows[i]);
-								switching=true;
+							if (reverse){
+							    if (sort_element_index == 0 ? a.innerHTML<b.innerHTML : parseInt(a.innerHTML) > parseInt(b.innerHTML)){
+                                    rows[i].parentNode.insertBefore(rows[i+1],rows[i]);
+                                    switching=true;
+							    } 
+							} else {
+                                if(sort_element_index == 0 ? a.innerHTML>b.innerHTML : parseInt(a.innerHTML) < parseInt(b.innerHTML)){
+                                    rows[i].parentNode.insertBefore(rows[i+1],rows[i]);
+                                    switching=true;
+                                }
 							}
 						}
 
@@ -1204,15 +1227,18 @@ HTML;
 					
 					for(var i = 0;i<headers.length;i++){
 						var index = headers[i].innerHTML.indexOf(' ↓');
+						var reverse_index = headers[i].innerHTML.indexOf(' ↑');
 						
-						if(index> -1){
-
-							headers[i].innerHTML = headers[i].innerHTML.substr(0, index);
-							break;
-						}
+						if(index > -1 || reverse_index > -1){
+							headers[i].innerHTML = headers[i].innerHTML.slice(0, -2);
+						} 
 					}
-
-					headers[sort_element_index].innerHTML = headers[sort_element_index].innerHTML + ' ↓';
+                    
+					if (reverse) {
+                        headers[sort_element_index].innerHTML = headers[sort_element_index].innerHTML + ' ↑';
+					} else {
+					    headers[sort_element_index].innerHTML = headers[sort_element_index].innerHTML + ' ↓';
+					}
 
 				}
 
