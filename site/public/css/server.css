@@ -251,7 +251,8 @@ table tr.table-header {
 }
 
 .table>thead>tr {
-    background: #E1E1E1;
+    background: #ffffff;
+    font-weight: bold;
 }
 
 .table>tbody>tr.info {
@@ -274,6 +275,21 @@ table tr.table-header {
 .tr-vertically-centered > td {
     vertical-align: middle;
 }
+
+.table-left {
+    text-align: center;
+}
+
+.table-left td {
+    border: none;
+}
+
+.table-left > tbody > tr > td:nth-child(3),
+.table-left > tbody > tr > td:nth-child(4),
+.table-left > tbody > tr > td:nth-child(5)  {
+    text-align: left;
+}
+
 
 /**********************************************************/
 
