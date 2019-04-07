@@ -2504,7 +2504,7 @@ AND gc_id IN (
                 break;
 
             case 'new_thread':
-                $column = 'all_new_threads';//n.reply_in_post_email
+                $column = 'all_new_threads';
                 //TODO: email notification for all_new_threads
 
                 break;

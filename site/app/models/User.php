@@ -161,7 +161,6 @@ class User extends AbstractModel {
         $this->notification_settings['all_new_threads'] = !empty($details['all_new_threads']) ? $details['all_new_threads'] : false;
         $this->notification_settings['all_new_posts'] = !empty($details['all_new_posts']) ? $details['all_new_posts'] : false;
         $this->notification_settings['all_modifications_forum'] = !empty($details['all_modifications_forum']) ? $details['all_modifications_forum'] : false;
-//        var_dump($details);
         $this->notification_settings['reply_in_post_thread_email'] = !empty($details['reply_in_post_thread_email']) ? $details['reply_in_post_thread_email'] : false;
         $this->notification_settings['merge_threads_email'] = !empty($details['merge_threads_email']) ? $details['merge_threads_email'] : false;
         $this->notification_settings['all_new_threads_email'] = !empty($details['all_new_threads_email']) ? $details['all_new_threads_email'] : false;
