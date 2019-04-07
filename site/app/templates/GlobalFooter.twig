@@ -38,6 +38,20 @@
         Course Queries: <br /> {{ self.query_list(course_queries) }}
     </div>
 {% endif %}
+
+<script>
+    $(window).bind('resize', function(e)
+    {
+        if (window.RT) clearTimeout(window.RT);
+        window.RT = setTimeout(function()
+        {
+            if(confirm("Window resized. Reload page?")) {
+                this.location.reload(false);
+            }
+        }, 100);
+    });
+</script>
+
 </body>
 </html>
 
