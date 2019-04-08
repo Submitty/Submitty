@@ -1,10 +1,8 @@
 <?php
 namespace app\views\forum;
 
-use app\authentication\DatabaseAuthentication;
 use app\libraries\DateUtils;
 use app\views\AbstractView;
-use app\models\Course;
 use app\libraries\FileUtils;
 
 
@@ -340,18 +338,12 @@ HTML;
 
 						$activeThreadAnnouncement = false;
 						$activeThreadTitle = "";
-						$function_date = 'date_format';
 						$activeThread = array();
 						$return .= $this->displayThreadList($threadsHead, false, $activeThreadAnnouncement, $activeThreadTitle, $activeThread, $currentThread, $currentCategoriesIds);
 						if(count($activeThread) == 0) {
 							$activeThread = $this->core->getQueries()->getThread($currentThread)[0];
 							$activeThreadTitle = $activeThread['title'];
 						}
-						$activeThreadTitle = htmlentities(html_entity_decode($activeThreadTitle, ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-
-						$thread_id = -1;
-						$userAccessToAnon = ($this->core->getUser()->getGroup() < 4) ? true : false;
-						$title_html = '';
 
 						$return .= <<<HTML
 						<i class="fas fa-caret-down fa-2x fa-fw fill-available" style="color:gray;" aria-hidden="true"></i>
@@ -566,12 +558,12 @@ HTML;
 					$used_active = false; //used for the first one if there is not thread_id set
 					$current_user = $this->core->getUser()->getId();
 					$display_thread_ids = $this->core->getUser()->getGroup() <= 2;
-					$start = 0;
+
 					$activeThreadAnnouncement = false;
 					$activeThreadTitle = "";
 					$function_date = 'date_format';
 					$activeThread = array();
-					$end = 10;
+
 					foreach($threads as $thread){
 						$first_post = $this->core->getQueries()->getFirstPostForThread($thread["id"]);
 						if(is_null($first_post)) {
@@ -608,7 +600,6 @@ HTML;
 
 						//fix legacy code
 						$titleDisplay = html_entity_decode($thread['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-						$first_post_content = html_entity_decode($first_post['content'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
 						//replace tags from displaying in sidebar
 						$first_post_content = str_replace("[/code]", "", str_replace("[code]", "", strip_tags($first_post["content"])));
@@ -639,7 +630,7 @@ HTML;
 							$icon = '<i class="fas fa-comments"></i> ';
 							$titleDisplay = $icon . $titleDisplay;
 						}
-						$first_post_content = htmlentities($first_post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
 						$return .= <<<HTML
 						<a href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread['id']))}">
 						<div class="{$class}">
@@ -739,7 +730,7 @@ HTML;
 				if(!empty($pre_post)){
 					$post_content = $pre_post;
 				}
-				$pre_post = "";
+
 				$pos++;
 			}
 		}
@@ -758,7 +749,6 @@ HTML;
 
 	public function createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level, $display_option, $includeReply){
 		$current_user = $this->core->getUser()->getId();
-		$post_html = "";
 		$post_id = $post["id"];
 		$thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
 
@@ -880,7 +870,6 @@ HTML;
 		}
 		if($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) {
 			$shouldEditThread = null;
-			$edit_button_title = "";
 			if($first) {
 				$shouldEditThread = "true";
 				$edit_button_title = "Edit thread and post";
