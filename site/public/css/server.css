@@ -276,17 +276,20 @@ table tr.table-header {
     vertical-align: middle;
 }
 
-.table-left {
+.table-text-left {
     text-align: center;
 }
 
-.table-left td {
+.table-text-left td {
     border: none;
 }
 
-.table-left > tbody > tr > td:nth-child(3),
-.table-left > tbody > tr > td:nth-child(4),
-.table-left > tbody > tr > td:nth-child(5)  {
+.table-text-left > tbody > tr > td:nth-child(3),
+.table-text-left > tbody > tr > td:nth-child(4),
+.table-text-left > tbody > tr > td:nth-child(5),
+.table-text-left > thead > tr > td:nth-child(3),
+.table-text-left > thead > tr > td:nth-child(4),
+.table-text-left > thead > tr > td:nth-child(5)  {
     text-align: left;
 }
 
