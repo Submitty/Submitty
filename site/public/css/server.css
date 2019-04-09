@@ -393,11 +393,7 @@ table tr.table-header {
     font-size: 20px;
 }
 
-#header-text>h1:nth-child(2) {
-    padding-top: 25px;
-}
-
-h1#breadcrumbs {
+#header-text>h1 {
     display: block;
     font-size: 1.5em;
     margin-block-start: 0.83em;
@@ -405,6 +401,10 @@ h1#breadcrumbs {
     margin-inline-start: 0px;
     margin-inline-end: 0px;
     font-weight: bold;
+}
+
+#header-text>h1:nth-child(2) {
+    padding-top: 25px;
 }
 
 .text-center {
