@@ -2374,9 +2374,8 @@ function updateHomeworkExtensions(data) {
     return false;
 }
 
-function loadHomeworkExtensions(gradeable) {
-    var id_date = gradeable.split(",");
-    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'get_extension_details', 'g_id': id_date[0]});
+function loadHomeworkExtensions(g_id,due_date) {
+    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'get_extension_details', 'g_id': g_id});
     $.ajax({
         url: url,
         success: function(data) {
@@ -2385,8 +2384,8 @@ function loadHomeworkExtensions(gradeable) {
             $('#my_table tr:gt(0)').remove();
             var title = '<div class="option-title" id="title">Current Extensions for ' + json['gradeable_id'] + '</div>';
             $('#title').replaceWith(title);
-            var due_date = '<p id ="due_date">Due Date: ' + id_date[1] + '</p>';
-            $('#due_date').replaceWith(due_date);
+            var print_due_date = '<p id ="due_date">' + due_date + '</p>';
+            $('#due_date').replaceWith(print_due_date);
             if(json['users'].length === 0){
                 $('#my_table').append('<tr><td colspan="4">There are no extensions for this homework</td></tr>');
             }
