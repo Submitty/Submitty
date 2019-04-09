@@ -131,6 +131,7 @@ class BaseTestCase(unittest.TestCase):
         if course_name is None:
             course_name = course.upper()
         self.driver.find_element_by_id(self.get_current_semester() + '_' + course).click()
+        # print(self.driver.page_source)
         WebDriverWait(self.driver, BaseTestCase.WAIT_TIME).until(EC.title_is(course_name))
 
     # see Navigation.twig for html attributes to use as arguments

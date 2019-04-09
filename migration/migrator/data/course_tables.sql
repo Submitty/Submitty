@@ -143,6 +143,8 @@ CREATE TABLE electronic_gradeable (
     eg_precision numeric NOT NULL,
     eg_regrade_allowed boolean DEFAULT true NOT NULL,
     eg_regrade_request_date timestamp(6) with time zone NOT NULL,
+    eg_thread_ids json DEFAULT '{}' NOT NULL,
+    eg_has_discussion boolean DEFAULT FALSE NOT NULL,
     CONSTRAINT eg_submission_date CHECK ((eg_submission_open_date <= eg_submission_due_date)),
     CONSTRAINT eg_team_lock_date_max CHECK ((eg_team_lock_date <= '9999-03-01 00:00:00.000000')),
     CONSTRAINT eg_submission_due_date_max CHECK ((eg_submission_due_date <= '9999-03-01 00:00:00.000000')),
@@ -457,6 +459,8 @@ CREATE TABLE users (
     user_group integer NOT NULL,
     registration_section character varying(255),
     rotating_section integer,
+    user_updated boolean NOT NULL DEFAULT false,
+    instructor_updated boolean NOT NULL DEFAULT false,
     manual_registration boolean DEFAULT false,
     last_updated timestamp(6) with time zone,
     CONSTRAINT users_user_group_check CHECK ((user_group >= 1) AND (user_group <= 4))

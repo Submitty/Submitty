@@ -32,8 +32,8 @@ Variables
 {# 
 Form
 #}
-What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-user-groups">
-    lowest privileged user group</a> that can grade this?
+What is the lowest privileged user group that can grade this?
+    <a class="helpicon" target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-user-groups"></a>
 <select name="min_grading_group" id="minimum_grading_group" class="int_val" style="width:180px;">
     {% for num, role in grading_groups %}
         <option value="{{ num }}" {{ gradeable.getMinGradingGroup() == num ? 'selected' : '' }}>{{ role }}</option>
@@ -43,7 +43,8 @@ What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gr
 
 <fieldset>
     <legend>
-        <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section">How should graders be assigned</a> to grade this item?:
+        How should graders be assigned to grade this item?
+        <a class="helpicon" target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section"></a>
         <br />
     </legend>
     <input type="radio" name="grade_by_registration" value="true" id="registration_section"
