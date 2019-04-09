@@ -171,8 +171,8 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
             if (show_expected) {
              autocheck_j["expected_file"] = expected_path.str();
             }
-            if (show_image_diff)
-            {
+            if (show_image_diff){
+              std:: string name = my_testcase.getPrefix() + autocheck_j.value("image_difference_file", std::to_string(which_autocheck) + "_difference.png");
               autocheck_j["image_difference_file"] = my_testcase.getPrefix() + std::to_string(which_autocheck) + "_difference.png";
             }
             if (show_actual) {
