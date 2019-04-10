@@ -7,10 +7,10 @@
         <div class="option">
             <p> Use this form to grant an extension (e.g., for an excused absence) to a user on a specific assignment.<br><br><br></p>
             <div class="option"><label for="g_id">Select Gradeable:</label><br>
-                <select name="g_id" id="g_id" onchange="loadHomeworkExtensions($(this).val(),$(this).find('option:selected').attr('dueDate'));" style="margin-top: 10px; width: 50%">
+                <select name="g_id" id="g_id" onchange="loadHomeworkExtensions($(this).val(),$(this).find('option:selected').attr('data-due-date'));" style="margin-top: 10px; width: 50%">
                     <option disabled selected value> -- select an option -- </option>
                     {% for index, value in gradeables %}
-                        <option value="{{value['g_id']}}" dueDate="{{value['eg_submission_due_date']}}">{{ value['g_title'] }}</option>
+                        <option value="{{value['g_id']}}" data-due-date="{{value['eg_submission_due_date']}}">{{ value['g_title'] }}</option>
                     {% endfor %}
                 </select>
                 <p>Due Date: </p>
