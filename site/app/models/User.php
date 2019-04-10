@@ -263,7 +263,7 @@ class User extends AbstractModel {
     }
 
     public function setGradingRegistrationSections($sections) {
-        if ($this->getGroup() < 4) {
+        if ($this->accessGrading()) {
             $this->grading_registration_sections = $sections;
         }
     }
