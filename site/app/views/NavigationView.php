@@ -425,8 +425,12 @@ class NavigationView extends AbstractView {
                 }
             }
 
+            // Due date passed with at least 50 percent points in autograding or gradable with no autograding points
             if ($graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() &&
-                $gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() != 0 && $points_percent >= 0.5 &&
+                (
+                    !$gradeable->getAutogradingConfig()->anyPoints() ||
+                    $gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() != 0 && $points_percent >= 0.5
+                ) &&
                 $list_section == GradeableList::CLOSED) {
                 $class = "btn-default";
             }
