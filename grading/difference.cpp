@@ -26,7 +26,6 @@ void Difference::printJSON(std::ostream & file_out) {
     // ByLineByChar;
     // ByWordByChar;
     // VectorVectorStringType;
-    // ByLineByWord;
     // VectorOtherType;
 
   case ByLineByChar:
@@ -36,10 +35,6 @@ void Difference::printJSON(std::ostream & file_out) {
   case ByWordByChar:
     diff1_name = "word";
     diff2_name = "char";
-    break;
-  case ByLineByWord:
-    diff1_name = "line";
-    diff2_name = "word";
     break;
   default:
     diff1_name = "line";

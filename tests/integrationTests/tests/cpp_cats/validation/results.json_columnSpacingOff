@@ -29,18 +29,6 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test04/output.txt",
-                    "description": "output.txt",
-                    "difference_file": "test04/0_diff.json",
-                    "expected_file": "test_output/testassignment/inst_output.txt"
-                }
-            ],
-            "points_awarded": 4,
-            "test_name": "Test 4 Test of by word comparison"
-        },
-        {
-            "autochecks": [
-                {
                     "actual_file": "test05/output.txt",
                     "description": "output.txt",
                     "difference_file": "test05/0_diff.json",
