@@ -7,6 +7,7 @@ namespace app\controllers;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\models\Button;
+use app\models\User;
 
 class GlobalController extends AbstractController {
 
@@ -96,7 +97,7 @@ class GlobalController extends AbstractController {
             $course_path = $this->core->getConfig()->getCoursePath();
             $course_materials_path = $course_path . "/uploads/course_materials";
             $any_files = FileUtils::getAllFiles($course_materials_path);
-            if ($this->core->getUser()->getGroup() === 1 || !empty($any_files)) {
+            if ($this->core->getUser()->accessAdmin() || !empty($any_files)) {
                 $sidebar_buttons[] = new Button($this->core, [
                     "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'course_materials', 'action' => 'view_course_materials_page')),
                     "title" => "Course Materials",
@@ -183,7 +184,7 @@ class GlobalController extends AbstractController {
                 $images_course_path = $this->core->getConfig()->getCoursePath();
                 $images_path = Fileutils::joinPaths($images_course_path, "uploads/student_images");
                 $any_images_files = FileUtils::getAllFiles($images_path, array(), true);
-                if ($this->core->getUser()->getGroup() === 1 && count($any_images_files) === 0) {
+                if ($this->core->getUser()->accessAdmin() && count($any_images_files) === 0) {
                     $at_least_one_grader_link = true;
                     $sidebar_buttons[] = new Button($this->core, [
                         "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page')),
@@ -194,7 +195,7 @@ class GlobalController extends AbstractController {
                     ]);
                 } else if (count($any_images_files) !== 0 && $this->core->getUser()->accessGrading()) {
                     $sections = $this->core->getUser()->getGradingRegistrationSections();
-                    if (!empty($sections) || $this->core->getUser()->getGroup() !== 3) {
+                    if (!empty($sections) || $this->core->getUser()->getGroup() !== User::GROUP_LIMITED_ACCESS_GRADER) {
                         $at_least_one_grader_link = true;
                         $sidebar_buttons[] = new Button($this->core, [
                             "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page')),
