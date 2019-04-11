@@ -459,6 +459,8 @@ CREATE TABLE users (
     user_group integer NOT NULL,
     registration_section character varying(255),
     rotating_section integer,
+    user_updated boolean NOT NULL DEFAULT false,
+    instructor_updated boolean NOT NULL DEFAULT false,
     manual_registration boolean DEFAULT false,
     last_updated timestamp(6) with time zone,
     CONSTRAINT users_user_group_check CHECK ((user_group >= 1) AND (user_group <= 4))

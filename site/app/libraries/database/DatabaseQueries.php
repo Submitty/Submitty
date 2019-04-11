@@ -970,11 +970,6 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         $this->course_db->query("
 SELECT COUNT(*) as cnt
 FROM gradeable_data
-INNER JOIN (
-    SELECT user_id FROM users AS u
-    WHERE {$section_key} IS NOT NULL
-) AS u
-ON u.user_id=gd_user_id
 WHERE g_id = ? AND gd_user_viewed_date IS NOT NULL
 
         ", array($g_id));
