@@ -202,7 +202,7 @@ TestResults* custom_doit(const TestCase &tc, const nlohmann::json& j, const nloh
   std::string output_file_name = "temporary_custom_validator_output.json";
   std::string input_file_name = "custom_validator_input.json";
 
-  //Write out this validator config for use by the 
+  //Write out this validator config for use by the custom validator
   std::ofstream input_file(input_file_name);
   input_file << j;
   input_file.close();

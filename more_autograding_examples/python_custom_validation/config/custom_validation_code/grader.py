@@ -6,9 +6,24 @@ import traceback
 
 def parse_args():
   parser = argparse.ArgumentParser()
-  parser.add_argument("-n", "--numbers", help="The number of numbers we expect", type=int)
-  parser.add_argument("-a", "--actual_files", nargs='+', help="The files to process")
+  parser.add_argument("-n", "--numbers", required=True, help="The number of numbers we expect", type=int)
+  parser.add_argument("-p", "--prefix", required=True, help="The testcase prefix")
   return parser.parse_args()
+
+def get_actual_files(prefix):
+  try:
+    with open('custom_validator_input.json') as json_file:  
+      tc = json.load(json_file)
+  except Exception as e:
+    return_error('Could not custom_validator_input.json')
+
+  if isinstance(tc['actual_file'], str):
+    actual_files = list([os.path.join(prefix, tc['actual_file']),])
+  else:
+    actual_files = list()
+    for file in tc['actual_file']:
+      actual_files.append(os.path.join(prefix, file))
+  return actual_files
 
 def load_file(file, number_of_numbers):
   data = list()
@@ -46,9 +61,11 @@ def main():
     args = parse_args()
   except Exception as e:
     return_error(message='ERROR: Incorrect arguments to custom validator')
-  actual_files = args.actual_files
+  prefix = args.prefix
   number_of_numbers = args.numbers
   
+  actual_files = get_actual_files(prefix)
+
   prev_data = None
 
   for file in actual_files:
