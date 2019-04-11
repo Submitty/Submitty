@@ -966,13 +966,29 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
 
-    public function getNumUsersWhoViewedGrade($g_id, $section_key) {
-        $this->course_db->query("
-SELECT COUNT(*) as cnt
-FROM gradeable_data
-WHERE g_id = ? AND gd_user_viewed_date IS NOT NULL
+    public function getNumUsersWhoViewedGradeBySections($gradeable, $sections) {
+        $table = $gradeable->isTeamAssignment() ? 'gradeable_teams' : 'users';
+        $grade_type = $gradeable->isGradeByRegistration() ? 'registration' : 'rotating';
+        $type = $gradeable->isTeamAssignment() ? 'team' : 'user';
 
-        ", array($g_id));
+        $params = array($gradeable->getId());
+
+        $sections_query = "";
+        if (count($sections) > 0) {
+            $sections_query= "{$grade_type}_section IN " . $this->createParamaterList(count($sections));
+            $params = array_merge($sections, $params);
+        }
+
+        $this->course_db->query("
+            SELECT COUNT(*) as cnt
+            FROM gradeable_data AS gd
+            INNER JOIN (
+                SELECT u.{$type}_id, u.{$grade_type}_section FROM {$table} AS u
+                WHERE u.{$sections_query}
+            ) AS u
+            ON gd.gd_{$type}_id=u.{$type}_id
+            WHERE gd.g_id = ? AND gd.gd_user_viewed_date IS NOT NULL
+        ", $params);
 
         return intval($this->course_db->row()['cnt']);
     }
