@@ -8,9 +8,9 @@ def up(config):
     :param config: Object holding configuration details about Submitty
     :type config: migrator.config.Config
     """
-    os.system("apt install -qy python3-skimage")
-    os.system("apt install -qy python-matplotlib")
-    os.system("apt-get update")
+    os.system("pip3 install scikit-image")
+    os.system("pip3 install matplotlib")
+    #os.system("apt-get update")
 
 
 def down(config):

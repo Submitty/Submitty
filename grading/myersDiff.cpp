@@ -197,37 +197,21 @@ TestResults* custom_doit(const TestCase &tc, const nlohmann::json& j, const nloh
   std::vector<nlohmann::json> dispatcher_actions;
   std::string execute_logfile = "/dev/null";
   nlohmann::json test_case_limits = tc.get_test_case_limits();
-  nlohmann::json assignment_limits = j.value("resource_limits",nlohmann::json());
+  nlohmann::json assignment_limits = whole_config.value("resource_limits",nlohmann::json());
   bool windowed = false;
   std::string output_file_name = "temporary_custom_validator_output.json";
+  std::string input_file_name = "custom_validator_input.json";
 
-  std::vector<std::string> actual_filenames   = stringOrArrayOfStrings(j,"actual_file");
-  std::vector<std::string> expected_filenames = stringOrArrayOfStrings(j,"expected_file");
+  //Write out this validator config for use by the 
+  std::ofstream input_file(input_file_name);
+  input_file << j;
+  input_file.close();
 
-  //grab the actual files.
-  std::string actual_file_argument = "";
-  if(actual_filenames.size() > 0){
-    actual_file_argument = "--actual_files";
-    for(int i=0; i< actual_filenames.size(); i++){
-      actual_file_argument += " " + tc.getPrefix() + actual_filenames[i]; 
-    }
-  }
-
-  //grab the expected files
-  std::string expected_file_argument  = "";
-  if(expected_filenames.size() > 0){
-    expected_file_argument = "--expected_files";
-    for(int i=0; i< expected_filenames.size(); i++){
-      //For the moment, expected files get no prefix, as they are stored
-      // one level above the testcase directory.
-      expected_file_argument += " " + expected_filenames[i]; 
-    }
-  }
-
-  command = command + " " + actual_file_argument + " " + expected_file_argument + " 1>"+output_file_name;
+  command = command + " --prefix " + tc.getPrefix() + " 1>"+output_file_name;
   int ret = execute(command, 
                     actions, dispatcher_actions, execute_logfile, test_case_limits,
                     assignment_limits, whole_config, windowed, "NOT_A_WINDOWED_ASSIGNMENT");
+  std::remove(input_file_name.c_str());
 
   std::ifstream ifs(output_file_name);
 
@@ -245,6 +229,7 @@ TestResults* custom_doit(const TestCase &tc, const nlohmann::json& j, const nloh
     std::cout << "ERROR: Could not parse the custom validator's output." << std::endl;
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: Could not parse a custom validator's output.")});
   }
+  std::remove(output_file_name.c_str());
 
   std::string validator_status = "fail";
   if(result["status"].is_string()){
@@ -252,7 +237,6 @@ TestResults* custom_doit(const TestCase &tc, const nlohmann::json& j, const nloh
       validator_status = "success";
     }
   }else{
-    std::remove(output_file_name.c_str());
     std::cout << "ERROR: A custom validator did not return success or failure" << std::endl;
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: A custom validator did not return success or failure")});
   }
@@ -264,19 +248,16 @@ TestResults* custom_doit(const TestCase &tc, const nlohmann::json& j, const nloh
     }
     //logs to validator_log
     std::cout << error_message << std::endl;
-    std::remove(output_file_name.c_str());
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: Custom validation failed.")});
   }
 
   if(!result["data"].is_object()){
-    std::remove(output_file_name.c_str());
     std::cout << "ERROR: The custom validator did not return a 'data' subdictionary." << std::endl;
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: A custom validator did not return a result.")});
   }
   
   if(!result["data"]["score"].is_number()){
     std::cout << "ERROR: A custom validator must return score as a number between 0 and 1" << std::endl;
-    std::remove(output_file_name.c_str());
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: A custom validator did not return a score.")});
   }
   float score = result["data"]["score"];
@@ -304,9 +285,6 @@ TestResults* custom_doit(const TestCase &tc, const nlohmann::json& j, const nloh
   }else if(status_string == "success"){
     status = MESSAGE_SUCCESS;
   }//else it stays information.
-
-  //Remove is safe, as we named and created the file.
-  std::remove(output_file_name.c_str());
 
   return new TestResults(score, {std::make_pair(status, message)});
 }
