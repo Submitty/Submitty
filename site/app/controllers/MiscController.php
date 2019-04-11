@@ -485,7 +485,7 @@ class MiscController extends AbstractController {
   	public function modifyCourseMaterialsFilePermission() {
 
         // security check
-        if($this->core->getUser()->getGroup() !== 1) {
+        if(!$this->core->getUser()->accessAdmin()) {
             $message = "You do not have access to that page. ";
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
@@ -524,7 +524,7 @@ class MiscController extends AbstractController {
 
     public function modifyCourseMaterialsFileTimeStamp() {
 
-        if($this->core->getUser()->getGroup() !== 1) {
+        if(!$this->core->getUser()->accessAdmin()) {
             $message = "You do not have access to that page. ";
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
