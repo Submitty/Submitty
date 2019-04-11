@@ -277,12 +277,11 @@
 {% endif %}
 
 <script type="text/javascript">
-    function makeSubmission(user_id, highest_version, is_pdf, path, count, repo_id, merge_previous=false, clobber=false) {
+    function makeSubmission(user_id, highest_version, is_pdf, path, repo_id, merge_previous=false, clobber=false) {
         // submit the selected pdf
         path = decodeURIComponent(path);
         if (is_pdf) {
-            submitSplitItem("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_id, path, count, merge_previous, clobber);
-            moveNextInput(count);
+            submitSplitItem("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_id, path, merge_previous, clobber);
         }
 
         // otherwise, this is a regular submission of the uploaded files
