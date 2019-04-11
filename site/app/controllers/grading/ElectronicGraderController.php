@@ -103,12 +103,8 @@ class ElectronicGraderController extends GradingController {
             case 'remove_empty':
                 $this->ajaxRemoveEmpty();
                 break;
-            case '':
-                $this->showStatus();
-                break;
             default:
-                // TODO: this is for testing
-                throw new \InvalidArgumentException('AHHH');
+                $this->showStatus();
                 break;
         }
     }
