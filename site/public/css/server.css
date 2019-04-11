@@ -194,11 +194,6 @@ input[type="checkbox"]:checked:before {
   display: inline-block;
 }
 
-input[type="checkbox"]:focus{
-    outline: 0 none;
-    box-shadow: none;
-}
-
 select.disabled,
 textarea.disabled,
 input.disabled {
@@ -1783,8 +1778,4 @@ end of styles used in the admin gradeable page
     max-height: 300px;
     overflow-y: scroll;
     overflow-x: hidden;
-}
-
-.checkbox-focus{
-    background-color: #00729E33;
 }
