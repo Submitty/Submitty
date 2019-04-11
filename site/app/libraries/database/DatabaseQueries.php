@@ -296,8 +296,8 @@ class DatabaseQueries {
         $values = implode(', ', array_fill(0, count($results)+1, '?'));
         $keys = implode(', ', array_keys($results));
         $updates = '';
-        
-        foreach($results as $key => $value) { 
+
+        foreach($results as $key => $value) {
             if($value != 'false') {
                 $results[$key] = 'true';
             }
@@ -311,8 +311,8 @@ class DatabaseQueries {
                                     VALUES
                                      (
                                         $values
-                                     ) 
-                                    ON CONFLICT (user_id) 
+                                     )
+                                    ON CONFLICT (user_id)
                                     DO
                                      UPDATE
                                         SET $updates", $test);
@@ -1622,7 +1622,7 @@ WHERE gcm_id=?", $params);
      */
     public function getAllElectronicGradeablesIds() {
         $this->course_db->query("
-          SELECT g_id, g_title 
+          SELECT g_id, g_title
           FROM gradeable INNER JOIN electronic_gradeable USING (g_id)
           WHERE eg_scanned_exam=FALSE and eg_has_due_date=TRUE
           ORDER BY eg_submission_due_date ASC
@@ -2493,12 +2493,12 @@ AND gc_id IN (
         if($notification->getNotifyNotToSource()){
             $not_send_users[] = $notification->getNotifySource();
         }
-        
+
         $restrict = count($not_send_users);
         if($restrict > 0) {
         	$ignore_self_query = "WHERE user_id NOT IN (" . implode(',', array_fill(0, $restrict, '?')) . ')';
         }
-        
+
         $column = '';
         if($type === 'reply') {
         	$post_thread_id = json_decode($params[1], true)[0]['thread_id'];
@@ -3552,7 +3552,7 @@ AND gc_id IN (
     }
 
     /**
-     * Gets a list of emails for all active particpants in a course  
+     * Gets a list of emails for all active particpants in a course
      */
     public function getClassEmailList(){
         $parameters = array();
@@ -3560,12 +3560,23 @@ AND gc_id IN (
 
         return $this->course_db->rows();
     }
-    
+
+    /**
+    * Gets a list of emails with user ids for all active particpants in a course
+    */
+
+    public function getClassEmailListWithIds() {
+      $parameters = array();
+      $this->course_db->query('SELECT user_id, user_email FROM users WHERE registration_section IS NOT null', $parameters);
+
+      return $this->course_db->rows();
+    }
+
     /**
      * Queues an email to be sent by email job
      * @param array $email_data
-     * @param string $recipient  
-     */ 
+     * @param string $recipient
+     */
     public function createEmail($email_data, $recipient){
         $parameters = array($recipient, $email_data["subject"], $email_data["body"]);
 
