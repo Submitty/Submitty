@@ -97,7 +97,7 @@ class ForumController extends AbstractController {
                 $this->showThreads();
                 break;
         }
-    }
+    } 
 
     private function showDeleted() {
         return ($this->core->getUser()->accessGrading() && isset($_COOKIE['show_deleted']) && $_COOKIE['show_deleted'] == "1");
@@ -200,7 +200,7 @@ class ForumController extends AbstractController {
 
     public function addNewCategory(){
         $result = array();
-        if($this->core->getUser()->accessGrading()){
+        if($this->core->getAccess()->canI("forum.modify_category")){
             if(!empty($_REQUEST["newCategory"])) {
                 $category = $_REQUEST["newCategory"];
                 if($this->isValidCategories(-1, array($category))) {
@@ -221,7 +221,7 @@ class ForumController extends AbstractController {
 
     public function deleteCategory(){
         $result = array();
-        if($this->core->getUser()->accessGrading()){
+        if($this->core->getAccess()->canI("forum.modify_category")) {
             if(!empty($_REQUEST["deleteCategory"])) {
                 $category = (int)$_REQUEST["deleteCategory"];
                 if(!$this->isValidCategories(array($category))) {
@@ -247,7 +247,8 @@ class ForumController extends AbstractController {
 
     public function editCategory(){
         $result = array();
-        if($this->core->getUser()->accessGrading()){
+
+        if($this->core->getAccess()->canI("forum.modify_category")){
             $category_id = $_REQUEST["category_id"];
             $category_desc = null;
             $category_color = null;
@@ -282,7 +283,7 @@ class ForumController extends AbstractController {
 
     public function reorderCategories(){
         $result = array();
-        if($this->core->getUser()->accessGrading()){
+        if($this->core->getAccess()->canI("forum.modify_category")){
             $rows = $this->core->getQueries()->getCategories();
 
             $current_order = array();
@@ -310,6 +311,12 @@ class ForumController extends AbstractController {
     //CODE WILL BE CONSOLIDATED IN FUTURE
 
     public function publishThread(){
+        
+        if(!$this->core->getAccess()->canI("forum.publish")) {
+            $this->core->addErrorMessage("Invalid CSRF token");
+            return;
+        }
+
         $result = array();
         $title = $_POST["title"];
         $thread_post_content = str_replace("\r", "", $_POST["thread_post_content"]);
@@ -372,6 +379,12 @@ class ForumController extends AbstractController {
     }
 
     public function publishPost(){
+
+        if(!$this->core->getAccess()->canI("forum.publish")) {
+            $this->core->addErrorMessage("Invalid CSRF token");
+            return;
+        }
+
         $result = array();
         $parent_id = (!empty($_POST["parent_id"])) ? htmlentities($_POST["parent_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8') : -1;
         $post_content_tag = 'thread_post_content';
@@ -423,7 +436,7 @@ class ForumController extends AbstractController {
     }
 
     public function alterAnnouncement($type){
-        if($this->core->getUser()->getGroup() <= 2){
+        if($this->core->getAccess()->canI("forum.modify_announcement")){
             $thread_id = $_POST["thread_id"];
             $this->core->getQueries()->setAnnouncement($thread_id, $type);
             if($type) {
@@ -444,34 +457,6 @@ class ForumController extends AbstractController {
         return $this->core->getOutput()->getOutput();
     }
 
-    private function checkPostEditAccess($post_id) {
-        if($this->core->getUser()->accessGrading()){
-                // Instructor/full access ta/mentor
-                return true;
-        } else {
-            $post = $this->core->getQueries()->getPost($post_id);
-            if($post['author_user_id'] === $this->core->getUser()->getId()) {
-                // Original Author
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private function checkThreadEditAccess($thread_id) {
-        if($this->core->getUser()->accessGrading()){
-                // Instructor/full access ta/mentor
-                return true;
-        } else {
-            $post = $this->core->getQueries()->getThread($thread_id)[0];
-            if($post['created_by'] === $this->core->getUser()->getId()) {
-                // Original Author
-                return true;
-            }
-        }
-        return false;
-    }
-
     /**
      * Alter content/delete/undelete post of a thread
      *
@@ -481,7 +466,8 @@ class ForumController extends AbstractController {
      */
     public function alterPost($modifyType){
         $post_id = $_POST["post_id"] ?? $_POST["edit_post_id"];
-        if(!($this->checkPostEditAccess($post_id))) {
+        $post = $this->core->getQueries()->getPost($post_id);
+        if(!$this->core->getAccess()->canI("forum.modify_post", ['post_author' => $post['author_user_id']])) {
                 $this->core->addErrorMessage("You do not have permissions to do that.");
                 return;
         }
@@ -493,7 +479,6 @@ class ForumController extends AbstractController {
             } else {
                 $type = "post";
             }
-            $post = $this->core->getQueries()->getPost($post_id);
             $post_author = $post['author_user_id'];
             $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'deleted', 'thread_id' => $thread_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
             $this->core->getQueries()->pushNotification($notification);
@@ -510,7 +495,6 @@ class ForumController extends AbstractController {
             } else {
                 /// We want to reload same thread again, in both case (thread/post undelete)
                 $type = "post";
-                $post = $this->core->getQueries()->getPost($post_id);
                 $post_author = $post['author_user_id'];
                 $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'undeleted', 'thread_id' => $thread_id, 'post_id' => $post_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
                 $this->core->getQueries()->pushNotification($notification);
@@ -555,7 +539,6 @@ class ForumController extends AbstractController {
                 }
             }
             if($any_changes) {
-                $post = $this->core->getQueries()->getPost($post_id);
                 $post_author = $post['author_user_id'];
                 $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'edited', 'thread_id' => $thread_id, 'post_id' => $post_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
                 $this->core->getQueries()->pushNotification($notification);
@@ -573,9 +556,6 @@ class ForumController extends AbstractController {
         // Ensure authentication before call
         if(!empty($_POST["title"])) {
             $thread_id = $_POST["edit_thread_id"];
-            if(!$this->checkThreadEditAccess($thread_id)) {
-                return false;
-            }
             $thread_title = $_POST["title"];
             $status = $_POST["thread_status"];
             $categories_ids  = array();
