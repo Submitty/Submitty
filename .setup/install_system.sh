@@ -256,7 +256,7 @@ else
 fi
 
 if [ ${VAGRANT} == 1 ]; then
-	adduser vagrant sudo
+	useradd vagrant sudo
 fi
 
 # change the default user umask (was 002)
@@ -266,16 +266,16 @@ grep -q "^UMASK 027" /etc/login.defs || (echo "ERROR! failed to set umask" && ex
 #add users not needed on a worker machine.
 if [ ${WORKER} == 0 ]; then
     if ! cut -d ':' -f 1 /etc/passwd | grep -q ${PHP_USER} ; then
-        adduser "${PHP_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+        useradd "${PHP_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
     fi
     usermod -a -G "${DAEMONPHP_GROUP}" "${PHP_USER}"
     if ! cut -d ':' -f 1 /etc/passwd | grep -q ${CGI_USER} ; then
-        adduser "${CGI_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+        useradd "${CGI_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
     fi
     usermod -a -G "${PHP_GROUP}" "${CGI_USER}"
     usermod -a -G "${DAEMONCGI_GROUP}" "${CGI_USER}"
     # THIS USER SHOULD NOT BE NECESSARY AS A UNIX GROUP
-    #adduser "${DB_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+    #useradd "${DB_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 
     # NOTE: ${CGI_USER} must be in the shadow group so that it has access to the
     # local passwords for pam authentication
@@ -288,7 +288,7 @@ if [ ${WORKER} == 0 ]; then
 fi
 
 if ! cut -d ':' -f 1 /etc/passwd | grep -q ${DAEMON_USER} ; then
-    adduser "${DAEMON_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+    useradd "${DAEMON_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 fi
 
 # The VCS directores (/var/local/submitty/vcs) are owfned by root:$DAEMONCGI_GROUP

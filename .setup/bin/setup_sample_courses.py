@@ -382,7 +382,7 @@ def add_to_group(group, user_id):
     :param user_id:
     """
     create_group(group)
-    os.system("adduser {} {}".format(user_id, group))
+    os.system("useradd {} {}".format(user_id, group))
 
 
 def get_php_db_password(password):
@@ -445,7 +445,7 @@ def parse_args():
 def create_user(user_id):
     if not user_exists(id):
         print("Creating user {}...".format(user_id))
-        os.system("/usr/sbin/adduser {} --quiet --home /tmp --gecos \'AUTH ONLY account\' "
+        os.system("/usr/sbin/useradd {} --quiet --home /tmp --gecos \'AUTH ONLY account\' "
                   "--no-create-home --disabled-password --shell "
                   "/usr/sbin/nologin".format(user_id))
         print("Setting password for user {}...".format(user_id))
@@ -572,14 +572,14 @@ class User(object):
     def _create_ssh(self):
         if not user_exists(self.id):
             print("Creating user {}...".format(self.id))
-            os.system("adduser {} --gecos 'First Last,RoomNumber,WorkPhone,HomePhone' "
+            os.system("useradd {} --gecos 'First Last,RoomNumber,WorkPhone,HomePhone' "
                       "--disabled-password".format(self.id))
             self.set_password()
 
     def _create_non_ssh(self):
         if not DB_ONLY and not user_exists(self.id):
             print("Creating user {}...".format(self.id))
-            os.system("/usr/sbin/adduser {} --quiet --home /tmp --gecos \'AUTH ONLY account\' "
+            os.system("/usr/sbin/useradd {} --quiet --home /tmp --gecos \'AUTH ONLY account\' "
                       "--no-create-home --disabled-password --shell "
                       "/usr/sbin/nologin".format(self.id))
             self.set_password()

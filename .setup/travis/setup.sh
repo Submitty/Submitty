@@ -39,17 +39,17 @@ python3 ${DIR}/../bin/create_untrusted_users.py
 addgroup submitty_daemonphp
 addgroup submitty_daemoncgi
 addgroup submitty_course_builders
-adduser ${PHP_USER} --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-adduser ${CGI_USER} --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-adduser ${CGI_USER} ${PHP_GROUP}
-adduser ${PHP_USER} shadow
-adduser ${CGI_USER} shadow
-adduser submitty_daemon --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-adduser ${PHP_USER} submitty_daemonphp
-adduser submitty_daemon submitty_daemonphp
-adduser ${CGI_USER} submitty_daemoncgi
-adduser submitty_daemon submitty_daemoncgi
-adduser submitty_daemon docker
+useradd ${PHP_USER} --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+useradd ${CGI_USER} --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+useradd ${CGI_USER} ${PHP_GROUP}
+useradd ${PHP_USER} shadow
+useradd ${CGI_USER} shadow
+useradd submitty_daemon --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+useradd ${PHP_USER} submitty_daemonphp
+useradd submitty_daemon submitty_daemonphp
+useradd ${CGI_USER} submitty_daemoncgi
+useradd submitty_daemon submitty_daemoncgi
+useradd submitty_daemon docker
 useradd -p $(openssl passwd -1 submitty_dbuser) submitty_dbuser
 
 chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}
