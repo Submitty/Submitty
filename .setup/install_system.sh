@@ -275,7 +275,7 @@ if [ ${WORKER} == 0 ]; then
     usermod -a -G "${PHP_GROUP}" "${CGI_USER}"
     usermod -a -G "${DAEMONCGI_GROUP}" "${CGI_USER}"
     # THIS USER SHOULD NOT BE NECESSARY AS A UNIX GROUP
-    #useradd "${DB_USER}" -c "First Last,RoomNumber,WorkPhone,HomePhone" 
+    #useradd -c "First Last,RoomNumber,WorkPhone,HomePhone" "${DB_USER}"
 
     # NOTE: ${CGI_USER} must be in the shadow group so that it has access to the
     # local passwords for pam authentication
