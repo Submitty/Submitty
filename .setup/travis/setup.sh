@@ -41,15 +41,11 @@ addgroup submitty_daemoncgi
 addgroup submitty_course_builders
 useradd -c "First Last,RoomNumber,WorkPhone,HomePhone" ${PHP_USER}
 useradd -c "First Last,RoomNumber,WorkPhone,HomePhone" ${CGI_USER}
-useradd -g ${PHP_GROUP} ${CGI_USER}
-useradd ${PHP_USER} 
-useradd ${CGI_USER}
+usermod -a -G ${PHP_GROUP} ${CGI_USER}
 useradd -c "First Last,RoomNumber,WorkPhone,HomePhone" submitty_daemon
-useradd -g submitty_daemonphp ${PHP_USER}
-useradd -g submitty_daemonphp submitty_daemon
-useradd -g submitty_daemoncgi ${CGI_USER}
-useradd -g submitty_daemoncgi submitty_daemon
-useradd -g docker submitty_daemon
+usermod -a -G submitty_daemonphp ${PHP_USER}
+usermod -a -G submitty_daemoncgi ${CGI_USER}
+usermod -a -G submitty_daemoncgi, submitty_daemonphp, docker submitty_daemon
 useradd -p $(openssl passwd -1 submitty_dbuser) submitty_dbuser
 
 chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}
