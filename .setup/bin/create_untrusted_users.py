@@ -15,5 +15,5 @@ for i in range(0, 60):
     except KeyError:
         uuid = 900 + i
         os.system("addgroup {} --gid {}".format(user, uuid))
-        os.system("useradd {} --home /tmp -M --uid {} --gid {} "
-                  "-c 'untrusted'".format(user, uuid, uuid))
+        os.system("useradd --home /tmp -M --uid {} --gid {} "
+                  "-c 'untrusted' {}".format(uuid, uuid, user))
