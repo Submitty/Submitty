@@ -445,8 +445,8 @@ def parse_args():
 def create_user(user_id):
     if not user_exists(id):
         print("Creating user {}...".format(user_id))
-        os.system("/usr/sbin/useradd {} --quiet --home /tmp --gecos \'AUTH ONLY account\' "
-                  "--no-create-home --disabled-password --shell "
+        os.system("/usr/sbin/useradd {} --quiet --home /tmp -c \'AUTH ONLY account\' "
+                  "-M --shell "
                   "/usr/sbin/nologin".format(user_id))
         print("Setting password for user {}...".format(user_id))
         os.system("echo {}:{} | chpasswd".format(user_id, user_id))
@@ -572,15 +572,14 @@ class User(object):
     def _create_ssh(self):
         if not user_exists(self.id):
             print("Creating user {}...".format(self.id))
-            os.system("useradd {} --gecos 'First Last,RoomNumber,WorkPhone,HomePhone' "
-                      "--disabled-password".format(self.id))
+            os.system("useradd {} -c 'First Last,RoomNumber,WorkPhone,HomePhone' ".format(self.id))
             self.set_password()
 
     def _create_non_ssh(self):
         if not DB_ONLY and not user_exists(self.id):
             print("Creating user {}...".format(self.id))
-            os.system("/usr/sbin/useradd {} --quiet --home /tmp --gecos \'AUTH ONLY account\' "
-                      "--no-create-home --disabled-password --shell "
+            os.system("/usr/sbin/useradd {} --quiet --home /tmp -c \'AUTH ONLY account\' "
+                      "-M --shell "
                       "/usr/sbin/nologin".format(self.id))
             self.set_password()
 

@@ -266,16 +266,16 @@ grep -q "^UMASK 027" /etc/login.defs || (echo "ERROR! failed to set umask" && ex
 #add users not needed on a worker machine.
 if [ ${WORKER} == 0 ]; then
     if ! cut -d ':' -f 1 /etc/passwd | grep -q ${PHP_USER} ; then
-        useradd "${PHP_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+        useradd "${PHP_USER}" -c "First Last,RoomNumber,WorkPhone,HomePhone" 
     fi
     usermod -a -G "${DAEMONPHP_GROUP}" "${PHP_USER}"
     if ! cut -d ':' -f 1 /etc/passwd | grep -q ${CGI_USER} ; then
-        useradd "${CGI_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+        useradd "${CGI_USER}" -c "First Last,RoomNumber,WorkPhone,HomePhone" 
     fi
     usermod -a -G "${PHP_GROUP}" "${CGI_USER}"
     usermod -a -G "${DAEMONCGI_GROUP}" "${CGI_USER}"
     # THIS USER SHOULD NOT BE NECESSARY AS A UNIX GROUP
-    #useradd "${DB_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+    #useradd "${DB_USER}" -c "First Last,RoomNumber,WorkPhone,HomePhone" 
 
     # NOTE: ${CGI_USER} must be in the shadow group so that it has access to the
     # local passwords for pam authentication
@@ -288,7 +288,7 @@ if [ ${WORKER} == 0 ]; then
 fi
 
 if ! cut -d ':' -f 1 /etc/passwd | grep -q ${DAEMON_USER} ; then
-    useradd "${DAEMON_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+    useradd "${DAEMON_USER}" -c "First Last,RoomNumber,WorkPhone,HomePhone" 
 fi
 
 # The VCS directores (/var/local/submitty/vcs) are owfned by root:$DAEMONCGI_GROUP
