@@ -101,7 +101,7 @@
                 expandFile(html_file, url_file);
             }
             else {
-                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{{ core.getConfig().getSiteUrl() }}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' style='border: 0'></iframe>");
+                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{{ core.getConfig().getSiteUrl() }}&component=misc&page=display_file&dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true' width='95%' style='border: 0'></iframe>");
                 if(iframe.hasClass("full_panel")){
                     $('#'+iframeId).attr("height", "1200px");
                 }
@@ -140,7 +140,7 @@
         else if (url_file.includes("split_pdf")) {
             directory = "split_pdf";
         }
-        window.open("{{ site_url|escape("js") }}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+        window.open("{{ site_url|escape("js") }}&component=misc&page=display_file&dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
         return false;
     }
     //TODO: Name better
