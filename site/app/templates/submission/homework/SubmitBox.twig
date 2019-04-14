@@ -350,11 +350,31 @@
             }
             // no user id entered, upload for whoever is logged in
             else if (user_id == ""){
-                makeSubmission(user_id, {{ highest_version }}, false, "", "", repo_id);
+                makeSubmission(user_id, {{ highest_version }}, false, "", repo_id);
             }
             // user id entered, need to validate first
             else {
-                validateUserId("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_id, false, "", "", repo_id, makeSubmission);
+                validateUserId("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_id)
+                .then(function(response){
+                    if(response['highest_version']){
+                        var option = displayPreviousSubmissionOptions(getSubmissionOption);
+                        function getSubmissionOption(option){
+                            var merge_previous = false;
+                            var clobber = false;
+
+                            if(option == 2){
+                                merge_previous = true;
+                            } else if(option == 3){
+                                merge_previous = true;
+                                clobber = true;
+                            }
+
+                            makeSubmission(user_id,response['highest_version'], false, "", "", merge_previous,clobber);
+                        }
+                    }else{
+                        makeSubmission(user_id, response['highest_version'], false, "", "");
+                    }
+                });
             }
             e.stopPropagation();
         });

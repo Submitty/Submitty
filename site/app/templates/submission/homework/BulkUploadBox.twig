@@ -84,6 +84,8 @@
     var num_submissions = {{ files|length }};
     var CSRF = "{{ core.getCsrfToken() }}";
     var g_id = "{{ gradeable_id }}";
+    var max_team_size = {{ max_team_size - 1 }};
+    var is_team_assignment = {{ team_assignment }};
     //autofill data
     $(function(){
         $("td > div :text").autocomplete({
@@ -98,12 +100,19 @@
         document.getElementById('row-' + String(index)).remove();
         num_submissions -= 1;
     }
-   
+    
     function uploadSplit(index){
         var submit_btn = document.getElementById("bulk_submit_" + String(index));
         var delete_btn = document.getElementById("bulk_delete_" + String(index));
         var user_id_textarea = document.getElementById("bulk_user_id_" + String(index));
-        var user_id = user_id_textarea.value;
+
+        if(is_team_assignment){
+            var user_id = array();
+            for (var i = 0; i < max_team_size; i++) 
+                user_id.push(document.getElementById("bulk_user_id_" + String(index) + "[" + String(i) + "]"));
+        }else{
+            var user_id = user_id_textarea.value;
+        }
 
         submit_btn.disabled = true;
         delete_btn.disabled = true;
@@ -145,6 +154,12 @@
             console.error(response);
             displaySubmissionMessage({'success' : false, 'message' : response});
         });
+    }
+
+    function uploadTeamSplit(index){
+        var submit_btn = document.getElementById("bulk_submit_" + String(index));
+        var delete_btn = document.getElementById("bulk_delete_" + String(index));
+        var user_id_textarea = document.getElementById("bulk_user_id_" + String(index));
     }
 
     function uploadSplitHelper(user_id,path,index = 0,merge_previous = false,clobber = false){

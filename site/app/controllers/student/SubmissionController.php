@@ -647,9 +647,14 @@ class SubmissionController extends AbstractController {
 
         $original_user_id = $this->core->getUser()->getId();
 
-        //user ids come in as a comma delimited list. we explode that list, then filter out empty values.
-        $user_ids = explode (",", $_POST['user_id']);
-        $user_ids = array_filter($user_ids);
+        $tmp_ids = $_POST['user_id'];
+        if(is_array($tmp_ids)){
+            $user_ids = array_filter($_POST['user_id']);
+        } else{
+            $user_ids = array($tmp_ids);
+            $user_ids = array_filter($user_ids);
+        }
+        
         //This grabs the first user in the list. If this is a team assignment, they will be the team leader.
         $user_id = reset($user_ids);
 
