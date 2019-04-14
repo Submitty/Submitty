@@ -13,8 +13,19 @@ use app\libraries\Output;
  */
 class NotificationSettings extends AbstractController {
 
-	const NOTIFICATION_SELECTIONS = ['merge_threads', 'all_new_threads', 'all_new_posts', 'all_modifications_forum', 'reply_in_post_thread','merge_threads_email', 'all_new_threads_email', 'all_new_posts_email', 'all_modifications_forum_email', 'reply_in_post_thread_email'];
-	const NUM = 10;
+	const NOTIFICATION_SELECTIONS = [
+	    'merge_threads',
+        'all_new_threads',
+        'all_new_posts',
+        'all_modifications_forum',
+        'reply_in_post_thread',
+//        'merge_threads_email', These will be commented out until they are
+//                               implemented in the push email notification function.
+//        'all_new_threads_email',
+//        'all_new_posts_email',
+//        'all_modifications_forum_email',
+        'reply_in_post_thread_email'
+    ];
 
 	public function __construct(Core $core) {
         parent::__construct($core);
@@ -45,7 +56,7 @@ class NotificationSettings extends AbstractController {
     }
 
     private function validateNotificationSettings($columns) {
-    	if(count($columns) <= self::NUM && count(array_intersect($columns, self::NOTIFICATION_SELECTIONS)) == count($columns)) {
+    	if(count($columns) <= count(NotificationSettings::NOTIFICATION_SELECTIONS) && count(array_intersect($columns, self::NOTIFICATION_SELECTIONS)) == count($columns)) {
     		return true;
     	}
     	return false;

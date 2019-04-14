@@ -2474,8 +2474,9 @@ AND gc_id IN (
         $url = "";
         $course_name = "[Submitty ". $this->core->getConfig()->getCourse()." ".$this->core->getConfig()->getCourseName() . "]";
         if ($notification->getType() != 'deleted') {
-            $id = json_decode($notification->getNotifyMetadata())[2];
             $thread_id = Notification::getThreadIdIfExists($notification->getNotifyMetadata());
+            $metadata = json_decode($notification->getNotifyMetadata());
+            $id = count($metadata) == 1 ? $thread_id : $metadata[2];
             $post = $this->getPost($id);
             $thread = $this->getThread($thread_id);
 
@@ -2498,7 +2499,7 @@ AND gc_id IN (
             case 'reply':
                 $sql = "SELECT u.user_email from notification_settings n, posts p, users u where thread_id = {$thread_id} and 
                         p.author_user_id = n.user_id and n.user_id = u.user_id and n.reply_in_post_thread_email = 'true' and
-                        u.user_id != '{$notification->getNotifySource()}' and (u.user_group != 4 OR u.registration_section IS NOT null) ";
+                        u.user_id != '{$notification->getNotifyTarget()}' and (u.user_group != 4 OR u.registration_section IS NOT null) ";
                 $sql .= "UNION SELECT u.user_email from notification_settings n, users u where n.all_new_posts_email = 'true' and 
                 n.user_id = u.user_id and (u.user_group != 4 OR u.registration_section IS NOT null)";
                 break;
@@ -2524,7 +2525,7 @@ AND gc_id IN (
             if ($sql != NULL) {
                 $sql .= " UNION ";
             }
-            $sql .= "SELECT user_email from users WHERE user_id = '{$notification->getNotifyTarget()}'";
+            $sql .= "SELECT user_email from users WHERE user_id = '{$notification->getNotifyTarget()}' and user_id != '{$notification->getNotifySource()}'";
         }
         if ($sql == null) {
             return;
