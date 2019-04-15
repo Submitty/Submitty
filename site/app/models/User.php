@@ -312,10 +312,10 @@ class User extends AbstractModel {
    		    return preg_match("~^[a-zA-Z'`\-\.\(\) ]{0,30}$~", $data) === 1;
 		case 'user_email':
 			//Check email address for appropriate format. e.g. "user@university.edu", "user@cs.university.edu", etc.
-			return preg_match("~^[^(),:;<>@\\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?<!\-)(\.[a-zA-Z0-9]+)+$~", $data) === 1;
+			return preg_match("~^$|^[^(),:;<>@\\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?<!\-)(\.[a-zA-Z0-9]+)+$~", $data) === 1;
 		case 'user_group':
             //user_group check is a digit between 1 - 4.
-			return preg_match("~^[1-4]{1}$~", $data) === 1;
+            return preg_match("~^[1-4]{1}$~", $data) === 1;
 		case 'registration_section':
 			//Registration section must contain only alpha (upper and lower permitted), numbers, underscores, hyphens.
 			//"NULL" is reserved, so section must not contain any alpha-case variation of "null".  e.g. "null", "NULL", "Null", etc.

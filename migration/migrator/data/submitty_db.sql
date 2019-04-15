@@ -122,7 +122,7 @@ CREATE TABLE users (
     user_preferred_firstname character varying,
     user_lastname character varying NOT NULL,
     user_preferred_lastname character varying,
-    user_email character varying NOT NULL,
+    user_email character varying ,
     user_updated BOOLEAN NOT NULL DEFAULT FALSE,
     instructor_updated BOOLEAN NOT NULL DEFAULT FALSE,
     last_updated timestamp(6) with time zone

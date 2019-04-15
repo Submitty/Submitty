@@ -164,7 +164,7 @@ class UsersController extends AbstractController {
             $user->setPreferredLastName(trim($_POST['user_preferred_lastname']));
         }
 
-        $user->setEmail(trim($_POST['user_email']));
+        $user->setEmail(!empty(trim($_POST['user_email'])) ? trim($_POST['user_email']) : null);
 
         if (!empty($_POST['user_password'])) {
             $user->setPassword($_POST['user_password']);
