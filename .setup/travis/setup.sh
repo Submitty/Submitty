@@ -45,7 +45,7 @@ usermod -a -G ${PHP_GROUP} ${CGI_USER}
 useradd -c "First Last,RoomNumber,WorkPhone,HomePhone" submitty_daemon
 usermod -a -G submitty_daemonphp ${PHP_USER}
 usermod -a -G submitty_daemoncgi ${CGI_USER}
-usermod -a -G submitty_daemoncgi, submitty_daemonphp, docker submitty_daemon
+usermod -a -G submitty_daemoncgi,submitty_daemonphp,docker submitty_daemon
 useradd -p $(openssl passwd -1 submitty_dbuser) submitty_dbuser
 
 chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}
