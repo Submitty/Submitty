@@ -911,7 +911,9 @@ class ForumController extends AbstractController {
             $class_list = $this->core->getQueries()->getClassEmailList();
 
             foreach($class_list as $student_email) {
-                $this->core->getQueries()->createEmail($email_data, $student_email["user_email"]);
+                if( !empty( $student_email["user_email"] ) ) {
+                    $this->core->getQueries()->createEmail($email_data, $student_email["user_email"]);
+                }
             }
 
         } 
