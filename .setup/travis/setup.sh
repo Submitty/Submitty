@@ -62,7 +62,7 @@ http://localhost
 
 ${AUTH_METHOD}" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
 
-bash -c "echo 'export PATH=${PATH}' >> /home/${PHP_USER}/.profile"
+bash -c "echo 'export PATH=${PATH}' >> /home/${PHP_USER}/.bash_profile"
 bash -c "echo 'export PATH=${PATH}' >> /home/${PHP_USER}/.bashrc"
 bash -c "echo 'export PATH=${PATH}' >> /home/${DAEMON_USER}/.bashrc"
 bash -c "echo 'export PATH=${PATH}' >> /home/${DAEMON_USER}/.bashrc"
