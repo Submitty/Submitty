@@ -202,12 +202,15 @@ TestResults* custom_doit(const TestCase &tc, const nlohmann::json& j, const nloh
   std::string output_file_name = "temporary_custom_validator_output.json";
   std::string input_file_name = "custom_validator_input.json";
 
+  //Add the testcase prefix to j for use by the validator.
+  nlohmann::json copy_j = j;
+  copy_j["testcase_prefix"] = tc.getPrefix();
   //Write out this validator config for use by the custom validator
   std::ofstream input_file(input_file_name);
-  input_file << j;
+  input_file << copy_j;
   input_file.close();
 
-  command = command + " --prefix " + tc.getPrefix() + " 1>"+output_file_name;
+  command = command + " 1>" + output_file_name;
   int ret = execute(command, 
                     actions, dispatcher_actions, execute_logfile, test_case_limits,
                     assignment_limits, whole_config, windowed, "NOT_A_WINDOWED_ASSIGNMENT");
