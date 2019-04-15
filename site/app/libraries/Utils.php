@@ -244,7 +244,7 @@ class Utils {
         $students_full = array();
         $null_section = array();
         foreach ($students as $student) {
-            if($student->getRegistrationSection() != null){
+            if($student->getRegistrationSection() != null && array_key_exists($student->getId(),$students_version)){
                 $student_entry = array('value' => $student->getId(),
                 'label' => $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>');
                 if ($students_version != null && $students_version[$student->getId()] !== 0) {
