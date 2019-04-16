@@ -199,6 +199,7 @@ HTML;
 				$('#{$display_option}').attr('checked', 'checked'); //Saves the radiobutton state when refreshing the page
 				$(".post_reply_from").submit(publishPost);
 				$("form").areYouSure();
+				$('.post_content').readmore({ speed: 75, collapsedHeight: 200, lessLink: '' });
 			});
 
 		</script>
@@ -528,6 +529,7 @@ HTML;
         if($this->core->getUser()->getGroup() <= 3){
         	$this->core->getOutput()->addInternalCss('chosen.min.css');
         	$this->core->getOutput()->addInternalJs('chosen.jquery.min.js');
+        	$this->core->getOutput()->addInternalJs('readmore.min.js');
 			$current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
 			$current_thread_date = $current_thread_first_post["timestamp"];
 			$merge_thread_list = $this->core->getQueries()->getThreadsBefore($current_thread_date, 1);
@@ -815,7 +817,8 @@ HTML;
 
 		//end code segment handling
 		$return .= <<<HTML
-			<pre class='pre_forum'><p class="post_content" style="white-space: pre-wrap; ">{$post_content}</p></pre>		
+			<pre class='pre_forum'><p class="post_content" style="white-space: pre-wrap; ">{$post_content}</p></pre>
+					
 			<hr style="margin-bottom:3px;">
 HTML;
 		if($display_option == 'tree'){
