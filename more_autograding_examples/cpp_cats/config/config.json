@@ -42,13 +42,13 @@
         },
         {
             "title" : "Test of by word comparison",
-            "details" : "./byChar.exe input.txt output.txt",
+            "details" : "./byWord.exe input.txt output.txt",
             "command" : "./a.out CatBreeds.txt output.txt",
             "points" : 4,
             "validation" : [
                 {
                     "method" : "diff",
-                    "comparison" : "byLinebyChar",
+                    "comparison" : "byLinebyWord",
                     "actual_file" : "output.txt",
                     "expected_file" : "inst_output.txt"
                 }
