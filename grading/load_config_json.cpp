@@ -700,13 +700,19 @@ void RewriteDeprecatedMyersDiff(nlohmann::json &whole_config) {
     for (int which_autocheck = 0; which_autocheck < validators->size(); which_autocheck++) {
       nlohmann::json& autocheck = (*validators)[which_autocheck];
       std::string method = autocheck.value("method","");
+      std::string comparison = autocheck.value("comparison","");
+
+      // if autocheck if old byLinebyWord format... make it byLinebyChar
+      if (comparison == "byLinebyWord") {
+          autocheck["comparison"] = "byLinebyChar";
+      }
 
       // if autocheck is old myersdiff format...  rewrite it!
       if (method == "myersDiffbyLinebyChar") {
         autocheck["method"] = "diff";
         assert (autocheck.find("comparison") == autocheck.end());
         autocheck["comparison"] = "byLinebyChar";
-      } else if (method == "myersDiffbyLinebyWord") {
+    } else if (method == "myersDiffbyLinebyWord") {
         autocheck["method"] = "diff";
         assert (autocheck.find("comparison") == autocheck.end());
         autocheck["comparison"] = "byLinebyChar";

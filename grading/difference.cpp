@@ -19,28 +19,8 @@ Difference::Difference() :
 
 
 void Difference::printJSON(std::ostream & file_out) {
-  std::string diff1_name;
-  std::string diff2_name;
-
-  switch (type) {
-    // ByLineByChar;
-    // ByWordByChar;
-    // VectorVectorStringType;
-    // VectorOtherType;
-
-  case ByLineByChar:
-    diff1_name = "line";
-    diff2_name = "char";
-    break;
-  case ByWordByChar:
-    diff1_name = "word";
-    diff2_name = "char";
-    break;
-  default:
-    diff1_name = "line";
-    diff2_name = "char";
-    break;
-  }
+  std::string diff1_name = "line";
+  std::string diff2_name = "char";
 
   nlohmann::json whole_file;
 
