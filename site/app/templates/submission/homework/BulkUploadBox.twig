@@ -85,7 +85,7 @@
     var CSRF = "{{ core.getCsrfToken() }}";
     var g_id = "{{ gradeable_id }}";
     var max_team_size = {{ max_team_size - 1 }};
-    var is_team_assignment = {{ team_assignment }};
+    var is_team_assignment = "{{ team_assignment }}";
     //autofill data
     $(function(){
         $("td > div :text").autocomplete({
