@@ -122,7 +122,7 @@ CREATE TABLE users (
     user_preferred_firstname character varying,
     user_lastname character varying NOT NULL,
     user_preferred_lastname character varying,
-    user_email character varying,
+    user_email character varying NOT NULL,
     user_updated BOOLEAN NOT NULL DEFAULT FALSE,
     instructor_updated BOOLEAN NOT NULL DEFAULT FALSE,
     last_updated timestamp(6) with time zone
@@ -211,6 +211,7 @@ ALTER TABLE ONLY sessions
 ALTER TABLE ONLY courses_registration_sections
     ADD CONSTRAINT courses_registration_sections_fkey FOREIGN KEY (semester, course) REFERENCES courses(semester, course) ON UPDATE CASCADE;
 
+ALTER TABLE ONLY users ALTER COLUMN user_email DROP NOT NULL;
 
 -- Completed on 2017-06-12 14:35:07 EDT
 
