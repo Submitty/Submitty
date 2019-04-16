@@ -10,6 +10,7 @@ use app\libraries\GradeableType;
 use app\libraries\Logger;
 use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
+use app\models\Notification;
 use app\controllers\grading\ElectronicGraderController;
 
 
@@ -132,6 +133,7 @@ class SubmissionController extends AbstractController {
 
         try {
             $this->core->getQueries()->insertNewRegradeRequest($graded_gradeable, $user, $content);
+            $this->notifyGradeInquiryOnCreate($graded_gradeable, $gradeable_id, $content);
             $this->core->getOutput()->renderJsonSuccess();
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
@@ -172,6 +174,7 @@ class SubmissionController extends AbstractController {
         try {
             $this->core->getQueries()->insertNewRegradePost($graded_gradeable->getRegradeRequest()->getId(), $user->getId(), $content);
             $graded_gradeable->getRegradeRequest()->setStatus($status);
+            $this->notifyGradeInquiryOnReply($graded_gradeable, $gradeable_id, $content);
             $this->core->getQueries()->saveRegradeRequest($graded_gradeable->getRegradeRequest());
             $this->core->getOutput()->renderJsonSuccess();
         } catch (\InvalidArgumentException $e) {
@@ -405,7 +408,7 @@ class SubmissionController extends AbstractController {
         //     $return = array('success' => false, 'message' => $msg);
         //     $this->core->getOutput()->renderJson($return);
         //     return $return;
-        // } else 
+        // } else
 
         //If the users are on multiple teams.
         if (count($graded_gradeables) > 1) {
@@ -540,7 +543,7 @@ class SubmissionController extends AbstractController {
                 if (!@unlink($uploaded_file["tmp_name"][$j])) {
                     return $this->uploadResult("Failed to delete the uploaded file {$uploaded_file["name"][$j]} from temporary storage.", false);
                 }
-            } 
+            }
         }
 
         // use pdf_check.cgi to check that # of pages is valid and split
@@ -566,7 +569,7 @@ class SubmissionController extends AbstractController {
                     "filename"  => $uploaded_file["name"][$i]
                 ];
 
-                $qr_upload_job  = "/var/local/submitty/daemon_job_queue/qr_upload_" . $uploaded_file["name"][$i] . ".json"; 
+                $qr_upload_job  = "/var/local/submitty/daemon_job_queue/qr_upload_" . $uploaded_file["name"][$i] . ".json";
 
                 //add new job to queue
                 if(!file_put_contents($qr_upload_job, json_encode($qr_upload_data, JSON_PRETTY_PRINT)) ){
@@ -815,7 +818,7 @@ class SubmissionController extends AbstractController {
         if (!@file_put_contents(FileUtils::joinPaths($version_path, ".submit.timestamp"), $current_time_string_tz."\n")) {
             return $this->uploadResult("Failed to save timestamp file for this submission.", false);
         }
-        
+
         $upload_time_string_tz = $timestamp . " " . $this->core->getConfig()->getTimezone()->getName();
 
         $bulk_upload_data = [
@@ -827,7 +830,7 @@ class SubmissionController extends AbstractController {
         if (FileUtils::writeJsonFile(FileUtils::joinPaths($version_path, "bulk_upload_data.json"), $bulk_upload_data) === false) {
             return $this->uploadResult("Failed to create bulk upload file for this submission.", false);
         }
-        
+
         $queue_file = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
             $gradeable->getId(), $who_id, $new_version);
         $queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_queue",
@@ -911,7 +914,7 @@ class SubmissionController extends AbstractController {
         $timestamp_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
             $gradeable->getId(), $timestamp);
         $files = FileUtils::getAllFiles($timestamp_path);
-        
+
         //check if there are any pdfs left to assign to students, otherwise delete the folder
         $any_pdfs_left = false;
         foreach ($files as $file){
@@ -1882,7 +1885,7 @@ class SubmissionController extends AbstractController {
         $path_reset = $json_path;
         $users = array();
         if(!file_exists($json_path)) {
-            return;   
+            return;
         }
         $user_id_arr = array_slice(scandir($json_path), 2);
         $user = $user_id_arr[0];
@@ -1900,5 +1903,105 @@ class SubmissionController extends AbstractController {
         }
         $this->core->getOutput()->renderOutput('grading\ElectronicGrader', 'statPage', $users);
     }
+
+    private function notifyGradeInquiryOnCreate($graded_gradeable, $gradeable_id, $content){
+      //TODO: send notification to grader per component
+      if($graded_gradeable->hasTaGradingInfo()){
+        $course = $this->core->getConfig()->getCourse();
+        $gradeable_id = $graded_gradeable->getGradeable()->getId();
+        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+        $graders = $ta_graded_gradeable->getGraders();
+        $submitter = $graded_gradeable->getSubmitter();
+        $user_id = $this->core->getUser()->getId();
+        //TODO: build link in email body
+        $notification_subject = "[Submitty $course] New Regrade Request";
+        $notification_body = "A student has submitted a grade inquiry for gradeable $gradeable_id.\nStudent ID $user_id writes:\n$content\n\nPlease visit Submitty to follow up on this request";
+        $regrade_email_data = [
+          "subject" => $notification_subject,
+          "body" => $notification_body
+        ];
+        foreach($graders as $grader){
+          if(!$grader->accessFullGrading()){
+            continue;
+          }
+          $new_grade_inquiry_notification = new Notification($this->core, array('component' => 'grading', 'type' => 'grade_inquiry_creation', 'gradeable_id' => $gradeable_id, 'grader_id' => $grader->getId(), 'submitter_id' => $user_id, 'who_id' => $submitter->getId()));
+          $this->core->getQueries()->pushSingleNotification($new_grade_inquiry_notification);
+          $this->core->getQueries()->createEmail($regrade_email_data, $grader->getEmail());
+        }
+        if($submitter->isTeam()){
+          $submitting_team = $submitter->getTeam()->getMemberUsers();
+          foreach($submitting_team as $submitting_user){
+            $this->core->addErrorMessage($submitting_user->getId());
+            if($submitting_user->getId() == $user_id){
+              continue;
+            }
+            $new_grade_inquiry_notification = new Notification($this->core, array('component' => 'student', 'type' => 'grade_inquiry_creation', 'gradeable_id' => $gradeable_id, 'submitter_id' => $user_id, 'who_id' => $submitting_user->getId()));
+            $this->core->getQueries()->pushSingleNotification($new_grade_inquiry_notification);
+          }
+        }
+      }
+    }
+    private function notifyGradeInquiryOnReply($graded_gradeable, $gradeable_id, $content) {
+      if($graded_gradeable->hasTaGradingInfo()){
+        $course = $this->core->getConfig()->getCourse();
+        $submitter = $graded_gradeable->getSubmitter();
+        $user = $this->core->getUser();
+        $is_grader = false;
+        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+        $graders = $ta_graded_gradeable->getGraders();
+        foreach($graders as $grader){
+          if($grader->getId() == $user->getId()){
+            $is_grader = true;
+            break;
+          }
+        }
+        //on a grader replying to discussions
+        if($is_grader == true){
+          //TODO: build link in notification body
+          $notification_subject = "[Submitty $course] Grade Inquiry Reply";
+          $notification_body = "An instructor or TA has posted a reply in your grade inquiry discussion.\n$content";
+          $regrade_email_data = [
+            "subject" => $notification_subject,
+            "body" => $notification_body
+          ];
+          $submitter = $graded_gradeable->getSubmitter();
+          if($submitter->isTeam()){
+            $submitting_team = $submitter->getTeam()->getMemberUsers();
+            foreach($submitting_team as $submitting_user){
+              $new_grade_inquiry_notification = new Notification($this->core, array('component' => 'student', 'type' => 'grade_inquiry_reply', 'gradeable_id' => $gradeable_id, 'grader_id' => $user->getId(), 'submitter_id' => $submitting_user->getId()));
+              $this->core->getQueries()->pushSingleNotification($new_grade_inquiry_notification);
+              $user_email = $submitting_user->getEmail();
+              $this->core->getQueries()->createEmail($regrade_email_data, $user_email);
+            }
+          }
+          else{
+            $new_grade_inquiry_notification = new Notification($this->core, array('component' => 'student', 'type' => 'grade_inquiry_reply', 'gradeable_id' => $gradeable_id, 'grader_id' => $user->getId(), 'submitter_id' => $submitter->getId()));
+            $this->core->getQueries()->pushSingleNotification($new_grade_inquiry_notification);
+            $user_email = $submitter->getUser()->getEmail();
+            $this->core->getQueries()->createEmail($regrade_email_data, $user_email);
+          }
+        }
+        //on a student replying to discussion
+        else{
+          $notification_subject = "[Submitty $course] Grade Inquiry Reply";
+          $notification_body = "A student has posted a reply in a grade inquiry discussion.\n$content";
+          $regrade_email_data = [
+            "subject" => $notification_subject,
+            "body" => $notification_body
+          ];
+          //TODO: only notify relevant graders
+          foreach($graders as $grader){
+            if(!$grader->accessFullGrading()){
+              continue;
+            }
+            $new_grade_inquiry_notification = new Notification($this->core, array('component' => 'grading', 'type' => 'grade_inquiry_reply', 'gradeable_id' => $gradeable_id, 'grader_id' => $grader->getId(), 'submitter_id' => $user->getId(), 'who_id' => $submitter->getId()));
+            $this->core->getQueries()->pushSingleNotification($new_grade_inquiry_notification);
+            $grader_email = $grader->getEmail();
+            $this->core->getQueries()->createEmail($regrade_email_data, $grader_email);
+          }
+        }
+      }
+    }
+
 
 }
