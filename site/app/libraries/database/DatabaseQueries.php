@@ -966,18 +966,29 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
 
-    public function getNumUsersWhoViewedGrade($g_id, $section_key) {
-        $this->course_db->query("
-SELECT COUNT(*) as cnt
-FROM gradeable_data
-INNER JOIN (
-    SELECT user_id FROM users AS u
-    WHERE {$section_key} IS NOT NULL
-) AS u
-ON u.user_id=gd_user_id
-WHERE g_id = ? AND gd_user_viewed_date IS NOT NULL
+    public function getNumUsersWhoViewedGradeBySections($gradeable, $sections) {
+        $table = $gradeable->isTeamAssignment() ? 'gradeable_teams' : 'users';
+        $grade_type = $gradeable->isGradeByRegistration() ? 'registration' : 'rotating';
+        $type = $gradeable->isTeamAssignment() ? 'team' : 'user';
 
-        ", array($g_id));
+        $params = array($gradeable->getId());
+
+        $sections_query = "";
+        if (count($sections) > 0) {
+            $sections_query= "{$grade_type}_section IN " . $this->createParamaterList(count($sections));
+            $params = array_merge($sections, $params);
+        }
+
+        $this->course_db->query("
+            SELECT COUNT(*) as cnt
+            FROM gradeable_data AS gd
+            INNER JOIN (
+                SELECT u.{$type}_id, u.{$grade_type}_section FROM {$table} AS u
+                WHERE u.{$sections_query}
+            ) AS u
+            ON gd.gd_{$type}_id=u.{$type}_id
+            WHERE gd.g_id = ? AND gd.gd_user_viewed_date IS NOT NULL
+        ", $params);
 
         return intval($this->course_db->row()['cnt']);
     }
@@ -3568,6 +3579,17 @@ AND gc_id IN (
         $this->course_db->query('SELECT user_email FROM users WHERE user_group != 4 OR registration_section IS NOT null', $parameters);
 
         return $this->course_db->rows();
+    }
+
+    /**
+    * Gets a list of emails with user ids for all active particpants in a course
+    */
+
+    public function getClassEmailListWithIds() {
+      $parameters = array();
+      $this->course_db->query('SELECT user_id, user_email FROM users WHERE registration_section IS NOT null', $parameters);
+
+      return $this->course_db->rows();
     }
 
     /**

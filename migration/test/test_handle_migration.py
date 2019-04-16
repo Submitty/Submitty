@@ -9,13 +9,11 @@ from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
-from .helpers import create_migration
-
 import migrator
 from migrator import main
 
 
-class TestPrintStatus(unittest.TestCase):
+class TestHandleMigration(unittest.TestCase):
     def setUp(self):
         self.stdout = sys.stdout
         sys.stdout = StringIO()
@@ -37,7 +35,7 @@ class TestPrintStatus(unittest.TestCase):
         if create:
             database.DynamicBase.metadata.create_all(database.engine)
         self.databases[environment] = database
-
+    
     def test_no_course_dir(self):
         self.args.environments = ['course']
         self.args.config = SimpleNamespace()
@@ -45,7 +43,7 @@ class TestPrintStatus(unittest.TestCase):
         self.args.config.submitty = {
             'submitty_data_dir': self.dir
         }
-        main.status(self.args)
+        main.handle_migration(self.args)
         self.assertEqual(
             "Could not find courses directory: {}\n".format(
                 str(Path(self.dir, 'courses'))
@@ -60,9 +58,9 @@ class TestPrintStatus(unittest.TestCase):
 
         with patch.object(migrator.db, 'Database') as mock_class:
             mock_class.side_effect = OperationalError('test', None, None)
-            main.status(self.args)
+            main.handle_migration(self.args)
         self.assertEqual(
-            "Could not get database for migrations for master\n",
+            "Database does not exist for master\n",
             sys.stdout.getvalue()
         )
 
@@ -73,9 +71,9 @@ class TestPrintStatus(unittest.TestCase):
 
         with patch.object(migrator.db, 'Database') as mock_class:
             mock_class.side_effect = OperationalError('test', None, None)
-            main.status(self.args)
+            main.handle_migration(self.args)
         self.assertEqual(
-            "Could not get database for migrations for system\n",
+            "Database does not exist for system\n",
             sys.stdout.getvalue()
         )
 
@@ -90,9 +88,9 @@ class TestPrintStatus(unittest.TestCase):
 
         with patch.object(migrator.db, 'Database') as mock_class:
             mock_class.side_effect = OperationalError('test', None, None)
-            main.status(self.args)
+            main.handle_migration(self.args)
         self.assertEqual(
-            "Could not get the status for the migrations for f19.csci1100\n",
+            "Submitty Database Migration Warning:  Database does not exist for semester=f19 course=csci1100\n",
             sys.stdout.getvalue()
         )
 
@@ -107,93 +105,14 @@ class TestPrintStatus(unittest.TestCase):
 
         with patch.object(migrator.db, 'Database') as mock_class:
             mock_class.side_effect = OperationalError('test', None, None)
-            main.status(self.args)
-        expected = """Could not get database for migrations for master
-Could not get database for migrations for system
-Could not get the status for the migrations for f19.csci1100
+            main.handle_migration(self.args)
+        expected = """Database does not exist for master
+Database does not exist for system
+Submitty Database Migration Warning:  Database does not exist for semester=f19 course=csci1100
 """
         self.assertEqual(expected, sys.stdout.getvalue())
 
-    def test_status_no_table_master(self):
-        self.setup_test('master', False)
-        self.args.environments = ['master']
-        self.args.config = SimpleNamespace()
-        self.args.config.database = dict()
-
-        with patch.object(migrator.db, 'Database') as mock_class:
-            mock_class.side_effect = [self.databases['master']]
-            main.status(self.args)
-        self.assertEqual(
-            "Could not find migration table for master\n",
-            sys.stdout.getvalue()
-        )
-        self.assertFalse(self.databases['master'].open)
-
-    def test_status_no_table_system(self):
-        self.setup_test('system', False)
-        self.args.environments = ['system']
-        self.args.config = SimpleNamespace()
-        self.args.config.database = dict()
-
-        with patch.object(migrator.db, 'Database') as mock_class:
-            mock_class.side_effect = [self.databases['system']]
-            main.status(self.args)
-        self.assertTrue(mock_class.called)
-        self.assertEqual(
-            "Could not find migration table for system\n",
-            sys.stdout.getvalue()
-        )
-        self.assertFalse(self.databases['system'].open)
-
-    def test_status_no_table_course(self):
-        self.setup_test('course', False)
-        self.args.environments = ['course']
-        self.args.choose_course = None
-        self.args.config = SimpleNamespace()
-        self.args.config.database = dict()
-        self.args.config.submitty = dict()
-        self.args.config.submitty['submitty_data_dir'] = Path(self.dir)
-        Path(self.dir, 'courses', 'f19', 'csci1100').mkdir(parents=True)
-
-        with patch.object(migrator.db, 'Database') as mock_class:
-            mock_class.side_effect = [self.databases['course']]
-            main.status(self.args)
-        self.assertTrue(mock_class.called)
-        self.assertEqual(
-            "Could not find migration table for f19.csci1100\n",
-            sys.stdout.getvalue()
-        )
-        self.assertFalse(self.databases['course'].open)
-
-    def test_status_no_table_all(self):
-        self.setup_test('master', False)
-        self.setup_test('system', False)
-        self.setup_test('course', False)
-        self.args.environments = ['system', 'course', 'master']
-        self.args.choose_course = None
-        self.args.config = SimpleNamespace()
-        self.args.config.database = dict()
-        self.args.config.submitty = dict()
-        self.args.config.submitty['submitty_data_dir'] = Path(self.dir)
-        Path(self.dir, 'courses', 'f19', 'csci1100').mkdir(parents=True)
-
-        with patch.object(migrator.db, 'Database') as mock_class:
-            mock_class.side_effect = [
-                self.databases['master'],
-                self.databases['system'],
-                self.databases['course']
-            ]
-            main.status(self.args)
-        expected = """Could not find migration table for master
-Could not find migration table for system
-Could not find migration table for f19.csci1100
-"""
-        self.assertEqual(expected, sys.stdout.getvalue())
-        self.assertFalse(self.databases['master'].open)
-        self.assertFalse(self.databases['system'].open)
-        self.assertFalse(self.databases['course'].open)
-
-    @patch('migrator.main.print_status')
+    @patch('migrator.main.migrate_environment')
     def test_status_master(self, mock_method):
         self.setup_test('master')
         self.args.environments = ['master']
@@ -202,7 +121,7 @@ Could not find migration table for f19.csci1100
 
         with patch.object(migrator.db, 'Database') as mock_class:
             mock_class.side_effect = [self.databases['master']]
-            main.status(self.args)
+            main.handle_migration(self.args)
         self.assertTrue(mock_class.called)
         self.assertTrue(mock_method.called)
         self.assertEqual(self.databases['master'], mock_method.call_args[0][0])
@@ -210,7 +129,7 @@ Could not find migration table for f19.csci1100
         self.assertEqual(self.args, mock_method.call_args[0][2])
         self.assertFalse(self.databases['master'].open)
 
-    @patch('migrator.main.print_status')
+    @patch('migrator.main.migrate_environment')
     def test_status_system(self, mock_method):
         self.setup_test('system')
         self.args.environments = ['system']
@@ -219,7 +138,7 @@ Could not find migration table for f19.csci1100
 
         with patch.object(migrator.db, 'Database') as mock_class:
             mock_class.side_effect = [self.databases['system']]
-            main.status(self.args)
+            main.handle_migration(self.args)
         self.assertTrue(mock_class.called)
         self.assertTrue(mock_method.called)
         self.assertEqual(self.databases['system'], mock_method.call_args[0][0])
@@ -227,7 +146,7 @@ Could not find migration table for f19.csci1100
         self.assertEqual(self.args, mock_method.call_args[0][2])
         self.assertFalse(self.databases['system'].open)
 
-    @patch('migrator.main.print_status')
+    @patch('migrator.main.migrate_environment')
     def test_status_course(self, mock_method):
         self.setup_test('course')
         self.args.environments = ['course']
@@ -240,7 +159,7 @@ Could not find migration table for f19.csci1100
 
         with patch.object(migrator.db, 'Database') as mock_class:
             mock_class.side_effect = [self.databases['course']]
-            main.status(self.args)
+            main.handle_migration(self.args)
         self.assertTrue(mock_class.called)
         self.assertTrue(mock_method.called)
         self.assertEqual(self.databases['course'], mock_method.call_args[0][0])
