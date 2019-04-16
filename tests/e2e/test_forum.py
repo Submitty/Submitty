@@ -1,7 +1,10 @@
 import tempfile
 import os
 import urllib.request
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from selenium.webdriver import ActionChains
 from .base_testcase import BaseTestCase
 import time
 
@@ -136,6 +139,16 @@ class TestForum(BaseTestCase):
         text_area.send_keys(newcontent)
         if upload_attachment:
             attachment_file = self.upload_attachment(upload_button)
+
+        x = submit_button.location['x'] + (submit_button.size['width']/2)
+        y = submit_button.location['y'] + (submit_button.size['height']/2)
+        print("x: "+str(x)+" - y: "+str(y))
+        print('submit button displayed: ' + str(submit_button.is_displayed()))
+        print('submit_button enabled: ' + str(submit_button.is_enabled()))
+        print(submit_button.get_attribute('innerHTML'))
+        print(submit_button.get_attribute('outerHTML'))
+
+        hover = ActionChains(self.driver).move_to_element(submit_button).perform()
         submit_button.click()
         self.wait_after_ajax()
         # Test existence only
