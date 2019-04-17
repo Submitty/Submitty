@@ -1,42 +1,48 @@
 {% set user_group = core.getUser().getGroup() %}
 
-<script>
+{% if show_more %}
+	<script>
 
-console.log('{{ more_data[0]["filter_option"] }}');
+		$(document).ready(function() { 
 
-$(document).ready(function() { 
+			$('#{{ more_data[0]["filter_option"] }}').parent().removeClass("active");
+			$('#{{ more_data[0]["filter_option"] }}').addClass("active");
 
-	$('#{{ more_data[0]["filter_option"] }}').parent().removeClass("active");
-	$('#{{ more_data[0]["filter_option"] }}').addClass("active");
+			var del = $('#delete');
+			var merge  = $('#merge_thread');
 
-	if('{{ more_data[0]["filter_option"] }}' === 'tree' && !$('#delete').attr('class').includes("active")) {
-		$('#dLabel').removeClass("active");
-	} else {
-		$('#dLabel').addClass("active");
-	}
+			var deleteActive = typeof del[0] !== typeof undefined && del[0].hasAttribute('class') && del.attr('class').includes('active');
+			var deleteMerge  = merge[0].hasAttribute('class')  && merge.attr('class').includes('active');
 
- });
+			if('{{ more_data[0]["filter_option"] }}' === 'tree' && !deleteActive && !deleteMerge) {
+				$('#dropdownLabel').removeClass("active");
+			} else {
+				$('#dropdownLabel').addClass("active");
+			}
 
-</script>
+		 });
+
+	</script>
+{% endif %}
 
 <div id="forum_bar">
 
 	<div class="row">
 
-	<div style="padding:0px;" class="col-6">
+	<div style="padding:0px;" class="col-7">
 
 
 		{% if thread_exists %}
 
 
 			<form id="search_block" method="post" action="{{ core.buildUrl({'component':'forum', 'page':'search_threads'}) }}">
-			<div class="row">
-				<div style="padding:0px;" class="col-8">
-					<input style="width:100%;" type="text" placeholder="Search here..." name="search_content" id="search_content"/>
+			<div class="row" style="position:relative; top:3px;">
+				<div style="padding:0px; margin-right:5px;" class="col-7">
+					<input style="width:100%; height:34px; " type="text" placeholder="Search here..." name="search_content" id="search_content"/>
 				</div>
 				<div style="padding:0px;" class="col-4">
 					<button type="submit" name="search" title="Submit search" class="btn btn-primary">
-		  				Search <i class="fas fa-search"></i>
+		  				Search
 					</button>
 					{% for button in forum_bar_buttons_left %}
 						{% if user_group <= button.required_rank %}
@@ -54,42 +60,42 @@ $(document).ready(function() {
 		
 		</div>
 		
-<div style="padding:0px;" class="col-6">
+	<div style="padding:0px;" class="col-5">
 
-	{% for button in forum_bar_buttons_right %}
-						{% if user_group <= button.required_rank %}
-							{% set link = (button.link[0]) ? 'href=' ~ button.link[1] %}
-							{% set onclick = (button.onclick[0]) ? 'onclick=' ~ button.onclick[1] %}
-							<a class="btn btn-primary {{ button.optional_class }}" style="{{ button.style }}" {{ link }} title="{{ button.title }}" {{ onclick }} >
-								{{ button.display_text|raw }}
-							</a>
-						{% endif %}
-					{% endfor %}
+		{% for button in forum_bar_buttons_right %}
+			{% if user_group <= button.required_rank %}
+				{% set link = (button.link[0]) ? 'href=' ~ button.link[1] %}
+				{% set onclick = (button.onclick[0]) ? 'onclick=' ~ button.onclick[1] %}
+				<a class="btn btn-primary {{ button.optional_class }}" style="{{ button.style }}" {{ link }} title="{{ button.title }}" {{ onclick }} >
+					{{ button.display_text|raw }}
+				</a>
+			{% endif %}
+		{% endfor %}
 
-{% if user_group <= 2 %}
-        <div class="dropdown">
-            <a id="dLabel" role="button" data-toggle="dropdown" class="btn btn-default" data-target="#" href="#">
-                More <span class="caret"></span>
-            </a>
-    		<ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu">
-              <li><a id="delete" class="{{ more_data[1]["optional_class"] }}" href="#" onclick="{{ more_data[1]["onclick"] }}">Show Deleted Threads</a></li>
-              <li><a href="{{ core.buildUrl({'component': 'forum', 'page': 'show_stats'}) }}">Stats</a></li>
-              <li class="divider"></li>
-              <li class="dropdown-submenu">
-                <a tabindex="-1" href="#">Sort posts by</a>
-                <ul class="dropdown-menu">
-                  <li id="tree"><a tabindex="-1" onclick="changeDisplayOptions('tree', {{ current_thread }})" href="#">Hierarchical</a></li>
-                  <li id="time"><a href="#" onclick="changeDisplayOptions('time', {{ current_thread }})">Chronological</a></li>
-                  <li id="alpha"><a href="#" onclick="changeDisplayOptions('alpha', {{ current_thread }})">Alphabetical</a></li>
-                </ul>
-              </li>
-            </ul>
-        </div>
-{% endif %}
+	{% if show_more %}
+	    <div class="dropdown" style="float:right;top:3px;margin-right:5px;">
+	        <a title="More options" id="dropdownLabel" role="button" data-toggle="dropdown" class="btn btn-default" data-target="#" href="#">
+	            More <span class="caret"></span>
+	        </a>
+			<ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu">
+			{% for more in more_data|slice(1) %}
+				{% if user_group <= more.required_rank %}
+					{% set onclick = (more.onclick[0]) ? 'onclick=' ~ more.onclick[1] %}
+					{% set optional_class = (more.optional_class[0]) ? 'class=' ~ more.optional_class[1] %}
+	          		<li><a id="{{ more.id }}" title="{{ more.title }}" {{ optional_class }} href="{{ more.link }}" {{ onclick }}>{{ more.display_text }}</a></li>
+	          	{% endif %}
+	        {% endfor %}
+	          <li class="divider"></li>
+	              <li id="tree"><a tabindex="-1" onclick="changeDisplayOptions('tree', {{ current_thread }})" href="#">Hierarchical</a></li>
+	              <li id="time"><a href="#" onclick="changeDisplayOptions('time', {{ current_thread }})">Chronological</a></li>
+	              {% if user_group <= core.getUser().accessGrading() %}
+	              	<li id="alpha"><a href="#" onclick="changeDisplayOptions('alpha', {{ current_thread }})">Alphabetical</a></li>
+	              {% endif %}
+	        </ul>
+	    </div>
+	{% endif %}
 
-		</div>
-		</div>
-
-
+	</div>
+</div>
 </div>
 <hr/>
