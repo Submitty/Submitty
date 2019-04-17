@@ -1008,19 +1008,6 @@ HTML;
 
 	$thread_exists = $this->core->getQueries()->threadExists();
 
-	if($thread_exists) {
-		// $buttons = array_merge($buttons, array(
-		// 	"required_rank" => 2,
-		// 	"display_text" => 'Stats',
-		// 	"style" => 'position:relative;top:3px;display:inline-block;',
-		// 	"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))),
-		// 	"optional_class" => '',
-		// 	"title" => 'Show Stats',
-		// 	"onclick" => array(true, 'resetScrollPosition();')
-		// ));
-
-	}
-
 	$return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", [
 								"forum_bar_buttons_right" => $buttons,
 								"forum_bar_buttons_left" => [],
