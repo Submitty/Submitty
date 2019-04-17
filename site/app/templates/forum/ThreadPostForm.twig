@@ -10,7 +10,7 @@
     </span>
     {% endif %}
 
-    {% if show_editcat and core.getUser().getGroup() <= 3 %}
+    {% if show_editcat and core.getUser().accessGrading() %}
         <span style="position:absolute;right: 0px;display:inline-block;">
         <a class="btn btn-primary btn-sm" title="Edit Categories" onclick="$('#category-list').css('display', 'block');">Edit Categories</a>
         </span>
@@ -21,7 +21,7 @@
     <div style="margin-bottom:10px;position: relative;" class="form-group row">
         <button type="button" title="Insert a link" onclick="addBBCode(1, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" style="margin-right:10px;" class="btn btn-default">Link <i class="fas fa-link fa-1x"></i></button>
         <button title="Insert a code segment" type="button" onclick="addBBCode(0, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default">Code <i class="fas fa-code fa-1x"></i></button>
-    {% if show_merge_thread_button and core.getUser().getGroup() <= 3 %}
+    {% if show_merge_thread_button and core.getUser().accessGrading() %}
         <a class="btn btn-primary" style="position:absolute;right: 0px;top:3px;display:inline-block;" title="Merge Threads" onclick="$('#merge-threads').css('display', 'block');">Merge Threads</a>
     {% endif %}
     </div>
@@ -110,10 +110,10 @@
             <option value="1">Resolved</option>
         </select>
         {% endif %}
-        {% if show_announcement and core.getUser().getGroup() <= 2 %}
+        {% if show_announcement and core.getUser().accessFullGrading() %}
             <label style="display:inline-block;" for="Announcement">Announcement?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Announcement" value="Announcement" data-ays-ignore="true"/>
         {% endif %}
-        {% if show_announcement and core.getUser().getGroup() <= 2 %}
+        {% if show_announcement and core.getUser().accessFullGrading() %}
             <label style="display:inline-block;" for="EmailAnnouncement">Send Email?</label> <input type="checkbox" style="margin-right:18px;display:inline-block;" name="EmailAnnouncement" value="EmailAnnouncement" data-ays-ignore="true"/>
         {% endif %}
         {% if show_cancel_edit_form %}
