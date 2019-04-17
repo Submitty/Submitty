@@ -52,6 +52,7 @@ use app\libraries\Utils;
  * @method string getRoomSeatingGradeableId()
  * @method bool isSeatingOnlyForInstructor()
  * @method array getCourseJson()
+ * @method array getFooterLinks()
  */
 
 class Config extends AbstractModel {
@@ -183,6 +184,9 @@ class Config extends AbstractModel {
     /** @property @var string|null */
     protected $room_seating_gradeable_id;
 
+    /** @property @var array */
+    protected $footer_links = array();
+
     /**
      * Config constructor.
      *
@@ -291,6 +295,23 @@ class Config extends AbstractModel {
 
         if (!empty($this->semester) && !empty($this->course)) {
             $this->course_path = FileUtils::joinPaths($this->submitty_path, "courses", $this->semester, $this->course);
+        }
+
+        $footer_links_json_file = FileUtils::joinPaths($this->config_path, "footer_links.json");
+        if (file_exists($footer_links_json_file)) {
+            $footer_links_json_data = json_decode(file_get_contents($footer_links_json_file);
+            // Validate
+            $required_keys = ['icon', 'link', 'title'];
+            $required_keys_counts = array_fill_keys($required_keys, 0);
+            $footer_links_json_data_count = [count($footer_links_json_data)];
+            foreach($required_keys_counts as $key => &$count) {
+                $count = count(array_column($footer_links_json_data, $key));
+            }
+            unset($count);
+            if (empty(array_diff($required_keys_counts, $footer_links_json_data_count))) {
+                // Validate OK, set config property
+                $this->footer_links = $footer_links_json_data;
+            }
         }
     }
 
