@@ -3594,7 +3594,11 @@ AND gc_id IN (
      * @param string $recipient
      */
     public function createEmail($email_data, $recipient){
-        $parameters = array($recipient, $email_data["subject"], $email_data["body"]);
+        $course = $this->core->getConfig()->getCourse();
+        $formatted_subject = "[Submitty $course]"." ".$email_data["subject"];
+        $formatted_body = $email_data["body"]."\n--\nNOTE: This is an automated email.\nAny responses will not be looked at or responded to.";
+
+        $parameters = array($recipient, $formatted_subject, $formatted_body);
 
         $this->submitty_db->query("
             INSERT INTO emails(

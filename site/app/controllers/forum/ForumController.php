@@ -899,12 +899,11 @@ class ForumController extends AbstractController {
         $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
     }
 
-    private function sendEmailAnnouncement($thread_title, $thread_content) { 
+    private function sendEmailAnnouncement($thread_title, $thread_content) {
             $course = $this->core->getConfig()->getCourse();
-            $formatted_subject = "[Submitty $course]: $thread_title";
 
             $email_data = [
-                "subject" => $formatted_subject,
+                "subject" => $thread_title,
                 "body" => $thread_content
             ];
 
@@ -914,6 +913,6 @@ class ForumController extends AbstractController {
                 $this->core->getQueries()->createEmail($email_data, $student_email["user_email"]);
             }
 
-        } 
+        }
 
 }
