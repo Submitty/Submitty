@@ -31,8 +31,8 @@
 	{% endif %}
 
 	{% if thread_exists %}
-		<form id="search_block" style="float:right;position:relative;top:3px;right:5px;display:none;" method="post" action="{{ core.buildUrl({'component':'forum', 'page':'search_threads'}) }}" onsubmit="if($('#search_content').text().replace(/ /g,'').length == 0){ return false; }">
-			<input type="text" size="35" placeholder="search" name="search_content" id="search_content" required/>
+		<form id="search_block" style="float:right;position:relative;top:3px;right:5px;display:none;" method="post" action="{{ core.buildUrl({'component':'forum', 'page':'search_threads'}) }}">
+			<input type="text" size="35" placeholder="search" name="search_content" id="search_content" onchange="$(this).val($(this).val().trim())" required/>
 
 			<button type="submit" name="search" title="Submit search" class="btn btn-primary">
 	  			Search
