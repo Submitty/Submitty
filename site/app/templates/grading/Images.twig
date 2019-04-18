@@ -29,7 +29,8 @@
                     {% endfor %}
                     {% if not image_found %}
                         {% if errorImageData == '_NONE_' %}
-                            <td><i><font color="gray"><img alt="No Image Available" class="no-image-available"/></font></i>
+                            <td><i><font color="gray"><img alt="No Image Available" class="no-image-available" 
+                                data-student-name="{{student.getDisplayedFirstName()}}-{{student.getDisplayedLastName()}}"/></font></i>
                             <div class="name"><br />
                         {% else %}
                             <td><img src="data:imgName/png;base64,{{ errorImageData }}" width="150" height="200/>
