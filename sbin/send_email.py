@@ -114,7 +114,7 @@ def send_email():
     for email_data in queued_emails:
         email = construct_mail_string(
             email_data["send_to"], email_data["subject"], email_data["body"])
-        mail_client.sendmail(EMAIL_SENDER, email_data["send_to"], email)
+        mail_client.sendmail(EMAIL_SENDER, email_data["send_to"], email.encode('utf8'))
         mark_sent(email_data["id"], db)
 
     LOG_FILE.write("[{}] Sucessfully Emailed {} Users\n".format(
