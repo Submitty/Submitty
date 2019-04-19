@@ -98,7 +98,7 @@ def mark_sent(email_id, db):
 
 def construct_mail_string(send_to, subject, body):
     """Format an email string."""
-    return "TO:%s\nFrom: %s\nSubject:  %s \n\n\n %s \n\n" % (
+    return "Content-Type: text/plain; charset=utf-8\nTO:%s\nFrom: %s\nSubject:  %s \n\n\n %s \n\n" % (
         send_to, EMAIL_SENDER, subject, body)
 
 
