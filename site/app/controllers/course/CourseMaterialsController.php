@@ -28,7 +28,7 @@ class CourseMaterialsController extends AbstractController {
     }
 
     public function deleteCourseMaterialsFile() {
-        if($this->core->getUser()->getGroup() !== 1) {
+        if(!$this->core->getUser()->accessAdmin()) {
            return $this->uploadResult("You have no permission to delete this file", false);
         }
 

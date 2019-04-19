@@ -1584,9 +1584,10 @@ function editPost(post_id, thread_id, shouldEditThread) {
                     $('#messages').append(message);
                     return;
                 }
-                var user_id = escape(json.user);
                 var post_content = json.post;
                 var anon = json.anon;
+                var change_anon = json.change_anon;
+                var user_id = escapeSpecialChars(json.user);
                 var time = Date.parse(json.post_time);
                 if(!time) {
                     // Timezone suffix ":00" might be missing
@@ -1602,7 +1603,12 @@ function editPost(post_id, thread_id, shouldEditThread) {
                 contentBox.value = post_content;
                 document.getElementById('edit_post_id').value = post_id;
                 document.getElementById('edit_thread_id').value = thread_id;
-                $('#thread_post_anon_edit').prop('checked', anon);
+                if(change_anon) {
+                    $('#thread_post_anon_edit').prop('checked', anon);
+                } else {
+                    $('label[for=Anon]').remove();
+                    $('#thread_post_anon_edit').remove();
+                }
                 $('#edit-user-post').css('display', 'block');
 
                 $(".cat-buttons input").prop('checked', false);
@@ -1951,7 +1957,7 @@ function showHistory(post_id) {
                     var first_name = post['user_info']['first_name'].trim();
                     var last_name = post['user_info']['last_name'].trim();
                     var author_user_id = post['user'];
-                    var visible_username = first_name + " " + last_name.substr(0 , 1) + ".";
+                    var visible_username = first_name + " " + ((last_name.length == 0) ? '' : (last_name.substr(0 , 1) + "."));
                     var info_name = first_name + " " + last_name + " (" + author_user_id + ")";
                     var visible_user_json = JSON.stringify(visible_username);
                     info_name = JSON.stringify(info_name);
