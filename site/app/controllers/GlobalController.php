@@ -327,8 +327,9 @@ class GlobalController extends AbstractController {
                 'csrf_token' => $this->core->getCsrfToken()
             ]);
         },  $wrapper_files);
+        $footer_links = $this->core->getConfig()->getFooterLinks();
         $runtime = $this->core->getOutput()->getRunTime();
-        return $this->core->getOutput()->renderTemplate('Global', 'footer', $runtime, $wrapper_urls);
+        return $this->core->getOutput()->renderTemplate('Global', 'footer', $runtime, $wrapper_urls, $footer_links);
     }
 
     private function routeEquals(string $a, string $b) {

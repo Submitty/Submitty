@@ -297,20 +297,25 @@ class Config extends AbstractModel {
             $this->course_path = FileUtils::joinPaths($this->submitty_path, "courses", $this->semester, $this->course);
         }
 
+        // Get additional links to display in the global footer.
         $footer_links_json_file = FileUtils::joinPaths($this->config_path, "footer_links.json");
         if (file_exists($footer_links_json_file)) {
-            $footer_links_json_data = json_decode(file_get_contents($footer_links_json_file);
-            // Validate
-            $required_keys = ['icon', 'link', 'title'];
-            $required_keys_counts = array_fill_keys($required_keys, 0);
-            $footer_links_json_data_count = [count($footer_links_json_data)];
-            foreach($required_keys_counts as $key => &$count) {
-                $count = count(array_column($footer_links_json_data, $key));
-            }
-            unset($count);
-            if (empty(array_diff($required_keys_counts, $footer_links_json_data_count))) {
-                // Validate OK, set config property
-                $this->footer_links = $footer_links_json_data;
+            $footer_links_json_data = json_decode(file_get_contents($footer_links_json_file), true);
+            // Validate that every footer link has required columns: 'icon', 'link', 'title'.
+            foreach ($footer_links_json_data as $row) {
+                switch (false) {
+                case array_key_exists('icon', $row):
+                case array_key_exists('link', $row):
+                case array_key_exists('title', $row):
+                    //Validation fail.  Exclude $row.
+                    continue;
+                default:
+                    //Validation OK.  Include $row.
+                    if (!Utils::startsWith($row['icon'], "fa-")) {
+                        $row['icon'] = "fa-" . $row['icon'];
+                    }
+                    $this->footer_links[] = $row;
+                }
             }
         }
     }
