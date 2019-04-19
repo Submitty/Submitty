@@ -21,7 +21,7 @@ def main():
     tries = 0
     while tries < 5:
         try:
-            res = requests.get(url)
+            res = requests.get(url, timeout=10)
             if res.status_code == 200:
                 json = res.json()
                 title = json['title'].lower()
@@ -34,7 +34,7 @@ def main():
                           "tag and re-run build when ready for merging.",
                           file=sys.stderr)
                 sys.exit(check)
-        except (requests.RequestException, KeyError):
+        except (requests.RequestException, requests.Timeout, KeyError):
             tries += 1
             time.sleep(1)
     raise SystemExit('Could not get title of PR for repo')
