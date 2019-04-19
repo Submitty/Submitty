@@ -4,17 +4,28 @@
                 </div> {# /.col-md#nav-body #}
             </div> {# /.row #}
             <div id="footer">
-                <span id="copyright">&copy; 2018 RPI | An <a href="https://rcos.io" target="_blank">RCOS project</a></span>|
-                <span id="github">
-                    <a href="https://github.com/Submitty/Submitty" target="_blank" title="Fork us on GitHub" aria-label="Visit our GitHub">
-                        <i class="fab fa-github fa-lg"></i>
-                    </a>
-                </span>
+                <div id="copyright">&copy; 2018 RPI <span class="footer_seperator">|</span> An <a href="https://rcos.io" target="_blank">RCOS project</a></div>
+                <div id="github">
+                    <span class="footer_seperator">|</span>
+                    <a href="https://github.com/Submitty/Submitty" target="_blank" title="Fork us on GitHub" aria-label="Visit our GitHub"><i class="fab fa-github fa-lg"></i></a>
+                </div>
+
+                {% for link in footer_links %}
+                    <div class="footer_link">
+                        <span class="footer_seperator">|</span>
+                        <i class="footer_link_icon fa fa-lg {{ link['icon'] }}"></i>
+                        <a href="{{ link['link'] }}" target="_blank" aria-label="{{ link['title'] }}">{{ link['title'] }}</a>
+                    </div>
+                {% endfor %}
 
                 {% if is_debug %}
-                    <a href="#" onClick="togglePageDetails();">Show Page Details</a>
+                    <div id="debug">
+                        <span class="footer_seperator">|</span>
+                        <a href="#" onClick="togglePageDetails();">Show Page Details</a>
+                    </div>
                 {% endif %}
             </div>
+
         </div> {# /#site-body #}
         {% if wrapper_urls['right_sidebar.html'] != null %}
             {# uploaded homepage redirect can go here? #}
