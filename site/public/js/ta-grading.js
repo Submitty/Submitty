@@ -624,13 +624,15 @@ function openAutoGrading(num){
 function openAllAutoGrading() {
     // show all divs whose id starts with testcase_
      $("[id^='tc_']").click();
-     $("[id^='testcase_']")[0].style.display="block";
+     $("[id^='testcase_']").style.display="block";
 }
 
 // close all outputs in Auto-Grading Testcases section
 function closeAllAutoGrading() {
     // hide all divs whose id starts with testcase_
     $("[id^='testcase_']").hide();
+    $("[id^='details_tc_']").find("span").hide();
+    $("[id^='details_tc_']").find(".loading-tools-show").show();
 }
 
 
