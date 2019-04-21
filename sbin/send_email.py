@@ -98,8 +98,19 @@ def mark_sent(email_id, db):
 
 def construct_mail_string(send_to, subject, body):
     """Format an email string."""
-    return "Content-Type: text/plain; charset=utf-8\nTO:%s\nFrom: %s\nSubject:  %s \n\n\n %s \n\n" % (
-        send_to, EMAIL_SENDER, subject, body)
+    headers = [
+        ('Content-Type', 'text/plain; charset=utf-8'),
+        ('TO', send_to),
+        ('From', EMAIL_SENDER),
+        ('Subject', subject)
+    ]
+
+    msg = ''
+    for header in headers:
+        msg += "{}: {}\n".format(*header)
+
+    msg += "\n\n{}\n\n".format(body)
+    return msg
 
 
 def send_email():
