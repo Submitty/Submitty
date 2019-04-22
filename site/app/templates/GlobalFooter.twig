@@ -4,25 +4,21 @@
                 </div> {# /.col-md#nav-body #}
             </div> {# /.row #}
             <div id="footer">
-                <div id="copyright">&copy; 2018 RPI <span class="footer_seperator">|</span> An <a href="https://rcos.io" target="_blank">RCOS project</a></div>
-                <div id="github">
-                    <span class="footer_seperator">|</span>
-                    <a href="https://github.com/Submitty/Submitty" target="_blank" title="Fork us on GitHub" aria-label="Visit our GitHub"><i class="fab fa-github fa-lg"></i></a>
-                </div>
+                &copy; {{ "now"|date("Y") }} Submitty
+                <span class="footer_seperator">|</span> <a href="https://github.com/Submitty/Submitty" target="_blank" title="Visit our GitHub" aria-label="Visit our GitHub"><i class="fab fa-github fa-lg"></i></a>
+                <span class="footer_seperator">|</span> An <a href="https://rcos.io" target="_blank">RCOS project</a>
 
                 {% for link in footer_links %}
-                    <div class="footer_link">
-                        <span class="footer_seperator">|</span>
+                    <span class="footer_seperator">|</span>
+                    {% if link['icon'] is defined %}
                         <i class="footer_link_icon fa fa-lg {{ link['icon'] }}"></i>
-                        <a href="{{ link['link'] }}" target="_blank" aria-label="{{ link['title'] }}">{{ link['title'] }}</a>
-                    </div>
+                    {% endif %}
+                    <a href="{{ link['url'] }}" target="_blank">{{ link['title'] }}</a>
                 {% endfor %}
 
                 {% if is_debug %}
-                    <div id="debug">
-                        <span class="footer_seperator">|</span>
-                        <a href="#" onClick="togglePageDetails();">Show Page Details</a>
-                    </div>
+                    <span class="footer_seperator">|</span>
+                    <a href="#" onClick="togglePageDetails();">Show Page Details</a>
                 {% endif %}
             </div>
 

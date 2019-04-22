@@ -300,21 +300,24 @@ class Config extends AbstractModel {
         // Get additional links to display in the global footer.
         $footer_links_json_file = FileUtils::joinPaths($this->config_path, "footer_links.json");
         if (file_exists($footer_links_json_file)) {
-            $footer_links_json_data = json_decode(file_get_contents($footer_links_json_file), true);
-            // Validate that every footer link has required columns: 'icon', 'link', 'title'.
-            foreach ($footer_links_json_data as $row) {
-                switch (false) {
-                case array_key_exists('icon', $row):
-                case array_key_exists('link', $row):
-                case array_key_exists('title', $row):
-                    //Validation fail.  Exclude $row.
-                    continue;
-                default:
-                    //Validation OK.  Include $row.
-                    if (!Utils::startsWith($row['icon'], "fa-")) {
-                        $row['icon'] = "fa-" . $row['icon'];
+            $data = file_get_contents($footer_links_json_file);
+            if ($data !== false) {
+                $footer_links_json_data = json_decode($data, true);
+                // Validate that every footer link ($row) has required columns: 'url' and 'title'.
+                // $row can also have an 'icon' column, but it is optional.
+                foreach ($footer_links_json_data as $row) {
+                    switch (false) {
+                    case array_key_exists('url', $row):
+                    case array_key_exists('title', $row):
+                        //Validation fail.  Exclude $row.
+                        continue;
+                    default:
+                        //Validation OK.  Include $row.
+                        if (isset($row['icon']) && !Utils::startsWith($row['icon'], "fa-")) {
+                            $row['icon'] = "fa-" . $row['icon'];
+                        }
+                        $this->footer_links[] = $row;
                     }
-                    $this->footer_links[] = $row;
                 }
             }
         }

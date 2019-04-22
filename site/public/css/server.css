@@ -490,13 +490,6 @@ table tr.table-header {
     color: #405E90;
 }
 
-#footer #copyright,
-#footer #github,
-#footer .footer_link,
-#footer #debug {
-    display: inline;
-}
-
 #footer .footer_seperator {
     padding-right: 8px;
     padding-left: 8px;
