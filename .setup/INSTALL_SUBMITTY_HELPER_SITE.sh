@@ -46,6 +46,24 @@ fi
 # install composer dependencies and generate classmap
 su - ${PHP_USER} -c "composer install -d \"${SUBMITTY_INSTALL_DIR}/site\" --no-dev --optimize-autoloader --no-suggest"
 
+# Install JS dependencies and then copy them into place
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/node_modules" ]; then
+    chmod 640 ${SUBMITTY_INSTALL_DIR}/site/package-lock.json
+    chmod -R 740 ${SUBMITTY_INSTALL_DIR}/site/node_modules
+fi
+su - ${PHP_USER} -c "npm install"
+NODE_FOLDER=${SUBMITTY_INSTALL_DIR}/site/node_modules
+VENDOR_FOLDER=${SUBMITTY_INSTALL_DIR}/site/public/vendor
+mkdir -p ${VENDOR_FOLDER}
+#fontawesome
+mkdir -p ${VENDOR_FOLDER}/fontawesome
+mkdir -p ${VENDOR_FOLDER}/fontawesome/css
+cp ${NODE_FOLDER}/@fortawesome/fontawesome-free/css/all.min.css ${VENDOR_FOLDER}/fontawesome/css/all.min.css
+cp -R ${NODE_FOLDER}/@fortawesome/fontawesome-free/webfonts ${VENDOR_FOLDER}/fontawesome/
+#codemirror
+mkdir -p ${VENDOR_FOLDER}/codemirror
+
+
 # TEMPORARY (until we have generalized code for generating charts in html)
 # copy the zone chart images
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public/zone_images/
