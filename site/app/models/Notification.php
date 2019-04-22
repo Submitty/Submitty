@@ -173,6 +173,38 @@ class Notification extends AbstractModel {
         }
     }
 
+    private function handleGrading($details) {
+      $this->setType($details['type']);
+
+      switch ($details['type']) {
+          case 'grade_inquiry_creation':
+            $this->actAsGradeInquiryCreation($details['gradeable_id'], $details['grader_id'], $details['submitter_id'], $details['who_id']);
+            break;
+          case 'grade_inquiry_reply':
+            $this->actAsGradeInquiryReply($details['gradeable_id'], $details['grader_id'], $details['submitter_id'], $details['who_id']);
+            break;
+          default:
+            return;
+      }
+
+    }
+
+    private function handleStudent($details) {
+      $this->setType($details['type']);
+
+      switch ($details['type']) {
+          case 'grade_inquiry_creation':
+            $this->actAsGradeInquiryCreation($details['gradeable_id'], '', $details['submitter_id'], $details['who_id']);
+            break;
+          case 'grade_inquiry_reply':
+            $this->actAsGradeInquiryReply($details['gradeable_id'], $details['grader_id'], $details['submitter_id'], '');
+            break;
+          default:
+            return;
+      }
+
+    }
+
     private function actAsNewForumThread($thread_id, $thread_title) {
         $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id))));
         $this->setNotifyContent("New Thread: ".$thread_title);
