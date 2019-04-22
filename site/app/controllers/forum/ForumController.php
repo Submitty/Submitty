@@ -4,6 +4,7 @@ namespace app\controllers\forum;
 
 use app\libraries\Core;
 use app\models\Notification;
+use app\models\Email;
 use app\controllers\AbstractController;
 use app\libraries\Output;
 use app\libraries\Utils;
@@ -900,17 +901,19 @@ class ForumController extends AbstractController {
     }
 
     private function sendEmailAnnouncement($thread_title, $thread_content) {
-            $course = $this->core->getConfig()->getCourse();
-
-            $email_data = [
-                "subject" => $thread_title,
-                "body" => $thread_content
-            ];
-
             $class_list = $this->core->getQueries()->getClassEmailList();
 
             foreach($class_list as $student_email) {
-                $this->core->getQueries()->createEmail($email_data, $student_email["user_email"]);
+                $email_data = array(
+                    "email_subject" => $thread_title,
+                    "email_body" => $thread_content,
+                    "recipient" => $student_email["user_email"],
+                    "type" => 'forum_announcement'
+                );
+
+                $announcement_email = new Email($this->core, $email_data);
+                $this->core->addErrorMessage($announcement_email->getSubject());
+                $this->core->getQueries()->createEmail($announcement_email);
             }
 
         }

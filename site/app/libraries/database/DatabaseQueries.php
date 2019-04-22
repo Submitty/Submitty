@@ -3591,14 +3591,10 @@ AND gc_id IN (
     /**
      * Queues an email to be sent by email job
      * @param array $email_data
-     * @param string $recipient
+     * @param Email $recipient
      */
-    public function createEmail($email_data, $recipient){
-        $course = $this->core->getConfig()->getCourse();
-        $formatted_subject = "[Submitty $course]"." ".$email_data["subject"];
-        $formatted_body = $email_data["body"]."\n--\nNOTE: This is an automated email.\nAny responses will not be looked at or responded to.";
-
-        $parameters = array($recipient, $formatted_subject, $formatted_body);
+    public function createEmail($email){
+        $parameters = array($email->getRecipient(), $email->getSubject(), $email->getBody());
 
         $this->submitty_db->query("
             INSERT INTO emails(
