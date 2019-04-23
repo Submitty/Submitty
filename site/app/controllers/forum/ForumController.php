@@ -6,7 +6,6 @@ use app\libraries\Core;
 use app\models\Notification;
 use app\models\Email;
 use app\controllers\AbstractController;
-use app\libraries\Output;
 use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\libraries\DateUtils;
@@ -488,7 +487,6 @@ class ForumController extends AbstractController {
         }
         if($modifyType == 0) { //delete post or thread
             $thread_id = $_POST["thread_id"];
-            $type = "";
             if($this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 1)){
                 $type = "thread";
             } else {
@@ -503,7 +501,6 @@ class ForumController extends AbstractController {
             return $this->core->getOutput()->getOutput();
         } else if($modifyType == 2) { //undelete post or thread
             $thread_id = $_POST["thread_id"];
-            $type = "";
             $result = $this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 0);
             if(is_null($result)) {
                 $error = "Parent post must be undeleted first.";
@@ -658,9 +655,6 @@ class ForumController extends AbstractController {
         $threads = $this->getSortedThreads($categories_ids, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $pageNumber, -1);
         $currentCategoriesIds = (!empty($_POST['currentCategoriesId'])) ? explode("|", $_POST["currentCategoriesId"]) : array();
         $currentThreadId = array_key_exists('currentThreadId', $_POST) && !empty($_POST["currentThreadId"]) && is_numeric($_POST["currentThreadId"]) ? (int)$_POST["currentThreadId"] : -1;
-        $thread_data = array();
-        $current_thread_title = "";
-        $activeThread = false;
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'showAlteredDisplayList', $threads, true, $currentThreadId, $currentCategoriesIds);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
@@ -823,10 +817,8 @@ class ForumController extends AbstractController {
     }
 
     public function showStats(){
-        $posts = array();
         $posts = $this->core->getQueries()->getPosts();
         $num_posts = count($posts);
-        $num_threads = 0;
         $users = array();
         for($i=0;$i<$num_posts;$i++){
             $user = $posts[$i]["author_user_id"];

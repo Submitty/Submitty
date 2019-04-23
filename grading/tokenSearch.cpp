@@ -3,7 +3,7 @@
  * AUTHORS: Please refer to 'AUTHORS.md' for a list of contributors
  * LICENSE: Please refer to 'LICENSE.md' for the conditions of using this code
  *
- * RELEVANT DOCUMENTATION: 
+ * RELEVANT DOCUMENTATION:
  * Based on the student output, search for tokens within
  * the output. Use for figuring out the final resutls based on the output.
  */
@@ -38,75 +38,6 @@ void buildTable ( int* V, const std::string& keyword ) {
       V[i] = 0;
     }
   }
-}
-
-/* METHOD: searchToken
- * ARGS: student: string containing student output, token: vector of strings that
- * is based of off the student output
- * RETURN: TestResults*
- * PURPOSE: Looks for a token specified in the second argument in the
- * student output. The algorithm runs in linear time with respect to the
- * length of the student output and preprocessing for the algorithm is
- * linear with respect to the token. Overall, the algorithm runs in O(N + M)
- * time where N is the length of the student and M is the length of the token.
- */
-
-
-
-TestResults* searchToken_doit (const TestCase &tc, const nlohmann::json& j) {
-  
-  std::vector<std::string> token_vec;
-  nlohmann::json::const_iterator data_json = j.find("data");
-  if (data_json != j.end()) {
-   for (int i = 0; i < data_json->size(); i++) {
-     token_vec.push_back((*data_json)[i]);
-   }
-  }
-
-  std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > messages;
-  std::string student_file_contents;
-  if (!openStudentFile(tc,j,student_file_contents,messages)) {
-    return new TestResults(0.0,messages);
-  }
-
-
-  //Build a table to use for the search
-  Tokens* diff = new Tokens();
-  diff->num_tokens = token_vec.size();
-  assert (diff->num_tokens > 0);
-  
-  int found = 0;
-
-  for (int which = 0; which < diff->num_tokens; which++) {
-    int V[token_vec[which].size()];
-    buildTable( V, token_vec[which] );
-    std::cout << "searching for " << token_vec[which] << std::endl;
-    int m = 0;
-    int i = 0;
-    while ( m + i < student_file_contents.size() ) {
-      if ( student_file_contents[i + m] == token_vec[which][i] ) {
-        if ( i == token_vec[which].size() - 1 ) {
-          diff->tokens_found.push_back( m );
-          std::cout << "found! " << std::endl;
-          found++;
-          break;
-        }
-        i++;
-      } else {
-        m += i - V[i];
-        if ( V[i] == -1 )
-          i = 0;
-        else
-          i = V[i];
-      }
-    }
-    diff->tokens_found.push_back( -1 );
-  }
-
-  assert (found <= diff->num_tokens);
-
-  diff->setGrade(found / float(diff->num_tokens));
-  return diff;
 }
 
 /* METHOD: searchAllTokens
@@ -189,7 +120,7 @@ TestResults* searchTokens ( const std::string& student,
  * ARGS: token: string with token to search for, searchstring: string of where to search for token
  * RETURN: int
  * PURPOSE: Looks for a single token in a string using the Rabin-Karp rolling hash
- * method.  Returns starting index if found, -1 if not.  
+ * method.  Returns starting index if found, -1 if not.
  */
 int RabinKarpSingle ( std::string token, std::string searchstring ) {
   long hash = 0;
@@ -235,14 +166,14 @@ std::vector< std::string > splitTokens ( const std::string& tokens ) {
       }
       tmpstr.clear();
       i = i + 2; // Skip to end of said delimiter
-    } 
+    }
     else if ( ( tokens.size() - i == 2 ) && tokens[i] == '\"' && tokens[i + 1] == '\n' ) {
       if ( tmpstr != "" ) {
         tokenlist.push_back( tmpstr );
       }
       tmpstr.clear();
       i = i + 1;
-    } 
+    }
     else if ( ( tokens.size() - i == 1 ) && tokens[i] == '\"' ) {
       if ( tmpstr != "" ) {
         tokenlist.push_back( tmpstr );
@@ -258,4 +189,3 @@ std::vector< std::string > splitTokens ( const std::string& tokens ) {
   }
   return tokenlist;
 }
-
