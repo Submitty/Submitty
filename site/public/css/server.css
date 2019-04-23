@@ -186,6 +186,14 @@ input[type="checkbox"]:checked:before {
     font-weight: 900
 }
 
+.helpicon::before {
+  font-family: 'Font Awesome 5 Free';
+  content: "\f059";
+  color: #1E90FF;
+  font-weight: 300;
+  display: inline-block;
+}
+
 input[type="checkbox"]:focus{
     outline: 0 none;
     box-shadow: none;
@@ -1764,4 +1772,15 @@ end of styles used in the admin gradeable page
     overflow: auto; 
     width: 100%;
     max-height: 300px;
+}
+#details-legend > li{
+    list-style: none;
+    padding-left: 15px;
+    font-size: 0.75em;
+}
+
+.ui-autocomplete{
+    max-height: 300px;
+    overflow-y: scroll;
+    overflow-x: hidden;
 }
