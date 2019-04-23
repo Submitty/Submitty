@@ -397,11 +397,6 @@ table tr.table-header {
     display: block;
     font-size: 1.5em;
     font-weight: bold;
-
-    /* vertical centering */
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
 }
 
 .text-center {
