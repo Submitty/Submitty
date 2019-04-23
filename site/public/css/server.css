@@ -484,6 +484,7 @@ table tr.table-header {
 
 #footer a {
     color: #000000;
+    text-decoration: none;
 }
 
 #footer a:hover {
@@ -497,14 +498,6 @@ table tr.table-header {
 
 #footer .footer_link_icon {
     padding-right: 4px;
-}
-
-#copyright > a {
-    color: #405E90;
-}
-
-#copyright > a:hover {
-    text-decoration: underline;
 }
 
 .sub {
