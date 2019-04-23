@@ -395,9 +395,9 @@ class Output {
         $this->css[] = $url.(($timestamp !== 0) ? "?v={$timestamp}" : '');
     }
 
-    public function addInternalJs($file) {
-        $timestamp = filemtime(FileUtils::joinPaths(__DIR__, '..', '..', 'public', 'js', $file));
-        $this->addJs($this->core->getConfig()->getBaseUrl()."js/".$file, $timestamp);
+    public function addInternalJs($file, $folder='js') {
+        $timestamp = filemtime(FileUtils::joinPaths(__DIR__, '..', '..', 'public', $folder, $file));
+        $this->addJs($this->core->getConfig()->getBaseUrl().$folder."/".$file, $timestamp);
     }
 
     public function addJs($url, $timestamp=0) {

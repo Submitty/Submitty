@@ -1065,7 +1065,14 @@ int execute(const std::string &cmd,
       const nlohmann::json &assignment_limits,
       const nlohmann::json &whole_config,
       const bool windowed,
-      const std::string display_variable) {
+      const std::string display_variable2) {
+
+  
+  std::string display_variable = display_variable2;
+  if (display_variable == "NO_DISPLAY_SET") {
+    display_variable = ":1";
+  }
+
 
   std::set<std::string> invalid_windows;
   bool window_mode = windowed; //Tells us if the process is expected to spawn a window. (additional support later) 

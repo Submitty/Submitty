@@ -1565,7 +1565,7 @@ class SubmissionController extends AbstractController {
     }
 
     private function ajaxUploadImagesFiles() {
-        if($this->core->getUser()->getGroup() !== 1) {
+        if(!$this->core->getUser()->accessAdmin()) {
             return $this->uploadResultMessage("You have no permission to access this page", false);
         }
 
@@ -1697,7 +1697,7 @@ class SubmissionController extends AbstractController {
     }
 
     private function ajaxUploadCourseMaterialsFiles() {
-      if($this->core->getUser()->getGroup() !== 1) {
+      if(!$this->core->getUser()->accessAdmin()) {
          return $this->uploadResultMessage("You have no permission to access this page", false);
       }
 

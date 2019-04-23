@@ -5,7 +5,6 @@ namespace app\controllers\forum;
 use app\libraries\Core;
 use app\models\Notification;
 use app\controllers\AbstractController;
-use app\libraries\Output;
 use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\libraries\DateUtils;
@@ -121,7 +120,7 @@ class ForumController extends AbstractController {
 	private function changeThreadStatus($status) {
 		$thread_id = $_POST['thread_id'];
 		$result = array();
-		if($this->core->getQueries()->getAuthorOfThread($thread_id) === $this->core->getUser()->getId() || $this->core->getUser()->getGroup() <= 3) {
+		if($this->core->getQueries()->getAuthorOfThread($thread_id) === $this->core->getUser()->getId() || $this->core->getUser()->accessGrading()) {
 			if($this->core->getQueries()->updateResolveState($thread_id, $status)) {
 				$result['success'] = 'Thread resolve state has been changed.';
 			} else {
@@ -315,8 +314,8 @@ class ForumController extends AbstractController {
         $thread_post_content = str_replace("\r", "", $_POST["thread_post_content"]);
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
         $thread_status = $_POST["thread_status"];
-        $announcement = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->getGroup() < 3) ? 1 : 0 ;
-        $email_announcement = (isset($_POST["EmailAnnouncement"]) && $_POST["EmailAnnouncement"] == "EmailAnnouncement" && $this->core->getUser()->getGroup() < 3) ? 1 : 0 ;
+        $announcement = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->accessFullGrading()) ? 1 : 0 ;
+        $email_announcement = (isset($_POST["EmailAnnouncement"]) && $_POST["EmailAnnouncement"] == "EmailAnnouncement" && $this->core->getUser()->accessFullGrading()) ? 1 : 0 ;
 
         $categories_ids  = array();
         foreach ($_POST["cat"] as $category_id) {
@@ -487,7 +486,6 @@ class ForumController extends AbstractController {
         }
         if($modifyType == 0) { //delete post or thread
             $thread_id = $_POST["thread_id"];
-            $type = "";
             if($this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 1)){
                 $type = "thread";
             } else {
@@ -502,7 +500,6 @@ class ForumController extends AbstractController {
             return $this->core->getOutput()->getOutput();
         } else if($modifyType == 2) { //undelete post or thread
             $thread_id = $_POST["thread_id"];
-            $type = "";
             $result = $this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 0);
             if(is_null($result)) {
                 $error = "Parent post must be undeleted first.";
@@ -522,6 +519,8 @@ class ForumController extends AbstractController {
             $status_edit_thread = $this->editThread();
             $status_edit_post   = $this->editPost();
             $any_changes = false;
+            $isError = false;
+            $messageString = '';
              // Author of first post and thread must be same
             if(is_null($status_edit_thread) && is_null($status_edit_post)) {
                 $this->core->addErrorMessage("No data submitted. Please try again.");
@@ -529,24 +528,26 @@ class ForumController extends AbstractController {
                 $type = is_null($status_edit_thread)?"Post":"Thread";
                 if($status_edit_thread || $status_edit_post) {
                     //$type is true
-                    $this->core->addSuccessMessage("{$type} updated successfully.");
+                    $messageString = "{$type} updated successfully.";
                     $any_changes = true;
                 } else {
-                    $this->core->addErrorMessage("{$type} updation failed. Please try again.");
+                    $isError = true;
+                    $messageString = "{$type} updation failed. Please try again.";
                 }
             } else {
                 if($status_edit_thread && $status_edit_post) {
-                    $this->core->addSuccessMessage("Thread and post updated successfully.");
+                    $messageString = "Thread and post updated successfully.";
                     $any_changes = true;
                 } else {
                     $type = ($status_edit_thread)?"Thread":"Post";
                     $type_opposite = (!$status_edit_thread)?"Thread":"Post";
+                    $isError = true;
                     if($status_edit_thread || $status_edit_post) {
                         //$type is true
-                        $this->core->addErrorMessage("{$type} updated successfully. {$type_opposite} updation failed. Please try again.");
+                        $messageString = "{$type} updated successfully. {$type_opposite} updation failed. Please try again.";
                         $any_changes = true;
                     } else {
-                        $this->core->addErrorMessage("Thread and Post updation failed. Please try again.");
+                        $messageString = "Thread and Post updation failed. Please try again.";
                     }
                 }
             }
@@ -555,6 +556,11 @@ class ForumController extends AbstractController {
                 $post_author = $post['author_user_id'];
                 $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'edited', 'thread_id' => $thread_id, 'post_id' => $post_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
                 $this->core->getQueries()->pushNotification($notification);
+            }
+            if($isError) {
+                $this->core->addErrorMessage($messageString);
+            } else {
+                $this->core->addSuccessMessage($messageString);
             }
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
         }
@@ -588,12 +594,15 @@ class ForumController extends AbstractController {
         $new_post_content = $_POST["thread_post_content"];
         if(!empty($new_post_content)) {
             $post_id = $_POST["edit_post_id"];
-            $original_creator = $this->core->getQueries()->getPost($post_id);
-            if(!empty($original_creator)) {
-                $original_creator = $original_creator['author_user_id'];
+            $original_post = $this->core->getQueries()->getPost($post_id);
+            if(!empty($original_post)) {
+                $original_creator = $original_post['author_user_id'];
             }
             $anon = ($_POST["Anon"] == "Anon") ? 1 : 0;
             $current_user = $this->core->getUser()->getId();
+            if(!$this->modifyAnonymous($original_creator)) {
+                $anon = $original_post["anonymous"] ? 1 : 0;
+            }
             return $this->core->getQueries()->editPost($original_creator, $current_user, $post_id, $new_post_content, $anon);
         }
         return null;
@@ -645,9 +654,6 @@ class ForumController extends AbstractController {
         $threads = $this->getSortedThreads($categories_ids, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $pageNumber, -1);
         $currentCategoriesIds = (!empty($_POST['currentCategoriesId'])) ? explode("|", $_POST["currentCategoriesId"]) : array();
         $currentThreadId = array_key_exists('currentThreadId', $_POST) && !empty($_POST["currentThreadId"]) && is_numeric($_POST["currentThreadId"]) ? (int)$_POST["currentThreadId"] : -1;
-        $thread_data = array();
-        $current_thread_title = "";
-        $activeThread = false;
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'showAlteredDisplayList', $threads, true, $currentThreadId, $currentCategoriesIds);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
@@ -749,24 +755,27 @@ class ForumController extends AbstractController {
         if($this->core->getUser()->accessGrading()){
             $_post = array();
             $older_posts = $this->core->getQueries()->getPostHistory($post_id);
+            $current_post = $this->core->getQueries()->getPost($post_id);
+            $oc = $current_post["author_user_id"];
+            $anon = $current_post["anonymous"];
             foreach ($older_posts as $post) {
-                $_post['user'] = $post["edit_author"];
+                $_post['user'] = !$this->modifyAnonymous($oc) && $oc == $post["edit_author"] && $anon ? '' : $post["edit_author"];
                 $_post['content'] = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'filter_post_content',  $post["content"]);
                 $_post['post_time'] = DateUtils::parseDateTime($post['edit_timestamp'], $this->core->getConfig()->getTimezone())->format("n/j g:i A");
                 $output[] = $_post;
             }
             if(count($output) == 0) {
-                $current_post = $this->core->getQueries()->getPost($post_id);
                 // Current post
-                $_post['user'] = $current_post["author_user_id"];
+                $_post['user'] = !$this->modifyAnonymous($oc) && $anon ? '' : $oc;
                 $_post['content'] = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'filter_post_content',  $current_post["content"]);
                 $_post['post_time'] = DateUtils::parseDateTime($current_post['timestamp'], $this->core->getConfig()->getTimezone())->format("n/j g:i A");
                 $output[] = $_post;
             }
             // Fetch additional information
             foreach ($output as &$_post) {
-                $_post['user_info'] = $this->core->getQueries()->getDisplayUserInfoFromUserId($_post['user']);
-                $_post['is_staff_post'] = $this->core->getQueries()->isStaffPost($_post['user']);
+                $emptyUser = empty($_post['user']);
+                $_post['user_info'] = $emptyUser ? array('first_name' => 'Anonymous', 'last_name' => '', 'email' => '') : $this->core->getQueries()->getDisplayUserInfoFromUserId($_post['user']);
+                $_post['is_staff_post'] = $emptyUser ? false : $this->core->getQueries()->isStaffPost($_post['user']);
             }
         } else {
             $output['error'] = "You do not have permissions to do that.";
@@ -775,15 +784,20 @@ class ForumController extends AbstractController {
         return $this->core->getOutput()->getOutput();
     }
 
+    public function modifyAnonymous($author) {
+        return $this->core->getUser()->accessFullGrading() || $this->core->getUser()->getId() === $author;
+    }
+
     public function getEditPostContent(){
         $post_id = $_POST["post_id"];
         if($this->checkPostEditAccess($post_id) && !empty($post_id)) {
             $result = $this->core->getQueries()->getPost($post_id);
             $output = array();
-            $output['user'] = $result["author_user_id"];
             $output['post'] = $result["content"];
             $output['post_time'] = $result['timestamp'];
             $output['anon'] = $result['anonymous'];
+            $output['change_anon'] = $this->modifyAnonymous($result["author_user_id"]);
+            $output['user'] = $output['anon'] ? 'Anonymous' : $result["author_user_id"];
             if(isset($_POST["thread_id"])) {
                 $this->getThreadContent($_POST["thread_id"], $output);
             }
@@ -802,10 +816,8 @@ class ForumController extends AbstractController {
     }
 
     public function showStats(){
-        $posts = array();
         $posts = $this->core->getQueries()->getPosts();
         $num_posts = count($posts);
-        $num_threads = 0;
         $users = array();
         for($i=0;$i<$num_posts;$i++){
             $user = $posts[$i]["author_user_id"];

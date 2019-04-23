@@ -226,7 +226,7 @@ HTML;
 	$show_deleted_class = '';
 	$show_deleted_action = '';
     $show_deleted_thread_title = '';
-	if($this->core->getUser()->getGroup() <= 3){
+	if($this->core->getUser()->accessGrading()){
 		if($show_deleted) {
 			$show_deleted_class = "active";
 			$show_deleted_action = "alterShowDeletedStatus(0);";
@@ -307,7 +307,7 @@ HTML;
 							"onclick" => array(true, $show_deleted_action)
 						),
 						array(
-							"required_rank" => 3,
+							"required_rank" => 2,
 							"display_text" => 'Stats',
 							"style" => 'position:relative;top:3px;display:inline-block;',
 							"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))),
@@ -998,7 +998,7 @@ HTML;
 
 	if($thread_exists) {
 		$buttons = array_merge($buttons, array(
-			"required_rank" => 3,
+			"required_rank" => 2,
 			"display_text" => 'Stats',
 			"style" => 'position:relative;top:3px;display:inline-block;',
 			"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))),
@@ -1047,8 +1047,13 @@ HTML;
 
 	public function statPage($users) {
 
-		if(!$this->forumAccess() || $this->core->getUser()->getGroup() > 3){
+		if(!$this->forumAccess()){
 			$this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
+			return;
+		}
+
+		if(!$this->core->getUser()->accessFullGrading()){
+			$this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
 			return;
 		}
 
