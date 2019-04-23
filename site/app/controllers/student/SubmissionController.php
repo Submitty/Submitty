@@ -131,8 +131,6 @@ class SubmissionController extends AbstractController {
             return;
         }
 
-
-
         try {
             $this->core->getQueries()->insertNewRegradeRequest($graded_gradeable, $user, $content);
             $this->notifyGradeInquiryOnCreate($graded_gradeable, $gradeable_id, $content);
@@ -265,132 +263,6 @@ class SubmissionController extends AbstractController {
         } catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
-    }
-
-    private function notifyGradeInquiryOnCreate($graded_gradeable, $gradeable_id, $content){
-      //TODO: send notification to grader per component
-      if($graded_gradeable->hasTaGradingInfo()){
-        $course = $this->core->getConfig()->getCourse();
-        $gradeable_id = $graded_gradeable->getGradeable()->getId();
-
-        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
-        $graders = $ta_graded_gradeable->getGraders();
-        $submitter = $graded_gradeable->getSubmitter();
-        $user_id = $this->core->getUser()->getId();
-
-        //TODO: build link in email body
-        $notification_subject = "[Submitty $course] New Regrade Request";
-        $notification_body = "A student has submitted a grade inquiry for gradeable $gradeable_id.\nStudent ID $user_id writes:\n$content\n\nPlease visit Submitty to follow up on this request";
-
-        $regrade_email_data = [
-          "subject" => $notification_subject,
-          "body" => $notification_body
-        ];
-
-        foreach($graders as $grader){
-          if(!$grader->accessFullGrading()){
-            continue;
-          }
-          $new_grade_inquiry_notification = new Notification($this->core, array('component' => 'grading', 'type' => 'grade_inquiry_creation', 'gradeable_id' => $gradeable_id, 'grader_id' => $grader->getId(), 'submitter_id' => $user_id, 'who_id' => $submitter->getId()));
-          $this->core->getQueries()->pushSingleNotification($new_grade_inquiry_notification);
-
-          $this->core->getQueries()->createEmail($regrade_email_data, $grader->getEmail());
-        }
-
-        if($submitter->isTeam()){
-          $submitting_team = $submitter->getTeam()->getMemberUsers();
-          foreach($submitting_team as $submitting_user){
-            $this->core->addErrorMessage($submitting_user->getId());
-            if($submitting_user->getId() == $user_id){
-              continue;
-            }
-
-            $new_grade_inquiry_notification = new Notification($this->core, array('component' => 'student', 'type' => 'grade_inquiry_creation', 'gradeable_id' => $gradeable_id, 'submitter_id' => $user_id, 'who_id' => $submitting_user->getId()));
-            $this->core->getQueries()->pushSingleNotification($new_grade_inquiry_notification);
-          }
-        }
-
-      }
-
-    }
-
-    private function notifyGradeInquiryOnReply($graded_gradeable, $gradeable_id, $content) {
-
-      if($graded_gradeable->hasTaGradingInfo()){
-        $course = $this->core->getConfig()->getCourse();
-        $submitter = $graded_gradeable->getSubmitter();
-        $user = $this->core->getUser();
-
-        $is_grader = false;
-        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
-        $graders = $ta_graded_gradeable->getGraders();
-
-        foreach($graders as $grader){
-          if($grader->getId() == $user->getId()){
-            $is_grader = true;
-            break;
-          }
-        }
-
-        //on a grader replying to discussions
-        if($is_grader == true){
-
-          //TODO: build link in notification body
-          $notification_subject = "[Submitty $course] Grade Inquiry Reply";
-          $notification_body = "An instructor or TA has posted a reply in your grade inquiry discussion.\n$content";
-
-          $regrade_email_data = [
-            "subject" => $notification_subject,
-            "body" => $notification_body
-          ];
-
-          $submitter = $graded_gradeable->getSubmitter();
-          if($submitter->isTeam()){
-            $submitting_team = $submitter->getTeam()->getMemberUsers();
-            foreach($submitting_team as $submitting_user){
-              $new_grade_inquiry_notification = new Notification($this->core, array('component' => 'student', 'type' => 'grade_inquiry_reply', 'gradeable_id' => $gradeable_id, 'grader_id' => $user->getId(), 'submitter_id' => $submitting_user->getId()));
-              $this->core->getQueries()->pushSingleNotification($new_grade_inquiry_notification);
-
-              $user_email = $submitting_user->getEmail();
-              $this->core->getQueries()->createEmail($regrade_email_data, $user_email);
-            }
-          }
-          else{
-            $new_grade_inquiry_notification = new Notification($this->core, array('component' => 'student', 'type' => 'grade_inquiry_reply', 'gradeable_id' => $gradeable_id, 'grader_id' => $user->getId(), 'submitter_id' => $submitter->getId()));
-            $this->core->getQueries()->pushSingleNotification($new_grade_inquiry_notification);
-
-            $user_email = $submitter->getUser()->getEmail();
-            $this->core->getQueries()->createEmail($regrade_email_data, $user_email);
-          }
-
-
-        }
-        //on a student replying to discussion
-        else{
-
-          $notification_subject = "[Submitty $course] Grade Inquiry Reply";
-          $notification_body = "A student has posted a reply in a grade inquiry discussion.\n$content";
-
-          $regrade_email_data = [
-            "subject" => $notification_subject,
-            "body" => $notification_body
-          ];
-
-          //TODO: only notify relevant graders
-          foreach($graders as $grader){
-            if(!$grader->accessFullGrading()){
-              continue;
-            }
-            $new_grade_inquiry_notification = new Notification($this->core, array('component' => 'grading', 'type' => 'grade_inquiry_reply', 'gradeable_id' => $gradeable_id, 'grader_id' => $grader->getId(), 'submitter_id' => $user->getId(), 'who_id' => $submitter->getId()));
-            $this->core->getQueries()->pushSingleNotification($new_grade_inquiry_notification);
-
-            $grader_email = $grader->getEmail();
-            $this->core->getQueries()->createEmail($regrade_email_data, $grader_email);
-          }
-
-        }
-      }
-
     }
 
     private function showHomeworkPage() {
@@ -2041,6 +1913,7 @@ class SubmissionController extends AbstractController {
         $graders = $ta_graded_gradeable->getGraders();
         $submitter = $graded_gradeable->getSubmitter();
         $user_id = $this->core->getUser()->getId();
+
         //TODO: build link in email body
         $notification_subject = "[Submitty $course] New Regrade Request";
         $notification_body = "A student has submitted a grade inquiry for gradeable $gradeable_id.\nStudent ID $user_id writes:\n$content\n\nPlease visit Submitty to follow up on this request";
@@ -2052,10 +1925,13 @@ class SubmissionController extends AbstractController {
           if(!$grader->accessFullGrading()){
             continue;
           }
+
           $new_grade_inquiry_notification = new Notification($this->core, array('component' => 'grading', 'type' => 'grade_inquiry_creation', 'gradeable_id' => $gradeable_id, 'grader_id' => $grader->getId(), 'submitter_id' => $user_id, 'who_id' => $submitter->getId()));
           $this->core->getQueries()->pushSingleNotification($new_grade_inquiry_notification);
+
           $this->core->getQueries()->createEmail($regrade_email_data, $grader->getEmail());
         }
+
         if($submitter->isTeam()){
           $submitting_team = $submitter->getTeam()->getMemberUsers();
           foreach($submitting_team as $submitting_user){
@@ -2083,7 +1959,7 @@ class SubmissionController extends AbstractController {
             break;
           }
         }
-        //on a grader replying to discussions
+        //on a grader replying to discussion
         if($is_grader == true){
           //TODO: build link in notification body
           $notification_subject = "[Submitty $course] Grade Inquiry Reply";

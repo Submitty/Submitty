@@ -15,9 +15,8 @@ def up(config, database, semester, course):
     :type course: str
     """
     #NOTE see other migrations for example usage. This is a workaround for executing a migration without a DB Session
-    database.engine.execute("ALTER type notifications_component ADD VALUE IF NOT EXISTS 'student';")
-    database.engine.execute("ALTER type notifications_component ADD VALUE IF NOT EXISTS 'grading';")
-    pass
+    database.engine.execution_options(autocommit=True, isolation_level='AUTOCOMMIT').execute("ALTER type notifications_component ADD VALUE IF NOT EXISTS 'student';")
+    database.engine.execution_options(autocommit=True, isolation_level='AUTOCOMMIT').execute("ALTER type notifications_component ADD VALUE IF NOT EXISTS 'grading';")
 
 
 def down(config, database, semester, course):
@@ -35,4 +34,3 @@ def down(config, database, semester, course):
     """
     database.engine.execute("DELETE FROM pg_enum WHERE enumlabel = 'student';")
     database.engine.execute("DELETE FROM pg_enum WHERE enumlabel = 'grading';")
-    pass
