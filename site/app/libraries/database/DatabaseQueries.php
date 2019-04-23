@@ -23,6 +23,7 @@ use app\models\GradeableComponentMark;
 use app\models\GradeableVersion;
 use app\models\User;
 use app\models\Notification;
+use app\models\Email;
 use app\models\SimpleLateUser;
 use app\models\Team;
 use app\models\Course;

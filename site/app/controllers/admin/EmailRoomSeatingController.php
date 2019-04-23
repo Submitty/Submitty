@@ -6,6 +6,7 @@ use app\libraries\Core;
 use app\controllers\AbstractController;
 use app\libraries\Output;
 use app\libraries\FileUtils;
+use app\models\Email;
 
 
 class EmailRoomSeatingController extends AbstractController {
@@ -66,10 +67,13 @@ Please email your instructor with any questions or concerns.';
 
             $email_data = [
                 "subject" => $this->replacePlaceholders($seating_assignment_subject, $room_seating_json),
-                "body" => $this->replacePlaceholders($seating_assignment_body, $room_seating_json)
+                "body" => $this->replacePlaceholders($seating_assignment_body, $room_seating_json),
+                "recipient" => $user_email,
+                "type" => 'seating_assignment'
             ];
 
-            $this->core->getQueries()->createEmail($email_data, $user_email);
+            $seating_assignment_email = new Email($this->core, $email_data);
+            $this->core->getQueries()->createEmail($seating_assignment_email);
         }
 
         $this->core->addSuccessMessage("Seating assignments have been sucessfully emailed!");
@@ -77,7 +81,6 @@ Please email your instructor with any questions or concerns.';
     }
 
     private function replacePlaceholders($message, $data) {
-
         $replaces = [
             'gradeable' => 'gradeable_id',
             'date' => 'exam_date',
@@ -95,8 +98,8 @@ Please email your instructor with any questions or concerns.';
         	}
         }
 
-				$message = str_replace('{$course_name}', $this->core->getConfig()->getCourse(), $message);
-        return $message; 
+		$message = str_replace('{$course_name}', $this->core->getConfig()->getCourse(), $message);
+        return $message;
     }
 
 }

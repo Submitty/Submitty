@@ -901,21 +901,20 @@ class ForumController extends AbstractController {
     }
 
     private function sendEmailAnnouncement($thread_title, $thread_content) {
-            $class_list = $this->core->getQueries()->getClassEmailList();
+      $class_list = $this->core->getQueries()->getClassEmailList();
 
-            foreach($class_list as $student_email) {
-                $email_data = array(
-                    "email_subject" => $thread_title,
-                    "email_body" => $thread_content,
-                    "recipient" => $student_email["user_email"],
-                    "type" => 'forum_announcement'
-                );
+      foreach($class_list as $student_email) {
+          $email_data = array(
+              "subject" => $thread_title,
+              "body" => $thread_content,
+              "recipient" => $student_email["user_email"],
+              "type" => 'forum_announcement'
+          );
 
-                $announcement_email = new Email($this->core, $email_data);
-                $this->core->addErrorMessage($announcement_email->getSubject());
-                $this->core->getQueries()->createEmail($announcement_email);
-            }
+          $announcement_email = new Email($this->core, $email_data);
+          $this->core->getQueries()->createEmail($announcement_email);
+      }
 
-        }
+    }
 
 }
