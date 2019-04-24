@@ -282,7 +282,7 @@ HTML;
 								"show_threads" => true,
 								"thread_exists" => true
 	];
-		if($this->core->getUser()->getGroup() <= 3){
+		if($this->core->getUser()->accessGrading()){
 			if($show_deleted) {
 				$show_deleted_class = "active";
 				$show_deleted_action = "alterShowDeletedStatus(0);";
