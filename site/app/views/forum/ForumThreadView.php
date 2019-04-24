@@ -413,7 +413,7 @@ HTML;
 
 		$activeThread = $this->core->getQueries()->getThread($currentThread)[0];
 
-		$activeThreadTitle = ($this->core->getUser()->getGroup() <= 2 ? "({$activeThread['id']}) " : '') . $activeThread['title'];
+		$activeThreadTitle = ($this->core->getUser()->accessFullGrading() ? "({$activeThread['id']}) " : '') . htmlentities($activeThread['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
 		$activeThreadAnnouncement = $activeThread['pinned'];
 
 		$thread_id = $activeThread['id'];
