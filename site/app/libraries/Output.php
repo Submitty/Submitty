@@ -67,6 +67,8 @@ class Output {
             'cache' => $this->core->getConfig()->isDebug() ? false : $cache_path,
             'debug' => $this->core->getConfig()->isDebug()
         ]);
+        $this->twig->getExtension(\Twig\Extension\CoreExtension::class)
+            ->setTimezone($this->core->getConfig()->getTimezone());
         $this->twig->addGlobal("core", $this->core);
         $this->twig->addFunction(new \Twig_Function("render_template", function(... $args) {
             return call_user_func_array('self::renderTemplate', $args);
