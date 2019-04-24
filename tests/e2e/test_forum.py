@@ -142,11 +142,6 @@ class TestForum(BaseTestCase):
 
         x = submit_button.location['x'] + (submit_button.size['width']/2)
         y = submit_button.location['y'] + (submit_button.size['height']/2)
-        print("x: "+str(x)+" - y: "+str(y))
-        print('submit button displayed: ' + str(submit_button.is_displayed()))
-        print('submit_button enabled: ' + str(submit_button.is_enabled()))
-        print(submit_button.get_attribute('innerHTML'))
-        print(submit_button.get_attribute('outerHTML'))
 
         hover = ActionChains(self.driver).move_to_element(submit_button).perform()
         submit_button.click()
