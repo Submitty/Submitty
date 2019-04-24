@@ -385,7 +385,8 @@ HTML;
 					<div id="posts_list" style="margin-top:10px;max-height: 100%" class="col-9">
 HTML;
 
-		$currentThreadFavorite = array_values($currentThreadArr)[0]['favorite'];
+		$currentThreadArrValues = array_values($currentThreadArr);
+		$currentThreadFavorite = !empty($currentThreadArrValues) ? $currentThreadArrValues[0]['favorite'] : false;
 		$return .= $this->generatePostList($currentThread, $posts, $unviewed_posts, $currentCourse, true, $threadExists, $display_option, $categories, $cookieSelectedCategories, $cookieSelectedThreadStatus, $cookieSelectedUnread, $currentCategoriesIds, $currentThreadFavorite);
 
 		$return .= <<<HTML
