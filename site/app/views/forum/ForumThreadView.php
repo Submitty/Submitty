@@ -1049,8 +1049,13 @@ HTML;
 
 	public function statPage($users) {
 
-		if(!$this->forumAccess() || $this->core->getUser()->getGroup() > 3){
+		if(!$this->forumAccess()){
 			$this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
+			return;
+		}
+
+		if(!$this->core->getUser()->accessFullGrading()){
+			$this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
 			return;
 		}
 
