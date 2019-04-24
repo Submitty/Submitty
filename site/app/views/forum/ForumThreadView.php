@@ -349,7 +349,7 @@ HTML;
 					$return .= <<<HTML
 					<div style="position:relative; height:100%; overflow-y:hidden;" class="row">
 
-  						<div id="thread_list" style="max-height: 100%;" class="col-3" prev_page="{$prev_page}" next_page="{$next_page}">
+						<div id="thread_list" style="overflow-y: auto; height:81vh;" class="col-3" prev_page="{$prev_page}" next_page="{$next_page}">
 						<i class="fas fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
 						<i class="fas fa-caret-up fa-2x fa-fw fill-available" style="color:gray;{$arrowup_visibility}" aria-hidden="true"></i>
 HTML;
@@ -382,7 +382,7 @@ HTML;
 							}
 						});
 					</script>
-					<div id="posts_list" style="margin-top:10px;max-height: 100%" class="col-9">
+					<div id="posts_list" style="overflow-y: auto; height:81vh;" class="col-9">
 HTML;
 
 		$currentThreadArrValues = array_values($currentThreadArr);
