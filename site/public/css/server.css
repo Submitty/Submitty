@@ -2054,3 +2054,9 @@ end of styles used in the admin gradeable page
     overflow-y: scroll;
     overflow-x: hidden;
 }
+
+/* Override the -15px that bootstrap-grid.css sets for these */
+.row {
+    margin-right: 0px;
+    margin-left: 0px;
+}

@@ -68,7 +68,7 @@ mkdir ${VENDOR_FOLDER}
 mkdir ${VENDOR_FOLDER}/fontawesome
 mkdir ${VENDOR_FOLDER}/fontawesome/css
 cp ${NODE_FOLDER}/@fortawesome/fontawesome-free/css/all.min.css ${VENDOR_FOLDER}/fontawesome/css/all.min.css
-cp -R ${NODE_FOLDER}/@fortawesome/fontawesome-free/webfonts ${VENDOR_FOLDER}/fontawesome/
+cp -R ${NODE_FOLDER}/@fortawesome/fontawesome-free/webfonts/ ${VENDOR_FOLDER}/fontawesome/
 # bootstrap
 cp -R ${NODE_FOLDER}/bootstrap/dist/ ${VENDOR_FOLDER}/bootstrap
 # chosen.js
@@ -145,11 +145,11 @@ crontab -u submitty_daemon /tmp/cron_jobs
 rm -f /tmp/cron_jobs
 
 # "other" can read & execute these files
-find ${SUBMITTY_INSTALL_DIR}/site/public/vendor -type f -name \*.ttf -exec chmod o+rx {} \;
-find ${SUBMITTY_INSTALL_DIR}/site/public/vendor -type f -name \*.eot -exec chmod o+rx {} \;
-find ${SUBMITTY_INSTALL_DIR}/site/public/vendor -type f -name \*.svg -exec chmod o+rx {} \;
-find ${SUBMITTY_INSTALL_DIR}/site/public/vendor -type f -name \*.woff -exec chmod o+rx {} \;
-find ${SUBMITTY_INSTALL_DIR}/site/public/vendor -type f -name \*.woff2 -exec chmod o+rx {} \;
+find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.ttf -exec chmod o+rx {} \;
+find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.eot -exec chmod o+rx {} \;
+find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.svg -exec chmod o+rx {} \;
+find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.woff -exec chmod o+rx {} \;
+find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.woff2 -exec chmod o+rx {} \;
 
 find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.js -exec chmod o+rx {} \;
 find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -type f -name \*.cgi -exec chmod u+x {} \;
