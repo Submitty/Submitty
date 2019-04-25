@@ -11,7 +11,9 @@ body {
     width: 100%;
     position: relative;
 }
-
+:root {
+    --viewed_content: #e8f1f8;
+}
 #site-body {
     /* OLD SEAFOAM GREEN COLOR */
     /* background-color: #B6CECE; */
@@ -109,6 +111,7 @@ a > i.far {
 a.btn {
     text-decoration: none;
 }
+
 
 /****************************
  * INPUT STYLES
@@ -711,15 +714,25 @@ table tr.table-header {
 }
 
 .active {
-    background-color: #d8eef6;
+    background-color: white;
+    /*    color: #4a4a4a;*/
+    border: 4px solid #276394;
 }
-
+/* TODO: MAKE THIS CASCADE */
 .deleted {
-    background-color: #A9A9A9 !important;
+    background-color: #A9A9A9;
+    color: #4a4a4a;
 }
 
 .deleted.active {
-    background-color: #505050 !important;
+    background-color: #505050;
+}
+.new_post {
+    background-color: var(--viewed_content);
+    /*background-color: #d4e1f2;*/
+}
+.viewed_post{
+    background-color: white;
 }
 
 .important {
@@ -729,8 +742,11 @@ table tr.table-header {
     border-color: #ffd700; /* gold */
 }
 
-.viewed {
-    color: #888888;
+.new_thread{
+    background-color: var(--viewed_content);
+}
+.btn-default.post_button_color{
+    background-color: inherit;
 }
 
 .box-title > h4 {
@@ -905,6 +921,9 @@ table tr.table-header {
 .post_content {
     margin-right: 5px;
 }
+.post_viewed_btn {
+    background-color: #dcdcdcb5 !important;
+}
 
 .first_post .post_button {
 }
@@ -922,11 +941,9 @@ table tr.table-header {
 .post_box {
     position: relative;
     box-shadow: 0 2px 15px -5px #888888;
-    padding:5px;
+    padding:7px;
     margin-top: 20px;
     word-wrap: break-word;
-    border-radius: 3px;
-    background-color:white;
     overflow-y: auto;
     overflow-x: hidden;
 }
@@ -938,7 +955,6 @@ table tr.table-header {
 .first_post{
     padding-left: 10px !important;
     margin-top: 0px !important;
-    border-radius: 0 !important;
 }
 
 .thread_box {
