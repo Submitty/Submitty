@@ -2,6 +2,7 @@
 
 namespace app\views\grading;
 
+use app\libraries\FileUtils;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Component;
