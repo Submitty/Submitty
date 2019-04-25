@@ -25,7 +25,7 @@
         <a class="btn btn-primary" style="position:absolute;right: 0px;top:3px;display:inline-block;" title="Merge Threads" onclick="$('#merge-threads').css('display', 'block');">Merge Threads</a>
     {% endif %}
     {% if show_lock_date and core.getUser().getGroup() <= 2 %}
-        <label  for="lock_thread_date" style="position:absolute;right: 0px;display:inline-block;margin: 0 2px"> Lock Thread date
+        <label id="label_lock_thread" for="lock_thread_date" style="position:absolute;right: 0px;display:inline-block;margin: 0 2px"> Lock Thread Date
             <input class="date_picker" placeholder="Lock Thread Date" name="lock_thread_date" id="lock_thread_date" type="text">
         </label>
         <script>
