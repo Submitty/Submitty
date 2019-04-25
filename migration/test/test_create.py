@@ -1,8 +1,10 @@
 """Test the create command."""
 
 from argparse import Namespace
+from io import StringIO
 from pathlib import Path
 import shutil
+import sys
 import tempfile
 import unittest
 
@@ -14,12 +16,15 @@ class TestCreate(unittest.TestCase):
 
     def setUp(self):
         """Set up the temp directory to use for the tests."""
+        self.stdout = sys.stdout
+        sys.stdout = StringIO()
         self.dir = tempfile.mkdtemp()
         self.old_path = migrator.MIGRATIONS_PATH
         migrator.MIGRATIONS_PATH = Path(self.dir)
 
     def tearDown(self):
         """Remove the temp directory we used for the tests."""
+        sys.stdout = self.stdout
         shutil.rmtree(self.dir)
         migrator.MIGRATIONS_PATH = self.old_path
 
@@ -66,6 +71,7 @@ def down({1}):
         parameter_text = """:param config: Object holding configuration details about Submitty
     :type config: migrator.config.Config"""
         self.create_test_runner(module_text, parameters, parameter_text, environment)
+        self.assertRegex(sys.stdout.getvalue(), r'Created migration: system\/[0-9]{14}_test.py')
 
     def test_create_master(self):
         """Test the create command for the master environment."""
@@ -77,6 +83,7 @@ def down({1}):
     :param database: Object for interacting with given database for environment
     :type database: migrator.db.Database"""
         self.create_test_runner(module_text, parameters, parameter_text, environment)
+        self.assertRegex(sys.stdout.getvalue(), r'Created migration: master\/[0-9]{14}_test.py')
 
     def test_create_course(self):
         """Test the create command for the course environment."""
@@ -92,6 +99,59 @@ def down({1}):
     :param course: Code of course being migrated
     :type course: str"""
         self.create_test_runner(module_text, parameters, parameter_text, environment)
+        self.assertRegex(sys.stdout.getvalue(), r'Created migration: course\/[0-9]{14}_test.py')
+
+    def test_create_master_and_system(self):
+        args = Namespace()
+        args.name = 'test'
+        args.environments = ['system', 'master']
+        for environment in args.environments:
+            Path(self.dir, environment).mkdir()
+        migrator.main.create(args)
+
+        for environment in args.environments:
+            found_files = 0
+            for entry in Path(self.dir, environment).iterdir():
+                with entry.open() as open_file:
+                    self.assertTrue(len(open_file.read()) > 0)
+                found_files += 1
+            self.assertEqual(1, found_files)
+
+        regex = r"""Created migration: master\/[0-9]{14}_test.py
+Created migration: system\/[0-9]{14}_test.py"""
+        self.assertRegex(sys.stdout.getvalue(), regex)
+
+    def test_create_all(self):
+        args = Namespace()
+        args.name = 'test'
+        args.environments = ['course', 'master', 'system']
+        for environment in args.environments:
+            Path(self.dir, environment).mkdir()
+        migrator.main.create(args)
+
+        for environment in args.environments:
+            found_files = 0
+            for entry in Path(self.dir, environment).iterdir():
+                with entry.open() as open_file:
+                    self.assertTrue(len(open_file.read()) > 0)
+                found_files += 1
+            self.assertEqual(1, found_files)
+
+        regex = r"""Created migration: master\/[0-9]{14}_test.py
+Created migration: system\/[0-9]{14}_test.py
+Created migration: course\/[0-9]{14}_test.py"""
+        self.assertRegex(sys.stdout.getvalue(), regex)
+
+    def test_create_bad_name(self):
+        args = Namespace()
+        args.name = 'invalid#!!!'
+        args.environments = ['system']
+        with self.assertRaises(ValueError) as cm:
+            migrator.main.create(args)
+        self.assertEqual(
+            "Invalid migration name (must only contain alphanumeric and _): invalid#!!!",
+            str(cm.exception)
+        )
 
 
 if __name__ == '__main__':
