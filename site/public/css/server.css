@@ -489,26 +489,20 @@ table tr.table-header {
 
 #footer a {
     color: #000000;
+    text-decoration: none;
 }
 
 #footer a:hover {
     color: #405E90;
 }
 
-#footer #copyright {
-    margin-right: 5px;
+#footer .footer_seperator {
+    padding-right: 8px;
+    padding-left: 8px;
 }
 
-#footer #github {
-    margin-left: 5px;
-}
-
-#copyright > a {
-    color: #405E90;
-}
-
-#copyright > a:hover {
-    text-decoration: underline;
+#footer .footer_link_icon {
+    padding-right: 4px;
 }
 
 .sub {
