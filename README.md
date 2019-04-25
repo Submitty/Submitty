@@ -1,4 +1,6 @@
-<img src="http://submitty.org/images/submitty_logo.png" alt="Submitty Logo" style="width: 500px;"/>
+<p align="center">
+  <img src="http://submitty.org/images/submitty_logo.png" alt="Submitty Logo" width="500px"/>
+</p>
 
 [![Build Status](https://travis-ci.com/Submitty/Submitty.svg?branch=master)](https://travis-ci.com/Submitty/Submitty)
 
