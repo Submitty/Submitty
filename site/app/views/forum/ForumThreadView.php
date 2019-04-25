@@ -1,10 +1,8 @@
 <?php
 namespace app\views\forum;
 
-use app\authentication\DatabaseAuthentication;
 use app\libraries\DateUtils;
 use app\views\AbstractView;
-use app\models\Course;
 use app\libraries\FileUtils;
 
 
@@ -161,7 +159,7 @@ HTML;
 		that have been created after applying filter and to be
 		displayed in the left panel.
 	*/
-	public function showForumThreads($user, $posts, $threadsHead, $show_deleted, $show_merged_thread, $display_option, $max_thread, $initialPageNumber) {
+	public function showForumThreads($user, $posts, $unviewed_posts, $threadsHead, $show_deleted, $show_merged_thread, $display_option, $max_thread, $initialPageNumber) {
 		if(!$this->forumAccess()){
 			$this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
 			return;
@@ -171,8 +169,9 @@ HTML;
 		$filteredThreadExists = (count($threadsHead)>0);
 		$currentThread = -1;
 		$currentCategoriesIds = array();
+		$show_deleted_thread_title = null;
 		$currentCourse = $this->core->getConfig()->getCourse();
-		$threadFiltering = $threadExists && !$filteredThreadExists && !(empty($_COOKIE[$currentCourse . '_forum_categories']) && empty($_COOKIE['forum_thread_status']));
+		$threadFiltering = $threadExists && !$filteredThreadExists && !(empty($_COOKIE[$currentCourse . '_forum_categories']) && empty($_COOKIE['forum_thread_status']) && empty($_COOKIE['unread_select_value']) === 'false');
 
 
 		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
@@ -244,7 +243,9 @@ HTML;
 
 	$cookieSelectedCategories = array();
 	$cookieSelectedThreadStatus = array();
+	$cookieSelectedUnread = false;
 	$category_ids_array = array_column($categories, 'category_id');
+
 	if(!empty($_COOKIE[$currentCourse . '_forum_categories'])) {
 		foreach(explode('|', $_COOKIE[$currentCourse . '_forum_categories']) as $selectedId) {
 			if(in_array((int)$selectedId, $category_ids_array)) {
@@ -258,6 +259,9 @@ HTML;
 				$cookieSelectedThreadStatus[] = $selectedStatus;
 			}
 		}
+	}
+	if(!empty($_COOKIE['unread_select_value'])){
+		$cookieSelectedUnread = $_COOKIE['unread_select_value'];
 	}
 
 	$default_button = array(
@@ -281,7 +285,17 @@ HTML;
 								"thread_exists" => true,
 								"show_more" => true
 	];
-
+		if($this->core->getUser()->accessGrading()){
+			if($show_deleted) {
+				$show_deleted_class = "active";
+				$show_deleted_action = "alterShowDeletedStatus(0);";
+      			$show_deleted_thread_title = "Hide Deleted Threads";
+			} else {
+				$show_deleted_class = "";
+				$show_deleted_action = "alterShowDeletedStatus(1);";
+      			$show_deleted_thread_title = "Show Deleted Threads";
+			}
+		}
         if(!$threadExists){
         $button_params["show_threads"] = false;
         $button_params["thread_exists"] = false;
@@ -345,25 +359,19 @@ HTML;
 					$return .= <<<HTML
 					<div style="position:relative; height:100%; overflow-y:hidden;" class="row">
 
-  						<div id="thread_list" style="max-height: 100%" class="col-3" prev_page="{$prev_page}" next_page="{$next_page}">
+						<div id="thread_list" style="overflow-y: auto; height:81vh;" class="col-3" prev_page="{$prev_page}" next_page="{$next_page}">
 						<i class="fas fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
 						<i class="fas fa-caret-up fa-2x fa-fw fill-available" style="color:gray;{$arrowup_visibility}" aria-hidden="true"></i>
 HTML;
 
 						$activeThreadAnnouncement = false;
 						$activeThreadTitle = "";
-						$function_date = 'date_format';
 						$activeThread = array();
 						$return .= $this->displayThreadList($threadsHead, false, $activeThreadAnnouncement, $activeThreadTitle, $activeThread, $currentThread, $currentCategoriesIds);
 						if(count($activeThread) == 0) {
 							$activeThread = $this->core->getQueries()->getThread($currentThread)[0];
 							$activeThreadTitle = $activeThread['title'];
 						}
-						$activeThreadTitle = htmlentities(html_entity_decode($activeThreadTitle, ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-
-						$thread_id = -1;
-						$userAccessToAnon = ($this->core->getUser()->getGroup() < 4) ? true : false;
-						$title_html = '';
 
 						$return .= <<<HTML
 						<i class="fas fa-caret-down fa-2x fa-fw fill-available" style="color:gray;" aria-hidden="true"></i>
@@ -378,11 +386,12 @@ HTML;
 							}
 						});
 					</script>
-					<div id="posts_list" style="margin-top:10px;max-height: 100%" class="col-9">
+					<div id="posts_list" style="overflow-y: auto; height:81vh;" class="col-9">
 HTML;
 
-		$currentThreadFavorite = array_values($currentThreadArr)[0]['favorite'];
-		$return .= $this->generatePostList($currentThread, $posts, $currentCourse, true, $threadExists, $display_option, $categories, $cookieSelectedCategories, $cookieSelectedThreadStatus, $currentCategoriesIds, $currentThreadFavorite);
+		$currentThreadArrValues = array_values($currentThreadArr);
+		$currentThreadFavorite = !empty($currentThreadArrValues) ? $currentThreadArrValues[0]['favorite'] : false;
+		$return .= $this->generatePostList($currentThread, $posts, $unviewed_posts, $currentCourse, true, $threadExists, $display_option, $categories, $cookieSelectedCategories, $cookieSelectedThreadStatus, $cookieSelectedUnread, $currentCategoriesIds, $currentThreadFavorite);
 
 		$return .= <<<HTML
 			<script>
@@ -398,18 +407,18 @@ HTML;
 
 		}
           
-
+		$this->core->getQueries()->visitThread($user, $activeThread['id']);
 		return $return;
 	}
 
-	public function generatePostList($currentThread, $posts, $currentCourse, $includeReply = false, $threadExists = false, $display_option = 'time', $categories = [], $cookieSelectedCategories = [], $cookieSelectedThreadStatus = [], $currentCategoriesIds = [], $isCurrentFavorite = false) {
+	public function generatePostList($currentThread, $posts, $unviewed_posts, $currentCourse, $includeReply = false, $threadExists = false, $display_option = 'time', $categories = [], $cookieSelectedCategories = [], $cookieSelectedThreadStatus = [], $cookieSelectedUnread = [], $currentCategoriesIds = [], $isCurrentFavorite = false) {
 
 		$return = '';
 		$title_html = '';
 
 		$activeThread = $this->core->getQueries()->getThread($currentThread)[0];
 
-		$activeThreadTitle = ($this->core->getUser()->getGroup() <= 2 ? "({$activeThread['id']}) " : '') . $activeThread['title'];
+		$activeThreadTitle = ($this->core->getUser()->accessFullGrading() ? "({$activeThread['id']}) " : '') . htmlentities($activeThread['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
 		$activeThreadAnnouncement = $activeThread['pinned'];
 
 		$thread_id = $activeThread['id'];
@@ -433,8 +442,7 @@ HTML;
 HTML;
                     } else if($this->core->getUser()->getGroup() <= 2 && !$activeThreadAnnouncement){
                         $title_html .= <<<HTML
-							<a style="position:relative; display:inline-block; color:orange; " onClick="alterAnnouncement({$activeThread['id']}, 'Are you sure you want to make this thread an announcement?', 'make_announcement')" title="Make thread an announcement"><i class="fas fa-star" title = "Make Announcement" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'gold')" style="position:relative; display:inline-block; color:#e0e0e0; -webkit-text-stroke-width: 1px;
-    -webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
+							<a style="position:relative; display:inline-block; color:orange; " onClick="alterAnnouncement({$activeThread['id']}, 'Are you sure you want to make this thread an announcement?', 'make_announcement')" title="Make thread an announcement"><i class="fas fa-star" title = "Make Announcement" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'gold')" style="position:relative; display:inline-block; color:#e0e0e0; -webkit-text-stroke-width: 1px; -webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
 HTML;
                     }
                     if($isCurrentFavorite) {
@@ -486,8 +494,7 @@ HTML;
 									} else {
 										$reply_level = $reply_level_array[$i];
 									}
-										
-									$return .= $this->createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level, $display_option, $includeReply);
+									$return .= $this->createPost($thread_id, $post, $unviewed_posts, $function_date, $title_html, $first, $reply_level, $display_option, $includeReply);
 									break;
 								}						
 							}
@@ -502,7 +509,7 @@ HTML;
 								$thread_id = $post["thread_id"];
 							}
                             $first_post_id = $this->core->getQueries()->getFirstPostForThread($thread_id)['id'];
-							$return .= $this->createPost($thread_id, $post, $function_date, $title_html, $first, 1, $display_option, $includeReply);		
+							$return .= $this->createPost($thread_id, $post, $unviewed_posts, $function_date, $title_html, $first, 1, $display_option, $includeReply);		
 							if($first){
 								$first= false;
 							}			
@@ -559,10 +566,10 @@ HTML;
 			"current_course" => $currentCourse,
 			"cookie_selected_categories" => $cookieSelectedCategories,
 			"cookie_selected_thread_status" => $cookieSelectedThreadStatus,
+			"cookie_selected_unread_value" => $cookieSelectedUnread,
 			"display_option" => $display_option,
 			"thread_exists" => $threadExists
 		]);
-
 		return $return;
 	}
 
@@ -578,12 +585,12 @@ HTML;
 					$used_active = false; //used for the first one if there is not thread_id set
 					$current_user = $this->core->getUser()->getId();
 					$display_thread_ids = $this->core->getUser()->getGroup() <= 2;
-					$start = 0;
+
 					$activeThreadAnnouncement = false;
 					$activeThreadTitle = "";
 					$function_date = 'date_format';
 					$activeThread = array();
-					$end = 10;
+
 					foreach($threads as $thread){
 						$first_post = $this->core->getQueries()->getFirstPostForThread($thread["id"]);
 						if(is_null($first_post)) {
@@ -611,16 +618,14 @@ HTML;
 							if($thread_id_p == -1)
 								$thread_id_p = $thread["id"];
 						}
-						if($this->core->getQueries()->viewedThread($current_user, $thread["id"])){
-							$class .= " viewed";
+						if(!$this->core->getQueries()->viewedThread($current_user, $thread["id"])){
+							$class .= " new_thread";
 						}
 						if($thread["deleted"]) {
 							$class .= " deleted";
 						}
-
 						//fix legacy code
 						$titleDisplay = html_entity_decode($thread['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-						$first_post_content = html_entity_decode($first_post['content'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
 						//replace tags from displaying in sidebar
 						$first_post_content = str_replace("[/code]", "", str_replace("[code]", "", strip_tags($first_post["content"])));
@@ -651,16 +656,14 @@ HTML;
 							$icon = '<i class="fas fa-comments"></i> ';
 							$titleDisplay = $icon . $titleDisplay;
 						}
-						$first_post_content = htmlentities($first_post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
 						$return .= <<<HTML
 						<a href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread['id']))}">
 						<div class="{$class}">
 HTML;
 						if($thread["pinned"] == true){
 							$return .= <<<HTML
-
-							<i class="fas fa-star" style="padding-left:3px;position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
-    -webkit-text-stroke-color: black;" title = "Announcement" aria-hidden="true"></i>
+							<i class="fas fa-star" style="padding-left:3px;position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px; -webkit-text-stroke-color: black;" title = "Announcement" aria-hidden="true"></i>
 HTML;
 						}
 						if(isset($thread['favorite']) && $thread['favorite']) {
@@ -751,7 +754,7 @@ HTML;
 				if(!empty($pre_post)){
 					$post_content = $pre_post;
 				}
-				$pre_post = "";
+
 				$pos++;
 			}
 		}
@@ -768,10 +771,10 @@ HTML;
 		return $post_content;
 	}
 
-	public function createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level, $display_option, $includeReply){
+	public function createPost($thread_id, $post, $unviewed_posts, $function_date, $title_html, $first, $reply_level, $display_option, $includeReply){
 		$current_user = $this->core->getUser()->getId();
-		$post_html = "";
 		$post_id = $post["id"];
+
 		$thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
 
 		$date = DateUtils::parseDateTime($post["timestamp"], $this->core->getConfig()->getTimezone());
@@ -798,7 +801,11 @@ HTML;
 		if($first && $display_option != 'alpha'){
 			$classes .= " first_post";
 		}
-
+		if(in_array($post_id, $unviewed_posts)){
+			$classes .= " new_post";
+		} else {
+			$classes .= " viewed_post";
+		}
 		if($this->core->getQueries()->isStaffPost($post["author_user_id"])){
 			$classes .= " important";
 		}
@@ -833,23 +840,23 @@ HTML;
 		if($display_option == 'tree'){
 			if(!$first){
 				$return .= <<<HTML
-					<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="replyPost({$post['id']})"> Reply</a>
+					<a class="btn btn-default btn-sm post_button_color" style=" text-decoration: none;" onClick="replyPost({$post['id']})"> Reply</a>
 HTML;
 			} else {
 				$return .= <<<HTML
-					<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="$('html, #posts_list').animate({ scrollTop: document.getElementById('posts_list').scrollHeight }, 'slow');"> Reply</a>
+					<a class="btn btn-default btn-sm post_button_color" style=" text-decoration: none;" onClick="$('html, #posts_list').animate({ scrollTop: document.getElementById('posts_list').scrollHeight }, 'slow');"> Reply</a>
 HTML;
 			}
 			if($this->core->getUser()->getGroup() <= 3) {
 				$return .= <<<HTML
-					<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="showHistory({$post['id']})">Show History</a>
+					<a class="btn btn-default btn-sm post_button_color" style=" text-decoration: none;" onClick="showHistory({$post['id']})">Show History</a>
 HTML;
 			}
 		}
 		if($includeReply && ($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) && $first && $thread_resolve_state == -1) {
 			//resolve button
 			$return .= <<<HTML
-				<a class="btn btn-default btn-sm" style="text-decoration: none;" onClick="changeThreadStatus({$post['thread_id']})" title="Mark thread as resolved">Mark as resolved</a>
+				<a class="btn btn-default btn-sm post_button_color" style="text-decoration: none;" onClick="changeThreadStatus({$post['thread_id']})" title="Mark thread as resolved">Mark as resolved</a>
 HTML;
 		}
 		$return .= <<<HTML
@@ -873,7 +880,7 @@ HTML;
 }
 		if(!$first){
 			$return .= <<<HTML
-				<a class="expand btn btn-default btn-sm" style="float:right; text-decoration:none; margin-top: -8px" onClick="hidePosts(this, {$post['id']})"></a>
+				<a class="expand btn btn-default btn-sm post_button_color" style="float:right; text-decoration:none; margin-top: -8px" onClick="hidePosts(this, {$post['id']})"></a>
 HTML;
 		}
 		if($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) {
@@ -892,7 +899,6 @@ HTML;
 		}
 		if($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) {
 			$shouldEditThread = null;
-			$edit_button_title = "";
 			if($first) {
 				$shouldEditThread = "true";
 				$edit_button_title = "Edit thread and post";
@@ -928,7 +934,7 @@ HTML;
 				$name = rawurlencode($file['name']);
 				$name_display = htmlentities(rawurldecode($file['name']), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 				$return .= <<<HTML
-					<a href="#" style="text-decoration:none;display:inline-block;white-space: nowrap;" class="btn-default btn-sm" onclick="openFileForum('forum_attachments', '{$name}', '{$path}')" > {$name_display} </a>
+					<a href="#" style="text-decoration:none;display:inline-block;white-space: nowrap;" class="btn-default btn-sm post_button_color" onclick="openFileForum('forum_attachments', '{$name}', '{$path}')" > {$name_display} </a>
 HTML;
 			}					
 		}
