@@ -291,12 +291,18 @@ class UsersController extends AbstractController {
         }
 
         if (!isset($_REQUEST['sort_type'])) {
-            $this->core->addErrorMessage("Must select one of the three options for setting up rotating sections");
+            $this->core->addErrorMessage("Must select one of the four options for setting up rotating sections");
             $this->core->redirect($return_url);
         }
         else if ($_REQUEST['sort_type'] === "drop_null") {
             $this->core->getQueries()->setNonRegisteredUsersRotatingSectionNull();
             $this->core->addSuccessMessage("Non registered students removed from rotating sections");
+            $this->core->redirect($return_url);
+        }
+        else if ($_REQUEST['sort_type'] === "drop_all") {
+            $this->core->getQueries()->setAllUsersRotatingSectionNull();
+            $this->core->getQueries()->setAllTeamsRotatingSectionNull();
+            $this->core->addSuccessMessage("All students removed from rotating sections");
             $this->core->redirect($return_url);
         }
 

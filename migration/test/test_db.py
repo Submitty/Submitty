@@ -1,3 +1,5 @@
+import shutil
+import tempfile
 import unittest
 import migrator.db
 
@@ -30,6 +32,47 @@ class TestDb(unittest.TestCase):
     def test_get_migration_table(self):
         table = migrator.db.get_migration_table('system', object)
         self.assertEqual('migrations_system', table.__tablename__)
+
+    def test_get_connection_string_sqlite(self):
+        params = {
+            'database_driver': 'sqlite'
+        }
+        string = migrator.db.Database.get_connection_string(params)
+        self.assertEqual('sqlite://', string)
+
+    def test_get_connection_string_postgresql(self):
+        params = {
+            'database_driver': 'psql',
+            'database_host': 'localhost',
+            'database_user': 'user',
+            'database_password': 'password',
+            'dbname': 'test'
+        }
+        string = migrator.db.Database.get_connection_string(params)
+        self.assertEqual('postgresql+psycopg2://user:password@localhost/test', string)
+
+    def test_get_connection_string_postgresql_str_host(self):
+        try:
+            host = tempfile.mkdtemp()
+            params = {
+                'database_driver': 'psql',
+                'database_host': host,
+                'database_user': 'user',
+                'database_password': 'password',
+                'dbname': 'test'
+            }
+            string = migrator.db.Database.get_connection_string(params)
+            self.assertEqual(
+                'postgresql+psycopg2://user:password@/test?host={}'.format(host),
+                string
+            )
+        finally:
+            shutil.rmtree(host)
+
+    def test_invalid_connection_string(self):
+        with self.assertRaises(RuntimeError) as cm:
+            migrator.db.Database.get_connection_string({'database_driver': 'invalid'})
+        self.assertEqual('Invalid driver: invalid', str(cm.exception))
 
 
 if __name__ == '__main__':
