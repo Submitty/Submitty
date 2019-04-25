@@ -187,7 +187,7 @@ HTML;
 		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}vendor/codemirror/mode/shell/shell.js"></script>
 		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}vendor/jquery.are-you-sure/jquery.are-you-sure.js"></script>
-		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}vendor/bootstrap/js/bootstrap.min.js"></script>
+		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 		<style>body {min-width: 925px;}</style>
 
 
