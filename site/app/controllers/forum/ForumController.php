@@ -5,7 +5,6 @@ namespace app\controllers\forum;
 use app\libraries\Core;
 use app\models\Notification;
 use app\controllers\AbstractController;
-use app\libraries\Output;
 use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\libraries\DateUtils;
@@ -487,7 +486,6 @@ class ForumController extends AbstractController {
         }
         if($modifyType == 0) { //delete post or thread
             $thread_id = $_POST["thread_id"];
-            $type = "";
             if($this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 1)){
                 $type = "thread";
             } else {
@@ -502,7 +500,6 @@ class ForumController extends AbstractController {
             return $this->core->getOutput()->getOutput();
         } else if($modifyType == 2) { //undelete post or thread
             $thread_id = $_POST["thread_id"];
-            $type = "";
             $result = $this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 0);
             if(is_null($result)) {
                 $error = "Parent post must be undeleted first.";
@@ -611,14 +608,15 @@ class ForumController extends AbstractController {
         return null;
     }
 
-    private function getSortedThreads($categories_ids, $max_thread, $show_deleted, $show_merged_thread, $thread_status, &$blockNumber, $thread_id = -1){
+    private function getSortedThreads($categories_ids, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, &$blockNumber, $thread_id = -1){
         $current_user = $this->core->getUser()->getId();
         if(!$this->isValidCategories($categories_ids)) {
             // No filter for category
             $categories_ids = array();
         }
 
-        $thread_block = $this->core->getQueries()->loadThreadBlock($categories_ids, $thread_status, $show_deleted, $show_merged_thread, $current_user, $blockNumber, $thread_id);
+        $thread_block = $this->core->getQueries()->loadThreadBlock($categories_ids, $thread_status, $unread_threads, $show_deleted, $show_merged_thread, $current_user, $blockNumber, $thread_id);
+
         $ordered_threads = $thread_block['threads'];
         $blockNumber = $thread_block['block_number'];
 
@@ -641,6 +639,7 @@ class ForumController extends AbstractController {
         $show_merged_thread = $this->showMergedThreads($currentCourse);
         $categories_ids = array_key_exists('thread_categories', $_POST) && !empty($_POST["thread_categories"]) ? explode("|", $_POST['thread_categories']) : array();
         $thread_status = array_key_exists('thread_status', $_POST) && ($_POST["thread_status"] === "0" || !empty($_POST["thread_status"])) ? explode("|", $_POST['thread_status']) : array();
+        $unread_threads = ($_POST["unread_select"] === 'true');
         if(empty($categories_ids) && !empty($_COOKIE[$currentCourse . '_forum_categories'])){
             $categories_ids = explode("|", $_COOKIE[$currentCourse . '_forum_categories']);
         }
@@ -654,12 +653,9 @@ class ForumController extends AbstractController {
             $status = (int)$status;
         }
         $max_thread = 0;
-        $threads = $this->getSortedThreads($categories_ids, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $pageNumber, -1);
+        $threads = $this->getSortedThreads($categories_ids, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, -1);
         $currentCategoriesIds = (!empty($_POST['currentCategoriesId'])) ? explode("|", $_POST["currentCategoriesId"]) : array();
         $currentThreadId = array_key_exists('currentThreadId', $_POST) && !empty($_POST["currentThreadId"]) && is_numeric($_POST["currentThreadId"]) ? (int)$_POST["currentThreadId"] : -1;
-        $thread_data = array();
-        $current_thread_title = "";
-        $activeThread = false;
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'showAlteredDisplayList', $threads, true, $currentThreadId, $currentCategoriesIds);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
@@ -676,11 +672,16 @@ class ForumController extends AbstractController {
         $category_id = in_array('thread_category', $_POST) ? $_POST['thread_category'] : -1;
         $category_id = array($category_id);
         $thread_status = array();
+        $new_posts = array();
+        $unread_threads = false;
         if(!empty($_COOKIE[$currentCourse . '_forum_categories']) &&  $category_id[0] == -1 ) {
             $category_id = explode('|', $_COOKIE[$currentCourse . '_forum_categories']);
         }
         if(!empty($_COOKIE['forum_thread_status'])){
             $thread_status = explode("|", $_COOKIE['forum_thread_status']);
+        }
+        if(!empty($_COOKIE['unread_select_value'])){
+            $unread_threads = ($_COOKIE['unread_select_value'] === 'true');
         }
         foreach ($category_id as &$id) {
             $id = (int)$id;
@@ -705,6 +706,10 @@ class ForumController extends AbstractController {
         if(!empty($_REQUEST["thread_id"])){
             $thread_id = (int)$_REQUEST["thread_id"];
             $this->core->getQueries()->markNotificationAsSeen($user, -2, (string)$thread_id);
+            $unread_p = $this->core->getQueries()->getUnviewedPosts($thread_id, $current_user);
+            foreach ($unread_p as $up) {
+                $new_posts[] = $up["id"];
+            }
             $thread = $this->core->getQueries()->getThread($thread_id);
             if(!empty($thread)) {
                 $thread = $thread[0];
@@ -726,6 +731,7 @@ class ForumController extends AbstractController {
 
         }
         if(empty($_REQUEST["thread_id"]) || empty($posts)) {
+            $new_posts = $this->core->getQueries()->getUnviewedPosts(-1, $current_user);
             $posts = $this->core->getQueries()->getPostsForThread($current_user, -1, $show_deleted);
         }
         $thread_id = -1;
@@ -733,9 +739,9 @@ class ForumController extends AbstractController {
             $thread_id = $posts[0]["thread_id"];
         }
         $pageNumber = 0;
-        $threads = $this->getSortedThreads($category_id, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $pageNumber, $thread_id);
+        $threads = $this->getSortedThreads($category_id, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, $thread_id);
 
-        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber);
+        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber);
     }
 
     private function getAllowedCategoryColor() {
@@ -822,10 +828,8 @@ class ForumController extends AbstractController {
     }
 
     public function showStats(){
-        $posts = array();
         $posts = $this->core->getQueries()->getPosts();
         $num_posts = count($posts);
-        $num_threads = 0;
         $users = array();
         for($i=0;$i<$num_posts;$i++){
             $user = $posts[$i]["author_user_id"];
