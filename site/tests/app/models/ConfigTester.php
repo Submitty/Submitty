@@ -243,7 +243,6 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'username_change_text' => 'Submitty welcomes all students.',
             'vcs_url' => 'http://example.com/{$vcs_type}/',
             'wrapper_files' => [],
-            'footer_links' => [],
             'system_message' => 'Some system message'
         );
         $actual = $config->toArray();

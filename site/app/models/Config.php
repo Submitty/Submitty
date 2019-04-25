@@ -52,7 +52,6 @@ use app\libraries\Utils;
  * @method string getRoomSeatingGradeableId()
  * @method bool isSeatingOnlyForInstructor()
  * @method array getCourseJson()
- * @method array getFooterLinks()
  */
 
 class Config extends AbstractModel {
@@ -184,9 +183,6 @@ class Config extends AbstractModel {
     /** @property @var string|null */
     protected $room_seating_gradeable_id;
 
-    /** @property @var array */
-    protected $footer_links = array();
-
     /**
      * Config constructor.
      *
@@ -295,31 +291,6 @@ class Config extends AbstractModel {
 
         if (!empty($this->semester) && !empty($this->course)) {
             $this->course_path = FileUtils::joinPaths($this->submitty_path, "courses", $this->semester, $this->course);
-        }
-
-        // Get additional links to display in the global footer.
-        $footer_links_json_file = FileUtils::joinPaths($this->config_path, "footer_links.json");
-        if (file_exists($footer_links_json_file)) {
-            $data = file_get_contents($footer_links_json_file);
-            if ($data !== false) {
-                $footer_links_json_data = json_decode($data, true);
-                // Validate that every footer link ($row) has required columns: 'url' and 'title'.
-                // $row can also have an 'icon' column, but it is optional.
-                foreach ($footer_links_json_data as $row) {
-                    switch (false) {
-                    case array_key_exists('url', $row):
-                    case array_key_exists('title', $row):
-                        //Validation fail.  Exclude $row.
-                        continue;
-                    default:
-                        //Validation OK.  Include $row.
-                        if (isset($row['icon']) && !Utils::startsWith($row['icon'], "fa-")) {
-                            $row['icon'] = "fa-" . $row['icon'];
-                        }
-                        $this->footer_links[] = $row;
-                    }
-                }
-            }
         }
     }
 

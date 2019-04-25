@@ -607,7 +607,8 @@ CREATE TABLE "student_favorites" (
 CREATE TABLE "viewed_responses" (
 	"thread_id" int NOT NULL,
 	"user_id" character varying NOT NULL,
-	"timestamp" timestamp with time zone NOT NULL
+	"timestamp" timestamp with time zone NOT NULL,
+    CONSTRAINT viewed_responses_pk PRIMARY KEY ("thread_id", "user_id")
 );
 
 

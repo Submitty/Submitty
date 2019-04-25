@@ -1303,16 +1303,19 @@ class ElectronicGraderController extends GradingController {
             $ta_graded_gradeable->deleteGradedComponent($graded_component->getComponent(), $graded_component->getGrader());
             $graded_component = null;
         }
+        else{
+
+            //change the component to be unverified after changing a mark
+            if($graded_component->isMarksModified()){
+                $graded_component->setVerifier();
+                $graded_component->setVerifyTime(null);
+            }
+        }
 
         // TODO: is this desirable
         // Reset the user viewed date since we updated the grade
         $ta_graded_gradeable->resetUserViewedDate();
 
-        //change the component to be unverified after changing a mark
-        if($graded_component->isMarksModified()){
-            $graded_component->setVerifier();
-            $graded_component->setVerifyTime(null);
-        }
         // Finally, save the changes to the database
         $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
     }
