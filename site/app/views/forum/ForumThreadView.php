@@ -37,7 +37,7 @@ HTML;
 			array(
 			"required_rank" => 4,
 			"display_text" => 'Create Thread',
-			"style" => 'position:relative;top:3px;',
+			"style" => 'position:relative;float:right;top:3px;',
 			"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))),
 			"optional_class" => '',
 			"title" => 'Create Thread',
@@ -46,7 +46,7 @@ HTML;
 			array(
 				"required_rank" => 4,
 				"display_text" => 'Back to Threads',
-				"style" => 'position:relative;top:3px;',
+				"style" => 'position:relative;float:right;top:3px;margin-right:5px;',
 				"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))),
 				"optional_class" => '',
 				"title" => 'Back to threads',
@@ -56,9 +56,11 @@ HTML;
 		);
 
 		$return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", [
-									"forum_bar_buttons" => $buttons,
+									"forum_bar_buttons_right" => $buttons,
+									"forum_bar_buttons_left" => [],
 									"show_threads" => false,
-									"thread_exists" => true
+									"thread_exists" => true,
+									"show_more" => false
 		]);
 
 		$return .= <<<HTML
@@ -185,6 +187,7 @@ HTML;
 		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/shell.js"></script>
 		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/jquery.are-you-sure.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 		<style>body {min-width: 925px;}</style>
 
 
@@ -265,7 +268,7 @@ HTML;
 		array(
 			"required_rank" => 4,
 			"display_text" => 'Create Thread',
-			"style" => 'position:relative;top:3px;',
+			"style" => 'float:right;position:relative;top:3px;',
 			"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))),
 			"optional_class" => '',
 			"title" => 'Create Thread',
@@ -276,9 +279,11 @@ HTML;
 
 	$button_params = [
 								"current_thread" => $currentThread,
-								"forum_bar_buttons" => $default_button,
+								"forum_bar_buttons_right" => $default_button,
+								"forum_bar_buttons_left" => [],
 								"show_threads" => true,
-								"thread_exists" => true
+								"thread_exists" => true,
+								"show_more" => true
 	];
 		if($this->core->getUser()->accessGrading()){
 			if($show_deleted) {
@@ -299,47 +304,54 @@ HTML;
 						<h4 style="text-align:center;">A thread hasn't been created yet. Be the first to do so!</h4>
 				</div>
 HTML;
-		} else {
+		} else {	
+
+			$more_data = array(
+					array(
+							"filter_option" => $display_option
+					),
+					array(
+							"display_text" => $show_merged_thread_title,
+							"id" => 'merge_thread',
+							"optional_class" => array(!empty($show_merged_thread_class), $show_merged_thread_class),
+							"title" => $show_merged_thread_title,
+							"onclick" => array(true, $show_merged_thread_action),
+							"link" => '#',
+							"required_rank" => 4
+						),
+					array(
+							"display_text" => $show_deleted_thread_title,
+							"optional_class" => array(!empty($show_deleted_class), $show_deleted_class),
+							"id" => 'delete',
+							"title" => $show_deleted_thread_title,
+							"link" => '#',
+							"onclick" => array(true, $show_deleted_action),
+							"required_rank" => 3
+						),
+					array(
+							"display_text" => 'Stats',
+							"id" => 'forum_stats',
+							"optional_class" => array(false, ''),
+							"title" => 'Forum Statistics',
+							"onclick" => array(false, ''),
+							"link" => $this->core->buildUrl(['component' => 'forum', 'page' => 'show_stats']),
+							"required_rank" => 2
+						)
+			);
+
 			$other_buttons = array(
 						array(
 							"required_rank" => 4,
-							"display_text" => $show_merged_thread_title,
-							"style" => 'position:relative;top:3px;display:inline-block;',
-							"link" => array(false),
-							"optional_class" => $show_merged_thread_class,
-							"title" => $show_merged_thread_title,
-							"onclick" => array(true, $show_merged_thread_action)
-						),
-						array(
-
-							"required_rank" => 3,
-							"display_text" => $show_deleted_thread_title,
-							"style" => 'position:relative;top:3px;display:inline-block;',
-							"link" => array(false),
-							"optional_class" => $show_deleted_class,
-							"title" => $show_deleted_thread_title,
-							"onclick" => array(true, $show_deleted_action)
-						),
-						array(
-							"required_rank" => 2,
-							"display_text" => 'Stats',
-							"style" => 'position:relative;top:3px;display:inline-block;',
-							"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))),
-							"optional_class" => '',
-							"title" => 'Show Stats',
-							"onclick" => array(true, 'resetScrollPosition();')
-						),
-						array(
-							"required_rank" => 4,
 							"display_text" => 'Filter',
-							"style" => 'position:relative;top:3px;display:inline-block;',
+							"style" => 'display:inline-block;',
 							"link" => array(false),
 							"optional_class" => '',
 							"title" => 'Filter Threads based on Categories',
 							"onclick" => array(true, "$('#category_wrapper').css('display','block');")
 						)
 			);
-					$button_params["forum_bar_buttons"] = array_merge($default_button, $other_buttons);
+					$button_params["more_data"] = $more_data;
+					$button_params["forum_bar_buttons_left"] = $other_buttons;
 					$return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", $button_params);
 					$next_page = $initialPageNumber + 1;
 					$prev_page = ($initialPageNumber == 1)?0:($initialPageNumber - 1);
@@ -992,7 +1004,7 @@ HTML;
 		array(
 			"required_rank" => 4,
 			"display_text" => 'Back to Threads',
-			"style" => 'position:relative;top:3px;',
+			"style" => 'position:relative;top:3px;float:right;',
 			"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))),
 			"optional_class" => '',
 			"title" => 'Back to threads',
@@ -1002,22 +1014,12 @@ HTML;
 
 	$thread_exists = $this->core->getQueries()->threadExists();
 
-	if($thread_exists) {
-		$buttons = array_merge($buttons, array(
-			"required_rank" => 2,
-			"display_text" => 'Stats',
-			"style" => 'position:relative;top:3px;display:inline-block;',
-			"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))),
-			"optional_class" => '',
-			"title" => 'Show Stats',
-			"onclick" => array(true, 'resetScrollPosition();')
-		));
-	}
-
 	$return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", [
-								"forum_bar_buttons" => $buttons,
+								"forum_bar_buttons_right" => $buttons,
+								"forum_bar_buttons_left" => [],
 								"show_threads" => false,
-								"thread_exists" => $thread_exists
+								"thread_exists" => $thread_exists,
+								"show_more" => false
 	]);
 
 
@@ -1076,7 +1078,7 @@ HTML;
 			array(
 				"required_rank" => 4,
 				"display_text" => 'Back to Threads',
-				"style" => 'position:relative;top:3px;',
+				"style" => 'position:relative;float:right;top:3px;',
 				"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))),
 				"optional_class" => '',
 				"title" => 'Back to threads',
@@ -1087,7 +1089,8 @@ HTML;
 		$thread_exists = $this->core->getQueries()->threadExists();
 
 		$return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", [
-									"forum_bar_buttons" => $buttons,
+									"forum_bar_buttons_right" => $buttons,
+									"forum_bar_buttons_left" => [],
 									"show_threads" => false,
 									"thread_exists" => $thread_exists
 		]);
