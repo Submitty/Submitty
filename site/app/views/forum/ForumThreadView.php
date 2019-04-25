@@ -198,6 +198,10 @@ HTML;
 			    enableTabsInTextArea('.post_content_reply');
 				saveScrollLocationOnRefresh('posts_list');
 				addCollapsable();
+				var b = $('#nav-buttons li a');
+				$.each(b, function(e) {
+					$(b[e]).tooltip('disable').attr('title', $(b[e]).attr('data-original-title'));
+				});
 				$('#{$display_option}').attr('checked', 'checked'); //Saves the radiobutton state when refreshing the page
 				$(".post_reply_from").submit(publishPost);
 				$("form").areYouSure();
