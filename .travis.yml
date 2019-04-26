@@ -184,7 +184,9 @@ jobs:
         - pip3 install pause
         - pip3 install paramiko
         - pip3 install psutil
-        - wget https://chromedriver.storage.googleapis.com/2.46/chromedriver_linux64.zip
+        - CHROME_VERSION=$(google-chrome --version | egrep -o -e '[0-9]+\.[0-9]+\.[0-9]+')
+        - CHROME_DRIVER_VERSION=$(curl -L https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION})
+        - wget https://chromedriver.storage.googleapis.com/${CHROME_DRIVER_VERSION}/chromedriver_linux64.zip
         - unzip chromedriver_linux64.zip
         - sudo chmod u+x chromedriver
         - sudo mv chromedriver /usr/bin/
