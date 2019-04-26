@@ -1,0 +1,213 @@
+{
+    "autograding": {
+        "compilation_to_runner": [
+            "**/*.out",
+            "**/*.class"
+        ],
+        "compilation_to_validation": [
+            "test*/STDOUT*.txt",
+            "test*/STDERR*.txt"
+        ],
+        "submission_to_compilation": [
+            "**/*.cpp",
+            "**/*.cxx",
+            "**/*.c",
+            "**/*.h",
+            "**/*.hpp",
+            "**/*.hxx",
+            "**/*.java"
+        ],
+        "submission_to_runner": [
+            "**/*.py",
+            "**/*.pdf"
+        ],
+        "submission_to_validation": [
+            "**/README.txt",
+            "textbox_*.txt",
+            "**/*.pdf"
+        ],
+        "use_checkout_subdirectory": "",
+        "work_to_details": [
+            "test*/*.txt",
+            "test*/*_diff.json",
+            "**/README.txt",
+            "textbox_*.txt",
+            "test*/textbox_*.txt",
+            "test01/STDOUT_0.txt",
+            "test01/STDOUT_1.txt",
+            "test01/STDOUT_2.txt",
+            "test01/STDERR_0.txt",
+            "test01/STDERR_1.txt",
+            "test01/STDERR_2.txt",
+            "test02/STDOUT_0.txt",
+            "test02/STDOUT_1.txt",
+            "test02/STDOUT_2.txt",
+            "test02/STDERR_0.txt",
+            "test02/STDERR_1.txt",
+            "test02/STDERR_2.txt"
+        ]
+    },
+    "autograding_method": "jailed_sandbox",
+    "container_options": {
+        "container_image": "ubuntu:custom",
+        "single_port_per_container": false,
+        "use_router": false
+    },
+    "testcases": [
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "python *.py",
+                        "python *.py",
+                        "python *.py"
+                    ],
+                    "container_image": "ubuntu:custom",
+                    "container_name": "container0",
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [],
+            "points": 10,
+            "pre_commands": [],
+            "single_port_per_container": false,
+            "title": "Python - Simple Grading",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "STDOUT_0.txt",
+                    "command": "python3 validator.py",
+                    "deduction": 0.333333343267441,
+                    "description": "Custom Validator Output",
+                    "method": "custom_validator",
+                    "show_actual": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDOUT_1.txt",
+                    "command": "python3 validator.py",
+                    "deduction": 0.333333343267441,
+                    "description": "Custom Validator Output",
+                    "method": "custom_validator",
+                    "show_actual": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDOUT_2.txt",
+                    "command": "python3 validator.py",
+                    "deduction": 0.333333343267441,
+                    "description": "Custom Validator Output",
+                    "method": "custom_validator",
+                    "show_actual": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDERR_0.txt",
+                    "deduction": 0.0,
+                    "description": "syntax error output from running python",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDERR_1.txt",
+                    "deduction": 0.0,
+                    "description": "syntax error output from running python",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDERR_2.txt",
+                    "deduction": 0.0,
+                    "description": "syntax error output from running python",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "python *.py",
+                        "python *.py",
+                        "python *.py"
+                    ],
+                    "container_image": "ubuntu:custom",
+                    "container_name": "container0",
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [],
+            "points": 10,
+            "pre_commands": [],
+            "single_port_per_container": false,
+            "title": "ANOTHER ONE",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "STDOUT_0.txt",
+                    "command": "python3 validator.py",
+                    "deduction": 0.333333343267441,
+                    "description": "Custom Validator Output",
+                    "method": "custom_validator",
+                    "show_actual": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDOUT_1.txt",
+                    "command": "python3 validator.py",
+                    "deduction": 0.333333343267441,
+                    "description": "Custom Validator Output",
+                    "method": "custom_validator",
+                    "show_actual": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDOUT_2.txt",
+                    "command": "python3 validator.py",
+                    "deduction": 0.333333343267441,
+                    "description": "Custom Validator Output",
+                    "method": "custom_validator",
+                    "show_actual": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDERR_0.txt",
+                    "deduction": 0.0,
+                    "description": "syntax error output from running python",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDERR_1.txt",
+                    "deduction": 0.0,
+                    "description": "syntax error output from running python",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDERR_2.txt",
+                    "deduction": 0.0,
+                    "description": "syntax error output from running python",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "max_submissions": 20,
+            "penalty": -0.1,
+            "points": -5,
+            "title": "Submission Limit",
+            "type": "FileCheck"
+        }
+    ]
+}
