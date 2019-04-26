@@ -2,9 +2,7 @@
 #include <set>
 #include <sys/stat.h>
 #include "TestCase.h"
-#include "JUnitGrader.h"
-#include "DrMemoryGrader.h"
-#include "PacmanGrader.h"
+#include "dispatch.h"
 #include "myersDiff.h"
 #include "tokenSearch.h"
 #include "execute.h"
@@ -32,12 +30,12 @@ int resident_set_size(int childPID);
 
 void adjust_test_case_limits(nlohmann::json &modified_test_case_limits,
                              int rlimit_name, rlim_t value) {
-  
+
   std::string rlimit_name_string = rlimit_name_decoder(rlimit_name);
-  
+
   // first, see if this quantity already has a value
   nlohmann::json::iterator t_itr = modified_test_case_limits.find(rlimit_name_string);
-  
+
   if (t_itr == modified_test_case_limits.end()) {
     // if it does not, add it
     modified_test_case_limits[rlimit_name_string] = value;
@@ -56,7 +54,7 @@ std::vector<std::string> stringOrArrayOfStrings(nlohmann::json j, const std::str
   if (itr == j.end())
     return answer;
   if (itr->is_string()) {
-    answer.push_back(*itr);    
+    answer.push_back(*itr);
   } else {
     assert (itr->is_array());
     nlohmann::json::const_iterator itr2 = itr->begin();
@@ -75,7 +73,7 @@ std::vector<nlohmann::json> mapOrArrayOfMaps(nlohmann::json j, const std::string
   if (itr == j.end())
     return answer;
   if (!itr->is_array()) {
-    answer.push_back(*itr);    
+    answer.push_back(*itr);
   } else {
     assert (itr->is_array());
     nlohmann::json::const_iterator itr2 = itr->begin();
@@ -91,7 +89,7 @@ std::vector<nlohmann::json> mapOrArrayOfMaps(nlohmann::json j, const std::string
 void fileStatus(const std::string &filename, bool &fileExists, bool &fileEmpty) {
   struct stat st;
   if (stat(filename.c_str(), &st) < 0) {
-    // failure 
+    // failure
     fileExists = false;
   }
   else {
@@ -114,7 +112,7 @@ bool getFileContents(const std::string &filename, std::string &file_contents) {
 }
 
 
-bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &student_file_contents, 
+bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &student_file_contents,
                      std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > &messages) {
 
   std::vector<std::string> filenames = stringOrArrayOfStrings(j,"actual_file");
@@ -160,7 +158,7 @@ bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &s
 }
 
 
-bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &expected_file_contents, 
+bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &expected_file_contents,
                       std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > &messages) {
 
   std::string filename = j.value("expected_file","");
@@ -181,72 +179,30 @@ bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &
   return true;
 }
 
-
-TestResults* intComparison_doit (const TestCase &tc, const nlohmann::json& j) {
-  std::string student_file_contents;
-  std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > error_messages;
-  if (!openStudentFile(tc,j,student_file_contents,error_messages)) {
-    return new TestResults(0.0,error_messages);
-  }
-  if (student_file_contents.size() == 0) {
-    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR!  FILE EMPTY")});
-  }
-  try {
-    int value = std::stoi(student_file_contents);
-    std::cout << "DONE STOI " << value << std::endl;
-    nlohmann::json::const_iterator itr = j.find("term");
-    if (itr == j.end() || !itr->is_number()) {
-      return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"ERROR!  integer \"term\" not specified")});
-    }
-    int term = (*itr);
-    std::string cmpstr = j.value("comparison","MISSING COMPARISON");
-    bool success;
-    if (cmpstr == "eq")      success = (value == term);
-    else if (cmpstr == "ne") success = (value != term);
-    else if (cmpstr == "gt") success = (value > term);
-    else if (cmpstr == "lt") success = (value < term);
-    else if (cmpstr == "ge") success = (value >= term);
-    else if (cmpstr == "le") success = (value <= term);
-    else {
-      return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE,"ERROR! UNKNOWN COMPARISON "+cmpstr)});
-    }
-    if (success)
-      return new TestResults(1.0);
-    std::string description = j.value("description","MISSING DESCRIPTION");
-    std::string failure_message = j.value("failure_message",
-                                          "ERROR! "+description+" "+std::to_string(value)+" "+cmpstr+" "+std::to_string(term));
-    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,failure_message)});
-  } catch (...) {
-    return new TestResults(0.0,{std::make_pair(MESSAGE_FAILURE,"int comparison do it error stoi")});
-  }
-}
-
-
-
 // =================================================================================
 // =================================================================================
 
 TestResults* TestCase::dispatch(const nlohmann::json& grader, int autocheck_number, const nlohmann::json whole_config) const {
   std::string method = grader.value("method","");
-  if      (method == "")                           { return NULL;                                           }
-  else if (method == "JUnitTestGrader")            { return JUnitTestGrader_doit(*this,grader);             }
-  else if (method == "EmmaInstrumentationGrader")  { return EmmaInstrumentationGrader_doit(*this,grader);   }
-  else if (method == "MultipleJUnitTestGrader")    { return MultipleJUnitTestGrader_doit(*this,grader);     }
-  else if (method == "EmmaCoverageReportGrader")   { return EmmaCoverageReportGrader_doit(*this,grader);    }
-  else if (method == "JaCoCoCoverageReportGrader") { return JaCoCoCoverageReportGrader_doit(*this,grader);  }
-  else if (method == "DrMemoryGrader")             { return DrMemoryGrader_doit(*this,grader);              }
-  else if (method == "PacmanGrader")               { return PacmanGrader_doit(*this,grader);                }
-  else if (method == "searchToken")                { return searchToken_doit(*this,grader);                 }
-  else if (method == "intComparison")              { return intComparison_doit(*this,grader);               }
-  else if (method == "diff")                       { return diff_doit(*this,grader);                        }
-  else if (method == "fileExists")                 { return fileExists_doit(*this,grader);                  }
-  else if (method == "warnIfNotEmpty")             { return warnIfNotEmpty_doit(*this,grader);              }
-  else if (method == "warnIfEmpty")                { return warnIfEmpty_doit(*this,grader);                 }
-  else if (method == "errorIfNotEmpty")            { return errorIfNotEmpty_doit(*this,grader);             }
-  else if (method == "errorIfEmpty")               { return errorIfEmpty_doit(*this,grader);                }
-  else if (method == "ImageDiff")                  { return ImageDiff_doit(*this,grader, autocheck_number); }
-  else if (method == "custom_validator")           { return custom_doit(*this,grader,whole_config); }
-  else                                             { return custom_dispatch(grader);                        }
+  if      (method == "")                           { return NULL;                                                     }
+  else if (method == "JUnitTestGrader")            { return dispatch::JUnitTestGrader_doit(*this,grader);             }
+  else if (method == "EmmaInstrumentationGrader")  { return dispatch::EmmaInstrumentationGrader_doit(*this,grader);   }
+  else if (method == "MultipleJUnitTestGrader")    { return dispatch::MultipleJUnitTestGrader_doit(*this,grader);     }
+  else if (method == "EmmaCoverageReportGrader")   { return dispatch::EmmaCoverageReportGrader_doit(*this,grader);    }
+  else if (method == "JaCoCoCoverageReportGrader") { return dispatch::JaCoCoCoverageReportGrader_doit(*this,grader);  }
+  else if (method == "DrMemoryGrader")             { return dispatch::DrMemoryGrader_doit(*this,grader);              }
+  else if (method == "PacmanGrader")               { return dispatch::PacmanGrader_doit(*this,grader);                }
+  else if (method == "searchToken")                { return dispatch::searchToken_doit(*this,grader);                 }
+  else if (method == "intComparison")              { return dispatch::intComparison_doit(*this,grader);               }
+  else if (method == "diff")                       { return dispatch::diff_doit(*this,grader);                        }
+  else if (method == "fileExists")                 { return dispatch::fileExists_doit(*this,grader);                  }
+  else if (method == "warnIfNotEmpty")             { return dispatch::warnIfNotEmpty_doit(*this,grader);              }
+  else if (method == "warnIfEmpty")                { return dispatch::warnIfEmpty_doit(*this,grader);                 }
+  else if (method == "errorIfNotEmpty")            { return dispatch::errorIfNotEmpty_doit(*this,grader);             }
+  else if (method == "errorIfEmpty")               { return dispatch::errorIfEmpty_doit(*this,grader);                }
+  else if (method == "ImageDiff")                  { return dispatch::ImageDiff_doit(*this,grader, autocheck_number); }
+  else if (method == "custom_validator")           { return dispatch::custom_doit(*this,grader,whole_config);         }
+  else                                             { return custom_dispatch(grader);                                  }
 }
 
 // =================================================================================
@@ -368,7 +324,7 @@ const nlohmann::json TestCase::get_test_case_limits() const {
     adjust_test_case_limits(_test_case_limits,RLIMIT_AS,RLIM_INFINITY);
     adjust_test_case_limits(_test_case_limits,RLIMIT_SIGPENDING,100);
   }
-  
+
   return _test_case_limits;
 }
 
@@ -511,7 +467,7 @@ std::string getAssignmentIdFromCurrentDirectory(std::string dir) {
     if (second_to_last_slash != -1) {
       tmp = dir.substr(second_to_last_slash+1,last_slash-second_to_last_slash-1);
     }
-    //std::cout << "tmp is now '" << tmp << "'\n";  
+    //std::cout << "tmp is now '" << tmp << "'\n";
   }
   assert (tmp.size() >= 1);
   return tmp;
