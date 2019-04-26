@@ -712,6 +712,11 @@ table tr.table-header {
     /*    color: #4a4a4a;*/
     border: 4px solid #276394;
 }
+
+.viewed_post{
+    background-color: white;
+}
+
 /* TODO: MAKE THIS CASCADE */
 .deleted {
     background-color: #A9A9A9;
@@ -721,12 +726,10 @@ table tr.table-header {
 .deleted.active {
     background-color: #505050;
 }
+
 .new_post {
     background-color: var(--viewed_content);
     /*background-color: #d4e1f2;*/
-}
-.viewed_post{
-    background-color: white;
 }
 
 .important {
