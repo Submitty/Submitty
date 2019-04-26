@@ -16,13 +16,11 @@ set (GRADINGCODE ${SUBMITTY_INSTALL_DIR}/src)
 add_library(submitty_grading
   ${GRADINGCODE}/grading/load_config_json.cpp
   ${GRADINGCODE}/grading/TestCase.cpp
-  ${GRADINGCODE}/grading/JUnitGrader.cpp
-  ${GRADINGCODE}/grading/DrMemoryGrader.cpp
-  ${GRADINGCODE}/grading/PacmanGrader.cpp
-  ${GRADINGCODE}/grading/myersDiff.cpp
+  ${GRADINGCODE}/grading/dispatch.cpp
   ${GRADINGCODE}/grading/tokens.cpp
   ${GRADINGCODE}/grading/tokenSearch.cpp
-  ${GRADINGCODE}/grading/clean.cpp 
+  ${GRADINGCODE}/grading/clean.cpp
+  ${GRADINGCODE}/grading/change.cpp
   ${GRADINGCODE}/grading/difference.cpp
   ${GRADINGCODE}/grading/execute.cpp
   ${GRADINGCODE}/grading/execute_limits.cpp
