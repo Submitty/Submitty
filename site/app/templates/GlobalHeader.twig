@@ -36,9 +36,9 @@
                     <div id='{{ message.type }}-{{ message.key }}' class="inner-message alert alert-{{ message.type }}">
                         <a class="fas fa-times message-close" onClick="removeMessagePopup('{{ message.type }}-{{ message.key }}');"></a>
                         {% if message.type == "error" %}
-                        <i class="fas fa-times-circle"></i> 
+                        <i class="fas fa-times-circle"></i>
                         {% else %}
-                        <i class="fas fa-check-circle"></i> 
+                        <i class="fas fa-check-circle"></i>
                         {% endif %}
                         {{ message.error }}
                     </div>
@@ -47,21 +47,19 @@
             <div id="header" class="row">
                 <div class="col-12 col-sm" id="header-text">
                     <div>
-                        <h2>
-                            {% for b in breadcrumbs %}
-                                {% if loop.index0 > 0 %}
-                                    &gt;
-                                {% endif %}
-                                {% if b.getUrl() is not empty %}
-                                    <a href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
-                                {% else %}
-                                    {{ b.getTitle() }}
-                                {% endif %}
-                                {% if b.getExternalUrl() is not empty %}
-                                    <a class="external" href="{{ b.getExternalUrl() }}" target="_blank"><i class="fas fa-external-link-alt"></i></a>
-                                {% endif %}
-                            {% endfor %}
-                        </h2>
+                        {% for b in breadcrumbs %}
+                            {% if loop.index0 > 0 %}
+                                &gt;
+                            {% endif %}
+                            {% if b.getUrl() is not empty %}
+                                <a href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
+                            {% else %}
+                                {{ b.getTitle() }}
+                            {% endif %}
+                            {% if b.getExternalUrl() is not empty %}
+                                <a class="external" href="{{ b.getExternalUrl() }}" target="_blank"><i class="fas fa-external-link-alt"></i></a>
+                            {% endif %}
+                        {% endfor %}
                     </div>
                 </div>
                 <a class="col-12 col-sm-auto" id="logo-box" href="http://submitty.org" target=_blank>
