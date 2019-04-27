@@ -84,8 +84,8 @@ class Output {
 
         $this->addVendorCss(FileUtils::joinPaths('jquery-ui', 'jquery-ui.min.css'));
         $this->addVendorCss(FileUtils::joinpaths('bootstrap', 'css', 'bootstrap-grid.min.css'));
-        $this->addInternalCss('bootstrap.css');
         $this->addInternalCss('server.css');
+        $this->addInternalCss('bootstrap.css');
         $this->addInternalCss('diff-viewer.css');
         $this->addInternalCss('glyphicons-halflings.css');
 

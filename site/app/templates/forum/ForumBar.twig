@@ -74,7 +74,7 @@
 
 	{% if show_more %}
 	    <div class="dropdown" style="float:right;top:3px;margin-right:5px;">
-	        <a title="More options" id="dropdownLabel" role="button" data-toggle="dropdown" class="btn btn-default" data-target="#" href="#">
+	        <a title="More options" id="dropdownLabel" role="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle" data-target="#" href="#">
 	            More <span class="caret"></span>
 	        </a>
 			<ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu">
@@ -82,14 +82,14 @@
 				{% if user_group <= more.required_rank %}
 					{% set onclick = (more.onclick[0]) ? 'onclick=' ~ more.onclick[1] %}
 					{% set optional_class = (more.optional_class[0]) ? 'class=' ~ more.optional_class[1] %}
-	          		<li><a id="{{ more.id }}" title="{{ more.title }}" {{ optional_class }} href="{{ more.link }}" {{ onclick }}>{{ more.display_text }}</a></li>
+	          		<li class='dropdown-item'><a id="{{ more.id }}" title="{{ more.title }}" {{ optional_class }} href="{{ more.link }}" {{ onclick }}>{{ more.display_text }}</a></li>
 	          	{% endif %}
 	        {% endfor %}
-	          <li class="divider"></li>
-	              <li id="tree"><a tabindex="-1" onclick="changeDisplayOptions('tree', {{ current_thread }})" href="#">Hierarchical</a></li>
-	              <li id="time"><a href="#" onclick="changeDisplayOptions('time', {{ current_thread }})">Chronological</a></li>
+	          <li class="dropdown-divider"></li>
+	              <li id="tree" class='dropdown-item'><a tabindex="-1" onclick="changeDisplayOptions('tree', {{ current_thread }})" href="#">Hierarchical</a></li>
+	              <li id="time" class='dropdown-item'><a href="#" onclick="changeDisplayOptions('time', {{ current_thread }})">Chronological</a></li>
 	              {% if user_group <= core.getUser().accessGrading() %}
-	              	<li id="alpha"><a href="#" onclick="changeDisplayOptions('alpha', {{ current_thread }})">Alphabetical</a></li>
+	              	<li id="alpha" class='dropdown-item'><a href="#" onclick="changeDisplayOptions('alpha', {{ current_thread }})">Alphabetical</a></li>
 	              {% endif %}
 	        </ul>
 	    </div>
