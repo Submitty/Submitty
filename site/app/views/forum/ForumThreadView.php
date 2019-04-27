@@ -226,9 +226,7 @@ HTML;
 		$show_merged_thread_action = "alterShowMergeThreadStatus(1,'" . $currentCourse . "');";
 		$show_merged_thread_title = "Show Merged Threads";
 	}
-	$return .= <<<HTML
-		<div class="full_height content forum_content forum_show_threads">
-HTML;
+
 	$show_deleted_class = '';
 	$show_deleted_action = '';
     $show_deleted_thread_title = '';
@@ -289,28 +287,47 @@ HTML;
 								"thread_exists" => true,
 								"show_more" => true
 	];
-		if($this->core->getUser()->accessGrading()){
-			if($show_deleted) {
-				$show_deleted_class = "active";
-				$show_deleted_action = "alterShowDeletedStatus(0);";
-      			$show_deleted_thread_title = "Hide Deleted Threads";
-			} else {
-				$show_deleted_class = "";
-				$show_deleted_action = "alterShowDeletedStatus(1);";
-      			$show_deleted_thread_title = "Show Deleted Threads";
-			}
+	if($this->core->getUser()->accessGrading()){
+		if($show_deleted) {
+			$show_deleted_class = "active";
+			$show_deleted_action = "alterShowDeletedStatus(0);";
+			$show_deleted_thread_title = "Hide Deleted Threads";
+		} else {
+			$show_deleted_class = "";
+			$show_deleted_action = "alterShowDeletedStatus(1);";
+			$show_deleted_thread_title = "Show Deleted Threads";
 		}
-        if(!$threadExists){
-        $button_params["show_threads"] = false;
-        $button_params["thread_exists"] = false;
-        $return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", $button_params);
+	}
+
+	$return .= $this->core->getOutput()->renderTwigTemplate("forum/EditPostForm.twig");
+	$return .= $this->core->getOutput()->renderTwigTemplate("forum/HistoryForm.twig");
+
+	$return .= $this->core->getOutput()->renderTwigTemplate("forum/FilterForm.twig", [
+		"categories" => $categories,
+		"current_thread" => $currentThread,
+		"current_category_ids" => $currentCategoriesIds,
+		"current_course" => $currentCourse,
+		"cookie_selected_categories" => $cookieSelectedCategories,
+		"cookie_selected_thread_status" => $cookieSelectedThreadStatus,
+		"cookie_selected_unread_value" => $cookieSelectedUnread,
+		"display_option" => $display_option,
+		"thread_exists" => $threadExists
+	]);
+	
+	$return .= <<<HTML
+		<div class="full_height content forum_content forum_show_threads">
+HTML;
+
+	if(!$threadExists){
+		$button_params["show_threads"] = false;
+		$button_params["thread_exists"] = false;
+		$return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", $button_params);
 		$return .= <<<HTML
 						<h4 style="text-align:center;">A thread hasn't been created yet. Be the first to do so!</h4>
 				</div>
 HTML;
-		} else {	
-
-			$more_data = array(
+	} else {
+		$more_data = array(
 					array(
 							"filter_option" => $display_option
 					),
@@ -520,7 +537,7 @@ HTML;
 						}
 					}
 			if($includeReply) {
-			$return .= <<<HTML
+				$return .= <<<HTML
 
 			<hr style="border-top:1px solid #999;margin-bottom: 5px;" />
 			
@@ -560,20 +577,7 @@ HTML;
 				"possibleMerges" => $merge_thread_list
 			]);
 		}
-		$return .= $this->core->getOutput()->renderTwigTemplate("forum/EditPostForm.twig");
-		$return .= $this->core->getOutput()->renderTwigTemplate("forum/HistoryForm.twig");
 
-		$return .= $this->core->getOutput()->renderTwigTemplate("forum/FilterForm.twig", [
-			"categories" => $categories,
-			"current_thread" => $currentThread,
-			"current_category_ids" => $currentCategoriesIds,
-			"current_course" => $currentCourse,
-			"cookie_selected_categories" => $cookieSelectedCategories,
-			"cookie_selected_thread_status" => $cookieSelectedThreadStatus,
-			"cookie_selected_unread_value" => $cookieSelectedUnread,
-			"display_option" => $display_option,
-			"thread_exists" => $threadExists
-		]);
 		return $return;
 	}
 
