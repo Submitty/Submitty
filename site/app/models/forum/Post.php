@@ -3,51 +3,68 @@
 namespace app\models\forum;
 
 use app\libraries\Core;
+use app\models\User;
 
 
 /**
  * Class Post
  *
- * @method void setPostId($post_id)
- * @method void setParentId($parent_id)
- * @method void setThreadId($thread_id)
- * @method void setContent($content)
- * @method void setIsAnonymous($is_anonymous)
- * @method void setPostType($post_type)
- * @method void setTimestamp($timestamp)
- * @method void setId(string $id) Get the id of the loaded user
+ * Setters
+ * @method void setPostId(int $id)
+ * @method void setThreadId(int $thread_id)
+ * @method void setParentId(int $parent_id)
+ * @method void setContent(string $content)
+ * @method void setTimestamp(\DateTime $timestamp)
+ * @method void setIsAnonymous(bool $is_anonymous)
+ * @method void setDeleted(bool $deleted)
+ * @method void setPostType(int $post_type)
+ * @method void setHasAttachment(bool $has_attachment)
+ *
+ * Accessors
+ * @method int       getId()
+ * @method int       getThreadId()
+ * @method int       getParentId()
+ * @method User      getAuthor()
+ * @method string    getContent()
+ * @method \DateTime getTimestamp()
+ * @method bool      getDeleted()
+ * @method int       getPostType()
+ * @method bool      getHasAttachment()
  */
 
 class Post extends AbstractModel {
 
-	const COMMENT    = 0;
-    const UNRESOLVED = 1;
-    const RESOLVED   = 2;
+    const static COMMENT    = 0;
+    const static UNRESOLVED = 1;
+    const static RESOLVED   = 2;
 
-	protected $post_id;
-	protected $parent_id;
-	protected $thread_id;
+    protected $id;
+    protected $thread_id;
+    protected $parent_id;
+    protected $parent;
+    protected $author;
+    protected $content;
+    protected $timestamp;
+    protected $is_anonymous;
+    protected $deleted;
+    protected $post_type;
+    protected $timestamp;
+    protected $has_attachment;
 
-	protected $author;
+    public function __construct(Core $core, $details=array()){
+        if(empty($details)) {
+            return;
+        }
 
-	protected $content;
-
-	protected $is_anonymous;
-
-	protected $post_type;
-
-	protected $timestamp;
-
-	public function __construct(Core $core, $details=array()) {
-		if(empty($details)) {
-			return;
-		}
-
-		setPostId($details['post_id']);
-		setParentId($details['parent_id']);
-		setThreadId($details['thread_id']);
-
-		
-	} 
+        setPostId($details['post_id']);
+        setThreadId($details['thread_id']);
+        setParentId($details['parent_id']);
+        setContent($details['content']);
+        setTimestamp($details['timestamp']);
+        setAnonymous($details['anonymous']);
+        setDeleted($details['deleted']);
+        setType($details['type']);
+        setAttachment($details['has_attachment']);
+    } 
 
 }
