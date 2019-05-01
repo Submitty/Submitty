@@ -57,7 +57,7 @@
                                 {{ b.getTitle() }}
                             {% endif %}
                             {% if b.getExternalUrl() is not empty %}
-                                <a class="external" href="{{ b.getExternalUrl() }}" target="_blank"><i class="fas fa-external-link-alt"></i></a>
+                                <a class="external" href="{{ b.getExternalUrl() }}" target="_blank" aria-label="Go to {{ b.getTitle() }}"><i class="fas fa-external-link-alt"></i></a>
                             {% endif %}
                         {% endfor %}
                     </div>
