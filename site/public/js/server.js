@@ -424,7 +424,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                 $.ajax({
                     url: url,
                     success: function(data) {
-                    	
+
                         data = JSON.parse(data);
                         console.log(data.ci);
 
@@ -455,7 +455,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                             //console.log(data.ci[users_color]);
                             for(var pos in data.ci[users_color]) {
                                 var element = data.ci[users_color][pos];
-                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {css: "border: 1px solid black; background: " + element[4]});   
+                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_prev_color": element[4], "data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; background: " + element[4]});   
                             }
                         }
                         $('.CodeMirror')[0].CodeMirror.refresh();
@@ -512,7 +512,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                             //console.log(data.ci[users_color]);
                             for(var pos in data.ci[users_color]) {
                                 var element = data.ci[users_color][pos];
-                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});   
+                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});   
                             }
                         }
                         	$('.CodeMirror')[0].CodeMirror.refresh();
@@ -544,11 +544,11 @@ function setUserSubmittedCode(gradeable_id, changed) {
                             for(var users_color in data.ci) {
                             for(var pos in data.ci[users_color]) {
                                 var element = data.ci[users_color][pos];
-                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});   
+                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});   
                             }
-                        }   
+                        }
                         	$('.CodeMirror')[0].CodeMirror.refresh();
-                        	
+
                         	$('.CodeMirror')[1].CodeMirror.refresh();
                             // $('[name="code_box_1"]').empty().append(data.display_code1);
                             // $('[name="code_box_2"]').empty().append(data.display_code2);
@@ -565,8 +565,8 @@ function setUserSubmittedCode(gradeable_id, changed) {
 }
 
 function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user_1_match_end, where, color , span_clicked, popup_user_2, popup_version_user_2) {
-    console.log(user_1_match_start);
-    console.log(user_1_match_end);
+    //console.log(user_1_match_start);
+    //console.log(user_1_match_end);
     var form = $("#users_with_plagiarism");
     var user_id_1 = $('[name="user_id_1"]', form).val();
     var version_user_1 = $('[name="version_user_1"]', form).val();
@@ -576,27 +576,16 @@ function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user
         user_id_2 = JSON.parse($('[name="user_id_2"]', form).val())["user_id"];
         version_user_2 = JSON.parse($('[name="user_id_2"]', form).val())["version"];
     }
-    $('[name="code_box_1"]').find('span').each(function(){
-        var attr = $(this).css('background-color');
-        if (typeof attr !== typeof undefined && attr !== false && attr == "rgb(255, 0, 0)") {
-            $(this).css('background-color',"#ffa500");
-        }
-    });
-    $('[name="code_box_2"]').find('span').each(function(){
-        var attr = $(this).css('background-color');
-        if (typeof attr !== typeof undefined && attr !== false && attr == "rgb(255, 0, 0)") {
-            $(this).css('background-color',"#ffa500");
-        }
-    });
+    
     var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_matches_for_clicked_match',
                         'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'start':user_1_match_start.line, 'end': user_1_match_end.line});
 
-    console.log(user_1_match_start.line);
+    //console.log(user_1_match_start.line);
 
     $.ajax({
         url: url,
         success: function(data) {
-            console.log(data);
+            //console.log(data);
             data = JSON.parse(data);
             if(data.error){
                 alert(data.error);
@@ -636,7 +625,7 @@ function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user
                 var to_append='';
 
                 $.each(data, function(i,match){
-                    console.log(match);
+                    //console.log(match);
                     to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick=getMatchesForClickedMatch("'+gradeable_id+'",event,'+user_1_match_start.line+','+ user_1_match_end.line+',"popup","'+ color+ '","","'+match[0]+'",'+match[1]+');>'+ match[3]+' '+match[4]+' &lt;'+match[0]+'&gt; (version:'+match[1]+')</div></li>';
                 });
                 to_append = $.parseHTML(to_append);
@@ -1593,9 +1582,10 @@ function editPost(post_id, thread_id, shouldEditThread) {
                     $('#messages').append(message);
                     return;
                 }
-                var user_id = escape(json.user);
                 var post_content = json.post;
                 var anon = json.anon;
+                var change_anon = json.change_anon;
+                var user_id = escapeSpecialChars(json.user);
                 var time = Date.parse(json.post_time);
                 if(!time) {
                     // Timezone suffix ":00" might be missing
@@ -1611,7 +1601,12 @@ function editPost(post_id, thread_id, shouldEditThread) {
                 contentBox.value = post_content;
                 document.getElementById('edit_post_id').value = post_id;
                 document.getElementById('edit_thread_id').value = thread_id;
-                $('#thread_post_anon_edit').prop('checked', anon);
+                if(change_anon) {
+                    $('#thread_post_anon_edit').prop('checked', anon);
+                } else {
+                    $('label[for=Anon]').remove();
+                    $('#thread_post_anon_edit').remove();
+                }
                 $('#edit-user-post').css('display', 'block');
 
                 $(".cat-buttons input").prop('checked', false);
@@ -1648,14 +1643,32 @@ function editPost(post_id, thread_id, shouldEditThread) {
         });
 }
 
-function enableTabsInTextArea(jQuerySelector){
+/**
+ * Enables the use of TAB key to indent within a textarea control.
+ *
+ * VPAT requires that keyboard navigation through all controls is always available.
+ * Since TAB is being redefined to indent code/text, ESC will be defined, in place
+ * of TAB, to proceed to the next control element.  SHIFT+TAB  shall be preserved
+ * with its default behavior of returning to the previous control element.
+ *
+ * @param string jQuerySelector
+ */
+function enableTabsInTextArea(jQuerySelector) {
     var t = $(jQuerySelector);
     t.on('input', function() {
         $(this).outerHeight(38).outerHeight(this.scrollHeight);
     });
     t.trigger('input');
-    t.keydown(function(t){
-        if(t.keyCode == 9){
+    t.keydown(function(t) {
+        if (t.which == 27) {  //ESC was pressed, proceed to next control element.
+            // Next control element may not be a sibling, so .next().focus() is not guaranteed
+            // to work.  There is also no guarantee that controls are properly wrapped within
+            // a <form>.  Therefore, retrieve a master list of all visible controls and switch
+            // focus to the next control in the list.
+            var controls = $(":input").filter(":visible");
+            controls.eq(controls.index(this) + 1).focus();
+            return false;
+        } else if (!t.shiftKey && t.keyCode == 9) { //TAB was pressed without SHIFT, text indent
             var text = this.value;
             var beforeCurse = this.selectionStart;
             var afterCurse = this.selectionEnd;
@@ -1663,6 +1676,7 @@ function enableTabsInTextArea(jQuerySelector){
             this.selectionStart = this.selectionEnd = beforeCurse+1;
             return false;
         }
+        // No need to test for SHIFT+TAB as it is not being redefined.
     });
 }
 
@@ -1738,6 +1752,7 @@ function dynamicScrollLoadPage(element, atEnd) {
 
     var categories_value = $("#thread_category").val();
     var thread_status_value = $("#thread_status_select").val();
+    var unread_select_value = $("#unread").is(':checked');
     categories_value = (categories_value == null)?"":categories_value.join("|");
     thread_status_value = (thread_status_value == null)?"":thread_status_value.join("|");
     $.ajax({
@@ -1746,6 +1761,7 @@ function dynamicScrollLoadPage(element, atEnd) {
             data: {
                 thread_categories: categories_value,
                 thread_status: thread_status_value,
+                unread_select: unread_select_value,
                 currentThreadId: currentThreadId,
                 currentCategoriesId: currentCategoriesId,
             },
@@ -1783,7 +1799,7 @@ function dynamicScrollContentOnDemand(jElement, urlPattern, currentThreadId, cur
     dynamicScrollLoadIfScrollVisible(jElement);
     $(jElement).scroll(function(){
         var element = $(this)[0];
-        var sensitivity = 3;
+        var sensitivity = 2;
         var isTop = element.scrollTop < sensitivity;
         var isBottom = (element.scrollHeight - element.offsetHeight - element.scrollTop) < sensitivity;
         if(isTop) {
@@ -1842,10 +1858,12 @@ function alterShowMergeThreadStatus(newStatus, course) {
 function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirstPage, success_callback){
     var categories_value = $("#thread_category").val();
     var thread_status_value = $("#thread_status_select").val();
+    var unread_select_value = $("#unread").is(':checked');
     categories_value = (categories_value == null)?"":categories_value.join("|");
     thread_status_value = (thread_status_value == null)?"":thread_status_value.join("|");
     document.cookie = course + "_forum_categories=" + categories_value + ";";
     document.cookie = "forum_thread_status=" + thread_status_value + ";";
+    document.cookie = "unread_select_value=" + unread_select_value + ";";
     var url = buildUrl({'component': 'forum', 'page': 'get_threads', 'page_number': (loadFirstPage?'1':'-1')});
     $.ajax({
             url: url,
@@ -1853,6 +1871,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
             data: {
                 thread_categories: categories_value,
                 thread_status: thread_status_value,
+                unread_select: unread_select_value,
                 currentThreadId: currentThreadId,
                 currentCategoriesId: currentCategoriesId,
             },
@@ -1911,7 +1930,9 @@ function generateCodeMirrorBlocks(container_element) {
     if (lineCount == 1) {
         editor0.setSize("100%", (editor0.defaultTextHeight() * 2) + "px");
     } else {
-        editor0.setSize("100%", "max-content");
+        //Default height for CodeMirror is 300px... 500px looks good
+        var h = (editor0.defaultTextHeight()) * lineCount + 15;
+        editor0.setSize("100%", (h > 500 ? 500 : h) + "px");
     }
 
     editor0.setOption("theme", "eclipse");
@@ -1958,7 +1979,7 @@ function showHistory(post_id) {
                     var first_name = post['user_info']['first_name'].trim();
                     var last_name = post['user_info']['last_name'].trim();
                     var author_user_id = post['user'];
-                    var visible_username = first_name + " " + last_name.substr(0 , 1) + ".";
+                    var visible_username = first_name + " " + ((last_name.length == 0) ? '' : (last_name.substr(0 , 1) + "."));
                     var info_name = first_name + " " + last_name + " (" + author_user_id + ")";
                     var visible_user_json = JSON.stringify(visible_username);
                     info_name = JSON.stringify(info_name);

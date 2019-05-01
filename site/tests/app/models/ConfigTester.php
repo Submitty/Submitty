@@ -24,7 +24,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             FileUtils::recursiveRmdir($this->temp_dir);
         }
     }
-    
+
     /**
      * This test ensures that the default value of the DEBUG flag within the config model is always false. This
      * means that if the value is not found within the json file, we don't have to worry about accidently
@@ -396,7 +396,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         try {
             $extra = array($section => null);
             $this->createConfigFile($extra);
-    
+
             $config = new Config($this->core, "s17", "csci0000");
             $config->loadCourseJson($this->course_json_path);
             $this->fail("Should have thrown ConfigException");
@@ -434,7 +434,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         try {
             $extra = [$section => [$setting => null]];
             $this->createConfigFile($extra);
-    
+
             $config = new Config($this->core, "s17", "csci0000");
             $config->loadCourseJson($this->course_json_path);
             $this->fail("Should have thrown ConfigException for {$section}.{$setting}");
