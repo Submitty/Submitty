@@ -3,21 +3,32 @@
 #include "clean.h"
 #include "myersDiff.h"
 
-// FIXME: Thus function has terrible variable names (diff1, diff2, a, b) 
+// FIXME: Thus function has terrible variable names (diff1, diff2, a, b)
 //   and the code is insufficiently commented for long term maintenance.
+Difference::Difference() :
+  TestResults(), output_length_a(0), output_length_b(0), edit_distance(0),
+  type(OtherType), extraStudentOutputOk(false), only_whitespace_changes(false) {
+
+  line_added = -1;
+  line_deleted = -1;
+  total_line = -1;
+  char_added = -1;
+  char_deleted = -1;
+  total_char = -1;
+}
 
 
 void Difference::printJSON(std::ostream & file_out) {
   std::string diff1_name;
   std::string diff2_name;
-  
+
   switch (type) {
     // ByLineByChar;
     // ByWordByChar;
     // VectorVectorStringType;
     // ByLineByWord;
     // VectorOtherType;
-    
+
   case ByLineByChar:
     diff1_name = "line";
     diff2_name = "char";
@@ -37,7 +48,7 @@ void Difference::printJSON(std::ostream & file_out) {
   }
 
   nlohmann::json whole_file;
-  
+
   // always have a "differences" tag, even if it is an empty array
   whole_file["differences"] = nlohmann::json::array();
 
@@ -75,7 +86,7 @@ void Difference::printJSON(std::ostream & file_out) {
       }
       expected[diff1_name].push_back(d1);
     }
-    
+
     blob["actual"] = student;
     blob["expected"] = expected;
     whole_file["differences"].push_back(blob);
@@ -86,207 +97,137 @@ void Difference::printJSON(std::ostream & file_out) {
 }
 
 
-void find_spot(const std::vector<std::string> &adata,
-               int num_rows,
-               int start_row,
-               int offset,
-               int &which_line,
-               int &which_character) {
-  which_line = start_row;
-  which_character = offset;
-  while (1) {
-    if (adata[which_line].size()+1 > which_character) {
-      break;
+void Difference::PrepareGrade(const nlohmann::json& j) {
+  std::cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << std::endl;
+  std::cout << "PREPARE GRADE" << std::endl;
+
+
+  // --------------------------------------------------------
+  //std::cout << "json " << j.dump(4) << std::endl;
+  if (j.find("max_char_changes") != j.end()) {
+    std::cout << "MAX CHAR CHANGES" << std::endl;
+
+    int max_char_changes = j.value("max_char_changes", -1);
+    assert (max_char_changes > 0);
+    int min_char_changes = j.value("min_char_changes",0);
+    assert (min_char_changes >= 0);
+    assert (min_char_changes < max_char_changes);
+
+    assert (total_char > 0);
+    if (max_char_changes > total_char) {
+      std::cout << "WARNING!  max_char_changes > total_char)" << std::endl;
+      max_char_changes = total_char;
+      if (min_char_changes > max_char_changes) {
+        min_char_changes = max_char_changes-1;
+      }
+      assert (min_char_changes >= 0);
     }
-    which_character -= (adata[which_line].size())+1;
-    which_line++;
-    if (which_line >= adata.size() -1) break;
-  }
-}
+    assert (max_char_changes <= total_char);
 
+    int char_changes = char_added + char_deleted;
 
-void IMPROVE(Change &c,
-             const std::vector<std::string> &adata,
-             const std::vector<std::string> &bdata,
-             std::string &added,
-             std::string &deleted,
-             int &tmp_line_added,
-             int &tmp_line_deleted,
-             int &tmp_char_added,
-             int &tmp_char_deleted) {
+    std::cout << "char_changes=" << char_changes << " min=" << min_char_changes << " max=" << max_char_changes << std::endl;
 
-  //  std::cout << "SOMETHING BETTER NEEDED HERE" << std::endl;
-  nlohmann::json j;
-  vectorOfLines a;
-  vectorOfLines b;
-  a.push_back(added);
-  b.push_back(deleted);
-  Difference *HERE = ses(j, &a, &b, true);
-  assert (HERE != NULL);
-  //std::cout << "EXTRA " << HERE->char_added << " " << HERE->char_deleted << std::endl;
-  tmp_char_added += HERE->char_added;
-  tmp_char_deleted += HERE->char_deleted;
+    int min_max_diff = max_char_changes-min_char_changes;
+    int lower_bar = std::max(0,min_char_changes-min_max_diff);
+    int upper_bar = max_char_changes + min_max_diff;
 
-  assert (HERE->changes.size() == 1);
-  Change &change = HERE->changes[0];
-  assert (change.a_start == 0);
-  assert (change.b_start == 0);
-  assert (change.a_changes.size() == 1);
-  assert (change.b_changes.size() == 1);
-  assert (change.a_changes[0] == 0);
-  assert (change.b_changes[0] == 0);
+    assert (0 <= lower_bar &&
+      lower_bar <= min_char_changes &&
+      min_char_changes <= max_char_changes &&
+      max_char_changes <= upper_bar);
 
-
-  int num_a_rows = c.a_changes.size();
-  int num_b_rows = c.b_changes.size();
-  int a_start = c.a_changes[0];
-  int b_start = c.b_changes[0];
-
-  c.a_characters.resize(num_a_rows);
-  c.b_characters.resize(num_b_rows);
-
-  for (int i = 0; i < change.a_characters[0].size(); i++) {
-    int offset = change.a_characters[0][i];
-    int which_line;
-    int which_character;
-    find_spot(adata,num_a_rows,a_start,offset,which_line,which_character);
-    c.a_characters[which_line-a_start].push_back(which_character);
-    //std::cout << "a: " << offset << " " << which_line << " " << which_character << std::endl;
-  }
-  for (int i = 0; i < change.b_characters[0].size(); i++) {
-    int offset = change.b_characters[0][i];
-    int which_line;
-    int which_character;
-    find_spot(bdata,num_b_rows,b_start,offset,which_line,which_character);
-    c.b_characters[which_line-b_start].push_back(which_character);
-    //std::cout << "b: " << offset << " " << which_line << " " << which_character << std::endl;
-  }
-  //std::cout << "DONE SOMETHING BETTER NEEDED HERE" << std::endl;
-}
-
-
-
-void INSPECT_IMPROVE_CHANGES(std::ostream& ostr, Change &c,
-                             const std::vector<std::string> &adata,
-                             const std::vector<std::string> &bdata,
-                             const nlohmann::json& j,
-                             bool &only_whitespace,
-                             bool extra_student_output_ok,
-                             int &line_added,
-                             int &line_deleted,
-                             int &char_added,
-                             int &char_deleted) {
-
-  //  std::cout << "IN INSPECT IMPROVE CHANGES" << std::endl;
-
-  std::string added;
-  std::string deleted;
-  int tmp_line_added = 0;
-  int tmp_line_deleted = 0;
-  int tmp_char_added = 0;
-  int tmp_char_deleted = 0;
-  //std::cout << "before" << std::endl;
-  bool ignore_line_endings = false;
-  if (j != nlohmann::json()) {
-    j.value("ignore_line_endings",false);
-  }
-  //std::cout << "after" << std::endl;
-  bool further_check = false;
-
-  if (c.a_changes.size() != 0 && c.b_changes.size() != 0 &&
-      c.a_changes.size() != c.b_changes.size()) {
-    further_check = true;
+    float grade;
+    if (char_changes < lower_bar) {
+      std::cout << "too few char changes (zero credit)" << std::endl;
+      messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  Approx " + std::to_string(char_changes) + " characters added and/or deleted.  Significantly fewer character changes than allowed."));
+    } else if (char_changes < min_char_changes) {
+      std::cout << "less than min char changes (partial credit)" << std::endl;
+      float numer = min_char_changes - char_changes;
+      float denom = min_max_diff;
+      std::cout << "numer " << numer << " denom= " << denom << std::endl;
+      assert (denom > 0);
+      grade = 1 - numer/denom;
+      messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  Approx " + std::to_string(char_changes) + " characters added and/or deleted.  Fewer character changes than allowed."));
+    } else if (char_changes < max_char_changes) {
+      messages.push_back(std::make_pair(MESSAGE_SUCCESS,"Approx " + std::to_string(char_changes) + " characters added and/or deleted.  Character changes within allowed range."));
+      std::cout << "between min and max char changes (full credit)" << std::endl;
+      grade = 1.0;
+    } else if (char_changes < upper_bar) {
+      std::cout << "more than max char changes (partial credit)" << std::endl;
+      float numer = char_changes - max_char_changes;
+      float denom = min_max_diff;
+      assert (denom > 0);
+      grade = 1 - numer/denom;
+      std::cout << "numer " << numer << " denom= " << denom << std::endl;
+      messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  Approx " + std::to_string(char_changes) + " characters added and/or deleted.  More character changes than allowed."));
+    } else {
+      std::cout << "too many char changes (zero credit)" << std::endl;
+      messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  Approx " + std::to_string(char_changes) + " characters added and/or deleted.  Significantly more character changes than allowed."));
+      grade = 0.0;
+    }
+    std::cout << "grade " << grade << std::endl;
+    assert (grade >= -0.00001 & grade <= 1.00001);
+    this->setGrade(grade);
   }
 
-  for (int i = 0; i < c.a_changes.size(); i++) {
-    int line = c.a_changes[i];
-    tmp_line_added++;
-    assert (line >= 0 && line < adata.size());
-    added+=adata[line] + '\n';
-  }
-  if (!further_check && c.a_characters.size()==0) {
-    c.a_characters.resize(c.a_changes.size());
-    for (int i = 0; i < c.a_changes.size(); i++) {
-      int line = c.a_changes[i];
-      // highlight rows!
-      for (int ch = 0; ch < adata[line].size(); ch++) {
-        c.a_characters[i].push_back(ch);
+  // --------------------------------------------------------
+  else if (this->extraStudentOutputOk) {
+    // only missing lines (deletions) are a problem
+    int count_of_missing_lines = 0;
+    for (int x = 0; x < this->changes.size(); x++) {
+      int num_b_lines = this->changes[x].b_changes.size();
+      if (num_b_lines > 0) {
+        count_of_missing_lines += num_b_lines;
       }
     }
-  }
-  for (int i = 0; i < c.b_changes.size(); i++) {
-    int line = c.b_changes[i];
-    tmp_line_deleted++;
-    assert (line >= 0 && line < bdata.size());
-    deleted+=bdata[line] + '\n';
-  }
-  if (!further_check && c.b_characters.size()==0) {
-    c.b_characters.resize(c.b_changes.size());
-    for (int i = 0; i < c.b_changes.size(); i++) {
-      int line = c.b_changes[i];
-      // highlight rows!
-      for (int ch = 0; ch < bdata[line].size(); ch++) {
-        c.b_characters[i].push_back(ch);
+    int output_length = this->output_length_b;
+    std::cout << "COMPARE outputlength=" << output_length << " missinglines=" << count_of_missing_lines << std::endl;
+    assert (count_of_missing_lines <= output_length);
+    float grade = 1.0;
+    if (output_length > 0) {
+      //std::cout << "SES [ESOO] calculating grade " << this->distance << "/" << output_length << std::endl;
+      //grade -= (this->distance / (float) output_length );
+      grade -= count_of_missing_lines / float(output_length);
+      std::cout <<
+        "grade:  missing_lines [ " << count_of_missing_lines <<
+        "] / output_length " << output_length << "]\n";
+      //std::cout << "SES [ESOO] calculated grade = " << std::setprecision(1) << std::fixed << std::setw(5) << grade << " " << std::setw(5) << (int)floor(5*grade) << std::endl;
+      if (grade < 1.0 && this->only_whitespace_changes) {
+        std::cout << "ONLY WHITESPACE DIFFERENCES! adjusting grade: " << grade << " -> ";
+        // FIXME:  Ugly, but with rounding, this will be only a -1 point grade for this test case
+        grade = std::max(grade,0.99f);
+        std::cout << grade << std::endl;
+      } else {
+        std::cout << "MORE THAN JUST WHITESPACE DIFFERENCES! " << std::endl;
       }
+    } else {
+      assert (output_length == 0);
+      std::cout << "NO OUTPUT, GRADE IS ZERO" << std::endl;
+      grade = 0;
     }
+
+    std::cout << "this test grade = " << grade << std::endl;
+    this->setGrade(grade);
   }
 
-  // if there are more lines in b (expected)
-  if (c.a_changes.size() < c.b_changes.size()) only_whitespace = false;
-
-  // if there are more lines in a (student), that might be ok...
-  if (c.a_changes.size() != c.b_changes.size()) {
-    // but if extra student output is not ok
-    if (!extra_student_output_ok || c.b_changes.size() != 0)
-      only_whitespace = false;
-  }
-
-  if (!further_check) {
-    for (int i = 0; i < c.a_characters.size(); i++) {
-      for (int j = 0; j < c.a_characters[i].size(); j++) {
-        int row = c.a_changes[i];
-        int col = c.a_characters[i][j];
-        if (adata[row][col] != ' ') only_whitespace = false;
-        tmp_char_added++;
-        added.push_back(adata[row][col]);
-      }
+  // --------------------------------------------------------
+  else {
+    // both missing lines (deletions) and extra lines are a deduction
+    int max_output_length = std::max(this->output_length_a, this->output_length_b);
+    float grade = 1.0;
+    if (max_output_length == 0) {
+      grade = 0;
+    } else {
+      //std::cout << "SES  calculating grade " << this->distance << "/" << max_output_length << std::endl;
+      grade -= (this->distance / (float) max_output_length );
+      std::cout <<
+        "grade:  this->distance [ " << this->distance <<
+        "] / max_output_length " << max_output_length << "]\n";
+      //std::cout << "SES calculated grade = " << grade << std::endl;
     }
-    for (int i = 0; i < c.b_characters.size(); i++) {
-      for (int j = 0; j < c.b_characters[i].size(); j++) {
-        int row = c.b_changes[i];
-        int col = c.b_characters[i][j];
-        if (bdata[row][col] != ' ') only_whitespace = false;
-        tmp_char_deleted++;
-        deleted.push_back(bdata[row][col]);
-      }
-    }
+    this->setGrade(grade);
   }
-
-#if 0
-  std::cout << "-----------" << std::endl;
-  std::cout << "added   '" << added << "'" << std::endl;
-  std::cout << "deleted '" << deleted << "'" << std::endl;
-#endif
-
-  if (further_check) {
-    IMPROVE(c,adata,bdata,added,deleted,
-            tmp_line_added,tmp_line_deleted,tmp_char_added,tmp_char_deleted);
-  }
-
-  line_added += tmp_line_added;
-  line_deleted += tmp_line_deleted;
-  char_added += tmp_char_added;
-  char_deleted += tmp_char_deleted;
-
-#if 0
-  if (j != nlohmann::json()) {
-    std::cout << "line_added=" << std::setw(6) << tmp_line_added << " " << " line_deleted=" << std::setw(6) << tmp_line_deleted
-              << " char_added=" << std::setw(6) << tmp_char_added << " " << " char_deleted=" << std::setw(6) << tmp_char_deleted << "  | cumm:  ";
-    std::cout << "line_added=" << std::setw(6) << line_added << " " << " line_deleted=" << std::setw(6) << line_deleted
-              << " char_added=" << std::setw(6) << char_added << " " << " char_deleted=" << std::setw(6) << char_deleted << std::endl;
-  }
-#endif
-
-  //  std::cout << "LEAVING INSPECT IMPROVE CHANGES" << std::endl;
-
+  // ===================================================
+  std::cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << std::endl;
 }
