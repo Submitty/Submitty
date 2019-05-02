@@ -128,3 +128,8 @@
 </div>
 <br>
 </div>
+<script>
+    $("input[name='title']").change(function () {
+        $(this).val($.trim($(this).val()));
+    });
+</script>
