@@ -264,6 +264,7 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
            my_program.find("valgrind") != std::string::npos) {
     categories.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
     categories.insert("COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION");
+    categories.insert("COMMUNICATIONS_AND_NETWORKING_KILL");
     categories.insert("FILE_MANAGEMENT_EXTENDED_ATTRIBUTES");
     categories.insert("FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY");
     categories.insert("FILE_MANAGEMENT_PERMISSIONS");
