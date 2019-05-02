@@ -168,18 +168,132 @@ HTML;
 
             $(document).ready(function() {
                 var editor0 = $('.CodeMirror')[0].CodeMirror;
+                var editor1 = $('.CodeMirror')[1].CodeMirror;
 
-                console.log('hello');
+                //console.log('hello');
 
                 editor0.getWrapperElement().onmousedown = function(e) {
                     var lineCh = editor0.coordsChar({ left: e.clientX, top: e.clientY });
+                    //console.log(lineCh);
                     var markers = editor0.findMarksAt(lineCh);
                     if (markers.length === 0) { return; }
                     var lineData = markers[0].find();
-                    console.log(lineData);
+                    var clickedMark = markers[0];
+                    
                     if(markers[0].css.toLowerCase().indexOf("#ffff00") != -1) { //Can be used to determine click
-                        editor0.markText(lineData.from, lineData.to, {'className': 'red_plag', 'css': 'background: #FF0000;'});
-                        getMatchesForClickedMatch("{$gradeable_id}", event, lineData.from, lineData.to, "code_box_1", "orange", null, "", "");
+
+                        // var redSegments = document.getElementsByClassName("red_plag");
+
+                        //console.log($(".red_plag")[0]);
+
+                        var allMarks = editor0.getAllMarks();
+
+                        allMarks.forEach(m => {
+                            if(m.className === "red_plag") {
+                                m.css = "border: 1px solid black; background: " + m.attributes["data_prev_color"];
+                                m.className = "";
+                            }
+                        });
+
+                        //console.log($($(redSegments[0]).parent().parent().parent())(".CodeMirror-linenumber").html());
+
+                        // if(redSegments.length > 0) {
+                        //     var r = redSegments[0];
+                        //     console.log($(r).parent());
+                        //     var position = r.
+                        //     var rLineCh = editor0.coordsChar( {left: position.left, top: position.top} );
+                        //     //console.log(rLineCh);
+                        //     var redMarkers = editor0.findMarksAt(lineCh);
+                        //     //console.log(redMarkers);
+                        //     var redClickedMark = redMarkers[0];
+
+                        //     redClickedMark.css = "border: 1px solid black; background:" + redClickedMark.attributes["data_prev_color"];
+                        //     //redClickedMark.className = "";
+                        //     console.log(redClickedMark);
+                        // }
+
+                        
+
+
+                        // redSegments.forEach(e => {
+                        //     console.log(e);
+                        // });
+
+                        setTimeout(function() {
+                            //your code to be executed after 1 second
+                            clickedMark.css = "border: 1px solid black; background:#FF0000";
+                            clickedMark.className = "red_plag";
+                            clickedMark.attributes = {"data_prev_color": "#ffff00"};
+                            editor0.refresh();
+                        }, 250);
+
+                            getMatchesForClickedMatch("{$gradeable_id}", event, lineData.from, lineData.to, "code_box_1", "orange", null, "", "");
+
+
+                        //editor0.markText(lineData.from, lineData.to, {attributes: {"data_color_prev": "#ffff00"}, 'className': 'red_plag', 'css': 'background: #FF0000;'});
+
+                        //Use jquery to modify all classesWith red_plag back to prev_color
+
+                    }
+                    if(markers[0].css.toLowerCase().indexOf("#ffa500") != -1) { //Can be used to determine click
+
+
+                        var redSegments = document.getElementsByClassName("red_plag");
+
+                        //console.log(redSegments);
+
+                        
+                        // redSegments.forEach(e => {
+                        //     console.log(e);
+                        // });
+
+
+                        //editor0.markText(lineData.from, lineData.to, {attributes: {"data_color_prev": "#ffa500"}, 'className': 'red_plag', 'css': 'background: #FF0000;'});
+                        var marks_editor2 = editor1.getAllMarks();
+                        marks_editor2.forEach(mark => {
+                            if(mark.attributes.data_start == markers[0].attributes.data_start && mark.attributes.data_end == markers[0].attributes.data_end) {
+                                //mark.className = 'red_plag';
+                                var marker_linedata = mark.find();
+                                //mark.css = "border: 1px solid black; border-right:1px solid red;background: #FF0000";
+                                //console.log(mark);
+                                //console.log(marker_linedata);
+
+                                var allMarks = editor0.getAllMarks();
+
+                                // allMarks.forEach(m => {
+                                //     if(m.className === "red_plag") {
+                                //         m.css = "border: 1px solid black; background: " + m.attributes["data_prev_color"];
+                                //         m.className = "";
+                                //     }
+                                // });
+
+                                // allMarks = marks_editor2;
+
+                                // allMarks.forEach(m => {
+                                //     if(m.className === "red_plag") {
+                                //         m.css = "border: 1px solid black; background: " + m.attributes["data_prev_color"];
+                                //         m.className = "";
+                                //     }
+                                // });
+
+                                clickedMark.css = "border: 1px solid black; background:#FF0000";
+                                clickedMark.className = "red_plag";
+                                clickedMark.attributes = {"data_prev_color": "#ffff00"};
+                                editor0.refresh();
+
+                                mark.css = "border: 1px solid black; background: #FF0000";
+                                mark.className = 'red_plag';
+                                mark.attributes = {"data_color_prev": "#ffa500"};
+                                editor1.refresh();
+
+                                //var top = editor1.charCoords(marker_linedata.from.line).top;
+
+                                editor1.scrollIntoView(marker_linedata.to);
+                                // 
+                                
+                            }
+                        });
+                        //getMatchesForClickedMatch("{$gradeable_id}", event, lineData.from, lineData.to, "code_box_2", "orange", markers[0].attributes, "", "");
                     }
                 }
             });
