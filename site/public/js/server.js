@@ -7,6 +7,8 @@ window.addEventListener("load", function() {
   }
 });
 
+window.addEventListener("resize", checkSidebarCollapse); 
+
 /**
  * Acts in a similar fashion to Core->buildUrl() function within the PHP code
  * so that we do not have to pass in fully built URL to JS functions, but rather
@@ -2626,6 +2628,9 @@ function checkSidebarCollapse() {
     var size = $(document.body).width();
     if (size < 1000) {
         $("#sidebar").toggleClass("collapsed", true);
+    }
+    else{
+        $("#sidebar").toggleClass("collapsed", false);
     }
 }
 
