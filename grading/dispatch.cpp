@@ -952,7 +952,15 @@ TestResults* dispatch::errorIfNotEmpty_doit (const TestCase &tc, const nlohmann:
   if (!openStudentFile(tc,j,student_file_contents,messages)) {
     return new TestResults(0.0,messages);
   }
-  if (j.find("jvm_memory") != j.end() && j["jvm_memory"] == true &&
+
+  // FIXME: this logic was the right idea, but since we don't
+  // automatically add the error version, the jvm_memory flag is not
+  // being inserted.  I don't want to make the instructor add this
+  // flag manually when they manually insert this validation check.
+  // Checking for this flag is not strictly necessary, but we should
+  // revisit this in the upcoming refactor.
+  
+  if (//j.find("jvm_memory") != j.end() && j["jvm_memory"] == true &&
       JavaToolOptionsCheck(student_file_contents)) {
     return new TestResults(1.0);
   }
