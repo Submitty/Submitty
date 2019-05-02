@@ -39,10 +39,10 @@ python3 ${DIR}/../bin/create_untrusted_users.py
 addgroup submitty_daemonphp
 addgroup submitty_daemoncgi
 addgroup submitty_course_builders
-useradd -c "First Last,RoomNumber,WorkPhone,HomePhone" ${PHP_USER}
-useradd -c "First Last,RoomNumber,WorkPhone,HomePhone" ${CGI_USER}
+useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" ${PHP_USER}
+useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" ${CGI_USER}
 usermod -a -G ${PHP_GROUP} ${CGI_USER}
-useradd -c "First Last,RoomNumber,WorkPhone,HomePhone" submitty_daemon
+useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" submitty_daemon
 usermod -a -G submitty_daemonphp ${PHP_USER}
 usermod -a -G submitty_daemoncgi ${CGI_USER}
 usermod -a -G submitty_daemoncgi,submitty_daemonphp,docker submitty_daemon
@@ -64,7 +64,7 @@ ${AUTH_METHOD}" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --
 
 bash -c "echo 'export PATH=${PATH}' >> /home/${PHP_USER}/.bash_profile"
 bash -c "echo 'export PATH=${PATH}' >> /home/${PHP_USER}/.bashrc"
-bash -c "echo 'export PATH=${PATH}' >> /home/${DAEMON_USER}/.bashrc"
+bash -c "echo 'export PATH=${PATH}' >> /home/${DAEMON_USER}/.bash_profile"
 bash -c "echo 'export PATH=${PATH}' >> /home/${DAEMON_USER}/.bashrc"
 # necessary so that PHP_USER has access to /home/travis/.phpenv/shims/composer
 usermod -a -G travis ${PHP_USER}
