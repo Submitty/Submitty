@@ -10,11 +10,10 @@
                 <select name="g_id" id="g_id" onchange="loadHomeworkExtensions($(this).val(),$(this).find('option:selected').attr('data-due-date'));" style="margin-top: 10px; width: 50%">
                     <option disabled selected value> -- select an option -- </option>
                     {% for index, value in gradeables %}
-                        <option value="{{value['g_id']}}" data-due-date="{{value['eg_submission_due_date']}}">{{ value['g_title'] }}</option>
+                        <option value="{{value['g_id']}}" data-due-date="{{value['eg_submission_due_date']|date("m/d/Y H:i:s")}}">{{ value['g_title'] }}</option>
                     {% endfor %}
                 </select>
-                <p>Due Date: </p>
-                <p id ="due_date"></p>
+                <p>Due Date: <span id ="due_date"></span></p>
             </div>
         </div>
         <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
@@ -63,7 +62,11 @@
                 var due_date_value = document.getElementById("due_date").innerHTML.substr(0,10);
                 var new_due_date = new Date(selectedDates[0]);
                 var old_due_date = new Date(due_date_value);
-                var diff = Math.floor(Math.abs(new_due_date - old_due_date) / (1000*60*60*24));
+                var delta = (new_due_date - old_due_date) / (1000*60*60*24);
+                if (delta < 0) {
+                    delta = 0;
+                }
+                var diff = Math.floor(delta);
                 document.getElementById("late_days").value = diff;
             },
         });
