@@ -68,8 +68,7 @@ Please email your instructor with any questions or concerns.';
             $email_data = [
                 "subject" => $this->replacePlaceholders($seating_assignment_subject, $room_seating_json),
                 "body" => $this->replacePlaceholders($seating_assignment_body, $room_seating_json),
-                "recipient" => $user_email,
-                "type" => 'seating_assignment'
+                "recipient" => $user_email
             ];
 
             $seating_assignment_email = new Email($this->core, $email_data);

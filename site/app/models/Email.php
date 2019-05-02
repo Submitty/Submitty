@@ -37,31 +37,8 @@ class Email extends AbstractModel {
         }
 
         $this->setRecipient($details["recipient"]);
-        switch($details["type"]){
-            case 'forum_announcement':
-                $this->handleForumAnnouncement($details["subject"], $details["body"]);
-                break;
-            case 'seating_assignment':
-                $this->handleSeatingAssignment($details["subject"], $details["body"]);
-                break;
-            default:
-                break;
-        }
-    }
-
-    private function handleForumAnnouncement($subject, $body) {
-        $formatted_subject = $this->formatSubject($subject);
-        $formatted_body = "An Instructor/TA made an announcement in the Submitty discussion forum:\n\n".$this->formatBody($body);
-
-        $this->setSubject($formatted_subject);
-        $this->setBody($formatted_body);
-    }
-
-    private function handleSeatingAssignment($subject, $body) {
-        $formatted_body = $this->formatBody($body);
-
-        $this->setSubject($subject);
-        $this->setBody($formatted_body);
+        $this->setSubject(formatSubject($details["subject"]));
+        $this->setBody(formatBody($details["body"]));
     }
 
     //inject course label into subject

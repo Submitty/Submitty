@@ -894,13 +894,13 @@ class ForumController extends AbstractController {
 
     private function sendEmailAnnouncement($thread_title, $thread_content) {
       $class_list = $this->core->getQueries()->getClassEmailList();
+      $formatted_body = "An Instructor/TA made an announcement in the Submitty discussion forum:\n\n".$thread_content;
 
       foreach($class_list as $student_email) {
           $email_data = array(
               "subject" => $thread_title,
-              "body" => $thread_content,
-              "recipient" => $student_email["user_email"],
-              "type" => 'forum_announcement'
+              "body" => $formatted_body,
+              "recipient" => $student_email["user_email"]
           );
 
           $announcement_email = new Email($this->core, $email_data);
