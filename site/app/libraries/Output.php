@@ -79,20 +79,20 @@ class Output {
     }
 
     public function setInternalResources() {
-        $this->addInternalCss('all.min.css', FileUtils::joinPaths('vendor', 'fontawesome', 'css'));
-        $this->addInternalCss('inconsolata.css', FileUtils::joinPaths('vendor', 'google'));
-        $this->addInternalCss('pt_sans.css', FileUtils::joinPaths('vendor', 'google'));
-        $this->addInternalCss('source_sans_pro.css', FileUtils::joinPaths('vendor', 'google'));
+        $this->addVendorCss(FileUtils::joinPaths('fontawesome', 'css', 'all.min.css'));
+        $this->addInternalCss(FileUtils::joinPaths('google', 'inconsolata.css'));
+        $this->addInternalCss(FileUtils::joinPaths('google', 'pt_sans.css'));
+        $this->addInternalCss(FileUtils::joinPaths('google', 'source_sans_pro.css'));
 
-        $this->addInternalCss('jquery-ui.min.css');
+        $this->addVendorCss(FileUtils::joinPaths('jquery-ui', 'jquery-ui.min.css'));
+        $this->addVendorCss(FileUtils::joinpaths('bootstrap', 'css', 'bootstrap-grid.min.css'));
         $this->addInternalCss('server.css');
         $this->addInternalCss('bootstrap.css');
-        $this->addInternalCss('bootstrap-grid.css');
         $this->addInternalCss('diff-viewer.css');
         $this->addInternalCss('glyphicons-halflings.css');
 
-        $this->addInternalJs('jquery.min.js');
-        $this->addInternalJs('jquery-ui.min.js');
+        $this->addVendorJs(FileUtils::joinPaths('jquery', 'jquery.min.js'));
+        $this->addVendorJs(FileUtils::joinPaths('jquery-ui', 'jquery-ui.min.js'));
         $this->addInternalJs('diff-viewer.js');
         $this->addInternalJs('server.js');
     }
@@ -392,7 +392,11 @@ class Output {
         $this->addCss($this->core->getConfig()->getBaseUrl().$folder."/".$file, $timestamp);
     }
     
- 
+    public function addVendorCss($file) {
+        $timestamp = filemtime(FileUtils::joinPaths(__DIR__, '..', '..', 'public', 'vendor', $file));
+        $this->addCss($this->core->getConfig()->getBaseUrl()."vendor/".$file, $timestamp);
+    }
+
     public function addCss($url, $timestamp=0) {
         $this->css[] = $url.(($timestamp !== 0) ? "?v={$timestamp}" : '');
     }
@@ -400,6 +404,11 @@ class Output {
     public function addInternalJs($file, $folder='js') {
         $timestamp = filemtime(FileUtils::joinPaths(__DIR__, '..', '..', 'public', $folder, $file));
         $this->addJs($this->core->getConfig()->getBaseUrl().$folder."/".$file, $timestamp);
+    }
+
+    public function addVendorJs($file) {
+        $timestamp = filemtime(FileUtils::joinPaths(__DIR__, '..', '..', 'public', 'vendor', $file));
+        $this->addJs($this->core->getConfig()->getBaseUrl()."vendor/".$file, $timestamp);
     }
 
     public function addJs($url, $timestamp=0) {

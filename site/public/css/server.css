@@ -1,5 +1,5 @@
 @import url("reset.css");
-@import url("../vendor/google/inconsolata.css");
+@import url("google/inconsolata.css");
 
 html {
     height: 100%;
@@ -1010,6 +1010,8 @@ tbody.collapse.in {
   background-image: none;
   filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
 }
+
+.show > .dropdown-menu,
 .open > .dropdown-menu {
   display: block;
 }
@@ -1063,6 +1065,7 @@ tbody.collapse.in {
     border-radius: 6px 0 6px 6px;
 }
 
+.show > a,
 .open > a {
   outline: 0;
 }
@@ -1109,6 +1112,7 @@ tbody.collapse.in {
 }
 .btn-primary:active,
 .btn-primary.active,
+.show > .dropdown-toggle.btn-primary,
 .open > .dropdown-toggle.btn-primary {
   color: #fff;
   background-color: #286090;
@@ -1116,12 +1120,15 @@ tbody.collapse.in {
 }
 .btn-primary:active:hover,
 .btn-primary.active:hover,
+.show > .dropdown-toggle.btn-primary:hover,
 .open > .dropdown-toggle.btn-primary:hover,
 .btn-primary:active:focus,
 .btn-primary.active:focus,
+.show > .dropdown-toggle.btn-primary:focus,
 .open > .dropdown-toggle.btn-primary:focus,
 .btn-primary:active.focus,
 .btn-primary.active.focus,
+.show > .dropdown-toggle.btn-primary.focus,
 .open > .dropdown-toggle.btn-primary.focus {
   color: #fff;
   background-color: #204d74;
@@ -1129,6 +1136,7 @@ tbody.collapse.in {
 }
 .btn-primary:active,
 .btn-primary.active,
+.show > .dropdown-toggle.btn-primary,
 .open > .dropdown-toggle.btn-primary {
   background-image: none;
 }
@@ -2006,4 +2014,10 @@ end of styles used in the admin gradeable page
     max-height: 300px;
     overflow-y: scroll;
     overflow-x: hidden;
+}
+
+/* Override the -15px that bootstrap-grid.css sets for these */
+.row {
+    margin-right: 0px;
+    margin-left: 0px;
 }
