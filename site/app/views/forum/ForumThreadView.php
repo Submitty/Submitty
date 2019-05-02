@@ -427,9 +427,10 @@ HTML;
 HTML;
 
 		}
-          
-		$this->core->getQueries()->visitThread($user, $activeThread['id']);
-		return $return;
+        if ( !empty($activeThread['id']) ) {
+            $this->core->getQueries()->visitThread($user, $activeThread['id']);
+        }
+        return $return;
 	}
 
 	public function generatePostList($currentThread, $posts, $unviewed_posts, $currentCourse, $includeReply = false, $threadExists = false, $display_option = 'time', $categories = [], $cookieSelectedCategories = [], $cookieSelectedThreadStatus = [], $cookieSelectedUnread = [], $currentCategoriesIds = [], $isCurrentFavorite = false) {
