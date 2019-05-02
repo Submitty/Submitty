@@ -762,7 +762,8 @@ HTML;
             "checkout" => $checkout,
             "results" => $results,
             "results_public" => $results_public,
-            "site_url" => $this->core->getConfig()->getSiteUrl()
+            "site_url" => $this->core->getConfig()->getSiteUrl(),
+            "active_version" => $display_version
         ]);
     }
 
