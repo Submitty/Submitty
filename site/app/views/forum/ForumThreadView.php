@@ -427,7 +427,7 @@ HTML;
 HTML;
 
 		}
-        if ( empty($activeThread['id']) ) {
+        if ( !empty($activeThread['id']) ) {
             $this->core->getQueries()->visitThread($user, $activeThread['id']);
         }
         return $return;
