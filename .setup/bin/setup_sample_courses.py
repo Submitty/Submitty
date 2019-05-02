@@ -1065,11 +1065,14 @@ class Course(object):
 
     def add_sample_forum_data(self):
         #set sample course to have forum enabled by default
-        config = configparser.ConfigParser()
-        config.read(os.path.join(self.course_path, "config", "config.ini"))
-        config.set("course_details", "forum_enabled", "true")
-        with open(os.path.join(self.course_path, "config", "config.ini"), 'w') as configfile:
-            config.write(configfile)
+        course_json_file = os.path.join(self.course_path, 'config', 'config.json')
+        with open(course_json_file, 'r+') as open_file:
+            course_json = json.load(open_file)
+            course_json['course_details']['forum_enabled'] = True
+            open_file.seek(0)
+            open_file.truncate()
+            json.dump(course_json, open_file, indent=2)
+
         f_data = (self.getForumDataFromFile('posts.txt'), self.getForumDataFromFile('threads.txt'), self.getForumDataFromFile('categories.txt'))
         forum_threads = Table("threads", self.metadata, autoload=True)
         forum_posts = Table("posts", self.metadata, autoload=True)
