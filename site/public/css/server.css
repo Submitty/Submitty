@@ -1541,7 +1541,7 @@ div.full_height {
     list-style-type: none;
     margin: 0;
     padding: 0;
-    width: 60%;
+    width: 65%;
 }
 
 #ui-category-list li {
@@ -2046,6 +2046,7 @@ end of styles used in the admin gradeable page
     width: 100%;
     max-height: 300px;
 }
+
 #details-legend > li{
     list-style: none;
     padding-left: 15px;
