@@ -10,6 +10,10 @@ use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\models\User;
 
+//Enable us to throw, catch, and handle exceptions as needed.
+use app\exceptions\ValidationException;
+use app\exceptions\DatabaseException;
+
 class UsersController extends AbstractController {
     public function run() {
         switch ($_REQUEST['action']) {
@@ -37,10 +41,10 @@ class UsersController extends AbstractController {
                 $this->updateRotatingSections();
                 break;
             case 'upload_grader_list':
-                $this->uploadGraderList();
+                $this->uploadUserList("graderlist");
                 break;
             case 'upload_class_list':
-                $this->uploadClassList();
+                $this->uploadUserList("classlist");
                 break;
             case 'students':
             default:
@@ -462,18 +466,47 @@ class UsersController extends AbstractController {
         $this->core->redirect($return_url);
     }
 
-    private function getCsvOrXlsxData($filename, $tmp_name, $return_url) {
+    /**
+     * Parse uploaded users data file as either XLSX or CSV, and return its data
+     *
+     * @param string $filename  Original name of uploaded file
+     * @param string $tmp_name  PHP assigned unique name and path of uploaded file
+     * @param string $return_url
+     *
+     * @return array $contents  Data rows and columns read from xlsx or csv file
+     */
+    private function getUserDataFromUpload($filename, $tmp_name, $return_url) {
+        // Data is confidential, and therefore must be deleted immediately after
+        // this process ends, regardless if process completes successfully or not.
+        register_shutdown_function(
+            function() use (&$csv_file, &$xlsx_file) {
+                foreach (array($csv_file, $xlsx_file) as $file) {
+                    if (isset($file) && file_exists($file)) {
+                        unlink($file);
+                    }
+                }
+            }
+        );
+
         $content_type = FileUtils::getContentType($filename);
         $mime_type = FileUtils::getMimeType($tmp_name);
 
+        // If an XLSX spreadsheet is uploaded.
         if ($content_type === 'spreadsheet/xlsx' && $mime_type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-            $csv_file = sys_get_temp_dir() . '/' . Utils::generateRandomString();
-            $xlsx_file = sys_get_temp_dir() . '/' . Utils::generateRandomString();
-            $old_umask = umask(0007);
+            // Declare tmp file paths with unique file names.
+            $csv_file = FileUtils::joinPaths($this->core->getConfig()->getCgiTmpPath(), uniqid("", true));
+            $xlsx_file = FileUtils::joinPaths($this->core->getConfig()->getCgiTmpPath(), uniqid("", true));
+
+            // This is to create tmp files and set permissions to RW-RW----
+            // chmod() is disabled by security policy, so we are using umask().
+            $old_umask = umask(0117);
             file_put_contents($csv_file, "");
+            $did_move = move_uploaded_file($tmp_name, $xlsx_file);
             umask($old_umask);
 
-            if (move_uploaded_file($tmp_name, $xlsx_file)) {
+            if ($did_move) {
+                // exec() and similar functions are disabled by security policy,
+                // so we are using a python script via CGI to invoke external program 'xlsx2csv'
                 $xlsx_tmp = basename($xlsx_file);
                 $csv_tmp = basename($csv_file);
                 $ch = curl_init();
@@ -500,295 +533,298 @@ class UsersController extends AbstractController {
 
                 curl_close($ch);
             } else {
-                $this->core->addErrorMessage("Error isolating uploaded XLSX. Contact your sysadmin.");
+                $this->core->addErrorMessage("Did not properly recieve spreadsheet. Contact your sysadmin.");
                 $this->core->redirect($return_url);
             }
 
         } else if ($content_type === 'text/csv' && $mime_type === 'text/plain') {
             $csv_file = $tmp_name;
-            $xlsx_file = null;
         } else {
             $this->core->addErrorMessage("Must upload xlsx or csv");
             $this->core->redirect($return_url);
         }
 
-        register_shutdown_function(
-            function() use ($csv_file, $xlsx_file) {
-                if (file_exists($xlsx_file)) {
-                    unlink($xlsx_file);
-                }
-                if (file_exists($csv_file)) {
-                    unlink($csv_file);
-                }
-            }
-        );
-
-        //Set environment config to allow '\r' EOL encoding. (Used by older versions of Microsoft Excel on Macintosh)
+        // Parse user data (should be a CSV file either uploaded or converted from XLSX).
+        // First, set environment config to allow '\r' EOL encoding. (Used by Microsoft Excel on Macintosh)
         ini_set("auto_detect_line_endings", true);
 
-        $contents = file($csv_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-        if ($contents === false) {
+        // Read csv file as an entire string.
+        $user_data = file_get_contents($csv_file);
+
+        // Make sure read was successful.
+        if ($user_data === false) {
             $this->core->addErrorMessage("File was not properly uploaded. Contact your sysadmin.");
             $this->core->redirect($return_url);
         }
 
-        if ($content_type === 'spreadsheet/xlsx' && $mime_type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-            unset($contents[0]); //xlsx2csv will add a row to the top of the spreadsheet
-        }
+        // Remove UTF-8 BOM, if it exists.  Otherwise, it will cause a validation error on row 1, $val[0].
+        // First, define BOM (byte order mark).  Always hexadecimal EFBBBF.
+        // (note that EFBBBF is not printable)
+        $bom = hex2bin('EFBBBF');
 
-        return $contents;
+        // Remove BOM from $user_data.
+        $user_data = preg_replace("~^{$bom}~", "", $user_data);
+
+        // convert csv data string to array of $user_data[$rows][$vals].
+        $user_data = array_map('str_getcsv', str_getcsv($user_data, PHP_EOL));
+
+        // Remove all empty-data rows.  This should preserve original row number
+        // ordering, so error messaging refers to appropriately labeled row(s)
+        // in the spreadsheet / csv upload.
+        $user_data = array_filter($user_data, function($row) {
+            return !empty(array_filter($row, function($val) {
+                return !empty($val);
+            }));
+        });
+
+        //Apply trim() to all data values.
+        array_walk_recursive($user_data, function(&$val) {
+            $val = trim($val);
+        });
+
+        return $user_data;
     }
 
-    public function uploadGraderList() {
-        $return_url = $this->core->buildUrl(array('component'=>'admin', 'page'=>'users', 'action'=>'graders'));
-        $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
+    /**
+     * Upsert user list data to database
+     *
+     * @param string $list_type "classlist" or "graderlist"
+     */
+    public function uploadUserList($list_type = "classlist") {
+        // A few places have different behaviors depending on $list_type.
+        // These closure functions will help control those few times when
+        // $list_type dictates behavior.
 
-        if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
-            $this->core->addErrorMessage("Invalid CSRF token");
-            $this->core->redirect($return_url);
-        }
-
-        if ($_FILES['upload']['name'] == "") {
-            $this->core->addErrorMessage("No input file specified");
-            $this->core->redirect($return_url);
-        }
-
-        $contents = $this->getCsvOrXlsxData($_FILES['upload']['name'], $_FILES['upload']['tmp_name'], $return_url);
-
-        //Validation and error checking.
-        $pref_firstname_idx = $use_database ? 6 : 5;
-        $pref_lastname_idx = $pref_firstname_idx + 1;
-        $error_message = "";
-        $row_num = 0;
-        $graders_data = array();
-        foreach($contents as $content) {
-            $row_num++;
-            $vals = str_getcsv($content);
-            $vals = array_map('trim', $vals);
-            if (isset($vals[4])) $vals[4] = intval($vals[4]); //change float read from xlsx to int
-
-            //Username must contain only lowercase alpha, numbers, underscores, hyphens
-            $error_message .= User::validateUserData('user_id', $vals[0]) ? "" : "ERROR on row {$row_num}, User Name \"".strip_tags($vals[0])."\"<br>";
-
-            //First and Last name must be alpha characters, white-space, or certain punctuation.
-            $error_message .= User::validateUserData('user_legal_firstname', $vals[1]) ? "" : "ERROR on row {$row_num}, First Name \"".strip_tags($vals[1])."\"<br>";
-            $error_message .= User::validateUserData('user_legal_lastname', $vals[2]) ? "" : "ERROR on row {$row_num}, Last Name \"".strip_tags($vals[2])."\"<br>";
-
-            //Check email address for appropriate format. e.g. "grader@university.edu", "grader@cs.university.edu", etc.
-            $error_message .= User::validateUserData('user_email', $vals[3]) ? "" : "ERROR on row {$row_num}, email \"".strip_tags($vals[3])."\"<br>";
-
-            //grader-level check is a digit between 1 - 4.
-            $error_message .= User::validateUserData('user_group', $vals[4]) ? "" : "ERROR on row {$row_num}, Grader Group \"".strip_tags($vals[4])."\"<br>";
-
-            //Preferred first and last name must be alpha characters, white-space, or certain punctuation.
-            if (isset($vals[$pref_firstname_idx]) && ($vals[$pref_firstname_idx] !== "")) {
-                $error_message .= User::validateUserData('user_preferred_firstname', $vals[$pref_firstname_idx]) ? "" : "ERROR on row {$row_num}, Preferred First Name \"".strip_tags($vals[$pref_firstname_idx])."\"<br>";
-            }
-            if (isset($vals[$pref_lastname_idx]) && ($vals[$pref_lastname_idx] !== "")) {
-                $error_message .= User::validateUserData('user_preferred_lastname', $vals[$pref_lastname_idx]) ? "" : "ERROR on row {$row_num}, Preferred Last Name \"".strip_tags($vals[$pref_lastname_idx])."\"<br>";
-            }
-
-            //Database password cannot be blank, no check on format
-            if ($use_database) {
-                $error_message .= User::validateUserData('user_password', $vals[5]) ? "" : "ERROR on row {$row_num}, password cannot be blank<br>";
-            }
-
-            $graders_data[] = $vals;
-        }
-
-        //Display any accumulated errors.  Quit on errors, otherwise continue.
-        if (!empty($error_message)) {
-            $this->core->addErrorMessage($error_message." Contact your sysadmin if this should not cause an error.");
-            $this->core->redirect($return_url);
-        }
-
-        //Existing graders are not updated.
-        $existing_users = $this->core->getQueries()->getAllUsers();
-        $graders_to_add = array();
-        $graders_to_update = array();
-        foreach($graders_data as $grader_data) {
-            $exists = false;
-            foreach($existing_users as $i => $existing_user) {
-                if ($grader_data[0] === $existing_user->getId()) {
-                    if ($grader_data[4] !== $existing_user->getGroup()) {
-                        $graders_to_update[] = $grader_data;
-                    }
-                    unset($existing_users[$i]);
-                    $exists = true;
-                    break;
-                }
-            }
-            if (!$exists) {
-                $graders_to_add[] = $grader_data;
-            }
-        }
-
-        //Insert new graders to database
-        $semester = $this->core->getConfig()->getSemester();
-        $course = $this->core->getConfig()->getCourse();
-        foreach($graders_to_add as $grader_data) {
-            $grader = new User($this->core);
-            $grader->setId($grader_data[0]);
-            $grader->setLegalFirstName($grader_data[1]);
-            $grader->setLegalLastName($grader_data[2]);
-            $grader->setEmail($grader_data[3]);
-            $grader->setGroup($grader_data[4]);
-            if (isset($grader_data[$pref_firstname_idx]) && ($grader_data[$pref_firstname_idx] !== "")) {
-                $grader->setPreferredFirstName($grader_data[$pref_firstname_idx]);
-            }
-            if (isset($grader_data[$pref_lastname_idx]) && ($grader_data[$pref_lastname_idx] !== "")) {
-                $grader->setPreferredLastName($grader_data[$pref_lastname_idx]);
-            }
-
-            if ($use_database) {
-                $grader->setPassword($grader_data[5]);
-            }
-            if ($this->core->getQueries()->getSubmittyUser($grader_data[0]) === null) {
-                $this->core->getQueries()->insertSubmittyUser($grader);
-            }
-            $this->core->getQueries()->insertCourseUser($grader, $semester, $course);
-        }
-        foreach($graders_to_update as $grader_data) {
-            $grader = $this->core->getQueries()->getUserById($grader_data[0]);
-            $grader->setGroup($grader_data[4]);
-            $this->core->getQueries()->updateUser($grader, $semester, $course);
-        }
-
-        $added = count($graders_to_add);
-        $updated = count($graders_to_update);
-        $this->core->addSuccessMessage("Uploaded {$_FILES['upload']['name']}: ({$added} added, {$updated} updated)");
-        $this->core->redirect($return_url);
-    }
-
-    public function uploadClassList() {
-        $return_url = $this->core->buildUrl(array('component'=>'admin', 'page'=>'users', 'action'=>'students'));
-        $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
-
-        if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
-            $this->core->addErrorMessage("Invalid CSRF token");
-            $this->core->redirect($return_url);
-        }
-
-        if ($_FILES['upload']['name'] == "") {
-            $this->core->addErrorMessage("No input file specified");
-            $this->core->redirect($return_url);
-        }
-
-        $contents = $this->getCsvOrXlsxData($_FILES['upload']['name'], $_FILES['upload']['tmp_name'], $return_url);
-
-        //Validation and error checking.
-        $num_reg_sections = count($this->core->getQueries()->getRegistrationSections());
-        $pref_firstname_idx = $use_database ? 6 : 5;
-        $pref_lastname_idx = $pref_firstname_idx + 1;
-        $error_message = "";
-        $row_num = 0;
-        $students_data = array();
-        foreach($contents as $content) {
-            $row_num++;
-            $vals = str_getcsv($content);
-            $vals = array_map('trim', $vals);
-
-            if (isset($vals[4])) {
-                if (strtolower($vals[4]) === "null") {
+        /**
+         * Closure to validate $vals[4] depending on $list_type
+         *
+         * @return boolean true on successful validation, false otherwise.
+         */
+        $row4_validation_function = function() use ($list_type, &$vals) {
+            //$row[4] is different based on classlist vs graderlist
+            switch($list_type) {
+            case "classlist":
+                //student
+                if (isset($vals[4]) && strtolower($vals[4]) === "null") {
                     $vals[4] = null;
                 }
+                //Check registration for appropriate format. Allowed characters - A-Z,a-z,_,-
+                return User::validateUserData('registration_section', $vals[4]);
+            case "graderlist":
+                //grader
+                if (isset($vals[4]) && is_numeric($vals[4])) {
+                    $vals[4] = intval($vals[4]); //change float read from xlsx to int
+                }
+                //grader-level check is a digit between 1 - 4.
+                return User::validateUserData('user_group', $vals[4]);
+            default:
+                throw new ValidationException("Unknown classlist", array($list_type, '$row4_validation_function'));
             }
+        };
 
-            //Username must contain only lowercase alpha, numbers, underscores, hyphens
-            $error_message .= User::validateUserData('user_id', $vals[0]) ? "" : "ERROR on row {$row_num}, User Name \"".strip_tags($vals[0])."\"<br>";
-
-            //First and Last name must be alpha characters, white-space, or certain punctuation.
-            $error_message .= User::validateUserData('user_legal_firstname', $vals[1]) ? "" : "ERROR on row {$row_num}, First Name \"{$vals[1]}\"<br>";
-            $error_message .= User::validateUserData('user_legal_lastname', $vals[2]) ? "" : "ERROR on row {$row_num}, Last Name \"".strip_tags($vals[2])."\"<br>";
-
-            //Check email address for appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.
-            $error_message .= User::validateUserData('user_email', $vals[3]) ? "" : "ERROR on row {$row_num}, email \"".strip_tags($vals[3])."\"<br>";
-
-            //Check registration for appropriate format. Allowed characters - A-Z,a-z,_,-
-            $error_message .= User::validateUserData('registration_section', $vals[4]) ? "" : "ERROR on row {$row_num}, Registration Section \"".strip_tags($vals[4])."\"<br>";
-
-            //Preferred first and last name must be alpha characters, white-space, or certain punctuation.
-            if (isset($vals[$pref_firstname_idx]) && ($vals[$pref_firstname_idx] !== "")) {
-                $error_message .= User::validateUserData('user_preferred_firstname', $vals[$pref_firstname_idx]) ? "" : "ERROR on row {$row_num}, Preferred First Name \"".strip_tags($vals[$pref_firstname_idx])."\"<br>";
+        /**
+         * Closure to get (as return) either user's registration_section or group_id, based on $list-type
+         *
+         * @return string
+         */
+        $get_user_registration_or_group_function = function($user) use ($list_type) {
+            switch($list_type) {
+            case "classlist":
+                return $user->getRegistrationSection();
+            case "graderlist":
+                return (string)$user->getGroup();
+            default:
+                throw new ValidationException("Unknown classlist", array($list_type, '$get_user_registration_or_group_function'));
             }
-            if (isset($vals[$pref_lastname_idx]) && ($vals[$pref_lastname_idx] !== "")) {
-                $error_message .= User::validateUserData('user_preferred_lastname', $vals[$pref_lastname_idx]) ? "" : "ERROR on row {$row_num}, Preferred Last Name \"".strip_tags($vals[$pref_lastname_idx])."\"<br>";
+        };
+
+        /**
+         * Closure to set a user's registration_section or group_id based on $list_type)
+         */
+        $set_user_registration_or_group_function = function(&$user) use ($list_type, &$row) {
+            switch($list_type) {
+            case "classlist":
+                // Registration section has to exist, or a DB exception gets thrown on INSERT or UPDATE.
+                // ON CONFLICT clause in DB query prevents thrown exceptions when registration section already exists.
+                $this->core->getQueries()->insertNewRegistrationSection($row[4]);
+                $user->setRegistrationSection($row[4]);
+                $user->setGroup(4);
+                break;
+            case "graderlist":
+                $user->setGroup($row[4]);
+                break;
+            default:
+                throw new ValidationException("Unknown classlist", array($list_type, '$set_user_registration_or_group_function'));
             }
+        };
 
-            //Database password cannot be blank, no check on format
-            if ($use_database) {
-                $error_message .= User::validateUserData('user_password', $vals[5]) ? "" : "ERROR on row {$row_num}, password cannot be blank<br>";
+        /**
+         * Closure to INSERT or UPDATE user data based on $action
+         *
+         * @param string $action "insert" or "update"
+         */
+        $insert_or_update_user_function = function($action, $user) use (&$semester, &$course, &$uploaded_data, &$return_url) {
+            try {
+                switch($action) {
+                case 'insert':
+                    //User must first exist in Submitty before being enrolled to a course.
+                    //$uploaded_data[0] = authentication ID.
+                    if (is_null($this->core->getQueries()->getSubmittyUser($uploaded_data[0]))) {
+                        $this->core->getQueries()->insertSubmittyUser($user);
+                    }
+                    $this->core->getQueries()->insertCourseUser($user, $semester, $course);
+                    break;
+                case 'update':
+                    $this->core->getQueries()->updateUser($user, $semester, $course);
+                    break;
+                default:
+                    throw new ValidationException("Unknown DB operation", array($action, '$insert_or_update_user_function'));
+                    break;
+                }
             }
+            catch (DatabaseException $e) {
+                $this->core->addErrorMessage("Database Exception.  Please contact your sysadmin.");
+                $this->core->redirect($return_url);
+            }
+        };
 
-            $students_data[] = $vals;
-        }
+        /**
+         * Closure to determine $return_url action ("students" or "graders").
+         *
+         * @return string
+         */
+        $set_return_url_action_function = function() use ($list_type) {
+            switch($list_type) {
+            case "classlist":
+                return "students";
+            case "graderlist":
+                return "graders";
+            default:
+                throw new ValidationException("Unknown classlist", array($list_type, '$set_return_url_action_function'));
+            }
+        };
 
-        //Display any accumulated errors.  Quit on errors, otherwise continue.
-        if (!empty($error_message)) {
-            $this->core->addErrorMessage($error_message." Contact your sysadmin if this should not cause an error.");
+        $return_url = $this->core->buildUrl(array('component'=>'admin', 'page'=>'users', 'action'=>$set_return_url_action_function()));
+        $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
+
+        if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
+            $this->core->addErrorMessage("Invalid CSRF token");
             $this->core->redirect($return_url);
         }
 
-        //Existing students are not updated.
+        if ($_FILES['upload']['name'] == "") {
+            $this->core->addErrorMessage("No input file specified");
+            $this->core->redirect($return_url);
+        }
+
+        $uploaded_data = $this->getUserDataFromUpload($_FILES['upload']['name'], $_FILES['upload']['tmp_name'], $return_url);
+
+        // Validation and error checking.
+        $pref_firstname_idx = $use_database ? 6 : 5;
+        $pref_lastname_idx = $pref_firstname_idx + 1;
+        $bad_rows = array();
+        foreach($uploaded_data as $row_num => $vals) {
+            // Blacklist validation.  Validation fails if any test resolves as false.
+            switch(false) {
+            // Bounds check to ensure minimum required number of rows is present.
+            case count($vals) >= 5:
+            // Username must contain only lowercase alpha, numbers, underscores, hyphens
+            case User::validateUserData('user_id', $vals[0]):
+            // First and Last name must be alpha characters, white-space, or certain punctuation.
+            case User::validateUserData('user_legal_firstname', $vals[1]):
+            case User::validateUserData('user_legal_lastname', $vals[2]):
+            // Check email address for appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.
+            case User::validateUserData('user_email', $vals[3]):
+            // $row[4] validation varies by $list_type
+            // "classlist" validates registration_section, and "graderlist" validates user_group
+            case $row4_validation_function():
+            // Database password cannot be blank, no check on format.
+            // Automatically validate if NOT using database authentication (e.g. using PAM authentication).
+            case !$use_database || User::validateUserData('user_password', $row[5]):
+            // Preferred first and last name must be alpha characters, white-space, or certain punctuation.
+            // Automatically validate if not set (this field is optional).
+            case !isset($vals[$pref_firstname_idx]) || User::validateUserData('user_preferred_firstname', $vals[$pref_firstname_idx]):
+            case !isset($vals[$pref_lastname_idx])  || User::validateUserData('user_preferred_lastname',  $vals[$pref_lastname_idx] ):
+                // Validation failed somewhere.  Record which row failed.
+                // $row_num is zero based.  ($row_num+1) will better match spreadsheet labeling.
+                $bad_rows[] = ($row_num+1);
+                break;
+            }
+        }
+
+        // $bad_rows will contain rows with errors.  No errors to report when empty.
+        if (!empty($bad_rows)) {
+            $msg = "Error(s) on row(s) ";
+            array_walk($bad_rows, function($row_num) use (&$msg) {
+                $msg .= " {$row_num}";
+            });
+            $this->core->addErrorMessage($msg);
+            $this->core->redirect($return_url);
+        }
+
+        // Isolate existing users ($users_to_update[]) and new users ($users_to_add[])
         $existing_users = $this->core->getQueries()->getAllUsers();
-        $students_to_add = array();
-        $students_to_update = array();
-        foreach($students_data as $student_data) {
+        $users_to_add = array();
+        $users_to_update = array();
+        foreach($uploaded_data as $row) {
             $exists = false;
             foreach($existing_users as $i => $existing_user) {
-                if ($student_data[0] === $existing_user->getId()) {
-                    if ($student_data[4] !== $existing_user->getRegistrationSection()) {
-                        $students_to_update[] = $student_data;
+                if ($row[0] === $existing_user->getId()) {
+                    // Validate if this user has any data to update.
+                    // Did student registration section or grader group change?
+                    if ($row[4] !== $get_user_registration_or_group_function($existing_user)) {
+                        $users_to_update[] = $row;
                     }
-                    unset($existing_users[$i]);
                     $exists = true;
+                    //Unset this existing user.
+                    //Those that remain in this list are candidates to be moved to NULL reg section, later.
+                    unset($existing_users[$i]);
                     break;
                 }
             }
             if (!$exists) {
-                $students_to_add[] = $student_data;
+                $users_to_add[] = $row;
             }
         }
 
-        //Insert new students to database
+        // Insert new students to database
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        foreach($students_to_add as $student_data) {
-            $student = new User($this->core);
-            $student->setId($student_data[0]);
-            $student->setLegalFirstName($student_data[1]);
-            $student->setLegalLastName($student_data[2]);
-            $student->setEmail($student_data[3]);
-            $student->setRegistrationSection($student_data[4]);
-            $student->setGroup(4);
-            if (isset($student_data[$pref_firstname_idx]) && ($student_data[$pref_firstname_idx] !== "")) {
-                $student->setPreferredFirstName($student_data[$pref_firstname_idx]);
+        foreach($users_to_add as $uploaded_data) {
+            $user = new User($this->core);
+            $user->setId($uploaded_data[0]);
+            $user->setLegalFirstName($uploaded_data[1]);
+            $user->setLegalLastName($uploaded_data[2]);
+            $user->setEmail($uploaded_data[3]);
+            $set_user_registration_or_group_function($user);
+            if (isset($uploaded_data[$pref_firstname_idx]) && !empty($uploaded_data[$pref_firstname_idx])) {
+                $user->setPreferredFirstName($uploaded_data[$pref_firstname_idx]);
             }
-            if (isset($student_data[$pref_lastname_idx]) && ($student_data[$pref_lastname_idx] !== "")) {
-                $student->setPreferredLastName($student_data[$pref_lastname_idx]);
+            if (isset($uploaded_data[$pref_lastname_idx]) && !empty($uploaded_data[$pref_lastname_idx])) {
+                $user->setPreferredLastName($uploaded_data[$pref_lastname_idx]);
             }
             if ($use_database) {
-                $student->setPassword($student_data[5]);
+                $user->setPassword($uploaded_data[5]);
             }
-            if ($this->core->getQueries()->getSubmittyUser($student_data[0]) === null) {
-                $this->core->getQueries()->insertSubmittyUser($student);
-            }
-            $this->core->getQueries()->insertCourseUser($student, $semester, $course);
-        }
-        foreach($students_to_update as $student_data) {
-            $student = $this->core->getQueries()->getUserById($student_data[0]);
-            $student->setRegistrationSection($student_data[4]);
-            $this->core->getQueries()->updateUser($student, $semester, $course);
+            $insert_or_update_user_function('insert', $user);
         }
 
-        $added = count($students_to_add);
-        $updated = count($students_to_update);
+        // Existing users update
+        foreach($users_to_update as $row) {
+            $user = $this->core->getQueries()->getUserById($row[0]);
+            //Update registration section (student) or group (grader)
+            $set_user_registration_or_group_function($user);
+            $insert_or_update_user_function('update', $user);
+        }
+        $added = count($users_to_add);
+        $updated = count($users_to_update);
 
-        if (isset($_POST['move_missing'])) {
-            foreach($existing_users as $user) {
-                if ($user->getRegistrationSection() != null) {
-                    $user->setRegistrationSection(null);
-                    $this->core->getQueries()->updateUser($user, $semester, $course);
+        //Special case to move students to the NULL section with a classlist upload.
+        if ($list_type === "classlist" && isset($_POST['move_missing'])) {
+            foreach($existing_users as $existing_user) {
+                if (!is_null($existing_user->getRegistrationSection())) {
+                    $existing_user->setRegistrationSection(null);
+                    $insert_or_update_user_function('update', $existing_user);
                     $updated++;
                 }
             }
