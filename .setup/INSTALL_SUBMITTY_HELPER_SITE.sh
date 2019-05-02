@@ -83,7 +83,7 @@ cp ${NODE_FOLDER}/codemirror/theme/monokai.css ${VENDOR_FOLDER}/codemirror/theme
 cp ${NODE_FOLDER}/codemirror/theme/eclipse.css ${VENDOR_FOLDER}/codemirror/theme
 # flatpickr
 mkdir ${VENDOR_FOLDER}/flatpickr
-cp ${NODE_FOLDER}/flatpickr/dist/*.min.* ${VENDOR_FOLDER}/flatpickr
+cp ${NODE_FOLDER}/flatpickr/dist/* ${VENDOR_FOLDER}/flatpickr
 # jquery
 mkdir ${VENDOR_FOLDER}/jquery
 cp ${NODE_FOLDER}/jquery/dist/jquery.min.* ${VENDOR_FOLDER}/jquery
@@ -93,6 +93,7 @@ cp ${NODE_FOLDER}/jquery.are-you-sure/jquery.are-you-sure.js ${VENDOR_FOLDER}/jq
 # jquery-ui
 mkdir ${VENDOR_FOLDER}/jquery-ui
 cp ${NODE_FOLDER}/jquery-ui-dist/*.min.* ${VENDOR_FOLDER}/jquery-ui
+cp -R ${NODE_FOLDER}/jquery-ui-dist/images ${VENDOR_FOLDER}/jquery-ui/
 # jquery-ui-timepicker-addon
 mkdir ${VENDOR_FOLDER}/jquery-ui-timepicker-addon
 cp ${NODE_FOLDER}/jquery-ui-timepicker-addon/dist/*.min.* ${VENDOR_FOLDER}/jquery-ui-timepicker-addon
