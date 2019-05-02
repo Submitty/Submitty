@@ -327,8 +327,33 @@ class GlobalController extends AbstractController {
                 'csrf_token' => $this->core->getCsrfToken()
             ]);
         },  $wrapper_files);
+        // Get additional links to display in the global footer.
+        $footer_links = [];
+        $footer_links_json_file = FileUtils::joinPaths($this->core->getConfig()->getConfigPath(), "footer_links.json");
+        if (file_exists($footer_links_json_file)) {
+            $footer_links_json_data = file_get_contents($footer_links_json_file);
+            if ($footer_links_json_data !== false) {
+                $footer_links_json_data = json_decode($footer_links_json_data, true);
+                // Validate that every footer link ($row) has required columns: 'url' and 'title'.
+                // $row can also have an 'icon' column, but it is optional.
+                foreach ($footer_links_json_data as $row) {
+                    switch (false) {
+                    case array_key_exists('url', $row):
+                    case array_key_exists('title', $row):
+                        //Validation fail.  Exclude $row.
+                        continue;
+                    default:
+                        //Validation OK.  Include $row.
+                        if (isset($row['icon']) && !Utils::startsWith($row['icon'], "fa-")) {
+                            $row['icon'] = "fa-" . $row['icon'];
+                        }
+                        $footer_links[] = $row;
+                    }
+                }
+            }
+        }
         $runtime = $this->core->getOutput()->getRunTime();
-        return $this->core->getOutput()->renderTemplate('Global', 'footer', $runtime, $wrapper_urls);
+        return $this->core->getOutput()->renderTemplate('Global', 'footer', $runtime, $wrapper_urls, $footer_links);
     }
 
     private function routeEquals(string $a, string $b) {

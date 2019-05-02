@@ -1,10 +1,8 @@
 <?php
 namespace app\views\forum;
 
-use app\authentication\DatabaseAuthentication;
 use app\libraries\DateUtils;
 use app\views\AbstractView;
-use app\models\Course;
 use app\libraries\FileUtils;
 
 
@@ -39,7 +37,7 @@ HTML;
 			array(
 			"required_rank" => 4,
 			"display_text" => 'Create Thread',
-			"style" => 'position:relative;top:3px;',
+			"style" => 'position:relative;float:right;top:3px;',
 			"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))),
 			"optional_class" => '',
 			"title" => 'Create Thread',
@@ -48,7 +46,7 @@ HTML;
 			array(
 				"required_rank" => 4,
 				"display_text" => 'Back to Threads',
-				"style" => 'position:relative;top:3px;',
+				"style" => 'position:relative;float:right;top:3px;margin-right:5px;',
 				"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))),
 				"optional_class" => '',
 				"title" => 'Back to threads',
@@ -58,9 +56,11 @@ HTML;
 		);
 
 		$return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", [
-									"forum_bar_buttons" => $buttons,
+									"forum_bar_buttons_right" => $buttons,
+									"forum_bar_buttons_left" => [],
 									"show_threads" => false,
-									"thread_exists" => true
+									"thread_exists" => true,
+									"show_more" => false
 		]);
 
 		$return .= <<<HTML
@@ -159,7 +159,7 @@ HTML;
 		that have been created after applying filter and to be
 		displayed in the left panel.
 	*/
-	public function showForumThreads($user, $posts, $threadsHead, $show_deleted, $show_merged_thread, $display_option, $max_thread, $initialPageNumber) {
+	public function showForumThreads($user, $posts, $unviewed_posts, $threadsHead, $show_deleted, $show_merged_thread, $display_option, $max_thread, $initialPageNumber) {
 		if(!$this->forumAccess()){
 			$this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
 			return;
@@ -169,8 +169,9 @@ HTML;
 		$filteredThreadExists = (count($threadsHead)>0);
 		$currentThread = -1;
 		$currentCategoriesIds = array();
+		$show_deleted_thread_title = null;
 		$currentCourse = $this->core->getConfig()->getCourse();
-		$threadFiltering = $threadExists && !$filteredThreadExists && !(empty($_COOKIE[$currentCourse . '_forum_categories']) && empty($_COOKIE['forum_thread_status']));
+		$threadFiltering = $threadExists && !$filteredThreadExists && !(empty($_COOKIE[$currentCourse . '_forum_categories']) && empty($_COOKIE['forum_thread_status']) && empty($_COOKIE['unread_select_value']) === 'false');
 
 
 		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
@@ -186,6 +187,7 @@ HTML;
 		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/shell.js"></script>
 		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/jquery.are-you-sure.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 		<style>body {min-width: 925px;}</style>
 
 
@@ -196,6 +198,10 @@ HTML;
 			    enableTabsInTextArea('.post_content_reply');
 				saveScrollLocationOnRefresh('posts_list');
 				addCollapsable();
+				var b = $('#nav-buttons li a');
+				$.each(b, function(e) {
+					$(b[e]).tooltip('disable').attr('title', $(b[e]).attr('data-original-title'));
+				});
 				$('#{$display_option}').attr('checked', 'checked'); //Saves the radiobutton state when refreshing the page
 				$(".post_reply_from").submit(publishPost);
 				$("form").areYouSure();
@@ -220,9 +226,7 @@ HTML;
 		$show_merged_thread_action = "alterShowMergeThreadStatus(1,'" . $currentCourse . "');";
 		$show_merged_thread_title = "Show Merged Threads";
 	}
-	$return .= <<<HTML
-		<div class="full_height content forum_content forum_show_threads">
-HTML;
+
 	$show_deleted_class = '';
 	$show_deleted_action = '';
     $show_deleted_thread_title = '';
@@ -241,7 +245,9 @@ HTML;
 
 	$cookieSelectedCategories = array();
 	$cookieSelectedThreadStatus = array();
+	$cookieSelectedUnread = false;
 	$category_ids_array = array_column($categories, 'category_id');
+
 	if(!empty($_COOKIE[$currentCourse . '_forum_categories'])) {
 		foreach(explode('|', $_COOKIE[$currentCourse . '_forum_categories']) as $selectedId) {
 			if(in_array((int)$selectedId, $category_ids_array)) {
@@ -256,12 +262,15 @@ HTML;
 			}
 		}
 	}
+	if(!empty($_COOKIE['unread_select_value'])){
+		$cookieSelectedUnread = $_COOKIE['unread_select_value'];
+	}
 
 	$default_button = array(
 		array(
 			"required_rank" => 4,
 			"display_text" => 'Create Thread',
-			"style" => 'position:relative;top:3px;',
+			"style" => 'float:right;position:relative;top:3px;',
 			"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))),
 			"optional_class" => '',
 			"title" => 'Create Thread',
@@ -272,60 +281,98 @@ HTML;
 
 	$button_params = [
 								"current_thread" => $currentThread,
-								"forum_bar_buttons" => $default_button,
+								"forum_bar_buttons_right" => $default_button,
+								"forum_bar_buttons_left" => [],
 								"show_threads" => true,
-								"thread_exists" => true
+								"thread_exists" => true,
+								"show_more" => true
 	];
+	if($this->core->getUser()->accessGrading()){
+		if($show_deleted) {
+			$show_deleted_class = "active";
+			$show_deleted_action = "alterShowDeletedStatus(0);";
+			$show_deleted_thread_title = "Hide Deleted Threads";
+		} else {
+			$show_deleted_class = "";
+			$show_deleted_action = "alterShowDeletedStatus(1);";
+			$show_deleted_thread_title = "Show Deleted Threads";
+		}
+	}
 
-        if(!$threadExists){
-        $button_params["show_threads"] = false;
-        $button_params["thread_exists"] = false;
-        $return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", $button_params);
+	$return .= $this->core->getOutput()->renderTwigTemplate("forum/EditPostForm.twig");
+	$return .= $this->core->getOutput()->renderTwigTemplate("forum/HistoryForm.twig");
+
+	$return .= $this->core->getOutput()->renderTwigTemplate("forum/FilterForm.twig", [
+		"categories" => $categories,
+		"current_thread" => $currentThread,
+		"current_category_ids" => $currentCategoriesIds,
+		"current_course" => $currentCourse,
+		"cookie_selected_categories" => $cookieSelectedCategories,
+		"cookie_selected_thread_status" => $cookieSelectedThreadStatus,
+		"cookie_selected_unread_value" => $cookieSelectedUnread,
+		"display_option" => $display_option,
+		"thread_exists" => $threadExists
+	]);
+	
+	$return .= <<<HTML
+		<div class="full_height content forum_content forum_show_threads">
+HTML;
+
+	if(!$threadExists){
+		$button_params["show_threads"] = false;
+		$button_params["thread_exists"] = false;
+		$return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", $button_params);
 		$return .= <<<HTML
 						<h4 style="text-align:center;">A thread hasn't been created yet. Be the first to do so!</h4>
 				</div>
 HTML;
-		} else {
+	} else {
+		$more_data = array(
+					array(
+							"filter_option" => $display_option
+					),
+					array(
+							"display_text" => $show_merged_thread_title,
+							"id" => 'merge_thread',
+							"optional_class" => array(!empty($show_merged_thread_class), $show_merged_thread_class),
+							"title" => $show_merged_thread_title,
+							"onclick" => array(true, $show_merged_thread_action),
+							"link" => '#',
+							"required_rank" => 4
+						),
+					array(
+							"display_text" => $show_deleted_thread_title,
+							"optional_class" => array(!empty($show_deleted_class), $show_deleted_class),
+							"id" => 'delete',
+							"title" => $show_deleted_thread_title,
+							"link" => '#',
+							"onclick" => array(true, $show_deleted_action),
+							"required_rank" => 3
+						),
+					array(
+							"display_text" => 'Stats',
+							"id" => 'forum_stats',
+							"optional_class" => array(false, ''),
+							"title" => 'Forum Statistics',
+							"onclick" => array(false, ''),
+							"link" => $this->core->buildUrl(['component' => 'forum', 'page' => 'show_stats']),
+							"required_rank" => 2
+						)
+			);
+
 			$other_buttons = array(
 						array(
 							"required_rank" => 4,
-							"display_text" => $show_merged_thread_title,
-							"style" => 'position:relative;top:3px;display:inline-block;',
-							"link" => array(false),
-							"optional_class" => $show_merged_thread_class,
-							"title" => $show_merged_thread_title,
-							"onclick" => array(true, $show_merged_thread_action)
-						),
-						array(
-
-							"required_rank" => 3,
-							"display_text" => $show_deleted_thread_title,
-							"style" => 'position:relative;top:3px;display:inline-block;',
-							"link" => array(false),
-							"optional_class" => $show_deleted_class,
-							"title" => $show_deleted_thread_title,
-							"onclick" => array(true, $show_deleted_action)
-						),
-						array(
-							"required_rank" => 3,
-							"display_text" => 'Stats',
-							"style" => 'position:relative;top:3px;display:inline-block;',
-							"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))),
-							"optional_class" => '',
-							"title" => 'Show Stats',
-							"onclick" => array(true, 'resetScrollPosition();')
-						),
-						array(
-							"required_rank" => 4,
 							"display_text" => 'Filter',
-							"style" => 'position:relative;top:3px;display:inline-block;',
+							"style" => 'display:inline-block;',
 							"link" => array(false),
 							"optional_class" => '',
 							"title" => 'Filter Threads based on Categories',
 							"onclick" => array(true, "$('#category_wrapper').css('display','block');")
 						)
 			);
-					$button_params["forum_bar_buttons"] = array_merge($default_button, $other_buttons);
+					$button_params["more_data"] = $more_data;
+					$button_params["forum_bar_buttons_left"] = $other_buttons;
 					$return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", $button_params);
 					$next_page = $initialPageNumber + 1;
 					$prev_page = ($initialPageNumber == 1)?0:($initialPageNumber - 1);
@@ -333,25 +380,19 @@ HTML;
 					$return .= <<<HTML
 					<div style="position:relative; height:100%; overflow-y:hidden;" class="row">
 
-  						<div id="thread_list" style="max-height: 100%" class="col-3" prev_page="{$prev_page}" next_page="{$next_page}">
+						<div id="thread_list" style="overflow-y: auto; height:81vh;" class="col-3" prev_page="{$prev_page}" next_page="{$next_page}">
 						<i class="fas fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
 						<i class="fas fa-caret-up fa-2x fa-fw fill-available" style="color:gray;{$arrowup_visibility}" aria-hidden="true"></i>
 HTML;
 
 						$activeThreadAnnouncement = false;
 						$activeThreadTitle = "";
-						$function_date = 'date_format';
 						$activeThread = array();
 						$return .= $this->displayThreadList($threadsHead, false, $activeThreadAnnouncement, $activeThreadTitle, $activeThread, $currentThread, $currentCategoriesIds);
 						if(count($activeThread) == 0) {
 							$activeThread = $this->core->getQueries()->getThread($currentThread)[0];
 							$activeThreadTitle = $activeThread['title'];
 						}
-						$activeThreadTitle = htmlentities(html_entity_decode($activeThreadTitle, ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-
-						$thread_id = -1;
-						$userAccessToAnon = ($this->core->getUser()->getGroup() < 4) ? true : false;
-						$title_html = '';
 
 						$return .= <<<HTML
 						<i class="fas fa-caret-down fa-2x fa-fw fill-available" style="color:gray;" aria-hidden="true"></i>
@@ -366,11 +407,12 @@ HTML;
 							}
 						});
 					</script>
-					<div id="posts_list" style="margin-top:10px;max-height: 100%" class="col-9">
+					<div id="posts_list" style="overflow-y: auto; height:81vh;" class="col-9">
 HTML;
 
-		$currentThreadFavorite = array_values($currentThreadArr)[0]['favorite'];
-		$return .= $this->generatePostList($currentThread, $posts, $currentCourse, true, $threadExists, $display_option, $categories, $cookieSelectedCategories, $cookieSelectedThreadStatus, $currentCategoriesIds, $currentThreadFavorite);
+		$currentThreadArrValues = array_values($currentThreadArr);
+		$currentThreadFavorite = !empty($currentThreadArrValues) ? $currentThreadArrValues[0]['favorite'] : false;
+		$return .= $this->generatePostList($currentThread, $posts, $unviewed_posts, $currentCourse, true, $threadExists, $display_option, $categories, $cookieSelectedCategories, $cookieSelectedThreadStatus, $cookieSelectedUnread, $currentCategoriesIds, $currentThreadFavorite);
 
 		$return .= <<<HTML
 			<script>
@@ -386,18 +428,18 @@ HTML;
 
 		}
           
-
+		$this->core->getQueries()->visitThread($user, $activeThread['id']);
 		return $return;
 	}
 
-	public function generatePostList($currentThread, $posts, $currentCourse, $includeReply = false, $threadExists = false, $display_option = 'time', $categories = [], $cookieSelectedCategories = [], $cookieSelectedThreadStatus = [], $currentCategoriesIds = [], $isCurrentFavorite = false) {
+	public function generatePostList($currentThread, $posts, $unviewed_posts, $currentCourse, $includeReply = false, $threadExists = false, $display_option = 'time', $categories = [], $cookieSelectedCategories = [], $cookieSelectedThreadStatus = [], $cookieSelectedUnread = [], $currentCategoriesIds = [], $isCurrentFavorite = false) {
 
 		$return = '';
 		$title_html = '';
 
 		$activeThread = $this->core->getQueries()->getThread($currentThread)[0];
 
-		$activeThreadTitle = ($this->core->getUser()->getGroup() <= 2 ? "({$activeThread['id']}) " : '') . $activeThread['title'];
+		$activeThreadTitle = ($this->core->getUser()->accessFullGrading() ? "({$activeThread['id']}) " : '') . htmlentities($activeThread['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
 		$activeThreadAnnouncement = $activeThread['pinned'];
 
 		$thread_id = $activeThread['id'];
@@ -421,8 +463,7 @@ HTML;
 HTML;
                     } else if($this->core->getUser()->getGroup() <= 2 && !$activeThreadAnnouncement){
                         $title_html .= <<<HTML
-							<a style="position:relative; display:inline-block; color:orange; " onClick="alterAnnouncement({$activeThread['id']}, 'Are you sure you want to make this thread an announcement?', 'make_announcement')" title="Make thread an announcement"><i class="fas fa-star" title = "Make Announcement" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'gold')" style="position:relative; display:inline-block; color:#e0e0e0; -webkit-text-stroke-width: 1px;
-    -webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
+							<a style="position:relative; display:inline-block; color:orange; " onClick="alterAnnouncement({$activeThread['id']}, 'Are you sure you want to make this thread an announcement?', 'make_announcement')" title="Make thread an announcement"><i class="fas fa-star" title = "Make Announcement" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'gold')" style="position:relative; display:inline-block; color:#e0e0e0; -webkit-text-stroke-width: 1px; -webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
 HTML;
                     }
                     if($isCurrentFavorite) {
@@ -474,8 +515,7 @@ HTML;
 									} else {
 										$reply_level = $reply_level_array[$i];
 									}
-										
-									$return .= $this->createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level, $display_option, $includeReply);
+									$return .= $this->createPost($thread_id, $post, $unviewed_posts, $function_date, $title_html, $first, $reply_level, $display_option, $includeReply);
 									break;
 								}						
 							}
@@ -490,14 +530,14 @@ HTML;
 								$thread_id = $post["thread_id"];
 							}
                             $first_post_id = $this->core->getQueries()->getFirstPostForThread($thread_id)['id'];
-							$return .= $this->createPost($thread_id, $post, $function_date, $title_html, $first, 1, $display_option, $includeReply);		
+							$return .= $this->createPost($thread_id, $post, $unviewed_posts, $function_date, $title_html, $first, 1, $display_option, $includeReply);		
 							if($first){
 								$first= false;
 							}			
 						}
 					}
 			if($includeReply) {
-			$return .= <<<HTML
+				$return .= <<<HTML
 
 			<hr style="border-top:1px solid #999;margin-bottom: 5px;" />
 			
@@ -537,19 +577,6 @@ HTML;
 				"possibleMerges" => $merge_thread_list
 			]);
 		}
-		$return .= $this->core->getOutput()->renderTwigTemplate("forum/EditPostForm.twig");
-		$return .= $this->core->getOutput()->renderTwigTemplate("forum/HistoryForm.twig");
-
-		$return .= $this->core->getOutput()->renderTwigTemplate("forum/FilterForm.twig", [
-			"categories" => $categories,
-			"current_thread" => $currentThread,
-			"current_category_ids" => $currentCategoriesIds,
-			"current_course" => $currentCourse,
-			"cookie_selected_categories" => $cookieSelectedCategories,
-			"cookie_selected_thread_status" => $cookieSelectedThreadStatus,
-			"display_option" => $display_option,
-			"thread_exists" => $threadExists
-		]);
 
 		return $return;
 	}
@@ -566,12 +593,12 @@ HTML;
 					$used_active = false; //used for the first one if there is not thread_id set
 					$current_user = $this->core->getUser()->getId();
 					$display_thread_ids = $this->core->getUser()->getGroup() <= 2;
-					$start = 0;
+
 					$activeThreadAnnouncement = false;
 					$activeThreadTitle = "";
 					$function_date = 'date_format';
 					$activeThread = array();
-					$end = 10;
+
 					foreach($threads as $thread){
 						$first_post = $this->core->getQueries()->getFirstPostForThread($thread["id"]);
 						if(is_null($first_post)) {
@@ -599,16 +626,14 @@ HTML;
 							if($thread_id_p == -1)
 								$thread_id_p = $thread["id"];
 						}
-						if($this->core->getQueries()->viewedThread($current_user, $thread["id"])){
-							$class .= " viewed";
+						if(!$this->core->getQueries()->viewedThread($current_user, $thread["id"])){
+							$class .= " new_thread";
 						}
 						if($thread["deleted"]) {
 							$class .= " deleted";
 						}
-
 						//fix legacy code
 						$titleDisplay = html_entity_decode($thread['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-						$first_post_content = html_entity_decode($first_post['content'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
 						//replace tags from displaying in sidebar
 						$first_post_content = str_replace("[/code]", "", str_replace("[code]", "", strip_tags($first_post["content"])));
@@ -636,19 +661,17 @@ HTML;
 						$titleDisplay = ($display_thread_ids ? "({$thread['id']}) " : '') . $titleDisplay;
 						$titleDisplay = htmlentities($titleDisplay, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 						if($thread["current_user_posted"]) {
-							$icon = '<i class="fas fa-comments"></i> ';
+							$icon = '<i class="fas fa-comments" title="You have contributed"></i> ';
 							$titleDisplay = $icon . $titleDisplay;
 						}
-						$first_post_content = htmlentities($first_post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
 						$return .= <<<HTML
 						<a href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread['id']))}">
 						<div class="{$class}">
 HTML;
 						if($thread["pinned"] == true){
 							$return .= <<<HTML
-
-							<i class="fas fa-star" style="padding-left:3px;position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
-    -webkit-text-stroke-color: black;" title = "Announcement" aria-hidden="true"></i>
+							<i class="fas fa-star" style="padding-left:3px;position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px; -webkit-text-stroke-color: black;" title = "Announcement" aria-hidden="true"></i>
 HTML;
 						}
 						if(isset($thread['favorite']) && $thread['favorite']) {
@@ -739,7 +762,7 @@ HTML;
 				if(!empty($pre_post)){
 					$post_content = $pre_post;
 				}
-				$pre_post = "";
+
 				$pos++;
 			}
 		}
@@ -756,10 +779,10 @@ HTML;
 		return $post_content;
 	}
 
-	public function createPost($thread_id, $post, $function_date, $title_html, $first, $reply_level, $display_option, $includeReply){
+	public function createPost($thread_id, $post, $unviewed_posts, $function_date, $title_html, $first, $reply_level, $display_option, $includeReply){
 		$current_user = $this->core->getUser()->getId();
-		$post_html = "";
 		$post_id = $post["id"];
+
 		$thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
 
 		$date = DateUtils::parseDateTime($post["timestamp"], $this->core->getConfig()->getTimezone());
@@ -786,7 +809,11 @@ HTML;
 		if($first && $display_option != 'alpha'){
 			$classes .= " first_post";
 		}
-
+		if(in_array($post_id, $unviewed_posts)){
+			$classes .= " new_post";
+		} else {
+			$classes .= " viewed_post";
+		}
 		if($this->core->getQueries()->isStaffPost($post["author_user_id"])){
 			$classes .= " important";
 		}
@@ -821,23 +848,23 @@ HTML;
 		if($display_option == 'tree'){
 			if(!$first){
 				$return .= <<<HTML
-					<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="replyPost({$post['id']})"> Reply</a>
+					<a class="btn btn-default btn-sm post_button_color" style=" text-decoration: none;" onClick="replyPost({$post['id']})"> Reply</a>
 HTML;
 			} else {
 				$return .= <<<HTML
-					<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="$('html, #posts_list').animate({ scrollTop: document.getElementById('posts_list').scrollHeight }, 'slow');"> Reply</a>
+					<a class="btn btn-default btn-sm post_button_color" style=" text-decoration: none;" onClick="$('html, #posts_list').animate({ scrollTop: document.getElementById('posts_list').scrollHeight }, 'slow');"> Reply</a>
 HTML;
 			}
 			if($this->core->getUser()->getGroup() <= 3) {
 				$return .= <<<HTML
-					<a class="btn btn-default btn-sm" style=" text-decoration: none;" onClick="showHistory({$post['id']})">Show History</a>
+					<a class="btn btn-default btn-sm post_button_color" style=" text-decoration: none;" onClick="showHistory({$post['id']})">Show History</a>
 HTML;
 			}
 		}
 		if($includeReply && ($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) && $first && $thread_resolve_state == -1) {
 			//resolve button
 			$return .= <<<HTML
-				<a class="btn btn-default btn-sm" style="text-decoration: none;" onClick="changeThreadStatus({$post['thread_id']})" title="Mark thread as resolved">Mark as resolved</a>
+				<a class="btn btn-default btn-sm post_button_color" style="text-decoration: none;" onClick="changeThreadStatus({$post['thread_id']})" title="Mark thread as resolved">Mark as resolved</a>
 HTML;
 		}
 		$return .= <<<HTML
@@ -861,7 +888,7 @@ HTML;
 }
 		if(!$first){
 			$return .= <<<HTML
-				<a class="expand btn btn-default btn-sm" style="float:right; text-decoration:none; margin-top: -8px" onClick="hidePosts(this, {$post['id']})"></a>
+				<a class="expand btn btn-default btn-sm post_button_color" style="float:right; text-decoration:none; margin-top: -8px" onClick="hidePosts(this, {$post['id']})"></a>
 HTML;
 		}
 		if($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) {
@@ -880,7 +907,6 @@ HTML;
 		}
 		if($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) {
 			$shouldEditThread = null;
-			$edit_button_title = "";
 			if($first) {
 				$shouldEditThread = "true";
 				$edit_button_title = "Edit thread and post";
@@ -916,7 +942,7 @@ HTML;
 				$name = rawurlencode($file['name']);
 				$name_display = htmlentities(rawurldecode($file['name']), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 				$return .= <<<HTML
-					<a href="#" style="text-decoration:none;display:inline-block;white-space: nowrap;" class="btn-default btn-sm" onclick="openFileForum('forum_attachments', '{$name}', '{$path}')" > {$name_display} </a>
+					<a href="#" style="text-decoration:none;display:inline-block;white-space: nowrap;" class="btn-default btn-sm post_button_color" onclick="openFileForum('forum_attachments', '{$name}', '{$path}')" > {$name_display} </a>
 HTML;
 			}					
 		}
@@ -986,7 +1012,7 @@ HTML;
 		array(
 			"required_rank" => 4,
 			"display_text" => 'Back to Threads',
-			"style" => 'position:relative;top:3px;',
+			"style" => 'position:relative;top:3px;float:right;',
 			"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))),
 			"optional_class" => '',
 			"title" => 'Back to threads',
@@ -996,22 +1022,12 @@ HTML;
 
 	$thread_exists = $this->core->getQueries()->threadExists();
 
-	if($thread_exists) {
-		$buttons = array_merge($buttons, array(
-			"required_rank" => 3,
-			"display_text" => 'Stats',
-			"style" => 'position:relative;top:3px;display:inline-block;',
-			"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats'))),
-			"optional_class" => '',
-			"title" => 'Show Stats',
-			"onclick" => array(true, 'resetScrollPosition();')
-		));
-	}
-
 	$return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", [
-								"forum_bar_buttons" => $buttons,
+								"forum_bar_buttons_right" => $buttons,
+								"forum_bar_buttons_left" => [],
 								"show_threads" => false,
-								"thread_exists" => $thread_exists
+								"thread_exists" => $thread_exists,
+								"show_more" => false
 	]);
 
 
@@ -1047,8 +1063,13 @@ HTML;
 
 	public function statPage($users) {
 
-		if(!$this->forumAccess() || $this->core->getUser()->getGroup() > 3){
+		if(!$this->forumAccess()){
 			$this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
+			return;
+		}
+
+		if(!$this->core->getUser()->accessFullGrading()){
+			$this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
 			return;
 		}
 
@@ -1065,7 +1086,7 @@ HTML;
 			array(
 				"required_rank" => 4,
 				"display_text" => 'Back to Threads',
-				"style" => 'position:relative;top:3px;',
+				"style" => 'position:relative;float:right;top:3px;',
 				"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))),
 				"optional_class" => '',
 				"title" => 'Back to threads',
@@ -1076,7 +1097,8 @@ HTML;
 		$thread_exists = $this->core->getQueries()->threadExists();
 
 		$return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", [
-									"forum_bar_buttons" => $buttons,
+									"forum_bar_buttons_right" => $buttons,
+									"forum_bar_buttons_left" => [],
 									"show_threads" => false,
 									"thread_exists" => $thread_exists
 		]);
