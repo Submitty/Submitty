@@ -37,14 +37,14 @@ class Email extends AbstractModel {
         }
 
         $this->setRecipient($details["recipient"]);
-        $this->setSubject(formatSubject($details["subject"]));
-        $this->setBody(formatBody($details["body"]));
+        $this->setSubject($this->formatSubject($details["subject"]));
+        $this->setBody($this->formatBody($details["body"]));
     }
 
     //inject course label into subject
     private function formatSubject($subject) {
         $course = $this->core->getConfig()->getCourse();
-        return "[Submitty $course] ".$subject;
+        return "[Submitty $course]: ".$subject;
     }
 
     //inject a "do not reply" note in the footer of the body

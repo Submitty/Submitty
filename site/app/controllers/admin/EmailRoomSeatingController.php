@@ -10,7 +10,7 @@ use app\models\Email;
 
 
 class EmailRoomSeatingController extends AbstractController {
-    const DEFAULT_EMAIL_SUBJECT = '[Submitty {$course_name}]: Seating Assignment for {$gradeable_id}';
+    const DEFAULT_EMAIL_SUBJECT = 'Seating Assignment for {$gradeable_id}';
     const DEFAULT_EMAIL_BODY =
 'Hello,
 
