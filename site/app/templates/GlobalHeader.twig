@@ -57,12 +57,12 @@
                                 {{ b.getTitle() }}
                             {% endif %}
                             {% if b.getExternalUrl() is not empty %}
-                                <a class="external" href="{{ b.getExternalUrl() }}" target="_blank"><i class="fas fa-external-link-alt"></i></a>
+                                <a class="external" href="{{ b.getExternalUrl() }}" target="_blank" aria-label="Go to {{ b.getTitle() }}"><i class="fas fa-external-link-alt"></i></a>
                             {% endif %}
                         {% endfor %}
                     </div>
                 </div>
-                <a class="col-12 col-sm-auto" id="logo-box" href="http://submitty.org" target=_blank>
+                <a class="col-12 col-sm-auto" id="logo-box" href="http://submitty.org" target="_blank" aria-label="Visit submitty dot org">
                     <img id="logo-submitty" src="../img/submitty_logo.png" alt="Submitty Logo">
                 </a>
             </div>
