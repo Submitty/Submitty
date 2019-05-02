@@ -55,12 +55,12 @@
         <div id="gradeable_type_container" {{ action == 'edit' ? 'hidden' : '' }}>
             <div>
                 <input type='radio' id="radio_checkpoints" name="type" value="Checkpoints"
-                    {{ action != 'new' and gradeable.getType() == 1 ? 'checked' : '' }}> {{ gradeable_type_strings['checkpoint'] }}
+                    {{ action != 'new' and gradeable.getType() == 1 ? 'checked' : '' }}> <label for="radio_checkpoints"> {{ gradeable_type_strings['checkpoint'] }} </label>
             </div>
 
             <div>
                 <input type='radio' id="radio_numeric" name="type" value="Numeric"
-                    {{ action != 'new' and gradeable.getType() == 2 ? 'checked' : '' }}> {{ gradeable_type_strings['numeric'] }}
+                    {{ action != 'new' and gradeable.getType() == 2 ? 'checked' : '' }}> <label for="radio_numeric"> {{ gradeable_type_strings['numeric'] }} </label>
             </div>
 
             <div hidden>
@@ -74,17 +74,17 @@
 
             <div>
                 <input class="ignore" type="radio" id="radio_ef_student_upload" name="electronic_gradeable_presets" value="normal"
-                        {{ action != 'new' and not gradeable.isScannedExam() and not gradeable.isVcs() ? 'checked' : ''}}> {{ gradeable_type_strings['electronic_hw'] }}
+                        {{ action != 'new' and not gradeable.isScannedExam() and not gradeable.isVcs() ? 'checked' : ''}}> <label for="radio_ef_student_upload"> {{ gradeable_type_strings['electronic_hw'] }} </label>
             </div>
 
             <div>
                 <input class="ignore" type="radio" id="radio_ef_vcs_upload" name="electronic_gradeable_presets" value="vcs"
-                        {{ action != 'new' and not gradeable.isScannedExam() and gradeable.isVcs() ? 'checked' : ''}}> {{ gradeable_type_strings['electronic_hw_vcs'] }}
+                        {{ action != 'new' and not gradeable.isScannedExam() and gradeable.isVcs() ? 'checked' : ''}}> <label for="radio_ef_vcs_upload"> {{ gradeable_type_strings['electronic_hw_vcs'] }} </label>
             </div>
 
             <div>
                 <input class="ignore" type="radio" id="radio_ef_scanned_exam" name="electronic_gradeable_presets" value="scanned_exam"
-                        {{ action != 'new' and gradeable.isScannedExam() ? 'checked' : '' }}> {{ gradeable_type_strings['electronic_exam'] }}
+                        {{ action != 'new' and gradeable.isScannedExam() ? 'checked' : '' }}> <label for="radio_ef_scanned_exam"> {{ gradeable_type_strings['electronic_exam'] }} </label>
             </div>
         </div>
     </div>
