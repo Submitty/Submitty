@@ -3,11 +3,20 @@ import migrator
 
 
 class TestInit(unittest.TestCase):
-    def test_get_environments(self):
+    def test_get_all_environments(self):
         expected = ['master', 'system', 'course']
         self.assertListEqual(expected, migrator.ENVIRONMENTS)
-        self.assertListEqual(expected, migrator.get_environments())
-        self.assertEqual(migrator.ENVIRONMENTS, migrator.get_environments())
+        self.assertListEqual(expected, migrator.get_all_environments())
+        self.assertEqual(migrator.ENVIRONMENTS, migrator.get_all_environments())
+
+    def test_get_environments_empty(self):
+        self.assertEqual([], migrator.get_environments([]))
+
+    def test_get_environments_all(self):
+        self.assertEqual(
+            ['master', 'system', 'course'],
+            migrator.get_environments(['course', 'master', 'system'])
+        )
 
     def test_get_paths(self):
         self.assertEqual(migrator.DIR_PATH, migrator.get_dir_path())

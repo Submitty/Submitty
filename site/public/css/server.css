@@ -11,7 +11,9 @@ body {
     width: 100%;
     position: relative;
 }
-
+:root {
+    --viewed_content: #e8f1f8;
+}
 #site-body {
     /* OLD SEAFOAM GREEN COLOR */
     /* background-color: #B6CECE; */
@@ -109,6 +111,7 @@ a > i.far {
 a.btn {
     text-decoration: none;
 }
+
 
 /****************************
  * INPUT STYLES
@@ -393,8 +396,10 @@ table tr.table-header {
     font-size: 20px;
 }
 
-#header-text>h2:nth-child(2) {
-    padding-top: 25px;
+#header-text>div {
+    display: block;
+    font-size: 1.5em;
+    font-weight: bold;
 }
 
 .text-center {
@@ -436,7 +441,7 @@ table tr.table-header {
 }
 
 .content.gradeable_message {
-    background-color: #006398; 
+    background-color: #006398;
     color: white;
 }
 
@@ -484,26 +489,20 @@ table tr.table-header {
 
 #footer a {
     color: #000000;
+    text-decoration: none;
 }
 
 #footer a:hover {
     color: #405E90;
 }
 
-#footer #copyright {
-    margin-right: 5px;
+#footer .footer_seperator {
+    padding-right: 8px;
+    padding-left: 8px;
 }
 
-#footer #github {
-    margin-left: 5px;
-}
-
-#copyright > a {
-    color: #405E90;
-}
-
-#copyright > a:hover {
-    text-decoration: underline;
+#footer .footer_link_icon {
+    padding-right: 4px;
 }
 
 .sub {
@@ -709,15 +708,28 @@ table tr.table-header {
 }
 
 .active {
-    background-color: #d8eef6;
+    background-color: white;
+    /*    color: #4a4a4a;*/
+    border: 4px solid #276394;
 }
 
+.viewed_post{
+    background-color: white;
+}
+
+/* TODO: MAKE THIS CASCADE */
 .deleted {
-    background-color: #A9A9A9 !important;
+    background-color: #A9A9A9;
+    color: #4a4a4a;
 }
 
 .deleted.active {
-    background-color: #505050 !important;
+    background-color: #505050;
+}
+
+.new_post {
+    background-color: var(--viewed_content);
+    /*background-color: #d4e1f2;*/
 }
 
 .important {
@@ -727,8 +739,11 @@ table tr.table-header {
     border-color: #ffd700; /* gold */
 }
 
-.viewed {
-    color: #888888;
+.new_thread{
+    background-color: var(--viewed_content);
+}
+.btn-default.post_button_color{
+    background-color: inherit;
 }
 
 .box-title > h4 {
@@ -880,9 +895,267 @@ table tr.table-header {
 
 }
 
+.fade {
+  opacity: 0;
+  -webkit-transition: opacity .15s linear;
+       -o-transition: opacity .15s linear;
+          transition: opacity .15s linear;
+}
+.fade.in {
+  opacity: 1;
+}
+.collapse {
+  display: none;
+}
+.collapse.in {
+  display: block;
+}
+tr.collapse.in {
+  display: table-row;
+}
+tbody.collapse.in {
+  display: table-row-group;
+}
+.collapsing {
+  position: relative;
+  height: 0;
+  overflow: hidden;
+  -webkit-transition-timing-function: ease;
+       -o-transition-timing-function: ease;
+          transition-timing-function: ease;
+  -webkit-transition-duration: .35s;
+       -o-transition-duration: .35s;
+          transition-duration: .35s;
+  -webkit-transition-property: height, visibility;
+       -o-transition-property: height, visibility;
+          transition-property: height, visibility;
+}
+.caret {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: 2px;
+  vertical-align: middle;
+  border-top: 4px dashed;
+  border-top: 4px solid \9;
+  border-right: 4px solid transparent;
+  border-left: 4px solid transparent;
+}
+.dropup,
+.dropdown {
+  position: relative;
+}
+.dropdown-toggle:focus {
+  outline: 0;
+}
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  display: none;
+  float: left;
+  min-width: 160px;
+  padding: 5px 0;
+  margin: 2px 0 0;
+  font-size: 14px;
+  text-align: left;
+  list-style: none;
+  background-color: #fff;
+  -webkit-background-clip: padding-box;
+          background-clip: padding-box;
+  border: 1px solid #ccc;
+  border: 1px solid rgba(0, 0, 0, .15);
+  border-radius: 4px;
+  -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+          box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+}
+.dropdown-menu.pull-right {
+  right: 0;
+  left: auto;
+}
+.dropdown-menu .divider {
+  height: 1px;
+  margin: 9px 0;
+  overflow: hidden;
+  background-color: #e5e5e5;
+}
+.dropdown-menu > li > a {
+  display: block;
+  padding: 3px 20px;
+  text-decoration: none;
+  clear: both;
+  font-weight: normal;
+  line-height: 1.42857143;
+  color: #333;
+  white-space: nowrap;
+}
+.dropdown-menu > li > a:hover,
+.dropdown-menu > li > a:focus {
+  color: #262626;
+  text-decoration: none;
+  background-color: #f5f5f5;
+}
+
+.dropdown-menu > .disabled > a,
+.dropdown-menu > .disabled > a:hover,
+.dropdown-menu > .disabled > a:focus {
+  color: #777;
+}
+.dropdown-menu > .disabled > a:hover,
+.dropdown-menu > .disabled > a:focus {
+  text-decoration: none;
+  cursor: not-allowed;
+  background-color: transparent;
+  background-image: none;
+  filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
+}
+.open > .dropdown-menu {
+  display: block;
+}
+
+
+.dropdown-submenu {
+    position: relative;
+}
+
+.dropdown-submenu>.dropdown-menu {
+    top: 0;
+    left: 100%;
+    margin-top: -6px;
+    margin-left: -1px;
+    -webkit-border-radius: 0 6px 6px 6px;
+    -moz-border-radius: 0 6px 6px;
+    border-radius: 0 6px 6px 6px;
+}
+
+.dropdown-submenu:hover>.dropdown-menu {
+    display: block;
+}
+
+.dropdown-submenu>a:after {
+    display: block;
+    content: " ";
+    float: right;
+    width: 0;
+    height: 0;
+    border-color: transparent;
+    border-style: solid;
+    border-width: 5px 0 5px 5px;
+    border-left-color: #ccc;
+    margin-top: 5px;
+    margin-right: -10px;
+}
+
+.dropdown-submenu:hover>a:after {
+    border-left-color: #fff;
+}
+
+.dropdown-submenu.pull-left {
+    float: none;
+}
+
+.dropdown-submenu.pull-left>.dropdown-menu {
+    left: -100%;
+    margin-left: 10px;
+    -webkit-border-radius: 6px 0 6px 6px;
+    -moz-border-radius: 6px 0 6px 6px;
+    border-radius: 6px 0 6px 6px;
+}
+
+.open > a {
+  outline: 0;
+}
+.dropdown-menu-right {
+  right: 0;
+  left: auto;
+}
+.dropdown-menu-left {
+  right: auto;
+  left: 0;
+}
+.dropdown-header {
+  display: block;
+  padding: 3px 20px;
+  font-size: 12px;
+  line-height: 1.42857143;
+  color: #777;
+  white-space: nowrap;
+}
+.dropdown-backdrop {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 990;
+}
+
+.btn-primary {
+  color: #fff;
+  background-color: #337ab7;
+  border-color: #2e6da4;
+}
+.btn-primary:focus,
+.btn-primary.focus {
+  color: #fff;
+  background-color: #286090;
+  border-color: #122b40;
+}
+.btn-primary:hover {
+  color: #fff;
+  background-color: #286090;
+  border-color: #204d74;
+}
+.btn-primary:active,
+.btn-primary.active,
+.open > .dropdown-toggle.btn-primary {
+  color: #fff;
+  background-color: #286090;
+  border-color: #204d74;
+}
+.btn-primary:active:hover,
+.btn-primary.active:hover,
+.open > .dropdown-toggle.btn-primary:hover,
+.btn-primary:active:focus,
+.btn-primary.active:focus,
+.open > .dropdown-toggle.btn-primary:focus,
+.btn-primary:active.focus,
+.btn-primary.active.focus,
+.open > .dropdown-toggle.btn-primary.focus {
+  color: #fff;
+  background-color: #204d74;
+  border-color: #122b40;
+}
+.btn-primary:active,
+.btn-primary.active,
+.open > .dropdown-toggle.btn-primary {
+  background-image: none;
+}
+.btn-primary.disabled:hover,
+.btn-primary[disabled]:hover,
+fieldset[disabled] .btn-primary:hover,
+.btn-primary.disabled:focus,
+.btn-primary[disabled]:focus,
+fieldset[disabled] .btn-primary:focus,
+.btn-primary.disabled.focus,
+.btn-primary[disabled].focus,
+fieldset[disabled] .btn-primary.focus {
+  background-color: #337ab7;
+  border-color: #2e6da4;
+}
+.btn-primary .badge {
+  color: #337ab7;
+  background-color: #fff;
+}
+
+.panel-heading > .dropdown .dropdown-toggle {
+  color: inherit;
+}
+
 #forum_bar {
     margin-right: 10px;
-    margin-left: 10px;
+    padding-left:15px;
     margin-top: 10px;
 }
 
@@ -903,6 +1176,9 @@ table tr.table-header {
 .post_content {
     margin-right: 5px;
 }
+.post_viewed_btn {
+    background-color: #dcdcdcb5 !important;
+}
 
 .first_post .post_button {
 }
@@ -920,11 +1196,9 @@ table tr.table-header {
 .post_box {
     position: relative;
     box-shadow: 0 2px 15px -5px #888888;
-    padding:5px;
+    padding:7px;
     margin-top: 20px;
     word-wrap: break-word;
-    border-radius: 3px;
-    background-color:white;
     overflow-y: auto;
     overflow-x: hidden;
 }
@@ -936,7 +1210,6 @@ table tr.table-header {
 .first_post{
     padding-left: 10px !important;
     margin-top: 0px !important;
-    border-radius: 0 !important;
 }
 
 .thread_box {
@@ -1022,7 +1295,7 @@ table .instructor .two-options{
     display: flex;
     flex-direction: column;
 }
-    
+
 #nav-positioner {
     margin-left: -30px;
     flex-grow: 1;
@@ -1769,7 +2042,7 @@ end of styles used in the admin gradeable page
 }
 
 .scrollable-image{
-    overflow: auto; 
+    overflow: auto;
     width: 100%;
     max-height: 300px;
 }
@@ -1779,3 +2052,8 @@ end of styles used in the admin gradeable page
     font-size: 0.75em;
 }
 
+.ui-autocomplete{
+    max-height: 300px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
