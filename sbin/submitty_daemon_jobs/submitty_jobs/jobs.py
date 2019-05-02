@@ -9,7 +9,7 @@ import shutil
 import subprocess
 import json
 import stat
-import urllib.parse
+from urllib.parse import unquote
 
 from . import INSTALL_DIR, DATA_DIR
 
@@ -182,8 +182,8 @@ class BulkQRSplit(CourseJob):
         gradeable_id = self.job_details['g_id']
         filename = self.job_details['filename']
 
-        qr_prefix = urllib.parse.unquote(self.job_details['qr_prefix'])
-        qr_suffix = urllib.parse.unquote(self.job_details['qr_suffix'])
+        qr_prefix = unquote(unquote(self.job_details['qr_prefix']))
+        qr_suffix = unquote(unquote(self.job_details['qr_suffix']))
 
         qr_script = Path(INSTALL_DIR, 'sbin', 'bulk_qr_split.py')
         #create paths
