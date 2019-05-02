@@ -256,7 +256,7 @@ else
 fi
 
 if [ ${VAGRANT} == 1 ]; then
-	useradd vagrant sudo
+	usermod -aG sudo vagrant
 fi
 
 # change the default user umask (was 002)
