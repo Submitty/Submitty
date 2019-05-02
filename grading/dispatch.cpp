@@ -1335,11 +1335,6 @@ TestResults* dispatch::diff_doit (const TestCase &tc, const nlohmann::json& j) {
     vectorOfLines text_b = stringToLines( expected_file_contents, j );
     answer = ses(j, &text_a, &text_b, true, extraStudentOutputOk );
     ((Difference*)answer)->type = ByLineByChar;
-  } else if (comparison == std::string("byLinebyWord")) {
-    vectorOfWords text_a = stringToWords( student_file_contents );
-    vectorOfWords text_b = stringToWords( expected_file_contents );
-    answer = ses(j, &text_a, &text_b, true );
-    ((Difference*)answer)->type = ByLineByWord;
   } else if (comparison == std::string("byLine")) {
     if (lineSwapOk) {
       answer = diffLineSwapOk_doit(j,student_file_contents,expected_file_contents);
@@ -1347,7 +1342,7 @@ TestResults* dispatch::diff_doit (const TestCase &tc, const nlohmann::json& j) {
       vectorOfWords text_a = stringToWordsLimitLineLength( student_file_contents );
       vectorOfWords text_b = stringToWordsLimitLineLength( expected_file_contents );
       answer = ses(j, &text_a, &text_b, false );
-      ((Difference*)answer)->type = ByLineByWord;
+      ((Difference*)answer)->type = ByLineByChar;
     } else {
       vectorOfLines text_a = stringToLines( student_file_contents, j );
       vectorOfLines text_b = stringToLines( expected_file_contents, j );
