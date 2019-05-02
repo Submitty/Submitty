@@ -310,7 +310,7 @@ class ForumController extends AbstractController {
 
     public function publishThread(){
         $result = array();
-        $title = $_POST["title"];
+        $title = trim($_POST["title"]);
         $thread_post_content = str_replace("\r", "", $_POST["thread_post_content"]);
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
         if(empty($_POST['lock_thread_date'] and !DateUtils::validateTimestamp($_POST['lock_thread_date']))){

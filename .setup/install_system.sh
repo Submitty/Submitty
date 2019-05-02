@@ -734,15 +734,6 @@ if [ ${WORKER} == 0 ]; then
         else
             python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py --submission_url ${SUBMISSION_URL}
         fi
-        #################################################################
-        # SET CSV FIELDS (for classlist upload data)
-        #################
-        # Vagrant auto-settings are based on Rensselaer Polytechnic Institute School
-        # of Science 2015-2016.
-
-        # Other Universities will need to rerun /bin/setcsvfields to match their
-        # classlist csv data.  See wiki for details.
-        ${SUBMITTY_INSTALL_DIR}/sbin/setcsvfields.py 13 12 15 7
     fi
 fi
 

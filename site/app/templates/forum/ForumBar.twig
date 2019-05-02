@@ -38,7 +38,7 @@
 			<form id="search_block" method="post" action="{{ core.buildUrl({'component':'forum', 'page':'search_threads'}) }}">
 			<div class="row" style="position:relative; top:3px;">
 				<div style="padding:0px; margin-right:5px;" class="col-7">
-					<input style="width:100%; height:34px; " type="text" placeholder="Search here..." name="search_content" id="search_content"/>
+					<input style="width:100%; height:34px; " type="text" placeholder="Search here..." name="search_content" id="search_content" onchange="$(this).val($(this).val().trim())" required />
 				</div>
 				<div style="padding:0px;" class="col-4">
 					<button type="submit" name="search" title="Submit search" class="btn btn-primary">

@@ -952,7 +952,15 @@ TestResults* dispatch::errorIfNotEmpty_doit (const TestCase &tc, const nlohmann:
   if (!openStudentFile(tc,j,student_file_contents,messages)) {
     return new TestResults(0.0,messages);
   }
-  if (j.find("jvm_memory") != j.end() && j["jvm_memory"] == true &&
+
+  // FIXME: this logic was the right idea, but since we don't
+  // automatically add the error version, the jvm_memory flag is not
+  // being inserted.  I don't want to make the instructor add this
+  // flag manually when they manually insert this validation check.
+  // Checking for this flag is not strictly necessary, but we should
+  // revisit this in the upcoming refactor.
+  
+  if (//j.find("jvm_memory") != j.end() && j["jvm_memory"] == true &&
       JavaToolOptionsCheck(student_file_contents)) {
     return new TestResults(1.0);
   }
@@ -1327,11 +1335,6 @@ TestResults* dispatch::diff_doit (const TestCase &tc, const nlohmann::json& j) {
     vectorOfLines text_b = stringToLines( expected_file_contents, j );
     answer = ses(j, &text_a, &text_b, true, extraStudentOutputOk );
     ((Difference*)answer)->type = ByLineByChar;
-  } else if (comparison == std::string("byLinebyWord")) {
-    vectorOfWords text_a = stringToWords( student_file_contents );
-    vectorOfWords text_b = stringToWords( expected_file_contents );
-    answer = ses(j, &text_a, &text_b, true );
-    ((Difference*)answer)->type = ByLineByWord;
   } else if (comparison == std::string("byLine")) {
     if (lineSwapOk) {
       answer = diffLineSwapOk_doit(j,student_file_contents,expected_file_contents);
@@ -1339,7 +1342,7 @@ TestResults* dispatch::diff_doit (const TestCase &tc, const nlohmann::json& j) {
       vectorOfWords text_a = stringToWordsLimitLineLength( student_file_contents );
       vectorOfWords text_b = stringToWordsLimitLineLength( expected_file_contents );
       answer = ses(j, &text_a, &text_b, false );
-      ((Difference*)answer)->type = ByLineByWord;
+      ((Difference*)answer)->type = ByLineByChar;
     } else {
       vectorOfLines text_a = stringToLines( student_file_contents, j );
       vectorOfLines text_b = stringToLines( expected_file_contents, j );
