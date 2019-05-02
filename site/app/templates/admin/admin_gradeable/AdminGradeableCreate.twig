@@ -38,8 +38,7 @@
         </div>
 
         <div class="option-input col-md-6">
-            <textarea onkeyup="textAreaAdjust(this)" name='title' id='g_title' class="required auto_save" style="overflow:hidden"
-            value="{{action != 'new' ? gradeable.getTitle() : '' }}" placeholder="(Required)" required></textarea>
+            <textarea onkeyup="textAreaAdjust(this)" name='title' id='g_title' class="required auto_save" style="overflow:hidden" placeholder="(Required)" required>{{action != 'new' ? gradeable.getTitle() : '' }}</textarea>
         </div>
     </div>
 
