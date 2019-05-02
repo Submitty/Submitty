@@ -487,11 +487,8 @@ class DatabaseQueries {
 		return count($this->course_db->rows()) == 1;
     }
 
-    public function visitThread($current_user, $thread_id)
-    {
-        if ($thread_id != null) {
-            $this->course_db->query("INSERT INTO viewed_responses(thread_id,user_id,timestamp) VALUES(?, ?, current_timestamp) ON CONFLICT (thread_id, user_id) DO UPDATE SET timestamp = current_timestamp", array($thread_id, $current_user));
-        }
+    public function visitThread($current_user, $thread_id){
+        $this->course_db->query("INSERT INTO viewed_responses(thread_id,user_id,timestamp) VALUES(?, ?, current_timestamp) ON CONFLICT (thread_id, user_id) DO UPDATE SET timestamp = current_timestamp", array($thread_id, $current_user));
     }
     /**
      * Set delete status for given post and all descendant
