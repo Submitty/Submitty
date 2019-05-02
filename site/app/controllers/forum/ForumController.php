@@ -4,6 +4,7 @@ namespace app\controllers\forum;
 
 use app\libraries\Core;
 use app\models\Notification;
+use app\models\Email;
 use app\controllers\AbstractController;
 use app\libraries\Utils;
 use app\libraries\FileUtils;
@@ -903,21 +904,21 @@ class ForumController extends AbstractController {
         $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
     }
 
-    private function sendEmailAnnouncement($thread_title, $thread_content) { 
-            $course = $this->core->getConfig()->getCourse();
-            $formatted_subject = "[Submitty $course]: $thread_title";
+    private function sendEmailAnnouncement($thread_title, $thread_content) {
+      $class_list = $this->core->getQueries()->getClassEmailList();
+      $formatted_body = "An Instructor/TA made an announcement in the Submitty discussion forum:\n\n".$thread_content;
 
-            $email_data = [
-                "subject" => $formatted_subject,
-                "body" => $thread_content
-            ];
+      foreach($class_list as $student_email) {
+          $email_data = array(
+              "subject" => $thread_title,
+              "body" => $formatted_body,
+              "recipient" => $student_email["user_email"]
+          );
 
-            $class_list = $this->core->getQueries()->getClassEmailList();
+          $announcement_email = new Email($this->core, $email_data);
+          $this->core->getQueries()->createEmail($announcement_email);
+      }
 
-            foreach($class_list as $student_email) {
-                $this->core->getQueries()->createEmail($email_data, $student_email["user_email"]);
-            }
-
-        } 
+    }
 
 }

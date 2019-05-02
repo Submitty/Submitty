@@ -749,6 +749,7 @@ if [[ ${VAGRANT} == 1 ]]; then
     jq '.email_server_hostname |= "localhost"' ${SUBMITTY_INSTALL_DIR}/config/database.json > ${SUBMITTY_INSTALL_DIR}/config/database.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/database.tmp ${SUBMITTY_INSTALL_DIR}/config/database.json
     jq '.email_server_port |= 25' ${SUBMITTY_INSTALL_DIR}/config/database.json > ${SUBMITTY_INSTALL_DIR}/config/database.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/database.tmp ${SUBMITTY_INSTALL_DIR}/config/database.json
     jq '.email_logs_path |= "/var/local/submitty/logs/emails/"' ${SUBMITTY_INSTALL_DIR}/config/database.json > ${SUBMITTY_INSTALL_DIR}/config/database.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/database.tmp ${SUBMITTY_INSTALL_DIR}/config/database.json
+    jq '.email_reply_to |= "do-not-reply@vagrant"' ${SUBMITTY_INSTALL_DIR}/config/database.json > ${SUBMITTY_INSTALL_DIR}/config/database.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/database.tmp ${SUBMITTY_INSTALL_DIR}/config/database.json
     chown root:${DAEMONPHP_GROUP} ${SUBMITTY_INSTALL_DIR}/config/database.json
     chmod 440 ${SUBMITTY_INSTALL_DIR}/config/database.json
     rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/vagrant/nullsmtpd.service  /etc/systemd/system/nullsmtpd.service
