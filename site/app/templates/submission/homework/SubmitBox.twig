@@ -5,7 +5,7 @@
     <div class='content gradeable_message'><p>{{ gradeable_message|raw }}</p></div>
 {% endif %}
 
-<div class="content">    
+<div class="content">
     <div class="upperinfo">
         <h1 class="upperinfo-left">New submission for: {{ gradeable_name }}</h1>
         {% if has_due_date %}
@@ -24,12 +24,12 @@
         <form id="submissionForm" method="post" style="text-align: center; margin: 0 auto; width: 100%; ">
             <div >
                 <input type='radio' id="radio_normal" name="submission_type" checked="true">
-                Normal Submission
+                <label for="radio_normal">Normal Submission</label>
                 <input type='radio' id="radio_student" name="submission_type">
-                Make Submission for a Student
+                <label for="radio_student">Make Submission for a Student</label>
                 {% if part_names|length == 1 and not is_vcs %}
                     <input type='radio' id="radio_bulk" name="submission_type">
-                    Bulk Upload
+                    <label for="radio_bulk">Bulk Upload</label>
                 {% endif %}
             </div>
             <div id="user_id_input" style="display: none">
@@ -43,10 +43,10 @@
             </div>
             <div class = "sub" id="pdf_submit_button" style="display: none">
                 <div class="sub">
-                    Split by QR code? 
+                    Split by QR code?
                     <input type="checkbox" id="use_qr">
-                    <span id="pages_prompt"># of page(s) per PDF:</span> 
-                    <span id="prefix_prompt">QR code prefix/suffix: 
+                    <span id="pages_prompt"># of page(s) per PDF:</span>
+                    <span id="prefix_prompt">QR code prefix/suffix:
                     <a style="text-decoration:none;" href = "https://submitty.org/instructor/exams#bulk-upload-and-split-with-qr-codes" target="_none">
                         <i title="Bulk Upload QR Help" class="far fa-question-circle"></i>
                     </a>
@@ -364,7 +364,7 @@
 
 {% macro render_textbox(textbox, images, index) %}
     {% for image in textbox.images %}
-        <img src="{{ attribute(images, image.name) }}"
+        <img src="{{ attribute(images, image.name) }}" alt=""
         {% if image.width > 0 %}
             width="{{ image.width }}"
         {% endif %}
@@ -375,37 +375,23 @@
     {% endfor %}
 
     <p style="max-width: 50em;">
-        {{ textbox.label }}
+        <label for="textbox_{{ index }}">{{ textbox.label }}
         <br>
         {% if textbox.row_count == 0 %}
+            </label>
             <input type="text" name="textbox_{{ index }}" id="textbox_{{ index }}" onKeyPress="handle_textbox_keypress();">
         {% else %}
-            <textarea rows="{{ textbox.row_count }}" cols="50"  style="width:60em; height:100%;" name="textbox_{{ index }}" id="textbox_{{ index }}" onKeyPress="handle_textbox_keypress();"></textarea>
+            Press <kbd>TAB</kbd> to indent.  Press <kbd>ESC</kbd> to advance from textarea.</label>
+            <textarea rows="{{ textbox.row_count }}" cols="50"  style="width:60em; height:100%; min-height:110px;" name="textbox_{{ index }}" id="textbox_{{ index }}" onKeyPress="handle_textbox_keypress();"></textarea>
             {#
                 Allow tab in the larger text boxes (normally tab moves to the next textbox)
                 http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
+
+                q.v. function enableTabsInTextArea(jQuerySelector) in server.js
             #}
             <script>
-                $("#textbox_{{ index }}").keydown(function(e) {
-                    if(e.keyCode === 9) { // tab was pressed
-                        // get caret position/selection
-                        var start = this.selectionStart;
-                        var end = this.selectionEnd;
-                        var $this = $(this);
-                        var value = $this.val();
-                        // set textarea value to: text before caret + tab + text after caret
-                        $this.val(value.substring(0, start)
-                            + "\t"
-                            + value.substring(end));
-                        // put caret at right position again (add one for the tab)
-                        this.selectionStart = this.selectionEnd = start + 1;
-                        // prevent the focus lose
-                        e.preventDefault();
-                        e.stopPropagation();
-                        return false;
-                    }
-                });
-            </script>
+                enableTabsInTextArea('#textbox_{{ index }}');
+           </script>
         {% endif %}
     </p>
     <br>

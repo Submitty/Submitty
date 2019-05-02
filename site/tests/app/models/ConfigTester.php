@@ -24,7 +24,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             FileUtils::recursiveRmdir($this->temp_dir);
         }
     }
-    
+
     /**
      * This test ensures that the default value of the DEBUG flag within the config model is always false. This
      * means that if the value is not found within the json file, we don't have to worry about accidently
@@ -138,6 +138,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($this->temp_dir, $config->getSubmittyPath());
         $this->assertEquals($this->temp_dir."/courses/s17/csci0000", $config->getCoursePath());
         $this->assertEquals($this->temp_dir."/logs", $config->getLogPath());
+        $this->assertEquals(FileUtils::joinPaths($this->temp_dir, "tmp", "cgi"), $config->getCgiTmpPath());
         $this->assertTrue($config->shouldLogExceptions());
         $this->assertEquals("pgsql", $config->getDatabaseDriver());
         $db_params = array(
@@ -185,6 +186,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'course_path' => $this->temp_dir.'/courses/s17/csci0000',
             'submitty_log_path' => $this->temp_dir.'/logs',
             'log_exceptions' => true,
+            'cgi_tmp_path' => FileUtils::joinPaths($this->temp_dir, "tmp", "cgi"),
             'database_driver' => 'pgsql',
             'submitty_database_params' => $db_params,
             'course_database_params' => array_merge($db_params, array('dbname' => 'submitty_s17_csci0000')),
@@ -396,7 +398,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         try {
             $extra = array($section => null);
             $this->createConfigFile($extra);
-    
+
             $config = new Config($this->core, "s17", "csci0000");
             $config->loadCourseJson($this->course_json_path);
             $this->fail("Should have thrown ConfigException");
@@ -434,7 +436,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         try {
             $extra = [$section => [$setting => null]];
             $this->createConfigFile($extra);
-    
+
             $config = new Config($this->core, "s17", "csci0000");
             $config->loadCourseJson($this->course_json_path);
             $this->fail("Should have thrown ConfigException for {$section}.{$setting}");

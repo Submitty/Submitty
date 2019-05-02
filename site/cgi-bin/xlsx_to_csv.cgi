@@ -24,10 +24,19 @@ def print_error(message):
 def main():
     print("Content-type: text/html")
     print()
+	# Do a localhost check
+	ip_addr = cgi.escape(os.environ["REMOTE_ADDR"])
+	if ip_addr != "127.0.0.1" and ip_addr != "localhost":
+		print_error("Cannot be called from external host")
+		return
+
+    with open("/usr/local/submitty/config/submitty.json") as data:
+        config = json.load(data)
 
     args = cgi.FieldStorage()
-    xlsx_file = "/tmp/" + os.path.basename(args['xlsx_file'].value)
-    csv_file = "/tmp/" + os.path.basename(args['csv_file'].value)
+    temp_dir = os.path.join(config['submitty_data_dir'], "tmp", "cgi")
+    xlsx_file = os.path.join(temp_dir, os.path.basename(args['xlsx_file'].value))
+    csv_file = os.path.join(temp_dir, os.path.basename(args['csv_file'].value))
 
     if (not os.path.isfile(xlsx_file)):
         print_error("XLSX spreadsheet not found")
@@ -40,7 +49,10 @@ def main():
         return
 
     # XLSX to CSV conversion
-    xlsx2csv.Xlsx2csv(xlsx_file, outputencoding='utf-8', skip_empty_lines=True).convert(csv_file)
+    # We are not going to skip empty lines, as to do so would reorder row
+    # numbering.  We want to preserve row numbering for error messaging.
+    # The calling PHP script will appropriately handle empty rows.
+    xlsx2csv.Xlsx2csv(xlsx_file, outputencoding='utf-8', skip_empty_lines=False).convert(csv_file)
 
     # Validate result after conversion
     with open(csv_file, "r") as read_file:
