@@ -42,7 +42,7 @@ class LateController extends AbstractController {
     public function viewExtensions() {
         $this->core->getOutput()->addInternalJs('flatpickr.js');
         $this->core->getOutput()->addInternalCss('flatpickr.min.css');
-        $e_gradeables = $this->core->getQueries()->getAllElectronicGradeables();
+        $e_gradeables = $this->core->getQueries()->getAllElectronicGradeablesIds();
         $this->core->getOutput()->renderOutput(array('admin', 'Extensions'), 'displayExtensions', $e_gradeables);
     }
 

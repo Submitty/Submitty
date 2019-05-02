@@ -1636,7 +1636,7 @@ WHERE gcm_id=?", $params);
      *
      * @return array
      */
-    public function getAllElectronicGradeables() {
+    public function getAllElectronicGradeablesIds() {
         $this->course_db->query("
             SELECT gradeable.g_id, g_title, eg_submission_due_date
             FROM gradeable INNER JOIN electronic_gradeable 
