@@ -539,7 +539,11 @@ if [ ${WORKER} == 0 ]; then
         su postgres -c "source ${SUBMITTY_REPOSITORY}/.setup/vagrant/db_users.sh";
         echo "Finished creating PostgreSQL users"
 
-        sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" "/etc/postgresql/${PG_VERSION}/main/postgresql.conf"
+        # Set timezone to UTC instead of using localtime (which is probably ET)
+        sed -i "s/timezone = 'localtime'/timezone = 'UTC'/" /etc/postgresql/${PG_VERSION}/main/postgresql.conf
+
+        # Set the listen address to be global so that we can access the guest DB from the host
+        sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" /etc/postgresql/${PG_VERSION}/main/postgresql.conf
         service postgresql restart
     fi
 fi
@@ -730,15 +734,6 @@ if [ ${WORKER} == 0 ]; then
         else
             python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py --submission_url ${SUBMISSION_URL}
         fi
-        #################################################################
-        # SET CSV FIELDS (for classlist upload data)
-        #################
-        # Vagrant auto-settings are based on Rensselaer Polytechnic Institute School
-        # of Science 2015-2016.
-
-        # Other Universities will need to rerun /bin/setcsvfields to match their
-        # classlist csv data.  See wiki for details.
-        ${SUBMITTY_INSTALL_DIR}/sbin/setcsvfields.py 13 12 15 7
     fi
 fi
 

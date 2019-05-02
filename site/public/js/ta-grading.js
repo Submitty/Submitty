@@ -481,6 +481,10 @@ registerKeyHandler({name: "Toggle Grade Inquiry Panel", code: "KeyX"}, function(
     toggleRegrade();
     updateCookies();
 });
+registerKeyHandler({name: "Toggle Discussion Panel", code: "KeyD"}, function() {
+    toggleDiscussion();
+    updateCookies();
+});
 //-----------------------------------------------------------------------------
 // Show/hide components
 

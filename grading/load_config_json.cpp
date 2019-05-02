@@ -136,7 +136,7 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
 
   nlohmann::json::iterator tc = whole_config.find("testcases");
   assert (tc != whole_config.end());
-  
+
   int testcase_num = 0;
   for (typename nlohmann::json::iterator itr = tc->begin(); itr != tc->end(); itr++,testcase_num++)
   {
@@ -205,7 +205,7 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
       }
 
       if(this_testcase["containers"][container_num]["container_name"].is_null()){
-        this_testcase["containers"][container_num]["container_name"] = "container" + std::to_string(container_num); 
+        this_testcase["containers"][container_num]["container_name"] = "container" + std::to_string(container_num);
       }
 
       if (this_testcase["containers"][container_num]["container_name"] == "router"){
@@ -233,7 +233,7 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
       if(this_testcase["containers"][container_num]["container_image"].is_null()){
         //TODO: store the default system image somewhere and fill it in here.
         this_testcase["containers"][container_num]["container_image"] = whole_config["container_options"]["container_image"];
-      }    
+      }
     }
 
     if(this_testcase["use_router"] && !found_router){
@@ -464,7 +464,7 @@ void FormatGraphicsActions(nlohmann::json &whole_config) {
       //Type requires a key_combination to press and can have an optional "delay_in_seconds" and "presses"
       else if(action_name == "key"){
         float delay_time_in_seconds = action.value("delay_in_seconds",0.1);
-        
+
         if(delay_time_in_seconds <= 0){
           std::cout << "ERROR: In the key command, delay must be greater than zero." << std::endl;
         }
@@ -472,7 +472,7 @@ void FormatGraphicsActions(nlohmann::json &whole_config) {
         action["delay_in_seconds"] = delay_time_in_seconds;
 
         validate_integer(action, "presses", true, 1, 1);
-        
+
         if(action["key_combination"].is_null()){
           std::cout << "ERROR: key combination to be pressed must be specified in the key command." << std::endl;
         }
@@ -483,7 +483,7 @@ void FormatGraphicsActions(nlohmann::json &whole_config) {
       //Click and drag can have an optional start_x and start_y, and must have an end_x and end_y
       // which are greater than 0.
       else if(action_name == "click and drag"){
-        
+
         validate_mouse_button(action);
 
         validate_integer(action, "start_x", false, 0, 0);
@@ -499,7 +499,7 @@ void FormatGraphicsActions(nlohmann::json &whole_config) {
       }
       //Click and drag delta can have an optional mouse button, and must have and end_x and end_y.
       else if(action_name == "click and drag delta"){
-       
+
         validate_mouse_button(action);
 
         validate_integer(action, "end_x",   true,  0, 0);
@@ -538,7 +538,7 @@ void FormatGraphicsActions(nlohmann::json &whole_config) {
         float gif_duration = float(action.value("seconds",1.0));
         assert(gif_duration > 0);
         action["seconds"] = gif_duration;
-        
+
         if(action["name"].is_null()){
           action["name"] = "gif_" + std::to_string(number_of_gifs);
         }
@@ -602,7 +602,7 @@ void formatPreActions(nlohmann::json &whole_config) {
 
     for (int i = 0; i < pre_commands.size(); i++){
       nlohmann::json pre_command = pre_commands[i];
-      
+
       //right now we only support copy.
       assert(pre_command["command"] == "cp");
 
@@ -616,7 +616,7 @@ void formatPreActions(nlohmann::json &whole_config) {
       assert(pre_command["testcase"].is_string());
 
       std::string testcase = pre_command["testcase"];
-      
+
       //remove trailing slash
       if(testcase.length() == 7){
         testcase = testcase.substr(0,6);
@@ -629,7 +629,7 @@ void formatPreActions(nlohmann::json &whole_config) {
 
       std::string number = testcase.substr(4,6);
       int remainder = std::stoi( number );
-      
+
       //we must be referencing a previous testcase. (+1 because we start at 0)
       assert(remainder > 0);
       assert(remainder < which_testcase+1);
@@ -656,7 +656,7 @@ void formatPreActions(nlohmann::json &whole_config) {
          this_testcase["pattern"] = "";
       }else{
         std::string pattern = pre_command["pattern"];
-        //The pattern must not container .. or $ 
+        //The pattern must not container .. or $
         assert(pattern.find("..") == std::string::npos);
         assert(pattern.find("$") == std::string::npos);
         assert(pattern.find("~") == std::string::npos);
@@ -669,7 +669,7 @@ void formatPreActions(nlohmann::json &whole_config) {
 
       std::string destination = pre_command["destination"];
 
-      //The destination must not container .. or $ 
+      //The destination must not container .. or $
       assert(destination.find("..") == std::string::npos);
       assert(destination.find("$") == std::string::npos);
       assert(destination.find("~") == std::string::npos);
@@ -700,16 +700,22 @@ void RewriteDeprecatedMyersDiff(nlohmann::json &whole_config) {
     for (int which_autocheck = 0; which_autocheck < validators->size(); which_autocheck++) {
       nlohmann::json& autocheck = (*validators)[which_autocheck];
       std::string method = autocheck.value("method","");
+      std::string comparison = autocheck.value("comparison","");
+
+      // if autocheck if old byLinebyWord format... make it byLinebyChar
+      if (comparison == "byLinebyWord") {
+          autocheck["comparison"] = "byLinebyChar";
+      }
 
       // if autocheck is old myersdiff format...  rewrite it!
       if (method == "myersDiffbyLinebyChar") {
         autocheck["method"] = "diff";
         assert (autocheck.find("comparison") == autocheck.end());
         autocheck["comparison"] = "byLinebyChar";
-      } else if (method == "myersDiffbyLinebyWord") {
+    } else if (method == "myersDiffbyLinebyWord") {
         autocheck["method"] = "diff";
         assert (autocheck.find("comparison") == autocheck.end());
-        autocheck["comparison"] = "byLinebyWord";
+        autocheck["comparison"] = "byLinebyChar";
       } else if (method == "myersDiffbyLine") {
         autocheck["method"] = "diff";
         assert (autocheck.find("comparison") == autocheck.end());
@@ -734,7 +740,7 @@ void RewriteDeprecatedMyersDiff(nlohmann::json &whole_config) {
 void InflateTestcases(nlohmann::json &whole_config){
   nlohmann::json::iterator tc = whole_config.find("testcases");
   assert (tc != whole_config.end());
-  
+
   int testcase_num = 0;
   for (typename nlohmann::json::iterator itr = tc->begin(); itr != tc->end(); itr++,testcase_num++){
       nlohmann::json this_testcase = whole_config["testcases"][testcase_num];
@@ -839,7 +845,7 @@ nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid) {
   InflateTestcases(answer);
 
   ArchiveValidatedFiles(answer);
-  
+
   return answer;
 }
 
@@ -850,7 +856,7 @@ void AddDefaultGraphicsChecks(nlohmann::json &json_graders, const nlohmann::json
   if(testcase.find("actions") == testcase.end()){
     return;
   }
-  
+
   std::vector<nlohmann::json> actions = mapOrArrayOfMaps(testcase, "actions");
 
   for (int action_num = 0; action_num < actions.size(); action_num++){
@@ -919,10 +925,10 @@ void AddDefaultGraders(const std::vector<nlohmann::json> &containers,
       if (commands.size() > 1){
         suffix = "_"+std::to_string(j)+".txt";
       }
-    
+
       AddDefaultGrader(containers[i]["commands"][j],files_covered,json_graders,prefix+"STDOUT"+suffix,whole_config);
       AddDefaultGrader(containers[i]["commands"][j],files_covered,json_graders,prefix+"STDERR"+suffix,whole_config);
-    } 
+    }
   }
 }
 
@@ -988,7 +994,7 @@ void FileCheck_Helper(nlohmann::json &single_testcase) {
   f_itr = single_testcase.find("actual_file");
   v_itr = single_testcase.find("validation");
   m_itr = single_testcase.find("max_submissions");
-  
+
   if (f_itr != single_testcase.end()) {
     // need to rewrite to use a validation
     assert (m_itr == single_testcase.end());
@@ -1219,7 +1225,7 @@ void CustomizeAutoGrading(const std::string& username, nlohmann::json& j) {
     assert (replacement == "hashed_username");
     int mod_value = j2.value("mod",-1);
     assert (mod_value > 0);
-    
+
     int A = 54059; /* a prime */
     int B = 76963; /* another prime */
     int FIRSTH = 37; /* also prime */
@@ -1227,8 +1233,8 @@ void CustomizeAutoGrading(const std::string& username, nlohmann::json& j) {
     for (int i = 0; i < username.size(); i++) {
       sum = (sum * A) ^ (username[i] * B);
     }
-    int assigned = (sum % mod_value)+1; 
-  
+    int assigned = (sum % mod_value)+1;
+
     std::string repl = std::to_string(assigned);
 
     nlohmann::json::iterator association = j2.find("association");
