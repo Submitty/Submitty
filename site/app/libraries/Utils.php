@@ -253,7 +253,7 @@ class Utils {
                         $students_version[$student->getId()] . ' Prev Submission)';
                     }
                     $students_full[] = $student_entry;
-            }
+                }
             }else{
                 $null_entry = array('value' => $student->getId(),
                 'label' => '[NULL section] ' . $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>'); 
