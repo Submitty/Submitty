@@ -574,7 +574,6 @@ CREATE TABLE "threads" (
 	"merged_post_id" int DEFAULT '-1',
 	"is_visible" BOOLEAN NOT NULL,
 	"status" int DEFAULT 0 NOT NULL,
-	"lock_thread_date" timestamp with time zone,
 	CONSTRAINT threads_pk PRIMARY KEY ("id")
 );
 
@@ -1161,6 +1160,8 @@ ALTER TABLE ONLY regrade_requests
 
 ALTER TABLE ONLY regrade_requests
     ADD CONSTRAINT gradeable_team_unique UNIQUE(g_id, team_id);
+
+ALTER TABLE threads ADD COLUMN lock_thread_date timestamp with time zone;
 
 -- End Forum Key relationships
 
