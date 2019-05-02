@@ -1935,7 +1935,6 @@ class SubmissionController extends AbstractController {
         if($submitter->isTeam()){
           $submitting_team = $submitter->getTeam()->getMemberUsers();
           foreach($submitting_team as $submitting_user){
-            $this->core->addErrorMessage($submitting_user->getId());
             if($submitting_user->getId() == $user_id){
               continue;
             }
