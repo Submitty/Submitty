@@ -1583,6 +1583,7 @@ function editPost(post_id, thread_id, shouldEditThread) {
                     return;
                 }
                 var post_content = json.post;
+                var lines = post_content.split(/\r|\r\n|\n/).length;
                 var anon = json.anon;
                 var change_anon = json.change_anon;
                 var user_id = escapeSpecialChars(json.user);
@@ -1596,6 +1597,7 @@ function editPost(post_id, thread_id, shouldEditThread) {
                 var date = time.toLocaleDateString();
                 time = time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
                 var contentBox = form.find("[name=thread_post_content]")[0];
+                contentBox.style.height = lines*14;
                 var editUserPrompt = document.getElementById('edit_user_prompt');
                 editUserPrompt.innerHTML = 'Editing a post by: ' + user_id + ' on ' + date + ' at ' + time;
                 contentBox.value = post_content;
