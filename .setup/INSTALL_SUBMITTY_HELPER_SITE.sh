@@ -83,7 +83,7 @@ cp ${NODE_FOLDER}/codemirror/theme/monokai.css ${VENDOR_FOLDER}/codemirror/theme
 cp ${NODE_FOLDER}/codemirror/theme/eclipse.css ${VENDOR_FOLDER}/codemirror/theme
 # flatpickr
 mkdir ${VENDOR_FOLDER}/flatpickr
-cp ${NODE_FOLDER}/flatpickr/dist/* ${VENDOR_FOLDER}/flatpickr
+cp -R ${NODE_FOLDER}/flatpickr/dist/* ${VENDOR_FOLDER}/flatpickr
 # jquery
 mkdir ${VENDOR_FOLDER}/jquery
 cp ${NODE_FOLDER}/jquery/dist/jquery.min.* ${VENDOR_FOLDER}/jquery
@@ -145,6 +145,10 @@ crontab -u submitty_daemon -r
 crontab -u submitty_daemon /tmp/cron_jobs
 rm -f /tmp/cron_jobs
 
+# Set permissions of files
+# set special user $PHP_USER as owner & group of all website files
+find ${SUBMITTY_INSTALL_DIR}/site -exec chown ${PHP_USER}:${PHP_GROUP} {} \;
+find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -exec chown ${CGI_USER}:${CGI_GROUP} {} \;
 # "other" can read & execute these files
 find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.ttf -exec chmod o+rx {} \;
 find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.eot -exec chmod o+rx {} \;
