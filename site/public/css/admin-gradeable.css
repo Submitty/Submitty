@@ -70,11 +70,13 @@ input[type="radio"],input[type="checkbox"] {
 }
 
 fieldset {
-    margin: 8px;
-    border: 1px solid silver;
     padding: 8px;
     border-radius: 4px;
     display: block;
+}
+
+#electronic_file {
+    padding-left: 20px;
 }
 
 legend{
