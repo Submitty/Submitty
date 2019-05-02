@@ -24,10 +24,10 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             FileUtils::recursiveRmdir($this->temp_dir);
         }
     }
-    
+
     /**
      * This test ensures that the default value of the DEBUG flag within the config model is always false. This
-     * means that if the value is not found within the ini file, we don't have to worry about accidently
+     * means that if the value is not found within the json file, we don't have to worry about accidently
      * exposing things to students.
      */
     public function testClassProperties() {
@@ -72,7 +72,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             "site_log_path" => $log_path,
             "submission_url" => "http://example.com",
             "vcs_url" => "",
-            "cgi_url" => "http://example.com/cgi-bin",
+            "cgi_url" => "",
             "institution_name" => "RPI",
             "username_change_text" => "Submitty welcomes all students.",
             "institution_homepage" => "https://rpi.edu",
@@ -102,6 +102,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'private_repository' => '',
                 'forum_enabled' => true,
                 'regrade_enabled' => false,
+                'seating_only_for_instructor' => false,
                 'regrade_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
                 'room_seating_gradeable_id' => ""
             )
@@ -137,6 +138,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($this->temp_dir, $config->getSubmittyPath());
         $this->assertEquals($this->temp_dir."/courses/s17/csci0000", $config->getCoursePath());
         $this->assertEquals($this->temp_dir."/logs", $config->getLogPath());
+        $this->assertEquals(FileUtils::joinPaths($this->temp_dir, "tmp", "cgi"), $config->getCgiTmpPath());
         $this->assertTrue($config->shouldLogExceptions());
         $this->assertEquals("pgsql", $config->getDatabaseDriver());
         $db_params = array(
@@ -184,6 +186,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'course_path' => $this->temp_dir.'/courses/s17/csci0000',
             'submitty_log_path' => $this->temp_dir.'/logs',
             'log_exceptions' => true,
+            'cgi_tmp_path' => FileUtils::joinPaths($this->temp_dir, "tmp", "cgi"),
             'database_driver' => 'pgsql',
             'submitty_database_params' => $db_params,
             'course_database_params' => array_merge($db_params, array('dbname' => 'submitty_s17_csci0000')),
@@ -226,6 +229,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                     'private_repository' => '',
                     'forum_enabled' => true,
                     'regrade_enabled' => false,
+                    'seating_only_for_instructor' => false,
                     'regrade_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
                     'room_seating_gradeable_id' => ""
                 ]
@@ -236,6 +240,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'institution_name' => 'RPI',
             'private_repository' => '',
             'regrade_enabled' => false,
+            'seating_only_for_instructor' => false,
             'room_seating_gradeable_id' => '',
             'username_change_text' => 'Submitty welcomes all students.',
             'vcs_url' => 'http://example.com/{$vcs_type}/',
@@ -287,13 +292,22 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals("sqlite", $config->getDatabaseDriver());
     }
 
-    public function testVcsUrl() {
+    public function testNonEmptyVcsUrl() {
         $extra = ['vcs_url' => 'https://some.vcs.url.com'];
         $this->createConfigFile($extra);
 
         $config = new Config($this->core, "s17", "config");
         $config->loadMasterConfigs($this->config_path);
         $this->assertEquals("https://some.vcs.url.com/", $config->getVcsUrl());
+    }
+
+    public function testNonEmptyCgiUrl() {
+        $extra = ['cgi_url' => 'https://some.cgi.url.com'];
+        $this->createConfigFile($extra);
+
+        $config = new Config($this->core, "s19", "config");
+        $config->loadMasterConfigs($this->config_path);
+        $this->assertEquals("https://some.cgi.url.com/", $config->getCgiUrl());
     }
 
     public function testCourseSeating() {
@@ -384,13 +398,13 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         try {
             $extra = array($section => null);
             $this->createConfigFile($extra);
-    
+
             $config = new Config($this->core, "s17", "csci0000");
             $config->loadCourseJson($this->course_json_path);
             $this->fail("Should have thrown ConfigException");
         }
         catch (ConfigException $exception) {
-            $this->assertEquals("Missing config section '{$section}' in ini file", $exception->getMessage());
+            $this->assertEquals("Missing config section '{$section}' in json file", $exception->getMessage());
         }
     }
 
@@ -400,7 +414,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
                 'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_rainbow_grades_summary',
                 'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type', 'private_repository',
-                'forum_enabled', 'regrade_enabled', 'regrade_message', 'room_seating_gradeable_id',
+                'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor', 'regrade_message', 'room_seating_gradeable_id',
             ],
         ];
         $return = array();
@@ -422,14 +436,14 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         try {
             $extra = [$section => [$setting => null]];
             $this->createConfigFile($extra);
-    
+
             $config = new Config($this->core, "s17", "csci0000");
             $config->loadCourseJson($this->course_json_path);
             $this->fail("Should have thrown ConfigException for {$section}.{$setting}");
         }
         catch (ConfigException $exception) {
             $this->assertEquals(
-                "Missing config setting '{$section}.{$setting}' in configuration ini file",
+                "Missing config setting '{$section}.{$setting}' in configuration json file",
                 $exception->getMessage()
             );
         }

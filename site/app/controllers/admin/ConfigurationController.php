@@ -39,7 +39,8 @@ class ConfigurationController extends AbstractController {
             'regrade_enabled'                => $this->core->getConfig()->isRegradeEnabled(),
             'regrade_message'                => $this->core->getConfig()->getRegradeMessage(),
             'private_repository'             => $this->core->getConfig()->getPrivateRepository(),
-            'room_seating_gradeable_id'      => $this->core->getConfig()->getRoomSeatingGradeableId()
+            'room_seating_gradeable_id'      => $this->core->getConfig()->getRoomSeatingGradeableId(),
+            'seating_only_for_instructor'    => $this->core->getConfig()->isSeatingOnlyForInstructor()
         );
 
         if (isset($_SESSION['request'])) {
@@ -67,8 +68,9 @@ class ConfigurationController extends AbstractController {
 
         $gradeable_seating_options = $this->getGradeableSeatingOptions();
         $config_url = $this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper'));
+        $email_room_seating_url = $this->core->buildUrl(array('component' => 'admin', 'page' => 'email_room_seating'));
 
-        $this->core->getOutput()->renderOutput(array('admin', 'Configuration'), 'viewConfig', $fields, $gradeable_seating_options, $config_url);
+        $this->core->getOutput()->renderOutput(array('admin', 'Configuration'), 'viewConfig', $fields, $gradeable_seating_options, $config_url, $email_room_seating_url);
     }
 
     public function updateConfiguration() {
@@ -103,7 +105,7 @@ class ConfigurationController extends AbstractController {
             $entry = intval($entry);
         }
         else if(in_array($name, array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary',
-                                      'display_custom_message', 'forum_enabled', 'regrade_enabled'))) {
+                                      'display_custom_message', 'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor'))) {
             $entry = $entry === "true" ? true : false;
         }
         else if($name === 'upload_message') {

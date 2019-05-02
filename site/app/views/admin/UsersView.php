@@ -98,16 +98,13 @@ class UsersView extends AbstractView {
                 $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
                 $grp = "";
                 switch ($student->getGroup()) {
-                    case 0:
-                        $grp = 'Developer';
-                        break;
-                    case 1:
+                    case USER::GROUP_INSTRUCTOR:
                         $grp = 'Instructor';
                         break;
-                    case 2:
+                    case USER::GROUP_FULL_ACCESS_GRADER:
                         $grp = 'Full Access Grader (Grad TA)';
                         break;
-                    case 3:
+                    case USER::GROUP_LIMITED_ACCESS_GRADER:
                         $grp = 'Limited Access Grader (Mentor)';
                         break;
                     default:
@@ -123,19 +120,15 @@ class UsersView extends AbstractView {
             foreach ($graders as $grader) {
                 $rot_sec = ($grader->getRotatingSection() === null) ? 'NULL' : $grader->getRotatingSection();
                 switch ($grader->getGroup()) {
-                    case 0:
-                        $reg_sec = 'All';
-                        $grp = 'Developer';
-                        break;
-                    case 1:
+                    case USER::GROUP_INSTRUCTOR:
                         $reg_sec = 'All';
                         $grp = 'Instructor';
                         break;
-                    case 2:
+                    case USER::GROUP_FULL_ACCESS_GRADER:
                         $grp = 'Full Access Grader (Grad TA)';
                         $reg_sec = implode(',', $grader->getGradingRegistrationSections());
                         break;
-                    case 3:
+                    case USER::GROUP_LIMITED_ACCESS_GRADER:
                         $grp = 'Limited Access Grader (Mentor)';
                         $reg_sec = implode(',', $grader->getGradingRegistrationSections());
                         break;

@@ -196,8 +196,11 @@ pip3 install clang
 #install DLL for zbar
 apt-get install libzbar0 --yes
 
+#python libraries for QR bulk upload
 pip3 install pyzbar
 pip3 install pdf2image
+pip3 install opencv-python
+pip3 install numpy
 
 # Install an email catcher
 if [ ${VAGRANT} == 1 ]; then
@@ -397,6 +400,7 @@ wget https://sourceforge.net/projects/tclap/files/tclap-1.2.2.tar.gz -o /dev/nul
 tar -xpzf tclap-1.2.2.tar.gz
 rm /tmp/tclap-1.2.2.tar.gz
 cd tclap-1.2.2/
+sed -i 's/SUBDIRS = include examples docs tests msc config/SUBDIRS = include docs msc config/' Makefile.in
 bash configure
 make
 make install
@@ -535,7 +539,11 @@ if [ ${WORKER} == 0 ]; then
         su postgres -c "source ${SUBMITTY_REPOSITORY}/.setup/vagrant/db_users.sh";
         echo "Finished creating PostgreSQL users"
 
-        sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" "/etc/postgresql/${PG_VERSION}/main/postgresql.conf"
+        # Set timezone to UTC instead of using localtime (which is probably ET)
+        sed -i "s/timezone = 'localtime'/timezone = 'UTC'/" /etc/postgresql/${PG_VERSION}/main/postgresql.conf
+
+        # Set the listen address to be global so that we can access the guest DB from the host
+        sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" /etc/postgresql/${PG_VERSION}/main/postgresql.conf
         service postgresql restart
     fi
 fi
