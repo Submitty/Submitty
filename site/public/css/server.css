@@ -1373,32 +1373,11 @@ div.full_height {
     padding: 2px 0px;
 }
 
-
-#sidebar.collapsed #nav-buttons ul li .collapse-icon {
-    display: inline-block;
-    width: 60px;
-    padding: 8px 6px;
-    text-align: center;
-}
-
 #sidebar.collapsed #nav-buttons ul li .nav-row .notification_badge {
     font-size: 12px;
     margin-top: -12px;
     text-align: right;
     position: relative; /* So it goes on top */
-}
-
-#nav-buttons ul li .nav-row.collapse-icon i.fa {
-    margin-left: 0;
-    width: 48px;
-}
-#nav-buttons ul li .nav-row.collapse-icon i.fas {
-    margin-left: 0;
-    width: 48px;
-}
-#nav-buttons ul li .nav-row.collapse-icon i.far {
-    margin-left: 0;
-    width: 48px;
 }
 
 #nav-buttons ul li a.nav-row {
@@ -1422,36 +1401,6 @@ div.full_height {
 }
 #nav-buttons ul li a.nav-row i.far {
     color: #000000;
-}
-
-#nav-buttons ul li a.collapse-icon i.fa {
-    color: #000000;
-}
-#nav-buttons ul li a.collapse-icon i.fas {
-    color: #000000;
-}
-#nav-buttons ul li a.collapse-icon i.far {
-    color: #000000;
-}
-
-#nav-buttons ul li a.collapse-icon:hover i.fa {
-    color: #006398;
-}
-#nav-buttons ul li a.collapse-icon:hover i.fas {
-    color: #006398;
-}
-#nav-buttons ul li a.collapse-icon:hover i.far {
-    color: #006398;
-}
-
-#nav-buttons ul li a.collapse-icon:active i.fa {
-    color: #790000;
-}
-#nav-buttons ul li a.collapse-icon:active i.fas {
-    color: #790000;
-}
-#nav-buttons ul li a.collapse-icon:active i.far {
-    color: #790000;
 }
 
 #nav-buttons ul li .nav-row i.fa {
