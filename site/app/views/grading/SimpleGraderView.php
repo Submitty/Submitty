@@ -2,6 +2,7 @@
 
 namespace app\views\grading;
 
+use app\libraries\FileUtils;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Component;
@@ -70,7 +71,7 @@ class SimpleGraderView extends AbstractView {
         }
         $component_ids = json_encode($comp_ids);
 
-        $this->core->getOutput()->addInternalJs('twig.min.js');
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
         $this->core->getOutput()->addInternalJs('ta-grading-keymap.js');
         $this->core->getOutput()->addInternalJs('simple-grading.js');
 

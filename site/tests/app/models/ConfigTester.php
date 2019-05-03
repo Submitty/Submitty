@@ -138,6 +138,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($this->temp_dir, $config->getSubmittyPath());
         $this->assertEquals($this->temp_dir."/courses/s17/csci0000", $config->getCoursePath());
         $this->assertEquals($this->temp_dir."/logs", $config->getLogPath());
+        $this->assertEquals(FileUtils::joinPaths($this->temp_dir, "tmp", "cgi"), $config->getCgiTmpPath());
         $this->assertTrue($config->shouldLogExceptions());
         $this->assertEquals("pgsql", $config->getDatabaseDriver());
         $db_params = array(
@@ -185,6 +186,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'course_path' => $this->temp_dir.'/courses/s17/csci0000',
             'submitty_log_path' => $this->temp_dir.'/logs',
             'log_exceptions' => true,
+            'cgi_tmp_path' => FileUtils::joinPaths($this->temp_dir, "tmp", "cgi"),
             'database_driver' => 'pgsql',
             'submitty_database_params' => $db_params,
             'course_database_params' => array_merge($db_params, array('dbname' => 'submitty_s17_csci0000')),

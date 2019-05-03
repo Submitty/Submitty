@@ -172,13 +172,13 @@ render();
             let selected = document.querySelector('.toolbar .text-color.color-selected');
             if (selected) {
                 selected.classList.remove('color-selected');
-                selected.removeAttribute('aria-selected');
+                selected.prop('aria-selected', false);
             }
 
             selected = document.querySelector(`.toolbar .text-color[data-color="${color}"]`);
             if (selected) {
                 selected.classList.add('color-selected');
-                selected.setAttribute('aria-selected', true);
+                selected.prop('aria-selected', true);
             }
 
         }
