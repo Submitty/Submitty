@@ -230,7 +230,7 @@ function newUserForm() {
     var form = $("#edit-user-form");
     form.css("display", "block");
     $('[name="edit_user"]', form).val("false");
-    $('[name="user_id"]', form).removeClass('readonly').removeAttr('readonly').val("");
+    $('[name="user_id"]', form).removeClass('readonly').prop('readonly', false).val("");
     $('[name="user_firstname"]', form).val("");
     $('[name="user_preferred_firstname"]', form).val("");
     $('[name="user_lastname"]', form).val("");
@@ -999,7 +999,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
 
 function removeTeamMemberInput(i) {
     var form = $("#admin-team-form");
-    $('[name="user_id_'+i+'"]', form).removeClass('readonly').removeAttr('readonly').val("");
+    $('[name="user_id_'+i+'"]', form).removeClass('readonly').prop('readonly', false).val("");
     $("#remove_member_"+i).remove();
     var student_full = JSON.parse($('#student_full_id').val());
     $('[name="user_id_'+i+'"]', form).autocomplete({
