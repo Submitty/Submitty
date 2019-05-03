@@ -97,9 +97,8 @@ int main(int argc, char *argv[]) {
         visible += points;
     }
     //container name only matters if we try to get the commands for this testcase.
-    //TODO: IN THIS CASE, THIS IS A HACK THAT MUST BE FIXED.
     std::string container_name = "";
-    TestCase tc(config_json,which_testcase, container_name);
+    TestCase tc(config_json,which_testcase,container_name);
     if (tc.isSubmissionLimit()) {
       max_submissions = tc.getMaxSubmissions();
     }
@@ -172,80 +171,87 @@ int main(int argc, char *argv[]) {
     j["content"] = nlohmann::json::array();
     for (int i = 0; i < content_blocks->size(); i++) {
       nlohmann::json content;
-      // Title, optional
-      nlohmann::json::iterator title = (*content_blocks)[i].find("title");
-      if (title != (*content_blocks)[i].end()) {
-	assert (title->is_string());
-        content["title"] = *title;
-      }
+      nlohmann::json content_block = (*content_blocks)[i];
+
+      // Title, Optional
+      std::string title = "";
       
-      // Exposition, optional
-      nlohmann::json::iterator exposition = (*content_blocks)[i].find("exposition");
-      if (exposition != (*content_blocks)[i].end()) {
-	assert (exposition->is_string());
-        content["exposition"] = *exposition;  
+      if(content_block["title"].is_string()){
+        title = content_block["title"];
+      }else if(!content_block["title"].is_null()){
+        bool title_is_string = false; 
+        assert(title_is_string);
       }
-      
+
+      // Description, optional
+      std::string description = "";
+      if(content_block["description"].is_string()){
+        title = content_block["description"];
+      }else if(!content_block["title"].is_null()){
+        bool description_is_string = false; 
+        assert(description_is_string);
+      }
+
       // Images, optional
-      content["images"] = (*content_blocks)[i].value("images", nlohmann::json::array({}));
+      content["images"] = (*content_blocks)[i].value("images", nlohmann::json::array());
 
       // Input
       nlohmann::json::iterator input = (*content_blocks)[i].find("input");
       if (input != (*content_blocks)[i].end()) {
-	content["input"] = nlohmann::json::array();
-	for (int j = 0; j < input->size(); j++) {
-	  nlohmann::json input_obj;
+      	content["input"] = nlohmann::json::array();
+      	for (int j = 0; j < input->size(); j++) {
+      	  nlohmann::json input_obj;
 
-	  // Type
-	  nlohmann::json::iterator in_type = (*input)[j].find("type");
-	  assert (in_type != (*input)[j].end());
-	  assert (*in_type == "textbox" || *in_type == "codebox" || *in_type == "multiplechoice");
-	  assert (in_type->is_string());
-	  input_obj["type"] = *in_type;
+      	  // Type
+      	  nlohmann::json::iterator in_type = (*input)[j].find("type");
+      	  assert (in_type != (*input)[j].end());
+          assert (in_type->is_string());
+      	  assert (*in_type == "textbox" || *in_type == "codebox" || *in_type == "multiplechoice");
+      	  input_obj["type"] = *in_type;
 
-	  // Label
-	  nlohmann::json::iterator in_label = (*input)[j].find("label");
-	  assert (in_label != (*input)[j].end());
-	  assert (in_label->is_string());
-	  input_obj["label"] = *in_label;
+      	  // Label
+      	  nlohmann::json::iterator in_label = (*input)[j].find("label");
+      	  assert (in_label != (*input)[j].end());
+          assert (in_label->is_string());
+      	  input_obj["label"] = *in_label;
 
-	  // Filename
-	  std::string s = "";
-	  if (i < 10) 
-	    s += "0";
-	  s += std::to_string(j);
-	  
-	  // Actual input configuration
-	  if (*in_type == "textbox" || *in_type == "codebox") {
-	    if (*in_type == "codebox") {
-	      nlohmann::json::iterator cb_lang = (*input)[j].find("language");
-	      assert (cb_lang != (*input)[j].end());
-	      assert (cb_lang->is_string());
-	      input_obj["language"] = *cb_lang;
-	    }
-	    
-	    input_obj["rows"] = (*input)[j].value("rows", 0);
-	    assert (int(input_obj["rows"]) >= 0);
+      	  // Filename
+      	  std::string s = "";
+      	  if (i < 10) 
+      	    s += "0";
+      	  s += std::to_string(j);
+      	  
+      	  // Actual input configuration
+      	  if (*in_type == "textbox" || *in_type == "codebox") {
+      	    if (*in_type == "codebox") {
+      	      nlohmann::json::iterator cb_lang = (*input)[j].find("language");
+      	      assert (cb_lang != (*input)[j].end());
+      	      assert (cb_lang->is_string());
+      	      input_obj["language"] = *cb_lang;
+      	    }
+      	    
+      	    input_obj["rows"] = (*input)[j].value("rows", 0);
+      	    assert (int(input_obj["rows"]) >= 0);
 
-	    input_obj["filename"] = (*input)[j].value("filename", "textbox_" + s + ".txt");
-	    input_obj["images"] = (*input)[j].value("images", nlohmann::json::array({}));
-	    content["input"].push_back(input_obj);
-	  } else if (*in_type == "multiplechoice") {
-	    nlohmann::json::iterator mc_allow_mult = (*input)[j].find("allow_multiple");
-	    assert (mc_allow_mult != (*input)[j].end());
-	    assert (mc_allow_mult->is_boolean());
-	    input_obj["allow_multiple"] = *mc_allow_mult;
+      	    input_obj["filename"] = (*input)[j].value("filename", "textbox_" + s + ".txt");
+      	    input_obj["images"] = (*input)[j].value("images", nlohmann::json::array());
+      	    content["input"].push_back(input_obj);
+      	  } else if (*in_type == "multiplechoice") {
+      	    nlohmann::json::iterator mc_allow_mult = (*input)[j].find("allow_multiple");
+      	    assert (mc_allow_mult != (*input)[j].end());
+      	    assert (mc_allow_mult->is_boolean());
+      	    input_obj["allow_multiple"] = *mc_allow_mult;
 
-	    nlohmann::json::iterator mc_choices = (*input)[j].find("choices");
-	    assert (mc_choices != (*input)[j].end());
-	    input_obj["choices"] = *mc_choices;
+      	    nlohmann::json::iterator mc_choices = (*input)[j].find("choices");
+      	    assert (mc_choices != (*input)[j].end());
+      	    input_obj["choices"] = *mc_choices;
 
-	    input_obj["filename"] = (*input)[j].value("filename", "mc_" + s + ".txt");
-	    content["input"].push_back(input_obj);
-	  } else {
-	    assert (false);
-	  }
-	}
+      	    input_obj["filename"] = (*input)[j].value("filename", "mc_" + s + ".txt");
+      	    content["input"].push_back(input_obj);
+      	  } else {
+      	    assert (false);
+      	  }
+      	}
       }
       j["content"].push_back(content);
     }
