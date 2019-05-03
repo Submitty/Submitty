@@ -54,7 +54,7 @@ What is the lowest privileged user group that can grade this?
         {{ gradeable.isGradeByRegistration() == false ? 'checked' : '' }}> Rotating Section
 
     <div id="rotating_data">
-        {% if rotating_gradeables|length != 0 %}
+        {% if rotating_gradeables|length != 0 and num_rotating_sections > 0 %}
             <br />
             Rotating Section History By Grader:
             <br />
@@ -113,7 +113,7 @@ What is the lowest privileged user group that can grade this?
                     section_numbers, gradeable_section_history, gradeable.getId()) }}
             {% elseif num_rotating_sections == 0 %}
                 <br/>
-                <p><b>There is no Rotating Section right now. Please Click on "Manage Sections" from the left sidebar to configure Rotating Sections for your course.</b></p>
+                <p><b>There is no Rotating Section right now. <br/> Please Click on "Manage Sections" from the left sidebar to configure Rotating Sections for your course.</b></p>
             {% endif %}
         </table>
     </div>
