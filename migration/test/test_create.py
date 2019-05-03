@@ -9,6 +9,7 @@ import tempfile
 import unittest
 
 import migrator
+import migrator.main
 
 
 class TestCreate(unittest.TestCase):
@@ -152,7 +153,3 @@ Created migration: course\/[0-9]{14}_test.py"""
             "Invalid migration name (must only contain alphanumeric and _): invalid#!!!",
             str(cm.exception)
         )
-
-
-if __name__ == '__main__':
-    unittest.main()

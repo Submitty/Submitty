@@ -4,63 +4,97 @@
 #}
 {% if action == 'new' or action == 'template' %}
     <div>
-        <label for="gradeable_template">From Template:</label>
-        <select name="gradeable_template" id="gradeable_template" style='width: 400px;'>
-            <option>--None--</option>
-
-            {% for template in template_list %}
+        <div class="option row">
+            <div class="option-desc col-md-6">
+                <label for="gradeable_template">
+                    <div class="option-title">Template</div>
+                    <div class="option-alt">Select from one of the templates</div>
+                </label>
+            </div>
+            <div class="option-input col-md-6">
+                <select name="gradeable_template" id="gradeable_template" style='margin-right:30px'>
+                <option>--None--</option>
+                {% for template in template_list %}
                 <option {{ action != 'new' and gradeable.getId() == template.g_id ? 'selected' : '' }}
                     value="{{ template.g_id }}">{{ template.g_title }}</option>
-            {% endfor %}
-        </select>
+                {% endfor %}
+                </select>
+            </div>
+        </div>
     </div>
+
 {% endif %}
 
 {#
     Primary Form
 #}
 <!-- Gradeable Title (read/write in all modes) -->
-<label for="g_title">What is the title of this gradeable?:</label>
-    <input style='width: 350px' type='text' name='title' id='g_title' class="required auto_save"
-        value="{{ action != 'new' ? gradeable.getTitle() : '' }}" placeholder="(Required)" required/>
+    <div class="option row">
+        <div class="option-desc col-md-6">
+            <label for="g_title">
+                <div class="option-title">Title</div>
+                <div class="option-alt">What is the title of this gradable? <p style="color:red">(Required)</p></div>
+            </label>
+        </div>
 
-<br />
+        <div class="option-input col-md-6">
+            <textarea onkeyup="textAreaAdjust(this)" name='title' id='g_title' class="required auto_save" style="overflow:hidden" placeholder="(Required)" required>{{action != 'new' ? gradeable.getTitle() : '' }}</textarea>
+        </div>
+    </div>
+
 
 <!-- Instruction URL (read/write in all modes) -->
-<label for="instructions_url">What is the URL to the assignment instructions? (shown to student)</label>
-    <input style='width: 350px' type='text' name='instructions_url' id='instructions_url' class="auto_save"
+<div class="option row">
+    <div class="option-desc col-md-6">
+        <label for="instructions_url">
+            <div class="option-title">Assignment URL</div>
+            <div class="option-alt">What is the URL to the assignment instructions? (shown to student)</div>
+        </label>
+    </div>
+    <div class="option-input col-md-6">
+        <input type='text' name='instructions_url' id='instructions_url' class="auto_save"
         value="{{ action != 'new' ? gradeable.getInstructionsUrl() : '' }}" placeholder="(Optional)" />
+    </div>
+</div>
 
-<br />
 
 <!-- Gradeable ID (readonly in edit mode, required) -->
-<label for="g_id">What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>):</label>
-<input style='width: 350px' type='text' name='id' id="g_id" class="required"
-       value="{{ action != 'new' ? gradeable.getId() : '' }}" placeholder="(Required)"
+<div class="option row">
+    <div class="option-desc col-md-6">
+        <label for="g_id">
+            <div class="option-title">Unique ID</div>
+            <div class="option-alt">What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>)</div>
+        </label>
+    </div>
+    <div class="option-input col-md-6">
+        <input type='text' name='id' id="g_id" class="required"
+        value="{{ action != 'new' ? gradeable.getId() : '' }}" placeholder="(Required)"
         {{ action == 'edit' ? 'readonly' : 'required' }} />
+    </div>
+</div>
 
-<br />
-<fieldset>
-    <legend>
-{% if action == 'new' or action == 'template' %}
-    <!-- Gradeable Type radio buttons (readonly in edit mode) -->
-   <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">What is the type of the gradeable <i style="font-style:normal;" class="helpicon"></i></a>
+<div class="option">
+    <legend class="option-desc col-md-12">
+        {% if action == 'new' or action == 'template' %}
+            <!-- Gradeable Type radio buttons (readonly in edit mode) -->
+            <div class="option-title">Gradable Type</div>
+            <div class="option-alt"><a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">What is the type of the gradeable <i style="font-style:normal;" class="helpicon"></i></a></div>    
             <span id="required_type" >(Required)</span>
         {% else %}
-            Gradeable type: <span id="gradeable-type-string">{{ type_string }}</span>
+            <b style='font-size:18px'>Gradeable type</b>: <span id="gradeable-type-string">{{ type_string }}</span>
             <br />
         {% endif %}
     </legend>
-    <div>
+    <fieldset class="option-desc col-md-12">
         <div id="gradeable_type_container" {{ action == 'edit' ? 'hidden' : '' }}>
             <div>
                 <input type='radio' id="radio_checkpoints" name="type" value="Checkpoints"
-                    {{ action != 'new' and gradeable.getType() == 1 ? 'checked' : '' }}> {{ gradeable_type_strings['checkpoint'] }}
+                    {{ action != 'new' and gradeable.getType() == 1 ? 'checked' : '' }}> <label for="radio_checkpoints"> {{ gradeable_type_strings['checkpoint'] }} </label>
             </div>
 
             <div>
                 <input type='radio' id="radio_numeric" name="type" value="Numeric"
-                    {{ action != 'new' and gradeable.getType() == 2 ? 'checked' : '' }}> {{ gradeable_type_strings['numeric'] }}
+                    {{ action != 'new' and gradeable.getType() == 2 ? 'checked' : '' }}> <label for="radio_numeric"> {{ gradeable_type_strings['numeric'] }} </label>
             </div>
 
             <div hidden>
@@ -74,164 +108,174 @@
 
             <div>
                 <input class="ignore" type="radio" id="radio_ef_student_upload" name="electronic_gradeable_presets" value="normal"
-                        {{ action != 'new' and not gradeable.isScannedExam() and not gradeable.isVcs() ? 'checked' : ''}}> {{ gradeable_type_strings['electronic_hw'] }}
+                        {{ action != 'new' and not gradeable.isScannedExam() and not gradeable.isVcs() ? 'checked' : ''}}> <label for="radio_ef_student_upload"> {{ gradeable_type_strings['electronic_hw'] }} </label>
             </div>
 
             <div>
                 <input class="ignore" type="radio" id="radio_ef_vcs_upload" name="electronic_gradeable_presets" value="vcs"
-                        {{ action != 'new' and not gradeable.isScannedExam() and gradeable.isVcs() ? 'checked' : ''}}> {{ gradeable_type_strings['electronic_hw_vcs'] }}
+                        {{ action != 'new' and not gradeable.isScannedExam() and gradeable.isVcs() ? 'checked' : ''}}> <label for="radio_ef_vcs_upload"> {{ gradeable_type_strings['electronic_hw_vcs'] }} </label>
             </div>
 
             <div>
                 <input class="ignore" type="radio" id="radio_ef_scanned_exam" name="electronic_gradeable_presets" value="scanned_exam"
-                        {{ action != 'new' and gradeable.isScannedExam() ? 'checked' : '' }}> {{ gradeable_type_strings['electronic_exam'] }}
+                        {{ action != 'new' and gradeable.isScannedExam() ? 'checked' : '' }}> <label for="radio_ef_scanned_exam"> {{ gradeable_type_strings['electronic_exam'] }} </label>
             </div>
         </div>
-    </div>
 
-  <!-- This is only relevant to Electronic Files -->
-    <fieldset class="gradeable_type_options electronic_file" id="electronic_file">
-        <div><legend>Will any or all of this assignment be manually graded (e.g., by the TAs or the instructor)?</legend></div>
-        <div>
-            <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val auto_save date-related"
-                    {{ action != 'new' and gradeable.getTaGrading() ? 'checked' : '' }} /> <label for="yes_ta_grade">Yes</label>
-            <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val auto_save date-related"
-                    {{ not (action != 'new' and gradeable.getTaGrading()) ? 'checked' : '' }} /> <label for="no_ta_grade">No</label>
-        </div>
-        {% if regrade_enabled %}
-            <div id="regrade_request_enable_container">
-                Will grade inquiries be enabled for this assignment?
-                <br />
-                <input type="radio" id="yes_regrade_allowed" name="regrade_allowed" value="true" class="bool_val auto_save date-related"
-                        {{ action != 'new' and gradeable.isRegradeAllowed() ? 'checked' : '' }} /> Yes
-                <input type="radio" id="no_regrade_allowed" name="regrade_allowed" value="false" class="bool_val auto_save date-related"
-                        {{ not (action != 'new' and gradeable.isRegradeAllowed()) ? 'checked' : '' }} /> No
+      <!-- This is only relevant to Electronic Files -->
+        <fieldset class="gradeable_type_options electronic_file" id="electronic_file">
+            <div><legend>Will any or all of this assignment be manually graded (e.g., by the TAs or the instructor)?</legend></div>
+            <div>
+                <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val auto_save date-related"
+                        {{ action != 'new' and gradeable.getTaGrading() ? 'checked' : '' }} /> <label for="yes_ta_grade">Yes</label>
+                <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val auto_save date-related"
+                        {{ not (action != 'new' and gradeable.getTaGrading()) ? 'checked' : '' }} /> <label for="no_ta_grade">No</label>
             </div>
-        {% endif %}
+            {% if regrade_enabled %}
+                <div id="regrade_request_enable_container">
+                    Will grade inquiries be enabled for this assignment?
+                    <br />
+                    <input type="radio" id="yes_regrade_allowed" name="regrade_allowed" value="true" class="bool_val auto_save date-related"
+                            {{ action != 'new' and gradeable.isRegradeAllowed() ? 'checked' : '' }} /> Yes
+                    <input type="radio" id="no_regrade_allowed" name="regrade_allowed" value="false" class="bool_val auto_save date-related"
+                            {{ not (action != 'new' and gradeable.isRegradeAllowed()) ? 'checked' : '' }} /> No
+                </div>
+            {% endif %}
 
-        {% if forum_enabled %}
+            {% if forum_enabled %}
 
-            <div id="discussion_grading_enable_container">
-                Is there a discussion component for this assignment?
-                <br />
-                <input type="radio" id="yes_discussion" name="discussion_based" value="true" class="bool_val auto_save date-related"
-                        {{ action != 'new' and gradeable.isDiscussionBased() ? 'checked' : '' }} /> Yes
-                <input type="radio" id="no_discussion" name="discussion_based" value="false" class="bool_val auto_save date-related"
-                        {{ not (action != 'new' and gradeable.isDiscussionBased()) ? 'checked' : '' }} /> No
-          
-                <div class="discussion_id_wrapper">
-                    <label for="discussion_thread_id">What thread id(s) should be included?</label>
-                        <input style="width: 70px" name="discussion_thread_id" id="discussion_thread_id" class="int_val auto_save" type="text"
-                               value="{{ action != 'new' ? gradeable.getStringThreadIds() : '' }}"/>
+                <div id="discussion_grading_enable_container">
+                    Is there a discussion component for this assignment?
+                    <br />
+                    <input type="radio" id="yes_discussion" name="discussion_based" value="true" class="bool_val auto_save date-related"
+                            {{ action != 'new' and gradeable.isDiscussionBased() ? 'checked' : '' }} /> Yes
+                    <input type="radio" id="no_discussion" name="discussion_based" value="false" class="bool_val auto_save date-related"
+                            {{ not (action != 'new' and gradeable.isDiscussionBased()) ? 'checked' : '' }} /> No
+
+                    <div class="discussion_id_wrapper">
+                        <label for="discussion_thread_id">What thread id(s) should be included?</label>
+                            <input style="width: 70px" name="discussion_thread_id" id="discussion_thread_id" class="int_val auto_save" type="text"
+                                   value="{{ action != 'new' ? gradeable.getStringThreadIds() : '' }}"/>
+                    </div>
+
                 </div>
 
+            {% endif %}
+
+            <div id="team-settings-container">
+                {% if action == 'new' or action == 'template' %}
+                    Is this a team assignment?
+                {% else %}
+                    Team Settings:
+                    {{ gradeable.isTeamAssignment() ? '' : ' This is an individual assignment' }}
+                {% endif %}
+                <div style="{{ action == 'edit' ? 'display:none' : '' }}">
+                    <input type="radio" id = "team_yes_radio" name="team_assignment" value="true"
+                            {{ action != 'new' and gradeable.isTeamAssignment() ? 'checked' : '' }}> <label for="team_yes_radio">Yes</label>
+
+                    <input type="radio" id = "team_no_radio" name="team_assignment" value ="false"
+                            {{ not (action != 'new' and gradeable.isTeamAssignment()) ? 'checked' :  '' }}> <label for="team_no_radio">No</label>
+                </div>
             </div>
 
-        {% endif %}
+            <!-- Team settings (read only in edit mode) -->
+            <div class="team_assignment team_yes" id="team_yes">
 
-        <div id="team-settings-container">
-            {% if action == 'new' or action == 'template' %}
-                Is this a team assignment?
-            {% else %}
-                Team Settings:
-                {{ gradeable.isTeamAssignment() ? '' : ' This is an individual assignment' }}
-            {% endif %}
-            <div style="{{ action == 'edit' ? 'display:none' : '' }}">
-                <input type="radio" id = "team_yes_radio" name="team_assignment" value="true"
-                        {{ action != 'new' and gradeable.isTeamAssignment() ? 'checked' : '' }}> <label for="team_yes_radio">Yes</label>
+                <label for="team_size_max">What is the maximum team size?</label>
+                    <input style="width: 50px" name="team_size_max" id="team_size_max" class="int_val auto_save" type="text"
+                           value="{{ action != 'new' ? gradeable.getTeamSizeMax() : '3' }}"/>
 
-                <input type="radio" id = "team_no_radio" name="team_assignment" value ="false"
-                        {{ not (action != 'new' and gradeable.isTeamAssignment()) ? 'checked' :  '' }}> <label for="team_no_radio">No</label>
+                {#Use teams from a previous gradeable:
+                <!-- Inherit teams from another gradeable? -->
+                <br />
+                    <!--Use a combo box if we can edit the value, otherwise show a text box (readonly)-->
+                {% if action == 'new' %}
+                    <select id='gradeable_teams' name="eg_inherit_teams_from" style='width: 170px;'
+                        value='{{ admin_gradeable.getEgInheritTeamsFrom() }}'>
+                        <option value=''>--None--</option>
+                        {% for parent in inherit_teams_list %}
+                            <option {{ admin_gradeable.getEgInheritTeamsFrom() == parent.g_id ? 'selected' : '' }}
+                                value="{{ parent.g_id }}">{{ parent.g_title }}</option>
+                        {% endfor %}
+                    </select>
+                {% else %}
+                    <input id='gradeable_teams_read' name='gradeable_teams_read' style='width=170px'
+                        value='{{ admin_gradeable.getEgInheritTeamsFrom() }}' readonly/>
+                {% endif %}
+                #}
             </div>
-        </div>
 
-        <!-- Team settings (read only in edit mode) -->
-        <div class="team_assignment team_yes" id="team_yes">
+            <div id="repository">
+                <h3>Path for the Version Control System (VCS) repository:</h3>
 
-            <label for="team_size_max">What is the maximum team size?</label>
-                <input style="width: 50px" name="team_size_max" id="team_size_max" class="int_val auto_save" type="text"
-                       value="{{ action != 'new' ? gradeable.getTeamSizeMax() : '3' }}"/>
+                VCS base URL (from Course Settings): <kbd>{{ vcs_base_url }}</kbd><br /><br />
 
-            {#Use teams from a previous gradeable:
-            <!-- Inherit teams from another gradeable? -->
-            <br />
-                <!--Use a combo box if we can edit the value, otherwise show a text box (readonly)-->
-            {% if action == 'new' %}
-                <select id='gradeable_teams' name="eg_inherit_teams_from" style='width: 170px;'
-                    value='{{ admin_gradeable.getEgInheritTeamsFrom() }}'>
-                    <option value=''>--None--</option>
-                    {% for parent in inherit_teams_list %}
-                        <option {{ admin_gradeable.getEgInheritTeamsFrom() == parent.g_id ? 'selected' : '' }}
-                            value="{{ parent.g_id }}">{{ parent.g_title }}</option>
-                    {% endfor %}
-                </select>
-            {% else %}
-                <input id='gradeable_teams_read' name='gradeable_teams_read' style='width=170px'
-                    value='{{ admin_gradeable.getEgInheritTeamsFrom() }}' readonly/>
-            {% endif %}
-            #}
-        </div>
+                <b>Specify the remainder of the VCS URL</b>, for example one of the following:<br />
+                <kbd>&#123;&#36;gradeable_id&#125;/&#123;&#36;user_id&#125;</kbd><br />
+                <kbd>&#123;&#36;gradeable_id&#125;/&#123;&#36;team_id&#125;</kbd><br />
+                <kbd>final_project/&#123;&#36;user_id&#125;</kbd><br />
+                <br />
 
-        <div id="repository">
-            <h3>Path for the Version Control System (VCS) repository:</h3>
+                <b>Or specify the complete url/path</b>, for example:<br />
+                <kbd>https://github.com/test-course/&#123;&#36;gradeable_id&#125;/&#123;&#36;repo_id&#125;</kbd>
+                <br /><br />
 
-            VCS base URL (from Course Settings): <kbd>{{ vcs_base_url }}</kbd><br /><br />
+                <b>Or if the entire URL will be provided by the student</b>, then leave this input blank.
+                <br /><br />
 
-            <b>Specify the remainder of the VCS URL</b>, for example one of the following:<br />
-            <kbd>&#123;&#36;gradeable_id&#125;/&#123;&#36;user_id&#125;</kbd><br />
-            <kbd>&#123;&#36;gradeable_id&#125;/&#123;&#36;team_id&#125;</kbd><br />
-            <kbd>final_project/&#123;&#36;user_id&#125;</kbd><br />
-            <br />
+                <em>Note: The following string variables will be replaced:</em><br />
+                <ul style="list-style-position: inside;">
+                   <li><kbd>&#123;&#36;vcs_type&#125;</kbd></li>
+                   <li><kbd>&#123;&#36;gradeable_id&#125;</kbd></li>
+                   <li><kbd>&#123;&#36;user_id&#125;</kbd> OR <kbd>&#123;&#36;team_id&#125;</kbd> OR <kbd>&#123;&#36;repo_id&#125;</kbd> (use only one)</li>
+                </ul>
+                <br />
 
-            <b>Or specify the complete url/path</b>, for example:<br />
-            <kbd>https://github.com/test-course/&#123;&#36;gradeable_id&#125;/&#123;&#36;repo_id&#125;</kbd>
-            <br /><br />
+                <input style='width: 83%' type='text' id="subdirectory" name='vcs_subdirectory' class="auto_save"
+                       value="{{ action != 'new' ? gradeable.getVcsSubdirectory() : '' }}" placeholder="(Optional)"/><br />
+                <br />
 
-            <b>Or if the entire URL will be provided by the student</b>, then leave this input blank.
-            <br /><br />
-
-            <em>Note: The following string variables will be replaced:</em><br />
-            <ul style="list-style-position: inside;">
-               <li><kbd>&#123;&#36;vcs_type&#125;</kbd></li>
-               <li><kbd>&#123;&#36;gradeable_id&#125;</kbd></li>
-               <li><kbd>&#123;&#36;user_id&#125;</kbd> OR <kbd>&#123;&#36;team_id&#125;</kbd> OR <kbd>&#123;&#36;repo_id&#125;</kbd> (use only one)</li>
-            </ul>
-            <br />
-
-            <input style='width: 83%' type='text' id="subdirectory" name='vcs_subdirectory' class="auto_save"
-                   value="{{ action != 'new' ? gradeable.getVcsSubdirectory() : '' }}" placeholder="(Optional)"/><br />
-            <br />
-
-            FULL VCS URL: <kbd id="vcs_url"></kbd>
-        </div>
+                FULL VCS URL: <kbd id="vcs_url"></kbd>
+            </div>
+        </fieldset>
     </fieldset>
-</fieldset>
+</div>
 <!-- Gradeable bucket (read/write in all modes) -->
-<label for="syllabus_bucket">
-<a target=_blank href="https://submitty.org/instructor/rainbow_grades/gradeables">What syllabus category does this item belong to? <i style="font-style:normal;" class="helpicon"></i></a>
-</label>
+<div class="option row">
+    <div class="option-desc col-md-6">
+        <label for="syllabus_bucket">
+            <div class="option-title">Syllabus Category</div>
+            <div class="option-alt"><a target=_blank href="https://submitty.org/instructor/rainbow_grades/gradeables">What syllabus category does this item belong to? <i style="font-style:normal;" class="helpicon"></i></a></div>
+        </label>
+    </div>
 
-<select name="syllabus_bucket" id="syllabus_bucket" class="auto_save" style="width: 170px;">
-    {% for bucket in syllabus_buckets %}
+    <div class="option-input col-md-6">
+        <select name="syllabus_bucket" id="syllabus_bucket" class="auto_save">
+        {% for bucket in syllabus_buckets %}
         <option value="{{ bucket }}" {{ action != 'new' and gradeable.getSyllabusBucket() == bucket ? 'selected' : '' }}>
             {{ bucket | title }}
         </option>
-    {% endfor %}
-</select>
+        {% endfor %}
+        </select>
+    </div>
+</div>
 
-<br />
 {% if action == 'new' or action == 'template' %}
-   <br />
-   <em>Note: After pressing the "Create New Gradeable" button you may not change: <br />
-   <ul style="margin-left:10px">
-   <li style="margin-left:15px"> the unique id,</li>
-   <li style="margin-left:15px"> gradeable type (electronic file upload, checkpoints, or text), </li>
-   <li style="margin-left:15px"> whether the students will submit as individuals or team, and </li>
-   <li style="margin-left:15px"> whether the students will submit by directly uploading files or by version control. </li>
-   </ul>
-   All other settings for this gradeable may be edited.</em>
-   <br /><br />
-   <button class="btn btn-primary" type="submit" style="margin-left:10px;">Create New Gradeable</button>
+<div class="option row">
+    <div class="option-desc col-md-12">
+        <em>Note: After pressing the "Create New Gradeable" button you may not change:</em>
+        <ul style="margin-left:10px">
+            <li style="margin-left:15px"><em>The unique id</em></li>
+            <li style="margin-left:15px"><em>Gradeable type (electronic file upload, checkpoints, or text)</em></li>
+            <li style="margin-left:15px"><em>Whether the students will submit as individuals or team</em></li>
+            <li style="margin-left:15px"><em>Whether the students will submit by directly uploading files or by version control</em></li>
+        </ul>
+        <em>All other settings for this gradeable may be edited.</em>
+    </div>
+</div>
+<div class="row">
+    <button class="btn btn-primary" type="submit" style="margin-left:10px;">Create New Gradeable</button>
+</div>
 {% endif %}
 
 
@@ -240,6 +284,15 @@
 </div>
 
 <script type="text/javascript">
+
+
+    /* Increasing Height of textarea*/
+    function textAreaAdjust(o) {
+        o.style.height = "1px"
+        o.style.height = (15+o.scrollHeight)+"px";
+    }
+
+
     function updateDateDisplay() {
         let elecDateBoxes = $('.electronic_file_dates input');
         elecDateBoxes.prop('disabled', true);
@@ -312,7 +365,7 @@
     }
 
     function onDiscussionChange() {
-    	if($('#yes_discussion').is(':checked')) {
+        if($('#yes_discussion').is(':checked')) {
             disableElementChildren('.discussion_id_wrapper', false);
         }
         else {

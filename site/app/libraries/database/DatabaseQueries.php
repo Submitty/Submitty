@@ -23,6 +23,7 @@ use app\models\GradeableComponentMark;
 use app\models\GradeableVersion;
 use app\models\User;
 use app\models\Notification;
+use app\models\Email;
 use app\models\SimpleLateUser;
 use app\models\Team;
 use app\models\Course;
@@ -149,8 +150,13 @@ class DatabaseQueries {
             }
             $query_raw_select[]     = "t.*";
             $query_raw_select[]     = "({$query_favorite}) as favorite";
-            $query_raw_select[]     = "(case when exists(select 1 from posts p where p.author_user_id = sf.user_id and p.thread_id = t.id) then true else false end) as current_user_posted";
+            $query_raw_select[]     = "CASE
+                                        WHEN EXISTS(SELECT * FROM (posts p LEFT JOIN forum_posts_history fp ON p.id = fp.post_id AND p.author_user_id != fp.edit_author) AS pfp WHERE (pfp.author_user_id = ? OR pfp.edit_author = ?) AND pfp.thread_id = t.id) THEN true 
+                                        ELSE false 
+                                        END as current_user_posted";
 
+            $query_parameters[]     = $current_user;
+            $query_parameters[]     = $current_user;
             $query_raw_join[]       = "LEFT JOIN student_favorites sf ON sf.thread_id = t.id and sf.user_id = ?";
             $query_parameters[]     = $current_user;
 
@@ -3624,10 +3630,10 @@ AND gc_id IN (
     /**
      * Queues an email to be sent by email job
      * @param array $email_data
-     * @param string $recipient
+     * @param Email $recipient
      */
-    public function createEmail($email_data, $recipient){
-        $parameters = array($recipient, $email_data["subject"], $email_data["body"]);
+    public function createEmail($email){
+        $parameters = array($email->getRecipient(), $email->getSubject(), $email->getBody());
 
         $this->submitty_db->query("
             INSERT INTO emails(
