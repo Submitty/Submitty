@@ -1009,7 +1009,7 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
   std::vector<nlohmann::json> dispatcher_actions;
   std::string execute_logfile = "/dev/null";
   nlohmann::json test_case_limits = tc.get_test_case_limits();
-  nlohmann::json assignment_limits = whole_config.value("resource_limits",nlohmann::json());
+  nlohmann::json assignment_limits = j.value("resource_limits",nlohmann::json());
   bool windowed = false;
   std::string output_file_name = "temporary_custom_validator_output.json";
   std::string input_file_name = "custom_validator_input.json";
