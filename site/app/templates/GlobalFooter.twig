@@ -4,17 +4,24 @@
                 </div> {# /.col-md#nav-body #}
             </div> {# /.row #}
             <div id="footer">
-                <span id="copyright">&copy; 2018 RPI | An <a href="https://rcos.io" target="_blank">RCOS project</a></span>|
-                <span id="github">
-                    <a href="https://github.com/Submitty/Submitty" target="_blank" title="Fork us on GitHub" aria-label="Visit our GitHub">
-                        <i class="fab fa-github fa-lg"></i>
-                    </a>
-                </span>
+                &copy; {{ "now"|date("Y") }} <a href="https://submitty.org" target="_blank">Submitty</a>
+                <span class="footer_seperator">|</span> <a href="https://github.com/Submitty/Submitty" target="_blank" title="Visit our GitHub" aria-label="Visit our GitHub"><i class="fab fa-github fa-lg"></i></a>
+                <span class="footer_seperator">|</span> <a href="https://rcos.io" target="_blank">An RCOS project</a>
+
+                {% for link in footer_links %}
+                    <span class="footer_seperator">|</span>
+                    {% if link['icon'] is defined %}
+                        <i class="footer_link_icon fa fa-lg {{ link['icon'] }}"></i>
+                    {% endif %}
+                    <a href="{{ link['url'] }}" target="_blank">{{ link['title'] }}</a>
+                {% endfor %}
 
                 {% if is_debug %}
+                    <span class="footer_seperator">|</span>
                     <a href="#" onClick="togglePageDetails();">Show Page Details</a>
                 {% endif %}
             </div>
+
         </div> {# /#site-body #}
         {% if wrapper_urls['right_sidebar.html'] != null %}
             {# uploaded homepage redirect can go here? #}

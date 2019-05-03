@@ -1,7 +1,7 @@
 #bar_wrapper {
      position: absolute;
      height: 41px;
-     width: 600px;
+     width: 650px;
      top: -90px;
      left: 45%;
      background-color: #edf6f6;
@@ -76,6 +76,11 @@
 .icon-selected.fa-edit {
     box-shadow: 0px 0px 3px 3px #00e08e;
     background-color: #00e08e;
+}
+
+.icon-selected.fa-comment-alt {
+    box-shadow: 0px 0px 3px 3px #72518a;
+    background-color: #72518a;
 }
 
 .icon-files {
@@ -300,6 +305,11 @@ progress::-webkit-progress-value {
 
 #overall-comment-collapsed {
     padding: 0 0 0 20px;
+    max-height: 100px;
+    overflow-x: hidden;
+    overlfow-y: scroll;
+    width: 100%;
+    overflow-wrap: break-word;
 }
 
 .ta-rubric-table {
@@ -757,6 +767,18 @@ tr.is_publish {
     width:48%;
     height:30%;
     overflow: hidden;
+}
+
+#discussion_browser {
+    left:15px;
+    bottom:40px;
+    width:48%;
+    height:30%;
+    overflow: hidden;
+}
+
+#discussion_browser.rubric_panel {
+    border:5px solid #72518a;
 }
 
 #directory_view {

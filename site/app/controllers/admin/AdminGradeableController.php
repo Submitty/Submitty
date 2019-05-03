@@ -124,8 +124,11 @@ class AdminGradeableController extends AbstractController {
             'action' => 'upload_new_gradeable'
         ]);
         $vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
-        $this->core->getOutput()->addInternalJs('flatpickr.js');
-        $this->core->getOutput()->addInternalCss('flatpickr.min.css');
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
+        $this->core->getOutput()->addVendorJs(
+            FileUtils::joinPaths('jquery-ui-timepicker-addon', 'jquery-ui-timepicker-addon.min.js')
+        );
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'submit_url' => $submit_url,
@@ -135,6 +138,7 @@ class AdminGradeableController extends AbstractController {
             'syllabus_buckets' => self::syllabus_buckets,
             'vcs_base_url' => $vcs_base_url,
             'regrade_enabled' => $this->core->getConfig()->isRegradeEnabled(),
+            'forum_enabled' => $this->core->getConfig()->isForumEnabled(),
             'gradeable_type_strings' => self::gradeable_type_strings
         ]);
     }
@@ -254,16 +258,17 @@ class AdminGradeableController extends AbstractController {
         // $this->inherit_teams_list = $this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams();
 
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
-            $this->core->getOutput()->addInternalJs('twig.min.js');
+            $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
             $this->core->getOutput()->addInternalJs('ta-grading-rubric-conflict.js');
             $this->core->getOutput()->addInternalJs('ta-grading-rubric.js');
             $this->core->getOutput()->addInternalJs('gradeable.js');
             $this->core->getOutput()->addInternalCss('ta-grading.css');
         }
-        $this->core->getOutput()->addInternalJs('flatpickr.js');
-        $this->core->getOutput()->addInternalCss('flatpickr.min.css');
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addInternalJs('admin-gradeable-updates.js');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
+
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'gradeable' => $gradeable,
             'action' => 'edit',
@@ -275,6 +280,7 @@ class AdminGradeableController extends AbstractController {
             'gradeable_components_enc' => json_encode($gradeable_components_enc),
             'regrade_allowed' => $gradeable->isRegradeAllowed(),
             'regrade_enabled' => $this->core->getConfig()->isRegradeEnabled(),
+            'forum_enabled' => $this->core->getConfig()->isForumEnabled(),
             // Non-Gradeable-model data
             'gradeable_section_history' => $gradeable_section_history,
             'num_rotating_sections' => $num_rotating_sections,
@@ -727,6 +733,21 @@ class AdminGradeableController extends AbstractController {
 
         // Electronic-only values
         if ($gradeable_type === GradeableType::ELECTRONIC_FILE) {
+
+            $jsonThreads = json_encode('{}');
+            $discussion_clicked = $details['discussion_based'] === 'true';
+
+            //Validate user input for discussion threads
+            if($discussion_clicked) {
+                $jsonThreads = array_map('intval', explode(',', $details['discussion_thread_id']));
+                foreach($jsonThreads as $thread) {
+                    if(!$this->core->getQueries()->existsThread($thread)) {
+                        throw new \InvalidArgumentException('Invalid thread id specified.');
+                    }
+                }
+                $jsonThreads = json_encode($jsonThreads);
+            }
+
             $gradeable_create_data = array_merge($gradeable_create_data, [
                 'team_assignment' => $details['team_assignment'] === 'true',
                 'vcs' => $details['vcs'] === 'true',
@@ -737,6 +758,10 @@ class AdminGradeableController extends AbstractController {
                 'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/upload_only/config',
                 'scanned_exam' => $details['scanned_exam'] === 'true',
                 'has_due_date' => true,
+                
+                //For discussion component 
+                'discussion_based' => $discussion_clicked,
+                'discussion_thread_ids' => $jsonThreads,
 
                 // TODO: properties that aren't supported yet
                 'peer_grading' => false,
@@ -838,9 +863,12 @@ class AdminGradeableController extends AbstractController {
             'peer_grading',
             'late_submission_allowed',
             'regrade_allowed',
+            'discussion_based',
             'vcs',
             'has_due_date'
         ];
+
+        $discussion_ids = 'discussion_thread_id';
 
         $numeric_properties = [
             'precision'
@@ -873,6 +901,22 @@ class AdminGradeableController extends AbstractController {
             if (in_array($prop, $numeric_properties) && !is_numeric($post_val)) {
                 $errors[$prop] = "{$prop} must be a number";
                 continue;
+            }
+
+            // Converts string array sep by ',' to json
+            if($prop === $discussion_ids) {
+                $post_val = array_map('intval', explode(',', $post_val));
+                foreach($post_val as $thread) {
+                    if(!$this->core->getQueries()->existsThread($thread)) {
+                        $errors[$prop] = 'Invalid thread id specified.';
+                        break;
+                    }
+                }
+                if(count($errors) == 0) {
+                    $post_val = json_encode($post_val);
+                } else {
+                    continue;
+                }
             }
 
             // Try to set the property

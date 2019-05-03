@@ -28,7 +28,7 @@ class PlagiarismController extends AbstractController {
                 break;
             case 'edit_plagiarism_saved_config':
                 $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildUrl(array('component' => 'admin', 'semester' => $_REQUEST['semester'] , 'course'=> $_REQUEST['course'],'page' => 'plagiarism')));
-                $this->core->getOutput()->addBreadcrumb('Configure '.($this->core->getQueries()->getGradeable($_REQUEST['gradeable_id']))->getName());
+                $this->core->getOutput()->addBreadcrumb('Configure '.($this->core->getQueries()->getGradeableConfig($_REQUEST['gradeable_id']))->getTitle());
                 $this->editPlagiarismSavedConfig();
                 break;
             case 're_run_plagiarism':
@@ -123,7 +123,7 @@ class PlagiarismController extends AbstractController {
         $semester = $_REQUEST['semester'];
         $course = $_REQUEST['course'];
         $gradeable_id= $_REQUEST['gradeable_id'];
-        $gradeable_title= ($this->core->getQueries()->getGradeable($gradeable_id))->getName();
+        $gradeable_title= ($this->core->getQueries()->getGradeableConfig($gradeable_id))->getTitle();
         $return_url= $this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course,'page' => 'plagiarism'));
         if(!$this->core->getUser()->accessAdmin()) {
             die("Don't have permission to access page.");
@@ -493,8 +493,17 @@ class PlagiarismController extends AbstractController {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
 
+        $gradeable = $this->tryGetGradeable($_REQUEST['gradeable_id']);
+        if($gradeable === false) {
+            return;
+        }
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id_1);
+        if ($graded_gradeable === false) {
+            return;
+        }
+
         $return="";
-        $active_version_user_1 = (string)$this->core->getQueries()->getGradeable($gradeable_id, $user_id_1)->getActiveVersion();
+        $active_version_user_1 =  (string)$graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $file_path= $course_path."/lichen/ranking/".$gradeable_id.".txt";
         if(!file_exists($file_path)) {
 			$return = array('error' => 'Ranking file not exists.');
@@ -578,6 +587,8 @@ class PlagiarismController extends AbstractController {
 	    		$end_line= $tokens_user_1[$match["end"]-1]["line"]-1;
                 $start_value = $tokens_user_1[$match["start"]-1]["value"];
 	    		$end_value =$tokens_user_1[$match["end"]-1]["value"];
+                $userMatchesStarts = array();
+                $userMatchesEnds = array();
 	    		if($match["type"] == "match") {
 	    			$orange_color = false;
 	    			if($user_id_2 != "") {
@@ -606,7 +617,10 @@ class PlagiarismController extends AbstractController {
                             $end_line_2 = $tokens_user_2[$user_2_matchingposition["end"]-1]["line"]-1;
                             $start_value_2 = $tokens_user_2[$user_2_matchingposition["start"]-1]["value"];
                             $end_value_2 =$tokens_user_2[$user_2_matchingposition["end"]-1]["value"];
-                            $color_info[2][] = [$start_pos_2, $start_line_2, $end_pos_2, $end_line_2, '#ffa500', $start_value_2, $end_value_2];
+                            $color_info[2][] = [$start_pos_2, $start_line_2, $end_pos_2, $end_line_2, '#ffa500', $start_value_2, $end_value_2, $user_2_matchingposition["start"], $user_2_matchingposition["end"]];
+                            
+                            $userMatchesStarts[] = $user_2_matchingposition["start"];
+                            $userMatchesEnds[] = $user_2_matchingposition["end"];
 
                 }
                 
@@ -624,7 +638,7 @@ class PlagiarismController extends AbstractController {
 
              
 
-            array_push($color_info[1], [$start_pos, $start_line, $end_pos, $end_line, $color, $start_value, $end_value]);
+            array_push($color_info[1], [$start_pos, $start_line, $end_pos, $end_line, $color, $start_value, $end_value, count($userMatchesStarts) > 0 ? $userMatchesStarts[0] : [], count($userMatchesEnds) > 0 ? $userMatchesEnds[0] : [] ]);
             
         
     	// foreach($color_info as $i=>$color_info_for_line) {

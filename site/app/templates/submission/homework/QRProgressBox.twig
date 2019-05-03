@@ -1,0 +1,46 @@
+<div class="content" id="qr_progress_box">
+	<h3>QR processing progress <button onClick="window.location.reload()" id="refresh_btn" style="margin:15px;" class="btn btn-default" disabled>Refresh</button></h3>
+	<div>
+		<h4 style="float:left;">Processing</h4>
+		<h4 style="float:right;">Files ready to assign <span class="green-message">Note: please refresh too see newly added files</span></h4>
+	</div>
+	<br>
+	<div class="box col-md-6" id = "processing_box">
+		<ol id="processing_list">
+		</ol>
+	</div>
+
+	<div class="box col-md-6" id = "assign_box">
+
+	</div>
+</div>
+<script type="text/javascript">
+	var processing_box, assign_box;
+	window.onload = function() {
+		processing_list = document.getElementById("processing_list");
+		assign_box = document.getElementById("assign_box");
+
+		//check the status of what is processing and what is complete every 2 seconds
+		checkQRProgress( "{{ gradeable_id }}" );
+		var loop = setInterval(function(){
+			checkQRProgress( "{{ gradeable_id }}" );
+		}, 2000);
+    }
+    function updateQRProgress(files, completed_count){
+    	//clear previous data before getting next
+    	assign_box.removeChild(assign_box.firstChild);
+    	while(processing_list.firstChild)
+    		processing_list.removeChild(processing_list.firstChild);
+    	//get the latest data
+    	for (var i = files.length - 1; i >= 0; i--) {
+    		var node = document.createElement("LI")
+    		var new_file = document.createTextNode(files[i]);
+    		node.appendChild(new_file);
+    		processing_list.appendChild(node);
+    	}
+    	if(completed_count > 0)
+    		document.getElementById("refresh_btn").disabled = false;
+    	var message = document.createTextNode(completed_count.toString() + " files ready to assign"); 
+    	assign_box.appendChild(message);
+    }
+</script>

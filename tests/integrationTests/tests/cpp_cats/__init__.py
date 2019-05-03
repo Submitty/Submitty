@@ -204,4 +204,3 @@ def spellingOff(test):
     test.run_validator()
     test.diff("grade.txt","grade.txt_spellingOff","-b")
     test.json_diff("results.json","results.json_spellingOff")
-

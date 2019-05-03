@@ -1,5 +1,4 @@
 #include <sys/time.h>
-#include <sys/resource.h>
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -195,6 +194,7 @@ bool local_executable (const std::string &program, const nlohmann::json &whole_c
   assert (program.substr(0,2) == "./");
 
   std::set<std::string> executables = get_compiled_executables(whole_config);
+
   if (executables.find(program.substr(2,program.size())) != executables.end()) {
     return true;
   }
@@ -1065,7 +1065,14 @@ int execute(const std::string &cmd,
       const nlohmann::json &assignment_limits,
       const nlohmann::json &whole_config,
       const bool windowed,
-      const std::string display_variable) {
+      const std::string display_variable2) {
+
+  
+  std::string display_variable = display_variable2;
+  if (display_variable == "NO_DISPLAY_SET") {
+    display_variable = ":1";
+  }
+
 
   std::set<std::string> invalid_windows;
   bool window_mode = windowed; //Tells us if the process is expected to spawn a window. (additional support later) 
@@ -1086,24 +1093,25 @@ int execute(const std::string &cmd,
         break;
       }
     }
-
   }
-
-  if(window_mode){
-    std::cout <<"Window mode activated." << std::endl;
-    char* my_display = getenv("DISPLAY"); //The display environment variable is unset. This sets it for child and parent.
-    if (my_display == NULL) {
-      setenv("DISPLAY", display_variable.c_str(), 1);
-    }
-    window_mode = true;
-    invalid_windows = snapshotOfActiveWindows();
-  }
-
 
   std::cout << "IN EXECUTE:  '" << cmd << "'" << std::endl;
   std::cout << "identified " << dispatcher_actions.size() << " dispatcher actions" << std::endl;
 
   std::ofstream logfile(execute_logfile.c_str(), std::ofstream::out | std::ofstream::app);
+
+  //If we want windowed mode, but there is no display set.
+  if(window_mode && display_variable == "NO_DISPLAY_SET"){
+    std::cout << "ERROR: Attempting to grade a windowed gradeable with no display variable set." << std::endl;
+    logfile << "ERROR: Attempting to grade a windowed gradeable with no display variable set." << std::endl;
+    return -1;
+  }
+
+  if(window_mode){
+    std::cout <<"Window mode activated." << std::endl;
+    setenv("DISPLAY", display_variable.c_str(), 1);
+    invalid_windows = snapshotOfActiveWindows();
+  }
 
   // Forking to allow the setting of limits of RLIMITS on the command
   int result = -1;

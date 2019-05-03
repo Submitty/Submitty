@@ -88,14 +88,20 @@ class PDFController extends AbstractController {
         $annotation_info = $_POST['GENERAL_INFORMATION'];
         $grader_id = $this->core->getUser()->getId();
         $course_path = $this->core->getConfig()->getCoursePath();
-        $gradeable = $this->core->getQueries()->getGradeable($annotation_info['gradeable_id']);
         $user_id = $annotation_info['user_id'];
-        if($gradeable->isTeamAssignment()){
-            $first_member = $this->core->getQueries()->getTeamById($user_id)->getMemberUserIds()[0];
-            $active_version = $this->core->getQueries()->getGradeable($annotation_info['gradeable_id'], $first_member)->getActiveVersion();
-        } else {
-            $active_version = $this->core->getQueries()->getGradeable($annotation_info['gradeable_id'], $user_id)->getActiveVersion();
+
+        $gradeable = $this->tryGetGradeable($annotation_info['gradeable_id'] ?? null);
+        if ($gradeable === false) {
+            return false;
         }
+
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id);
+        if ($graded_gradeable === false) {
+            return false;
+        }
+
+        $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
+
         $annotation_gradeable_path = FileUtils::joinPaths($course_path, 'annotations', $annotation_info['gradeable_id']);
         if(!is_dir($annotation_gradeable_path) && !FileUtils::createDir($annotation_gradeable_path)){
             return $this->core->getOutput()->renderJsonFail('Creating annotation gradeable folder failed');
