@@ -11,6 +11,9 @@ if [[ $(command -v jdk_switcher) ]]; then
     jdk_switcher use default
 fi
 
+# Set Node.JS version
+nvm use 10
+
 # Set the Java version
 
 # we have to unset this as the JVM will print a message on STDERR on any execution if this is set because somehow that makes sense I guess

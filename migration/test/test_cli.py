@@ -250,7 +250,3 @@ class TestCli(unittest.TestCase):
             self.assertEqual(expected, mock_method.call_args[0][0])
         finally:
             shutil.rmtree(str(config_path))
-
-
-if __name__ == '__main__':
-    unittest.run()
