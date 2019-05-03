@@ -109,6 +109,7 @@ The vagrant box comes with some handy aliases:
     submitty_restart_services    - restarts all Submitty related systemctl
     migrator                     - run the migrator tool
     vagrant_info                 - print out the MotD again
+    ntp_sync                     - Re-syncs NTP in case of time drift
 
 Saved variables:
     SUBMITTY_REPOSITORY, SUBMITTY_INSTALL_DIR, SUBMITTY_DATA_DIR,
