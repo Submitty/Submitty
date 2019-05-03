@@ -249,7 +249,7 @@ table tr.table-header {
 }
 
 .table>thead>tr {
-    background: #E1E1E1;
+    background: #ededed;
 }
 
 .table>tbody>tr.info {
@@ -272,6 +272,24 @@ table tr.table-header {
 .tr-vertically-centered > td {
     vertical-align: middle;
 }
+
+.table-text-left {
+    text-align: center;
+}
+
+.table-text-left td {
+    border: none;
+}
+
+.table-text-left > tbody > tr > td:nth-child(3),
+.table-text-left > tbody > tr > td:nth-child(4),
+.table-text-left > tbody > tr > td:nth-child(5),
+.table-text-left > thead > tr > th:nth-child(3),
+.table-text-left > thead > tr > th:nth-child(4),
+.table-text-left > thead > tr > th:nth-child(5)  {
+    text-align: left;
+}
+
 
 /**********************************************************/
 
