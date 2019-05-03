@@ -13,7 +13,9 @@ input[disabled] {
 
 select {
     margin-top:7px;
-    /* width: 60px; */
+    width: -webkit-fill-available;
+    width: -moz-available;
+    width:  fill-available;
     min-width: 60px;
 }
 
@@ -68,11 +70,13 @@ input[type="radio"],input[type="checkbox"] {
 }
 
 fieldset {
-    margin: 8px;
-    border: 1px solid silver;
     padding: 8px;
     border-radius: 4px;
     display: block;
+}
+
+#electronic_file {
+    padding-left: 20px;
 }
 
 legend{
@@ -120,7 +124,7 @@ div.btn-container {
 }
 
 #team-settings-container {
-    margin-top: 10px
+    margin-top: 10px;
 }
 
 .disabled-btn{

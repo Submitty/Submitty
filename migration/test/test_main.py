@@ -47,7 +47,3 @@ class TestMain(unittest.TestCase):
             self.assertEqual('f', func_args[3])
 
         main.call_func(func, 'g', 'course', args)
-
-
-if __name__ == '__main__':
-    unittest.main()

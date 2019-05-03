@@ -23,6 +23,7 @@ use app\models\GradeableComponentMark;
 use app\models\GradeableVersion;
 use app\models\User;
 use app\models\Notification;
+use app\models\Email;
 use app\models\SimpleLateUser;
 use app\models\Team;
 use app\models\Course;
@@ -3629,10 +3630,10 @@ AND gc_id IN (
     /**
      * Queues an email to be sent by email job
      * @param array $email_data
-     * @param string $recipient
+     * @param Email $recipient
      */
-    public function createEmail($email_data, $recipient){
-        $parameters = array($recipient, $email_data["subject"], $email_data["body"]);
+    public function createEmail($email){
+        $parameters = array($email->getRecipient(), $email->getSubject(), $email->getBody());
 
         $this->submitty_db->query("
             INSERT INTO emails(
