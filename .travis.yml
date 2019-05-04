@@ -263,8 +263,8 @@ jobs:
         - tar xf ${LLVM_ARCHIVE_PATH} -C ${HOME}/clang+llvm --strip-components 1
         - export PATH=${HOME}/clang+llvm/bin:${PATH}
         # Create symlink so that it's in expected location for whitelist
-        - sudo ln -s /usr/bin/clang $(which clang)
-        - sudo ln -s /usr/bin/clang++ $(which clang++)
+        - sudo ln -s $(which clang) /usr/bin/clang
+        - sudo ln -s $(which clang++) /usr/bin/clang++
         - pip3 install -U pip
         - pip3 install PyYAML
         - pip3 install python-dateutil
