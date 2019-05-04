@@ -29,7 +29,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      */
     private $core;
 
-    public function setUp() {
+    public function setUp(): void {
         $_REQUEST['action'] = 'upload';
         $_REQUEST['gradeable_id'] = 'test';
         $_REQUEST['vcs_checkout'] = false;
@@ -146,7 +146,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      * Cleanup routine for the tester. This deletes any folders/files we created in the tmp directory to hold our fake
      * uploaded files.
      */
-    public function tearDown() {
+    public function tearDown(): void {
         $this->assertTrue(FileUtils::recursiveRmdir($this->config['tmp_path']));
     }
 

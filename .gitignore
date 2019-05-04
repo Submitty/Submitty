@@ -34,3 +34,4 @@ composer.phar
 Pipfile
 Pipfile.lock
 composer.lock
+.phpunit.result.cache
