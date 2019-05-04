@@ -35,7 +35,7 @@
                     "expected_file": "test_output/testassignment/inst_output.txt"
                 }
             ],
-            "points_awarded": 4,
+            "points_awarded": 1,
             "test_name": "Test 4 Test of by word comparison"
         },
         {

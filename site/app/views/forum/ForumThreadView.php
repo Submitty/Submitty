@@ -179,15 +179,15 @@ HTML;
 		//Body Style is necessary to make sure that the forum is still readable...
 		$return = <<<HTML
 
-		<link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}css/iframe/codemirror.css" />
-		<link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}css/iframe/eclipse.css" />
-		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/codemirror.js"></script>
-		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/clike.js"></script>
-		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/python.js"></script>
-		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/shell.js"></script>
+		<link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}vendor/codemirror/codemirror.css" />
+		<link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}vendor/codemirror/theme/eclipse.css" />
+		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}vendor/codemirror/codemirror.js"></script>
+		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}vendor/codemirror/mode/clike/clike.js"></script>
+		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}vendor/codemirror/mode/python/python.js"></script>
+		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}vendor/codemirror/mode/shell/shell.js"></script>
 		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
-		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/jquery.are-you-sure.min.js"></script>
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}vendor/jquery.are-you-sure/jquery.are-you-sure.js"></script>
+		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 		<style>body {min-width: 925px;}</style>
 
 
@@ -226,9 +226,7 @@ HTML;
 		$show_merged_thread_action = "alterShowMergeThreadStatus(1,'" . $currentCourse . "');";
 		$show_merged_thread_title = "Show Merged Threads";
 	}
-	$return .= <<<HTML
-		<div class="full_height content forum_content forum_show_threads">
-HTML;
+
 	$show_deleted_class = '';
 	$show_deleted_action = '';
     $show_deleted_thread_title = '';
@@ -289,28 +287,47 @@ HTML;
 								"thread_exists" => true,
 								"show_more" => true
 	];
-		if($this->core->getUser()->accessGrading()){
-			if($show_deleted) {
-				$show_deleted_class = "active";
-				$show_deleted_action = "alterShowDeletedStatus(0);";
-      			$show_deleted_thread_title = "Hide Deleted Threads";
-			} else {
-				$show_deleted_class = "";
-				$show_deleted_action = "alterShowDeletedStatus(1);";
-      			$show_deleted_thread_title = "Show Deleted Threads";
-			}
+	if($this->core->getUser()->accessGrading()){
+		if($show_deleted) {
+			$show_deleted_class = "active";
+			$show_deleted_action = "alterShowDeletedStatus(0);";
+			$show_deleted_thread_title = "Hide Deleted Threads";
+		} else {
+			$show_deleted_class = "";
+			$show_deleted_action = "alterShowDeletedStatus(1);";
+			$show_deleted_thread_title = "Show Deleted Threads";
 		}
-        if(!$threadExists){
-        $button_params["show_threads"] = false;
-        $button_params["thread_exists"] = false;
-        $return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", $button_params);
+	}
+
+	$return .= $this->core->getOutput()->renderTwigTemplate("forum/EditPostForm.twig");
+	$return .= $this->core->getOutput()->renderTwigTemplate("forum/HistoryForm.twig");
+
+	$return .= $this->core->getOutput()->renderTwigTemplate("forum/FilterForm.twig", [
+		"categories" => $categories,
+		"current_thread" => $currentThread,
+		"current_category_ids" => $currentCategoriesIds,
+		"current_course" => $currentCourse,
+		"cookie_selected_categories" => $cookieSelectedCategories,
+		"cookie_selected_thread_status" => $cookieSelectedThreadStatus,
+		"cookie_selected_unread_value" => $cookieSelectedUnread,
+		"display_option" => $display_option,
+		"thread_exists" => $threadExists
+	]);
+	
+	$return .= <<<HTML
+		<div class="full_height content forum_content forum_show_threads">
+HTML;
+
+	if(!$threadExists){
+		$button_params["show_threads"] = false;
+		$button_params["thread_exists"] = false;
+		$return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", $button_params);
 		$return .= <<<HTML
 						<h4 style="text-align:center;">A thread hasn't been created yet. Be the first to do so!</h4>
 				</div>
 HTML;
-		} else {	
-
-			$more_data = array(
+	} else {
+		$more_data = array(
 					array(
 							"filter_option" => $display_option
 					),
@@ -410,9 +427,10 @@ HTML;
 HTML;
 
 		}
-          
-		$this->core->getQueries()->visitThread($user, $activeThread['id']);
-		return $return;
+        if ( !empty($activeThread['id']) ) {
+            $this->core->getQueries()->visitThread($user, $activeThread['id']);
+        }
+        return $return;
 	}
 
 	public function generatePostList($currentThread, $posts, $unviewed_posts, $currentCourse, $includeReply = false, $threadExists = false, $display_option = 'time', $categories = [], $cookieSelectedCategories = [], $cookieSelectedThreadStatus = [], $cookieSelectedUnread = [], $currentCategoriesIds = [], $isCurrentFavorite = false) {
@@ -520,7 +538,7 @@ HTML;
 						}
 					}
 			if($includeReply) {
-			$return .= <<<HTML
+				$return .= <<<HTML
 
 			<hr style="border-top:1px solid #999;margin-bottom: 5px;" />
 			
@@ -549,8 +567,8 @@ HTML;
 HTML;
 
         if($this->core->getUser()->getGroup() <= 3){
-        	$this->core->getOutput()->addInternalCss('chosen.min.css');
-        	$this->core->getOutput()->addInternalJs('chosen.jquery.min.js');
+        	$this->core->getOutput()->addVendorCss(FileUtils::joinPaths('chosen-js', 'chosen.min.css'));
+        	$this->core->getOutput()->addVendorJs(FileUtils::joinPaths('chosen-js', 'chosen.jquery.min.js'));
 			$current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
 			$current_thread_date = $current_thread_first_post["timestamp"];
 			$merge_thread_list = $this->core->getQueries()->getThreadsBefore($current_thread_date, 1);
@@ -560,20 +578,7 @@ HTML;
 				"possibleMerges" => $merge_thread_list
 			]);
 		}
-		$return .= $this->core->getOutput()->renderTwigTemplate("forum/EditPostForm.twig");
-		$return .= $this->core->getOutput()->renderTwigTemplate("forum/HistoryForm.twig");
 
-		$return .= $this->core->getOutput()->renderTwigTemplate("forum/FilterForm.twig", [
-			"categories" => $categories,
-			"current_thread" => $currentThread,
-			"current_category_ids" => $currentCategoriesIds,
-			"current_course" => $currentCourse,
-			"cookie_selected_categories" => $cookieSelectedCategories,
-			"cookie_selected_thread_status" => $cookieSelectedThreadStatus,
-			"cookie_selected_unread_value" => $cookieSelectedUnread,
-			"display_option" => $display_option,
-			"thread_exists" => $threadExists
-		]);
 		return $return;
 	}
 
@@ -977,7 +982,7 @@ HTML;
 		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
 		$this->core->getOutput()->addBreadcrumb("Create Thread", $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
 		$return = <<<HTML
-		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/jquery.are-you-sure.min.js"></script>
+		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}vendor/jquery.are-you-sure/jquery.are-you-sure.js"></script>
 		<script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 		<script> 
 			$( document ).ready(function() {

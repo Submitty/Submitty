@@ -19,6 +19,8 @@ __pycache__/
 .coverage
 
 /site/vendor/
+/site/node_modules/
+/site/public/vendor/
 /site/config/*
 !/site/config/course_template.json
 

@@ -51,12 +51,12 @@
     {# /Import+Export teams buttons #}
     <br />
     <br />
-    <table class="table table-striped table-bordered persist-area">
+    <table class="table table-striped table-bordered persist-area table-text-left">
         {# Table header #}
         <thead class="persist-thead">
             <tr>
                 {% for column in columns %}
-                    <td width="{{ column.width }}">{{ column.title }}</td>
+                    <th width="{{ column.width }}">{{ column.title }}</th>
                 {% endfor %}
             </tr>
         </thead>

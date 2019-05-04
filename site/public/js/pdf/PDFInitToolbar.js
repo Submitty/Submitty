@@ -28,7 +28,7 @@ window.onbeforeunload = function(){
                 switch($(selected[0]).attr('value')){
                     case 'pen':
                         $('#file_content').css('overflow', 'auto');
-                        $('#scroll_lock_mode').removeAttr('checked');
+                        $('#scroll_lock_mode').prop('checked', false);
                         UI.disablePen();
                         break;
                     case 'eraser':

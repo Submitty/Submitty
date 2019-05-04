@@ -68,7 +68,3 @@ class TestConfig(unittest.TestCase):
             self.assertDictEqual(database_obj, config.database)
         finally:
             shutil.rmtree(temp_dir)
-
-
-if __name__ == '__main__':
-    unittest.main()
