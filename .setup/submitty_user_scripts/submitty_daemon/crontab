@@ -1,0 +1,1 @@
+* * * * * python3 ${SUBMITTY_INSTALL_DIR}/sbin/send_email.py
