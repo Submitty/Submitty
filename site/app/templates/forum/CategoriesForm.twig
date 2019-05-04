@@ -22,7 +22,7 @@
             <li id="categorylistitem-{{ category.category_id }}" {% if loop.index != 1 %} class="category-sortable"{% endif %} style="color: {{ category.color }}; {% if loop.index == 1 %}display: none;{% endif %}">
                 <i class="fas fa-bars handle" aria-hidden="true" title="Drag to reorder"></i>
                 <span class="categorylistitem-desc">
-                    <span>{{ category.category_desc }}</span>
+                    <span style="word-wrap: break-word;">{{ category.category_desc }}</span>
                     <a class="post_button" title="Edit Category Description"><i class="fas fa-edit" aria-hidden="true"></i></a>
                 </span>
                 <span class="categorylistitem-editdesc" style="display: none;">
