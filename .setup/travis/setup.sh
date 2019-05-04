@@ -39,13 +39,17 @@ python3 ${DIR}/../bin/create_untrusted_users.py
 addgroup submitty_daemonphp
 addgroup submitty_daemoncgi
 addgroup submitty_course_builders
-useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" ${PHP_USER}
-useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" ${CGI_USER}
-usermod -a -G ${PHP_GROUP} ${CGI_USER}
-useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" submitty_daemon
-usermod -a -G submitty_daemonphp ${PHP_USER}
-usermod -a -G submitty_daemoncgi ${CGI_USER}
-usermod -a -G submitty_daemoncgi,submitty_daemonphp,docker submitty_daemon
+adduser ${PHP_USER} --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+adduser ${CGI_USER} --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+adduser ${CGI_USER} ${PHP_GROUP}
+adduser ${PHP_USER} shadow
+adduser ${CGI_USER} shadow
+adduser submitty_daemon --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+adduser ${PHP_USER} submitty_daemonphp
+adduser submitty_daemon submitty_daemonphp
+adduser ${CGI_USER} submitty_daemoncgi
+adduser submitty_daemon submitty_daemoncgi
+adduser submitty_daemon docker
 useradd -p $(openssl passwd -1 submitty_dbuser) submitty_dbuser
 
 chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}
@@ -62,9 +66,9 @@ http://localhost
 
 ${AUTH_METHOD}" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
 
-bash -c "echo 'export PATH=${PATH}' >> /home/${PHP_USER}/.bash_profile"
+bash -c "echo 'export PATH=${PATH}' >> /home/${PHP_USER}/.profile"
 bash -c "echo 'export PATH=${PATH}' >> /home/${PHP_USER}/.bashrc"
-bash -c "echo 'export PATH=${PATH}' >> /home/${DAEMON_USER}/.bash_profile"
+bash -c "echo 'export PATH=${PATH}' >> /home/${DAEMON_USER}/.bashrc"
 bash -c "echo 'export PATH=${PATH}' >> /home/${DAEMON_USER}/.bashrc"
 # necessary so that PHP_USER has access to /home/travis/.phpenv/shims/composer
 usermod -a -G travis ${PHP_USER}
