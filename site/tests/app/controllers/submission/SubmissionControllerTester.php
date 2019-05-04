@@ -29,7 +29,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      */
     private $core;
 
-    public function setUp() {
+    public function setUp(): void {
         $_REQUEST['action'] = 'upload';
         $_REQUEST['gradeable_id'] = 'test';
         $_REQUEST['vcs_checkout'] = false;
