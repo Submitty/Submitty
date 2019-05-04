@@ -11,7 +11,7 @@
     }
   },
   "require": {
-    "twig/twig": "^2.0",
+    "twig/twig": "^2.9.0",
     "ramsey/uuid": "^3.8"
   },
   "autoload-dev": {
