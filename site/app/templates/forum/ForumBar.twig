@@ -88,6 +88,7 @@
 	          <li class="dropdown-divider"></li>
 	              <li id="tree" class='dropdown-item'><a tabindex="-1" onclick="changeDisplayOptions('tree', {{ current_thread }})" href="#">Hierarchical</a></li>
 	              <li id="time" class='dropdown-item'><a href="#" onclick="changeDisplayOptions('time', {{ current_thread }})">Chronological</a></li>
+				  <li id="reverse-time" class='dropdown-item'><a href="#" onclick="changeDisplayOptions('reverse-time', {{ current_thread }})">Chronological(Desc)</a></li>
 	              {% if user_group <= core.getUser().accessGrading() %}
 	              	<li id="alpha" class='dropdown-item'><a href="#" onclick="changeDisplayOptions('alpha', {{ current_thread }})">Alphabetical</a></li>
 	              {% endif %}
