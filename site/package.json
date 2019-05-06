@@ -21,7 +21,7 @@
     "jquery-ui-timepicker-addon": "~1.5.3",
     "jquery.are-you-sure": "~1.9.0",
     "pdfjs-dist": "~1.10.100",
-    "twig": "^1.13.2"
+    "twig": "^1.13.3"
   },
   "devDependencies": {}
 }
