@@ -109,6 +109,7 @@ The vagrant box comes with some handy aliases:
     submitty_restart_services    - restarts all Submitty related systemctl
     migrator                     - run the migrator tool
     vagrant_info                 - print out the MotD again
+    ntp_sync                     - Re-syncs NTP in case of time drift
 
 Saved variables:
     SUBMITTY_REPOSITORY, SUBMITTY_INSTALL_DIR, SUBMITTY_DATA_DIR,
@@ -140,9 +141,10 @@ alias install_submitty_bin='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setu
 alias submitty_install_bin='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/INSTALL_SUBMITTY_HELPER_BIN.sh'
 alias submitty_code_watcher='python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/code_watcher.py'
 alias submitty_restart_autograding='systemctl restart submitty_autograding_shipper && systemctl restart submitty_autograding_worker'
-alias submitty_restart_services='submitty_restart_autograding && systemctl restart submitty_daemon_jobs_handler && systemctl restart nullsmptd'
+alias submitty_restart_services='submitty_restart_autograding && systemctl restart submitty_daemon_jobs_handler && systemctl restart nullsmtpd'
 alias migrator='python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -c ${SUBMITTY_INSTALL_DIR}/config'
 alias vagrant_info='cat /etc/motd'
+alias ntp_sync='service ntp stop && ntpd -gq && service ntp start'
 cd ${SUBMITTY_INSTALL_DIR}" >> /root/.bashrc
 else
     #TODO: We should get options for ./.setup/CONFIGURE_SUBMITTY.py script
