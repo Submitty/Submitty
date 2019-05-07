@@ -3,6 +3,7 @@
 namespace app\views\grading;
 
 use app\controllers\student\LateDaysTableController;
+use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\AutoGradedVersion;
@@ -358,10 +359,10 @@ HTML;
         } else {
             if ($gradeable->isTeamAssignment()) {
                 if ($show_edit_teams) {
-                    $columns[] = ["width" => "3%",  "title" => "",                 "function" => "index"];
-                    $columns[] = ["width" => "5%",  "title" => "Section",          "function" => "section"];
-                    $columns[] = ["width" => "6%",  "title" => "Edit Teams",       "function" => "team_edit"];
-                    $columns[] = ["width" => "12%", "title" => "Team Id",          "function" => "team_id"];
+                    $columns[] = ["width" => "2%",  "title" => "",                 "function" => "index"];
+                    $columns[] = ["width" => "8%",  "title" => "Section",          "function" => "section"];
+                    $columns[] = ["width" => "5%",  "title" => "Edit Teams",       "function" => "team_edit"];
+                    $columns[] = ["width" => "10%", "title" => "Team Id",          "function" => "team_id"];
                     $columns[] = ["width" => "32%", "title" => "Team Members",     "function" => "team_members"];
                 } else {
                     $columns[] = ["width" => "3%",  "title" => "",                 "function" => "index"];
@@ -369,9 +370,9 @@ HTML;
                     $columns[] = ["width" => "50%", "title" => "Team Members",     "function" => "team_members"];
                 }
             } else {
-                $columns[]     = ["width" => "3%",  "title" => "",                 "function" => "index"];
-                $columns[]     = ["width" => "5%",  "title" => "Section",          "function" => "section"];
-                $columns[]     = ["width" => "20%", "title" => "User ID",          "function" => "user_id"];
+                $columns[]     = ["width" => "2%",  "title" => "",                 "function" => "index"];
+                $columns[]     = ["width" => "8%", "title" => "Section",          "function" => "section"];
+                $columns[]     = ["width" => "13%", "title" => "User ID",          "function" => "user_id"];
                 $columns[]     = ["width" => "15%", "title" => "First Name",       "function" => "user_first"];
                 $columns[]     = ["width" => "15%", "title" => "Last Name",        "function" => "user_last"];
             }
@@ -599,9 +600,9 @@ HTML;
         }
 
         $return .= <<<HTML
-            <link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}css/iframe/codemirror.css" />
-        <link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}css/iframe/eclipse.css" />
-        <script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}js/iframe/codemirror.js"></script>
+            <link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}vendor/codemirror/codemirror.css" />
+        <link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}vendor/codemirror/theme/eclipse.css" />
+        <script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}vendor/codemirror/codemirror.js"></script>
 HTML;
 
         if(!$peer) {
@@ -684,7 +685,7 @@ HTML;
         foreach($threadIds as $threadId) {
             $posts = $this->core->getQueries()->getPostsForThread($this->core->getUser()->getId(), $threadId, false, 'time', $submitter_id);
             if(count($posts) > 0) {
-                $posts_view .= $this->core->getOutput()->renderTemplate('forum\ForumThread', 'generatePostList', $threadId, $posts, $currentCourse, false, true, $submitter_id);
+                $posts_view .= $this->core->getOutput()->renderTemplate('forum\ForumThread', 'generatePostList', $threadId, $posts, [], $currentCourse, false, true, $submitter_id);
             } else {
                 $posts_view .= <<<HTML
                     <h3 style="text-align: center;">No posts for thread id: {$threadId}</h3> <br/>
@@ -762,7 +763,8 @@ HTML;
             "checkout" => $checkout,
             "results" => $results,
             "results_public" => $results_public,
-            "site_url" => $this->core->getConfig()->getSiteUrl()
+            "site_url" => $this->core->getConfig()->getSiteUrl(),
+            "active_version" => $display_version
         ]);
     }
 
@@ -838,7 +840,7 @@ HTML;
         $has_active_version = $graded_gradeable->getAutoGradedGradeable()->hasActiveVersion();
         $has_submission = $graded_gradeable->getAutoGradedGradeable()->hasSubmission();
 
-        $this->core->getOutput()->addInternalJs('twig.min.js');
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
         $this->core->getOutput()->addInternalJs('ta-grading-keymap.js');
         $this->core->getOutput()->addInternalJs('ta-grading.js');
         $this->core->getOutput()->addInternalJs('ta-grading-rubric-conflict.js');

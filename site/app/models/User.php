@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\libraries\Core;
+use app\exceptions\ValidationException;
 
 /**
  * Class User
@@ -318,16 +319,16 @@ class User extends AbstractModel {
 			return preg_match("~^[1-4]{1}$~", $data) === 1;
 		case 'registration_section':
 			//Registration section must contain only alpha (upper and lower permitted), numbers, underscores, hyphens.
-			//"NULL" is reserved, so section must not contain any alpha-case variation of "null".  e.g. "null", "NULL", "Null", etc.
-			return preg_match("~^(?!^null$)[a-z0-9_\-]+$~i", $data) === 1;
+			//"NULL" registration section should be validated as a datatype, not as a string.
+			return preg_match("~^(?!^null$)[a-z0-9_\-]+$~i", $data) === 1 || is_null($data);
 		case 'user_password':
 	        //Database password cannot be blank, no check on format
 			return $data !== "";
 		default:
-			//$data can't be validated since $field is unknown.  Notify developer with a stop error (also protectes data record integrity).
-			$field = var_export(htmlentities($field), true);
-			$data = var_export(htmlentities($data), true);
-			trigger_error('User::validateUserData() called with unknown $field '.$field.' and $data '.$data, E_USER_ERROR);
+			//$data can't be validated since $field is unknown.  Notify developer with an exception (also protectes data record integrity).
+			$ex_field = '$field: ' . var_export(htmlentities($field), true);
+			$ex_data = '$data:  ' . var_export(htmlentities($data), true);
+			throw new ValidationException('User::validateUserData() called with unknown $field.  See extra details, below.', array($ex_field, $ex_data));
     	}
     }
 
