@@ -80,7 +80,7 @@ class Access {
     /** If the current set of flags requires the "semester" (type string) and "course" (type string) arguments */
     const REQUIRE_ARGS_SEMESTER_COURSE  = 1 << 28;
     /** Ensure on the forum the operation is done by the correct user. */ 
-    const REQUIRE_FORUM_SAME_USER       = 1 << 29;
+    const REQUIRE_FORUM_SAME_STUDENT       = 1 << 29;
 
 
     // Broader user group access cases since generally actions are "minimum this group"
@@ -189,7 +189,7 @@ class Access {
         $this->permissions["forum.modify_category"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_CSRF;
         $this->permissions["forum.publish"] = self::ALLOW_MIN_STUDENT | self::CHECK_CSRF;
         $this->permissions["forum.modify_announcement"] = self::ALLOW_MIN_FULL_ACCESS_GRADER | self::CHECK_CSRF;
-        $this->permissions["forum.modify_post"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_CSRF | self::REQUIRE_FORUM_SAME_USER; 
+        $this->permissions["forum.modify_post"] = self::ALLOW_MIN_STUDENT | self::CHECK_CSRF | self::REQUIRE_FORUM_SAME_STUDENT; 
 
         $this->permissions["admin.wrapper"] = self::ALLOW_MIN_INSTRUCTOR;
     }
@@ -354,8 +354,8 @@ class Access {
             }
         }
 
-        if (self::checkBits($checks, self::REQUIRE_FORUM_SAME_USER)) {
-            if (array_key_exists('post_author', $args) && $this->core->getUser()->getId() != $args['post_author']) { 
+        if (self::checkBits($checks, self::REQUIRE_FORUM_SAME_STUDENT)) {
+            if ($group === User::GROUP_STUDENT && array_key_exists('post_author', $args) && $this->core->getUser()->getId() != $args['post_author']) { 
                 return false;
             }
         }

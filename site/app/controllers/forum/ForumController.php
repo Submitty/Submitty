@@ -468,7 +468,7 @@ class ForumController extends AbstractController {
         $post_id = $_POST["post_id"] ?? $_POST["edit_post_id"];
         $post = $this->core->getQueries()->getPost($post_id);
         if(!$this->core->getAccess()->canI("forum.modify_post", ['post_author' => $post['author_user_id']])) {
-                $this->core->addErrorMessage("You do not have permissions to do that.");
+                $this->core->getOutput()->renderJson(['error' => 'You do not have permissions to do that.']);
                 return;
         }
         if($modifyType == 0) { //delete post or thread
@@ -542,9 +542,8 @@ class ForumController extends AbstractController {
                 $this->core->getQueries()->pushNotification($notification);
             }
             if($isError) {
-                $this->core->addErrorMessage($messageString);
-            } else {
-                $this->core->addSuccessMessage($messageString);
+                $this->core->getOutput()->renderJson(['error' => $messageString]);
+                return;
             }
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
         }
@@ -579,7 +578,7 @@ class ForumController extends AbstractController {
             if(!empty($original_post)) {
                 $original_creator = $original_post['author_user_id'];
             }
-            $anon = ($_POST["Anon"] == "Anon") ? 1 : 0;
+            $anon = (!empty($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
             $current_user = $this->core->getUser()->getId();
             if(!$this->modifyAnonymous($original_creator)) {
                 $anon = $original_post["anonymous"] ? 1 : 0;
@@ -783,20 +782,22 @@ class ForumController extends AbstractController {
 
     public function getEditPostContent(){
         $post_id = $_POST["post_id"];
-        if($this->checkPostEditAccess($post_id) && !empty($post_id)) {
+        if(!empty($post_id)) {
             $result = $this->core->getQueries()->getPost($post_id);
-            $output = array();
-            $output['post'] = $result["content"];
-            $output['post_time'] = $result['timestamp'];
-            $output['anon'] = $result['anonymous'];
-            $output['change_anon'] = $this->modifyAnonymous($result["author_user_id"]);
-            $output['user'] = $output['anon'] ? 'Anonymous' : $result["author_user_id"];
-            if(isset($_POST["thread_id"])) {
-                $this->getThreadContent($_POST["thread_id"], $output);
+            if($this->core->getAccess()->canI("forum.modify_post", ['post_author' => $result['author_user_id']])) {
+                $output = array();
+                $output['post'] = $result["content"];
+                $output['post_time'] = $result['timestamp'];
+                $output['anon'] = $result['anonymous'];
+                $output['change_anon'] = $this->modifyAnonymous($result["author_user_id"]);
+                $output['user'] = $output['anon'] ? 'Anonymous' : $result["author_user_id"];
+                if(isset($_POST["thread_id"])) {
+                    $this->getThreadContent($_POST["thread_id"], $output);
+                }
+                $this->core->getOutput()->renderJson($output);
+            } else {
+                $this->core->getOutput()->renderJson(array('error' => "You do not have permissions to do that."));
             }
-            $this->core->getOutput()->renderJson($output);
-        } else {
-            $this->core->getOutput()->renderJson(array('error' => "You do not have permissions to do that."));
         }
         return $this->core->getOutput()->getOutput();
     }

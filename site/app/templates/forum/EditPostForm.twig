@@ -4,6 +4,7 @@
 {% block body %}
     <input type="hidden" id="edit_thread_id" name="edit_thread_id" value="" data-ays-ignore="true"/>
     <input type="hidden" id="edit_post_id" name="edit_post_id" value="" data-ays-ignore="true"/>
+    <input type="hidden" id="csrf_token" name="csrf_token" value="{{ core.getCsrfToken() }}" data-ays-ignore="true"/>
     {% include 'forum/ThreadPostForm.twig' with {
         "show_title": true,
         "show_post": true,
