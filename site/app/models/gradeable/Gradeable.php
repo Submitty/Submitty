@@ -45,6 +45,8 @@ use app\models\User;
  * @method void setVcs($use_vcs)
  * @method string getVcsSubdirectory()
  * @method void setVcsSubdirectory($subdirectory)
+ * @method int getVcsHostType()
+ * @method void setVcsHostType($host_type)
  * @method bool isTeamAssignment()
  * @method int getTeamSizeMax()
  * @method \DateTime getTeamLockDate()
@@ -136,6 +138,8 @@ class Gradeable extends AbstractModel {
     protected $vcs = false;
     /** @property @var string The subdirectory within the VCS repository for this gradeable */
     protected $vcs_subdirectory = "";
+    /** @property @var int Where are we hosting VCS (-1 -> Not VCS gradeable, 0,1 -> Submitty, 2,3 -> public/private Github) */
+    protected $vcs_host_type = -1;
     /** @property @var bool If the gradeable is a team assignment */
     protected $team_assignment = false;
     /** @property @var int The maximum team size (if the gradeable is a team assignment) */
@@ -219,6 +223,7 @@ class Gradeable extends AbstractModel {
             $this->setAutogradingConfigPath($details['autograding_config_path']);
             $this->setVcs($details['vcs']);
             $this->setVcsSubdirectory($details['vcs_subdirectory']);
+            $this->setVcsHostType($details['vcs_host_type']);
             $this->setTeamAssignmentInternal($details['team_assignment']);
             $this->setTeamSizeMax($details['team_size_max']);
             $this->setTaGradingInternal($details['ta_grading']);
@@ -988,7 +993,7 @@ class Gradeable extends AbstractModel {
     private function setTeamAssignmentInternal($use_teams) {
         $this->team_assignment = $use_teams === true;
     }
-    
+
     /** @internal */
     public function setTeamAssignment($use_teams) {
         throw new \BadFunctionCallException('Cannot change teamness of gradeable');
@@ -1558,7 +1563,7 @@ class Gradeable extends AbstractModel {
 
         return $sections;
     }
-  
+
     /**
      * return true if students can currently submit regrades for this assignment, false otherwise
      * @return bool

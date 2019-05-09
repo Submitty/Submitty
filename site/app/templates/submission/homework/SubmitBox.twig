@@ -147,23 +147,22 @@
     {# /Admin submission type selector #}
 
     {% if is_vcs %}
-        {#
-            TODO: Build ability for students to specify their own repo url
-            if (strpos($gradeable->getSubdirectory(),"\$repo_id") !== false) {
-                $return .= <<<HTML
-    repository id: <input type="text" id="repo_id" class="required" value="" placeholder="(Required)"/><br /><br />
-    HTML;
-            }
-            else if ($gradeable->getSubdirectory() == "" && $this->core->getConfig()->getVcsBaseUrl() == "") {
-                $return .= <<<HTML
-    Enter the URL for your repository, ex. <kbd>https://github.com/username/homework-1</kbd><br />
-    repository URL: <input type="text" id="repo_id" class="required" value ="" placeholder="(Required)"/><br /><br />
-    HTML;
-            }
-        #}
-        <h3>To access your Repository:</h3>
-        <span><em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em></span><br />
-        <samp>git  clone  {{ repository_path }}  SPECIFY_TARGET_DIRECTORY</samp><br /><br />
+        {% if vcs_host_type == 0 or vcs_host_type == 1 %}
+            <h3>To access your Repository:</h3>
+            <span><em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em></span><br />
+            <samp>git  clone  {{ repository_path }}  SPECIFY_TARGET_DIRECTORY</samp><br /><br />
+        {% endif %}
+
+        {% if vcs_host_type == 2 or vcs_host_type == 3 %}
+            <h3>Please enter your GitHub URL: </h3>
+
+            GitHub URL: <kbd>https://www.github.com/</kbd>
+            <input style='width: 16%' type="text" id="github_user_id" name="git_user_id" class="required" value="{{ github_user_id }}" placeholder="user_name"/>
+            <kbd>/</kbd>
+            <input style='width: 16%' type="text" id="github_repo_id" name="git_repo_id" class="required" value="{{ github_repo_id }}" placeholder="repo_name"/>
+            <br /><br />
+        {% endif %}
+
         <input type="submit" id="submit" class="btn btn-primary" value="Grade My Repository" />
     {% else %}
         <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
@@ -277,7 +276,7 @@
 {% endif %}
 
 <script type="text/javascript">
-    function makeSubmission(user_id, highest_version, is_pdf, path, count, repo_id, merge_previous=false, clobber=false) {
+    function makeSubmission(user_id, highest_version, is_pdf, path, count, git_user_id, git_repo_id, merge_previous=false, clobber=false) {
         // submit the selected pdf
         path = decodeURIComponent(path);
         if (is_pdf) {
@@ -296,7 +295,8 @@
                 {{ num_text_boxes }},
                 "{{ gradeable_id }}",
                 "{{ user_id }}",
-                repo_id,
+                git_user_id,
+                git_repo_id,
                 {{ student_page ? "true" : "false" }},
                 {{ component_names|length }},
                 merge_previous,
@@ -313,7 +313,8 @@
                 {{ num_text_boxes }},
                 "{{ gradeable_id }}",
                 user_id,
-                repo_id,
+                git_user_id,
+                git_repo_id,
                 {{ student_page ? "true" : "false" }},
                 {{ component_names|length }},
                 merge_previous,
@@ -324,7 +325,6 @@
     $(function() {
         $("#submit").click(function(e){ // Submit button
             var user_id = "";
-            var repo_id = "";
             var num_pages = 0;
             if ($('#radio_student').is(':checked')) {
                 user_id = $("#user_id").val();
@@ -342,8 +342,11 @@
                 }
             };
             // vcs upload
+            var git_user_id = "";
+            var git_repo_id = "";
             if ({{ is_vcs ? "true" : "false" }}) {
-                repo_id = $("#repo_id").val();
+                git_user_id = $("#github_user_id").val();
+                git_repo_id = $("#github_repo_id").val();
             }
             // bulk upload
             if ($("#radio_bulk").is(":checked")) {
@@ -351,11 +354,11 @@
             }
             // no user id entered, upload for whoever is logged in
             else if (user_id == ""){
-                makeSubmission(user_id, {{ highest_version }}, false, "", "", repo_id);
+                makeSubmission(user_id, {{ highest_version }}, false, "", "", git_user_id, git_repo_id);
             }
             // user id entered, need to validate first
             else {
-                validateUserId("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_id, false, "", "", repo_id, makeSubmission);
+                validateUserId("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_id, false, "", "", git_user_id, git_repo_id, makeSubmission);
             }
             e.stopPropagation();
         });

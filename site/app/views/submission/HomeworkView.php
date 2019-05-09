@@ -265,6 +265,9 @@ class HomeworkView extends AbstractView {
             $students_full = json_decode(Utils::getAutoFillData($students, $students_version));
         }
 
+        $github_user_id = '';
+        $github_repo_id = '';
+
         $image_data = [];
         if (!$gradeable->isVcs()) {
             foreach ($textboxes as $textbox) {
@@ -306,6 +309,26 @@ class HomeworkView extends AbstractView {
                 }
             }
         }
+        else {
+            // Get path to VCS_CHECKOUT
+            $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable->getId());
+            $who_id = $this->core->getUser()->getId();
+            $user_path = FileUtils::joinPaths($gradeable_path, $who_id);
+            $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
+            $version_path = FileUtils::joinPaths($user_path, $highest_version);
+            $path = FileUtils::joinPaths($version_path, ".submit.VCS_CHECKOUT");
+
+            // Load repo and user id
+            if (file_exists($path)) {
+                $json = json_decode(file_get_contents($path), true);
+                if (!is_null($json)) {
+                    if (isset($json["git_user_id"]))
+                        $github_user_id = $json["git_user_id"];
+                    if (isset($json["git_repo_id"]))
+                        $github_repo_id = $json["git_repo_id"];
+                }
+            }
+        }
 
         $component_names = array_map(function(Component $component) {
             return $component->getTitle();
@@ -330,6 +353,9 @@ class HomeworkView extends AbstractView {
             'part_names' => $gradeable->getAutogradingConfig()->getPartNames(),
             'is_vcs' => $gradeable->isVcs(),
             'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
+            'vcs_host_type' => $gradeable->getVcsHostType(),
+            'github_user_id' => $github_user_id,
+            'github_repo_id' => $github_repo_id,
             'has_due_date' => $gradeable->hasDueDate(),
             'repository_path' => $my_repository,
             'show_no_late_submission_warning' => !$gradeable->isLateSubmissionAllowed() && $gradeable->isSubmissionClosed(),
