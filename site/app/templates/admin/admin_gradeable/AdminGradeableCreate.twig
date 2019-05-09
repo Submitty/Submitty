@@ -212,10 +212,11 @@
             </div>
 
             <div id="repository">
+                <label for="repository">VCS Repository Details (select one)</label>
                 <div>
                     <input type='radio' id="vcs_radio_submitty_hosted" name="vcs_radio_buttons" value="submitty-hosted"
-                        {{ action != 'new' and gradeable.getVcsHostType() == 0 ? 'checked' : '' }}
-                        {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> Submitty Hosted – This gradeable
+                        {{ action == 'new' or (action != 'new' and gradeable.getVcsHostType() == 0) ? 'checked' : '' }}
+                        {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> Submitty hosted – single gradeable repository
     
                     <div id="vcs_submitty_url_content" name="vcs_content" style="margin-left: 5%">
                         <kbd id="vcs_url">{{ vcs_base_url }}&#123;&#36;gradeable_id&#125;&#47;</kbd>
@@ -226,12 +227,12 @@
                 <div class="team_no">
                     <input type='radio' id="vcs_radio_submitty_hosted_set_url" name="vcs_radio_buttons" value="submitty-hosted-url"
                         {{ action != 'new' and gradeable.getVcsHostType() == 1 ? 'checked' : '' }}
-                        {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> Submitty Hosted – Set URL
+                        {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> Submitty hosted – choose repository name (can be used for multiple gradeables)
     
                     <div id="vcs_submitty_set_url_content" name="vcs_content" style="margin-left: 5%">
                         {% if action == 'new' or action == 'template' %}
                             <kbd id="vcs_url">{{ vcs_base_url }}</kbd>
-                            <input style='width: 16%' type='text' name="vcs_url" id="vcs_submitty_url" class="auto_save" placeholder="a_project"
+                            <input style='width: 30%' type='text' name="vcs_url" id="vcs_submitty_url" class="required auto_save" placeholder="(Required)"
                                     value="" required />
                             <kbd id="vcs_url2">&#47;&#123;&#36;user_id&#125;</kbd>
                         {% else %}
@@ -242,11 +243,11 @@
     
                 <input type='radio' id="vcs_radio_public_github" name="vcs_radio_buttons" value="public-github"
                     {{ action != 'new' and gradeable.getVcsHostType() == 2 ? 'checked' : '' }}
-                    {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> Public Github </br>
+                    {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> Github hosted - public repository </br>
     
                 <input type='radio' id="vcs_radio_private_github" name="vcs_radio_buttons" value="private-github"
                     {{ action != 'new' and gradeable.getVcsHostType() == 3 ? 'checked' : '' }}
-                    {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> Private Github
+                    {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> Github hosted - private repository (NOTE: INCOMPLETE -- DO NOT USE)
             </div>
         </fieldset>
     </fieldset>
