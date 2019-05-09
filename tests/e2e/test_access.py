@@ -5,6 +5,12 @@ class TestAccess(BaseTestCase):
     def __init__(self, testname):
         super().__init__(testname, log_in=False)
 
+    def test_simple_router_course_page(self):
+        self.log_in('/index.php?semester=' + self.semester + '&course=sample', user_id='student')
+        expected = self.driver.page_source
+        self.driver.get('/{}/sample/'.format(self.semester))
+        self.assertEqual(expected, self.driver.page_source)
+
     def test_no_course_in_url(self):
         self.log_in("/index.php?semester=null", "Submitty")
         self.assertEqual(self.test_url + "/index.php?&success_login=true", self.driver.current_url)
