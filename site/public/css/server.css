@@ -197,11 +197,6 @@ input[type="checkbox"]:checked:before {
   display: inline-block;
 }
 
-input[type="checkbox"]:focus{
-    outline: 0 none;
-    box-shadow: none;
-}
-
 select.disabled,
 textarea.disabled,
 input.disabled {
