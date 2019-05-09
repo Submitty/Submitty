@@ -6,7 +6,7 @@ class TestAccess(BaseTestCase):
         super().__init__(testname, log_in=False)
 
     def test_simple_router_course_page(self):
-        self.log_in('/index.php?semester=' + self.semester + '&course=sample')
+        self.log_in('/index.php?semester=' + self.semester + '&course=sample', title='SAMPLE')
         self.assertEqual('SAMPLE', self.driver.title)
         self.driver.get('/{}/sample/'.format(self.semester))
         self.assertEqual('SAMPLE', self.driver.title)
