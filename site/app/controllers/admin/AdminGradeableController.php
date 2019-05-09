@@ -769,7 +769,7 @@ class AdminGradeableController extends AbstractController {
         if ($gradeable_type === GradeableType::ELECTRONIC_FILE) {
 
             $jsonThreads = json_encode('{}');
-            $discussion_clicked = $details['discussion_based'] === 'true';
+            $discussion_clicked = isset($details['discussion_based']) && ($details['discussion_based'] === 'true');
 
             //Validate user input for discussion threads
             if($discussion_clicked) {
@@ -782,11 +782,13 @@ class AdminGradeableController extends AbstractController {
                 $jsonThreads = json_encode($jsonThreads);
             }
 
+            $regrade_allowed = isset($details['regrade_allowed']) && ($details['regrade_allowed'] === 'true');
+
             $gradeable_create_data = array_merge($gradeable_create_data, [
                 'team_assignment' => $details['team_assignment'] === 'true',
                 'ta_grading' => $details['ta_grading'] === 'true',
                 'team_size_max' => $details['team_size_max'],
-                'regrade_allowed' => $details['regrade_allowed'] === 'true',
+                'regrade_allowed' => $regrade_allowed,
                 'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/upload_only/config',
                 'scanned_exam' => $details['scanned_exam'] === 'true',
                 'has_due_date' => true,
