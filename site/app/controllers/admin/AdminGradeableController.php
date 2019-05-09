@@ -731,11 +731,45 @@ class AdminGradeableController extends AbstractController {
             $gradeable_create_data[$prop] = $details[$prop] ?? '';
         }
 
+        // VCS specific values
+        if ($details['vcs'] === 'true') {
+            $host_button = $details['vcs_radio_buttons'];
+
+            // Find which radio button is pressed and what host type to use
+            $host_type = -1;
+            if      ($host_button === 'submitty-hosted')     { $host_type = 0; }
+            else if ($host_button === 'submitty-hosted-url') { $host_type = 1; }
+            else if ($host_button === 'public-github')       { $host_type = 2; }
+            else if ($host_button === 'private-github')      { $host_type = 3; }
+
+            $subdir = '';
+            // Submitty hosted -> this gradeable subdirectory
+            if ($host_type === 0)
+                $subdir = $this->core->getConfig()->getVcsBaseUrl() . $details['id'] . ($details['team_assignment'] === 'true' ? "/{\$team_id}" : "/{\$user_id}");
+            // Submitty hosted -> custom url
+            if ($host_type === 1)
+                $subdir = $this->core->getConfig()->getVcsBaseUrl() . $details['vcs_url'] . "/{\$user_id}";
+
+            $vcs_property_values = [
+                'vcs' => true,
+                'vcs_subdirectory' => $subdir,
+                'vcs_host_type' => $host_type
+            ];
+            $gradeable_create_data = array_merge($gradeable_create_data, $vcs_property_values);
+        } else {
+            $non_vcs_property_values = [
+                'vcs' => false,
+                'vcs_subdirectory' => '',
+                'vcs_host_type' => -1
+            ];
+            $gradeable_create_data = array_merge($gradeable_create_data, $non_vcs_property_values);
+        }
+
         // Electronic-only values
         if ($gradeable_type === GradeableType::ELECTRONIC_FILE) {
 
             $jsonThreads = json_encode('{}');
-            $discussion_clicked = $details['discussion_based'] === 'true';
+            $discussion_clicked = isset($details['discussion_based']) && ($details['discussion_based'] === 'true');
 
             //Validate user input for discussion threads
             if($discussion_clicked) {
@@ -748,18 +782,18 @@ class AdminGradeableController extends AbstractController {
                 $jsonThreads = json_encode($jsonThreads);
             }
 
+            $regrade_allowed = isset($details['regrade_allowed']) && ($details['regrade_allowed'] === 'true');
+
             $gradeable_create_data = array_merge($gradeable_create_data, [
                 'team_assignment' => $details['team_assignment'] === 'true',
-                'vcs' => $details['vcs'] === 'true',
                 'ta_grading' => $details['ta_grading'] === 'true',
                 'team_size_max' => $details['team_size_max'],
-                'vcs_subdirectory' => $details['vcs_subdirectory'],
-                'regrade_allowed' => $details['regrade_allowed'] === 'true',
+                'regrade_allowed' => $regrade_allowed,
                 'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/upload_only/config',
                 'scanned_exam' => $details['scanned_exam'] === 'true',
                 'has_due_date' => true,
-                
-                //For discussion component 
+
+                //For discussion component
                 'discussion_based' => $discussion_clicked,
                 'discussion_thread_ids' => $jsonThreads,
 
@@ -775,6 +809,7 @@ class AdminGradeableController extends AbstractController {
                 'vcs' => false,
                 'team_size_max' => 0,
                 'vcs_subdirectory' => '',
+                'vcs_host_type' => -1,
                 'autograding_config_path' => '',
                 'peer_grading' => false,
                 'peer_grade_set' => 0,
