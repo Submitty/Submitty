@@ -6,6 +6,7 @@ use app\libraries\ExceptionHandler;
 use app\libraries\Logger;
 use app\libraries\Utils;
 use app\libraries\Access;
+use app\libraries\Router;
 
 /*
  * The user's umask is ignored for the user running php, so we need
@@ -26,6 +27,8 @@ ini_set('display_errors', 1);
 require_once(__DIR__.'/../vendor/autoload.php');
 
 $core = new Core();
+$core->setRouter(new Router($_GET['url'] ?? ''));
+
 /**
  * Register custom expection and error handlers that will get run anytime our application
  * throws something or suffers a fatal error. This allows us to print a very generic error
@@ -45,6 +48,7 @@ function exception_handler($throwable) {
             $message = htmlentities($message, ENT_QUOTES);
         }
     }
+    
     $core->getOutput()->showException($message);
 }
 set_exception_handler("exception_handler");
@@ -58,14 +62,32 @@ function error_handler() {
 }
 register_shutdown_function("error_handler");
 
+$semester = '';
+$course = '';
+
+if ($core->getRouter()->hasNext()) {
+    $first = $core->getRouter()->getNext();
+    if (in_array($first, ['authentication', 'home'])) {
+        $_REQUEST['component'] = $first;
+    }
+    else {
+        $semester = $first ?? '';
+        $course = $core->getRouter()->getNext() ?? '';
+    }
+}
+
 /*
  * Check that we have a semester and a course specified by the user and then that there's no
  * potential for path trickery by using basename which will return only the last part of a
  * given path (such that /../../test would become just test)
  */
 
-if(empty($_REQUEST['semester']) || empty($_REQUEST['course'])){
-    $_REQUEST['semester'] = $_REQUEST['course'] = "";
+if (empty($_REQUEST['semester'])) {
+    $_REQUEST['semester'] = $semester;
+}
+
+if (empty($_REQUEST['course'])) {
+    $_REQUEST['course'] = $course;
 }
 
 
@@ -178,6 +200,7 @@ else if ($core->getConfig()->isCourseLoaded()
     $_REQUEST['component'] = 'navigation';
     $_REQUEST['page'] = 'no_access';
 }
+
 // Log the user action if they were logging in, logging out, or uploading something
 if ($core->getUser() !== null) {
     if (empty($_COOKIE['submitty_token'])) {
