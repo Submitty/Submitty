@@ -201,7 +201,7 @@ class Core {
     /**
      * @return Config
      */
-    public function getConfig() {
+    public function getConfig(): ?Config {
         return $this->config;
     }
 
@@ -321,19 +321,17 @@ class Core {
      * @throws AuthenticationException
      */
     public function authenticate($persistent_cookie = true) {
-        $auth = false;
         $user_id = $this->authentication->getUserId();
         try {
             if ($this->authentication->authenticate()) {
-                $auth = true;
-                $session_id = $this->session_manager->newSession($user_id);
-                $cookie_id = 'submitty_session_id';
                 // Set the cookie to last for 7 days
-                $cookie_data = array('session_id' => $session_id);
-                $cookie_data['expire_time'] = ($persistent_cookie === true) ? time() + (7 * 24 * 60 * 60) : 0;
-                if (Utils::setCookie($cookie_id, $cookie_data, $cookie_data['expire_time']) === false) {
-                    return false;
-                }
+                $token = TokenManager::generateSessionToken(
+                    $this->session_manager->newSession($user_id),
+                    $user_id,
+                    $this->getConfig()->getBaseUrl(),
+                    'testing',
+                    $persistent_cookie
+                );
             }
         }
         catch (\Exception $e) {
@@ -344,7 +342,7 @@ class Core {
             }
             throw new AuthenticationException($e->getMessage(), $e->getCode(), $e);
         }
-        return $auth;
+        return Utils::setCookie('submitty_session', (string) $token, $cookie_data['expire_time']);
     }
 
     /**
