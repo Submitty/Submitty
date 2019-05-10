@@ -225,21 +225,33 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
         # cleanup the previous checkout (if it exists)
         shutil.rmtree(checkout_path,ignore_errors=True)
         os.makedirs(checkout_path, exist_ok=True)
-        subprocess.check_call(['/usr/bin/git', 'clone', vcs_path, checkout_path])
-        os.chdir(checkout_path)
+        try:
+            # git clone may fail -- because repository does not exist,
+            # or because we don't have appropriate access credentials
+            subprocess.check_call(['/usr/bin/git', 'clone', vcs_path, checkout_path])
+            os.chdir(checkout_path)
 
-        # determine which version we need to checkout
-        what_version = subprocess.check_output(['git', 'rev-list', '-n', '1', '--before="'+submission_string+'"', 'master'])
-        what_version = str(what_version.decode('utf-8')).rstrip()
-        if what_version == "":
-            # oops, pressed the grade button before a valid commit
-            shutil.rmtree(checkout_path, ignore_errors=True)
-        else:
-            # and check out the right version
-            subprocess.call(['git', 'checkout', '-b', 'grade', what_version])
-        os.chdir(tmp)
-        subprocess.call(['ls', '-lR', checkout_path], stdout=open(tmp_logs + "/overall.txt", 'a'))
-        obj['revision'] = what_version
+            # determine which version we need to checkout
+            what_version = subprocess.check_output(['git', 'rev-list', '-n', '1', '--before="'+submission_string+'"', 'master'])
+            what_version = str(what_version.decode('utf-8')).rstrip()
+            if what_version == "":
+                # oops, pressed the grade button before a valid commit
+                shutil.rmtree(checkout_path, ignore_errors=True)
+            else:
+                # and check out the right version
+                subprocess.call(['git', 'checkout', '-b', 'grade', what_version])
+            os.chdir(tmp)
+            subprocess.call(['ls', '-lR', checkout_path], stdout=open(tmp_logs + "/overall.txt", 'a'))
+            obj['revision'] = what_version
+
+        except subprocess.CalledProcessError as error:
+            grade_items_logging.log_message(job_id,message="ERROR: failed to clone repository " + str(error))
+            os.chdir(checkout_path)
+            with open(os.path.join(checkout_path,"failed_to_clone_repository.txt"),'w') as f:
+                print(str(error),file=f)
+                print("\n",file=f)
+                print("Check to be sure the repository exists.\n",file=f)
+                print("And check to be sure the submitty_daemon user has appropriate access credentials.\n",file=f)
 
     copytree_if_exists(submission_path,os.path.join(tmp_submission,"submission"))
     copytree_if_exists(checkout_path,os.path.join(tmp_submission,"checkout"))
