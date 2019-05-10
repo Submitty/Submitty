@@ -56,7 +56,11 @@
                                 {# (size - 1) because twig loops are range inclusive #}
                                 {% set outer_loop = loop %}
                                 {% for i in 1..(max_team_size - 1) %}
-                                    <input type="text" id="bulk_user_id_{{ outer_loop.index }}[{{ i }}]" value =""/>
+                                    <input type="text" id="bulk_user_id_{{ outer_loop.index }}[{{ i }}]" value =""
+                                    {% if i == max_team_size - 1 %}
+                                        onkeydown="uploadOnEnter( {{ outer_loop.index }} );" 
+                                    {% endif %}
+                                    />
                                 {% endfor %}
                             {% endif %}
                         </div>
@@ -84,8 +88,9 @@
     var num_submissions = {{ files|length }};
     var CSRF = "{{ core.getCsrfToken() }}";
     var g_id = "{{ gradeable_id }}";
-    var max_team_size = {{ max_team_size - 1 }};
-    var is_team_assignment = "{{ team_assignment }}";
+    var max_team_size = {{ max_team_size }};
+    //team_assignment may either be 1 or not given so convert to a string to handle either case
+    var is_team_assignment = "{{ team_assignment }}" === "1";
     //autofill data
     $(function(){
         $("td > div :text").autocomplete({
@@ -100,16 +105,31 @@
         document.getElementById('row-' + String(index)).remove();
         num_submissions -= 1;
     }
-    
+
+    //if the user presses 'enter' try and make a submission as if hitting the submit button
+    function uploadOnEnter(index){
+        var key = window.event.keyCode;
+        if(key === 13){
+            uploadSplit(index);
+        }
+    }
+
     function uploadSplit(index){
         var submit_btn = document.getElementById("bulk_submit_" + String(index));
         var delete_btn = document.getElementById("bulk_delete_" + String(index));
         var user_id_textarea = document.getElementById("bulk_user_id_" + String(index));
 
         if(is_team_assignment){
-            var user_id = array();
-            for (var i = 0; i < max_team_size; i++) 
-                user_id.push(document.getElementById("bulk_user_id_" + String(index) + "[" + String(i) + "]"));
+            var user_id = [];
+            var tmp_user = document.getElementById("bulk_user_id_" + String(index)).value;
+            if(tmp_user != "")
+                user_id.push(tmp_user);
+
+            for (var i = 1; i < max_team_size; i++) {
+                tmp_user = document.getElementById("bulk_user_id_" + String(index) + "[" + String(i) + "]").value;
+                if(tmp_user != "")
+                    user_id.push(tmp_user);
+            }
         }else{
             var user_id = user_id_textarea.value;
         }
@@ -154,12 +174,6 @@
             console.error(response);
             displaySubmissionMessage({'success' : false, 'message' : response});
         });
-    }
-
-    function uploadTeamSplit(index){
-        var submit_btn = document.getElementById("bulk_submit_" + String(index));
-        var delete_btn = document.getElementById("bulk_delete_" + String(index));
-        var user_id_textarea = document.getElementById("bulk_user_id_" + String(index));
     }
 
     function uploadSplitHelper(user_id,path,index = 0,merge_previous = false,clobber = false){
@@ -244,7 +258,11 @@
                 uploadSplitHelper(user_id,path,index);
                 return submitAll(index + 1);
             }
-        }
+        })
+        .catch(function(response){
+            displaySubmissionMessage({'success' : false, 'message' : response}, index);
+            return submitAll(index + 1);
+        });
     }
 
     function confirmDeleteAll(){

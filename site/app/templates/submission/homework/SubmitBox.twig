@@ -285,7 +285,7 @@
 {% endif %}
 
 <script type="text/javascript">
-    function makeSubmission(user_id, highest_version, is_pdf, path, repo_id, merge_previous=false, clobber=false) {
+    function makeSubmission(user_id, highest_version, is_pdf, path, git_user_id, git_repo_id, merge_previous=false, clobber=false) {
         // submit the selected pdf
         path = decodeURIComponent(path);
         if (is_pdf) {
@@ -362,7 +362,7 @@
             }
             // no user id entered, upload for whoever is logged in
             else if (user_id == ""){
-                makeSubmission(user_id, {{ highest_version }}, false, "", repo_id);
+                makeSubmission(user_id, {{ highest_version }}, false, "", git_repo_id);
             }
             // user id entered, need to validate first
             else {
