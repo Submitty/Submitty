@@ -151,14 +151,14 @@
             TODO: Build ability for students to specify their own repo url
             if (strpos($gradeable->getSubdirectory(),"\$repo_id") !== false) {
                 $return .= <<<HTML
-    repository id: <input type="text" id="repo_id" class="required" value="" placeholder="(Required)"/><br /><br />
-    HTML;
+                repository id: <input type="text" id="repo_id" class="required" value="" placeholder="(Required)"/><br /><br />
+                HTML;
             }
             else if ($gradeable->getSubdirectory() == "" && $this->core->getConfig()->getVcsBaseUrl() == "") {
                 $return .= <<<HTML
-    Enter the URL for your repository, ex. <kbd>https://github.com/username/homework-1</kbd><br />
-    repository URL: <input type="text" id="repo_id" class="required" value ="" placeholder="(Required)"/><br /><br />
-    HTML;
+        Enter the URL for your repository, ex. <kbd>https://github.com/username/homework-1</kbd><br />
+        repository URL: <input type="text" id="repo_id" class="required" value ="" placeholder="(Required)"/><br /><br />
+        HTML;
             }
         #}
         <h3>To access your Repository:</h3>
@@ -166,51 +166,46 @@
         <samp>git  clone  {{ repository_path }}  SPECIFY_TARGET_DIRECTORY</samp><br /><br />
         <input type="submit" id="submit" class="btn btn-primary" value="Grade My Repository" />
     {% else %}
-      <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
+        <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
+        
+            <script type="text/javascript" src="../../../../js/showdown.min.js"></script>
+            <script type="text/javascript" src="../../../../js/xss.min.js"></script>
+            <script type="text/javascript" src="../../../../js/showdown-xss-filter.js"></script>
 
-	<script type="text/javascript" src="../../../../js/showdown.min.js"></script>
-	<script type="text/javascript" src="../../../../js/xss.min.js"></script>
-	<script type="text/javascript" src="../../../../js/showdown-xss-filter.js"></script>
+            {# Render content #}
+            {% for c in contents %}
+                <h2>{{ c.title }}</h2>
+                <div id="exp_{{ loop.index0 }}"></div>
+                <script type="text/javascript">
+                    var converter = new showdown.Converter({ extensions: ['xssfilter']});
+                    var md = "{{ c.exposition|raw }}";
+                    document.getElementById("exp_{{ loop.index0 }}").innerHTML = converter.makeHtml(md);
+                </script>
+                <br>
 
-	{# Render content #}
-	{% for c in contents %}
-	  <h2>{{ c.title }}</h2>
-	  <div id="exp_{{ loop.index0 }}"></div>
-	  <script type="text/javascript">
-	    var converter = new showdown.Converter({ extensions: ['xssfilter']});
-	    var md = "{{ c.exposition|raw }}";
-	    document.getElementById("exp_{{ loop.index0 }}").innerHTML = converter.makeHtml(md);
-	  </script>
-	  <br>
-
-	    {# Render the inputs for the given content block #}
-	    {% for i in c.input %}
-	      {% if i.type == "textbox" %}
-		{{ self.render_textbox(i, image_data, loop.index0) }}
-	      {% elseif i.type == "codebox" %}
-		
-		</div>
-        <br>
-		
-	      {% elseif i.type == "multiplechoice" %}
-            <strong>{{ i.label }}</strong>
-            <br>
-            <fieldset>
-		      {% for choice in i.choices %}
-                {% if i.allow_multiple == true %}
-                    <input type="checkbox" value="{{ choice }}" /><label for="{{ choice }}">{{ choice }}</label><br />
-                {% else %}
-                    <input type="radio" name="choice" value="{{ choice }}" /><label for="{{ choice }}">{{ choice }}</label><br />
-                {% endif %}
-              {% endfor %}
-            </fieldset>
-            <br>
-	      {% endif %}
-	    {% endfor %}
-	{% endfor %}
+                {# Render the inputs for the given content block #}
+                {% for i in c.input %}
+                    {% if i.type == "textbox" %}
+                        {{ self.render_textbox(i, image_data, loop.index0) }}
+                    {% elseif i.type == "codebox" %}
+                        <br>
+                    {% elseif i.type == "multiplechoice" %}
+                        <strong>{{ i.label }}</strong>
+                        <br>
+                        <fieldset>
+                            {% for choice in i.choices %}
+                                {% if i.allow_multiple == true %}
+                                    <input type="checkbox" value="{{ choice }}" /><label for="{{ choice }}">{{ choice }}</label><br />
+                                {% else %}
+                                    <input type="radio" name="choice" value="{{ choice }}" /><label for="{{ choice }}">{{ choice }}</label><br />
+                                {% endif %}
+                            {% endfor %}
+                        </fieldset>
+                        <br>
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
     
-
-	
             {# Submit boxes #}
             {% for part in part_names %}
                 <div id="upload{{ loop.index }}" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 150px;">
@@ -414,10 +409,10 @@
     <p style="max-width: 50em;">
         <strong>{{ textbox.label }}</strong>
         <br>
-          {% if textbox.row_count == 0 %}
-	    {# Maybe refactor this so that it uses input_### or something for compatability #}
-            <input type="text" name="textbox_{{ index }}" id="textbox_{{ index }}" onKeyPress="handle_textbox_keypress();">
-        {% else %}
+            {% if textbox.row_count == 0 %}
+                {# Maybe refactor this so that it uses input_### or something for compatability #}
+                <input type="text" name="textbox_{{ index }}" id="textbox_{{ index }}" onKeyPress="handle_textbox_keypress();">
+            {% else %}
             <textarea rows="{{ textbox.row_count }}" cols="50"  style="width:60em; height:100%;" name="textbox_{{ index }}" id="textbox_{{ index }}" onKeyPress="handle_textbox_keypress();"></textarea>
             {#
                 Allow tab in the larger text boxes (normally tab moves to the next textbox)

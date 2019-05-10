@@ -1090,11 +1090,6 @@ class SubmissionController extends AbstractController {
 
             // save the contents of the text boxes to files
             $empty_inputs = true;
-
-            // DO I NEED TO LOOK AT DATABASE STUFF??????
-            // THIS IS WHERE I'M STOPPING FOR TODAY.
-
-            
             if (isset($_POST['input_answers'])) {
                 $input_answer_array = json_decode($_POST['input_answers']);
                 for ($i = 0; $i < $gradeable->getAutogradingConfig()->getNumInputs(); $i++) {
