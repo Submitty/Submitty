@@ -206,8 +206,18 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
     # --------------------------------------------------------------------
     # CHECKOUT THE STUDENT's REPO
     if is_vcs:
+
+        # if we are public or private github, we will have an empty vcs_subdirectory
+        if vcs_subdirectory == '':
+            with open (os.path.join(submission_path,".submit.VCS_CHECKOUT")) as submission_vcs_file:
+                VCS_JSON = json.load(submission_vcs_file)
+                git_user_id = VCS_JSON["git_user_id"]
+                git_repo_id = VCS_JSON["git_repo_id"]
+                vcs_path="https://www.github.com/"+git_user_id+"/"+git_repo_id
+                print ("vcs_path is ",vcs_path)
+
         # is vcs_subdirectory standalone or should it be combined with base_url?
-        if vcs_subdirectory[0] == '/' or '://' in vcs_subdirectory:
+        elif vcs_subdirectory[0] == '/' or '://' in vcs_subdirectory:
             vcs_path = vcs_subdirectory
         else:
             if '://' in vcs_base_url:
@@ -225,25 +235,40 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
         # cleanup the previous checkout (if it exists)
         shutil.rmtree(checkout_path,ignore_errors=True)
         os.makedirs(checkout_path, exist_ok=True)
+
+        # git clone may fail -- because repository does not exist,
+        # or because we don't have appropriate access credentials
         try:
-            # git clone may fail -- because repository does not exist,
-            # or because we don't have appropriate access credentials
             subprocess.check_call(['/usr/bin/git', 'clone', vcs_path, checkout_path])
             os.chdir(checkout_path)
 
             # determine which version we need to checkout
-            what_version = subprocess.check_output(['git', 'rev-list', '-n', '1', '--before="'+submission_string+'"', 'master'])
-            what_version = str(what_version.decode('utf-8')).rstrip()
-            if what_version == "":
-                # oops, pressed the grade button before a valid commit
-                shutil.rmtree(checkout_path, ignore_errors=True)
-            else:
-                # and check out the right version
-                subprocess.call(['git', 'checkout', '-b', 'grade', what_version])
-            os.chdir(tmp)
-            subprocess.call(['ls', '-lR', checkout_path], stdout=open(tmp_logs + "/overall.txt", 'a'))
-            obj['revision'] = what_version
+            # if the repo is empty or the master branch does not exist, this command will fail
+            try:
+                what_version = subprocess.check_output(['git', 'rev-list', '-n', '1', '--before="'+submission_string+'"', 'master'])
+                what_version = str(what_version.decode('utf-8')).rstrip()
+                if what_version == "":
+                    # oops, pressed the grade button before a valid commit
+                    shutil.rmtree(checkout_path, ignore_errors=True)
+                else:
+                    # and check out the right version
+                    subprocess.call(['git', 'checkout', '-b', 'grade', what_version])
+                os.chdir(tmp)
+                subprocess.call(['ls', '-lR', checkout_path], stdout=open(tmp_logs + "/overall.txt", 'a'))
+                obj['revision'] = what_version
 
+            # exception on git rev-list
+            except subprocess.CalledProcessError as error:
+                grade_items_logging.log_message(job_id,message="ERROR: failed to determine version on master branch " + str(error))
+                os.chdir(checkout_path)
+                with open(os.path.join(checkout_path,"failed_to_determine_version_on_master_branch.txt"),'w') as f:
+                    print(str(error),file=f)
+                    print("\n",file=f)
+                    print("Check to be sure the repository is not empty.\n",file=f)
+                    print("Check to be sure the repository has a master branch.\n",file=f)
+                    print("And check to be sure the timestamps on the master branch are reasonable.\n",file=f)
+
+        # exception on git clone
         except subprocess.CalledProcessError as error:
             grade_items_logging.log_message(job_id,message="ERROR: failed to clone repository " + str(error))
             os.chdir(checkout_path)
