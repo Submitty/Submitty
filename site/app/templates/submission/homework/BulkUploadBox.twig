@@ -244,11 +244,7 @@
                 uploadSplitHelper(user_id,path,index);
                 return submitAll(index + 1);
             }
-        })
-        .catch(function(response){
-            displaySubmissionMessage({'success' : false, 'message' : response}, index);
-            return submitAll(index + 1);
-        });
+        }
     }
 
     function confirmDeleteAll(){

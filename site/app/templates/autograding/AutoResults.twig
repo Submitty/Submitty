@@ -50,7 +50,7 @@
 
                 {# Details button #}
                 {% if testcase.has_extra_results and can_view_details %}
-                    <span class="loading-tools" style="float:right">
+                    <span class="loading-tools" id="details_tc_{{ loop.index0 }}" style="float:right">
                         <span class="loading-tools-hide" style="color: #0000EE; text-decoration: underline;" hidden>
                             Hide Details
                         </span>

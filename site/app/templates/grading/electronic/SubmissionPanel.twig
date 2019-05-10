@@ -29,7 +29,7 @@
             </script>
 
             {% if not peer %}
-                <button class="btn btn-default" onclick="downloadZip('{{  gradeable_id }}','{{ submitter_id }}')">Download Zip File</button>
+                <button class="btn btn-default" onclick="downloadZip('{{  gradeable_id }}','{{ submitter_id }}', {{ active_version }})">Download Zip File</button>
             {% endif %}
 
             <div id="changeCodeStyle" class="btn-group btn-group-toggle" onchange="changeEditorStyle($('[name=codeStyle]:checked')[0].id);" data-toggle="buttons">

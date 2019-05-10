@@ -7,6 +7,8 @@ window.addEventListener("load", function() {
   }
 });
 
+window.addEventListener("resize", checkSidebarCollapse); 
+
 /**
  * Acts in a similar fashion to Core->buildUrl() function within the PHP code
  * so that we do not have to pass in fully built URL to JS functions, but rather
@@ -228,7 +230,7 @@ function newUserForm() {
     var form = $("#edit-user-form");
     form.css("display", "block");
     $('[name="edit_user"]', form).val("false");
-    $('[name="user_id"]', form).removeClass('readonly').removeAttr('readonly').val("");
+    $('[name="user_id"]', form).removeClass('readonly').prop('readonly', false).val("");
     $('[name="user_firstname"]', form).val("");
     $('[name="user_preferred_firstname"]', form).val("");
     $('[name="user_lastname"]', form).val("");
@@ -424,7 +426,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                 $.ajax({
                     url: url,
                     success: function(data) {
-                    	
+
                         data = JSON.parse(data);
                         console.log(data.ci);
 
@@ -455,8 +457,6 @@ function setUserSubmittedCode(gradeable_id, changed) {
                             //console.log(data.ci[users_color]);
                             for(var pos in data.ci[users_color]) {
                                 var element = data.ci[users_color][pos];
-                                console.log(element[5]);
-                                console.log(element[6]);
                                 $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_prev_color": element[4], "data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; background: " + element[4]});   
                             }
                         }
@@ -548,9 +548,9 @@ function setUserSubmittedCode(gradeable_id, changed) {
                                 var element = data.ci[users_color][pos];
                                 $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});   
                             }
-                        }   
+                        }
                         	$('.CodeMirror')[0].CodeMirror.refresh();
-                        	
+
                         	$('.CodeMirror')[1].CodeMirror.refresh();
                             // $('[name="code_box_1"]').empty().append(data.display_code1);
                             // $('[name="code_box_2"]').empty().append(data.display_code2);
@@ -999,7 +999,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
 
 function removeTeamMemberInput(i) {
     var form = $("#admin-team-form");
-    $('[name="user_id_'+i+'"]', form).removeClass('readonly').removeAttr('readonly').val("");
+    $('[name="user_id_'+i+'"]', form).removeClass('readonly').prop('readonly', false).val("");
     $("#remove_member_"+i).remove();
     var student_full = JSON.parse($('#student_full_id').val());
     $('[name="user_id_'+i+'"]', form).autocomplete({
@@ -1585,6 +1585,7 @@ function editPost(post_id, thread_id, shouldEditThread) {
                     return;
                 }
                 var post_content = json.post;
+                var lines = post_content.split(/\r|\r\n|\n/).length;
                 var anon = json.anon;
                 var change_anon = json.change_anon;
                 var user_id = escapeSpecialChars(json.user);
@@ -1598,6 +1599,7 @@ function editPost(post_id, thread_id, shouldEditThread) {
                 var date = time.toLocaleDateString();
                 time = time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
                 var contentBox = form.find("[name=thread_post_content]")[0];
+                contentBox.style.height = lines*14;
                 var editUserPrompt = document.getElementById('edit_user_prompt');
                 editUserPrompt.innerHTML = 'Editing a post by: ' + user_id + ' on ' + date + ' at ' + time;
                 contentBox.value = post_content;
@@ -1645,14 +1647,32 @@ function editPost(post_id, thread_id, shouldEditThread) {
         });
 }
 
-function enableTabsInTextArea(jQuerySelector){
+/**
+ * Enables the use of TAB key to indent within a textarea control.
+ *
+ * VPAT requires that keyboard navigation through all controls is always available.
+ * Since TAB is being redefined to indent code/text, ESC will be defined, in place
+ * of TAB, to proceed to the next control element.  SHIFT+TAB  shall be preserved
+ * with its default behavior of returning to the previous control element.
+ *
+ * @param string jQuerySelector
+ */
+function enableTabsInTextArea(jQuerySelector) {
     var t = $(jQuerySelector);
     t.on('input', function() {
         $(this).outerHeight(38).outerHeight(this.scrollHeight);
     });
     t.trigger('input');
-    t.keydown(function(t){
-        if(t.keyCode == 9){
+    t.keydown(function(t) {
+        if (t.which == 27) {  //ESC was pressed, proceed to next control element.
+            // Next control element may not be a sibling, so .next().focus() is not guaranteed
+            // to work.  There is also no guarantee that controls are properly wrapped within
+            // a <form>.  Therefore, retrieve a master list of all visible controls and switch
+            // focus to the next control in the list.
+            var controls = $(":input").filter(":visible");
+            controls.eq(controls.index(this) + 1).focus();
+            return false;
+        } else if (!t.shiftKey && t.keyCode == 9) { //TAB was pressed without SHIFT, text indent
             var text = this.value;
             var beforeCurse = this.selectionStart;
             var afterCurse = this.selectionEnd;
@@ -1660,6 +1680,7 @@ function enableTabsInTextArea(jQuerySelector){
             this.selectionStart = this.selectionEnd = beforeCurse+1;
             return false;
         }
+        // No need to test for SHIFT+TAB as it is not being redefined.
     });
 }
 
@@ -1735,6 +1756,7 @@ function dynamicScrollLoadPage(element, atEnd) {
 
     var categories_value = $("#thread_category").val();
     var thread_status_value = $("#thread_status_select").val();
+    var unread_select_value = $("#unread").is(':checked');
     categories_value = (categories_value == null)?"":categories_value.join("|");
     thread_status_value = (thread_status_value == null)?"":thread_status_value.join("|");
     $.ajax({
@@ -1743,6 +1765,7 @@ function dynamicScrollLoadPage(element, atEnd) {
             data: {
                 thread_categories: categories_value,
                 thread_status: thread_status_value,
+                unread_select: unread_select_value,
                 currentThreadId: currentThreadId,
                 currentCategoriesId: currentCategoriesId,
             },
@@ -1780,7 +1803,7 @@ function dynamicScrollContentOnDemand(jElement, urlPattern, currentThreadId, cur
     dynamicScrollLoadIfScrollVisible(jElement);
     $(jElement).scroll(function(){
         var element = $(this)[0];
-        var sensitivity = 3;
+        var sensitivity = 2;
         var isTop = element.scrollTop < sensitivity;
         var isBottom = (element.scrollHeight - element.offsetHeight - element.scrollTop) < sensitivity;
         if(isTop) {
@@ -1839,10 +1862,12 @@ function alterShowMergeThreadStatus(newStatus, course) {
 function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirstPage, success_callback){
     var categories_value = $("#thread_category").val();
     var thread_status_value = $("#thread_status_select").val();
+    var unread_select_value = $("#unread").is(':checked');
     categories_value = (categories_value == null)?"":categories_value.join("|");
     thread_status_value = (thread_status_value == null)?"":thread_status_value.join("|");
     document.cookie = course + "_forum_categories=" + categories_value + ";";
     document.cookie = "forum_thread_status=" + thread_status_value + ";";
+    document.cookie = "unread_select_value=" + unread_select_value + ";";
     var url = buildUrl({'component': 'forum', 'page': 'get_threads', 'page_number': (loadFirstPage?'1':'-1')});
     $.ajax({
             url: url,
@@ -1850,6 +1875,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
             data: {
                 thread_categories: categories_value,
                 thread_status: thread_status_value,
+                unread_select: unread_select_value,
                 currentThreadId: currentThreadId,
                 currentCategoriesId: currentCategoriesId,
             },
@@ -2402,7 +2428,7 @@ function updateHomeworkExtensions(data) {
     return false;
 }
 
-function loadHomeworkExtensions(g_id) {
+function loadHomeworkExtensions(g_id, due_date) {
     var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'get_extension_details', 'g_id': g_id});
     $.ajax({
         url: url,
@@ -2412,6 +2438,7 @@ function loadHomeworkExtensions(g_id) {
             $('#my_table tr:gt(0)').remove();
             var title = '<div class="option-title" id="title">Current Extensions for ' + json['gradeable_id'] + '</div>';
             $('#title').replaceWith(title);
+            $('#due_date').text(due_date);
             if(json['users'].length === 0){
                 $('#my_table').append('<tr><td colspan="4">There are no extensions for this homework</td></tr>');
             }
@@ -2603,6 +2630,9 @@ function checkSidebarCollapse() {
     if (size < 1000) {
         $("#sidebar").toggleClass("collapsed", true);
     }
+    else{
+        $("#sidebar").toggleClass("collapsed", false);
+    }
 }
 
 //Called from the DOM collapse button, toggle collapsed and save to localStorage
@@ -2622,6 +2652,9 @@ $(document).ready(function() {
         position: { my: "right+0 bottom+0" },
         content: function () {
             if($("#sidebar").hasClass("collapsed")) {
+                if ($(this).attr("title") === "Collapse Sidebar") {
+                    return "Expand Sidebar";
+                }
                 return $(this).attr("title")
             }
             else {
@@ -2629,7 +2662,6 @@ $(document).ready(function() {
             }
         }
     });
-    $("#nav-sidebar-collapse.collapse-icon").attr("title", "Expand Sidebar");
 
     //Remember sidebar preference
     if (localStorage.sidebar !== "") {

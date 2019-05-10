@@ -377,7 +377,7 @@ function checkForPreviousSubmissions(csrf_token, gradeable_id, user_id){
             'user_id' : user_id
         },
         type: 'POST',
-    });  
+    });
 }
 
 /**
@@ -656,7 +656,7 @@ function handleBulk(gradeable_id, num_pages, use_qr_codes = false, qr_prefix = "
  * @param num_components
  * @param merge_previous
  */
-function handleSubmission(days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_textboxes, gradeable_id, user_id, repo_id, student_page, num_components, merge_previous=false, clobber=false) {
+function handleSubmission(days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_textboxes, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false) {
     $("#submit").prop("disabled", true);
 
     var submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload', 'gradeable_id': gradeable_id, "merge": merge_previous, "clobber": clobber});
@@ -689,7 +689,8 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
     formData.append('csrf_token', csrf_token);
     formData.append('vcs_checkout', vcs_checkout);
     formData.append('user_id', user_id);
-    formData.append('repo_id', repo_id);
+    formData.append('git_user_id', git_user_id);
+    formData.append('git_repo_id', git_repo_id);
     formData.append('student_page', student_page)
 
     if (!vcs_checkout) {
