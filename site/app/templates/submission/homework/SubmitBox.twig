@@ -156,12 +156,21 @@
         {% if vcs_host_type == 2 or vcs_host_type == 3 %}
             <h3>Please enter your GitHub URL: </h3>
 
-            GitHub URL: <kbd>https://www.github.com/</kbd>
+            GitHub URL: &nbsp;&nbsp; <kbd>https://www.github.com/</kbd>
             <input style='width: 16%' type="text" id="github_user_id" name="git_user_id" class="required" value="{{ github_user_id }}" placeholder="user_name"/>
             <kbd>/</kbd>
             <input style='width: 16%' type="text" id="github_repo_id" name="git_repo_id" class="required" value="{{ github_repo_id }}" placeholder="repo_name"/>
+            <br />
+
+            {% if vcs_host_type == 2 %}
+            Note: This should be a <em>public repository</em>, visible to everyone.
+            {% else %}
+            Note: If this is not a <em>public repository</em>, please ensure that you have granted read access to INCOMPLETE! FIXME! SPECIAL USER.
+            {% endif %}
             <br /><br />
+
         {% endif %}
+
 
         <input type="submit" id="submit" class="btn btn-primary" value="Grade My Repository" />
     {% else %}

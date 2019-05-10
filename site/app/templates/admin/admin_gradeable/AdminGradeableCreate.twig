@@ -237,11 +237,11 @@
     
                 <input type='radio' id="vcs_radio_public_github" name="vcs_radio_buttons" value="public-github"
                     {{ action != 'new' and gradeable.getVcsHostType() == 2 ? 'checked' : '' }}
-                    {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> Github hosted - public repository </br>
+                    {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> Github hosted - public repository, students will provide URL </br>
     
                 <input type='radio' id="vcs_radio_private_github" name="vcs_radio_buttons" value="private-github"
                     {{ action != 'new' and gradeable.getVcsHostType() == 3 ? 'checked' : '' }}
-                    {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> Github hosted - private repository (NOTE: INCOMPLETE -- DO NOT USE)
+                    {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> Github hosted - private repository, students will provide URL (NOTE: INCOMPLETE -- DO NOT USE)
             </div>
         </fieldset>
     </fieldset>
