@@ -405,7 +405,7 @@ class SubmissionController extends AbstractController {
         //     $return = array('success' => false, 'message' => $msg);
         //     $this->core->getOutput()->renderJson($return);
         //     return $return;
-        // } else 
+        // } else
 
         //If the users are on multiple teams.
         if (count($graded_gradeables) > 1) {
@@ -540,7 +540,7 @@ class SubmissionController extends AbstractController {
                 if (!@unlink($uploaded_file["tmp_name"][$j])) {
                     return $this->uploadResult("Failed to delete the uploaded file {$uploaded_file["name"][$j]} from temporary storage.", false);
                 }
-            } 
+            }
         }
 
         // use pdf_check.cgi to check that # of pages is valid and split
@@ -815,7 +815,7 @@ class SubmissionController extends AbstractController {
         if (!@file_put_contents(FileUtils::joinPaths($version_path, ".submit.timestamp"), $current_time_string_tz."\n")) {
             return $this->uploadResult("Failed to save timestamp file for this submission.", false);
         }
-        
+
         $upload_time_string_tz = $timestamp . " " . $this->core->getConfig()->getTimezone()->getName();
 
         $bulk_upload_data = [
@@ -827,7 +827,7 @@ class SubmissionController extends AbstractController {
         if (FileUtils::writeJsonFile(FileUtils::joinPaths($version_path, "bulk_upload_data.json"), $bulk_upload_data) === false) {
             return $this->uploadResult("Failed to create bulk upload file for this submission.", false);
         }
-        
+
         $queue_file = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
             $gradeable->getId(), $who_id, $new_version);
         $queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_queue",
@@ -911,7 +911,7 @@ class SubmissionController extends AbstractController {
         $timestamp_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
             $gradeable->getId(), $timestamp);
         $files = FileUtils::getAllFiles($timestamp_path);
-        
+
         //check if there are any pdfs left to assign to students, otherwise delete the folder
         $any_pdfs_left = false;
         foreach ($files as $file){
@@ -951,7 +951,7 @@ class SubmissionController extends AbstractController {
         $clobber = isset($_REQUEST['clobber']) && $_REQUEST['clobber'] === 'true';
 
         $vcs_checkout = isset($_REQUEST['vcs_checkout']) ? $_REQUEST['vcs_checkout'] === "true" : false;
-        if ($vcs_checkout && !isset($_POST['repo_id'])) {
+        if ($vcs_checkout && !isset($_POST['git_repo_id'])) {
             return $this->uploadResult("Invalid repo id.", false);
         }
 
@@ -977,7 +977,7 @@ class SubmissionController extends AbstractController {
         $original_user_id = $this->core->getUser()->getId();
         $user_id = $_POST['user_id'];
         // repo_id for VCS use
-        $repo_id = $_POST['repo_id'];
+        $repo_id = ($vcs_checkout ? $_POST['git_repo_id'] : "");
 
         // make sure is full grader if the two ids do not match
         if ($original_user_id !== $user_id && !$this->core->getUser()->accessFullGrading()) {
@@ -1274,6 +1274,13 @@ class SubmissionController extends AbstractController {
             $vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
             $vcs_path = $gradeable->getVcsSubdirectory();
 
+            if ($gradeable->getVcsHostType() == 0 || $gradeable->getVcsHostType() == 1) {
+                $vcs_path = str_replace("{\$gradeable_id}",$gradeable_id,$vcs_path);
+                $vcs_path = str_replace("{\$user_id}",$who_id,$vcs_path);
+                $vcs_path = str_replace("{\$team_id}",$who_id,$vcs_path);
+                $vcs_full_path = $vcs_base_url.$vcs_path;
+            }
+
             // use entirely student input
             if ($vcs_base_url == "" && $vcs_path == "") {
                 if ($repo_id == "") {
@@ -1298,6 +1305,17 @@ class SubmissionController extends AbstractController {
             if (!@touch(FileUtils::joinPaths($version_path, ".submit.VCS_CHECKOUT"))) {
                 return $this->uploadResult("Failed to touch file for vcs submission.", false);
             }
+
+            // Public or private github
+            if ($gradeable->getVcsHostType() == 2 || $gradeable->getVcsHostType() == 3) {
+                $dst = FileUtils::joinPaths($version_path, ".submit.VCS_CHECKOUT");
+                $json = array("git_user_id" => $_POST["git_user_id"],
+                              "git_repo_id" => $_POST["git_repo_id"]);
+                if (!@file_put_contents($dst, FileUtils::encodeJson($json))) {
+                    return $this->uploadResult("Failed to write to VCS_CHECKOUT file.", false);
+                }
+            }
+
         }
 
         // save the contents of the page number inputs to files

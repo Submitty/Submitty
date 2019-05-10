@@ -31,7 +31,7 @@
             {% for ranks in statuses %}
                 {% if loop.index == 1 or ranks|length > 0 %}
                     <h2>Your {{ loop.index == 1 ? "" : "Archived " }}Courses</h2>
-                    {# This is a layout table #}
+                    {# This is also a layout table #}
                     <table class="courses-table">
                         <tbody>
                         {% for rank in ranks %}
