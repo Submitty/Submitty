@@ -744,12 +744,13 @@ class AdminGradeableController extends AbstractController {
 
             $subdir = '';
             // Submitty hosted -> this gradeable subdirectory
-            if ($host_type === 0)
-                $subdir = $this->core->getConfig()->getVcsBaseUrl() . $details['id'] . ($details['team_assignment'] === 'true' ? "/{\$team_id}" : "/{\$user_id}");
+            if ($host_type === 0) {
+                $subdir = $details['id'] . ($details['team_assignment'] === 'true' ? "/{\$team_id}" : "/{\$user_id}");
+            }
             // Submitty hosted -> custom url
-            if ($host_type === 1)
-                $subdir = $this->core->getConfig()->getVcsBaseUrl() . $details['vcs_url'] . "/{\$user_id}";
-
+            if ($host_type === 1) {
+                $subdir = $details['vcs_url'] . "/{\$user_id}";
+            }
             $vcs_property_values = [
                 'vcs' => true,
                 'vcs_subdirectory' => $subdir,
