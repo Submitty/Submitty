@@ -47,20 +47,22 @@
                     <td id="input_area">
                         <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
                         <div id="users_{{ loop.index }}">
-                            {% if use_qr_codes %}
-                                <input type="text" id="bulk_user_id_{{ loop.index }}" value ="{{ file["id"] }}"/>
-                            {% else %}
-                                <input type="text" id="bulk_user_id_{{ loop.index }}" value =""/>
-                            {% endif %}
+                            <input type="text" id="bulk_user_id_{{ loop.index }}" 
+                                {% if use_qr_codes %}
+                                    value ="{{ file["id"] }}"
+                                {% else %}
+                                    value =""
+                                {% endif %}
+
+                                {% if team_assignment %}
+                                    onkeydown="uploadOnEnter( {{ loop.index }} );"
+                                {% endif %}
+                            />
                             {% if team_assignment %}
                                 {# (size - 1) because twig loops are range inclusive #}
                                 {% set outer_loop = loop %}
                                 {% for i in 1..(max_team_size - 1) %}
-                                    <input type="text" id="bulk_user_id_{{ outer_loop.index }}[{{ i }}]" value =""
-                                    {% if i == max_team_size - 1 %}
-                                        onkeydown="uploadOnEnter( {{ outer_loop.index }} );" 
-                                    {% endif %}
-                                    />
+                                    <input type="text" id="bulk_user_id_{{ outer_loop.index }}[{{ i }}]" value ="" onkeydown="uploadOnEnter( {{ outer_loop.index }} );" />
                                 {% endfor %}
                             {% endif %}
                         </div>
@@ -109,7 +111,7 @@
     //if the user presses 'enter' try and make a submission as if hitting the submit button
     function uploadOnEnter(index){
         var key = window.event.keyCode;
-        if(key === 13){
+        if(key === 13 && is_team_assignment){
             uploadSplit(index);
         }
     }
@@ -152,6 +154,15 @@
 
                 //callback function once user actually picks something
                 function getSubmissionOption(option){
+                    //user closes do nothing
+                    if(option === -1){
+                        submit_btn.disabled = false;
+                        delete_btn.disabled = false;
+                        user_id_textarea.disabled = false;
+                        return;
+                    }
+
+
                     var merge_previous = false;
                     var clobber = false;
 
