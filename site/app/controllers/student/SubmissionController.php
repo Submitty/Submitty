@@ -404,13 +404,13 @@ class SubmissionController extends AbstractController {
 
         // Below is true if no users are on a team. In this case, we later make the team automatically,
         //   so this should not return a failure.
-        if (count($graded_gradeables) === 0) {
-            // No user was on a team
-            $msg = 'No user on a team';
-            $return = array('success' => false, 'message' => $msg);
-            $this->core->getOutput()->renderJson($return);
-            return $return;
-        }
+        // if (count($graded_gradeables) === 0) {
+        //     // No user was on a team
+        //     $msg = 'No user on a team';
+        //     $return = array('success' => false, 'message' => $msg);
+        //     $this->core->getOutput()->renderJson($return);
+        //     return $return;
+        // }
 
         //If the users are on multiple teams.
         if ($gradeable->isTeamAssignment() && count($graded_gradeables) > 1) {
@@ -422,8 +422,11 @@ class SubmissionController extends AbstractController {
         }
 
         $highest_version = -1;
-        $graded_gradeable = $graded_gradeables[0];
-        $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
+
+        if(count($graded_gradeables) > 0){
+            $graded_gradeable = $graded_gradeables[0];
+            $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
+        }
 
         //If there has been a previous submission, we tag it so that we can pop up a warning.
         $return = array('success' => true, 'highest_version' => $highest_version, 'previous_submission' => $highest_version > 0);
