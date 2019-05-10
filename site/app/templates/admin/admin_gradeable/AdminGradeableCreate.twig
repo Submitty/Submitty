@@ -131,6 +131,8 @@
                 <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val auto_save date-related"
                         {{ not (action != 'new' and gradeable.getTaGrading()) ? 'checked' : '' }} /> <label for="no_ta_grade">No</label>
             </div>
+
+
             {% if regrade_enabled %}
                 <div id="regrade_request_enable_container">
                     Will grade inquiries be enabled for this assignment?
@@ -153,7 +155,7 @@
                             {{ not (action != 'new' and gradeable.isDiscussionBased()) ? 'checked' : '' }} /> No
 
                     <div class="discussion_id_wrapper">
-                        <label for="discussion_thread_id">What thread id(s) should be included?</label>
+                        <label for="discussion_thread_id">What thread id(s) should be included? (separate by commas)</label>
                             <input style="width: 70px" name="discussion_thread_id" id="discussion_thread_id" class="int_val auto_save" type="text"
                                    value="{{ action != 'new' ? gradeable.getStringThreadIds() : '' }}"/>
                     </div>
@@ -237,11 +239,11 @@
     
                 <input type='radio' id="vcs_radio_public_github" name="vcs_radio_buttons" value="public-github"
                     {{ action != 'new' and gradeable.getVcsHostType() == 2 ? 'checked' : '' }}
-                    {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> Github hosted - public repository </br>
+                    {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> Github hosted - public repository, students will provide URL </br>
     
                 <input type='radio' id="vcs_radio_private_github" name="vcs_radio_buttons" value="private-github"
                     {{ action != 'new' and gradeable.getVcsHostType() == 3 ? 'checked' : '' }}
-                    {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> Github hosted - private repository (NOTE: INCOMPLETE -- DO NOT USE)
+                    {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> Github hosted - private repository, students will provide URL (NOTE: INCOMPLETE -- DO NOT USE)
             </div>
         </fieldset>
     </fieldset>
@@ -394,11 +396,15 @@
             // $('.manual_grading').show();
             disableElementChildren('.manual_grading', false);
             disableElementChildren('.no_manual_grading', true);
+            $('#regrade_request_enable_container').show();
+            $('#discussion_grading_enable_container').show();
         }
         else {
             // $('.manual_grading').hide();
             disableElementChildren('.manual_grading', true);
             disableElementChildren('.no_manual_grading', false);
+            $('#regrade_request_enable_container').hide();
+            $('#discussion_grading_enable_container').hide();
         }
         updateDateDisplay();
     }
