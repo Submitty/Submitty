@@ -137,7 +137,7 @@ if (isset($_COOKIE[$cookie_key])) {
         $token = TokenManager::getTokenFromSessionCookie(
             $_COOKIE[$cookie_key],
             $core->getConfig()->getBaseUrl(),
-            'testing'
+            $core->getConfig()->getSecretSession()
         );
         $session_id = $token->getClaim('session_id');
         $expire_time = $token->getClaim('expire_time');
@@ -154,7 +154,7 @@ if (isset($_COOKIE[$cookie_key])) {
                         $session_id,
                         $core->getUser()->getId(),
                         $core->getConfig()->getBaseUrl(),
-                        'testing'
+                        $core->getConfig()->getSecretSession()
                     ),
                     $expire_time
                 );

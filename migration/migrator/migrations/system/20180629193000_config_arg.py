@@ -16,7 +16,7 @@ def _replace(migration_path, old, new):
 
 def up(config):
     migration_path = Path(config.submitty['submitty_install_dir'], 'migrations')
-    _replace(migration_path /'system', 'up()', 'up(config)')
+    _replace(migration_path / 'system', 'up()', 'up(config)')
     _replace(migration_path / 'system', 'down()', 'down(config)')
     for folder in ('course', 'master'):
         _replace(migration_path / folder, 'up(conn', 'up(config, conn')

@@ -329,7 +329,7 @@ class Core {
                     $this->session_manager->newSession($user_id),
                     $user_id,
                     $this->getConfig()->getBaseUrl(),
-                    'testing',
+                    $this->getConfig()->getSecretSession(),
                     $persistent_cookie
                 );
             }
