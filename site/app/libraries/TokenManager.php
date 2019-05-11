@@ -8,6 +8,17 @@ use Lcobucci\JWT\Token;
 use Lcobucci\JWT\ValidationData;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
 
+/**
+ * Utility class that wraps around the Lcobucci\JWT library, so that we
+ * only define calling it here instead of multiple places. The JWT
+ * interface itself allows us to create tokens to use for various
+ * parts of the system (like authentication). Minimally, all tokens
+ * that are generated should be signed (and their signature then verified)
+ * to ensure the tokens have not been hampered with.
+ *
+ * @see https://jwt.io
+ * @see https://github.com/lcobucci/jwt
+ */
 class TokenManager {
     public static function generateSessionToken(
         string $session_id,
@@ -26,10 +37,10 @@ class TokenManager {
             ->getToken();
     }
 
-    public static function getTokenFromSessionCookie(string $token, string $issuer, string $secret): Token {
+    public static function parseSessionToken(string $token, string $issuer, string $secret): Token {
         $token = (new Parser())->parse($token);
         if (!$token->verify(new Sha256(), $secret)) {
-            throw new \RuntimeException("Invalid secret for token");
+            throw new \RuntimeException("Invalid signature for token");
         }
         
         $headers = [

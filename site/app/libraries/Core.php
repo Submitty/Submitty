@@ -286,16 +286,18 @@ class Core {
 
     /**
      * Given a session id (which should be coming from a cookie or request header), the database is queried to find
-     * a session that matches the string, then returns the user that matches that row (if it exists). If no session
-     * is found that matches the given id, return false, otherwise return true and load the user.
+     * a session that matches the string, returning the user_id associated with it. The user_id is then checked to
+     * make sure it matches our expected one from our session token, and if that all passes, then we load the
+     * user into the core and returns true, else return false.
      *
-     * @param $session_id
+     * @param string $session_id
+     * @param string $expected_user_id
      *
      * @return bool
      */
-    public function getSession($session_id) {
+    public function getSession(string $session_id, string $expected_user_id): bool {
         $user_id = $this->session_manager->getSession($session_id);
-        if ($user_id === false) {
+        if ($user_id === false || $user_id !== $expected_user_id) {
             return false;
         }
         $this->loadUser($user_id);

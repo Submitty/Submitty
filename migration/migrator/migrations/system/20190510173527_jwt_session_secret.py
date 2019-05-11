@@ -21,6 +21,6 @@ def up(config):
                 'session': ''.join(secrets.choice(characters) for _ in range(64))
             }
             with secrets_path.open('w') as open_file:
-                json.dump(secret_dict, open_file)
-            secrets_path.chmod(0o400)
+                json.dump(secret_dict, open_file, indent=2)
+            secrets_path.chmod(0o440)
             shutil.chown(str(secrets_path), 'root', config.submitty_users['php_user'])

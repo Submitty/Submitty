@@ -134,14 +134,16 @@ $logged_in = false;
 $cookie_key = 'submitty_session';
 if (isset($_COOKIE[$cookie_key])) {
     try {
-        $token = TokenManager::getTokenFromSessionCookie(
+        $token = TokenManager::parseSessionToken(
             $_COOKIE[$cookie_key],
             $core->getConfig()->getBaseUrl(),
             $core->getConfig()->getSecretSession()
         );
         $session_id = $token->getClaim('session_id');
         $expire_time = $token->getClaim('expire_time');
-        $logged_in = $core->getSession($session_id);
+        $logged_in = $core->getSession($session_id, $token->getClaim('sub'));
+        // make sure that the session exists and it's for the user they're claiming
+        // to be
         if (!$logged_in) {
             // delete cookie that's stale
             Utils::setCookie($cookie_key, "", time() - 3600);
