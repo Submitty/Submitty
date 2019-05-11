@@ -149,7 +149,7 @@ if (isset($_COOKIE[$cookie_key])) {
                     $cookie_key,
                     (string) TokenManager::generateSessionToken(
                         $session_id,
-                        $core->getUser()->getId(),
+                        $token->getClaim('sub'),
                         $core->getConfig()->getBaseUrl(),
                         $core->getConfig()->getSecretSession()
                     ),
