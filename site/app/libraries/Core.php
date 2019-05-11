@@ -322,7 +322,7 @@ class Core {
      *
      * @throws AuthenticationException
      */
-    public function authenticate($persistent_cookie = true) {
+    public function authenticate(bool $persistent_cookie = true): bool {
         $user_id = $this->authentication->getUserId();
         try {
             if ($this->authentication->authenticate()) {
@@ -334,6 +334,7 @@ class Core {
                     $this->getConfig()->getSecretSession(),
                     $persistent_cookie
                 );
+                return Utils::setCookie('submitty_session', (string) $token, $cookie_data['expire_time']);
             }
         }
         catch (\Exception $e) {
@@ -344,7 +345,7 @@ class Core {
             }
             throw new AuthenticationException($e->getMessage(), $e->getCode(), $e);
         }
-        return Utils::setCookie('submitty_session', (string) $token, $cookie_data['expire_time']);
+        return false;
     }
 
     /**
