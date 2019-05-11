@@ -544,7 +544,6 @@ HTML;
 			
 					<form style="margin-right:17px;" class="post_reply_from" method="POST" onsubmit="post.disabled=true; post.value='Submitting post...'; return true;" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
 						<input type="hidden" name="thread_id" value="{$thread_id}" />
-						<input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
 						<input type="hidden" name="parent_id" value="{$first_post_id}" />
 						<input type="hidden" name="display_option" value="{$display_option}" />
 HTML;
@@ -955,7 +954,6 @@ HTML;
 					<form class="reply-box post_reply_from" id="$post_id-reply" onsubmit="post.disabled=true; post.value='Submitting post...'; return true;" style="margin-left:{$offset}px" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
 						<input type="hidden" name="thread_id" value="{$thread_id}" />
 						<input type="hidden" name="parent_id" value="{$post_id}" />
-						<input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
 	            		<br/>
 HTML;
 	            		$GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id'])?$GLOBALS['post_box_id']+1:1;
@@ -1038,7 +1036,6 @@ HTML;
 
 			<h3 style="margin-bottom:10px;"> Create Thread </h3>
 			<form style="margin-right: 15px; margin-left:15px;" id="thread_form" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread'))}" enctype="multipart/form-data">
-			<input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
 HTML;
 
 				$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig", [

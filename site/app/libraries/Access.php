@@ -80,7 +80,7 @@ class Access {
     /** If the current set of flags requires the "semester" (type string) and "course" (type string) arguments */
     const REQUIRE_ARGS_SEMESTER_COURSE  = 1 << 28;
     /** Ensure on the forum the operation is done by the correct user. */ 
-    const REQUIRE_FORUM_SAME_STUDENT       = 1 << 29;
+    const REQUIRE_FORUM_SAME_STUDENT    = 1 << 29;
 
 
     // Broader user group access cases since generally actions are "minimum this group"

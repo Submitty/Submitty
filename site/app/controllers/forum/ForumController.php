@@ -313,8 +313,8 @@ class ForumController extends AbstractController {
     public function publishThread(){
         
         if(!$this->core->getAccess()->canI("forum.publish")) {
-            $this->core->addErrorMessage("Invalid CSRF token");
-            return;
+            $this->core->getOutput()->renderJson(['error' => "Invalid CSRF token"]);
+            return $this->core->getOutput()->getOutput();
         }
 
         $result = array();
@@ -381,8 +381,8 @@ class ForumController extends AbstractController {
     public function publishPost(){
 
         if(!$this->core->getAccess()->canI("forum.publish")) {
-            $this->core->addErrorMessage("Invalid CSRF token");
-            return;
+            $this->core->getOutput()->renderJson(['error' => "Invalid CSRF token"]);
+            return $this->core->getOutput()->getOutput();
         }
 
         $result = array();
