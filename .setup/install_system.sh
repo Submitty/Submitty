@@ -109,6 +109,7 @@ The vagrant box comes with some handy aliases:
     submitty_restart_services    - restarts all Submitty related systemctl
     migrator                     - run the migrator tool
     vagrant_info                 - print out the MotD again
+    ntp_sync                     - Re-syncs NTP in case of time drift
 
 Saved variables:
     SUBMITTY_REPOSITORY, SUBMITTY_INSTALL_DIR, SUBMITTY_DATA_DIR,
@@ -140,9 +141,10 @@ alias install_submitty_bin='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setu
 alias submitty_install_bin='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/INSTALL_SUBMITTY_HELPER_BIN.sh'
 alias submitty_code_watcher='python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/code_watcher.py'
 alias submitty_restart_autograding='systemctl restart submitty_autograding_shipper && systemctl restart submitty_autograding_worker'
-alias submitty_restart_services='submitty_restart_autograding && systemctl restart submitty_daemon_jobs_handler && systemctl restart nullsmptd'
+alias submitty_restart_services='submitty_restart_autograding && systemctl restart submitty_daemon_jobs_handler && systemctl restart nullsmtpd'
 alias migrator='python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -c ${SUBMITTY_INSTALL_DIR}/config'
 alias vagrant_info='cat /etc/motd'
+alias ntp_sync='service ntp stop && ntpd -gq && service ntp start'
 cd ${SUBMITTY_INSTALL_DIR}" >> /root/.bashrc
 else
     #TODO: We should get options for ./.setup/CONFIGURE_SUBMITTY.py script
@@ -208,6 +210,12 @@ if [ ${VAGRANT} == 1 ]; then
 fi
 
 #################################################################
+# Node Package Setup
+####################
+
+npm install -g npm
+
+#################################################################
 # STACK SETUP
 #################
 
@@ -256,7 +264,7 @@ else
 fi
 
 if [ ${VAGRANT} == 1 ]; then
-	adduser vagrant sudo
+	usermod -aG sudo vagrant
 fi
 
 # change the default user umask (was 002)
@@ -266,16 +274,16 @@ grep -q "^UMASK 027" /etc/login.defs || (echo "ERROR! failed to set umask" && ex
 #add users not needed on a worker machine.
 if [ ${WORKER} == 0 ]; then
     if ! cut -d ':' -f 1 /etc/passwd | grep -q ${PHP_USER} ; then
-        adduser "${PHP_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+        useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${PHP_USER}"
     fi
     usermod -a -G "${DAEMONPHP_GROUP}" "${PHP_USER}"
     if ! cut -d ':' -f 1 /etc/passwd | grep -q ${CGI_USER} ; then
-        adduser "${CGI_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+        useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${CGI_USER}"
     fi
     usermod -a -G "${PHP_GROUP}" "${CGI_USER}"
     usermod -a -G "${DAEMONCGI_GROUP}" "${CGI_USER}"
     # THIS USER SHOULD NOT BE NECESSARY AS A UNIX GROUP
-    #adduser "${DB_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+    #useradd -c "First Last,RoomNumber,WorkPhone,HomePhone" "${DB_USER}"
 
     # NOTE: ${CGI_USER} must be in the shadow group so that it has access to the
     # local passwords for pam authentication
@@ -288,7 +296,7 @@ if [ ${WORKER} == 0 ]; then
 fi
 
 if ! cut -d ':' -f 1 /etc/passwd | grep -q ${DAEMON_USER} ; then
-    adduser "${DAEMON_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+    useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${DAEMON_USER}"
 fi
 
 # The VCS directores (/var/local/submitty/vcs) are owfned by root:$DAEMONCGI_GROUP
@@ -539,7 +547,11 @@ if [ ${WORKER} == 0 ]; then
         su postgres -c "source ${SUBMITTY_REPOSITORY}/.setup/vagrant/db_users.sh";
         echo "Finished creating PostgreSQL users"
 
-        sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" "/etc/postgresql/${PG_VERSION}/main/postgresql.conf"
+        # Set timezone to UTC instead of using localtime (which is probably ET)
+        sed -i "s/timezone = 'localtime'/timezone = 'UTC'/" /etc/postgresql/${PG_VERSION}/main/postgresql.conf
+
+        # Set the listen address to be global so that we can access the guest DB from the host
+        sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" /etc/postgresql/${PG_VERSION}/main/postgresql.conf
         service postgresql restart
     fi
 fi
@@ -730,15 +742,6 @@ if [ ${WORKER} == 0 ]; then
         else
             python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py --submission_url ${SUBMISSION_URL}
         fi
-        #################################################################
-        # SET CSV FIELDS (for classlist upload data)
-        #################
-        # Vagrant auto-settings are based on Rensselaer Polytechnic Institute School
-        # of Science 2015-2016.
-
-        # Other Universities will need to rerun /bin/setcsvfields to match their
-        # classlist csv data.  See wiki for details.
-        ${SUBMITTY_INSTALL_DIR}/sbin/setcsvfields.py 13 12 15 7
     fi
 fi
 
@@ -748,6 +751,7 @@ if [[ ${VAGRANT} == 1 ]]; then
     jq '.email_server_hostname |= "localhost"' ${SUBMITTY_INSTALL_DIR}/config/database.json > ${SUBMITTY_INSTALL_DIR}/config/database.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/database.tmp ${SUBMITTY_INSTALL_DIR}/config/database.json
     jq '.email_server_port |= 25' ${SUBMITTY_INSTALL_DIR}/config/database.json > ${SUBMITTY_INSTALL_DIR}/config/database.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/database.tmp ${SUBMITTY_INSTALL_DIR}/config/database.json
     jq '.email_logs_path |= "/var/local/submitty/logs/emails/"' ${SUBMITTY_INSTALL_DIR}/config/database.json > ${SUBMITTY_INSTALL_DIR}/config/database.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/database.tmp ${SUBMITTY_INSTALL_DIR}/config/database.json
+    jq '.email_reply_to |= "do-not-reply@vagrant"' ${SUBMITTY_INSTALL_DIR}/config/database.json > ${SUBMITTY_INSTALL_DIR}/config/database.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/database.tmp ${SUBMITTY_INSTALL_DIR}/config/database.json
     chown root:${DAEMONPHP_GROUP} ${SUBMITTY_INSTALL_DIR}/config/database.json
     chmod 440 ${SUBMITTY_INSTALL_DIR}/config/database.json
     rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/vagrant/nullsmtpd.service  /etc/systemd/system/nullsmtpd.service

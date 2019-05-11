@@ -1,16 +1,13 @@
-<script src="js/pdf/pdf.min.js"></script>
-<script src="js/pdf/pdf_viewer.js"></script>
+<script src="vendor/pdfjs/pdf.min.js"></script>
+<script src="vendor/pdfjs/pdf_viewer.js"></script>
 <script src="js/pdf/pdf-annotate.min.js"></script>
 <script src="js/pdf/PDFAnnotateEmbedded.js"></script>
 {% if student_popup is not defined or student_popup == false %}
     {#This initializes the toolbar and activates annotation mode#}
     <script src="js/pdf/PDFInitToolbar.js"></script>
-{% else %}
-    {#Jquery is needed if a new window is popping up#}
-    <script src="js/jquery.min.js"></script>
 {% endif %}
 
-<link rel="stylesheet" type="text/css" href="css/pdf/pdf_viewer.css"/>
+<link rel="stylesheet" type="text/css" href="vendor/pdfjs/pdf_viewer.css"/>
 <link rel="stylesheet" type="text/css" href="css/pdf/pdf_embedded.css"/>
 
 <div id="content-wrapper">

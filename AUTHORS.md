@@ -1,6 +1,7 @@
 ## Admins / Project Managers
-[Barbara Cutler](http://www.cs.rpi.edu/~cutler/)  
-[Matthew Peveler](http://mpeveler.com/)  
+[Barbara Cutler](http://www.cs.rpi.edu/~cutler/) 2014-current  
+[Matthew Peveler](http://mpeveler.com/) 2014-current  
+Evan Maicus 2016-current  
 
 ## Developers
 
@@ -17,7 +18,6 @@ Andrew Aikens 2017-current
 Shail Patel 2018-current  
 Leon Montealegre 2017-current  
 Buster Holzbauer 2017-current  
-Evan Maicus 2016-current  
 Ana Milanova 2016-current  
 Steven Lindsey 2014-current  
 Peter Bailie 2014-current  

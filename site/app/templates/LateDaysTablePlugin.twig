@@ -17,18 +17,20 @@
 <p>Total late days remaining for future assignments: {{ late_days.getLateDaysRemaining() }}</p>
 <br>
 <br>
+{# This table is a data table #}
 <table>
+    <caption />
     <thead>
-    <tr>
-        <th style="padding:5px; border:thin solid black; vertical-align:middle;" align="left">Assignment name</th>
-        <th style="padding:5px; border:thin solid black; vertical-align:middle">Due date</th>
-        <th style="padding:5px; border:thin solid black; vertical-align:middle">Maximum number of late days allowed for this
-            assignment</th>
-        <th style="padding:5px; border:thin solid black; vertical-align:middle">Assignment submitted # of days after deadline</th>
-        <th style="padding:5px; border:thin solid black; vertical-align:middle">Student granted # of days extension for this assignment</th>
-        <th style="padding:5px; border:thin solid black; vertical-align:middle">Status</th>
-        <th style="padding:5px; border:thin solid black; vertical-align:middle">Late days charged for this assignment</th>
-    </tr>
+        <tr>
+            <th style="padding:5px; border:thin solid black; vertical-align:middle;" align="left">Assignment name</th>
+            <th style="padding:5px; border:thin solid black; vertical-align:middle">Due date</th>
+            <th style="padding:5px; border:thin solid black; vertical-align:middle">Maximum number of late days allowed for this
+                assignment</th>
+            <th style="padding:5px; border:thin solid black; vertical-align:middle">Assignment submitted # of days after deadline</th>
+            <th style="padding:5px; border:thin solid black; vertical-align:middle">Student granted # of days extension for this assignment</th>
+            <th style="padding:5px; border:thin solid black; vertical-align:middle">Status</th>
+            <th style="padding:5px; border:thin solid black; vertical-align:middle">Late days charged for this assignment</th>
+        </tr>
     </thead>
     <tbody id="late_day_table">
     {% for late_day_info in late_days.getLateDayInfo() %}

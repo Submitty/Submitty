@@ -12,19 +12,19 @@ class LoggerTester extends \PHPUnit\Framework\TestCase {
     private $ta_grading;
     private $directory;
 
-    public static function setUpBeforeClass() {
+    public static function setUpBeforeClass(): void {
         $_SERVER['HTTP_HOST'] = "localhost";
         $_SERVER['HTTPS'] = true;
         $_SERVER['REQUEST_URI'] = "index.php?test=1";
     }
 
-    public static function tearDownAfterClass() {
+    public static function tearDownAfterClass(): void {
         unset($_SERVER['HTTP_HOST']);
         unset($_SERVER['HTTPS']);
         unset($_SERVER['REQUEST_URI']);
     }
 
-    public function setUp() {
+    public function setUp(): void {
         $this->directory = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
         FileUtils::createDir($this->directory);
         FileUtils::createDir(FileUtils::joinPaths($this->directory, 'access'));
@@ -39,7 +39,7 @@ class LoggerTester extends \PHPUnit\Framework\TestCase {
         $this->ta_grading = FileUtils::joinPaths($this->directory, 'ta_grading', $filename.".log");
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         FileUtils::recursiveRmdir($this->directory);
     }
 

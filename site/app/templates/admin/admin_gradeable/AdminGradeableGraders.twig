@@ -54,7 +54,7 @@ What is the lowest privileged user group that can grade this?
         {{ gradeable.isGradeByRegistration() == false ? 'checked' : '' }}> Rotating Section
 
     <div id="rotating_data">
-        {% if rotating_gradeables|length != 0 %}
+        {% if rotating_gradeables|length != 0 and num_rotating_sections > 0 %}
             <br />
             Rotating Section History By Grader:
             <br />
@@ -85,31 +85,36 @@ What is the lowest privileged user group that can grade this?
         <table id="grader_assignment">
             {# Helpful debuging line.  Uncomment to view graders data #}
             {# <tr>{{ all_graders|json_encode() }}</tr> #}
-            <tr>
-                <th />
-                <th>All</th>
-                {% for rs in section_numbers %}
-                    <th>{{ rs }}</th>
-                {% endfor %}
-            </tr>
-            <tr class="g1">
-                <th>Instructor Graders</th>
-            </tr>
-            <!-- Instructors -->
-            {{ self.display_graders(graders_from_usertypes[1], 'g1',
-                section_numbers, gradeable_section_history, gradeable.getId()) }}
-            <tr class="g2">
-                <th>Full Access Graders</th>
-            </tr>
-            <!-- Full Access Graders -->
-            {{ self.display_graders(graders_from_usertypes[2], 'g2',
-                section_numbers, gradeable_section_history, gradeable.getId()) }}
-            <tr class="g3">
-                <th>Limited Access Graders</th>
-            </tr>
-            <!-- Limited Access Graders -->
-            {{ self.display_graders(graders_from_usertypes[3], 'g3',
-                section_numbers, gradeable_section_history, gradeable.getId()) }}
+            {% if num_rotating_sections > 0 %}
+                <tr>
+                    <th />
+                    <th>All</th>
+                    {% for rs in section_numbers %}
+                        <th>{{ rs }}</th>
+                    {% endfor %}
+                </tr>
+                <tr class="g1">
+                    <th>Instructor Graders</th>
+                </tr>
+                <!-- Instructors -->
+                {{ self.display_graders(graders_from_usertypes[1], 'g1',
+                    section_numbers, gradeable_section_history, gradeable.getId()) }}
+                <tr class="g2">
+                    <th>Full Access Graders</th>
+                </tr>
+                <!-- Full Access Graders -->
+                {{ self.display_graders(graders_from_usertypes[2], 'g2',
+                    section_numbers, gradeable_section_history, gradeable.getId()) }}
+                <tr class="g3">
+                    <th>Limited Access Graders</th>
+                </tr>
+                <!-- Limited Access Graders -->
+                {{ self.display_graders(graders_from_usertypes[3], 'g3',
+                    section_numbers, gradeable_section_history, gradeable.getId()) }}
+            {% elseif num_rotating_sections == 0 %}
+                <br/>
+                <p><b>Rotating Sections have not been set up yet. <br/> You can set up Rotating Sections using the "Manage Sections" option on the sidebar.</b></p>
+            {% endif %}
         </table>
     </div>
 </fieldset>

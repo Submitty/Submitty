@@ -57,6 +57,7 @@ mkdir -p ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils
 
 # copy all of the files
 rsync -rtz  ${SUBMITTY_REPOSITORY}/sbin/*   ${SUBMITTY_INSTALL_DIR}/sbin/
+rsync -rtz  ${SUBMITTY_REPOSITORY}/autograder/autograder/* ${SUBMITTY_INSTALL_DIR}/sbin/autograder/
 
 # most of the scripts should be root only
 find ${SUBMITTY_INSTALL_DIR}/sbin -type f -exec chown root:root {} \;
