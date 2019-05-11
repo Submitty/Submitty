@@ -132,38 +132,38 @@
                 <div class="row">
                     <div class="col-md-6">
                         {# This is a data table #}
-                        <table class="table table-bordered table-striped">
-                            <caption>Registered Students (non-NULL registration section)</caption>
-                            <thead>
-                                <tr>
-                                    <th>Section</th>
-                                    <th>Num</th>
-                                </tr>
+                        <table class="table table-striped">
+                            <caption class="caption_h3">Registered Students<br>(non-NULL registration section)</caption>
+                            <thead class="table-bordered">
+                                <th>Rotating Section</th>
+                                <th>Students</th>
                             </thead>
-                            {% for row in not_null_counts %}
-                            <tr>
-                                <td>Section {{ row['rotating_section'] ?? "NULL" }}</td>
-                                <td>{{ row['count'] }}</td>
-                            </tr>
-                            {% endfor %}
+                            <tbody class="table-bordered">
+                                {% for row in not_null_counts %}
+                                <tr>
+                                    <td>Section {{ row['rotating_section'] ?? "NULL" }}</td>
+                                    <td>{{ row['count'] }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
                         </table>
                     </div>
                     <div class="col-md-6">
                         {# This is a data table #}
-                        <table class="table table-bordered table-striped">
-                            <caption>Users with Registration Section = NULL</caption>
-                            <thead>
-                                <tr>
-                                    <th>Section</th>
-                                    <th>Num</th>
-                                </tr>
+                        <table class="table table-striped">
+                            <caption class="caption_h3">Users with<br>Registration Section = NULL</caption>
+                             <thead class="table-bordered">
+                                <th>Rotating Section</th>
+                                <th>Students</th>
                             </thead>
-                            {% for row in null_counts %}
-                            <tr>
-                                <td>Section {{ row['rotating_section'] ?? "NULL" }}</td>
-                                <td>{{ row['count'] }}</td>
-                            </tr>
-                            {% endfor %}
+                            <tbody class="table-bordered">
+                                {% for row in null_counts %}
+                                <tr class="table-bordered">
+                                    <td>Section {{ row['rotating_section'] ?? "NULL" }}</td>
+                                    <td>{{ row['count'] }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
                         </table>
                     </div>
                 </div>
