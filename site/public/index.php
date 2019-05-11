@@ -8,11 +8,6 @@ use app\libraries\Utils;
 use app\libraries\Access;
 use app\libraries\TokenManager;
 
-use Lcobucci\JWT\Builder;
-use Lcobucci\JWT\Parser;
-use Lcobucci\JWT\ValidationData;
-use Lcobucci\JWT\Signer\Hmac\Sha256;
-
 /*
  * The user's umask is ignored for the user running php, so we need
  * to set it from inside of php to make sure the group read & execute
