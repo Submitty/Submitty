@@ -240,7 +240,7 @@ class BulkUpload(CourseJob):
                 subprocess.call([str(script), filename, split_path, num])
             os.chdir(current_path)
         except Exception as err:
-            print("Failed to launch bulk_qr_split subprocess!")
+            print("Failed to launch bulk_split subprocess!")
             print(err)
             sys.exit(1)
         

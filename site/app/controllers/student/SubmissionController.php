@@ -569,17 +569,17 @@ class SubmissionController extends AbstractController {
                     "is_qr"     => true
                 ];
 
-                $qr_upload_job  = "/var/local/submitty/daemon_job_queue/qr_upload_" . $uploaded_file["name"][$i] . ".json"; 
+                $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . $uploaded_file["name"][$i] . ".json"; 
 
                 //add new job to queue
-                if(!file_put_contents($qr_upload_job, json_encode($qr_upload_data, JSON_PRETTY_PRINT)) ){
+                if(!file_put_contents($bulk_upload_job, json_encode($qr_upload_data, JSON_PRETTY_PRINT)) ){
                     $this->core->getOutput()->renderJsonFail("Failed to write BulkQRSplit job");
                     return $this->uploadResult("Failed to write BulkQRSplit job", false);
                 }
             }
         }else{
             for($i = 0; $i < $count; $i++){
-                $qr_upload_data = [
+                $job_data = [
                     "job"       => "BulkUpload",
                     "semester"  => $semester,
                     "course"    => $course,
@@ -590,12 +590,12 @@ class SubmissionController extends AbstractController {
                     "is_qr"     => false
                 ];
 
-                $qr_upload_job  = "/var/local/submitty/daemon_job_queue/qr_upload_" . $uploaded_file["name"][$i] . ".json"; 
+                $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . $uploaded_file["name"][$i] . ".json"; 
 
                 //add new job to queue
-                if(!file_put_contents($qr_upload_job, json_encode($qr_upload_data, JSON_PRETTY_PRINT)) ){
-                    $this->core->getOutput()->renderJsonFail("Failed to write BulkQRSplit job");
-                    return $this->uploadResult("Failed to write BulkQRSplit job", false);
+                if(!file_put_contents($bulk_upload_job, json_encode($job_data, JSON_PRETTY_PRINT)) ){
+                    $this->core->getOutput()->renderJsonFail("Failed to write Bulk upload job");
+                    return $this->uploadResult("Failed to write Bulk upload job", false);
                 }
             }
         }

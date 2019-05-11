@@ -9,6 +9,7 @@ If any of the uploaded bulk pdfs are not divisible by the number of pages
 per pdf, all created split pdfs for this version are deleted and an error message
 is returned.
 """
+import os
 import PyPDF2
 import sys
 import traceback
@@ -22,10 +23,10 @@ except ImportError as e:
     traceback.print_exc() 
     sys.exit(1)
 
+filename = sys.argv[1]
+split_path = sys.argv[2]
+num = sys.argv[3]
 try:
-    filename = sys.argv[1]
-    split_path = sys.argv[2]
-    num = sys.argv[3]
     # check that all pages are divisible
     pdfFileObj = open(filename, 'rb')
     pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
@@ -71,10 +72,7 @@ try:
         pdf_images = convert_from_bytes(open(cover_filename, 'rb').read())
         pdf_images[0].save('{}.jpg'.format(cover_filename[:-4]), "JPEG", quality = 100);
 
-        # get rid of unnecessary copies
-        for filename in os.listdir(bulk_path):
-
-        oa.chdir(bulk_path)
+        os.chdir(bulk_path)
         os.remove(filename)
 
         os.chdir(current_path) #make sure this is in right place
