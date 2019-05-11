@@ -173,37 +173,54 @@
             <script type="text/javascript" src="../../../../js/showdown-xss-filter.js"></script>
 
             {# Render content #}
+            {% set num_inputs = 0 %}
             {% for c in contents %}
-                <h2>{{ c.title }}</h2>
-                <div id="exp_{{ loop.index0 }}"></div>
-                <script type="text/javascript">
-                    var converter = new showdown.Converter({ extensions: ['xssfilter']});
-                    var md = "{{ c.exposition|raw }}";
-                    document.getElementById("exp_{{ loop.index0 }}").innerHTML = converter.makeHtml(md);
-                </script>
-                <br>
+                <div id="content_{{ loop.index0 }}">
+                    <h2>{{ c.title }}</h2>
 
-                {# Render the inputs for the given content block #}
-                {% for i in c.input %}
-                    {% if i.type == "textbox" %}
-                        {{ self.render_textbox(i, image_data, loop.index0) }}
-                    {% elseif i.type == "codebox" %}
-                        <br>
-                    {% elseif i.type == "multiplechoice" %}
-                        <strong>{{ i.label }}</strong>
-                        <br>
-                        <fieldset>
-                            {% for choice in i.choices %}
-                                {% if i.allow_multiple == true %}
-                                    <input type="checkbox" value="{{ choice }}" /><label for="{{ choice }}">{{ choice }}</label><br />
-                                {% else %}
-                                    <input type="radio" name="choice" value="{{ choice }}" /><label for="{{ choice }}">{{ choice }}</label><br />
-                                {% endif %}
-                            {% endfor %}
-                        </fieldset>
-                        <br>
-                    {% endif %}
-                {% endfor %}
+                    {% for image in c.images %}
+                        <img src="{{ attribute(image_data, image.name) }}"
+                        {% if image.width > 0 %}
+                            width="{{ image.width }}"
+                        {% endif %}
+                        {% if image.height > 0 %}
+                            height="{{ image.height }}"
+                        {% endif %}
+                        />
+                    {% endfor %}
+
+                    {# Render the inputs for the given content block #}
+                    {% for i in c.input %}
+                        <div id="input_container_{{ loop.index0 }}">
+                            {% if i.type == "textbox" %}
+                                {{ self.render_textbox(i, num_inputs ) }}
+                            {% elseif i.type == "codebox" %}
+                                <br>
+                            {% elseif i.type == "multiplechoice" %}
+                                <strong>{{ i.label }}</strong>
+                                <br>
+                                <fieldset>
+                                    {% for choice in i.choices %}
+                                        {% if i.allow_multiple == true %}
+                                            <input type="checkbox" name="input_{{ num_inputs }}" id="input_{{ num_inputs }}" value="{{ choice }}" onclick="handle_input_keypress();"" />
+                                            <label for="{{ choice }}">
+                                                {{ choice }}
+                                            </label>
+                                        {% else %}
+                                            <input type="radio" name="input_{{ num_inputs }}" id="input_{{ num_inputs }}" value="{{ choice }}" onclick="handle_input_keypress();" />
+                                            <label for="{{ choice }}">
+                                                {{ choice }}
+                                            </label>
+                                        {% endif %}
+                                        <br/>
+                                    {% endfor %}
+                                </fieldset>
+                                <br>
+                            {% endif %}
+                        </div>
+                        {% set num_inputs = num_inputs + 1 %}
+                    {% endfor %}
+                </div>
             {% endfor %}
     
             {# Submit boxes #}
@@ -325,7 +342,7 @@
                 {{ max_submissions }},
                 "{{ core.getCsrfToken() }}",
                 {{ is_vcs ? "true" : "false" }},
-                {{ num_text_boxes }},
+                {{ num_inputs }},
                 "{{ gradeable_id }}",
                 "{{ user_id }}",
                 repo_id,
@@ -342,7 +359,7 @@
                 {{ max_submissions }},
                 "{{ core.getCsrfToken() }}",
                 {{ is_vcs ? "true" : "false" }},
-                {{ num_text_boxes }},
+                {{ num_inputs }},
                 "{{ gradeable_id }}",
                 user_id,
                 repo_id,
@@ -394,32 +411,22 @@
     });
 </script>
 
-{% macro render_textbox(textbox, images, index) %}
-    {% for image in textbox.images %}
-        <img src="{{ attribute(images, image.name) }}"
-        {% if image.width > 0 %}
-            width="{{ image.width }}"
-        {% endif %}
-        {% if image.height > 0 %}
-            height="{{ image.height }}"
-        {% endif %}
-        />
-    {% endfor %}
+{% macro render_textbox(textbox, index) %}
 
     <p style="max-width: 50em;">
         <strong>{{ textbox.label }}</strong>
         <br>
-            {% if textbox.row_count == 0 %}
-                {# Maybe refactor this so that it uses input_### or something for compatability #}
-                <input type="text" name="textbox_{{ index }}" id="textbox_{{ index }}" onKeyPress="handle_textbox_keypress();">
+            {% if textbox.rows == 0 %}
+                {# Maybe refactor this so that it uses input_### or something for compatibility #}
+                <input type="text" name="input_{{ index }}" id="input_{{ index }}" onKeyPress="handle_input_keypress();">
             {% else %}
-            <textarea rows="{{ textbox.row_count }}" cols="50"  style="width:60em; height:100%;" name="textbox_{{ index }}" id="textbox_{{ index }}" onKeyPress="handle_textbox_keypress();"></textarea>
+            <textarea rows="{{ textbox.rows }}" cols="50"  style="width:60em; height:100%;" name="input_{{ index }}" id="input_{{ index }}" onKeyPress="handle_input_keypress();"></textarea>
             {#
                 Allow tab in the larger text boxes (normally tab moves to the next textbox)
                 http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
             #}
             <script>
-                $("#textbox_{{ index }}").keydown(function(e) {
+                $("#input_{{ index }}").keydown(function(e) {
                     if(e.keyCode === 9) { // tab was pressed
                         // get caret position/selection
                         var start = this.selectionStart;

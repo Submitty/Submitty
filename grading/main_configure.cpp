@@ -181,15 +181,17 @@ int main(int argc, char *argv[]) {
         bool title_is_string = false; 
         assert(title_is_string);
       }
+      content["title"] = title;
 
       // Description, optional
       std::string description = "";
       if(content_block["description"].is_string()){
-        title = content_block["description"];
-      }else if(!content_block["title"].is_null()){
+        description = content_block["description"];
+      }else if(!content_block["description"].is_null()){
         bool description_is_string = false; 
         assert(description_is_string);
       }
+      content["description"] = description;
 
       // Images, optional
       content["images"] = (*content_blocks)[i].value("images", nlohmann::json::array());
@@ -239,7 +241,7 @@ int main(int argc, char *argv[]) {
       	    assert (int(input_obj["rows"]) >= 0);
             
 
-      	    input_obj["filename"] = input.value("filename", "textbox_" + s + ".txt");
+      	    input_obj["filename"] = input.value("filename", "input_" + s + ".txt");
       	    input_obj["images"] = input.value("images", nlohmann::json::array());
       	    content["input"].push_back(input_obj);
       	  } else if (*in_type == "multiplechoice") {

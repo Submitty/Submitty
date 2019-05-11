@@ -11,7 +11,7 @@
         {
             "type" : "FileCheck",
             "title" : "iClicker ID",
-            "actual_file" : "textbox_0.txt",
+            "actual_file" : "input_0.txt",
             "points" : 0
         }
     ]

@@ -306,11 +306,6 @@ function handle_input_keypress() {
     setButtonStatus();
 }
 
-function handle_input_keypress() {
-    empty_inputs = false;
-    setButtonStatus();
-}
-
 // BULK UPLOAD
 //========================================================================================
 function openFile(url_full) {
@@ -765,12 +760,18 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
         formData.append('previous_files', JSON.stringify(previous_files));
     }
 
-    var input_answers = [];
-    for (var i = 0; i < num_inputs; i++) {
-	// NOTE THIS IS WRONG, NEED TO HANDLE ALL TYPES, NOT JUST TEXT BOXES
-        input_answers[i] = $("#textbox_"+i).val();
+    var input_answers = $("[id^=input_]").serializeArray();
+    var input_answers_object = {};
+
+    for (var i = 0; i < input_answers.length; i++) {
+        var this_answer = input_answers[i];
+        if(!(this_answer.name in input_answers_object)){
+            input_answers_object[this_answer.name] = Array();
+        }
+        input_answers_object[this_answer.name].push(this_answer.value);
     }
-    formData.append('input_answers', JSON.stringify(input_answers));
+
+    formData.append('input_answers', JSON.stringify(input_answers_object));
 
     if (student_page) {
         var pages = [];

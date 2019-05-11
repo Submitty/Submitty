@@ -1091,15 +1091,18 @@ class SubmissionController extends AbstractController {
             // save the contents of the text boxes to files
             $empty_inputs = true;
             if (isset($_POST['input_answers'])) {
-                $input_answer_array = json_decode($_POST['input_answers']);
+                $input_answer_object = json_decode($_POST['input_answers'], true);
                 for ($i = 0; $i < $gradeable->getAutogradingConfig()->getNumInputs(); $i++) {
-                    $input_answer_val = $input_answer_array[$i];
-                    if ($input_answer_val != "") $empty_inputs = false;
+                    $input_answers = $input_answer_object["input_" . $i];
+                    if ( count($input_answers) > 0)  $empty_inputs = false;
                     $filename = $gradeable->getAutogradingConfig()->getInputs()[$i]->getFileName();
                     $dst = FileUtils::joinPaths($version_path, $filename);
                     // FIXME: add error checking
                     $file = fopen($dst, "w");
-                    fwrite($file, $input_answer_val);
+
+                    foreach($input_answers as $input_answer_val){
+                        fwrite($file, $input_answer_val . "\n");
+                    }
                     fclose($file);
                 }
             }

@@ -269,8 +269,8 @@ class HomeworkView extends AbstractView {
 
         $image_data = [];
         if (!$gradeable->isVcs()) {
-            foreach ($inputs as $inp) {
-                foreach ($inp->getImages() as $image) {
+            foreach ($contents as $content_chunk) {
+                foreach ($content_chunk["images"] as $image) {
                     $image_name = $image['name'];
                     $imgPath = FileUtils::joinPaths(
                         $this->core->getConfig()->getCoursePath(),
@@ -285,7 +285,6 @@ class HomeworkView extends AbstractView {
                         // Format the image SRC:  data:{mime};base64,{data};
                         $inputimagesrc = 'data: ' . mime_content_type($imgPath) . ';charset=utf-8;base64,' . $inputImageData;
                         // insert the sample image data
-
                         $image_data[$image_name] = $inputimagesrc;
                     }
                 }
@@ -324,7 +323,6 @@ class HomeworkView extends AbstractView {
         $my_repository = $graded_gradeable !== null ? $gradeable->getRepositoryPath($this->core->getUser(),$my_team) : "";
 
         $DATE_FORMAT = "m/d/Y @ H:i";
-
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
             'gradeable_id' => $gradeable->getId(),
             'gradeable_name' => $gradeable->getTitle(),
