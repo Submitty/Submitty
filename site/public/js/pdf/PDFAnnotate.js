@@ -8,8 +8,8 @@ let RENDER_OPTIONS = {
     rotate: parseInt(localStorage.getItem(`${documentId}/rotate`), 10) || 0
 };
 
-PDFAnnotate.setStoreAdapter(new PDFAnnotate.LocalStoreAdapter());
-PDFJS.workerSrc = './shared/pdf.worker.js';
+PDFAnnotate.setStoreAdapter(new PDFAnnotate.LocalUserStoreAdapter());
+pdfjsLib.workerSrc = 'vendor/pdfjs/pdf.worker.min.js';
 
 // Render stuff
 let NUM_PAGES = 0;
@@ -43,12 +43,12 @@ function render() {
             user_id: 'instructor',
             file_name: 'toy_eb.pdf'
         },
-        success: function(data){
+        success: function(data) {
             RENDER_OPTIONS.documentId = 'toy_eb.pdf';
             documentId = 'toy_eb'.pdf;
-            var pdfData = JSON.parse(data);
+            let pdfData = JSON.parse(data);
             pdfData = atob(pdfData);
-            PDFJS.getDocument({data:pdfData}).then((pdf) => {
+            pdfjsLib.getDocument({data: pdfData}).then((pdf) => {
                 RENDER_OPTIONS.pdfDocument = pdf;
 
                 let viewer = document.getElementById('viewer');
