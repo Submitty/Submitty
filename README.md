@@ -13,8 +13,8 @@ System instructions located at http://submitty.org/
 Submitty is an open source programming assignment submission system
 from the 
 [Rensselaer Center for Open Source Software (RCOS)](https://rcos.io/), launched
-by the [Department of Computer Science](http://www.cs.rpi.edu/) at 
-[Rensselaer Polytechnic Institute (RPI)](http://rpi.edu/).
+by the [Department of Computer Science](https://science.rpi.edu/computer-science) at 
+[Rensselaer Polytechnic Institute (RPI)](https://rpi.edu/).
 The Submitty project is hosted on [GitHub](https://github.com/Submitty).
 
 

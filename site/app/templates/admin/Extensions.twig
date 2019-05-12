@@ -7,18 +7,26 @@
         <div class="option">
             <p> Use this form to grant an extension (e.g., for an excused absence) to a user on a specific assignment.<br><br><br></p>
             <div class="option"><label for="g_id">Select Gradeable:</label><br>
-                <select name="g_id" id="g_id" onchange="loadHomeworkExtensions($(this).val());" style="margin-top: 10px; width: 50%">
+                <select name="g_id" id="g_id" onchange="loadHomeworkExtensions($(this).val(),$(this).find('option:selected').attr('data-due-date'));clearDate();" style="margin-top: 10px; width: 50%">
                     <option disabled selected value> -- select an option -- </option>
-                    {% for index, value in gradeable_ids %}
-                        <option value="{{ value['g_id'] }}">{{ value['g_title'] }}</option>
+                    {% for index, value in gradeables %}
+                        <option value="{{value['g_id']}}" data-due-date="{{value['eg_submission_due_date']|date("m/d/Y H:i:s")}}">{{ value['g_title'] }}</option>
                     {% endfor %}
                 </select>
+                <p>Due Date: <span id ="due_date"></span></p>
             </div>
         </div>
         <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
         <div class="option-title">Single Student Entry<br></div>
-        <div class="option" style="width:25%; display:inline-block;"><label for="user_id">Student ID:</label><br><input class="option-input" type="text" name="user_id" id="user_id" style="float:left"></div>
-        <div class="option" style="width:25%; display:inline-block;"><label for="late_days">Number of Days of Extension:</label><br><input class="option-input" type="text" name="late_days" id="late_days" style="float:left"></div>
+        <div class="option" style="width:25%; display:inline-block;"><label for="user_id">Student ID:</label><br>
+            <input class="option-input" type="text" name="user_id" id="user_id" style="float:left">
+        </div>
+        <div class="option" style="width:25%; display:inline-block;"><label for="late_days">Give the Days of Extension:</label><br>
+            <input class="option-input" type="text" name="late_days" id="late_days" style="float:left" onkeyup="clearDate()">
+        </div>
+        <div class="option" style="width:25%; display:inline-block;"><label for="late_calendar">Or Pick a New Due Date:</label><br>
+            <input name="late_calendar" id="late_calendar" class="option-input" type="text" style="float:left">
+        </div>
         <div class="option" style="width:10%; display:inline-block; vertical-align: bottom;"><input class="btn btn-primary" type="submit" value="Submit" style="float:left"></div>
         <div class="option-title" id="csv_upload_title">Multiple Student Entry Via CSV Upload</div>
         <div id="csv_upload_format">Do not use column headers. CSV must be of the following form: student_id, gradeable_id, days_of_extension</div>
@@ -42,6 +50,29 @@
 <script>
     $("#user_id").autocomplete({
         source: {{ student_full|raw }}
+    });
+    function clearDate(){
+        document.getElementById("late_calendar").value = "";
+    }
+    $(document).ready(function() {
+        flatpickr(document.getElementById("late_calendar"), {
+            allowInput: true,
+            enableTime: false,
+            enableSeconds: false,
+            time_24hr: true,
+            dateFormat: "Y-m-d",
+            onChange: function(selectedDates, dateStr, instance) {
+                var due_date_value = document.getElementById("due_date").innerHTML.substr(0,10);
+                var new_due_date = new Date(selectedDates[0]);
+                var old_due_date = new Date(due_date_value);
+                var delta = (new_due_date - old_due_date) / (1000*60*60*24);
+                if (delta < 0) {
+                    delta = 0;
+                }
+                var diff = Math.floor(delta);
+                document.getElementById("late_days").value = diff;
+            },
+        });
     });
 </script>
 {% include('admin/users/MoreExtensions.twig') %}
