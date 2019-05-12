@@ -60,7 +60,7 @@ class TokenManager {
         }
 
         $claims = $token->getClaims();
-        if (!$token->hasClaim('session_id') || !$token->hasClaim('expire_time')) {
+        if (!$token->hasClaim('session_id') || !$token->hasClaim('expire_time') || !$token->hasClaim('sub')) {
             throw new \RuntimeException('Missing claims in session token');
         }
         return $token;
