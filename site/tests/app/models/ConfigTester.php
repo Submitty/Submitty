@@ -15,11 +15,11 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
     private $config_path = null;
     private $course_json_path = null;
 
-    public function setUp() {
+    public function setUp(): void {
         $this->core = $this->createMock(Core::class);
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         if ($this->temp_dir !== null && is_dir($this->temp_dir)) {
             FileUtils::recursiveRmdir($this->temp_dir);
         }
