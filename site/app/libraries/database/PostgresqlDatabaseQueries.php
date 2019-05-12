@@ -1376,6 +1376,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   eg_config_path AS autograding_config_path,
                   eg_is_repository AS vcs,
                   eg_subdirectory AS vcs_subdirectory,
+                  eg_vcs_host_type AS vcs_host_type,
                   eg_team_assignment AS team_assignment,
                   eg_max_team_size AS team_size_max,
                   eg_team_lock_date AS team_lock_date,

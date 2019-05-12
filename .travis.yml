@@ -31,7 +31,7 @@ jobs:
     # Warm up the pip and composer caches to use it for the rest of the build stages
     - &00-cache
       stage: 00 warm up cache
-      php: 7.0
+      php: 7.2
       before_install: source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
         - pushd site
@@ -51,49 +51,43 @@ jobs:
         - pip3 install psutil
       script: skip
     - <<: *00-cache
-      php: 7.1
-      if: branch = master OR type = pull_request
-    - <<: *00-cache
-      php: 7.2
+      php: 7.3
       if: branch = master OR type = pull_request
 
     - &00-python-cache
       language: python
-      python: 3.5
+      python: 3.6
       install:
         - pip3 install flake8 flake8-bugbear flake8-docstrings sqlalchemy psycopg2-binary
       script: skip
     - <<: *00-python-cache
-      python: 3.6
+      python: 3.7
       if: branch = master OR type = pull_request
 
     # Lint the codebase to ensure that the code is compliant to our system
     - &01-php-lint
       stage: 01 lint
-      php: 7.0
+      php: 7.2
       script:
         - find -L . -path ./site/vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
     - <<: *01-php-lint
-      php: 7.1
-      if: branch = master OR type = pull_request
-    - <<: *01-php-lint
-      php: 7.2
+      php: 7.3
       if: branch = master OR type = pull_request
     
     - &01-python-lint
       language: python
-      python: 3.5
+      python: 3.6
       install:
         - pip3 install flake8 flake8-bugbear flake8-docstrings
       script:
         - flake8
     - <<: *01-python-lint
-      python: 3.6
+      python: 3.7
       if: branch = master OR type = pull_request
 
     - &02-php-unit
       stage: 02 unit test
-      php: 7.0
+      php: 7.2
       script:
         - pushd site
         - vendor/bin/phpunit --version
@@ -104,15 +98,12 @@ jobs:
         - travis_retry php vendor/bin/php-coveralls -v -c tests/coveralls.yml
         - popd
     - <<: *02-php-unit
-      php: 7.1
-      if: branch = master OR type = pull_request
-    - <<: *02-php-unit
-      php: 7.2
+      php: 7.3
       if: branch = master OR type = pull_request
 
     - &02-python-unit
       language: python
-      python: 3.4
+      python: 3.6
       install:
         - pip3 install -U pip
         - pip3 install tzlocal
@@ -126,15 +117,12 @@ jobs:
         - python3 -m unittest discover
         - popd
     - <<: *02-python-unit
-      python: 3.5
-      if: branch = master OR type = pull_request
-    - <<: *02-python-unit
-      python: 3.6
+      python: 3.7
       if: branch = master OR type = pull_request
 
     - &03-e2e
       stage: 03 e2e test
-      php: 7.0
+      php: 7.2
       env: AUTH_METHOD=1
       services:
         - xvfb
@@ -227,20 +215,14 @@ jobs:
       script:
         - TEST_URL="http://localhost" python -m unittest discover -v --start-directory tests
     - <<: *03-e2e
-      php: 7.1
+      php: 7.3
       if: branch = master OR type = pull_request
     - <<: *03-e2e
       php: 7.2
-      if: branch = master OR type = pull_request
-    - <<: *03-e2e
-      php: 7.0
-      env: AUTH_METHOD=2
-    - <<: *03-e2e
-      php: 7.1
       env: AUTH_METHOD=2
       if: branch = master OR type = pull_request
     - <<: *03-e2e
-      php: 7.2
+      php: 7.3
       env: AUTH_METHOD=2
       if: branch = master OR type = pull_request
 
@@ -275,12 +257,14 @@ jobs:
       env: CLANG_VER="5.0.1"
       before_install: source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
-        - sudo apt-get install clang
         - export LLVM_ARCHIVE_PATH=${HOME}/clang+llvm.tar.xz
         - wget http://releases.llvm.org/${CLANG_VER}/clang+llvm-${CLANG_VER}-x86_64-linux-gnu-ubuntu-14.04.tar.xz -O ${LLVM_ARCHIVE_PATH}
         - mkdir ${HOME}/clang+llvm
         - tar xf ${LLVM_ARCHIVE_PATH} -C ${HOME}/clang+llvm --strip-components 1
         - export PATH=${HOME}/clang+llvm/bin:${PATH}
+        # Create symlink so that it's in expected location for whitelist
+        - sudo ln -s $(which clang) /usr/bin/clang
+        - sudo ln -s $(which clang++) /usr/bin/clang++
         - pip3 install -U pip
         - pip3 install PyYAML
         - pip3 install python-dateutil

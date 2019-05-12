@@ -122,7 +122,3 @@ MIGRATION                                                                   STAT
 
 """
         self.assertEqual(expected, sys.stdout.getvalue())        
-
-
-if __name__ == '__main__':
-    unittest.main()

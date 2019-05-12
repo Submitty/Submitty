@@ -33,7 +33,3 @@ class TestInit(unittest.TestCase):
         finally:
             migrator.DIR_PATH = old_dir
             migrator.MIGRATIONS_PATH = old_migration
-
-
-if __name__ == '__main__':
-    unittest.main()

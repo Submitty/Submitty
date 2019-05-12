@@ -7,6 +7,8 @@ window.addEventListener("load", function() {
   }
 });
 
+window.addEventListener("resize", checkSidebarCollapse); 
+
 /**
  * Acts in a similar fashion to Core->buildUrl() function within the PHP code
  * so that we do not have to pass in fully built URL to JS functions, but rather
@@ -228,7 +230,7 @@ function newUserForm() {
     var form = $("#edit-user-form");
     form.css("display", "block");
     $('[name="edit_user"]', form).val("false");
-    $('[name="user_id"]', form).removeClass('readonly').removeAttr('readonly').val("");
+    $('[name="user_id"]', form).removeClass('readonly').prop('readonly', false).val("");
     $('[name="user_firstname"]', form).val("");
     $('[name="user_preferred_firstname"]', form).val("");
     $('[name="user_lastname"]', form).val("");
@@ -997,7 +999,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
 
 function removeTeamMemberInput(i) {
     var form = $("#admin-team-form");
-    $('[name="user_id_'+i+'"]', form).removeClass('readonly').removeAttr('readonly').val("");
+    $('[name="user_id_'+i+'"]', form).removeClass('readonly').prop('readonly', false).val("");
     $("#remove_member_"+i).remove();
     var student_full = JSON.parse($('#student_full_id').val());
     $('[name="user_id_'+i+'"]', form).autocomplete({
@@ -1583,6 +1585,7 @@ function editPost(post_id, thread_id, shouldEditThread) {
                     return;
                 }
                 var post_content = json.post;
+                var lines = post_content.split(/\r|\r\n|\n/).length;
                 var anon = json.anon;
                 var change_anon = json.change_anon;
                 var user_id = escapeSpecialChars(json.user);
@@ -1596,6 +1599,7 @@ function editPost(post_id, thread_id, shouldEditThread) {
                 var date = time.toLocaleDateString();
                 time = time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
                 var contentBox = form.find("[name=thread_post_content]")[0];
+                contentBox.style.height = lines*14;
                 var editUserPrompt = document.getElementById('edit_user_prompt');
                 editUserPrompt.innerHTML = 'Editing a post by: ' + user_id + ' on ' + date + ' at ' + time;
                 contentBox.value = post_content;
@@ -2424,7 +2428,7 @@ function updateHomeworkExtensions(data) {
     return false;
 }
 
-function loadHomeworkExtensions(g_id) {
+function loadHomeworkExtensions(g_id, due_date) {
     var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'get_extension_details', 'g_id': g_id});
     $.ajax({
         url: url,
@@ -2434,6 +2438,7 @@ function loadHomeworkExtensions(g_id) {
             $('#my_table tr:gt(0)').remove();
             var title = '<div class="option-title" id="title">Current Extensions for ' + json['gradeable_id'] + '</div>';
             $('#title').replaceWith(title);
+            $('#due_date').text(due_date);
             if(json['users'].length === 0){
                 $('#my_table').append('<tr><td colspan="4">There are no extensions for this homework</td></tr>');
             }
@@ -2625,6 +2630,9 @@ function checkSidebarCollapse() {
     if (size < 1000) {
         $("#sidebar").toggleClass("collapsed", true);
     }
+    else{
+        $("#sidebar").toggleClass("collapsed", false);
+    }
 }
 
 //Called from the DOM collapse button, toggle collapsed and save to localStorage
@@ -2644,6 +2652,9 @@ $(document).ready(function() {
         position: { my: "right+0 bottom+0" },
         content: function () {
             if($("#sidebar").hasClass("collapsed")) {
+                if ($(this).attr("title") === "Collapse Sidebar") {
+                    return "Expand Sidebar";
+                }
                 return $(this).attr("title")
             }
             else {
@@ -2651,7 +2662,6 @@ $(document).ready(function() {
             }
         }
     });
-    $("#nav-sidebar-collapse.collapse-icon").attr("title", "Expand Sidebar");
 
     //Remember sidebar preference
     if (localStorage.sidebar !== "") {
