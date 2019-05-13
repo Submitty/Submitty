@@ -4,6 +4,7 @@ namespace app\models\forum;
 
 use app\libraries\Core;
 use app\models\Post;
+use app\models\AbstractModel;
 
 /**
  * Class PostList
@@ -24,11 +25,17 @@ class PostList extends AbstractModel {
     protected $post_list;
 
     public function __construct(Core $core, $posts=array(), int $type) {
+        parent::__construct($core);
         if(empty($details)) {
             return;
         }
 
         $this->setList($posts, $type);
+    }
+
+
+    public function getFirst() : Post {
+        return $post_list[0];
     } 
 
 

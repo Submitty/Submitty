@@ -4,6 +4,7 @@ namespace app\models\forum;
 
 use app\libraries\Core;
 use app\models\User;
+use app\models\AbstractModel;
 
 
 /**
@@ -34,9 +35,9 @@ use app\models\User;
 
 class Post extends AbstractModel {
 
-    const static COMMENT    = 0;
-    const static UNRESOLVED = 1;
-    const static RESOLVED   = 2;
+    const COMMENT    = 0;
+    const UNRESOLVED = 1;
+    const RESOLVED   = 2;
 
     protected $id;
     protected $thread_id;
@@ -48,22 +49,23 @@ class Post extends AbstractModel {
     protected $is_anonymous;
     protected $deleted;
     protected $post_type;
-    protected $timestamp;
     protected $has_attachment;
 
     public function __construct(Core $core, $details=array()){
+        parent::__construct($core);
+
         if(empty($details)) {
             return;
         }
 
-        setPostId($details['post_id']);
+        //setPostId($details['post_id']);
         setThreadId($details['thread_id']);
         setParentId($details['parent_id']);
         setContent($details['content']);
-        setTimestamp($details['timestamp']);
+        //setTimestamp($details['timestamp']);
         setAnonymous($details['anonymous']);
-        setDeleted($details['deleted']);
-        setType($details['type']);
+        //setDeleted($details['deleted']);
+        //setType($details['type']);
         setAttachment($details['has_attachment']);
     } 
 
