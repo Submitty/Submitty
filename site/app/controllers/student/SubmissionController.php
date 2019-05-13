@@ -1091,17 +1091,20 @@ class SubmissionController extends AbstractController {
             }
 
             // save the contents of the text boxes to files
-            $empty_textboxes = true;
-            if (isset($_POST['textbox_answers'])) {
-                $textbox_answer_array = json_decode($_POST['textbox_answers']);
-                for ($i = 0; $i < $gradeable->getAutogradingConfig()->getNumTextBoxes(); $i++) {
-                    $textbox_answer_val = $textbox_answer_array[$i];
-                    if ($textbox_answer_val != "") $empty_textboxes = false;
-                    $filename = $gradeable->getAutogradingConfig()->getTextboxes()[$i]->getFileName();
+            $empty_inputs = true;
+            if (isset($_POST['input_answers'])) {
+                $input_answer_object = json_decode($_POST['input_answers'], true);
+                for ($i = 0; $i < $gradeable->getAutogradingConfig()->getNumInputs(); $i++) {
+                    $input_answers = $input_answer_object["input_" . $i];
+                    if ( count($input_answers) > 0)  $empty_inputs = false;
+                    $filename = $gradeable->getAutogradingConfig()->getInputs()[$i]->getFileName();
                     $dst = FileUtils::joinPaths($version_path, $filename);
                     // FIXME: add error checking
                     $file = fopen($dst, "w");
-                    fwrite($file, $textbox_answer_val);
+
+                    foreach($input_answers as $input_answer_val){
+                        fwrite($file, $input_answer_val . "\n");
+                    }
                     fclose($file);
                 }
             }
@@ -1120,7 +1123,7 @@ class SubmissionController extends AbstractController {
             }
 
 
-            if (empty($uploaded_files) && empty($previous_files_src) && $empty_textboxes) {
+            if (empty($uploaded_files) && empty($previous_files_src) && $empty_inputs) {
                 return $this->uploadResult("No files to be submitted.", false);
             }
 
