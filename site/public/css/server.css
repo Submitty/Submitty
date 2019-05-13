@@ -731,12 +731,12 @@ table tr.table-header {
 
 /* TODO: MAKE THIS CASCADE */
 .deleted {
-    background-color: #A9A9A9;
+    background-color: #DDDDDD;
     color: #4a4a4a;
 }
 
 .deleted.active {
-    background-color: #505050;
+    background-color: #C0C0C0;
 }
 
 .new_post {
