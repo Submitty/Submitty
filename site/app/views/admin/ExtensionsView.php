@@ -6,12 +6,12 @@ use app\views\AbstractView;
 use app\libraries\Utils;
 
 class ExtensionsView extends AbstractView {
-    public function displayExtensions($gradeable_ids) {
+    public function displayExtensions($gradeables) {
         $students = $this->core->getQueries()->getAllUsers();
         $student_full = Utils::getAutoFillData($students);
 
         return $this->core->getOutput()->renderTwigTemplate("admin/Extensions.twig", [
-            "gradeable_ids" => $gradeable_ids,
+            "gradeables" => $gradeables,
             "student_full" => $student_full
         ]);
     }

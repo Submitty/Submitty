@@ -641,7 +641,7 @@ class NavigationView extends AbstractView {
             "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'edit_gradeable_page', 'id' => $gradeable->getId())),
             "class" => "fas fa-pencil-alt",
             "title_on_hover" => true,
-            "aria_label" => "edit gradeable {$gradeable->getId()}"
+            "aria_label" => "edit gradeable {$gradeable->getTitle()}"
         ]);
         return $button;
     }

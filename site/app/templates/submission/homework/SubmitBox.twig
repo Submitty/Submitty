@@ -147,33 +147,88 @@
     {# /Admin submission type selector #}
 
     {% if is_vcs %}
-        {#
-            TODO: Build ability for students to specify their own repo url
-            if (strpos($gradeable->getSubdirectory(),"\$repo_id") !== false) {
-                $return .= <<<HTML
-    repository id: <input type="text" id="repo_id" class="required" value="" placeholder="(Required)"/><br /><br />
-    HTML;
-            }
-            else if ($gradeable->getSubdirectory() == "" && $this->core->getConfig()->getVcsBaseUrl() == "") {
-                $return .= <<<HTML
-    Enter the URL for your repository, ex. <kbd>https://github.com/username/homework-1</kbd><br />
-    repository URL: <input type="text" id="repo_id" class="required" value ="" placeholder="(Required)"/><br /><br />
-    HTML;
-            }
-        #}
-        <h3>To access your Repository:</h3>
-        <span><em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em></span><br />
-        <samp>git  clone  {{ repository_path }}  SPECIFY_TARGET_DIRECTORY</samp><br /><br />
+        {% if vcs_host_type == 0 or vcs_host_type == 1 %}
+            <h3>To access your Repository:</h3>
+            <span><em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em></span><br />
+            <samp>git  clone  {{ repository_path }}  SPECIFY_TARGET_DIRECTORY</samp><br /><br />
+        {% endif %}
+
+        {% if vcs_host_type == 2 or vcs_host_type == 3 %}
+            <h3>Please enter your GitHub URL: </h3>
+
+            GitHub URL: &nbsp;&nbsp; <kbd>https://www.github.com/</kbd>
+            <input style='width: 16%' type="text" id="github_user_id" name="git_user_id" class="required" value="{{ github_user_id }}" placeholder="user_name"/>
+            <kbd>/</kbd>
+            <input style='width: 16%' type="text" id="github_repo_id" name="git_repo_id" class="required" value="{{ github_repo_id }}" placeholder="repo_name"/>
+            <br />
+
+            {% if vcs_host_type == 2 %}
+            Note: This should be a <em>public repository</em>, visible to everyone.
+            {% else %}
+            Note: If this is not a <em>public repository</em>, please ensure that you have granted read access to INCOMPLETE! FIXME! SPECIAL USER.
+            {% endif %}
+            <br /><br />
+
+        {% endif %}
         <input type="submit" id="submit" class="btn btn-primary" value="Grade My Repository" />
     {% else %}
         <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
+        
+            <script type="text/javascript" src="../../../../js/showdown.min.js"></script>
+            <script type="text/javascript" src="../../../../js/xss.min.js"></script>
+            <script type="text/javascript" src="../../../../js/showdown-xss-filter.js"></script>
 
-            {# Text boxes #}
-            {% for textbox in textboxes %}
-                {{ self.render_textbox(textbox, image_data, loop.index0) }}
+            {# Render content #}
+            {% set num_inputs = 0 %}
+            {% for c in contents %}
+                <div id="content_{{ loop.index0 }}">
+                    <h2>{{ c.title }}</h2>
+
+                    {% for image in c.images %}
+                        <img src="{{ attribute(image_data, image.name) }}"
+                        {% if image.width > 0 %}
+                            width="{{ image.width }}"
+                        {% endif %}
+                        {% if image.height > 0 %}
+                            height="{{ image.height }}"
+                        {% endif %}
+                        />
+                    {% endfor %}
+
+                    {# Render the inputs for the given content block #}
+                    {% for i in c.input %}
+                        <div id="input_container_{{ loop.index0 }}">
+                            {% if i.type == "textbox" %}
+                                {{ self.render_textbox(i, num_inputs ) }}
+                            {% elseif i.type == "codebox" %}
+                                <br>
+                            {% elseif i.type == "multiplechoice" %}
+                                <strong>{{ i.label }}</strong>
+                                <br>
+                                <fieldset>
+                                    {% for choice in i.choices %}
+                                        {% if i.allow_multiple == true %}
+                                            <input type="checkbox" name="input_{{ num_inputs }}" id="input_{{ num_inputs }}" value="{{ choice }}" onclick="handle_input_keypress();"" />
+                                            <label for="{{ choice }}">
+                                                {{ choice }}
+                                            </label>
+                                        {% else %}
+                                            <input type="radio" name="input_{{ num_inputs }}" id="input_{{ num_inputs }}" value="{{ choice }}" onclick="handle_input_keypress();" />
+                                            <label for="{{ choice }}">
+                                                {{ choice }}
+                                            </label>
+                                        {% endif %}
+                                        <br/>
+                                    {% endfor %}
+                                </fieldset>
+                                <br>
+                            {% endif %}
+                        </div>
+                        {% set num_inputs = num_inputs + 1 %}
+                    {% endfor %}
+                </div>
             {% endfor %}
-            {# /Text boxes #}
-
+    
             {# Submit boxes #}
             {% for part in part_names %}
                 <div id="upload{{ loop.index }}" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 150px;">
@@ -277,7 +332,7 @@
 {% endif %}
 
 <script type="text/javascript">
-    function makeSubmission(user_id, highest_version, is_pdf, path, count, repo_id, merge_previous=false, clobber=false) {
+    function makeSubmission(user_id, highest_version, is_pdf, path, count, git_user_id, git_repo_id, merge_previous=false, clobber=false) {
         // submit the selected pdf
         path = decodeURIComponent(path);
         if (is_pdf) {
@@ -293,10 +348,11 @@
                 {{ max_submissions }},
                 "{{ core.getCsrfToken() }}",
                 {{ is_vcs ? "true" : "false" }},
-                {{ num_text_boxes }},
+                {{ num_inputs }},
                 "{{ gradeable_id }}",
                 "{{ user_id }}",
-                repo_id,
+                git_user_id,
+                git_repo_id,
                 {{ student_page ? "true" : "false" }},
                 {{ component_names|length }},
                 merge_previous,
@@ -310,10 +366,11 @@
                 {{ max_submissions }},
                 "{{ core.getCsrfToken() }}",
                 {{ is_vcs ? "true" : "false" }},
-                {{ num_text_boxes }},
+                {{ num_inputs }},
                 "{{ gradeable_id }}",
                 user_id,
-                repo_id,
+                git_user_id,
+                git_repo_id,
                 {{ student_page ? "true" : "false" }},
                 {{ component_names|length }},
                 merge_previous,
@@ -324,7 +381,6 @@
     $(function() {
         $("#submit").click(function(e){ // Submit button
             var user_id = "";
-            var repo_id = "";
             var num_pages = 0;
             if ($('#radio_student').is(':checked')) {
                 user_id = $("#user_id").val();
@@ -342,8 +398,11 @@
                 }
             };
             // vcs upload
+            var git_user_id = "";
+            var git_repo_id = "";
             if ({{ is_vcs ? "true" : "false" }}) {
-                repo_id = $("#repo_id").val();
+                git_user_id = $("#github_user_id").val();
+                git_repo_id = $("#github_repo_id").val();
             }
             // bulk upload
             if ($("#radio_bulk").is(":checked")) {
@@ -351,38 +410,27 @@
             }
             // no user id entered, upload for whoever is logged in
             else if (user_id == ""){
-                makeSubmission(user_id, {{ highest_version }}, false, "", "", repo_id);
+                makeSubmission(user_id, {{ highest_version }}, false, "", "", git_user_id, git_repo_id);
             }
             // user id entered, need to validate first
             else {
-                validateUserId("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_id, false, "", "", repo_id, makeSubmission);
+                validateUserId("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_id, false, "", "", git_user_id, git_repo_id, makeSubmission);
             }
             e.stopPropagation();
         });
     });
 </script>
 
-{% macro render_textbox(textbox, images, index) %}
-    {% for image in textbox.images %}
-        <img src="{{ attribute(images, image.name) }}" alt=""
-        {% if image.width > 0 %}
-            width="{{ image.width }}"
-        {% endif %}
-        {% if image.height > 0 %}
-            height="{{ image.height }}"
-        {% endif %}
-        />
-    {% endfor %}
+{% macro render_textbox(textbox, index) %}
 
     <p style="max-width: 50em;">
-        <label for="textbox_{{ index }}">{{ textbox.label }}
+        <strong>{{ textbox.label }}</strong>
         <br>
-        {% if textbox.row_count == 0 %}
-            </label>
-            <input type="text" name="textbox_{{ index }}" id="textbox_{{ index }}" onKeyPress="handle_textbox_keypress();">
+        {% if textbox.rows == 0 %}
+            <input type="text" name="input_{{ index }}" id="input_{{ index }}" onKeyPress="handle_input_keypress();">
         {% else %}
             Press <kbd>TAB</kbd> to indent.  Press <kbd>ESC</kbd> to advance from textarea.</label>
-            <textarea rows="{{ textbox.row_count }}" cols="50"  style="width:60em; height:100%; min-height:110px;" name="textbox_{{ index }}" id="textbox_{{ index }}" onKeyPress="handle_textbox_keypress();"></textarea>
+            <textarea rows="{{ textbox.rows }}" cols="50"  style="width:60em; height:100%; min-height:110px;" name="input_{{ index }}" id="input_{{ index }}" onKeyPress="handle_input_keypress();"></textarea>
             {#
                 Allow tab in the larger text boxes (normally tab moves to the next textbox)
                 http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
@@ -390,7 +438,7 @@
                 q.v. function enableTabsInTextArea(jQuerySelector) in server.js
             #}
             <script>
-                enableTabsInTextArea('#textbox_{{ index }}');
+                enableTabsInTextArea('#input_{{ index }}');
            </script>
         {% endif %}
     </p>
