@@ -170,18 +170,65 @@
             <br /><br />
 
         {% endif %}
-
-
         <input type="submit" id="submit" class="btn btn-primary" value="Grade My Repository" />
     {% else %}
         <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
+        
+            <script type="text/javascript" src="../../../../js/showdown.min.js"></script>
+            <script type="text/javascript" src="../../../../js/xss.min.js"></script>
+            <script type="text/javascript" src="../../../../js/showdown-xss-filter.js"></script>
 
-            {# Text boxes #}
-            {% for textbox in textboxes %}
-                {{ self.render_textbox(textbox, image_data, loop.index0) }}
+            {# Render content #}
+            {% set num_inputs = 0 %}
+            {% for c in contents %}
+                <div id="content_{{ loop.index0 }}">
+                    <h2>{{ c.title }}</h2>
+
+                    {% for image in c.images %}
+                        <img src="{{ attribute(image_data, image.name) }}"
+                        {% if image.width > 0 %}
+                            width="{{ image.width }}"
+                        {% endif %}
+                        {% if image.height > 0 %}
+                            height="{{ image.height }}"
+                        {% endif %}
+                        />
+                    {% endfor %}
+
+                    {# Render the inputs for the given content block #}
+                    {% for i in c.input %}
+                        <div id="input_container_{{ loop.index0 }}">
+                            {% if i.type == "textbox" %}
+                                {{ self.render_textbox(i, num_inputs ) }}
+                            {% elseif i.type == "codebox" %}
+                                <br>
+                            {% elseif i.type == "multiplechoice" %}
+                                <strong>{{ i.label }}</strong>
+                                <br>
+                                <fieldset>
+                                    {% for choice in i.choices %}
+                                        {% if i.allow_multiple == true %}
+                                            <input type="checkbox" name="input_{{ num_inputs }}" id="input_{{ num_inputs }}" value="{{ choice }}" onclick="handle_input_keypress();"" />
+                                            <label for="{{ choice }}">
+                                                {{ choice }}
+                                            </label>
+                                        {% else %}
+                                            <input type="radio" name="input_{{ num_inputs }}" id="input_{{ num_inputs }}" value="{{ choice }}" onclick="handle_input_keypress();" />
+                                            <label for="{{ choice }}">
+                                                {{ choice }}
+                                            </label>
+                                        {% endif %}
+                                        <br/>
+                                    {% endfor %}
+                                </fieldset>
+                                <br>
+                            {% endif %}
+                        </div>
+                        {% set num_inputs = num_inputs + 1 %}
+                    {% endfor %}
+                </div>
             {% endfor %}
-            {# /Text boxes #}
-
+    
             {# Submit boxes #}
             {% for part in part_names %}
                 <div id="upload{{ loop.index }}" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 150px;">
@@ -301,7 +348,7 @@
                 {{ max_submissions }},
                 "{{ core.getCsrfToken() }}",
                 {{ is_vcs ? "true" : "false" }},
-                {{ num_text_boxes }},
+                {{ num_inputs }},
                 "{{ gradeable_id }}",
                 "{{ user_id }}",
                 git_user_id,
@@ -319,7 +366,7 @@
                 {{ max_submissions }},
                 "{{ core.getCsrfToken() }}",
                 {{ is_vcs ? "true" : "false" }},
-                {{ num_text_boxes }},
+                {{ num_inputs }},
                 "{{ gradeable_id }}",
                 user_id,
                 git_user_id,
@@ -374,27 +421,16 @@
     });
 </script>
 
-{% macro render_textbox(textbox, images, index) %}
-    {% for image in textbox.images %}
-        <img src="{{ attribute(images, image.name) }}" alt=""
-        {% if image.width > 0 %}
-            width="{{ image.width }}"
-        {% endif %}
-        {% if image.height > 0 %}
-            height="{{ image.height }}"
-        {% endif %}
-        />
-    {% endfor %}
+{% macro render_textbox(textbox, index) %}
 
     <p style="max-width: 50em;">
-        <label for="textbox_{{ index }}">{{ textbox.label }}
+        <strong>{{ textbox.label }}</strong>
         <br>
-        {% if textbox.row_count == 0 %}
-            </label>
-            <input type="text" name="textbox_{{ index }}" id="textbox_{{ index }}" onKeyPress="handle_textbox_keypress();">
+        {% if textbox.rows == 0 %}
+            <input type="text" name="input_{{ index }}" id="input_{{ index }}" onKeyPress="handle_input_keypress();">
         {% else %}
             Press <kbd>TAB</kbd> to indent.  Press <kbd>ESC</kbd> to advance from textarea.</label>
-            <textarea rows="{{ textbox.row_count }}" cols="50"  style="width:60em; height:100%; min-height:110px;" name="textbox_{{ index }}" id="textbox_{{ index }}" onKeyPress="handle_textbox_keypress();"></textarea>
+            <textarea rows="{{ textbox.rows }}" cols="50"  style="width:60em; height:100%; min-height:110px;" name="input_{{ index }}" id="input_{{ index }}" onKeyPress="handle_input_keypress();"></textarea>
             {#
                 Allow tab in the larger text boxes (normally tab moves to the next textbox)
                 http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
@@ -402,7 +438,7 @@
                 q.v. function enableTabsInTextArea(jQuerySelector) in server.js
             #}
             <script>
-                enableTabsInTextArea('#textbox_{{ index }}');
+                enableTabsInTextArea('#input_{{ index }}');
            </script>
         {% endif %}
     </p>

@@ -97,9 +97,8 @@ int main(int argc, char *argv[]) {
         visible += points;
     }
     //container name only matters if we try to get the commands for this testcase.
-    //TODO: IN THIS CASE, THIS IS A HACK THAT MUST BE FIXED.
     std::string container_name = "";
-    TestCase tc(config_json,which_testcase, container_name);
+    TestCase tc(config_json,which_testcase,container_name);
     if (tc.isSubmissionLimit()) {
       max_submissions = tc.getMaxSubmissions();
     }
@@ -165,33 +164,120 @@ int main(int argc, char *argv[]) {
       j["part_names"].push_back((*parts)[i]);
     }
   }
-  nlohmann::json::iterator textboxes = config_json.find("textboxes");
-  if (textboxes != config_json.end()) {
-    j["textboxes"] =  nlohmann::json::array();
-    for (int i = 0; i < textboxes->size(); i++) {
-      nlohmann::json textbox;
-      nlohmann::json::iterator label = (*textboxes)[i].find("label");
-      assert (label != (*textboxes)[i].end());
-      assert (label->is_string());
-      textbox["label"] = *label;
-      // default #rows = 0 => single row, non resizeable, textbox
-      textbox["rows"]  = (*textboxes)[i].value("rows",0);
-      assert (int(textbox["rows"]) >= 0);
-      textbox["filename"] = (*textboxes)[i].value("filename","textbox_"+std::to_string(i)+".txt");
-      //list of images to display above the text box
-      textbox["images"] = (*textboxes)[i].value("images", nlohmann::json::array({}));
-      j["textboxes"].push_back(textbox);
+
+  // JSON parsing for content block
+  nlohmann::json::iterator content_blocks = config_json.find("content");
+  if (content_blocks != config_json.end()) {
+    j["content"] = nlohmann::json::array();
+    for (int i = 0; i < content_blocks->size(); i++) {
+      nlohmann::json content;
+      nlohmann::json content_block = (*content_blocks)[i];
+
+      // Title, Optional
+      std::string title = "";
+      if(content_block["title"].is_string()){
+        title = content_block["title"];
+      }else if(!content_block["title"].is_null()){
+        bool title_is_string = false; 
+        assert(title_is_string);
+      }
+      content["title"] = title;
+
+      // Description, optional
+      std::string description = "";
+      if(content_block["description"].is_string()){
+        description = content_block["description"];
+      }else if(!content_block["description"].is_null()){
+        bool description_is_string = false; 
+        assert(description_is_string);
+      }
+      content["description"] = description;
+
+      // Images, optional
+      content["images"] = (*content_blocks)[i].value("images", nlohmann::json::array());
+
+      // Input
+      nlohmann::json::iterator inpt_ptr = (*content_blocks)[i].find("input");
+      if (inpt_ptr != (*content_blocks)[i].end()) {
+        assert((*content_blocks)[i]["input"].is_array());
+        nlohmann::json input_array = *inpt_ptr;
+      	content["input"] = nlohmann::json::array();
+      	for (int k = 0; k < input_array.size(); k++) {
+      	  nlohmann::json input = input_array[k];
+          nlohmann::json input_obj;
+
+      	  // Type
+      	  nlohmann::json::iterator in_type = input.find("type");
+      	  assert (in_type != input.end());
+          assert (in_type->is_string());
+      	  assert (*in_type == "textbox" || *in_type == "codebox" || *in_type == "multiplechoice");
+      	  input_obj["type"] = *in_type;
+          
+
+      	  // Label
+      	  nlohmann::json::iterator in_label = input.find("label");
+      	  assert (in_label != input.end());
+          assert (in_label->is_string());
+      	  input_obj["label"] = *in_label;
+          
+
+      	  // Filename
+      	  std::string s = "";
+      	  if (i < 10) 
+      	    s += "0";
+      	  s += std::to_string(k);
+
+
+      	  // Actual input configuration
+      	  if (*in_type == "textbox" || *in_type == "codebox") {
+      	    if (*in_type == "codebox") {
+      	      nlohmann::json::iterator cb_lang = input.find("language");
+      	      assert (cb_lang != input.end());
+      	      assert (cb_lang->is_string());
+      	      input_obj["language"] = *cb_lang;
+      	    }
+      	    
+      	    input_obj["rows"] = input.value("rows", 0);
+      	    assert (int(input_obj["rows"]) >= 0);
+            
+
+      	    input_obj["filename"] = input.value("filename", "input_" + s + ".txt");
+      	    input_obj["images"] = input.value("images", nlohmann::json::array());
+      	    content["input"].push_back(input_obj);
+      	  } else if (*in_type == "multiplechoice") {
+
+            if(!input["allow_multiple"].is_null()){
+              assert(input["allow_multiple"].is_boolean());
+              input_obj["allow_multiple"] = input["allow_multiple"];
+            }else{
+              input_obj["allow_multiple"] = false;
+            }
+
+      	    
+            nlohmann::json::iterator mc_choices = input.find("choices");
+      	    assert (mc_choices != input.end());
+      	    input_obj["choices"] = *mc_choices;
+
+
+      	    input_obj["filename"] = input.value("filename", "mc_" + s + ".txt");
+      	    content["input"].push_back(input_obj);
+      	  } else {
+      	    assert (false);
+      	  }
+      	}
+      }
+      j["content"].push_back(content);
     }
   }
 
   // By default, we have one drop zone without a part label / sub
   // directory.
 
-  // But, if there are textboxes, but there are no explicit parts
+  // But, if there are input fields, but there are no explicit parts
   // (drag & drop zones / "bucket"s for file upload), set part_names
   // to an empty array (no zones for file drag & drop).
   if (parts == config_json.end() &&
-      textboxes != config_json.end()) {
+      content_blocks != config_json.end()) {
     j["part_names"] =  nlohmann::json::array();
   }
 
