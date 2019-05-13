@@ -112,6 +112,10 @@ ExceptionHandler::setDisplayExceptions($core->getConfig()->isDebug());
 /** @noinspection PhpUnhandledExceptionInspection */
 $core->loadDatabases();
 
+if($core->getConfig()->isCourseLoaded() && $core->getConfig()->isForumEnabled()) {
+    $core->loadForum();
+}
+
 $core->getOutput()->setInternalResources();
 
 // We only want to show notices and warnings in debug mode, as otherwise errors are important
@@ -266,7 +270,7 @@ switch($_REQUEST['component']) {
         $control->run();
         break;
     case 'forum':
-        $control = new app\controllers\forum\ForumController($core);
+        $control = new app\controllers\forum\ForumController2($core);
         $control->run();
         break;
     case 'notification_settings':
