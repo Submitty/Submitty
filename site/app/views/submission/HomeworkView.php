@@ -15,6 +15,7 @@ use app\models\User;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
+use app\models\gradeable\AbstractGradeableInput;
 
 class HomeworkView extends AbstractView {
 
@@ -246,7 +247,8 @@ class HomeworkView extends AbstractView {
     private function renderSubmitBox(Gradeable $gradeable, $graded_gradeable, $version_instance, int $late_days_use): string {
         $student_page = $gradeable->isStudentPdfUpload();
         $students_full = [];
-        $textboxes = $gradeable->getAutogradingConfig()->getTextboxes();
+        $inputs = $gradeable->getAutogradingConfig()->getInputs();
+        $contents = $gradeable->getAutogradingConfig()->getContent();
         $old_files = [];
         $display_version = 0;
 
@@ -270,8 +272,8 @@ class HomeworkView extends AbstractView {
 
         $image_data = [];
         if (!$gradeable->isVcs()) {
-            foreach ($textboxes as $textbox) {
-                foreach ($textbox->getImages() as $image) {
+            foreach ($contents as $content_chunk) {
+                foreach ($content_chunk["images"] as $image) {
                     $image_name = $image['name'];
                     $imgPath = FileUtils::joinPaths(
                         $this->core->getConfig()->getCoursePath(),
@@ -282,12 +284,11 @@ class HomeworkView extends AbstractView {
                     $content_type = FileUtils::getContentType($imgPath);
                     if (substr($content_type, 0, 5) === 'image') {
                         // Read image path, convert to base64 encoding
-                        $textBoxImageData = base64_encode(file_get_contents($imgPath));
+                        $inputImageData = base64_encode(file_get_contents($imgPath));
                         // Format the image SRC:  data:{mime};base64,{data};
-                        $textBoximagesrc = 'data: ' . mime_content_type($imgPath) . ';charset=utf-8;base64,' . $textBoxImageData;
+                        $inputimagesrc = 'data: ' . mime_content_type($imgPath) . ';charset=utf-8;base64,' . $inputImageData;
                         // insert the sample image data
-
-                        $image_data[$image_name] = $textBoximagesrc;
+                        $image_data[$image_name] = $inputimagesrc;
                     }
                 }
             }
@@ -334,9 +335,9 @@ class HomeworkView extends AbstractView {
             return $component->getTitle();
         }, $gradeable->getComponents());
 
-        $textbox_data = array_map(function(SubmissionTextBox $text_box) {
-            return $text_box->toArray();
-        }, $textboxes);
+        $input_data = array_map(function(AbstractGradeableInput $inp) {
+            return $inp->toArray();
+        }, $inputs);
 
         $highest_version = $graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : 0;
 
@@ -345,7 +346,6 @@ class HomeworkView extends AbstractView {
         $my_repository = $graded_gradeable !== null ? $gradeable->getRepositoryPath($this->core->getUser(),$my_team) : "";
 
         $DATE_FORMAT = "m/d/Y @ H:i";
-
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
             'gradeable_id' => $gradeable->getId(),
             'gradeable_name' => $gradeable->getTitle(),
@@ -366,7 +366,7 @@ class HomeworkView extends AbstractView {
                && $gradeable->getAutogradingConfig()->getGradeableMessage() !== '',
             'gradeable_message' => $gradeable->getAutogradingConfig()->getGradeableMessage(),
             'allowed_late_days' => $gradeable->getLateDays(),
-            'num_text_boxes' => $gradeable->getAutogradingConfig()->getNumTextBoxes(),
+            'num_inputs' => $gradeable->getAutogradingConfig()->getNumInputs(),
             'max_submissions' => $gradeable->getAutogradingConfig()->getMaxSubmissions(),
             'display_version' => $display_version,
             'highest_version' => $highest_version,
@@ -374,7 +374,8 @@ class HomeworkView extends AbstractView {
             'students_full' => $students_full,
             'late_days_use' => $late_days_use,
             'old_files' => $old_files,
-            'textboxes' => $textbox_data,
+            'inputs' => $input_data,
+            'contents' => $contents,
             'image_data' => $image_data,
             'component_names' => $component_names,
             'upload_message' => $this->core->getConfig()->getUploadMessage()
