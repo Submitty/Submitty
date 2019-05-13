@@ -7,7 +7,10 @@ import tempfile
 from types import SimpleNamespace
 import unittest
 from .helpers import create_migration
+
 import migrator
+import migrator.db
+import migrator.main
 
 
 class TestMigrateEnvironmentUp(unittest.TestCase):
@@ -325,7 +328,3 @@ DONE
                 self.assertTrue(Path(self.dir, up_file).exists())
             else:
                 self.assertFalse(Path(self.dir, up_file).exists())
-
-
-if __name__ == '__main__':
-    unittest.main()

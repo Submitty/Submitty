@@ -4,45 +4,64 @@
         "submission_to_validation" : [ "*.txt", "*.png" ],
         "work_to_details" : [ "*.txt", "*.png" ]
     },
-    "textboxes" : [
+    "content" : [
         { 
-            "label": "The above animal:",
+            "title" : "Question 1",
             "images": [
                 {
-                    "image_name" : "image1.png"
+                    "name" : "image1.png"
                 }
             ],
-            "filename" : "animal.txt"
+            "input" : [
+                {
+                    "type" : "textbox",
+                    "label": "The above animal:",
+                    "filename" : "animal.txt"
+                },
+                {
+                    "label": "200-300 word description",
+                    "rows" : 5,
+                    "filename" : "description.txt",
+                    "type" : "textbox"
+                }   
+            ]
         },
         {    
-            "label": "200-300 word description",
-            "rows" : 5,
-            "filename" : "description.txt"
-        },
-        {    
-            "label": "Write a haiku about one of the above images:",
+            "title" : "Question 2",
             "images": [
                 {
-                    "image_name" : "image2.png",
-                    "image_height" : 200,
-                    "image_width" : 200
+                    "name" : "image2.png",
+                    "height" : 200,
+                    "width" : 200
                 },
                 {
-                    "image_name" : "image3.png",
-                    "image_height" : 200,
-                    "image_width" : 200
+                    "name" : "image3.png",
+                    "height" : 200,
+                    "width" : 200
                 },
                 {
-                    "image_name" : "image4.png",
-                    "image_height" : 200,
-                    "image_width" : 200
+                    "name" : "image4.png",
+                    "height" : 200,
+                    "width" : 200
                 }
             ],
-            "filename" : "haiku.txt"
+            "input" : [
+                {
+                    "label": "Write a haiku about one of the above images:",
+                    "type" : "textbox",
+                    "filename" : "haiku.txt"
+                }
+            ]
         },
         { 
-            "label": "Number of hours spent on this assignment:",
-            "filename" : "hours.txt"
+            "title" : "Question 4",
+            "input" : [
+                {
+                    "type" : "textbox",
+                    "label": "Number of hours spent on this assignment:",
+                    "filename" : "hours.txt"
+                }
+            ]
         }
     ],
     "testcases" : [ 

@@ -124,11 +124,11 @@ class AdminGradeableController extends AbstractController {
             'action' => 'upload_new_gradeable'
         ]);
         $vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
-        $this->core->getOutput()->addInternalJs('flatpickr.js');
-        $this->core->getOutput()->addInternalJs('jquery.min.js');
-        $this->core->getOutput()->addInternalJs('jquery-ui.min.js');
-        $this->core->getOutput()->addInternalJs('jquery-ui-timepicker-addon.js');
-        $this->core->getOutput()->addInternalCss('flatpickr.min.css');
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
+        $this->core->getOutput()->addVendorJs(
+            FileUtils::joinPaths('jquery-ui-timepicker-addon', 'jquery-ui-timepicker-addon.min.js')
+        );
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'submit_url' => $submit_url,
@@ -258,14 +258,14 @@ class AdminGradeableController extends AbstractController {
         // $this->inherit_teams_list = $this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams();
 
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
-            $this->core->getOutput()->addInternalJs('twig.min.js');
+            $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
             $this->core->getOutput()->addInternalJs('ta-grading-rubric-conflict.js');
             $this->core->getOutput()->addInternalJs('ta-grading-rubric.js');
             $this->core->getOutput()->addInternalJs('gradeable.js');
             $this->core->getOutput()->addInternalCss('ta-grading.css');
         }
-        $this->core->getOutput()->addInternalJs('flatpickr.js');
-        $this->core->getOutput()->addInternalCss('flatpickr.min.css');
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addInternalJs('admin-gradeable-updates.js');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
 
@@ -731,11 +731,46 @@ class AdminGradeableController extends AbstractController {
             $gradeable_create_data[$prop] = $details[$prop] ?? '';
         }
 
+        // VCS specific values
+        if ($details['vcs'] === 'true') {
+            $host_button = $details['vcs_radio_buttons'];
+
+            // Find which radio button is pressed and what host type to use
+            $host_type = -1;
+            if      ($host_button === 'submitty-hosted')     { $host_type = 0; }
+            else if ($host_button === 'submitty-hosted-url') { $host_type = 1; }
+            else if ($host_button === 'public-github')       { $host_type = 2; }
+            else if ($host_button === 'private-github')      { $host_type = 3; }
+
+            $subdir = '';
+            // Submitty hosted -> this gradeable subdirectory
+            if ($host_type === 0) {
+                $subdir = $details['id'] . ($details['team_assignment'] === 'true' ? "/{\$team_id}" : "/{\$user_id}");
+            }
+            // Submitty hosted -> custom url
+            if ($host_type === 1) {
+                $subdir = $details['vcs_url'] . "/{\$user_id}";
+            }
+            $vcs_property_values = [
+                'vcs' => true,
+                'vcs_subdirectory' => $subdir,
+                'vcs_host_type' => $host_type
+            ];
+            $gradeable_create_data = array_merge($gradeable_create_data, $vcs_property_values);
+        } else {
+            $non_vcs_property_values = [
+                'vcs' => false,
+                'vcs_subdirectory' => '',
+                'vcs_host_type' => -1
+            ];
+            $gradeable_create_data = array_merge($gradeable_create_data, $non_vcs_property_values);
+        }
+
         // Electronic-only values
         if ($gradeable_type === GradeableType::ELECTRONIC_FILE) {
 
             $jsonThreads = json_encode('{}');
-            $discussion_clicked = $details['discussion_based'] === 'true';
+            $discussion_clicked = isset($details['discussion_based']) && ($details['discussion_based'] === 'true');
 
             //Validate user input for discussion threads
             if($discussion_clicked) {
@@ -748,18 +783,18 @@ class AdminGradeableController extends AbstractController {
                 $jsonThreads = json_encode($jsonThreads);
             }
 
+            $regrade_allowed = isset($details['regrade_allowed']) && ($details['regrade_allowed'] === 'true');
+
             $gradeable_create_data = array_merge($gradeable_create_data, [
                 'team_assignment' => $details['team_assignment'] === 'true',
-                'vcs' => $details['vcs'] === 'true',
                 'ta_grading' => $details['ta_grading'] === 'true',
                 'team_size_max' => $details['team_size_max'],
-                'vcs_subdirectory' => $details['vcs_subdirectory'],
-                'regrade_allowed' => $details['regrade_allowed'] === 'true',
+                'regrade_allowed' => $regrade_allowed,
                 'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/upload_only/config',
                 'scanned_exam' => $details['scanned_exam'] === 'true',
                 'has_due_date' => true,
-                
-                //For discussion component 
+
+                //For discussion component
                 'discussion_based' => $discussion_clicked,
                 'discussion_thread_ids' => $jsonThreads,
 
@@ -775,6 +810,7 @@ class AdminGradeableController extends AbstractController {
                 'vcs' => false,
                 'team_size_max' => 0,
                 'vcs_subdirectory' => '',
+                'vcs_host_type' => -1,
                 'autograding_config_path' => '',
                 'peer_grading' => false,
                 'peer_grade_set' => 0,

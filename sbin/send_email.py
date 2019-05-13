@@ -25,6 +25,7 @@ try:
     EMAIL_SENDER = CONFIG['email_sender']
     EMAIL_HOSTNAME = CONFIG['email_server_hostname']
     EMAIL_PORT = int(CONFIG['email_server_port'])
+    EMAIL_REPLY_TO = CONFIG['email_reply_to']
     EMAIL_LOG_PATH = CONFIG["email_logs_path"]
 
     DB_HOST = CONFIG['database_host']
@@ -102,6 +103,7 @@ def construct_mail_string(send_to, subject, body):
         ('Content-Type', 'text/plain; charset=utf-8'),
         ('TO', send_to),
         ('From', EMAIL_SENDER),
+        ('reply-to', EMAIL_REPLY_TO),
         ('Subject', subject)
     ]
 

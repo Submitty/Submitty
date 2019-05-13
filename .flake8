@@ -53,7 +53,6 @@ exclude=
     sbin/killall.py,
     sbin/run_lichen_plagiarism.py,
     sbin/sendEmail.py,
-    sbin/setcsvfields.py,
     sbin/submitty_autograding_shipper.py,
     sbin/submitty_autograding_worker.py,
     sbin/untrusted_canary.py,

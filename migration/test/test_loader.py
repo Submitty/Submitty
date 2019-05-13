@@ -42,7 +42,3 @@ def foo():
             'table': None
         }
         self.assertDictEqual(expected, migrations['1_test'])
-
-
-if __name__ == '__main__':
-    unittest.main()

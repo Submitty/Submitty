@@ -1012,34 +1012,21 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
   nlohmann::json assignment_limits = j.value("resource_limits",nlohmann::json());
   bool windowed = false;
   std::string output_file_name = "temporary_custom_validator_output.json";
+  std::string input_file_name = "custom_validator_input.json";
 
-  std::vector<std::string> actual_filenames   = stringOrArrayOfStrings(j,"actual_file");
-  std::vector<std::string> expected_filenames = stringOrArrayOfStrings(j,"expected_file");
+  //Add the testcase prefix to j for use by the validator.
+  nlohmann::json copy_j = j;
+  copy_j["testcase_prefix"] = tc.getPrefix();
+  //Write out this validator config for use by the custom validator
+  std::ofstream input_file(input_file_name);
+  input_file << copy_j;
+  input_file.close();
 
-  //grab the actual files.
-  std::string actual_file_argument = "";
-  if(actual_filenames.size() > 0){
-    actual_file_argument = "--actual_files";
-    for(int i=0; i< actual_filenames.size(); i++){
-      actual_file_argument += " " + tc.getPrefix() + actual_filenames[i];
-    }
-  }
-
-  //grab the expected files
-  std::string expected_file_argument  = "";
-  if(expected_filenames.size() > 0){
-    expected_file_argument = "--expected_files";
-    for(int i=0; i< expected_filenames.size(); i++){
-      //For the moment, expected files get no prefix, as they are stored
-      // one level above the testcase directory.
-      expected_file_argument += " " + expected_filenames[i];
-    }
-  }
-
-  command = command + " " + actual_file_argument + " " + expected_file_argument + " 1>"+output_file_name;
-  int ret = execute(command,
+  command = command + " 1>" + output_file_name;
+  int ret = execute(command, 
                     actions, dispatcher_actions, execute_logfile, test_case_limits,
                     assignment_limits, whole_config, windowed, "NOT_A_WINDOWED_ASSIGNMENT");
+  std::remove(input_file_name.c_str());
 
   std::ifstream ifs(output_file_name);
 
@@ -1057,6 +1044,7 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
     std::cout << "ERROR: Could not parse the custom validator's output." << std::endl;
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: Could not parse a custom validator's output.")});
   }
+  std::remove(output_file_name.c_str());
 
   std::string validator_status = "fail";
   if(result["status"].is_string()){
@@ -1064,7 +1052,6 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
       validator_status = "success";
     }
   }else{
-    std::remove(output_file_name.c_str());
     std::cout << "ERROR: A custom validator did not return success or failure" << std::endl;
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: A custom validator did not return success or failure")});
   }
@@ -1076,19 +1063,16 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
     }
     //logs to validator_log
     std::cout << error_message << std::endl;
-    std::remove(output_file_name.c_str());
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: Custom validation failed.")});
   }
 
   if(!result["data"].is_object()){
-    std::remove(output_file_name.c_str());
     std::cout << "ERROR: The custom validator did not return a 'data' subdictionary." << std::endl;
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: A custom validator did not return a result.")});
   }
-
+  
   if(!result["data"]["score"].is_number()){
     std::cout << "ERROR: A custom validator must return score as a number between 0 and 1" << std::endl;
-    std::remove(output_file_name.c_str());
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: A custom validator did not return a score.")});
   }
   float score = result["data"]["score"];
@@ -1116,9 +1100,6 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
   }else if(status_string == "success"){
     status = MESSAGE_SUCCESS;
   }//else it stays information.
-
-  //Remove is safe, as we named and created the file.
-  std::remove(output_file_name.c_str());
 
   return new TestResults(score, {std::make_pair(status, message)});
 }
@@ -1335,11 +1316,6 @@ TestResults* dispatch::diff_doit (const TestCase &tc, const nlohmann::json& j) {
     vectorOfLines text_b = stringToLines( expected_file_contents, j );
     answer = ses(j, &text_a, &text_b, true, extraStudentOutputOk );
     ((Difference*)answer)->type = ByLineByChar;
-  } else if (comparison == std::string("byLinebyWord")) {
-    vectorOfWords text_a = stringToWords( student_file_contents );
-    vectorOfWords text_b = stringToWords( expected_file_contents );
-    answer = ses(j, &text_a, &text_b, true );
-    ((Difference*)answer)->type = ByLineByWord;
   } else if (comparison == std::string("byLine")) {
     if (lineSwapOk) {
       answer = diffLineSwapOk_doit(j,student_file_contents,expected_file_contents);
@@ -1347,7 +1323,7 @@ TestResults* dispatch::diff_doit (const TestCase &tc, const nlohmann::json& j) {
       vectorOfWords text_a = stringToWordsLimitLineLength( student_file_contents );
       vectorOfWords text_b = stringToWordsLimitLineLength( expected_file_contents );
       answer = ses(j, &text_a, &text_b, false );
-      ((Difference*)answer)->type = ByLineByWord;
+      ((Difference*)answer)->type = ByLineByChar;
     } else {
       vectorOfLines text_a = stringToLines( student_file_contents, j );
       vectorOfLines text_b = stringToLines( expected_file_contents, j );

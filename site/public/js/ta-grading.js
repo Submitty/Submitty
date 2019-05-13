@@ -627,14 +627,24 @@ function openAutoGrading(num){
 // expand all outputs in Auto-Grading Testcases section
 function openAllAutoGrading() {
     // show all divs whose id starts with testcase_
-     $("[id^='tc_']").click();
-     $("[id^='testcase_']")[0].style.display="block";
+     var clickable_divs  = $("[id^='tc_']");
+
+     for(var i = 0; i < clickable_divs.length; i++){
+        var clickable_div = clickable_divs[i];
+        var num = clickable_div.id.split("_")[1];
+        var content_div = $('#testcase_' + num);
+        if(content_div.css("display") == "none"){
+            clickable_div.click();
+        }
+     }
 }
 
 // close all outputs in Auto-Grading Testcases section
 function closeAllAutoGrading() {
     // hide all divs whose id starts with testcase_
     $("[id^='testcase_']").hide();
+    $("[id^='details_tc_']").find("span").hide();
+    $("[id^='details_tc_']").find(".loading-tools-show").show();
 }
 
 

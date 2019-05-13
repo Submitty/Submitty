@@ -7,7 +7,7 @@ use app\models\User;
 
 class UserTester extends \PHPUnit\Framework\TestCase {
     private $core;
-    public function setUp() {
+    public function setUp(): void {
         $this->core = $this->createMock(Core::class);
     }
 

@@ -21,8 +21,8 @@
                 $("[name='rotating_type']").addClass('disabled').attr('disabled', 'true');
             }
             else {
-                $("[name='sections']").removeClass('disabled').removeAttr('readonly');
-                $("[name='rotating_type']").removeClass('disabled').removeAttr('disabled');
+                $("[name='sections']").removeClass('disabled').prop('readonly', false);
+                $("[name='rotating_type']").removeClass('disabled').prop('disabled', false);
             }
         });
     });
