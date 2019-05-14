@@ -282,49 +282,6 @@ class ForumController2 extends AbstractController {
                                             'categories'         => $categories_ids,
                                             'parent_id'          => -1,
                                             'thread_id'          => -1 ], true );
-
-        // if(empty($title) || empty($thread_post_content)){
-        //     $this->core->addErrorMessage("One of the fields was empty or bad. Please re-submit your thread.");
-        //     $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'));
-        // } else if(!$this->isValidCategories($categories_ids)){
-        //     $this->core->addErrorMessage("You must select valid categories. Please re-submit your thread.");
-        //     $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'));
-        // } else {
-        //     $hasGoodAttachment = $this->checkGoodAttachment(true, -1, 'file_input');
-        //     if($hasGoodAttachment[0] == -1){
-        //         $result['next_page'] = $hasGoodAttachment[1];
-        //     } else {
-        //         // Good Attachment
-        //         $result = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_post_content, $anon, $announcement, $thread_status, $hasGoodAttachment[0], $categories_ids);
-        //         $id = $result["thread_id"];
-        //         $post_id = $result["post_id"];
-
-        //         if($hasGoodAttachment[0] == 1) {
-
-        //             $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $id);
-        //             FileUtils::createDir($thread_dir);
-
-        //             $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
-        //             FileUtils::createDir($post_dir);
-
-        //             for($i = 0; $i < count($_FILES["file_input"]["name"]); $i++){
-        //                 $target_file = $post_dir . "/" . basename($_FILES["file_input"]["name"][$i]);
-        //                 move_uploaded_file($_FILES["file_input"]["tmp_name"][$i], $target_file);
-        //             }
-
-        //         }
-
-        //         $notification = new Notification($this->core, array('component' => 'forum', 'type' => $announcement ? 'new_announcement' : 'new_thread', 'thread_id' => $id, 'thread_title' => $title));
-        //         $this->core->getQueries()->pushNotification($notification);
-
-        //         if($email_announcement) {
-        //             $this->sendEmailAnnouncement($title, $thread_post_content);
-        //         }
-        //         $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $id));
-        //     }
-        // }
-        // $this->core->getOutput()->renderJson($result);
-        // return $this->core->getOutput()->getOutput();
     }
 
     private function search(){
@@ -343,51 +300,6 @@ class ForumController2 extends AbstractController {
                                             'anon'      => $anon,  
                                             'thread_id' => $thread_id,
                                             'parent_id' => $parent_id ], false );
-
-        //$display_option = (!empty($_POST["display_option"])) ? htmlentities($_POST["display_option"], ENT_QUOTES | ENT_HTML5, 'UTF-8') : "tree";
-        
-
-
-        // if(empty($post_content) || empty($thread_id)){
-        //     $this->core->addErrorMessage("There was an error submitting your post. Please re-submit your post.");
-        //     $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'));
-        // } else if(!$this->core->getQueries()->existsThread($thread_id)) {
-        //     $this->core->addErrorMessage("There was an error submitting your post. Thread doesn't exist.");
-        //     $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'));
-        // } else if(!$this->core->getQueries()->existsPost($thread_id, $parent_id)) {
-        //     $this->core->addErrorMessage("There was an error submitting your post. Parent post doesn't exist in given thread.");
-        //     $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'));
-        // } else {
-        //     $hasGoodAttachment = $this->checkGoodAttachment(false, $thread_id, $file_post);
-        //     if($hasGoodAttachment[0] == -1){
-        //         $result['next_page'] = $hasGoodAttachment[1];
-        //     } else {
-        //         $post_id = $this->core->getQueries()->createPost($this->core->getUser()->getId(), $post_content, $thread_id, $anon, 0, false, $hasGoodAttachment[0], $parent_id);
-        //         $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
-
-        //         if(!is_dir($thread_dir)) {
-        //             FileUtils::createDir($thread_dir);
-        //         }
-
-        //         if($hasGoodAttachment[0] == 1) {
-        //             $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
-        //             FileUtils::createDir($post_dir);
-        //             for($i = 0; $i < count($_FILES[$file_post]["name"]); $i++){
-        //                 $target_file = $post_dir . "/" . basename($_FILES[$file_post]["name"][$i]);
-        //                 move_uploaded_file($_FILES[$file_post]["tmp_name"][$i], $target_file);
-        //             }
-        //         }
-        //         // Notification to parent post author
-        //         $post = $this->core->getQueries()->getPost($parent_id);
-        //         $post_author = $post['author_user_id'];
-        //         $notification_anonymous = ($anon == 1) ? true : false;
-        //         $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'reply', 'thread_id' => $thread_id, 'post_id' => $parent_id, 'post_content' => $post['content'], 'reply_to' => $post_author, 'child_id' => $post_id, 'anonymous' => $notification_anonymous));
-        //         $this->core->getQueries()->pushNotification($notification);
-        //         $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'option' => $display_option, 'thread_id' => $thread_id));
-        //     }
-        // }
-        // $this->core->getOutput()->renderJson($result);
-        // return $this->core->getOutput()->getOutput();
     }
 
     public function alterAnnouncement($type){
