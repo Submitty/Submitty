@@ -12,7 +12,9 @@
   },
   "require": {
     "twig/twig": "^2.9.0",
-    "ramsey/uuid": "^3.8.0"
+    "ramsey/uuid": "^3.8.0",
+    "aptoma/twig-markdown": "~2.0",
+    "michelf/php-markdown": "~1.8"
   },
   "autoload-dev": {
     "psr-4": {
