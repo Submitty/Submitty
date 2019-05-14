@@ -21,15 +21,16 @@
     </form>
     <div id="load-late-days" align="center">
         <div class="option-title" id="late_day_title">Late Days Allowed</div>
+        {# This is a data table #}
         <table id="late_day_table" class="table table-striped table-bordered persist-area" style="width:80%">
 			<caption />
             <thead class="persist-thead">
-            <th>Student ID</th>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Total Allowed Late Days</th>
-            <th>Effective Date</th>
-            <th>Delete</th>
+                <th>Student ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Total Allowed Late Days</th>
+                <th>Effective Date</th>
+                <th>Delete</th>
             </thead>
             <tbody>
             {% if not users or (users|length < 1) %}
