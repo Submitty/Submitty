@@ -1985,6 +1985,10 @@ end of styles used in the admin gradeable page
     margin-bottom: 3px;
 }
 
+.editor {
+    width: 75%;
+}
+
 .noscript,
 .system_message {
     width: 100%;
