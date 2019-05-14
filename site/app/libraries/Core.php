@@ -53,6 +53,9 @@ class Core {
     /** @var Access $access */
     private $access = null;
 
+    /** @var Router */
+    private $router;
+
     /**
      * Core constructor.
      *
@@ -506,6 +509,14 @@ class Core {
         finally {
             curl_close($ch);
         }
+    }
+
+    public function setRouter(Router $router) {
+        $this->router = $router;
+    }
+
+    public function getRouter(): Router {
+        return $this->router;
     }
 
     /**
