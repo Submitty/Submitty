@@ -66,6 +66,7 @@
                     <div style="float:left; word-break: break-word;">
                         <p style="padding-bottom: 10px;">{{ component.student_comment|nl2br }}</p>
                         <p>
+                        {# This is a layout table #}
                         <table class="gradeable_comment">
                             {% for mark in component.marks if mark.show_mark %}
                                 <tr>
