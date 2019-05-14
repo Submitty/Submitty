@@ -59,6 +59,7 @@
                     <div style="float:left; word-break: break-word;">
                         <p style="padding-bottom: 10px;">{{ component.getStudentComment() }}</p>
                         <p>
+                            {# This is a layout table #}
                             <table class="gradeable_comment">
                                 {% for mark in component.getMarks() if mark.getHasMark() or mark.getPublish() == 't' %}
                                     <tr>

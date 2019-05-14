@@ -290,6 +290,15 @@ table tr.table-header {
     text-align: left;
 }
 
+/* layout table classes  */
+/* Layout tables do not have <caption>, <thead>, and <th> tags */
+
+/* styling used in a <th> cell, except this is for a layout table */
+.layout_th_cell {
+    font-weight: bold;
+    text-align: center;
+    display: table-cell;
+}
 
 /**********************************************************/
 
@@ -1760,6 +1769,18 @@ textarea.comment_display {
     width: 75%;
 }
 
+.rubric_layout_body {
+    background: #f9f9f9;
+}
+
+/* <tr> tag styling to replace <thead> and <tfoot> in rubric tables*/
+.rubric_layout_header,
+.rubric_layout_footer {
+    background: #e1e1e1;
+}
+
+
+
 /*
 end of styles used in the admin gradeable page
 */
@@ -1956,13 +1977,14 @@ end of styles used in the admin gradeable page
 .wrapper-bottom {
     background-color: #99ccff;
 }
-.wrapper-upload th {
-    background-color: #f4f4f4;
-}
 
-.wrapper-upload td, .wrapper-upload th {
+.wrapper-upload td {
     padding: 4px;
     border: 1px solid #000;
+}
+
+.wrapper-upload .wrapper_layout_header {
+    background-color: #f4f4f4;
 }
 
 .query-list {
@@ -2036,4 +2058,21 @@ end of styles used in the admin gradeable page
 .row {
     margin-right: 0px;
     margin-left: 0px;
+}
+
+/* Data table captions that replace <h3> and <h5> for VPAT */
+.caption_h3 {
+    font-size: 1.17em;
+    font-weight: bold;
+    text-align: left;
+    caption-side: top;
+    border: 0;
+}
+
+.caption_h5 {
+    font-size: 0.83em;
+    font-weight: bold;
+    text-align: left;
+    caption-side: top;
+    border: 0;
 }
