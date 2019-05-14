@@ -1,4 +1,6 @@
-<img src="http://submitty.org/images/submitty_logo.png" alt="Submitty Logo" style="width: 500px;"/>
+<p align="center">
+  <img src="http://submitty.org/images/submitty_logo.png" alt="Submitty Logo" width="500px"/>
+</p>
 
 [![Build Status](https://travis-ci.com/Submitty/Submitty.svg?branch=master)](https://travis-ci.com/Submitty/Submitty)
 
@@ -11,8 +13,8 @@ System instructions located at http://submitty.org/
 Submitty is an open source programming assignment submission system
 from the 
 [Rensselaer Center for Open Source Software (RCOS)](https://rcos.io/), launched
-by the [Department of Computer Science](http://www.cs.rpi.edu/) at 
-[Rensselaer Polytechnic Institute (RPI)](http://rpi.edu/).
+by the [Department of Computer Science](https://science.rpi.edu/computer-science) at 
+[Rensselaer Polytechnic Institute (RPI)](https://rpi.edu/).
 The Submitty project is hosted on [GitHub](https://github.com/Submitty).
 
 
@@ -32,7 +34,7 @@ The Submitty project is hosted on [GitHub](https://github.com/Submitty).
 
 # Contact Us
 
-If you have a question or would like access to our demo site, please contact us at submitty@cs.rpi.edu.
+If you have a question, please [contact us](https://submitty.org/#contact-us) through email or our Slack.
 
 
 ### LICENSING

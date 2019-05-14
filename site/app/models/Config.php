@@ -23,6 +23,7 @@ use app\libraries\Utils;
  * @method string getCgiUrl()
  * @method string getSiteUrl()
  * @method string getSubmittyPath()
+ * @method string getCgiTmpPath()
  * @method string getCoursePath()
  * @method string getDatabaseDriver()
  * @method array getSubmittyDatabaseParams()
@@ -52,6 +53,7 @@ use app\libraries\Utils;
  * @method string getRoomSeatingGradeableId()
  * @method bool isSeatingOnlyForInstructor()
  * @method array getCourseJson()
+ * @method string getSecretSession()
  */
 
 class Config extends AbstractModel {
@@ -106,6 +108,8 @@ class Config extends AbstractModel {
     protected $submitty_log_path;
     /** @property @var bool */
     protected $log_exceptions;
+    /** @property @var string */
+    protected $cgi_tmp_path;
 
     /** @property @var string */
     protected $database_driver = "pgsql";
@@ -182,6 +186,8 @@ class Config extends AbstractModel {
     protected $seating_only_for_instructor;
     /** @property @var string|null */
     protected $room_seating_gradeable_id;
+    /** @property @var string */
+    protected $secret_session;
 
     /**
      * Config constructor.
@@ -274,6 +280,8 @@ class Config extends AbstractModel {
             $this->vcs_url = rtrim($submitty_json['vcs_url'], '/').'/';
         }
 
+        $this->cgi_tmp_path = FileUtils::joinPaths($this->submitty_path, "tmp", "cgi");
+
         // Check that the paths from the config file are valid
         foreach(array('submitty_path', 'submitty_log_path') as $path) {
             if (!is_dir($this->$path)) {
@@ -291,6 +299,24 @@ class Config extends AbstractModel {
 
         if (!empty($this->semester) && !empty($this->course)) {
             $this->course_path = FileUtils::joinPaths($this->submitty_path, "courses", $this->semester, $this->course);
+        }
+
+        $secrets_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'secrets_submitty_php.json'));
+        if (!$secrets_json) {
+            throw new ConfigException("Could not find secrets config: {$this->config_path}/secrets_submitty_php.json");
+        }
+
+        foreach(['session'] as $key) {
+            $var = "secret_{$key}";
+            $secrets_json[$key] = trim($secrets_json[$key]) ?? '';
+            if (empty($secrets_json[$key])) {
+                throw new ConfigException("Missing secret var: {$key}");
+            }
+            else if (strlen($secrets_json[$key]) < 32) {
+                // enforce a minimum 32 bytes for the secrets
+                throw new ConfigException("Secret {$key} is too weak. It should be at least 32 bytes.");
+            }
+            $this->$var = $secrets_json[$key];
         }
     }
 

@@ -15,16 +15,16 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
     private $config_path = null;
     private $course_json_path = null;
 
-    public function setUp() {
+    public function setUp(): void {
         $this->core = $this->createMock(Core::class);
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         if ($this->temp_dir !== null && is_dir($this->temp_dir)) {
             FileUtils::recursiveRmdir($this->temp_dir);
         }
     }
-    
+
     /**
      * This test ensures that the default value of the DEBUG flag within the config model is always false. This
      * means that if the value is not found within the json file, we don't have to worry about accidently
@@ -80,6 +80,12 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         ];
         $config = array_replace($config, $extra);
         FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "submitty.json"), $config);
+
+        $config = [
+            'session' => 'LIW0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93'
+        ];
+        $config = array_replace($config, $extra);
+        FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "secrets_submitty_php.json"), $config);
 
         $this->course_json_path = FileUtils::joinPaths($course_path, "config", "config.json");
         $config = array(
@@ -138,6 +144,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($this->temp_dir, $config->getSubmittyPath());
         $this->assertEquals($this->temp_dir."/courses/s17/csci0000", $config->getCoursePath());
         $this->assertEquals($this->temp_dir."/logs", $config->getLogPath());
+        $this->assertEquals(FileUtils::joinPaths($this->temp_dir, "tmp", "cgi"), $config->getCgiTmpPath());
         $this->assertTrue($config->shouldLogExceptions());
         $this->assertEquals("pgsql", $config->getDatabaseDriver());
         $db_params = array(
@@ -173,6 +180,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             $config->getCourseJsonPath());
         $this->assertEquals('', $config->getRoomSeatingGradeableId());
         $this->assertFalse($config->displayRoomSeating());
+        $this->assertEquals('LIW0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93', $config->getSecretSession());
 
         $expected = array(
             'debug' => false,
@@ -185,6 +193,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'course_path' => $this->temp_dir.'/courses/s17/csci0000',
             'submitty_log_path' => $this->temp_dir.'/logs',
             'log_exceptions' => true,
+            'cgi_tmp_path' => FileUtils::joinPaths($this->temp_dir, "tmp", "cgi"),
             'database_driver' => 'pgsql',
             'submitty_database_params' => $db_params,
             'course_database_params' => array_merge($db_params, array('dbname' => 'submitty_s17_csci0000')),
@@ -243,7 +252,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'username_change_text' => 'Submitty welcomes all students.',
             'vcs_url' => 'http://example.com/{$vcs_type}/',
             'wrapper_files' => [],
-            'system_message' => 'Some system message'
+            'system_message' => 'Some system message',
+            'secret_session' => 'LIW0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93'
         );
         $actual = $config->toArray();
 
@@ -396,7 +406,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         try {
             $extra = array($section => null);
             $this->createConfigFile($extra);
-    
+
             $config = new Config($this->core, "s17", "csci0000");
             $config->loadCourseJson($this->course_json_path);
             $this->fail("Should have thrown ConfigException");
@@ -434,7 +444,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         try {
             $extra = [$section => [$setting => null]];
             $this->createConfigFile($extra);
-    
+
             $config = new Config($this->core, "s17", "csci0000");
             $config->loadCourseJson($this->course_json_path);
             $this->fail("Should have thrown ConfigException for {$section}.{$setting}");
@@ -481,6 +491,34 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->createConfigFile($extra);
 
         $config = new Config($this->core, "s17", "csci0000");
+        $config->loadMasterConfigs($this->config_path);
+    }
+
+    public function testMissingSecretsFile() {
+        $this->createConfigFile();
+        unlink(FileUtils::joinPaths($this->temp_dir, 'config', 'secrets_submitty_php.json'));
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionMessageRegExp('/^Could not find secrets config: .*\/config\/secrets_submitty_php\.json$/');
+        $config = new Config($this->core, 's17', 'csci0000');
+        $config->loadMasterConfigs($this->config_path);
+    }
+
+    public function testNullSecret() {
+        $extra = ['session' => null];
+        $this->createConfigFile($extra);
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionMessage("Missing secret var: session");
+        $config = new Config($this->core, 's17', 'csci0000');
+        $config->loadMasterConfigs($this->config_path);
+    }
+
+    public function testWeakSecret() {
+        $extra = ['session' => 'weak'];
+        $this->createConfigFile($extra);
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionMessage('Secret session is too weak. It should be at least 32 bytes.');
+
+        $config = new Config($this->core, 's17', 'csci0000');
         $config->loadMasterConfigs($this->config_path);
     }
 }
