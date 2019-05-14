@@ -402,20 +402,33 @@ class SubmissionController extends AbstractController {
             $graded_gradeables[] = $gg;
         }
 
-        // Below is true if no users are on a team. In this case, we later make the team automatically,
-        //   so this should not return a failure.
-        // if (count($graded_gradeables) === 0) {
-        //     // No user was on a team
-        //     $msg = 'No user on a team';
-        //     $return = array('success' => false, 'message' => $msg);
-        //     $this->core->getOutput()->renderJson($return);
-        //     return $return;
-        // }
+        $null_team_count = 0;
+        $inconsistent_teams = false;
+        if($gradeable->isTeamAssignment()){
+            $teams = [];
+            foreach ($user_ids as $user) {
+                $tmp = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $user);
+                if($tmp === NULL){
+                    $null_team_count ++;
+                }else{
+                    $teams[] = $tmp->getId();
+                }
+            }
+            $teams = array_unique(array_filter($teams));
+            $inconsistent_teams = count($teams) > 1;
+        }
 
         //If the users are on multiple teams.
-        if ($gradeable->isTeamAssignment() && count($graded_gradeables) > 1) {
+        if ($gradeable->isTeamAssignment() && $inconsistent_teams) {
             // Not all users were on the same team
             $msg = "Inconsistent teams. One or more users are on different teams.";
+            $return = array('success' => false, 'message' => $msg);
+            $this->core->getOutput()->renderJson($return);
+            return $return;
+        }
+        //If a user not assigned to any team is matched with a user already on a team
+        if($gradeable->isTeamAssignment() && $null_team_count != 0 && count($teams) != 0){
+            $msg = "One or more users with no team are being submitted with another user already on a team";
             $return = array('success' => false, 'message' => $msg);
             $this->core->getOutput()->renderJson($return);
             return $return;
@@ -716,6 +729,7 @@ class SubmissionController extends AbstractController {
                     $gradeable->createTeam($leader_user, $members);
                 } catch (\Exception $e) {
                     $this->core->addErrorMessage('Team may not have been properly initialized: ' . $e->getMessage());
+                    return $this->uploadResult("Failed to form a team from members: " . implode(",", $members) . ", " . $leader_user, false);
                 }
 
                 // Once team is created, load in the graded gradeable

@@ -100,6 +100,21 @@
         });
     });
 
+    function toggleButtons(index, disable){
+        var submit_btn = document.getElementById("bulk_submit_" + String(index));
+        var delete_btn = document.getElementById("bulk_delete_" + String(index));
+        var user_id_textarea = document.getElementById("bulk_user_id_" + String(index));
+
+        submit_btn.disabled = disable;
+        delete_btn.disabled = disable;
+        user_id_textarea.disabled = disable;
+
+        if(is_team_assignment){
+            for(var i = 1; i < max_team_size; i++)
+                document.getElementById("bulk_user_id_" + String(index) + "[" + String(i) + "]").disabled = disable;
+        }
+    }
+
     function focusNextSubmission(index){
         if( (index + 1) <= num_submissions){
             document.getElementById("bulk_user_id_" + String(index + 1)).focus();
@@ -136,10 +151,7 @@
             var user_id = user_id_textarea.value;
         }
 
-        submit_btn.disabled = true;
-        delete_btn.disabled = true;
-        user_id_textarea.disabled = true;
-
+        toggleButtons(index, true);
         var path = decodeURIComponent(path_list[index]);
 
         //verify user id is valid, then assign
@@ -156,9 +168,7 @@
                 function getSubmissionOption(option){
                     //user closes do nothing
                     if(option === -1){
-                        submit_btn.disabled = false;
-                        delete_btn.disabled = false;
-                        user_id_textarea.disabled = false;
+                        toggleButtons(index, false);
                         return;
                     }
 
@@ -179,9 +189,7 @@
         })
         .catch(function(response){
             //allow user to retry assigning on failure
-            submit_btn.disabled = false;
-            delete_btn.disabled = false;
-            user_id_textarea.disabled = false;
+            toggleButtons(index, false);
             console.error(response);
             displaySubmissionMessage({'success' : false, 'message' : response});
         });
@@ -197,9 +205,7 @@
             displaySubmissionMessage({'success' : false, 'message' : submit_response}, index);
             console.error(submit_response);
             //allow user to retry assigning on failure
-            submit_btn.disabled = false;
-            delete_btn.disabled = false;
-            user_id_textarea.disabled = false;
+            toggleButtons(index, false);
         });
     }
 
@@ -208,9 +214,7 @@
         var delete_btn = document.getElementById("bulk_delete_" + String(index));
         var user_id_textarea = document.getElementById("bulk_user_id_" + String(index));
 
-        submit_btn.disabled = true;
-        delete_btn.disabled = true;
-        user_id_textarea.disabled = true;
+        toggleButtons(index, true);
 
         var path = decodeURIComponent(path_list[index]);
 
@@ -225,15 +229,11 @@
                 console.error(submit_response);
                 displaySubmissionMessage({'success' : false, 'message' : submit_response}, index);
 
-                submit_btn.disabled = false;
-                delete_btn.disabled = false;
-                user_id_textarea.disabled = false;
+                toggleButtons(index, false);
             });
         }else{
             //enable submit options if we don't delete
-            submit_btn.disabled = false;
-            delete_btn.disabled = false;
-            user_id_textarea.disabled = false;
+            toggleButtons(index, false);
         }
     }
 
@@ -263,9 +263,7 @@
                 var delete_btn = document.getElementById("bulk_delete_" + String(index));
                 var user_id_textarea = document.getElementById("bulk_user_id_" + String(index));
 
-                submit_btn.disabled = true;
-                delete_btn.disabled = true;
-                user_id_textarea.disabled = true;
+                toggleButtons(index, true);
                 uploadSplitHelper(user_id,path,index);
                 return submitAll(index + 1);
             }
@@ -297,9 +295,7 @@
             return deleteAll(index + 1);
         }
 
-        submit_btn.disabled = true;
-        delete_btn.disabled = true;
-        user_id_textarea.disabled = true;
+        toggleButtons(index, true);
 
         var path = decodeURIComponent(path_list[index]);
 
@@ -312,9 +308,7 @@
             console.error(submit_response);
             displaySubmissionMessage({'success' : false, 'message' : submit_response}, index);
 
-            submit_btn.disabled = false;
-            delete_btn.disabled = false;
-            user_id_textarea.disabled = false;
+            toggleButtons(index, false);
 
             return deleteAll(index + 1);
         });
