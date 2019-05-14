@@ -41,7 +41,8 @@ class Forum extends AbstractModel {
 
         //$pushFunction($result);
 
-        return 'Good stuff we passed a post.';
+        $this->core->getOutput()->renderJson(json_encode(['success' => 'Good stuff we passed a post.']));
+        return $this->core->getOutput()->getOutput();
 
     }
 

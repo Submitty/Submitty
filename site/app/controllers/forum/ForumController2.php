@@ -262,22 +262,21 @@ class ForumController2 extends AbstractController {
         $thread_post_content = $_POST["thread_post_content"];
         $anon = $_POST["Anon"];
         $thread_status = $_POST["thread_status"];
-        $announcement = $_POST["Announcement"];
-        $email_announcement = $_POST["EmailAnnouncement"];
+        
 
         //Default to false
-        $announcement = !empty($announcement) && $this->core->getUser()->accessGrading() && $announcement == 'true' ? true : false;
-        $email_announcement = !empty($email_announcement) && $this->core->getUser()->accessFullGrading() && $email_announcement == 'true' ? true : false;
+        $announcement = !empty($_POST["Announcement"]) && $this->core->getUser()->accessGrading() && $_POST["Announcement"] == 'true' ? true : false;
+        $email_announcement = !empty($_POST["EmailAnnouncement"]) && $this->core->getUser()->accessFullGrading() && $_POST["EmailAnnouncement"] == 'true' ? true : false;
 
         $categories_ids  = array();
         foreach ($_POST["cat"] as $category_id) {
             $categories_ids[] = (int)$category_id;
         }
 
-        $this->core->getForum()->publish( [ 'title'              => $title, 
+        return $this->core->getForum()->publish( [ 'title'              => $title, 
                                             'content'            => $thread_post_content,
                                             'anon'               => $anon,  
-                                            'status'             => $thead_status,
+                                            'status'             => $thread_status,
                                             'announcement'       => $announcement, 
                                             'email_announcement' => $email_announcement,
                                             'categories'         => $categories_ids,
@@ -340,7 +339,7 @@ class ForumController2 extends AbstractController {
         $anon = $_POST['Anon'];
 
 
-        $this->core->getForum()->publish( [ 'content'   => $post_content,
+        return $this->core->getForum()->publish( [ 'content'   => $post_content,
                                             'anon'      => $anon,  
                                             'thread_id' => $thread_id,
                                             'parent_id' => $parent_id ], false );
