@@ -1,4 +1,7 @@
-const { UI } = PDFAnnotate;
+if (PDFAnnotate.default) {
+    PDFAnnotate = PDFAnnotate.default;
+}
+
 let documentId = 'example.pdf';
 let PAGE_HEIGHT;
 let RENDER_OPTIONS = {
@@ -8,8 +11,8 @@ let RENDER_OPTIONS = {
     rotate: parseInt(localStorage.getItem(`${documentId}/rotate`), 10) || 0
 };
 
-PDFAnnotate.setStoreAdapter(new PDFAnnotate.LocalStoreAdapter());
-PDFJS.workerSrc = './shared/pdf.worker.js';
+PDFAnnotate.setStoreAdapter(new PDFAnnotate.LocalUserStoreAdapter(''));
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdfjs/pdf.worker.min.js';
 
 // Render stuff
 let NUM_PAGES = 0;
@@ -28,7 +31,7 @@ document.getElementById('content-wrapper').addEventListener('scroll', function (
 
     if (visiblePage && okToRender) {
         setTimeout(function () {
-            UI.renderPage(visiblePageNum, RENDER_OPTIONS);
+            PDFAnnotate.UI.renderPage(visiblePageNum, RENDER_OPTIONS);
         });
     }
 });
@@ -43,23 +46,23 @@ function render() {
             user_id: 'instructor',
             file_name: 'toy_eb.pdf'
         },
-        success: function(data){
+        success: function(data) {
             RENDER_OPTIONS.documentId = 'toy_eb.pdf';
             documentId = 'toy_eb'.pdf;
-            var pdfData = JSON.parse(data);
+            let pdfData = JSON.parse(data);
             pdfData = atob(pdfData);
-            PDFJS.getDocument({data:pdfData}).then((pdf) => {
+            pdfjsLib.getDocument({data: pdfData}).then((pdf) => {
                 RENDER_OPTIONS.pdfDocument = pdf;
 
                 let viewer = document.getElementById('viewer');
                 viewer.innerHTML = '';
                 NUM_PAGES = pdf.pdfInfo.numPages;
                 for (let i=0; i<NUM_PAGES; i++) {
-                    let page = UI.createPage(i+1);
+                    let page = PDFAnnotate.UI.createPage(i+1);
                     viewer.appendChild(page);
                 }
 
-                UI.renderPage(1, RENDER_OPTIONS).then(([pdfPage, annotations]) => {
+                PDFAnnotate.UI.renderPage(1, RENDER_OPTIONS).then(([pdfPage, annotations]) => {
                     let viewport = pdfPage.getViewport(RENDER_OPTIONS.scale, RENDER_OPTIONS.rotate);
                     PAGE_HEIGHT = viewport.height;
                 });
@@ -82,8 +85,8 @@ render();
         currentTarget = target;
         hotspotColor = currentTarget.getAttribute('stroke');
 
-        UI.setArrow(10, hotspotColor);
-        UI.setCircle(10, hotspotColor);
+        PDFAnnotate.UI.setArrow(10, hotspotColor);
+        PDFAnnotate.UI.setCircle(10, hotspotColor);
 
         let a = document.querySelector('.hotspot-color .color');
         if (a) {
@@ -105,8 +108,8 @@ render();
         localStorage.setItem(`${RENDER_OPTIONS.documentId}/hotspot/color`, value);
         hotspotColor = value;
 
-        UI.setArrow(10, hotspotColor);
-        UI.setCircle(10, hotspotColor);
+        PDFAnnotate.UI.setArrow(10, hotspotColor);
+        PDFAnnotate.UI.setCircle(10, hotspotColor);
 
         if (!currentTarget) {
             return; // nothing to do
@@ -129,8 +132,8 @@ render();
         });
     });
 
-    UI.addEventListener('annotation:click', handleAnnotationClick);
-    UI.addEventListener('annotation:blur', handleAnnotationBlur);
+    PDFAnnotate.UI.addEventListener('annotation:click', handleAnnotationClick);
+    PDFAnnotate.UI.addEventListener('annotation:blur', handleAnnotationBlur);
 })();
 
 // Text stuff
@@ -184,7 +187,7 @@ render();
         }
 
         if (modified) {
-            UI.setText(textSize, textColor);
+            PDFAnnotate.UI.setText(textSize, textColor);
         }
     }
 
@@ -247,7 +250,7 @@ render();
         }
 
         if (modified) {
-            UI.setPen(penSize, penColor);
+            PDFAnnotate.UI.setPen(penSize, penColor);
         }
     }
 
@@ -274,29 +277,29 @@ render();
 
             switch (tooltype) {
                 case 'cursor':
-                    UI.disableEdit();
+                    PDFAnnotate.UI.disableEdit();
                     break;
                 case 'draw':
-                    UI.disablePen();
+                    PDFAnnotate.UI.disablePen();
                     break;
                 case 'arrow':
-                    UI.disableArrow();
+                    PDFAnnotate.UI.disableArrow();
                     break;
                 case 'text':
-                    UI.disableText();
+                    PDFAnnotate.UI.disableText();
                     break;
                 case 'point':
-                    UI.disablePoint();
+                    PDFAnnotate.UI.disablePoint();
                     break;
                 case 'area':
                 case 'highlight':
                 case 'strikeout':
-                    UI.disableRect();
+                    PDFAnnotate.UI.disableRect();
                     break;
                 case 'circle':
                 case 'emptycircle':
                 case 'fillcircle':
-                    UI.disableCircle();
+                    PDFAnnotate.UI.disableCircle();
                     break;
             }
         }
@@ -311,29 +314,29 @@ render();
 
         switch (type) {
             case 'cursor':
-                UI.enableEdit();
+                PDFAnnotate.UI.enableEdit();
                 break;
             case 'draw':
-                UI.enablePen();
+                PDFAnnotate.UI.enablePen();
                 break;
             case 'arrow':
-                UI.enableArrow();
+                PDFAnnotate.UI.enableArrow();
                 break;
             case 'text':
-                UI.enableText();
+                PDFAnnotate.UI.enableText();
                 break;
             case 'point':
-                UI.enablePoint();
+                PDFAnnotate.UI.enablePoint();
                 break;
             case 'area':
             case 'highlight':
             case 'strikeout':
-                UI.enableRect(type);
+                PDFAnnotate.UI.enableRect(type);
                 break;
             case 'circle':
             case 'emptycircle':
             case 'fillcircle':
-                UI.enableCircle(type);
+                PDFAnnotate.UI.enableCircle(type);
                 break;
         }
     }
@@ -459,10 +462,10 @@ render();
         }
     }
 
-    UI.addEventListener('annotation:click', handleAnnotationClick);
-    UI.addEventListener('annotation:blur', handleAnnotationBlur);
+    PDFAnnotate.UI.addEventListener('annotation:click', handleAnnotationClick);
+    PDFAnnotate.UI.addEventListener('annotation:blur', handleAnnotationBlur);
 
-    UI.setArrow(10, 'darkgoldenrod');
-    UI.setCircle(10, 'darkgoldenrod')
+    PDFAnnotate.UI.setArrow(10, 'darkgoldenrod');
+    PDFAnnotate.UI.setCircle(10, 'darkgoldenrod')
 
 })(window, document);

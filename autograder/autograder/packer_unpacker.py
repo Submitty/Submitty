@@ -110,6 +110,34 @@ def unzip_queue_file(zipfilename):
     os.rmdir(tmp_dir)
     return queue_obj
 
+
+def valid_github_user_id(userid):
+    # Github username may only contain alphanumeric characters or
+    # hyphens. Github username cannot have multiple consecutive
+    # hyphens. Github username cannot begin or end with a hyphen.
+    # Maximum is 39 characters.
+    if (userid==''):
+        # GitHub userid cannot be empty
+        return False
+    checklegal = lambda char: char.isalnum() or char == '-'
+    filtered_userid = ''.join(list(filter(checklegal,userid)))
+    if not userid == filtered_userid:
+        return False
+    return True
+
+
+def valid_github_repo_id(repoid):
+    # Only characters, numbers, dots, minus and underscore are allowed.
+    if (repoid==''):
+        # GitHub repoid cannot be empty
+        return False
+    checklegal = lambda char: char.isalnum() or char == '.' or char == '-' or char == '_'
+    filtered_repoid = ''.join(list(filter(checklegal,repoid)))
+    if not repoid == filtered_repoid:
+        return False
+    return True
+
+
 # ==================================================================================
 # ==================================================================================
 def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_directory,next_to_grade):
@@ -206,40 +234,92 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
     # --------------------------------------------------------------------
     # CHECKOUT THE STUDENT's REPO
     if is_vcs:
-        # is vcs_subdirectory standalone or should it be combined with base_url?
-        if vcs_subdirectory[0] == '/' or '://' in vcs_subdirectory:
-            vcs_path = vcs_subdirectory
-        else:
-            if '://' in vcs_base_url:
-                vcs_path = urllib.parse.urljoin(vcs_base_url, vcs_subdirectory)
-            else:
-                vcs_path = os.path.join(vcs_base_url, vcs_subdirectory)
-
-        with open(os.path.join(tmp_logs, "overall.txt"), 'a') as f:
-            print("====================================\nVCS CHECKOUT", file=f)
-            print('vcs_base_url', vcs_base_url, file=f)
-            print('vcs_subdirectory', vcs_subdirectory, file=f)
-            print('vcs_path', vcs_path, file=f)
-            print(['/usr/bin/git', 'clone', vcs_path, checkout_path], file=f)
 
         # cleanup the previous checkout (if it exists)
         shutil.rmtree(checkout_path,ignore_errors=True)
         os.makedirs(checkout_path, exist_ok=True)
-        subprocess.check_call(['/usr/bin/git', 'clone', vcs_path, checkout_path])
-        os.chdir(checkout_path)
 
-        # determine which version we need to checkout
-        what_version = subprocess.check_output(['git', 'rev-list', '-n', '1', '--before="'+submission_string+'"', 'master'])
-        what_version = str(what_version.decode('utf-8')).rstrip()
-        if what_version == "":
-            # oops, pressed the grade button before a valid commit
-            shutil.rmtree(checkout_path, ignore_errors=True)
-        else:
-            # and check out the right version
-            subprocess.call(['git', 'checkout', '-b', 'grade', what_version])
-        os.chdir(tmp)
-        subprocess.call(['ls', '-lR', checkout_path], stdout=open(tmp_logs + "/overall.txt", 'a'))
-        obj['revision'] = what_version
+        try:
+            # If we are public or private github, we will have an empty vcs_subdirectory
+            if vcs_subdirectory == '':
+                with open (os.path.join(submission_path,".submit.VCS_CHECKOUT")) as submission_vcs_file:
+                    VCS_JSON = json.load(submission_vcs_file)
+                    git_user_id = VCS_JSON["git_user_id"]
+                    git_repo_id = VCS_JSON["git_repo_id"]
+                    if not valid_github_user_id(git_user_id):
+                        raise Exception ("Invalid GitHub user/organization name: '"+git_user_id+"'")
+                    if not valid_github_repo_id(git_repo_id):
+                        raise Exception ("Invalid GitHub repository name: '"+git_repo_id+"'")
+                    # construct path for GitHub
+                    vcs_path="https://www.github.com/"+git_user_id+"/"+git_repo_id
+
+            # is vcs_subdirectory standalone or should it be combined with base_url?
+            elif vcs_subdirectory[0] == '/' or '://' in vcs_subdirectory:
+                vcs_path = vcs_subdirectory
+            else:
+                if '://' in vcs_base_url:
+                    vcs_path = urllib.parse.urljoin(vcs_base_url, vcs_subdirectory)
+                else:
+                    vcs_path = os.path.join(vcs_base_url, vcs_subdirectory)
+
+            with open(os.path.join(tmp_logs, "overall.txt"), 'a') as f:
+                print("====================================\nVCS CHECKOUT", file=f)
+                print('vcs_base_url', vcs_base_url, file=f)
+                print('vcs_subdirectory', vcs_subdirectory, file=f)
+                print('vcs_path', vcs_path, file=f)
+                print(['/usr/bin/git', 'clone', vcs_path, checkout_path], file=f)
+
+            # git clone may fail -- because repository does not exist,
+            # or because we don't have appropriate access credentials
+            try:
+                subprocess.check_call(['/usr/bin/git', 'clone', vcs_path, checkout_path])
+                os.chdir(checkout_path)
+
+                # determine which version we need to checkout
+                # if the repo is empty or the master branch does not exist, this command will fail
+                try:
+                    what_version = subprocess.check_output(['git', 'rev-list', '-n', '1', '--before="'+submission_string+'"', 'master'])
+                    what_version = str(what_version.decode('utf-8')).rstrip()
+                    if what_version == "":
+                        # oops, pressed the grade button before a valid commit
+                        shutil.rmtree(checkout_path, ignore_errors=True)
+                    else:
+                        # and check out the right version
+                        subprocess.call(['git', 'checkout', '-b', 'grade', what_version])
+                    os.chdir(tmp)
+                    subprocess.call(['ls', '-lR', checkout_path], stdout=open(tmp_logs + "/overall.txt", 'a'))
+                    obj['revision'] = what_version
+
+                # exception on git rev-list
+                except subprocess.CalledProcessError as error:
+                    grade_items_logging.log_message(job_id,message="ERROR: failed to determine version on master branch " + str(error))
+                    os.chdir(checkout_path)
+                    with open(os.path.join(checkout_path,"failed_to_determine_version_on_master_branch.txt"),'w') as f:
+                        print(str(error),file=f)
+                        print("\n",file=f)
+                        print("Check to be sure the repository is not empty.\n",file=f)
+                        print("Check to be sure the repository has a master branch.\n",file=f)
+                        print("And check to be sure the timestamps on the master branch are reasonable.\n",file=f)
+
+            # exception on git clone
+            except subprocess.CalledProcessError as error:
+                grade_items_logging.log_message(job_id,message="ERROR: failed to clone repository " + str(error))
+                os.chdir(checkout_path)
+                with open(os.path.join(checkout_path,"failed_to_clone_repository.txt"),'w') as f:
+                    print(str(error),file=f)
+                    print("\n",file=f)
+                    print("Check to be sure the repository exists.\n",file=f)
+                    print("And check to be sure the submitty_daemon user has appropriate access credentials.\n",file=f)
+
+        # exception in constructing full git repository url/path
+        except Exception as error:
+            grade_items_logging.log_message(job_id,message="ERROR: failed to construct valid repository url/path" + str(error))
+            os.chdir(checkout_path)
+            with open(os.path.join(checkout_path,"failed_to_construct_valid_repository_url.txt"),'w') as f:
+                print(str(error),file=f)
+                print("\n",file=f)
+                print("Check to be sure the repository exists.\n",file=f)
+                print("And check to be sure the submitty_daemon user has appropriate access credentials.\n",file=f)
 
     copytree_if_exists(submission_path,os.path.join(tmp_submission,"submission"))
     copytree_if_exists(checkout_path,os.path.join(tmp_submission,"checkout"))

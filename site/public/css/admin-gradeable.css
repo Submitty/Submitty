@@ -123,6 +123,14 @@ div.btn-container {
     margin-bottom: 5px;
 }
 
+#regrade_request_enable_container {
+    margin-top: 10px;
+}
+
+#discussion_grading_enable_container {
+    margin-top: 10px;
+}
+
 #team-settings-container {
     margin-top: 10px;
 }
