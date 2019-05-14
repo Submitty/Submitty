@@ -6,6 +6,7 @@ use app\libraries\ExceptionHandler;
 use app\libraries\Logger;
 use app\libraries\Utils;
 use app\libraries\Access;
+use app\libraries\TokenManager;
 use app\libraries\Router;
 
 /*
@@ -144,22 +145,44 @@ if($core->getConfig()->isDebug()) {
     error_reporting(E_ERROR);
 }
 
-// Check if we have a saved cookie with a session id and then that there exists a session with that id
-// If there is no session, then we delete the cookie
+// Check if we have a saved cookie with a session id and then that there exists
+// a session with that id. If there is no session, then we delete the cookie.
 $logged_in = false;
-$cookie_key = 'submitty_session_id';
+$cookie_key = 'submitty_session';
 if (isset($_COOKIE[$cookie_key])) {
-    $cookie = json_decode($_COOKIE[$cookie_key], true);
-    $logged_in = $core->getSession($cookie['session_id']);
-    if (!$logged_in) {
-        // delete the stale and invalid cookie
-        Utils::setCookie($cookie_key, "", time() - 3600);
-    }
-    else {
-        if ($cookie['expire_time'] > 0) {
-            $cookie['expire_time'] = time() + (7 * 24 * 60 * 60);
-            Utils::setCookie($cookie_key, $cookie, $cookie['expire_time']);
+    try {
+        $token = TokenManager::parseSessionToken(
+            $_COOKIE[$cookie_key],
+            $core->getConfig()->getBaseUrl(),
+            $core->getConfig()->getSecretSession()
+        );
+        $session_id = $token->getClaim('session_id');
+        $expire_time = $token->getClaim('expire_time');
+        $logged_in = $core->getSession($session_id, $token->getClaim('sub'));
+        // make sure that the session exists and it's for the user they're claiming
+        // to be
+        if (!$logged_in) {
+            // delete cookie that's stale
+            Utils::setCookie($cookie_key, "", time() - 3600);
         }
+        else {
+            if ($expire_time > 0 || $reset_cookie) {
+                Utils::setCookie(
+                    $cookie_key,
+                    (string) TokenManager::generateSessionToken(
+                        $session_id,
+                        $token->getClaim('sub'),
+                        $core->getConfig()->getBaseUrl(),
+                        $core->getConfig()->getSecretSession()
+                    ),
+                    $expire_time
+                );
+            }
+        }
+    }
+    catch (Exception $exc) {
+        // Invalid cookie data, delete it
+        Utils::setCookie($cookie_key, "", time() - 3600);
     }
 }
 
