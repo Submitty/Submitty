@@ -6,7 +6,7 @@
         They can be placed in any of the locations shown in the below diagram.<br>
         Note that they are loaded in frames and will not be able to run scripts or affect the rest of Submitty.<br>
         <br>
-        You can also upload a CSS file to override the default styles from Submitty.<br>        
+        You can also upload a CSS file to override the default styles from Submitty.<br>
         <a target=_blank href="http://submitty.org/instructor/website_customization">More information about Website Customization <i style="font-style:normal;" class="helpicon"></i></a>
     </div>
     <br>
@@ -22,13 +22,14 @@
             <div class="wrapper-bottom">Bottom Bar</div>
         </div>
     </div>
-	<br>
+    <br>
+    {# This is a data table #}
     <table class="wrapper-upload">
-        <tr>
-            <th>Panel</th>
-            <th>File Type</th>
-            <th>Upload</th>
-            <th>Current File</th>
+        <tr class="wrapper_layout_header">
+            <td class="layout_th_cell">Panel</td>
+            <td class="layout_th_cell">File Type</td>
+            <td class="layout_th_cell">Upload</th>
+            <td class="layout_th_cell">Current File</td>
         </tr>
         {{ self.table_file(wrapper_files, "top_bar.html", "Top Bar", "HTML", "wrapper-top", "top_bar") }}
         {{ self.table_file(wrapper_files, "left_sidebar.html", "Left Sidebar", "HTML", "wrapper-left", "left_sidebar") }}

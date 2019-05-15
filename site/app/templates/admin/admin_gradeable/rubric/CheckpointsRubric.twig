@@ -1,16 +1,13 @@
 <div class="multi-field-wrapper-checkpoints">
+    {# This is a layout table #}
     <table class="checkpoints-table table table-bordered" id="gradeable_rubric" style=" border: 1px solid #AAA; max-width:50% !important;">
-        <!-- Headings -->
-        <thead style="background: #E1E1E1;">
-        <tr>
-            <th> Label </th>
-            <th> Extra Credit? </th>
+        <!-- Layout Headings -->
+        <tr class="rubric_layout_header">
+            <td class="layout_th_cell"> Label </th>
+            <td class="layout_th_cell"> Extra Credit? </th>
         </tr>
-        </thead>
-        <tbody style="background: #f9f9f9;">
-
         <!-- This is a bit of a hack, but it works (^_^) -->
-        <tr class="multi-field" id="mult-field-0" style="display:none;">
+        <tr class="rubric_layout_body multi-field" id="mult-field-0" style="display:none;">
             <td>
                 <input style="width: 200px" name="checkpoint_label_0" type="text" class="checkpoint_label" value="Checkpoint 0"/>
             </td>
