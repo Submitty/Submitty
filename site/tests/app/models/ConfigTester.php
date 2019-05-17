@@ -81,6 +81,12 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $config = array_replace($config, $extra);
         FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "submitty.json"), $config);
 
+        $config = [
+            'session' => 'LIW0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93'
+        ];
+        $config = array_replace($config, $extra);
+        FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "secrets_submitty_php.json"), $config);
+
         $this->course_json_path = FileUtils::joinPaths($course_path, "config", "config.json");
         $config = array(
             'database_details' => array(
@@ -174,6 +180,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             $config->getCourseJsonPath());
         $this->assertEquals('', $config->getRoomSeatingGradeableId());
         $this->assertFalse($config->displayRoomSeating());
+        $this->assertEquals('LIW0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93', $config->getSecretSession());
 
         $expected = array(
             'debug' => false,
@@ -245,7 +252,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'username_change_text' => 'Submitty welcomes all students.',
             'vcs_url' => 'http://example.com/{$vcs_type}/',
             'wrapper_files' => [],
-            'system_message' => 'Some system message'
+            'system_message' => 'Some system message',
+            'secret_session' => 'LIW0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93'
         );
         $actual = $config->toArray();
 
@@ -483,6 +491,34 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->createConfigFile($extra);
 
         $config = new Config($this->core, "s17", "csci0000");
+        $config->loadMasterConfigs($this->config_path);
+    }
+
+    public function testMissingSecretsFile() {
+        $this->createConfigFile();
+        unlink(FileUtils::joinPaths($this->temp_dir, 'config', 'secrets_submitty_php.json'));
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionMessageRegExp('/^Could not find secrets config: .*\/config\/secrets_submitty_php\.json$/');
+        $config = new Config($this->core, 's17', 'csci0000');
+        $config->loadMasterConfigs($this->config_path);
+    }
+
+    public function testNullSecret() {
+        $extra = ['session' => null];
+        $this->createConfigFile($extra);
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionMessage("Missing secret var: session");
+        $config = new Config($this->core, 's17', 'csci0000');
+        $config->loadMasterConfigs($this->config_path);
+    }
+
+    public function testWeakSecret() {
+        $extra = ['session' => 'weak'];
+        $this->createConfigFile($extra);
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionMessage('Secret session is too weak. It should be at least 32 bytes.');
+
+        $config = new Config($this->core, 's17', 'csci0000');
         $config->loadMasterConfigs($this->config_path);
     }
 }

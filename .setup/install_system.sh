@@ -212,8 +212,10 @@ fi
 #################################################################
 # Node Package Setup
 ####################
-
-npm install -g npm
+# NOTE: with umask 0027, the npm packages end up with the wrong permissions.
+# (this happens if we re-run install_system on an existing installation).
+# So let's manually set the umask just for this call.
+(umask 0022 && npm install -g npm)
 
 #################################################################
 # STACK SETUP
@@ -430,7 +432,7 @@ if [ ${WORKER} == 0 ]; then
     php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
     rm -f /tmp/composer-setup.php
 
-    a2enmod include actions cgi suexec authnz_external headers ssl proxy_fcgi
+    a2enmod include actions cgi suexec authnz_external headers ssl proxy_fcgi rewrite
 
     # A real user will have to do these steps themselves for a non-vagrant setup as to do it in here would require
     # asking the user questions as well as searching the filesystem for certificates, etc.
