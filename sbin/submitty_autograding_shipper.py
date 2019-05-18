@@ -16,6 +16,7 @@ import paramiko
 import tempfile
 import socket
 import traceback
+import subprocess
 
 from autograder import grade_items_logging
 from autograder import grade_item
@@ -387,6 +388,109 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
         grade_items_logging.log_message(JOB_ID, message=str(my_name)+" ERROR attempting to remove grading file: " + grading_file + " exception=" + str(e))
 
 
+def checkout_vcs_repo(my_file):
+    print ("SHIPPER CHECKOUT VCS REPO ", my_file)
+
+    with open(my_file, 'r') as infile:
+        obj = json.load(infile)
+
+    partial_path = os.path.join(obj["gradeable"],obj["who"],str(obj["version"]))
+    checkout_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"checkout",partial_path)
+    results_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"results",partial_path)
+
+    is_vcs,vcs_type,vcs_base_url,vcs_subdirectory = packer_unpacker.get_vcs_info(SUBMITTY_DATA_DIR,obj["semester"],obj["course"],obj["gradeable"],obj["who"],obj["team"])
+
+    # cleanup the previous checkout (if it exists)
+    shutil.rmtree(checkout_path,ignore_errors=True)
+    os.makedirs(checkout_path, exist_ok=True)
+
+    job_id = "~VCS~"
+
+    try:
+        # If we are public or private github, we will have an empty vcs_subdirectory
+        if vcs_subdirectory == '':
+            with open (os.path.join(submission_path,".submit.VCS_CHECKOUT")) as submission_vcs_file:
+                VCS_JSON = json.load(submission_vcs_file)
+                git_user_id = VCS_JSON["git_user_id"]
+                git_repo_id = VCS_JSON["git_repo_id"]
+                if not valid_github_user_id(git_user_id):
+                    raise Exception ("Invalid GitHub user/organization name: '"+git_user_id+"'")
+                if not valid_github_repo_id(git_repo_id):
+                    raise Exception ("Invalid GitHub repository name: '"+git_repo_id+"'")
+                # construct path for GitHub
+                vcs_path="https://www.github.com/"+git_user_id+"/"+git_repo_id
+
+        # is vcs_subdirectory standalone or should it be combined with base_url?
+        elif vcs_subdirectory[0] == '/' or '://' in vcs_subdirectory:
+            vcs_path = vcs_subdirectory
+        else:
+            if '://' in vcs_base_url:
+                vcs_path = urllib.parse.urljoin(vcs_base_url, vcs_subdirectory)
+            else:
+                vcs_path = os.path.join(vcs_base_url, vcs_subdirectory)
+
+        Path(results_path+"/logs").mkdir(parents=True, exist_ok=True)
+        with open(os.path.join(results_path, "logs", "checkout.txt"), 'a') as f:
+            print("====================================\nVCS CHECKOUT", file=f)
+            print('vcs_base_url', vcs_base_url, file=f)
+            print('vcs_subdirectory', vcs_subdirectory, file=f)
+            print('vcs_path', vcs_path, file=f)
+            print(['/usr/bin/git', 'clone', vcs_path, checkout_path], file=f)
+
+        # git clone may fail -- because repository does not exist,
+        # or because we don't have appropriate access credentials
+        try:
+            subprocess.check_call(['/usr/bin/git', 'clone', vcs_path, checkout_path])
+            os.chdir(checkout_path)
+
+            # determine which version we need to checkout
+            # if the repo is empty or the master branch does not exist, this command will fail
+            try:
+                what_version = subprocess.check_output(['git', 'rev-list', '-n', '1', '--before="'+submission_string+'"', 'master'])
+                what_version = str(what_version.decode('utf-8')).rstrip()
+                if what_version == "":
+                    # oops, pressed the grade button before a valid commit
+                    shutil.rmtree(checkout_path, ignore_errors=True)
+                else:
+                    # and check out the right version
+                    subprocess.call(['git', 'checkout', '-b', 'grade', what_version])
+                os.chdir(tmp)
+                subprocess.call(['ls', '-lR', checkout_path], stdout=open(tmp_logs + "/overall.txt", 'a'))
+                obj['revision'] = what_version
+
+            # exception on git rev-list
+            except subprocess.CalledProcessError as error:
+                grade_items_logging.log_message(job_id,message="ERROR: failed to determine version on master branch " + str(error))
+                os.chdir(checkout_path)
+                with open(os.path.join(checkout_path,"failed_to_determine_version_on_master_branch.txt"),'w') as f:
+                    print(str(error),file=f)
+                    print("\n",file=f)
+                    print("Check to be sure the repository is not empty.\n",file=f)
+                    print("Check to be sure the repository has a master branch.\n",file=f)
+                    print("And check to be sure the timestamps on the master branch are reasonable.\n",file=f)
+
+        # exception on git clone
+        except subprocess.CalledProcessError as error:
+            grade_items_logging.log_message(job_id,message="ERROR: failed to clone repository " + str(error))
+            os.chdir(checkout_path)
+            with open(os.path.join(checkout_path,"failed_to_clone_repository.txt"),'w') as f:
+                print(str(error),file=f)
+                print("\n",file=f)
+                print("Check to be sure the repository exists.\n",file=f)
+                print("And check to be sure the submitty_daemon user has appropriate access credentials.\n",file=f)
+
+    # exception in constructing full git repository url/path
+    except Exception as error:
+        grade_items_logging.log_message(job_id,message="ERROR: failed to construct valid repository url/path" + str(error))
+        os.chdir(checkout_path)
+        with open(os.path.join(checkout_path,"failed_to_construct_valid_repository_url.txt"),'w') as f:
+            print(str(error),file=f)
+            print("\n",file=f)
+            print("Check to be sure the repository exists.\n",file=f)
+            print("And check to be sure the submitty_daemon user has appropriate access credentials.\n",file=f)
+
+
+
 # ==================================================================================
 def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
     """
@@ -399,6 +503,21 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
 
     overall_lock.acquire()
     folder= INTERACTIVE_QUEUE
+
+    # Our first priority is to perform any awaiting VCS checkouts
+    # Grab all the VCS files currently in the folder...
+    vcs_files = [str(f) for f in Path(folder).glob('VCS__*')]
+    for f in vcs_files:
+        vcs_file = f[len(folder)+1:]
+        no_vcs_file = f[len(folder)+1+5:]
+        # do the checkout
+        checkout_vcs_repo(folder+"/"+vcs_file)
+        # confirm the regular queue file exists
+        exists = os.path.isfile(folder+"/"+no_vcs_file)
+        if not exists:
+            grade_items_logging.log_message(JOB_ID, message=str(my_name)+" ERROR: non vcs queue file missing "+str(no_vcs_file))
+        # cleanup the vcs queue file
+        os.remove(folder+"/"+vcs_file)
 
     # Grab all the files currently in the folder, sorted by creation
     # time, and put them in the queue to be graded
