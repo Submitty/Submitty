@@ -1411,10 +1411,11 @@ class SubmissionController extends AbstractController {
           if (@file_put_contents($vcs_queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
             return $this->uploadResult("Failed to create vcs file for grading queue.", false);
           }
-        }
-        // Then create the file that will trigger autograding
-        if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
+        } else {
+          // Then create the file that will trigger autograding
+          if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
             return $this->uploadResult("Failed to create file for grading queue.", false);
+          }
         }
 
         if($gradeable->isTeamAssignment()) {

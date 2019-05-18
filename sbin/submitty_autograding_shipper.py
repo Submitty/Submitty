@@ -346,7 +346,7 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
     name = os.path.basename(os.path.realpath(queue_file))
     grading_file = os.path.join(directory, "GRADING_" + name)
 
-    #TODO: breach which_machine into id, address, and passphrase.
+    #TODO: break which_machine into id, address, and passphrase.
     
     try:
         # prepare the job
@@ -388,6 +388,35 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
         grade_items_logging.log_message(JOB_ID, message=str(my_name)+" ERROR attempting to remove grading file: " + grading_file + " exception=" + str(e))
 
 
+# ==================================================================================
+# ==================================================================================
+def valid_github_user_id(userid):
+    # Github username may only contain alphanumeric characters or
+    # hyphens. Github username cannot have multiple consecutive
+    # hyphens. Github username cannot begin or end with a hyphen.
+    # Maximum is 39 characters.
+    if (userid==''):
+        # GitHub userid cannot be empty
+        return False
+    checklegal = lambda char: char.isalnum() or char == '-'
+    filtered_userid = ''.join(list(filter(checklegal,userid)))
+    if not userid == filtered_userid:
+        return False
+    return True
+
+
+def valid_github_repo_id(repoid):
+    # Only characters, numbers, dots, minus and underscore are allowed.
+    if (repoid==''):
+        # GitHub repoid cannot be empty
+        return False
+    checklegal = lambda char: char.isalnum() or char == '.' or char == '-' or char == '_'
+    filtered_repoid = ''.join(list(filter(checklegal,repoid)))
+    if not repoid == filtered_repoid:
+        return False
+    return True
+
+
 def checkout_vcs_repo(my_file):
     print ("SHIPPER CHECKOUT VCS REPO ", my_file)
 
@@ -395,6 +424,7 @@ def checkout_vcs_repo(my_file):
         obj = json.load(infile)
 
     partial_path = os.path.join(obj["gradeable"],obj["who"],str(obj["version"]))
+    submission_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"submissions",partial_path)
     checkout_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"checkout",partial_path)
     results_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"results",partial_path)
 
@@ -430,7 +460,7 @@ def checkout_vcs_repo(my_file):
                 vcs_path = os.path.join(vcs_base_url, vcs_subdirectory)
 
         Path(results_path+"/logs").mkdir(parents=True, exist_ok=True)
-        with open(os.path.join(results_path, "logs", "checkout.txt"), 'a') as f:
+        with open(os.path.join(results_path, "logs", "vcs_checkout.txt"), 'a') as f:
             print("====================================\nVCS CHECKOUT", file=f)
             print('vcs_base_url', vcs_base_url, file=f)
             print('vcs_subdirectory', vcs_subdirectory, file=f)
@@ -446,6 +476,9 @@ def checkout_vcs_repo(my_file):
             # determine which version we need to checkout
             # if the repo is empty or the master branch does not exist, this command will fail
             try:
+                # grab the submission time
+                with open (os.path.join(submission_path,".submit.timestamp")) as submission_time_file:
+                    submission_string = submission_time_file.read().rstrip()
                 what_version = subprocess.check_output(['git', 'rev-list', '-n', '1', '--before="'+submission_string+'"', 'master'])
                 what_version = str(what_version.decode('utf-8')).rstrip()
                 if what_version == "":
@@ -454,8 +487,7 @@ def checkout_vcs_repo(my_file):
                 else:
                     # and check out the right version
                     subprocess.call(['git', 'checkout', '-b', 'grade', what_version])
-                os.chdir(tmp)
-                subprocess.call(['ls', '-lR', checkout_path], stdout=open(tmp_logs + "/overall.txt", 'a'))
+                subprocess.call(['ls', '-lR', checkout_path], stdout=open(os.path.join(results_path, "logs", "vcs_checkout.txt"), 'a'))
                 obj['revision'] = what_version
 
             # exception on git rev-list
@@ -489,7 +521,7 @@ def checkout_vcs_repo(my_file):
             print("Check to be sure the repository exists.\n",file=f)
             print("And check to be sure the submitty_daemon user has appropriate access credentials.\n",file=f)
 
-
+    return obj
 
 # ==================================================================================
 def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
@@ -511,11 +543,10 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
         vcs_file = f[len(folder)+1:]
         no_vcs_file = f[len(folder)+1+5:]
         # do the checkout
-        checkout_vcs_repo(folder+"/"+vcs_file)
-        # confirm the regular queue file exists
-        exists = os.path.isfile(folder+"/"+no_vcs_file)
-        if not exists:
-            grade_items_logging.log_message(JOB_ID, message=str(my_name)+" ERROR: non vcs queue file missing "+str(no_vcs_file))
+        updated_obj = checkout_vcs_repo(folder+"/"+vcs_file)
+        # save the regular grading queue file
+        with open(os.path.join(folder,no_vcs_file), "w") as queue_file:
+            json.dump(updated_obj, queue_file)
         # cleanup the vcs queue file
         os.remove(folder+"/"+vcs_file)
 
