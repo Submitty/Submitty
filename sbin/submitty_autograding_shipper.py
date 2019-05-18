@@ -459,35 +459,74 @@ def checkout_vcs_repo(my_file):
             else:
                 vcs_path = os.path.join(vcs_base_url, vcs_subdirectory)
 
+        # warning: --depth is ignored in local clones; use file:// instead.
+        if not '://' in vcs_path:
+            vcs_path = "file:///" + vcs_path
+
         Path(results_path+"/logs").mkdir(parents=True, exist_ok=True)
-        with open(os.path.join(results_path, "logs", "vcs_checkout.txt"), 'a') as f:
-            print("====================================\nVCS CHECKOUT", file=f)
+        checkout_log_file = os.path.join(results_path, "logs", "vcs_checkout.txt")
+
+        # grab the submission time
+        with open (os.path.join(submission_path,".submit.timestamp")) as submission_time_file:
+            submission_string = submission_time_file.read().rstrip()
+
+
+        # OPTION: A shallow clone with only the most recent commit
+        # from the submission timestamp.
+        #
+        #   NOTE: if the student has set their computer time in the
+        #     future, they could be confused that we don't grab their
+        #     most recent code.
+        #   NOTE: github repos currently fail (a bug?) with an error when
+        #     --shallow-since is used:
+        #     "fatal: The remote end hung up unexpectedly"
+        #
+        #clone_command = ['/usr/bin/git', 'clone', vcs_path, checkout_path, '--shallow-since='+submission_string, '-b', 'master']
+
+
+        # OPTION: A shallow clone, with just the most recent commit.
+        #
+        #  NOTE: If the server is busy, it might take seconds of
+        #     minutes for an available shipper to process the git
+        #     clone, and thethe timestamp might be slightly late)
+        #
+        #  So we choose this option!  (for now)
+        #
+        clone_command = ['/usr/bin/git', 'clone', vcs_path, checkout_path, '--depth', '1', '-b', 'master']
+
+
+        with open(checkout_log_file, 'a') as f:
+            print("VCS CHECKOUT", file=f)
             print('vcs_base_url', vcs_base_url, file=f)
             print('vcs_subdirectory', vcs_subdirectory, file=f)
             print('vcs_path', vcs_path, file=f)
-            print(['/usr/bin/git', 'clone', vcs_path, checkout_path], file=f)
+            print(' '.join(clone_command), file=f)
+            print("\n====================================\n", file=f)
 
         # git clone may fail -- because repository does not exist,
         # or because we don't have appropriate access credentials
         try:
-            subprocess.check_call(['/usr/bin/git', 'clone', vcs_path, checkout_path])
+            subprocess.check_call(clone_command)
             os.chdir(checkout_path)
 
             # determine which version we need to checkout
             # if the repo is empty or the master branch does not exist, this command will fail
             try:
-                # grab the submission time
-                with open (os.path.join(submission_path,".submit.timestamp")) as submission_time_file:
-                    submission_string = submission_time_file.read().rstrip()
-                what_version = subprocess.check_output(['git', 'rev-list', '-n', '1', '--before="'+submission_string+'"', 'master'])
+                what_version = subprocess.check_output(['git', 'rev-list', '-n', '1', 'master'])
+                # old method:  when we had the full history, roll-back to a version by date
+                #what_version = subprocess.check_output(['git', 'rev-list', '-n', '1', '--before="'+submission_string+'"', 'master'])
                 what_version = str(what_version.decode('utf-8')).rstrip()
                 if what_version == "":
                     # oops, pressed the grade button before a valid commit
                     shutil.rmtree(checkout_path, ignore_errors=True)
-                else:
-                    # and check out the right version
-                    subprocess.call(['git', 'checkout', '-b', 'grade', what_version])
-                subprocess.call(['ls', '-lR', checkout_path], stdout=open(os.path.join(results_path, "logs", "vcs_checkout.txt"), 'a'))
+                # old method:
+                #else:
+                #    # and check out the right version
+                #    subprocess.call(['git', 'checkout', '-b', 'grade', what_version])
+
+                subprocess.call(['ls', '-lR', checkout_path], stdout=open(checkout_log_file, 'a'))
+                print("\n====================================\n", file=open(checkout_log_file, 'a'))
+                subprocess.call(['du', '-skh', checkout_path], stdout=open(checkout_log_file, 'a'))
                 obj['revision'] = what_version
 
             # exception on git rev-list
