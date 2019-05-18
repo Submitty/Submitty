@@ -575,7 +575,38 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
     overall_lock.acquire()
     folder= INTERACTIVE_QUEUE
 
+
+    # ----------------------------------------------------------------
     # Our first priority is to perform any awaiting VCS checkouts
+
+    # Note: This design is imperfect:
+    #
+    #   * If all shippers are busy working on long-running autograding
+    #     tasks there will be a delay of seconds or minutes between
+    #     a student pressing the submission button and clone happening.
+    #     This is a minor exploit allowing them to theoretically
+    #     continue working on their submission past the deadline for
+    #     the time period of the delay.
+    #     -- This is not a significant, practical problem.
+    #
+    #   * If multiple and/or large git submissions arrive close
+    #     together, this shipper job will be tied up performing these
+    #     clone operations.  Because we don't release the lock, any
+    #     other shippers that complete their work will also be blocked
+    #     from either helping with the clones or tackling the next
+    #     autograding job.
+    #     -- Based on experience with actual submission patterns, we
+    #        do not anticipate that this will be a significant
+    #        bottleneck at this time.
+    #
+    #   * If a git clone takes a very long time and/or hangs because of
+    #     network problems, this could halt all work on the server.
+    #     -- We'll need to monitor the production server.
+    #
+    # We plan to do a complete overhaul of the
+    # scheduler/shipper/worker and refactoring this design should be
+    # part of the project.
+
     # Grab all the VCS files currently in the folder...
     vcs_files = [str(f) for f in Path(folder).glob('VCS__*')]
     for f in vcs_files:
@@ -588,6 +619,8 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
             json.dump(updated_obj, queue_file)
         # cleanup the vcs queue file
         os.remove(folder+"/"+vcs_file)
+    # ----------------------------------------------------------------
+
 
     # Grab all the files currently in the folder, sorted by creation
     # time, and put them in the queue to be graded
