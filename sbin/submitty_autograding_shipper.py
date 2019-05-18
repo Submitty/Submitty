@@ -486,7 +486,7 @@ def checkout_vcs_repo(my_file):
 
         # OPTION: A shallow clone, with just the most recent commit.
         #
-        #  NOTE: If the server is busy, it might take seconds of
+        #  NOTE: If the server is busy, it might take seconds or
         #     minutes for an available shipper to process the git
         #     clone, and thethe timestamp might be slightly late)
         #
