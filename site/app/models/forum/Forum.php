@@ -56,7 +56,7 @@ class Forum extends AbstractModel {
             empty($data['title']) || empty($data['status']) ||
             empty($data['announcement']) || empty($data['categories']) || 
             empty($data['email_announcement']) || $data['parent_id'] !== -1 ||
-            !ForumUtils::isValidCategories($this->core->getQueries()->getCategories(), $categories_ids)){
+            !$this->isValidCategories($this->core->getQueries()->getCategories(), $categories_ids)){
             return [false, null];
         }
 
