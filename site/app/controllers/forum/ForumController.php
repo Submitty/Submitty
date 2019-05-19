@@ -848,7 +848,7 @@ class ForumController extends AbstractController {
         preg_match('/\((.*?)\)/', $parent_thread_id, $result);
         $parent_thread_id = $result[1];
         $thread_id = $child_thread_id;
-        if($this->core->getUser()->accessGrading()){
+        if($this->core->getAccess()->canI("forum.merge_thread")){
             if(is_numeric($parent_thread_id) && is_numeric($child_thread_id)) {
                 $message = "";
                 $child_root_post = -1;

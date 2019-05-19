@@ -190,6 +190,7 @@ class Access {
         $this->permissions["forum.publish"] = self::ALLOW_MIN_STUDENT | self::CHECK_CSRF;
         $this->permissions["forum.modify_announcement"] = self::ALLOW_MIN_FULL_ACCESS_GRADER | self::CHECK_CSRF;
         $this->permissions["forum.modify_post"] = self::ALLOW_MIN_STUDENT | self::CHECK_CSRF | self::REQUIRE_FORUM_SAME_STUDENT; 
+        $this->permissions["forum.merge_thread"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_CSRF;
 
         $this->permissions["admin.wrapper"] = self::ALLOW_MIN_INSTRUCTOR;
     }
