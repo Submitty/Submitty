@@ -103,6 +103,8 @@ cp ${NODE_FOLDER}/pdfjs-dist/build/pdf.min.js ${VENDOR_FOLDER}/pdfjs
 cp ${NODE_FOLDER}/pdfjs-dist/build/pdf.worker.min.js ${VENDOR_FOLDER}/pdfjs
 cp ${NODE_FOLDER}/pdfjs-dist/web/pdf_viewer.css ${VENDOR_FOLDER}/pdfjs/pdf_viewer.css
 cp ${NODE_FOLDER}/pdfjs-dist/web/pdf_viewer.js ${VENDOR_FOLDER}/pdfjs/pdf_viewer.js
+# pdf-annotate.js
+cp -R "${NODE_FOLDER}/@submitty/pdf-annotate.js/dist" ${VENDOR_FOLDER}/pdf-annotate.js
 # twig.js
 mkdir ${VENDOR_FOLDER}/twigjs
 cp ${NODE_FOLDER}/twig/twig.min.js ${VENDOR_FOLDER}/twigjs/
@@ -111,20 +113,6 @@ cp ${NODE_FOLDER}/twig/twig.min.js ${VENDOR_FOLDER}/twigjs/
 # copy the zone chart images
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public/zone_images/
 cp ${SUBMITTY_INSTALL_DIR}/zone_images/* ${SUBMITTY_INSTALL_DIR}/site/public/zone_images/ 2>/dev/null
-
-#####################################
-# Installing PDF annotator
-
-mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public/js/pdf
-pushd ${SUBMITTY_INSTALL_DIR}/site/public/js/pdf
-if [[ ! -f VERSION || $(< VERSION) != "${Pdf_Annotate_Js_Version}" ]]; then
-    for b in pdf-annotate.min.js pdf-annotate.min.js.map;
-        do wget -nv "https://github.com/Submitty/pdf-annotate.js/releases/download/${Pdf_Annotate_Js_Version}/${b}" -O ${b}
-    done
-
-    echo ${Pdf_Annotate_Js_Version} > VERSION
-fi
-popd > /dev/null
 
 # set the permissions of all files
 # $PHP_USER can read & execute all directories and read all files

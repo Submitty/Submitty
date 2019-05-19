@@ -42,7 +42,7 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
 
   if (whole_config["autograding"].find("submission_to_validation") == whole_config["autograding"].end()) {
     whole_config["autograding"]["submission_to_validation"].push_back("**/README.txt");
-    whole_config["autograding"]["submission_to_validation"].push_back("textbox_*.txt");
+    whole_config["autograding"]["submission_to_validation"].push_back("input_*.txt");
     whole_config["autograding"]["submission_to_validation"].push_back("**/*.pdf");
   }
 
@@ -50,9 +50,9 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
     whole_config["autograding"]["work_to_details"].push_back("test*/*.txt");
     whole_config["autograding"]["work_to_details"].push_back("test*/*_diff.json");
     whole_config["autograding"]["work_to_details"].push_back("**/README.txt");
-    whole_config["autograding"]["work_to_details"].push_back("textbox_*.txt");
+    whole_config["autograding"]["work_to_details"].push_back("input_*.txt");
     //todo check up on how this works.
-    whole_config["autograding"]["work_to_details"].push_back("test*/textbox_*.txt");
+    whole_config["autograding"]["work_to_details"].push_back("test*/input_*.txt");
   }
 
   if (whole_config["autograding"].find("use_checkout_subdirectory") == whole_config["autograding"].end()) {

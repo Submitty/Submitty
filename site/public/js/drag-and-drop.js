@@ -17,7 +17,7 @@ var label_array = [];
 var use_previous = false;
 var changed = false;        // if files from previous submission changed
 
-var empty_textboxes = true;
+var empty_inputs = true;
 
 var student_ids = [];           // all student ids
 var student_without_ids = [];   // student ids for those w/o submissions
@@ -230,7 +230,7 @@ function setButtonStatus() {
 
     if (labels == 0) {
         $("#startnew").prop("disabled", true);
-        if (empty_textboxes) {
+        if (empty_inputs) {
             $("#submit").prop("disabled", true);
         } else {
             $("#submit").prop("disabled", false);
@@ -301,13 +301,8 @@ function addLabel(filename, filesize, part, previous){
     label_array[part-1].push(filename);
 }
 
-function handle_textbox_keypress() {
-    empty_textboxes = false;
-    setButtonStatus();
-}
-
-function handle_textbox_keypress() {
-    empty_textboxes = false;
+function handle_input_keypress() {
+    empty_inputs = false;
     setButtonStatus();
 }
 
@@ -689,14 +684,14 @@ function handleBulk(gradeable_id, num_pages, use_qr_codes = false, qr_prefix = "
  * @param versions_allowed
  * @param csrf_token
  * @param vcs_checkout
- * @param num_textboxes
+ * @param num_inputs
  * @param user_id
  * @param repo_id
  * @param student_page
  * @param num_components
  * @param merge_previous
  */
-function handleSubmission(days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_textboxes, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false) {
+function handleSubmission(days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false) {
     $("#submit").prop("disabled", true);
 
     var submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload', 'gradeable_id': gradeable_id, "merge": merge_previous, "clobber": clobber});
@@ -735,7 +730,7 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
 
     if (!vcs_checkout) {
         // Check if new submission
-        if (!isValidSubmission() && empty_textboxes) {
+        if (!isValidSubmission() && empty_inputs) {
             alert("Not a new submission.");
             window.location.reload();
             return;
@@ -766,18 +761,25 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
         formData.append('previous_files', JSON.stringify(previous_files));
     }
 
-    var textbox_answers = [];
-    for (var i = 0; i < num_textboxes; i++) {
-        textbox_answers[i] = $("#textbox_"+i).val();
+    var input_answers = $("[id^=input_]").serializeArray();
+    var input_answers_object = {};
+
+    for (var i = 0; i < input_answers.length; i++) {
+        var this_answer = input_answers[i];
+        if(!(this_answer.name in input_answers_object)){
+            input_answers_object[this_answer.name] = Array();
+        }
+        input_answers_object[this_answer.name].push(this_answer.value);
     }
-    formData.append('textbox_answers', JSON.stringify(textbox_answers));
+
+    formData.append('input_answers', JSON.stringify(input_answers_object));
 
     if (student_page) {
         var pages = [];
         for (var i = 0; i < num_components; i++) {
             pages[i] = $("#page_"+i).val();
             if (pages[i] == "") {
-                alert("You cannot leave a page textbox empty.");
+                alert("You cannot leave a page input empty.");
                 $("#submit").prop("disabled", false);
                 return;
             }
