@@ -25,7 +25,7 @@ class NavigationController extends AbstractController {
                 break;
             case 'notification_settings':
                 $this->core->getOutput()->addBreadcrumb("Notification Settings");
-                $this->core->getOutput()->renderTwigOutput("NotificationsSettings.twig",[
+                $this->core->getOutput()->renderTwigOutput("NotificationSettings.twig",[
                     'notification_saves' => $this->core->getUser()->getNotificationSettings()
                 ]);
                 break;
