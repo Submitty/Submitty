@@ -903,7 +903,7 @@ HTML;
 				$ud_button_icon = "fa-trash";
 			}
 			$return .= <<<HTML
-			<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; float:right;" onClick="deletePostToggle({$ud_toggle_status}, {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'n/j g:i A')}' )" title="{$ud_button_title}"><i class="fa {$ud_button_icon}" aria-hidden="true"></i></a>
+			<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; float:right;" onClick="deletePostToggle({$ud_toggle_status}, {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'n/j g:i A')}', '{$this->core->getCsrfToken()}' )" title="{$ud_button_title}"><i class="fa {$ud_button_icon}" aria-hidden="true"></i></a>
 HTML;
 		}
 		if($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) {
@@ -916,7 +916,7 @@ HTML;
 				$edit_button_title = "Edit post";
 			}
 			$return .= <<<HTML
-				<a class="post_button" style="position:relative; display:inline-block; color:black; float:right;" onClick="editPost({$post['id']}, {$post['thread_id']}, {$shouldEditThread})" title="{$edit_button_title}"><i class="fas fa-edit" aria-hidden="true"></i></a>
+				<a class="post_button" style="position:relative; display:inline-block; color:black; float:right;" onClick="editPost({$post['id']}, {$post['thread_id']}, {$shouldEditThread}, '{$this->core->getCsrfToken()}')" title="{$edit_button_title}"><i class="fas fa-edit" aria-hidden="true"></i></a>
 HTML;
 		} 
 
@@ -1034,8 +1034,8 @@ HTML;
 
 		$return .= <<<HTML
 
-			<form style="margin-right: 15px; margin-left:15px;" id="thread_form" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread'))}" enctype="multipart/form-data">
 			<h3 style="margin-bottom:10px;"> Create Thread </h3>
+			<form style="margin-right: 15px; margin-left:15px;" id="thread_form" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread'))}" enctype="multipart/form-data">
 HTML;
 
 				$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig", [

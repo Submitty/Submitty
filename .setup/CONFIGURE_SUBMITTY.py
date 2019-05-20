@@ -6,7 +6,9 @@ import grp
 import json
 import os
 import pwd
+import secrets
 import shutil
+import string
 import tzlocal
 import tempfile
 
@@ -342,6 +344,7 @@ DATABASE_JSON = os.path.join(CONFIG_INSTALL_DIR, 'database.json')
 SUBMITTY_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty.json')
 SUBMITTY_USERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty_users.json')
 WORKERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'autograding_workers.json')
+SECRETS_PHP_JSON = os.path.join(CONFIG_INSTALL_DIR, 'secrets_submitty_php.json')
 
 #If the workers.json exists, rescue it from the destruction of config (move it to a temp directory).
 tmp_autograding_workers_file = ""
@@ -412,7 +415,7 @@ config['submitty_install_dir'] = SUBMITTY_INSTALL_DIR
 config['submitty_repository'] = SUBMITTY_REPOSITORY
 config['submitty_data_dir'] = SUBMITTY_DATA_DIR
 config['autograding_log_path'] = AUTOGRADING_LOG_PATH
-config['timezone'] = tzlocal.get_localzone().zone
+config['timezone'] = TIMEZONE
 
 if not args.worker:
     config['site_log_path'] = TAGRADING_LOG_PATH
@@ -454,6 +457,19 @@ with open(SUBMITTY_USERS_JSON, 'w') as json_file:
     json.dump(config, json_file, indent=2)
 shutil.chown(SUBMITTY_USERS_JSON, 'root', DAEMON_GROUP)
 os.chmod(SUBMITTY_USERS_JSON, 0o440)
+
+##############################################################################
+# Write secrets_submitty_php json
+
+if not args.worker:
+    config = OrderedDict()
+    characters = string.ascii_letters + string.digits
+    config['session'] = ''.join(secrets.choice(characters) for _ in range(64))
+    with open(SECRETS_PHP_JSON, 'w') as json_file:
+        json.dump(config, json_file, indent=2)
+    shutil.chown(SECRETS_PHP_JSON, 'root', PHP_GROUP)
+    os.chmod(SECRETS_PHP_JSON, 0o440)
+
 
 ##############################################################################
 

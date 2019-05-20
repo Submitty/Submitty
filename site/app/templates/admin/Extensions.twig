@@ -33,15 +33,16 @@
         <div style="padding-bottom:20px;"><input type="file" name="csv_upload" id="csv_upload" aria-labelledby="csv_upload_title csv_upload_format" onchange="return updateHomeworkExtensions($(this));"></div>
     </form>
     <div id="load-homework-extensions" align="center">
+        {# This is a data table #}
         <table id="my_table" class="table table-striped table-bordered persist-area" style="width:70%" align="center">
             <div class="option-title" id="title"></div>
             <div>
             	<caption />
                 <thead class="persist-thead">
-                <th>Student ID</th>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>Number of Days of Extension</th>
+                    <th>Student ID</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Number of Days of Extension</th>
                 </thead>
             </div>
         </table>
