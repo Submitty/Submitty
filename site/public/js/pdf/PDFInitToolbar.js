@@ -1,21 +1,24 @@
-const { UI } = PDFAnnotate;
+if (PDFAnnotate.default) {
+  PDFAnnotate = PDFAnnotate.default;
+}
+
 let loaded = sessionStorage.getItem('toolbar_loaded');
-window.onbeforeunload = function(){
+window.onbeforeunload = function() {
     sessionStorage.removeItem('toolbar_loaded');
 };
 //Toolbar stuff
-(function (){
+(function () {
     let active_toolbar = true;
     const debounce = (fn, time, ...args) => {
-        if(active_toolbar){
+        if (active_toolbar) {
             fn(args);
             active_toolbar = false;
-            setTimeout(function(){
+            setTimeout(function() {
                 active_toolbar = true;
             }, time);
         }
     }
-    function setActiveToolbarItem(option){
+    function setActiveToolbarItem(option) {
         let selected = $('.tool-selected');
         let clicked_button = $("a[value="+option+"]");
         if(option != selected.attr('value')){
@@ -29,16 +32,16 @@ window.onbeforeunload = function(){
                     case 'pen':
                         $('#file_content').css('overflow', 'auto');
                         $('#scroll_lock_mode').prop('checked', false);
-                        UI.disablePen();
+                        PDFAnnotate.UI.disablePen();
                         break;
                     case 'eraser':
-                        UI.disableEraser();
+                        PDFAnnotate.UI.disableEraser();
                         break;
                     case 'cursor':
-                        UI.disableEdit();
+                        PDFAnnotate.UI.disableEdit();
                         break;
                     case 'text':
-                        UI.disableText();
+                        PDFAnnotate.UI.disableText();
                         break;
                 }
                 $('.selection_panel').hide();
@@ -46,14 +49,14 @@ window.onbeforeunload = function(){
             switch(option){
                 case 'pen':
                     currentTool = 'pen';
-                    UI.enablePen();
+                    PDFAnnotate.UI.enablePen();
                     break;
                 case 'eraser':
                     currentTool = 'eraser';
-                    UI.enableEraser();
+                    PDFAnnotate.UI.enableEraser();
                     break;
                 case 'cursor':
-                    UI.enableEdit();
+                    PDFAnnotate.UI.enableEdit();
                     break;
                 case 'clear':
                     clearCanvas();
@@ -75,7 +78,7 @@ window.onbeforeunload = function(){
                     break;
                 case 'text':
                     currentTool = 'text';
-                    UI.enableText();
+                    PDFAnnotate.UI.enableText();
                     break;
             }
         } else {
@@ -244,7 +247,7 @@ window.onbeforeunload = function(){
         }
 
         if (modified) {
-            UI.setPen(penSize, penColor);
+            PDFAnnotate.UI.setPen(penSize, penColor);
         }
     }
 
@@ -284,7 +287,7 @@ window.onbeforeunload = function(){
         }
 
         if (modified) {
-            UI.setText(textSize, textColor);
+            PDFAnnotate.UI.setText(textSize, textColor);
         }
     }
     if(!loaded){

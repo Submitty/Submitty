@@ -34,7 +34,7 @@ The Submitty project is hosted on [GitHub](https://github.com/Submitty).
 
 # Contact Us
 
-If you have a question or would like access to our demo site, please contact us at submitty@cs.rpi.edu.
+If you have a question, please [contact us](https://submitty.org/#contact-us) through email or our Slack.
 
 
 ### LICENSING
