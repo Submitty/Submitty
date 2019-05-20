@@ -4,6 +4,7 @@
     {% endif %}
 >
 <div class="form-group row" style="position: relative;">
+    <input type="hidden" id="csrf_token" name="csrf_token" value="{{ core.getCsrfToken() }}" data-ays-ignore="true"/>
     {% if show_title %}
     <span class="edit_thread">
         Title: <input type="text" size="45" placeholder="Title" name="title" id="title" required/>
