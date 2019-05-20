@@ -210,7 +210,7 @@ int main(int argc, char *argv[]) {
       	  nlohmann::json::iterator in_type = input.find("type");
       	  assert (in_type != input.end());
           assert (in_type->is_string());
-      	  assert (*in_type == "textbox" || *in_type == "codebox" || *in_type == "multiplechoice");
+      	  assert (*in_type == "short_answer" || *in_type == "codebox" || *in_type == "multiplechoice");
       	  input_obj["type"] = *in_type;
           
 
@@ -229,7 +229,7 @@ int main(int argc, char *argv[]) {
 
 
       	  // Actual input configuration
-      	  if (*in_type == "textbox" || *in_type == "codebox") {
+      	  if (*in_type == "short_answer" || *in_type == "codebox") {
       	    if (*in_type == "codebox") {
       	      nlohmann::json::iterator cb_lang = input.find("language");
       	      assert (cb_lang != input.end());
