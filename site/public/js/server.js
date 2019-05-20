@@ -2008,14 +2008,15 @@ function showHistory(post_id) {
     });
 }
 
-function addNewCategory(){
+function addNewCategory(csrf_token){
     var newCategory = $("#new_category_text").val();
     var url = buildUrl({'component': 'forum', 'page': 'add_category'});
     $.ajax({
             url: url,
             type: "POST",
             data: {
-                newCategory: newCategory
+                newCategory: newCategory,
+                csrf_token: csrf_token
             },
             success: function(data){
                 try {
@@ -2088,11 +2089,11 @@ function deleteCategory(category_id, category_desc){
     })
 }
 
-function editCategory(category_id, category_desc, category_color) {
+function editCategory(category_id, category_desc, category_color, csrf_token) {
     if(category_desc === null && category_color === null) {
         return;
     }
-    var data = {category_id: category_id};
+    var data = {category_id: category_id, csrf_token: csrf_token};
     if(category_desc !== null) {
         data['category_desc'] = category_desc;
     }
