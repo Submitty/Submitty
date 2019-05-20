@@ -56,7 +56,7 @@
                 var item = $(this).parent().parent().parent();
                 var category_id = parseInt(item.attr('id').split("-")[1]);
                 var category_desc = item.find(".categorylistitem-desc span").text().trim();
-                deleteCategory(category_id, category_desc);
+                deleteCategory(category_id, category_desc, '{{ core.getCsrfToken() }}');
             });
             $("#ui-category-list").find(".fa-edit").click(function() {
                 var item = $(this).parent().parent().parent();

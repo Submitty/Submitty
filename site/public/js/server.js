@@ -2057,13 +2057,14 @@ function addNewCategory(csrf_token){
     })
 }
 
-function deleteCategory(category_id, category_desc){
+function deleteCategory(category_id, category_desc, csrf_token){
     var url = buildUrl({'component': 'forum', 'page': 'delete_category'});
     $.ajax({
             url: url,
             type: "POST",
             data: {
-                deleteCategory: category_id
+                deleteCategory: category_id,
+                csrf_token: csrf_token
             },
             success: function(data){
                 try {
