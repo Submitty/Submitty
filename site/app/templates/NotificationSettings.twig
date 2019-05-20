@@ -9,14 +9,12 @@
             <div><h1>Notification/Email Settings</h1></div>
             <div class="row">
                 <div class="heading col-md-4">
-
-                    {#<hr>#}
                 </div>
-                <div class="heading col-md-2">
+                <div class="heading col-md-3">
                     <h2>Notification Settings</h2>
                 </div>
-                <div class="heading col-md-6">
-                    <h2>Email<br>Settings</h2>
+                <div class="heading col-md-5">
+                    <h2>Email Settings (work in progress)</h2>
                 </div>
 
             </div>
@@ -29,9 +27,9 @@
                         <div class="option-alt">Receive a notification whenever an instructor posts a new announcement</div>
                     </label>
                 </div>
-                <div class="option-input col-md-2"><input type="checkbox" name="announcement" id="announcement" disabled checked></div>
+                <div class="option-input col-md-3"><input type="checkbox" name="announcement" id="announcement" disabled checked></div>
 
-                <div class="option-input col-md-6"><input type="checkbox" name="announcement_email" id="announcement_email" disabled checked></div>
+                <div class="option-input col-md-5"><input type="checkbox" name="announcement_email" id="announcement_email" disabled checked></div>
             </div>
             <div class="option row">
                 <div class="option-desc col-md-4">
@@ -40,9 +38,9 @@
                         <div class="option-alt">Receive a notification whenever a reply is posted in a thread that you created</div>
                     </label>
                 </div>
-                <div class="option-input col-md-2"><input type="checkbox" name="reply_thread" id="reply_thread" disabled checked></div>
+                <div class="option-input col-md-3"><input type="checkbox" name="reply_thread" id="reply_thread" disabled checked></div>
 
-                <div class="option-input col-md-6"><input type="checkbox" name="reply_thread_email" id="reply_thread_email" disabled checked></div>
+                <div class="option-input col-md-5"><input type="checkbox" name="reply_thread_email" id="reply_thread_email" disabled checked></div>
             </div>
             <div class="option row">
                 <div class="option-desc col-md-4">
@@ -51,9 +49,9 @@
                         <div class="option-alt">Receive a notification whenever one of your posts was edited, deleted, or merged</div>
                     </label>
                 </div>
-                <div class="option-input col-md-2"><input type="checkbox" name="reply_in_post_thread" id="reply_in_post_thread" disabled="true" checked></div>
+                <div class="option-input col-md-3"><input type="checkbox" name="reply_in_post_thread" id="reply_in_post_thread" disabled="true" checked></div>
 
-{#                <div class="option-input col-md-6"><input type="checkbox" name="reply_in_post_thread_email" id="reply_in_post_thread_email" disabled checked></div>#}
+                <div class="option-input col-md-5"><input type="checkbox" name="reply_in_post_thread_email" id="reply_in_post_thread_email" disabled checked></div>
             </div>
             <div class="option row">
                 <div class="option-desc col-md-4">
@@ -62,9 +60,9 @@
                         <div class="option-alt">Receive a notification whenever a reply is posted in a thread in which you also posted</div>
                     </label>
                 </div>
-                <div class="option-input col-md-2"><input type="checkbox" name="reply_in_post_thread" id="reply_in_post_thread" {% if notification_saves['reply_in_post_thread'] %}checked="true"{% endif %}></div>
+                <div class="option-input col-md-3"><input type="checkbox" name="reply_in_post_thread" id="reply_in_post_thread" {% if notification_saves['reply_in_post_thread'] %}checked="true"{% endif %}></div>
 
-                <div class="option-input col-md-6"><input type="checkbox" name="reply_in_post_thread_email" id="reply_in_post_thread_email" {% if notification_saves['reply_in_post_thread_email'] %}checked="true"{% endif %}></div>
+                <div class="option-input col-md-5"><input type="checkbox" name="reply_in_post_thread_email" id="reply_in_post_thread_email" {% if notification_saves['reply_in_post_thread_email'] %}checked="true"{% endif %}></div>
 
 
             </div>
@@ -75,9 +73,9 @@
                         <div class="option-alt">Receive a notification whenever a thread is merged</div>
                     </label>
                 </div>
-                <div class="option-input col-md-2"><input type="checkbox" name="merge_threads" id="merge_threads" {% if notification_saves['merge_threads'] %}checked="true"{% endif %}></div>
+                <div class="option-input col-md-3"><input type="checkbox" name="merge_threads" id="merge_threads" {% if notification_saves['merge_threads'] %}checked="true"{% endif %}></div>
 
-                {#<div class="option-input col-md-6"><input type="checkbox" name="merge_threads_email" id="merge_threads_email" {% if notification_saves['merge_threads_email'] %}checked="true"{% endif %}></div>#}
+                <div class="option-input col-md-5"><input type="checkbox" name="merge_threads_email" id="merge_threads_email" {% if notification_saves['merge_threads_email'] %}checked="true"{% endif %}></div>
 
 
             </div>
@@ -88,9 +86,9 @@
                         <div class="option-alt">Receive a notification whenever a thread is created</div>
                     </label>
                 </div>
-                <div class="option-input col-md-2"><input type="checkbox" name="all_new_threads" id="all_new_threads" {% if notification_saves['all_new_threads'] %}checked="true"{% endif %}></div>
+                <div class="option-input col-md-3"><input type="checkbox" name="all_new_threads" id="all_new_threads" {% if notification_saves['all_new_threads'] %}checked="true"{% endif %}></div>
 
-                {#<div class="option-input col-md-6"><input type="checkbox" name="all_new_threads_email" id="all_new_threads_email" {% if notification_saves['all_new_threads_email'] %}checked="true"{% endif %}></div>#}
+                <div class="option-input col-md-5"><input type="checkbox" name="all_new_threads_email" id="all_new_threads_email" {% if notification_saves['all_new_threads_email'] %}checked="true"{% endif %}></div>
 
 
             </div>
@@ -101,10 +99,10 @@
                         <div class="option-alt">Receive a notification whenever a post is created</div>
                     </label>
                 </div>
-                <div class="option-input col-md-2"><input type="checkbox" name="all_new_posts" id="all_new_posts" {% if notification_saves['all_new_posts'] %}checked="true"{% endif %}></div>
+                <div class="option-input col-md-3"><input type="checkbox" name="all_new_posts" id="all_new_posts" {% if notification_saves['all_new_posts'] %}checked="true"{% endif %}></div>
 
 
-                {#<div class="option-input col-md-6"><input type="checkbox" name="all_new_posts_email" id="all_new_posts_email" {% if notification_saves['all_new_posts_email'] %}checked="true"{% endif %}></div>#}
+                <div class="option-input col-md-5"><input type="checkbox" name="all_new_posts_email" id="all_new_posts_email" {% if notification_saves['all_new_posts_email'] %}checked="true"{% endif %}></div>
 
 
             </div>
@@ -116,9 +114,9 @@
                             <div class="option-alt">Receive a notification whenever a thread/post has been edited, deleted, or undeleted</div>
                         </label>
                     </div>
-                    <div class="option-input col-md-2"><input type="checkbox" name="all_modifications_forum" id="all_modifications_forum" {% if notification_saves['all_modifications_forum'] %}checked="true"{% endif %}></div>
+                    <div class="option-input col-md-3"><input type="checkbox" name="all_modifications_forum" id="all_modifications_forum" {% if notification_saves['all_modifications_forum'] %}checked="true"{% endif %}></div>
 
-                    {#<div class="option-input col-md-6"><input type="checkbox" name="all_modifications_forum_email" id="all_modifications_forum_email" {% if notification_saves['all_modifications_forum_email'] %}checked="true"{% endif %}></div>#}
+                    <div class="option-input col-md-5"><input type="checkbox" name="all_modifications_forum_email" id="all_modifications_forum_email" {% if notification_saves['all_modifications_forum_email'] %}checked="true"{% endif %}></div>
 
 
                 </div>
@@ -137,16 +135,13 @@
                 url: url,
                 success: function(data) {
                     try {
-                        console.log(data);
                         var json = JSON.parse(data);
-                        console.log(json);
                         if(json['error']) {
                             var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onclick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['error'] + '</div>';
                         }else {
                             var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onclick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['success'] + '</div>';
                         }
                     } catch(err) {
-                        alert(err);
                         var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onclick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
                     }
                     $('#notification-settings').css('display', 'none');
