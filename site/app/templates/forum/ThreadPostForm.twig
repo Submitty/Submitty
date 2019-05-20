@@ -133,4 +133,11 @@
     $("input[name='title']").change(function () {
         $(this).val($.trim($(this).val()));
     });
+
+    $(".cat-buttons").each(function () {
+        if($(this).text().length>50) {
+            $(this).text(str.substr(0, 47) + '…');
+        }
+    });
+
 </script>
