@@ -1505,6 +1505,13 @@ function publishFormWithAttachments(form, test_category, error_message) {
         success: function(data){
             try {
                 var json = JSON.parse(data);
+
+                if(json["error"]) {
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json["error"] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+
             } catch (err){
                 var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
                 $('#messages').append(message);
@@ -1560,7 +1567,7 @@ function changeThreadStatus(thread_id) {
 	});
 }
 
-function editPost(post_id, thread_id, shouldEditThread) {
+function editPost(post_id, thread_id, shouldEditThread, csrf_token) {
     if(!checkAreYouSureForm()) return;
     var form = $("#thread_form");
     var url = buildUrl({'component': 'forum', 'page': 'get_edit_post_content'});
@@ -1569,7 +1576,8 @@ function editPost(post_id, thread_id, shouldEditThread) {
             type: "POST",
             data: {
                 post_id: post_id,
-                thread_id: thread_id
+                thread_id: thread_id,
+                csrf_token: csrf_token
             },
             success: function(data){
                 try {
@@ -2292,7 +2300,7 @@ function hidePosts(text, id) {
 
 }
 
-function deletePostToggle(isDeletion, thread_id, post_id, author, time){
+function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_token){
     if(!checkAreYouSureForm()) return;
     var page = (isDeletion?"delete_post":"undelete_post");
     var message = (isDeletion?"delete":"undelete");
@@ -2305,7 +2313,8 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time){
             type: "POST",
             data: {
                 post_id: post_id,
-                thread_id: thread_id
+                thread_id: thread_id,
+                csrf_token: csrf_token
             },
             success: function(data){
                 try {
