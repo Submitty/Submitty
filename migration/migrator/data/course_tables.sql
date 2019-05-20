@@ -518,9 +518,6 @@ CREATE TABLE notification_settings (
 	reply_in_post_thread_email BOOLEAN DEFAULT FALSE NOT NULL
 );
 
-
-
-
 --
 -- Name: regrade_discussion; Type: TABLE; Schema: public; Owner: -
 --
