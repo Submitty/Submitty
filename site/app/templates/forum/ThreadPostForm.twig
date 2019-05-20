@@ -135,8 +135,16 @@
     });
 
     $(".cat-buttons").each(function () {
-        if($(this).text().length>50) {
-            $(this).text(str.substr(0, 47) + '…');
+        if($(this).text().length>20) {
+            $(this).text($(this).text().substr(0, 17) + '…');
+        }
+    });
+
+    // XPRILION
+
+    $(".label_forum").each(function () {
+        if($(this).text().length>20) {
+            $(this).text($(this).text().substr(0, 17) + '…');
         }
     });
 
