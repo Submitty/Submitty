@@ -2350,7 +2350,7 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
     }
 }
 
-function alterAnnouncement(thread_id, confirmString, url){
+function alterAnnouncement(thread_id, confirmString, url, csrf_token){
     var confirm = window.confirm(confirmString);
     if(confirm){
         var url = buildUrl({'component': 'forum', 'page': url});
@@ -2358,7 +2358,9 @@ function alterAnnouncement(thread_id, confirmString, url){
             url: url,
             type: "POST",
             data: {
-                thread_id: thread_id
+                thread_id: thread_id,
+                csrf_token: csrf_token
+
             },
             success: function(data){
                 window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'thread_id': thread_id}));
