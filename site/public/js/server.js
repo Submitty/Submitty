@@ -2008,14 +2008,15 @@ function showHistory(post_id) {
     });
 }
 
-function addNewCategory(){
+function addNewCategory(csrf_token){
     var newCategory = $("#new_category_text").val();
     var url = buildUrl({'component': 'forum', 'page': 'add_category'});
     $.ajax({
             url: url,
             type: "POST",
             data: {
-                newCategory: newCategory
+                newCategory: newCategory,
+                csrf_token: csrf_token
             },
             success: function(data){
                 try {
@@ -2056,13 +2057,14 @@ function addNewCategory(){
     })
 }
 
-function deleteCategory(category_id, category_desc){
+function deleteCategory(category_id, category_desc, csrf_token){
     var url = buildUrl({'component': 'forum', 'page': 'delete_category'});
     $.ajax({
             url: url,
             type: "POST",
             data: {
-                deleteCategory: category_id
+                deleteCategory: category_id,
+                csrf_token: csrf_token
             },
             success: function(data){
                 try {
@@ -2088,11 +2090,11 @@ function deleteCategory(category_id, category_desc){
     })
 }
 
-function editCategory(category_id, category_desc, category_color) {
+function editCategory(category_id, category_desc, category_color, csrf_token) {
     if(category_desc === null && category_color === null) {
         return;
     }
-    var data = {category_id: category_id};
+    var data = {category_id: category_id, csrf_token: csrf_token};
     if(category_desc !== null) {
         data['category_desc'] = category_desc;
     }
@@ -2349,7 +2351,7 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
     }
 }
 
-function alterAnnouncement(thread_id, confirmString, url){
+function alterAnnouncement(thread_id, confirmString, url, csrf_token){
     var confirm = window.confirm(confirmString);
     if(confirm){
         var url = buildUrl({'component': 'forum', 'page': url});
@@ -2357,7 +2359,9 @@ function alterAnnouncement(thread_id, confirmString, url){
             url: url,
             type: "POST",
             data: {
-                thread_id: thread_id
+                thread_id: thread_id,
+                csrf_token: csrf_token
+
             },
             success: function(data){
                 window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'thread_id': thread_id}));
