@@ -362,16 +362,15 @@ function isValidSubmission(){
 
 function checkForPreviousSubmissions(csrf_token, gradeable_id, user_id){
     var formData = new FormData();
-    formData.append('csrf_token', csrf_token);
-    formData.append('user_id', user_id);
     var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'verify', 'gradeable_id': gradeable_id});
 
     return $.ajax({
         async: false,
         url: url,
-        data: formData,
-        processData: false,
-        contentType: false,
+        data: {
+            'csrf_token' : csrf_token,
+            'user_id' : user_id
+        },
         type: 'POST',
     });
 }
@@ -380,160 +379,140 @@ function checkForPreviousSubmissions(csrf_token, gradeable_id, user_id){
  * @param csrf_token
  * @param gradeable_id
  * @param user_id
- * @param is_pdf
- * @param path
- * @param count
- * @param makeSubmission, a callback function
+ * Ajax call to check if user id is valid and has a corresponding user and gradeable.
+ * user_id can be an array of ids to validate multiple at once for teams
  */
-function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, git_user_id, git_repo_id, makeSubmission, qr_bulk_upload = false) {
-
-    var formData = new FormData();
-    formData.append('csrf_token', csrf_token);
-    formData.append('user_id', user_id);
-
-    var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'verify', 'gradeable_id': gradeable_id});
-    $.ajax({
-        url: url,
-        data: formData,
-        processData: false,
-        contentType: false,
-        type: 'POST',
-        success: function(data) {
-            try {
-                data = JSON.parse(data);
-                if (data['success']) {
-                    if(data['previous_submission'] && !qr_bulk_upload) { // if there is a previous submission, give the user merge options
-                        var form = $("#previous-submission-form");
-                        var submitter = form.find(".submit-button");
-                        var closer = form.find(".close-button");
-
-                        submitter.off('click');
-                        closer.off('click');
-
-                        submitter.on('click', function() { // on click, make submission based on which radio input was checked
-                            if($("#instructor-submit-option-new").is(":checked")) {
-                                localStorage.setItem("instructor-submit-option", "0");
-                                makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id);
-                            }
-                            else if($("#instructor-submit-option-merge-1").is(":checked")) {
-                                localStorage.setItem("instructor-submit-option", "1");
-                                makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id, true);
-                            }
-                            else if($("#instructor-submit-option-merge-2").is(":checked")) {
-                                localStorage.setItem("instructor-submit-option", "2");
-                                makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id, true, true);
-                            }
-                            form.css("display", "none");
-                        });
-
-                        closer.on('click', function() {
-                            if($("#instructor-submit-option-new").is(":checked")) {
-                                localStorage.setItem("instructor-submit-option", "0");
-                            }
-                            else if($("#instructor-submit-option-merge-1").is(":checked")) {
-                                localStorage.setItem("instructor-submit-option", "1");
-                            }
-                            else if($("#instructor-submit-option-merge-2").is(":checked")) {
-                                localStorage.setItem("instructor-submit-option", "2");
-                            }
-                            form.css("display", "none");
-                        });
-
-                        $('.popup-form').css('display', 'none');
-                        form.css("display", "block");
-
-                        // on open, set either the new submission or merge no clobber option to checked based on the whether or not the toggle-merge-default checkbox is checked.
-                        var radio_idx;
-                        if(localStorage.getItem("instructor-submit-option") === null) {
-                            radio_idx = 0;
-                        }
-                        else {
-                            radio_idx = parseInt(localStorage.getItem("instructor-submit-option"));
-                        }
-                        form.find('input:radio')[radio_idx].checked = true;
-                        form.find(".btn-success").focus();
-                    }
-                    else { // if no previous submissions, no merging will be necessary
-                        makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id);
-                    }
+function validateUserId(csrf_token, gradeable_id, user_id){
+    var url = buildUrl({'component': 'student', 'page': 'submission', 
+                        'action': 'verify', 'gradeable_id': gradeable_id});
+    return new Promise(function (resolve, reject) {
+        $.ajax({
+            url : url,
+            data : {
+                'csrf_token' : csrf_token,
+                'user_id' : user_id
+            },
+            type : 'POST',
+            success : function(response){ 
+                response = JSON.parse(response);
+                if(response['success']){
+                    resolve(response); 
+                }else{
+                    reject(response['message']);
                 }
-                else {
-                    alert("ERROR! \n\n" + data['message']);
-                }
+            },
+            error : function(err){
+                console.log("Error while trying to validate user id" + user_id);
+                reject(new Error(err));
             }
-            catch (e) {
-                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
-                    "send it to an administrator, as well as what you were doing and what files you were uploading.");
-                console.log(data);
-            }
-        },
-        error: function() {
-            $("#submit").prop("disabled", false);
-            alert("Something went wrong. Please try again.");
-        }
+        });
     });
 }
 
+//@param json a dictionary {success : true/false, message : string}
+//@param index used for id
+//function to display pop-up notification after bulk submission/delete
+function displaySubmissionMessage(json, index = 0){
+    var message ='<div id="bulk_message_' + String(index) + '" class="inner-message alert alert-' +
+                        (json['success'] ? 'success' : 'error') + '">\
+                    <a class="fas fa-times message-close" onclick="removeMessagePopup(\'bulk_message_' + String(index) + '\');"></a>\
+                    <i class="' + (json['success'] ? 'fas fa-check-circle' : 'fas fa-times-circle') +'"></i>' + json['message'] + 
+                 '</div>';
+
+    $('#messages').append(message);
+    setTimeout(function() {
+        $("#bulk_message_" + String(index)).fadeOut().empty();
+    }, 5000);
+}
+
+//@param callback to function when user selects an option
+//function to display the different options when submiting a split item to a student with previous submissions
+function displayPreviousSubmissionOptions(callback){
+    var form = $("#previous-submission-form");
+    var submit_btn = form.find(".submit-button");
+    var closer_btn = form.find(".close-button");
+
+    var option;
+    // on click, make submission based on which radio input was checked
+    submit_btn.on('click', function() { 
+        if($("#instructor-submit-option-new").is(":checked")) {
+            localStorage.setItem("instructor-submit-option", "0");
+            option = 1;
+        }else if($("#instructor-submit-option-merge-1").is(":checked")) {
+            localStorage.setItem("instructor-submit-option", "1");
+            option = 2;
+        }else if($("#instructor-submit-option-merge-2").is(":checked")) {
+            localStorage.setItem("instructor-submit-option", "2");
+            option = 3;
+        }
+        form.css("display", "none");
+        callback(option);
+    });
+
+    //on close, save the option selected
+    closer_btn.on('click', function() {
+        if($("#instructor-submit-option-new").is(":checked")) {
+            localStorage.setItem("instructor-submit-option", "0");
+        }else if($("#instructor-submit-option-merge-1").is(":checked")) {
+            localStorage.setItem("instructor-submit-option", "1");
+        }else if($("#instructor-submit-option-merge-2").is(":checked")) {
+            localStorage.setItem("instructor-submit-option", "2");
+        }
+        form.css("display", "none");
+        callback(-1);
+    });
+
+    $('.popup-form').css('display', 'none');
+    form.css("display", "block");
+
+    //check the option from whatever option was saved
+    var radio_idx;
+    if(localStorage.getItem("instructor-submit-option") === null) {
+        radio_idx = 0;
+    }else {
+        radio_idx = parseInt(localStorage.getItem("instructor-submit-option"));
+    }
+    form.find('input:radio')[radio_idx].checked = true;
+}
+
 /**
-* @param csrf_token
-* @param gradeable_id
-* @param user_id
-* @param path
-* @param count
-*/
-function submitSplitItem(csrf_token, gradeable_id, user_id, path, count, merge_previous=false, clobber=false) {
-    var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload_split', 'gradeable_id': gradeable_id, 'merge': merge_previous, 'clobber': clobber});
-    var return_url = buildUrl({'component': 'student','gradeable_id': gradeable_id});
+ * @param csrf_token
+ * @param gradeable_id
+ * @param user_id
+ * @param path
+ * @param merge_previous
+ * @param clobber
+ * @return promise resolve on success, reject otherwise. Contains fail/success message
+ * Ajax call to submit a split item to a student. Optional params to merge and or clobber previous submissions
+ */
+function submitSplitItem(csrf_token, gradeable_id, user_id, path, merge_previous=false, clobber=false) {
+    var url = buildUrl({'component': 'student', 'page': 'submission', 
+                        'action': 'upload_split', 'gradeable_id': gradeable_id, 
+                        'merge': merge_previous, 'clobber': clobber});
 
-    var formData = new FormData();
-
-    formData.append('csrf_token', csrf_token);
-    formData.append('user_id', user_id);
-    formData.append('path', path);
-
-    $.ajax({
-        url: url,
-        data: formData,
-        processData: false,
-        contentType: false,
-        type: 'POST',
-        success: function(data) {
-            try {
-                data = JSON.parse(data);
-                if (data['success']) {
-                    $("#bulk_submit_" + count).prop("disabled", true);
-                    $("#bulk_delete_" + count).prop("disabled", true);
-                    $("#users_" + count + " :input").prop("disabled", true);
-                    var message ='<div id="submit_' + count +  '" class="inner-message alert alert-success"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'submit_' + count +'\');"></a><i class="fas fa-check-circle"></i>' + data['message'] + '</div>';
-                    $('#messages').append(message);
-                    setTimeout(function() {
-                        $('#submit_' + count).fadeOut();
-                    }, 5000);
-                    var index = student_without_ids.indexOf(user_id);
-                    if (index > -1) {
-                        student_without_ids.splice(index, 1);
-                    }
-                    return;
+    return new Promise(function (resolve, reject) {
+        $.ajax({
+            url: url,
+            data: {
+                'csrf_token' : csrf_token,
+                'user_id' : user_id,
+                'path' : path
+            },
+            type: 'POST',
+            success: function(response) {     
+                response = JSON.parse(response);
+                if (response['success']) {
+                    resolve(response);
                 }
                 else {
-                    if (data['message'] == "You do not have access to that page.") {
-                        window.location.href = return_url;
-                    }
-                    else {
-                        alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
-                    }
-                }
+                    reject(response);
+                }    
+            },
+            error: function(err) {
+                console.log("Failed while submiting split item");
+                reject(new Error(err));
             }
-            catch (e) {
-                console.log(e);
-                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
-                    "send it to an administrator, as well as what you were doing and what files you were uploading.");
-                console.log(data);
-            }
-        },
-        error: function() {
-            alert("ERROR! Please contact administrator that you could not upload files.");
-        }
+        });
     });
 }
 
@@ -541,51 +520,33 @@ function submitSplitItem(csrf_token, gradeable_id, user_id, path, count, merge_p
 * @param csrf_token
 * @param gradeable_id
 * @param path
-* @param count
+* @return promise resolve on success, reject otherwise. Contains fail/success message
 */
-function deleteSplitItem(csrf_token, gradeable_id, path, count) {
+function deleteSplitItem(csrf_token, gradeable_id, path) {
 
     var submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'delete_split', 'gradeable_id': gradeable_id});
 
-    var formData = new FormData();
-
-    formData.append('csrf_token', csrf_token);
-    formData.append('path', path);
-
-    $.ajax({
-        url: submit_url,
-        data: formData,
-        processData: false,
-        contentType: false,
-        type: 'POST',
-        success: function(data) {
-            try {
-                data = JSON.parse(data);
-                if (data['success']) {
-                    $("#bulk_submit_" + count).prop("disabled", true);
-                    $("#bulk_delete_" + count).prop("disabled", true);
-                    $("#bulk_user_id_" + count).val("");
-                    $("#bulk_user_id_" + count).prop("disabled", true);
-                    var message ='<div id="delete_' + count + '" class="inner-message alert alert-success"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'delete_' + count + '\');"></a><i class="fas fa-check-circle"></i>' + data['message'] + '</div>';
-                    $('#messages').append(message);
-                    setTimeout(function() {
-                        $('#delete_' + count).fadeOut();
-                    }, 5000);
-                    return;
+    return new Promise(function (resolve, reject) {
+        $.ajax({
+            url: submit_url,
+            data: {
+                'csrf_token' : csrf_token,
+                'path' : path
+            },
+            type: 'POST',
+            success: function(response) {
+                response = JSON.parse(response);
+                if (response['success']) {
+                    resolve(response);
+                }else {
+                    reject(response);
                 }
-                else {
-                    alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
-                }
+            },
+            error: function(err) {
+                console.log("Failed while deleting split item");
+                reject(new Error(err));
             }
-            catch (e) {
-                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
-                    "send it to an administrator, as well as what you were doing and what files you were deleting.");
-                console.log(data);
-            }
-        },
-        error: function() {
-            alert("ERROR! Please contact administrator that you could not delete files.");
-        }
+        });
     });
 }
 
