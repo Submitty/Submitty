@@ -205,8 +205,7 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
         # there should be a checkout log file in the results directory
         # move that file to the tmp logs directory..
         vcs_checkout_logfile = os.path.join(results_path,"logs","vcs_checkout.txt")
-        exists = os.path.isfile(vcs_checkout_logfile)
-        if exists:
+        if os.path.isfile(vcs_checkout_logfile):
             shutil.move(vcs_checkout_logfile,tmp_logs)
         else:
             grade_items_logging.log_message(JOB_ID, message=str(my_name)+" ERROR: missing vcs_checkout.txt logfile "+str(vcs_checkout_logfile))

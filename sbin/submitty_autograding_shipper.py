@@ -395,6 +395,8 @@ def valid_github_user_id(userid):
     # hyphens. Github username cannot have multiple consecutive
     # hyphens. Github username cannot begin or end with a hyphen.
     # Maximum is 39 characters.
+    #
+    # NOTE: We only scrub the input for allowed characters.
     if (userid==''):
         # GitHub userid cannot be empty
         return False
@@ -424,9 +426,10 @@ def checkout_vcs_repo(my_file):
         obj = json.load(infile)
 
     partial_path = os.path.join(obj["gradeable"],obj["who"],str(obj["version"]))
-    submission_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"submissions",partial_path)
-    checkout_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"checkout",partial_path)
-    results_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"results",partial_path)
+    course_dir = os.path.join(SUBMITTY_DATA_DIR, "courses", obj["semester"], obj["course"])
+    submission_path = os.path.join(course_dir, "submissions", partial_path)
+    checkout_path = os.path.join(course_dir, "checkout", partial_path)
+    results_path = os.path.join(course_dir, "results", partial_path)
 
     is_vcs,vcs_type,vcs_base_url,vcs_subdirectory = packer_unpacker.get_vcs_info(SUBMITTY_DATA_DIR,obj["semester"],obj["course"],obj["gradeable"],obj["who"],obj["team"])
 
