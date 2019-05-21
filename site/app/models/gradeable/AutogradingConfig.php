@@ -167,7 +167,7 @@ class AutogradingConfig extends AbstractModel {
 
         // Get the input details
         for ($i = 0; $i < $num_inputs; $i++) {
-            if ($actual_input[$i]['type'] == "textbox") {
+            if ($actual_input[$i]['type'] == "short_answer") {
                 $this->inputs[$i] = new SubmissionTextBox($this->core, $actual_input[$i]);
             } elseif ($actual_input[$i]['type'] == "codebox") {
                 $this->inputs[$i] = new SubmissionCodeBox($this->core, $actual_input[$i]);
