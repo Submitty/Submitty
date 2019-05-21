@@ -833,6 +833,8 @@ class SubmissionController extends AbstractController {
         $queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_queue",
             implode("__", $queue_file));
 
+        $vcs_checkout = isset($_REQUEST['vcs_checkout']) ? $_REQUEST['vcs_checkout'] === "true" : false;
+
         // create json file...
         $queue_data = array("semester" => $this->core->getConfig()->getSemester(),
             "course" => $this->core->getConfig()->getCourse(),
@@ -844,7 +846,8 @@ class SubmissionController extends AbstractController {
             "team" => $team_id,
             "who" => $who_id,
             "is_team" => $gradeable->isTeamAssignment(),
-            "version" => $new_version);
+            "version" => $new_version,
+            "vcs_checkout" => $vcs_checkout);
 
         if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
             return $this->uploadResult("Failed to create file for grading queue.", false);
@@ -1372,15 +1375,22 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Failed to save timestamp file for this submission.", false);
         }
 
-        $queue_file = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
-            $gradeable->getId(), $who_id, $new_version);
+        $queue_file_helper = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
+                                   $gradeable->getId(), $who_id, $new_version);
+        $queue_file_helper = implode("__", $queue_file_helper);
         $queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_queue",
-            implode("__", $queue_file));
+                                           $queue_file_helper);
+        // SPECIAL NAME FOR QUEUE FILE OF VCS GRADEABLES
+        $vcs_queue_file = "";
+        if ($vcs_checkout === true) {
+          $vcs_queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_queue",
+                                                 "VCS__".$queue_file_helper);
+        }
 
         // create json file...
         $queue_data = array("semester" => $this->core->getConfig()->getSemester(),
             "course" => $this->core->getConfig()->getCourse(),
-            "gradeable" =>  $gradeable->getId(),
+            "gradeable" => $gradeable->getId(),
             "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
             "max_possible_grading_time" => $gradeable->getAutogradingConfig()->getMaxPossibleGradingTime(),
             "queue_time" => $current_time,
@@ -1388,15 +1398,24 @@ class SubmissionController extends AbstractController {
             "team" => $team_id,
             "who" => $who_id,
             "is_team" => $gradeable->isTeamAssignment(),
-            "version" => $new_version);
+            "version" => $new_version,
+            "vcs_checkout" => $vcs_checkout);
 
         if ($gradeable->isTeamAssignment()) {
             $queue_data['team_members'] = $team->getMemberUserIds();
         }
 
-
-        if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
+        // Create the vcs file first!  (avoid race condition, we must
+        // check out the files before trying to grade them)
+        if ($vcs_queue_file !== "") {
+          if (@file_put_contents($vcs_queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
+            return $this->uploadResult("Failed to create vcs file for grading queue.", false);
+          }
+        } else {
+          // Then create the file that will trigger autograding
+          if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
             return $this->uploadResult("Failed to create file for grading queue.", false);
+          }
         }
 
         if($gradeable->isTeamAssignment()) {
