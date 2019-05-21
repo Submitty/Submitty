@@ -180,11 +180,11 @@
 
             {# Render content #}
             {% set num_inputs = 0 %}
-            {% for c in contents %}
+            {% for n in notebooks %}
                 <div id="content_{{ loop.index0 }}">
-                    <h2>{{ c.title }}</h2>
+                    <h2>{{ n.title }}</h2>
 
-                    {% for image in c.images %}
+                    {% for image in n.images %}
                         <img src="{{ attribute(image_data, image.name) }}"
                         {% if image.width > 0 %}
                             width="{{ image.width }}"
@@ -196,7 +196,7 @@
                     {% endfor %}
 
                     {# Render the inputs for the given content block #}
-                    {% for i in c.input %}
+                    {% for i in n.input %}
                         <div id="input_container_{{ loop.index0 }}">
                             {% if i.type == "short_answer" %}
                                 {{ self.render_short_answer(i, num_inputs ) }}

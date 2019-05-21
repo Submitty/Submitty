@@ -48,8 +48,8 @@ class AutogradingConfig extends AbstractModel {
     /** @property @var string[] The names of different upload bins on the submission page (1-indexed) */
     protected $part_names = [];
 
-    /** @property @var array Array of content objects */
-    private $content = [];
+    /** @property @var array Array of notebooks objects */
+    private $notebooks = [];
     /** @property @var AbstractGradingInput[] Grading input configs for all new types of gradeable input*/
     private $inputs = [];
     /** @property @var AutogradingTestcase[] Cut-down information about autograding test cases*/
@@ -144,7 +144,7 @@ class AutogradingConfig extends AbstractModel {
         $actual_input = array();
         if (isset($details['content'])) {
             foreach ($details['content'] as $c) {
-                $this->content[$other_count] = $c;
+                $this->notebooks[$other_count] = $c;
                 $num_inputs = $num_inputs + count($c['input'] ?? []);
                 foreach ($c['input'] as $inp) {
                     $actual_input[$temp_count] = $inp;
@@ -202,8 +202,8 @@ class AutogradingConfig extends AbstractModel {
         return $this->inputs;
     }
 
-    public function getContent() {
-        return $this->content;
+    public function getNotebooks() {
+        return $this->notebooks;
     }
 
     /**
