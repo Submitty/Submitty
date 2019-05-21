@@ -142,20 +142,6 @@
         {% endif %}
         <input type="submit" style="display:inline-block;" name="post" value="{{ submit_label }}" class="btn btn-primary" />
     </span>
-    {% if locked_thread and core.getUser.getGroup > 1%}
-        <script>
-            $(document).ready(function () {
-                $('input[type="submit"]').prop('disabled',true);
-                $('input[name="Anon"]').prop('disabled',true);
-                $('label[for="Anon"]').prop('disabled',true);
-                $("button#link_btn").prop({'disabled':true});
-                $("button#code_btn").prop({'disabled':true});
-                $("label#file_input_label").addClass('disabled');
-                $(".post_button_color").addClass('disabled');
-                $("textarea").prop({'disabled': true, 'value': 'Thread is locked'});
-            })
-        </script>
-    {% endif %}
 </div>
 <br>
 </div>
