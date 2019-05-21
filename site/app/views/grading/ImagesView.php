@@ -35,8 +35,11 @@ class ImagesView extends AbstractView {
         $expected_images_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "student_images");
 
         $dir = new \DirectoryIterator($expected_images_path);
+        //Extensions array can be extended if we want to support more types
+        $valid_image_extensions = array("png", "jpg", "jpeg");
         foreach ($dir as $fileinfo) {
-            if (!$fileinfo->isDot() && $fileinfo->getExtension() === "png") {
+            $extension = $fileinfo->getExtension();
+            if (!$fileinfo->isDot() && in_array($fileinfo->getExtension(), $valid_image_extensions)) {
 
                 $expected_image = $fileinfo->getPathname();
                 $content_type = FileUtils::getContentType($expected_image);
