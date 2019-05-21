@@ -37,7 +37,8 @@ try:
 
     TODAY = datetime.datetime.now()
     LOG_FILE = open(os.path.join(
-        EMAIL_LOG_PATH, "{:04d}{:02d}{:02d}.txt".format(TODAY.year, TODAY.month, TODAY.day)), 'a')
+        EMAIL_LOG_PATH, "{:04d}{:02d}{:02d}.txt".format(TODAY.year, TODAY.month,
+                                                        TODAY.day)), 'a')
 except Exception as config_fail_error:
     print("[{}] Error: Email/Database Configuration Failed {}".format(
         str(datetime.datetime.now()), str(config_fail_error)))
