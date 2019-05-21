@@ -4,7 +4,7 @@
         "submission_to_validation" : [ "*.txt", "*.png" ],
         "work_to_details" : [ "*.txt", "*.png" ]
     },
-    "content" : [
+    "notebook" : [
         { 
             "title" : "Question 1",
             "images": [

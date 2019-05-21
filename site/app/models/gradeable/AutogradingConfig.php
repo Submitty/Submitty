@@ -142,8 +142,8 @@ class AutogradingConfig extends AbstractModel {
         $temp_count = 0;
         $other_count = 0;
         $actual_input = array();
-        if (isset($details['content'])) {
-            foreach ($details['content'] as $c) {
+        if (isset($details['notebook'])) {
+            foreach ($details['notebook'] as $c) {
                 $this->notebooks[$other_count] = $c;
                 $num_inputs = $num_inputs + count($c['input'] ?? []);
                 foreach ($c['input'] as $inp) {
