@@ -46,7 +46,7 @@ class ImagesView extends AbstractView {
                     // Read image path, convert to base64 encoding
                     $expected_img_data = base64_encode(file_get_contents($expected_image));
 
-                    $img_name = $fileinfo->getBasename('.png');
+                    $img_name = pathinfo($fileinfo->getBasename(), PATHINFO_FILENAME);
                     if ($img_name === "error_image") {
                         $error_image_data = $expected_img_data;
                     }
