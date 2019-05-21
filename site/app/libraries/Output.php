@@ -5,7 +5,6 @@ use app\controllers\GlobalController;
 use app\exceptions\OutputException;
 use app\models\Breadcrumb;
 use Aptoma\Twig\Extension\MarkdownExtension;
-use Aptoma\Twig\Extension\MarkdownEngine;
 
 /**
  * Class Output
@@ -64,8 +63,6 @@ class Output {
         $template_root = FileUtils::joinPaths(dirname(__DIR__), 'templates');
         $cache_path = FileUtils::joinPaths(dirname(dirname(__DIR__)), 'cache', 'twig');
 
-        $engine = new MarkdownEngine\MichelfMarkdownEngine();
-
         $this->twig_loader = new \Twig_Loader_Filesystem($template_root);
         $this->twig = new \Twig_Environment($this->twig_loader, [
             'cache' => $this->core->getConfig()->isDebug() ? false : $cache_path,
@@ -80,7 +77,7 @@ class Output {
         if($this->core->getConfig()->wrapperEnabled()) {
             $this->twig_loader->addPath(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site'), $namespace = 'site_uploads');
         }
-        $this->twig->addExtension(new MarkdownExtension($engine));
+        $this->twig->addExtension(new MarkdownExtension(new CustomParsedownEngine()));
     }
 
     public function setInternalResources() {
