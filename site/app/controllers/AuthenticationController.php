@@ -164,7 +164,7 @@ class AuthenticationController extends AbstractController {
         }
         $this->core->getAuthentication()->setUserId($_POST['user_id']);
         $this->core->getAuthentication()->setPassword($_POST['password']);
-        if ($this->core->authenticate(false) !== true) {
+        if ($this->core->getAuthentication()->authenticate() !== true) {
             $msg = "Could not login using that user id or password";
             return $this->core->getOutput()->renderJsonFail($msg);
         }

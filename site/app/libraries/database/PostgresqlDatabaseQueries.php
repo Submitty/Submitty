@@ -28,7 +28,9 @@ class PostgresqlDatabaseQueries extends DatabaseQueries{
         $this->course_db->query("
 SELECT u.*, ns.merge_threads, ns.all_new_threads,
         ns.all_new_posts, ns.all_modifications_forum,
-        ns.reply_in_post_thread, sr.grading_registration_sections
+        ns.reply_in_post_thread, ns.merge_threads_email, ns.all_new_threads_email, 
+        ns.all_new_posts_email, ns.all_modifications_forum_email,
+        ns.reply_in_post_thread_email, sr.grading_registration_sections
 FROM users u
 LEFT JOIN notification_settings as ns ON u.user_id = ns.user_id
 LEFT JOIN (
