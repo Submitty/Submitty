@@ -150,9 +150,9 @@
                     Is there a discussion component for this assignment?
                     <br />
                     <input type="radio" id="yes_discussion" name="discussion_based" value="true" class="bool_val auto_save date-related"
-                            {{ action != 'new' and gradeable.isDiscussionBased() ? 'checked' : '' }} /> Yes
+                            {{ action != 'new' and gradeable.isDiscussionBased() ? 'checked' : '' }} /> <label for="yes_discussion">Yes</label>
                     <input type="radio" id="no_discussion" name="discussion_based" value="false" class="bool_val auto_save date-related"
-                            {{ not (action != 'new' and gradeable.isDiscussionBased()) ? 'checked' : '' }} /> No
+                            {{ not (action != 'new' and gradeable.isDiscussionBased()) ? 'checked' : '' }} /> <label for="no_discussion">No</label>
 
                     <div class="discussion_id_wrapper">
                         <label for="discussion_thread_id">What thread id(s) should be included? (separate by commas)</label>

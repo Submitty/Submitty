@@ -16,6 +16,7 @@ import paramiko
 import tempfile
 import socket
 import traceback
+import subprocess
 
 from autograder import grade_items_logging
 from autograder import grade_item
@@ -345,7 +346,7 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
     name = os.path.basename(os.path.realpath(queue_file))
     grading_file = os.path.join(directory, "GRADING_" + name)
 
-    #TODO: breach which_machine into id, address, and passphrase.
+    #TODO: break which_machine into id, address, and passphrase.
     
     try:
         # prepare the job
@@ -388,6 +389,183 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
 
 
 # ==================================================================================
+# ==================================================================================
+def valid_github_user_id(userid):
+    # Github username may only contain alphanumeric characters or
+    # hyphens. Github username cannot have multiple consecutive
+    # hyphens. Github username cannot begin or end with a hyphen.
+    # Maximum is 39 characters.
+    #
+    # NOTE: We only scrub the input for allowed characters.
+    if (userid==''):
+        # GitHub userid cannot be empty
+        return False
+    checklegal = lambda char: char.isalnum() or char == '-'
+    filtered_userid = ''.join(list(filter(checklegal,userid)))
+    if not userid == filtered_userid:
+        return False
+    return True
+
+
+def valid_github_repo_id(repoid):
+    # Only characters, numbers, dots, minus and underscore are allowed.
+    if (repoid==''):
+        # GitHub repoid cannot be empty
+        return False
+    checklegal = lambda char: char.isalnum() or char == '.' or char == '-' or char == '_'
+    filtered_repoid = ''.join(list(filter(checklegal,repoid)))
+    if not repoid == filtered_repoid:
+        return False
+    return True
+
+
+def checkout_vcs_repo(my_file):
+    print ("SHIPPER CHECKOUT VCS REPO ", my_file)
+
+    with open(my_file, 'r') as infile:
+        obj = json.load(infile)
+
+    partial_path = os.path.join(obj["gradeable"],obj["who"],str(obj["version"]))
+    course_dir = os.path.join(SUBMITTY_DATA_DIR, "courses", obj["semester"], obj["course"])
+    submission_path = os.path.join(course_dir, "submissions", partial_path)
+    checkout_path = os.path.join(course_dir, "checkout", partial_path)
+    results_path = os.path.join(course_dir, "results", partial_path)
+
+    is_vcs,vcs_type,vcs_base_url,vcs_subdirectory = packer_unpacker.get_vcs_info(SUBMITTY_DATA_DIR,obj["semester"],obj["course"],obj["gradeable"],obj["who"],obj["team"])
+
+    # cleanup the previous checkout (if it exists)
+    shutil.rmtree(checkout_path,ignore_errors=True)
+    os.makedirs(checkout_path, exist_ok=True)
+
+    job_id = "~VCS~"
+
+    try:
+        # If we are public or private github, we will have an empty vcs_subdirectory
+        if vcs_subdirectory == '':
+            with open (os.path.join(submission_path,".submit.VCS_CHECKOUT")) as submission_vcs_file:
+                VCS_JSON = json.load(submission_vcs_file)
+                git_user_id = VCS_JSON["git_user_id"]
+                git_repo_id = VCS_JSON["git_repo_id"]
+                if not valid_github_user_id(git_user_id):
+                    raise Exception ("Invalid GitHub user/organization name: '"+git_user_id+"'")
+                if not valid_github_repo_id(git_repo_id):
+                    raise Exception ("Invalid GitHub repository name: '"+git_repo_id+"'")
+                # construct path for GitHub
+                vcs_path="https://www.github.com/"+git_user_id+"/"+git_repo_id
+
+        # is vcs_subdirectory standalone or should it be combined with base_url?
+        elif vcs_subdirectory[0] == '/' or '://' in vcs_subdirectory:
+            vcs_path = vcs_subdirectory
+        else:
+            if '://' in vcs_base_url:
+                vcs_path = urllib.parse.urljoin(vcs_base_url, vcs_subdirectory)
+            else:
+                vcs_path = os.path.join(vcs_base_url, vcs_subdirectory)
+
+        # warning: --depth is ignored in local clones; use file:// instead.
+        if not '://' in vcs_path:
+            vcs_path = "file:///" + vcs_path
+
+        Path(results_path+"/logs").mkdir(parents=True, exist_ok=True)
+        checkout_log_file = os.path.join(results_path, "logs", "vcs_checkout.txt")
+
+        # grab the submission time
+        with open (os.path.join(submission_path,".submit.timestamp")) as submission_time_file:
+            submission_string = submission_time_file.read().rstrip()
+
+
+        # OPTION: A shallow clone with only the most recent commit
+        # from the submission timestamp.
+        #
+        #   NOTE: if the student has set their computer time in the
+        #     future, they could be confused that we don't grab their
+        #     most recent code.
+        #   NOTE: github repos currently fail (a bug?) with an error when
+        #     --shallow-since is used:
+        #     "fatal: The remote end hung up unexpectedly"
+        #
+        #clone_command = ['/usr/bin/git', 'clone', vcs_path, checkout_path, '--shallow-since='+submission_string, '-b', 'master']
+
+
+        # OPTION: A shallow clone, with just the most recent commit.
+        #
+        #  NOTE: If the server is busy, it might take seconds or
+        #     minutes for an available shipper to process the git
+        #     clone, and thethe timestamp might be slightly late)
+        #
+        #  So we choose this option!  (for now)
+        #
+        clone_command = ['/usr/bin/git', 'clone', vcs_path, checkout_path, '--depth', '1', '-b', 'master']
+
+
+        with open(checkout_log_file, 'a') as f:
+            print("VCS CHECKOUT", file=f)
+            print('vcs_base_url', vcs_base_url, file=f)
+            print('vcs_subdirectory', vcs_subdirectory, file=f)
+            print('vcs_path', vcs_path, file=f)
+            print(' '.join(clone_command), file=f)
+            print("\n====================================\n", file=f)
+
+        # git clone may fail -- because repository does not exist,
+        # or because we don't have appropriate access credentials
+        try:
+            subprocess.check_call(clone_command)
+            os.chdir(checkout_path)
+
+            # determine which version we need to checkout
+            # if the repo is empty or the master branch does not exist, this command will fail
+            try:
+                what_version = subprocess.check_output(['git', 'rev-list', '-n', '1', 'master'])
+                # old method:  when we had the full history, roll-back to a version by date
+                #what_version = subprocess.check_output(['git', 'rev-list', '-n', '1', '--before="'+submission_string+'"', 'master'])
+                what_version = str(what_version.decode('utf-8')).rstrip()
+                if what_version == "":
+                    # oops, pressed the grade button before a valid commit
+                    shutil.rmtree(checkout_path, ignore_errors=True)
+                # old method:
+                #else:
+                #    # and check out the right version
+                #    subprocess.call(['git', 'checkout', '-b', 'grade', what_version])
+
+                subprocess.call(['ls', '-lR', checkout_path], stdout=open(checkout_log_file, 'a'))
+                print("\n====================================\n", file=open(checkout_log_file, 'a'))
+                subprocess.call(['du', '-skh', checkout_path], stdout=open(checkout_log_file, 'a'))
+                obj['revision'] = what_version
+
+            # exception on git rev-list
+            except subprocess.CalledProcessError as error:
+                grade_items_logging.log_message(job_id,message="ERROR: failed to determine version on master branch " + str(error))
+                os.chdir(checkout_path)
+                with open(os.path.join(checkout_path,"failed_to_determine_version_on_master_branch.txt"),'w') as f:
+                    print(str(error),file=f)
+                    print("\n",file=f)
+                    print("Check to be sure the repository is not empty.\n",file=f)
+                    print("Check to be sure the repository has a master branch.\n",file=f)
+                    print("And check to be sure the timestamps on the master branch are reasonable.\n",file=f)
+
+        # exception on git clone
+        except subprocess.CalledProcessError as error:
+            grade_items_logging.log_message(job_id,message="ERROR: failed to clone repository " + str(error))
+            os.chdir(checkout_path)
+            with open(os.path.join(checkout_path,"failed_to_clone_repository.txt"),'w') as f:
+                print(str(error),file=f)
+                print("\n",file=f)
+                print("Check to be sure the repository exists.\n",file=f)
+                print("And check to be sure the submitty_daemon user has appropriate access credentials.\n",file=f)
+
+    # exception in constructing full git repository url/path
+    except Exception as error:
+        grade_items_logging.log_message(job_id,message="ERROR: failed to construct valid repository url/path" + str(error))
+        os.chdir(checkout_path)
+        with open(os.path.join(checkout_path,"failed_to_construct_valid_repository_url.txt"),'w') as f:
+            print(str(error),file=f)
+            print("\n",file=f)
+            print("Check to be sure the repository exists.\n",file=f)
+            print("And check to be sure the submitty_daemon user has appropriate access credentials.\n",file=f)
+
+    return obj
+
+# ==================================================================================
 def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
     """
     Picks a job from the queue
@@ -399,6 +577,53 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
 
     overall_lock.acquire()
     folder= INTERACTIVE_QUEUE
+
+
+    # ----------------------------------------------------------------
+    # Our first priority is to perform any awaiting VCS checkouts
+
+    # Note: This design is imperfect:
+    #
+    #   * If all shippers are busy working on long-running autograding
+    #     tasks there will be a delay of seconds or minutes between
+    #     a student pressing the submission button and clone happening.
+    #     This is a minor exploit allowing them to theoretically
+    #     continue working on their submission past the deadline for
+    #     the time period of the delay.
+    #     -- This is not a significant, practical problem.
+    #
+    #   * If multiple and/or large git submissions arrive close
+    #     together, this shipper job will be tied up performing these
+    #     clone operations.  Because we don't release the lock, any
+    #     other shippers that complete their work will also be blocked
+    #     from either helping with the clones or tackling the next
+    #     autograding job.
+    #     -- Based on experience with actual submission patterns, we
+    #        do not anticipate that this will be a significant
+    #        bottleneck at this time.
+    #
+    #   * If a git clone takes a very long time and/or hangs because of
+    #     network problems, this could halt all work on the server.
+    #     -- We'll need to monitor the production server.
+    #
+    # We plan to do a complete overhaul of the
+    # scheduler/shipper/worker and refactoring this design should be
+    # part of the project.
+
+    # Grab all the VCS files currently in the folder...
+    vcs_files = [str(f) for f in Path(folder).glob('VCS__*')]
+    for f in vcs_files:
+        vcs_file = f[len(folder)+1:]
+        no_vcs_file = f[len(folder)+1+5:]
+        # do the checkout
+        updated_obj = checkout_vcs_repo(folder+"/"+vcs_file)
+        # save the regular grading queue file
+        with open(os.path.join(folder,no_vcs_file), "w") as queue_file:
+            json.dump(updated_obj, queue_file)
+        # cleanup the vcs queue file
+        os.remove(folder+"/"+vcs_file)
+    # ----------------------------------------------------------------
+
 
     # Grab all the files currently in the folder, sorted by creation
     # time, and put them in the queue to be graded
