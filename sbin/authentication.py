@@ -77,13 +77,13 @@ if __name__ == "__main__":
     True
     """
     #
-    print(check_password({'REQUEST_URI': '/git/f17/sample/open_homework/instructor'}, 'instructor', 'instructor'))
-    print(check_password({'REQUEST_URI': '/git/f17/sample/open_homework/instructor'}, 'ta', 'ta'))
-    print(check_password({'REQUEST_URI': '/git/f17/sample/open_homework/instructor'}, 'student', 'student'))
-    print(check_password({'REQUEST_URI': '/git/f17/sample/open_homework/student'}, 'student', 'student'))
+    print(check_password({'REQUEST_URI': '/git/s19/sample/open_homework/instructor'}, 'instructor', 'instructor'))
+    print(check_password({'REQUEST_URI': '/git/s19/sample/open_homework/instructor'}, 'ta', 'ta'))
+    print(check_password({'REQUEST_URI': '/git/s19/sample/open_homework/instructor'}, 'student', 'student'))
+    print(check_password({'REQUEST_URI': '/git/s19/sample/open_homework/student'}, 'student', 'student'))
 
-    print(check_password({'REQUEST_URI': '/git/f17/sample/instructor'}, 'instructor', 'instructor'))
-    print(check_password({'REQUEST_URI': '/git/f17/sample/instructor'}, 'ta', 'ta'))
-    print(check_password({'REQUEST_URI': '/git/f17/sample/instructor'}, 'student', 'student'))
-    print(check_password({'REQUEST_URI': '/git/f17/sample/student'}, 'student', 'student'))
+    print(check_password({'REQUEST_URI': '/git/s19/sample/instructor'}, 'instructor', 'instructor'))
+    print(check_password({'REQUEST_URI': '/git/s19/sample/instructor'}, 'ta', 'ta'))
+    print(check_password({'REQUEST_URI': '/git/s19/sample/instructor'}, 'student', 'student'))
+    print(check_password({'REQUEST_URI': '/git/s19/sample/student'}, 'student', 'student'))
 
