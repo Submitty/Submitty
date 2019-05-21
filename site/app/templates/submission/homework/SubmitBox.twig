@@ -180,11 +180,11 @@
 
             {# Render content #}
             {% set num_inputs = 0 %}
-            {% for c in contents %}
+            {% for n in notebook %}
                 <div id="content_{{ loop.index0 }}">
-                    <h2>{{ c.title }}</h2>
+                    <h2>{{ n.title }}</h2>
 
-                    {% for image in c.images %}
+                    {% for image in n.images %}
                         <img src="{{ attribute(image_data, image.name) }}"
                         {% if image.width > 0 %}
                             width="{{ image.width }}"
@@ -196,10 +196,10 @@
                     {% endfor %}
 
                     {# Render the inputs for the given content block #}
-                    {% for i in c.input %}
+                    {% for i in n.input %}
                         <div id="input_container_{{ loop.index0 }}">
-                            {% if i.type == "textbox" %}
-                                {{ self.render_textbox(i, num_inputs ) }}
+                            {% if i.type == "short_answer" %}
+                                {{ self.render_short_answer(i, num_inputs ) }}
                             {% elseif i.type == "codebox" %}
                                 <br>
                             {% elseif i.type == "multiplechoice" %}
@@ -440,16 +440,16 @@
     });
 </script>
 
-{% macro render_textbox(textbox, index) %}
+{% macro render_short_answer(short_answer, index) %}
 
     <p style="max-width: 50em;">
-        <strong>{{ textbox.label }}</strong>
+        <strong>{{ short_answer.label }}</strong>
         <br>
-        {% if textbox.rows == 0 %}
+        {% if short_answer.rows == 0 %}
             <input type="text" name="input_{{ index }}" id="input_{{ index }}" onKeyPress="handle_input_keypress();">
         {% else %}
             Press <kbd>TAB</kbd> to indent.  Press <kbd>ESC</kbd> to advance from textarea.</label>
-            <textarea rows="{{ textbox.rows }}" cols="50"  style="width:60em; height:100%; min-height:110px;" name="input_{{ index }}" id="input_{{ index }}" onKeyPress="handle_input_keypress();"></textarea>
+            <textarea rows="{{ short_answer.rows }}" cols="50"  style="width:60em; height:100%; min-height:110px;" name="input_{{ index }}" id="input_{{ index }}" onKeyPress="handle_input_keypress();"></textarea>
             {#
                 Allow tab in the larger text boxes (normally tab moves to the next textbox)
                 http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
