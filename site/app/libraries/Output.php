@@ -31,9 +31,9 @@ class Output {
     
     private $start_time;
 
-    /** @var \Twig_Environment $twig */
+    /** @var \Twig\Environment $twig */
     private $twig = null;
-    /** @var \Twig_LoaderInterface $twig */
+    /** @var \Twig\Loader\LoaderInterface $twig */
     private $twig_loader = null;
     /** @var GlobalController $controller */
     private $controller;
@@ -62,15 +62,15 @@ class Output {
         $template_root = FileUtils::joinPaths(dirname(__DIR__), 'templates');
         $cache_path = FileUtils::joinPaths(dirname(dirname(__DIR__)), 'cache', 'twig');
 
-        $this->twig_loader = new \Twig_Loader_Filesystem($template_root);
-        $this->twig = new \Twig_Environment($this->twig_loader, [
+        $this->twig_loader = new \Twig\Loader\FilesystemLoader($template_root);
+        $this->twig = new \Twig\Environment($this->twig_loader, [
             'cache' => $this->core->getConfig()->isDebug() ? false : $cache_path,
             'debug' => $this->core->getConfig()->isDebug()
         ]);
         $this->twig->getExtension(\Twig\Extension\CoreExtension::class)
             ->setTimezone($this->core->getConfig()->getTimezone());
         $this->twig->addGlobal("core", $this->core);
-        $this->twig->addFunction(new \Twig_Function("render_template", function(... $args) {
+        $this->twig->addFunction(new \Twig\TwigFunction("render_template", function(... $args) {
             return call_user_func_array('self::renderTemplate', $args);
         }, ["is_safe" => ["html"]]));
         if($this->core->getConfig()->wrapperEnabled()) {
