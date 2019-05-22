@@ -196,9 +196,9 @@
                         />
                     {% endfor %}
 
-                    {% if c.description != None %}
+                    {% if n.description != None %}
                         <div id="description_{{ loop.index0 }}">
-                            {{ c.description | markdown }}
+                            {{ n.description | markdown }}
                         </div>
                         <br>
                     {% endif %}
