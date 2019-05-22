@@ -25,10 +25,7 @@ class ImagesView extends AbstractView {
         }
 
 
-        //$images_data_array to contain base64_encoded image urls
-        $images_data_array = array();
-        //$images_names_array to contain the names of the images (rcs ids)
-        $images_names_array = array();
+        $image_data = array();
         $error_image_data = '_NONE_';
 
         //Get the expected images path and png files to loop through
@@ -36,23 +33,27 @@ class ImagesView extends AbstractView {
 
         $dir = new \DirectoryIterator($expected_images_path);
         //Extensions array can be extended if we want to support more types
-        $valid_image_extensions = array("png", "jpg", "jpeg");
+        $valid_image_subtypes = array('png', 'jpg', 'jpeg', 'gif');
         foreach ($dir as $fileinfo) {
-            if (!$fileinfo->isDot() && in_array($fileinfo->getExtension(), $valid_image_extensions)) {
-
+            if (!$fileinfo->isDot() && !$fileinfo->isDir()) {
                 $expected_image = $fileinfo->getPathname();
-                $content_type = FileUtils::getContentType($expected_image);
-                if (substr($content_type, 0, 5) === "image") {
+                list($mime_type, $mime_subtype) = explode('/', FileUtils::getMimeType($expected_image), 2);
+                if ($mime_type === "image" && in_array($mime_subtype, $valid_image_subtypes)) {
                     // Read image path, convert to base64 encoding
                     $expected_img_data = base64_encode(file_get_contents($expected_image));
 
-                    $img_name = pathinfo($fileinfo->getBasename(), PATHINFO_FILENAME);
+                    $img_name = $fileinfo->getBasename('.' . $fileinfo->getExtension());
                     if ($img_name === "error_image") {
-                        $error_image_data = $expected_img_data;
+                        $error_image_data = [
+                            'subtype' => $mime_subtype,
+                            'image' => $expected_img_data
+                        ];
                     }
                     else {
-                        array_push($images_data_array, $expected_img_data);
-                        array_push($images_names_array, $img_name);
+                        $image_data[$img_name] = [
+                            'subtype' => $mime_subtype,
+                            'image' => $expected_img_data
+                        ];
                     }
                 }
             }
@@ -62,8 +63,7 @@ class ImagesView extends AbstractView {
 
         return $this->core->getOutput()->renderTwigTemplate("grading/Images.twig", [
             "sections" => $sections,
-            "imageNameArray" => $images_names_array,
-            "imageDataArray" => $images_data_array,
+            "imageData" => $image_data,
             "errorImageData" => $error_image_data,
             "hasInstructorPermission" => $instructor_permission
         ]);
