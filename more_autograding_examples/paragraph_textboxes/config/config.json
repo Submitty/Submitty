@@ -60,6 +60,7 @@
             "input" : [
                 {
                     "type" : "short_answer",
+                    "starter_value_string" : "Too many!",
                     "label": "Number of hours spent on this assignment:",
                     "filename" : "hours.txt"
                 }
