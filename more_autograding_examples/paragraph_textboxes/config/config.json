@@ -9,7 +9,8 @@
             "title" : "Question 1",
             "images": [
                 {
-                    "name" : "image1.png"
+                    "name" : "image1.png",
+                    "alt" : "A very happy pig."
                 }
             ],
             "input" : [
@@ -34,7 +35,8 @@
                 {
                     "name" : "image2.png",
                     "height" : 200,
-                    "width" : 200
+                    "width" : 200,
+                    "alt" : "The sun"
                 },
                 {
                     "name" : "image3.png",
@@ -44,7 +46,8 @@
                 {
                     "name" : "image4.png",
                     "height" : 200,
-                    "width" : 200
+                    "width" : 200,
+                    "alt" : "Volcano"
                 }
             ],
             "input" : [
