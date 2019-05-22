@@ -225,13 +225,13 @@
                             {% endif %}
                         </div>
                         {% set num_inputs = num_inputs + 1 %}
-                    {% endfor %}
+                    {% endfor %}_
                 </div>
             {% endfor %}
     
             {# Submit boxes #}
             {% for part in part_names %}
-                <div id="upload{{ loop.index }}" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 150px;">
+                <div tabindex="0" id="upload{{ loop.index }}" onkeypress="clicked_on_box(event)" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 150px;">
                     <h3 class="label" id="label{{ loop.index }}">
                         {% if part_names|length > 1 %}
                             Drag your {{ part }} here or click to open file browser
