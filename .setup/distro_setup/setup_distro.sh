@@ -95,7 +95,7 @@ ${DISTRO_LINE}
 ##    submitty_daemon, ta, instructor, postgres           ##
 ##                                                        ##
 ##  The following accounts are database accounts:         ##
-##    submitty_dbuser, root, vagrant                      ##
+##    submitty_dbuser, postgres, vagrant                  ##
 ##                                                        ##
 ##  The following users can log into the website:         ##
 ##    instructor, ta, ta2, ta3, student                   ##
