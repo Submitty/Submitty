@@ -4,7 +4,7 @@
         "submission_to_validation" : [ "*.txt", "*.png" ],
         "work_to_details" : [ "*.txt", "*.png" ]
     },
-    "content" : [
+    "notebook" : [
         { 
             "title" : "Question 1",
             "images": [
@@ -14,7 +14,7 @@
             ],
             "input" : [
                 {
-                    "type" : "textbox",
+                    "type" : "short_answer",
                     "label": "The above animal:",
                     "filename" : "animal.txt"
                 },
@@ -22,7 +22,7 @@
                     "label": "200-300 word description",
                     "rows" : 5,
                     "filename" : "description.txt",
-                    "type" : "textbox"
+                    "type" : "short_answer"
                 }   
             ]
         },
@@ -48,16 +48,16 @@
             "input" : [
                 {
                     "label": "Write a haiku about one of the above images:",
-                    "type" : "textbox",
+                    "type" : "short_answer",
                     "filename" : "haiku.txt"
                 }
             ]
         },
         { 
-            "title" : "Question 4",
+            "title" : "Question 3",
             "input" : [
                 {
-                    "type" : "textbox",
+                    "type" : "short_answer",
                     "label": "Number of hours spent on this assignment:",
                     "filename" : "hours.txt"
                 }
