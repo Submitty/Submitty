@@ -37,9 +37,9 @@
                     {% if loop.index % 5 == 0 %}
                         </tr>
                     {% endif %}
+                    {% flush %}
                 {% endfor %}
                 </tbody>
-                {% flush %}
             {% endfor %}
         {% else %}
             <tr>
