@@ -25,7 +25,7 @@ class ImagesView extends AbstractView {
         }
 
 
-        $image_data = array();
+        $image_data = [];
         $error_image_data = '_NONE_';
 
         //Get the expected images path and png files to loop through
@@ -33,7 +33,7 @@ class ImagesView extends AbstractView {
 
         $dir = new \DirectoryIterator($expected_images_path);
         //Extensions array can be extended if we want to support more types
-        $valid_image_subtypes = array('png', 'jpg', 'jpeg', 'gif');
+        $valid_image_subtypes = ['png', 'jpg', 'jpeg', 'gif'];
         foreach ($dir as $fileinfo) {
             if (!$fileinfo->isDot() && !$fileinfo->isDir()) {
                 $expected_image = $fileinfo->getPathname();
