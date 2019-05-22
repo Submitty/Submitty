@@ -69,7 +69,7 @@
                 {
                     "type" : "multiplechoice",
                     "label": "How much wood would a wood chuck chuck if a wood chuck could chuck wood?",
-                    "choices" : ["1", "3", "5", "42", "<script>alert(\"Hello! I am an alert box!;\");</script> "],
+                    "choices" : ["1", "3", "5", "42"],
                     "allow_multiple" : false,
                     "filename" : "multiple_choice.txt"
                 }
