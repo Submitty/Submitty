@@ -17,23 +17,17 @@
                     {% if loop.index % 5 == 1 %}
                         <tr id="user-{{ student.getId() }}">
                     {% endif %}
-                    {% set image_found = false %}
-                    {% for imageData in imageDataArray if not image_found %}
-                        {% set imgName = imageNameArray[loop.index-1] %}
-                        {% if student.getId() == imgName %}
-                            <td><img src="data:imgName/png;base64,{{ imageData }}" width="150" height="200/>
-                            <div class="name"><br /><br />{{student.getDisplayedFirstName()}} {{student.getDisplayedLastName()}}
-                            <br />{{student.getId()}}</div>
-                            </td>
-                            {% set image_found = true %}
-                        {% endif %}
-                    {% endfor %}
-                    {% if not image_found %}
+                    {% if imageData[student.getId()] is defined %}
+                        <td><img src="data:image/{{ imageData[student.getId()].subtype }};base64,{{ imageData[student.getId()].image }}" width="150" height="200/>
+                        <div class="name"><br /><br />{{student.getDisplayedFirstName()}} {{student.getDisplayedLastName()}}
+                        <br />{{student.getId()}}</div>
+                        </td>
+                    {% else %}
                         {% if errorImageData == '_NONE_' %}
                             <td><i><font color="gray"><img alt="No Image Available" /></font></i>
                             <div class="name"><br />
                         {% else %}
-                            <td><img src="data:imgName/png;base64,{{ errorImageData }}" width="150" height="200/>
+                            <td><img src="data:image/{{ errorImageData.subtype }};base64,{{ errorImageData.image }}" width="150" height="200/>
                             <div class="name"><br /><br />
                         {% endif %}
                         {{student.getDisplayedFirstName()}} {{student.getDisplayedLastName()}}
@@ -41,9 +35,9 @@
                         </td>
                     {% endif %}
                     {% if loop.index % 5 == 0 %}
-
                         </tr>
                     {% endif %}
+                    {% flush %}
                 {% endfor %}
                 </tbody>
             {% endfor %}
