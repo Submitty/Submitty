@@ -45,31 +45,41 @@
         <div class="row">
             <div class="box col-md-6">
                 <h2>Current Registration Section Counts</h2>
+                {# This is a data table #}
                 <table class="table table-bordered table-striped">
-                    {% for section in reg_sections %}
-                        {% if reg_sections_count[section['sections_registration_id']] %}
+                    <caption />
+                    <thead>
                         <tr>
-                            <td>Section {{ section['sections_registration_id'] }}</td>
-                            <td>{{ reg_sections_count[section['sections_registration_id']] }}</td>
+                            <th>Section</th>
+                            <th>Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for section in reg_sections %}
+                            {% if reg_sections_count[section['sections_registration_id']] %}
+                            <tr>
+                                <td>Section {{ section['sections_registration_id'] }}</td>
+                                <td>{{ reg_sections_count[section['sections_registration_id']] }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td>Section {{ section['sections_registration_id'] }}</td>
+                                <td>0</td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                        {% if reg_sections_count['NULL'] %}
+                        <tr>
+                            <td>Section NULL</td>
+                            <td>{{ reg_sections_count['NULL'] }}</td>
                         </tr>
                         {% else %}
                         <tr>
-                            <td>Section {{ section['sections_registration_id'] }}</td>
+                            <td>Section NULL</td>
                             <td>0</td>
                         </tr>
                         {% endif %}
-                    {% endfor %}
-                    {% if reg_sections_count['NULL'] %}
-                    <tr>
-                        <td>Section NULL</td>
-                        <td>{{ reg_sections_count['NULL'] }}</td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td>Section NULL</td>
-                        <td>0</td>
-                    </tr>
-                    {% endif %}
+                    </tbody>
                 </table>
             </div>
             <div class="box col-md-6">
@@ -121,25 +131,39 @@
                 <h2>Current Rotating Section Counts</h2>
                 <div class="row">
                     <div class="col-md-6">
-                        <h3>Registered Students<br>(non NULL registration section)</h3>
-                        <table class="table table-bordered table-striped">
-                            {% for row in not_null_counts %}
-                            <tr>
-                                <td>Section {{ row['rotating_section'] ?? "NULL" }}</td>
-                                <td>{{ row['count'] }}</td>
-                            </tr>
-                            {% endfor %}
+                        {# This is a data table #}
+                        <table class="table table-striped">
+                            <caption class="caption_h3">Registered Students<br>(non-NULL registration section)</caption>
+                            <thead class="table-bordered">
+                                <th>Rotating Section</th>
+                                <th>Students</th>
+                            </thead>
+                            <tbody class="table-bordered">
+                                {% for row in not_null_counts %}
+                                <tr>
+                                    <td>Section {{ row['rotating_section'] ?? "NULL" }}</td>
+                                    <td>{{ row['count'] }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
                         </table>
                     </div>
                     <div class="col-md-6">
-                        <h3>Users with<br>Registration Section=NULL</h3>
-                        <table class="table table-bordered table-striped">
-                            {% for row in null_counts %}
-                            <tr>
-                                <td>Section {{ row['rotating_section'] ?? "NULL" }}</td>
-                                <td>{{ row['count'] }}</td>
-                            </tr>
-                            {% endfor %}
+                        {# This is a data table #}
+                        <table class="table table-striped">
+                            <caption class="caption_h3">Users with<br>Registration Section = NULL</caption>
+                             <thead class="table-bordered">
+                                <th>Rotating Section</th>
+                                <th>Students</th>
+                            </thead>
+                            <tbody class="table-bordered">
+                                {% for row in null_counts %}
+                                <tr class="table-bordered">
+                                    <td>Section {{ row['rotating_section'] ?? "NULL" }}</td>
+                                    <td>{{ row['count'] }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -155,11 +179,14 @@
                         </label>
                             <label>excluding students in registration </label>
 
+                        {# This is a layout table #}
                         <table style="width:100%">
                             {% for row in reg_sections %}
-                            <tr><th>
-                                <input type="checkbox" name="{{ row['sections_registration_id'] }}" value="{{ row['sections_registration_id'] }}" >Section {{ row['sections_registration_id'] }}</input>
-                                </th></tr>
+                            <tr>
+                                <td style="text-align: center; font-weight: bold">
+                                    <input type="checkbox" name="{{ row['sections_registration_id'] }}" value="{{ row['sections_registration_id'] }}" >Section {{ row['sections_registration_id'] }}</input>
+                                </td>
+                            </tr>
                             {% endfor %}
                         </table>
 

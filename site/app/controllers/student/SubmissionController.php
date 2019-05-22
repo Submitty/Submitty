@@ -363,9 +363,14 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Invalid gradeable id '{$gradeable_id}'", false);
         }
 
-        //usernames come in comma delimited. We split on the commas, then filter out blanks.
-        $user_ids = explode (",", $_POST['user_id']);
-        $user_ids = array_filter($user_ids);
+        //filter out empty, null strings
+        $tmp_ids = $_POST['user_id'];
+        if(is_array($tmp_ids)){
+            $user_ids = array_filter($_POST['user_id']);
+        } else{
+            $user_ids = array($tmp_ids);
+            $user_ids = array_filter($user_ids);
+        }
 
         //If no user id's were submitted, give a graceful error.
         if (count($user_ids) === 0) {
@@ -397,26 +402,40 @@ class SubmissionController extends AbstractController {
             $graded_gradeables[] = $gg;
         }
 
-        // Below is true if no users are on a team. In this case, we later make the team automatically,
-        //   so this should not return a failure.
-        // if (count($graded_gradeables) === 0) {
-        //     // No user was on a team
-        //     $msg = 'No user on a team';
-        //     $return = array('success' => false, 'message' => $msg);
-        //     $this->core->getOutput()->renderJson($return);
-        //     return $return;
-        // } else
+        $null_team_count = 0;
+        $inconsistent_teams = false;
+        if($gradeable->isTeamAssignment()){
+            $teams = [];
+            foreach ($user_ids as $user) {
+                $tmp = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $user);
+                if($tmp === NULL){
+                    $null_team_count ++;
+                }else{
+                    $teams[] = $tmp->getId();
+                }
+            }
+            $teams = array_unique(array_filter($teams));
+            $inconsistent_teams = count($teams) > 1;
+        }
 
         //If the users are on multiple teams.
-        if (count($graded_gradeables) > 1) {
+        if ($gradeable->isTeamAssignment() && $inconsistent_teams) {
             // Not all users were on the same team
             $msg = "Inconsistent teams. One or more users are on different teams.";
             $return = array('success' => false, 'message' => $msg);
             $this->core->getOutput()->renderJson($return);
             return $return;
         }
+        //If a user not assigned to any team is matched with a user already on a team
+        if($gradeable->isTeamAssignment() && $null_team_count != 0 && count($teams) != 0){
+            $msg = "One or more users with no team are being submitted with another user already on a team";
+            $return = array('success' => false, 'message' => $msg);
+            $this->core->getOutput()->renderJson($return);
+            return $return;
+        }
 
         $highest_version = -1;
+
         if(count($graded_gradeables) > 0){
             $graded_gradeable = $graded_gradeables[0];
             $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
@@ -654,9 +673,14 @@ class SubmissionController extends AbstractController {
 
         $original_user_id = $this->core->getUser()->getId();
 
-        //user ids come in as a comma delimited list. we explode that list, then filter out empty values.
-        $user_ids = explode (",", $_POST['user_id']);
-        $user_ids = array_filter($user_ids);
+        $tmp_ids = $_POST['user_id'];
+        if(is_array($tmp_ids)){
+            $user_ids = array_filter($_POST['user_id']);
+        } else{
+            $user_ids = array($tmp_ids);
+            $user_ids = array_filter($user_ids);
+        }
+        
         //This grabs the first user in the list. If this is a team assignment, they will be the team leader.
         $user_id = reset($user_ids);
 
@@ -705,6 +729,7 @@ class SubmissionController extends AbstractController {
                     $gradeable->createTeam($leader_user, $members);
                 } catch (\Exception $e) {
                     $this->core->addErrorMessage('Team may not have been properly initialized: ' . $e->getMessage());
+                    return $this->uploadResult("Failed to form a team from members: " . implode(",", $members) . ", " . $leader_user, false);
                 }
 
                 // Once team is created, load in the graded gradeable
@@ -833,6 +858,8 @@ class SubmissionController extends AbstractController {
         $queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_queue",
             implode("__", $queue_file));
 
+        $vcs_checkout = isset($_REQUEST['vcs_checkout']) ? $_REQUEST['vcs_checkout'] === "true" : false;
+
         // create json file...
         $queue_data = array("semester" => $this->core->getConfig()->getSemester(),
             "course" => $this->core->getConfig()->getCourse(),
@@ -844,7 +871,8 @@ class SubmissionController extends AbstractController {
             "team" => $team_id,
             "who" => $who_id,
             "is_team" => $gradeable->isTeamAssignment(),
-            "version" => $new_version);
+            "version" => $new_version,
+            "vcs_checkout" => $vcs_checkout);
 
         if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
             return $this->uploadResult("Failed to create file for grading queue.", false);
@@ -1091,17 +1119,20 @@ class SubmissionController extends AbstractController {
             }
 
             // save the contents of the text boxes to files
-            $empty_textboxes = true;
-            if (isset($_POST['textbox_answers'])) {
-                $textbox_answer_array = json_decode($_POST['textbox_answers']);
-                for ($i = 0; $i < $gradeable->getAutogradingConfig()->getNumTextBoxes(); $i++) {
-                    $textbox_answer_val = $textbox_answer_array[$i];
-                    if ($textbox_answer_val != "") $empty_textboxes = false;
-                    $filename = $gradeable->getAutogradingConfig()->getTextboxes()[$i]->getFileName();
+            $empty_inputs = true;
+            if (isset($_POST['input_answers'])) {
+                $input_answer_object = json_decode($_POST['input_answers'], true);
+                for ($i = 0; $i < $gradeable->getAutogradingConfig()->getNumInputs(); $i++) {
+                    $input_answers = $input_answer_object["input_" . $i];
+                    if ( count($input_answers) > 0)  $empty_inputs = false;
+                    $filename = $gradeable->getAutogradingConfig()->getInputs()[$i]->getFileName();
                     $dst = FileUtils::joinPaths($version_path, $filename);
                     // FIXME: add error checking
                     $file = fopen($dst, "w");
-                    fwrite($file, $textbox_answer_val);
+
+                    foreach($input_answers as $input_answer_val){
+                        fwrite($file, $input_answer_val . "\n");
+                    }
                     fclose($file);
                 }
             }
@@ -1120,7 +1151,7 @@ class SubmissionController extends AbstractController {
             }
 
 
-            if (empty($uploaded_files) && empty($previous_files_src) && $empty_textboxes) {
+            if (empty($uploaded_files) && empty($previous_files_src) && $empty_inputs) {
                 return $this->uploadResult("No files to be submitted.", false);
             }
 
@@ -1369,15 +1400,22 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Failed to save timestamp file for this submission.", false);
         }
 
-        $queue_file = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
-            $gradeable->getId(), $who_id, $new_version);
+        $queue_file_helper = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
+                                   $gradeable->getId(), $who_id, $new_version);
+        $queue_file_helper = implode("__", $queue_file_helper);
         $queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_queue",
-            implode("__", $queue_file));
+                                           $queue_file_helper);
+        // SPECIAL NAME FOR QUEUE FILE OF VCS GRADEABLES
+        $vcs_queue_file = "";
+        if ($vcs_checkout === true) {
+          $vcs_queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_queue",
+                                                 "VCS__".$queue_file_helper);
+        }
 
         // create json file...
         $queue_data = array("semester" => $this->core->getConfig()->getSemester(),
             "course" => $this->core->getConfig()->getCourse(),
-            "gradeable" =>  $gradeable->getId(),
+            "gradeable" => $gradeable->getId(),
             "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
             "max_possible_grading_time" => $gradeable->getAutogradingConfig()->getMaxPossibleGradingTime(),
             "queue_time" => $current_time,
@@ -1385,15 +1423,24 @@ class SubmissionController extends AbstractController {
             "team" => $team_id,
             "who" => $who_id,
             "is_team" => $gradeable->isTeamAssignment(),
-            "version" => $new_version);
+            "version" => $new_version,
+            "vcs_checkout" => $vcs_checkout);
 
         if ($gradeable->isTeamAssignment()) {
             $queue_data['team_members'] = $team->getMemberUserIds();
         }
 
-
-        if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
+        // Create the vcs file first!  (avoid race condition, we must
+        // check out the files before trying to grade them)
+        if ($vcs_queue_file !== "") {
+          if (@file_put_contents($vcs_queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
+            return $this->uploadResult("Failed to create vcs file for grading queue.", false);
+          }
+        } else {
+          // Then create the file that will trigger autograding
+          if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
             return $this->uploadResult("Failed to create file for grading queue.", false);
+          }
         }
 
         if($gradeable->isTeamAssignment()) {
