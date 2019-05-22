@@ -221,6 +221,7 @@ int main(int argc, char *argv[]) {
           auto in_starter_value_string = input.find("starter_value_string");
           if(in_starter_value_string != input.end())
           {
+            assert(in_starter_value_string->is_string());
             starter_value_string = *in_starter_value_string;
           }
 
