@@ -2081,3 +2081,7 @@ end of styles used in the admin gradeable page
 #upload-boxes > div:focus {
     outline: 2px solid cornflowerblue;
 }
+
+.fa-trash:focus {
+    outline: 2px solid cornflowerblue;
+}
