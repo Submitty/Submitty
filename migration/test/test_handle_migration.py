@@ -29,11 +29,10 @@ class TestHandleMigration(unittest.TestCase):
 
     def setup_test(self, environment, create=True):
         Path(self.dir, environment).mkdir()
-        self.stdout = sys.stdout
 
-    def create_database(environment, create=True):
+    def create_database(self, environment, create=True):
         database = migrator.db.Database({'database_driver': 'sqlite'}, environment)
-        if create:
+        if create is True:
             database.DynamicBase.metadata.create_all(database.engine)
         return database
 
@@ -197,20 +196,22 @@ Submitty Database Migration Warning:  Database does not exist for semester=f19 c
         self.setup_test('course')
         database_1 = self.create_database('course')
         database_2 = self.create_database('course')
+        database_3 = self.create_database('course')
         args.environments = ['course']
         args.choose_course = None
         args.config = SimpleNamespace()
         args.config.database = dict()
         args.config.submitty = dict()
         args.config.submitty['submitty_data_dir'] = Path(self.dir)
+        Path(self.dir, 'courses', 'f18', 'csci1100').mkdir(parents=True)
         Path(self.dir, 'courses', 'f19', 'csci1100').mkdir(parents=True)
         Path(self.dir, 'courses', 'f19', 'csci1200').mkdir(parents=True)
         with patch.object(migrator.db, 'Database') as mock_class:
-            mock_class.side_effect = [database_1, database_2]
+            mock_class.side_effect = [database_1, database_2, database_3]
             main.handle_migration(args)
         self.assertTrue(mock_class.called)
         self.assertTrue(mock_method.called)
-        self.assertEqual(2, mock_method.call_count)
+        self.assertEqual(3, mock_method.call_count)
 
         mock_args = mock_method.call_args_list[0][0]
         expected_args = deepcopy(args)
@@ -219,12 +220,12 @@ Submitty Database Migration Warning:  Database does not exist for semester=f19 c
         self.assertEqual(args.config.database, dict())
         self.assertNotIn('semester', expected_args)
         self.assertNotIn('course', expected_args)
-        expected_args.config.database = {'dbname': 'submitty_f19_csci1200'}
-        expected_args.semester = 'f19'
-        expected_args.course = 'csci1200'
+        expected_args.config.database = {'dbname': 'submitty_f18_csci1100'}
+        expected_args.semester = 'f18'
+        expected_args.course = 'csci1100'
         self.assertEqual(expected_args, mock_args[2])
-        self.assertEqual(expected_args.semester, 'f19')
-        self.assertEqual(expected_args.course, 'csci1200')
+        self.assertEqual(expected_args.semester, 'f18')
+        self.assertEqual(expected_args.course, 'csci1100')
         self.assertFalse(database_1.open)
 
         mock_args = mock_method.call_args_list[1][0]
@@ -241,3 +242,18 @@ Submitty Database Migration Warning:  Database does not exist for semester=f19 c
         self.assertEqual(expected_args.semester, 'f19')
         self.assertEqual(expected_args.course, 'csci1100')
         self.assertFalse(database_2.open)
+
+        mock_args = mock_method.call_args_list[2][0]
+        expected_args = deepcopy(args)
+        self.assertEqual(database_3, mock_args[0])
+        self.assertEqual('course', mock_args[1])
+        self.assertEqual(args.config.database, dict())
+        self.assertNotIn('semester', expected_args)
+        self.assertNotIn('course', expected_args)
+        expected_args.config.database = {'dbname': 'submitty_f19_csci1200'}
+        expected_args.semester = 'f19'
+        expected_args.course = 'csci1200'
+        self.assertEqual(expected_args, mock_args[2])
+        self.assertEqual(expected_args.semester, 'f19')
+        self.assertEqual(expected_args.course, 'csci1200')
+        self.assertFalse(database_3.open)

@@ -88,8 +88,9 @@ def status(args):
             if not course_dir.exists():
                 print("Could not find courses directory: {}".format(course_dir))
                 continue
-            for semester in os.listdir(str(course_dir)):
-                for course in os.listdir(os.path.join(str(course_dir), semester)):
+            for semester in sorted(os.listdir(str(course_dir))):
+                courses = sorted(os.listdir(os.path.join(str(course_dir), semester)))
+                for course in courses:
                     loop_args = deepcopy(args)
                     cond1 = loop_args.choose_course is not None
                     cond2 = [semester, course] != loop_args.choose_course
@@ -214,8 +215,9 @@ def handle_migration(args):
             if not course_dir.exists():
                 print("Could not find courses directory: {}".format(course_dir))
                 continue
-            for semester in os.listdir(str(course_dir)):
-                for course in os.listdir(os.path.join(str(course_dir), semester)):
+            for semester in sorted(os.listdir(str(course_dir))):
+                courses = sorted(os.listdir(os.path.join(str(course_dir), semester)))
+                for course in courses:
                     loop_args = deepcopy(args)
                     cond1 = loop_args.choose_course is not None
                     cond2 = [semester, course] != loop_args.choose_course
