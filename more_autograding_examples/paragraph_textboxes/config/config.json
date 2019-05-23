@@ -62,6 +62,17 @@
                     "filename" : "hours.txt"
                 }
             ]
+        },
+        {
+            "title" : "Question 4",
+            "input" : [
+                {
+                    "type" : "codebox",
+                    "language" : "clike",
+                    "label": "Control execution of the following python code so that if the temperature is lower than 50 degrees, we wear a coat.",
+                    "filename" : "question4.py"
+                }
+            ]
         }
     ],
     "testcases" : [ 

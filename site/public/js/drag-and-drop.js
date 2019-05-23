@@ -722,18 +722,18 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
         formData.append('previous_files', JSON.stringify(previous_files));
     }
 
-    var input_answers = $("[id^=input_]").serializeArray();
-    var input_answers_object = {};
+    var short_answer_answers = $("[id^=short_answer_]").serializeArray();
+    var short_answer_answers_object = {};
 
-    for (var i = 0; i < input_answers.length; i++) {
-        var this_answer = input_answers[i];
-        if(!(this_answer.name in input_answers_object)){
-            input_answers_object[this_answer.name] = Array();
+    for (var i = 0; i < short_answer_answers.length; i++) {
+        var this_answer = short_answer_answers[i];
+        if(!(this_answer.name in short_answer_answers_object)){
+            short_answer_answers_object[this_answer.name] = Array();
         }
-        input_answers_object[this_answer.name].push(this_answer.value);
+        short_answer_answers_object[this_answer.name].push(this_answer.value);
     }
 
-    formData.append('input_answers', JSON.stringify(input_answers_object));
+    formData.append('short_answer_answers', JSON.stringify(short_answer_answers_object));
 
     if (student_page) {
         var pages = [];

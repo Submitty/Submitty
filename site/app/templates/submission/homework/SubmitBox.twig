@@ -1,5 +1,14 @@
 {% import _self as self %}
 
+<link rel="stylesheet" href="{{ base_url }}vendor/codemirror/codemirror.css" />
+<link rel="stylesheet" href="{{ base_url }}vendor/codemirror/theme/eclipse.css" />
+<link rel="stylesheet" href="{{ base_url }}vendor/codemirror/theme/monokai.css" />
+<script type="text/javascript" language="javascript" src="{{ base_url }}vendor/jquery/jquery.min.js"></script>
+<script type="text/javascript" language="javascript" src="{{ base_url }}vendor/codemirror/codemirror.js"></script>
+<script type="text/javascript" language="javascript" src="{{ base_url }}vendor/codemirror/mode/clike/clike.js"></script>
+<script type="text/javascript" language="javascript" src="{{ base_url }}vendor/codemirror/mode/python/python.js"></script>
+<script type="text/javascript" language="javascript" src="{{ base_url }}vendor/codemirror/mode/shell/shell.js"></script>
+
 {# Display the gradeable_message if one exists at the top of the page #}
 {% if has_gradeable_message %}
     <div class='content gradeable_message'><p>{{ gradeable_message|raw }}</p></div>
@@ -179,7 +188,9 @@
             <script type="text/javascript" src="../../../../js/showdown-xss-filter.js"></script>
 
             {# Render content #}
-            {% set num_inputs = 0 %}
+            {% set num_short_answer = 0 %}
+            {% set num_codeboxes = 0 %}
+            {% set num_multiple_choice = 0%}
             {% for n in notebook %}
                 <div id="content_{{ loop.index0 }}">
                     <h2>{{ n.title }}</h2>
@@ -198,22 +209,40 @@
                     {# Render the inputs for the given content block #}
                     {% for i in n.input %}
                         <div id="input_container_{{ loop.index0 }}">
+
                             {% if i.type == "short_answer" %}
-                                {{ self.render_short_answer(i, num_inputs ) }}
+                                {{ self.render_short_answer(i, num_short_answer ) }}
+                                {% set num_short_answer = num_short_answer + 1 %}
                             {% elseif i.type == "codebox" %}
-                                <br>
-                            {% elseif i.type == "multiplechoice" %}
                                 <strong>{{ i.label }}</strong>
+
+                                <div id="codeBox_{{ num_codeboxes }}" style="border: 1px solid LightGrey;">
+                                </div>
+                                <script>
+                                    var editor_{{num_codeboxes}} = CodeMirror(document.getElementById("codeBox_{{ num_codeboxes }}"), 
+                                        {
+                                            "value" : "if i == 0:\n    a = 'hello'\nelse:\n    a = 'goodbye'\n",
+                                            "mode": "{{i.language}}",
+                                            lineNumbers: true,
+                                            "theme": "eclipse"
+                                            //myCodeMirror.setSize(500, 300);
+                                        }
+                                    );
+                                </script>
                                 <br>
+                                {% set num_codeboxes = num_codeboxes + 1 %}
+                            {% elseif i.type == "multiplechoice" %}
+                                <br>
+                                <strong>{{ i.label }}</strong>
                                 <fieldset>
                                     {% for choice in i.choices %}
                                         {% if i.allow_multiple == true %}
-                                            <input type="checkbox" name="input_{{ num_inputs }}" id="input_{{ num_inputs }}" value="{{ choice }}" onclick="handle_input_keypress();"" />
+                                            <input type="checkbox" name="multiple_choice_{{ num_multiple_choice }}" id="multiple_choice_{{ num_multiple_choice }}" value="{{ choice }}" onclick="handle_input_keypress();"" />
                                             <label for="{{ choice }}">
                                                 {{ choice }}
                                             </label>
                                         {% else %}
-                                            <input type="radio" name="input_{{ num_inputs }}" id="input_{{ num_inputs }}" value="{{ choice }}" onclick="handle_input_keypress();" />
+                                            <input type="radio" name="multiple_choice_{{ num_multiple_choice }}" id="multiple_choice_{{ num_multiple_choice }}" value="{{ choice }}" onclick="handle_input_keypress();" />
                                             <label for="{{ choice }}">
                                                 {{ choice }}
                                             </label>
@@ -446,10 +475,10 @@
         <strong>{{ short_answer.label }}</strong>
         <br>
         {% if short_answer.rows == 0 %}
-            <input type="text" name="input_{{ index }}" id="input_{{ index }}" onKeyPress="handle_input_keypress();">
+            <input type="text" name="short_answer_{{ index }}" id="short_answer_{{ index }}" onKeyPress="handle_input_keypress();">
         {% else %}
             Press <kbd>TAB</kbd> to indent.  Press <kbd>ESC</kbd> to advance from textarea.</label>
-            <textarea rows="{{ short_answer.rows }}" cols="50"  style="width:60em; height:100%; min-height:110px;" name="input_{{ index }}" id="input_{{ index }}" onKeyPress="handle_input_keypress();"></textarea>
+            <textarea rows="{{ short_answer.rows }}" cols="50"  style="width:60em; height:100%; min-height:110px;" name="short_answer_{{ index }}" id="short_answer_{{ index }}" onKeyPress="handle_input_keypress();"></textarea>
             {#
                 Allow tab in the larger text boxes (normally tab moves to the next textbox)
                 http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
