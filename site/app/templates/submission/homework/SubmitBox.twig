@@ -1,5 +1,6 @@
 {% import _self as self %}
 
+
 {# Display the gradeable_message if one exists at the top of the page #}
 {% if has_gradeable_message %}
     <div class='content gradeable_message'><p>{{ gradeable_message|raw }}</p></div>
@@ -194,6 +195,13 @@
                         {% endif %}
                         />
                     {% endfor %}
+
+                    {% if n.description != None %}
+                        <div id="description_{{ loop.index0 }}">
+                            {{ n.description | markdown }}
+                        </div>
+                        <br>
+                    {% endif %}
 
                     {# Render the inputs for the given content block #}
                     {% for i in n.input %}

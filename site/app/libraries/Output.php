@@ -4,6 +4,7 @@ namespace app\libraries;
 use app\controllers\GlobalController;
 use app\exceptions\OutputException;
 use app\models\Breadcrumb;
+use Aptoma\Twig\Extension\MarkdownExtension;
 
 /**
  * Class Output
@@ -90,6 +91,7 @@ HTML;
         if($this->core->getConfig()->wrapperEnabled()) {
             $this->twig_loader->addPath(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site'), $namespace = 'site_uploads');
         }
+        $this->twig->addExtension(new MarkdownExtension(new CustomParsedownEngine()));
     }
 
     public function setInternalResources() {
