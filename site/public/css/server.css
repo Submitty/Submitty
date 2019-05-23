@@ -2076,3 +2076,7 @@ end of styles used in the admin gradeable page
     caption-side: top;
     border: 0;
 }
+
+#upload-boxes > div:focus {
+    outline: 2px solid cornflowerblue;
+}
