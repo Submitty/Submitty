@@ -15,6 +15,8 @@ class ImagesView extends AbstractView {
      */
     public function listStudentImages($students, $grader_sections, $instructor_permission) {
         $this->core->getOutput()->addBreadcrumb("Student Photos");
+        $this->core->getOutput()->addInternalJs("drag-and-drop.js");
+
         //Assemble students into sections if they are in grader_sections based on the registration section.
         $sections = [];
         foreach ($students as $student) {
@@ -39,28 +41,24 @@ class ImagesView extends AbstractView {
                 $expected_image = $fileinfo->getPathname();
                 list($mime_type, $mime_subtype) = explode('/', FileUtils::getMimeType($expected_image), 2);
                 if ($mime_type === "image" && in_array($mime_subtype, $valid_image_subtypes)) {
-                    // Read image path, convert to base64 encoding
-                    $expected_img_data = base64_encode(file_get_contents($expected_image));
-
                     $img_name = $fileinfo->getBasename('.' . $fileinfo->getExtension());
                     if ($img_name === "error_image") {
                         $error_image_data = [
                             'subtype' => $mime_subtype,
-                            'image' => $expected_img_data
+                            'path' => $expected_image
                         ];
                     }
                     else {
                         $image_data[$img_name] = [
                             'subtype' => $mime_subtype,
-                            'image' => $expected_img_data
+                            'path' => $expected_image
                         ];
                     }
                 }
             }
         }
 
-        $this->core->getOutput()->addInternalJs("drag-and-drop.js");
-
+        $this->core->getOutput()->disableBuffer();
         return $this->core->getOutput()->renderTwigTemplate("grading/Images.twig", [
             "sections" => $sections,
             "imageData" => $image_data,

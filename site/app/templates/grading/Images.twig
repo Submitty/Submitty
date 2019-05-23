@@ -18,7 +18,7 @@
                         <tr id="user-{{ student.getId() }}">
                     {% endif %}
                     {% if imageData[student.getId()] is defined %}
-                        <td><img src="data:image/{{ imageData[student.getId()].subtype }};base64,{{ imageData[student.getId()].image }}" width="150" height="200/>
+                        <td>{{ base64_image(imageData[student.getId()].path, student.getId()) }}
                         <div class="name"><br /><br />{{student.getDisplayedFirstName()}} {{student.getDisplayedLastName()}}
                         <br />{{student.getId()}}</div>
                         </td>
@@ -27,7 +27,7 @@
                             <td><i><font color="gray"><img alt="No Image Available" /></font></i>
                             <div class="name"><br />
                         {% else %}
-                            <td><img src="data:image/{{ errorImageData.subtype }};base64,{{ errorImageData.image }}" width="150" height="200/>
+                            <td>{{ base64_image(errorImageData.path, 'No Image Available') }}
                             <div class="name"><br /><br />
                         {% endif %}
                         {{student.getDisplayedFirstName()}} {{student.getDisplayedLastName()}}

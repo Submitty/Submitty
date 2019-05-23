@@ -70,9 +70,23 @@ class Output {
         $this->twig->getExtension(\Twig\Extension\CoreExtension::class)
             ->setTimezone($this->core->getConfig()->getTimezone());
         $this->twig->addGlobal("core", $this->core);
+
         $this->twig->addFunction(new \Twig\TwigFunction("render_template", function(... $args) {
             return call_user_func_array('self::renderTemplate', $args);
         }, ["is_safe" => ["html"]]));
+        $this->twig->addFunction(new \Twig\TwigFunction('base64_image', function(string $path, string $title): string {
+            $valid_image_subtypes = ['png', 'jpg', 'jpeg', 'gif'];
+            list($mime_type, $mime_subtype) = explode('/', FileUtils::getMimeType($path), 2);
+            if ($mime_type === "image" && in_array($mime_subtype, $valid_image_subtypes)) {
+                // Read image path, convert to base64 encoding
+                $image_data = base64_encode(file_get_contents($path));
+                return <<<HTML
+<img alt="${title}" src="data:image/${mime_subtype};base64,${image_data}" width="150" height="200" />
+HTML;
+            }
+            throw new OutputException('Invalid path to image file');
+        }, ['is_safe' => ['html']]));
+
         if($this->core->getConfig()->wrapperEnabled()) {
             $this->twig_loader->addPath(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site'), $namespace = 'site_uploads');
         }
