@@ -15,11 +15,13 @@
             "input" : [
                 {
                     "type" : "short_answer",
+                    "starter_value_string" : "Hello, world!",
                     "label": "The above animal:",
                     "filename" : "animal.txt"
                 },
                 {
                     "label": "200-300 word description",
+                    "starter_value_string" : "Hello again, brave new world",
                     "rows" : 5,
                     "filename" : "description.txt",
                     "type" : "short_answer"
@@ -58,6 +60,7 @@
             "input" : [
                 {
                     "type" : "short_answer",
+                    "starter_value_string" : "Too many!",
                     "label": "Number of hours spent on this assignment:",
                     "filename" : "hours.txt"
                 }

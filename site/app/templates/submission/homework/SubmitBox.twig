@@ -202,8 +202,6 @@
                         </div>
                         <br>
                     {% endif %}
-
-                    {# Render the inputs for the given content block #}
                     {% for i in n.input %}
                         <div id="input_container_{{ loop.index0 }}">
                             {% if i.type == "short_answer" %}
@@ -454,19 +452,25 @@
         <strong>{{ short_answer.label }}</strong>
         <br>
         {% if short_answer.rows == 0 %}
-            <input type="text" name="input_{{ index }}" id="input_{{ index }}" onKeyPress="handle_input_keypress();">
+            <form>
+                <input type="text" name="input_{{ index }}" id="input_{{ index }}" value="{{ short_answer.starter_value_string }}" onKeyPress="handle_input_keypress();">
+                <br /><input type="reset" class="btn btn-primary" style="margin-top: 5px" value="Reset">
+            </form>
         {% else %}
-            Press <kbd>TAB</kbd> to indent.  Press <kbd>ESC</kbd> to advance from textarea.</label>
-            <textarea rows="{{ short_answer.rows }}" cols="50"  style="width:60em; height:100%; min-height:110px;" name="input_{{ index }}" id="input_{{ index }}" onKeyPress="handle_input_keypress();"></textarea>
-            {#
-                Allow tab in the larger text boxes (normally tab moves to the next textbox)
-                http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
-
-                q.v. function enableTabsInTextArea(jQuerySelector) in server.js
-            #}
-            <script>
-                enableTabsInTextArea('#input_{{ index }}');
-           </script>
+            <form>
+                Press <kbd>TAB</kbd> to indent.  Press <kbd>ESC</kbd> to advance from textarea.</label>
+                <textarea rows="{{ short_answer.rows }}" cols="50"  style="width:60em; height:100%; min-height:110px;" name="input_{{ index }}" id="input_{{ index }}" onKeyPress="handle_input_keypress();">{{ short_answer.starter_value_string }}</textarea>
+                <br />
+                <input type="reset" class="btn btn-primary" style="margin-top: 5px" value="Reset">
+                {#
+                    Allow tab in the larger text boxes (normally tab moves to the next textbox)
+                    http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
+                    q.v. function enableTabsInTextArea(jQuerySelector) in server.js
+                #}
+                <script>
+                    enableTabsInTextArea('#input_{{ index }}');
+                </script>
+            </form>
         {% endif %}
     </p>
     <br>
