@@ -378,6 +378,9 @@ chmod o+r . *.jar
 popd > /dev/null
 
 
+# fix all java_tools permissions
+chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/java_tools
+chmod -R 755 ${SUBMITTY_INSTALL_DIR}/java_tools
 
 
 #################################################################
