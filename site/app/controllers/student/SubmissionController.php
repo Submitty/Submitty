@@ -1129,7 +1129,7 @@ class SubmissionController extends AbstractController {
 
             $short_answer_objects    = $_POST['short_answer_answers'] ?? "";
             $codebox_objects         = $_POST['codebox_answers'] ?? "";
-            $multiple_choice_objects = $_POST['multiple_choice'] ?? "";
+            $multiple_choice_objects = $_POST['multiple_choice_answers'] ?? "";
             $short_answer_objects    = json_decode($short_answer_objects,true);
             $codebox_objects         = json_decode($codebox_objects,true);
             $multiple_choice_objects = json_decode($multiple_choice_objects,true);

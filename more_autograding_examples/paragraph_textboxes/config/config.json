@@ -82,7 +82,7 @@
                     "type" : "codebox",
                     "language" : "clike",
                     "label": "Control execution of the following python code so that if the temperature is lower than 50 degrees, we wear a coat.",
-                    "filename" : "question4.py"
+                    "filename" : "codebox.py"
                 }
             ]
         }
@@ -112,10 +112,16 @@
             "actual_file" : "hours.txt",
             "points" : 0
         },
-                {
+        {
             "type" : "FileCheck",
             "title" : "Review Multiple Choice",
             "actual_file" : "multiple_choice.txt",
+            "points" : 0
+        },
+        {
+            "type" : "FileCheck",
+            "title" : "Review Multiple Choice",
+            "actual_file" : "codebox.py",
             "points" : 0
         }
     ]

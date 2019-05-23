@@ -639,6 +639,36 @@ function handleBulk(gradeable_id, num_pages, use_qr_codes = false, qr_prefix = "
 }
 
 /**
+ * @param type
+ */
+function gatherInputAnswersByType(type){
+
+    var input_answers = {};
+
+    if(type == "codebox"){
+        var inputs = $("[id^="+type+"_]");
+        for(var i = 0; i < inputs.length; i++){
+            var editor_name = inputs[i].id;
+            //grab the editor and get its value.
+            var value = window[editor_name].getValue();
+
+        }
+    }else{
+        var inputs = $("[id^="+type+"_]").serializeArray();
+
+        for (var i = 0; i < inputs.length; i++) {
+            var this_input_answer = inputs[i];
+            if(!(this_input_answer.name in input_answers)){
+                input_answers[this_input_answer.name] = Array();
+            }
+            input_answers[this_input_answer.name].push(this_input_answer.value);
+        }
+    }
+
+    return input_answers;
+}
+
+/**
  * @param days_late
  * @param late_days_allowed
  * @param versions_used
@@ -722,18 +752,14 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
         formData.append('previous_files', JSON.stringify(previous_files));
     }
 
-    var short_answer_answers = $("[id^=short_answer_]").serializeArray();
-    var short_answer_answers_object = {};
+    
+    var short_answer_object    = gatherInputAnswersByType("short_answer");
+    var multiple_choice_object = gatherInputAnswersByType("multiple_choice");
+    car codebox_object         = gatherInputAnswersByType("codebox");
+    formData.append('short_answer_answers'   , JSON.stringify(short_answer_object));
+    formData.append('multiple_choice_answers', JSON.stringify(multiple_choice_object));
+    formData.append('codebox_answers'        , JSON.stringify(multiple_choice_object));
 
-    for (var i = 0; i < short_answer_answers.length; i++) {
-        var this_answer = short_answer_answers[i];
-        if(!(this_answer.name in short_answer_answers_object)){
-            short_answer_answers_object[this_answer.name] = Array();
-        }
-        short_answer_answers_object[this_answer.name].push(this_answer.value);
-    }
-
-    formData.append('short_answer_answers', JSON.stringify(short_answer_answers_object));
 
     if (student_page) {
         var pages = [];
