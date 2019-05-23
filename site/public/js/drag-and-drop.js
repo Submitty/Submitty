@@ -292,6 +292,14 @@ function addLabel(filename, filesize, part, previous){
         this.parentNode.parentNode.removeChild(this.parentNode);
         deleteSingleFile(filename, part, previous);
     };
+
+    // FOR VPAT if trash can has focus and key is pressed it will delete item
+    tmp.children[0].onkeypress = function(e){
+        e.stopPropagation();
+        this.parentNode.parentNode.removeChild(this.parentNode);
+        deleteSingleFile(filename, part, previous);
+    };
+
     // add to parent div
     var dropzone = document.getElementById("upload" + part);
     // Uncomment if want buttons for emptying single bucket
