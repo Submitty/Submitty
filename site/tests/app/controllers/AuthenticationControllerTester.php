@@ -16,7 +16,7 @@ class AuthenticationControllerTester extends BaseUnitTest {
         $auth = $this->createMock(AbstractAuthentication::class);
         $auth->method('setUserId')->willReturn(null);
         $auth->method('setPassword')->willReturn(null);
-        $core->method('authenticate')->willReturn($authenticate);
+        $auth->method('authenticate')->willReturn($authenticate);
         $core->method('getAuthentication')->willReturn($auth);
         return $core;
     }

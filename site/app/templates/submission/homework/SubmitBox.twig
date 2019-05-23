@@ -1,5 +1,6 @@
 {% import _self as self %}
 
+
 {# Display the gradeable_message if one exists at the top of the page #}
 {% if has_gradeable_message %}
     <div class='content gradeable_message'><p>{{ gradeable_message|raw }}</p></div>
@@ -203,6 +204,12 @@
                     {% endfor %}
 
                     {# Render the inputs for the given notebook block #}
+                    {% if n.description != None %}
+                        <div id="description_{{ loop.index0 }}">
+                            {{ n.description | markdown }}
+                        </div>
+                        <br>
+                    {% endif %}
                     {% for i in n.input %}
                         <div id="input_container_{{ loop.index0 }}">
                             {% if i.type == "short_answer" %}
@@ -339,12 +346,11 @@
 {% endif %}
 
 <script type="text/javascript">
-    function makeSubmission(user_id, highest_version, is_pdf, path, count, git_user_id, git_repo_id, merge_previous=false, clobber=false) {
+    function makeSubmission(user_id, highest_version, is_pdf, path, git_user_id, git_repo_id, merge_previous=false, clobber=false) {
         // submit the selected pdf
         path = decodeURIComponent(path);
         if (is_pdf) {
-            submitSplitItem("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_id, path, count, merge_previous, clobber);
-            moveNextInput(count);
+            submitSplitItem("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_id, path, merge_previous, clobber);
         }
 
         // otherwise, this is a regular submission of the uploaded files
@@ -417,11 +423,31 @@
             }
             // no user id entered, upload for whoever is logged in
             else if (user_id == ""){
-                makeSubmission(user_id, {{ highest_version }}, false, "", "", git_user_id, git_repo_id);
+                makeSubmission(user_id, {{ highest_version }}, false, "", git_repo_id);
             }
             // user id entered, need to validate first
             else {
-                validateUserId("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_id, false, "", "", git_user_id, git_repo_id, makeSubmission);
+                validateUserId("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_id)
+                .then(function(response){
+                    if(response['highest_version']){
+                        var option = displayPreviousSubmissionOptions(getSubmissionOption);
+                        function getSubmissionOption(option){
+                            var merge_previous = false;
+                            var clobber = false;
+
+                            if(option == 2){
+                                merge_previous = true;
+                            } else if(option == 3){
+                                merge_previous = true;
+                                clobber = true;
+                            }
+
+                            makeSubmission(user_id,response['highest_version'], false, "", "", merge_previous,clobber);
+                        }
+                    }else{
+                        makeSubmission(user_id, response['highest_version'], false, "", "");
+                    }
+                });
             }
             e.stopPropagation();
         });
