@@ -15,7 +15,7 @@ import migrator
 from migrator import main
 
 
-class TestPrintStatus(unittest.TestCase):
+class TestStatus(unittest.TestCase):
     def setUp(self):
         self.stdout = sys.stdout
         sys.stdout = StringIO()
@@ -207,6 +207,9 @@ Could not find migration table for f19.csci1100
         self.assertTrue(mock_method.called)
         self.assertEqual(self.databases['master'], mock_method.call_args[0][0])
         self.assertEqual('master', mock_method.call_args[0][1])
+        # Test that mutation did not happen
+        self.assertEqual(self.args.config.database, dict())
+        self.args.config.database = {'dbname': 'submitty'}
         self.assertEqual(self.args, mock_method.call_args[0][2])
         self.assertFalse(self.databases['master'].open)
 
@@ -224,6 +227,9 @@ Could not find migration table for f19.csci1100
         self.assertTrue(mock_method.called)
         self.assertEqual(self.databases['system'], mock_method.call_args[0][0])
         self.assertEqual('system', mock_method.call_args[0][1])
+        # Test that mutation did not happen
+        self.assertEqual(self.args.config.database, dict())
+        self.args.config.database = {'dbname': 'submitty'}
         self.assertEqual(self.args, mock_method.call_args[0][2])
         self.assertFalse(self.databases['system'].open)
 
@@ -245,6 +251,13 @@ Could not find migration table for f19.csci1100
         self.assertTrue(mock_method.called)
         self.assertEqual(self.databases['course'], mock_method.call_args[0][0])
         self.assertEqual('course', mock_method.call_args[0][1])
+        # Test that mutation did not happen
+        self.assertEqual(self.args.config.database, dict())
+        self.assertNotIn('semester', self.args)
+        self.assertNotIn('course', self.args)
+        self.args.config.database = {'dbname': 'submitty_f19_csci1100'}
+        self.args.semester = 'f19'
+        self.args.course = 'csci1100'
         self.assertEqual(self.args, mock_method.call_args[0][2])
         self.assertEqual(self.args.semester, 'f19')
         self.assertEqual(self.args.course, 'csci1100')
