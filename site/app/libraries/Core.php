@@ -337,7 +337,7 @@ class Core {
                     $this->getConfig()->getSecretSession(),
                     $persistent_cookie
                 );
-                return Utils::setCookie('submitty_session', (string) $token, $cookie_data['expire_time']);
+                return Utils::setCookie('submitty_session', (string) $token, $token->getClaim('expire_time'));
             }
         }
         catch (\Exception $e) {

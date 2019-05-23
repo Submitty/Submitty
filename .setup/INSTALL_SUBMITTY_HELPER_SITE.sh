@@ -121,7 +121,7 @@ chmod -R 440 ${SUBMITTY_INSTALL_DIR}/site
 find ${SUBMITTY_INSTALL_DIR}/site -type d -exec chmod ogu+x {} \;
 
 # "other" can read all of these files
-array=( css otf jpg png ico txt twig )
+array=( css otf jpg png ico txt twig map )
 for i in "${array[@]}"; do
     find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.${i} -exec chmod o+r {} \;
 done
