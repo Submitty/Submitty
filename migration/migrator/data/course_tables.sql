@@ -510,7 +510,12 @@ CREATE TABLE notification_settings (
 	all_new_threads BOOLEAN DEFAULT FALSE NOT NULL,
 	all_new_posts BOOLEAN DEFAULT FALSE NOT NULL,
 	all_modifications_forum BOOLEAN DEFAULT FALSE NOT NULL,
-	reply_in_post_thread BOOLEAN DEFAULT FALSE NOT NULL
+	reply_in_post_thread BOOLEAN DEFAULT FALSE NOT NULL,
+	merge_threads_email BOOLEAN DEFAULT FALSE NOT NULL,
+	all_new_threads_email BOOLEAN DEFAULT FALSE NOT NULL,
+	all_new_posts_email BOOLEAN DEFAULT FALSE NOT NULL,
+	all_modifications_forum_email BOOLEAN DEFAULT FALSE NOT NULL,
+	reply_in_post_thread_email BOOLEAN DEFAULT FALSE NOT NULL
 );
 
 --
