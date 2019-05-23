@@ -233,6 +233,8 @@ Could not find migration table for f19.csci1100
             mock_class.side_effect = [database]
             main.status(self.args)
         self.assertTrue(mock_class.called)
+        self.assertEqual(1, mock_class.call_count)
+        self.assertTrue(({'dbname': 'submitty'}, 'system'), mock_class.call_args[0])
         self.assertTrue(mock_method.called)
         self.assertEqual(database, mock_method.call_args[0][0])
         self.assertEqual('system', mock_method.call_args[0][1])
@@ -258,6 +260,11 @@ Could not find migration table for f19.csci1100
             mock_class.side_effect = [database]
             main.status(self.args)
         self.assertTrue(mock_class.called)
+        self.assertEqual(1, mock_class.call_count)
+        self.assertTrue(
+            ({'dbname': 'submitty_f19_csci1100'}, 'course'),
+            mock_class.call_args[0]
+        )
         self.assertTrue(mock_method.called)
         self.assertEqual(database, mock_method.call_args[0][0])
         self.assertEqual('course', mock_method.call_args[0][1])
@@ -297,6 +304,19 @@ Could not find migration table for f19.csci1100
             ]
             main.status(self.args)
         self.assertTrue(mock_class.called)
+        self.assertEqual(3, mock_class.call_count)
+        self.assertTrue(
+            ({'dbname': 'submitty_f18_csci1100'}, 'course'),
+            mock_class.call_args_list[0][0]
+        )
+        self.assertTrue(
+            ({'dbname': 'submitty_f19_csci1100'}, 'course'),
+            mock_class.call_args_list[1][0]
+        )
+        self.assertTrue(
+            ({'dbname': 'submitty_f19_csci1200'}, 'course'),
+            mock_class.call_args_list[2][0]
+        )
         self.assertTrue(mock_method.called)
         self.assertEqual(3, mock_method.call_count)
 

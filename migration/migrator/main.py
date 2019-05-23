@@ -203,7 +203,7 @@ def handle_migration(args):
             loop_args = deepcopy(args)
             loop_args.config.database['dbname'] = 'submitty'
             try:
-                database = db.Database(args.config.database, environment)
+                database = db.Database(loop_args.config.database, environment)
             except OperationalError:
                 print('Database does not exist for {}'.format(environment))
                 continue
