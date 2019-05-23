@@ -206,6 +206,13 @@
                         />
                     {% endfor %}
 
+                    {% if n.description != None %}
+                        <div id="description_{{ loop.index0 }}">
+                            {{ n.description | markdown }}
+                        </div>
+                        <br>
+                    {% endif %}
+
                     {# Render the inputs for the given content block #}
                     {% for i in n.input %}
                         <div id="input_container_{{ loop.index0 }}">

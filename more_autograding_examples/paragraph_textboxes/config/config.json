@@ -63,8 +63,20 @@
                 }
             ]
         },
+        { 
+            "description" : "### Question 4, Multiple Choice  \nThis question uses the multiple choice option and a markdown description.  \n```  \nthis is an example of code formatting  \n```  \n",
+            "input" : [
+                {
+                    "type" : "multiplechoice",
+                    "label": "How much wood would a wood chuck chuck if a wood chuck could chuck wood?",
+                    "choices" : ["1", "3", "5", "42"],
+                    "allow_multiple" : false,
+                    "filename" : "multiple_choice.txt"
+                }
+            ]
+        },
         {
-            "title" : "Question 4",
+            "title" : "Question 5",
             "input" : [
                 {
                     "type" : "codebox",
@@ -98,6 +110,12 @@
             "type" : "FileCheck",
             "title" : "Review Hours",
             "actual_file" : "hours.txt",
+            "points" : 0
+        },
+                {
+            "type" : "FileCheck",
+            "title" : "Review Multiple Choice",
+            "actual_file" : "multiple_choice.txt",
             "points" : 0
         }
     ]
