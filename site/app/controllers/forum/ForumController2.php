@@ -258,22 +258,22 @@ class ForumController2 extends AbstractController {
     public function publishThread(){
         
         //Get post data
-        $title = trim($_POST["title"]);
-        $thread_post_content = $_POST["thread_post_content"];
-        $anon = $_POST["Anon"];
-        $thread_status = $_POST["thread_status"];
+        $title = trim($_POST['title']);
+        $thread_post_content = $_POST['thread_post_content'];
+        $anon = $_POST['Anon'];
+        $thread_status = $_POST['thread_status'];
         
 
         //Default to false
-        $announcement = !empty($_POST["Announcement"]) && $this->core->getUser()->accessGrading() && $_POST["Announcement"] == 'true' ? true : false;
-        $email_announcement = !empty($_POST["EmailAnnouncement"]) && $this->core->getUser()->accessFullGrading() && $_POST["EmailAnnouncement"] == 'true' ? true : false;
+        $announcement = !empty($_POST['Announcement']) && $this->core->getUser()->accessGrading() && $_POST['Announcement'] == 'true' ? true : false;
+        $email_announcement = !empty($_POST['EmailAnnouncement']) && $this->core->getUser()->accessFullGrading() && $_POST['EmailAnnouncement'] == 'true' ? true : false;
 
         $categories_ids  = array();
         foreach ($_POST["cat"] as $category_id) {
             $categories_ids[] = (int)$category_id;
         }
 
-        return $this->core->getForum()->publish( [ 'title'              => $title, 
+        $result = $this->core->getForum()->publish( [ 'title'              => $title, 
                                             'content'            => $thread_post_content,
                                             'anon'               => $anon,  
                                             'status'             => $thread_status,
@@ -282,6 +282,14 @@ class ForumController2 extends AbstractController {
                                             'categories'         => $categories_ids,
                                             'parent_id'          => -1,
                                             'thread_id'          => -1 ], true );
+
+        if($result) {
+            //We published with success!
+            $this->core->addSuccessMessage('Thread created successfully.');
+            $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', )));
+        } else {
+            $this->core->addErrorMessage('The post data is malformed. Please try submitting your post again.');
+        }
     }
 
     private function search(){

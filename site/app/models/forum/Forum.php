@@ -33,8 +33,7 @@ class Forum extends AbstractModel {
         }
 
         if(!$verify[0]) {
-            $this->core->addErrorMessage("The post data is malformed. Please try submitting your post again.");
-            return;
+            return false;
         }
 
         $result = $verify[1];
@@ -42,13 +41,13 @@ class Forum extends AbstractModel {
         //$pushFunction($result);
 
         $this->core->getOutput()->renderJson(json_encode(['success' => 'Good stuff we passed a post.']));
-        return $this->core->getOutput()->getOutput();
+        return true;
 
     }
 
 
 
-    public function validateThreadData(Array $data, bool $createObject) {
+    private function validateThreadData(Array $data, bool $createObject) {
 
         $goodPost = $this->validatePostData($data, false, true);
         
@@ -64,7 +63,7 @@ class Forum extends AbstractModel {
 
     }
 
-    public function validatePostData(Array $data, bool $createObject, bool $isThread) {
+    private function validatePostData(Array $data, bool $createObject, bool $isThread) {
 
         //Still need to validate thread id...
         if( empty($data['content']) || empty($data['anon']) || 
