@@ -421,33 +421,64 @@
             e.stopPropagation();
         });
 
-        var currentDate = new Date();
-        var currentSeconds = currentDate.getSeconds();
+        var localDate = new Date();
+        var serverDate;
 
         var fetchTimeUrl = window.location.href + "&action=fetch_time";
 
-        // console.log(fetchTimeUrl);
+        var nextTimeFetch = 0 ;
+        var setTimerOn = 0;
 
-        var nextTimeFetch = 60 - currentSeconds;
+        fetchServerTime();
 
-        setTimeout(setTime, nextTimeFetch * 1000);
-        // console.log("Next fetch in: "+nextTimeFetch);
 
-        function setTime() {
-            if(nextTimeFetch != 60) {
-                nextTimeFetch = 60;
-                setInterval(setTime, nextTimeFetch * 1000);
+        function fetchServerTime() {
+            console.log("Fetching Server");
+            if(nextTimeFetch == 0) {
+                // console.log("Fetch set time remaining: "+(60 - localDate.getSeconds()));
+                nextTimeFetch = 300;
+                setTimeout(function(){
+                    setInterval(fetchServerTime, nextTimeFetch * 1000);
+                    // console.log("Next fetch set");
+                }, (60 - localDate.getSeconds())*1000);
             }
 
             $.ajax({
                 url: fetchTimeUrl,
                 dataType: "json",
                 success: function(result){
-                    $('#current-server-time').empty().text(result.data);
-                    // console.log(result);
+                    serverDate = new Date(result.data.time * 1000);
+                    console.log("Updated servertime");
+                    if(setTimerOn == 0){
+                        // console.log("Server time remaining: "+(60 - serverDate.getSeconds()));
+                        setTimeout(function(){
+                            // console.log("Setting interval");
+                            serverDate = new Date((result.data.time + (60 - serverDate.getSeconds()))* 1000);
+                            setTime();
+                            setInterval(setTime, 60 * 1000);
+                        }, (60 - serverDate.getSeconds())*1000);
+                        setTimerOn = 1;
+                    }
+
                 }
             });
         }
+
+        function setTime(){
+
+            var datestring = ("0" + serverDate.getDate()).slice(-2) + "-" + ("0"+(serverDate.getMonth()+1)).slice(-2) + "-" +
+                serverDate.getFullYear() + " @ " + ("0" + serverDate.getHours()).slice(-2) + ":" + ("0" + serverDate.getMinutes()).slice(-2);
+
+            $('#current-server-time').empty().append(datestring);
+
+            // console.log(datestring);
+
+            var serverEpochTime = Math.round(serverDate.getTime() / 1000) + 60;
+            serverDate = new Date(serverEpochTime*1000);
+
+        }
+
+
 
     });
 </script>
