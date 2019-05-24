@@ -1,5 +1,6 @@
 {% import _self as self %}
 
+
 {# Display the gradeable_message if one exists at the top of the page #}
 {% if has_gradeable_message %}
     <div class='content gradeable_message'><p>{{ gradeable_message|raw }}</p></div>
@@ -186,16 +187,29 @@
 
                     {% for image in n.images %}
                         <img src="{{ attribute(image_data, image.name) }}"
+
                         {% if image.width > 0 %}
                             width="{{ image.width }}"
                         {% endif %}
+
                         {% if image.height > 0 %}
                             height="{{ image.height }}"
                         {% endif %}
+
+                        {% if image.alt is defined %}
+                            alt="{{ image.alt }}"
+                        {% endif %}
+
                         />
                     {% endfor %}
 
-                    {# Render the inputs for the given content block #}
+                    {# Render the inputs for the given notebook block #}
+                    {% if n.description != None %}
+                        <div id="description_{{ loop.index0 }}">
+                            {{ n.description | markdown }}
+                        </div>
+                        <br>
+                    {% endif %}
                     {% for i in n.input %}
                         <div id="input_container_{{ loop.index0 }}">
                             {% if i.type == "short_answer" %}
@@ -208,7 +222,7 @@
                                 <fieldset>
                                     {% for choice in i.choices %}
                                         {% if i.allow_multiple == true %}
-                                            <input type="checkbox" name="input_{{ num_inputs }}" id="input_{{ num_inputs }}" value="{{ choice }}" onclick="handle_input_keypress();"" />
+                                            <input type="checkbox" name="input_{{ num_inputs }}" id="input_{{ num_inputs }}" value="{{ choice }}" onclick="handle_input_keypress();" />
                                             <label for="{{ choice }}">
                                                 {{ choice }}
                                             </label>
@@ -231,7 +245,12 @@
     
             {# Submit boxes #}
             {% for part in part_names %}
-                <div id="upload{{ loop.index }}" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 150px;">
+                <div tabindex="0"
+                     id="upload{{ loop.index }}"
+                     onkeypress="clicked_on_box(event)"
+                     role="text"
+                     aria-label="Press enter to upload your {{ part }} file"
+                     style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 150px;">
                     <h3 class="label" id="label{{ loop.index }}">
                         {% if part_names|length > 1 %}
                             Drag your {{ part }} here or click to open file browser
@@ -446,19 +465,25 @@
         <strong>{{ short_answer.label }}</strong>
         <br>
         {% if short_answer.rows == 0 %}
-            <input type="text" name="input_{{ index }}" id="input_{{ index }}" onKeyPress="handle_input_keypress();">
+            <form>
+                <input type="text" name="input_{{ index }}" id="input_{{ index }}" value="{{ short_answer.starter_value_string }}" onKeyPress="handle_input_keypress();">
+                <br /><input type="reset" class="btn btn-primary" style="margin-top: 5px" value="Reset">
+            </form>
         {% else %}
-            Press <kbd>TAB</kbd> to indent.  Press <kbd>ESC</kbd> to advance from textarea.</label>
-            <textarea rows="{{ short_answer.rows }}" cols="50"  style="width:60em; height:100%; min-height:110px;" name="input_{{ index }}" id="input_{{ index }}" onKeyPress="handle_input_keypress();"></textarea>
-            {#
-                Allow tab in the larger text boxes (normally tab moves to the next textbox)
-                http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
-
-                q.v. function enableTabsInTextArea(jQuerySelector) in server.js
-            #}
-            <script>
-                enableTabsInTextArea('#input_{{ index }}');
-           </script>
+            <form>
+                Press <kbd>TAB</kbd> to indent.  Press <kbd>ESC</kbd> to advance from textarea.</label>
+                <textarea rows="{{ short_answer.rows }}" cols="50"  style="width:60em; height:100%; min-height:110px;" name="input_{{ index }}" id="input_{{ index }}" onKeyPress="handle_input_keypress();">{{ short_answer.starter_value_string }}</textarea>
+                <br />
+                <input type="reset" class="btn btn-primary" style="margin-top: 5px" value="Reset">
+                {#
+                    Allow tab in the larger text boxes (normally tab moves to the next textbox)
+                    http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
+                    q.v. function enableTabsInTextArea(jQuerySelector) in server.js
+                #}
+                <script>
+                    enableTabsInTextArea('#input_{{ index }}');
+                </script>
+            </form>
         {% endif %}
     </p>
     <br>
