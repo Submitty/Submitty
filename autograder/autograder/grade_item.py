@@ -252,6 +252,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     checkout_path = os.path.join(tmp_submission, "checkout")
 
     provided_code_path = os.path.join(tmp_autograding, "provided_code")
+    solution_path = os.path.join(tmp_autograding, "solution")
     test_input_path = os.path.join(tmp_autograding, "test_input")
     test_output_path = os.path.join(tmp_autograding, "test_output")
     custom_validation_code_path = os.path.join(tmp_autograding, "custom_validation_code")
@@ -304,6 +305,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     checkout_path = os.path.join(tmp_submission,"checkout")
 
     provided_code_path = os.path.join(tmp_autograding,"provided_code")
+    solution_path = os.path.join(tmp_autograding,"solution")
     test_input_path = os.path.join(tmp_autograding,"test_input")
     test_output_path = os.path.join(tmp_autograding,"test_output")
     custom_validation_code_path = os.path.join(tmp_autograding,"custom_validation_code")
@@ -448,6 +450,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     tmp_work = os.path.join(tmp,"TMP_WORK")
     tmp_work_test_input = os.path.join(tmp_work, "test_input")
     tmp_work_test_output = os.path.join(tmp_work, "test_output")
+    tmp_work_solution = os.path.join(tmp_work, "solution")
     tmp_work_submission = os.path.join(tmp_work, "submitted_files")
     tmp_work_compiled = os.path.join(tmp_work, "compiled_files")
     tmp_work_checkout = os.path.join(tmp_work, "checkout")
@@ -456,6 +459,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
 
     os.mkdir(tmp_work_test_input)
     os.mkdir(tmp_work_test_output)
+    os.mkdir(tmp_work_solution)
     os.mkdir(tmp_work_submission)
     os.mkdir(tmp_work_compiled)
     os.mkdir(tmp_work_checkout)
@@ -556,8 +560,12 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     # copy_contents_into(job_id,test_output_path,tmp_work,tmp_logs)
     copy_contents_into(job_id,test_output_path,tmp_work_test_output,tmp_logs)
 
+
     # copy any instructor custom validation code into the tmp work directory
     copy_contents_into(job_id,custom_validation_code_path,tmp_work,tmp_logs)
+
+    # copy any instructor solution code into the tmp work directory
+    copy_contents_into(job_id,solution_path,tmp_work_solution,tmp_logs)
 
     subprocess.call(['ls', '-lR', '.'], stdout=open(tmp_logs + "/overall.txt", 'a'))
 
