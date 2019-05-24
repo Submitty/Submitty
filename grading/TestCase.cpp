@@ -88,7 +88,7 @@ std::vector<nlohmann::json> mapOrArrayOfMaps(nlohmann::json j, const std::string
 
 void fileStatus(const std::string &filename, bool &fileExists, bool &fileEmpty) {
   struct stat st;
-  if (stat(filename.c_str(), &st) < 0) {
+  if (stat('test_output/' + filename.c_str(), &st) < 0) {
     // failure
     fileExists = false;
   }
@@ -161,7 +161,7 @@ bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &s
 bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &expected_file_contents,
                       std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > &messages) {
 
-  std::string filename = j.value("expected_file","");
+  std::string filename = "test_output/" + j.value("expected_file","");
   if (filename == "") {
     messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  EXPECTED FILENAME MISSING"));
     return false;
