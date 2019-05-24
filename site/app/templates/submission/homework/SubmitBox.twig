@@ -431,8 +431,6 @@
                     type="text"
                     name="input_{{ index }}"
                     id="input_{{ index }}"
-                    data-original="{{ short_answer.starter_value_string }}"
-                    data-prev-submission="{{ short_answer.recent_submission_string }}"
                     {% if core.getConfig().keepPreviousFiles() %}
                         value="{{ short_answer.recent_submission_string }}"
                     {% else %}
@@ -440,8 +438,6 @@
                     {% endif %}
                     onKeyPress="handle_input_keypress();">
             <br />
-            <button type="button" class="btn btn-primary btn-push-down">Clear</button>
-            <button type="button" class="btn btn-primary btn-push-down">Use Most Recent Submission</button>
         {% else %}
             Press <kbd>TAB</kbd> to indent.  Press <kbd>ESC</kbd> to advance from textarea.</label>
             <textarea
@@ -450,12 +446,8 @@
                     style="width:60em; height:100%; min-height:110px;"
                     name="input_{{ index }}"
                     id="input_{{ index }}"
-                    data-original="{{ short_answer.starter_value_string }}"
-                    data-prev-submission="{{ short_answer.recent_submission_string }}"
                     onKeyPress="handle_input_keypress()">{% if core.getConfig().keepPreviousFiles() %}{{ short_answer.recent_submission_string }}{% else %}{{ short_answer.starter_value_string }}{% endif %}</textarea>
             <br />
-            <button type="button" class="btn btn-primary btn-push-down">Clear</button>
-            <button type="button" class="btn btn-primary btn-push-down">Use Most Recent Submission</button>
             {#
                 Allow tab in the larger text boxes (normally tab moves to the next textbox)
                 http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
@@ -466,6 +458,23 @@
                 enableTabsInTextArea('#input_{{ index }}');
             </script>
         {% endif %}
+        <button type="button" id="input_{{ index }}_clear_button" class="btn btn-primary btn-push-down">Clear</button>
+        <button type="button" id="input_{{ index }}_recent_button" class="btn btn-primary btn-push-down">Use Most Recent Submission</button>
+        <script>
+
+            // These scripts reset enable the clear and use most recent submission (per short_answer box)
+            document.getElementById("input_{{ index }}_clear_button").addEventListener("click", function() {
+                document.getElementById("input_{{ index }}").value = "{{ short_answer.starter_value_string }}";
+            });
+
+            document.getElementById("input_{{ index }}").addEventListener("keyup", function() {
+                alert('test');
+            });
+
+            document.getElementById("input_{{ index }}_recent_button").addEventListener("click", function() {
+                document.getElementById("input_{{ index }}").value = "{{ short_answer.recent_submission_string }}";
+            });
+        </script>
     </p>
     <br>
 {% endmacro %}
