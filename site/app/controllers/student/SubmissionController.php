@@ -107,8 +107,7 @@ class SubmissionController extends AbstractController {
     }
 
     private function fetchTime(){
-//        $DATE_FORMAT = "m/d/Y @ H:i";
-        $this->core->getOutput()->renderJsonSuccess(Array("time" => time(), "offset" => date('Z')/-60));
+        $this->core->getOutput()->renderJsonSuccess(Array("time" => time()));
         return;
     }
 
