@@ -2076,3 +2076,9 @@ end of styles used in the admin gradeable page
     caption-side: top;
     border: 0;
 }
+
+.invisible-btn{
+    background-color: #00000000;
+    border: 0px;
+    padding: 0px;
+}

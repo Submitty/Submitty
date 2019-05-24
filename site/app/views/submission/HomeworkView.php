@@ -248,7 +248,7 @@ class HomeworkView extends AbstractView {
         $student_page = $gradeable->isStudentPdfUpload();
         $students_full = [];
         $inputs = $gradeable->getAutogradingConfig()->getInputs();
-        $contents = $gradeable->getAutogradingConfig()->getContent();
+        $notebook = $gradeable->getAutogradingConfig()->getNotebook();
         $old_files = [];
         $display_version = 0;
 
@@ -272,8 +272,8 @@ class HomeworkView extends AbstractView {
 
         $image_data = [];
         if (!$gradeable->isVcs()) {
-            foreach ($contents as $content_chunk) {
-                foreach ($content_chunk["images"] as $image) {
+            foreach ($notebook as $notebook_chunk) {
+                foreach ($notebook_chunk["images"] as $image) {
                     $image_name = $image['name'];
                     $imgPath = FileUtils::joinPaths(
                         $this->core->getConfig()->getCoursePath(),
@@ -289,6 +289,16 @@ class HomeworkView extends AbstractView {
                         $inputimagesrc = 'data: ' . mime_content_type($imgPath) . ';charset=utf-8;base64,' . $inputImageData;
                         // insert the sample image data
                         $image_data[$image_name] = $inputimagesrc;
+                    }
+                }
+            }
+
+            // If alt text is not set for image then set it to default string
+            foreach ($notebook as $notebook_key => $notebook_value) {
+                foreach ($notebook[$notebook_key]['images'] as $image_key => $image_value) {
+                    if(!isset($image_value['alt']))
+                    {
+                        $notebook[$notebook_key]['images'][$image_key]['alt'] = "Instructor Provided Image";
                     }
                 }
             }
@@ -375,7 +385,7 @@ class HomeworkView extends AbstractView {
             'late_days_use' => $late_days_use,
             'old_files' => $old_files,
             'inputs' => $input_data,
-            'contents' => $contents,
+            'notebook' => $notebook,
             'image_data' => $image_data,
             'component_names' => $component_names,
             'upload_message' => $this->core->getConfig()->getUploadMessage()
