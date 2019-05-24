@@ -421,7 +421,6 @@
             e.stopPropagation();
         });
 
-        var localDate = new Date();
         var serverDate;
 
         var fetchTimeUrl = window.location.href + "&action=fetch_time";
@@ -433,6 +432,9 @@
 
 
         function fetchServerTime() {
+
+            var localDate = new Date();
+
             console.log("Fetching Server");
             if(nextTimeFetch == 0) {
                 // console.log("Fetch set time remaining: "+(60 - localDate.getSeconds()));
@@ -447,7 +449,8 @@
                 url: fetchTimeUrl,
                 dataType: "json",
                 success: function(result){
-                    serverDate = new Date(result.data.time * 1000);
+                    localDate = new Date();
+                    serverDate = new Date((result.data.time + (localDate.getSeconds())) * 1000);
                     console.log("Updated servertime");
                     if(setTimerOn == 0){
                         // console.log("Server time remaining: "+(60 - serverDate.getSeconds()));
