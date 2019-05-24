@@ -293,6 +293,16 @@ class HomeworkView extends AbstractView {
                 }
             }
 
+            // If alt text is not set for image then set it to default string
+            foreach ($notebook as $notebook_key => $notebook_value) {
+                foreach ($notebook[$notebook_key]['images'] as $image_key => $image_value) {
+                    if(!isset($image_value['alt']))
+                    {
+                        $notebook[$notebook_key]['images'][$image_key]['alt'] = "Instructor Provided Image";
+                    }
+                }
+            }
+
             if($version_instance !== null) {
                 $display_version = $version_instance->getVersion();
                 for ($i = 1; $i <= $gradeable->getAutogradingConfig()->getNumParts(); $i++) {

@@ -2082,6 +2082,14 @@ end of styles used in the admin gradeable page
     outline: 2px solid cornflowerblue;
 }
 
+/* Give trash cans inside submission boxes a blue outline when they have focus (for VPAT compliance) */
 .fa-trash:focus {
     outline: 2px solid cornflowerblue;
 }
+
+.invisible-btn{
+    background-color: #00000000;
+    border: 0px;
+    padding: 0px;
+}
+

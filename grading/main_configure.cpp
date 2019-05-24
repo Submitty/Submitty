@@ -212,21 +212,33 @@ int main(int argc, char *argv[]) {
           assert (in_type->is_string());
       	  assert (*in_type == "short_answer" || *in_type == "codebox" || *in_type == "multiplechoice");
       	  input_obj["type"] = *in_type;
-          
+
+          // starter_value_string, optional
+          // Create a empty string
+          std::string starter_value_string = "";
+
+          // If field inside json was not empty then assign to the new string
+          auto in_starter_value_string = input.find("starter_value_string");
+          if(in_starter_value_string != input.end())
+          {
+            assert(in_starter_value_string->is_string());
+            starter_value_string = *in_starter_value_string;
+          }
+
+          // Assign starter_value_string to input_obj
+      	  input_obj["starter_value_string"] = starter_value_string;
 
       	  // Label
       	  nlohmann::json::iterator in_label = input.find("label");
       	  assert (in_label != input.end());
           assert (in_label->is_string());
       	  input_obj["label"] = *in_label;
-          
 
       	  // Filename
       	  std::string s = "";
       	  if (i < 10) 
       	    s += "0";
       	  s += std::to_string(k);
-
 
       	  // Actual input configuration
       	  if (*in_type == "short_answer" || *in_type == "codebox") {
@@ -253,7 +265,7 @@ int main(int argc, char *argv[]) {
               input_obj["allow_multiple"] = false;
             }
 
-      	    
+
             nlohmann::json::iterator mc_choices = input.find("choices");
       	    assert (mc_choices != input.end());
       	    input_obj["choices"] = *mc_choices;
