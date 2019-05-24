@@ -97,4 +97,46 @@ class TestWriteGradeHistory(unittest.TestCase):
 
             self.assertEqual(len(expected), len(actual))
             for i in range(len(expected)):
-                self.assertEqual(expected[i], actual[i])
+                self.assertDictEqual(expected[i], actual[i])
+
+    def test_late_submission(self):
+        with TemporaryDirectory() as tmpdirname:
+            history_file = Path(tmpdirname, 'history.json')
+            write_grade_history.just_write_grade_history(
+                str(history_file),
+                "2019-05-23 23:59:59-0400",
+                "2019-05-28 20:39:12-0400",
+                301451,
+                "2019-05-28 20:39:12-0400",
+                "",
+                "2019-05-28 20:39:32-0400",
+                20,
+                "2019-05-28 20:39:55-0400",
+                23,
+                "Automatic grading total: 25 / 30",
+                1
+            )
+
+            expected = []
+            expected.append(OrderedDict({
+                'assignment_deadline': '2019-05-23 23:59:59-0400',
+                'submission_time': '2019-05-28 20:39:12-0400',
+                'days_late_before_extensions': 4,
+                'queue_time': '2019-05-28 20:39:12-0400',
+                'batch_regrade': False,
+                'grading_began': '2019-05-28 20:39:32-0400',
+                'wait_time': 20,
+                'grading_finished': '2019-05-28 20:39:55-0400',
+                'grade_time': 23,
+                'autograde_result': 'Automatic grading total: 25 / 30',
+                'autograde_total': 25,
+                'autograde_max_possible': 30,
+                'revision': 1
+            }))
+
+            with history_file.open() as open_file:
+                actual = json.load(open_file, object_pairs_hook=OrderedDict)
+
+            self.assertEqual(len(expected), len(actual))
+            for i in range(len(expected)):
+                self.assertDictEqual(expected[i], actual[i])
