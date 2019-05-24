@@ -15,11 +15,11 @@
                 {# BAD STATUS - AUTO ZERO BECAUSE INSUFFICIENT LATE DAYS REMAIN #}
                 {{ self.line_breaks(loop.index0 > 0 ? 2 : 0) }}
                 Your active version was submitted {{ message.info.late }} {{ self.day_or_days(message.info.late) }}
-                after the deadline but you
+                after the deadline. 
                 {% if message.info.remaining == 0 %}
-                    have no remaining late days.
+                  You have no late days remaining for future assignments.
                 {% else %}
-                    only have {{ message.info.remaining }} remaining late {{ self.day_or_days(message.info.remaining) }}.
+                   You still have {{ message.info.remaining }} late {{ self.day_or_days(message.info.remaining) }} remaining.
                 {% endif %}
             {% elseif message.type == 'too_many_used' %}
                 {# BAD STATUS - AUTO ZERO BECAUSE TOO MANY LATE DAYS USED ON THIS ASSIGNMENT #}
@@ -69,9 +69,8 @@
             {% elseif message.type == 'would_allowed' %}
                 {# SUBMISSION NOW WOULD BE LATE #}
                 {{ self.line_breaks(loop.index0 > 0 ? 1 : 0) }}
-                If you {{ self.submit_or_resubmit(message.info.active_version) }} to this assignment now,
-                you will be charged {{ message.info.charged }} late {{ self.day_or_days(message.info.charged) }},
-                and have {{ message.info.remaining }} remaining late {{ self.day_or_days(message.info.remaining) }} for future assignments.
+                You have been charged {{ message.info.charged }} {{ self.day_or_days(message.info.charged) }} already for this assignment. You won't be charged again 
+                for all submissions made today.
             {% elseif message.type == 'would_get_zero' %}
                 {{ self.line_breaks(loop.index0 > 0 ? 1 : 0) }}
                 If you submit to this assignment now, your grade for this assignment will be recorded as a zero.
