@@ -567,9 +567,6 @@ class ForumController extends AbstractController {
         // Ensure authentication before call
         if(!empty($_POST["title"])) {
             $thread_id = $_POST["edit_thread_id"];
-            if(!$this->checkThreadEditAccess($thread_id)) {
-                return false;
-            }
             if(empty($_POST['lock_thread_date']) and !DateUtils::validateTimestamp($_POST['lock_thread_date'])){
                 $lock_thread_date = null;
             }
