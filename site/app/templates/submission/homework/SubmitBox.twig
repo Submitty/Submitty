@@ -222,7 +222,7 @@
                                 <fieldset>
                                     {% for choice in i.choices %}
                                         {% if i.allow_multiple == true %}
-                                            <input type="checkbox" name="input_{{ num_inputs }}" id="input_{{ num_inputs }}" value="{{ choice }}" onclick="handle_input_keypress();"" />
+                                            <input type="checkbox" name="input_{{ num_inputs }}" id="input_{{ num_inputs }}" value="{{ choice }}" onclick="handle_input_keypress();" />
                                             <label for="{{ choice }}">
                                                 {{ choice }}
                                             </label>
@@ -245,7 +245,12 @@
     
             {# Submit boxes #}
             {% for part in part_names %}
-                <div id="upload{{ loop.index }}" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 150px;">
+                <div tabindex="0"
+                     id="upload{{ loop.index }}"
+                     onkeypress="clicked_on_box(event)"
+                     role="text"
+                     aria-label="Press enter to upload your {{ part }} file"
+                     style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 150px;">
                     <h3 class="label" id="label{{ loop.index }}">
                         {% if part_names|length > 1 %}
                             Drag your {{ part }} here or click to open file browser
