@@ -6,6 +6,9 @@ use app\libraries\Core;
 use app\libraries\DateUtils;
 use \app\models\AbstractModel;
 use app\models\User;
+use app\libraries\FileUtils;
+use app\exceptions\FileNotFoundException;
+use app\exceptions\IOException;
 
 /**
  * Class GradedGradeable
@@ -187,6 +190,101 @@ class GradedGradeable extends AbstractModel {
      */
     public function getTotalScore() {
         return floatval(max(0.0, $this->getTaGradingScore() + $this->getAutoGradingScore()));
+    }
+
+    /**
+     * Gets a new 'notebook' which contains information about most recent submissions
+     *
+     * @return array An updated 'notebook' which has the most recent submission data entered into the
+     * 'recent_submission_string' key for each input item inside the notebook.  If there haven't been any submissions,
+     * then 'recent_submission_string' is populated with 'starter_value_string' if one exists, otherwise it will be
+     * blank.
+     */
+    public function getUpdatedNotebook() {
+
+        // Get notebook
+        $newNotebook = $this->getGradeable()->getAutogradingConfig()->getNotebook();
+
+        foreach ($newNotebook as $notebookKey => $notebookVal) {
+            foreach ($notebookVal['input'] as $inputKey => $inputVal) {
+
+                // Get most recent submission string
+                $recentSubmissionString = $this->getRecentSubmissionContents($inputVal['filename']);
+
+                // If string was null then use starter_value_string
+                if($recentSubmissionString === NULL) {
+
+                    $recentSubmissionString = $inputVal['starter_value_string'];
+
+                }
+
+                // Add field to the array
+                $newNotebook[$notebookKey]['input'][$inputKey]['recent_submission_string'] = $recentSubmissionString;
+            }
+        }
+
+        // Operate on notebook to add prev_submission field to inputs
+        return $newNotebook;
+    }
+
+    /**
+     * Get the data from the student's most recent submission
+     *
+     * @param $filename Name of the file to collect the data out of
+     * @throws FileNotFoundException if file with passed filename could not be found
+     * @throws IOException if there was an error reading contents from the file
+     * @return string|null if successful returns the contents of a students most recent submission as a string,
+     * if no submissions exist then returns null.
+     */
+    private function getRecentSubmissionContents($filename) {
+
+        // Get items in path to student's submission folder
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $gradable_dir = $this->getGradeableId();
+        $student_id = $this->core->getUser()->getId();
+
+        // Join path items
+        $user_submission_folder = FileUtils::joinPaths($course_path, 'submissions', $gradable_dir, $student_id);
+
+        // Get some info about the files in this user's submission folder
+        $files = FileUtils::getAllFiles($user_submission_folder);
+
+        // Get number of submissions
+        // This is equal to number of files in directory minus 1 (to account for user json file inside directory)
+        $num_of_submissions = count($files) - 1;
+
+        // If no submissions yet return null
+        if($num_of_submissions <= 0)
+        {
+            return NULL;
+        }
+
+        // Append submission folder to $user_submission_folder
+        $user_submission_folder = FileUtils::joinPaths($user_submission_folder, $num_of_submissions);
+
+        // Get complete file path
+        $complete_file_path = FileUtils::joinPaths($user_submission_folder, $filename);
+
+        // If desired file does not exist in the most recent submission directory throw exception
+        if(!file_exists($complete_file_path))
+        {
+            throw new FileNotFoundException("Unable to locate submission file.");
+        }
+
+        // Read file contents into string
+        $file_contents = file_get_contents($complete_file_path);
+
+        // If file_contents is False an error has occured
+        if($file_contents === False)
+        {
+            throw new IOException("An error retrieving submission contents.");
+        }
+
+        // Remove trailing newline
+        $file_contents = rtrim($file_contents, "\n");
+
+        // Get the contents of the most recent submission and return it
+        return $file_contents;
     }
 
     /* Intentionally Unimplemented accessor methods */
