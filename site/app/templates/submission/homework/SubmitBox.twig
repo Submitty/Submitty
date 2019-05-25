@@ -462,6 +462,15 @@
         <button type="button" id="input_{{ index }}_recent_button" class="btn btn-primary btn-push-down">Use Most Recent Submission</button>
         <script>
 
+            // Setup init state of buttons
+            {% if core.getConfig().keepPreviousFiles() %}
+                document.getElementById("input_{{ index }}_clear_button").disabled = false;
+                document.getElementById("input_{{ index }}_recent_button").disabled = true;
+            {% else %}
+                document.getElementById("input_{{ index }}_clear_button").disabled = true;
+                document.getElementById("input_{{ index }}_recent_button").disabled = false;
+            {% endif %}
+
             // Setup click events for clear button
             document.getElementById("input_{{ index }}_clear_button").addEventListener("click", function() {
 
