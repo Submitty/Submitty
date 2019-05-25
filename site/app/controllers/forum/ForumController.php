@@ -701,7 +701,9 @@ class ForumController extends AbstractController {
                 }
                 if($option == "alpha"){
                     $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, $show_deleted, 'alpha');
-                } else {
+                } else if($option == "reverse-time") {
+                    $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, $show_deleted, 'reverse-time');
+                }else {
                     $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, $show_deleted, 'tree');
                 }
                 if(empty($posts)){
