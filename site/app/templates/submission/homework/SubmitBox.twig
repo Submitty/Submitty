@@ -462,18 +462,59 @@
         <button type="button" id="input_{{ index }}_recent_button" class="btn btn-primary btn-push-down">Use Most Recent Submission</button>
         <script>
 
-            // These scripts reset enable the clear and use most recent submission (per short_answer box)
+            // Setup click events for clear button
             document.getElementById("input_{{ index }}_clear_button").addEventListener("click", function() {
+
+                // Reset string
                 document.getElementById("input_{{ index }}").value = "{{ short_answer.starter_value_string }}";
+
+                // Disable button clear button
+                document.getElementById("input_{{ index }}_clear_button").disabled = true;
+
+                // Enable recent button
+                document.getElementById("input_{{ index }}_recent_button").disabled = false;
             });
 
-            document.getElementById("input_{{ index }}").addEventListener("keyup", function() {
-                alert('test');
-            });
-
+            // Setup click events for most recent submission button
             document.getElementById("input_{{ index }}_recent_button").addEventListener("click", function() {
+
+                // Reset string
                 document.getElementById("input_{{ index }}").value = "{{ short_answer.recent_submission_string }}";
+
+                // Disable recent button
+                document.getElementById("input_{{ index }}_recent_button").disabled = true;
+
+                // Enable clear button
+                document.getElementById("input_{{ index }}_clear_button").disabled = false;
             });
+
+            // Check state of buttons after each change to the input
+            document.getElementById("input_{{ index }}").addEventListener("keyup", function() {
+
+                // Get value from input box
+                var box_value = document.getElementById("input_{{ index }}").value;
+
+                // Set button states based on if it equals the starter string or most recent string
+                if (box_value === "{{ short_answer.starter_value_string }}")
+                {
+                    document.getElementById("input_{{ index }}_clear_button").disabled = true;
+                }
+                else
+                {
+                    document.getElementById("input_{{ index }}_clear_button").disabled = false;
+                }
+
+                if (box_value === "{{ short_answer.recent_submission_string }}")
+                {
+                    document.getElementById("input_{{ index }}_recent_button").disabled = true;
+                }
+                else
+                {
+                    document.getElementById("input_{{ index }}_recent_button").disabled = false;
+                }
+            });
+
+
         </script>
     </p>
     <br>
