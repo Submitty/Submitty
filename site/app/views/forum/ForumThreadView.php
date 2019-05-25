@@ -907,31 +907,39 @@ HTML;
 HTML;
 		}
 		if($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) {
-			if($deleted && $this->core->getUser()->getGroup() <= 3){
-				$ud_toggle_status = "false";
-				$ud_button_title = "Undelete post";
-				$ud_button_icon = "fa-undo";
+			if(!($this->core->getQueries()->isThreadLocked($thread_id) != 1 || $this->core->getUser()->accessFullGrading() )){
+
 			} else {
-				$ud_toggle_status = "true";
-				$ud_button_title = "Remove post";
-				$ud_button_icon = "fa-trash";
-			}
-			$return .= <<<HTML
-			<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; float:right;" onClick="deletePostToggle({$ud_toggle_status}, {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'n/j g:i A')}', '{$this->core->getCsrfToken()}' )" title="{$ud_button_title}"><i class="fa {$ud_button_icon}" aria-hidden="true"></i></a>
+				if($deleted && $this->core->getUser()->getGroup() <= 3){
+					$ud_toggle_status = "false";
+					$ud_button_title = "Undelete post";
+					$ud_button_icon = "fa-undo";
+				} else {
+					$ud_toggle_status = "true";
+					$ud_button_title = "Remove post";
+					$ud_button_icon = "fa-trash";
+				}
+				$return .= <<<HTML
+				<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; float:right;" onClick="deletePostToggle({$ud_toggle_status}, {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'n/j g:i A')}', '{$this->core->getCsrfToken()}' )" title="{$ud_button_title}"><i class="fa {$ud_button_icon}" aria-hidden="true"></i></a>
 HTML;
+			}
 		}
 		if($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) {
-			$shouldEditThread = null;
-			if($first) {
-				$shouldEditThread = "true";
-				$edit_button_title = "Edit thread and post";
+			if(!($this->core->getQueries()->isThreadLocked($thread_id) != 1 || $this->core->getUser()->accessFullGrading() )){
+
 			} else {
-				$shouldEditThread = "false";
-				$edit_button_title = "Edit post";
-			}
-			$return .= <<<HTML
-				<a class="post_button" style="position:relative; display:inline-block; color:black; float:right;" onClick="editPost({$post['id']}, {$post['thread_id']}, {$shouldEditThread}, '{$this->core->getCsrfToken()}')" title="{$edit_button_title}"><i class="fas fa-edit" aria-hidden="true"></i></a>
+				$shouldEditThread = null;
+				if($first) {
+					$shouldEditThread = "true";
+					$edit_button_title = "Edit thread and post";
+				} else {
+					$shouldEditThread = "false";
+					$edit_button_title = "Edit post";
+				}
+				$return .= <<<HTML
+					<a class="post_button" style="position:relative; display:inline-block; color:black; float:right;" onClick="editPost({$post['id']}, {$post['thread_id']}, {$shouldEditThread}, '{$this->core->getCsrfToken()}')" title="{$edit_button_title}"><i class="fas fa-edit" aria-hidden="true"></i></a>
 HTML;
+			}
         }
 
         $return .= <<<HTML
