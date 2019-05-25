@@ -199,7 +199,7 @@
                     {% for i in n.input %}
                         <div id="input_container_{{ loop.index0 }}">
                             {% if i.type == "short_answer" %}
-                                {{ self.render_short_answer(i, num_inputs ) }}
+                                {{ self.render_short_answer(i, num_inputs, highest_version) }}
                             {% elseif i.type == "codebox" %}
                                 <br>
                             {% elseif i.type == "multiplechoice" %}
@@ -421,7 +421,7 @@
     });
 </script>
 
-{% macro render_short_answer(short_answer, index) %}
+{% macro render_short_answer(short_answer, index, version) %}
 
     <p style="max-width: 50em;">
         <strong>{{ short_answer.label }}</strong>
@@ -462,9 +462,20 @@
         <button type="button" id="input_{{ index }}_recent_button" class="btn btn-primary btn-push-down">Use Most Recent Submission</button>
         <script>
 
+            // If no previous submissions then hide recent submission button
+            {% if version == 0 %}
+                document.getElementById("input_{{ index }}_recent_button").style.visibility = 'hidden';
+            {% endif %}
+
             // Setup init state of buttons
             {% if core.getConfig().keepPreviousFiles() %}
-                document.getElementById("input_{{ index }}_clear_button").disabled = false;
+
+                {% if version == 0 %}
+                    document.getElementById("input_{{ index }}_clear_button").disabled = true;
+                {% else %}
+                    document.getElementById("input_{{ index }}_clear_button").disabled = false;
+                {% endif %}
+
                 document.getElementById("input_{{ index }}_recent_button").disabled = true;
             {% else %}
                 document.getElementById("input_{{ index }}_clear_button").disabled = true;
