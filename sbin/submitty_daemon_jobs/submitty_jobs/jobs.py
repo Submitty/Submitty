@@ -10,7 +10,8 @@ import subprocess
 import json
 import stat
 from urllib.parse import unquote
-
+from . import bulk_qr_split
+from . import bulk_upload_split
 from . import INSTALL_DIR, DATA_DIR
 
 
@@ -198,7 +199,7 @@ class BulkUpload(CourseJob):
             if 'num' not in self.job_details:
                 print("did not pass in the number to divide " + filename + " by")
                 sys.exit(1)
-            num = self.job_details['num']
+            num  = self.job_details['num']
             script = Path(INSTALL_DIR, 'sbin', 'bulk_upload_split.py')
         #create paths
         try:
@@ -235,9 +236,11 @@ class BulkUpload(CourseJob):
 
         try:
             if is_qr:
-                subprocess.call([str(script), filename, split_path, qr_prefix, qr_suffix])
+                bulk_qr_split.main([filename, split_path, qr_prefix, qr_suffix])
             else: 
-                subprocess.call([str(script), filename, split_path, num])
+                bulk_upload_split.main([filename, split_path, num])
+
+            os.remove(filename)
             os.chdir(current_path)
         except Exception as err:
             print("Failed to launch bulk_split subprocess!")
