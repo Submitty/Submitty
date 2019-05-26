@@ -114,12 +114,12 @@
     //highlight pages that don't match the expected, also save the expected page count in session storage
     function highlightPageCount(){
         var expected_count = parseInt(document.getElementById("expected_pages_input").value);
-        if(expected_count == NaN || expected_count <= 0 || !expected_count)
+        if(expected_count == NaN || !expected_count)
             return;
 
         var pages = document.getElementsByClassName("pdf_page_count");
         for (var i = pages.length - 1; i >= 0; i--) {
-            if(parseInt(pages[i].innerHTML) !== expected_count)
+            if(parseInt(pages[i].innerHTML) !== expected_count && expected_count >= 0)
                 pages[i].style.backgroundColor = "#FFC107";
             else
                 pages[i].style.backgroundColor = "";
