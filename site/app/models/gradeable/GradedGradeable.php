@@ -232,7 +232,7 @@ class GradedGradeable extends AbstractModel {
      * @param $filename Name of the file to collect the data out of
      * @throws FileNotFoundException if file with passed filename could not be found
      * @throws IOException if there was an error reading contents from the file
-     * @return string if successful returns the contents of a students most recent submission as a string
+     * @return string if successful returns the contents of a students most recent submission
      */
     private function getRecentSubmissionContents($filename) {
 
@@ -263,7 +263,7 @@ class GradedGradeable extends AbstractModel {
         // If file_contents is False an error has occured
         if($file_contents === False)
         {
-            throw new IOException("An error retrieving submission contents.");
+            throw new IOException("An error occurred retrieving submission contents.");
         }
 
         // Remove trailing newline
