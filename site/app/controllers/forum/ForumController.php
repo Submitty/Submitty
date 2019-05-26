@@ -311,7 +311,7 @@ class ForumController extends AbstractController {
     //CODE WILL BE CONSOLIDATED IN FUTURE
 
     public function publishThread(){
-        
+
         if(!$this->core->getAccess()->canI("forum.publish")) {
             $this->core->getOutput()->renderJson(['error' => "Invalid CSRF token"]);
             return $this->core->getOutput()->getOutput();
@@ -321,10 +321,10 @@ class ForumController extends AbstractController {
         $title = trim($_POST["title"]);
         $thread_post_content = str_replace("\r", "", $_POST["thread_post_content"]);
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
-        if(empty($_POST['lock_thread_date'] and !DateUtils::validateTimestamp($_POST['lock_thread_date']))){
-            $lock_thread_date = null;
-        } else {
+        if( !empty($_POST['lock_thread_date'])  and $this->core->getUser()->accessAdmin() ){
             $lock_thread_date = $_POST['lock_thread_date'];
+        } else {
+            $lock_thread_date = null;
         }
         $thread_status = $_POST["thread_status"];
         $announcement = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->accessFullGrading()) ? 1 : 0 ;
@@ -567,11 +567,11 @@ class ForumController extends AbstractController {
         // Ensure authentication before call
         if(!empty($_POST["title"])) {
             $thread_id = $_POST["edit_thread_id"];
-            if(empty($_POST['lock_thread_date']) and !DateUtils::validateTimestamp($_POST['lock_thread_date'])){
-                $lock_thread_date = null;
+            if( !empty($_POST['lock_thread_date']) and $this->core->getUser()->accessAdmin()){
+                $lock_thread_date = $_POST['lock_thread_date'];
             }
             else{
-                $lock_thread_date = $_POST['lock_thread_date'];
+                $lock_thread_date = null;
             }
             $thread_title = $_POST["title"];
             $status = $_POST["thread_status"];
