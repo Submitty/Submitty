@@ -208,14 +208,13 @@ class GradedGradeable extends AbstractModel {
         foreach ($newNotebook as $notebookKey => $notebookVal) {
             foreach ($notebookVal['input'] as $inputKey => $inputVal) {
 
-                // Get most recent submission string
-                $recentSubmissionString = $this->getRecentSubmissionContents($inputVal['filename']);
-
-                // If string was null then use starter_value_string
-                if($recentSubmissionString === NULL) {
-
+                // If no previous submissions set string to default starter_value_string
+                if($this->getAutoGradedGradeable()->getHighestVersion() == 0) {
                     $recentSubmissionString = $inputVal['starter_value_string'];
-
+                }
+                else {
+                    // Get most recent submission string
+                    $recentSubmissionString = $this->getRecentSubmissionContents($inputVal['filename']);
                 }
 
                 // Add field to the array
@@ -233,8 +232,7 @@ class GradedGradeable extends AbstractModel {
      * @param $filename Name of the file to collect the data out of
      * @throws FileNotFoundException if file with passed filename could not be found
      * @throws IOException if there was an error reading contents from the file
-     * @return string|null if successful returns the contents of a students most recent submission as a string,
-     * if no submissions exist then returns null.
+     * @return string if successful returns the contents of a students most recent submission as a string
      */
     private function getRecentSubmissionContents($filename) {
 
@@ -242,28 +240,16 @@ class GradedGradeable extends AbstractModel {
         $course_path = $this->core->getConfig()->getCoursePath();
         $gradable_dir = $this->getGradeableId();
         $student_id = $this->core->getUser()->getId();
+        $version = $this->getAutoGradedGradeable()->getHighestVersion();
 
         // Join path items
-        $user_submission_folder = FileUtils::joinPaths($course_path, 'submissions', $gradable_dir, $student_id);
-
-        // Get some info about the files in this user's submission folder
-        $files = FileUtils::getAllFiles($user_submission_folder);
-
-        // Get number of submissions
-        // This is equal to number of files in directory minus 1 (to account for user json file inside directory)
-        $num_of_submissions = count($files) - 1;
-
-        // If no submissions yet return null
-        if($num_of_submissions <= 0)
-        {
-            return NULL;
-        }
-
-        // Append submission folder to $user_submission_folder
-        $user_submission_folder = FileUtils::joinPaths($user_submission_folder, $num_of_submissions);
-
-        // Get complete file path
-        $complete_file_path = FileUtils::joinPaths($user_submission_folder, $filename);
+        $complete_file_path = FileUtils::joinPaths(
+            $course_path,
+            'submissions',
+            $gradable_dir,
+            $student_id,
+            $version,
+            $filename);
 
         // If desired file does not exist in the most recent submission directory throw exception
         if(!file_exists($complete_file_path))
