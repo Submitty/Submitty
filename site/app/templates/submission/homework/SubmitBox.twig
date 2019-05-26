@@ -265,21 +265,24 @@
         </div>
 
         <button type="button" id="submit" class="btn btn-success" style="margin-right: 100px;">Submit</button>
-        <button type="button" id="startnew" class="btn btn-primary">Clear</button>
 
-        {% if display_version == highest_version and display_version > 0 %}
-            <button type="button" id= "getprev" class="btn btn-primary">Use Most Recent Submission</button>
+        {% if part_names is not empty %}
+            <button type="button" id="startnew" class="btn btn-primary">Clear</button>
 
-            {% if core.getConfig().keepPreviousFiles() %}
-            <script type="text/javascript">
-                $(function() {
-                    setUsePrevious();
-                    {% for file in old_files %}
-                        addLabel('{{ file.name }}', '{{ file.size }}', {{ file.part }}, true);
-                        readPrevious('{{ file.name }}', {{ file.part }});
-                    {% endfor %}
-                });
-            </script>
+            {% if display_version == highest_version and display_version > 0 %}
+                <button type="button" id= "getprev" class="btn btn-primary">Use Most Recent Submission</button>
+
+                {% if core.getConfig().keepPreviousFiles() %}
+                <script type="text/javascript">
+                    $(function() {
+                        setUsePrevious();
+                        {% for file in old_files %}
+                            addLabel('{{ file.name }}', '{{ file.size }}', {{ file.part }}, true);
+                            readPrevious('{{ file.name }}', {{ file.part }});
+                        {% endfor %}
+                    });
+                </script>
+                {% endif %}
             {% endif %}
         {% endif %}
 
@@ -461,7 +464,6 @@
         <button type="button" id="input_{{ index }}_clear_button" class="btn btn-primary btn-push-down">Clear</button>
         <button type="button" id="input_{{ index }}_recent_button" class="btn btn-primary btn-push-down">Use Most Recent Submission</button>
         <script>
-
             // If no previous submissions then hide recent submission button
             {% if version == 0 %}
                 document.getElementById("input_{{ index }}_recent_button").style.visibility = 'hidden';
@@ -533,8 +535,6 @@
                     document.getElementById("input_{{ index }}_recent_button").disabled = false;
                 }
             });
-
-
         </script>
     </p>
     <br>
