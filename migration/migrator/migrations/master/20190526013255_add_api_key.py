@@ -14,7 +14,7 @@ def up(config, database):
     
         database.execute("CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;")
 
-        database.execute("ALTER TABLE users ADD COLUMN api_key character varying(255) NOT NULL default encode(gen_random_bytes(16), 'hex');")
+        database.execute("ALTER TABLE users ADD COLUMN api_key character varying(255) NOT NULL UNIQUE DEFAULT encode(gen_random_bytes(16), 'hex');")
 
         database.execute("""
 CREATE OR REPLACE FUNCTION generate_api_key() 

@@ -126,7 +126,7 @@ CREATE TABLE users (
     user_updated BOOLEAN NOT NULL DEFAULT FALSE,
     instructor_updated BOOLEAN NOT NULL DEFAULT FALSE,
     last_updated timestamp(6) with time zone,
-    api_key character varying(255) NOT NULL default encode(gen_random_bytes(16), 'hex')
+    api_key character varying(255) NOT NULL UNIQUE DEFAULT encode(gen_random_bytes(16), 'hex')
 );
 
 CREATE TABLE courses_registration_sections (
