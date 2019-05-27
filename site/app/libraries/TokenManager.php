@@ -7,6 +7,7 @@ use Lcobucci\JWT\Parser;
 use Lcobucci\JWT\Token;
 use Lcobucci\JWT\ValidationData;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
+use Lcobucci\JWT\Signer\Key;
 
 /**
  * Utility class that wraps around the Lcobucci\JWT library, so that we
@@ -33,7 +34,7 @@ class TokenManager {
             ->relatedTo($user_id)
             ->withClaim('session_id', $session_id)
             ->withClaim('expire_time', $expire_time)
-            ->getToken(new Sha256(), $secret);
+            ->getToken(new Sha256(), new Key($secret));
     }
 
     public static function parseSessionToken(string $token, string $issuer, string $secret): Token {
