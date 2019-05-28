@@ -20,7 +20,7 @@ class Forum extends AbstractModel {
         //$this->forum_db = $forum_db;
     }
 
-    public function publish(Array $data, bool $isThread) {
+    public function publish(Array $data, bool $isThread) : bool {
 
         $pushFunction = null;
 
@@ -40,14 +40,14 @@ class Forum extends AbstractModel {
 
         //$pushFunction($result);
 
-        $this->core->getOutput()->renderJson(json_encode(['success' => 'Good stuff we passed a post.']));
+        //$this->core->getOutput()->renderJson(json_encode(['success' => 'Good stuff we passed a post.']));
         return true;
 
     }
 
 
 
-    private function validateThreadData(Array $data, bool $createObject) {
+    private function validateThreadData(Array $data, bool $createObject) : Array {
 
         $goodPost = $this->validatePostData($data, false, true);
         
@@ -55,7 +55,7 @@ class Forum extends AbstractModel {
             empty($data['title']) || empty($data['status']) ||
             empty($data['announcement']) || empty($data['categories']) || 
             empty($data['email_announcement']) || $data['parent_id'] !== -1 ||
-            !$this->isValidCategories($this->core->getQueries()->getCategories(), $categories_ids)){
+            !$this->isValidCategories($this->core->getQueries()->getCategories(), $data['categories'])){
             return [false, null];
         }
 
@@ -63,9 +63,8 @@ class Forum extends AbstractModel {
 
     }
 
-    private function validatePostData(Array $data, bool $createObject, bool $isThread) {
+    private function validatePostData(Array $data, bool $createObject, bool $isThread) : Array {
 
-        //Still need to validate thread id...
         if( empty($data['content']) || empty($data['anon']) || 
             empty($data['thread_id']) || empty($data['parent_id']) ||
             (!$isThread && !$this->core->getQueries()->existsThread($data['thread_id'])) ||

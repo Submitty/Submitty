@@ -260,7 +260,7 @@ class ForumController2 extends AbstractController {
         //Get post data
         $title = trim($_POST['title']);
         $thread_post_content = $_POST['thread_post_content'];
-        $anon = $_POST['Anon'];
+        $anon = !empty($_POST['Anon']) ? true : false;
         $thread_status = $_POST['thread_status'];
         
 
@@ -273,22 +273,22 @@ class ForumController2 extends AbstractController {
             $categories_ids[] = (int)$category_id;
         }
 
-        $result = $this->core->getForum()->publish( [ 'title'              => $title, 
-                                            'content'            => $thread_post_content,
-                                            'anon'               => $anon,  
-                                            'status'             => $thread_status,
-                                            'announcement'       => $announcement, 
-                                            'email_announcement' => $email_announcement,
-                                            'categories'         => $categories_ids,
-                                            'parent_id'          => -1,
-                                            'thread_id'          => -1 ], true );
+        $result = $this->core->getForum()->publish( [   'title'              => $title, 
+                                                        'content'            => $thread_post_content,
+                                                        'anon'               => $anon,  
+                                                        'status'             => $thread_status,
+                                                        'announcement'       => $announcement, 
+                                                        'email_announcement' => $email_announcement,
+                                                        'categories'         => $categories_ids,
+                                                        'parent_id'          => -1,
+                                                        'thread_id'          => -1 ], true );
 
         if($result) {
             //We published with success!
             $this->core->addSuccessMessage('Thread created successfully.');
-            $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', )));
+            $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
         } else {
-            $this->core->addErrorMessage('The post data is malformed. Please try submitting your post again.');
+            return $this->core->getOutput()->renderJson(['error' => 'The post data is malformed. Please try submitting your post again.']);
         }
     }
 
@@ -301,7 +301,7 @@ class ForumController2 extends AbstractController {
         $parent_id = $_POST['parent_id'];
         $post_content = $_POST['thread_post_content'];
         $thread_id = $_POST['thread_id'];
-        $anon = $_POST['Anon'];
+        $anon = !empty($_POST['Anon']) ? true : false;
 
 
         return $this->core->getForum()->publish( [ 'content'   => $post_content,
