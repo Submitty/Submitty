@@ -646,12 +646,18 @@ function gatherInputAnswersByType(type){
     var input_answers = {};
 
     if(type == "codebox"){
-        var inputs = $("[id^="+type+"_]");
-        for(var i = 0; i < inputs.length; i++){
-            var editor_name = inputs[i].id;
-            //grab the editor and get its value.
-            var value = window[editor_name].getValue();
+        var inputs = $("[id^=codebox_]");
 
+        for(var i = 0; i < inputs.length; i++){
+            var this_input_answer = inputs[i];
+            var editor_name = this_input_answer.id;
+            var editor = this_input_answer.querySelector(".CodeMirror").CodeMirror;
+            var value = editor.getValue();
+
+            if(!(editor_name in input_answers)){
+                input_answers[editor_name] = Array();
+            }
+            input_answers[editor_name].push(value);
         }
     }else{
         var inputs = $("[id^="+type+"_]").serializeArray();
@@ -755,10 +761,10 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
     
     var short_answer_object    = gatherInputAnswersByType("short_answer");
     var multiple_choice_object = gatherInputAnswersByType("multiple_choice");
-    car codebox_object         = gatherInputAnswersByType("codebox");
+    var codebox_object         = gatherInputAnswersByType("codebox");
     formData.append('short_answer_answers'   , JSON.stringify(short_answer_object));
     formData.append('multiple_choice_answers', JSON.stringify(multiple_choice_object));
-    formData.append('codebox_answers'        , JSON.stringify(multiple_choice_object));
+    formData.append('codebox_answers'        , JSON.stringify(codebox_object));
 
 
     if (student_page) {

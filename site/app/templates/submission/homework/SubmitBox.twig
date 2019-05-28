@@ -223,16 +223,15 @@
                             {% elseif i.type == "codebox" %}
                                 <strong>{{ i.label }}</strong>
 
-                                <div id="codeBox_{{ num_codeboxes }}" style="border: 1px solid LightGrey;">
+                                <div id="codebox_{{ num_codeboxes }}" name="codebox_{{ num_codeboxes }}" style="border: 1px solid LightGrey;">
                                 </div>
                                 <script>
-                                    var editor_{{num_codeboxes}} = CodeMirror(document.getElementById("codeBox_{{ num_codeboxes }}"), 
+                                    var editor_{{num_codeboxes}} = CodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"), 
                                         {
-                                            "value" : "if i == 0:\n    a = 'hello'\nelse:\n    a = 'goodbye'\n",
+                                            //"value" : "This is the string in {{num_codeboxes}}",
                                             "mode": "{{i.language}}",
                                             lineNumbers: true,
                                             "theme": "eclipse"
-                                            //myCodeMirror.setSize(500, 300);
                                         }
                                     );
                                 </script>
