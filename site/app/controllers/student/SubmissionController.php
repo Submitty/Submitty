@@ -1134,7 +1134,9 @@ class SubmissionController extends AbstractController {
             $codebox_objects         = json_decode($codebox_objects,true);
             $multiple_choice_objects = json_decode($multiple_choice_objects,true);
 
-            foreach($gradeable->getAutogradingConfig()->getInputs() as $this_input) {
+            $this_config_inputs = $gradeable->getAutogradingConfig()->getInputs() ?? array();
+
+            foreach($this_config_inputs as $this_input) {
                 if($this_input instanceof SubmissionTextBox){
                     $answers = $short_answer_objects["short_answer_" .  $num_short_answers] ?? array();
                     $num_short_answers += 1;
