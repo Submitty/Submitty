@@ -642,33 +642,30 @@ function handleBulk(gradeable_id, num_pages, use_qr_codes = false, qr_prefix = "
  * @param type
  */
 function gatherInputAnswersByType(type){
-
     var input_answers = {};
+    var inputs = $("[id^="+type+"_]");
 
-    if(type == "codebox"){
-        var inputs = $("[id^=codebox_]");
+    if(type != "codebox"){
+        inputs = inputs.serializeArray();
+    }
 
-        for(var i = 0; i < inputs.length; i++){
-            var this_input_answer = inputs[i];
-            var editor_name = this_input_answer.id;
+    for(var i = 0; i < inputs.length; i++){
+        var this_input_answer = inputs[i];
+        var key = "";
+        var value = "";
+        if(type == "codebox"){
+            key = this_input_answer.id;
             var editor = this_input_answer.querySelector(".CodeMirror").CodeMirror;
-            var value = editor.getValue();
-
-            if(!(editor_name in input_answers)){
-                input_answers[editor_name] = Array();
-            }
-            input_answers[editor_name].push(value);
+            value = editor.getValue();
+        }else{
+            key = this_input_answer.name;
+            value = this_input_answer.value;
         }
-    }else{
-        var inputs = $("[id^="+type+"_]").serializeArray();
 
-        for (var i = 0; i < inputs.length; i++) {
-            var this_input_answer = inputs[i];
-            if(!(this_input_answer.name in input_answers)){
-                input_answers[this_input_answer.name] = Array();
-            }
-            input_answers[this_input_answer.name].push(this_input_answer.value);
+        if(!(key in input_answers)){
+            input_answers[key] = Array();
         }
+        input_answers[key].push(value);
     }
 
     return input_answers;

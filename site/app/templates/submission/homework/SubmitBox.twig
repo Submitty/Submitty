@@ -3,7 +3,6 @@
 <link rel="stylesheet" href="{{ base_url }}vendor/codemirror/codemirror.css" />
 <link rel="stylesheet" href="{{ base_url }}vendor/codemirror/theme/eclipse.css" />
 <link rel="stylesheet" href="{{ base_url }}vendor/codemirror/theme/monokai.css" />
-<script type="text/javascript" language="javascript" src="{{ base_url }}vendor/jquery/jquery.min.js"></script>
 <script type="text/javascript" language="javascript" src="{{ base_url }}vendor/codemirror/codemirror.js"></script>
 <script type="text/javascript" language="javascript" src="{{ base_url }}vendor/codemirror/mode/clike/clike.js"></script>
 <script type="text/javascript" language="javascript" src="{{ base_url }}vendor/codemirror/mode/python/python.js"></script>
@@ -222,13 +221,12 @@
                                 {% set num_short_answer = num_short_answer + 1 %}
                             {% elseif i.type == "codebox" %}
                                 <strong>{{ i.label }}</strong>
-
-                                <div id="codebox_{{ num_codeboxes }}" name="codebox_{{ num_codeboxes }}" style="border: 1px solid LightGrey;">
+                                <div id="codebox_{{ num_codeboxes }}" name="codebox_{{ num_codeboxes }}" style="border: 1px solid LightGrey;" onKeyPress="handle_input_keypress();">
                                 </div>
                                 <script>
                                     var editor_{{num_codeboxes}} = CodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"), 
                                         {
-                                            //"value" : "This is the string in {{num_codeboxes}}",
+                                            //"value" : "",
                                             "mode": "{{i.language}}",
                                             lineNumbers: true,
                                             "theme": "eclipse"
