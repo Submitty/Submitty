@@ -130,20 +130,9 @@
 <br>
 </div>
 <script>
-    $("input[name='title']").change(function () {
-        $(this).val($.trim($(this).val()));
+    $(function(){
+        $("input[name='title']").change(function () {
+            $(this).val($.trim($(this).val()));
+        });
     });
-
-    $(".cat-buttons").each(function () {
-        if($(this).text().length>50) {
-            $(this).text($(this).text().substr(0, 47) + '…');
-        }
-    });
-
-    $(".label_forum").each(function () {
-        if($(this).text().length>50) {
-            $(this).text($(this).text().substr(0, 47) + '…');
-        }
-    });
-
 </script>

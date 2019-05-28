@@ -202,12 +202,17 @@ class ForumController extends AbstractController {
         $result = array();
         if($this->core->getAccess()->canI("forum.modify_category")){
             if(!empty($_REQUEST["newCategory"])) {
-                $category = $_REQUEST["newCategory"];
+                $category = trim($_REQUEST["newCategory"]);
                 if($this->isValidCategories(-1, array($category))) {
                     $result["error"] = "That category already exists.";
                 } else {
-                    $newCategoryId = $this->core->getQueries()->addNewCategory($category);
-                    $result["new_id"] = $newCategoryId["category_id"];
+                    if(strlen($category)>50){
+                        $result["error"] = "Category name is more than 50 characters.";
+                    }
+                    else {
+                        $newCategoryId = $this->core->getQueries()->addNewCategory($category);
+                        $result["new_id"] = $newCategoryId["category_id"];
+                    }
                 }
             } else {
                 $result["error"] = "No category data submitted. Please try again.";
@@ -255,9 +260,13 @@ class ForumController extends AbstractController {
             $should_update = true;
 
             if(!empty($_REQUEST["category_desc"])) {
-                $category_desc = $_REQUEST["category_desc"];
+                $category_desc = trim($_REQUEST["category_desc"]);
                 if($this->isValidCategories(-1, array($category_desc))) {
                     $result["error"] = "That category already exists.";
+                    $should_update = false;
+                }
+                else if(strlen($category_desc) > 50){
+                    $result["error"] = "Category name is more than 50 characters.";
                     $should_update = false;
                 }
             }
@@ -268,6 +277,7 @@ class ForumController extends AbstractController {
                     $should_update = false;
                 }
             }
+
             if($should_update) {
                 $this->core->getQueries()->editCategory($category_id, $category_desc, $category_color);
                 $result["success"] = "OK";
