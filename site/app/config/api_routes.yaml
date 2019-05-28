@@ -1,0 +1,5 @@
+# authorization/token
+getToken:
+    path:       token
+    controller: TokenController
+    methods:    GET

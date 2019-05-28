@@ -65,10 +65,14 @@ register_shutdown_function("error_handler");
 
 $semester = '';
 $course = '';
+$is_api = False;
 
 if ($core->getRouter()->hasNext()) {
     $first = $core->getRouter()->getNext();
-    if (in_array($first, ['authentication', 'home'])) {
+    if ($first === 'api') {
+        $is_api = True;
+    }
+    elseif (in_array($first, ['authentication', 'home'])) {
         $_REQUEST['component'] = $first;
     }
     else {
@@ -278,55 +282,61 @@ if (empty($_REQUEST['component']) && $core->getUser() !== null) {
 /********************************************
 * END LOGIN CODE
 *********************************************/
-switch($_REQUEST['component']) {
-    case 'admin':
-        $control = new app\controllers\AdminController($core);
-        $control->run();
-        break;
-    case 'authentication':
-        $control = new app\controllers\AuthenticationController($core, $logged_in);
-        $control->run();
-        break;
-    case 'grading':
-        $control = new app\controllers\GradingController($core);
-        $control->run();
-        break;
-    case 'home':
-        $control = new app\controllers\HomePageController($core);
-        $control->run();
-        break;
-    case 'misc':
-        $control = new app\controllers\MiscController($core);
-        $control->run();
-        break;
-    case 'student':
-        $control = new app\controllers\StudentController($core);
-        $control->run();
-        break;
-    case 'submission':
-        $control = new app\controllers\StudentController($core);
-        $control->run();
-        break;
-    case 'navigation':
-        $control = new app\controllers\NavigationController($core);
-        $control->run();
-        break;
-    case 'forum':
-        $control = new app\controllers\forum\ForumController($core);
-        $control->run();
-        break;
-    case 'notification_settings':
-        $control = new app\controllers\NotificationSettings($core);
-        $control->run();
-        break;
-    case 'pdf':
-        $control = new app\controllers\pdf\PDFController($core);
-        $control->run();
-        break;
-    default:
-        $control = new app\controllers\AuthenticationController($core, $logged_in);
-        $control->run();
-        break;
+if ($is_api) {
+    $router = new app\libraries\ApiRouter($core);
+    $router->run();
+}
+else {
+    switch($_REQUEST['component']) {
+        case 'admin':
+            $control = new app\controllers\AdminController($core);
+            $control->run();
+            break;
+        case 'authentication':
+            $control = new app\controllers\AuthenticationController($core, $logged_in);
+            $control->run();
+            break;
+        case 'grading':
+            $control = new app\controllers\GradingController($core);
+            $control->run();
+            break;
+        case 'home':
+            $control = new app\controllers\HomePageController($core);
+            $control->run();
+            break;
+        case 'misc':
+            $control = new app\controllers\MiscController($core);
+            $control->run();
+            break;
+        case 'student':
+            $control = new app\controllers\StudentController($core);
+            $control->run();
+            break;
+        case 'submission':
+            $control = new app\controllers\StudentController($core);
+            $control->run();
+            break;
+        case 'navigation':
+            $control = new app\controllers\NavigationController($core);
+            $control->run();
+            break;
+        case 'forum':
+            $control = new app\controllers\forum\ForumController($core);
+            $control->run();
+            break;
+        case 'notification_settings':
+            $control = new app\controllers\NotificationSettings($core);
+            $control->run();
+            break;
+        case 'pdf':
+            $control = new app\controllers\pdf\PDFController($core);
+            $control->run();
+            break;
+        default:
+            $control = new app\controllers\AuthenticationController($core, $logged_in);
+            $control->run();
+            break;
+    }
 }
 
 $core->getOutput()->displayOutput();
