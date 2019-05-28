@@ -120,7 +120,7 @@
         },
         {
             "type" : "FileCheck",
-            "title" : "Review Multiple Choice",
+            "title" : "Review Python Input",
             "actual_file" : "codebox.txt",
             "points" : 0
         }
