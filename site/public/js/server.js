@@ -1625,11 +1625,14 @@ function editPost(post_id, thread_id, shouldEditThread, csrf_token) {
                 // If first post of thread
                 if(shouldEditThread) {
                     var thread_title = json.title;
+                    var thread_lock_date =  json.lock_thread_date;
                     var thread_status = json.thread_status;
                     $("#title").prop('disabled', false);
                     $(".edit_thread").show();
+                    $('#label_lock_thread').show();
                     $("#title").val(thread_title);
                     $("#thread_status").val(thread_status);
+                    $('#lock_thread_date').val(thread_lock_date);
                     // Categories
                     $(".cat-buttons").removeClass('cat-selected');
                     $.each(categories_ids, function(index, category_id) {
@@ -1644,6 +1647,7 @@ function editPost(post_id, thread_id, shouldEditThread, csrf_token) {
                 } else {
                     $("#title").prop('disabled', true);
                     $(".edit_thread").hide();
+                    $('#label_lock_thread').hide();
                     $("#thread_form").prop("ignore-cat",true);
                     $("#category-selection-container").hide();
                     $("#thread_status").hide();
@@ -2689,8 +2693,8 @@ $(document).ready(function() {
     checkSidebarCollapse();
 });
 
-function checkQRProgress(gradeable_id){
-    var url = buildUrl({'component': 'misc', 'page': 'check_qr_upload_progress'});
+function checkBulkProgress(gradeable_id){
+    var url = buildUrl({'component': 'misc', 'page': 'check_bulk_progress'});
     $.ajax({
         url: url,
         data: {
@@ -2700,7 +2704,7 @@ function checkQRProgress(gradeable_id){
         success: function(data) {
             data = JSON.parse(data);
             var result = {};
-            updateQRProgress(data['job_data'], data['count']);
+            updateBulkProgress(data['job_data'], data['count']);
         },
         error: function(e) {
             console.log("Failed to check job queue");

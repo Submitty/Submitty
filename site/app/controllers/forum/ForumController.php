@@ -202,12 +202,17 @@ class ForumController extends AbstractController {
         $result = array();
         if($this->core->getAccess()->canI("forum.modify_category")){
             if(!empty($_REQUEST["newCategory"])) {
-                $category = $_REQUEST["newCategory"];
+                $category = trim($_REQUEST["newCategory"]);
                 if($this->isValidCategories(-1, array($category))) {
                     $result["error"] = "That category already exists.";
                 } else {
-                    $newCategoryId = $this->core->getQueries()->addNewCategory($category);
-                    $result["new_id"] = $newCategoryId["category_id"];
+                    if(strlen($category)>50){
+                        $result["error"] = "Category name is more than 50 characters.";
+                    }
+                    else {
+                        $newCategoryId = $this->core->getQueries()->addNewCategory($category);
+                        $result["new_id"] = $newCategoryId["category_id"];
+                    }
                 }
             } else {
                 $result["error"] = "No category data submitted. Please try again.";
@@ -255,9 +260,13 @@ class ForumController extends AbstractController {
             $should_update = true;
 
             if(!empty($_REQUEST["category_desc"])) {
-                $category_desc = $_REQUEST["category_desc"];
+                $category_desc = trim($_REQUEST["category_desc"]);
                 if($this->isValidCategories(-1, array($category_desc))) {
                     $result["error"] = "That category already exists.";
+                    $should_update = false;
+                }
+                else if(strlen($category_desc) > 50){
+                    $result["error"] = "Category name is more than 50 characters.";
                     $should_update = false;
                 }
             }
@@ -268,6 +277,7 @@ class ForumController extends AbstractController {
                     $should_update = false;
                 }
             }
+
             if($should_update) {
                 $this->core->getQueries()->editCategory($category_id, $category_desc, $category_color);
                 $result["success"] = "OK";
@@ -311,7 +321,7 @@ class ForumController extends AbstractController {
     //CODE WILL BE CONSOLIDATED IN FUTURE
 
     public function publishThread(){
-        
+
         if(!$this->core->getAccess()->canI("forum.publish")) {
             $this->core->getOutput()->renderJson(['error' => "Invalid CSRF token"]);
             return $this->core->getOutput()->getOutput();
@@ -321,6 +331,11 @@ class ForumController extends AbstractController {
         $title = trim($_POST["title"]);
         $thread_post_content = str_replace("\r", "", $_POST["thread_post_content"]);
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
+        if( !empty($_POST['lock_thread_date'])  and $this->core->getUser()->accessAdmin() ){
+            $lock_thread_date = $_POST['lock_thread_date'];
+        } else {
+            $lock_thread_date = null;
+        }
         $thread_status = $_POST["thread_status"];
         $announcement = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->accessFullGrading()) ? 1 : 0 ;
         $email_announcement = (isset($_POST["EmailAnnouncement"]) && $_POST["EmailAnnouncement"] == "EmailAnnouncement" && $this->core->getUser()->accessFullGrading()) ? 1 : 0 ;
@@ -341,7 +356,9 @@ class ForumController extends AbstractController {
                 $result['next_page'] = $hasGoodAttachment[1];
             } else {
                 // Good Attachment
-                $result = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_post_content, $anon, $announcement, $thread_status, $hasGoodAttachment[0], $categories_ids);
+                $result = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_post_content, $anon, $announcement, $thread_status, $hasGoodAttachment[0], $categories_ids, $lock_thread_date);
+
+
                 $id = $result["thread_id"];
                 $post_id = $result["post_id"];
 
@@ -402,6 +419,9 @@ class ForumController extends AbstractController {
         } else if(!$this->core->getQueries()->existsPost($thread_id, $parent_id)) {
             $this->core->addErrorMessage("There was an error submitting your post. Parent post doesn't exist in given thread.");
             $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'));
+        } else if($this->core->getQueries()->isThreadLocked($thread_id) and !$this->core->getUser()->accessAdmin() ) {
+            $this->core->addErrorMessage("Thread is locked.");
+            $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', "thread_id" => $thread_id));
         } else {
             $hasGoodAttachment = $this->checkGoodAttachment(false, $thread_id, $file_post);
             if($hasGoodAttachment[0] == -1){
@@ -471,7 +491,14 @@ class ForumController extends AbstractController {
                 $this->core->getOutput()->renderJson(['error' => 'You do not have permissions to do that.']);
                 return;
         }
-        if($modifyType == 0) { //delete post or thread
+        if(!empty($_POST['edit_thread_id']) && $this->core->getQueries()->isThreadLocked($_POST['edit_thread_id']) and !$this->core->getUser()->accessAdmin() ){
+            $this->core->addErrorMessage("Thread is locked.");
+            $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $_POST['edit_thread_id'])));
+        } else if($this->core->getQueries()->isThreadLocked($_POST['thread_id']) and !$this->core->getUser()->accessAdmin() ){
+            $this->core->getOutput()->renderJson(['error' => 'Thread is locked']);
+            return;
+        }
+        else if($modifyType == 0) { //delete post or thread
             $thread_id = $_POST["thread_id"];
             if($this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 1)){
                 $type = "thread";
@@ -553,6 +580,12 @@ class ForumController extends AbstractController {
         // Ensure authentication before call
         if(!empty($_POST["title"])) {
             $thread_id = $_POST["edit_thread_id"];
+            if( !empty($_POST['lock_thread_date']) and $this->core->getUser()->accessAdmin()){
+                $lock_thread_date = $_POST['lock_thread_date'];
+            }
+            else{
+                $lock_thread_date = null;
+            }
             $thread_title = $_POST["title"];
             $status = $_POST["thread_status"];
             $categories_ids  = array();
@@ -564,7 +597,7 @@ class ForumController extends AbstractController {
             if(!$this->isValidCategories($categories_ids)) {
                 return false;
             }
-            return $this->core->getQueries()->editThread($thread_id, $thread_title, $categories_ids, $status);
+            return $this->core->getQueries()->editThread($thread_id, $thread_title, $categories_ids, $status, $lock_thread_date);
         }
         return null;
     }
@@ -701,7 +734,9 @@ class ForumController extends AbstractController {
                 }
                 if($option == "alpha"){
                     $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, $show_deleted, 'alpha');
-                } else {
+                } else if($option == "reverse-time") {
+                    $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, $show_deleted, 'reverse-time');
+                }else {
                     $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, $show_deleted, 'tree');
                 }
                 if(empty($posts)){
@@ -804,6 +839,7 @@ class ForumController extends AbstractController {
 
     private function getThreadContent($thread_id, &$output){
         $result = $this->core->getQueries()->getThread($thread_id)[0];
+        $output['lock_thread_date'] = $result['lock_thread_date'];
         $output['title'] = $result["title"];
         $output['categories_ids'] = $this->core->getQueries()->getCategoriesIdForThread($thread_id);
         $output['thread_status'] = $result["status"];

@@ -461,7 +461,9 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult($msg, false);
         }
 
-        if (!isset($_POST['num_pages'])) {
+        $is_qr = $_POST['use_qr_codes'] === "true";
+
+        if (!isset($_POST['num_pages']) && !$is_qr) {
             $msg = "Did not pass in number of pages or files were too large.";
             $return = array('success' => false, 'message' => $msg);
             $this->core->getOutput()->renderJson($return);
@@ -567,7 +569,7 @@ class SubmissionController extends AbstractController {
 
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        if($_POST['use_qr_codes'] === "true"){
+        if($is_qr){
             $qr_prefix = rawurlencode($_POST['qr_prefix']);
             $qr_suffix = rawurlencode($_POST['qr_suffix']);
 
@@ -575,55 +577,46 @@ class SubmissionController extends AbstractController {
             //create a new job to split but uploads via QR
             for($i = 0; $i < $count; $i++){
                 $qr_upload_data = [
-                    "job"       => "BulkQRSplit",
+                    "job"       => "BulkUpload",
                     "semester"  => $semester,
                     "course"    => $course,
                     "g_id"      => $gradeable_id,
                     "timestamp" => $current_time,
                     "qr_prefix" => $qr_prefix,
                     "qr_suffix" => $qr_suffix,
-                    "filename"  => $uploaded_file["name"][$i]
+                    "filename"  => $uploaded_file["name"][$i],
+                    "is_qr"     => true
                 ];
 
-                $qr_upload_job  = "/var/local/submitty/daemon_job_queue/qr_upload_" . $uploaded_file["name"][$i] . ".json"; 
+                $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . $uploaded_file["name"][$i] . ".json"; 
 
                 //add new job to queue
-                if(!file_put_contents($qr_upload_job, json_encode($qr_upload_data, JSON_PRETTY_PRINT)) ){
+                if(!file_put_contents($bulk_upload_job, json_encode($qr_upload_data, JSON_PRETTY_PRINT)) ){
                     $this->core->getOutput()->renderJsonFail("Failed to write BulkQRSplit job");
                     return $this->uploadResult("Failed to write BulkQRSplit job", false);
                 }
             }
-            $return = array('success' => true);
-            $this->core->getOutput()->renderJson($return);
-            return $return;
-        }
+        }else{
+            for($i = 0; $i < $count; $i++){
+                $job_data = [
+                    "job"       => "BulkUpload",
+                    "semester"  => $semester,
+                    "course"    => $course,
+                    "g_id"      => $gradeable_id,
+                    "timestamp" => $current_time,
+                    "filename"  => $uploaded_file["name"][$i],
+                    "num"       => $num_pages,
+                    "is_qr"     => false
+                ];
 
-        // Open a cURL connection
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."pdf_check.cgi?&num={$num_pages}&sem={$semester}&course={$course}&g_id={$gradeable_id}&ver={$current_time}");
+                $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . $uploaded_file["name"][$i] . ".json"; 
 
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        $output = curl_exec($ch);
-
-        if ($output === false) {
-            return $this->uploadResult(curl_error($ch),false);
-        }
-
-        $output = json_decode($output, true);
-        curl_close($ch);
-
-        if ($output === null) {
-            FileUtils::recursiveRmdir($version_path);
-            return $this->uploadResult("Error JSON response for pdf split: ".json_last_error_msg(),false);
-        }
-        if (!isset($output['valid'])) {
-            FileUtils::recursiveRmdir($version_path);
-            return $this->uploadResult($output, false);
-            //return $this->uploadResult("Missing response in JSON for pdf split",false);
-        }
-        else if ($output['valid'] !== true) {
-            FileUtils::recursiveRmdir($version_path);
-            return $this->uploadResult($output['message'],false);
+                //add new job to queue
+                if(!file_put_contents($bulk_upload_job, json_encode($job_data, JSON_PRETTY_PRINT)) ){
+                    $this->core->getOutput()->renderJsonFail("Failed to write Bulk upload job");
+                    return $this->uploadResult("Failed to write Bulk upload job", false);
+                }
+            }
         }
 
         $return = array('success' => true);
