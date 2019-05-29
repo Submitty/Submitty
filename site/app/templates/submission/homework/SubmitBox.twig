@@ -54,7 +54,11 @@
                     </span>
                     <input type="number" id= "num_pages" placeholder="required"/>
                     <input type="text" id="qr_prefix" placeholder="Prefix (optional)" />
-                     <input type="text" id="qr_suffix" placeholder="Suffix (optional)" />
+                    <input type="text" id="qr_suffix" placeholder="Suffix (optional)" />
+                    <div style="text-align:center;padding:5px;" id="expected_num_box">
+                        Expected Number of pages per PDF:
+                        <input type="number" id= "expected_pages_input" placeholder="optional" onchange="highlightPageCount()" />
+                    </div>
                 </div>
             </div>
         </form>
@@ -66,6 +70,7 @@
                 $('#qr_suffix').prop('hidden', true);
                 $('#prefix_prompt').prop('hidden', true);
                 $('#qr_progress_box').prop('hidden', true);
+                $('#expected_num_box').prop('hidden', true);
                 //load what upload mode the user selected (if any)
                 if(sessionStorage.getItem('radio_bulk')){
                     $('#radio_bulk').prop('checked', true);
@@ -83,6 +88,7 @@
                     $('#num_pages').prop('hidden', true);
                     $('#use_qr').prop('checked',true);
                     $('#qr_progress_box').prop('hidden', false);
+                    $('#expected_num_box').prop('hidden', false);
                     //populate prefix textarea
                     if(sessionStorage.getItem('qr_prefix')){
                         $('#qr_prefix').val(sessionStorage.getItem('qr_prefix'));
@@ -138,6 +144,7 @@
                     $('#prefix_prompt').prop('hidden', !$('#prefix_prompt').is(':hidden'));
                     $('#pages_prompt').prop('hidden', !$('#pages_prompt').is(':hidden'));
                     $('#qr_progress_box').prop('hidden', !$('#qr_progress_box').is(':hidden'));
+                    $('#expected_num_box').prop('hidden',!$('#expected_num_box').is(':hidden'));
                 });
                 $("#user_id").autocomplete({
                     source: students_full

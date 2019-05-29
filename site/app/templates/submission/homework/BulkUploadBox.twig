@@ -5,13 +5,6 @@
         <h1>Unassigned PDF Uploads</h1>
     {% endif %}
 
-    {% if use_qr_codes %}
-    <div style="text-align:center;margin:10px;padding:5px;">
-        Expected Number of pages per PDF:
-        <input type="number" id= "expected_pages_input" placeholder="optional" onchange="highlightPageCount()" />
-    </div>
-    {% endif %}
-
     <div style="text-align:center;margin:10px;padding:5px;">
         <button type="button" id="bulk_submit_all" class="btn btn-primary" onclick="submitAll(1)">Submit All Uploaded PDFS</button>
         <button type="button" id="bulk_delete_all" class="btn btn-default" onclick="confirmDeleteAll()">Delete All Uploaded PDFS</button>
@@ -119,8 +112,8 @@
 
         var pages = document.getElementsByClassName("pdf_page_count");
         for (var i = pages.length - 1; i >= 0; i--) {
-            if(parseInt(pages[i].innerHTML) !== expected_count && expected_count >= 0)
-                pages[i].style.backgroundColor = "#FFC107";
+            if(parseInt(pages[i].innerHTML) !== expected_count && expected_count > 0)
+                pages[i].style.backgroundColor = "#FF5722";
             else
                 pages[i].style.backgroundColor = "";
         }
@@ -287,9 +280,13 @@
         }
         //if the expected page count doesn't match skip and let the user decide
         var page_count = document.getElementById("page_count_" + String(index));
-        if(!page_count)
-            return submitAll(index + 1);
-        if(expected_count != NaN && expected_count > 0 && expected_count != parseInt(page_count.innerHTML))
+        if(page_count){
+            if(expected_count != NaN && expected_count > 0 && expected_count != parseInt(page_count.innerHTML))
+                return submitAll(index + 1);
+        }
+
+        //if theres an invalid submission skip this
+        if(document.getElementById("row-" + String(index)).style.backgroundColor == "pink")
             return submitAll(index + 1);
 
         var path = decodeURIComponent(path_list[index]);
