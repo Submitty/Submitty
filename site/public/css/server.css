@@ -1519,7 +1519,7 @@ div.full_height {
     list-style-type: none;
     margin: 0;
     padding: 0;
-    width: 65%;
+    width: 100%;
 }
 
 #ui-category-list li {
