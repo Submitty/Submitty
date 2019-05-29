@@ -23,20 +23,20 @@
         {# /Nav buttons #}
 
         {# Panel buttons #}
-        <i title="Reset Rubric Panel Positions (Press R)" class="fas fa-redo icon-header" onclick="resetModules(); updateCookies();"></i>
-        <i title="Show/Hide Autograding Testcases (Press A)" class="fas fa-list icon-header" onclick="toggleAutograding(); updateCookies();"></i>
-        <i title="Show/Hide Grading Rubric (Press G)" class="fas fa-edit icon-header" onclick="toggleRubric(); updateCookies();"></i>
-        <i title="Show/Hide Submission and Results Browser (Press O)" class="fas fa-folder-open icon-header" onclick="toggleSubmissions(); updateCookies();"></i>
+        <button title="Reset Rubric Panel Positions (Press R)" class="invisible-btn" onclick="resetModules(); updateCookies();"> <i class="fas fa-redo icon-header" ></i> </button>
+        <button title="Show/Hide Autograding Testcases (Press A)" class="invisible-btn" onclick="toggleAutograding(); updateCookies();"> <i class="fas fa-list icon-header" ></i> </button>
+        <button title="Show/Hide Grading Rubric (Press G)" class="invisible-btn" onclick="toggleRubric(); updateCookies();"> <i class="fas fa-edit icon-header" ></i> </button>
+        <button title="Show/Hide Submission and Results Browser (Press O)" class="invisible-btn" onclick="toggleSubmissions(); updateCookies();"> <i class="fas fa-folder-open icon-header" ></i> </button>
         {% if not peer %}
-            <i title="Show/Hide Student Information (Press S)" class="fas fa-user icon-header" onclick="toggleInfo(); updateCookies();"></i>
+            <button title="Show/Hide Student Information (Press S)" class="invisible-btn" onclick="toggleInfo(); updateCookies();"> <i class="fas fa-user icon-header" ></i> </button>
         {% endif %}
         {% if discussion_based %}
-            <i title="Show/Hide Discussion Posts" class="fas fa-comment-alt icon-header" onclick="toggleDiscussion(); updateCookies();"></i>
+            <button title="Show/Hide Discussion Posts" class="invisible-btn" onclick="toggleDiscussion(); updateCookies();"> <i class="fas fa-comment-alt icon-header" ></i> </button>
         {% endif %}
         {% if regrade_panel_available %}
-            <i title="Show/Hide Regrade Information (Press X)" class="fas fa-hand-paper icon-header" onclick="toggleRegrade(); updateCookies();"></i>
+            <button title="Show/Hide Regrade Information (Press X)" class="invisible-btn" onclick="toggleRegrade(); updateCookies();"> <i class="fas fa-hand-paper icon-header" ></i> </button>
         {% endif %}
-        <i title="Show Grading Settings" class="fas fa-wrench icon-header" onclick="showSettings();"></i>
+        <button title="Show Grading Settings" class="invisible-btn" onclick="showSettings();"> <i class="fas fa-wrench icon-header" ></i> </button>
         {# /Panel buttons #}
     </div>
 

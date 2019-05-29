@@ -4,6 +4,7 @@
 {% block body %}
         Merge current thread into
         <input type="hidden" id="merge_thread_child" name="merge_thread_child" value="{{ current_thread }}" data-ays-ignore="true">
+        <input type="hidden" id="csrf_token" name="csrf_token" value="{{ core.getCsrfToken() }}" data-ays-ignore="true"/>
         <select class="chosen-select" id="merge_thread_parent" name="merge_thread_parent" style="width:200px;" data-ays-ignore="true">
             {% for threads in possibleMerges %}
                 <option value=({{ threads['id'] }})>({{ threads['id'] }}) {{ threads['title'] }}</option>

@@ -43,30 +43,24 @@ class DiffViewerTester extends \PHPUnit\Framework\TestCase {
         $this->assertTrue($diff->existsDifference());
     }
 
-    /**
-     * @expectedException \Exception
-     */
     public function testActualException() {
         $diff = new DiffViewer("file_that_doesnt_exist", "", "", "");
+        $this->expectException(\Exception::class);
         $diff->buildViewer();
     }
 
-    /**
-     * @expectedException \Exception
-     */
     public function testExpectedException() {
         $diff = new DiffViewer(__TEST_DATA__."/diffs/diff_test_01/input_actual.txt",
                                "file_that_doesnt_exist", "", "");
+        $this->expectException(\Exception::class);
         $diff->buildViewer();
     }
 
-    /**
-     * @expectedException \Exception
-     */
     public function testDifferencesException() {
         $diff = new DiffViewer(__TEST_DATA__."/diffs/diff_test_01/input_actual.txt",
                                __TEST_DATA__."/diffs/diff_test_01/input_expected.txt",
                                "file_that_doesnt_exist", "");
+        $this->expectException(\Exception::class);
         $diff->buildViewer();
     }
 }
