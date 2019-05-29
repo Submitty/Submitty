@@ -255,60 +255,11 @@ class ForumController2 extends AbstractController {
         return $this->core->getOutput()->getOutput();
     }
 
-    public function publishThread(){
-        
-        //Get post data
-        $title = trim($_POST['title']);
-        $thread_post_content = $_POST['thread_post_content'];
-        $anon = !empty($_POST['Anon']) ? true : false;
-        $thread_status = $_POST['thread_status'];
-        
-
-        //Default to false
-        $announcement = !empty($_POST['Announcement']) && $this->core->getUser()->accessGrading() && $_POST['Announcement'] == 'true' ? true : false;
-        $email_announcement = !empty($_POST['EmailAnnouncement']) && $this->core->getUser()->accessFullGrading() && $_POST['EmailAnnouncement'] == 'true' ? true : false;
-
-        $categories_ids  = array();
-        foreach ($_POST["cat"] as $category_id) {
-            $categories_ids[] = (int)$category_id;
-        }
-
-        $result = $this->core->getForum()->publish( [   'title'              => $title, 
-                                                        'content'            => $thread_post_content,
-                                                        'anon'               => $anon,  
-                                                        'status'             => $thread_status,
-                                                        'announcement'       => $announcement, 
-                                                        'email_announcement' => $email_announcement,
-                                                        'categories'         => $categories_ids,
-                                                        'parent_id'          => -1,
-                                                        'thread_id'          => -1 ], true );
-
-        if($result) {
-            //We published with success!
-            $this->core->addSuccessMessage('Thread created successfully.');
-            $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
-        } else {
-            return $this->core->getOutput()->renderJson(['error' => 'The post data is malformed. Please try submitting your post again.']);
-        }
-    }
-
     private function search(){
         $results = $this->core->getQueries()->searchThreads($_POST['search_content']);
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'searchResult', $results);
     }
 
-    public function publishPost(){
-        $parent_id = $_POST['parent_id'];
-        $post_content = $_POST['thread_post_content'];
-        $thread_id = $_POST['thread_id'];
-        $anon = !empty($_POST['Anon']) ? true : false;
-
-
-        return $this->core->getForum()->publish( [ 'content'   => $post_content,
-                                            'anon'      => $anon,  
-                                            'thread_id' => $thread_id,
-                                            'parent_id' => $parent_id ], false );
-    }
 
     public function alterAnnouncement($type){
         if($this->core->getUser()->getGroup() <= 2){
@@ -321,15 +272,6 @@ class ForumController2 extends AbstractController {
         } else {
             $this->core->addErrorMessage("You do not have permissions to do that.");
         }
-    }
-
-    public function pinThread($type){
-        $thread_id = $_POST["thread_id"];
-        $current_user = $this->core->getUser()->getId();
-        $this->core->getQueries()->addPinnedThread($current_user, $thread_id, $type);
-        $response = array('user' => $current_user, 'thread' => $thread_id, 'type' => $type);
-        $this->core->getOutput()->renderJson($response);
-        return $this->core->getOutput()->getOutput();
     }
 
     private function checkPostEditAccess($post_id) {
@@ -689,33 +631,6 @@ class ForumController2 extends AbstractController {
         return $this->core->getUser()->accessFullGrading() || $this->core->getUser()->getId() === $author;
     }
 
-    public function getEditPostContent(){
-        $post_id = $_POST["post_id"];
-        if($this->checkPostEditAccess($post_id) && !empty($post_id)) {
-            $result = $this->core->getQueries()->getPost($post_id);
-            $output = array();
-            $output['post'] = $result["content"];
-            $output['post_time'] = $result['timestamp'];
-            $output['anon'] = $result['anonymous'];
-            $output['change_anon'] = $this->modifyAnonymous($result["author_user_id"]);
-            $output['user'] = $output['anon'] ? 'Anonymous' : $result["author_user_id"];
-            if(isset($_POST["thread_id"])) {
-                $this->getThreadContent($_POST["thread_id"], $output);
-            }
-            $this->core->getOutput()->renderJson($output);
-        } else {
-            $this->core->getOutput()->renderJson(array('error' => "You do not have permissions to do that."));
-        }
-        return $this->core->getOutput()->getOutput();
-    }
-
-    private function getThreadContent($thread_id, &$output){
-        $result = $this->core->getQueries()->getThread($thread_id)[0];
-        $output['title'] = $result["title"];
-        $output['categories_ids'] = $this->core->getQueries()->getCategoriesIdForThread($thread_id);
-        $output['thread_status'] = $result["status"];
-    }
-
     public function showStats(){
         $posts = $this->core->getQueries()->getPosts();
         $num_posts = count($posts);
@@ -792,21 +707,91 @@ class ForumController2 extends AbstractController {
         $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
     }
 
-    private function sendEmailAnnouncement($thread_title, $thread_content) {
-      $class_list = $this->core->getQueries()->getClassEmailList();
-      $formatted_body = "An Instructor/TA made an announcement in the Submitty discussion forum:\n\n".$thread_content;
 
-      foreach($class_list as $student_email) {
-          $email_data = array(
-              "subject" => $thread_title,
-              "body" => $formatted_body,
-              "recipient" => $student_email["user_email"]
-          );
+    //Modified functions below...
 
-          $announcement_email = new Email($this->core, $email_data);
-          $this->core->getQueries()->createEmail($announcement_email);
-      }
+    public function publishThread(){
+        
+        //Get post data
+        $title = trim($_POST['title']);
+        $thread_post_content = $_POST['thread_post_content'];
+        $anon = !empty($_POST['Anon']) ? true : false;
+        $thread_status = $_POST['thread_status'];
+        
 
+        //Default to false
+        $announcement = !empty($_POST['Announcement']) && $this->core->getUser()->accessGrading() && $_POST['Announcement'] == 'true' ? true : false;
+        $email_announcement = !empty($_POST['EmailAnnouncement']) && $this->core->getUser()->accessFullGrading() && $_POST['EmailAnnouncement'] == 'true' ? true : false;
+
+        $categories_ids  = array();
+        foreach ($_POST["cat"] as $category_id) {
+            $categories_ids[] = (int)$category_id;
+        }
+
+        $result = $this->core->getForum()->publish( [   'title'              => $title, 
+                                                        'content'            => $thread_post_content,
+                                                        'anon'               => $anon,  
+                                                        'status'             => $thread_status,
+                                                        'announcement'       => $announcement, 
+                                                        'email_announcement' => $email_announcement,
+                                                        'categories'         => $categories_ids,
+                                                        'parent_id'          => -1,
+                                                        'thread_id'          => -1 ], true );
+
+        if($result) {
+            //We published with success!
+            $this->core->addSuccessMessage('Thread created successfully.');
+            $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
+        } else {
+            return $this->core->getOutput()->renderJson(['error' => 'The post data is malformed. Please try submitting your post again.']);
+        }
+    }
+
+    public function publishPost(){
+        $parent_id = $_POST['parent_id'];
+        $post_content = $_POST['thread_post_content'];
+        $thread_id = $_POST['thread_id'];
+        $anon = !empty($_POST['Anon']) ? true : false;
+
+
+        return $this->core->getForum()->publish( [ 'content'   => $post_content,
+                                                   'anon'      => $anon,  
+                                                   'thread_id' => $thread_id,
+                                                   'parent_id' => $parent_id ], false );
+    }
+
+
+    //Ajax endpoint
+    public function pinThread($type){
+        $thread_id = $_POST["thread_id"];
+        
+        $result = $this->core->getForum()->pinThread($thread_id, $type);
+
+        if($result) {
+            //Should review specs on submitty.org
+            $response = ['success' => 'Thread pinned successfully.'];
+        } else {
+            $response = ['failure' => 'Thread id does not exist.'];
+        }
+
+        $this->core->getOutput()->renderJson($response);
+        return $this->core->getOutput()->getOutput();
+    }
+
+    public function getEditPostContent(){
+        $post_id = $_POST["post_id"];
+
+        $result = $this->core->getForum()->getEditContent($post_id);
+
+        $this->core->getOutput()->renderJson($result);
+        return $this->core->getOutput()->getOutput();
+    }
+
+    private function getThreadContent($thread_id, &$output){
+        $result = $this->core->getQueries()->getThread($thread_id)[0];
+        $output['title'] = $result["title"];
+        $output['categories_ids'] = $this->core->getQueries()->getCategoriesIdForThread($thread_id);
+        $output['thread_status'] = $result["status"];
     }
 
 }

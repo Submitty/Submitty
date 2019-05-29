@@ -57,6 +57,8 @@ class Post extends AbstractModel {
     
     /** @property @var bool post display as anon */
     protected $is_anonymous;
+
+    //Will add soon
     //protected $deleted;
     //protected $post_type;
     //protected $has_attachment;
@@ -67,10 +69,6 @@ class Post extends AbstractModel {
         if(empty($details)) {
             return;
         }
-
-        // var_dump($details);
-
-        // throw new Exception();
 
         //setPostId($details['post_id']);
         $this->setThreadId((int)$details['thread_id']);
