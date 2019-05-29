@@ -72,7 +72,6 @@
                 $('#qr_prefix').prop('hidden', true);
                 $('#qr_suffix').prop('hidden', true);
                 $('#prefix_prompt').prop('hidden', true);
-                $('#qr_progress_box').prop('hidden', true);
                 //load what upload mode the user selected (if any)
                 if(sessionStorage.getItem('radio_bulk')){
                     $('#radio_bulk').prop('checked', true);
@@ -89,7 +88,6 @@
                     $('#pages_prompt').prop('hidden', true);
                     $('#num_pages').prop('hidden', true);
                     $('#use_qr').prop('checked',true);
-                    $('#qr_progress_box').prop('hidden', false);
                     //populate prefix textarea
                     if(sessionStorage.getItem('qr_prefix')){
                         $('#qr_prefix').val(sessionStorage.getItem('qr_prefix'));
@@ -144,7 +142,6 @@
                     $('#qr_suffix').prop('hidden', !$('#qr_suffix').is(':hidden'));
                     $('#prefix_prompt').prop('hidden', !$('#prefix_prompt').is(':hidden'));
                     $('#pages_prompt').prop('hidden', !$('#pages_prompt').is(':hidden'));
-                    $('#qr_progress_box').prop('hidden', !$('#qr_progress_box').is(':hidden'));
                 });
                 $("#user_id").autocomplete({
                     source: students_full
@@ -223,14 +220,14 @@
                         <div id="input_container_{{ loop.index0 }}">
 
                             {% if i.type == "short_answer" %}
-                                {{ self.render_short_answer(i, num_short_answer ) }}
+                                {{ self.render_short_answer(i, num_short_answer, highest_version ) }}
                                 {% set num_short_answer = num_short_answer + 1 %}
                             {% elseif i.type == "codebox" %}
                                 <strong>{{ i.label }}</strong>
                                 <div id="codebox_{{ num_codeboxes }}" name="codebox_{{ num_codeboxes }}" style="border: 1px solid LightGrey;" onKeyPress="handle_input_keypress();">
                                 </div>
                                 <script>
-                                    var editor_{{num_codeboxes}} = CodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"), 
+                                    var editor_{{num_codeboxes}} = CodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"),
                                         {
                                             //"value" : "",
                                             "mode": "{{i.language}}",
@@ -247,12 +244,12 @@
                                 <fieldset>
                                     {% for choice in i.choices %}
                                         {% if i.allow_multiple == true %}
-                                            <input type="checkbox" name="multiple_choice_{{ num_multiple_choice }}" id="multiple_choice_{{ num_multiple_choice }}" value="{{ choice }}" onclick="handle_input_keypress();"" />
+                                            <input type="checkbox" name="multiple_choice_{{ num_multiple_choice }}" id="multiple_choice_{{ num_multiple_choice }}" value="{{ choice }}" onclick="handle_input_keypress();" />
                                             <label for="{{ choice }}">
                                                 {{ choice }}
                                             </label>
                                         {% else %}
-                                            <input type="radio" name="multiple_choice_{{ num_multiple_choice }}" id="multiple_choice_{{ num_multiple_choice }}" value="{{ choice }}" onclick="handle_input_keypress();" />
+                                            <input type="radio" name="multiple_choice_{{ num_multiple_choice }}" id="multiple_choice_{{ num_multiple_choice }}" value="{{ choice }}" {% if choice == i.recent_submission_string %}checked="checked" {% endif %}onclick="handle_input_keypress();" />
                                             <label for="{{ choice }}">
                                                 {{ choice }}
                                             </label>
@@ -309,21 +306,24 @@
         </div>
 
         <button type="button" id="submit" class="btn btn-success" style="margin-right: 100px;">Submit</button>
-        <button type="button" id="startnew" class="btn btn-primary">Clear</button>
 
-        {% if display_version == highest_version and display_version > 0 %}
-            <button type="button" id= "getprev" class="btn btn-primary">Use Most Recent Submission</button>
+        {% if part_names is not empty %}
+            <button type="button" id="startnew" class="btn btn-primary">Clear</button>
 
-            {% if core.getConfig().keepPreviousFiles() %}
-            <script type="text/javascript">
-                $(function() {
-                    setUsePrevious();
-                    {% for file in old_files %}
-                        addLabel('{{ file.name }}', '{{ file.size }}', {{ file.part }}, true);
-                        readPrevious('{{ file.name }}', {{ file.part }});
-                    {% endfor %}
-                });
-            </script>
+            {% if display_version == highest_version and display_version > 0 %}
+                <button type="button" id= "getprev" class="btn btn-primary">Use Most Recent Submission</button>
+
+                {% if core.getConfig().keepPreviousFiles() %}
+                <script type="text/javascript">
+                    $(function() {
+                        setUsePrevious();
+                        {% for file in old_files %}
+                            addLabel('{{ file.name }}', '{{ file.size }}', {{ file.part }}, true);
+                            readPrevious('{{ file.name }}', {{ file.part }});
+                        {% endfor %}
+                    });
+                </script>
+                {% endif %}
             {% endif %}
         {% endif %}
 
@@ -372,7 +372,7 @@
 
 {% if core.getUser().accessFullGrading() %}
     {% include 'submission/homework/PreviousSubmissionForm.twig' %}            
-    {% include 'submission/homework/QRProgressBox.twig' %}
+    {% include 'submission/homework/BulkUploadProgressBox.twig' %}
 {% endif %}
 
 <script type="text/javascript">
@@ -484,32 +484,118 @@
     });
 </script>
 
-{% macro render_short_answer(short_answer, index) %}
+{% macro render_short_answer(short_answer, index, version) %}
 
     <p style="max-width: 50em;">
         <strong>{{ short_answer.label }}</strong>
         <br>
         {% if short_answer.rows == 0 %}
-            <form>
-                <input type="text" name="short_answer_{{ index }}" id="short_answer_{{ index }}" value="{{ short_answer.starter_value_string }}" onKeyPress="handle_input_keypress();">
-                <br /><input type="reset" class="btn btn-primary" style="margin-top: 5px" value="Reset">
-            </form>
+            <input
+                    type="text"
+                    name="short_answer_{{ index }}"
+                    id="short_answer_{{ index }}"
+                    {% if core.getConfig().keepPreviousFiles() %}
+                        value="{{ short_answer.recent_submission_string }}"
+                    {% else %}
+                        value="{{ short_answer.starter_value_string }}"
+                    {% endif %}
+                    onKeyPress="handle_input_keypress();">
+            <br />
         {% else %}
-            <form>
-                Press <kbd>TAB</kbd> to indent.  Press <kbd>ESC</kbd> to advance from textarea.</label>
-                <textarea rows="{{ short_answer.rows }}" cols="50"  style="width:60em; height:100%; min-height:110px;" name="short_answer_{{ index }}" id="short_answer_{{ index }}" onKeyPress="handle_input_keypress();">{{ short_answer.starter_value_string }}</textarea>
-                <br />
-                <input type="reset" class="btn btn-primary" style="margin-top: 5px" value="Reset">
-                {#
-                    Allow tab in the larger text boxes (normally tab moves to the next textbox)
-                    http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
-                    q.v. function enableTabsInTextArea(jQuerySelector) in server.js
-                #}
-                <script>
-                    enableTabsInTextArea('#short_answer_{{ index }}');
-                </script>
-            </form>
+            Press <kbd>TAB</kbd> to indent.  Press <kbd>ESC</kbd> to advance from textarea.</label>
+            <textarea
+                    rows="{{ short_answer.rows }}"
+                    cols="50"
+                    style="width:60em; height:100%; min-height:110px;"
+                    name="short_answer_{{ index }}"
+                    id="short_answer_{{ index }}"
+                    onKeyPress="handle_input_keypress()">{% if core.getConfig().keepPreviousFiles() %}{{ short_answer.recent_submission_string }}{% else %}{{ short_answer.starter_value_string }}{% endif %}</textarea>
+            <br />
+            {#
+                Allow tab in the larger text boxes (normally tab moves to the next textbox)
+                http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
+
+                q.v. function enableTabsInTextArea(jQuerySelector) in server.js
+            #}
+            <script>
+                enableTabsInTextArea('#short_answer_{{ index }}');
+            </script>
         {% endif %}
+        <button type="button" id="short_answer_{{ index }}_clear_button" class="btn btn-primary btn-push-down">Clear</button>
+        <button type="button" id="short_answer_{{ index }}_recent_button" class="btn btn-primary btn-push-down">Use Most Recent Submission</button>
+        <script>
+            // If no previous submissions then hide recent submission button
+            {% if version == 0 %}
+                document.getElementById("short_answer_{{ index }}_recent_button").style.visibility = 'hidden';
+            {% endif %}
+
+            // Setup init state of buttons
+            {% if core.getConfig().keepPreviousFiles() %}
+
+                {% if version == 0 %}
+                    document.getElementById("short_answer_{{ index }}_clear_button").disabled = true;
+                {% else %}
+                    document.getElementById("short_answer_{{ index }}_clear_button").disabled = false;
+                {% endif %}
+
+                document.getElementById("short_answer_{{ index }}_recent_button").disabled = true;
+            {% else %}
+                document.getElementById("short_answer_{{ index }}_clear_button").disabled = true;
+                document.getElementById("short_answer_{{ index }}_recent_button").disabled = false;
+            {% endif %}
+
+            // Setup click events for clear button
+            document.getElementById("short_answer_{{ index }}_clear_button").addEventListener("click", function() {
+
+                // Reset string
+                document.getElementById("short_answer_{{ index }}").value = "{{ short_answer.starter_value_string }}";
+
+                // Disable button clear button
+                document.getElementById("short_answer_{{ index }}_clear_button").disabled = true;
+
+                // Enable recent button
+                document.getElementById("short_answer_{{ index }}_recent_button").disabled = false;
+            });
+
+            // Setup click events for most recent submission button
+            document.getElementById("short_answer_{{ index }}_recent_button").addEventListener("click", function() {
+
+                // Reset string
+                document.getElementById("short_answer_{{ index }}").value = "{{ short_answer.recent_submission_string }}";
+
+                // Disable recent button
+                document.getElementById("short_answer_{{ index }}_recent_button").disabled = true;
+
+                // Enable clear button
+                document.getElementById("short_answer_{{ index }}_clear_button").disabled = false;
+            });
+
+            // Check state of buttons after each change to the input
+            document.getElementById("short_answer_{{ index }}").addEventListener("keyup", function() {
+
+                // Get value from input box
+                var box_value = document.getElementById("short_answer_{{ index }}").value;
+
+                // Set button states based on if it equals the starter string or most recent string
+                if (box_value === "{{ short_answer.starter_value_string }}")
+                {
+                    document.getElementById("short_answer_{{ index }}_clear_button").disabled = true;
+                }
+                else
+                {
+                    document.getElementById("short_answer_{{ index }}_clear_button").disabled = false;
+                }
+
+                if (box_value === "{{ short_answer.recent_submission_string }}")
+                {
+                    document.getElementById("short_answer_{{ index }}_recent_button").disabled = true;
+                }
+                else
+                {
+                    document.getElementById("short_answer_{{ index }}_recent_button").disabled = false;
+                }
+            });
+        </script>
     </p>
     <br>
 {% endmacro %}

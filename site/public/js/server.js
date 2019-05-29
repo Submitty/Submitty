@@ -2693,8 +2693,8 @@ $(document).ready(function() {
     checkSidebarCollapse();
 });
 
-function checkQRProgress(gradeable_id){
-    var url = buildUrl({'component': 'misc', 'page': 'check_qr_upload_progress'});
+function checkBulkProgress(gradeable_id){
+    var url = buildUrl({'component': 'misc', 'page': 'check_bulk_progress'});
     $.ajax({
         url: url,
         data: {
@@ -2704,7 +2704,7 @@ function checkQRProgress(gradeable_id){
         success: function(data) {
             data = JSON.parse(data);
             var result = {};
-            updateQRProgress(data['job_data'], data['count']);
+            updateBulkProgress(data['job_data'], data['count']);
         },
         error: function(e) {
             console.log("Failed to check job queue");
