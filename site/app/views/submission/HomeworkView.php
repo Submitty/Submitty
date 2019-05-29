@@ -15,6 +15,7 @@ use app\models\User;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
+use app\models\gradeable\AbstractGradeableInput;
 
 class HomeworkView extends AbstractView {
 
@@ -246,7 +247,8 @@ class HomeworkView extends AbstractView {
     private function renderSubmitBox(Gradeable $gradeable, $graded_gradeable, $version_instance, int $late_days_use): string {
         $student_page = $gradeable->isStudentPdfUpload();
         $students_full = [];
-        $textboxes = $gradeable->getAutogradingConfig()->getTextboxes();
+        $inputs = $gradeable->getAutogradingConfig()->getInputs();
+        $notebook = $gradeable->getAutogradingConfig()->getNotebook();
         $old_files = [];
         $display_version = 0;
 
@@ -265,10 +267,13 @@ class HomeworkView extends AbstractView {
             $students_full = json_decode(Utils::getAutoFillData($students, $students_version));
         }
 
+        $github_user_id = '';
+        $github_repo_id = '';
+
         $image_data = [];
         if (!$gradeable->isVcs()) {
-            foreach ($textboxes as $textbox) {
-                foreach ($textbox->getImages() as $image) {
+            foreach ($notebook as $notebook_chunk) {
+                foreach ($notebook_chunk["images"] as $image) {
                     $image_name = $image['name'];
                     $imgPath = FileUtils::joinPaths(
                         $this->core->getConfig()->getCoursePath(),
@@ -279,12 +284,21 @@ class HomeworkView extends AbstractView {
                     $content_type = FileUtils::getContentType($imgPath);
                     if (substr($content_type, 0, 5) === 'image') {
                         // Read image path, convert to base64 encoding
-                        $textBoxImageData = base64_encode(file_get_contents($imgPath));
+                        $inputImageData = base64_encode(file_get_contents($imgPath));
                         // Format the image SRC:  data:{mime};base64,{data};
-                        $textBoximagesrc = 'data: ' . mime_content_type($imgPath) . ';charset=utf-8;base64,' . $textBoxImageData;
+                        $inputimagesrc = 'data: ' . mime_content_type($imgPath) . ';charset=utf-8;base64,' . $inputImageData;
                         // insert the sample image data
+                        $image_data[$image_name] = $inputimagesrc;
+                    }
+                }
+            }
 
-                        $image_data[$image_name] = $textBoximagesrc;
+            // If alt text is not set for image then set it to default string
+            foreach ($notebook as $notebook_key => $notebook_value) {
+                foreach ($notebook[$notebook_key]['images'] as $image_key => $image_value) {
+                    if(!isset($image_value['alt']))
+                    {
+                        $notebook[$notebook_key]['images'][$image_key]['alt'] = "Instructor Provided Image";
                     }
                 }
             }
@@ -306,14 +320,34 @@ class HomeworkView extends AbstractView {
                 }
             }
         }
+        else {
+            // Get path to VCS_CHECKOUT
+            $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable->getId());
+            $who_id = $this->core->getUser()->getId();
+            $user_path = FileUtils::joinPaths($gradeable_path, $who_id);
+            $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
+            $version_path = FileUtils::joinPaths($user_path, $highest_version);
+            $path = FileUtils::joinPaths($version_path, ".submit.VCS_CHECKOUT");
+
+            // Load repo and user id
+            if (file_exists($path)) {
+                $json = json_decode(file_get_contents($path), true);
+                if (!is_null($json)) {
+                    if (isset($json["git_user_id"]))
+                        $github_user_id = $json["git_user_id"];
+                    if (isset($json["git_repo_id"]))
+                        $github_repo_id = $json["git_repo_id"];
+                }
+            }
+        }
 
         $component_names = array_map(function(Component $component) {
             return $component->getTitle();
         }, $gradeable->getComponents());
 
-        $textbox_data = array_map(function(SubmissionTextBox $text_box) {
-            return $text_box->toArray();
-        }, $textboxes);
+        $input_data = array_map(function(AbstractGradeableInput $inp) {
+            return $inp->toArray();
+        }, $inputs);
 
         $highest_version = $graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : 0;
 
@@ -322,7 +356,6 @@ class HomeworkView extends AbstractView {
         $my_repository = $graded_gradeable !== null ? $gradeable->getRepositoryPath($this->core->getUser(),$my_team) : "";
 
         $DATE_FORMAT = "m/d/Y @ H:i";
-
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
             'gradeable_id' => $gradeable->getId(),
             'gradeable_name' => $gradeable->getTitle(),
@@ -330,6 +363,9 @@ class HomeworkView extends AbstractView {
             'part_names' => $gradeable->getAutogradingConfig()->getPartNames(),
             'is_vcs' => $gradeable->isVcs(),
             'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
+            'vcs_host_type' => $gradeable->getVcsHostType(),
+            'github_user_id' => $github_user_id,
+            'github_repo_id' => $github_repo_id,
             'has_due_date' => $gradeable->hasDueDate(),
             'repository_path' => $my_repository,
             'show_no_late_submission_warning' => !$gradeable->isLateSubmissionAllowed() && $gradeable->isSubmissionClosed(),
@@ -340,7 +376,7 @@ class HomeworkView extends AbstractView {
                && $gradeable->getAutogradingConfig()->getGradeableMessage() !== '',
             'gradeable_message' => $gradeable->getAutogradingConfig()->getGradeableMessage(),
             'allowed_late_days' => $gradeable->getLateDays(),
-            'num_text_boxes' => $gradeable->getAutogradingConfig()->getNumTextBoxes(),
+            'num_inputs' => $gradeable->getAutogradingConfig()->getNumInputs(),
             'max_submissions' => $gradeable->getAutogradingConfig()->getMaxSubmissions(),
             'display_version' => $display_version,
             'highest_version' => $highest_version,
@@ -348,7 +384,8 @@ class HomeworkView extends AbstractView {
             'students_full' => $students_full,
             'late_days_use' => $late_days_use,
             'old_files' => $old_files,
-            'textboxes' => $textbox_data,
+            'inputs' => $input_data,
+            'notebook' => $notebook,
             'image_data' => $image_data,
             'component_names' => $component_names,
             'upload_message' => $this->core->getConfig()->getUploadMessage()

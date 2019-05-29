@@ -244,14 +244,16 @@ class Utils {
         $students_full = array();
         $null_section = array();
         foreach ($students as $student) {
-            if($student->getRegistrationSection() != null){
-                $student_entry = array('value' => $student->getId(),
-                'label' => $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>');
-                if ($students_version != null && $students_version[$student->getId()] !== 0) {
-                    $student_entry['label'] .= ' (' .
-                    $students_version[$student->getId()] . ' Prev Submission)';
+            $student_entry = array('value' => $student->getId(),
+                    'label' => $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>');
+            $students_full[] = $student_entry;
+            if($students_version != null){
+                if($student->getRegistrationSection() != null && array_key_exists($student->getId(),$students_version)){
+                    if ($students_version[$student->getId()] !== 0) {
+                        $student_entry['label'] .= ' (' .
+                        $students_version[$student->getId()] . ' Prev Submission)';
+                    }
                 }
-                $students_full[] = $student_entry;
             }else{
                 $null_entry = array('value' => $student->getId(),
                 'label' => '[NULL section] ' . $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>'); 

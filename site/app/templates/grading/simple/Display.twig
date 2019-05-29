@@ -57,51 +57,52 @@
         <input class="csvButtonUpload" type="file" id="csvUpload" style="float: right" accept=".csv, .txt">
         <label for="csvUpload" style="float: right; padding-right: 10px;">Upload CSV</label>
     {% endif %}
-
+    {# This is a data table #}
     <table class="table table-striped table-bordered persist-area" style="table-layout: fixed;">
+        <caption />
         {# Table header #}
         <thead class="persist-thead">
             <tr>
-                <td width="20"></td>
-                <td width="70">Section</td>
-                <td width="90" style="text-align: left">
+                <th width="20"></th>
+                <th width="70">Section</th>
+                <th width="90" style="text-align: left">
                     <a href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': action, 'g_id': gradeable.getId(), 'sort': 'id', 'view': view}) }}">
                         <span class="tooltiptext" title="sort by ID" aria-hidden="true">User ID </span><i class="fas fa-sort"></i>
                     </a>
-                </td>
-                <td width="110" style="text-align: left">
+                </th>
+                <th width="110" style="text-align: left">
                     <a href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': action, 'g_id': gradeable.getId(), 'sort': 'first', 'view': view}) }}">
                         <span class="tooltiptext" title="sort by First Name" aria-hidden="true">First Name </span><i class="fas fa-sort"></i>
                     </a>
-                </td>
-                <td width="110" style="text-align: left">
+                </th>
+                <th width="110" style="text-align: left">
                     <a href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': action, 'g_id': gradeable.getId(), 'sort': 'last', 'view': view}) }}">
                         <span class="tooltiptext" title="sort by Last Name" aria-hidden="true">Last Name </span><i class="fas fa-sort"></i>
                     </a>
-                </td>
+                </th>
 
                 {% if action == 'lab' %}
                     {% set colspan = 5 + gradeable.getComponents()|length %}
                     {% for component in gradeable.getComponents() %}
-                        <td width="150">
+                        <th width="150">
                             {{ component.getTitle() }}
-                        </td>
+                        </th>
                     {% endfor %}
                 {% else %}
                     {% set colspan = 5 + components_numeric|length + components_text|length %}
                     {% if components_numeric|length > 0 %}
                         {% set colspan = colspan + 1 %}
                         {% for component in components_numeric %}
-                            <td width="150" style="text-align: center">
+                            <th width="150" style="text-align: center">
                                 {{ component.getTitle() }}({{ component.getMaxValue() }})
-                            </td>
+                            </th>
                         {% endfor %}
-                        <td width="60" style="text-align: center">Total</td>
+                        <th width="60" style="text-align: center">Total</th>
                     {% endif %}
                     {% for component in components_text %}
-                        <td width="200" style="text-align: center">
+                        <th width="200" style="text-align: center">
                             {{ component.getTitle() }}
-                        </td>
+                        </th>
                     {% endfor %}
                 {% endif %}
             </tr>

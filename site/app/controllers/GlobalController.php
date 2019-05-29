@@ -338,16 +338,16 @@ class GlobalController extends AbstractController {
                 // $row can also have an 'icon' column, but it is optional.
                 foreach ($footer_links_json_data as $row) {
                     switch (false) {
-                    case array_key_exists('url', $row):
-                    case array_key_exists('title', $row):
-                        //Validation fail.  Exclude $row.
-                        continue;
-                    default:
-                        //Validation OK.  Include $row.
-                        if (isset($row['icon']) && !Utils::startsWith($row['icon'], "fa-")) {
-                            $row['icon'] = "fa-" . $row['icon'];
-                        }
-                        $footer_links[] = $row;
+                        case array_key_exists('url', $row):
+                        case array_key_exists('title', $row):
+                            //Validation fail.  Exclude $row.
+                            continue 2;
+                        default:
+                            //Validation OK.  Include $row.
+                            if (isset($row['icon']) && !Utils::startsWith($row['icon'], "fa-")) {
+                                $row['icon'] = "fa-" . $row['icon'];
+                            }
+                            $footer_links[] = $row;
                     }
                 }
             }

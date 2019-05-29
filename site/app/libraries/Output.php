@@ -4,6 +4,7 @@ namespace app\libraries;
 use app\controllers\GlobalController;
 use app\exceptions\OutputException;
 use app\models\Breadcrumb;
+use Aptoma\Twig\Extension\MarkdownExtension;
 
 /**
  * Class Output
@@ -31,9 +32,9 @@ class Output {
     
     private $start_time;
 
-    /** @var \Twig_Environment $twig */
+    /** @var \Twig\Environment $twig */
     private $twig = null;
-    /** @var \Twig_LoaderInterface $twig */
+    /** @var \Twig\Loader\LoaderInterface $twig */
     private $twig_loader = null;
     /** @var GlobalController $controller */
     private $controller;
@@ -62,37 +63,52 @@ class Output {
         $template_root = FileUtils::joinPaths(dirname(__DIR__), 'templates');
         $cache_path = FileUtils::joinPaths(dirname(dirname(__DIR__)), 'cache', 'twig');
 
-        $this->twig_loader = new \Twig_Loader_Filesystem($template_root);
-        $this->twig = new \Twig_Environment($this->twig_loader, [
+        $this->twig_loader = new \Twig\Loader\FilesystemLoader($template_root);
+        $this->twig = new \Twig\Environment($this->twig_loader, [
             'cache' => $this->core->getConfig()->isDebug() ? false : $cache_path,
             'debug' => $this->core->getConfig()->isDebug()
         ]);
         $this->twig->getExtension(\Twig\Extension\CoreExtension::class)
             ->setTimezone($this->core->getConfig()->getTimezone());
         $this->twig->addGlobal("core", $this->core);
-        $this->twig->addFunction(new \Twig_Function("render_template", function(... $args) {
+
+        $this->twig->addFunction(new \Twig\TwigFunction("render_template", function(... $args) {
             return call_user_func_array('self::renderTemplate', $args);
         }, ["is_safe" => ["html"]]));
+        $this->twig->addFunction(new \Twig\TwigFunction('base64_image', function(string $path, string $title): string {
+            $valid_image_subtypes = ['png', 'jpg', 'jpeg', 'gif'];
+            list($mime_type, $mime_subtype) = explode('/', FileUtils::getMimeType($path), 2);
+            if ($mime_type === "image" && in_array($mime_subtype, $valid_image_subtypes)) {
+                // Read image path, convert to base64 encoding
+                $image_data = base64_encode(file_get_contents($path));
+                return <<<HTML
+<img alt="${title}" src="data:image/${mime_subtype};base64,${image_data}" width="150" height="200" />
+HTML;
+            }
+            throw new OutputException('Invalid path to image file');
+        }, ['is_safe' => ['html']]));
+
         if($this->core->getConfig()->wrapperEnabled()) {
             $this->twig_loader->addPath(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site'), $namespace = 'site_uploads');
         }
+        $this->twig->addExtension(new MarkdownExtension(new CustomParsedownEngine()));
     }
 
     public function setInternalResources() {
-        $this->addInternalCss('all.min.css', FileUtils::joinPaths('vendor', 'fontawesome', 'css'));
-        $this->addInternalCss('inconsolata.css', FileUtils::joinPaths('vendor', 'google'));
-        $this->addInternalCss('pt_sans.css', FileUtils::joinPaths('vendor', 'google'));
-        $this->addInternalCss('source_sans_pro.css', FileUtils::joinPaths('vendor', 'google'));
+        $this->addVendorCss(FileUtils::joinPaths('fontawesome', 'css', 'all.min.css'));
+        $this->addInternalCss(FileUtils::joinPaths('google', 'inconsolata.css'));
+        $this->addInternalCss(FileUtils::joinPaths('google', 'pt_sans.css'));
+        $this->addInternalCss(FileUtils::joinPaths('google', 'source_sans_pro.css'));
 
-        $this->addInternalCss('jquery-ui.min.css');
+        $this->addVendorCss(FileUtils::joinPaths('jquery-ui', 'jquery-ui.min.css'));
+        $this->addVendorCss(FileUtils::joinpaths('bootstrap', 'css', 'bootstrap-grid.min.css'));
         $this->addInternalCss('server.css');
         $this->addInternalCss('bootstrap.css');
-        $this->addInternalCss('bootstrap-grid.css');
         $this->addInternalCss('diff-viewer.css');
         $this->addInternalCss('glyphicons-halflings.css');
 
-        $this->addInternalJs('jquery.min.js');
-        $this->addInternalJs('jquery-ui.min.js');
+        $this->addVendorJs(FileUtils::joinPaths('jquery', 'jquery.min.js'));
+        $this->addVendorJs(FileUtils::joinPaths('jquery-ui', 'jquery-ui.min.js'));
         $this->addInternalJs('diff-viewer.js');
         $this->addInternalJs('server.js');
     }
@@ -392,7 +408,11 @@ class Output {
         $this->addCss($this->core->getConfig()->getBaseUrl().$folder."/".$file, $timestamp);
     }
     
- 
+    public function addVendorCss($file) {
+        $timestamp = filemtime(FileUtils::joinPaths(__DIR__, '..', '..', 'public', 'vendor', $file));
+        $this->addCss($this->core->getConfig()->getBaseUrl()."vendor/".$file, $timestamp);
+    }
+
     public function addCss($url, $timestamp=0) {
         $this->css[] = $url.(($timestamp !== 0) ? "?v={$timestamp}" : '');
     }
@@ -400,6 +420,11 @@ class Output {
     public function addInternalJs($file, $folder='js') {
         $timestamp = filemtime(FileUtils::joinPaths(__DIR__, '..', '..', 'public', $folder, $file));
         $this->addJs($this->core->getConfig()->getBaseUrl().$folder."/".$file, $timestamp);
+    }
+
+    public function addVendorJs($file) {
+        $timestamp = filemtime(FileUtils::joinPaths(__DIR__, '..', '..', 'public', 'vendor', $file));
+        $this->addJs($this->core->getConfig()->getBaseUrl()."vendor/".$file, $timestamp);
     }
 
     public function addJs($url, $timestamp=0) {

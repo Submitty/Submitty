@@ -24,6 +24,7 @@ class GradingQueue {
     private $grading_files = [];
 
     const GRADING_FILE_PREFIX = 'GRADING_';
+    const VCS_FILE_PREFIX = 'VCS__';
     const QUEUE_FILE_SEPARATOR = '__';
 
     const NOT_QUEUED = -1;
@@ -93,6 +94,7 @@ class GradingQueue {
             $auto_graded_version->getVersion()
         ]);
         $grading_queue_file = self::GRADING_FILE_PREFIX . $queue_file;
+        $vcs_queue_file = self::VCS_FILE_PREFIX . $queue_file;
 
         //FIXME: it would be nice to show the student which queue their assignment is in
         //FIXME:    but this could be a pretty expensive operation
@@ -106,12 +108,17 @@ class GradingQueue {
         // Then, check its position in the queue
         $queue_status = array_search($queue_file, $this->queue_files, true);
         if($queue_status === false) {
-            // This means the file didn't exist when we loaded the queue state
-            return self::NOT_QUEUED;
-        } else {
+          // Also check for the vcs queue file, which will soon be converted into a regular queue file
+          $queue_status = array_search($vcs_queue_file, $this->queue_files, true);
+        }
+
+        if($queue_status !== false) {
             // Convert from 0-indexed array since 0 is self::GRADING
             return $queue_status + 1;
         }
+
+        // Otherwise...  the file didn't exist when we loaded the queue state (likely something went wrong)
+        return self::NOT_QUEUED;
     }
 
     /**

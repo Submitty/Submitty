@@ -135,8 +135,8 @@ class MiscController extends AbstractController {
             $message = "You do not have access to that page. ";
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
-                                                    'page' => 'course_materials',
-                                                    'action' => 'view_course_materials_page')));
+                'page' => 'course_materials',
+                'action' => 'view_course_materials_page')));
         }
 
         // delete the file from upload/course_materials
@@ -165,8 +165,8 @@ class MiscController extends AbstractController {
 
         //refresh course materials page
         $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
-                                                    'page' => 'course_materials',
-                                                    'action' => 'view_course_materials_page')));
+            'page' => 'course_materials',
+            'action' => 'view_course_materials_page')));
     }
 
     private function deleteCourseMaterialFolder() {
@@ -178,8 +178,8 @@ class MiscController extends AbstractController {
             $message = "You do not have access to that page.";
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
-                                                    'page' => 'course_materials',
-                                                    'action' => 'view_course_materials_page')));
+                'page' => 'course_materials',
+                'action' => 'view_course_materials_page')));
         }
 
         // remove entry from json file
@@ -207,8 +207,8 @@ class MiscController extends AbstractController {
 
         //refresh course materials page
         $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
-                                                    'page' => 'course_materials',
-                                                    'action' => 'view_course_materials_page')));
+            'page' => 'course_materials',
+            'action' => 'view_course_materials_page')));
     }
 
     private function readFile() {
@@ -329,7 +329,7 @@ class MiscController extends AbstractController {
         $zip->open($zip_name, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
         for ($x = 0; $x < count($paths); $x++) {
             if (is_dir($paths[$x])) {
-                    $files = new \RecursiveIteratorIterator(
+                $files = new \RecursiveIteratorIterator(
                     new \RecursiveDirectoryIterator($paths[$x]),
                     \RecursiveIteratorIterator::LEAVES_ONLY
                 );
@@ -405,66 +405,80 @@ class MiscController extends AbstractController {
                 $gradeable->getId());
             if($type === "all") {
                 $zip->addEmptyDir($path);
-                $files = new \RecursiveIteratorIterator(
-                    new \RecursiveDirectoryIterator($gradeable_path),
-                    \RecursiveIteratorIterator::LEAVES_ONLY
-                );
-                foreach ($files as $name => $file)
-                {
-                    // Skip directories (they would be added automatically)
-                    if (!$file->isDir())
-                    {
-                        // Get real and relative path for current file
-                        $filePath = $file->getRealPath();
-                        $relativePath = substr($filePath, strlen($gradeable_path) + 1);
-                        // Add current file to archive
-                        $zip->addFile($filePath, $path . "/" . $relativePath);
+                if (file_exists($gradeable_path)) {
+                    if (!is_dir($gradeable_path)) { //if dir is already present, but it's a file
+                        $message = "Oops! That page is not available.";
+                        $this->core->addErrorMessage($message);
+                        $this->core->redirect($this->core->getConfig()->getSiteUrl());
                     }
+                    else{
+                        $files = new \RecursiveIteratorIterator(
+                            new \RecursiveDirectoryIterator($gradeable_path),
+                            \RecursiveIteratorIterator::LEAVES_ONLY
+                        );
+                        foreach ($files as $name => $file)
+                        {
+                            // Skip directories (they would be added automatically)
+                            if (!$file->isDir())
+                            {
+                                // Get real and relative path for current file
+                                $filePath = $file->getRealPath();
+                                $relativePath = substr($filePath, strlen($gradeable_path) + 1);
+                                // Add current file to archive
+                                $zip->addFile($filePath, $path . "/" . $relativePath);
+                            }
+                        }
+                    }
+                } else { //no dir exists with this name
+                    $message = "Oops! That page is not available.";
+                    $this->core->addErrorMessage($message);
+                    $this->core->redirect($this->core->getConfig()->getSiteUrl());
                 }
-           } else {
-               //gets the students that are part of the sections
-               if ($gradeable->isGradeByRegistration()) {
-                   $section_key = "registration_section";
-                   $sections = $this->core->getUser()->getGradingRegistrationSections();
-                   $students = $this->core->getQueries()->getUsersByRegistrationSections($sections);
-               }
-               else {
-                   $section_key = "rotating_section";
-                   $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable->getId(),
-                       $this->core->getUser()->getId());
-                   $students = $this->core->getQueries()->getUsersByRotatingSections($sections);
-               }
-               $students_array = array();
-               foreach($students as $student) {
-                   $students_array[] = $student->getId();
-               }
-               $files = scandir($gradeable_path);
-               $arr_length = count($students_array);
-               foreach($files as $file) {
-                   for ($x = 0; $x < $arr_length; $x++) {
-                       if ($students_array[$x] === $file) {
-                           $temp_path = $gradeable_path . "/" . $file;
-                           $files_in_folder = new \RecursiveIteratorIterator(
-                               new \RecursiveDirectoryIterator($temp_path),
-                               \RecursiveIteratorIterator::LEAVES_ONLY
-                           );
 
-                           //makes a new directory in the zip to add the files in
-                           $zip -> addEmptyDir($file);
+            } else {
+                //gets the students that are part of the sections
+                if ($gradeable->isGradeByRegistration()) {
+                    $section_key = "registration_section";
+                    $sections = $this->core->getUser()->getGradingRegistrationSections();
+                    $students = $this->core->getQueries()->getUsersByRegistrationSections($sections);
+                }
+                else {
+                    $section_key = "rotating_section";
+                    $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable->getId(),
+                        $this->core->getUser()->getId());
+                    $students = $this->core->getQueries()->getUsersByRotatingSections($sections);
+                }
+                $students_array = array();
+                foreach($students as $student) {
+                    $students_array[] = $student->getId();
+                }
+                $files = scandir($gradeable_path);
+                $arr_length = count($students_array);
+                foreach($files as $file) {
+                    for ($x = 0; $x < $arr_length; $x++) {
+                        if ($students_array[$x] === $file) {
+                            $temp_path = $gradeable_path . "/" . $file;
+                            $files_in_folder = new \RecursiveIteratorIterator(
+                                new \RecursiveDirectoryIterator($temp_path),
+                                \RecursiveIteratorIterator::LEAVES_ONLY
+                            );
 
-                           foreach ($files_in_folder as $name => $file_in_folder)
-                           {
-                               // Skip directories (they would be added automatically)
-                               if (!$file_in_folder->isDir())
-                               {
-                                   // Get real and relative path for current file
-                                   $filePath = $file_in_folder->getRealPath();
-                                   $relativePath = substr($filePath, strlen($temp_path) + 1);
-                                   // Add current file to archive
-                                   $zip->addFile($filePath, $file . "/" . $relativePath);
-                               }
-                           }
-                           $x = $arr_length; //cuts the for loop early when found
+                            //makes a new directory in the zip to add the files in
+                            $zip -> addEmptyDir($file);
+
+                            foreach ($files_in_folder as $name => $file_in_folder)
+                            {
+                                // Skip directories (they would be added automatically)
+                                if (!$file_in_folder->isDir())
+                                {
+                                    // Get real and relative path for current file
+                                    $filePath = $file_in_folder->getRealPath();
+                                    $relativePath = substr($filePath, strlen($temp_path) + 1);
+                                    // Add current file to archive
+                                    $zip->addFile($filePath, $file . "/" . $relativePath);
+                                }
+                            }
+                            $x = $arr_length; //cuts the for loop early when found
                         }
                     }
                 }
@@ -482,15 +496,15 @@ class MiscController extends AbstractController {
     }
 
 
-  	public function modifyCourseMaterialsFilePermission() {
+    public function modifyCourseMaterialsFilePermission() {
 
         // security check
         if(!$this->core->getUser()->accessAdmin()) {
             $message = "You do not have access to that page. ";
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
-                                            'page' => 'course_materials',
-                                            'action' => 'view_course_materials_page')));
+                'page' => 'course_materials',
+                'action' => 'view_course_materials_page')));
             return;
         }
 
@@ -528,9 +542,9 @@ class MiscController extends AbstractController {
             $message = "You do not have access to that page. ";
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
-                                            'page' => 'course_materials',
-                                            'action' => 'view_course_materials_page')));
-           return;
+                'page' => 'course_materials',
+                'action' => 'view_course_materials_page')));
+            return;
         }
 
         if (!isset($_REQUEST['filename']) ||
