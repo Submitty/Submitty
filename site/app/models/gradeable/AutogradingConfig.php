@@ -48,8 +48,8 @@ class AutogradingConfig extends AbstractModel {
     /** @property @var string[] The names of different upload bins on the submission page (1-indexed) */
     protected $part_names = [];
 
-    /** @property @var array Array of content objects */
-    private $content = [];
+    /** @property @var array Array of notebook objects */
+    private $notebook = [];
     /** @property @var AbstractGradingInput[] Grading input configs for all new types of gradeable input*/
     private $inputs = [];
     /** @property @var AutogradingTestcase[] Cut-down information about autograding test cases*/
@@ -142,9 +142,9 @@ class AutogradingConfig extends AbstractModel {
         $temp_count = 0;
         $other_count = 0;
         $actual_input = array();
-        if (isset($details['content'])) {
-            foreach ($details['content'] as $c) {
-                $this->content[$other_count] = $c;
+        if (isset($details['notebook'])) {
+            foreach ($details['notebook'] as $c) {
+                $this->notebook[$other_count] = $c;
                 $num_inputs = $num_inputs + count($c['input'] ?? []);
                 foreach ($c['input'] as $inp) {
                     $actual_input[$temp_count] = $inp;
@@ -167,7 +167,7 @@ class AutogradingConfig extends AbstractModel {
 
         // Get the input details
         for ($i = 0; $i < $num_inputs; $i++) {
-            if ($actual_input[$i]['type'] == "textbox") {
+            if ($actual_input[$i]['type'] == "short_answer") {
                 $this->inputs[$i] = new SubmissionTextBox($this->core, $actual_input[$i]);
             } elseif ($actual_input[$i]['type'] == "codebox") {
                 $this->inputs[$i] = new SubmissionCodeBox($this->core, $actual_input[$i]);
@@ -202,8 +202,8 @@ class AutogradingConfig extends AbstractModel {
         return $this->inputs;
     }
 
-    public function getContent() {
-        return $this->content;
+    public function getNotebook() {
+        return $this->notebook;
     }
 
     /**
