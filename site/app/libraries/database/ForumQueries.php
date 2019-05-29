@@ -10,7 +10,7 @@ class ForumQueries extends DatabaseQueries {
 
         $parent_id = $p->getParentId(); 
 
-        if(!$isFirst && $p->getParentId() == 0){
+        if(!$isFirst && $parent_id == 0){
             $this->course_db->query("SELECT MIN(id) as id FROM posts where thread_id = ?", [ $p->getThreadId() ] );
             $parent_id = $this->course_db->rows()[0]["id"];
         }
@@ -25,11 +25,11 @@ class ForumQueries extends DatabaseQueries {
             }
         }
 
-        return [true, $this->course_db->rows()[0]["max_id"];
+        return [true, $this->course_db->rows()[0]["max_id"]];
     }
 
 
-    public function createThread(Thread &$t){
+    public function createThread(Thread &$t) {
 
         $this->course_db->beginTransaction();
 
@@ -65,6 +65,7 @@ class ForumQueries extends DatabaseQueries {
 
         $this->course_db->commit();
 
+        //Will change...
         return [true, 'thread_id' => $id, 'post_id' => $post_id];
     }
 
