@@ -385,7 +385,7 @@ class HomeworkView extends AbstractView {
             'late_days_use' => $late_days_use,
             'old_files' => $old_files,
             'inputs' => $input_data,
-            'notebook' => $notebook,
+            'notebook' => $graded_gradeable->getUpdatedNotebook(),
             'image_data' => $image_data,
             'component_names' => $component_names,
             'upload_message' => $this->core->getConfig()->getUploadMessage()

@@ -1178,6 +1178,10 @@ fieldset[disabled] .btn-primary.focus {
   background-color: #fff;
 }
 
+.btn-push-down {
+    margin-top: 5px
+}
+
 .panel-heading > .dropdown .dropdown-toggle {
   color: inherit;
 }
