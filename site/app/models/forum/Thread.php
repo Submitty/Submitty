@@ -46,7 +46,7 @@ class Thread extends AbstractModel {
     } 
 
     public function getFirstPost() : Post {
-        return $posts_list->getFirst();
+        return $posts_list[0];
     }
 
 }
