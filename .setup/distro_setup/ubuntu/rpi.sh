@@ -103,6 +103,7 @@ curl https://soot-build.cs.uni-paderborn.de/public/origin/develop/soot/soot-deve
 -o /dev/null > /dev/null 2>&1
 popd > /dev/null
 
+# fix all java_tools permissions
 chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/java_tools
 chmod -R 755 ${SUBMITTY_INSTALL_DIR}/java_tools
 

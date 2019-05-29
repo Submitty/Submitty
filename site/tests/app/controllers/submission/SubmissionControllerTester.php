@@ -764,7 +764,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         sort($files);
         $this->assertEquals(array('.submit.VCS_CHECKOUT', '.submit.timestamp'), $files);
         $touch_file = implode("__", array($this->config['semester'], $this->config['course'], "test", "testUser", "1"));
-        $this->assertFileExists(FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_queue", $touch_file));
+        $this->assertFileExists(FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_queue", "VCS__".$touch_file));
     }
 
     public function testEmptyPost() {
