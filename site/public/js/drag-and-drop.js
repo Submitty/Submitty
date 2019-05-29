@@ -276,7 +276,8 @@ function addLabel(filename, filesize, part, previous){
     var tmp = document.createElement('label');
     tmp.setAttribute("class", "mylabel");
     tmp.setAttribute("fname", filename);
-    tmp.innerHTML =  filename + " " + filesize + "kb <i class='fas fa-trash'></i><br />";
+    tmp.innerHTML =  filename + " " + filesize + "kb <i role='text' aria-label='Press enter to remove file " + filename + "' tabindex='0' class='fas fa-trash'></i><br />";
+
     // styling
     tmp.children[0].onmouseover = function(e){
         e.stopPropagation();
@@ -292,6 +293,14 @@ function addLabel(filename, filesize, part, previous){
         this.parentNode.parentNode.removeChild(this.parentNode);
         deleteSingleFile(filename, part, previous);
     };
+
+    // FOR VPAT if trash can has focus and key is pressed it will delete item
+    tmp.children[0].onkeypress = function(e){
+        e.stopPropagation();
+        this.parentNode.parentNode.removeChild(this.parentNode);
+        deleteSingleFile(filename, part, previous);
+    };
+
     // add to parent div
     var dropzone = document.getElementById("upload" + part);
     // Uncomment if want buttons for emptying single bucket
