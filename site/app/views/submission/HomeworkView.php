@@ -354,6 +354,7 @@ class HomeworkView extends AbstractView {
         // instructors can access this page even if they aren't on a team => don't create errors
         $my_team = $graded_gradeable !== null ? $graded_gradeable->getSubmitter()->getTeam() : "";
         $my_repository = $graded_gradeable !== null ? $gradeable->getRepositoryPath($this->core->getUser(),$my_team) : "";
+        $notebook_data = $graded_gradeable !== null ? $graded_gradeable->getUpdatedNotebook() : array();
 
         $DATE_FORMAT = "m/d/Y @ H:i";
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
@@ -385,7 +386,7 @@ class HomeworkView extends AbstractView {
             'late_days_use' => $late_days_use,
             'old_files' => $old_files,
             'inputs' => $input_data,
-            'notebook' => $graded_gradeable->getUpdatedNotebook(),
+            'notebook' => $notebook_data,
             'image_data' => $image_data,
             'component_names' => $component_names,
             'upload_message' => $this->core->getConfig()->getUploadMessage()
