@@ -37,12 +37,42 @@ class TokenManager {
             ->getToken(new Sha256(), new Key($secret));
     }
 
+    public static function generateApiToken(
+        string $api_key,
+        string $issuer,
+        string $secret,
+        $persistent=true
+    ): Token {
+        $expire_time = ($persistent) ? time() + (7 * 24 * 60 * 60) : 0;
+        return (new Builder())->issuedBy($issuer)
+            ->issuedAt(time())
+            ->withClaim('api_key', $api_key)
+            ->withClaim('expire_time', $expire_time)
+            ->getToken(new Sha256(), new Key($secret));
+    }
+
     public static function parseSessionToken(string $token, string $issuer, string $secret): Token {
+        $token = self::parseToken($token, $issuer, $secret);
+        if (!$token->hasClaim('session_id') || !$token->hasClaim('expire_time') || !$token->hasClaim('sub')) {
+            throw new \RuntimeException('Missing claims in session token');
+        }
+        return $token;
+    }
+
+    public static function parseApiToken(string $token, string $issuer, string $secret): Token {
+        $token = self::parseToken($token, $issuer, $secret);
+        if (!$token->hasClaim('api_key') || !$token->hasClaim('expire_time')) {
+            throw new \RuntimeException('Missing claims in api token');
+        }
+        return $token;
+    }
+
+    private static function parseToken(string $token, string $issuer, string $secret): Token {
         $token = (new Parser())->parse($token);
         if (!$token->verify(new Sha256(), $secret)) {
             throw new \RuntimeException("Invalid signature for token");
         }
-        
+
         $headers = [
             'alg' => 'HS256',
             'typ' => 'JWT'
@@ -59,9 +89,6 @@ class TokenManager {
             throw new \RuntimeException('Invalid claims in token');
         }
 
-        if (!$token->hasClaim('session_id') || !$token->hasClaim('expire_time') || !$token->hasClaim('sub')) {
-            throw new \RuntimeException('Missing claims in session token');
-        }
         return $token;
     }
 }
