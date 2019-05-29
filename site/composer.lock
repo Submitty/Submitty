@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "aptoma/twig-markdown",
-            "version": "3.1.0",
+            "version": "3.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aptoma/twig-markdown.git",
-                "reference": "dd287a4c60bd7ca44b6f74795a4c3b96d7497e83"
+                "reference": "496ec52657ead7c7e816a8702da26c3cc2e0990c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aptoma/twig-markdown/zipball/dd287a4c60bd7ca44b6f74795a4c3b96d7497e83",
-                "reference": "dd287a4c60bd7ca44b6f74795a4c3b96d7497e83",
+                "url": "https://api.github.com/repos/aptoma/twig-markdown/zipball/496ec52657ead7c7e816a8702da26c3cc2e0990c",
+                "reference": "496ec52657ead7c7e816a8702da26c3cc2e0990c",
                 "shasum": ""
             },
             "require": {
@@ -61,7 +61,7 @@
                 "markdown",
                 "twig"
             ],
-            "time": "2019-03-13T11:25:31+00:00"
+            "time": "2019-05-24T07:47:05+00:00"
         },
         {
             "name": "erusev/parsedown",
