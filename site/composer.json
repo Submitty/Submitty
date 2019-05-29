@@ -19,7 +19,9 @@
     "symfony/routing": "^4.2",
     "symfony/config": "^4.2",
     "symfony/http-foundation": "^4.2",
-    "symfony/yaml": "^4.2"
+    "doctrine/annotations": "^1.6",
+    "doctrine/cache": "^1.8",
+    "symfony/framework-bundle": "^4.2"
   },
   "autoload-dev": {
     "psr-4": {

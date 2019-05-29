@@ -3,25 +3,16 @@
 
 namespace app\controllers\api;
 
+use Symfony\Component\Routing\Annotation\Route;
 
-use app\controllers\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
 
-class TokenController extends AbstractController {
+class TokenController extends AbstractApiController {
 
-    /** @var Request */
-    private $request;
-
-    public function run() {
-        $this->request = Request::createFromGlobals();
-        switch ($this->request->getMethod()) {
-            case 'GET':
-                $this->get();
-                break;
-        }
-    }
-
-    private function get() {
+    /**
+     *
+     * @Route("/token", methods={"GET"})
+     */
+    public function getToken() {
         $this->core->getOutput()->renderJsonSuccess("test");
     }
 }
