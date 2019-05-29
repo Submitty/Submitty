@@ -4,7 +4,6 @@ namespace app\models\gradeable;
 
 use app\exceptions\AuthorizationException;
 use app\libraries\Core;
-use app\libraries\DateUtils;
 use \app\models\AbstractModel;
 use app\models\User;
 use app\libraries\FileUtils;
