@@ -2,6 +2,7 @@
 
 namespace app\models\gradeable;
 
+use app\exceptions\AuthorizationException;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use \app\models\AbstractModel;
@@ -209,12 +210,24 @@ class GradedGradeable extends AbstractModel {
             foreach ($notebookVal['input'] as $inputKey => $inputVal) {
 
                 // If no previous submissions set string to default starter_value_string
-                if($this->getAutoGradedGradeable()->getHighestVersion() == 0) {
+                if($this->getAutoGradedGradeable()->getHighestVersion() == 0)
+                {
                     $recentSubmissionString = $inputVal['starter_value_string'];
                 }
-                else {
-                    // Get most recent submission string
-                    $recentSubmissionString = $this->getRecentSubmissionContents($inputVal['filename']);
+                // Else there has been a previous submission try to get it
+                else
+                {
+
+                    try
+                    {
+                        // Try to get the most recent submission
+                        $recentSubmissionString = $this->getRecentSubmissionContents($inputVal['filename']);
+                    }
+                    catch (AuthorizationException $e)
+                    {
+                        // If the user lacked permission then just set to default instructor provided string
+                        $recentSubmissionString = $inputVal['starter_value_string'];
+                    }
                 }
 
                 // Add field to the array
@@ -230,6 +243,7 @@ class GradedGradeable extends AbstractModel {
      * Get the data from the student's most recent submission
      *
      * @param $filename Name of the file to collect the data out of
+     * @throws AuthorizationException if the user lacks permissions to read the submissions file
      * @throws FileNotFoundException if file with passed filename could not be found
      * @throws IOException if there was an error reading contents from the file
      * @return string if successful returns the contents of a students most recent submission
@@ -251,6 +265,15 @@ class GradedGradeable extends AbstractModel {
             $version,
             $filename);
 
+        // Check if the user has permission to access this submission
+        $isAuthorized = $this->core->getAccess()->canI('path.read', ["dir" => "submissions", "path" => $complete_file_path]);
+
+        // If user lacks permission to get the submission contents throw Auth exception
+        if(!$isAuthorized)
+        {
+            throw new AuthorizationException("The user lacks permissions to access this data.");
+        }
+
         // If desired file does not exist in the most recent submission directory throw exception
         if(!file_exists($complete_file_path))
         {
@@ -269,7 +292,6 @@ class GradedGradeable extends AbstractModel {
         // Remove trailing newline
         $file_contents = rtrim($file_contents, "\n");
 
-        // Get the contents of the most recent submission and return it
         return $file_contents;
     }
 
