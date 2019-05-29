@@ -10,7 +10,7 @@ def up(config, database):
     :param database: Object for interacting with given database for environment
     :type database: migrator.db.Database
     """
-    database.execute("ALTER TABLE IF EXISTS users ADD COLUMN user_numric_id varchar;")
+    database.execute("ALTER TABLE IF EXISTS users ADD COLUMN user_numeric_id varchar;")
     database.execute("""CREATE OR REPLACE FUNCTION sync_user() RETURNS trigger AS
 -- TRIGGER function to sync users data on INSERT or UPDATE of user_record in
 -- table users.  NOTE: INSERT should not trigger this function as function
