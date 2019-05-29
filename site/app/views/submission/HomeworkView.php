@@ -360,6 +360,8 @@ class HomeworkView extends AbstractView {
             'gradeable_id' => $gradeable->getId(),
             'gradeable_name' => $gradeable->getTitle(),
             'formatted_due_date' => $gradeable->getSubmissionDueDate()->format($DATE_FORMAT),
+            'formatted_current_time' => date($DATE_FORMAT, time()),
+            'due_in_a_day' => ($gradeable->getSubmissionDueDate()->format("U") - time()) <= (24*60*60),
             'part_names' => $gradeable->getAutogradingConfig()->getPartNames(),
             'is_vcs' => $gradeable->isVcs(),
             'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),

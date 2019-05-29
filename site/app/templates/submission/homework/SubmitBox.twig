@@ -10,9 +10,55 @@
     <div class="upperinfo">
         <h1 class="upperinfo-left">New submission for: {{ gradeable_name }}</h1>
         {% if has_due_date %}
-            <h3 class="upperinfo-right">Due: {{ formatted_due_date }}</h3>
+            <h3 class="upperinfo-right">Due: {{ formatted_due_date }} <br>
+                {%  if due_in_a_day %}
+                    <span>Now: <span id="current-server-time">{{ formatted_current_time }}</span></span>
+                {% endif %}
+            </h3>
         {% endif %}
     </div>
+
+    <script>
+        $(function(){
+
+            // Get browser's time, timezone offset and unix timestamp (all in milliseconds)
+            var localDate = new Date();
+            var localTimestamp = localDate.getTime();
+            var localOffset = localDate.getTimezoneOffset() * 60000;
+
+            // Calculate shift to UTC in milliseconds
+            var UTCTime = localTimestamp + localOffset;
+            var serverTimeShift;
+
+            var fetchTimeUrl = window.location.href + "&action=fetch_time";
+
+            setTimeout(function(){
+                console.log("Ran");
+                $.ajax({
+                    url: fetchTimeUrl,
+                    dataType: "json",
+                    success: function(result){
+                        // timezone offset returned in seconds from server
+                        var serverOffset = result.data.offset * 1000;
+
+                        // server time shift is shift from UTC and the seconds before the ajax call was made is added to it.
+                        serverTimeShift = UTCTime + serverOffset + ((60 - localDate.getSeconds())*1000);
+
+                        setTime(); // Since setInterval runs after the interval and we need an update right now, run the function once
+                        setInterval(function(){setTime()}, 60 * 1000);
+                    }
+                });
+            }, (60 - localDate.getSeconds())*1000); // setting ajax call to server time fetch only when seconds on clock is 00
+
+            function setTime(){
+                var serverDate = new Date(serverTimeShift); //
+                var datestring = ("0" + serverDate.getDate()).slice(-2) + "-" + ("0"+(serverDate.getMonth()+1)).slice(-2) + "-" +
+                    serverDate.getFullYear() + " @ " + ("0" + serverDate.getHours()).slice(-2) + ":" + ("0" + serverDate.getMinutes()).slice(-2);
+                $('#current-server-time').empty().append(datestring);
+                serverTimeShift += 60*1000; // update time, in milliseconds
+            }
+        });
+    </script>
 
     {% if show_no_late_submission_warning %}
         <div>
