@@ -252,7 +252,7 @@
                                                 {{ choice }}
                                             </label>
                                         {% else %}
-                                            <input type="radio" name="multiple_choice_{{ num_multiple_choice }}" id="multiple_choice_{{ num_multiple_choice }}" value="{{ choice }}" onclick="handle_input_keypress();" />
+                                            <input type="radio" name="multiple_choice_{{ num_multiple_choice }}" id="multiple_choice_{{ num_multiple_choice }}" value="{{ choice }}" {% if choice == i.recent_submission_string %}checked="checked" {% endif %}onclick="handle_input_keypress();" />
                                             <label for="{{ choice }}">
                                                 {{ choice }}
                                             </label>
