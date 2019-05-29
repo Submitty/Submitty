@@ -1,5 +1,12 @@
 {% import _self as self %}
 
+<link rel="stylesheet" href="{{ base_url }}vendor/codemirror/codemirror.css" />
+<link rel="stylesheet" href="{{ base_url }}vendor/codemirror/theme/eclipse.css" />
+<link rel="stylesheet" href="{{ base_url }}vendor/codemirror/theme/monokai.css" />
+<script type="text/javascript" language="javascript" src="{{ base_url }}vendor/codemirror/codemirror.js"></script>
+<script type="text/javascript" language="javascript" src="{{ base_url }}vendor/codemirror/mode/clike/clike.js"></script>
+<script type="text/javascript" language="javascript" src="{{ base_url }}vendor/codemirror/mode/python/python.js"></script>
+<script type="text/javascript" language="javascript" src="{{ base_url }}vendor/codemirror/mode/shell/shell.js"></script>
 
 {# Display the gradeable_message if one exists at the top of the page #}
 {% if has_gradeable_message %}
@@ -177,7 +184,9 @@
             <script type="text/javascript" src="../../../../js/showdown-xss-filter.js"></script>
 
             {# Render content #}
-            {% set num_inputs = 0 %}
+            {% set num_short_answer = 0 %}
+            {% set num_codeboxes = 0 %}
+            {% set num_multiple_choice = 0%}
             {% for n in notebook %}
                 <div id="content_{{ loop.index0 }}">
                     <h2>{{ n.title }}</h2>
@@ -209,22 +218,38 @@
                     {% endif %}
                     {% for i in n.input %}
                         <div id="input_container_{{ loop.index0 }}">
+
                             {% if i.type == "short_answer" %}
-                                {{ self.render_short_answer(i, num_inputs, highest_version) }}
+                                {{ self.render_short_answer(i, num_short_answer, highest_version ) }}
+                                {% set num_short_answer = num_short_answer + 1 %}
                             {% elseif i.type == "codebox" %}
-                                <br>
-                            {% elseif i.type == "multiplechoice" %}
                                 <strong>{{ i.label }}</strong>
+                                <div id="codebox_{{ num_codeboxes }}" name="codebox_{{ num_codeboxes }}" style="border: 1px solid LightGrey;" onKeyPress="handle_input_keypress();">
+                                </div>
+                                <script>
+                                    var editor_{{num_codeboxes}} = CodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"),
+                                        {
+                                            //"value" : "",
+                                            "mode": "{{i.language}}",
+                                            lineNumbers: true,
+                                            "theme": "eclipse"
+                                        }
+                                    );
+                                </script>
                                 <br>
+                                {% set num_codeboxes = num_codeboxes + 1 %}
+                            {% elseif i.type == "multiplechoice" %}
+                                <br>
+                                <strong>{{ i.label }}</strong>
                                 <fieldset>
                                     {% for choice in i.choices %}
                                         {% if i.allow_multiple == true %}
-                                            <input type="checkbox" name="input_{{ num_inputs }}" id="input_{{ num_inputs }}" value="{{ choice }}" onclick="handle_input_keypress();" />
+                                            <input type="checkbox" name="multiple_choice_{{ num_multiple_choice }}" id="multiple_choice_{{ num_multiple_choice }}" value="{{ choice }}" onclick="handle_input_keypress();" />
                                             <label for="{{ choice }}">
                                                 {{ choice }}
                                             </label>
                                         {% else %}
-                                            <input type="radio" name="input_{{ num_inputs }}" id="input_{{ num_inputs }}" value="{{ choice }}" onclick="handle_input_keypress();" />
+                                            <input type="radio" name="multiple_choice_{{ num_multiple_choice }}" id="multiple_choice_{{ num_multiple_choice }}" value="{{ choice }}" {% if choice == i.recent_submission_string %}checked="checked" {% endif %}onclick="handle_input_keypress();" />
                                             <label for="{{ choice }}">
                                                 {{ choice }}
                                             </label>
@@ -233,9 +258,9 @@
                                     {% endfor %}
                                 </fieldset>
                                 <br>
+                                {% set num_multiple_choice = num_multiple_choice + 1%}
                             {% endif %}
                         </div>
-                        {% set num_inputs = num_inputs + 1 %}
                     {% endfor %}
                 </div>
             {% endfor %}
@@ -467,8 +492,8 @@
         {% if short_answer.rows == 0 %}
             <input
                     type="text"
-                    name="input_{{ index }}"
-                    id="input_{{ index }}"
+                    name="short_answer_{{ index }}"
+                    id="short_answer_{{ index }}"
                     {% if core.getConfig().keepPreviousFiles() %}
                         value="{{ short_answer.recent_submission_string }}"
                     {% else %}
@@ -482,8 +507,8 @@
                     rows="{{ short_answer.rows }}"
                     cols="50"
                     style="width:60em; height:100%; min-height:110px;"
-                    name="input_{{ index }}"
-                    id="input_{{ index }}"
+                    name="short_answer_{{ index }}"
+                    id="short_answer_{{ index }}"
                     onKeyPress="handle_input_keypress()">{% if core.getConfig().keepPreviousFiles() %}{{ short_answer.recent_submission_string }}{% else %}{{ short_answer.starter_value_string }}{% endif %}</textarea>
             <br />
             {#
@@ -493,81 +518,81 @@
                 q.v. function enableTabsInTextArea(jQuerySelector) in server.js
             #}
             <script>
-                enableTabsInTextArea('#input_{{ index }}');
+                enableTabsInTextArea('#short_answer_{{ index }}');
             </script>
         {% endif %}
-        <button type="button" id="input_{{ index }}_clear_button" class="btn btn-primary btn-push-down">Clear</button>
-        <button type="button" id="input_{{ index }}_recent_button" class="btn btn-primary btn-push-down">Use Most Recent Submission</button>
+        <button type="button" id="short_answer_{{ index }}_clear_button" class="btn btn-primary btn-push-down">Clear</button>
+        <button type="button" id="short_answer_{{ index }}_recent_button" class="btn btn-primary btn-push-down">Use Most Recent Submission</button>
         <script>
             // If no previous submissions then hide recent submission button
             {% if version == 0 %}
-                document.getElementById("input_{{ index }}_recent_button").style.visibility = 'hidden';
+                document.getElementById("short_answer_{{ index }}_recent_button").style.visibility = 'hidden';
             {% endif %}
 
             // Setup init state of buttons
             {% if core.getConfig().keepPreviousFiles() %}
 
                 {% if version == 0 %}
-                    document.getElementById("input_{{ index }}_clear_button").disabled = true;
+                    document.getElementById("short_answer_{{ index }}_clear_button").disabled = true;
                 {% else %}
-                    document.getElementById("input_{{ index }}_clear_button").disabled = false;
+                    document.getElementById("short_answer_{{ index }}_clear_button").disabled = false;
                 {% endif %}
 
-                document.getElementById("input_{{ index }}_recent_button").disabled = true;
+                document.getElementById("short_answer_{{ index }}_recent_button").disabled = true;
             {% else %}
-                document.getElementById("input_{{ index }}_clear_button").disabled = true;
-                document.getElementById("input_{{ index }}_recent_button").disabled = false;
+                document.getElementById("short_answer_{{ index }}_clear_button").disabled = true;
+                document.getElementById("short_answer_{{ index }}_recent_button").disabled = false;
             {% endif %}
 
             // Setup click events for clear button
-            document.getElementById("input_{{ index }}_clear_button").addEventListener("click", function() {
+            document.getElementById("short_answer_{{ index }}_clear_button").addEventListener("click", function() {
 
                 // Reset string
-                document.getElementById("input_{{ index }}").value = "{{ short_answer.starter_value_string }}";
+                document.getElementById("short_answer_{{ index }}").value = "{{ short_answer.starter_value_string }}";
 
                 // Disable button clear button
-                document.getElementById("input_{{ index }}_clear_button").disabled = true;
+                document.getElementById("short_answer_{{ index }}_clear_button").disabled = true;
 
                 // Enable recent button
-                document.getElementById("input_{{ index }}_recent_button").disabled = false;
+                document.getElementById("short_answer_{{ index }}_recent_button").disabled = false;
             });
 
             // Setup click events for most recent submission button
-            document.getElementById("input_{{ index }}_recent_button").addEventListener("click", function() {
+            document.getElementById("short_answer_{{ index }}_recent_button").addEventListener("click", function() {
 
                 // Reset string
-                document.getElementById("input_{{ index }}").value = "{{ short_answer.recent_submission_string }}";
+                document.getElementById("short_answer_{{ index }}").value = "{{ short_answer.recent_submission_string }}";
 
                 // Disable recent button
-                document.getElementById("input_{{ index }}_recent_button").disabled = true;
+                document.getElementById("short_answer_{{ index }}_recent_button").disabled = true;
 
                 // Enable clear button
-                document.getElementById("input_{{ index }}_clear_button").disabled = false;
+                document.getElementById("short_answer_{{ index }}_clear_button").disabled = false;
             });
 
             // Check state of buttons after each change to the input
-            document.getElementById("input_{{ index }}").addEventListener("keyup", function() {
+            document.getElementById("short_answer_{{ index }}").addEventListener("keyup", function() {
 
                 // Get value from input box
-                var box_value = document.getElementById("input_{{ index }}").value;
+                var box_value = document.getElementById("short_answer_{{ index }}").value;
 
                 // Set button states based on if it equals the starter string or most recent string
                 if (box_value === "{{ short_answer.starter_value_string }}")
                 {
-                    document.getElementById("input_{{ index }}_clear_button").disabled = true;
+                    document.getElementById("short_answer_{{ index }}_clear_button").disabled = true;
                 }
                 else
                 {
-                    document.getElementById("input_{{ index }}_clear_button").disabled = false;
+                    document.getElementById("short_answer_{{ index }}_clear_button").disabled = false;
                 }
 
                 if (box_value === "{{ short_answer.recent_submission_string }}")
                 {
-                    document.getElementById("input_{{ index }}_recent_button").disabled = true;
+                    document.getElementById("short_answer_{{ index }}_recent_button").disabled = true;
                 }
                 else
                 {
-                    document.getElementById("input_{{ index }}_recent_button").disabled = false;
+                    document.getElementById("short_answer_{{ index }}_recent_button").disabled = false;
                 }
             });
         </script>

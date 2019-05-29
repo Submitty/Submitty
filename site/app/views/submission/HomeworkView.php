@@ -358,6 +358,7 @@ class HomeworkView extends AbstractView {
 
         $DATE_FORMAT = "m/d/Y @ H:i";
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
+            'base_url' => $this->core->getConfig()->getBaseUrl(),
             'gradeable_id' => $gradeable->getId(),
             'gradeable_name' => $gradeable->getTitle(),
             'formatted_due_date' => $gradeable->getSubmissionDueDate()->format($DATE_FORMAT),
