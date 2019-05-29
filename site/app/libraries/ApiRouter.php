@@ -9,7 +9,6 @@ use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\Loader\AnnotationDirectoryLoader;
-use Symfony\Bundle\FrameworkBundle\Routing\AnnotatedRouteControllerLoader;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\Common\Annotations\AnnotationException;
@@ -29,7 +28,7 @@ class ApiRouter {
     public function run() {
         $fileLocator = new FileLocator();
         try {
-            $annotationLoader = new AnnotatedRouteControllerLoader(new AnnotationReader());
+            $annotationLoader = new AnnotatedRouteLoader(new AnnotationReader());
         } catch (AnnotationException $e) {
             return $this->core->getOutput()->renderJsonError($e->getMessage());
         }
@@ -44,9 +43,8 @@ class ApiRouter {
         try {
             $parameters = $matcher->matchRequest(Request::createFromGlobals());
 
-            $methodInfo = explode("::", $parameters['_controller']);
-            $controllerName = $methodInfo[0];
-            $methodName = $methodInfo[1];
+            $controllerName = $parameters['_controller'];
+            $methodName = $parameters['_method'];
 
             $controller = new $controllerName($this->core);
             return $controller->$methodName();
