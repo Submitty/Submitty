@@ -261,9 +261,9 @@
                                     {% endfor %}
                                 </fieldset>
                                 <br>
+                                {% set num_multiple_choice = num_multiple_choice + 1%}
                             {% endif %}
                         </div>
-                        {% set num_inputs = num_inputs + 1 %}
                     {% endfor %}
                 </div>
             {% endfor %}
