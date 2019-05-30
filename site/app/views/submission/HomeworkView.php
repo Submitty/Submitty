@@ -272,36 +272,29 @@ class HomeworkView extends AbstractView {
 
         $image_data = [];
         if (!$gradeable->isVcs()) {
-//            foreach ($notebook as $notebook_chunk) {
-//                foreach ($notebook_chunk["images"] as $image) {
-//                    $image_name = $image['name'];
-//                    $imgPath = FileUtils::joinPaths(
-//                        $this->core->getConfig()->getCoursePath(),
-//                        'test_input',
-//                        $gradeable->getId(),
-//                        $image_name
-//                    );
-//                    $content_type = FileUtils::getContentType($imgPath);
-//                    if (substr($content_type, 0, 5) === 'image') {
-//                        // Read image path, convert to base64 encoding
-//                        $inputImageData = base64_encode(file_get_contents($imgPath));
-//                        // Format the image SRC:  data:{mime};base64,{data};
-//                        $inputimagesrc = 'data: ' . mime_content_type($imgPath) . ';charset=utf-8;base64,' . $inputImageData;
-//                        // insert the sample image data
-//                        $image_data[$image_name] = $inputimagesrc;
-//                    }
-//                }
-//            }
 
-//            // If alt text is not set for image then set it to default string
-//            foreach ($notebook as $notebook_key => $notebook_value) {
-//                foreach ($notebook[$notebook_key]['images'] as $image_key => $image_value) {
-//                    if(!isset($image_value['alt']))
-//                    {
-//                        $notebook[$notebook_key]['images'][$image_key]['alt'] = "Instructor Provided Image";
-//                    }
-//                }
-//            }
+            // Prepare notebook image data for displaying
+            foreach ($notebook as $cell) {
+                if ($cell['type'] == "image")
+                {
+                    $image_name = $cell['image'];
+                    $imgPath = FileUtils::joinPaths(
+                        $this->core->getConfig()->getCoursePath(),
+                        'test_input',
+                        $gradeable->getId(),
+                        $image_name
+                    );
+                    $content_type = FileUtils::getContentType($imgPath);
+                    if (substr($content_type, 0, 5) === 'image') {
+                        // Read image path, convert to base64 encoding
+                        $inputImageData = base64_encode(file_get_contents($imgPath));
+                        // Format the image SRC:  data:{mime};base64,{data};
+                        $inputimagesrc = 'data: ' . mime_content_type($imgPath) . ';charset=utf-8;base64,' . $inputImageData;
+                        // insert the sample image data
+                        $image_data[$image_name] = $inputimagesrc;
+                    }
+                }
+            }
 
             if($version_instance !== null) {
                 $display_version = $version_instance->getVersion();

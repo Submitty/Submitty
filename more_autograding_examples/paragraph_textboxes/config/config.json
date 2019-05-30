@@ -8,6 +8,13 @@
         {
             "type": "markdown",
             "markdown_string": "###This is an example of a markdown header 3\n#This is header 1."
+        },
+        {
+            "type": "image",
+            "image" : "image1.png",
+            "alt_text" : "A very happy pig.",
+            "height": 300,
+            "width": 300
         }
     ],
     "testcases" : [ 

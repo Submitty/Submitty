@@ -136,9 +136,6 @@ class AutogradingConfig extends AbstractModel {
             }
         }
 
-        // defaults to 1 if no set
-        $num_parts = count($details['part_names'] ?? [1]);
-
         // Setup $this->notebook
         $actual_input = array();
         if (isset($details['notebook'])) {
@@ -149,14 +146,17 @@ class AutogradingConfig extends AbstractModel {
 
                 // If cell is of markdown type then figure out if it is markdown_string or markdown_file and pass this
                 // markdown forward as 'data' as opposed to 'string' or 'file'
-                $markdown = $this->getMarkdownData($notebook_cell);
+                if($notebook_cell['type'] == "markdown")
+                {
+                    $markdown = $this->getMarkdownData($notebook_cell);
 
-                // Remove string or file from $notebook_cell
-                unset($notebook_cell['markdown_string']);
-                unset($notebook_cell['markdown_file']);
+                    // Remove string or file from $notebook_cell
+                    unset($notebook_cell['markdown_string']);
+                    unset($notebook_cell['markdown_file']);
 
-                // Readd as data
-                $notebook_cell['markdown_data'] = $markdown;
+                    // Readd as data
+                    $notebook_cell['markdown_data'] = $markdown;
+                }
 
                 // Add this cell $this->notebook
                 array_push($this->notebook, $notebook_cell);
@@ -170,6 +170,9 @@ class AutogradingConfig extends AbstractModel {
                 }
             }
         }
+
+        // defaults to 1 if no set
+        $num_parts = count($details['part_names'] ?? [1]);
 
         // Get all of the part names
         for ($i = 1; $i <= $num_parts; $i++) {
@@ -204,6 +207,7 @@ class AutogradingConfig extends AbstractModel {
         // Else if markdown_file is set then read the file and return its contents
         else if(isset($cell['markdown_file']))
         {
+            // TODO: Implement reading from markdown_file and passing that along
             throw new NotImplementedException("Reading from a markdown_file is not yet implemented.");
         }
         // Else something unexpected happened
