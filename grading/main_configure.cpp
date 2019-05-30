@@ -6,6 +6,7 @@
 #include "default_config.h"
 
 
+
 /*
 
   Generates a file in json format containing all of the information defined in
@@ -165,120 +166,167 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  // JSON parsing for notebook cells
+  /******************************************
+
+  PASSING THROUGH NOTEBOOK CELLS WITH NO VALIDATION DURING DEVELOPMENT AND TESTING
+
+  ******************************************/
+
+  // Validate and inflate notebook data
   nlohmann::json::iterator in_notebook_cells = config_json.find("notebook");
   if (in_notebook_cells != config_json.end()) {
     j["notebook"] = nlohmann::json::array();
-    for (int i = 0; i < in_notebook_cells->size(); i++) {
-      nlohmann::json out_notebook;
+    for (int i = 0; i < in_notebook_cells->size(); i++)
+    {
+      nlohmann::json out_notebook_cell;
       nlohmann::json in_notebook_cell = (*in_notebook_cells)[i];
 
+//      // Get type field
+//      std::string type = "";
+//      if(in_notebook_cell["type"].is_string())
+//      {
+//        type = in_notebook_cell["type"];
+//      }
+//      else if(!in_notebook_cell["type"].is_null())
+//      {
+//        bool type_is_string = false;
+//        assert(type_is_string);
+//      }
+//      out_notebook_cell["type"] = type;
+//
+//      // Handle each specific note book cell type
+//      // Handle markdown data
+//      if(type == "markdown")
+//      {
+//
+//      }
+//      // Handle image data
+//      else if(type == "image")
+//      {
+//
+//      }
+//      // Handle short_answer data
+//      else if(type == "short_answer")
+//      {
+//
+//      }
+//      // Handle multiple choice data
+//      else if(type == "multiple_choice")
+//      {
+//
+//      }
+//      // Else unknown type was passed in throw exception
+//      else
+//      {
+////        throw "An unknown notebook cell 'type' was detected in the supplied config.json file.";
+//      }
+
       // Title, Optional
-      std::string title = "";
-      if(in_notebook_cell["title"].is_string()){
-        title = in_notebook_cell["title"];
-      }else if(!in_notebook_cell["title"].is_null()){
-        bool title_is_string = false; 
-        assert(title_is_string);
-      }
-      out_notebook["title"] = title;
+//      std::string title = "";
+//      if(in_notebook_cell["title"].is_string()){
+//        title = in_notebook_cell["title"];
+//      }else if(!in_notebook_cell["title"].is_null()){
+//        bool title_is_string = false;
+//        assert(title_is_string);
+//      }
+//      out_notebook_cell["title"] = title;
 
       // Description, optional
-      std::string description = "";
-      if(in_notebook_cell["description"].is_string()){
-        description = in_notebook_cell["description"];
-      }else if(!in_notebook_cell["description"].is_null()){
-        bool description_is_string = false; 
-        assert(description_is_string);
-      }
-      out_notebook["description"] = description;
-
-      // Images, optional
-      out_notebook["images"] = (*in_notebook_cells)[i].value("images", nlohmann::json::array());
-
-      // Input
-      nlohmann::json::iterator inpt_ptr = (*in_notebook_cells)[i].find("input");
-      if (inpt_ptr != (*in_notebook_cells)[i].end()) {
-        assert((*in_notebook_cells)[i]["input"].is_array());
-        nlohmann::json input_array = *inpt_ptr;
-      	out_notebook["input"] = nlohmann::json::array();
-      	for (int k = 0; k < input_array.size(); k++) {
-      	  nlohmann::json input = input_array[k];
-          nlohmann::json input_obj;
-
-      	  // Type
-      	  nlohmann::json::iterator in_type = input.find("type");
-      	  assert (in_type != input.end());
-          assert (in_type->is_string());
-      	  assert (*in_type == "short_answer" || *in_type == "codebox" || *in_type == "multiplechoice");
-      	  input_obj["type"] = *in_type;
-
-          // starter_value_string, optional
-          // Create a empty string
-          std::string starter_value_string = "";
-
-          // If field inside json was not empty then assign to the new string
-          auto in_starter_value_string = input.find("starter_value_string");
-          if(in_starter_value_string != input.end())
-          {
-            assert(in_starter_value_string->is_string());
-            starter_value_string = *in_starter_value_string;
-          }
-
-          // Assign starter_value_string to input_obj
-      	  input_obj["starter_value_string"] = starter_value_string;
-
-      	  // Label
-      	  nlohmann::json::iterator in_label = input.find("label");
-      	  assert (in_label != input.end());
-          assert (in_label->is_string());
-      	  input_obj["label"] = *in_label;
-
-      	  // Filename
-      	  std::string s = "";
-      	  if (i < 10) 
-      	    s += "0";
-      	  s += std::to_string(k);
-
-      	  // Actual input configuration
-      	  if (*in_type == "short_answer" || *in_type == "codebox") {
-      	    if (*in_type == "codebox") {
-      	      nlohmann::json::iterator cb_lang = input.find("language");
-      	      assert (cb_lang != input.end());
-      	      assert (cb_lang->is_string());
-      	      input_obj["language"] = *cb_lang;
-      	    }
-      	    
-      	    input_obj["rows"] = input.value("rows", 0);
-      	    assert (int(input_obj["rows"]) >= 0);
-            
-
-      	    input_obj["filename"] = input.value("filename", "input_" + s + ".txt");
-      	    input_obj["images"] = input.value("images", nlohmann::json::array());
-      	    out_notebook["input"].push_back(input_obj);
-      	  } else if (*in_type == "multiplechoice") {
-
-            if(!input["allow_multiple"].is_null()){
-              assert(input["allow_multiple"].is_boolean());
-              input_obj["allow_multiple"] = input["allow_multiple"];
-            }else{
-              input_obj["allow_multiple"] = false;
-            }
-
-
-            nlohmann::json::iterator mc_choices = input.find("choices");
-      	    assert (mc_choices != input.end());
-      	    input_obj["choices"] = *mc_choices;
-
-
-      	    input_obj["filename"] = input.value("filename", "mc_" + s + ".txt");
-      	    out_notebook["input"].push_back(input_obj);
-      	  } else {
-      	    assert (false);
-      	  }
-      	}
-      }
-      j["notebook"].push_back(out_notebook);
+//      std::string description = "";
+//      if(in_notebook_cell["description"].is_string()){
+//        description = in_notebook_cell["description"];
+//      }else if(!in_notebook_cell["description"].is_null()){
+//        bool description_is_string = false;
+//        assert(description_is_string);
+//      }
+//      out_notebook_cell["description"] = description;
+//
+//      // Images, optional
+//      out_notebook_cell["images"] = (*in_notebook_cells)[i].value("images", nlohmann::json::array());
+//
+//      // Input
+//      nlohmann::json::iterator inpt_ptr = (*in_notebook_cells)[i].find("input");
+//      if (inpt_ptr != (*in_notebook_cells)[i].end()) {
+//        assert((*in_notebook_cells)[i]["input"].is_array());
+//        nlohmann::json input_array = *inpt_ptr;
+//      	out_notebook_cell["input"] = nlohmann::json::array();
+//      	for (int k = 0; k < input_array.size(); k++) {
+//      	  nlohmann::json input = input_array[k];
+//          nlohmann::json input_obj;
+//
+//      	  // Type
+//      	  nlohmann::json::iterator in_type = input.find("type");
+//      	  assert (in_type != input.end());
+//          assert (in_type->is_string());
+//      	  assert (*in_type == "short_answer" || *in_type == "codebox" || *in_type == "multiplechoice");
+//      	  input_obj["type"] = *in_type;
+//
+//          // starter_value_string, optional
+//          // Create a empty string
+//          std::string starter_value_string = "";
+//
+//          // If field inside json was not empty then assign to the new string
+//          auto in_starter_value_string = input.find("starter_value_string");
+//          if(in_starter_value_string != input.end())
+//          {
+//            assert(in_starter_value_string->is_string());
+//            starter_value_string = *in_starter_value_string;
+//          }
+//
+//          // Assign starter_value_string to input_obj
+//      	  input_obj["starter_value_string"] = starter_value_string;
+//
+//      	  // Label
+//      	  nlohmann::json::iterator in_label = input.find("label");
+//      	  assert (in_label != input.end());
+//          assert (in_label->is_string());
+//      	  input_obj["label"] = *in_label;
+//
+//      	  // Filename
+//      	  std::string s = "";
+//      	  if (i < 10)
+//      	    s += "0";
+//      	  s += std::to_string(k);
+//
+//      	  // Actual input configuration
+//      	  if (*in_type == "short_answer" || *in_type == "codebox") {
+//      	    if (*in_type == "codebox") {
+//      	      nlohmann::json::iterator cb_lang = input.find("language");
+//      	      assert (cb_lang != input.end());
+//      	      assert (cb_lang->is_string());
+//      	      input_obj["language"] = *cb_lang;
+//      	    }
+//
+//      	    input_obj["rows"] = input.value("rows", 0);
+//      	    assert (int(input_obj["rows"]) >= 0);
+//
+//
+//      	    input_obj["filename"] = input.value("filename", "input_" + s + ".txt");
+//      	    input_obj["images"] = input.value("images", nlohmann::json::array());
+//      	    out_notebook_cell["input"].push_back(input_obj);
+//      	  } else if (*in_type == "multiplechoice") {
+//
+//            if(!input["allow_multiple"].is_null()){
+//              assert(input["allow_multiple"].is_boolean());
+//              input_obj["allow_multiple"] = input["allow_multiple"];
+//            }else{
+//              input_obj["allow_multiple"] = false;
+//            }
+//
+//
+//            nlohmann::json::iterator mc_choices = input.find("choices");
+//      	    assert (mc_choices != input.end());
+//      	    input_obj["choices"] = *mc_choices;
+//
+//
+//      	    input_obj["filename"] = input.value("filename", "mc_" + s + ".txt");
+//      	    out_notebook_cell["input"].push_back(input_obj);
+//      	  } else {
+//      	    assert (false);
+//      	  }
+//      	}
+//      }
+      j["notebook"].push_back(in_notebook_cell);
     }
   }
 
