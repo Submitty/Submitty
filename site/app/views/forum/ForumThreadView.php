@@ -537,8 +537,8 @@ HTML;
 							}			
 						}
 					}
-			if($includeReply) {
-				$return .= <<<HTML
+            if(($this->core->getQueries()->isThreadLocked($thread_id) != 1 || $this->core->getUser()->accessFullGrading() ) && $includeReply  ) {
+                $return .= <<<HTML
 
 			<hr style="border-top:1px solid #999;margin-bottom: 5px;" />
 			
@@ -547,28 +547,29 @@ HTML;
 						<input type="hidden" name="parent_id" value="{$first_post_id}" />
 						<input type="hidden" name="display_option" value="{$display_option}" />
 HTML;
-						$GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id'])?$GLOBALS['post_box_id']+1:1;
+                $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 1;
 
 
-							$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig", [
-								"show_post" => true,
-								"post_content_placeholder" => "Enter your reply to all here...",
-								"show_merge_thread_button" => true,
-								"post_box_id" => $post_box_id,
-								"attachment_script" => true,
-								"show_anon" => true,
-								"submit_label" => "Submit Reply to All",
-							]);
-						}
-						
-						$return .= <<<HTML
+                $return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig", [
+                    "show_post" => true,
+                    "post_content_placeholder" => "Enter your reply to all here...",
+                    "show_merge_thread_button" => true,
+                    "post_box_id" => $post_box_id,
+                    "attachment_script" => true,
+                    "show_anon" => true,
+                    "submit_label" => "Submit Reply to All",
+                ]);
+
+                $return .= <<<HTML
 	            	</form>
 	            	<br/>
 HTML;
-
+            }
         if($this->core->getUser()->getGroup() <= 3){
         	$this->core->getOutput()->addVendorCss(FileUtils::joinPaths('chosen-js', 'chosen.min.css'));
         	$this->core->getOutput()->addVendorJs(FileUtils::joinPaths('chosen-js', 'chosen.jquery.min.js'));
+        	$this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
+        	$this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
 			$current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
 			$current_thread_date = $current_thread_first_post["timestamp"];
 			$merge_thread_list = $this->core->getQueries()->getThreadsBefore($current_thread_date, 1);
@@ -708,6 +709,14 @@ HTML;
 							<i class="fa ${fa_icon}" style="margin-right:${fa_margin_right}; padding-left:3px; position:relative; float:right; display:inline-block; color:${fa_color}; font-size:${fa_font_size};" title = "${tooltip}" aria-hidden="true"></i>
 HTML;
 						}
+						if($this->core->getQueries()->isThreadLocked($thread['id']))
+                        {
+                            $return .= <<<HTML
+                            <i class="fas fa-lock" style="padding-left:3px;position:relative; float:right; display:inline-block; color: white; -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: black;" title="Locked" aria-hidden="true"></i>
+HTML;
+
+                        }
 						$categories_content = array();
 						foreach ($thread["categories_desc"] as $category_desc) {
 							$categories_content[] = array(htmlentities($category_desc, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
@@ -780,60 +789,63 @@ HTML;
 		return $post_content;
 	}
 
-	public function createPost($thread_id, $post, $unviewed_posts, $function_date, $title_html, $first, $reply_level, $display_option, $includeReply){
-		$current_user = $this->core->getUser()->getId();
-		$post_id = $post["id"];
+	public function createPost($thread_id, $post, $unviewed_posts, $function_date, $title_html, $first, $reply_level, $display_option, $includeReply)
+    {
+        $current_user = $this->core->getUser()->getId();
+        $post_html = "";
+        $locked_thread = $this->core->getQueries()->isThreadLocked($thread_id);
+        $post_id = $post["id"];
 
-		$thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
+        $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
 
-		$date = DateUtils::parseDateTime($post["timestamp"], $this->core->getConfig()->getTimezone());
-		if(!is_null($post["edit_timestamp"])) {
-			$edit_date = $function_date(DateUtils::parseDateTime($post["edit_timestamp"], $this->core->getConfig()->getTimezone()),"n/j g:i A");
-		} else {
-			$edit_date = null;
-		}
-		$user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($post["author_user_id"]);
-		$author_email = htmlentities(trim($user_info['user_email']), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-		$first_name = htmlentities(trim($user_info["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-		$last_name = htmlentities(trim($user_info["last_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-		$visible_username = $first_name . " " . substr($last_name, 0 , 1) . ".";
-		$thread_resolve_state = $this->core->getQueries()->getResolveState($thread_id)[0]['status'];
+        $date = DateUtils::parseDateTime($post["timestamp"], $this->core->getConfig()->getTimezone());
+        if (!is_null($post["edit_timestamp"])) {
+            $edit_date = $function_date(DateUtils::parseDateTime($post["edit_timestamp"], $this->core->getConfig()->getTimezone()), "n/j g:i A");
+        } else {
+            $edit_date = null;
+        }
+        $user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($post["author_user_id"]);
+        $author_email = htmlentities(trim($user_info['user_email']), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $first_name = htmlentities(trim($user_info["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $last_name = htmlentities(trim($user_info["last_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $visible_username = $first_name . " " . substr($last_name, 0, 1) . ".";
+        $thread_resolve_state = $this->core->getQueries()->getResolveState($thread_id)[0]['status'];
 
-		if($display_option != 'tree'){
-			$reply_level = 1;
-		}
-		
-		if($post["anonymous"]){
-			$visible_username = "Anonymous";
-		} 
-		$classes = "post_box";						
-		if($first && $display_option != 'alpha'){
-			$classes .= " first_post";
-		}
-		if(in_array($post_id, $unviewed_posts)){
-			$classes .= " new_post";
-		} else {
-			$classes .= " viewed_post";
-		}
-		if($this->core->getQueries()->isStaffPost($post["author_user_id"])){
-			$classes .= " important";
-		}
-		if($post["deleted"]) {
-			$classes .= " deleted";
-			$deleted = true;
-		} else {
-			$deleted = false;
-		}
-		$offset = min(($reply_level - 1) * 30, 180);
-		
-		$return = <<<HTML
+        if ($display_option != 'tree') {
+            $reply_level = 1;
+        }
+
+        if ($post["anonymous"]) {
+            $visible_username = "Anonymous";
+        }
+        $classes = "post_box";
+        if ($first && $display_option != 'alpha') {
+            $classes .= " first_post";
+        }
+        if (in_array($post_id, $unviewed_posts)) {
+            $classes .= " new_post";
+        } else {
+            $classes .= " viewed_post";
+        }
+        if ($this->core->getQueries()->isStaffPost($post["author_user_id"])) {
+            $classes .= " important";
+        }
+        if ($post["deleted"]) {
+            $classes .= " deleted";
+            $deleted = true;
+        } else {
+            $deleted = false;
+        }
+        $offset = min(($reply_level - 1) * 30, 180);
+
+        $return = <<<HTML
 			<div class="$classes" id="$post_id" style="margin-left:{$offset}px;" reply-level="$reply_level">
 HTML;
 
 
-		if($first){
+        if ($first) {
             $return .= $title_html;
-        } 
+        }
 
         //handle converting links 
 
@@ -841,134 +853,147 @@ HTML;
         //convert legacy htmlentities being saved in db
         $post_content = $this->filter_post_content($post['content']);
 
-		//end code segment handling
-		$return .= <<<HTML
+        //end code segment handling
+        $return .= <<<HTML
 			<pre class='pre_forum'><p class="post_content" style="white-space: pre-wrap; ">{$post_content}</p></pre>		
 			<hr style="margin-bottom:3px;">
 HTML;
-		if($display_option == 'tree'){
-			if(!$first){
-				$return .= <<<HTML
+        if ($display_option == 'tree') {
+            if(!($this->core->getQueries()->isThreadLocked($thread_id) != 1 || $this->core->getUser()->accessFullGrading() )){
+
+            }else if (!$first ) {
+                $return .= <<<HTML
 					<a class="btn btn-default btn-sm post_button_color" style=" text-decoration: none;" onClick="replyPost({$post['id']})"> Reply</a>
 HTML;
-			} else {
-				$return .= <<<HTML
+            } else {
+                $return .= <<<HTML
 					<a class="btn btn-default btn-sm post_button_color" style=" text-decoration: none;" onClick="$('html, #posts_list').animate({ scrollTop: document.getElementById('posts_list').scrollHeight }, 'slow');"> Reply</a>
 HTML;
-			}
-			if($this->core->getUser()->getGroup() <= 3) {
-				$return .= <<<HTML
+            }
+            if ($this->core->getUser()->getGroup() <= 3) {
+                $return .= <<<HTML
 					<a class="btn btn-default btn-sm post_button_color" style=" text-decoration: none;" onClick="showHistory({$post['id']})">Show History</a>
 HTML;
-			}
-		}
-		if($includeReply && ($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) && $first && $thread_resolve_state == -1) {
-			//resolve button
-			$return .= <<<HTML
+            }
+        }
+        if ($includeReply && ($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) && $first && $thread_resolve_state == -1) {
+            //resolve button
+            $return .= <<<HTML
 				<a class="btn btn-default btn-sm post_button_color" style="text-decoration: none;" onClick="changeThreadStatus({$post['thread_id']})" title="Mark thread as resolved">Mark as resolved</a>
 HTML;
-		}
-		$return .= <<<HTML
+        }
+        $return .= <<<HTML
 			<span style="margin-top:8px;margin-left:10px;float:right;">							
 HTML;
-       if($this->core->getUser()->getGroup() <= 2 && $post["author_user_id"]!=$current_user){
+        if ($this->core->getUser()->getGroup() <= 2 && $post["author_user_id"] != $current_user) {
             $return .= <<<HTML
                 <a style=" margin-right:2px;display:inline-block; color:black; " onClick='$(this).next().toggle();' title="Show/Hide email address"><i class="fas fa-envelope" aria-hidden="true"></i></a>
                 <a href="mailto:{$author_email}" style="display: none;">{$author_email}</a>
 HTML;
-}
-		if($this->core->getUser()->getGroup() <= 2){
-			$info_name = $first_name . " " . $last_name . " (" . $post['author_user_id'] . ")";
-			$visible_user_json = json_encode($visible_username);
-			$info_name = json_encode($info_name);
-			$jscriptAnonFix = $post['anonymous'] ? 'true' : 'false' ;
-			$jscriptAnonFix = json_encode($jscriptAnonFix);
-			$return .= <<<HTML
+        }
+        if ($this->core->getUser()->getGroup() <= 2) {
+            $info_name = $first_name . " " . $last_name . " (" . $post['author_user_id'] . ")";
+            $visible_user_json = json_encode($visible_username);
+            $info_name = json_encode($info_name);
+            $jscriptAnonFix = $post['anonymous'] ? 'true' : 'false';
+            $jscriptAnonFix = json_encode($jscriptAnonFix);
+            $return .= <<<HTML
 				<a style=" margin-right:2px;display:inline-block; color:black; " onClick='changeName(this.parentNode, {$info_name}, {$visible_user_json}, {$jscriptAnonFix})' title="Show full user information"><i class="fas fa-eye" aria-hidden="true"></i></a>
 HTML;
-}
-		if(!$first){
-			$return .= <<<HTML
+        }
+        if (!$first) {
+            $return .= <<<HTML
 				<a class="expand btn btn-default btn-sm post_button_color" style="float:right; text-decoration:none; margin-top: -8px" onClick="hidePosts(this, {$post['id']})"></a>
 HTML;
 		}
 		if($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) {
-			if($deleted && $this->core->getUser()->getGroup() <= 3){
-				$ud_toggle_status = "false";
-				$ud_button_title = "Undelete post";
-				$ud_button_icon = "fa-undo";
+			if(!($this->core->getQueries()->isThreadLocked($thread_id) != 1 || $this->core->getUser()->accessFullGrading() )){
+
 			} else {
-				$ud_toggle_status = "true";
-				$ud_button_title = "Remove post";
-				$ud_button_icon = "fa-trash";
-			}
-			$return .= <<<HTML
-			<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; float:right;" onClick="deletePostToggle({$ud_toggle_status}, {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'n/j g:i A')}', '{$this->core->getCsrfToken()}' )" title="{$ud_button_title}"><i class="fa {$ud_button_icon}" aria-hidden="true"></i></a>
+				if($deleted && $this->core->getUser()->getGroup() <= 3){
+					$ud_toggle_status = "false";
+					$ud_button_title = "Undelete post";
+					$ud_button_icon = "fa-undo";
+				} else {
+					$ud_toggle_status = "true";
+					$ud_button_title = "Remove post";
+					$ud_button_icon = "fa-trash";
+				}
+				$return .= <<<HTML
+				<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; float:right;" onClick="deletePostToggle({$ud_toggle_status}, {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'n/j g:i A')}', '{$this->core->getCsrfToken()}' )" title="{$ud_button_title}"><i class="fa {$ud_button_icon}" aria-hidden="true"></i></a>
 HTML;
+			}
 		}
 		if($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) {
-			$shouldEditThread = null;
-			if($first) {
-				$shouldEditThread = "true";
-				$edit_button_title = "Edit thread and post";
-			} else {
-				$shouldEditThread = "false";
-				$edit_button_title = "Edit post";
-			}
-			$return .= <<<HTML
-				<a class="post_button" style="position:relative; display:inline-block; color:black; float:right;" onClick="editPost({$post['id']}, {$post['thread_id']}, {$shouldEditThread}, '{$this->core->getCsrfToken()}')" title="{$edit_button_title}"><i class="fas fa-edit" aria-hidden="true"></i></a>
-HTML;
-		} 
+			if(!($this->core->getQueries()->isThreadLocked($thread_id) != 1 || $this->core->getUser()->accessFullGrading() )){
 
-		$return .= <<<HTML
+			} else {
+				$shouldEditThread = null;
+				if($first) {
+					$shouldEditThread = "true";
+					$edit_button_title = "Edit thread and post";
+				} else {
+					$shouldEditThread = "false";
+					$edit_button_title = "Edit post";
+				}
+				$return .= <<<HTML
+					<a class="post_button" style="position:relative; display:inline-block; color:black; float:right;" onClick="editPost({$post['id']}, {$post['thread_id']}, {$shouldEditThread}, '{$this->core->getCsrfToken()}')" title="{$edit_button_title}"><i class="fas fa-edit" aria-hidden="true"></i></a>
+HTML;
+			}
+        }
+
+        $return .= <<<HTML
 		<h7 style="position:relative; right:5px;">
 			<strong id="post_user_id">{$visible_username}</strong>
-			{$function_date($date,"n/j g:i A")}
+			{$function_date($date, "n/j g:i A")}
 HTML;
-		if(!is_null($edit_date)) {
-			$return .= <<<HTML
+        if (!is_null($edit_date)) {
+            $return .= <<<HTML
 			(<i>Last edit at {$edit_date}</i>)
 HTML;
-		}
-		$return .= <<<HTML
+        }
+        $return .= <<<HTML
 		</h7>
 		</span>
 HTML;
 
-		if($post["has_attachment"]){
-			$post_dir = FileUtils::joinPaths($thread_dir, $post["id"]);
-			$files = FileUtils::getAllFiles($post_dir);
-			foreach($files as $file){
-				$path = rawurlencode($file['path']);
-				$name = rawurlencode($file['name']);
-				$name_display = htmlentities(rawurldecode($file['name']), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-				$return .= <<<HTML
+        if ($post["has_attachment"]) {
+            $post_dir = FileUtils::joinPaths($thread_dir, $post["id"]);
+            $files = FileUtils::getAllFiles($post_dir);
+            foreach ($files as $file) {
+                $path = rawurlencode($file['path']);
+                $name = rawurlencode($file['name']);
+                $name_display = htmlentities(rawurldecode($file['name']), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                $return .= <<<HTML
 					<a href="#" style="text-decoration:none;display:inline-block;white-space: nowrap;" class="btn-default btn-sm post_button_color" onclick="openFileForum('forum_attachments', '{$name}', '{$path}')" > {$name_display} </a>
 HTML;
-			}					
-		}
-			$offset = $offset + 30;
-						$return .= <<<HTML
+            }
+        }
+        $offset = $offset + 30;
+        $return .= <<<HTML
 </div>
-
+HTML;
+        if ($this->core->getQueries()->isThreadLocked($thread_id) != 1 || $this->core->getUser()->accessFullGrading()) {
+            $return .= <<<HTML
 					<form class="reply-box post_reply_from" id="$post_id-reply" onsubmit="post.disabled=true; post.value='Submitting post...'; return true;" style="margin-left:{$offset}px" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
 						<input type="hidden" name="thread_id" value="{$thread_id}" />
 						<input type="hidden" name="parent_id" value="{$post_id}" />
 	            		<br/>
 HTML;
-	            		$GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id'])?$GLOBALS['post_box_id']+1:1;
-						$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig", [
-							"show_post" => true,
-							"post_content_placeholder" => "Enter your reply to {$visible_username} here...",
-							"show_merge_thread_button" => false,
-							"post_box_id" => $post_box_id,
-							"show_anon" => true,
-							"submit_label" => "Submit Reply to {$visible_username}",
-						]);
-						$return .= <<<HTML
+            $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 1;
+            $return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig", [
+                "show_post" => true,
+                "post_content_placeholder" => "Enter your reply to {$visible_username} here...",
+                "show_merge_thread_button" => false,
+                "post_box_id" => $post_box_id,
+                "show_anon" => true,
+                "submit_label" => "Submit Reply to {$visible_username}",
+            ]);
+
+            $return .= <<<HTML
 	            	</form>
 HTML;
-
+        }
 		return $return;
 	}
 
@@ -1037,11 +1062,13 @@ HTML;
 			<h3 style="margin-bottom:10px;"> Create Thread </h3>
 			<form style="margin-right: 15px; margin-left:15px;" id="thread_form" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread'))}" enctype="multipart/form-data">
 HTML;
-
+                $this->core->getOutput()->addInternalJs("flatpickr.js");
+                $this->core->getOutput()->addInternalCss('flatpickr.min.css');
 				$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig", [
 					"show_title" => true,
 					"show_post" => true,
 					"post_textarea_large" => true,
+                    "show_lock_date" => true,
 					"post_content_placeholder" => "Enter your post here...",
 					"show_categories" => true,
 					"post_box_id" => 1,
