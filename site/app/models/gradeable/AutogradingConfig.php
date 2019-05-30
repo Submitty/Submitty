@@ -3,9 +3,11 @@
 namespace app\models\gradeable;
 
 
+use app\exceptions\NotImplementedException;
 use app\libraries\Core;
 use app\libraries\Utils;
 use app\models\AbstractModel;
+use app\models\Email;
 use app\models\grading\AbstractGradingInput;
 use app\models\GradeableTestcase;
 use app\models\gradeable\AutogradingTestcase;
@@ -137,20 +139,35 @@ class AutogradingConfig extends AbstractModel {
         // defaults to 1 if no set
         $num_parts = count($details['part_names'] ?? [1]);
 
-        // defaults to 0 if not set
-        $num_inputs = 0;
-        $temp_count = 0;
-        $other_count = 0;
+        // Setup $this->notebook
         $actual_input = array();
         if (isset($details['notebook'])) {
-            foreach ($details['notebook'] as $c) {
-                $this->notebook[$other_count] = $c;
-                $num_inputs = $num_inputs + count($c['input'] ?? []);
-                foreach ($c['input'] as $inp) {
-                    $actual_input[$temp_count] = $inp;
-                    $temp_count++;
+
+            // For each item in the notebook array inside the $details collect data and assign to variables in
+            // $this->notebook
+            foreach ($details['notebook'] as $notebook_cell) {
+
+                // If cell is of markdown type then figure out if it is markdown_string or markdown_file and pass this
+                // markdown forward as 'data' as opposed to 'string' or 'file'
+                $markdown = $this->getMarkdownData($notebook_cell);
+
+                // Remove string or file from $notebook_cell
+                unset($notebook_cell['markdown_string']);
+                unset($notebook_cell['markdown_file']);
+
+                // Readd as data
+                $notebook_cell['markdown_data'] = $markdown;
+
+                // Add this cell $this->notebook
+                array_push($this->notebook, $notebook_cell);
+
+                // If cell is a type of input add it to the $actual_inputs array
+                if($notebook_cell['type'] == "short_answer"
+                    OR $notebook_cell['type'] == "codebox"
+                    OR $notebook_cell['type'] == "multiple_choice")
+                {
+                    array_push($actual_input, $notebook_cell);
                 }
-                $other_count++;
             }
         }
 
@@ -166,14 +183,34 @@ class AutogradingConfig extends AbstractModel {
         }
 
         // Get the input details
-        for ($i = 0; $i < $num_inputs; $i++) {
+        for ($i = 0; $i < count($actual_input); $i++) {
             if ($actual_input[$i]['type'] == "short_answer") {
                 $this->inputs[$i] = new SubmissionTextBox($this->core, $actual_input[$i]);
             } elseif ($actual_input[$i]['type'] == "codebox") {
                 $this->inputs[$i] = new SubmissionCodeBox($this->core, $actual_input[$i]);
-            } elseif ($actual_input[$i]['type'] == "multiplechoice") {
+            } elseif ($actual_input[$i]['type'] == "multiple_choice") {
                 $this->inputs[$i] = new SubmissionMultipleChoice($this->core, $actual_input[$i]);
             }
+        }
+    }
+
+    private function getMarkdownData($cell)
+    {
+        // If markdown_string is set then just return that
+        if(isset($cell['markdown_string']))
+        {
+            return $cell['markdown_string'];
+        }
+        // Else if markdown_file is set then read the file and return its contents
+        else if(isset($cell['markdown_file']))
+        {
+            throw new NotImplementedException("Reading from a markdown_file is not yet implemented.");
+        }
+        // Else something unexpected happened
+        else
+        {
+            throw new \InvalidArgumentException("An error occured parsing notebook data.\n" .
+                "Markdown configuration may only specify one of 'markdown_string' or 'markdown_file'");
         }
     }
 

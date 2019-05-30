@@ -198,7 +198,7 @@ int main(int argc, char *argv[]) {
 //      // Handle markdown data
 //      if(type == "markdown")
 //      {
-//
+//          // Assert only one of the following was passed (markdown_string OR markdown_file)
 //      }
 //      // Handle image data
 //      else if(type == "image")
@@ -218,6 +218,7 @@ int main(int argc, char *argv[]) {
 //      // Else unknown type was passed in throw exception
 //      else
 //      {
+            // TODO: Figure out how to throw exception here
 ////        throw "An unknown notebook cell 'type' was detected in the supplied config.json file.";
 //      }
 

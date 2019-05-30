@@ -187,11 +187,20 @@
             {% set num_short_answer = 0 %}
             {% set num_codeboxes = 0 %}
             {% set num_multiple_choice = 0%}
-            {% for n in notebook %}
+            {% for cell in notebook %}
                 <div id="content_{{ loop.index0 }}">
-                    <h2>{{ n.title }}</h2>
 
-                    {% for image in n.images %}
+                    {# Handle if cell is markdown #}
+                    {% if cell.type == "markdown" %}
+
+                        {# Render markdown #}
+                        {{ cell.markdown_data | markdown }}
+
+                    {% endif %}
+
+                    <h2>{{ cell.title }}</h2>
+
+                    {% for image in cell.images %}
                         <img src="{{ attribute(image_data, image.name) }}"
 
                         {% if image.width > 0 %}
@@ -210,16 +219,16 @@
                     {% endfor %}
 
                     {# Render the inputs for the given notebook block #}
-                    {% if n.description != None %}
+                    {% if cell.description != None %}
                         <div id="description_{{ loop.index0 }}">
-                            {{ n.description | markdown }}
+                            {{ cell.description | markdown }}
                         </div>
                         <br>
                     {% endif %}
-                    {% for i in n.input %}
+                    {% for i in cell.input %}
                         <div id="input_container_{{ loop.index0 }}">
 
-                            {% if i.type == "short_answer" %}
+                            {% if cell.type == "short_answer" %}
                                 {{ self.render_short_answer(i, num_short_answer, highest_version ) }}
                                 {% set num_short_answer = num_short_answer + 1 %}
                             {% elseif i.type == "codebox" %}

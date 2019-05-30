@@ -205,34 +205,34 @@ class GradedGradeable extends AbstractModel {
         // Get notebook
         $newNotebook = $this->getGradeable()->getAutogradingConfig()->getNotebook();
 
-        foreach ($newNotebook as $notebookKey => $notebookVal) {
-            foreach ($notebookVal['input'] as $inputKey => $inputVal) {
-
-                // If no previous submissions set string to default starter_value_string
-                if($this->getAutoGradedGradeable()->getHighestVersion() == 0)
-                {
-                    $recentSubmissionString = $inputVal['starter_value_string'];
-                }
-                // Else there has been a previous submission try to get it
-                else
-                {
-
-                    try
-                    {
-                        // Try to get the most recent submission
-                        $recentSubmissionString = $this->getRecentSubmissionContents($inputVal['filename']);
-                    }
-                    catch (AuthorizationException $e)
-                    {
-                        // If the user lacked permission then just set to default instructor provided string
-                        $recentSubmissionString = $inputVal['starter_value_string'];
-                    }
-                }
-
-                // Add field to the array
-                $newNotebook[$notebookKey]['input'][$inputKey]['recent_submission_string'] = $recentSubmissionString;
-            }
-        }
+//        foreach ($newNotebook as $notebookKey => $notebookVal) {
+//            foreach ($notebookVal['input'] as $inputKey => $inputVal) {
+//
+//                // If no previous submissions set string to default starter_value_string
+//                if($this->getAutoGradedGradeable()->getHighestVersion() == 0)
+//                {
+//                    $recentSubmissionString = $inputVal['starter_value_string'];
+//                }
+//                // Else there has been a previous submission try to get it
+//                else
+//                {
+//
+//                    try
+//                    {
+//                        // Try to get the most recent submission
+//                        $recentSubmissionString = $this->getRecentSubmissionContents($inputVal['filename']);
+//                    }
+//                    catch (AuthorizationException $e)
+//                    {
+//                        // If the user lacked permission then just set to default instructor provided string
+//                        $recentSubmissionString = $inputVal['starter_value_string'];
+//                    }
+//                }
+//
+//                // Add field to the array
+//                $newNotebook[$notebookKey]['input'][$inputKey]['recent_submission_string'] = $recentSubmissionString;
+//            }
+//        }
 
         // Operate on notebook to add prev_submission field to inputs
         return $newNotebook;
