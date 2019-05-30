@@ -165,43 +165,43 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  // JSON parsing for notebook block
-  nlohmann::json::iterator notebook_blocks = config_json.find("notebook");
-  if (notebook_blocks != config_json.end()) {
+  // JSON parsing for notebook cells
+  nlohmann::json::iterator in_notebook_cells = config_json.find("notebook");
+  if (in_notebook_cells != config_json.end()) {
     j["notebook"] = nlohmann::json::array();
-    for (int i = 0; i < notebook_blocks->size(); i++) {
-      nlohmann::json notebook;
-      nlohmann::json notebook_block = (*notebook_blocks)[i];
+    for (int i = 0; i < in_notebook_cells->size(); i++) {
+      nlohmann::json out_notebook;
+      nlohmann::json in_notebook_cell = (*in_notebook_cells)[i];
 
       // Title, Optional
       std::string title = "";
-      if(notebook_block["title"].is_string()){
-        title = notebook_block["title"];
-      }else if(!notebook_block["title"].is_null()){
+      if(in_notebook_cell["title"].is_string()){
+        title = in_notebook_cell["title"];
+      }else if(!in_notebook_cell["title"].is_null()){
         bool title_is_string = false; 
         assert(title_is_string);
       }
-      notebook["title"] = title;
+      out_notebook["title"] = title;
 
       // Description, optional
       std::string description = "";
-      if(notebook_block["description"].is_string()){
-        description = notebook_block["description"];
-      }else if(!notebook_block["description"].is_null()){
+      if(in_notebook_cell["description"].is_string()){
+        description = in_notebook_cell["description"];
+      }else if(!in_notebook_cell["description"].is_null()){
         bool description_is_string = false; 
         assert(description_is_string);
       }
-      notebook["description"] = description;
+      out_notebook["description"] = description;
 
       // Images, optional
-      notebook["images"] = (*notebook_blocks)[i].value("images", nlohmann::json::array());
+      out_notebook["images"] = (*in_notebook_cells)[i].value("images", nlohmann::json::array());
 
       // Input
-      nlohmann::json::iterator inpt_ptr = (*notebook_blocks)[i].find("input");
-      if (inpt_ptr != (*notebook_blocks)[i].end()) {
-        assert((*notebook_blocks)[i]["input"].is_array());
+      nlohmann::json::iterator inpt_ptr = (*in_notebook_cells)[i].find("input");
+      if (inpt_ptr != (*in_notebook_cells)[i].end()) {
+        assert((*in_notebook_cells)[i]["input"].is_array());
         nlohmann::json input_array = *inpt_ptr;
-      	notebook["input"] = nlohmann::json::array();
+      	out_notebook["input"] = nlohmann::json::array();
       	for (int k = 0; k < input_array.size(); k++) {
       	  nlohmann::json input = input_array[k];
           nlohmann::json input_obj;
@@ -255,7 +255,7 @@ int main(int argc, char *argv[]) {
 
       	    input_obj["filename"] = input.value("filename", "input_" + s + ".txt");
       	    input_obj["images"] = input.value("images", nlohmann::json::array());
-      	    notebook["input"].push_back(input_obj);
+      	    out_notebook["input"].push_back(input_obj);
       	  } else if (*in_type == "multiplechoice") {
 
             if(!input["allow_multiple"].is_null()){
@@ -272,13 +272,13 @@ int main(int argc, char *argv[]) {
 
 
       	    input_obj["filename"] = input.value("filename", "mc_" + s + ".txt");
-      	    notebook["input"].push_back(input_obj);
+      	    out_notebook["input"].push_back(input_obj);
       	  } else {
       	    assert (false);
       	  }
       	}
       }
-      j["notebook"].push_back(notebook);
+      j["notebook"].push_back(out_notebook);
     }
   }
 
@@ -289,7 +289,7 @@ int main(int argc, char *argv[]) {
   // (drag & drop zones / "bucket"s for file upload), set part_names
   // to an empty array (no zones for file drag & drop).
   if (parts == config_json.end() &&
-      notebook_blocks != config_json.end()) {
+      in_notebook_cells != config_json.end()) {
     j["part_names"] =  nlohmann::json::array();
   }
 
