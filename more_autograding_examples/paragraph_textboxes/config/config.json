@@ -15,6 +15,22 @@
             "alt_text" : "A very happy pig.",
             "height": 300,
             "width": 300
+        },
+        {
+            "type": "markdown",
+            "markdown_string": "The above animal:"
+        },
+        {
+            "type": "short_answer",
+            "filename": "box_one.txt",
+            "initial_value": "This is the first box pre-populated with data.",
+            "rows": 5
+        },
+        {
+          "type": "short_answer",
+          "filename": "box_two.txt",
+          "initial_value": "This is the second box pre-populated with data.",
+          "rows": 5
         }
     ],
     "testcases" : [ 

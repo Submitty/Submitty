@@ -171,6 +171,17 @@ class AutogradingConfig extends AbstractModel {
             }
         }
 
+        // Setup $this->inputs
+        for ($i = 0; $i < count($actual_input); $i++) {
+            if ($actual_input[$i]['type'] == "short_answer") {
+                $this->inputs[$i] = new SubmissionTextBox($this->core, $actual_input[$i]);
+            } elseif ($actual_input[$i]['type'] == "codebox") {
+                $this->inputs[$i] = new SubmissionCodeBox($this->core, $actual_input[$i]);
+            } elseif ($actual_input[$i]['type'] == "multiple_choice") {
+                $this->inputs[$i] = new SubmissionMultipleChoice($this->core, $actual_input[$i]);
+            }
+        }
+
         // defaults to 1 if no set
         $num_parts = count($details['part_names'] ?? [1]);
 
@@ -182,17 +193,6 @@ class AutogradingConfig extends AbstractModel {
                 $this->part_names[$i] = $details['part_names'][$j];
             } else {
                 $this->part_names[$i] = "Part " . $i;
-            }
-        }
-
-        // Get the input details
-        for ($i = 0; $i < count($actual_input); $i++) {
-            if ($actual_input[$i]['type'] == "short_answer") {
-                $this->inputs[$i] = new SubmissionTextBox($this->core, $actual_input[$i]);
-            } elseif ($actual_input[$i]['type'] == "codebox") {
-                $this->inputs[$i] = new SubmissionCodeBox($this->core, $actual_input[$i]);
-            } elseif ($actual_input[$i]['type'] == "multiple_choice") {
-                $this->inputs[$i] = new SubmissionMultipleChoice($this->core, $actual_input[$i]);
             }
         }
     }
