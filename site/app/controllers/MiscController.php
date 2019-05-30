@@ -49,8 +49,8 @@ class MiscController extends AbstractController {
             case 'modify_course_materials_file_time_stamp':
                 $this->modifyCourseMaterialsFileTimeStamp();
                 break;
-            case 'check_qr_upload_progress':
-                $this->checkQRUploadProgress();
+            case 'check_bulk_progress':
+                $this->checkBulkProgress();
                 break;
         }
     }
@@ -570,7 +570,7 @@ class MiscController extends AbstractController {
         }
     }
 
-    public function checkQRUploadProgress(){
+    public function checkBulkProgress(){
         $gradeable_id = $_POST['gradeable_id'] ?? NULL;
         if($gradeable_id === NULL){
             $result = ['error' => "gradeable_id cannot be null"];
@@ -585,11 +585,11 @@ class MiscController extends AbstractController {
         $complete_count = 0;
         try{
             foreach(scandir($job_path) as $job){
-                if(strpos($job, 'qr_upload_') !== false)
+                if(strpos($job, 'bulk_upload_') !== false)
                     $found = true;
                 else
                     continue;
-                //remove 'qr_upload_' and '.json' from job file name
+                //remove 'bulk_upload_' and '.json' from job file name
                 $result[] = substr($job,11,-5);
             }
             //look in the split upload folder to see what is complete
