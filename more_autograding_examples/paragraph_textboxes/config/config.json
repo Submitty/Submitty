@@ -31,6 +31,19 @@
           "filename": "box_two.txt",
           "initial_value": "This is the second box pre-populated with data.",
           "rows": 5
+        },
+        {
+            "type": "markdown",
+            "markdown_string": "Multiple choice select one:"
+        },
+        {
+            "type": "multiple_choice",
+            "filename": "select_one.txt",
+            "choice":[
+                {"value": "short", "description": "the plant will be short because it doesn't get enough water"},
+                {"value": "medium", "description": "the plant will grow normally"},
+                {"value": "tall", "description": "the plant will be tall because it gets lots of light"}
+            ],
         }
     ],
     "testcases" : [ 
