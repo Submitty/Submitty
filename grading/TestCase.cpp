@@ -88,7 +88,7 @@ std::vector<nlohmann::json> mapOrArrayOfMaps(nlohmann::json j, const std::string
 
 void fileStatus(const std::string &filename, bool &fileExists, bool &fileEmpty) {
   struct stat st;
-  if (stat('test_output/' + filename.c_str(), &st) < 0) {
+  if (stat(filename.c_str(), &st) < 0) {
     // failure
     fileExists = false;
   }
