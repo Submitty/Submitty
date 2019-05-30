@@ -997,97 +997,60 @@ HTML;
 		return $return;
 	}
 
-	public function createThread($category_colors) {
+    public function createThread($category_colors){
 
-		if(!$this->forumAccess()){
-			$this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
-			return;
-		}
+        if(!$this->forumAccess()){
+            $this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
+            return;
+        }
 
-		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
-		$this->core->getOutput()->addBreadcrumb("Create Thread", $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
-		$return = <<<HTML
-		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}vendor/jquery.are-you-sure/jquery.are-you-sure.js"></script>
-		<script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
-		<script> 
-			$( document ).ready(function() {
-				enableTabsInTextArea("[name=thread_post_content]");
-				$("#thread_form").submit(createThread);
-				$("form").areYouSure();
-			});
-		 </script>
-HTML;
+        $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
+        $this->core->getOutput()->addBreadcrumb("Create Thread", $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
+
+        $page_js = [];
+        $page_js[] = "vendor/jquery.are-you-sure/jquery.are-you-sure.js";
+        $page_js[] = "js/drag-and-drop.js";
+        $page_js = "js/flatpickr.js";
+
+        $page_css = [];
+        $page_css[] = "css/flatpickr.min.css";
+
+        $categories = "";
+        $category_colors;
+
         if($this->core->getUser()->getGroup() <= 3){
             $categories = $this->core->getQueries()->getCategories();
 
             $dummy_category = array('color' => '#000000', 'category_desc' => 'dummy', 'category_id' => "dummy");
             array_unshift($categories, $dummy_category);
-
-            $return .= $this->core->getOutput()->renderTwigTemplate("forum/CategoriesForm.twig", [
-                "categories" => $categories,
-                "category_colors" => $category_colors
-            ]);
         }
 
-		$return .= <<<HTML
-		<div class="content forum_content">
-		
-HTML;
+        $buttons = array(
+            array(
+                "required_rank" => 4,
+                "display_text" => 'Back to Threads',
+                "style" => 'position:relative;top:3px;float:right;',
+                "link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))),
+                "optional_class" => '',
+                "title" => 'Back to threads',
+                "onclick" => array(false)
+            )
+        );
 
-	$buttons = array(
-		array(
-			"required_rank" => 4,
-			"display_text" => 'Back to Threads',
-			"style" => 'position:relative;top:3px;float:right;',
-			"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))),
-			"optional_class" => '',
-			"title" => 'Back to threads',
-			"onclick" => array(false)
-		)
-	);
+        $thread_exists = $this->core->getQueries()->threadExists();
 
-	$thread_exists = $this->core->getQueries()->threadExists();
+        $return = $this->core->getOutput()->renderTwigTemplate("forum/createThread.twig", [
+            "page_js" => $page_js,
+            "page_css" => $page_css,
+            "categories" => $categories,
+            "category_colors" => $category_colors,
+            "buttons" => $buttons,
+            "thread_exists" => $thread_exists,
+            "form_action" => $this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread')),
+        ]);
 
-	$return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", [
-								"forum_bar_buttons_right" => $buttons,
-								"forum_bar_buttons_left" => [],
-								"show_threads" => false,
-								"thread_exists" => $thread_exists,
-								"show_more" => false
-	]);
-
-
-		$return .= <<<HTML
-
-			<h3 style="margin-bottom:10px;"> Create Thread </h3>
-			<form style="margin-right: 15px; margin-left:15px;" id="thread_form" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread'))}" enctype="multipart/form-data">
-HTML;
-                $this->core->getOutput()->addInternalJs("flatpickr.js");
-                $this->core->getOutput()->addInternalCss('flatpickr.min.css');
-				$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig", [
-					"show_title" => true,
-					"show_post" => true,
-					"post_textarea_large" => true,
-                    "show_lock_date" => true,
-					"post_content_placeholder" => "Enter your post here...",
-					"show_categories" => true,
-					"post_box_id" => 1,
-					"attachment_script" => true,
-					"show_anon" => true,
-					"show_thread_status" => true,
-					"show_announcement" => true,
-					"show_editcat" => true,
-					"submit_label" => "Submit Post",
-				]);
-			$return .= <<<HTML
-			</form>
-		</div>
-HTML;
-
-		return $return;
-	}
-
-
+        return $return;
+    }
 
 	public function statPage($users) {
 
