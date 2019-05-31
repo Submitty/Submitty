@@ -1007,13 +1007,11 @@ HTML;
         $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
         $this->core->getOutput()->addBreadcrumb("Create Thread", $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
 
-        $page_js = [];
-        $page_js[] = "vendor/jquery.are-you-sure/jquery.are-you-sure.js";
-        $page_js[] = "js/drag-and-drop.js";
-        $page_js = "js/flatpickr.js";
+        $this->core->getOutput()->addInternalJs('drag-and-drop.js');
+        $this->core->getOutput()->addVendorJs('flatpickr/flatpickr.js');
+        $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
 
-        $page_css = [];
-        $page_css[] = "css/flatpickr.min.css";
+        $this->core->getOutput()->addInternalCss('flatpickr.min.css');
 
         $categories = "";
         $category_colors;
@@ -1040,8 +1038,6 @@ HTML;
         $thread_exists = $this->core->getQueries()->threadExists();
 
         $return = $this->core->getOutput()->renderTwigTemplate("forum/createThread.twig", [
-            "page_js" => $page_js,
-            "page_css" => $page_css,
             "categories" => $categories,
             "category_colors" => $category_colors,
             "buttons" => $buttons,
