@@ -229,12 +229,17 @@
                             <br>
                                 <div id="codebox_{{ num_codeboxes }}" name="codebox_{{ num_codeboxes }}" style="border: 1px solid LightGrey;" onKeyPress="handle_input_keypress();">
                                 </div>
-
-
                                 <script>
+
+                                    {# Get recent submission #}
+                                    var recent_submission = "{{ cell.recent_submission }}";
+
+                                    {# Transform escaped characters back into regular characters#}
+                                    recent_submission = convertHTMLEntity(recent_submission);
+
                                     var editor_{{num_codeboxes}} = CodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"),
                                         {
-                                            {#"value" : "{{ cell.recent_submission  }}",#}
+                                            "value" : recent_submission,
                                             "mode": "{{ cell.programming_language }}",
                                             lineNumbers: true,
                                             "theme": "eclipse"
@@ -248,7 +253,7 @@
                     {% elseif cell.type == "multiple_choice" %}
 
                         {# Obtain list of previously selected elements #}
-                        {% if cell.recent_submission is defined %}
+                        {% if cell.recent_submission is defined and core.getConfig().keepPreviousFiles() %}
                             {% set prev_checked = cell.recent_submission | split('\n') %}
                         {% endif %}
 
@@ -261,7 +266,12 @@
                                         {{ choice.description }}
                                     </label>
                                 {% else %}
-                                    <input type="radio" name="multiple_choice_{{ num_multiple_choice }}" id="multiple_choice_{{ num_multiple_choice }}" value="{{ choice.value }}" {% if choice.value == cell.recent_submission %}checked="checked" {% endif %}onclick="handle_input_keypress();" />
+                                    <input type="radio"
+                                           name="multiple_choice_{{ num_multiple_choice }}"
+                                           id="multiple_choice_{{ num_multiple_choice }}"
+                                           value="{{ choice.value }}"
+                                           {% if choice.value == cell.recent_submission and core.getConfig().keepPreviousFiles() %}checked="checked" {% endif %}
+                                           onclick="handle_input_keypress();" />
                                     <label for="multiple_choice_{{ num_multiple_choice }}">
                                         {{ choice.description }}
                                     </label>
@@ -271,7 +281,7 @@
                         </fieldset>
                         <br>
 
-                        {% set num_multiple_choice = num_multiple_choice + 1%}
+                        {% set num_multiple_choice = num_multiple_choice + 1 %}
 
                     {% endif %}
 
