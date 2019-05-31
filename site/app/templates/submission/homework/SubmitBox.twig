@@ -232,7 +232,7 @@
                                 <script>
 
                                     {# Get recent submission #}
-                                    var recent_submission = "{% if core.getConfig().keepPreviousFiles() %}{{ cell.recent_submission }}{% else %}{{ cell.initial_value }}{% endif %}";
+                                    var recent_submission = `{% if core.getConfig().keepPreviousFiles() %}{{ cell.recent_submission }}{% else %}{{ cell.initial_value }}{% endif %}`;
 
                                     {# Transform escaped characters back into regular characters#}
                                     recent_submission = convertHTMLEntity(recent_submission);
