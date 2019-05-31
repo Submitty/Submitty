@@ -146,7 +146,7 @@ class AutogradingConfig extends AbstractModel {
 
                 // If cell is of markdown type then figure out if it is markdown_string or markdown_file and pass this
                 // markdown forward as 'data' as opposed to 'string' or 'file'
-                if($notebook_cell['type'] == "markdown")
+                if($notebook_cell['type'] == 'markdown')
                 {
                     $markdown = $this->getMarkdownData($notebook_cell);
 
@@ -162,9 +162,7 @@ class AutogradingConfig extends AbstractModel {
                 array_push($this->notebook, $notebook_cell);
 
                 // If cell is a type of input add it to the $actual_inputs array
-                if($notebook_cell['type'] == "short_answer"
-                    OR $notebook_cell['type'] == "codebox"
-                    OR $notebook_cell['type'] == "multiple_choice")
+                if($notebook_cell['type'] == 'short_answer' OR $notebook_cell['type'] == 'multiple_choice')
                 {
                     array_push($actual_input, $notebook_cell);
                 }
@@ -173,11 +171,21 @@ class AutogradingConfig extends AbstractModel {
 
         // Setup $this->inputs
         for ($i = 0; $i < count($actual_input); $i++) {
-            if ($actual_input[$i]['type'] == "short_answer") {
-                $this->inputs[$i] = new SubmissionTextBox($this->core, $actual_input[$i]);
-            } elseif ($actual_input[$i]['type'] == "codebox") {
-                $this->inputs[$i] = new SubmissionCodeBox($this->core, $actual_input[$i]);
-            } elseif ($actual_input[$i]['type'] == "multiple_choice") {
+            if ($actual_input[$i]['type'] == 'short_answer') {
+
+                // If programming language is set then this is a codebox
+                if(isset($actual_input[$i]['programming_language']))
+                {
+                    $this->inputs[$i] = new SubmissionCodeBox($this->core, $actual_input[$i]);
+                }
+                // Else regular textbox
+                else
+                {
+                    $this->inputs[$i] = new SubmissionTextBox($this->core, $actual_input[$i]);
+
+                }
+
+            } elseif ($actual_input[$i]['type'] == 'multiple_choice') {
                 $this->inputs[$i] = new SubmissionMultipleChoice($this->core, $actual_input[$i]);
             }
         }

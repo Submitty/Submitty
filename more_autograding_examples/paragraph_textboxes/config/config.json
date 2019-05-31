@@ -61,6 +61,15 @@
                 {"value": "5", "description": "five"}
             ],
             "allow_multiple": true
+        },
+        {
+          "type": "markdown",
+          "markdown_string": "Codebox"
+        },
+        {
+          "type": "short_answer",
+          "programming_language": "python",
+          "filename": "codebox.txt"
         }
     ],
     "testcases" : [ 

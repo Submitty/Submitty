@@ -255,15 +255,11 @@ int main(int argc, char *argv[]) {
           // Pass forward populated items
           out_notebook_cell["filename"] = filename;
           out_notebook_cell["initial_value"] = initial_value;
+          out_notebook_cell["rows"] = rows;
 
           if(programming_language != "")
           {
               out_notebook_cell["programming_language"] = programming_language;
-          }
-
-          if(rows != 0)
-          {
-              out_notebook_cell["rows"] = rows;
           }
       }
 
