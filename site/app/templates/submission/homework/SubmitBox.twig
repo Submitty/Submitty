@@ -29,30 +29,35 @@
 
     {# Admin submission type selector #}
     {% if core.getUser().accessFullGrading() %}
-        <form id="submissionForm" method="post" style="display: flex; justify-content: center; width: 100%; ">
-            <div >
+        <form id="submissionForm" method="post" style="width: 100%; ">
+            <div style="clear:both;">
                 <input type='radio' id="radio_normal" name="submission_type" checked="true">
                 <label for="radio_normal">Normal Submission</label>
+                &nbsp;&nbsp;&nbsp;&nbsp;
                 <input type='radio' id="radio_student" name="submission_type">
                 <label for="radio_student">Make Submission for a Student</label>
                 {% if part_names|length == 1 and not is_vcs %}
+                    &nbsp;&nbsp;&nbsp;&nbsp;
                     <input type='radio' id="radio_bulk" name="submission_type">
                     <label for="radio_bulk">Bulk Upload</label>
                 {% endif %}
             </div>
             <div id="user_id_input" style="display: none">
+                <br />
                 <div class="sub">
-                    Input the user_id of the student you wish to submit for. This <i>permanently</i> affects the student's submissions, so please use with caution.
+                    Note: This <i>permanently</i> affects the student's submissions, so please use with caution.
                 </div>
                 <div class="sub">
                     <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
                     user_id: <input type="text" id= "user_id" value ="" placeholder="{{ user_id }}"/>
                 </div>
             </div>
+            <br />
             <div class = "sub" id="pdf_submit_button" style="display: none">
                 <div class="sub">
                     Split by QR code?
                     <input type="checkbox" id="use_qr">
+                    <br />
                     <span id="pages_prompt"># of page(s) per PDF:</span>
                     <span id="prefix_prompt">QR code prefix/suffix:
                     <a style="text-decoration:none;" href = "https://submitty.org/instructor/exams#bulk-upload-and-split-with-qr-codes" target="_none">
@@ -62,11 +67,12 @@
                     <input type="number" id= "num_pages" placeholder="required"/>
                     <input type="text" id="qr_prefix" placeholder="Prefix (optional)" />
                     <input type="text" id="qr_suffix" placeholder="Suffix (optional)" />
-                    <div style="text-align:center;padding:5px;" id="expected_num_box">
-                        Expected Number of pages per PDF:
-                        <input type="number" id= "expected_pages_input" placeholder="optional" onchange="highlightPageCount()" />
+                    <div id="expected_num_box">
+                    Expected Number of pages per PDF:
+                    <input type="number" id= "expected_pages_input" placeholder="optional" onchange="highlightPageCount()" />
                     </div>
                 </div>
+                <br />
             </div>
         </form>
 
