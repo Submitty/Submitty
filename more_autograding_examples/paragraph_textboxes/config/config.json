@@ -84,38 +84,38 @@
     "testcases" : [ 
         {
             "type" : "FileCheck",
-            "title" : "Review Favorite Color",
-            "actual_file" : "animal.txt",
+            "title" : "First Box",
+            "actual_file" : "box_one.txt",
             "points" : 0
         },
         {
             "type" : "FileCheck",
-            "title" : "Review Description",
-            "actual_file" : "description.txt",
+            "title" : "Second Box",
+            "actual_file" : "box_two.txt",
             "points" : 0
         },
         {
             "type" : "FileCheck",
-            "title" : "Review Haiku",
-            "actual_file" : "haiku.txt",
+            "title" : "Select One",
+            "actual_file" : "select_one.txt",
             "points" : 0
         },
         {
             "type" : "FileCheck",
-            "title" : "Review Hours",
-            "actual_file" : "hours.txt",
+            "title" : "Select Many",
+            "actual_file" : "select_many.txt",
             "points" : 0
         },
         {
             "type" : "FileCheck",
-            "title" : "Review Multiple Choice",
-            "actual_file" : "multiple_choice.txt",
-            "points" : 0
-        },
-        {
-            "type" : "FileCheck",
-            "title" : "Review Python Input",
+            "title" : "Codebox",
             "actual_file" : "codebox.txt",
+            "points" : 0
+        },
+        {
+            "type" : "FileCheck",
+            "title" : "Codebox 2",
+            "actual_file" : "codebox2.txt",
             "points" : 0
         }
     ]
