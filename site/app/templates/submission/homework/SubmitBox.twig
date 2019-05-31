@@ -218,8 +218,58 @@
                     {# Handle if cell is short_answer #}
                     {% elseif cell.type == "short_answer" %}
 
-                        {{ self.render_short_answer(cell, num_short_answer, highest_version) }}
-                        {% set num_short_answer = num_short_answer + 1 %}
+                        {# If programming language not defined render regular text boxes#}
+                        {% if cell.programming_language is not defined %}
+
+                            {{ self.render_short_answer(cell, num_short_answer, highest_version) }}
+                            {% set num_short_answer = num_short_answer + 1 %}
+
+                        {# Else render a codebox #}
+                        {% else %}
+                            <br>
+                                <div id="codebox_{{ num_codeboxes }}" name="codebox_{{ num_codeboxes }}" style="border: 1px solid LightGrey;" onKeyPress="handle_input_keypress();">
+                                </div>
+                                <script>
+                                    var editor_{{num_codeboxes}} = CodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"),
+                                        {
+                                            //"value" : "",
+                                            "mode": "{{i.language}}",
+                                            lineNumbers: true,
+                                            "theme": "eclipse"
+                                        }
+                                    );
+                                </script>
+                            <br>
+                            {% set num_codeboxes = num_codeboxes + 1 %}
+                        {% endif %}
+
+                    {% elseif cell.type == "multiple_choice" %}
+
+                        {# Obtain list of previously selected elements #}
+                        {% if cell.recent_submission is defined %}
+                            {% set prev_checked = cell.recent_submission | split('\n') %}
+                        {% endif %}
+
+                        <br>
+                        <fieldset>
+                            {% for choice in cell.choices %}
+                                {% if cell.allow_multiple == true %}
+                                    <input type="checkbox" name="multiple_choice_{{ num_multiple_choice }}" id="multiple_choice_{{ num_multiple_choice }}" value="{{ choice.value }}" {% if choice.value in prev_checked %}checked="checked" {% endif %}onclick="handle_input_keypress();" />
+                                    <label for="multiple_choice_{{ num_multiple_choice }}">
+                                        {{ choice.description }}
+                                    </label>
+                                {% else %}
+                                    <input type="radio" name="multiple_choice_{{ num_multiple_choice }}" id="multiple_choice_{{ num_multiple_choice }}" value="{{ choice.value }}" {% if choice.value == cell.recent_submission %}checked="checked" {% endif %}onclick="handle_input_keypress();" />
+                                    <label for="multiple_choice_{{ num_multiple_choice }}">
+                                        {{ choice.description }}
+                                    </label>
+                                {% endif %}
+                                <br/>
+                            {% endfor %}
+                        </fieldset>
+                        <br>
+
+                        {% set num_multiple_choice = num_multiple_choice + 1%}
 
                     {% endif %}
 
@@ -285,7 +335,7 @@
                                                 {{ choice }}
                                             </label>
                                         {% else %}
-                                            <input type="radio" name="multiple_choice_{{ num_multiple_choice }}" id="multiple_choice_{{ num_multiple_choice }}" value="{{ choice }}" {% if choice == i.recent_submission_string %}checked="checked" {% endif %}onclick="handle_input_keypress();" />
+                                            <input type="radio" name="multiple_choice_{{ num_multiple_choice }}" id="multiple_choice_{{ num_multiple_choice }}" value="{{ choice }}" {% if choice == i.recent_submission %}checked="checked" {% endif %}onclick="handle_input_keypress();" />
                                             <label for="{{ choice }}">
                                                 {{ choice }}
                                             </label>
@@ -529,7 +579,7 @@
                     name="short_answer_{{ index }}"
                     id="short_answer_{{ index }}"
                     {% if core.getConfig().keepPreviousFiles() %}
-                        value="{{ short_answer.recent_submission_string }}"
+                        value="{{ short_answer.recent_submission }}"
                     {% else %}
                         value="{{ short_answer.initial_value }}"
                     {% endif %}
@@ -543,7 +593,7 @@
                     style="width:60em; height:100%; min-height:110px;"
                     name="short_answer_{{ index }}"
                     id="short_answer_{{ index }}"
-                    onKeyPress="handle_input_keypress()">{% if core.getConfig().keepPreviousFiles() %}{{ short_answer.recent_submission_string }}{% else %}{{ short_answer.initial_value }}{% endif %}</textarea>
+                    onKeyPress="handle_input_keypress()">{% if core.getConfig().keepPreviousFiles() %}{{ short_answer.recent_submission }}{% else %}{{ short_answer.initial_value }}{% endif %}</textarea>
             <br />
             {#
                 Allow tab in the larger text boxes (normally tab moves to the next textbox)
@@ -595,7 +645,7 @@
             document.getElementById("short_answer_{{ index }}_recent_button").addEventListener("click", function() {
 
                 // Reset string
-                document.getElementById("short_answer_{{ index }}").value = "{{ short_answer.recent_submission_string }}";
+                document.getElementById("short_answer_{{ index }}").value = "{{ short_answer.recent_submission }}";
 
                 // Disable recent button
                 document.getElementById("short_answer_{{ index }}_recent_button").disabled = true;
@@ -620,7 +670,7 @@
                     document.getElementById("short_answer_{{ index }}_clear_button").disabled = false;
                 }
 
-                if (box_value === "{{ short_answer.recent_submission_string }}")
+                if (box_value === "{{ short_answer.recent_submission }}")
                 {
                     document.getElementById("short_answer_{{ index }}_recent_button").disabled = true;
                 }

@@ -45,6 +45,22 @@
                 {"value": "tall", "description": "the plant will be tall because it gets lots of light"}
             ],
             "allow_multiple": false
+        },
+        {
+            "type": "markdown",
+            "markdown_string": "Multiple choice select many:"
+        },
+        {
+            "type": "multiple_choice",
+            "filename": "select_many.txt",
+            "choices":[
+                {"value": "1", "description": "one"},
+                {"value": "2", "description": "two"},
+                {"value": "3", "description": "three"},
+                {"value": "4", "description": "four"},
+                {"value": "5", "description": "five"}
+            ],
+            "allow_multiple": true
         }
     ],
     "testcases" : [ 
