@@ -11,6 +11,9 @@ use app\libraries\Logger;
 use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
 use app\controllers\grading\ElectronicGraderController;
+use app\models\gradeable\SubmissionTextBox;
+use app\models\gradeable\SubmissionCodeBox;
+use app\models\gradeable\SubmissionMultipleChoice;
 
 
 
@@ -1113,21 +1116,48 @@ class SubmissionController extends AbstractController {
 
             // save the contents of the text boxes to files
             $empty_inputs = true;
-            if (isset($_POST['input_answers'])) {
-                $input_answer_object = json_decode($_POST['input_answers'], true);
-                for ($i = 0; $i < $gradeable->getAutogradingConfig()->getNumInputs(); $i++) {
-                    $input_answers = $input_answer_object["input_" . $i];
-                    if ( count($input_answers) > 0)  $empty_inputs = false;
-                    $filename = $gradeable->getAutogradingConfig()->getInputs()[$i]->getFileName();
-                    $dst = FileUtils::joinPaths($version_path, $filename);
-                    // FIXME: add error checking
-                    $file = fopen($dst, "w");
+            $num_short_answers = 0;
+            $num_codeboxes = 0;
+            $num_multiple_choice = 0;
 
-                    foreach($input_answers as $input_answer_val){
-                        fwrite($file, $input_answer_val . "\n");
-                    }
-                    fclose($file);
+            $short_answer_objects    = $_POST['short_answer_answers'] ?? "";
+            $codebox_objects         = $_POST['codebox_answers'] ?? "";
+            $multiple_choice_objects = $_POST['multiple_choice_answers'] ?? "";
+            $short_answer_objects    = json_decode($short_answer_objects,true);
+            $codebox_objects         = json_decode($codebox_objects,true);
+            $multiple_choice_objects = json_decode($multiple_choice_objects,true);
+
+            $this_config_inputs = $gradeable->getAutogradingConfig()->getInputs() ?? array();
+
+            foreach($this_config_inputs as $this_input) {
+                if($this_input instanceof SubmissionTextBox){
+                    $answers = $short_answer_objects["short_answer_" .  $num_short_answers] ?? array();
+                    $num_short_answers += 1;
                 }
+                else if($this_input instanceof SubmissionCodeBox){
+                    $answers = $codebox_objects["codebox_" .  $num_codeboxes] ?? array();
+                    $num_codeboxes += 1;
+                }
+                else if($this_input instanceof SubmissionMultipleChoice){
+                    $answers = $multiple_choice_objects["multiple_choice_" .  $num_multiple_choice] ?? array();;
+                    $num_multiple_choice += 1;
+                }else{
+                    //TODO: How should we handle this case?
+                    continue;
+                }
+
+                $filename = $this_input->getFileName();
+                $dst = FileUtils::joinPaths($version_path, $filename);
+
+                if ( count($answers) > 0)  $empty_inputs = false;
+
+                // FIXME: add error checking
+                $file = fopen($dst, "w");
+
+                foreach($answers as $answer_val){
+                    fwrite($file, $answer_val . "\n");
+                }
+                fclose($file);
             }
 
             $previous_files_src = array();
