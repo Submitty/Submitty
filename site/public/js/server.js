@@ -232,6 +232,7 @@ function newUserForm() {
     form.css("display", "block");
     $('[name="edit_user"]', form).val("false");
     $('[name="user_id"]', form).removeClass('readonly').prop('readonly', false).val("");
+    $('[name="user_numeric_id"]', form).val("");
     $('[name="user_firstname"]', form).val("");
     $('[name="user_preferred_firstname"]', form).val("");
     $('[name="user_lastname"]', form).val("");
