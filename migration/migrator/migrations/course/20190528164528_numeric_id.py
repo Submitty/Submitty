@@ -14,8 +14,8 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("ALTER TABLE IF EXISTS users ADD COLUMN user_numeric_id varchar;")
-    database.execute("CREATE INDEX users_user_numeric_id_idx ON users using btree (user_numeric_id ASC NULLS LAST);")
+    database.execute("ALTER TABLE IF EXISTS users ADD COLUMN IF NOT EXISTS user_numeric_id varchar;")
+    database.execute("CREATE INDEX IF NOT EXISTS users_user_numeric_id_idx ON users using btree (user_numeric_id ASC NULLS LAST);")
 
 def down(config, database, semester, course):
     """
@@ -30,5 +30,4 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("DROP INDEX IF EXSISTS users_user_numeric_id_idx;")
-    database.execute("ALTER TABLE IF EXISTS users DROP COLUMN IF EXISTS user_numeric_id;")
+    pass
