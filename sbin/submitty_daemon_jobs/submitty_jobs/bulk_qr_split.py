@@ -22,12 +22,12 @@ except ImportError:
     sys.exit(1)
 
 
-def main():
+def main(args):
     """Scan through PDF and split PDF and images."""
-    filename = sys.argv[1]
-    split_path = sys.argv[2]
-    qr_prefix = sys.argv[3]
-    qr_suffix = sys.argv[4]
+    filename = args[0]
+    split_path = args[1]
+    qr_prefix = args[2]
+    qr_suffix = args[3]
     try:
         os.chdir(split_path)
         pdfPages = PdfFileReader(filename)

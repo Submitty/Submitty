@@ -65,7 +65,6 @@
                 $('#qr_prefix').prop('hidden', true);
                 $('#qr_suffix').prop('hidden', true);
                 $('#prefix_prompt').prop('hidden', true);
-                $('#qr_progress_box').prop('hidden', true);
                 //load what upload mode the user selected (if any)
                 if(sessionStorage.getItem('radio_bulk')){
                     $('#radio_bulk').prop('checked', true);
@@ -82,7 +81,6 @@
                     $('#pages_prompt').prop('hidden', true);
                     $('#num_pages').prop('hidden', true);
                     $('#use_qr').prop('checked',true);
-                    $('#qr_progress_box').prop('hidden', false);
                     //populate prefix textarea
                     if(sessionStorage.getItem('qr_prefix')){
                         $('#qr_prefix').val(sessionStorage.getItem('qr_prefix'));
@@ -137,7 +135,6 @@
                     $('#qr_suffix').prop('hidden', !$('#qr_suffix').is(':hidden'));
                     $('#prefix_prompt').prop('hidden', !$('#prefix_prompt').is(':hidden'));
                     $('#pages_prompt').prop('hidden', !$('#pages_prompt').is(':hidden'));
-                    $('#qr_progress_box').prop('hidden', !$('#qr_progress_box').is(':hidden'));
                 });
                 $("#user_id").autocomplete({
                     source: students_full
@@ -213,7 +210,7 @@
                     {% for i in n.input %}
                         <div id="input_container_{{ loop.index0 }}">
                             {% if i.type == "short_answer" %}
-                                {{ self.render_short_answer(i, num_inputs ) }}
+                                {{ self.render_short_answer(i, num_inputs, highest_version) }}
                             {% elseif i.type == "codebox" %}
                                 <br>
                             {% elseif i.type == "multiplechoice" %}
@@ -222,7 +219,7 @@
                                 <fieldset>
                                     {% for choice in i.choices %}
                                         {% if i.allow_multiple == true %}
-                                            <input type="checkbox" name="input_{{ num_inputs }}" id="input_{{ num_inputs }}" value="{{ choice }}" onclick="handle_input_keypress();"" />
+                                            <input type="checkbox" name="input_{{ num_inputs }}" id="input_{{ num_inputs }}" value="{{ choice }}" onclick="handle_input_keypress();" />
                                             <label for="{{ choice }}">
                                                 {{ choice }}
                                             </label>
@@ -245,7 +242,12 @@
     
             {# Submit boxes #}
             {% for part in part_names %}
-                <div id="upload{{ loop.index }}" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 150px;">
+                <div tabindex="0"
+                     id="upload{{ loop.index }}"
+                     onkeypress="clicked_on_box(event)"
+                     role="text"
+                     aria-label="Press enter to upload your {{ part }} file"
+                     style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 150px;">
                     <h3 class="label" id="label{{ loop.index }}">
                         {% if part_names|length > 1 %}
                             Drag your {{ part }} here or click to open file browser
@@ -279,21 +281,24 @@
         </div>
 
         <button type="button" id="submit" class="btn btn-success" style="margin-right: 100px;">Submit</button>
-        <button type="button" id="startnew" class="btn btn-primary">Clear</button>
 
-        {% if display_version == highest_version and display_version > 0 %}
-            <button type="button" id= "getprev" class="btn btn-primary">Use Most Recent Submission</button>
+        {% if part_names is not empty %}
+            <button type="button" id="startnew" class="btn btn-primary">Clear</button>
 
-            {% if core.getConfig().keepPreviousFiles() %}
-            <script type="text/javascript">
-                $(function() {
-                    setUsePrevious();
-                    {% for file in old_files %}
-                        addLabel('{{ file.name }}', '{{ file.size }}', {{ file.part }}, true);
-                        readPrevious('{{ file.name }}', {{ file.part }});
-                    {% endfor %}
-                });
-            </script>
+            {% if display_version == highest_version and display_version > 0 %}
+                <button type="button" id= "getprev" class="btn btn-primary">Use Most Recent Submission</button>
+
+                {% if core.getConfig().keepPreviousFiles() %}
+                <script type="text/javascript">
+                    $(function() {
+                        setUsePrevious();
+                        {% for file in old_files %}
+                            addLabel('{{ file.name }}', '{{ file.size }}', {{ file.part }}, true);
+                            readPrevious('{{ file.name }}', {{ file.part }});
+                        {% endfor %}
+                    });
+                </script>
+                {% endif %}
             {% endif %}
         {% endif %}
 
@@ -342,7 +347,7 @@
 
 {% if core.getUser().accessFullGrading() %}
     {% include 'submission/homework/PreviousSubmissionForm.twig' %}            
-    {% include 'submission/homework/QRProgressBox.twig' %}
+    {% include 'submission/homework/BulkUploadProgressBox.twig' %}
 {% endif %}
 
 <script type="text/javascript">
@@ -454,32 +459,118 @@
     });
 </script>
 
-{% macro render_short_answer(short_answer, index) %}
+{% macro render_short_answer(short_answer, index, version) %}
 
     <p style="max-width: 50em;">
         <strong>{{ short_answer.label }}</strong>
         <br>
         {% if short_answer.rows == 0 %}
-            <form>
-                <input type="text" name="input_{{ index }}" id="input_{{ index }}" value="{{ short_answer.starter_value_string }}" onKeyPress="handle_input_keypress();">
-                <br /><input type="reset" class="btn btn-primary" style="margin-top: 5px" value="Reset">
-            </form>
+            <input
+                    type="text"
+                    name="input_{{ index }}"
+                    id="input_{{ index }}"
+                    {% if core.getConfig().keepPreviousFiles() %}
+                        value="{{ short_answer.recent_submission_string }}"
+                    {% else %}
+                        value="{{ short_answer.starter_value_string }}"
+                    {% endif %}
+                    onKeyPress="handle_input_keypress();">
+            <br />
         {% else %}
-            <form>
-                Press <kbd>TAB</kbd> to indent.  Press <kbd>ESC</kbd> to advance from textarea.</label>
-                <textarea rows="{{ short_answer.rows }}" cols="50"  style="width:60em; height:100%; min-height:110px;" name="input_{{ index }}" id="input_{{ index }}" onKeyPress="handle_input_keypress();">{{ short_answer.starter_value_string }}</textarea>
-                <br />
-                <input type="reset" class="btn btn-primary" style="margin-top: 5px" value="Reset">
-                {#
-                    Allow tab in the larger text boxes (normally tab moves to the next textbox)
-                    http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
-                    q.v. function enableTabsInTextArea(jQuerySelector) in server.js
-                #}
-                <script>
-                    enableTabsInTextArea('#input_{{ index }}');
-                </script>
-            </form>
+            Press <kbd>TAB</kbd> to indent.  Press <kbd>ESC</kbd> to advance from textarea.</label>
+            <textarea
+                    rows="{{ short_answer.rows }}"
+                    cols="50"
+                    style="width:60em; height:100%; min-height:110px;"
+                    name="input_{{ index }}"
+                    id="input_{{ index }}"
+                    onKeyPress="handle_input_keypress()">{% if core.getConfig().keepPreviousFiles() %}{{ short_answer.recent_submission_string }}{% else %}{{ short_answer.starter_value_string }}{% endif %}</textarea>
+            <br />
+            {#
+                Allow tab in the larger text boxes (normally tab moves to the next textbox)
+                http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
+
+                q.v. function enableTabsInTextArea(jQuerySelector) in server.js
+            #}
+            <script>
+                enableTabsInTextArea('#input_{{ index }}');
+            </script>
         {% endif %}
+        <button type="button" id="input_{{ index }}_clear_button" class="btn btn-primary btn-push-down">Clear</button>
+        <button type="button" id="input_{{ index }}_recent_button" class="btn btn-primary btn-push-down">Use Most Recent Submission</button>
+        <script>
+            // If no previous submissions then hide recent submission button
+            {% if version == 0 %}
+                document.getElementById("input_{{ index }}_recent_button").style.visibility = 'hidden';
+            {% endif %}
+
+            // Setup init state of buttons
+            {% if core.getConfig().keepPreviousFiles() %}
+
+                {% if version == 0 %}
+                    document.getElementById("input_{{ index }}_clear_button").disabled = true;
+                {% else %}
+                    document.getElementById("input_{{ index }}_clear_button").disabled = false;
+                {% endif %}
+
+                document.getElementById("input_{{ index }}_recent_button").disabled = true;
+            {% else %}
+                document.getElementById("input_{{ index }}_clear_button").disabled = true;
+                document.getElementById("input_{{ index }}_recent_button").disabled = false;
+            {% endif %}
+
+            // Setup click events for clear button
+            document.getElementById("input_{{ index }}_clear_button").addEventListener("click", function() {
+
+                // Reset string
+                document.getElementById("input_{{ index }}").value = "{{ short_answer.starter_value_string }}";
+
+                // Disable button clear button
+                document.getElementById("input_{{ index }}_clear_button").disabled = true;
+
+                // Enable recent button
+                document.getElementById("input_{{ index }}_recent_button").disabled = false;
+            });
+
+            // Setup click events for most recent submission button
+            document.getElementById("input_{{ index }}_recent_button").addEventListener("click", function() {
+
+                // Reset string
+                document.getElementById("input_{{ index }}").value = "{{ short_answer.recent_submission_string }}";
+
+                // Disable recent button
+                document.getElementById("input_{{ index }}_recent_button").disabled = true;
+
+                // Enable clear button
+                document.getElementById("input_{{ index }}_clear_button").disabled = false;
+            });
+
+            // Check state of buttons after each change to the input
+            document.getElementById("input_{{ index }}").addEventListener("keyup", function() {
+
+                // Get value from input box
+                var box_value = document.getElementById("input_{{ index }}").value;
+
+                // Set button states based on if it equals the starter string or most recent string
+                if (box_value === "{{ short_answer.starter_value_string }}")
+                {
+                    document.getElementById("input_{{ index }}_clear_button").disabled = true;
+                }
+                else
+                {
+                    document.getElementById("input_{{ index }}_clear_button").disabled = false;
+                }
+
+                if (box_value === "{{ short_answer.recent_submission_string }}")
+                {
+                    document.getElementById("input_{{ index }}_recent_button").disabled = true;
+                }
+                else
+                {
+                    document.getElementById("input_{{ index }}_recent_button").disabled = false;
+                }
+            });
+        </script>
     </p>
     <br>
 {% endmacro %}
