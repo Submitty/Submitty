@@ -32,7 +32,7 @@
         {
           "type": "short_answer",
           "filename": "box_two.txt",
-          "initial_value": "This is the second box pre-populated with data.",
+          "initial_value": "string hello \"Hello world\";\ncout << hello;",
           "rows": 5
         },
         {

@@ -532,7 +532,7 @@
                     type="text"
                     name="short_answer_{{ index }}"
                     id="short_answer_{{ index }}"
-                    class="sa-box"
+                    class="sa_box"
                     data-initial_value="{{ short_answer.initial_value }}"
                     data-recent_submission="{{ short_answer.recent_submission }}"
                     {% if core.getConfig().keepPreviousFiles() %}
@@ -550,7 +550,7 @@
                     style="width:60em; height:100%; min-height:110px;"
                     name="short_answer_{{ index }}"
                     id="short_answer_{{ index }}"
-                    class="sa-box"
+                    class="sa_box"
                     data-initial_value="{{ short_answer.initial_value }}"
                     data-recent_submission="{{ short_answer.recent_submission }}"
                     onKeyPress="handle_input_keypress()">{% if core.getConfig().keepPreviousFiles() %}{{ short_answer.recent_submission }}{% else %}{{ short_answer.initial_value }}{% endif %}</textarea>
@@ -574,19 +574,19 @@
             {% endif %}
 
             // Setup init state of buttons
-{#            {% if core.getConfig().keepPreviousFiles() %}#}
+            {% if core.getConfig().keepPreviousFiles() %}
 
-{#                {% if version == 0 %}#}
-{#                    document.getElementById("short_answer_{{ index }}_clear_button").disabled = true;#}
-{#                {% else %}#}
-{#                    document.getElementById("short_answer_{{ index }}_clear_button").disabled = false;#}
-{#                {% endif %}#}
+                {% if version == 0 %}
+                    document.getElementById("short_answer_{{ index }}_clear_button").disabled = true;
+                {% else %}
+                    document.getElementById("short_answer_{{ index }}_clear_button").disabled = false;
+                {% endif %}
 
-{#                document.getElementById("short_answer_{{ index }}_recent_button").disabled = true;#}
-{#            {% else %}#}
-{#                document.getElementById("short_answer_{{ index }}_clear_button").disabled = true;#}
-{#                document.getElementById("short_answer_{{ index }}_recent_button").disabled = false;#}
-{#            {% endif %}#}
+                document.getElementById("short_answer_{{ index }}_recent_button").disabled = true;
+            {% else %}
+                document.getElementById("short_answer_{{ index }}_clear_button").disabled = true;
+                document.getElementById("short_answer_{{ index }}_recent_button").disabled = false;
+            {% endif %}
 
             // Setup click events for buttons
             $(".sa_clear_reset").click(function() {
@@ -613,9 +613,52 @@
 
                 // Set the data into the textbox
                 $(field_id).val(data_to_set);
+
+                // Set button states
+                if(button_action == "clear")
+                {
+                    $(field_id + "_clear_button").attr("disabled", true);
+                    $(field_id + "_recent_button").attr("disabled", false);
+                }
+                else
+                {
+                    $(field_id + "_clear_button").attr("disabled", false);
+                    $(field_id + "_recent_button").attr("disabled", true);
+                }
             });
 
+            // Setup button handlers for when data is entered into a text box
+            $(".sa_box").keyup(function() {
 
+                var items = this.id.split("_");
+
+                var index_num = items[2];
+
+                var initial_value = this.getAttribute("data-initial_value");
+                var recent_submission = this.getAttribute("data-recent_submission");
+
+                var text_box_id = "#short_answer_" + index_num;
+                var clear_button_id = "#short_answer_" + index_num + "_clear_button";
+                var recent_button_id = "#short_answer_" + index_num + "_recent_button";
+
+                if($(text_box_id).val() == initial_value)
+                {
+                    $(clear_button_id).attr("disabled", true);
+                }
+                else
+                {
+                    $(clear_button_id).attr("disabled", false);
+                }
+
+                if($(text_box_id).val() == recent_submission)
+                {
+                    $(recent_button_id).attr("disabled", true);
+                }
+                else
+                {
+                    $(recent_button_id).attr("disabled", false);
+                }
+            });
         </script>
     </p>
     <br>
