@@ -1,5 +1,7 @@
 <?php
 
+namespace app\libraries\database;
+
 use app\models\forum\Thread;
 use app\models\forum\Post;
 
