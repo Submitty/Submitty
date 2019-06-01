@@ -235,7 +235,7 @@
                     {# Handle if cell is short_answer #}
                     {% elseif cell.type == "short_answer" %}
 
-                        {# If programming language not defined render regular text boxes#}
+                        {# If programming language not defined render regular text boxes #}
                         {% if cell.programming_language is not defined %}
 
                             {{ self.render_short_answer(cell, num_short_answer, highest_version) }}
@@ -251,7 +251,7 @@
                                     {# Get recent submission #}
                                     var recent_submission = `{% if core.getConfig().keepPreviousFiles() %}{{ cell.recent_submission }}{% else %}{{ cell.initial_value }}{% endif %}`;
 
-                                    {# Transform escaped characters back into regular characters#}
+                                    {# Transform escaped characters back into regular characters #}
                                     recent_submission = convertHTMLEntity(recent_submission);
 
                                     var editor_{{num_codeboxes}} = CodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"),
@@ -532,6 +532,9 @@
                     type="text"
                     name="short_answer_{{ index }}"
                     id="short_answer_{{ index }}"
+                    class="sa-box"
+                    data-initial_value="{{ short_answer.initial_value }}"
+                    data-recent_submission="{{ short_answer.recent_submission }}"
                     {% if core.getConfig().keepPreviousFiles() %}
                         value="{{ short_answer.recent_submission }}"
                     {% else %}
@@ -540,13 +543,16 @@
                     onKeyPress="handle_input_keypress();">
             <br />
         {% else %}
-            Press <kbd>TAB</kbd> to indent.  Press <kbd>ESC</kbd> to advance from textarea.</label>
+            <label>Press <kbd>TAB</kbd> to indent.  Press <kbd>ESC</kbd> to advance from textarea.</label>
             <textarea
                     rows="{{ short_answer.rows }}"
                     cols="50"
                     style="width:60em; height:100%; min-height:110px;"
                     name="short_answer_{{ index }}"
                     id="short_answer_{{ index }}"
+                    class="sa-box"
+                    data-initial_value="{{ short_answer.initial_value }}"
+                    data-recent_submission="{{ short_answer.recent_submission }}"
                     onKeyPress="handle_input_keypress()">{% if core.getConfig().keepPreviousFiles() %}{{ short_answer.recent_submission }}{% else %}{{ short_answer.initial_value }}{% endif %}</textarea>
             <br />
             {#
@@ -559,80 +565,57 @@
                 enableTabsInTextArea('#short_answer_{{ index }}');
             </script>
         {% endif %}
-        <button type="button" id="short_answer_{{ index }}_clear_button" class="btn btn-primary btn-push-down">Clear</button>
-        <button type="button" id="short_answer_{{ index }}_recent_button" class="btn btn-primary btn-push-down">Use Most Recent Submission</button>
+        <button type="button" id="short_answer_{{ index }}_clear_button" class="btn btn-primary btn-push-down sa_clear_reset">Clear</button>
+        <button type="button" id="short_answer_{{ index }}_recent_button" class="btn btn-primary btn-push-down sa_clear_reset">Use Most Recent Submission</button>
         <script>
-            // If no previous submissions then hide recent submission button
+
             {% if version == 0 %}
                 document.getElementById("short_answer_{{ index }}_recent_button").style.visibility = 'hidden';
             {% endif %}
 
             // Setup init state of buttons
-            {% if core.getConfig().keepPreviousFiles() %}
+{#            {% if core.getConfig().keepPreviousFiles() %}#}
 
-                {% if version == 0 %}
-                    document.getElementById("short_answer_{{ index }}_clear_button").disabled = true;
-                {% else %}
-                    document.getElementById("short_answer_{{ index }}_clear_button").disabled = false;
-                {% endif %}
+{#                {% if version == 0 %}#}
+{#                    document.getElementById("short_answer_{{ index }}_clear_button").disabled = true;#}
+{#                {% else %}#}
+{#                    document.getElementById("short_answer_{{ index }}_clear_button").disabled = false;#}
+{#                {% endif %}#}
 
-                document.getElementById("short_answer_{{ index }}_recent_button").disabled = true;
-            {% else %}
-                document.getElementById("short_answer_{{ index }}_clear_button").disabled = true;
-                document.getElementById("short_answer_{{ index }}_recent_button").disabled = false;
-            {% endif %}
+{#                document.getElementById("short_answer_{{ index }}_recent_button").disabled = true;#}
+{#            {% else %}#}
+{#                document.getElementById("short_answer_{{ index }}_clear_button").disabled = true;#}
+{#                document.getElementById("short_answer_{{ index }}_recent_button").disabled = false;#}
+{#            {% endif %}#}
 
-            // Setup click events for clear button
-            document.getElementById("short_answer_{{ index }}_clear_button").addEventListener("click", function() {
+            // Setup click events for buttons
+            $(".sa_clear_reset").click(function() {
 
-                // Reset string
-                document.getElementById("short_answer_{{ index }}").value = "{{ short_answer.initial_value }}";
+                // Collect the id of the button and split it apart to find out which short answer it is bound to
+                // and which action it preforms
+                var items = this.id.split("_");
 
-                // Disable button clear button
-                document.getElementById("short_answer_{{ index }}_clear_button").disabled = true;
+                var index_num = items[2];
+                var button_action = items[3];
+                var field_id = "#short_answer_" + index_num;
 
-                // Enable recent button
-                document.getElementById("short_answer_{{ index }}_recent_button").disabled = false;
-            });
+                var data_to_set = "";
 
-            // Setup click events for most recent submission button
-            document.getElementById("short_answer_{{ index }}_recent_button").addEventListener("click", function() {
-
-                // Reset string
-                document.getElementById("short_answer_{{ index }}").value = "{{ short_answer.recent_submission }}";
-
-                // Disable recent button
-                document.getElementById("short_answer_{{ index }}_recent_button").disabled = true;
-
-                // Enable clear button
-                document.getElementById("short_answer_{{ index }}_clear_button").disabled = false;
-            });
-
-            // Check state of buttons after each change to the input
-            document.getElementById("short_answer_{{ index }}").addEventListener("keyup", function() {
-
-                // Get value from input box
-                var box_value = document.getElementById("short_answer_{{ index }}").value;
-
-                // Set button states based on if it equals the starter string or most recent string
-                if (box_value === "{{ short_answer.starter_value_string }}")
+                // Collect data from the data-* attribute of the text box
+                if(button_action == "clear")
                 {
-                    document.getElementById("short_answer_{{ index }}_clear_button").disabled = true;
+                    var data_to_set = $(field_id).attr("data-initial_value");
                 }
                 else
                 {
-                    document.getElementById("short_answer_{{ index }}_clear_button").disabled = false;
+                    var data_to_set = $(field_id).attr("data-recent_submission");
                 }
 
-                if (box_value === "{{ short_answer.recent_submission }}")
-                {
-                    document.getElementById("short_answer_{{ index }}_recent_button").disabled = true;
-                }
-                else
-                {
-                    document.getElementById("short_answer_{{ index }}_recent_button").disabled = false;
-                }
+                // Set the data into the textbox
+                $(field_id).val(data_to_set);
             });
+
+
         </script>
     </p>
     <br>
