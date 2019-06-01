@@ -302,6 +302,8 @@
 
                     {% endif %}
 
+                </div>
+
             {% endfor %}
     
             {# Submit boxes #}
@@ -322,7 +324,6 @@
                     <input type="file" name="files" id="input_file{{ loop.index }}" style="display: none" onchange="addFilesFromInput({{ loop.index }})" multiple />
                 </div>
             {% endfor %}
-            {# /Submit boxes #}
         </div>
 
         {# Page selector #}
