@@ -792,8 +792,6 @@ HTML;
 	public function createPost($thread_id, $post, $unviewed_posts, $function_date, $title_html, $first, $reply_level, $display_option, $includeReply)
     {
         $current_user = $this->core->getUser()->getId();
-        $post_html = "";
-        $locked_thread = $this->core->getQueries()->isThreadLocked($thread_id);
         $post_id = $post["id"];
 
         $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
@@ -805,9 +803,9 @@ HTML;
             $edit_date = null;
         }
         $user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($post["author_user_id"]);
-        $author_email = htmlentities(trim($user_info['user_email']), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $first_name = htmlentities(trim($user_info["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $last_name = htmlentities(trim($user_info["last_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $author_email = trim($user_info['user_email']);
+        $first_name = trim($user_info["first_name"]);
+        $last_name = trim($user_info["last_name"]);
         $visible_username = $first_name . " " . substr($last_name, 0, 1) . ".";
         $thread_resolve_state = $this->core->getQueries()->getResolveState($thread_id)[0]['status'];
 
@@ -818,94 +816,55 @@ HTML;
         if ($post["anonymous"]) {
             $visible_username = "Anonymous";
         }
-        $classes = "post_box";
+        $classes = ["post_box"];
         if ($first && $display_option != 'alpha') {
-            $classes .= " first_post";
+            $classes[] = " first_post";
         }
         if (in_array($post_id, $unviewed_posts)) {
-            $classes .= " new_post";
+            $classes[] = " new_post";
         } else {
-            $classes .= " viewed_post";
+            $classes[] = " viewed_post";
         }
         if ($this->core->getQueries()->isStaffPost($post["author_user_id"])) {
-            $classes .= " important";
+            $classes[] = " important";
         }
         if ($post["deleted"]) {
-            $classes .= " deleted";
+            $classes[] = " deleted";
             $deleted = true;
         } else {
             $deleted = false;
         }
+
         $offset = min(($reply_level - 1) * 30, 180);
 
-        $return = <<<HTML
-			<div class="$classes" id="$post_id" style="margin-left:{$offset}px;" reply-level="$reply_level">
-HTML;
-
-
-        if ($first) {
-            $return .= $title_html;
-        }
-
         //handle converting links 
-
 
         //convert legacy htmlentities being saved in db
         $post_content = $this->filter_post_content($post['content']);
 
-        //end code segment handling
-        $return .= <<<HTML
-			<pre class='pre_forum'><p class="post_content" style="white-space: pre-wrap; ">{$post_content}</p></pre>		
-			<hr style="margin-bottom:3px;">
-HTML;
-        if ($display_option == 'tree') {
-            if(!($this->core->getQueries()->isThreadLocked($thread_id) != 1 || $this->core->getUser()->accessFullGrading() )){
+        $isThreadLocked = $this->core->getQueries()->isThreadLocked($thread_id);
+        $userAccessFullGrading = $this->core->getUser()->accessFullGrading();
+        $userGroup = $this->core->getUser()->getGroup();
 
-            }else if (!$first ) {
-                $return .= <<<HTML
-					<a class="btn btn-default btn-sm post_button_color" style=" text-decoration: none;" onClick="replyPost({$post['id']})"> Reply</a>
-HTML;
-            } else {
-                $return .= <<<HTML
-					<a class="btn btn-default btn-sm post_button_color" style=" text-decoration: none;" onClick="$('html, #posts_list').animate({ scrollTop: document.getElementById('posts_list').scrollHeight }, 'slow');"> Reply</a>
-HTML;
-            }
-            if ($this->core->getUser()->getGroup() <= 3) {
-                $return .= <<<HTML
-					<a class="btn btn-default btn-sm post_button_color" style=" text-decoration: none;" onClick="showHistory({$post['id']})">Show History</a>
-HTML;
-            }
-        }
-        if ($includeReply && ($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) && $first && $thread_resolve_state == -1) {
-            //resolve button
-            $return .= <<<HTML
-				<a class="btn btn-default btn-sm post_button_color" style="text-decoration: none;" onClick="changeThreadStatus({$post['thread_id']})" title="Mark thread as resolved">Mark as resolved</a>
-HTML;
-        }
-        $return .= <<<HTML
-			<span style="margin-top:8px;margin-left:10px;float:right;">							
-HTML;
-        if ($this->core->getUser()->getGroup() <= 2 && $post["author_user_id"] != $current_user) {
-            $return .= <<<HTML
-                <a style=" margin-right:2px;display:inline-block; color:black; " onClick='$(this).next().toggle();' title="Show/Hide email address"><i class="fas fa-envelope" aria-hidden="true"></i></a>
-                <a href="mailto:{$author_email}" style="display: none;">{$author_email}</a>
-HTML;
-        }
+        $post_user_info = [];
+
+
         if ($this->core->getUser()->getGroup() <= 2) {
             $info_name = $first_name . " " . $last_name . " (" . $post['author_user_id'] . ")";
             $visible_user_json = json_encode($visible_username);
             $info_name = json_encode($info_name);
             $jscriptAnonFix = $post['anonymous'] ? 'true' : 'false';
             $jscriptAnonFix = json_encode($jscriptAnonFix);
-            $return .= <<<HTML
-				<a style=" margin-right:2px;display:inline-block; color:black; " onClick='changeName(this.parentNode, {$info_name}, {$visible_user_json}, {$jscriptAnonFix})' title="Show full user information"><i class="fas fa-eye" aria-hidden="true"></i></a>
-HTML;
+
+            $post_user_info = [
+                "info_name" => $info_name,
+                "visible_user_json" => $visible_user_json,
+                "jscriptAnonFix" => $jscriptAnonFix
+            ];
         }
-        if (!$first) {
-            $return .= <<<HTML
-				<a class="expand btn btn-default btn-sm post_button_color" style="float:right; text-decoration:none; margin-top: -8px" onClick="hidePosts(this, {$post['id']})"></a>
-HTML;
-		}
+
+        $post_button = [];
+
 		if($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) {
 			if(!($this->core->getQueries()->isThreadLocked($thread_id) != 1 || $this->core->getUser()->accessFullGrading() )){
 
@@ -919,16 +878,16 @@ HTML;
 					$ud_button_title = "Remove post";
 					$ud_button_icon = "fa-trash";
 				}
-				$return .= <<<HTML
-				<a class="post_button" style="bottom: 1px;position:relative; display:inline-block; float:right;" onClick="deletePostToggle({$ud_toggle_status}, {$post['thread_id']}, {$post['id']}, '{$post['author_user_id']}', '{$function_date($date,'n/j g:i A')}', '{$this->core->getCsrfToken()}' )" title="{$ud_button_title}"><i class="fa {$ud_button_icon}" aria-hidden="true"></i></a>
-HTML;
-			}
-		}
-		if($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) {
-			if(!($this->core->getQueries()->isThreadLocked($thread_id) != 1 || $this->core->getUser()->accessFullGrading() )){
 
-			} else {
+				$post_button["delete"] = [
+				    "ud_toggle_status" => $ud_toggle_status,
+                    "csrf_token" => $this->core->getCsrfToken(),
+                    "ud_button_title" => $ud_button_title,
+                    "ud_button_icon" => $ud_button_icon
+                ];
+
 				$shouldEditThread = null;
+
 				if($first) {
 					$shouldEditThread = "true";
 					$edit_button_title = "Edit thread and post";
@@ -936,64 +895,69 @@ HTML;
 					$shouldEditThread = "false";
 					$edit_button_title = "Edit post";
 				}
-				$return .= <<<HTML
-					<a class="post_button" style="position:relative; display:inline-block; color:black; float:right;" onClick="editPost({$post['id']}, {$post['thread_id']}, {$shouldEditThread}, '{$this->core->getCsrfToken()}')" title="{$edit_button_title}"><i class="fas fa-edit" aria-hidden="true"></i></a>
-HTML;
+
+				$post_button["edit"] = [
+				    "shouldEditThread" => $shouldEditThread,
+                    "edit_button_title" => $edit_button_title,
+                    "csrf_token" => $this->core->getCsrfToken()
+                ];
 			}
         }
 
-        $return .= <<<HTML
-		<h7 style="position:relative; right:5px;">
-			<strong id="post_user_id">{$visible_username}</strong>
-			{$function_date($date, "n/j g:i A")}
-HTML;
-        if (!is_null($edit_date)) {
-            $return .= <<<HTML
-			(<i>Last edit at {$edit_date}</i>)
-HTML;
-        }
-        $return .= <<<HTML
-		</h7>
-		</span>
-HTML;
+		$post_attachment = ["exist" => false];
 
         if ($post["has_attachment"]) {
+            $post_attachment["exist"] = true;
+
             $post_dir = FileUtils::joinPaths($thread_dir, $post["id"]);
             $files = FileUtils::getAllFiles($post_dir);
+
+            $post_attachment["files"] = [];
+
             foreach ($files as $file) {
                 $path = rawurlencode($file['path']);
                 $name = rawurlencode($file['name']);
-                $name_display = htmlentities(rawurldecode($file['name']), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-                $return .= <<<HTML
-					<a href="#" style="text-decoration:none;display:inline-block;white-space: nowrap;" class="btn-default btn-sm post_button_color" onclick="openFileForum('forum_attachments', '{$name}', '{$path}')" > {$name_display} </a>
-HTML;
+                $name_display = rawurldecode($file['name']);
+
+                $post_attachment["files"][] = [
+                    "path" => $path,
+                    "name" => $name,
+                    "name_display" => $name_display
+                ];
             }
         }
-        $offset = $offset + 30;
-        $return .= <<<HTML
-</div>
-HTML;
-        if ($this->core->getQueries()->isThreadLocked($thread_id) != 1 || $this->core->getUser()->accessFullGrading()) {
-            $return .= <<<HTML
-					<form class="reply-box post_reply_from" id="$post_id-reply" onsubmit="post.disabled=true; post.value='Submitting post...'; return true;" style="margin-left:{$offset}px" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
-						<input type="hidden" name="thread_id" value="{$thread_id}" />
-						<input type="hidden" name="parent_id" value="{$post_id}" />
-	            		<br/>
-HTML;
-            $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 1;
-            $return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig", [
-                "show_post" => true,
-                "post_content_placeholder" => "Enter your reply to {$visible_username} here...",
-                "show_merge_thread_button" => false,
-                "post_box_id" => $post_box_id,
-                "show_anon" => true,
-                "submit_label" => "Submit Reply to {$visible_username}",
-            ]);
 
-            $return .= <<<HTML
-	            	</form>
-HTML;
+        if ($this->core->getQueries()->isThreadLocked($thread_id) != 1 || $this->core->getUser()->accessFullGrading()) {
+            $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 1;
         }
+
+        $return = $this->core->getOutput()->renderTwigTemplate("forum/CreatePost.twig", [
+            "classes" => $classes,
+            "post_id" => $post_id,
+            "reply_level" => $reply_level,
+            "offset" => $offset,
+            "first" => $first,
+            "title_html" => $title_html,
+            "post_content" => $post_content,
+            "post" => $post,
+            "display_option" => $display_option,
+            "isThreadLocked" => $isThreadLocked,
+            "userAccessFullGrading" => $userAccessFullGrading,
+            "userGroup" => $userGroup,
+            "includeReply" => $includeReply,
+            "thread_resolve_state" => $thread_resolve_state,
+            "current_user" => $current_user,
+            "author_email" => $author_email,
+            "post_user_info" => $post_user_info,
+            "post_date" => $function_date($date,'n/j g:i A'),
+            "edit_date" => $edit_date,
+            "post_buttons" => $post_button,
+            "visible_username" => $visible_username,
+            "post_attachment" => $post_attachment,
+            "form_post_url" => $this->core->buildUrl(['component' => 'forum', 'page' => 'publish_post']),
+            "post_box_id" => $post_box_id,
+        ]);
+
 		return $return;
 	}
 
