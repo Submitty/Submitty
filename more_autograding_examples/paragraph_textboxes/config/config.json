@@ -72,13 +72,8 @@
         {
           "type": "short_answer",
           "programming_language": "python",
-          "filename": "codebox.txt"
-        },
-        {
-            "type": "short_answer",
-            "programming_language": "python",
-            "filename": "codebox2.txt",
-            "initial_value": "print(\"Hello world!\")"
+          "filename": "codebox.txt",
+            "initial_value": "print(\"Hello world!\")\necho \"Hello world!\"\nprintf(\"Hello world!\");"
         }
     ],
     "testcases" : [ 
@@ -110,12 +105,6 @@
             "type" : "FileCheck",
             "title" : "Codebox",
             "actual_file" : "codebox.txt",
-            "points" : 0
-        },
-        {
-            "type" : "FileCheck",
-            "title" : "Codebox 2",
-            "actual_file" : "codebox2.txt",
             "points" : 0
         }
     ]
