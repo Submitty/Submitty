@@ -298,6 +298,21 @@
                         </fieldset>
                         <br>
 
+                        {# Create reset to recent submission button if a previous submission exists #}
+                        {% if cell.recent_submission is defined %}
+                            <button type="button" id="mc_{{ num_multiple_choice }}_recent_button" class="btn btn-primary mc_reset">Use Most Recent Submission</button>
+
+                            <script>
+                                {# Configure initial state for the button #}
+                                {% if core.getConfig().keepPreviousFiles() %}
+                                    $("#mc_{{ num_multiple_choice }}_recent_button").attr("disabled", true);
+                                {% else %}
+                                    $("#mc_{{ num_multiple_choice }}_recent_button").attr("disabled", false);
+                                {% endif %}
+                            </script>
+
+                        {% endif %}
+
                         {% set num_multiple_choice = num_multiple_choice + 1 %}
 
                     {% endif %}
