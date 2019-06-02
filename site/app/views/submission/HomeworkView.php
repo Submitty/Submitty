@@ -275,7 +275,7 @@ class HomeworkView extends AbstractView {
 
             // Prepare notebook image data for displaying
             foreach ($notebook as $cell) {
-                if ($cell['type'] == "image")
+              if (isset($cell['type']) && $cell['type'] == "image")
                 {
                     $image_name = $cell['image'];
                     $imgPath = FileUtils::joinPaths(
