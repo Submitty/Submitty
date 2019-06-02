@@ -272,9 +272,12 @@ class HomeworkView extends AbstractView {
 
         $image_data = [];
         if (!$gradeable->isVcs()) {
-            foreach ($notebook as $notebook_chunk) {
-                foreach ($notebook_chunk["images"] as $image) {
-                    $image_name = $image['name'];
+
+            // Prepare notebook image data for displaying
+            foreach ($notebook as $cell) {
+                if (isset($cell['type']) && $cell['type'] == "image")
+                {
+                    $image_name = $cell['image'];
                     $imgPath = FileUtils::joinPaths(
                         $this->core->getConfig()->getCoursePath(),
                         'test_input',
@@ -289,16 +292,6 @@ class HomeworkView extends AbstractView {
                         $inputimagesrc = 'data: ' . mime_content_type($imgPath) . ';charset=utf-8;base64,' . $inputImageData;
                         // insert the sample image data
                         $image_data[$image_name] = $inputimagesrc;
-                    }
-                }
-            }
-
-            // If alt text is not set for image then set it to default string
-            foreach ($notebook as $notebook_key => $notebook_value) {
-                foreach ($notebook[$notebook_key]['images'] as $image_key => $image_value) {
-                    if(!isset($image_value['alt']))
-                    {
-                        $notebook[$notebook_key]['images'][$image_key]['alt'] = "Instructor Provided Image";
                     }
                 }
             }

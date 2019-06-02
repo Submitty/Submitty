@@ -204,82 +204,106 @@
             {% set num_short_answer = 0 %}
             {% set num_codeboxes = 0 %}
             {% set num_multiple_choice = 0%}
-            {% for n in notebook %}
+            {% for cell in notebook %}
                 <div id="content_{{ loop.index0 }}">
-                    <h2>{{ n.title }}</h2>
 
-                    {% for image in n.images %}
-                        <img src="{{ attribute(image_data, image.name) }}"
+                    {# Handle if cell is markdown #}
+                    {% if cell.type == "markdown" %}
 
-                        {% if image.width > 0 %}
-                            width="{{ image.width }}"
+                        {# Render markdown #}
+                        {{ cell.markdown_data | markdown }}
+
+                    {# Handle if cell is image #}
+                    {% elseif cell.type == "image" %}
+
+                        <img src="{{ attribute(image_data, cell.image) }}"
+
+                        {% if cell.width > 0 %}
+                            width="{{ cell.width }}"
                         {% endif %}
 
-                        {% if image.height > 0 %}
-                            height="{{ image.height }}"
+                        {% if cell.height > 0 %}
+                            height="{{ cell.height }}"
                         {% endif %}
 
-                        {% if image.alt is defined %}
-                            alt="{{ image.alt }}"
+                        {% if cell.alt_text is defined %}
+                            alt="{{ cell.alt_text }}"
                         {% endif %}
 
-                        />
-                    {% endfor %}
+                        >
 
-                    {# Render the inputs for the given notebook block #}
-                    {% if n.description != None %}
-                        <div id="description_{{ loop.index0 }}">
-                            {{ n.description | markdown }}
-                        </div>
-                        <br>
-                    {% endif %}
-                    {% for i in n.input %}
-                        <div id="input_container_{{ loop.index0 }}">
+                    {# Handle if cell is short_answer #}
+                    {% elseif cell.type == "short_answer" %}
 
-                            {% if i.type == "short_answer" %}
-                                {{ self.render_short_answer(i, num_short_answer, highest_version ) }}
-                                {% set num_short_answer = num_short_answer + 1 %}
-                            {% elseif i.type == "codebox" %}
-                                <strong>{{ i.label }}</strong>
+                        {# If programming language not defined render regular text boxes #}
+                        {% if cell.programming_language is not defined %}
+
+                            {{ self.render_short_answer(cell, num_short_answer, highest_version) }}
+                            {% set num_short_answer = num_short_answer + 1 %}
+
+                        {# Else render a codebox #}
+                        {% else %}
+                            <br>
                                 <div id="codebox_{{ num_codeboxes }}" name="codebox_{{ num_codeboxes }}" style="border: 1px solid LightGrey;" onKeyPress="handle_input_keypress();">
                                 </div>
                                 <script>
+
+                                    {# Get recent submission #}
+                                    var recent_submission = `{% if core.getConfig().keepPreviousFiles() %}{{ cell.recent_submission }}{% else %}{{ cell.initial_value }}{% endif %}`;
+
+                                    {# Transform escaped characters back into regular characters #}
+                                    recent_submission = convertHTMLEntity(recent_submission);
+
                                     var editor_{{num_codeboxes}} = CodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"),
                                         {
-                                            //"value" : "",
-                                            "mode": "{{i.language}}",
+                                            "value" : recent_submission,
+                                            "mode": "{{ cell.programming_language }}",
                                             lineNumbers: true,
                                             "theme": "eclipse"
                                         }
                                     );
                                 </script>
-                                <br>
-                                {% set num_codeboxes = num_codeboxes + 1 %}
-                            {% elseif i.type == "multiplechoice" %}
-                                <br>
-                                <strong>{{ i.label }}</strong>
-                                <fieldset>
-                                    {% for choice in i.choices %}
-                                        {% if i.allow_multiple == true %}
-                                            <input type="checkbox" name="multiple_choice_{{ num_multiple_choice }}" id="multiple_choice_{{ num_multiple_choice }}" value="{{ choice }}" onclick="handle_input_keypress();" />
-                                            <label for="{{ choice }}">
-                                                {{ choice }}
-                                            </label>
-                                        {% else %}
-                                            <input type="radio" name="multiple_choice_{{ num_multiple_choice }}" id="multiple_choice_{{ num_multiple_choice }}" value="{{ choice }}" {% if choice == i.recent_submission_string %}checked="checked" {% endif %}onclick="handle_input_keypress();" />
-                                            <label for="{{ choice }}">
-                                                {{ choice }}
-                                            </label>
-                                        {% endif %}
-                                        <br/>
-                                    {% endfor %}
-                                </fieldset>
-                                <br>
-                                {% set num_multiple_choice = num_multiple_choice + 1%}
-                            {% endif %}
-                        </div>
-                    {% endfor %}
+                            <br>
+                            {% set num_codeboxes = num_codeboxes + 1 %}
+                        {% endif %}
+
+                    {% elseif cell.type == "multiple_choice" %}
+
+                        {# Obtain list of previously selected elements #}
+                        {% if cell.recent_submission is defined and core.getConfig().keepPreviousFiles() %}
+                            {% set prev_checked = cell.recent_submission | split('\n') %}
+                        {% endif %}
+
+                        <br>
+                        <fieldset>
+                            {% for choice in cell.choices %}
+                                {% if cell.allow_multiple == true %}
+                                    <input type="checkbox" name="multiple_choice_{{ num_multiple_choice }}" id="multiple_choice_{{ num_multiple_choice }}" value="{{ choice.value }}" {% if choice.value in prev_checked %}checked="checked" {% endif %}onclick="handle_input_keypress();" />
+                                    <label for="multiple_choice_{{ num_multiple_choice }}">
+                                        {{ choice.description }}
+                                    </label>
+                                {% else %}
+                                    <input type="radio"
+                                           name="multiple_choice_{{ num_multiple_choice }}"
+                                           id="multiple_choice_{{ num_multiple_choice }}"
+                                           value="{{ choice.value }}"
+                                           {% if choice.value == cell.recent_submission and core.getConfig().keepPreviousFiles() %}checked="checked" {% endif %}
+                                           onclick="handle_input_keypress();" />
+                                    <label for="multiple_choice_{{ num_multiple_choice }}">
+                                        {{ choice.description }}
+                                    </label>
+                                {% endif %}
+                                <br/>
+                            {% endfor %}
+                        </fieldset>
+                        <br>
+
+                        {% set num_multiple_choice = num_multiple_choice + 1 %}
+
+                    {% endif %}
+
                 </div>
+
             {% endfor %}
     
             {# Submit boxes #}
@@ -300,7 +324,6 @@
                     <input type="file" name="files" id="input_file{{ loop.index }}" style="display: none" onchange="addFilesFromInput({{ loop.index }})" multiple />
                 </div>
             {% endfor %}
-            {# /Submit boxes #}
         </div>
 
         {# Page selector #}
@@ -504,29 +527,33 @@
 {% macro render_short_answer(short_answer, index, version) %}
 
     <p style="max-width: 50em;">
-        <strong>{{ short_answer.label }}</strong>
-        <br>
         {% if short_answer.rows == 0 %}
             <input
                     type="text"
                     name="short_answer_{{ index }}"
                     id="short_answer_{{ index }}"
+                    class="sa_box"
+                    data-initial_value="{{ short_answer.initial_value }}"
+                    data-recent_submission="{{ short_answer.recent_submission }}"
                     {% if core.getConfig().keepPreviousFiles() %}
-                        value="{{ short_answer.recent_submission_string }}"
+                        value="{{ short_answer.recent_submission }}"
                     {% else %}
-                        value="{{ short_answer.starter_value_string }}"
+                        value="{{ short_answer.initial_value }}"
                     {% endif %}
                     onKeyPress="handle_input_keypress();">
             <br />
         {% else %}
-            Press <kbd>TAB</kbd> to indent.  Press <kbd>ESC</kbd> to advance from textarea.</label>
+            <label>Press <kbd>TAB</kbd> to indent.  Press <kbd>ESC</kbd> to advance from textarea.</label>
             <textarea
                     rows="{{ short_answer.rows }}"
                     cols="50"
                     style="width:60em; height:100%; min-height:110px;"
                     name="short_answer_{{ index }}"
                     id="short_answer_{{ index }}"
-                    onKeyPress="handle_input_keypress()">{% if core.getConfig().keepPreviousFiles() %}{{ short_answer.recent_submission_string }}{% else %}{{ short_answer.starter_value_string }}{% endif %}</textarea>
+                    class="sa_box"
+                    data-initial_value="{{ short_answer.initial_value }}"
+                    data-recent_submission="{{ short_answer.recent_submission }}"
+                    onKeyPress="handle_input_keypress()">{% if core.getConfig().keepPreviousFiles() %}{{ short_answer.recent_submission }}{% else %}{{ short_answer.initial_value }}{% endif %}</textarea>
             <br />
             {#
                 Allow tab in the larger text boxes (normally tab moves to the next textbox)
@@ -538,10 +565,10 @@
                 enableTabsInTextArea('#short_answer_{{ index }}');
             </script>
         {% endif %}
-        <button type="button" id="short_answer_{{ index }}_clear_button" class="btn btn-primary btn-push-down">Clear</button>
-        <button type="button" id="short_answer_{{ index }}_recent_button" class="btn btn-primary btn-push-down">Use Most Recent Submission</button>
+        <button type="button" id="short_answer_{{ index }}_clear_button" class="btn btn-primary btn-push-down sa_clear_reset">Clear</button>
+        <button type="button" id="short_answer_{{ index }}_recent_button" class="btn btn-primary btn-push-down sa_clear_reset">Use Most Recent Submission</button>
         <script>
-            // If no previous submissions then hide recent submission button
+
             {% if version == 0 %}
                 document.getElementById("short_answer_{{ index }}_recent_button").style.visibility = 'hidden';
             {% endif %}
@@ -561,55 +588,75 @@
                 document.getElementById("short_answer_{{ index }}_recent_button").disabled = false;
             {% endif %}
 
-            // Setup click events for clear button
-            document.getElementById("short_answer_{{ index }}_clear_button").addEventListener("click", function() {
+            // Setup click events for buttons
+            $(".sa_clear_reset").click(function() {
 
-                // Reset string
-                document.getElementById("short_answer_{{ index }}").value = "{{ short_answer.starter_value_string }}";
+                // Collect the id of the button and split it apart to find out which short answer it is bound to
+                // and which action it preforms
+                var items = this.id.split("_");
 
-                // Disable button clear button
-                document.getElementById("short_answer_{{ index }}_clear_button").disabled = true;
+                var index_num = items[2];
+                var button_action = items[3];
+                var field_id = "#short_answer_" + index_num;
 
-                // Enable recent button
-                document.getElementById("short_answer_{{ index }}_recent_button").disabled = false;
-            });
+                var data_to_set = "";
 
-            // Setup click events for most recent submission button
-            document.getElementById("short_answer_{{ index }}_recent_button").addEventListener("click", function() {
-
-                // Reset string
-                document.getElementById("short_answer_{{ index }}").value = "{{ short_answer.recent_submission_string }}";
-
-                // Disable recent button
-                document.getElementById("short_answer_{{ index }}_recent_button").disabled = true;
-
-                // Enable clear button
-                document.getElementById("short_answer_{{ index }}_clear_button").disabled = false;
-            });
-
-            // Check state of buttons after each change to the input
-            document.getElementById("short_answer_{{ index }}").addEventListener("keyup", function() {
-
-                // Get value from input box
-                var box_value = document.getElementById("short_answer_{{ index }}").value;
-
-                // Set button states based on if it equals the starter string or most recent string
-                if (box_value === "{{ short_answer.starter_value_string }}")
+                // Collect data from the data-* attribute of the text box
+                if(button_action == "clear")
                 {
-                    document.getElementById("short_answer_{{ index }}_clear_button").disabled = true;
+                    var data_to_set = $(field_id).attr("data-initial_value");
                 }
                 else
                 {
-                    document.getElementById("short_answer_{{ index }}_clear_button").disabled = false;
+                    var data_to_set = $(field_id).attr("data-recent_submission");
                 }
 
-                if (box_value === "{{ short_answer.recent_submission_string }}")
+                // Set the data into the textbox
+                $(field_id).val(data_to_set);
+
+                // Set button states
+                if(button_action == "clear")
                 {
-                    document.getElementById("short_answer_{{ index }}_recent_button").disabled = true;
+                    $(field_id + "_clear_button").attr("disabled", true);
+                    $(field_id + "_recent_button").attr("disabled", false);
                 }
                 else
                 {
-                    document.getElementById("short_answer_{{ index }}_recent_button").disabled = false;
+                    $(field_id + "_clear_button").attr("disabled", false);
+                    $(field_id + "_recent_button").attr("disabled", true);
+                }
+            });
+
+            // Setup button handlers for when data is entered into a text box
+            $(".sa_box").keyup(function() {
+
+                var items = this.id.split("_");
+
+                var index_num = items[2];
+
+                var initial_value = this.getAttribute("data-initial_value");
+                var recent_submission = this.getAttribute("data-recent_submission");
+
+                var text_box_id = "#short_answer_" + index_num;
+                var clear_button_id = "#short_answer_" + index_num + "_clear_button";
+                var recent_button_id = "#short_answer_" + index_num + "_recent_button";
+
+                if($(text_box_id).val() == initial_value)
+                {
+                    $(clear_button_id).attr("disabled", true);
+                }
+                else
+                {
+                    $(clear_button_id).attr("disabled", false);
+                }
+
+                if($(text_box_id).val() == recent_submission)
+                {
+                    $(recent_button_id).attr("disabled", true);
+                }
+                else
+                {
+                    $(recent_button_id).attr("disabled", false);
                 }
             });
         </script>
