@@ -352,6 +352,9 @@ class HomeworkView extends AbstractView {
         // Import custom stylesheet to style notebook items
         $this->core->getOutput()->addInternalCss('gradeable-notebook.css');
 
+        // Import custom js for notebook items
+        $this->core->getOutput()->addInternalJs('gradeable-notebook.js');
+
         $DATE_FORMAT = "m/d/Y @ H:i";
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
             'base_url' => $this->core->getConfig()->getBaseUrl(),
