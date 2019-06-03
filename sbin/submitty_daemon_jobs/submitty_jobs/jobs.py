@@ -220,9 +220,6 @@ class BulkUpload(CourseJob):
             if not os.path.exists(split_path):
                 os.makedirs(split_path)
 
-            # adding write permissions for PHP
-            self.add_permissions_recursive(uploads_path, stat.S_IWGRP | stat.S_IXGRP, stat.S_IWGRP | stat.S_IXGRP, stat.S_IWGRP)
-
             # copy over file to new directory
             if not os.path.isfile(os.path.join(split_path, filename)):
                 shutil.copyfile(os.path.join(bulk_path, filename), os.path.join(split_path, filename))
@@ -246,4 +243,3 @@ class BulkUpload(CourseJob):
             print("Failed to launch bulk_split subprocess!")
             print(err)
             sys.exit(1)
-        
