@@ -271,6 +271,10 @@ class Utils {
         $students_full = array_unique(array_merge($students_full, $null_section), SORT_REGULAR);
         return json_encode($students_full);
     }
+    
+    /*
+     * Given a multidimensional array of students, key, and id, removeStudentWithId deletes matching student row(s).
+     */
 
     public static function removeStudentWithId($students, $key, $id) {
         foreach($students as $subKey => $student) {
