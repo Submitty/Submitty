@@ -57,8 +57,7 @@ def solution(test):
     test.run_validator()
     test.diff("grade.txt","solution_grade.txt","-b")
     test.json_diff("results.json","solution_results.json")
-    #TODO: Solve this error
-    # test.diff("test02/STDOUT.txt","data/simple_out.txt")
+    test.diff("test02/STDOUT.txt","data/test_output/simple_out.txt")
     test.empty_file("test02/STDERR.txt")
     test.empty_file("test02/execute_logfile.txt")
 

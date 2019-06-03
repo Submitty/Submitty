@@ -404,7 +404,7 @@ class TestcaseWrapper:
             f2 = f1
 
         f1 = os.path.join("data", f1)
-        if not 'data' in os.path.split(f2):
+        if not 'data' in os.path.split(os.path.split(f2)[0]):
             f2 = os.path.join("validation", f2)
 
         filename1 = os.path.join(self.testcase_path, f1)

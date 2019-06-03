@@ -65,6 +65,11 @@ def allCorrect(test):
     test.run_run()
     test.run_validator()
 
+    test.diff("test03/output.txt","data/test_output/inst_output.txt")
+    test.diff("test04/output.txt","data/test_output/inst_output.txt")
+    test.diff("test05/output.txt","data/test_output/inst_output.txt")
+    test.diff("test06/output.txt","data/test_output/inst_output.txt")
+
     test.empty_file("test02/STDOUT.txt")
     test.empty_file("test02/STDERR.txt")
     test.empty_file("test03/STDOUT.txt")

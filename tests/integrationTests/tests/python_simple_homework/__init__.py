@@ -56,8 +56,7 @@ def correct(test):
         os.path.join(test.testcase_path, "data")])
     test.run_run()
     test.run_validator()
-    #TODO: Solve this particulare error
-    # test.diff("test01/STDOUT.txt","data/hw01part1_sol.txt")
+    test.diff("test01/STDOUT.txt","data/test_output/hw01part1_sol.txt")
     test.empty_file("test01/STDERR.txt")
     test.empty_json_diff("test01/0_diff.json")
     test.diff("grade.txt","grade.txt_correct","-b")
