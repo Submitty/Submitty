@@ -246,6 +246,7 @@ class Utils {
         foreach ($students as $student) {
             $student_entry = array('value' => $student->getId(),
                     'label' => $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>');
+            $students_full[] = $student_entry;
             if($students_version != null) {
                 if($student->getRegistrationSection() != null && array_key_exists($student->getId(),$students_version)) {
                     if ($students_version[$student->getId()] !== 0) {
@@ -253,17 +254,18 @@ class Utils {
                         $students_version[$student->getId()] . ' Prev Submission)';
                     }
                 }
-                $students_full[] = $student_entry;
             } else {
                 $null_entry = array('value' => $student->getId(),
-                'label' => '[NULL section]' . $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>'); 
+                'label' => '[NULL section] ' . $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>'); 
 
                 $in_null_section = false;
                 foreach ($null_section as $null_student) {
                     if($null_student['value'] === $student->getId()) $in_null_section = true;
                 }
-                if(!$in_null_section) $null_section[] = $null_entry; 
-                //$students_full = self::removeStudentWithId($students_full, 'value', $student->getId());
+                if(!$in_null_section && $student->getRegistrationSection() == null) {
+                    $null_section[] = $null_entry; 
+                    $students_full = self::removeStudentWithId($students_full, 'value', $student->getId());
+                } 
             }
         }
         $students_full = array_unique(array_merge($students_full, $null_section), SORT_REGULAR);
