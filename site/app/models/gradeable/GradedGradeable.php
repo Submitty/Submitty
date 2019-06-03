@@ -208,7 +208,8 @@ class GradedGradeable extends AbstractModel {
         foreach ($newNotebook as $notebookKey => $notebookVal) {
 
             // Handle if the notebook cell type is short_answer
-            if($notebookVal['type'] == "short_answer") {
+            if(isset($notebookVal['type']) &&
+               $notebookVal['type'] == "short_answer") {
 
                 // If no previous submissions set string to default initial_value
                 if($this->getAutoGradedGradeable()->getHighestVersion() == 0)
@@ -235,7 +236,8 @@ class GradedGradeable extends AbstractModel {
             }
 
             // Handle if notebook cell type is multiple_choice
-            else if($notebookVal['type'] == "multiple_choice")
+            else if(isset($notebookVal['type']) &&
+                    $notebookVal['type'] == "multiple_choice")
             {
 
                 // If no previous submissions do nothing

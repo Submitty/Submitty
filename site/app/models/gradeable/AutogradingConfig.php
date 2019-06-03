@@ -146,7 +146,8 @@ class AutogradingConfig extends AbstractModel {
 
                 // If cell is of markdown type then figure out if it is markdown_string or markdown_file and pass this
                 // markdown forward as 'data' as opposed to 'string' or 'file'
-                if($notebook_cell['type'] == 'markdown')
+                if(isset($notebook_cell['type']) &&
+                   $notebook_cell['type'] == 'markdown')
                 {
                     $markdown = $this->getMarkdownData($notebook_cell);
 
@@ -162,7 +163,8 @@ class AutogradingConfig extends AbstractModel {
                 array_push($this->notebook, $notebook_cell);
 
                 // If cell is a type of input add it to the $actual_inputs array
-                if($notebook_cell['type'] == 'short_answer' OR $notebook_cell['type'] == 'multiple_choice')
+                if(isset($notebook_cell['type']) &&
+                   ($notebook_cell['type'] == 'short_answer' OR $notebook_cell['type'] == 'multiple_choice'))
                 {
                     array_push($actual_input, $notebook_cell);
                 }
