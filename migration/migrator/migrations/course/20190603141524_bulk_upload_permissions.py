@@ -23,7 +23,7 @@ def up(config, database, semester, course):
     #  drwxr-s---       $DAEMON_USER     ta_www_group    uploads/
     #  drwxr-s---       $PHP_USER        ta_www_group    uploads/bulk_pdf/
     #  drwxrws---       $DAEMON_USER     ta_www_group    uploads/split_pdf/
-    
+
     # set the owner/group/permissions
     os.system("chown "+daemon_user+":"+course_group+" "+str(uploads_dir))
     os.system("chmod u+rwx  "+str(uploads_dir))
@@ -39,7 +39,7 @@ def up(config, database, semester, course):
     os.system("chmod -R u+rwx  "+str(split_uploads_dir))
     os.system("chmod -R g+rwxs "+str(split_uploads_dir))
     os.system("chmod -R o-rwx  "+str(split_uploads_dir))
-    
+
     pass
 
 
