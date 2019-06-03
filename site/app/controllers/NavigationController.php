@@ -9,6 +9,7 @@ use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Submitter;
 use app\models\gradeable\GradeableList;
 use app\models\Notification;
+use Symfony\Component\Routing\Annotation\Route;
 
 class NavigationController extends AbstractController {
     public function __construct(Core $core) {
@@ -39,7 +40,11 @@ class NavigationController extends AbstractController {
         $this->core->getOutput()->renderOutput('Navigation', 'noAccessCourse');
     }
 
-    private function navigationPage() {
+    /**
+     * @Route("/{semester}/{course}")
+     * @Route("/{semester}/{course}/navigation")
+     */
+    public function navigationPage() {
         $gradeables_list = new GradeableList($this->core);
 
         $future_gradeables_list = $gradeables_list->getFutureGradeables();

@@ -27,11 +27,9 @@ class HomePageController extends AbstractController {
         switch ($_REQUEST['page']) {
             case 'change_username':
                 $this->changeUserName();
-                $this->showHomepage();
                 break;
             case 'change_password':
                 $this->changePassword();
-                $this->showHomepage();
                 break;
             case 'home_page':
             default:
@@ -41,7 +39,7 @@ class HomePageController extends AbstractController {
     }
 
     /**
-     * @Route("/home/change_password", methods={"POST"})
+     * @Route("/home/change_password")
      */
     public function changePassword(){
         $user = $this->core->getUser();
@@ -54,12 +52,13 @@ class HomePageController extends AbstractController {
         else {
             $this->core->addErrorMessage("Must put same password in both boxes.");
         }
+        $this->core->redirect($this->core->buildNewUrl(['home']));
     }
 
 	/**
 	 * Update/change first and last preferred name in $user model.
      *
-     * @Route("/home/change_username", methods={"POST"})
+     * @Route("/home/change_username")
 	 */
     public function changeUserName(){
         $user = $this->core->getUser();
@@ -78,6 +77,7 @@ class HomePageController extends AbstractController {
                 $this->core->addErrorMessage("Preferred names must not exceed 30 chars.  Letters, spaces, hyphens, apostrophes, periods, parentheses, and backquotes permitted.");
             }
         }
+        $this->core->redirect($this->core->buildNewUrl(['home']));
     }
 
     /**

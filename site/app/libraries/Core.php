@@ -385,6 +385,17 @@ class Core {
     }
 
     /**
+     * @param array  $parts
+     * @param string $hash
+     *
+     * @return string
+     */
+    public function buildNewUrl($parts=array(), $hash = null) {
+        $url = $this->getConfig()->getBaseUrl().implode("/", $parts);
+        return $url;
+    }
+
+    /**
      * @param     $url
      * @param int $status_code
      */

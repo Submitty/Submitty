@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\libraries\Core;
 use app\libraries\Output;
 use app\libraries\Utils;
+use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * Class AuthenticationController
@@ -37,7 +38,6 @@ class AuthenticationController extends AbstractController {
                 $this->logout();
                 break;
             case 'checklogin':
-                $this->isLoggedIn();
                 $this->checkLogin();
                 break;
             case 'vcs_login':
@@ -45,7 +45,6 @@ class AuthenticationController extends AbstractController {
                 break;
             case 'login':
             default:
-                $this->isLoggedIn();
                 $this->loginForm();
                 break;
         }
@@ -67,6 +66,8 @@ class AuthenticationController extends AbstractController {
      * Logs out the current user from the system. This is done by both deleting the current going
      * session from the database as well as invalidating the session id saved in the cookie. The latter
      * is not strictly necessary, but still good to tidy up.
+     *
+     * @Route("/authentication/logout")
      */
     public function logout() {
         $cookie_id = 'submitty_session_id';
@@ -79,8 +80,11 @@ class AuthenticationController extends AbstractController {
     
     /**
      * Display the login form to the user
+     *
+     * @Route("/authentication/login")
      */
     public function loginForm() {
+        $this->isLoggedIn();
         $old = $_REQUEST['old'] ?? [];
 
         //Don't log in to bring us back to login
@@ -98,6 +102,7 @@ class AuthenticationController extends AbstractController {
      * to maintain that old request data passing it back into the login form.
      */
     public function checkLogin() {
+        $this->isLoggedIn();
         $redirect = array();
         $no_redirect = !empty($_POST['no_redirect']) ? $_POST['no_redirect'] == 'true' : false;
         $_POST['stay_logged_in'] = (isset($_POST['stay_logged_in']));

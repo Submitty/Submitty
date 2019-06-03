@@ -291,9 +291,9 @@ if ($is_api) {
     $router = new app\libraries\ApiRouter($core);
     $router->run();
 }
-elseif ($logged_in) {
+else {
     try {
-        $router = new app\libraries\MainRouter($core);
+        $router = new app\libraries\MainRouter($core, $logged_in);
         $router->run();
     }
     catch (Exception $e) {
@@ -301,7 +301,7 @@ elseif ($logged_in) {
     }
 }
 
-if (!$logged_in || $caught) {
+if ($caught) {
     switch($_REQUEST['component']) {
         case 'admin':
             $control = new app\controllers\AdminController($core);
