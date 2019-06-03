@@ -16,8 +16,10 @@ try:
     from pyzbar.pyzbar import ZBarSymbol
     import cv2
 except ImportError:
-    print("\nbulk_qr_split.py: Error! ")
-    print("One or more required python modules not installed correctly\n")
+    msg = "One or more required python modules not installed correctly\n"
+    log_file.write(msg)
+    log_file.write(traceback.format_exc())
+    print(msg)
     traceback.print_exc()
     sys.exit(1)
 
@@ -28,6 +30,7 @@ def main(args):
     split_path = args[1]
     qr_prefix = args[2]
     qr_suffix = args[3]
+
     try:
         os.chdir(split_path)
         pdfPages = PdfFileReader(filename)
@@ -129,8 +132,11 @@ def main(args):
         # remove original, unsplit file
         os.remove(filename)
     except Exception:
-        print("\nbulk_qr_split.py: Failed when splitting pdf " + str(filename))
+        msg = "Failed when splitting pdf " + str(filename)
+        log_file.write(msg)
+        log_file.write(traceback.format_exc)
         traceback.print_exc()
+        print(msg)
         sys.exit(1)
 
 

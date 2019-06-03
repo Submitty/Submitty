@@ -184,23 +184,40 @@ class BulkUpload(CourseJob):
         filename = self.job_details['filename']
         is_qr = self.job_details['is_qr']
 
+        #print("HERER")
+        #print(CONFIG["submitty_data_dir"] + "/logs/bulk_uploads")
+        #print(Path(CONFIG["submitty_data_dir"], "logs", "bulk_uploads", timestamp + "_" + filename))
+        #log_path = Path(CONFIG["submitty_data_dir"], "logs", "bulk_uploads", timestamp + "_" + filename)
+        #print(log_path)
+
+        log_path = os.path.join(DATA_DIR, "logs", "bulk_uploads")
+        log_file = open(log_path + "/" + timestamp + "-" + filename + ".txt", "w")
+       
         if is_qr and ('qr_prefix' not in self.job_details or 'qr_suffix' not in self.job_details):
-            print("did not pass in qr prefix or suffix")
+            msg = "missing qr_prefix or qr_suffix argument in job"
+            print(msg)
+            log_file.write(msg) 
             sys.exit(1)
 
         if is_qr:
             qr_prefix = unquote(unquote(self.job_details['qr_prefix']))
             qr_suffix = unquote(unquote(self.job_details['qr_suffix']))
+            log_file.write("Started Bulk Upload QR Job at " + timestamp + "\n")
+            log_file.write("QR Prefix : \"" + qr_prefix + "\"\nQR Suffix : \"" + qr_suffix + "\"\n")
 
         script = ''
         if is_qr:
             script = Path(INSTALL_DIR, 'sbin', 'bulk_qr_split.py')
         else:
             if 'num' not in self.job_details:
-                print("did not pass in the number to divide " + filename + " by")
+                msg = "did not pass in the number to divide " + filename + " by"
+                log_file.write(msg)
+                print(msg)
                 sys.exit(1)
             num  = self.job_details['num']
             script = Path(INSTALL_DIR, 'sbin', 'bulk_upload_split.py')
+            log_file.write("Started Bulk Upload Job at " + timestamp + "\n")
+            log_file.write("Split every " + str(num) + " pages")
         #create paths
         try:
             with open("/usr/local/submitty/config/submitty.json", encoding='utf-8') as data_file:
@@ -211,14 +228,21 @@ class BulkUpload(CourseJob):
             bulk_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads/bulk_pdf",gradeable_id,timestamp)
             split_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads/split_pdf",gradeable_id,timestamp)
         except Exception as err:
-            print("Failed while parsing args and creating paths")
-            print(err)
+            msg = "Failed while parsing args and creating paths\n"
+            msg += err
+            print(msg)
+            log_file.write(msg)
+            log_file.close()
             sys.exit(1)
 
         #copy file over to correct folders
         try:
             if not os.path.exists(split_path):
-                os.makedirs(split_path)
+                #if another job already creates the folder, continue moving files over
+                try:
+                    os.makedirs(split_path)
+                except Exception:
+                    pass
 
             # adding write permissions for PHP
             self.add_permissions_recursive(uploads_path, stat.S_IWGRP | stat.S_IXGRP, stat.S_IWGRP | stat.S_IXGRP, stat.S_IWGRP)
@@ -229,9 +253,13 @@ class BulkUpload(CourseJob):
 
             # move to copy folder
             os.chdir(split_path)
+            log_file.write("Moved " + filename + " from " + bulk_path + " to " + split_path + "\n")
         except Exception as err:
-            print("Failed while copying files")
-            print(err)
+            msg = "Failed while copying files\n"
+            msg += err
+            print(msg)
+            log_file.write(msg)
+            log_file.close()
             sys.exit(1)
 
         try:
@@ -243,7 +271,10 @@ class BulkUpload(CourseJob):
             os.remove(filename)
             os.chdir(current_path)
         except Exception as err:
-            print("Failed to launch bulk_split subprocess!")
-            print(err)
+            msg = "Failed to launch bulk_split subprocess\n"
+            msg += err
+            print(msg)
+            log_file.write(msg)
+            log_file.close()
             sys.exit(1)
         

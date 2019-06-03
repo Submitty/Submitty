@@ -21,13 +21,17 @@ def main(args):
     filename = args[0]
     split_path = args[1]
     num = int(args[2])
+
     try:
         # check that all pages are divisible
         pdfFileObj = open(filename, 'rb')
         pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
         total_pages = pdfReader.numPages
         if (total_pages % num != 0):
-            print(filename + " not divisible by " + str(num))
+            msg = filename + " not divisible by " + str(num)
+            print(msg)
+            log_file.write(msg)
+            log_file.close()
             sys.exit(1)
 
         # recalculate the total # of pages for each file
@@ -66,7 +70,9 @@ def main(args):
             pdf_images[0].save('{}.jpg'.format(cover_filename[:-4]),
                                "JPEG", quality=100)
     except Exception:
+        log_file.write(traceback.format_exc())
         traceback.print_exc()
+        log_file.close()
 
 
 if __name__ == "__main__":
