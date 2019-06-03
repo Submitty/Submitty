@@ -556,7 +556,8 @@ class NavigationView extends AbstractView {
                 $button = new Button($this->core, [
                     "title" => "REGRADE",
                     "class" => "btn btn-danger btn-nav btn-nav-grade",
-                    "href" => $href
+                    "href" => $href,
+                    "badge" => $gradeable->getActiveRegradeRequestCount()
                 ]);
 
                 return $button;

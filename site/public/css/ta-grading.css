@@ -198,6 +198,9 @@ progress::-webkit-progress-value {
 #regrade_info.rubric_panel {
     border:5px solid #ffa500 ;
 }
+#regrade_inner_info.inquiry_alert {
+    border:5px solid #c40233 ;
+}
 #student_info.rubric_panel {
     border:5px solid black;
 }
