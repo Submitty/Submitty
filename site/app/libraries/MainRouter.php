@@ -68,7 +68,7 @@ class MainRouter {
         }
         elseif ($this->core->getUser() === null) {
             $this->core->loadSubmittyUser();
-            if (!$this->endswith($this->parameters['_controller'], 'AuthenticationController')) {
+            if (!$this->endsWith($this->parameters['_controller'], 'AuthenticationController')) {
                 $this->request = Request::create(
                     $this->core->buildNewUrl(['navigation', 'no_access']),
                     'GET'
@@ -78,7 +78,7 @@ class MainRouter {
         }
         elseif ($this->core->getConfig()->isCourseLoaded()
             && !$this->core->getAccess()->canI("course.view", ["semester" => $this->core->getConfig()->getSemester(), "course" => $this->core->getConfig()->getCourse()])
-            && !$this->endswith($this->parameters['_controller'], 'AuthenticationController')) {
+            && !$this->endsWith($this->parameters['_controller'], 'AuthenticationController')) {
             $this->request = Request::create(
                 $this->core->buildNewUrl(['navigation', 'no_access']),
                 'GET'
@@ -132,7 +132,7 @@ class MainRouter {
         }
     }
 
-    private function endswith($string, $ending) {
+    private function endsWith($string, $ending) {
         $str_len = strlen($string);
         $ending_len = strlen($ending);
         if ($ending_len > $str_len) return false;
