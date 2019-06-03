@@ -9,6 +9,8 @@ use app\libraries\Access;
 use app\libraries\TokenManager;
 use app\libraries\Router;
 
+use Doctrine\Common\Annotations\AnnotationRegistry;
+
 /*
  * The user's umask is ignored for the user running php, so we need
  * to set it from inside of php to make sure the group read & execute
@@ -25,7 +27,8 @@ session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-require_once(__DIR__.'/../vendor/autoload.php');
+$loader = require_once(__DIR__.'/../vendor/autoload.php');
+AnnotationRegistry::registerLoader([$loader, 'loadClass']);
 
 $core = new Core();
 $core->setRouter(new Router($_GET['url'] ?? ''));
@@ -282,11 +285,23 @@ if (empty($_REQUEST['component']) && $core->getUser() !== null) {
 /********************************************
 * END LOGIN CODE
 *********************************************/
+$caught = false;
+
 if ($is_api) {
     $router = new app\libraries\ApiRouter($core);
     $router->run();
 }
-else {
+elseif ($logged_in) {
+    try {
+        $router = new app\libraries\MainRouter($core);
+        $router->run();
+    }
+    catch (Exception $e) {
+        $caught = true;
+    }
+}
+
+if (!$logged_in || $caught) {
     switch($_REQUEST['component']) {
         case 'admin':
             $control = new app\controllers\AdminController($core);

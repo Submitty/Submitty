@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\libraries\Core;
 use app\libraries\Output;
 use app\libraries\Utils;
+use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * Class HomePageController
@@ -39,6 +40,9 @@ class HomePageController extends AbstractController {
         }
     }
 
+    /**
+     * @Route("/home/change_password", methods={"POST"})
+     */
     public function changePassword(){
         $user = $this->core->getUser();
         if(!empty($_POST['new_password']) && !empty($_POST['confirm_new_password'])
@@ -54,6 +58,8 @@ class HomePageController extends AbstractController {
 
 	/**
 	 * Update/change first and last preferred name in $user model.
+     *
+     * @Route("/home/change_username", methods={"POST"})
 	 */
     public function changeUserName(){
         $user = $this->core->getUser();
@@ -76,6 +82,9 @@ class HomePageController extends AbstractController {
 
     /**
      * Display the HomePageView to the student.
+     *
+     * @Route("/home")
+     * @Route("/home/home_page")
      */
     public function showHomepage() {
         $user = $this->core->getUser();
