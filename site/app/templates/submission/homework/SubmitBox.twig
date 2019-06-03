@@ -269,49 +269,86 @@
 
                     {% elseif cell.type == "multiple_choice" %}
 
-                        {# Obtain list of previously selected elements #}
-                        {% if cell.recent_submission is defined and core.getConfig().keepPreviousFiles() %}
-                            {% set prev_checked = cell.recent_submission | split('\n') %}
-                        {% endif %}
-
                         <br>
-                        <fieldset>
+                        <fieldset id="mc_field_{{ num_multiple_choice }}"
+                                  class="mc"
+                                  {% if cell.recent_submission is defined %}data-prev_checked="{{ cell.recent_submission }}"{% endif %}>
                             {% for choice in cell.choices %}
                                 {% if cell.allow_multiple == true %}
-                                    <input type="checkbox" name="multiple_choice_{{ num_multiple_choice }}" id="multiple_choice_{{ num_multiple_choice }}" value="{{ choice.value }}" {% if choice.value in prev_checked %}checked="checked" {% endif %}onclick="handle_input_keypress();" />
+                                    <input type="checkbox"
+                                           name="multiple_choice_{{ num_multiple_choice }}"
+                                           id="multiple_choice_{{ num_multiple_choice }}"
+                                           value="{{ choice.value }}"
+                                           onclick="handle_input_keypress();" />
+
                                     <label for="multiple_choice_{{ num_multiple_choice }}">
                                         {{ choice.description }}
                                     </label>
+
                                 {% else %}
                                     <input type="radio"
                                            name="multiple_choice_{{ num_multiple_choice }}"
                                            id="multiple_choice_{{ num_multiple_choice }}"
                                            value="{{ choice.value }}"
-                                           {% if choice.value == cell.recent_submission and core.getConfig().keepPreviousFiles() %}checked="checked" {% endif %}
                                            onclick="handle_input_keypress();" />
+
                                     <label for="multiple_choice_{{ num_multiple_choice }}">
                                         {{ choice.description }}
                                     </label>
+
                                 {% endif %}
                                 <br/>
                             {% endfor %}
                         </fieldset>
                         <br>
 
-                        {# Create reset to recent submission button if a previous submission exists #}
-                        {% if cell.recent_submission is defined %}
-                            <button type="button" id="mc_{{ num_multiple_choice }}_recent_button" class="btn btn-primary mc_reset">Use Most Recent Submission</button>
+                        {# Create reset to recent submission button #}
+                        <button type="button" id="mc_{{ num_multiple_choice }}_recent_button" class="btn btn-primary mc_recent">Use Most Recent Submission</button>
 
-                            <script>
-                                {# Configure initial state for the button #}
-                                {% if core.getConfig().keepPreviousFiles() %}
-                                    $("#mc_{{ num_multiple_choice }}_recent_button").attr("disabled", true);
-                                {% else %}
-                                    $("#mc_{{ num_multiple_choice }}_recent_button").attr("disabled", false);
-                                {% endif %}
-                            </script>
+                        <script>
+                            {# Set the multiple choice checkmarks or radio buttons from a previous submission #}
+                            function setMultipleChoices(mc_field_id)
+                            {
+                                var parts = mc_field_id.split("_");
+                                var id = parts[2];
+                                var prev_checked = $("#" + mc_field_id).attr("data-prev_checked");
 
-                        {% endif %}
+                                prev_checked = prev_checked.split("\n");
+
+                                // For each input inside the fieldset see if its value is inside the prev checked array
+                                $("#" + mc_field_id + " :input").each(function(index,element) {
+
+                                    var value = element.getAttribute("value");
+
+                                    if(prev_checked.includes(value))
+                                    {
+                                        $(element).prop("checked", true);
+                                    }
+                                    else
+                                    {
+                                        $(element).prop("checked", false);
+                                    }
+                                });
+                            }
+
+                            {# Populate checkboxes initially #}
+                            {% if cell.recent_submission is defined and core.getConfig().keepPreviousFiles() %}
+                                setMultipleChoices("mc_field_{{ num_multiple_choice }}");
+                            {% endif %}
+
+                            {# Hide button if no previous submissions #}
+                            {% if cell.recent_submission is not defined %}
+                                $("#mc_{{ num_multiple_choice }}_recent_button").hide();
+                            {% endif %}
+
+                            {# Configure initial state for the button #}
+                            {% if core.getConfig().keepPreviousFiles() %}
+                                $("#mc_{{ num_multiple_choice }}_recent_button").attr("disabled", true);
+                            {% else %}
+                                $("#mc_{{ num_multiple_choice }}_recent_button").attr("disabled", false);
+                            {% endif %}
+
+                        </script>
 
                         {% set num_multiple_choice = num_multiple_choice + 1 %}
 
@@ -321,8 +358,30 @@
 
             {% endfor %}
 
-            {# Place scripts relevant to notebook items here #}
+            {# Place scripts relevant to short answer items here #}
             <script>
+
+                {# Register click event handler for mc reset button #}
+                $(".mc_recent").click(function() {
+
+                    // Collect the id of the button and split it apart to find out which field it is bound to
+                    var items = this.id.split("_");
+                    var index = items[1];
+                    var field_set_id = "mc_field_" + index;
+
+                    setMultipleChoices(field_set_id);
+                    $(this).attr("disabled", true);
+                });
+
+                {# Register change event handler for mc fieldsets #}
+                $(".mc").change(function() {
+
+                    var items = this.id.split("_");
+                    var index = items[2];
+
+                    // Enable reset button
+                    $("#mc_" + index + "_recent_button").attr("disabled", false);
+                });
 
                 // Setup click events for short answer buttons
                 $(".sa_clear_reset").click(function() {
@@ -395,7 +454,6 @@
                         $(recent_button_id).attr("disabled", false);
                     }
                 });
-
             </script>
     
             {# Submit boxes #}
