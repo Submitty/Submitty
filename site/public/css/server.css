@@ -1178,10 +1178,6 @@ fieldset[disabled] .btn-primary.focus {
   background-color: #fff;
 }
 
-.btn-push-down {
-    margin-top: 5px
-}
-
 .panel-heading > .dropdown .dropdown-toggle {
   color: inherit;
 }
@@ -2095,9 +2091,4 @@ end of styles used in the admin gradeable page
     background-color: #00000000;
     border: 0px;
     padding: 0px;
-}
-
-/* Display notebook multiple choice descriptions on same line as radio button or checkbox */
-.mc > label > *:first-child {
-    display: inline;
 }

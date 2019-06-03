@@ -200,6 +200,7 @@
         <input type="submit" id="submit" class="btn btn-primary" value="Grade My Repository" />
     {% else %}
         <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
+        <div class="notebook">
 
             <script>
                 {# Set the multiple choice checkmarks or radio buttons from a previous submission #}
@@ -271,7 +272,6 @@
 
                         {# Else render a codebox #}
                         {% else %}
-                            <br>
                                 <div id="codebox_{{ num_codeboxes }}" name="codebox_{{ num_codeboxes }}" style="border: 1px solid LightGrey;" onKeyPress="handle_input_keypress();">
                                 </div>
                                 <script>
@@ -297,7 +297,6 @@
 
                     {% elseif cell.type == "multiple_choice" %}
 
-                        <br>
                         <fieldset id="mc_field_{{ num_multiple_choice }}"
                                   class="mc"
                                   {% if cell.recent_submission is defined %}data-prev_checked="{{ cell.recent_submission }}"{% endif %}>
@@ -328,7 +327,6 @@
                                 <br/>
                             {% endfor %}
                         </fieldset>
-                        <br>
 
                         {# Create reset to recent submission button #}
                         <button type="button" id="mc_{{ num_multiple_choice }}_recent_button" class="btn btn-primary mc_recent">Use Most Recent Submission</button>
@@ -477,6 +475,7 @@
                 </div>
             {% endfor %}
 
+        </div>
         </div>
 
         {# Page selector #}
@@ -718,8 +717,8 @@
                 enableTabsInTextArea('#short_answer_{{ index }}');
             </script>
         {% endif %}
-        <button type="button" id="short_answer_{{ index }}_clear_button" class="btn btn-primary btn-push-down sa_clear_reset">Clear</button>
-        <button type="button" id="short_answer_{{ index }}_recent_button" class="btn btn-primary btn-push-down sa_clear_reset">Use Most Recent Submission</button>
+        <button type="button" id="short_answer_{{ index }}_clear_button" class="btn btn-primary sa_clear_reset">Clear</button>
+        <button type="button" id="short_answer_{{ index }}_recent_button" class="btn btn-primary sa_clear_reset">Use Most Recent Submission</button>
         <script>
 
             {% if version == 0 %}
