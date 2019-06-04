@@ -41,8 +41,8 @@ class NavigationController extends AbstractController {
     }
 
     /**
-     * @Route("/{semester}/{course}")
-     * @Route("/{semester}/{course}/navigation")
+     * @Route("/{_semester}/{_course}")
+     * @Route("/{_semester}/{_course}/navigation")
      */
     public function navigationPage() {
         $gradeables_list = new GradeableList($this->core);

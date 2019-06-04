@@ -11,6 +11,7 @@ use app\libraries\Logger;
 use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
 use app\controllers\grading\ElectronicGraderController;
+use Symfony\Component\Routing\Annotation\Route;
 
 
 
@@ -262,8 +263,14 @@ class SubmissionController extends AbstractController {
         }
     }
 
-    private function showHomeworkPage() {
-        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+    /**
+     * @Route("/{_semester}/{_course}/student/{gradeable_id}")
+     * @return array
+     */
+    public function showHomeworkPage($gradeable_id = null) {
+        if (!isset($gradeable_id)) {
+            $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+        }
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
         if($gradeable === null) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
