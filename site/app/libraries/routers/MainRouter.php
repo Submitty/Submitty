@@ -37,7 +37,7 @@ class MainRouter {
         $fileLocator = new FileLocator();
         $annotationLoader = new AnnotatedRouteLoader(new AnnotationReader());
         $loader = new AnnotationDirectoryLoader($fileLocator, $annotationLoader);
-        $collection = $loader->load(realpath(__DIR__ . "/../controllers"));
+        $collection = $loader->load(realpath(__DIR__ . "/../../controllers"));
 
         $this->matcher = new UrlMatcher($collection, new RequestContext());
         $this->parameters = $this->matcher->matchRequest($this->request);
@@ -48,6 +48,7 @@ class MainRouter {
 
         $controllerName = $this->parameters['_controller'];
         $methodName = $this->parameters['_method'];
+        $controller = new $controllerName($this->core);
 
         if (in_array('semester', $this->parameters) && in_array('course', $this->parameters)) {
             $semester = $this->parameters['semester'];
@@ -55,8 +56,13 @@ class MainRouter {
             $this->core->loadConfig($semester, $course);
         }
 
-        $controller = new $controllerName($this->core);
-        return $controller->$methodName();
+        foreach ($this->parameters as $key => $value) {
+            if (Utils::startsWith($key, "_")) {
+                unset($this->parameters[$key]);
+            }
+        }
+
+        return call_user_func_array(array($controller, $methodName), $this->parameters);
     }
 
     private function loginCheck() {
