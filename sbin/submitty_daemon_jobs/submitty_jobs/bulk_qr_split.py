@@ -16,10 +16,7 @@ try:
     from pyzbar.pyzbar import ZBarSymbol
     import cv2
 except ImportError:
-    msg = "One or more required python modules not installed correctly\n"
-    log_file.write(msg)
-    log_file.write(traceback.format_exc())
-    print(msg)
+    print("One or more required python modules not installed correctly")
     traceback.print_exc()
     sys.exit(1)
 
@@ -30,7 +27,7 @@ def main(args):
     split_path = args[1]
     qr_prefix = args[2]
     qr_suffix = args[3]
-
+    log_file = args[4]
     try:
         os.chdir(split_path)
         pdfPages = PdfFileReader(filename)
@@ -55,6 +52,8 @@ def main(args):
                 # found a new qr code, split here
                 # convert byte literal to string
                 data = val[0][0].decode("utf-8")
+                log_file.write("\tFound a QR code with value " + data +
+                               " on page " + str(page_number) + "\n")
                 if data == "none":  # blank exam with 'none' qr code
                     data = "BLANK EXAM"
                 else:
@@ -108,6 +107,8 @@ def main(args):
                 pdf_writer.addPage(pdfPages.getPage(i))
             i += 1
 
+        log_file.write("\tFinished splitting into {} files\n".format(cover_index))
+
         # save whatever is left
         output_filename = '{}_{}.pdf'.format(filename[:-4], cover_index)
         output[output_filename]['id'] = data
@@ -129,14 +130,12 @@ def main(args):
             with open('decoded.json', 'w') as out:
                 json.dump(prev_data, out)
 
-        # remove original, unsplit file
-        os.remove(filename)
     except Exception:
-        msg = "Failed when splitting pdf " + str(filename)
-        log_file.write(msg)
-        log_file.write(traceback.format_exc)
-        traceback.print_exc()
+        msg = "Failed when splitting pdf " + filename
         print(msg)
+        traceback.print_exc()
+        log_file.write(msg + "\n")
+        log_file.write(traceback.format_exc())
         sys.exit(1)
 
 

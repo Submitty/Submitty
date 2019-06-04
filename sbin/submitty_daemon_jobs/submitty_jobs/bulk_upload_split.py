@@ -21,7 +21,7 @@ def main(args):
     filename = args[0]
     split_path = args[1]
     num = int(args[2])
-
+    log_file = args[3]
     try:
         # check that all pages are divisible
         pdfFileObj = open(filename, 'rb')
@@ -30,8 +30,7 @@ def main(args):
         if (total_pages % num != 0):
             msg = filename + " not divisible by " + str(num)
             print(msg)
-            log_file.write(msg)
-            log_file.close()
+            log_file.write(msg + "\n")
             sys.exit(1)
 
         # recalculate the total # of pages for each file
@@ -65,14 +64,15 @@ def main(args):
             with open(cover_filename, 'wb') as out:
                 cover_writer.write(out)
 
+            log_file.write("\tSplitting PDF at page " + str(i) + "\n")
+
             # save cover as image
             pdf_images = convert_from_bytes(open(cover_filename, 'rb').read())
             pdf_images[0].save('{}.jpg'.format(cover_filename[:-4]),
                                "JPEG", quality=100)
     except Exception:
-        log_file.write(traceback.format_exc())
         traceback.print_exc()
-        log_file.close()
+        log_file.write(traceback.format_exc())
 
 
 if __name__ == "__main__":
