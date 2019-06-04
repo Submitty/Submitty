@@ -69,8 +69,7 @@
             {% elseif message.type == 'would_allowed' %}
                 {# SUBMISSION NOW WOULD BE LATE #}
                 {{ self.line_breaks(loop.index0 > 0 ? 1 : 0) }}
-                You have been charged {{ message.info.charged }} {{ self.day_or_days(message.info.charged) }} already for this assignment. You won't be charged again 
-                for all submissions made today.
+                You have been charged {{ message.info.charged }} {{ self.day_or_days(message.info.charged) }} already for this assignment. You won't be charged for another submission today.
             {% elseif message.type == 'would_get_zero' %}
                 {{ self.line_breaks(loop.index0 > 0 ? 1 : 0) }}
                 If you submit to this assignment now, your grade for this assignment will be recorded as a zero.
