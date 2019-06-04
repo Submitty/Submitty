@@ -524,7 +524,8 @@ class MiscController extends AbstractController {
             $json = FileUtils::readJsonFile($file_data);
 
             foreach ($json as $path => $file) {
-                if (substr(realpath($path), 0, strlen($root_path)) != $root_path) {
+                // check if the file is in the requested folder
+                if (!Utils::startsWith(realpath($path), $root_path)) {
                     continue;
                 }
                 if ($file['release_datetime'] < $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")) {
