@@ -2,6 +2,7 @@
 
 namespace app\libraries;
 
+use app\exceptions\AuthenticationException;
 use Lcobucci\JWT\Builder;
 use Lcobucci\JWT\Parser;
 use Lcobucci\JWT\Token;
@@ -40,7 +41,7 @@ class TokenManager {
     public static function parseSessionToken(string $token, string $issuer, string $secret): Token {
         $token = (new Parser())->parse($token);
         if (!$token->verify(new Sha256(), $secret)) {
-            throw new \RuntimeException("Invalid signature for token");
+            throw new AuthenticationException("Invalid signature for token");
         }
         
         $headers = [
@@ -49,19 +50,19 @@ class TokenManager {
         ];
         foreach ($headers as $key => $value) {
             if ($token->getHeader($key) !== $value) {
-                throw new \RuntimeException("Invalid value for ${key}: ${value}");
+                throw new AuthenticationException("Invalid value for ${key}: ${value}");
             }
         }
 
         $data = new ValidationData();
         $data->setIssuer($issuer);
         if (!$token->validate($data)) {
-            throw new \RuntimeException('Invalid claims in token');
+            throw new AuthenticationException('Invalid claims in token');
         }
 
         $claims = $token->getClaims();
         if (!$token->hasClaim('session_id') || !$token->hasClaim('expire_time') || !$token->hasClaim('sub')) {
-            throw new \RuntimeException('Missing claims in session token');
+            throw new AuthenticationException('Missing claims in session token');
         }
         return $token;
     }
