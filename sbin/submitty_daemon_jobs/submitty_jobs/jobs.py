@@ -221,7 +221,10 @@ class BulkUpload(CourseJob):
                 os.makedirs(split_path)
 
             # adding write permissions for PHP
-            self.add_permissions_recursive(split_path, stat.S_IWGRP | stat.S_IXGRP, stat.S_IWGRP | stat.S_IXGRP, stat.S_IWGRP)
+            self.add_permissions_recursive(split_path,
+                                           stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |   stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP |   stat.S_ISGID,
+                                           stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |   stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP |   stat.S_ISGID,
+                                           stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |   stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP |   stat.S_ISGID)
 
             # copy over file to new directory
             if not os.path.isfile(os.path.join(split_path, filename)):
