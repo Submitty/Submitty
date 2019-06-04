@@ -207,7 +207,7 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
             ssh.get_host_keys()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-            ssh.connect(hostname = host, username = user)
+            ssh.connect(hostname = host, username = user, timeout=5)
             sftp = ssh.open_sftp()
 
             sftp.put(autograding_zip_tmp,autograding_zip)
@@ -278,7 +278,7 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
         try:
-            ssh.connect(hostname = host, username = user)
+            ssh.connect(hostname = host, username = user, timeout=5)
 
             sftp = ssh.open_sftp()
             fd1, local_done_queue_file = tempfile.mkstemp()
