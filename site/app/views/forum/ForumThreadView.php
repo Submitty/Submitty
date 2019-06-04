@@ -592,7 +592,6 @@ HTML;
 
     public function displayThreadList($threads, $filtering, &$activeThreadAnnouncement, &$activeThreadTitle, &$activeThread, $thread_id_p, $current_categories_ids)
     {
-        $return = "";
         $used_active = false; //used for the first one if there is not thread_id set
         $current_user = $this->core->getUser()->getId();
         $display_thread_ids = $this->core->getUser()->getGroup() <= 2;
@@ -600,15 +599,15 @@ HTML;
         $activeThreadAnnouncement = false;
         $activeThreadTitle = "";
         $function_date = 'date_format';
-        $activeThread = array();
+        $activeThread = [];
 
-        $thread_content = Array();
+        $thread_content = [];
 
         foreach ($threads as $thread) {
             $first_post = $this->core->getQueries()->getFirstPostForThread($thread["id"]);
             if (is_null($first_post)) {
                 // Thread without any posts(eg. Merged Thread)
-                $first_post = array('content' => "");
+                $first_post = ['content' => ""];
                 $date = null;
             } else {
                 $date = DateUtils::parseDateTime($first_post['timestamp'], $this->core->getConfig()->getTimezone());
@@ -638,7 +637,8 @@ HTML;
                 $class .= " deleted";
             }
             //fix legacy code
-            $titleDisplay = html_entity_decode($thread['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $titleDisplay = $thread['title'];
+
 
             //replace tags from displaying in sidebar
             $first_post_content = str_replace("[/code]", "", str_replace("[code]", "", strip_tags($first_post["content"])));
@@ -664,13 +664,8 @@ HTML;
                 $titleDisplay .= "...";
             }
             $titleDisplay = ($display_thread_ids ? "({$thread['id']}) " : '') . $titleDisplay;
-            $titleDisplay = htmlentities($titleDisplay, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-            if ($thread["current_user_posted"]) {
-                $icon = '<i class="fas fa-comments" title="You have contributed"></i> ';
-                $titleDisplay = $icon . $titleDisplay;
-            }
 
-            $link = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread['id']));
+            $link = $this->core->buildUrl(['component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread['id']]);
 
             $favorite = isset($thread['favorite']) && $thread['favorite'];
 
@@ -693,21 +688,21 @@ HTML;
                 }
             }
 
-            $categories_content = array();
+            $categories_content = [];
             foreach ($thread["categories_desc"] as $category_desc) {
-                $categories_content[] = array(htmlentities($category_desc, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+                $categories_content[] = [$category_desc];
             }
             for ($i = 0; $i < count($thread["categories_color"]); $i += 1) {
                 $categories_content[$i][] = $thread["categories_color"][$i];
             }
 
-            $date_content = Array("not_null" => !is_null($date));
+            $date_content = ["not_null" => !is_null($date)];
 
             if (!is_null($date)) {
                 $date_content["formatted"] = $function_date($date, "n/j g:i A");
             }
 
-            $thread_content[] = Array(
+            $thread_content[] = [
                 "title" => $titleDisplay,
                 "content" => $contentDisplay,
                 "categories" => $categories_content,
@@ -723,15 +718,16 @@ HTML;
                 "fa_font_size" => $fa_font_size,
                 "tooltip" => $tooltip,
                 "is_locked" => $this->core->getQueries()->isThreadLocked($thread['id']),
-                "date" => $date_content
-            );
+                "date" => $date_content,
+                "current_user_posted" => $thread["current_user_posted"]
+            ];
         }
 
 
-        $return .= $this->core->getOutput()->renderTwigTemplate("forum/displayThreadList.twig", [
+        $return = $this->core->getOutput()->renderTwigTemplate("forum/displayThreadList.twig", [
             "thread_content" => $thread_content,
         ]);
-
+        
         return $return;
     }
 
@@ -742,8 +738,6 @@ HTML;
 		if(!empty($pre_post)){
 			$post_content = $pre_post;
 		}
-
-		$post_content = htmlentities($post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
 		preg_match_all('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', $post_content, $result);
 		$accepted_schemes = array("https", "http");
