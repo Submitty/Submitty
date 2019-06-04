@@ -43,7 +43,7 @@ class ApiRouter {
             $methodName = $parameters['_method'];
 
             $controller = new $controllerName($this->core);
-            return $controller->$methodName();
+            return call_user_func_array(array($controller, $methodName), $parameters);
         } catch (ResourceNotFoundException $e) {
             return $this->core->getOutput()->renderJsonFail($e->getMessage());
         } catch (\Throwable $e) {
