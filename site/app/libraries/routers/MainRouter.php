@@ -1,7 +1,7 @@
 <?php
 
 
-namespace app\libraries;
+namespace app\libraries\routers;
 
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpFoundation\Request;
@@ -10,6 +10,7 @@ use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\Loader\AnnotationDirectoryLoader;
 use Doctrine\Common\Annotations\AnnotationReader;
 use app\libraries\Utils;
+use app\libraries\Core;
 
 
 class MainRouter {

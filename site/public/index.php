@@ -7,7 +7,7 @@ use app\libraries\Logger;
 use app\libraries\Utils;
 use app\libraries\Access;
 use app\libraries\TokenManager;
-use app\libraries\ClassicRouter;
+use app\libraries\routers\ClassicRouter;
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
 
@@ -288,12 +288,12 @@ if (empty($_REQUEST['component']) && $core->getUser() !== null) {
 $caught = false;
 
 if ($is_api) {
-    $router = new app\libraries\ApiRouter($core);
+    $router = new app\libraries\routers\ApiRouter($core);
     $router->run();
 }
 else {
     try {
-        $router = new app\libraries\MainRouter($core, $logged_in);
+        $router = new app\libraries\routers\MainRouter($core, $logged_in);
         $router->run();
     }
     catch (Exception $e) {

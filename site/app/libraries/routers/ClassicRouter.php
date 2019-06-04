@@ -1,6 +1,6 @@
 <?php
 
-namespace app\libraries;
+namespace app\libraries\routers;
 
 class ClassicRouter {
     private $pieces = [];
