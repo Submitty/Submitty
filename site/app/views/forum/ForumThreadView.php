@@ -52,17 +52,17 @@ class ForumThreadView extends AbstractView {
 		$thread_list = [];
 
 		foreach($threadArray as $thread_id => $data){
-			$thread_title = htmlentities($fromIdtoTitle[$thread_id], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+			$thread_title = $fromIdtoTitle[$thread_id];
 
             $thread_link = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id));
 
             $thread_list[$count-1] = Array("thread_title" => $thread_title, "thread_link" => $thread_link, "posts" => Array());
 
 			foreach($data as $post) {
-				$author = htmlentities($post['author'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+				$author = $post['author'];
 				$user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($post["p_author"]);
-				$first_name = htmlentities(trim($user_info["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-				$last_name = htmlentities(trim($user_info["last_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+				$first_name = trim($user_info["first_name"]);
+				$last_name = trim($user_info["last_name"]);
 				$visible_username = $first_name . " " . substr($last_name, 0 , 1) . ".";
 
 				if($post["anonymous"]){
@@ -79,7 +79,6 @@ class ForumThreadView extends AbstractView {
 
                 $post_link = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)) . "#" . $post['p_id'];
 
-				$post_content = htmlentities($post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 				$posted_on = date_format(DateUtils::parseDateTime($post['timestamp_post'], $this->core->getConfig()->getTimezone()), "n/j g:i A");
 
                 $thread_list[$count-1]["posts"][] = Array(
@@ -961,7 +960,7 @@ HTML;
         $this->core->getOutput()->addVendorJs('flatpickr/flatpickr.js');
         $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
 
-        $this->core->getOutput()->addInternalCss('flatpickr.min.css');
+        $this->core->getOutput()->addVendorCss('flatpickr/flatpickr.min.css');
 
         $categories = "";
         $category_colors;
