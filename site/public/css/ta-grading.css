@@ -106,22 +106,9 @@
     box-shadow: 0px 0px 3px 3px rgba(0, 0, 0, 0.4);
     background-color: rgba(0, 0, 0, 0.4);
 }
-.icon-selected.fa-hand-paper {
+.icon-selected.grade_inquiry_icon{
     box-shadow: 0px 0px 3px 3px #ffa500;
     background-color: #ffa500;
-}
-
-.grade_inquiry_pending {
-    animation-name: grade_inquiry_pending_animation;
-    animation-duration: 2s;
-    animation-iteration-count: infinite;
-}
-
-/* animation for pending grade inquiry */
-@keyframes grade_inquiry_pending_animation {
-    0%   {box-shadow: 0px 0px 3px 3px red;background-color:red;}
-    50%  {box-shadow: 0px 0px 3px 3px #ffa500;background-color:#ffa500;}
-    100% {box-shadow: 0px 0px 3px 3px red;background-color:red;}
 }
 
 .icon-header {
@@ -211,9 +198,6 @@ progress::-webkit-progress-value {
 }
 #regrade_info.rubric_panel {
     border:5px solid #ffa500 ;
-}
-#regrade_inner_info.inquiry_alert {
-    border:5px solid #c40233 ;
 }
 #student_info.rubric_panel {
     border:5px solid black;
