@@ -9,11 +9,11 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
 
     private $path;
 
-    public function setUp() {
+    public function setUp(): void {
         $this->path = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         if (file_exists($this->path)) {
             FileUtils::recursiveRmdir($this->path);
         }

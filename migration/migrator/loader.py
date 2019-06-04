@@ -1,6 +1,7 @@
 """Module to handle loading of migrations and modules."""
 from collections import OrderedDict
 from importlib.machinery import SourceFileLoader
+import re
 
 
 def load_module(name, path):
@@ -27,8 +28,9 @@ def load_migrations(path):
     :type path: pathlib.Path or str
     """
     migrations = OrderedDict()
+    r = re.compile(r'^[0-9]+\_.+\.py$')
     filtered = filter(
-        lambda x: x.endswith('.py'),
+        lambda x: r.search(x) is not None,
         [x.name for x in path.iterdir()]
     )
     for migration in sorted(filtered):

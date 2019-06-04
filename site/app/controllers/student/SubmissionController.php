@@ -11,6 +11,9 @@ use app\libraries\Logger;
 use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
 use app\controllers\grading\ElectronicGraderController;
+use app\models\gradeable\SubmissionTextBox;
+use app\models\gradeable\SubmissionCodeBox;
+use app\models\gradeable\SubmissionMultipleChoice;
 
 
 
@@ -92,6 +95,9 @@ class SubmissionController extends AbstractController {
                 break;
             case 'change_request_status':
                 return $this->changeRequestStatus();
+                break;
+            case 'stat_page':
+                return $this->showStats();
                 break;
             case 'display':
             default:
@@ -360,9 +366,14 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Invalid gradeable id '{$gradeable_id}'", false);
         }
 
-        //usernames come in comma delimited. We split on the commas, then filter out blanks.
-        $user_ids = explode (",", $_POST['user_id']);
-        $user_ids = array_filter($user_ids);
+        //filter out empty, null strings
+        $tmp_ids = $_POST['user_id'];
+        if(is_array($tmp_ids)){
+            $user_ids = array_filter($_POST['user_id']);
+        } else{
+            $user_ids = array($tmp_ids);
+            $user_ids = array_filter($user_ids);
+        }
 
         //If no user id's were submitted, give a graceful error.
         if (count($user_ids) === 0) {
@@ -394,26 +405,40 @@ class SubmissionController extends AbstractController {
             $graded_gradeables[] = $gg;
         }
 
-        // Below is true if no users are on a team. In this case, we later make the team automatically,
-        //   so this should not return a failure.
-        // if (count($graded_gradeables) === 0) {
-        //     // No user was on a team
-        //     $msg = 'No user on a team';
-        //     $return = array('success' => false, 'message' => $msg);
-        //     $this->core->getOutput()->renderJson($return);
-        //     return $return;
-        // } else 
+        $null_team_count = 0;
+        $inconsistent_teams = false;
+        if($gradeable->isTeamAssignment()){
+            $teams = [];
+            foreach ($user_ids as $user) {
+                $tmp = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $user);
+                if($tmp === NULL){
+                    $null_team_count ++;
+                }else{
+                    $teams[] = $tmp->getId();
+                }
+            }
+            $teams = array_unique(array_filter($teams));
+            $inconsistent_teams = count($teams) > 1;
+        }
 
         //If the users are on multiple teams.
-        if (count($graded_gradeables) > 1) {
+        if ($gradeable->isTeamAssignment() && $inconsistent_teams) {
             // Not all users were on the same team
             $msg = "Inconsistent teams. One or more users are on different teams.";
             $return = array('success' => false, 'message' => $msg);
             $this->core->getOutput()->renderJson($return);
             return $return;
         }
+        //If a user not assigned to any team is matched with a user already on a team
+        if($gradeable->isTeamAssignment() && $null_team_count != 0 && count($teams) != 0){
+            $msg = "One or more users with no team are being submitted with another user already on a team";
+            $return = array('success' => false, 'message' => $msg);
+            $this->core->getOutput()->renderJson($return);
+            return $return;
+        }
 
         $highest_version = -1;
+
         if(count($graded_gradeables) > 0){
             $graded_gradeable = $graded_gradeables[0];
             $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
@@ -439,7 +464,9 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult($msg, false);
         }
 
-        if (!isset($_POST['num_pages'])) {
+        $is_qr = $_POST['use_qr_codes'] === "true";
+
+        if (!isset($_POST['num_pages']) && !$is_qr) {
             $msg = "Did not pass in number of pages or files were too large.";
             $return = array('success' => false, 'message' => $msg);
             $this->core->getOutput()->renderJson($return);
@@ -537,45 +564,62 @@ class SubmissionController extends AbstractController {
                 if (!@unlink($uploaded_file["tmp_name"][$j])) {
                     return $this->uploadResult("Failed to delete the uploaded file {$uploaded_file["name"][$j]} from temporary storage.", false);
                 }
-            } 
+            }
         }
 
         // use pdf_check.cgi to check that # of pages is valid and split
         // also get the cover image and name for each pdf appropriately
 
-        // Open a cURL connection
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        $qr_prefix = rawurlencode($_POST['qr_prefix']);
-        $qr_suffix = rawurlencode($_POST['qr_suffix']);
-        $ch = curl_init();
-        if($_POST['use_qr_codes'] === "false"){
-            curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."pdf_check.cgi?&num={$num_pages}&sem={$semester}&course={$course}&g_id={$gradeable_id}&ver={$current_time}");
+        if($is_qr){
+            $qr_prefix = rawurlencode($_POST['qr_prefix']);
+            $qr_suffix = rawurlencode($_POST['qr_suffix']);
+
+            $config_data = json_decode(file_get_contents("/usr/local/submitty/config/submitty.json"));
+            //create a new job to split but uploads via QR
+            for($i = 0; $i < $count; $i++){
+                $qr_upload_data = [
+                    "job"       => "BulkUpload",
+                    "semester"  => $semester,
+                    "course"    => $course,
+                    "g_id"      => $gradeable_id,
+                    "timestamp" => $current_time,
+                    "qr_prefix" => $qr_prefix,
+                    "qr_suffix" => $qr_suffix,
+                    "filename"  => $uploaded_file["name"][$i],
+                    "is_qr"     => true
+                ];
+
+                $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . $uploaded_file["name"][$i] . ".json"; 
+
+                //add new job to queue
+                if(!file_put_contents($bulk_upload_job, json_encode($qr_upload_data, JSON_PRETTY_PRINT)) ){
+                    $this->core->getOutput()->renderJsonFail("Failed to write BulkQRSplit job");
+                    return $this->uploadResult("Failed to write BulkQRSplit job", false);
+                }
+            }
         }else{
-            curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."pdf_check_qr.cgi?&sem={$semester}&course={$course}&g_id={$gradeable_id}&ver={$current_time}&qr_prefix={$qr_prefix}&qr_suffix={$qr_suffix}");
-        }
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        $output = curl_exec($ch);
+            for($i = 0; $i < $count; $i++){
+                $job_data = [
+                    "job"       => "BulkUpload",
+                    "semester"  => $semester,
+                    "course"    => $course,
+                    "g_id"      => $gradeable_id,
+                    "timestamp" => $current_time,
+                    "filename"  => $uploaded_file["name"][$i],
+                    "num"       => $num_pages,
+                    "is_qr"     => false
+                ];
 
-        if ($output === false) {
-            return $this->uploadResult(curl_error($ch),false);
-        }
+                $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . $uploaded_file["name"][$i] . ".json"; 
 
-        $output = json_decode($output, true);
-        curl_close($ch);
-
-        if ($output === null) {
-            FileUtils::recursiveRmdir($version_path);
-            return $this->uploadResult("Error JSON response for pdf split: ".json_last_error_msg(),false);
-        }
-        if (!isset($output['valid'])) {
-            FileUtils::recursiveRmdir($version_path);
-            return $this->uploadResult($output, false);
-            //return $this->uploadResult("Missing response in JSON for pdf split",false);
-        }
-        else if ($output['valid'] !== true) {
-            FileUtils::recursiveRmdir($version_path);
-            return $this->uploadResult($output['message'],false);
+                //add new job to queue
+                if(!file_put_contents($bulk_upload_job, json_encode($job_data, JSON_PRETTY_PRINT)) ){
+                    $this->core->getOutput()->renderJsonFail("Failed to write Bulk upload job");
+                    return $this->uploadResult("Failed to write Bulk upload job", false);
+                }
+            }
         }
 
         $return = array('success' => true);
@@ -625,9 +669,14 @@ class SubmissionController extends AbstractController {
 
         $original_user_id = $this->core->getUser()->getId();
 
-        //user ids come in as a comma delimited list. we explode that list, then filter out empty values.
-        $user_ids = explode (",", $_POST['user_id']);
-        $user_ids = array_filter($user_ids);
+        $tmp_ids = $_POST['user_id'];
+        if(is_array($tmp_ids)){
+            $user_ids = array_filter($_POST['user_id']);
+        } else{
+            $user_ids = array($tmp_ids);
+            $user_ids = array_filter($user_ids);
+        }
+        
         //This grabs the first user in the list. If this is a team assignment, they will be the team leader.
         $user_id = reset($user_ids);
 
@@ -676,6 +725,7 @@ class SubmissionController extends AbstractController {
                     $gradeable->createTeam($leader_user, $members);
                 } catch (\Exception $e) {
                     $this->core->addErrorMessage('Team may not have been properly initialized: ' . $e->getMessage());
+                    return $this->uploadResult("Failed to form a team from members: " . implode(",", $members) . ", " . $leader_user, false);
                 }
 
                 // Once team is created, load in the graded gradeable
@@ -788,22 +838,23 @@ class SubmissionController extends AbstractController {
         }
 
         $upload_time_string_tz = $timestamp . " " . $this->core->getConfig()->getTimezone()->getName();
-        
+
         $bulk_upload_data = [
             "submit_timestamp" =>  $current_time_string_tz,
             "upload_timestamp" =>  $upload_time_string_tz,
             "filepath" => $uploaded_file
         ];
 
-        #writeJsonFile returns false on failure.
         if (FileUtils::writeJsonFile(FileUtils::joinPaths($version_path, "bulk_upload_data.json"), $bulk_upload_data) === false) {
             return $this->uploadResult("Failed to create bulk upload file for this submission.", false);
         }
-        
+
         $queue_file = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
             $gradeable->getId(), $who_id, $new_version);
         $queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_queue",
             implode("__", $queue_file));
+
+        $vcs_checkout = isset($_REQUEST['vcs_checkout']) ? $_REQUEST['vcs_checkout'] === "true" : false;
 
         // create json file...
         $queue_data = array("semester" => $this->core->getConfig()->getSemester(),
@@ -816,7 +867,8 @@ class SubmissionController extends AbstractController {
             "team" => $team_id,
             "who" => $who_id,
             "is_team" => $gradeable->isTeamAssignment(),
-            "version" => $new_version);
+            "version" => $new_version,
+            "vcs_checkout" => $vcs_checkout);
 
         if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
             return $this->uploadResult("Failed to create file for grading queue.", false);
@@ -883,7 +935,7 @@ class SubmissionController extends AbstractController {
         $timestamp_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
             $gradeable->getId(), $timestamp);
         $files = FileUtils::getAllFiles($timestamp_path);
-        
+
         //check if there are any pdfs left to assign to students, otherwise delete the folder
         $any_pdfs_left = false;
         foreach ($files as $file){
@@ -923,7 +975,7 @@ class SubmissionController extends AbstractController {
         $clobber = isset($_REQUEST['clobber']) && $_REQUEST['clobber'] === 'true';
 
         $vcs_checkout = isset($_REQUEST['vcs_checkout']) ? $_REQUEST['vcs_checkout'] === "true" : false;
-        if ($vcs_checkout && !isset($_POST['repo_id'])) {
+        if ($vcs_checkout && !isset($_POST['git_repo_id'])) {
             return $this->uploadResult("Invalid repo id.", false);
         }
 
@@ -949,7 +1001,7 @@ class SubmissionController extends AbstractController {
         $original_user_id = $this->core->getUser()->getId();
         $user_id = $_POST['user_id'];
         // repo_id for VCS use
-        $repo_id = $_POST['repo_id'];
+        $repo_id = ($vcs_checkout ? $_POST['git_repo_id'] : "");
 
         // make sure is full grader if the two ids do not match
         if ($original_user_id !== $user_id && !$this->core->getUser()->accessFullGrading()) {
@@ -1063,19 +1115,49 @@ class SubmissionController extends AbstractController {
             }
 
             // save the contents of the text boxes to files
-            $empty_textboxes = true;
-            if (isset($_POST['textbox_answers'])) {
-                $textbox_answer_array = json_decode($_POST['textbox_answers']);
-                for ($i = 0; $i < $gradeable->getAutogradingConfig()->getNumTextBoxes(); $i++) {
-                    $textbox_answer_val = $textbox_answer_array[$i];
-                    if ($textbox_answer_val != "") $empty_textboxes = false;
-                    $filename = $gradeable->getAutogradingConfig()->getTextboxes()[$i]->getFileName();
-                    $dst = FileUtils::joinPaths($version_path, $filename);
-                    // FIXME: add error checking
-                    $file = fopen($dst, "w");
-                    fwrite($file, $textbox_answer_val);
-                    fclose($file);
+            $empty_inputs = true;
+            $num_short_answers = 0;
+            $num_codeboxes = 0;
+            $num_multiple_choice = 0;
+
+            $short_answer_objects    = $_POST['short_answer_answers'] ?? "";
+            $codebox_objects         = $_POST['codebox_answers'] ?? "";
+            $multiple_choice_objects = $_POST['multiple_choice_answers'] ?? "";
+            $short_answer_objects    = json_decode($short_answer_objects,true);
+            $codebox_objects         = json_decode($codebox_objects,true);
+            $multiple_choice_objects = json_decode($multiple_choice_objects,true);
+
+            $this_config_inputs = $gradeable->getAutogradingConfig()->getInputs() ?? array();
+
+            foreach($this_config_inputs as $this_input) {
+                if($this_input instanceof SubmissionTextBox){
+                    $answers = $short_answer_objects["short_answer_" .  $num_short_answers] ?? array();
+                    $num_short_answers += 1;
                 }
+                else if($this_input instanceof SubmissionCodeBox){
+                    $answers = $codebox_objects["codebox_" .  $num_codeboxes] ?? array();
+                    $num_codeboxes += 1;
+                }
+                else if($this_input instanceof SubmissionMultipleChoice){
+                    $answers = $multiple_choice_objects["multiple_choice_" .  $num_multiple_choice] ?? array();;
+                    $num_multiple_choice += 1;
+                }else{
+                    //TODO: How should we handle this case?
+                    continue;
+                }
+
+                $filename = $this_input->getFileName();
+                $dst = FileUtils::joinPaths($version_path, $filename);
+
+                if ( count($answers) > 0)  $empty_inputs = false;
+
+                // FIXME: add error checking
+                $file = fopen($dst, "w");
+
+                foreach($answers as $answer_val){
+                    fwrite($file, $answer_val . "\n");
+                }
+                fclose($file);
             }
 
             $previous_files_src = array();
@@ -1092,7 +1174,7 @@ class SubmissionController extends AbstractController {
             }
 
 
-            if (empty($uploaded_files) && empty($previous_files_src) && $empty_textboxes) {
+            if (empty($uploaded_files) && empty($previous_files_src) && $empty_inputs) {
                 return $this->uploadResult("No files to be submitted.", false);
             }
 
@@ -1246,6 +1328,13 @@ class SubmissionController extends AbstractController {
             $vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
             $vcs_path = $gradeable->getVcsSubdirectory();
 
+            if ($gradeable->getVcsHostType() == 0 || $gradeable->getVcsHostType() == 1) {
+                $vcs_path = str_replace("{\$gradeable_id}",$gradeable_id,$vcs_path);
+                $vcs_path = str_replace("{\$user_id}",$who_id,$vcs_path);
+                $vcs_path = str_replace("{\$team_id}",$who_id,$vcs_path);
+                $vcs_full_path = $vcs_base_url.$vcs_path;
+            }
+
             // use entirely student input
             if ($vcs_base_url == "" && $vcs_path == "") {
                 if ($repo_id == "") {
@@ -1270,6 +1359,17 @@ class SubmissionController extends AbstractController {
             if (!@touch(FileUtils::joinPaths($version_path, ".submit.VCS_CHECKOUT"))) {
                 return $this->uploadResult("Failed to touch file for vcs submission.", false);
             }
+
+            // Public or private github
+            if ($gradeable->getVcsHostType() == 2 || $gradeable->getVcsHostType() == 3) {
+                $dst = FileUtils::joinPaths($version_path, ".submit.VCS_CHECKOUT");
+                $json = array("git_user_id" => $_POST["git_user_id"],
+                              "git_repo_id" => $_POST["git_repo_id"]);
+                if (!@file_put_contents($dst, FileUtils::encodeJson($json))) {
+                    return $this->uploadResult("Failed to write to VCS_CHECKOUT file.", false);
+                }
+            }
+
         }
 
         // save the contents of the page number inputs to files
@@ -1323,15 +1423,22 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Failed to save timestamp file for this submission.", false);
         }
 
-        $queue_file = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
-            $gradeable->getId(), $who_id, $new_version);
+        $queue_file_helper = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
+                                   $gradeable->getId(), $who_id, $new_version);
+        $queue_file_helper = implode("__", $queue_file_helper);
         $queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_queue",
-            implode("__", $queue_file));
+                                           $queue_file_helper);
+        // SPECIAL NAME FOR QUEUE FILE OF VCS GRADEABLES
+        $vcs_queue_file = "";
+        if ($vcs_checkout === true) {
+          $vcs_queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_queue",
+                                                 "VCS__".$queue_file_helper);
+        }
 
         // create json file...
         $queue_data = array("semester" => $this->core->getConfig()->getSemester(),
             "course" => $this->core->getConfig()->getCourse(),
-            "gradeable" =>  $gradeable->getId(),
+            "gradeable" => $gradeable->getId(),
             "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
             "max_possible_grading_time" => $gradeable->getAutogradingConfig()->getMaxPossibleGradingTime(),
             "queue_time" => $current_time,
@@ -1339,15 +1446,24 @@ class SubmissionController extends AbstractController {
             "team" => $team_id,
             "who" => $who_id,
             "is_team" => $gradeable->isTeamAssignment(),
-            "version" => $new_version);
+            "version" => $new_version,
+            "vcs_checkout" => $vcs_checkout);
 
         if ($gradeable->isTeamAssignment()) {
             $queue_data['team_members'] = $team->getMemberUserIds();
         }
 
-
-        if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
+        // Create the vcs file first!  (avoid race condition, we must
+        // check out the files before trying to grade them)
+        if ($vcs_queue_file !== "") {
+          if (@file_put_contents($vcs_queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
+            return $this->uploadResult("Failed to create vcs file for grading queue.", false);
+          }
+        } else {
+          // Then create the file that will trigger autograding
+          if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
             return $this->uploadResult("Failed to create file for grading queue.", false);
+          }
         }
 
         if($gradeable->isTeamAssignment()) {
@@ -1537,7 +1653,7 @@ class SubmissionController extends AbstractController {
     }
 
     private function ajaxUploadImagesFiles() {
-        if($this->core->getUser()->getGroup() !== 1) {
+        if(!$this->core->getUser()->accessAdmin()) {
             return $this->uploadResultMessage("You have no permission to access this page", false);
         }
 
@@ -1669,7 +1785,7 @@ class SubmissionController extends AbstractController {
     }
 
     private function ajaxUploadCourseMaterialsFiles() {
-      if($this->core->getUser()->getGroup() !== 1) {
+      if(!$this->core->getUser()->accessAdmin()) {
          return $this->uploadResultMessage("You have no permission to access this page", false);
       }
 
@@ -1846,4 +1962,31 @@ class SubmissionController extends AbstractController {
         $this->core->getOutput()->renderString($refresh_string);
         return array('refresh' => $refresh_bool, 'string' => $refresh_string);
     }
+
+    public function showStats() {
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+        $json_path = $course_path . "/submissions/" . $gradeable_id . "/";
+        $path_reset = $json_path;
+        $users = array();
+        if(!file_exists($json_path)) {
+            return;   
+        }
+        $user_id_arr = array_slice(scandir($json_path), 2);
+        $user = $user_id_arr[0];
+        $users[$user] = array();
+        for($i = 0; $i < count($user_id_arr); ++$i) {
+            $files = scandir($json_path . $user_id_arr[$i]);
+            $num_files = count($files) - 3;
+            $json_path = $json_path . $user_id_arr[$i] . "/" . $num_files . "/bulk_upload_data.json";
+            $users[$user_id_arr[$i]]["first_name"] = $this->core->getQueries()->getUserById($user_id_arr[$i])->getDisplayedFirstName();
+            $users[$user_id_arr[$i]]["last_name"] = $this->core->getQueries()->getUserById($user_id_arr[$i])->getDisplayedLastName();
+            $users[$user_id_arr[$i]]['upload_time'] = json_decode(file_get_contents($json_path), true)['upload_timestamp'];
+            $users[$user_id_arr[$i]]['submit_time'] = json_decode(file_get_contents($json_path), true)['submit_timestamp'];
+            $users[$user_id_arr[$i]]['file'] = json_decode(file_get_contents($json_path), true)['filepath'];
+            $json_path = $path_reset;
+        }
+        $this->core->getOutput()->renderOutput('grading\ElectronicGrader', 'statPage', $users);
+    }
+
 }

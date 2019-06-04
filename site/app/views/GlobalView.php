@@ -36,14 +36,15 @@ class GlobalView extends AbstractView {
         ]);
      }
 
-    public function footer($runtime, $wrapper_urls) {
+    public function footer($runtime, $wrapper_urls, $footer_links) {
         return $this->core->getOutput()->renderTwigTemplate("GlobalFooter.twig", [
             "runtime" => $runtime,
             "wrapper_enabled" => $this->core->getConfig()->wrapperEnabled(),
             "is_debug" => $this->core->getConfig()->isDebug(),
             "submitty_queries" => $this->core->getConfig()->isDebug() && $this->core->getSubmittyDB() ? $this->core->getSubmittyDB()->getPrintQueries() : [],
             "course_queries" => $this->core->getConfig()->isDebug() && $this->core->getCourseDB() ? $this->core->getCourseDB()->getPrintQueries() : [],
-            "wrapper_urls" => $wrapper_urls
+            "wrapper_urls" => $wrapper_urls,
+            "footer_links" => $footer_links
         ]);
     }
 

@@ -13,7 +13,6 @@
 #include <stdlib.h>
 #include <string>
 #include <algorithm>
-#include "STRutil.h"
 #include "difference.h"
 #include "tokens.h"
 
@@ -24,7 +23,7 @@
  * ARGS: token: string with token to search for, searchstring: string of where to search for token
  * RETURN: int
  * PURPOSE: Looks for a single token in a string using the Rabin-Karp rolling hash
- * method.  Returns starting index if found, -1 if not.  
+ * method.  Returns starting index if found, -1 if not.
  */
 int RabinKarpSingle ( std::string token, std::string searchstring );
 
@@ -34,19 +33,6 @@ int RabinKarpSingle ( std::string token, std::string searchstring );
  * PURPOSE: split up the tokens within the string into individual tokens stored in the vector
  */
 std::vector< std::string > splitTokens ( const std::string& tokens );
-
-/* METHOD: searchToken
- * ARGS: student: string containing student output, token: vector of strings that
- * is based of off the student output
- * RETURN: TestResults*
- * PURPOSE: Looks for a token specified in the second argument in the
- * student output. The algorithm runs in linear time with respect to the
- * length of the student output and preprocessing for the algorithm is
- * linear with respect to the token. Overall, the algorithm runs in O(N + M)
- * time where N is the length of the student and M is the length of the token.
- */
-TestResults* searchToken_doit (const TestCase &tc, const nlohmann::json& j);
-//( const std::string& student, const std::vector<std::string>& tokens );
 
 /* METHOD: searchTokens
  * ARGS: student: string of student output, token_vec: vector of strings based

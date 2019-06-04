@@ -88,15 +88,17 @@ if [ ${VAGRANT} == 1 ]; then
 ############################################################
 ${DISTRO_LINE}
 ##                                                        ##
-##  All user accounts have same password unless otherwise ##
-##  noted below. The following user accounts exist:       ##
-##    vagrant/vagrant, root/vagrant, submitty_dbuser,     ##
-##    submitty_php, submitty_cgi, submitty_daemon, ta,    ##
-##    instructor, developer, postgres                     ##
+##  All user accounts have same password as name.         ##
 ##                                                        ##
-##  The following accounts have database accounts         ##
-##  with same password as above:                          ##
-##    submitty_dbuser, postgres, root, vagrant            ##
+##  The following accounts are system users:              ##
+##    vagrant, root, submitty_php, submitty_cgi,          ##
+##    submitty_daemon, ta, instructor, postgres           ##
+##                                                        ##
+##  The following accounts are database accounts:         ##
+##    submitty_dbuser, postgres, vagrant                  ##
+##                                                        ##
+##  The following users can log into the website:         ##
+##    instructor, ta, ta2, ta3, student                   ##
 ##                                                        ##
 ##  The VM can be accessed with the following urls:       ##
 ${SUBMISSION_LINE}
@@ -106,7 +108,11 @@ ${GIT_LINE}
 ##  The database can be accessed on the host machine at   ##
 ${DATABASE_LINE}
 ##                                                        ##
-##  Checkout https://submitty.org/developer for helpful   ##
+##  The vagrant box comes with some helpful commands,     ##
+##  which can be shown by doing:                          ##
+##    submitty_help                                       ##
+##                                                        ##
+##  Check out https://submitty.org/developer for helpful  ##
 ##  information on getting started and developing.        ##
 ##                                                        ##
 ##  Happy developing!                                     ##

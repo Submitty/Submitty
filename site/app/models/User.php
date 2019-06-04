@@ -3,12 +3,15 @@
 namespace app\models;
 
 use app\libraries\Core;
+use app\exceptions\ValidationException;
 
 /**
  * Class User
  *
  * @method string getId()
  * @method void setId(string $id) Get the id of the loaded user
+ * @method void getNumericId()
+ * @method void setNumericId(string $id)
  * @method void setAnonId(string $anon_id)
  * @method string getPassword()
  * @method string getLegalFirstName() Get the first name of the loaded user
@@ -54,6 +57,8 @@ class User extends AbstractModel {
 
     /** @property @var string The id of this user which should be a unique identifier (ex: RCS ID at RPI) */
     protected $id;
+    /** @property @var string Alternate ID for a user, such as a campus assigned ID (ex: RIN at RPI) */
+    protected $numeric_id = null;
     /** @property @var string The anonymous id of this user which should be unique for each course they are in*/
     protected $anon_id;
     /**
@@ -132,6 +137,10 @@ class User extends AbstractModel {
             $this->setPassword($details['user_password']);
         }
 
+        if (isset($details['user_numeric_id'])) {
+            $this->setNumericId($details['user_numeric_id']);
+        }
+
         if (!empty($details['anon_id'])) {
             $this->anon_id = $details['anon_id'];
         }
@@ -161,6 +170,11 @@ class User extends AbstractModel {
         $this->notification_settings['all_new_threads'] = !empty($details['all_new_threads']) ? $details['all_new_threads'] : false;
         $this->notification_settings['all_new_posts'] = !empty($details['all_new_posts']) ? $details['all_new_posts'] : false;
         $this->notification_settings['all_modifications_forum'] = !empty($details['all_modifications_forum']) ? $details['all_modifications_forum'] : false;
+        $this->notification_settings['reply_in_post_thread_email'] = !empty($details['reply_in_post_thread_email']) ? $details['reply_in_post_thread_email'] : false;
+        $this->notification_settings['merge_threads_email'] = !empty($details['merge_threads_email']) ? $details['merge_threads_email'] : false;
+        $this->notification_settings['all_new_threads_email'] = !empty($details['all_new_threads_email']) ? $details['all_new_threads_email'] : false;
+        $this->notification_settings['all_new_posts_email'] = !empty($details['all_new_posts_email']) ? $details['all_new_posts_email'] : false;
+        $this->notification_settings['all_modifications_forum_email'] = !empty($details['all_modifications_forum_email']) ? $details['all_modifications_forum_email'] : false;
 
         $this->registration_section = isset($details['registration_section']) ? $details['registration_section'] : null;
         $this->rotating_section = isset($details['rotating_section']) ? intval($details['rotating_section']) : null;
@@ -263,7 +277,7 @@ class User extends AbstractModel {
     }
 
     public function setGradingRegistrationSections($sections) {
-        if ($this->getGroup() < 4) {
+        if ($this->accessGrading()) {
             $this->grading_registration_sections = $sections;
         }
     }
@@ -318,16 +332,16 @@ class User extends AbstractModel {
 			return preg_match("~^[1-4]{1}$~", $data) === 1;
 		case 'registration_section':
 			//Registration section must contain only alpha (upper and lower permitted), numbers, underscores, hyphens.
-			//"NULL" is reserved, so section must not contain any alpha-case variation of "null".  e.g. "null", "NULL", "Null", etc.
-			return preg_match("~^(?!^null$)[a-z0-9_\-]+$~i", $data) === 1;
+			//"NULL" registration section should be validated as a datatype, not as a string.
+			return preg_match("~^(?!^null$)[a-z0-9_\-]+$~i", $data) === 1 || is_null($data);
 		case 'user_password':
 	        //Database password cannot be blank, no check on format
 			return $data !== "";
 		default:
-			//$data can't be validated since $field is unknown.  Notify developer with a stop error (also protectes data record integrity).
-			$field = var_export(htmlentities($field), true);
-			$data = var_export(htmlentities($data), true);
-			trigger_error('User::validateUserData() called with unknown $field '.$field.' and $data '.$data, E_USER_ERROR);
+			//$data can't be validated since $field is unknown.  Notify developer with an exception (also protectes data record integrity).
+			$ex_field = '$field: ' . var_export(htmlentities($field), true);
+			$ex_data = '$data:  ' . var_export(htmlentities($data), true);
+			throw new ValidationException('User::validateUserData() called with unknown $field.  See extra details, below.', array($ex_field, $ex_data));
     	}
     }
 

@@ -29,7 +29,7 @@ abstract class AbstractAuthentication {
     abstract public function authenticate();
 
     public function setUserId($user_id) {
-        $this->user_id = strtolower($user_id);
+        $this->user_id = trim(strtolower($user_id));
     }
 
     public function setPassword($password) {

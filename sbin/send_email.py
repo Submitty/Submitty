@@ -18,22 +18,27 @@ try:
         os.path.dirname(os.path.realpath(__file__)), '..', 'config')
 
     with open(os.path.join(CONFIG_PATH, 'database.json')) as open_file:
-        CONFIG = json.load(open_file)
+        DATABASE_CONFIG = json.load(open_file)
 
-    EMAIL_USER = CONFIG.get('email_user', None)
-    EMAIL_PASSWORD = CONFIG.get('email_password', None)
-    EMAIL_SENDER = CONFIG['email_sender']
-    EMAIL_HOSTNAME = CONFIG['email_server_hostname']
-    EMAIL_PORT = int(CONFIG['email_server_port'])
-    EMAIL_LOG_PATH = CONFIG["email_logs_path"]
+    with open(os.path.join(CONFIG_PATH, 'email.json')) as open_file:
+        EMAIL_CONFIG = json.load(open_file)
 
-    DB_HOST = CONFIG['database_host']
-    DB_USER = CONFIG['database_user']
-    DB_PASSWORD = CONFIG['database_password']
+    EMAIL_USER = EMAIL_CONFIG.get('email_user', None)
+    EMAIL_PASSWORD = EMAIL_CONFIG.get('email_password', None)
+    EMAIL_SENDER = EMAIL_CONFIG['email_sender']
+    EMAIL_HOSTNAME = EMAIL_CONFIG['email_server_hostname']
+    EMAIL_PORT = int(EMAIL_CONFIG['email_server_port'])
+    EMAIL_REPLY_TO = EMAIL_CONFIG['email_reply_to']
+    EMAIL_LOG_PATH = EMAIL_CONFIG["email_logs_path"]
+
+    DB_HOST = DATABASE_CONFIG['database_host']
+    DB_USER = DATABASE_CONFIG['database_user']
+    DB_PASSWORD = DATABASE_CONFIG['database_password']
 
     TODAY = datetime.datetime.now()
     LOG_FILE = open(os.path.join(
-        EMAIL_LOG_PATH, "{}{}{}.txt".format(TODAY.year, TODAY.month, TODAY.day)), 'a')
+        EMAIL_LOG_PATH, "{:04d}{:02d}{:02d}.txt".format(TODAY.year, TODAY.month,
+                                                        TODAY.day)), 'a')
 except Exception as config_fail_error:
     print("[{}] Error: Email/Database Configuration Failed {}".format(
         str(datetime.datetime.now()), str(config_fail_error)))
@@ -98,8 +103,20 @@ def mark_sent(email_id, db):
 
 def construct_mail_string(send_to, subject, body):
     """Format an email string."""
-    return "TO:%s\nFrom: %s\nSubject:  %s \n\n\n %s \n\n" % (
-        send_to, EMAIL_SENDER, subject, body)
+    headers = [
+        ('Content-Type', 'text/plain; charset=utf-8'),
+        ('TO', send_to),
+        ('From', EMAIL_SENDER),
+        ('reply-to', EMAIL_REPLY_TO),
+        ('Subject', subject)
+    ]
+
+    msg = ''
+    for header in headers:
+        msg += "{}: {}\n".format(*header)
+
+    msg += "\n\n{}\n\n".format(body)
+    return msg
 
 
 def send_email():
@@ -114,7 +131,7 @@ def send_email():
     for email_data in queued_emails:
         email = construct_mail_string(
             email_data["send_to"], email_data["subject"], email_data["body"])
-        mail_client.sendmail(EMAIL_SENDER, email_data["send_to"], email)
+        mail_client.sendmail(EMAIL_SENDER, email_data["send_to"], email.encode('utf8'))
         mark_sent(email_data["id"], db)
 
     LOG_FILE.write("[{}] Sucessfully Emailed {} Users\n".format(

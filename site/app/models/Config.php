@@ -23,6 +23,7 @@ use app\libraries\Utils;
  * @method string getCgiUrl()
  * @method string getSiteUrl()
  * @method string getSubmittyPath()
+ * @method string getCgiTmpPath()
  * @method string getCoursePath()
  * @method string getDatabaseDriver()
  * @method array getSubmittyDatabaseParams()
@@ -50,7 +51,9 @@ use app\libraries\Utils;
  * @method string getVcsType()
  * @method string getPrivateRepository()
  * @method string getRoomSeatingGradeableId()
+ * @method bool isSeatingOnlyForInstructor()
  * @method array getCourseJson()
+ * @method string getSecretSession()
  */
 
 class Config extends AbstractModel {
@@ -71,7 +74,7 @@ class Config extends AbstractModel {
 
     /** @property @var string path on the filesystem that points to the course data directory */
     protected $config_path;
-    /** @property @var string path to the ini file that contains all the course specific settings */
+    /** @property @var string path to the json file that contains all the course specific settings */
     protected $course_json_path;
 
     /** @property @var array */
@@ -105,6 +108,8 @@ class Config extends AbstractModel {
     protected $submitty_log_path;
     /** @property @var bool */
     protected $log_exceptions;
+    /** @property @var string */
+    protected $cgi_tmp_path;
 
     /** @property @var string */
     protected $database_driver = "pgsql";
@@ -177,8 +182,12 @@ class Config extends AbstractModel {
     protected $regrade_enabled;
     /** @property @var string */
     protected $regrade_message;
+    /** @property @var bool*/
+    protected $seating_only_for_instructor;
     /** @property @var string|null */
     protected $room_seating_gradeable_id;
+    /** @property @var string */
+    protected $secret_session;
 
     /**
      * Config constructor.
@@ -255,9 +264,14 @@ class Config extends AbstractModel {
         }
 
         $this->timezone = new \DateTimeZone($this->timezone);
-
         $this->base_url = rtrim($this->base_url, "/")."/";
-        $this->cgi_url = $this->base_url."cgi-bin/";
+
+        if (!empty($submitty_json['cgi_url'])){
+            $this->cgi_url = rtrim($submitty_json['cgi_url'], "/")."/";
+        }
+        else {
+            $this->cgi_url = $this->base_url."cgi-bin/";
+        }
 
         if (empty($submitty_json['vcs_url'])) {
             $this->vcs_url = $this->base_url . '{$vcs_type}/';
@@ -265,6 +279,8 @@ class Config extends AbstractModel {
         else {
             $this->vcs_url = rtrim($submitty_json['vcs_url'], '/').'/';
         }
+
+        $this->cgi_tmp_path = FileUtils::joinPaths($this->submitty_path, "tmp", "cgi");
 
         // Check that the paths from the config file are valid
         foreach(array('submitty_path', 'submitty_log_path') as $path) {
@@ -284,6 +300,24 @@ class Config extends AbstractModel {
         if (!empty($this->semester) && !empty($this->course)) {
             $this->course_path = FileUtils::joinPaths($this->submitty_path, "courses", $this->semester, $this->course);
         }
+
+        $secrets_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'secrets_submitty_php.json'));
+        if (!$secrets_json) {
+            throw new ConfigException("Could not find secrets config: {$this->config_path}/secrets_submitty_php.json");
+        }
+
+        foreach(['session'] as $key) {
+            $var = "secret_{$key}";
+            $secrets_json[$key] = trim($secrets_json[$key]) ?? '';
+            if (empty($secrets_json[$key])) {
+                throw new ConfigException("Missing secret var: {$key}");
+            }
+            else if (strlen($secrets_json[$key]) < 32) {
+                // enforce a minimum 32 bytes for the secrets
+                throw new ConfigException("Secret {$key} is too weak. It should be at least 32 bytes.");
+            }
+            $this->$var = $secrets_json[$key];
+        }
     }
 
     public function loadCourseJson($course_json_path) {
@@ -297,7 +331,7 @@ class Config extends AbstractModel {
         }
 
         if (!isset($this->course_json['database_details']) || !is_array($this->course_json['database_details'])) {
-            throw new ConfigException("Missing config section 'database_details' in ini file");
+            throw new ConfigException("Missing config section 'database_details' in json file");
         }
 
         $this->course_database_params = array_merge($this->submitty_database_params, $this->course_json['database_details']);
@@ -306,7 +340,7 @@ class Config extends AbstractModel {
             'course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
             'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_rainbow_grades_summary',
             'display_custom_message', 'room_seating_gradeable_id', 'course_email', 'vcs_base_url', 'vcs_type',
-            'private_repository', 'forum_enabled', 'regrade_enabled', 'regrade_message'
+            'private_repository', 'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor', 'regrade_message'
         ];
         $this->setConfigValues($this->course_json, 'course_details', $array);
 
@@ -330,7 +364,7 @@ class Config extends AbstractModel {
         }
 
         $array = array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary',
-            'display_custom_message', 'forum_enabled', 'regrade_enabled');
+            'display_custom_message', 'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor');
         foreach ($array as $key) {
             $this->$key = ($this->$key == true) ? true : false;
         }
@@ -351,12 +385,12 @@ class Config extends AbstractModel {
 
     private function setConfigValues($config, $section, $keys) {
         if (!isset($config[$section]) || !is_array($config[$section])) {
-            throw new ConfigException("Missing config section '{$section}' in ini file");
+            throw new ConfigException("Missing config section '{$section}' in json file");
         }
 
         foreach ($keys as $key) {
             if (!isset($config[$section][$key])) {
-              throw new ConfigException("Missing config setting '{$section}.{$key}' in configuration ini file");
+              throw new ConfigException("Missing config setting '{$section}.{$key}' in configuration json file");
             }
             $this->$key = $config[$section][$key];
         }
@@ -415,6 +449,7 @@ class Config extends AbstractModel {
     public function displayRoomSeating() {
         return $this->room_seating_gradeable_id !== "";
     }
+
 
     public function getLogPath() {
         return $this->submitty_log_path;

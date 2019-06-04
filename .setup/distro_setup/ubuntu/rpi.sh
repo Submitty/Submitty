@@ -103,6 +103,7 @@ curl https://soot-build.cs.uni-paderborn.de/public/origin/develop/soot/soot-deve
 -o /dev/null > /dev/null 2>&1
 popd > /dev/null
 
+# fix all java_tools permissions
 chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/java_tools
 chmod -R 755 ${SUBMITTY_INSTALL_DIR}/java_tools
 
@@ -172,6 +173,7 @@ pip3 install numpy
 pip3 install matplotlib
 pip3 install opencv-python
 pip3 install scipy
+pip3 install scikit-image
 
 ##################################################
 #install some pdflatex packages

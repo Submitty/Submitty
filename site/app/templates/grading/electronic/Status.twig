@@ -158,10 +158,16 @@
                     Download Zip of All Assigned Students
                 </a>
             {% endif %}
-            {% if core.getUser().accessFullGrading() %}
+            {% if core.getUser().accessFullGrading() and submitted_total %}
                 <a class="btn btn-primary"
                    href="{{ core.buildUrl({'component': 'misc', 'page': 'download_all_assigned', 'dir': 'submissions', 'gradeable_id': gradeable_id, 'type': 'All'}) }}">
                     Download Zip of All Students
+                </a>
+            {% endif %}
+	    {% if core.getUser().accessFullGrading() %}
+                <a class="btn btn-primary"
+                   href="{{ core.buildUrl({'component': 'submission', 'action': 'stat_page', 'gradeable_id': gradeable_id}) }}">
+                    Bulk Upload Forensics
                 </a>
             {% endif %}
         {% endif %}

@@ -86,12 +86,12 @@ def perform_systemctl_command_on_worker(daemon, mode, target):
       ssh = paramiko.SSHClient()
       ssh.get_host_keys()
       ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-      ssh.connect(hostname = host, username = user)
+      ssh.connect(hostname = host, username = user, timeout=10)
   except Exception as e:
       print("ERROR: could not ssh to {0}@{1} due to following error: {2}".format(user, host,str(e)))
       return EXIT_CODES['failure']
   try:
-      (stdin, stdout, stderr) = ssh.exec_command(command)
+      (stdin, stdout, stderr) = ssh.exec_command(command, timeout=5)
       status = int(stdout.channel.recv_exit_status())
   except Exception as e:
       print("ERROR: Command did not properly execute: ".format(host, str(e)))
@@ -128,7 +128,7 @@ def verify_systemctl_status_code(status, mode, daemon, target, disable_on_failur
 
   return correct
 
-if __name__ == "__main__":
+def parse_arguments():
   #parse arguments
   parser = argparse.ArgumentParser(description='A wrapper for the various systemctl functions. \
     This script must be run as the submitty supervisor.',
@@ -145,14 +145,11 @@ if __name__ == "__main__":
   parser.add_argument("mode", metavar="MODE", type=str.lower, help="Valid modes are status, start, restart, and stop", 
     choices=VALID_MODES)
 
-  args = parser.parse_args()
+  return parser.parse_args()
 
-  if args.daemon == None:
+def main(daemon, target, mode):
+  if daemon == None:
     daemon = 'worker'
-  else:
-    daemon = args.daemon
-  target = args.target
-  mode = args.mode
 
   # determine whether we are working on a local or foreign machine
   local = False if (target != None and target.lower() != 'primary') else True
@@ -198,4 +195,7 @@ if __name__ == "__main__":
 
 
   sys.exit(status)
-  
+
+if __name__ == "__main__":
+  args = parse_arguments()
+  main(args.daemon, args.target, args.mode)

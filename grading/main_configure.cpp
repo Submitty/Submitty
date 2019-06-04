@@ -1,9 +1,9 @@
 #include <iostream>
 #include <fstream>
 
+#include "execute.h"
 #include "TestCase.h"
 #include "default_config.h"
-
 
 /*
 
@@ -11,7 +11,6 @@
   config.json for easier parsing.
 
 */
-
 
 // =====================================================================
 // =====================================================================
@@ -31,8 +30,6 @@ nlohmann::json printTestCase(TestCase test) {
   j["view_file"] = "";
   return j;
 }
-
-
 
 int main(int argc, char *argv[]) {
 
@@ -96,9 +93,8 @@ int main(int argc, char *argv[]) {
         visible += points;
     }
     //container name only matters if we try to get the commands for this testcase.
-    //TODO: IN THIS CASE, THIS IS A HACK THAT MUST BE FIXED.
     std::string container_name = "";
-    TestCase tc(config_json,which_testcase, container_name);
+    TestCase tc(config_json,which_testcase,container_name);
     if (tc.isSubmissionLimit()) {
       max_submissions = tc.getMaxSubmissions();
     }
@@ -164,33 +160,169 @@ int main(int argc, char *argv[]) {
       j["part_names"].push_back((*parts)[i]);
     }
   }
-  nlohmann::json::iterator textboxes = config_json.find("textboxes");
-  if (textboxes != config_json.end()) {
-    j["textboxes"] =  nlohmann::json::array();
-    for (int i = 0; i < textboxes->size(); i++) {
-      nlohmann::json textbox;
-      nlohmann::json::iterator label = (*textboxes)[i].find("label");
-      assert (label != (*textboxes)[i].end());
-      assert (label->is_string());
-      textbox["label"] = *label;
-      // default #rows = 0 => single row, non resizeable, textbox
-      textbox["rows"]  = (*textboxes)[i].value("rows",0);
-      assert (int(textbox["rows"]) >= 0);
-      textbox["filename"] = (*textboxes)[i].value("filename","textbox_"+std::to_string(i)+".txt");
-      //list of images to display above the text box
-      textbox["images"] = (*textboxes)[i].value("images", nlohmann::json::array({}));
-      j["textboxes"].push_back(textbox);
+
+  /******************************************
+
+  Validate and inflate notebook data
+
+  ******************************************/
+
+  nlohmann::json::iterator in_notebook_cells = config_json.find("notebook");
+  if (in_notebook_cells != config_json.end())
+  {
+
+    // Setup "notebook" items inside the 'j' json item that will be passed forward
+    j["notebook"] = nlohmann::json::array();
+
+    for (int i = 0; i < in_notebook_cells->size(); i++)
+    {
+      nlohmann::json out_notebook_cell;
+      nlohmann::json in_notebook_cell = (*in_notebook_cells)[i];
+
+      // Get type field
+      std::string type = in_notebook_cell.value("type", "");
+      assert(type != "");
+      out_notebook_cell["type"] = type;
+
+      // Handle each specific note book cell type
+      // Handle markdown data
+      if(type == "markdown")
+      {
+          // Get markdown items
+          std::string markdown_string = in_notebook_cell.value("markdown_string", "");
+          std::string markdown_file = in_notebook_cell.value("markdown_file", "");
+
+          // Assert only one was passed in
+          assert(
+                  (markdown_string != "" && markdown_file == "") ||
+                  (markdown_string == "" && markdown_file != "")
+                  );
+
+          // Pass forward the item that was passed in
+          if(markdown_string != "")
+          {
+              out_notebook_cell["markdown_string"] = markdown_string;
+          }
+          else
+          {
+              out_notebook_cell["markdown_file"] = markdown_file;
+          }
+      }
+
+      // Handle image data
+      else if(type == "image")
+      {
+          // Get req image items
+          std::string image = in_notebook_cell.value("image", "");
+
+          // Assert req fields were not empty
+          assert(image != "");
+
+          // Get optional image items
+          int height = in_notebook_cell.value("height", 0);
+          int width = in_notebook_cell.value("width", 0);
+          std::string alt_text = in_notebook_cell.value("alt_text", "Instructor provided image");
+
+          // Pass forward populated items
+          out_notebook_cell["image"] = image;
+          out_notebook_cell["alt_text"] = alt_text;
+
+          if(height > 0)
+          {
+              out_notebook_cell["height"] = height;
+          }
+
+          if(width > 0)
+          {
+              out_notebook_cell["width"] = width;
+          }
+      }
+
+      // Handle short_answer data
+      else if(type == "short_answer")
+      {
+          // Get req short_answer items
+          std::string filename = in_notebook_cell.value("filename", "");
+
+          // Assert req fields were not empty
+          assert(filename != "");
+
+          // Get optional short_answer items
+          std::string initial_value = in_notebook_cell.value("initial_value", "");
+          std::string programming_language = in_notebook_cell.value("programming_language", "");
+          int rows = in_notebook_cell.value("rows", 0);
+
+          // Pass forward populated items
+          out_notebook_cell["filename"] = filename;
+          out_notebook_cell["initial_value"] = initial_value;
+          out_notebook_cell["rows"] = rows;
+
+          if(programming_language != "")
+          {
+              out_notebook_cell["programming_language"] = programming_language;
+          }
+      }
+
+      // Handle multiple choice data
+      else if(type == "multiple_choice")
+      {
+          // Get req multiple choice items
+          std::string filename = in_notebook_cell.value("filename", "");
+
+          // Assert filename was present
+          assert(filename != "");
+
+          // Get choices
+          nlohmann::json choices = in_notebook_cell.value("choices", nlohmann::json::array());
+
+          int num_of_choices = 0;
+          for (auto it = choices.begin(); it != choices.end(); ++it)
+          {
+              // Reassign the value of this iteration to choice
+              nlohmann::json choice = it.value();
+
+              // Get value and description
+              std::string value = choice.value("value", "");
+              std::string description = choice.value("description", "");
+
+              // Assert choice value and description were in fact present
+              assert(value != "");
+              assert(description != "");
+
+              num_of_choices++;
+          }
+
+          // Assert choices was not empty
+          assert(num_of_choices > 0);
+
+          bool allow_multiple = in_notebook_cell.value("allow_multiple", false);
+
+          // Pass forward items
+          out_notebook_cell["filename"] = filename;
+          out_notebook_cell["choices"] = choices;
+          out_notebook_cell["allow_multiple"] = allow_multiple;
+      }
+
+      // Else unknown type was passed in throw exception
+      else
+      {
+            throw "An unknown notebook cell 'type' was detected in the supplied config.json file. Build failed.";
+      }
+
+      // Add this newly validated notebook cell to the one being sent forward
+      j["notebook"].push_back(out_notebook_cell);
+
     }
   }
 
   // By default, we have one drop zone without a part label / sub
   // directory.
 
-  // But, if there are textboxes, but there are no explicit parts
+  // But, if there are input fields, but there are no explicit parts
   // (drag & drop zones / "bucket"s for file upload), set part_names
   // to an empty array (no zones for file drag & drop).
   if (parts == config_json.end() &&
-      textboxes != config_json.end()) {
+      in_notebook_cells != config_json.end()) {
     j["part_names"] =  nlohmann::json::array();
   }
 
@@ -228,5 +360,6 @@ int main(int argc, char *argv[]) {
     complete_config.open(complete_config_file, std::ios::out);
     complete_config << config_json.dump(4) << std::endl;
   }
+
   return 0;
 }

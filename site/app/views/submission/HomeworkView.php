@@ -15,6 +15,7 @@ use app\models\User;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
+use app\models\gradeable\AbstractGradeableInput;
 
 class HomeworkView extends AbstractView {
 
@@ -246,7 +247,8 @@ class HomeworkView extends AbstractView {
     private function renderSubmitBox(Gradeable $gradeable, $graded_gradeable, $version_instance, int $late_days_use): string {
         $student_page = $gradeable->isStudentPdfUpload();
         $students_full = [];
-        $textboxes = $gradeable->getAutogradingConfig()->getTextboxes();
+        $inputs = $gradeable->getAutogradingConfig()->getInputs();
+        $notebook = $gradeable->getAutogradingConfig()->getNotebook();
         $old_files = [];
         $display_version = 0;
 
@@ -257,20 +259,25 @@ class HomeworkView extends AbstractView {
                 $student_ids[] = $student->getId();
             }
 
-            // FIXME: this works, but does not really use new model.  We don't need all that much of the info anyway
-            $gradeables = $this->core->getQueries()->getGradeables($gradeable->getId(), $student_ids);
             $students_version = array();
-            foreach ($gradeables as $g) {
-                $students_version[] = array($g->getUser(), $g->getHighestVersion());
+            foreach ($this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids) as $gg) {
+                /** @var GradedGradeable $gg */
+                $students_version[$gg->getSubmitter()->getId()] = $gg->getAutoGradedGradeable()->getHighestVersion();
             }
             $students_full = json_decode(Utils::getAutoFillData($students, $students_version));
         }
 
+        $github_user_id = '';
+        $github_repo_id = '';
+
         $image_data = [];
         if (!$gradeable->isVcs()) {
-            foreach ($textboxes as $textbox) {
-                foreach ($textbox->getImages() as $image) {
-                    $image_name = $image['name'];
+
+            // Prepare notebook image data for displaying
+            foreach ($notebook as $cell) {
+                if (isset($cell['type']) && $cell['type'] == "image")
+                {
+                    $image_name = $cell['image'];
                     $imgPath = FileUtils::joinPaths(
                         $this->core->getConfig()->getCoursePath(),
                         'test_input',
@@ -280,12 +287,11 @@ class HomeworkView extends AbstractView {
                     $content_type = FileUtils::getContentType($imgPath);
                     if (substr($content_type, 0, 5) === 'image') {
                         // Read image path, convert to base64 encoding
-                        $textBoxImageData = base64_encode(file_get_contents($imgPath));
+                        $inputImageData = base64_encode(file_get_contents($imgPath));
                         // Format the image SRC:  data:{mime};base64,{data};
-                        $textBoximagesrc = 'data: ' . mime_content_type($imgPath) . ';charset=utf-8;base64,' . $textBoxImageData;
+                        $inputimagesrc = 'data: ' . mime_content_type($imgPath) . ';charset=utf-8;base64,' . $inputImageData;
                         // insert the sample image data
-
-                        $image_data[$image_name] = $textBoximagesrc;
+                        $image_data[$image_name] = $inputimagesrc;
                     }
                 }
             }
@@ -307,30 +313,54 @@ class HomeworkView extends AbstractView {
                 }
             }
         }
+        else {
+            // Get path to VCS_CHECKOUT
+            $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable->getId());
+            $who_id = $this->core->getUser()->getId();
+            $user_path = FileUtils::joinPaths($gradeable_path, $who_id);
+            $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
+            $version_path = FileUtils::joinPaths($user_path, $highest_version);
+            $path = FileUtils::joinPaths($version_path, ".submit.VCS_CHECKOUT");
+
+            // Load repo and user id
+            if (file_exists($path)) {
+                $json = json_decode(file_get_contents($path), true);
+                if (!is_null($json)) {
+                    if (isset($json["git_user_id"]))
+                        $github_user_id = $json["git_user_id"];
+                    if (isset($json["git_repo_id"]))
+                        $github_repo_id = $json["git_repo_id"];
+                }
+            }
+        }
 
         $component_names = array_map(function(Component $component) {
             return $component->getTitle();
         }, $gradeable->getComponents());
 
-        $textbox_data = array_map(function(SubmissionTextBox $text_box) {
-            return $text_box->toArray();
-        }, $textboxes);
+        $input_data = array_map(function(AbstractGradeableInput $inp) {
+            return $inp->toArray();
+        }, $inputs);
 
         $highest_version = $graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : 0;
 
         // instructors can access this page even if they aren't on a team => don't create errors
         $my_team = $graded_gradeable !== null ? $graded_gradeable->getSubmitter()->getTeam() : "";
         $my_repository = $graded_gradeable !== null ? $gradeable->getRepositoryPath($this->core->getUser(),$my_team) : "";
+        $notebook_data = $graded_gradeable !== null ? $graded_gradeable->getUpdatedNotebook() : array();
 
         $DATE_FORMAT = "m/d/Y @ H:i";
-
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
+            'base_url' => $this->core->getConfig()->getBaseUrl(),
             'gradeable_id' => $gradeable->getId(),
             'gradeable_name' => $gradeable->getTitle(),
             'formatted_due_date' => $gradeable->getSubmissionDueDate()->format($DATE_FORMAT),
             'part_names' => $gradeable->getAutogradingConfig()->getPartNames(),
             'is_vcs' => $gradeable->isVcs(),
             'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
+            'vcs_host_type' => $gradeable->getVcsHostType(),
+            'github_user_id' => $github_user_id,
+            'github_repo_id' => $github_repo_id,
             'has_due_date' => $gradeable->hasDueDate(),
             'repository_path' => $my_repository,
             'show_no_late_submission_warning' => !$gradeable->isLateSubmissionAllowed() && $gradeable->isSubmissionClosed(),
@@ -341,7 +371,7 @@ class HomeworkView extends AbstractView {
                && $gradeable->getAutogradingConfig()->getGradeableMessage() !== '',
             'gradeable_message' => $gradeable->getAutogradingConfig()->getGradeableMessage(),
             'allowed_late_days' => $gradeable->getLateDays(),
-            'num_text_boxes' => $gradeable->getAutogradingConfig()->getNumTextBoxes(),
+            'num_inputs' => $gradeable->getAutogradingConfig()->getNumInputs(),
             'max_submissions' => $gradeable->getAutogradingConfig()->getMaxSubmissions(),
             'display_version' => $display_version,
             'highest_version' => $highest_version,
@@ -349,7 +379,8 @@ class HomeworkView extends AbstractView {
             'students_full' => $students_full,
             'late_days_use' => $late_days_use,
             'old_files' => $old_files,
-            'textboxes' => $textbox_data,
+            'inputs' => $input_data,
+            'notebook' => $notebook_data,
             'image_data' => $image_data,
             'component_names' => $component_names,
             'upload_message' => $this->core->getConfig()->getUploadMessage()
@@ -368,12 +399,13 @@ class HomeworkView extends AbstractView {
         $count = 1;
         $count_array = array();
         $use_qr_codes = false;
+        $qr_file = [];
         foreach ($all_directories as $timestamp => $content) {
             $dir_files = $content['files'];
-            $json_file = '';
             foreach ($dir_files as $filename => $details) {
                 if($filename === 'decoded.json'){
-                    $json_file = $details['path'];
+                    $qr_file +=  FileUtils::readJsonFile($details['path']);
+                    $use_qr_codes = true;
                 }
                 $clean_timestamp = str_replace('_', ' ', $timestamp);
                 $path = rawurlencode(htmlspecialchars($details['path']));
@@ -437,25 +469,17 @@ class HomeworkView extends AbstractView {
                 ];
                 $count++;
             }
-            $json_data = ($json_file !== '') ? FileUtils::readJsonFile($json_file) : '';
-            //check for invalid ID's if using bulk upload with QR codes
-            if($json_data != ''){
-                $use_qr_codes = true;
-                for($i = 0; $i < count($files); $i++){
-                    $filename = rawurldecode($files[$i]['filename_full']);
-                    foreach($json_data as $decoded_data){
-                        //compare each file name in json data with ones split
-                        foreach ($decoded_data as $qr_file) {
-                            if($qr_file['pdf_name'] === $filename){
-                                $files[$i]['page_count'] = $qr_file['page_count'];
-                                $files[$i]['user_id']['id'] = $qr_file['id'];
-                                $files[$i]['user_id']['valid'] = ($this->core->getQueries()->getUserById($qr_file['id']) === null) ? false:true;
-                                goto end;
-                            }
-                        }
-                    }
-                    end:;
-                }
+        }
+        if($use_qr_codes){
+            for ($i = 0; $i < count($files); $i++) {
+                if(!array_key_exists($files[$i]['filename_full'], $qr_file))
+                    continue;
+                $data = $qr_file[$files[$i]['filename_full']];
+                $is_valid = $this->core->getQueries()->getUserById($data['id']) !== null;
+                $files[$i] += ['page_count' => $data['page_count'],
+                               'id' => $data['id'],
+                               'valid' => $is_valid
+                              ];
             }
         }
         $semester = $this->core->getConfig()->getSemester();
@@ -463,15 +487,13 @@ class HomeworkView extends AbstractView {
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         $current_time = $this->core->getDateTimeNow()->format("m-d-Y_H:i:sO");
         $ch = curl_init();
-        $use_images = !$use_qr_codes && sizeof($cover_images) != 0;
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/BulkUploadBox.twig', [
             'gradeable_id' => $gradeable->getId(),
             'team_assignment' => $gradeable->isTeamAssignment(),
             'max_team_size' => $gradeable->getTeamSizeMax(),
             'count_array' => $count_array,
             'files' => $files,
-            'use_qr_codes' => $use_qr_codes,
-            'use_images' => $use_images
+            'use_qr_codes' => $use_qr_codes
         ]);
     }
 
@@ -541,7 +563,7 @@ class HomeworkView extends AbstractView {
             $param = array_merge($param, [
                 'in_queue' => $version_instance->isQueued(),
                 'grading' => $version_instance->isGrading(),
-                'db_submission_time' => DateUtils::dateTimeToString($version_instance->getSubmissionTime()),
+                'submission_time' => DateUtils::dateTimeToString($version_instance->getSubmissionTime()),
                 'days_late' => $version_instance->getDaysLate(),
                 'num_autogrades' => $version_instance->getHistoryCount(),
                 'files' => array_merge($files['submissions'], $files['checkout']),
@@ -553,7 +575,6 @@ class HomeworkView extends AbstractView {
                 $param = array_merge($param, [
                     'results' => 0,
                     'grade_time' => $history->getGradeTime(),
-                    'history_submission_time' => DateUtils::dateTimeToString($history->getSubmissionTime()),
                     'grading_finished' => DateUtils::dateTimeToString($history->getGradingFinished()),
                     'wait_time' => $history->getWaitTime(),
                     'revision' => $history->getVcsRevision(),

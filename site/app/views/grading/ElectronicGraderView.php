@@ -3,10 +3,12 @@
 namespace app\views\grading;
 
 use app\controllers\student\LateDaysTableController;
+use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\GradedGradeable;
+use app\models\gradeable\LateDayInfo;
 use app\models\SimpleStat;
 use app\models\Team;
 use app\models\User;
@@ -209,6 +211,113 @@ class ElectronicGraderView extends AbstractView {
         ]);
     }
 
+    public function statPage($users) {
+        
+        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+
+        $return = <<<HTML
+        
+		<div class="content_upload_content">
+
+HTML;
+        $this->core->getOutput()->addBreadcrumb("Bulk Upload Forensics", $this->core->buildUrl(array('component' => 'submission', 'action' => 'stat_page', 'gradeable_id' => $gradeable_id)));
+        
+		$return .= <<<HTML
+			<div style="padding-left:20px;padding-bottom: 10px;border-radius:3px;padding-right:20px;">
+				<table class="table table-striped table-bordered persist-area" id="content_upload_table">
+					<tr>			
+				        <td style = "cursor:pointer;" width="25%" id="user_down">User &darr;</td>
+				        <td style = "cursor:pointer;" width="25%" id="upload_down">Upload Timestamp</td>
+				        <td style = "cursor:pointer;" width="25%" id="submission_down">Submission Timestamp</td>
+				        <td style = "cursor:pointer;" width="25%" id="filepath_down">Filepath</td>
+					</tr>
+HTML;
+
+		foreach($users as $user => $details){
+			$first_name = htmlspecialchars($details["first_name"]);
+			$last_name = htmlspecialchars($details["last_name"]);
+            $upload_timestamp = $details["upload_time"];
+            $submit_timestamp = $details["submit_time"];
+            $filepath = htmlspecialchars($details["file"]);
+            
+			$return .= <<<HTML
+			<tbody>
+				<tr>
+					<td>{$last_name}, {$first_name}</td>
+                    <td>{$upload_timestamp}</td>
+                    <td>{$submit_timestamp}</td>
+                    <td>{$filepath}</td>
+				</tr>
+			</tbody>
+HTML;
+			
+		}
+		
+		$return .= <<<HTML
+				</table>
+			</div>
+			</div>
+
+			<script>
+				$("td").click(function(){
+					if($(this).attr('id')=="user_down"){
+						sortTable(0);
+					}
+					if($(this).attr('id')=="upload_down"){
+						sortTable(1);
+					}
+					if($(this).attr('id')=="submission_down"){
+						sortTable(2);
+					}
+					if($(this).attr('id')=="filepath_down"){
+						sortTable(3);
+					}
+					
+				});
+				
+				function sortTable(sort_element_index){
+					var table = document.getElementById("content_upload_table");
+					var switching = true;
+					while(switching){
+						switching=false;
+						var rows = table.getElementsByTagName("TBODY");
+						for(var i=1;i<rows.length-1;i++){
+
+							var a = rows[i].getElementsByTagName("TR")[0].getElementsByTagName("TD")[sort_element_index];
+							var b = rows[i+1].getElementsByTagName("TR")[0].getElementsByTagName("TD")[sort_element_index];
+                            // sorted alphabetically by last name or by earliest time
+							if((sort_element_index >= 0 && sort_element_index <= 3) ? a.innerHTML>b.innerHTML : parseInt(a.innerHTML) < parseInt(b.innerHTML)){
+								rows[i].parentNode.insertBefore(rows[i+1],rows[i]);
+								switching=true;
+							}
+						}
+					}
+
+					var row0 = table.getElementsByTagName("TBODY")[0].getElementsByTagName("TR")[0];
+					var headers = row0.getElementsByTagName("TD");
+					
+					for(var i = 0;i<headers.length;i++){
+						var index = headers[i].innerHTML.indexOf(' ↓');
+						
+						if(index> -1){
+
+							headers[i].innerHTML = headers[i].innerHTML.substr(0, index);
+							break;
+						}
+					}
+
+					headers[sort_element_index].innerHTML = headers[sort_element_index].innerHTML + ' ↓';
+
+				}
+
+			</script>
+HTML;
+		return $return;
+
+	}
+
+    
+
     /**
      * @param Gradeable $gradeable
      * @param GradedGradeable[] $graded_gradeables,
@@ -250,10 +359,10 @@ class ElectronicGraderView extends AbstractView {
         } else {
             if ($gradeable->isTeamAssignment()) {
                 if ($show_edit_teams) {
-                    $columns[] = ["width" => "3%",  "title" => "",                 "function" => "index"];
-                    $columns[] = ["width" => "5%",  "title" => "Section",          "function" => "section"];
-                    $columns[] = ["width" => "6%",  "title" => "Edit Teams",       "function" => "team_edit"];
-                    $columns[] = ["width" => "12%", "title" => "Team Id",          "function" => "team_id"];
+                    $columns[] = ["width" => "2%",  "title" => "",                 "function" => "index"];
+                    $columns[] = ["width" => "8%",  "title" => "Section",          "function" => "section"];
+                    $columns[] = ["width" => "5%",  "title" => "Edit Teams",       "function" => "team_edit"];
+                    $columns[] = ["width" => "10%", "title" => "Team Id",          "function" => "team_id"];
                     $columns[] = ["width" => "32%", "title" => "Team Members",     "function" => "team_members"];
                 } else {
                     $columns[] = ["width" => "3%",  "title" => "",                 "function" => "index"];
@@ -261,9 +370,9 @@ class ElectronicGraderView extends AbstractView {
                     $columns[] = ["width" => "50%", "title" => "Team Members",     "function" => "team_members"];
                 }
             } else {
-                $columns[]     = ["width" => "3%",  "title" => "",                 "function" => "index"];
-                $columns[]     = ["width" => "5%",  "title" => "Section",          "function" => "section"];
-                $columns[]     = ["width" => "20%", "title" => "User ID",          "function" => "user_id"];
+                $columns[]     = ["width" => "2%",  "title" => "",                 "function" => "index"];
+                $columns[]     = ["width" => "8%", "title" => "Section",          "function" => "section"];
+                $columns[]     = ["width" => "13%", "title" => "User ID",          "function" => "user_id"];
                 $columns[]     = ["width" => "15%", "title" => "First Name",       "function" => "user_first"];
                 $columns[]     = ["width" => "15%", "title" => "Last Name",        "function" => "user_last"];
             }
@@ -485,6 +594,17 @@ class ElectronicGraderView extends AbstractView {
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderSubmissionPanel', $graded_gradeable, $display_version);
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit);
+
+        if($graded_gradeable->getGradeable()->isDiscussionBased()) {
+            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderDiscussionForum', json_decode($graded_gradeable->getGradeable()->getDiscussionThreadId(), true), $graded_gradeable->getSubmitter()->getId());
+        }
+
+        $return .= <<<HTML
+            <link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}vendor/codemirror/codemirror.css" />
+        <link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}vendor/codemirror/theme/eclipse.css" />
+        <script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}vendor/codemirror/codemirror.js"></script>
+HTML;
+
         if(!$peer) {
             $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderInformationPanel', $graded_gradeable, $display_version_instance);
         }
@@ -504,7 +624,7 @@ class ElectronicGraderView extends AbstractView {
                 ]);
             }
         } else {
-            if ($late_status != "Good" && $late_status != "Late") {
+            if ($late_status != LateDayInfo::STATUS_GOOD && $late_status != LateDayInfo::STATUS_LATE) {
                 $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
                     "color" => "#F62817", // fire engine red
                     "message" => "Late Submission"
@@ -533,6 +653,7 @@ class ElectronicGraderView extends AbstractView {
             "next_student_url" => $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $graded_gradeable->getGradeableId(), 'who_id' => $next_id]),
             "home_url" => $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'details', 'gradeable_id' => $graded_gradeable->getGradeableId(), 'view' => (count($this->core->getUser()->getGradingRegistrationSections()) == 0) ? 'all' : null]),
             'regrade_panel_available' => $this->core->getConfig()->isRegradeEnabled(),
+            'discussion_based' => $graded_gradeable->getGradeable()->isDiscussionBased()
         ]);
     }
 
@@ -546,6 +667,46 @@ class ElectronicGraderView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/AutogradingPanel.twig", [
             "version_instance" => $version_instance,
             "show_hidden_cases" => $show_hidden_cases,
+        ]);
+    }
+
+    public function renderDiscussionForum($threadIds, $submitter_id) {
+        $posts_view = <<<HTML
+            <span class="col grading_label">Discussion Posts</span>
+HTML;
+            
+        $currentCourse = $this->core->getConfig()->getCourse();
+
+        //Empty thread input
+        if($threadIds === "{}") {
+            $threadIds = array();
+        }
+
+        foreach($threadIds as $threadId) {
+            $posts = $this->core->getQueries()->getPostsForThread($this->core->getUser()->getId(), $threadId, false, 'time', $submitter_id);
+            if(count($posts) > 0) {
+                $posts_view .= $this->core->getOutput()->renderTemplate('forum\ForumThread', 'generatePostList', $threadId, $posts, [], $currentCourse, false, true, $submitter_id);
+            } else {
+                $posts_view .= <<<HTML
+                    <h3 style="text-align: center;">No posts for thread id: {$threadId}</h3> <br/>
+HTML;
+            }
+
+            $posts_view .= <<<HTML
+                    <a href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $threadId))}" target="_blank" rel="noopener nofollow" class="btn btn-default btn-sm" style=" text-decoration: none;" onClick=""> Go to thread</a>
+                    <hr style="border-top:1px solid #999;margin-bottom: 5px;" /> <br/>
+HTML;
+
+        }
+
+        if(empty($threadIds)) {
+            $posts_view .= <<<HTML
+                <h3 style="text-align: center;">No thread id specified.</h3> <br/>
+HTML;
+        }
+
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/DiscussionForumPanel.twig", [
+            "discussion_forum_content" => $posts_view
         ]);
     }
 
@@ -602,7 +763,8 @@ class ElectronicGraderView extends AbstractView {
             "checkout" => $checkout,
             "results" => $results,
             "results_public" => $results_public,
-            "site_url" => $this->core->getConfig()->getSiteUrl()
+            "site_url" => $this->core->getConfig()->getSiteUrl(),
+            "active_version" => $display_version
         ]);
     }
 
@@ -678,7 +840,7 @@ class ElectronicGraderView extends AbstractView {
         $has_active_version = $graded_gradeable->getAutoGradedGradeable()->hasActiveVersion();
         $has_submission = $graded_gradeable->getAutoGradedGradeable()->hasSubmission();
 
-        $this->core->getOutput()->addInternalJs('twig.min.js');
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
         $this->core->getOutput()->addInternalJs('ta-grading-keymap.js');
         $this->core->getOutput()->addInternalJs('ta-grading.js');
         $this->core->getOutput()->addInternalJs('ta-grading-rubric-conflict.js');

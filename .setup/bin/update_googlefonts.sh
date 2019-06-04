@@ -5,7 +5,7 @@
 set -e
 
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
-DEST=${THIS_DIR}/../../site/public/vendor/google
+DEST=${THIS_DIR}/../../site/public/css/google
 
 rm -rf ${DEST}
 mkdir -p ${DEST}

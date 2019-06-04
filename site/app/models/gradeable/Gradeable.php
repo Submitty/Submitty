@@ -10,6 +10,7 @@ use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\libraries\Core;
 use app\models\AbstractModel;
+use app\models\grading\AbstractGradeableInput;
 use app\models\GradingSection;
 use app\models\Team;
 use app\models\User;
@@ -45,6 +46,8 @@ use app\models\User;
  * @method void setVcs($use_vcs)
  * @method string getVcsSubdirectory()
  * @method void setVcsSubdirectory($subdirectory)
+ * @method int getVcsHostType()
+ * @method void setVcsHostType($host_type)
  * @method bool isTeamAssignment()
  * @method int getTeamSizeMax()
  * @method \DateTime getTeamLockDate()
@@ -69,6 +72,10 @@ use app\models\User;
  * @method float getPrecision()
  * @method Component[] getComponents()
  * @method bool isRegradeAllowed()
+ * @method bool isDiscussionBased()
+ * @method void setDiscussionBased($discussion_based)
+ * @method string  getDiscussionThreadId()
+ * @method void setDiscussionThreadId($discussion_thread_id)
  * @method int getActiveRegradeRequestCount()
  * @method void setHasDueDate($has_due_date)
  */
@@ -132,6 +139,8 @@ class Gradeable extends AbstractModel {
     protected $vcs = false;
     /** @property @var string The subdirectory within the VCS repository for this gradeable */
     protected $vcs_subdirectory = "";
+    /** @property @var int Where are we hosting VCS (-1 -> Not VCS gradeable, 0,1 -> Submitty, 2,3 -> public/private Github) */
+    protected $vcs_host_type = -1;
     /** @property @var bool If the gradeable is a team assignment */
     protected $team_assignment = false;
     /** @property @var int The maximum team size (if the gradeable is a team assignment) */
@@ -184,8 +193,14 @@ class Gradeable extends AbstractModel {
     protected $late_days = 0;
     /** @property @var \DateTime The deadline for submitting a grade inquiry */
     protected $regrade_request_date = null;
-    /** @property @var boolean are grade inquiries enabled for this assignment*/
+    /** @property @var bool are grade inquiries enabled for this assignment*/
     protected $regrade_allowed = true;
+    /** @property @var bool does this assignmennt have a discussion component*/
+    protected $discussion_based = false;
+    /** @property @var string thread id for cooresponding to discussion forum thread*/
+    protected $discussion_thread_id = '';
+
+
     /**
      * Gradeable constructor.
      * @param Core $core
@@ -209,6 +224,7 @@ class Gradeable extends AbstractModel {
             $this->setAutogradingConfigPath($details['autograding_config_path']);
             $this->setVcs($details['vcs']);
             $this->setVcsSubdirectory($details['vcs_subdirectory']);
+            $this->setVcsHostType($details['vcs_host_type']);
             $this->setTeamAssignmentInternal($details['team_assignment']);
             $this->setTeamSizeMax($details['team_size_max']);
             $this->setTaGradingInternal($details['ta_grading']);
@@ -222,6 +238,8 @@ class Gradeable extends AbstractModel {
             $this->setLateSubmissionAllowed($details['late_submission_allowed']);
             $this->setPrecision($details['precision']);
             $this->setRegradeAllowedInternal($details['regrade_allowed']);
+            $this->setDiscussionBased((boolean)$details['discussion_based']);
+            $this->setDiscussionThreadId($details['discussion_thread_ids']);
         }
 
         $this->setActiveRegradeRequestCount($details['active_regrade_request_count'] ?? 0);
@@ -621,6 +639,10 @@ class Gradeable extends AbstractModel {
         return $dates;
     }
 
+    public function getStringThreadIds() {
+        return $this->isDiscussionBased() ? implode(',', json_decode($this->getDiscussionThreadId())) : '';
+    }
+
     /**
      * Gets all of the gradeable's date values as strings indexed by property name (including late_days)
      * @param bool $add_utc_offset True to add the UTC offset to the output strings
@@ -972,7 +994,7 @@ class Gradeable extends AbstractModel {
     private function setTeamAssignmentInternal($use_teams) {
         $this->team_assignment = $use_teams === true;
     }
-    
+
     /** @internal */
     public function setTeamAssignment($use_teams) {
         throw new \BadFunctionCallException('Cannot change teamness of gradeable');
@@ -1542,7 +1564,7 @@ class Gradeable extends AbstractModel {
 
         return $sections;
     }
-  
+
     /**
      * return true if students can currently submit regrades for this assignment, false otherwise
      * @return bool

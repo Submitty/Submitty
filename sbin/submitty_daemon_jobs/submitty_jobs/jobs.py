@@ -7,7 +7,11 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
-
+import json
+import stat
+from urllib.parse import unquote
+from . import bulk_qr_split
+from . import bulk_upload_split
 from . import INSTALL_DIR, DATA_DIR
 
 
@@ -155,4 +159,96 @@ class DeleteLichenResult(CourseGradeableJob):
             for folder in ['provided_code', 'tokenized', 'concatenated', 'hashes', 'matches']:
                 shutil.rmtree(str(Path(lichen_dir, folder, gradeable)), ignore_errors=True)
             msg = 'Deleted lichen plagiarism results and saved config for {}'.format(gradeable)
-            open_file.write(msg)
+            open_file.write(msg) 
+
+class BulkUpload(CourseJob):
+    required_keys = CourseJob.required_keys + ['timestamp', 'g_id', 'filename', 'is_qr']
+
+    def add_permissions(self,item,perms):
+        if os.getuid() == os.stat(item).st_uid:
+            os.chmod(item,os.stat(item).st_mode | perms)
+
+    def add_permissions_recursive(self,top_dir,root_perms,dir_perms,file_perms):
+        for root, dirs, files in os.walk(top_dir):
+            self.add_permissions(root,root_perms)
+        for d in dirs:
+            self.add_permissions(os.path.join(root, d),dir_perms)
+        for f in files:
+            self.add_permissions(os.path.join(root, f),file_perms)
+
+    def run_job(self):
+        semester = self.job_details['semester']
+        course = self.job_details['course']
+        timestamp = self.job_details['timestamp']
+        gradeable_id = self.job_details['g_id']
+        filename = self.job_details['filename']
+        is_qr = self.job_details['is_qr']
+
+        if is_qr and ('qr_prefix' not in self.job_details or 'qr_suffix' not in self.job_details):
+            print("did not pass in qr prefix or suffix")
+            sys.exit(1)
+
+        if is_qr:
+            qr_prefix = unquote(unquote(self.job_details['qr_prefix']))
+            qr_suffix = unquote(unquote(self.job_details['qr_suffix']))
+
+        script = ''
+        if is_qr:
+            script = Path(INSTALL_DIR, 'sbin', 'bulk_qr_split.py')
+        else:
+            if 'num' not in self.job_details:
+                print("did not pass in the number to divide " + filename + " by")
+                sys.exit(1)
+            num  = self.job_details['num']
+            script = Path(INSTALL_DIR, 'sbin', 'bulk_upload_split.py')
+        #create paths
+        try:
+            with open("/usr/local/submitty/config/submitty.json", encoding='utf-8') as data_file:
+                CONFIG = json.loads(data_file.read())
+
+            current_path = os.path.dirname(os.path.realpath(__file__))
+            uploads_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads")
+            bulk_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads/bulk_pdf",gradeable_id,timestamp)
+            split_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads/split_pdf",gradeable_id,timestamp)
+            root_split_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads/split_pdf")
+        except Exception as err:
+            print("Failed while parsing args and creating paths")
+            print(err)
+            sys.exit(1)
+
+        #copy file over to correct folders
+        try:
+            if not os.path.exists(split_path):
+                os.makedirs(split_path)
+
+            # copy over file to new directory
+            if not os.path.isfile(os.path.join(split_path, filename)):
+                shutil.copyfile(os.path.join(bulk_path, filename), os.path.join(split_path, filename))
+
+            # move to copy folder
+            os.chdir(split_path)
+        except Exception as err:
+            print("Failed while copying files")
+            print(err)
+            sys.exit(1)
+
+        try:
+            if is_qr:
+                bulk_qr_split.main([filename, split_path, qr_prefix, qr_suffix])
+            else: 
+                bulk_upload_split.main([filename, split_path, num])
+
+            os.remove(filename)
+            os.chdir(current_path)
+        except Exception as err:
+            print("Failed to launch bulk_split subprocess!")
+            print(err)
+            sys.exit(1)
+
+        # reset permissions just in case, group needs read/write
+        # access so submitty_php can view & delete pdfs when they are
+        # assigned to a student and/or deleted
+        self.add_permissions_recursive(root_split_path,
+                                       stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |   stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP |   stat.S_ISGID,
+                                       stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |   stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP |   stat.S_ISGID,
+                                       stat.S_IRUSR | stat.S_IWUSR |                  stat.S_IRGRP | stat.S_IWGRP                                  )
