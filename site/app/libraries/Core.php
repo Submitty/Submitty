@@ -53,7 +53,7 @@ class Core {
     /** @var Access $access */
     private $access = null;
 
-    /** @var Router */
+    /** @var ClassicRouter */
     private $router;
 
     /**
@@ -523,11 +523,11 @@ class Core {
         }
     }
 
-    public function setRouter(Router $router) {
+    public function setRouter(ClassicRouter $router) {
         $this->router = $router;
     }
 
-    public function getRouter(): Router {
+    public function getRouter(): ClassicRouter {
         return $this->router;
     }
 

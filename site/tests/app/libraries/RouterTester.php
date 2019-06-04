@@ -2,11 +2,11 @@
 
 namespace tests\app\libraries;
 
-use app\libraries\Router;
+use app\libraries\ClassicRouter;
 
 class RouterTester {
     public function testRouter() {
-        $router = new Router('part/part2/part3');
+        $router = new ClassicRouter('part/part2/part3');
         $expected = ['part', 'part2', 'part3'];
         $actual = [];
         while ($router->hasNext()) {
@@ -19,7 +19,7 @@ class RouterTester {
     }
 
     public function testEmptyRouter() {
-        $router = new Router();
+        $router = new ClassicRouter();
         $this->assertFalse($router->hasNext());
         $this->assertNull($router->getNext());
     }

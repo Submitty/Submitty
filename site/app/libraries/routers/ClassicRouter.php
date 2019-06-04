@@ -2,7 +2,7 @@
 
 namespace app\libraries;
 
-class Router {
+class ClassicRouter {
     private $pieces = [];
 
     public function __construct(string $url) {

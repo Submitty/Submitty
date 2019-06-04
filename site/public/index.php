@@ -7,7 +7,7 @@ use app\libraries\Logger;
 use app\libraries\Utils;
 use app\libraries\Access;
 use app\libraries\TokenManager;
-use app\libraries\Router;
+use app\libraries\ClassicRouter;
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
 
@@ -31,7 +31,7 @@ $loader = require_once(__DIR__.'/../vendor/autoload.php');
 AnnotationRegistry::registerLoader([$loader, 'loadClass']);
 
 $core = new Core();
-$core->setRouter(new Router($_GET['url'] ?? ''));
+$core->setRouter(new ClassicRouter($_GET['url'] ?? ''));
 
 /**
  * Register custom expection and error handlers that will get run anytime our application
