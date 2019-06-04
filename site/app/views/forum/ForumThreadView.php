@@ -966,7 +966,7 @@ HTML;
         $categories = "";
         $category_colors;
 
-        if($this->core->getUser()->getGroup() <= 3){
+        if($this->core->getUser()->accessGrading()){
             $categories = $this->core->getQueries()->getCategories();
 
             $dummy_category = array('color' => '#000000', 'category_desc' => 'dummy', 'category_id' => "dummy");
