@@ -9,6 +9,7 @@ use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\Loader\AnnotationDirectoryLoader;
 use Doctrine\Common\Annotations\AnnotationReader;
+use app\libraries\Utils;
 
 
 class MainRouter {
@@ -68,7 +69,7 @@ class MainRouter {
         }
         elseif ($this->core->getUser() === null) {
             $this->core->loadSubmittyUser();
-            if (!$this->endsWith($this->parameters['_controller'], 'AuthenticationController')) {
+            if (!Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
                 $this->request = Request::create(
                     $this->core->buildNewUrl(['navigation', 'no_access']),
                     'GET'
@@ -78,7 +79,7 @@ class MainRouter {
         }
         elseif ($this->core->getConfig()->isCourseLoaded()
             && !$this->core->getAccess()->canI("course.view", ["semester" => $this->core->getConfig()->getSemester(), "course" => $this->core->getConfig()->getCourse()])
-            && !$this->endsWith($this->parameters['_controller'], 'AuthenticationController')) {
+            && !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
             $this->request = Request::create(
                 $this->core->buildNewUrl(['navigation', 'no_access']),
                 'GET'
@@ -130,12 +131,5 @@ class MainRouter {
                 $this->parameters = $this->matcher->matchRequest($this->request);
             }
         }
-    }
-
-    private function endsWith($string, $ending) {
-        $str_len = strlen($string);
-        $ending_len = strlen($ending);
-        if ($ending_len > $str_len) return false;
-        return substr_compare($string, $ending, $str_len - $ending_len, $ending_len) === 0;
     }
 }
