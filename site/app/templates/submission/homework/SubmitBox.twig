@@ -1,5 +1,13 @@
 {% import _self as self %}
 
+<link rel="stylesheet" href="{{ base_url }}vendor/codemirror/codemirror.css" />
+<link rel="stylesheet" href="{{ base_url }}vendor/codemirror/theme/eclipse.css" />
+<link rel="stylesheet" href="{{ base_url }}vendor/codemirror/theme/monokai.css" />
+<script type="text/javascript" language="javascript" src="{{ base_url }}vendor/codemirror/codemirror.js"></script>
+<script type="text/javascript" language="javascript" src="{{ base_url }}vendor/codemirror/mode/clike/clike.js"></script>
+<script type="text/javascript" language="javascript" src="{{ base_url }}vendor/codemirror/mode/python/python.js"></script>
+<script type="text/javascript" language="javascript" src="{{ base_url }}vendor/codemirror/mode/shell/shell.js"></script>
+
 {# Display the gradeable_message if one exists at the top of the page #}
 {% if has_gradeable_message %}
     <div class='content gradeable_message'><p>{{ gradeable_message|raw }}</p></div>
@@ -21,40 +29,50 @@
 
     {# Admin submission type selector #}
     {% if core.getUser().accessFullGrading() %}
-        <form id="submissionForm" method="post" style="text-align: center; margin: 0 auto; width: 100%; ">
-            <div >
+        <form id="submissionForm" method="post" style="width: 100%; ">
+            <div style="clear:both;">
                 <input type='radio' id="radio_normal" name="submission_type" checked="true">
                 <label for="radio_normal">Normal Submission</label>
+                &nbsp;&nbsp;&nbsp;&nbsp;
                 <input type='radio' id="radio_student" name="submission_type">
                 <label for="radio_student">Make Submission for a Student</label>
                 {% if part_names|length == 1 and not is_vcs %}
+                    &nbsp;&nbsp;&nbsp;&nbsp;
                     <input type='radio' id="radio_bulk" name="submission_type">
                     <label for="radio_bulk">Bulk Upload</label>
                 {% endif %}
             </div>
             <div id="user_id_input" style="display: none">
+                <br />
                 <div class="sub">
-                    Input the user_id of the student you wish to submit for. This <i>permanently</i> affects the student's submissions, so please use with caution.
+                    Note: This <i>permanently</i> affects the student's submissions, so please use with caution.
                 </div>
                 <div class="sub">
                     <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
                     user_id: <input type="text" id= "user_id" value ="" placeholder="{{ user_id }}"/>
                 </div>
             </div>
+            <br />
             <div class = "sub" id="pdf_submit_button" style="display: none">
                 <div class="sub">
                     Split by QR code?
                     <input type="checkbox" id="use_qr">
+                    <br />
                     <span id="pages_prompt"># of page(s) per PDF:</span>
                     <span id="prefix_prompt">QR code prefix/suffix:
                     <a style="text-decoration:none;" href = "https://submitty.org/instructor/exams#bulk-upload-and-split-with-qr-codes" target="_none">
-                        <i title="Bulk Upload QR Help" class="far fa-question-circle"></i>
+                        <i title="Bulk Upload QR Help" class="far fa-question-circle helpicon"></i>
                     </a>
                     </span>
                     <input type="number" id= "num_pages" placeholder="required"/>
                     <input type="text" id="qr_prefix" placeholder="Prefix (optional)" />
-                     <input type="text" id="qr_suffix" placeholder="Suffix (optional)" />
+                    <input type="text" id="qr_suffix" placeholder="Suffix (optional)" />
+                    <div id="expected_num_box">
+                    Expected Number of pages per PDF:
+                    <input type="number" id= "expected_pages_input" placeholder="optional" onchange="highlightPageCount()" />
+                    </div>
                 </div>
+                <br />
             </div>
         </form>
 
@@ -64,10 +82,13 @@
                 $('#qr_prefix').prop('hidden', true);
                 $('#qr_suffix').prop('hidden', true);
                 $('#prefix_prompt').prop('hidden', true);
-                $('#qr_progress_box').prop('hidden', true);
+                $('#bulk_progress_box').prop('hidden', true);
+                $('#expected_num_box').prop('hidden', true);
+
                 //load what upload mode the user selected (if any)
                 if(sessionStorage.getItem('radio_bulk')){
                     $('#radio_bulk').prop('checked', true);
+                    $('#bulk_progress_box').prop('hidden', false);
                 }else if(sessionStorage.getItem('radio_student')){
                     $('#radio_student').prop('checked',true);
                 }else{
@@ -81,7 +102,7 @@
                     $('#pages_prompt').prop('hidden', true);
                     $('#num_pages').prop('hidden', true);
                     $('#use_qr').prop('checked',true);
-                    $('#qr_progress_box').prop('hidden', false);
+                    $('#expected_num_box').prop('hidden', false);
                     //populate prefix textarea
                     if(sessionStorage.getItem('qr_prefix')){
                         $('#qr_prefix').val(sessionStorage.getItem('qr_prefix'));
@@ -95,6 +116,9 @@
                 }
                 if ($("#radio_bulk").is(":checked")) {
                     $('#pdf_submit_button').show();
+                    $('#bulk_progress_box').prop('hidden', false);
+                }else{
+                     $('#bulk_progress_box').prop('hidden', true);
                 }
                 if($('#use_qr').is(':checked')){
                     //save qr_code prefix on textarea change
@@ -113,6 +137,7 @@
                     $('#user_id_input').hide();
                     $('#pdf_submit_button').hide();
                     $('#user_id').val('');
+                    $('#bulk_progress_box').prop('hidden', true);
                 });
                 $('#radio_student').click(function() {
                     sessionStorage.setItem('radio_student', true);
@@ -120,6 +145,7 @@
                     sessionStorage.removeItem('radio_normal');
                     $('#pdf_submit_button').hide();
                     $('#user_id_input').show();
+                    $('#bulk_progress_box').prop('hidden', true);
                 });
                 $('#radio_bulk').click(function()  {
                     sessionStorage.setItem('radio_bulk', true);
@@ -128,6 +154,7 @@
                     $('#user_id_input').hide();
                     $('#pdf_submit_button').show();
                     $('#user_id').val('');
+                    $('#bulk_progress_box').prop('hidden', false);
                 });
                 $('#use_qr').click(function(){
                     (sessionStorage.getItem('use_qr')) ? sessionStorage.removeItem('use_qr') : sessionStorage.setItem('use_qr', true);
@@ -136,7 +163,7 @@
                     $('#qr_suffix').prop('hidden', !$('#qr_suffix').is(':hidden'));
                     $('#prefix_prompt').prop('hidden', !$('#prefix_prompt').is(':hidden'));
                     $('#pages_prompt').prop('hidden', !$('#pages_prompt').is(':hidden'));
-                    $('#qr_progress_box').prop('hidden', !$('#qr_progress_box').is(':hidden'));
+                    $('#expected_num_box').prop('hidden',!$('#expected_num_box').is(':hidden'));
                 });
                 $("#user_id").autocomplete({
                     source: students_full
@@ -173,65 +200,120 @@
         <input type="submit" id="submit" class="btn btn-primary" value="Grade My Repository" />
     {% else %}
         <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
-        
-            <script type="text/javascript" src="../../../../js/showdown.min.js"></script>
-            <script type="text/javascript" src="../../../../js/xss.min.js"></script>
-            <script type="text/javascript" src="../../../../js/showdown-xss-filter.js"></script>
-
             {# Render content #}
-            {% set num_inputs = 0 %}
-            {% for c in contents %}
+            {% set num_short_answer = 0 %}
+            {% set num_codeboxes = 0 %}
+            {% set num_multiple_choice = 0%}
+            {% for cell in notebook %}
                 <div id="content_{{ loop.index0 }}">
-                    <h2>{{ c.title }}</h2>
 
-                    {% for image in c.images %}
-                        <img src="{{ attribute(image_data, image.name) }}"
-                        {% if image.width > 0 %}
-                            width="{{ image.width }}"
-                        {% endif %}
-                        {% if image.height > 0 %}
-                            height="{{ image.height }}"
-                        {% endif %}
-                        />
-                    {% endfor %}
+                    {# Handle if cell is markdown #}
+                    {% if cell.type == "markdown" %}
 
-                    {# Render the inputs for the given content block #}
-                    {% for i in c.input %}
-                        <div id="input_container_{{ loop.index0 }}">
-                            {% if i.type == "textbox" %}
-                                {{ self.render_textbox(i, num_inputs ) }}
-                            {% elseif i.type == "codebox" %}
-                                <br>
-                            {% elseif i.type == "multiplechoice" %}
-                                <strong>{{ i.label }}</strong>
-                                <br>
-                                <fieldset>
-                                    {% for choice in i.choices %}
-                                        {% if i.allow_multiple == true %}
-                                            <input type="checkbox" name="input_{{ num_inputs }}" id="input_{{ num_inputs }}" value="{{ choice }}" onclick="handle_input_keypress();"" />
-                                            <label for="{{ choice }}">
-                                                {{ choice }}
-                                            </label>
-                                        {% else %}
-                                            <input type="radio" name="input_{{ num_inputs }}" id="input_{{ num_inputs }}" value="{{ choice }}" onclick="handle_input_keypress();" />
-                                            <label for="{{ choice }}">
-                                                {{ choice }}
-                                            </label>
-                                        {% endif %}
-                                        <br/>
-                                    {% endfor %}
-                                </fieldset>
-                                <br>
-                            {% endif %}
-                        </div>
-                        {% set num_inputs = num_inputs + 1 %}
-                    {% endfor %}
+                        {# Render markdown #}
+                        {{ cell.markdown_data | markdown }}
+
+                    {# Handle if cell is image #}
+                    {% elseif cell.type == "image" %}
+
+                        <img src="{{ attribute(image_data, cell.image) }}"
+
+                        {% if cell.width > 0 %}
+                            width="{{ cell.width }}"
+                        {% endif %}
+
+                        {% if cell.height > 0 %}
+                            height="{{ cell.height }}"
+                        {% endif %}
+
+                        {% if cell.alt_text is defined %}
+                            alt="{{ cell.alt_text }}"
+                        {% endif %}
+
+                        >
+
+                    {# Handle if cell is short_answer #}
+                    {% elseif cell.type == "short_answer" %}
+
+                        {# If programming language not defined render regular text boxes #}
+                        {% if cell.programming_language is not defined %}
+
+                            {{ self.render_short_answer(cell, num_short_answer, highest_version) }}
+                            {% set num_short_answer = num_short_answer + 1 %}
+
+                        {# Else render a codebox #}
+                        {% else %}
+                            <br>
+                                <div id="codebox_{{ num_codeboxes }}" name="codebox_{{ num_codeboxes }}" style="border: 1px solid LightGrey;" onKeyPress="handle_input_keypress();">
+                                </div>
+                                <script>
+
+                                    {# Get recent submission #}
+                                    var recent_submission = `{% if core.getConfig().keepPreviousFiles() %}{{ cell.recent_submission }}{% else %}{{ cell.initial_value }}{% endif %}`;
+
+                                    {# Transform escaped characters back into regular characters #}
+                                    recent_submission = convertHTMLEntity(recent_submission);
+
+                                    var editor_{{num_codeboxes}} = CodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"),
+                                        {
+                                            "value" : recent_submission,
+                                            "mode": "{{ cell.programming_language }}",
+                                            lineNumbers: true,
+                                            "theme": "eclipse"
+                                        }
+                                    );
+                                </script>
+                            <br>
+                            {% set num_codeboxes = num_codeboxes + 1 %}
+                        {% endif %}
+
+                    {% elseif cell.type == "multiple_choice" %}
+
+                        {# Obtain list of previously selected elements #}
+                        {% if cell.recent_submission is defined and core.getConfig().keepPreviousFiles() %}
+                            {% set prev_checked = cell.recent_submission | split('\n') %}
+                        {% endif %}
+
+                        <br>
+                        <fieldset>
+                            {% for choice in cell.choices %}
+                                {% if cell.allow_multiple == true %}
+                                    <input type="checkbox" name="multiple_choice_{{ num_multiple_choice }}" id="multiple_choice_{{ num_multiple_choice }}" value="{{ choice.value }}" {% if choice.value in prev_checked %}checked="checked" {% endif %}onclick="handle_input_keypress();" />
+                                    <label for="multiple_choice_{{ num_multiple_choice }}">
+                                        {{ choice.description }}
+                                    </label>
+                                {% else %}
+                                    <input type="radio"
+                                           name="multiple_choice_{{ num_multiple_choice }}"
+                                           id="multiple_choice_{{ num_multiple_choice }}"
+                                           value="{{ choice.value }}"
+                                           {% if choice.value == cell.recent_submission and core.getConfig().keepPreviousFiles() %}checked="checked" {% endif %}
+                                           onclick="handle_input_keypress();" />
+                                    <label for="multiple_choice_{{ num_multiple_choice }}">
+                                        {{ choice.description }}
+                                    </label>
+                                {% endif %}
+                                <br/>
+                            {% endfor %}
+                        </fieldset>
+                        <br>
+
+                        {% set num_multiple_choice = num_multiple_choice + 1 %}
+
+                    {% endif %}
+
                 </div>
+
             {% endfor %}
     
             {# Submit boxes #}
             {% for part in part_names %}
-                <div id="upload{{ loop.index }}" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 150px;">
+                <div tabindex="0"
+                     id="upload{{ loop.index }}"
+                     onkeypress="clicked_on_box(event)"
+                     role="text"
+                     aria-label="Press enter to upload your {{ part }} file"
+                     style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 150px;">
                     <h3 class="label" id="label{{ loop.index }}">
                         {% if part_names|length > 1 %}
                             Drag your {{ part }} here or click to open file browser
@@ -242,7 +324,6 @@
                     <input type="file" name="files" id="input_file{{ loop.index }}" style="display: none" onchange="addFilesFromInput({{ loop.index }})" multiple />
                 </div>
             {% endfor %}
-            {# /Submit boxes #}
         </div>
 
         {# Page selector #}
@@ -265,21 +346,24 @@
         </div>
 
         <button type="button" id="submit" class="btn btn-success" style="margin-right: 100px;">Submit</button>
-        <button type="button" id="startnew" class="btn btn-primary">Clear</button>
 
-        {% if display_version == highest_version and display_version > 0 %}
-            <button type="button" id= "getprev" class="btn btn-primary">Use Most Recent Submission</button>
+        {% if part_names is not empty %}
+            <button type="button" id="startnew" class="btn btn-primary">Clear</button>
 
-            {% if core.getConfig().keepPreviousFiles() %}
-            <script type="text/javascript">
-                $(function() {
-                    setUsePrevious();
-                    {% for file in old_files %}
-                        addLabel('{{ file.name }}', '{{ file.size }}', {{ file.part }}, true);
-                        readPrevious('{{ file.name }}', {{ file.part }});
-                    {% endfor %}
-                });
-            </script>
+            {% if display_version == highest_version and display_version > 0 %}
+                <button type="button" id= "getprev" class="btn btn-primary">Use Most Recent Submission</button>
+
+                {% if core.getConfig().keepPreviousFiles() %}
+                <script type="text/javascript">
+                    $(function() {
+                        setUsePrevious();
+                        {% for file in old_files %}
+                            addLabel('{{ file.name }}', '{{ file.size }}', {{ file.part }}, true);
+                            readPrevious('{{ file.name }}', {{ file.part }});
+                        {% endfor %}
+                    });
+                </script>
+                {% endif %}
             {% endif %}
         {% endif %}
 
@@ -328,16 +412,15 @@
 
 {% if core.getUser().accessFullGrading() %}
     {% include 'submission/homework/PreviousSubmissionForm.twig' %}            
-    {% include 'submission/homework/QRProgressBox.twig' %}
+    {% include 'submission/homework/BulkUploadProgressBox.twig' %}
 {% endif %}
 
 <script type="text/javascript">
-    function makeSubmission(user_id, highest_version, is_pdf, path, count, git_user_id, git_repo_id, merge_previous=false, clobber=false) {
+    function makeSubmission(user_id, highest_version, is_pdf, path, git_user_id, git_repo_id, merge_previous=false, clobber=false) {
         // submit the selected pdf
         path = decodeURIComponent(path);
         if (is_pdf) {
-            submitSplitItem("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_id, path, count, merge_previous, clobber);
-            moveNextInput(count);
+            submitSplitItem("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_id, path, merge_previous, clobber);
         }
 
         // otherwise, this is a regular submission of the uploaded files
@@ -410,27 +493,68 @@
             }
             // no user id entered, upload for whoever is logged in
             else if (user_id == ""){
-                makeSubmission(user_id, {{ highest_version }}, false, "", "", git_user_id, git_repo_id);
+                makeSubmission(user_id, {{ highest_version }}, false, "", git_repo_id);
             }
             // user id entered, need to validate first
             else {
-                validateUserId("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_id, false, "", "", git_user_id, git_repo_id, makeSubmission);
+                validateUserId("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_id)
+                .then(function(response){
+                    if(response['highest_version']){
+                        var option = displayPreviousSubmissionOptions(getSubmissionOption);
+                        function getSubmissionOption(option){
+                            var merge_previous = false;
+                            var clobber = false;
+
+                            if(option == 2){
+                                merge_previous = true;
+                            } else if(option == 3){
+                                merge_previous = true;
+                                clobber = true;
+                            }
+
+                            makeSubmission(user_id,response['highest_version'], false, "", "", merge_previous,clobber);
+                        }
+                    }else{
+                        makeSubmission(user_id, response['highest_version'], false, "", "");
+                    }
+                });
             }
             e.stopPropagation();
         });
     });
 </script>
 
-{% macro render_textbox(textbox, index) %}
+{% macro render_short_answer(short_answer, index, version) %}
 
     <p style="max-width: 50em;">
-        <strong>{{ textbox.label }}</strong>
-        <br>
-        {% if textbox.rows == 0 %}
-            <input type="text" name="input_{{ index }}" id="input_{{ index }}" onKeyPress="handle_input_keypress();">
+        {% if short_answer.rows == 0 %}
+            <input
+                    type="text"
+                    name="short_answer_{{ index }}"
+                    id="short_answer_{{ index }}"
+                    class="sa_box"
+                    data-initial_value="{{ short_answer.initial_value }}"
+                    data-recent_submission="{{ short_answer.recent_submission }}"
+                    {% if core.getConfig().keepPreviousFiles() %}
+                        value="{{ short_answer.recent_submission }}"
+                    {% else %}
+                        value="{{ short_answer.initial_value }}"
+                    {% endif %}
+                    onKeyPress="handle_input_keypress();">
+            <br />
         {% else %}
-            Press <kbd>TAB</kbd> to indent.  Press <kbd>ESC</kbd> to advance from textarea.</label>
-            <textarea rows="{{ textbox.rows }}" cols="50"  style="width:60em; height:100%; min-height:110px;" name="input_{{ index }}" id="input_{{ index }}" onKeyPress="handle_input_keypress();"></textarea>
+            <label>Press <kbd>TAB</kbd> to indent.  Press <kbd>ESC</kbd> to advance from textarea.</label>
+            <textarea
+                    rows="{{ short_answer.rows }}"
+                    cols="50"
+                    style="width:60em; height:100%; min-height:110px;"
+                    name="short_answer_{{ index }}"
+                    id="short_answer_{{ index }}"
+                    class="sa_box"
+                    data-initial_value="{{ short_answer.initial_value }}"
+                    data-recent_submission="{{ short_answer.recent_submission }}"
+                    onKeyPress="handle_input_keypress()">{% if core.getConfig().keepPreviousFiles() %}{{ short_answer.recent_submission }}{% else %}{{ short_answer.initial_value }}{% endif %}</textarea>
+            <br />
             {#
                 Allow tab in the larger text boxes (normally tab moves to the next textbox)
                 http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
@@ -438,9 +562,104 @@
                 q.v. function enableTabsInTextArea(jQuerySelector) in server.js
             #}
             <script>
-                enableTabsInTextArea('#input_{{ index }}');
-           </script>
+                enableTabsInTextArea('#short_answer_{{ index }}');
+            </script>
         {% endif %}
+        <button type="button" id="short_answer_{{ index }}_clear_button" class="btn btn-primary btn-push-down sa_clear_reset">Clear</button>
+        <button type="button" id="short_answer_{{ index }}_recent_button" class="btn btn-primary btn-push-down sa_clear_reset">Use Most Recent Submission</button>
+        <script>
+
+            {% if version == 0 %}
+                document.getElementById("short_answer_{{ index }}_recent_button").style.visibility = 'hidden';
+            {% endif %}
+
+            // Setup init state of buttons
+            {% if core.getConfig().keepPreviousFiles() %}
+
+                {% if version == 0 %}
+                    document.getElementById("short_answer_{{ index }}_clear_button").disabled = true;
+                {% else %}
+                    document.getElementById("short_answer_{{ index }}_clear_button").disabled = false;
+                {% endif %}
+
+                document.getElementById("short_answer_{{ index }}_recent_button").disabled = true;
+            {% else %}
+                document.getElementById("short_answer_{{ index }}_clear_button").disabled = true;
+                document.getElementById("short_answer_{{ index }}_recent_button").disabled = false;
+            {% endif %}
+
+            // Setup click events for buttons
+            $(".sa_clear_reset").click(function() {
+
+                // Collect the id of the button and split it apart to find out which short answer it is bound to
+                // and which action it preforms
+                var items = this.id.split("_");
+
+                var index_num = items[2];
+                var button_action = items[3];
+                var field_id = "#short_answer_" + index_num;
+
+                var data_to_set = "";
+
+                // Collect data from the data-* attribute of the text box
+                if(button_action == "clear")
+                {
+                    var data_to_set = $(field_id).attr("data-initial_value");
+                }
+                else
+                {
+                    var data_to_set = $(field_id).attr("data-recent_submission");
+                }
+
+                // Set the data into the textbox
+                $(field_id).val(data_to_set);
+
+                // Set button states
+                if(button_action == "clear")
+                {
+                    $(field_id + "_clear_button").attr("disabled", true);
+                    $(field_id + "_recent_button").attr("disabled", false);
+                }
+                else
+                {
+                    $(field_id + "_clear_button").attr("disabled", false);
+                    $(field_id + "_recent_button").attr("disabled", true);
+                }
+            });
+
+            // Setup button handlers for when data is entered into a text box
+            $(".sa_box").keyup(function() {
+
+                var items = this.id.split("_");
+
+                var index_num = items[2];
+
+                var initial_value = this.getAttribute("data-initial_value");
+                var recent_submission = this.getAttribute("data-recent_submission");
+
+                var text_box_id = "#short_answer_" + index_num;
+                var clear_button_id = "#short_answer_" + index_num + "_clear_button";
+                var recent_button_id = "#short_answer_" + index_num + "_recent_button";
+
+                if($(text_box_id).val() == initial_value)
+                {
+                    $(clear_button_id).attr("disabled", true);
+                }
+                else
+                {
+                    $(clear_button_id).attr("disabled", false);
+                }
+
+                if($(text_box_id).val() == recent_submission)
+                {
+                    $(recent_button_id).attr("disabled", true);
+                }
+                else
+                {
+                    $(recent_button_id).attr("disabled", false);
+                }
+            });
+        </script>
     </p>
     <br>
 {% endmacro %}

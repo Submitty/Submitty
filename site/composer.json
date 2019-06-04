@@ -13,6 +13,8 @@
   "require": {
     "twig/twig": "^2.9.0",
     "ramsey/uuid": "^3.8.0",
+    "aptoma/twig-markdown": "^3.1.0",
+    "erusev/parsedown": "^1.7.3",
     "lcobucci/jwt": "^3.2.5"
   },
   "autoload-dev": {

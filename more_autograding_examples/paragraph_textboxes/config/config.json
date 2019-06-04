@@ -4,89 +4,107 @@
         "submission_to_validation" : [ "*.txt", "*.png" ],
         "work_to_details" : [ "*.txt", "*.png" ]
     },
-    "content" : [
-        { 
-            "title" : "Question 1",
-            "images": [
-                {
-                    "name" : "image1.png"
-                }
-            ],
-            "input" : [
-                {
-                    "type" : "textbox",
-                    "label": "The above animal:",
-                    "filename" : "animal.txt"
-                },
-                {
-                    "label": "200-300 word description",
-                    "rows" : 5,
-                    "filename" : "description.txt",
-                    "type" : "textbox"
-                }   
-            ]
+    "notebook" : [
+        {
+            "type": "markdown",
+            "markdown_string": "#Header 1  \n###Header 3  \n#####Header 5  \n------  \nRegular text"
         },
-        {    
-            "title" : "Question 2",
-            "images": [
-                {
-                    "name" : "image2.png",
-                    "height" : 200,
-                    "width" : 200
-                },
-                {
-                    "name" : "image3.png",
-                    "height" : 200,
-                    "width" : 200
-                },
-                {
-                    "name" : "image4.png",
-                    "height" : 200,
-                    "width" : 200
-                }
-            ],
-            "input" : [
-                {
-                    "label": "Write a haiku about one of the above images:",
-                    "type" : "textbox",
-                    "filename" : "haiku.txt"
-                }
-            ]
+        {
+            "type": "image",
+            "image" : "image1.png",
+            "alt_text" : "A very happy pig.",
+            "height": 300,
+            "width": 300
         },
-        { 
-            "title" : "Question 4",
-            "input" : [
-                {
-                    "type" : "textbox",
-                    "label": "Number of hours spent on this assignment:",
-                    "filename" : "hours.txt"
-                }
-            ]
+        {
+            "type": "image",
+            "image" : "image1.png"
+        },
+        {
+            "type": "markdown",
+            "markdown_string": "The above animal:"
+        },
+        {
+            "type": "short_answer",
+            "filename": "box_one.txt",
+            "initial_value": "Box one"
+        },
+        {
+          "type": "short_answer",
+          "filename": "box_two.txt",
+          "initial_value": "string hello \"Hello world\";\ncout << hello;",
+          "rows": 5
+        },
+        {
+            "type": "markdown",
+            "markdown_string": "Multiple choice select one:"
+        },
+        {
+            "type": "multiple_choice",
+            "filename": "select_one.txt",
+            "choices":[
+                {"value": "short", "description": "the plant will be short because it doesn't get enough water"},
+                {"value": "medium", "description": "the plant will grow normally"},
+                {"value": "tall", "description": "the plant will be tall because it gets lots of light"}
+            ],
+            "allow_multiple": false
+        },
+        {
+            "type": "markdown",
+            "markdown_string": "Multiple choice select many:"
+        },
+        {
+            "type": "multiple_choice",
+            "filename": "select_many.txt",
+            "choices":[
+                {"value": "1", "description": "one"},
+                {"value": "2", "description": "two"},
+                {"value": "3", "description": "three"},
+                {"value": "4", "description": "four"},
+                {"value": "5", "description": "five"}
+            ],
+            "allow_multiple": true
+        },
+        {
+          "type": "markdown",
+          "markdown_string": "Codebox"
+        },
+        {
+          "type": "short_answer",
+          "programming_language": "python",
+          "filename": "codebox.txt",
+            "initial_value": "print(\"Hello world!\")\necho \"Hello world!\"\nprintf(\"Hello world!\");"
         }
     ],
     "testcases" : [ 
         {
             "type" : "FileCheck",
-            "title" : "Review Favorite Color",
-            "actual_file" : "animal.txt",
+            "title" : "First Box",
+            "actual_file" : "box_one.txt",
             "points" : 0
         },
         {
             "type" : "FileCheck",
-            "title" : "Review Description",
-            "actual_file" : "description.txt",
+            "title" : "Second Box",
+            "actual_file" : "box_two.txt",
             "points" : 0
         },
         {
             "type" : "FileCheck",
-            "title" : "Review Haiku",
-            "actual_file" : "haiku.txt",
+            "title" : "Select One",
+            "actual_file" : "select_one.txt",
             "points" : 0
         },
         {
             "type" : "FileCheck",
-            "title" : "Review Hours",
-            "actual_file" : "hours.txt",
+            "title" : "Select Many",
+            "actual_file" : "select_many.txt",
+            "points" : 0
+        },
+        {
+            "type" : "FileCheck",
+            "title" : "Codebox",
+            "actual_file" : "codebox.txt",
             "points" : 0
         }
     ]

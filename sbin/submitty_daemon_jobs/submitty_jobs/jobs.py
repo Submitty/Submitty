@@ -10,7 +10,8 @@ import subprocess
 import json
 import stat
 from urllib.parse import unquote
-
+from . import bulk_qr_split
+from . import bulk_upload_split
 from . import INSTALL_DIR, DATA_DIR
 
 
@@ -160,8 +161,8 @@ class DeleteLichenResult(CourseGradeableJob):
             msg = 'Deleted lichen plagiarism results and saved config for {}'.format(gradeable)
             open_file.write(msg) 
 
-class BulkQRSplit(CourseJob):
-    required_keys = CourseJob.required_keys + ['timestamp', 'g_id', 'filename']
+class BulkUpload(CourseJob):
+    required_keys = CourseJob.required_keys + ['timestamp', 'g_id', 'filename', 'is_qr']
 
     def add_permissions(self,item,perms):
         if os.getuid() == os.stat(item).st_uid:
@@ -181,11 +182,25 @@ class BulkQRSplit(CourseJob):
         timestamp = self.job_details['timestamp']
         gradeable_id = self.job_details['g_id']
         filename = self.job_details['filename']
+        is_qr = self.job_details['is_qr']
 
-        qr_prefix = unquote(unquote(self.job_details['qr_prefix']))
-        qr_suffix = unquote(unquote(self.job_details['qr_suffix']))
+        if is_qr and ('qr_prefix' not in self.job_details or 'qr_suffix' not in self.job_details):
+            print("did not pass in qr prefix or suffix")
+            sys.exit(1)
 
-        qr_script = Path(INSTALL_DIR, 'sbin', 'bulk_qr_split.py')
+        if is_qr:
+            qr_prefix = unquote(unquote(self.job_details['qr_prefix']))
+            qr_suffix = unquote(unquote(self.job_details['qr_suffix']))
+
+        script = ''
+        if is_qr:
+            script = Path(INSTALL_DIR, 'sbin', 'bulk_qr_split.py')
+        else:
+            if 'num' not in self.job_details:
+                print("did not pass in the number to divide " + filename + " by")
+                sys.exit(1)
+            num  = self.job_details['num']
+            script = Path(INSTALL_DIR, 'sbin', 'bulk_upload_split.py')
         #create paths
         try:
             with open("/usr/local/submitty/config/submitty.json", encoding='utf-8') as data_file:
@@ -195,6 +210,7 @@ class BulkQRSplit(CourseJob):
             uploads_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads")
             bulk_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads/bulk_pdf",gradeable_id,timestamp)
             split_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads/split_pdf",gradeable_id,timestamp)
+            root_split_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads/split_pdf")
         except Exception as err:
             print("Failed while parsing args and creating paths")
             print(err)
@@ -204,9 +220,6 @@ class BulkQRSplit(CourseJob):
         try:
             if not os.path.exists(split_path):
                 os.makedirs(split_path)
-
-            # adding write permissions for PHP
-            self.add_permissions_recursive(uploads_path, stat.S_IWGRP | stat.S_IXGRP, stat.S_IWGRP | stat.S_IXGRP, stat.S_IWGRP)
 
             # copy over file to new directory
             if not os.path.isfile(os.path.join(split_path, filename)):
@@ -220,11 +233,22 @@ class BulkQRSplit(CourseJob):
             sys.exit(1)
 
         try:
-            subprocess.call([str(qr_script), filename, split_path, qr_prefix, qr_suffix])
-            
+            if is_qr:
+                bulk_qr_split.main([filename, split_path, qr_prefix, qr_suffix])
+            else: 
+                bulk_upload_split.main([filename, split_path, num])
+
+            os.remove(filename)
             os.chdir(current_path)
         except Exception as err:
-            print("Failed to launch bulk_qr_split subprocess!")
+            print("Failed to launch bulk_split subprocess!")
             print(err)
             sys.exit(1)
-        
+
+        # reset permissions just in case, group needs read/write
+        # access so submitty_php can view & delete pdfs when they are
+        # assigned to a student and/or deleted
+        self.add_permissions_recursive(root_split_path,
+                                       stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |   stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP |   stat.S_ISGID,
+                                       stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |   stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP |   stat.S_ISGID,
+                                       stat.S_IRUSR | stat.S_IWUSR |                  stat.S_IRGRP | stat.S_IWGRP                                  )

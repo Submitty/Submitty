@@ -1505,6 +1505,13 @@ function publishFormWithAttachments(form, test_category, error_message) {
         success: function(data){
             try {
                 var json = JSON.parse(data);
+
+                if(json["error"]) {
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json["error"] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+
             } catch (err){
                 var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
                 $('#messages').append(message);
@@ -1560,7 +1567,7 @@ function changeThreadStatus(thread_id) {
 	});
 }
 
-function editPost(post_id, thread_id, shouldEditThread) {
+function editPost(post_id, thread_id, shouldEditThread, csrf_token) {
     if(!checkAreYouSureForm()) return;
     var form = $("#thread_form");
     var url = buildUrl({'component': 'forum', 'page': 'get_edit_post_content'});
@@ -1569,7 +1576,8 @@ function editPost(post_id, thread_id, shouldEditThread) {
             type: "POST",
             data: {
                 post_id: post_id,
-                thread_id: thread_id
+                thread_id: thread_id,
+                csrf_token: csrf_token
             },
             success: function(data){
                 try {
@@ -1617,11 +1625,14 @@ function editPost(post_id, thread_id, shouldEditThread) {
                 // If first post of thread
                 if(shouldEditThread) {
                     var thread_title = json.title;
+                    var thread_lock_date =  json.lock_thread_date;
                     var thread_status = json.thread_status;
                     $("#title").prop('disabled', false);
                     $(".edit_thread").show();
+                    $('#label_lock_thread').show();
                     $("#title").val(thread_title);
                     $("#thread_status").val(thread_status);
+                    $('#lock_thread_date').val(thread_lock_date);
                     // Categories
                     $(".cat-buttons").removeClass('cat-selected');
                     $.each(categories_ids, function(index, category_id) {
@@ -1636,6 +1647,7 @@ function editPost(post_id, thread_id, shouldEditThread) {
                 } else {
                     $("#title").prop('disabled', true);
                     $(".edit_thread").hide();
+                    $('#label_lock_thread').hide();
                     $("#thread_form").prop("ignore-cat",true);
                     $("#category-selection-container").hide();
                     $("#thread_status").hide();
@@ -2000,14 +2012,15 @@ function showHistory(post_id) {
     });
 }
 
-function addNewCategory(){
+function addNewCategory(csrf_token){
     var newCategory = $("#new_category_text").val();
     var url = buildUrl({'component': 'forum', 'page': 'add_category'});
     $.ajax({
             url: url,
             type: "POST",
             data: {
-                newCategory: newCategory
+                newCategory: newCategory,
+                csrf_token: csrf_token
             },
             success: function(data){
                 try {
@@ -2048,13 +2061,14 @@ function addNewCategory(){
     })
 }
 
-function deleteCategory(category_id, category_desc){
+function deleteCategory(category_id, category_desc, csrf_token){
     var url = buildUrl({'component': 'forum', 'page': 'delete_category'});
     $.ajax({
             url: url,
             type: "POST",
             data: {
-                deleteCategory: category_id
+                deleteCategory: category_id,
+                csrf_token: csrf_token
             },
             success: function(data){
                 try {
@@ -2080,11 +2094,11 @@ function deleteCategory(category_id, category_desc){
     })
 }
 
-function editCategory(category_id, category_desc, category_color) {
+function editCategory(category_id, category_desc, category_color, csrf_token) {
     if(category_desc === null && category_color === null) {
         return;
     }
-    var data = {category_id: category_id};
+    var data = {category_id: category_id, csrf_token: csrf_token};
     if(category_desc !== null) {
         data['category_desc'] = category_desc;
     }
@@ -2292,7 +2306,7 @@ function hidePosts(text, id) {
 
 }
 
-function deletePostToggle(isDeletion, thread_id, post_id, author, time){
+function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_token){
     if(!checkAreYouSureForm()) return;
     var page = (isDeletion?"delete_post":"undelete_post");
     var message = (isDeletion?"delete":"undelete");
@@ -2305,7 +2319,8 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time){
             type: "POST",
             data: {
                 post_id: post_id,
-                thread_id: thread_id
+                thread_id: thread_id,
+                csrf_token: csrf_token
             },
             success: function(data){
                 try {
@@ -2340,7 +2355,7 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time){
     }
 }
 
-function alterAnnouncement(thread_id, confirmString, url){
+function alterAnnouncement(thread_id, confirmString, url, csrf_token){
     var confirm = window.confirm(confirmString);
     if(confirm){
         var url = buildUrl({'component': 'forum', 'page': url});
@@ -2348,7 +2363,9 @@ function alterAnnouncement(thread_id, confirmString, url){
             url: url,
             type: "POST",
             data: {
-                thread_id: thread_id
+                thread_id: thread_id,
+                csrf_token: csrf_token
+
             },
             success: function(data){
                 window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'thread_id': thread_id}));
@@ -2676,8 +2693,8 @@ $(document).ready(function() {
     checkSidebarCollapse();
 });
 
-function checkQRProgress(gradeable_id){
-    var url = buildUrl({'component': 'misc', 'page': 'check_qr_upload_progress'});
+function checkBulkProgress(gradeable_id){
+    var url = buildUrl({'component': 'misc', 'page': 'check_bulk_progress'});
     $.ajax({
         url: url,
         data: {
@@ -2687,7 +2704,7 @@ function checkQRProgress(gradeable_id){
         success: function(data) {
             data = JSON.parse(data);
             var result = {};
-            updateQRProgress(data['job_data'], data['count']);
+            updateBulkProgress(data['job_data'], data['count']);
         },
         error: function(e) {
             console.log("Failed to check job queue");
@@ -2709,4 +2726,19 @@ function resizeNoScrollTextareas() {
     $('textarea.noscroll').each(function() {
         auto_grow(this);
     })
+}
+
+/**
+ * Transforms a escaped characters back into their regular characters
+ *
+ * https://stackoverflow.com/questions/5796718/html-entity-decode
+ */
+function convertHTMLEntity(text){
+    const span = document.createElement('span');
+
+    return text
+        .replace(/&[#A-Za-z0-9]+;/gi, (entity,position,text)=> {
+            span.innerHTML = entity;
+            return span.innerText;
+        });
 }

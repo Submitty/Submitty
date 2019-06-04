@@ -510,7 +510,12 @@ CREATE TABLE notification_settings (
 	all_new_threads BOOLEAN DEFAULT FALSE NOT NULL,
 	all_new_posts BOOLEAN DEFAULT FALSE NOT NULL,
 	all_modifications_forum BOOLEAN DEFAULT FALSE NOT NULL,
-	reply_in_post_thread BOOLEAN DEFAULT FALSE NOT NULL
+	reply_in_post_thread BOOLEAN DEFAULT FALSE NOT NULL,
+	merge_threads_email BOOLEAN DEFAULT FALSE NOT NULL,
+	all_new_threads_email BOOLEAN DEFAULT FALSE NOT NULL,
+	all_new_posts_email BOOLEAN DEFAULT FALSE NOT NULL,
+	all_modifications_forum_email BOOLEAN DEFAULT FALSE NOT NULL,
+	reply_in_post_thread_email BOOLEAN DEFAULT FALSE NOT NULL
 );
 
 --
@@ -575,6 +580,7 @@ CREATE TABLE "threads" (
 	"merged_post_id" int DEFAULT '-1',
 	"is_visible" BOOLEAN NOT NULL,
 	"status" int DEFAULT 0 NOT NULL,
+	"lock_thread_date" timestamp with time zone,
 	CONSTRAINT threads_pk PRIMARY KEY ("id")
 );
 

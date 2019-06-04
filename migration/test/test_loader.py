@@ -42,3 +42,22 @@ def foo():
             'table': None
         }
         self.assertDictEqual(expected, migrations['1_test'])
+
+    def test_load_migrations_bad_filename(self):
+        self.create_migration('1_test.py')
+        self.create_migration('.2_test.py')
+        self.create_migration('#3_test.py')
+        self.create_migration('.#4_test.py')
+        self.create_migration('5_test.pyc')
+        self.create_migration('6_test.py.bak')
+        migrations = loader.load_migrations(Path(self.dir))
+        self.assertEqual(1, len(migrations.keys()))
+        self.assertListEqual(['1_test'], list(migrations.keys()))
+        expected = {
+            'id': '1_test',
+            'commit_time': None,
+            'status': 0,
+            'module': loader.load_module('1_test', Path(self.dir, '1_test.py')),
+            'table': None
+        }
+        self.assertDictEqual(expected, migrations['1_test'])
