@@ -1178,6 +1178,10 @@ fieldset[disabled] .btn-primary.focus {
   background-color: #fff;
 }
 
+.btn-push-down {
+    margin-top: 5px
+}
+
 .panel-heading > .dropdown .dropdown-toggle {
   color: inherit;
 }
@@ -1519,7 +1523,7 @@ div.full_height {
     list-style-type: none;
     margin: 0;
     padding: 0;
-    width: 65%;
+    width: 100%;
 }
 
 #ui-category-list li {
@@ -2093,3 +2097,7 @@ end of styles used in the admin gradeable page
     padding: 0px;
 }
 
+/* Display notebook multiple choice descriptions on same line as radio button or checkbox */
+.mc > label > *:first-child {
+    display: inline;
+}

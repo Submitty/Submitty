@@ -135,6 +135,10 @@ ExceptionHandler::setDisplayExceptions($core->getConfig()->isDebug());
 /** @noinspection PhpUnhandledExceptionInspection */
 $core->loadDatabases();
 
+if($core->getConfig()->isCourseLoaded() && $core->getConfig()->isForumEnabled()) {
+    $core->loadForum();
+}
+
 $core->getOutput()->setInternalResources();
 
 // We only want to show notices and warnings in debug mode, as otherwise errors are important

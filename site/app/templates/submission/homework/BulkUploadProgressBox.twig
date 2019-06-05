@@ -1,5 +1,7 @@
-<div class="content" id="qr_progress_box">
-	<h3>QR processing progress <button onClick="window.location.reload()" id="refresh_btn" style="margin:15px;" class="btn btn-default" disabled>Refresh</button></h3>
+<div class="content" id="bulk_progress_box">
+	<h3>Bulk upload processing progress 
+		<button onClick="window.location.reload()" id="refresh_btn" style="margin:15px;" class="btn btn-default" disabled>Refresh</button>
+	</h3>
 	<div>
 		<h4 style="float:left;">Processing</h4>
 		<h4 style="float:right;">Files ready to assign <span class="green-message">Note: please refresh too see newly added files</span></h4>
@@ -21,12 +23,12 @@
 		assign_box = document.getElementById("assign_box");
 
 		//check the status of what is processing and what is complete every 2 seconds
-		checkQRProgress( "{{ gradeable_id }}" );
+		checkBulkProgress( "{{ gradeable_id }}" );
 		var loop = setInterval(function(){
-			checkQRProgress( "{{ gradeable_id }}" );
+			checkBulkProgress( "{{ gradeable_id }}" );
 		}, 2000);
     }
-    function updateQRProgress(files, completed_count){
+    function updateBulkProgress(files, completed_count){
     	//clear previous data before getting next
     	assign_box.removeChild(assign_box.firstChild);
     	while(processing_list.firstChild)
