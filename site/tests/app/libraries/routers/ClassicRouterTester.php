@@ -1,6 +1,6 @@
 <?php
 
-namespace tests\app\libraries;
+namespace tests\app\libraries\routers;
 
 use app\libraries\routers\ClassicRouter;
 

@@ -23,11 +23,11 @@ class WebRouter {
     /** @var bool */
     protected $logged_in;
 
-    /** @var array */
-    protected $parameters;
-
     /** @var UrlMatcher  */
     protected $matcher;
+
+    /** @var array */
+    public $parameters;
 
     public function __construct(Request $request, Core $core, $logged_in) {
         $this->core = $core;
@@ -42,11 +42,10 @@ class WebRouter {
 
         $this->matcher = new UrlMatcher($collection, new RequestContext());
         $this->parameters = $this->matcher->matchRequest($this->request);
+        $this->loginCheck();
     }
 
     public function run() {
-        $this->loginCheck();
-
         $controllerName = $this->parameters['_controller'];
         $methodName = $this->parameters['_method'];
         $controller = new $controllerName($this->core);
@@ -70,7 +69,7 @@ class WebRouter {
     private function loginCheck() {
         if (!$this->logged_in) {
             $this->request = Request::create(
-                $this->core->buildNewUrl(['authentication', 'login']),
+                '/authentication/login',
                 'GET',
                 ['old' => $this->request]
             );
@@ -80,7 +79,7 @@ class WebRouter {
             $this->core->loadSubmittyUser();
             if (!Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
                 $this->request = Request::create(
-                    $this->core->buildNewUrl(['navigation', 'no_access']),
+                    '/navigation/no_access',
                     'GET'
                 );
                 $this->parameters = $this->matcher->matchRequest($this->request);
@@ -90,7 +89,7 @@ class WebRouter {
             && !$this->core->getAccess()->canI("course.view", ["semester" => $this->core->getConfig()->getSemester(), "course" => $this->core->getConfig()->getCourse()])
             && !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
             $this->request = Request::create(
-                $this->core->buildNewUrl(['navigation', 'no_access']),
+                '/navigation/no_access',
                 'GET'
             );
             $this->parameters = $this->matcher->matchRequest($this->request);
@@ -102,14 +101,14 @@ class WebRouter {
             if ($this->logged_in){
                 if (isset($this->parameters['_method']) && $this->parameters['_method'] === 'logout'){
                     $this->request = Request::create(
-                        $this->core->buildNewUrl(['authentication', 'logout']),
+                        '/authentication/logout',
                         'GET'
                     );
                     $this->parameters = $this->matcher->matchRequest($this->request);
                 }
                 else {
                     $this->request = Request::create(
-                        $this->core->buildNewUrl(['home']),
+                        '/home',
                         'GET'
                     );
                     $this->parameters = $this->matcher->matchRequest($this->request);
@@ -117,7 +116,7 @@ class WebRouter {
             }
             else {
                 $this->request = Request::create(
-                    $this->core->buildNewUrl(['authentication']),
+                    '/authentication/login',
                     'GET'
                 );
                 $this->parameters = $this->matcher->matchRequest($this->request);
@@ -127,14 +126,14 @@ class WebRouter {
         if (empty($this->parameters['_controller']) && $this->core->getUser() !== null) {
             if ($this->core->getConfig()->isCourseLoaded()) {
                 $this->request = Request::create(
-                    $this->core->buildNewUrl(['navigation']),
+                    '/' . $this->core->getConfig()->getSemester() . '/' . $this->core->getConfig()->getCourse(),
                     'GET'
                 );
                 $this->parameters = $this->matcher->matchRequest($this->request);
             }
             else {
                 $this->request = Request::create(
-                    $this->core->buildNewUrl(['home']),
+                    '/home',
                     'GET'
                 );
                 $this->parameters = $this->matcher->matchRequest($this->request);
