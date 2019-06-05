@@ -21,7 +21,7 @@ SET row_security = off;
 --
 
 CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
-
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
 
 --
 -- TOC entry 2161 (class 0 OID 0)
@@ -126,7 +126,8 @@ CREATE TABLE users (
     user_email character varying NOT NULL,
     user_updated BOOLEAN NOT NULL DEFAULT FALSE,
     instructor_updated BOOLEAN NOT NULL DEFAULT FALSE,
-    last_updated timestamp(6) with time zone
+    last_updated timestamp(6) with time zone,
+    api_key character varying(255) NOT NULL UNIQUE DEFAULT encode(gen_random_bytes(16), 'hex')
 );
 
 CREATE TABLE courses_registration_sections (
@@ -337,6 +338,15 @@ EXCEPTION WHEN integrity_constraint_violation THEN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION generate_api_key() RETURNS TRIGGER AS $generate_api_key$
+-- TRIGGER function to generate api_key on INSERT or UPDATE of user_password in
+-- table users.
+BEGIN
+    NEW.api_key := encode(gen_random_bytes(16), 'hex');
+    RETURN NEW;
+END;
+$generate_api_key$ LANGUAGE plpgsql;
+
 -- Foreign Key Constraint *REQUIRES* insert trigger to be assigned to course_users.
 -- Updates can happen in either users and/or courses_users.
 CREATE TRIGGER user_sync_courses_users AFTER INSERT OR UPDATE ON courses_users FOR EACH ROW EXECUTE PROCEDURE sync_courses_user();
@@ -345,3 +355,6 @@ CREATE TRIGGER user_sync_users AFTER UPDATE ON users FOR EACH ROW EXECUTE PROCED
 -- INSERT and DELETE triggers for syncing registration sections happen on different instances of TG_WHEN (after vs before).
 CREATE TRIGGER insert_sync_registration_id AFTER INSERT OR UPDATE ON courses_registration_sections FOR EACH ROW EXECUTE PROCEDURE sync_insert_registration_section();
 CREATE TRIGGER delete_sync_registration_id BEFORE DELETE ON courses_registration_sections FOR EACH ROW EXECUTE PROCEDURE sync_delete_registration_section();
+
+-- Generate API key when a user is created or its password is changed.
+CREATE TRIGGER generate_api_key BEFORE INSERT OR UPDATE OF user_password ON users FOR EACH ROW EXECUTE PROCEDURE generate_api_key();
