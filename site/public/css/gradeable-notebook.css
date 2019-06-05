@@ -7,7 +7,7 @@
 .notebook h7
 {
     margin-top: 2rem;
-    margin-bottom: 0;
+    margin-bottom: .3rem;
     margin-left: 0;
     margin-right: 0;
 }
@@ -15,7 +15,7 @@
 .notebook p
 {
     margin-top: 2px;
-    margin-botom: 2px;
+    margin-bottom: 2px;
 }
 
 .notebook ul {
@@ -27,11 +27,18 @@
 .notebook .codebox_clear_reset,
 .notebook .mc_recent
 {
-    margin-top: 5px;
+    margin-top: 7px;
 }
 
 /* Display notebook multiple choice descriptions on same line as radio button or checkbox */
-.mc > label > *:first-child
+.mc > label > :first-child
 {
     display: inline;
+}
+
+/* Clear top margin for items that live inside a single multiple choice description */
+/* Useful for several newline separated headers inside a single markdown item  */
+.mc > label > *
+{
+    margin-top: 0;
 }
