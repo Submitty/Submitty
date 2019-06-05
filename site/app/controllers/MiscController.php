@@ -517,7 +517,7 @@ class MiscController extends AbstractController {
         $zip = new \ZipArchive();
         $zip->open($zip_name, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
 
-        if(!$this->core->getUser()->accessAdmin()) {
+        if(!$this->core->getUser()->accessGrading()) {
             // if the user is not the instructor
             // download all accessible files according to course_materials_file_data.json
             $file_data = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
