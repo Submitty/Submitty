@@ -40,14 +40,11 @@ class TokenManager {
     public static function generateApiToken(
         string $api_key,
         string $issuer,
-        string $secret,
-        $persistent=true
+        string $secret
     ): Token {
-        $expire_time = ($persistent) ? time() + (7 * 24 * 60 * 60) : 0;
         return (new Builder())->issuedBy($issuer)
             ->issuedAt(time())
             ->withClaim('api_key', $api_key)
-            ->withClaim('expire_time', $expire_time)
             ->getToken(new Sha256(), new Key($secret));
     }
 
@@ -61,7 +58,7 @@ class TokenManager {
 
     public static function parseApiToken(string $token, string $issuer, string $secret): Token {
         $token = self::parseToken($token, $issuer, $secret);
-        if (!$token->hasClaim('api_key') || !$token->hasClaim('expire_time')) {
+        if (!$token->hasClaim('api_key')) {
             throw new \RuntimeException('Missing claims in api token');
         }
         return $token;

@@ -121,7 +121,7 @@ class TokenManagerTester extends \PHPUnit\Framework\TestCase {
     }
 
     public function testMissingApiKey() {
-        $token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyIsImV4cGlyZV90aW1lIjoiZXhwaXJlX3RpbWUifQ.8FubS2_gwrtepWEUb-NooNRgYjYtkBbswHIgwLcKtAg';
+        $token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyJ9.J9gYCSxsWhDg2SQ0ZU1-8vSBagRqfujj1zh3CJ7JGgM';
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Missing claims in api token');
         TokenManager::parseApiToken($token, 'https://submitty.org', 'secret');
