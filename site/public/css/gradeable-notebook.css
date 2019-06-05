@@ -30,6 +30,13 @@
     margin-top: 7px;
 }
 
+/* Set default font for short_answer boxes */
+.notebook textarea,
+.notebook input[type="text"]
+{
+    font-family: monospace;
+}
+
 /* Display notebook multiple choice descriptions on same line as radio button or checkbox */
 .mc > label > :first-child
 {
