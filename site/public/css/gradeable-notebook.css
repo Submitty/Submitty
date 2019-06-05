@@ -24,6 +24,7 @@
 
 /* Push recent and clear buttons down a little bit */
 .notebook .sa_clear_reset,
+.notebook .codebox_clear_reset,
 .notebook .mc_recent
 {
     margin-top: 5px;

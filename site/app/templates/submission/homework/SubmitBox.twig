@@ -245,24 +245,54 @@
 
                         {# Else render a codebox #}
                         {% else %}
-                                <div id="codebox_{{ num_codeboxes }}" name="codebox_{{ num_codeboxes }}" style="border: 1px solid LightGrey;" onKeyPress="handle_input_keypress();">
+                                <div id="codebox_{{ num_codeboxes }}"
+                                     name="codebox_{{ num_codeboxes }}"
+                                     class="codebox"
+                                     data-initial_value="{{ cell.initial_value }}"
+                                     data-recent_submission="{{ cell.recent_submission }}"
+                                     style="border: 1px solid LightGrey;" onKeyPress="handle_input_keypress();">
                                 </div>
+
+                                <button type="button" id="codebox_{{ num_codeboxes }}_clear_button" class="btn btn-primary codebox_clear_reset">Clear</button>
+                                <button type="button" id="codebox_{{ num_codeboxes }}_recent_button" class="btn btn-primary codebox_clear_reset">Use Most Recent Submission</button>
+
                                 <script>
-
-                                    {# Get recent submission #}
-                                    var recent_submission = `{% if core.getConfig().keepPreviousFiles() %}{{ cell.recent_submission }}{% else %}{{ cell.initial_value }}{% endif %}`;
-
-                                    {# Transform escaped characters back into regular characters #}
-                                    recent_submission = convertHTMLEntity(recent_submission);
 
                                     var editor_{{num_codeboxes}} = CodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"),
                                         {
-                                            "value" : recent_submission,
                                             "mode": "{{ cell.programming_language }}",
                                             lineNumbers: true,
                                             "theme": "eclipse"
                                         }
                                     );
+
+                                    {# Populate codebox initially #}
+                                    {% if core.getConfig().keepPreviousFiles() %}
+                                        setCodeBox("codebox_{{ num_codeboxes }}", "recent");
+                                    {% else %}
+                                        setCodeBox("codebox_{{ num_codeboxes }}", "clear");
+                                    {% endif %}
+
+                                    {# Hide recent button if no previous submissions #}
+                                    {% if highest_version == 0 %}
+                                        document.getElementById("codebox_{{ num_codeboxes }}_recent_button").style.visibility = 'hidden';
+                                    {% endif %}
+
+                                    {# Setup init state of buttons #}
+                                    {% if core.getConfig().keepPreviousFiles() %}
+
+                                        {% if highest_version == 0 %}
+                                            document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = true;
+                                        {% else %}
+                                            document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = false;
+                                        {% endif %}
+
+                                        document.getElementById("codebox_{{ num_codeboxes }}_recent_button").disabled = true;
+                                    {% else %}
+                                        document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = true;
+                                        document.getElementById("codebox_{{ num_codeboxes }}_recent_button").disabled = false;
+
+                                    {% endif %}
                                 </script>
                             <br>
                             {% set num_codeboxes = num_codeboxes + 1 %}

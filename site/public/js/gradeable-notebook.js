@@ -1,7 +1,10 @@
+/**
+ * Checks all radio buttons or checkboxes that were previously checked in the recent submission
+ *
+ * @param mc_field_id The id of the multiple choice fieldset
+ */
 function setMultipleChoices(mc_field_id)
 {
-    var parts = mc_field_id.split("_");
-    var id = parts[2];
     var prev_checked = $("#" + mc_field_id).attr("data-prev_checked");
 
     prev_checked = prev_checked.split("\n");
@@ -22,8 +25,68 @@ function setMultipleChoices(mc_field_id)
     });
 }
 
+/**
+ * Sets the contents of the codebox
+ *
+ * @param codebox_id The id of the codebox div
+ * @param state May be either clear (set to initial_value) or recent (set to recent submission)
+ */
+function setCodeBox(codebox_id, state)
+{
+    // Get initial and previous submission values
+    var initial_value = $("#" + codebox_id).attr("data-initial_value");
+    var recent_submission = $("#" + codebox_id).attr("data-recent_submission");
+
+    // Get the codebox
+    var codebox = $("#" + codebox_id + " .CodeMirror").get(0).CodeMirror;
+
+    if(state == "clear")
+    {
+        codebox.setValue(initial_value);
+    }
+    else
+    {
+        codebox.setValue(recent_submission);
+    }
+}
+
 $(document).ready(function () {
 
+    // Register click handler for codebox clear and recent buttons
+    $(".codebox_clear_reset").click(function() {
+
+        // Collect the id of the button and split it apart to find out which field it is bound to
+        var items = this.id.split("_");
+        var index = items[1];
+        var action = items[2];
+        var button_selector = "#codebox_" + index +  "_";
+
+        setCodeBox("codebox_" + index, action);
+
+        if(action == "clear")
+        {
+            $(button_selector + "clear_button").attr("disabled", true);
+            $(button_selector + "recent_button").attr("disabled", false);
+        }
+        else
+        {
+            $(button_selector + "clear_button").attr("disabled", false);
+            $(button_selector + "recent_button").attr("disabled", true);
+        }
+    });
+
+    // Register handler to detect changes inside codeboxes and then enable buttons
+    $("div .codebox").keypress(function() {
+
+        // Get index of codebox so we can select appropriate buttons to enable
+        var index = this.id.substr(-1);
+
+        // Enable buttons
+        $("#codebox_" + index + "_clear_button").attr("disabled", false);
+        $("#codebox_" + index + "_recent_button").attr("disabled", false);
+    });
+
+    // Register click handler for multiple choice recent submission button
     $(".mc_recent").click(function() {
 
         // Collect the id of the button and split it apart to find out which field it is bound to
@@ -35,6 +98,7 @@ $(document).ready(function () {
         $(this).attr("disabled", true);
     });
 
+    // Register change handler to enable buttons when multiple choice inputs change
     $(".mc").change(function() {
 
         var items = this.id.split("_");
