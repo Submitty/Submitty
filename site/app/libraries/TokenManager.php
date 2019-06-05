@@ -86,10 +86,6 @@ class TokenManager {
             throw new \RuntimeException('Invalid claims in token');
         }
 
-        if (!$token->hasClaim('session_id') || !$token->hasClaim('expire_time') || !$token->hasClaim('sub')) {
-            throw new \RuntimeException('Missing claims in session token');
-        }
-
         return $token;
     }
 }
