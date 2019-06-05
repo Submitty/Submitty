@@ -1,7 +1,6 @@
 <?php
 
 use app\exceptions\BaseException;
-use app\exceptions\AuthenticationException;
 use app\libraries\Core;
 use app\libraries\ExceptionHandler;
 use app\libraries\Logger;
@@ -181,7 +180,7 @@ if (isset($_COOKIE[$cookie_key])) {
             }
         }
     }
-    catch (AuthenticationException $exc) {
+    catch (\InvalidArgumentException $exc) {
         // Invalid cookie data, delete it
         Utils::setCookie($cookie_key, "", time() - 3600);
     }

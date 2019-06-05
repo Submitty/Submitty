@@ -3,7 +3,6 @@
 namespace tests\app\libraries;
 
 use app\libraries\TokenManager;
-use app\exceptions\AuthenticationException;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
 
 class TokenManagerTester extends \PHPUnit\Framework\TestCase {
@@ -38,7 +37,7 @@ class TokenManagerTester extends \PHPUnit\Framework\TestCase {
             'secret'
         );
 
-        $this->expectException(AuthenticationException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid signature for token');
         TokenManager::parseSessionToken((string) $token, 'https://submitty.org', '');
     }
@@ -51,7 +50,7 @@ class TokenManagerTester extends \PHPUnit\Framework\TestCase {
             'secret'
         );
 
-        $this->expectException(AuthenticationException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid claims in token');
         TokenManager::parseSessionToken((string) $token, 'https://wrong.org', 'secret');        
     }
@@ -59,14 +58,14 @@ class TokenManagerTester extends \PHPUnit\Framework\TestCase {
     public function testWrongType() {
         // Generated at https://jwt.io/ with typ JWT
         $token = 'eyJ0eXAiOiJBQUEiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyIsInN1YiI6InVzZXJfaWQiLCJzZXNzaW9uX2lkIjoic2Vzc2lvbl9pZCJ9.H10IvoXjP-Gf2Z6fgT-e8V5TgHkohi48Xlq6lD4rHwg';
-        $this->expectException(AuthenticationException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid value for typ: JWT');
         TokenManager::parseSessionToken($token, 'https://submitty.org', 'secret');
     }
 
     public function testMissingSessionId() {
         $token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyX2lkIiwiaXNzIjoiaHR0cHM6Ly9zdWJtaXR0eS5vcmciLCJleHBpcmVfdGltZSI6MH0.SDjPG61GUYWf5agRWJVZAd_iuiHHlQceuKeGgCsc1dY';
-        $this->expectException(AuthenticationException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Missing claims in session token');
         TokenManager::parseSessionToken($token, 'https://submitty.org', '');
     }
