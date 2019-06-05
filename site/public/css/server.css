@@ -741,7 +741,11 @@ table tr.table-header {
 /* TODO: MAKE THIS CASCADE */
 .deleted {
     background-color: #dcdcdc;
+<<<<<<< HEAD
    /* color: #4a4a4a; */
+=======
+    /*color: #4a4a4a;*/
+>>>>>>> 9e340c5ba3ce2a1494c90a2fcd824f887dce7a5c
 }
 
 .deleted.active {
