@@ -15,6 +15,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         $details = array(
             'user_id' => "test",
             'anon_id' => "TestAnon",
+            'user_numeric_id' => '123456789',
             'user_password' => "test",
             'user_firstname' => "User",
             'user_preferred_firstname' => null,
@@ -30,6 +31,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         $user = new User($this->core, $details);
         $this->assertEquals($details['user_id'], $user->getId());
         $this->assertEquals($details['anon_id'], $user->getAnonId());
+        $this->assertEquals($details['user_numeric_id'], $user->getNumericId());
         $this->assertEquals($details['user_firstname'], $user->getLegalFirstName());
         $this->assertEquals($details['user_preferred_firstname'], $user->getPreferredFirstName());
         $this->assertEquals($details['user_firstname'], $user->getDisplayedFirstName());
@@ -51,6 +53,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         $details = array(
             'user_id' => "test",
             'anon_id' => "TestAnon",
+            'user_numeric_id' => '123456789',
             'user_firstname' => "User",
             'user_preferred_firstname' => "Paul",
             'user_lastname' => "Tester",
@@ -65,6 +68,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         $user = new User($this->core, $details);
         $this->assertEquals($details['user_id'], $user->getId());
         $this->assertEquals($details['anon_id'], $user->getAnonId());
+        $this->assertEquals($details['user_numeric_id'], $user->getNumericId());
         $this->assertEquals($details['user_firstname'], $user->getLegalFirstName());
         $this->assertEquals($details['user_preferred_firstname'], $user->getPreferredFirstName());
         $this->assertEquals($details['user_preferred_firstname'], $user->getDisplayedFirstName());
@@ -76,6 +80,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
     public function testPassword() {
         $details = array(
             'user_id' => "test",
+            'user_numeric_id' => "123456789",
             'user_password' => "test",
             'user_firstname' => "User",
             'user_preferred_firstname' => null,
@@ -101,6 +106,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         $details = array(
             'user_id' => "test",
             'anon_id' => "TestAnonymous",
+            'user_numeric_id' => '123456789',
             'user_password' => "test",
             'user_firstname' => "User",
             'user_preferred_firstname' => null,
@@ -131,6 +137,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'manual_registration' => false,
             'preferred_first_name' => "",
             'preferred_last_name' => "",
+            'numeric_id' => '123456789',
             'registration_section' => 1,
             'rotating_section' => null,
             'modified' => true,

@@ -2097,3 +2097,7 @@ end of styles used in the admin gradeable page
     padding: 0px;
 }
 
+/* Display notebook multiple choice descriptions on same line as radio button or checkbox */
+.mc > label > *:first-child {
+    display: inline;
+}

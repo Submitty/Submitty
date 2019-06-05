@@ -7,6 +7,7 @@ use Lcobucci\JWT\Parser;
 use Lcobucci\JWT\Token;
 use Lcobucci\JWT\ValidationData;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
+use Lcobucci\JWT\Signer\Key;
 
 /**
  * Utility class that wraps around the Lcobucci\JWT library, so that we
@@ -28,13 +29,12 @@ class TokenManager {
         $persistent=true
     ): Token {
         $expire_time = ($persistent) ? time() + (7 * 24 * 60 * 60) : 0;
-        return (new Builder())->setIssuer($issuer)
-            ->setIssuedAt(time())
-            ->setSubject($user_id)
-            ->set('session_id', $session_id)
-            ->set('expire_time', $expire_time)
-            ->sign(new Sha256(), $secret)
-            ->getToken();
+        return (new Builder())->issuedBy($issuer)
+            ->issuedAt(time())
+            ->relatedTo($user_id)
+            ->withClaim('session_id', $session_id)
+            ->withClaim('expire_time', $expire_time)
+            ->getToken(new Sha256(), new Key($secret));
     }
 
     public static function parseSessionToken(string $token, string $issuer, string $secret): Token {
@@ -59,7 +59,6 @@ class TokenManager {
             throw new \RuntimeException('Invalid claims in token');
         }
 
-        $claims = $token->getClaims();
         if (!$token->hasClaim('session_id') || !$token->hasClaim('expire_time') || !$token->hasClaim('sub')) {
             throw new \RuntimeException('Missing claims in session token');
         }

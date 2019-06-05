@@ -43,9 +43,9 @@
             "type": "multiple_choice",
             "filename": "select_one.txt",
             "choices":[
-                {"value": "short", "description": "the plant will be short because it doesn't get enough water"},
-                {"value": "medium", "description": "the plant will grow normally"},
-                {"value": "tall", "description": "the plant will be tall because it gets lots of light"}
+                {"value": "short", "description": "#the plant\n##will be short\n###because it doesn't get enough water"},
+                {"value": "medium", "description": "##the plant will grow normally"},
+                {"value": "tall", "description": "[the plant will be tall because it gets lots of light](http://submitty.org)"}
             ],
             "allow_multiple": false
         },
