@@ -442,6 +442,8 @@ function displayPreviousSubmissionOptions(callback){
     var closer_btn = form.find(".close-button");
 
     var option;
+    submit_btn.tabindex = -1;
+    closer_btn.tabindex = -1;
     // on click, make submission based on which radio input was checked
     submit_btn.on('click', function() { 
         if($("#instructor-submit-option-new").is(":checked")) {
@@ -482,6 +484,35 @@ function displayPreviousSubmissionOptions(callback){
         radio_idx = parseInt(localStorage.getItem("instructor-submit-option"));
     }
     form.find('input:radio')[radio_idx].checked = true;
+    //since the modal object isn't rendered on the page manually set what the tab button does
+    form.find('input:radio')[radio_idx].focus();
+    var current_btn = radio_idx;
+    if(form.css('display') !== 'none'){
+        $(document).keydown(function(e){
+            if(e.keyCode == 9){
+                event.preventDefault();
+                if(current_btn === 0){
+                    $("#instructor-submit-option-merge-1").focus();
+                }else if(current_btn === 1){
+                    $("#instructor-submit-option-merge-2").focus();
+                }else if(current_btn === 2){
+                    closer_btn.focus();
+                }else if(current_btn === 3){
+                    submit_btn.focus();
+                }else if(current_btn === 4){
+                    $("#instructor-submit-option-new").focus();
+                }
+                current_btn = (current_btn == 4) ? 0 : current_btn + 1;
+            }
+            if(e.keyCode == 13 &&  closer_btn.is(":focus")){
+                closer_btn.click();
+                console.log("!!!");
+            }
+            if(e.keyCode == 27){
+                closer_btn.click();
+            }
+        });
+    }
 }
 
 /**
