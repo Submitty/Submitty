@@ -433,155 +433,134 @@ HTML;
         return $return;
 	}
 
-	public function generatePostList($currentThread, $posts, $unviewed_posts, $currentCourse, $includeReply = false, $threadExists = false, $display_option = 'time', $categories = [], $cookieSelectedCategories = [], $cookieSelectedThreadStatus = [], $cookieSelectedUnread = [], $currentCategoriesIds = [], $isCurrentFavorite = false) {
+    public function generatePostList($currentThread, $posts, $unviewed_posts, $currentCourse, $includeReply = false, $threadExists = false, $display_option = 'time', $categories = [], $cookieSelectedCategories = [], $cookieSelectedThreadStatus = [], $cookieSelectedUnread = [], $currentCategoriesIds = [], $isCurrentFavorite = false) {
 
-		$return = '';
-		$title_html = '';
+        $activeThread = $this->core->getQueries()->getThread($currentThread)[0];
 
-		$activeThread = $this->core->getQueries()->getThread($currentThread)[0];
+        $activeThreadTitle = ($this->core->getUser()->accessFullGrading() ? "({$activeThread['id']}) " : '') . $activeThread['title'];
+        $activeThreadAnnouncement = $activeThread['pinned'];
 
-		$activeThreadTitle = ($this->core->getUser()->accessFullGrading() ? "({$activeThread['id']}) " : '') . htmlentities($activeThread['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-		$activeThreadAnnouncement = $activeThread['pinned'];
+        $thread_id = $activeThread['id'];
+        $function_date = 'date_format';
 
-		$thread_id = $activeThread['id'];
-		$function_date = 'date_format';
+        $first = true;
+        $first_post_id = 1;
 
-		$return .= <<<HTML
-			
-HTML;
+        $post_data = [];
 
-		  $title_html .= <<<HTML
-            <h3 style="max-width: 95%; display:inline-block;word-wrap: break-word;margin-top:10px; margin-left: 5px;">
-HTML;
-					if($this->core->getUser()->getGroup() <= 2 && $activeThreadAnnouncement){
-                        $title_html .= <<<HTML
-							<a style="display:inline-block; color:orange; " onClick="alterAnnouncement({$activeThread['id']}, 'Are you sure you want to remove this thread as an announcement?', 'remove_announcement', '{$this->core->getCsrfToken()}')" title="Remove Announcement"><i class="fas fa-star" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
-    -webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
-HTML;
-                    } else if($activeThreadAnnouncement){
-                        $title_html .= <<<HTML
-						 <i class="fas fa-star" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px; -webkit-text-stroke-color: black;" title = "Announcement" aria-hidden="true"></i>
-HTML;
-                    } else if($this->core->getUser()->getGroup() <= 2 && !$activeThreadAnnouncement){
-                        $title_html .= <<<HTML
-							<a style="position:relative; display:inline-block; color:orange; " onClick="alterAnnouncement({$activeThread['id']}, 'Are you sure you want to make this thread an announcement?', 'make_announcement', '{$this->core->getCsrfToken()}')" title="Make thread an announcement"><i class="fas fa-star" title = "Make Announcement" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'gold')" style="position:relative; display:inline-block; color:#e0e0e0; -webkit-text-stroke-width: 1px; -webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
-HTML;
+        $csrf_token = $this->core->getCsrfToken();
+
+        if($display_option == "tree"){
+            $order_array = array();
+            $reply_level_array = array();
+            foreach($posts as $post){
+                if($thread_id == -1) {
+                    $thread_id = $post["thread_id"];
+                }
+                if($first){
+                    $first= false;
+                    $first_post_id = $post["id"];
+                }
+                if($post["parent_id"] > $first_post_id){
+                    $place = array_search($post["parent_id"], $order_array);
+                    $tmp_array = array($post["id"]);
+                    $parent_reply_level = $reply_level_array[$place];
+                    while($place && $place+1 < sizeof($reply_level_array) && $reply_level_array[$place+1] > $parent_reply_level){
+                        $place++;
                     }
-                    if($isCurrentFavorite) {
-                    	$title_html .= <<<HTML
-							<a style="position:relative; display:inline-block; color:orange; " onClick="pinThread({$activeThread['id']}, 'unpin_thread');" title="Pin Thread"><i class="fas fa-thumbtack" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;-webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
-HTML;
-					} else {
-                    	$title_html .= <<<HTML
-							<a style="position:relative; display:inline-block; color:orange; " onClick="pinThread({$activeThread['id']}, 'pin_thread');" title="Pin Thread"><i class="fas fa-thumbtack" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'gold')" style="position:relative; display:inline-block; color:#e0e0e0; -webkit-text-stroke-width: 1px;-webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
-HTML;
-					}
-                    $title_html .= <<< HTML
-					{$activeThreadTitle}</h3>
-HTML;
-					$first = true;
-					$first_post_id = 1;
-					if($display_option == "tree"){
-						$order_array = array();
-						$reply_level_array = array();
-						foreach($posts as $post){
-							if($thread_id == -1) {
-								$thread_id = $post["thread_id"];
-							}
-							if($first){
-								$first= false;
-								$first_post_id = $post["id"];
-							}
-							if($post["parent_id"] > $first_post_id){
-								$place = array_search($post["parent_id"], $order_array);
-								$tmp_array = array($post["id"]);
-								$parent_reply_level = $reply_level_array[$place];
-								while($place && $place+1 < sizeof($reply_level_array) && $reply_level_array[$place+1] > $parent_reply_level){
-									$place++;
-								}
-								array_splice($order_array, $place+1, 0, $tmp_array);
-								array_splice($reply_level_array, $place+1, 0, $parent_reply_level+1);
-							} else {
-								array_push($order_array, $post["id"]);
-								array_push($reply_level_array, 1);
-							}
-						}
-						$i = 0;
-						$first = true;
-						foreach($order_array as $ordered_post){
-							foreach($posts as $post){
-								if($post["id"] == $ordered_post){
-									if($post["parent_id"] == $first_post_id) {
-										$reply_level = 1;	
-									} else {
-										$reply_level = $reply_level_array[$i];
-									}
-									$return .= $this->createPost($thread_id, $post, $unviewed_posts, $function_date, $title_html, $first, $reply_level, $display_option, $includeReply);
-									break;
-								}						
-							}
-							if($first){
-								$first= false;
-							}
-							$i++;
-						}	
-					} else {
-						foreach($posts as $post){
-							if($thread_id == -1) {
-								$thread_id = $post["thread_id"];
-							}
-                            $first_post_id = $this->core->getQueries()->getFirstPostForThread($thread_id)['id'];
-							$return .= $this->createPost($thread_id, $post, $unviewed_posts, $function_date, $title_html, $first, 1, $display_option, $includeReply);		
-							if($first){
-								$first= false;
-							}			
-						}
-					}
-            if(($this->core->getQueries()->isThreadLocked($thread_id) != 1 || $this->core->getUser()->accessFullGrading() ) && $includeReply  ) {
-                $return .= <<<HTML
-
-			<hr style="border-top:1px solid #999;margin-bottom: 5px;" />
-			
-					<form style="margin-right:17px;" class="post_reply_from" method="POST" onsubmit="post.disabled=true; post.value='Submitting post...'; return true;" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'))}" enctype="multipart/form-data">
-						<input type="hidden" name="thread_id" value="{$thread_id}" />
-						<input type="hidden" name="parent_id" value="{$first_post_id}" />
-						<input type="hidden" name="display_option" value="{$display_option}" />
-HTML;
-                $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 1;
-
-
-                $return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig", [
-                    "show_post" => true,
-                    "post_content_placeholder" => "Enter your reply to all here...",
-                    "show_merge_thread_button" => true,
-                    "post_box_id" => $post_box_id,
-                    "attachment_script" => true,
-                    "show_anon" => true,
-                    "submit_label" => "Submit Reply to All",
-                ]);
-
-                $return .= <<<HTML
-	            	</form>
-	            	<br/>
-HTML;
+                    array_splice($order_array, $place+1, 0, $tmp_array);
+                    array_splice($reply_level_array, $place+1, 0, $parent_reply_level+1);
+                } else {
+                    array_push($order_array, $post["id"]);
+                    array_push($reply_level_array, 1);
+                }
             }
-        if($this->core->getUser()->getGroup() <= 3){
-        	$this->core->getOutput()->addVendorCss(FileUtils::joinPaths('chosen-js', 'chosen.min.css'));
-        	$this->core->getOutput()->addVendorJs(FileUtils::joinPaths('chosen-js', 'chosen.jquery.min.js'));
-        	$this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
-        	$this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
-			$current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
-			$current_thread_date = $current_thread_first_post["timestamp"];
-			$merge_thread_list = $this->core->getQueries()->getThreadsBefore($current_thread_date, 1);
-			$return .= $this->core->getOutput()->renderTwigTemplate("forum/MergeThreadsForm.twig", [
-				"current_thread_date" => $current_thread_date,
-				"current_thread" => $currentThread,
-				"possibleMerges" => $merge_thread_list
-			]);
-		}
+            $i = 0;
+            $first = true;
+            foreach($order_array as $ordered_post){
+                foreach($posts as $post){
+                    if($post["id"] == $ordered_post){
+                        if($post["parent_id"] == $first_post_id) {
+                            $reply_level = 1;
+                        } else {
+                            $reply_level = $reply_level_array[$i];
+                        }
 
-		return $return;
-	}
+                        $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $function_date, $first, $reply_level, $display_option, $includeReply);
+
+                        break;
+                    }
+                }
+                if($first){
+                    $first= false;
+                }
+                $i++;
+            }
+        } else {
+            foreach($posts as $post){
+                if($thread_id == -1) {
+                    $thread_id = $post["thread_id"];
+                }
+
+                $first_post_id = $this->core->getQueries()->getFirstPostForThread($thread_id)['id'];
+
+                $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $function_date, $first, 1, $display_option, $includeReply);
+
+                if($first){
+                    $first= false;
+                }
+            }
+        }
+
+        $isThreadLocked = $this->core->getQueries()->isThreadLocked($thread_id);
+        $accessFullGrading = $this->core->getUser()->accessFullGrading();
+
+        $post_box_id = 0;
+
+        if(($isThreadLocked != 1 || $accessFullGrading ) && $includeReply  ) {
+
+            $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 1;
+
+        }
+
+        $merge_thread_content = [];
+
+        if($this->core->getUser()->getGroup() <= 3){
+            $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('chosen-js', 'chosen.min.css'));
+            $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('chosen-js', 'chosen.jquery.min.js'));
+            $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
+            $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
+            $current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
+            $current_thread_date = $current_thread_first_post["timestamp"];
+            $merge_thread_list = $this->core->getQueries()->getThreadsBefore($current_thread_date, 1);
+
+            $merge_thread_content = [
+                "current_thread_date" => $current_thread_date,
+                "current_thread" => $currentThread,
+                "possibleMerges" => $merge_thread_list
+            ];
+        }
+
+        $return = $this->core->getOutput()->renderTwigTemplate("forum/GeneratePostList.twig", [
+            "userGroup" => $this->core->getUser()->getGroup(),
+            "activeThread" => $activeThread,
+            "activeThreadAnnouncement" => $activeThreadAnnouncement,
+            "isCurrentFavorite" => $isCurrentFavorite,
+            "display_option" => $display_option,
+            "post_data" => $post_data,
+            "isThreadLocked" => $isThreadLocked,
+            "accessFullGrading" => $accessFullGrading,
+            "includeReply" => $includeReply,
+            "thread_id" => $thread_id,
+            "first_post_id" => $first_post_id,
+            "merge_thread_content" => $merge_thread_content,
+            "csrf_token" => $csrf_token,
+            "activeThreadTitle" => $activeThreadTitle,
+            "post_box_id" => $post_box_id
+        ]);
+
+        return $return;
+    }
 
 	public function showAlteredDisplayList($threads, $filtering, $thread_id, $categories_ids){
 		$tempArray = array();
@@ -789,7 +768,7 @@ HTML;
 		return $post_content;
 	}
 
-	public function createPost($thread_id, $post, $unviewed_posts, $function_date, $title_html, $first, $reply_level, $display_option, $includeReply)
+	public function createPost($thread_id, $post, $unviewed_posts, $function_date, $first, $reply_level, $display_option, $includeReply)
     {
         $current_user = $this->core->getUser()->getId();
         $post_id = $post["id"];
@@ -837,10 +816,7 @@ HTML;
 
         $offset = min(($reply_level - 1) * 30, 180);
 
-        //handle converting links 
-
-        //convert legacy htmlentities being saved in db
-        $post_content = $this->filter_post_content($post['content']);
+        $post_content = ($this->filter_post_content($post['content']));
 
         $isThreadLocked = $this->core->getQueries()->isThreadLocked($thread_id);
         $userAccessFullGrading = $this->core->getUser()->accessFullGrading();
@@ -931,13 +907,12 @@ HTML;
             $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 1;
         }
 
-        $return = $this->core->getOutput()->renderTwigTemplate("forum/CreatePost.twig", [
+        $return = [
             "classes" => $classes,
             "post_id" => $post_id,
             "reply_level" => $reply_level,
             "offset" => $offset,
             "first" => $first,
-            "title_html" => $title_html,
             "post_content" => $post_content,
             "post" => $post,
             "display_option" => $display_option,
@@ -956,7 +931,9 @@ HTML;
             "post_attachment" => $post_attachment,
             "form_post_url" => $this->core->buildUrl(['component' => 'forum', 'page' => 'publish_post']),
             "post_box_id" => $post_box_id,
-        ]);
+            "thread_id" => $thread_id,
+            "parent_id" => $post_id,
+        ];
 
 		return $return;
 	}
