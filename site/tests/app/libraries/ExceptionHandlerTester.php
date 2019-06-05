@@ -24,13 +24,12 @@ class ExceptionHandlerTester extends \PHPUnit\Framework\TestCase {
 
     public function testThrowServerException() {
         $message = ExceptionHandler::handleException(new \RuntimeException("test"));
-        $this->assertContains("An exception was thrown. Please contact an administrator about what you were doing that caused this exception.", $message);
-        $this->assertNotContains("test", $message);
+        $this->assertEquals("An exception was thrown. Please contact an administrator about what you were doing that caused this exception.\n", $message);
     }
 
     public function testThrowRuntimeException() {
         ExceptionHandler::setDisplayExceptions(true);
-        $this->assertContains("test", ExceptionHandler::handleException(new \RuntimeException("test")));
+        $this->assertRegExp("/Message:\ntest\n\n/", ExceptionHandler::handleException(new \RuntimeException("test")));
         ExceptionHandler::setDisplayExceptions(false);
     }
 
@@ -66,7 +65,7 @@ class ExceptionHandlerTester extends \PHPUnit\Framework\TestCase {
         catch(AuthenticationException $e) {
             ExceptionHandler::setDisplayExceptions(true);
             $message = ExceptionHandler::handleException($e);
-            $this->assertContains("tests\\app\\libraries\\ExceptionHandlerTester->authenticate()", $message);
+            $this->assertRegExp("/Stack Trace:\n#0 (.*)\/site\/tests\/app\/libraries\/ExceptionHandlerTester\.php\(62\): tests\\\app\\\libraries\\\ExceptionHandlerTester\-\>authenticate\(\)\n/", $message);
         }
     }
 
@@ -75,7 +74,7 @@ class ExceptionHandlerTester extends \PHPUnit\Framework\TestCase {
         $exception = new BaseException("exception message");
         $exception->setDisplayMessage(true);
         $message = ExceptionHandler::handleException($exception);
-        $this->assertContains("exception message", $message);
-        $this->assertNotContains("Stack Trace", $message);
+        $this->assertStringContainsString("exception message", $message);
+        $this->assertStringNotContainsString("Stack Trace", $message);
     }
 }

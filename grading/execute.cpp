@@ -149,6 +149,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
 
   if(running_in_docker){
     allowed_system_programs.insert({"bash", "/bin/bash"});
+    allowed_system_programs.insert({"php",  "/usr/bin/php"});
   }
   // find full path name
   std::map<std::string,std::string>::const_iterator itr = allowed_system_programs.find(program);
@@ -225,7 +226,8 @@ std::string validate_program(const std::string &program, const nlohmann::json &w
     std::cerr << message << std::endl;
     exit(1);
   } else {
-    bool running_in_docker = whole_config.value("docker_enabled", false);
+    std::string mode = whole_config.value("autograding_method", "");
+    bool running_in_docker = (mode == "docker") ? true : false;
     if (system_program(program,full_path_executable,running_in_docker)) {
       return full_path_executable;
     }
@@ -1065,7 +1067,14 @@ int execute(const std::string &cmd,
       const nlohmann::json &assignment_limits,
       const nlohmann::json &whole_config,
       const bool windowed,
-      const std::string display_variable) {
+      const std::string display_variable2) {
+
+  
+  std::string display_variable = display_variable2;
+  if (display_variable == "NO_DISPLAY_SET") {
+    display_variable = ":1";
+  }
+
 
   std::set<std::string> invalid_windows;
   bool window_mode = windowed; //Tells us if the process is expected to spawn a window. (additional support later) 

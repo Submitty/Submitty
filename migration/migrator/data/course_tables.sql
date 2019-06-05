@@ -124,6 +124,7 @@ CREATE TABLE electronic_gradeable (
     eg_config_path character varying(1024) NOT NULL,
     eg_is_repository boolean NOT NULL,
     eg_subdirectory character varying(1024) NOT NULL,
+    eg_vcs_host_type integer DEFAULT(0) NOT NULL,
     eg_team_assignment boolean NOT NULL,
     --eg_inherit_teams_from character varying(255) NOT NULL,
     eg_max_team_size integer NOT NULL,
@@ -451,6 +452,7 @@ CREATE TABLE sessions (
 CREATE TABLE users (
     user_id character varying NOT NULL,
     anon_id character varying,
+    user_numeric_id character varying,
     user_firstname character varying NOT NULL,
     user_preferred_firstname character varying,
     user_lastname character varying NOT NULL,
@@ -464,6 +466,10 @@ CREATE TABLE users (
     manual_registration boolean DEFAULT false,
     last_updated timestamp(6) with time zone,
     CONSTRAINT users_user_group_check CHECK ((user_group >= 1) AND (user_group <= 4))
+);
+
+CREATE INDEX users_user_numeric_id_idx ON users using btree (
+    user_numeric_id ASC NULLS LAST
 );
 
 
@@ -509,7 +515,12 @@ CREATE TABLE notification_settings (
 	all_new_threads BOOLEAN DEFAULT FALSE NOT NULL,
 	all_new_posts BOOLEAN DEFAULT FALSE NOT NULL,
 	all_modifications_forum BOOLEAN DEFAULT FALSE NOT NULL,
-	reply_in_post_thread BOOLEAN DEFAULT FALSE NOT NULL
+	reply_in_post_thread BOOLEAN DEFAULT FALSE NOT NULL,
+	merge_threads_email BOOLEAN DEFAULT FALSE NOT NULL,
+	all_new_threads_email BOOLEAN DEFAULT FALSE NOT NULL,
+	all_new_posts_email BOOLEAN DEFAULT FALSE NOT NULL,
+	all_modifications_forum_email BOOLEAN DEFAULT FALSE NOT NULL,
+	reply_in_post_thread_email BOOLEAN DEFAULT FALSE NOT NULL
 );
 
 --
@@ -574,6 +585,7 @@ CREATE TABLE "threads" (
 	"merged_post_id" int DEFAULT '-1',
 	"is_visible" BOOLEAN NOT NULL,
 	"status" int DEFAULT 0 NOT NULL,
+	"lock_thread_date" timestamp with time zone,
 	CONSTRAINT threads_pk PRIMARY KEY ("id")
 );
 
@@ -607,7 +619,8 @@ CREATE TABLE "student_favorites" (
 CREATE TABLE "viewed_responses" (
 	"thread_id" int NOT NULL,
 	"user_id" character varying NOT NULL,
-	"timestamp" timestamp with time zone NOT NULL
+	"timestamp" timestamp with time zone NOT NULL,
+    CONSTRAINT viewed_responses_pkey PRIMARY KEY ("thread_id", "user_id")
 );
 
 
@@ -1165,4 +1178,3 @@ ALTER TABLE ONLY regrade_requests
 --
 -- PostgreSQL database dump complete
 --
-

@@ -28,7 +28,9 @@ class PostgresqlDatabaseQueries extends DatabaseQueries{
         $this->course_db->query("
 SELECT u.*, ns.merge_threads, ns.all_new_threads,
         ns.all_new_posts, ns.all_modifications_forum,
-        ns.reply_in_post_thread, sr.grading_registration_sections
+        ns.reply_in_post_thread, ns.merge_threads_email, ns.all_new_threads_email,
+        ns.all_new_posts_email, ns.all_modifications_forum_email,
+        ns.reply_in_post_thread_email, sr.grading_registration_sections
 FROM users u
 LEFT JOIN notification_settings as ns ON u.user_id = ns.user_id
 LEFT JOIN (
@@ -111,13 +113,14 @@ ORDER BY SUBSTRING(u.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(u.reg
 
 
     public function insertSubmittyUser(User $user) {
-        $array = array($user->getId(), $user->getPassword(), $user->getLegalFirstName(), $user->getPreferredFirstName(),
+        $array = array($user->getId(), $user->getPassword(), $user->getNumericId(),
+                       $user->getLegalFirstName(), $user->getPreferredFirstName(),
                        $user->getLegalLastName(), $user->getPreferredLastName(), $user->getEmail(),
                        $this->submitty_db->convertBoolean($user->isUserUpdated()),
                        $this->submitty_db->convertBoolean($user->isInstructorUpdated()));
 
-        $this->submitty_db->query("INSERT INTO users (user_id, user_password, user_firstname, user_preferred_firstname, user_lastname, user_preferred_lastname, user_email, user_updated, instructor_updated)
-                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", $array);
+        $this->submitty_db->query("INSERT INTO users (user_id, user_password, user_numeric_id, user_firstname, user_preferred_firstname, user_lastname, user_preferred_lastname, user_email, user_updated, instructor_updated)
+                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $array);
     }
 
     public function insertCourseUser(User $user, $semester, $course) {
@@ -133,7 +136,7 @@ VALUES (?,?,?,?,?,?)", $params);
     }
 
     public function updateUser(User $user, $semester=null, $course=null) {
-        $params = array($user->getLegalFirstName(), $user->getPreferredFirstName(),
+        $params = array($user->getNumericId(), $user->getLegalFirstName(), $user->getPreferredFirstName(),
                        $user->getLegalLastName(), $user->getPreferredLastName(), $user->getEmail(),
                        $this->submitty_db->convertBoolean($user->isUserUpdated()),
                        $this->submitty_db->convertBoolean($user->isInstructorUpdated()));
@@ -147,7 +150,8 @@ VALUES (?,?,?,?,?,?)", $params);
         $this->submitty_db->query("
 UPDATE users
 SET
-  user_firstname=?, user_preferred_firstname=?, user_lastname=?, user_preferred_lastname=?,
+  user_numeric_id=?, user_firstname=?, user_preferred_firstname=?,
+  user_lastname=?, user_preferred_lastname=?,
   user_email=?, user_updated=?, instructor_updated=?{$extra}
 WHERE user_id=?", $params);
 
@@ -1376,6 +1380,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   eg_config_path AS autograding_config_path,
                   eg_is_repository AS vcs,
                   eg_subdirectory AS vcs_subdirectory,
+                  eg_vcs_host_type AS vcs_host_type,
                   eg_team_assignment AS team_assignment,
                   eg_max_team_size AS team_size_max,
                   eg_team_lock_date AS team_lock_date,

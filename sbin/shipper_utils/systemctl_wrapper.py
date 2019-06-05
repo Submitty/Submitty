@@ -86,12 +86,12 @@ def perform_systemctl_command_on_worker(daemon, mode, target):
       ssh = paramiko.SSHClient()
       ssh.get_host_keys()
       ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-      ssh.connect(hostname = host, username = user)
+      ssh.connect(hostname = host, username = user, timeout=10)
   except Exception as e:
       print("ERROR: could not ssh to {0}@{1} due to following error: {2}".format(user, host,str(e)))
       return EXIT_CODES['failure']
   try:
-      (stdin, stdout, stderr) = ssh.exec_command(command)
+      (stdin, stdout, stderr) = ssh.exec_command(command, timeout=5)
       status = int(stdout.channel.recv_exit_status())
   except Exception as e:
       print("ERROR: Command did not properly execute: ".format(host, str(e)))

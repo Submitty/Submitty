@@ -4,6 +4,7 @@ namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
 use app\libraries\DateUtils;
+use app\libraries\FileUtils;
 
 class LateController extends AbstractController {
     public function run() {
@@ -40,8 +41,10 @@ class LateController extends AbstractController {
     }
 
     public function viewExtensions() {
-        $g_ids = $this->core->getQueries()->getAllElectronicGradeablesIds();
-        $this->core->getOutput()->renderOutput(array('admin', 'Extensions'), 'displayExtensions', $g_ids);
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
+        $e_gradeables = $this->core->getQueries()->getAllElectronicGradeablesIds();
+        $this->core->getOutput()->renderOutput(array('admin', 'Extensions'), 'displayExtensions', $e_gradeables);
     }
 
     public function update($type, $delete) {

@@ -29,7 +29,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      */
     private $core;
 
-    public function setUp() {
+    public function setUp(): void {
         $_REQUEST['action'] = 'upload';
         $_REQUEST['gradeable_id'] = 'test';
         $_REQUEST['vcs_checkout'] = false;
@@ -146,7 +146,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      * Cleanup routine for the tester. This deletes any folders/files we created in the tmp directory to hold our fake
      * uploaded files.
      */
-    public function tearDown() {
+    public function tearDown(): void {
         $this->assertTrue(FileUtils::recursiveRmdir($this->config['tmp_path']));
     }
 
@@ -749,6 +749,7 @@ class SubmissionControllerTester extends BaseUnitTest {
     }
 
     public function testVcsUpload() {
+        $_POST['git_repo_id'] = "some_repo_id";
         $_REQUEST['vcs_checkout'] = "true";
         $return = $this->runController();
         $this->assertFalse($return['error'], "Error: {$return['message']}");
@@ -763,7 +764,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         sort($files);
         $this->assertEquals(array('.submit.VCS_CHECKOUT', '.submit.timestamp'), $files);
         $touch_file = implode("__", array($this->config['semester'], $this->config['course'], "test", "testUser", "1"));
-        $this->assertFileExists(FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_queue", $touch_file));
+        $this->assertFileExists(FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_queue", "VCS__".$touch_file));
     }
 
     public function testEmptyPost() {
@@ -1057,6 +1058,7 @@ class SubmissionControllerTester extends BaseUnitTest {
     }
 
     public function testErrorCreateVcsFile() {
+        $_POST['git_repo_id'] = "some_repo_id";
         $_REQUEST['vcs_checkout'] = "true";
         FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), null, true);
         FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1"), 0444);
@@ -1162,7 +1164,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $_REQUEST['action'] = 'display';
         $core = $this->createMockCore();
         $now = new \DateTime("now", $core->getConfig()->getTimezone());
-        
+
         $gradeable = $this->createMockGradeable();
         $gradeable->method('hasAutogradingConfig')->willReturn(true);
         $gradeable->method('getSubmissionOpenDate')->willReturn($now);

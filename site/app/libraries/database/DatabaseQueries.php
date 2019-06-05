@@ -23,6 +23,7 @@ use app\models\GradeableComponentMark;
 use app\models\GradeableVersion;
 use app\models\User;
 use app\models\Notification;
+use app\models\Email;
 use app\models\SimpleLateUser;
 use app\models\Team;
 use app\models\Course;
@@ -120,7 +121,7 @@ class DatabaseQueries {
     /**
      * Helper function for generating sql query according to the given requirements
      */
-    public function buildLoadThreadQuery($categories_ids, $thread_status, $show_deleted, $show_merged_thread, $current_user,
+    public function buildLoadThreadQuery($categories_ids, $thread_status, $unread_threads, $show_deleted, $show_merged_thread, $current_user,
                                         &$query_select, &$query_join, &$query_where, &$query_order, &$query_parameters,
                                         $want_categories, $want_order) {
         $query_raw_select = array();
@@ -149,8 +150,13 @@ class DatabaseQueries {
             }
             $query_raw_select[]     = "t.*";
             $query_raw_select[]     = "({$query_favorite}) as favorite";
-            $query_raw_select[]     = "(case when exists(select 1 from posts p where p.author_user_id = sf.user_id and p.thread_id = t.id) then true else false end) as current_user_posted";
+            $query_raw_select[]     = "CASE
+                                        WHEN EXISTS(SELECT * FROM (posts p LEFT JOIN forum_posts_history fp ON p.id = fp.post_id AND p.author_user_id != fp.edit_author) AS pfp WHERE (pfp.author_user_id = ? OR pfp.edit_author = ?) AND pfp.thread_id = t.id) THEN true 
+                                        ELSE false 
+                                        END as current_user_posted";
 
+            $query_parameters[]     = $current_user;
+            $query_parameters[]     = $current_user;
             $query_raw_join[]       = "LEFT JOIN student_favorites sf ON sf.thread_id = t.id and sf.user_id = ?";
             $query_parameters[]     = $current_user;
 
@@ -183,6 +189,24 @@ class DatabaseQueries {
 
             $query_raw_join[] = "JOIN ({$query_select_categories}) AS QSC ON QSC.thread_id = t.id";
         }
+        // Unread Threads
+        if($unread_threads) {
+            $query_raw_where[] = 
+
+            "EXISTS(
+                SELECT thread_id 
+                FROM (posts LEFT JOIN forum_posts_history ON posts.id = forum_posts_history.post_id) AS jp
+                WHERE(
+                    jp.thread_id = t.id
+                    AND NOT EXISTS(
+                        SELECT thread_id 
+                        FROM viewed_responses v 
+                        WHERE v.thread_id = jp.thread_id
+                            AND v.user_id = ?
+                            AND (v.timestamp >= jp.timestamp
+                            AND (jp.edit_timestamp IS NULL OR (jp.edit_timestamp IS NOT NULL AND v.timestamp >= jp.edit_timestamp))))))";
+            $query_parameters[] = $current_user;
+        }
 
         $query_select   = implode(", ", $query_raw_select);
         $query_join     = implode(" ", $query_raw_join);
@@ -195,6 +219,7 @@ class DatabaseQueries {
      *
      * @param  array(int)    categories_ids     Filter threads having atleast provided categories
      * @param  array(int)    thread_status      Filter threads having thread status among $thread_status
+     * @param  bool          unread_threads     Filter threads to show only unread threads
      * @param  bool          show_deleted       Consider deleted threads
      * @param  bool          show_merged_thread Consider merged threads
      * @param  string        current_user       user_id of currrent user
@@ -202,7 +227,7 @@ class DatabaseQueries {
      * @param  int           thread_id          If blockNumber is not known, find it using thread_id
      * @return array('block_number' => int, 'threads' => array(threads))    Ordered filtered threads
      */
-    public function loadThreadBlock($categories_ids, $thread_status, $show_deleted, $show_merged_thread, $current_user, $blockNumber, $thread_id){
+    public function loadThreadBlock($categories_ids, $thread_status, $unread_threads, $show_deleted, $show_merged_thread, $current_user, $blockNumber, $thread_id){
         $blockSize = 30;
         $loadLastPage = false;
 
@@ -214,7 +239,7 @@ class DatabaseQueries {
         // $blockNumber is 1 based index
         if($blockNumber <= -1) {
             // Find the last block
-            $this->buildLoadThreadQuery($categories_ids, $thread_status, $show_deleted, $show_merged_thread, $current_user, $query_select, $query_join, $query_where, $query_order, $query_parameters, false, false);
+            $this->buildLoadThreadQuery($categories_ids, $thread_status, $unread_threads, $show_deleted, $show_merged_thread, $current_user, $query_select, $query_join, $query_where, $query_order, $query_parameters, false, false);
             $query = "SELECT count(*) FROM (SELECT {$query_select} FROM threads t {$query_join} WHERE {$query_where}) AS SUBQUERY";
             $this->course_db->query($query, $query_parameters);
             $results = $this->course_db->rows();
@@ -226,7 +251,7 @@ class DatabaseQueries {
             if($thread_id >= 1)
             {
                 // Find $blockNumber
-                $this->buildLoadThreadQuery($categories_ids, $thread_status, $show_deleted, $show_merged_thread, $current_user, $query_select, $query_join, $query_where, $query_order, $query_parameters, false, true);
+                $this->buildLoadThreadQuery($categories_ids, $thread_status, $unread_threads, $show_deleted, $show_merged_thread, $current_user, $query_select, $query_join, $query_where, $query_order, $query_parameters, false, true);
                 $query = "SELECT SUBQUERY.row_number as row_number FROM (SELECT {$query_select} FROM threads t {$query_join} WHERE {$query_where} ORDER BY {$query_order}) AS SUBQUERY WHERE SUBQUERY.id = ?";
                 $query_parameters[] = $thread_id;
                 $this->course_db->query($query, $query_parameters);
@@ -238,7 +263,7 @@ class DatabaseQueries {
             }
         }
         $query_offset = ($blockNumber-1) * $blockSize;
-        $this->buildLoadThreadQuery($categories_ids, $thread_status, $show_deleted, $show_merged_thread, $current_user, $query_select, $query_join, $query_where, $query_order, $query_parameters, true, true);
+        $this->buildLoadThreadQuery($categories_ids, $thread_status, $unread_threads, $show_deleted, $show_merged_thread, $current_user, $query_select, $query_join, $query_where, $query_order, $query_parameters, true, true);
         $query = "SELECT {$query_select} FROM threads t {$query_join} WHERE {$query_where} ORDER BY {$query_order} LIMIT ? OFFSET ?";
         $query_parameters[] = $blockSize;
         $query_parameters[] = $query_offset;
@@ -267,8 +292,6 @@ class DatabaseQueries {
 
         try {
             $this->course_db->query("INSERT INTO posts (thread_id, parent_id, author_user_id, content, timestamp, anonymous, deleted, endorsed_by, type, has_attachment) VALUES (?, ?, ?, ?, current_timestamp, ?, ?, ?, ?, ?)", array($thread_id, $parent_post, $user, $content, $anonymous, 0, NULL, $type, $hasAttachment));
-            $this->course_db->query("DELETE FROM viewed_responses WHERE thread_id = ?", array($thread_id));
-            //retrieve generated thread_id
             $this->course_db->query("SELECT MAX(id) as max_id from posts where thread_id=? and author_user_id=?", array($thread_id, $user));
         } catch (DatabaseException $dbException){
             if($this->course_db->inTransaction()){
@@ -365,13 +388,33 @@ class DatabaseQueries {
         return intval($this->course_db->rows()[0]['user_group']) <= 3;
     }
 
-    public function createThread($user, $title, $content, $anon, $prof_pinned, $status, $hasAttachment, $categories_ids){
+
+    public function getUnviewedPosts($thread_id, $user_id){
+        if($thread_id == -1) {
+            $this->course_db->query("SELECT MAX(id) as max from threads WHERE deleted = false and merged_thread_id = -1 GROUP BY pinned ORDER BY pinned DESC");
+            $rows = $this->course_db->rows();
+            if(!empty($rows)) {
+                $thread_id = $rows[0]["max"];
+            } else {
+                // No thread found, hence no posts found
+                return array();
+            }
+        } 
+        $this->course_db->query("SELECT DISTINCT id FROM (posts LEFT JOIN forum_posts_history ON posts.id = forum_posts_history.post_id) AS pfph WHERE pfph.thread_id = ? AND NOT EXISTS(SELECT * FROM viewed_responses v WHERE v.thread_id = ? AND v.user_id = ? AND (v.timestamp >= pfph.timestamp AND (pfph.edit_timestamp IS NULL OR (pfph.edit_timestamp IS NOT NULL AND v.timestamp >= pfph.edit_timestamp))))", array($thread_id, $thread_id, $user_id));
+        $rows = $this->course_db->rows();
+        if(empty($rows)){
+            $rows = array();
+        }
+        return $rows;
+    }
+
+    public function createThread($user, $title, $content, $anon, $prof_pinned, $status, $hasAttachment, $categories_ids, $lock_thread_date){
 
         $this->course_db->beginTransaction();
 
         try {
         //insert data
-        $this->course_db->query("INSERT INTO threads (title, created_by, pinned, status, deleted, merged_thread_id, merged_post_id, is_visible) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", array($title, $user, $prof_pinned, $status, 0, -1, -1, true));
+        $this->course_db->query("INSERT INTO threads (title, created_by, pinned, status, deleted, merged_thread_id, merged_post_id, is_visible, lock_thread_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)", array($title, $user, $prof_pinned, $status, 0, -1, -1, true, $lock_thread_date));
 
         //retrieve generated thread_id
         $this->course_db->query("SELECT MAX(id) as max_id from threads where title=? and created_by=?", array($title, $user));
@@ -451,6 +494,9 @@ class DatabaseQueries {
 		return count($this->course_db->rows()) == 1;
     }
 
+    public function visitThread($current_user, $thread_id){
+        $this->course_db->query("INSERT INTO viewed_responses(thread_id,user_id,timestamp) VALUES(?, ?, current_timestamp) ON CONFLICT (thread_id, user_id) DO UPDATE SET timestamp = current_timestamp", array($thread_id, $current_user));
+    }
     /**
      * Set delete status for given post and all descendant
      *
@@ -504,7 +550,6 @@ class DatabaseQueries {
             // Insert latest version of post into forum_posts_history
             $this->course_db->query("INSERT INTO forum_posts_history(post_id, edit_author, content, edit_timestamp) SELECT id, ?, content, current_timestamp FROM posts WHERE id = ?", array($user, $post_id));
             $this->course_db->query("UPDATE notifications SET content = substring(content from '.+?(?=from)') || 'from ' || ? where metadata::json->>1 = ? and metadata::json->>2 = ?", array(Utils::getDisplayNameForum($anon, $this->getDisplayUserInfoFromUserId($original_creator)), $this->getParentPostId($post_id), $post_id));
-            $this->course_db->query("DELETE FROM viewed_responses WHERE thread_id = (SELECT thread_id FROM posts WHERE id = ?)", array($post_id));
             $this->course_db->commit();
         } catch(DatabaseException $dbException) {
             $this->course_db->rollback();
@@ -512,10 +557,10 @@ class DatabaseQueries {
         } return true;
     }
 
-    public function editThread($thread_id, $thread_title, $categories_ids, $status) {
+    public function editThread($thread_id, $thread_title, $categories_ids, $status, $lock_thread_date) {
         try {
             $this->course_db->beginTransaction();
-            $this->course_db->query("UPDATE threads SET title = ?, status = ? WHERE id = ?", array($thread_title, $status, $thread_id));
+            $this->course_db->query("UPDATE threads SET title = ?, status = ?, lock_thread_date = ? WHERE id = ?", array($thread_title, $status,$lock_thread_date, $thread_id));
             $this->course_db->query("DELETE FROM thread_categories WHERE thread_id = ?", array($thread_id));
             foreach ($categories_ids as $category_id) {
                 $this->course_db->query("INSERT INTO thread_categories (thread_id, category_id) VALUES (?, ?)", array($thread_id, $category_id));
@@ -1638,10 +1683,11 @@ WHERE gcm_id=?", $params);
      */
     public function getAllElectronicGradeablesIds() {
         $this->course_db->query("
-          SELECT g_id, g_title
-          FROM gradeable INNER JOIN electronic_gradeable USING (g_id)
-          WHERE eg_scanned_exam=FALSE and eg_has_due_date=TRUE
-          ORDER BY eg_submission_due_date ASC
+            SELECT gradeable.g_id, g_title, eg_submission_due_date
+            FROM gradeable INNER JOIN electronic_gradeable 
+                ON gradeable.g_id = electronic_gradeable.g_id
+            WHERE g_gradeable_type=0 and eg_scanned_exam=FALSE and eg_has_due_date=TRUE
+            ORDER BY g_grade_released_date DESC
         ");
         return $this->course_db->rows();
     }
@@ -2274,7 +2320,7 @@ AND gc_id IN (
     }
 
     public function viewedThread($user, $thread_id){
-      $this->course_db->query("SELECT * from viewed_responses where thread_id = ? and user_id = ?", array($thread_id, $user));
+      $this->course_db->query("SELECT * FROM viewed_responses v WHERE thread_id = ? AND user_id = ? AND NOT EXISTS(SELECT thread_id FROM (posts LEFT JOIN forum_posts_history ON posts.id = forum_posts_history.post_id) AS jp WHERE jp.thread_id = ? AND (jp.timestamp > v.timestamp OR (jp.edit_timestamp IS NOT NULL AND jp.edit_timestamp > v.timestamp)))" , array($thread_id, $user, $thread_id));
       return count($this->course_db->rows()) > 0;
     }
 
@@ -2355,16 +2401,14 @@ AND gc_id IN (
       $param_list[] = $thread_id;
       $history_query = "LEFT JOIN forum_posts_history fph ON (fph.post_id is NULL OR (fph.post_id = posts.id and NOT EXISTS (SELECT 1 from forum_posts_history WHERE post_id = fph.post_id and edit_timestamp > fph.edit_timestamp )))";
       if($option == 'alpha'){
+
         $this->course_db->query("SELECT posts.*, fph.edit_timestamp, users.user_lastname FROM posts INNER JOIN users ON posts.author_user_id=users.user_id {$history_query} WHERE thread_id=? AND {$query_delete} ORDER BY user_lastname, posts.timestamp;", array($thread_id));
+      } else if ( $option == 'reverse-time' ){
+        $this->course_db->query("SELECT posts.*, fph.edit_timestamp FROM posts {$history_query} WHERE thread_id=? AND {$query_delete} {$query_filter_on_user} ORDER BY timestamp DESC ", array_reverse($param_list));
       } else {
         $this->course_db->query("SELECT posts.*, fph.edit_timestamp FROM posts {$history_query} WHERE thread_id=? AND {$query_delete} {$query_filter_on_user} ORDER BY timestamp ASC", array_reverse($param_list));
       }
-
       $result_rows = $this->course_db->rows();
-
-      if(count($result_rows) > 0){
-        $this->course_db->query("INSERT INTO viewed_responses(thread_id,user_id,timestamp) SELECT ?, ?, current_timestamp WHERE NOT EXISTS (SELECT 1 FROM viewed_responses WHERE thread_id=? AND user_id=?)", array($thread_id, $current_user, $thread_id, $current_user));
-      }
       return $result_rows;
     }
 
@@ -3081,6 +3125,7 @@ AND gc_id IN (
                 DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()),
                 $this->course_db->convertBoolean($gradeable->isVcs()),
                 $gradeable->getVcsSubdirectory(),
+                $gradeable->getVcsHostType(),
                 $this->course_db->convertBoolean($gradeable->isTeamAssignment()),
                 $gradeable->getTeamSizeMax(),
                 DateUtils::dateTimeToString($gradeable->getTeamLockDate()),
@@ -3108,6 +3153,7 @@ AND gc_id IN (
                   eg_submission_due_date,
                   eg_is_repository,
                   eg_subdirectory,
+                  eg_vcs_host_type,
                   eg_team_assignment,
                   eg_max_team_size,
                   eg_team_lock_date,
@@ -3128,7 +3174,7 @@ AND gc_id IN (
                   eg_thread_ids,
                   eg_has_discussion
                   )
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $params);
         }
 
         // Make sure to create the rotating sections
@@ -3214,6 +3260,7 @@ AND gc_id IN (
                     DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()),
                     $this->course_db->convertBoolean($gradeable->isVcs()),
                     $gradeable->getVcsSubdirectory(),
+                    $gradeable->getVcsHostType(),
                     $this->course_db->convertBoolean($gradeable->isTeamAssignment()),
                     $gradeable->getTeamSizeMax(),
                     DateUtils::dateTimeToString($gradeable->getTeamLockDate()),
@@ -3241,6 +3288,7 @@ AND gc_id IN (
                       eg_submission_due_date=?,
                       eg_is_repository=?,
                       eg_subdirectory=?,
+                      eg_vcs_host_type=?,
                       eg_team_assignment=?,
                       eg_max_team_size=?,
                       eg_team_lock_date=?,
@@ -3591,10 +3639,10 @@ AND gc_id IN (
     /**
      * Queues an email to be sent by email job
      * @param array $email_data
-     * @param string $recipient
+     * @param Email $recipient
      */
-    public function createEmail($email_data, $recipient){
-        $parameters = array($recipient, $email_data["subject"], $email_data["body"]);
+    public function createEmail($email){
+        $parameters = array($email->getRecipient(), $email->getSubject(), $email->getBody());
 
         $this->submitty_db->query("
             INSERT INTO emails(
@@ -3603,5 +3651,19 @@ AND gc_id IN (
               body,
               created)
             VALUES(?, ?, ?, NOW())", $parameters);
+    }
+
+    /**
+     * Gives true if thread is locked
+     * @param $thread_id
+     * @return bool
+     */
+    public function isThreadLocked($thread_id){
+
+        $this->course_db->query('SELECT lock_thread_date FROM threads WHERE id = ?', [$thread_id]);
+        if(empty($this->course_db->rows()[0]['lock_thread_date'])){
+            return false;
+        }
+        return $this->course_db->rows()[0]['lock_thread_date'] < date("Y-m-d H:i:S");
     }
 }

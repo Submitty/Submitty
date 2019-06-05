@@ -1,6 +1,7 @@
 """Basic migration script to handle the database."""
 
 from collections import OrderedDict
+from copy import deepcopy
 from datetime import datetime
 import os
 from pathlib import Path
@@ -62,12 +63,12 @@ def status(args):
     :param args: arguments for status
     :type args: argparse.Namespace
     """
-    args.config.database['dbname'] = 'submitty'
-
     for environment in get_environments(args.environments):
         if environment in ['master', 'system']:
+            loop_args = deepcopy(args)
+            loop_args.config.database['dbname'] = 'submitty'
             try:
-                database = db.Database(args.config.database, environment)
+                database = db.Database(loop_args.config.database, environment)
                 exists = database.engine.dialect.has_table(
                     database.engine,
                     database.migration_table.__tablename__
@@ -76,7 +77,7 @@ def status(args):
                     print('Could not find migration table for {}'.format(environment))
                     database.close()
                     continue
-                print_status(database, environment, args)
+                print_status(database, environment, loop_args)
                 database.close()
             except OperationalError:
                 print(
@@ -87,20 +88,22 @@ def status(args):
             if not course_dir.exists():
                 print("Could not find courses directory: {}".format(course_dir))
                 continue
-            for semester in os.listdir(str(course_dir)):
-                for course in os.listdir(os.path.join(str(course_dir), semester)):
-                    cond1 = args.choose_course is not None
-                    cond2 = [semester, course] != args.choose_course
+            for semester in sorted(os.listdir(str(course_dir))):
+                courses = sorted(os.listdir(os.path.join(str(course_dir), semester)))
+                for course in courses:
+                    loop_args = deepcopy(args)
+                    cond1 = loop_args.choose_course is not None
+                    cond2 = [semester, course] != loop_args.choose_course
                     if cond1 and cond2:
                         continue
-                    args.semester = semester
-                    args.course = course
-                    args.config.database['dbname'] = 'submitty_{}_{}'.format(
+                    loop_args.semester = semester
+                    loop_args.course = course
+                    loop_args.config.database['dbname'] = 'submitty_{}_{}'.format(
                         semester,
                         course
                     )
                     try:
-                        database = db.Database(args.config.database, environment)
+                        database = db.Database(loop_args.config.database, environment)
                         exists = database.engine.dialect.has_table(
                             database.engine,
                             database.migration_table.__tablename__
@@ -114,7 +117,7 @@ def status(args):
                             )
                             database.close()
                             continue
-                        print_status(database, environment, args)
+                        print_status(database, environment, loop_args)
                         database.close()
                     except OperationalError:
                         print('Could not get the status for the migrations '
@@ -195,14 +198,12 @@ def handle_migration(args):
     :param args: arguments parsed from argparse
     :type args: argparse.Namespace
     """
-    args.config.database['dbname'] = 'submitty'
-
     for environment in get_environments(args.environments):
-        args.course = None
-        args.semester = None
         if environment in ['master', 'system']:
+            loop_args = deepcopy(args)
+            loop_args.config.database['dbname'] = 'submitty'
             try:
-                database = db.Database(args.config.database, environment)
+                database = db.Database(loop_args.config.database, environment)
             except OperationalError:
                 print('Database does not exist for {}'.format(environment))
                 continue
@@ -214,21 +215,23 @@ def handle_migration(args):
             if not course_dir.exists():
                 print("Could not find courses directory: {}".format(course_dir))
                 continue
-            for semester in os.listdir(str(course_dir)):
-                for course in os.listdir(os.path.join(str(course_dir), semester)):
-                    cond1 = args.choose_course is not None
-                    cond2 = [semester, course] != args.choose_course
+            for semester in sorted(os.listdir(str(course_dir))):
+                courses = sorted(os.listdir(os.path.join(str(course_dir), semester)))
+                for course in courses:
+                    loop_args = deepcopy(args)
+                    cond1 = loop_args.choose_course is not None
+                    cond2 = [semester, course] != loop_args.choose_course
                     if cond1 and cond2:
                         continue
-                    args.semester = semester
-                    args.course = course
-                    args.config.database['dbname'] = 'submitty_{}_{}'.format(
+                    loop_args.semester = semester
+                    loop_args.course = course
+                    loop_args.config.database['dbname'] = 'submitty_{}_{}'.format(
                         semester,
                         course
                     )
                     try:
-                        database = db.Database(args.config.database, environment)
-                        migrate_environment(database, environment, args)
+                        database = db.Database(loop_args.config.database, environment)
+                        migrate_environment(database, environment, loop_args)
                         database.close()
                     except OperationalError:
                         print("Submitty Database Migration Warning:  "
