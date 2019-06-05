@@ -7,7 +7,7 @@ window.addEventListener("load", function() {
   }
 });
 
-window.addEventListener("resize", checkSidebarCollapse); 
+window.addEventListener("resize", checkSidebarCollapse);
 
 /**
  * Acts in a similar fashion to Core->buildUrl() function within the PHP code
@@ -170,6 +170,7 @@ function editUserForm(user_id) {
             if (!user.hasClass('readonly')) {
                 user.addClass('readonly');
             }
+            $('[name="user_numeric_id"]', form).val(json['user_numeric_id']);
             $('[name="user_firstname"]', form).val(json['user_firstname']);
             if (json['user_preferred_firstname'] === null) {
                 json['user_preferred_firstname'] = "";
@@ -231,6 +232,7 @@ function newUserForm() {
     form.css("display", "block");
     $('[name="edit_user"]', form).val("false");
     $('[name="user_id"]', form).removeClass('readonly').prop('readonly', false).val("");
+    $('[name="user_numeric_id"]', form).val("");
     $('[name="user_firstname"]', form).val("");
     $('[name="user_preferred_firstname"]', form).val("");
     $('[name="user_lastname"]', form).val("");
@@ -457,7 +459,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                             //console.log(data.ci[users_color]);
                             for(var pos in data.ci[users_color]) {
                                 var element = data.ci[users_color][pos];
-                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_prev_color": element[4], "data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; background: " + element[4]});   
+                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_prev_color": element[4], "data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; background: " + element[4]});
                             }
                         }
                         $('.CodeMirror')[0].CodeMirror.refresh();
@@ -514,7 +516,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                             //console.log(data.ci[users_color]);
                             for(var pos in data.ci[users_color]) {
                                 var element = data.ci[users_color][pos];
-                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});   
+                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});
                             }
                         }
                         	$('.CodeMirror')[0].CodeMirror.refresh();
@@ -546,7 +548,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                             for(var users_color in data.ci) {
                             for(var pos in data.ci[users_color]) {
                                 var element = data.ci[users_color][pos];
-                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});   
+                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});
                             }
                         }
                         	$('.CodeMirror')[0].CodeMirror.refresh();
@@ -578,7 +580,7 @@ function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user
         user_id_2 = JSON.parse($('[name="user_id_2"]', form).val())["user_id"];
         version_user_2 = JSON.parse($('[name="user_id_2"]', form).val())["version"];
     }
-    
+
     var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_matches_for_clicked_match',
                         'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'start':user_1_match_start.line, 'end': user_1_match_end.line});
 

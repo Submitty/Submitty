@@ -45,7 +45,7 @@
                         <a onclick="openFile('{{ file.url_full }}')"><i class="fas fa-window-restore" aria-hidden="true" title="Pop out the full PDF in a new window"></i></a>
                     </td>
                     <td id="input_area">
-                        <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+                        <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}"/>
                         <div id="users_{{ loop.index }}">
                             <input type="text" id="bulk_user_id_{{ loop.index }}" 
                                 {% if use_qr_codes %}
@@ -54,9 +54,7 @@
                                     value =""
                                 {% endif %}
 
-                                {% if team_assignment %}
-                                    onkeydown="uploadOnEnter( {{ loop.index }} );"
-                                {% endif %}
+                                onkeydown="uploadOnEnter( {{ loop.index }} );"
                             />
                             {% if team_assignment %}
                                 {# (size - 1) because twig loops are range inclusive #}
@@ -150,7 +148,7 @@
     //if the user presses 'enter' try and make a submission as if hitting the submit button
     function uploadOnEnter(index){
         var key = window.event.keyCode;
-        if(key === 13 && is_team_assignment){
+        if(key === 13){
             uploadSplit(index);
         }
     }
