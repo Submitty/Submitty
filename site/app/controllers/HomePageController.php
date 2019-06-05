@@ -76,7 +76,6 @@ class HomePageController extends AbstractController {
      * Display the HomePageView to the student.
      *
      * @Route("/home")
-     * @Route("/home/home_page")
      */
     public function showHomepage() {
         $user = $this->core->getUser();
