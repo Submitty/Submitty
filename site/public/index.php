@@ -293,7 +293,7 @@ if ($is_api) {
 }
 else {
     try {
-        $router = new app\libraries\routers\MainRouter($core, $logged_in);
+        $router = new app\libraries\routers\WebRouter($core, $logged_in);
         $router->run();
     }
     catch (Exception $e) {

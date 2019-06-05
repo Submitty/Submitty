@@ -13,7 +13,7 @@ use app\libraries\Utils;
 use app\libraries\Core;
 
 
-class MainRouter {
+class WebRouter {
     /** @var Core  */
     protected $core;
 
