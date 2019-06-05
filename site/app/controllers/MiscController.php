@@ -512,7 +512,7 @@ class MiscController extends AbstractController {
         // makes a random zip file name on the server
         $temp_name = uniqid($this->core->getUser()->getId(), true);
         $zip_name = $temp_dir . "/" . $temp_name . ".zip";
-        $zip_file_name = $dir_name . ".zip";
+        $zip_file_name = preg_replace('/\s+/', '_', $dir_name) . ".zip";
 
         $zip = new \ZipArchive();
         $zip->open($zip_name, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
@@ -522,7 +522,6 @@ class MiscController extends AbstractController {
             // download all accessible files according to course_materials_file_data.json
             $file_data = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
             $json = FileUtils::readJsonFile($file_data);
-
             foreach ($json as $path => $file) {
                 // check if the file is in the requested folder
                 if (!Utils::startsWith(realpath($path), $root_path)) {
