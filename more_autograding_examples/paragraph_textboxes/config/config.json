@@ -32,7 +32,7 @@
         {
           "type": "short_answer",
           "filename": "box_two.txt",
-          "initial_value": "string hello \"Hello world\";\ncout << hello;",
+          "initial_value": ".\n^\n$\n*\n+\n-\n?\n( )\n[ ]\n{ }\n\\\n|\n`",
           "rows": 5
         },
         {
@@ -73,7 +73,7 @@
           "type": "short_answer",
           "programming_language": "python",
           "filename": "codebox.txt",
-            "initial_value": "print(\"Hello world!\")\necho \"Hello world!\"\nprintf(\"Hello world!\");"
+            "initial_value": ".\n^\n$\n*\n+\n-\n?\n( )\n[ ]\n{ }\n\\\n|\n`"
         }
     ],
     "testcases" : [ 
