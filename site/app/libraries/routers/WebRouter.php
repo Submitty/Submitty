@@ -29,12 +29,13 @@ class WebRouter {
     /** @var UrlMatcher  */
     protected $matcher;
 
-    public function __construct(Core $core, $logged_in) {
+    public function __construct(Request $request, Core $core, $logged_in) {
         $this->core = $core;
-        $this->request = Request::createFromGlobals();
+        $this->request = $request;
         $this->logged_in = $logged_in;
 
         $fileLocator = new FileLocator();
+        /** @noinspection PhpUnhandledExceptionInspection */
         $annotationLoader = new AnnotatedRouteLoader(new AnnotationReader());
         $loader = new AnnotationDirectoryLoader($fileLocator, $annotationLoader);
         $collection = $loader->load(realpath(__DIR__ . "/../../controllers"));
@@ -53,6 +54,7 @@ class WebRouter {
         if (in_array('semester', $this->parameters) && in_array('course', $this->parameters)) {
             $semester = $this->parameters['semester'];
             $course = $this->parameters['course'];
+            /** @noinspection PhpUnhandledExceptionInspection */
             $this->core->loadConfig($semester, $course);
         }
 

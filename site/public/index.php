@@ -10,6 +10,7 @@ use app\libraries\TokenManager;
 use app\libraries\routers\ClassicRouter;
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
+use Symfony\Component\HttpFoundation\Request;
 
 /*
  * The user's umask is ignored for the user running php, so we need
@@ -29,6 +30,8 @@ ini_set('display_errors', 1);
 
 $loader = require_once(__DIR__.'/../vendor/autoload.php');
 AnnotationRegistry::registerLoader([$loader, 'loadClass']);
+
+$request = Request::createFromGlobals();
 
 $core = new Core();
 $core->setRouter(new ClassicRouter($_GET['url'] ?? ''));
@@ -292,12 +295,12 @@ if (empty($_REQUEST['component']) && $core->getUser() !== null) {
 $caught = false;
 
 if ($is_api) {
-    $router = new app\libraries\routers\ApiRouter($core);
+    $router = new app\libraries\routers\ApiRouter($request, $core);
     $router->run();
 }
 else {
     try {
-        $router = new app\libraries\routers\WebRouter($core, $logged_in);
+        $router = new app\libraries\routers\WebRouter($request, $core, $logged_in);
         $router->run();
     }
     catch (Exception $e) {

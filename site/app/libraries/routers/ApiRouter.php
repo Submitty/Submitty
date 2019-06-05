@@ -15,10 +15,15 @@ use app\libraries\Core;
 
 
 class ApiRouter {
+    /** @var Core  */
     protected $core;
 
-    public function __construct(Core $core) {
+    /** @var Request  */
+    protected $request;
+
+    public function __construct(Request $request, Core $core) {
         $this->core = $core;
+        $this->request = $request;
     }
 
     public function run() {
@@ -37,7 +42,7 @@ class ApiRouter {
         $matcher = new UrlMatcher($collection, new RequestContext());
 
         try {
-            $parameters = $matcher->matchRequest(Request::createFromGlobals());
+            $parameters = $matcher->matchRequest($this->request);
 
             $controllerName = $parameters['_controller'];
             $methodName = $parameters['_method'];
