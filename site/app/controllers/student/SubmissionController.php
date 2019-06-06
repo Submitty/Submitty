@@ -11,6 +11,7 @@ use app\libraries\Logger;
 use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
 use app\models\Notification;
+use app\models\Email;
 use app\controllers\grading\ElectronicGraderController;
 use app\models\gradeable\SubmissionTextBox;
 use app\models\gradeable\SubmissionCodeBox;
@@ -2005,10 +2006,7 @@ class SubmissionController extends AbstractController {
         //TODO: build link in email body
         $notification_subject = "[Submitty $course] New Regrade Request";
         $notification_body = "A student has submitted a grade inquiry for gradeable $gradeable_id.\nStudent ID $user_id writes:\n$content\n\nPlease visit Submitty to follow up on this request";
-        $regrade_email_data = [
-          "subject" => $notification_subject,
-          "body" => $notification_body
-        ];
+
         foreach($graders as $grader){
           if(!$grader->accessFullGrading()){
             continue;
@@ -2016,8 +2014,13 @@ class SubmissionController extends AbstractController {
 
           $new_grade_inquiry_notification = new Notification($this->core, array('component' => 'grading', 'type' => 'grade_inquiry_creation', 'gradeable_id' => $gradeable_id, 'grader_id' => $grader->getId(), 'submitter_id' => $user_id, 'who_id' => $submitter->getId()));
           $this->core->getQueries()->pushSingleNotification($new_grade_inquiry_notification);
-
-          $this->core->getQueries()->createEmail($regrade_email_data, $grader->getEmail());
+          $regrade_email_data = [
+              "subject" => $notification_subject,
+              "body" => $notification_body,
+              "recipient" => $grader->getEmail()
+          ];
+          $new_grade_inquiry_email = new Email($this->core, $regrade_email_data);
+          $this->core->getQueries()->createEmail($new_grade_inquiry_email);
         }
 
         if($submitter->isTeam()){
