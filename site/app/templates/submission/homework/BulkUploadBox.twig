@@ -45,7 +45,7 @@
                         <a onclick="openFile('{{ file.url_full }}')"><i class="fas fa-window-restore" aria-hidden="true" title="Pop out the full PDF in a new window"></i></a>
                     </td>
                     <td id="input_area">
-                        <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+                        <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}"/>
                         <div id="users_{{ loop.index }}">
                             <input type="text" id="bulk_user_id_{{ loop.index }}" 
                                 {% if use_qr_codes %}
@@ -54,9 +54,7 @@
                                     value =""
                                 {% endif %}
 
-                                {% if team_assignment %}
-                                    onkeydown="uploadOnEnter( {{ loop.index }} );"
-                                {% endif %}
+                                onkeydown="uploadOnEnter( {{ loop.index }} );"
                             />
                             {% if team_assignment %}
                                 {# (size - 1) because twig loops are range inclusive #}
@@ -68,7 +66,7 @@
                         </div>
                     </td>
                     {% if use_qr_codes %}
-                        <td>
+                        <td class="pdf_page_count" id="page_count_{{ loop.index }}">
                             {{ file["page_count"] }}
                         </td>
                     {% endif %}
@@ -95,10 +93,34 @@
     var is_team_assignment = "{{ team_assignment }}" === "1";
     //autofill data
     $(function(){
+        if(sessionStorage.getItem("expected_count"))
+            document.getElementById("expected_pages_input").value = sessionStorage.getItem("expected_count");
+
         $("td > div :text").autocomplete({
             source: students_full 
         });
+        highlightPageCount();
     });
+
+    //highlight pages that don't match the expected, also save the expected page count in session storage
+    function highlightPageCount(){
+        var expected_count = parseInt(document.getElementById("expected_pages_input").value);
+        if(expected_count == NaN || !expected_count)
+            return;
+
+        var pages = document.getElementsByClassName("pdf_page_count");
+        for (var i = pages.length - 1; i >= 0; i--) {
+            if(parseInt(pages[i].innerHTML) !== expected_count && expected_count > 0)
+                pages[i].style.backgroundColor = "#FF5722";
+            else
+                pages[i].style.backgroundColor = "";
+        }
+
+        if(!sessionStorage.getItem("expected_count")){
+            sessionStorage.setItem("expected_count", expected_count);
+        }
+        sessionStorage.setItem("expected_count", expected_count);
+    }
 
     function toggleButtons(index, disable){
         var submit_btn = document.getElementById("bulk_submit_" + String(index));
@@ -126,7 +148,7 @@
     //if the user presses 'enter' try and make a submission as if hitting the submit button
     function uploadOnEnter(index){
         var key = window.event.keyCode;
-        if(key === 13 && is_team_assignment){
+        if(key === 13){
             uploadSplit(index);
         }
     }
@@ -238,10 +260,11 @@
     }
 
     function submitAll(index){
-        if(index > path_list.length || index > num_submissions)
+        if(index > Object.keys(path_list).length || index > num_submissions)
             return;
 
         var text_area = document.getElementById("bulk_user_id_" + String(index));
+        var expected_count = parseInt(document.getElementById("expected_pages_input").value);
 
         var user_id = "";
         if(text_area !== null){
@@ -253,6 +276,16 @@
         }else{
             return submitAll(index + 1);
         }
+        //if the expected page count doesn't match skip and let the user decide
+        var page_count = document.getElementById("page_count_" + String(index));
+        if(page_count){
+            if(expected_count != NaN && expected_count > 0 && expected_count != parseInt(page_count.innerHTML))
+                return submitAll(index + 1);
+        }
+
+        //if theres an invalid submission skip this
+        if(document.getElementById("row-" + String(index)).style.backgroundColor == "pink")
+            return submitAll(index + 1);
 
         var path = decodeURIComponent(path_list[index]);
 
@@ -266,10 +299,13 @@
                 toggleButtons(index, true);
                 uploadSplitHelper(user_id,path,index);
                 return submitAll(index + 1);
+            }else{
+                return submitAll(index + 1);
             }
         })
         .catch(function(response){
             displaySubmissionMessage({'success' : false, 'message' : response}, index);
+            console.error(response);
             return submitAll(index + 1);
         });
     }

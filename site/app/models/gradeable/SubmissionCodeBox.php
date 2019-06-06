@@ -21,6 +21,6 @@ class SubmissionCodeBox extends AbstractTextBox {
     public function __construct(Core $core, array $details) {
         parent::__construct($core, $details);
 
-        $this->language = $details['language'];
+        $this->language = $details['programming_language'];
     }
 }

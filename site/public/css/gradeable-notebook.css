@@ -1,0 +1,51 @@
+.notebook h1,
+.notebook h2,
+.notebook h3,
+.notebook h4,
+.notebook h5,
+.notebook h6,
+.notebook h7
+{
+    margin-top: 2rem;
+    margin-bottom: .3rem;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.notebook p
+{
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+.notebook ul {
+    padding-left: 3rem;
+}
+
+/* Push recent and clear buttons down a little bit */
+.notebook .sa_clear_reset,
+.notebook .codebox_clear_reset,
+.notebook .mc_recent
+{
+    margin-top: 7px;
+}
+
+/* Set default font for short_answer boxes */
+.notebook textarea,
+.notebook input[type="text"]
+{
+    font-family: monospace;
+}
+
+/* Display notebook multiple choice descriptions on same line as radio button or checkbox */
+.mc > label > :first-child
+{
+    display: inline;
+}
+
+/* Clear top margin for items that live inside a single multiple choice description */
+/* Useful for several newline separated headers inside a single markdown item  */
+.mc > label > *
+{
+    margin-top: 0;
+}
