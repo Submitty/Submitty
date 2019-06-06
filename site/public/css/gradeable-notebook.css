@@ -22,13 +22,14 @@
     padding-left: 3rem;
 }
 
-/* Push recent and clear buttons down a little bit */
+/* Push recent and clear buttons down a little bit and shrink them slightly */
 .notebook .sa_clear_reset,
 .notebook .codebox_clear_reset,
 .notebook .mc_recent,
 .notebook .mc_clear
 {
     margin-top: 7px;
+    padding: 3px 6px;
 }
 
 /* Set default font for short_answer boxes */
