@@ -517,6 +517,8 @@ HTML;
 
         $post_box_id = 0;
 
+        $form_action_link = $this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_post'));
+
         if(($isThreadLocked != 1 || $accessFullGrading ) && $includeReply  ) {
 
             $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 1;
@@ -553,6 +555,7 @@ HTML;
             "includeReply" => $includeReply,
             "thread_id" => $thread_id,
             "first_post_id" => $first_post_id,
+            "form_action_link" => $form_action_link,
             "merge_thread_content" => $merge_thread_content,
             "csrf_token" => $csrf_token,
             "activeThreadTitle" => $activeThreadTitle,
