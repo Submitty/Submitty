@@ -199,7 +199,8 @@
         {% endif %}
         <input type="submit" id="submit" class="btn btn-primary" value="Grade My Repository" />
     {% else %}
-        <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
+
+        {# Notebook #}
         <div class="notebook">
 
             {# Render content #}
@@ -361,7 +362,10 @@
 
             {% endfor %}
 
+        </div>
 
+        {# File upload boxes #}
+        <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
             {# Submit boxes #}
             {% for part in part_names %}
                 <div tabindex="0"
@@ -380,8 +384,6 @@
                     <input type="file" name="files" id="input_file{{ loop.index }}" style="display: none" onchange="addFilesFromInput({{ loop.index }})" multiple />
                 </div>
             {% endfor %}
-
-        </div>
         </div>
 
         {# Page selector #}
