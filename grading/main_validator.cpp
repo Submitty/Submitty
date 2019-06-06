@@ -255,6 +255,9 @@ void WriteToResultsJSON(const TestCase &my_testcase,
     tc_j["autochecks"] = autocheck_js;
   }
 
+  // TODO: Modify this line to pass through "testcase_label"
+  if (testcase_ != "") tc_j["testcase_message"] = testcase_message;
+
   if (testcase_message != "") tc_j["testcase_message"] = testcase_message;
   tc_j["points_awarded"] = testcase_pts;
 

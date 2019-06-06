@@ -184,6 +184,13 @@ int main(int argc, char *argv[]) {
       assert(type != "");
       out_notebook_cell["type"] = type;
 
+      // Get testcase_ref if it exists
+      std::string testcase_ref = in_notebook_cell.value("testcase_ref", "");
+      if(testcase_ref != "")
+      {
+        out_notebook_cell["testcase_ref"] = testcase_ref;
+      }
+
       // Handle each specific note book cell type
       // Handle markdown data
       if(type == "markdown")
