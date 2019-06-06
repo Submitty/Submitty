@@ -635,39 +635,34 @@ function setupSimpleGrading(action) {
     });
 
     // the offset of the search bar: used to lock the search bar on scroll
-    var search_bar_offset = $("#student-search").offset(); 
+    var search_bar_offset = $("#student-search-input").offset(); 
 
     // used to reposition the search field when the window scrolls
     $(window).on("scroll", function(event) {
-        var search_field = $("#student-search");
+        var search_field = $("#student-search-input");
         if(search_bar_offset.top < $(window).scrollTop()) {
             search_field.addClass("fixed-top");
-            search_field.css("left", search_bar_offset.left);
         }
         else {
-            search_field.css("position", "relative");
-            search_field.css("left", "");
+            search_field.removeClass("fixed-top");
         }
     });
 
     // check if the search field needs to be repositioned when the page is loaded
     if(search_bar_offset.top < $(window).scrollTop()) {
-        var search_field = $("#student-search");
+        var search_field = $("#student-search-input");
         search_field.addClass("fixed-top");
-        search_field.css("left", search_bar_offset.left);
     }
 
     // check if the search field needs to be repositioned when the page is resized
     $(window).on("resize", function(event) {
         var settings_btn_offset = $("#settings-btn").offset();
-        search_bar_offset = {   // NOTE: THE SEARCH BAR IS PLACED RELATIVE TO THE SETTINGS BUTTON
+        search_bar_offset = {  
             top : settings_btn_offset.top,
-            left : settings_btn_offset.left - $("#student-search").width()
         };
         if(search_bar_offset.top < $(window).scrollTop()) {
-            var search_field = $("#student-search");
+            var search_field = $("#student-search-input");
             search_field.addClass("fixed-top");
-            search_field.css("left", search_bar_offset.left);
         }
     });
 
