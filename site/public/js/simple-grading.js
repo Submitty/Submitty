@@ -172,9 +172,9 @@ function updateCheckpointCells(elems, score) {
         scores[elem.data("id")] = elem.data("score");
 
         // update css to reflect score
-        if (elem.data("score") === 1.0) elem.css("background-color", "#88d0f4");
-        else if (elem.data("score") === 0.5) elem.css("background-color", "");
-        else elem.css("background-color", "#149bdf");
+        if (elem.data("score") === 1.0) elem.css("background-color", "#149bdf");
+        else if (elem.data("score") === 0.5) elem.css("background-color", "#88d0f4");
+        else elem.css("background-color", "");
 
         // create border we can animate to reflect ajax status
         elem.css("border-right", "15px solid #ddd");
