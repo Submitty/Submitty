@@ -299,6 +299,7 @@
                             {% set num_codeboxes = num_codeboxes + 1 %}
                         {% endif %}
 
+                    {# Handle if cell is multiple choice #}
                     {% elseif cell.type == "multiple_choice" %}
 
                         <fieldset id="mc_field_{{ num_multiple_choice }}"
@@ -333,6 +334,7 @@
                         </fieldset>
 
                         {# Create reset to recent submission button #}
+                        <button type="button" id="mc_{{ num_multiple_choice }}_clear_button" class="btn btn-primary mc_clear">Clear</button>
                         <button type="button" id="mc_{{ num_multiple_choice }}_recent_button" class="btn btn-primary mc_recent">Use Most Recent Submission</button>
 
                         <script>
@@ -348,9 +350,17 @@
 
                             {# Configure initial state for the button #}
                             {% if core.getConfig().keepPreviousFiles() %}
+
+                                {% if highest_version == 0 %}
+                                    $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", true);
+                                {% else %}
+                                    $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", false);
+                                {% endif %}
+
                                 $("#mc_{{ num_multiple_choice }}_recent_button").attr("disabled", true);
                             {% else %}
-                                $("#mc_{{ num_multiple_choice }}_recent_button").attr("disabled", false);
+                                    $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", true);
+                                    $("#mc_{{ num_multiple_choice }}_recent_button").attr("disabled", false);
                             {% endif %}
                         </script>
 
