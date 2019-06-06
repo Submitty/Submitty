@@ -7,7 +7,7 @@
     "notebook" : [
         {
             "type": "markdown",
-            "markdown_string": "#Header 1  \n###Header 3  \n#####Header 5  \n------  \nRegular text"
+            "markdown_string": "word1  \n  \n  \ntwo  \nthree\nfour"
         },
         {
             "type": "image",
@@ -32,7 +32,7 @@
         {
           "type": "short_answer",
           "filename": "box_two.txt",
-          "initial_value": "string hello \"Hello world\";\ncout << hello;",
+          "initial_value": ".\n^\n$\n*\n+\n-\n?\n( )\n[ ]\n{ }\n\\\n|\n`",
           "rows": 5
         },
         {
@@ -43,8 +43,8 @@
             "type": "multiple_choice",
             "filename": "select_one.txt",
             "choices":[
-                {"value": "short", "description": "#the plant\n##will be short\n###because it doesn't get enough water"},
-                {"value": "medium", "description": "##the plant will grow normally"},
+                {"value": "short", "description": "# the plant will  \n ## be short because it  \n ### doesn't get enough water"},
+                {"value": "medium", "description": "### the plant will grow normally"},
                 {"value": "tall", "description": "[the plant will be tall because it gets lots of light](http://submitty.org)"}
             ],
             "allow_multiple": false
@@ -73,7 +73,7 @@
           "type": "short_answer",
           "programming_language": "python",
           "filename": "codebox.txt",
-            "initial_value": "print(\"Hello world!\")\necho \"Hello world!\"\nprintf(\"Hello world!\");"
+            "initial_value": ".\n^\n$\n*\n+\n-\n?\n( )\n[ ]\n{ }\n\\\n|\n`"
         }
     ],
     "testcases" : [ 

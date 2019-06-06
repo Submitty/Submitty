@@ -200,33 +200,7 @@
         <input type="submit" id="submit" class="btn btn-primary" value="Grade My Repository" />
     {% else %}
         <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
-
-            <script>
-                {# Set the multiple choice checkmarks or radio buttons from a previous submission #}
-                function setMultipleChoices(mc_field_id)
-                {
-                    var parts = mc_field_id.split("_");
-                    var id = parts[2];
-                    var prev_checked = $("#" + mc_field_id).attr("data-prev_checked");
-
-                    prev_checked = prev_checked.split("\n");
-
-                    // For each input inside the fieldset see if its value is inside the prev checked array
-                    $("#" + mc_field_id + " :input").each(function(index,element) {
-
-                        var value = element.getAttribute("value");
-
-                        if(prev_checked.includes(value))
-                        {
-                            $(element).prop("checked", true);
-                        }
-                        else
-                        {
-                            $(element).prop("checked", false);
-                        }
-                    });
-                }
-            </script>
+        <div class="notebook">
 
             {# Render content #}
             {% set num_short_answer = 0 %}
@@ -271,25 +245,54 @@
 
                         {# Else render a codebox #}
                         {% else %}
-                            <br>
-                                <div id="codebox_{{ num_codeboxes }}" name="codebox_{{ num_codeboxes }}" style="border: 1px solid LightGrey;" onKeyPress="handle_input_keypress();">
+                                <div id="codebox_{{ num_codeboxes }}"
+                                     name="codebox_{{ num_codeboxes }}"
+                                     class="codebox"
+                                     data-initial_value="{{ cell.initial_value }}"
+                                     data-recent_submission="{{ cell.recent_submission }}"
+                                     style="border: 1px solid LightGrey;" onKeyPress="handle_input_keypress();">
                                 </div>
+
+                                <button type="button" id="codebox_{{ num_codeboxes }}_clear_button" class="btn btn-primary codebox_clear_reset">Clear</button>
+                                <button type="button" id="codebox_{{ num_codeboxes }}_recent_button" class="btn btn-primary codebox_clear_reset">Use Most Recent Submission</button>
+
                                 <script>
-
-                                    {# Get recent submission #}
-                                    var recent_submission = `{% if core.getConfig().keepPreviousFiles() %}{{ cell.recent_submission }}{% else %}{{ cell.initial_value }}{% endif %}`;
-
-                                    {# Transform escaped characters back into regular characters #}
-                                    recent_submission = convertHTMLEntity(recent_submission);
 
                                     var editor_{{num_codeboxes}} = CodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"),
                                         {
-                                            "value" : recent_submission,
                                             "mode": "{{ cell.programming_language }}",
                                             lineNumbers: true,
                                             "theme": "eclipse"
                                         }
                                     );
+
+                                    {# Populate codebox initially #}
+                                    {% if core.getConfig().keepPreviousFiles() %}
+                                        setCodeBox("codebox_{{ num_codeboxes }}", "recent");
+                                    {% else %}
+                                        setCodeBox("codebox_{{ num_codeboxes }}", "clear");
+                                    {% endif %}
+
+                                    {# Hide recent button if no previous submissions #}
+                                    {% if highest_version == 0 %}
+                                        document.getElementById("codebox_{{ num_codeboxes }}_recent_button").style.visibility = 'hidden';
+                                    {% endif %}
+
+                                    {# Setup init state of buttons #}
+                                    {% if core.getConfig().keepPreviousFiles() %}
+
+                                        {% if highest_version == 0 %}
+                                            document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = true;
+                                        {% else %}
+                                            document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = false;
+                                        {% endif %}
+
+                                        document.getElementById("codebox_{{ num_codeboxes }}_recent_button").disabled = true;
+                                    {% else %}
+                                        document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = true;
+                                        document.getElementById("codebox_{{ num_codeboxes }}_recent_button").disabled = false;
+
+                                    {% endif %}
                                 </script>
                             <br>
                             {% set num_codeboxes = num_codeboxes + 1 %}
@@ -297,7 +300,6 @@
 
                     {% elseif cell.type == "multiple_choice" %}
 
-                        <br>
                         <fieldset id="mc_field_{{ num_multiple_choice }}"
                                   class="mc"
                                   {% if cell.recent_submission is defined %}data-prev_checked="{{ cell.recent_submission }}"{% endif %}>
@@ -328,7 +330,6 @@
                                 <br/>
                             {% endfor %}
                         </fieldset>
-                        <br>
 
                         {# Create reset to recent submission button #}
                         <button type="button" id="mc_{{ num_multiple_choice }}_recent_button" class="btn btn-primary mc_recent">Use Most Recent Submission</button>
@@ -360,103 +361,6 @@
 
             {% endfor %}
 
-            {# Place scripts relevant to short answer items here #}
-            <script>
-
-                {# Register click event handler for mc reset button #}
-                $(".mc_recent").click(function() {
-
-                    // Collect the id of the button and split it apart to find out which field it is bound to
-                    var items = this.id.split("_");
-                    var index = items[1];
-                    var field_set_id = "mc_field_" + index;
-
-                    setMultipleChoices(field_set_id);
-                    $(this).attr("disabled", true);
-                });
-
-                {# Register change event handler for mc fieldsets #}
-                $(".mc").change(function() {
-
-                    var items = this.id.split("_");
-                    var index = items[2];
-
-                    // Enable reset button
-                    $("#mc_" + index + "_recent_button").attr("disabled", false);
-                });
-
-                // Setup click events for short answer buttons
-                $(".sa_clear_reset").click(function() {
-
-                    // Collect the id of the button and split it apart to find out which short answer it is bound to
-                    // and which action it preforms
-                    var items = this.id.split("_");
-
-                    var index_num = items[2];
-                    var button_action = items[3];
-                    var field_id = "#short_answer_" + index_num;
-
-                    var data_to_set = "";
-
-                    // Collect data from the data-* attribute of the text box
-                    if(button_action == "clear")
-                    {
-                        var data_to_set = $(field_id).attr("data-initial_value");
-                    }
-                    else
-                    {
-                        var data_to_set = $(field_id).attr("data-recent_submission");
-                    }
-
-                    // Set the data into the textbox
-                    $(field_id).val(data_to_set);
-
-                    // Set button states
-                    if(button_action == "clear")
-                    {
-                        $(field_id + "_clear_button").attr("disabled", true);
-                        $(field_id + "_recent_button").attr("disabled", false);
-                    }
-                    else
-                    {
-                        $(field_id + "_clear_button").attr("disabled", false);
-                        $(field_id + "_recent_button").attr("disabled", true);
-                    }
-                });
-
-                // Setup keyup event for short answer boxes
-                $(".sa_box").keyup(function() {
-
-                    var items = this.id.split("_");
-
-                    var index_num = items[2];
-
-                    var initial_value = this.getAttribute("data-initial_value");
-                    var recent_submission = this.getAttribute("data-recent_submission");
-
-                    var text_box_id = "#short_answer_" + index_num;
-                    var clear_button_id = "#short_answer_" + index_num + "_clear_button";
-                    var recent_button_id = "#short_answer_" + index_num + "_recent_button";
-
-                    if($(text_box_id).val() == initial_value)
-                    {
-                        $(clear_button_id).attr("disabled", true);
-                    }
-                    else
-                    {
-                        $(clear_button_id).attr("disabled", false);
-                    }
-
-                    if($(text_box_id).val() == recent_submission)
-                    {
-                        $(recent_button_id).attr("disabled", true);
-                    }
-                    else
-                    {
-                        $(recent_button_id).attr("disabled", false);
-                    }
-                });
-            </script>
 
             {# Submit boxes #}
             {% for part in part_names %}
@@ -477,6 +381,7 @@
                 </div>
             {% endfor %}
 
+        </div>
         </div>
 
         {# Page selector #}
@@ -718,8 +623,8 @@
                 enableTabsInTextArea('#short_answer_{{ index }}');
             </script>
         {% endif %}
-        <button type="button" id="short_answer_{{ index }}_clear_button" class="btn btn-primary btn-push-down sa_clear_reset">Clear</button>
-        <button type="button" id="short_answer_{{ index }}_recent_button" class="btn btn-primary btn-push-down sa_clear_reset">Use Most Recent Submission</button>
+        <button type="button" id="short_answer_{{ index }}_clear_button" class="btn btn-primary sa_clear_reset">Clear</button>
+        <button type="button" id="short_answer_{{ index }}_recent_button" class="btn btn-primary sa_clear_reset">Use Most Recent Submission</button>
         <script>
 
             {% if version == 0 %}
