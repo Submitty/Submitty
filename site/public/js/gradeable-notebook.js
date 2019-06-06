@@ -67,6 +67,17 @@ function setCodeBox(codebox_id, state)
 
 $(document).ready(function () {
 
+    // If any button inside the notebook has been clicked then enable the submission button
+    $(".notebook button").click(function() {
+
+        // Set global javascript variable to allow submission for notebook
+        window.is_notebook = true;
+
+        // Enable submit button
+        $("#submit").attr("disabled", false);
+
+    });
+
     // Register click handler for codebox clear and recent buttons
     $(".codebox_clear_reset").click(function() {
 
