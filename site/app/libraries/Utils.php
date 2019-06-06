@@ -240,21 +240,21 @@ class Utils {
      * students_version is an array of user and their highest submitted version
      */
 
-    public static function getAutoFillData($students, $students_version = null){
+    public static function getAutoFillData($students, $students_version = null) {
         $students_full = array();
         $null_section = array();
         foreach ($students as $student) {
             $student_entry = array('value' => $student->getId(),
                     'label' => $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>');
             $students_full[] = $student_entry;
-            if($students_version != null){
-                if($student->getRegistrationSection() != null && array_key_exists($student->getId(),$students_version)){
+            if($students_version != null) {
+                if($student->getRegistrationSection() != null && array_key_exists($student->getId(),$students_version)) {
                     if ($students_version[$student->getId()] !== 0) {
                         $student_entry['label'] .= ' (' .
                         $students_version[$student->getId()] . ' Prev Submission)';
                     }
                 }
-            }else{
+            } else {
                 $null_entry = array('value' => $student->getId(),
                 'label' => '[NULL section] ' . $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>'); 
 
@@ -262,10 +262,26 @@ class Utils {
                 foreach ($null_section as $null_student) {
                     if($null_student['value'] === $student->getId()) $in_null_section = true;
                 }
-                if(!$in_null_section) $null_section[] = $null_entry;
+                if(!$in_null_section && $student->getRegistrationSection() == null) {
+                    $null_section[] = $null_entry; 
+                    $students_full = self::removeStudentWithId($students_full, 'value', $student->getId());
+                } 
             }
         }
         $students_full = array_unique(array_merge($students_full, $null_section), SORT_REGULAR);
         return json_encode($students_full);
     }
+    
+    /*
+     * Given a multidimensional array of students, key, and id, removeStudentWithId deletes matching student row(s).
+     */
+
+    public static function removeStudentWithId($students, $key, $id) {
+        foreach($students as $subKey => $student) {
+             if($student[$key] === $id) {
+                  unset($students[$subKey]);
+             }
+        }
+        return $students;
+   }
 }
