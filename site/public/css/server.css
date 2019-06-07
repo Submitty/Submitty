@@ -1177,10 +1177,6 @@ fieldset[disabled] .btn-primary.focus {
   background-color: #fff;
 }
 
-.btn-push-down {
-    margin-top: 5px
-}
-
 .panel-heading > .dropdown .dropdown-toggle {
   color: inherit;
 }
@@ -2095,4 +2091,3 @@ end of styles used in the admin gradeable page
     border: 0px;
     padding: 0px;
 }
-
