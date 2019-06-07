@@ -16,7 +16,7 @@ function clean_homework {
     rm -rf $course_dir/test_input/${3}
     rm -rf $course_dir/test_output/${3}
     rm -rf $course_dir/provided_code/${3}
-    rm -rf $course_dir/solution/${3}
+    rm -rf $course_dir/instructor_solution/${3}
     rm -rf $course_dir/custom_validation_code/${3}
     rm -rf $course_dir/build/${3}
     rm -rf $course_dir/bin/${3}
@@ -39,12 +39,12 @@ function fix_permissions {
     chmod  -f  u=rwx,g=rwx,o=x   $hw_bin_path
     chmod  -f  u=rwx,g=rwx,o=x   $hw_bin_path/*out
 
-    # copy the provided code, solution, test input, test output, and custom validation code files to the appropriate directories
+    # copy the provided code, instructor_solution, test input, test output, and custom validation code files to the appropriate directories
     if [ -d $hw_build_path/provided_code/ ]; then
 	rsync -ruz --delete $hw_build_path/provided_code/    $course_dir/provided_code/$assignment/
     fi
-    if [ -d $hw_build_path/solution/ ]; then
-	rsync -ruz --delete $hw_build_path/solution/    $course_dir/solution/$assignment/
+    if [ -d $hw_build_path/instructor_solution/ ]; then
+	rsync -ruz --delete $hw_build_path/instructor_solution/    $course_dir/instructor_solution/$assignment/
     fi
     if [ -d $hw_build_path/test_input/ ]; then
 	rsync -ruz --delete $hw_build_path/test_input/   $course_dir/test_input/$assignment/
@@ -63,9 +63,9 @@ function fix_permissions {
     find $course_dir/provided_code/           -type d -exec chmod -f ug+rwx,g+s,o= {} \;
     find $course_dir/provided_code/           -type f -exec chmod -f ug+rw,o= {} \;
     find $course_dir/provided_code/                   -exec chgrp -f ${course_group} {} \;
-    find $course_dir/solution/           -type d -exec chmod -f ug+rwx,g+s,o= {} \;
-    find $course_dir/solution/           -type f -exec chmod -f ug+rw,o= {} \;
-    find $course_dir/solution/                   -exec chgrp -f ${course_group} {} \;
+    find $course_dir/instructor_solution/           -type d -exec chmod -f ug+rwx,g+s,o= {} \;
+    find $course_dir/instructor_solution/           -type f -exec chmod -f ug+rw,o= {} \;
+    find $course_dir/instructor_solution/                   -exec chgrp -f ${course_group} {} \;
     find $course_dir/test_input/              -type d -exec chmod -f ug+rwx,g+s,o= {} \;
     find $course_dir/test_input/              -type f -exec chmod -f ug+rw,o= {} \;
     find $course_dir/test_input/                      -exec chgrp -f ${course_group} {} \;
@@ -96,7 +96,7 @@ function build_homework {
     # location of the homework source files, including:
     # $hw_source/config.h
     # $hw_source/provided_code/<instructor code files>
-    # $hw_source/solution/<instructor code files>
+    # $hw_source/instructor_solution/<instructor code files>
     # $hw_source/test_input/<input files>
     # $hw_source/test_output/<output files>
     # $hw_source/custom_validation_code/<instructor code files>
