@@ -30,10 +30,6 @@ def initialize(test):
     subprocess.call(["cp",
                      os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
                      os.path.join(test.testcase_path, "assignment_config")])
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "simple_out.txt"),
-                     os.path.join(test.testcase_path, "data")])
-
 
 ############################################################################
 
@@ -44,6 +40,11 @@ def cleanup(test):
                     glob.glob(os.path.join(test.testcase_path, "data", "test*")))
     subprocess.call(["rm"] + ["-f"] +
                     glob.glob(os.path.join(test.testcase_path, "data", "results*")))
+    
+    os.mkdir(os.path.join(test.testcase_path ,"data" ,"test_output"))
+    subprocess.call(["cp",
+                     os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "simple_out.txt"),
+                     os.path.join(test.testcase_path, "data", "test_output")])
 
 
 @testcase
@@ -56,7 +57,7 @@ def solution(test):
     test.run_validator()
     test.diff("grade.txt","solution_grade.txt","-b")
     test.json_diff("results.json","solution_results.json")
-    test.diff("test02/STDOUT.txt","data/simple_out.txt")
+    test.diff("test02/STDOUT.txt","data/test_output/simple_out.txt")
     test.empty_file("test02/STDERR.txt")
     test.empty_file("test02/execute_logfile.txt")
 
