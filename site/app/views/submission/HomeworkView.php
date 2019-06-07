@@ -389,6 +389,7 @@ class HomeworkView extends AbstractView {
             'old_files' => $old_files,
             'inputs' => $input_data,
             'notebook' => $notebook_data,
+            'testcase_messages' => $testcase_messages,
             'image_data' => $image_data,
             'component_names' => $component_names,
             'upload_message' => $this->core->getConfig()->getUploadMessage()

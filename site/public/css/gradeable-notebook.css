@@ -52,3 +52,8 @@
 {
     margin-top: 0;
 }
+
+.notebook .notebook_feedback_msg
+{
+    color: blue;
+}

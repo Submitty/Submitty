@@ -215,9 +215,12 @@
 
                         {# Render markdown #}
                         {{ cell.markdown_data | markdown }}
+                        {{ self.render_testcase_messages(cell, testcase_messages) }}
 
                     {# Handle if cell is image #}
                     {% elseif cell.type == "image" %}
+
+                        {{ self.render_testcase_messages(cell, testcase_messages) }}
 
                         <img src="{{ attribute(image_data, cell.image) }}"
 
@@ -237,6 +240,8 @@
 
                     {# Handle if cell is short_answer #}
                     {% elseif cell.type == "short_answer" %}
+
+                        {{ self.render_testcase_messages(cell, testcase_messages) }}
 
                         {# If programming language not defined render regular text boxes #}
                         {% if cell.programming_language is not defined %}
@@ -301,6 +306,8 @@
 
                     {# Handle if cell is multiple choice #}
                     {% elseif cell.type == "multiple_choice" %}
+
+                        {{ self.render_testcase_messages(cell, testcase_messages) }}
 
                         <fieldset id="mc_field_{{ num_multiple_choice }}"
                                   class="mc"
@@ -593,6 +600,23 @@
         });
     });
 </script>
+
+{% macro render_testcase_messages(cell, testcase_messages) %}
+
+    {# If testcase_ref is set then attempt to display associated messages #}
+    {% if cell.testcase_ref is defined %}
+
+        {% if testcase_messages[cell.testcase_ref] is defined %}
+
+            {% for msg in testcase_messages[cell.testcase_ref] %}
+                <p class="notebook_feedback_msg">{{ msg }}</p>
+            {% endfor %}
+
+        {% endif %}
+
+    {% endif %}
+
+{% endmacro %}
 
 {% macro render_short_answer(short_answer, index, version) %}
 
