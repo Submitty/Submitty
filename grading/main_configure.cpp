@@ -18,6 +18,7 @@
 nlohmann::json printTestCase(TestCase test) {
   nlohmann::json j;
   j["title"] = "Test " + std::to_string(test.getID()) + " " + test.getTitle();
+  j["testcase_label"] = test.getTestcaseLabel();
   j["details"] = test.getDetails();
   j["points"] = test.getPoints();
   j["extra_credit"] = test.getExtraCredit();

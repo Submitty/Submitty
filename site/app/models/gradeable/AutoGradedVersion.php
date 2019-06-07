@@ -157,37 +157,28 @@ class AutoGradedVersion extends AbstractModel {
 
     public function getTestcaseMessages()
     {
-        // Get results.json and place it into an object
-        $submitter_id = $this->graded_gradeable->getSubmitter()->getId();
-        $gradeable = $this->graded_gradeable->getGradeable();
-        $course_path = $this->core->getConfig()->getCoursePath();
-        $results_path = FileUtils::joinPaths($course_path, 'results', $gradeable->getId(), $submitter_id, $this->version);
-        $results_json = FileUtils::readJsonFile(FileUtils::joinPaths($results_path, 'results.json')) ?? array();
+        $this->loadTestcases();
 
         $output = array();
 
         // If results were found then append message arrays to output array
         // where key is the testcase_label
-        if(!empty($results_json))
+        if(!is_null($this->graded_testcases))
         {
-            foreach ($results_json['testcases'] as $testcase)
+            foreach ($this->graded_testcases as $graded_testcase)
             {
-                if(isset($testcase['testcase_label']) AND isset($testcase['autochecks']))
+                $testcase_label = $graded_testcase->getTestcase()->getTestcaseLabel();
+
+                // If a testcase_label exists then get the auto grading messages
+                if($testcase_label != "")
                 {
-                    foreach ($testcase['autochecks'] as $autocheck)
+                    $output[$testcase_label] = array();
+
+                    $autochecks = $graded_testcase->getAutochecks();
+
+                    foreach ($autochecks as $autocheck)
                     {
-                        foreach ($autocheck['messages'] as $message)
-                        {
-                            if(isset($output[$testcase['testcase_label']]))
-                            {
-                                array_push($output[$testcase['testcase_label']], $message);
-                            }
-                            else
-                            {
-                                $output[$testcase['testcase_label']] = array();
-                                array_push($output[$testcase['testcase_label']], $message);
-                            }
-                        }
+                        array_push($output[$testcase_label], $autocheck->getMessages()[0]);
                     }
                 }
             }
