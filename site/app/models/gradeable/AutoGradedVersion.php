@@ -178,7 +178,10 @@ class AutoGradedVersion extends AbstractModel {
 
                     foreach ($autochecks as $autocheck)
                     {
-                        array_push($output[$testcase_label], $autocheck->getMessages()[0]);
+                      foreach ($autocheck->getMessages() as $msg)
+                        {
+                        array_push($output[$testcase_label], $msg); //autocheck->getMessages()[0]);
+                        }
                     }
                 }
             }
