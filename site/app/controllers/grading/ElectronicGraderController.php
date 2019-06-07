@@ -108,8 +108,8 @@ class ElectronicGraderController extends GradingController {
             default:
                 $this->showStatus();
                 break;
-            }
         }
+    }
 
 
     /**
@@ -569,7 +569,7 @@ class ElectronicGraderController extends GradingController {
         if ($show_edit_teams) {
             $all_reg_sections = $this->core->getQueries()->getRegistrationSections();
             $key = 'sections_registration_id';
-                foreach ($all_reg_sections as $i => $section) {
+            foreach ($all_reg_sections as $i => $section) {
                 $all_reg_sections[$i] = $section[$key];
             }
 
