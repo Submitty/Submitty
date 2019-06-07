@@ -1,0 +1,41 @@
+{%  include "forum/CategoriesForm.twig" with {"categories" : categories, "category_colors" : category_colors} %}
+
+<div class="content forum_content">
+
+    {%  include "forum/ForumBar.twig" with {
+        "forum_bar_buttons_right" : buttons,
+        "forum_bar_buttons_left" : [],
+        "show_threads" : False,
+        "thread_exists" : thread_exists,
+        "show_more" : False
+    } %}
+
+    <h3 style="margin-bottom:10px;"> Create Thread </h3>
+    <form style="margin-right: 15px; margin-left:15px;" id="thread_form" method="POST" action="{{ form_action }}" enctype="multipart/form-data">
+
+        {%  include "forum/ThreadPostForm.twig" with {
+            "show_title" : true,
+            "show_post" : true,
+            "post_textarea_large" : true,
+            "show_lock_date" : true,
+            "post_content_placeholder" : "Enter your post here...",
+            "show_categories" : true,
+            "post_box_id" : 1,
+            "attachment_script" : true,
+            "show_anon" : true,
+            "show_thread_status" : true,
+            "show_announcement" : true,
+            "show_editcat" : true,
+            "submit_label" : "Submit Post",
+        } %}
+
+    </form>
+</div>
+
+<script>
+    $( document ).ready(function() {
+        enableTabsInTextArea("[name=thread_post_content]");
+        $("#thread_form").submit(createThread);
+        $("form").areYouSure();
+    });
+</script>
