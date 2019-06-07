@@ -264,6 +264,13 @@ std::string TestCase::getTitle() const {
   return (*itr);
 }
 
+std::string TestCase::getTestcaseLabel() const {
+
+  // Get testcase_label
+  std::string testcase_label = _json.value("testcase_label", "");
+
+  return testcase_label;
+}
 
 std::string TestCase::getPrefix() const {
   std::stringstream ss;

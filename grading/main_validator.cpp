@@ -241,6 +241,7 @@ void WriteToResultsJSON(const TestCase &my_testcase,
                         const std::string &title,
                         bool view_testcase,
                         nlohmann::json& autocheck_js,
+                        const std::string &testcase_label,
                         const std::string &testcase_message,
                         int testcase_pts,
                         nlohmann::json &all_testcases) {
@@ -255,8 +256,7 @@ void WriteToResultsJSON(const TestCase &my_testcase,
     tc_j["autochecks"] = autocheck_js;
   }
 
-  // TODO: Modify this line to pass through "testcase_label"
-  if (testcase_ != "") tc_j["testcase_message"] = testcase_message;
+  if (testcase_label != "") tc_j["testcase_label"] = testcase_label;
 
   if (testcase_message != "") tc_j["testcase_message"] = testcase_message;
   tc_j["points_awarded"] = testcase_pts;
@@ -369,8 +369,18 @@ void ValidateATestCase(nlohmann::json config_json, int which_testcase,
         nonhidden_automated_points_possible += possible_points;
       }
     }
+
     // EXPORT TO results.json and grade.txt
-    WriteToResultsJSON(my_testcase,title,view_testcase,autocheck_js,testcase_message,testcase_pts,all_testcases);
+    WriteToResultsJSON(
+    my_testcase,
+    title,
+    view_testcase,
+    autocheck_js,
+    my_testcase.getTestcaseLabel(),
+    testcase_message,
+    testcase_pts,
+    all_testcases);
+
     WriteToGradefile(which_testcase,my_testcase,gradefile,testcase_pts);
 }
 
