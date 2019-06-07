@@ -1055,6 +1055,14 @@ function importTeamForm() {
     $('[name="upload_team"]', form).val(null);
 }
 
+
+function randomizeRotatingGroupsButton() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#randomize-button-warning");
+    form.css("display", "block");
+}
+
+
 /**
  * Toggles the page details box of the page, showing or not showing various information
  * such as number of queries run, length of time for script execution, and other details

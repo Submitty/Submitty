@@ -1,32 +1,4 @@
-<script type="text/javascript">
-    $(function() {
-        $("[name='rotating_type']").change(function() {
-            if ($(this).val() == "alphabetically") {
-                $("[name='fewest']").prop('checked', false).attr('onclick', 'return false').addClass("disabled");
 
-            }
-            else {
-                $("[name='fewest']").attr('onclick', '').removeClass('disabled');
-            }
-        });
-
-        $("[name='sort_type']").change(function() {
-            var val = $(this).val();
-            if (val == "fewest") {
-                $("[name='sections']").val({{ max_section }}).addClass('disabled').attr('readonly', 'readonly');
-                $("[name='rotating_type']").val("random").addClass('disabled').attr('disabled', 'true');
-            }
-            else if (val == "drop_null" || val == "drop_all") {
-                $("[name='sections']").addClass('disabled').attr('readonly', 'readonly');
-                $("[name='rotating_type']").addClass('disabled').attr('disabled', 'true');
-            }
-            else {
-                $("[name='sections']").removeClass('disabled').prop('readonly', false);
-                $("[name='rotating_type']").removeClass('disabled').prop('disabled', false);
-            }
-        });
-    });
-</script>
 <div class="content">
     <h1>Manage Registration Sections</h1>
     <p>

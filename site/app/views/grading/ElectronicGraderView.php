@@ -118,7 +118,7 @@ class ElectronicGraderView extends AbstractView {
             }
 
             if($gradeable->isTeamAssignment()){
-                $team_percentage = round(($team_total/$total_students) * 100, 1);
+                $team_percentage = $total_students != 0 ? round(($team_total/$total_students) * 100, 1) : 0;
             }
             if ($peer) {
                 $peer_count = count($gradeable->getPeerComponents());
@@ -180,6 +180,7 @@ class ElectronicGraderView extends AbstractView {
             "gradeable_title" => $gradeable->getTitle(),
             "team_assignment" => $gradeable->isTeamAssignment(),
             "ta_grades_released" => $gradeable->isTaGradeReleased(),
+            "rotating_sections_error" => (!$gradeable->isGradeByRegistration()) and ($total_students == 0),
             "autograding_non_extra_credit" => $gradeable->getAutogradingConfig()->getTotalNonExtraCredit(),
             "peer" => $peer,
             "team_total" => $team_total,
@@ -330,7 +331,7 @@ HTML;
      * @param bool $show_edit_teams
      * @return string
      */
-    public function detailsPage(Gradeable $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $view_all) {
+    public function detailsPage(Gradeable $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all) {
 
         $peer = false;
         if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
@@ -532,6 +533,11 @@ HTML;
             }
         }
 
+        //sorts sections numerically, NULL always at the end
+        usort($sections, function($a,$b)
+            { return ($a['title'] == 'NULL' or $b['title'] == 'NULL') ? ($a['title'] == 'NULL') : ($a['title'] > $b['title']);   });
+
+
         $empty_team_info = [];
         foreach ($empty_teams as $team) {
             /* @var Team $team */
@@ -553,6 +559,7 @@ HTML;
             "show_all_sections_button" => $show_all_sections_button,
             "show_import_teams_button" => $show_import_teams_button,
             "show_export_teams_button" => $show_export_teams_button,
+            "past_grade_start_date" => $past_grade_start_date,
             "columns" => $columns,
             "peer" => $peer
         ]);
@@ -573,6 +580,13 @@ HTML;
 
     public function importTeamForm(Gradeable $gradeable) {
         return $this->core->getOutput()->renderTwigTemplate("grading/ImportTeamForm.twig", [
+            "gradeable_id" => $gradeable->getId()
+        ]);
+    }
+
+
+    public function randomizeButtonWarning(Gradeable $gradeable) {
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/RandomizeButtonWarning.twig", [
             "gradeable_id" => $gradeable->getId()
         ]);
     }

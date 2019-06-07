@@ -37,6 +37,8 @@ class ElectronicGraderController extends GradingController {
             case 'import_teams':
                 $this->importTeams();
                 break;
+            case 'randomize_team_rotating_sections':
+                $this->randomizeTeamRotatingSections();
             case 'grade':
                 $this->showGrading();
                 break;
@@ -106,8 +108,9 @@ class ElectronicGraderController extends GradingController {
             default:
                 $this->showStatus();
                 break;
+            }
         }
-    }
+
 
     /**
      * Checks that a given diff viewer option is valid using DiffViewer::isValidSpecialCharsOption
@@ -559,13 +562,14 @@ class ElectronicGraderController extends GradingController {
         $show_edit_teams = $this->core->getAccess()->canI("grading.electronic.show_edit_teams") && $gradeable->isTeamAssignment();
         $show_import_teams_button = $show_edit_teams && (count($all_teams) > count($empty_teams));
         $show_export_teams_button = $show_edit_teams && (count($all_teams) == count($empty_teams));
+        $past_grade_start_date = $gradeable->getDates()['grade_start_date'] < $this->core->getDateTimeNow();
 
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $view_all);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all);
 
         if ($show_edit_teams) {
             $all_reg_sections = $this->core->getQueries()->getRegistrationSections();
             $key = 'sections_registration_id';
-            foreach ($all_reg_sections as $i => $section) {
+                foreach ($all_reg_sections as $i => $section) {
                 $all_reg_sections[$i] = $section[$key];
             }
 
@@ -577,6 +581,8 @@ class ElectronicGraderController extends GradingController {
             }
             $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'adminTeamForm', $gradeable, $all_reg_sections, $all_rot_sections);
             $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'importTeamForm', $gradeable);
+
+            $this->core->getOutput()->renderOutput(array('grading','ElectronicGrader'), 'randomizeButtonWarning', $gradeable);
         }
     }
 
@@ -715,6 +721,42 @@ class ElectronicGraderController extends GradingController {
         $filename = $this->core->getConfig()->getCourse() . "_" . $gradeable_id . "_teams.csv";
         $this->core->getOutput()->renderFile($csvdata, $filename);
     }
+
+    /**
+     * Randomly redistributes teams with members into Rotating Grading Sections
+     * Evenly distributes them between all sections, giving extra teams to Sections numerically if necessary
+     *      Ex: 13 teams in 3 sections will always give Section 1: 5 teams; Section 2: 4 teams;  Section 3: 4 teams
+     */
+    public function randomizeTeamRotatingSections() {
+        $gradeable_id = $_REQUEST['gradeable_id'];
+        $section_count = $this->core->getQueries()->getMaxRotatingSection();
+        $return_url = $this->core->buildUrl((
+            array('component' => 'grading', 'page' => 'electronic', 'action' => 'details', 'gradeable_id' => $gradeable_id, 'view' => 'all')));
+        $teams = $this->core->getQueries()->getTeamsWithMembersFromGradeableID($gradeable_id);
+
+        //Does nothing if there are no sections or no teams
+        if ($section_count <= 0 or empty($teams)) {
+            $this->core->redirect($return_url);
+            return;
+        }
+
+        shuffle($teams);
+
+        $cur_group = 1;
+        foreach ($teams as $team_id) {
+            $this->core->getQueries()->updateTeamRotatingSection($team_id,$cur_group);
+            $cur_group++;
+            if ($cur_group > $section_count) {
+                $cur_group = 1;
+            }
+        }
+
+        $this->core->redirect($return_url);
+        return;
+    }
+
+
+
 
     /**
      * Handle requests to create individual teams via the AdminTeamForm
