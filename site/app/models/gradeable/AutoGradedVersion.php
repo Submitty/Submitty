@@ -166,7 +166,8 @@ class AutoGradedVersion extends AbstractModel {
 
         $output = array();
 
-        // If results were found
+        // If results were found then append message arrays to output array
+        // where key is the testcase_label
         if(!empty($results_json))
         {
             foreach ($results_json['testcases'] as $testcase)
@@ -179,12 +180,12 @@ class AutoGradedVersion extends AbstractModel {
                         {
                             if(isset($output[$testcase['testcase_label']]))
                             {
-                                array_push($output[$testcase['testcase_label']], $message['message']);
+                                array_push($output[$testcase['testcase_label']], $message);
                             }
                             else
                             {
                                 $output[$testcase['testcase_label']] = array();
-                                array_push($output[$testcase['testcase_label']], $message['message']);
+                                array_push($output[$testcase['testcase_label']], $message);
                             }
                         }
                     }

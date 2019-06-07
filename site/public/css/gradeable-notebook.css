@@ -53,7 +53,23 @@
     margin-top: 0;
 }
 
-.notebook .notebook_feedback_msg
+/* Style the color of notebook feedback messages */
+.notebook .feedback_msg_failure
+{
+    color: red;
+}
+
+.notebook .feedback_msg_warning
+{
+    color: orange;
+}
+
+.notebook .feedback_msg_info
 {
     color: blue;
+}
+
+.notebook .feedback_msg_success
+{
+    color: green;
 }

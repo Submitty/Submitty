@@ -609,7 +609,7 @@
         {% if testcase_messages[cell.testcase_ref] is defined %}
 
             {% for msg in testcase_messages[cell.testcase_ref] %}
-                <p class="notebook_feedback_msg">{{ msg }}</p>
+                <p class="feedback_msg_{{ msg.type }}">{{ msg.message }}</p>
             {% endfor %}
 
         {% endif %}
