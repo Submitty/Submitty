@@ -244,6 +244,7 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
       insert_router["container_name"] = "router";
       insert_router["import_default_router"] = true;
       insert_router["container_image"] = "ubuntu:custom";
+      insert_router["server"] = false;
       this_testcase["containers"].push_back(insert_router);
     }
     assert(found_non_server == true);
