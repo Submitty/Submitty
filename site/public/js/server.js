@@ -2729,18 +2729,3 @@ function resizeNoScrollTextareas() {
         auto_grow(this);
     })
 }
-
-/**
- * Transforms a escaped characters back into their regular characters
- *
- * https://stackoverflow.com/questions/5796718/html-entity-decode
- */
-function convertHTMLEntity(text){
-    const span = document.createElement('span');
-
-    return text
-        .replace(/&[#A-Za-z0-9]+;/gi, (entity,position,text)=> {
-            span.innerHTML = entity;
-            return span.innerText;
-        });
-}
