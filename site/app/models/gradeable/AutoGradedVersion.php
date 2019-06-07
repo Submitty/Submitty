@@ -155,6 +155,46 @@ class AutoGradedVersion extends AbstractModel {
         }
     }
 
+    public function getTestcaseMessages()
+    {
+        // Get results.json and place it into an object
+        $submitter_id = $this->graded_gradeable->getSubmitter()->getId();
+        $gradeable = $this->graded_gradeable->getGradeable();
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $results_path = FileUtils::joinPaths($course_path, 'results', $gradeable->getId(), $submitter_id, $this->version);
+        $results_json = FileUtils::readJsonFile(FileUtils::joinPaths($results_path, 'results.json')) ?? array();
+
+        $output = array();
+
+        // If results were found
+        if(!empty($results_json))
+        {
+            foreach ($results_json['testcases'] as $testcase)
+            {
+                if(isset($testcase['testcase_label']) AND isset($testcase['autochecks']))
+                {
+                    foreach ($testcase['autochecks'] as $autocheck)
+                    {
+                        foreach ($autocheck['messages'] as $message)
+                        {
+                            if(isset($output[$testcase['testcase_label']]))
+                            {
+                                array_push($output[$testcase['testcase_label']], $message['message']);
+                            }
+                            else
+                            {
+                                $output[$testcase['testcase_label']] = array();
+                                array_push($output[$testcase['testcase_label']], $message['message']);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $output;
+    }
+
     /**
      * Loads AutoGradedTestcase instances for all testcases in this Gradeable from the disk
      */
