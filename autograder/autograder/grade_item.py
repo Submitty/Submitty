@@ -540,6 +540,100 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                           stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
                           stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH) 
 
+    # RUN SOLUTION RUNNER
+    with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
+        print ("====================================\nRUNNER SOLUTION STARTS", file=f)
+    tmp_work_generated_output = os.path.join(tmp_work,"generated_output")
+    os.mkdir(tmp_work_generated_output)
+
+    with open(os.path.join(tmp_logs,"solution_runner_log.txt"), 'w') as logfile:
+        for testcase_num in range(1, len(my_testcases)+1):
+            testcase_folder = os.path.join(tmp_work_generated_output, "test{:02}".format(testcase_num))
+
+            os.makedirs(testcase_folder)
+            os.chdir(testcase_folder)
+            
+            # copy any instructor provided solution code files to testcase folder
+            copy_contents_into(job_id,instructor_solution_path,testcase_folder,tmp_logs)
+            
+            # copy test input into testcase folder
+            copy_contents_into(job_id,test_input_path,testcase_folder,tmp_logs)
+            
+            # copy compile.out to the current directory
+            shutil.copy (os.path.join(bin_path,"solution_runner.out"),os.path.join(testcase_folder,"my_solution_runner.out"))
+            add_permissions(os.path.join(testcase_folder,"my_solution_runner.out"), stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)          
+            untrusted_grant_rwx_access(which_untrusted, testcase_folder)
+            add_permissions_recursive(testcase_folder,
+                        stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                        stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                        stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+
+            # if USE_DOCKER:
+            #     try:
+            #         #There can be only one container for a compilation step, so grab its container image
+            #         #TODO: set default in load_config_json.cpp
+            #         if my_testcases[testcase_num-1]['type'] == 'FileCheck':
+            #             print("performing filecheck in default ubuntu:custom container")
+            #             container_image = "ubuntu:custom"
+            #         else:
+            #             container_image = my_testcases[testcase_num-1]["containers"][0]["container_image"]
+            #             print('creating a compilation container with image {0}'.format(container_image))
+            #         untrusted_uid = str(getpwnam(which_untrusted).pw_uid)
+
+            #         compilation_container = None
+            #         compilation_container = subprocess.check_output(['docker', 'create', '-i', '-u', untrusted_uid, '--network', 'none',
+            #                                    '-v', testcase_folder + ':' + testcase_folder,
+            #                                    '-w', testcase_folder,
+            #                                    container_image,
+            #                                    #The command to be run.
+            #                                    os.path.join(testcase_folder, 'my_solution_runner.out'), 
+            #                                    queue_obj['gradeable'],
+            #                                    queue_obj['who'], 
+            #                                    str(queue_obj['version']), 
+            #                                    submission_string, 
+            #                                    '--testcase', str(testcase_num)
+            #                                    ]).decode('utf8').strip()
+            #         print("starting container")
+            #         compile_success = subprocess.call(['docker', 'start', '-i', compilation_container],
+            #                                        stdout=logfile,
+            #                                        cwd=testcase_folder)
+            #     except Exception as e:
+            #         print('An error occurred when compiling with docker.')
+            #         grade_items_logging.log_stack_trace(job_id,is_batch_job,which_untrusted,item_name,trace=traceback.format_exc())
+            #     finally:
+            #         if compilation_container != None:
+            #             subprocess.call(['docker', 'rm', '-f', compilation_container])
+            #             print("cleaned up compilation container.")
+            # else:
+            compile_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
+                                                which_untrusted,
+                                                os.path.join(testcase_folder,"my_solution_runner.out"),
+                                                queue_obj["gradeable"],
+                                                queue_obj["who"],
+                                                str(queue_obj["version"]),
+                                                submission_string,
+                                                '--testcase', str(testcase_num)],
+                                                stdout=logfile, 
+                                                cwd=testcase_folder)
+            # remove the compilation program
+            untrusted_grant_rwx_access(which_untrusted, testcase_folder)
+            os.remove(os.path.join(testcase_folder,"my_solution_runner.out"))
+
+        if compile_success == 0:
+            print (which_machine,which_untrusted,"COMPILATION OK")
+        else:
+            print (which_machine,which_untrusted,"COMPILATION FAILURE")
+            grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,message="COMPILATION FAILURE")
+        add_permissions_recursive(tmp_compilation,
+                        stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                        stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                        stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+
+
+    # return to the main tmp directory
+    os.chdir(tmp_work)
+    
+
     # --------------------------------------------------------------------
     # RUN VALIDATOR
     with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
