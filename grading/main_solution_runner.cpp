@@ -76,6 +76,7 @@ int main(int argc, char *argv[]) {
     std::vector<std::string> outputGeneratorCommandsForValidation = stringOrArrayOfStrings(my_testcase.getGrader(i), "command");
     for (int j = 0; j < outputGeneratorCommandsForValidation.size();  j++){
       int exit_no = execute(outputGeneratorCommandsForValidation[j],
+                            true,
                             actions,
                             dispatcher_actions,
                             "execute_logfile.txt",
