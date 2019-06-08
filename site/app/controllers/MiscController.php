@@ -4,6 +4,7 @@ namespace app\controllers;
 
 
 use app\libraries\FileUtils;
+use app\libraries\DateUtils;
 use app\libraries\Utils;
 use app\libraries\Core;
 
@@ -527,7 +528,8 @@ class MiscController extends AbstractController {
                 if (!Utils::startsWith(realpath($path), $root_path)) {
                     continue;
                 }
-                if ($file['release_datetime'] < $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")) {
+                if ($file['checked'] === '1' &&
+                    $file['release_datetime'] < $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")) {
                     $relative_path = substr($path, strlen($root_path) + 1);
                     $zip->addFile($path, $relative_path);
                 }
