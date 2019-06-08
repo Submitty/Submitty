@@ -26,6 +26,8 @@
             "points" : 2,
             "validation" : [
                 {
+                    "command" : [ "clang++ solution.cpp -o solution.exe" , 
+                        "solution.exe 5 > frame_5.txt"],
                     "method" : "diff",
                     "actual_file" : "STDOUT.txt",
                     "expected_file" : "frame_1.txt"
