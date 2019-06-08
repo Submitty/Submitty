@@ -27,6 +27,15 @@ class WebRouter {
     /** @var UrlMatcher  */
     protected $matcher;
 
+    /**
+     * This variable should be removed and be replaced
+     * by $this->core->getConfig()->isCourseLoaded()
+     * once the ClassicRouter is completely removed
+     *
+     * @var bool
+     */
+    protected $course_loaded = false;
+
     /** @var array */
     public $parameters;
 
@@ -42,15 +51,23 @@ class WebRouter {
         $collection = $loader->load(realpath(__DIR__ . "/../../controllers"));
 
         $this->matcher = new UrlMatcher($collection, new RequestContext());
-        try {
-            $this->parameters = $this->matcher->matchRequest($this->request);
-            $this->loadCourses();
-            $this->loginCheck();
-        }
-        catch (ResourceNotFoundException $e) {
-            // redirect to login page or home page
-            $this->loginCheck();
-        }
+
+        $this->parameters = $this->matcher->matchRequest($this->request);
+        $this->loadCourses();
+        $this->loginCheck();
+
+        /* REMOVE THE COMMENTS ONCE THE ROUTER IS READY */
+        /*
+            try {
+                $this->parameters = $this->matcher->matchRequest($this->request);
+                $this->loadCourses();
+                $this->loginCheck();
+            }
+            catch (ResourceNotFoundException $e) {
+                // redirect to login page or home page
+                $this->loginCheck();
+            }
+        */
     }
 
     public function run() {
@@ -68,11 +85,13 @@ class WebRouter {
     }
 
     private function loadCourses() {
-        if (in_array('_semester', $this->parameters) && in_array('_course', $this->parameters)) {
+        if (array_key_exists('_semester', $this->parameters) &&
+            array_key_exists('_course', $this->parameters)) {
             $semester = $this->parameters['_semester'];
             $course = $this->parameters['_course'];
             /** @noinspection PhpUnhandledExceptionInspection */
             $this->core->loadConfig($semester, $course);
+            $this->course_loaded = true;
         }
     }
 
@@ -95,7 +114,7 @@ class WebRouter {
                 $this->parameters = $this->matcher->matchRequest($this->request);
             }
         }
-        elseif ($this->core->getConfig()->isCourseLoaded()
+        elseif ($this->course_loaded
             && !$this->core->getAccess()->canI("course.view", ["semester" => $this->core->getConfig()->getSemester(), "course" => $this->core->getConfig()->getCourse()])
             && !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
             $this->request = Request::create(
@@ -107,7 +126,7 @@ class WebRouter {
 
         // TODO: log
 
-        if(!$this->core->getConfig()->isCourseLoaded()) {
+        if(!$this->course_loaded) {
             if ($this->logged_in){
                 if (isset($this->parameters['_method']) && $this->parameters['_method'] === 'logout'){
                     $this->request = Request::create(

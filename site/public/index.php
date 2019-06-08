@@ -304,7 +304,6 @@ else {
         $router->run();
     }
     catch (Exception $e) {
-//        die($e->getMessage());
         $caught = true;
     }
 }
