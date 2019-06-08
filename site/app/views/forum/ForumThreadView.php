@@ -17,22 +17,6 @@ class ForumThreadView extends AbstractView {
     	$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
     	$this->core->getOutput()->addBreadcrumb("Search");
 
-    	$return = <<<HTML
-
-    	<style>
-	    	.hoverable:hover {
-			    -webkit-filter: brightness(85%);
-			    -webkit-transition: all .5s ease;
-			    -moz-transition: all .5s ease;
-			    -o-transition: all .5s ease;
-			    -ms-transition: all .5s ease;
-			    transition: all .5s ease;
-			}
-    	</style>
-
-    	<div class="content forum_content">
-HTML;
-
 		$buttons = array(
 			array(
 			"required_rank" => 4,
@@ -52,35 +36,8 @@ HTML;
 				"title" => 'Back to threads',
 				"onclick" => array(false)
 			)
-
 		);
 
-		$return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", [
-									"forum_bar_buttons_right" => $buttons,
-									"forum_bar_buttons_left" => [],
-									"show_threads" => false,
-									"thread_exists" => true,
-									"show_more" => false
-		]);
-
-		$return .= <<<HTML
-		<div id="search_wrapper">
-
-    	<table style="" class="table table-striped table-bordered persist-area table-hover">
-
-    	<thead class="persist-thead">
-            <tr>                
-                <td width="45%">Post Content</td>
-                <td width="25%">Author</td>
-                <td width="10%">Timestamp</td>
-            </tr>	
-
-        </thead>
-
-        <tbody>
-
-
-HTML;
 		$threadArray = array();
 		$fromIdtoTitle = array();
 		foreach($threads as $thread){
@@ -91,18 +48,21 @@ HTML;
 			$threadArray[$thread["thread_id"]][] = $thread;
 		}
 		$count = 1;
+
+		$thread_list = [];
+
 		foreach($threadArray as $thread_id => $data){
-			$thread_title = htmlentities($fromIdtoTitle[$thread_id], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-			$return .= <<<HTML
-			<tr class="info persist-header hoverable" title="Go to thread" style="cursor: pointer;" onclick="window.location = '{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id))}';">            
-				<td colspan="10" style="text-align: center"><h4>{$thread_title}</h4></td>
-			</tr>
-HTML;
+			$thread_title = $fromIdtoTitle[$thread_id];
+
+            $thread_link = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id));
+
+            $thread_list[$count-1] = Array("thread_title" => $thread_title, "thread_link" => $thread_link, "posts" => Array());
+
 			foreach($data as $post) {
-				$author = htmlentities($post['author'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+				$author = $post['author'];
 				$user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($post["p_author"]);
-				$first_name = htmlentities(trim($user_info["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-				$last_name = htmlentities(trim($user_info["last_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+				$first_name = trim($user_info["first_name"]);
+				$last_name = trim($user_info["last_name"]);
 				$visible_username = $first_name . " " . substr($last_name, 0 , 1) . ".";
 
 				if($post["anonymous"]){
@@ -116,41 +76,30 @@ HTML;
                 if(!empty($pre_post)){
                     $post_content = $pre_post;
 				}
-				$post_content = htmlentities($post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+                $post_link = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)) . "#" . $post['p_id'];
+
 				$posted_on = date_format(DateUtils::parseDateTime($post['timestamp_post'], $this->core->getConfig()->getTimezone()), "n/j g:i A");
-				$return .= <<<HTML
 
-				<tr title="Go to post" style="cursor: pointer;" onclick="window.location = '{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id))}#{$post['p_id']}';" id="search-row-{$count}" class="hoverable">
-	                <td align="left"><pre class='pre_forum'><p class="post_content" style="white-space: pre-wrap; ">{$post_content}</p></pre></td>
-	                <td>{$visible_username}</td>
-	                <td>{$posted_on}</td>      
+                $thread_list[$count-1]["posts"][] = Array(
+                    "post_link" => $post_link,
+                    "count" => $count,
+                    "post_content" => $post_content,
+                    "visible_username" => $visible_username,
+                    "posted_on" => $posted_on
+                );
 
-		        </tr>
-	            
-
-HTML;
 				$count++;
 			}
 		}
-		
-            
 
-        $return .= <<<HTML
 
-        </tbody>
+        $return = $this->core->getOutput()->renderTwigTemplate("forum/searchResults.twig", [
+            "buttons" => $buttons,
+            "count_threads" => count($threads),
+            "threads" => $thread_list
+        ]);
 
-        </table>
-HTML;
-
-		if(count($threads) == 0) {
-		$return .= <<<HTML
-			<h4 style="padding-bottom:20px;text-align:center;margin-top:20px;">No threads match your search criteria.</h4>
-HTML;
-		}
-
-    	$return .= <<<HTML
-    	</div> </div> 
-HTML;
     	return $return;
     }
 	
@@ -997,97 +946,56 @@ HTML;
 		return $return;
 	}
 
-	public function createThread($category_colors) {
+    public function createThread($category_colors){
 
-		if(!$this->forumAccess()){
-			$this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
-			return;
-		}
+        if(!$this->forumAccess()){
+            $this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
+            return;
+        }
 
-		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
-		$this->core->getOutput()->addBreadcrumb("Create Thread", $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
-		$return = <<<HTML
-		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}vendor/jquery.are-you-sure/jquery.are-you-sure.js"></script>
-		<script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
-		<script> 
-			$( document ).ready(function() {
-				enableTabsInTextArea("[name=thread_post_content]");
-				$("#thread_form").submit(createThread);
-				$("form").areYouSure();
-			});
-		 </script>
-HTML;
-        if($this->core->getUser()->getGroup() <= 3){
+        $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
+        $this->core->getOutput()->addBreadcrumb("Create Thread", $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
+
+        $this->core->getOutput()->addInternalJs('drag-and-drop.js');
+        $this->core->getOutput()->addVendorJs('flatpickr/flatpickr.js');
+        $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
+
+        $this->core->getOutput()->addVendorCss('flatpickr/flatpickr.min.css');
+
+        $categories = "";
+        $category_colors;
+
+        if($this->core->getUser()->accessGrading()){
             $categories = $this->core->getQueries()->getCategories();
 
             $dummy_category = array('color' => '#000000', 'category_desc' => 'dummy', 'category_id' => "dummy");
             array_unshift($categories, $dummy_category);
-
-            $return .= $this->core->getOutput()->renderTwigTemplate("forum/CategoriesForm.twig", [
-                "categories" => $categories,
-                "category_colors" => $category_colors
-            ]);
         }
 
-		$return .= <<<HTML
-		<div class="content forum_content">
-		
-HTML;
+        $buttons = array(
+            array(
+                "required_rank" => 4,
+                "display_text" => 'Back to Threads',
+                "style" => 'position:relative;top:3px;float:right;',
+                "link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))),
+                "optional_class" => '',
+                "title" => 'Back to threads',
+                "onclick" => array(false)
+            )
+        );
 
-	$buttons = array(
-		array(
-			"required_rank" => 4,
-			"display_text" => 'Back to Threads',
-			"style" => 'position:relative;top:3px;float:right;',
-			"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))),
-			"optional_class" => '',
-			"title" => 'Back to threads',
-			"onclick" => array(false)
-		)
-	);
+        $thread_exists = $this->core->getQueries()->threadExists();
 
-	$thread_exists = $this->core->getQueries()->threadExists();
+        $return = $this->core->getOutput()->renderTwigTemplate("forum/createThread.twig", [
+            "categories" => $categories,
+            "category_colors" => $category_colors,
+            "buttons" => $buttons,
+            "thread_exists" => $thread_exists,
+            "form_action" => $this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread')),
+        ]);
 
-	$return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", [
-								"forum_bar_buttons_right" => $buttons,
-								"forum_bar_buttons_left" => [],
-								"show_threads" => false,
-								"thread_exists" => $thread_exists,
-								"show_more" => false
-	]);
-
-
-		$return .= <<<HTML
-
-			<h3 style="margin-bottom:10px;"> Create Thread </h3>
-			<form style="margin-right: 15px; margin-left:15px;" id="thread_form" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread'))}" enctype="multipart/form-data">
-HTML;
-                $this->core->getOutput()->addInternalJs("flatpickr.js");
-                $this->core->getOutput()->addInternalCss('flatpickr.min.css');
-				$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig", [
-					"show_title" => true,
-					"show_post" => true,
-					"post_textarea_large" => true,
-                    "show_lock_date" => true,
-					"post_content_placeholder" => "Enter your post here...",
-					"show_categories" => true,
-					"post_box_id" => 1,
-					"attachment_script" => true,
-					"show_anon" => true,
-					"show_thread_status" => true,
-					"show_announcement" => true,
-					"show_editcat" => true,
-					"submit_label" => "Submit Post",
-				]);
-			$return .= <<<HTML
-			</form>
-		</div>
-HTML;
-
-		return $return;
-	}
-
-
+        return $return;
+    }
 
 	public function statPage($users) {
 
@@ -1208,15 +1116,14 @@ HTML;
 					var thread_titles = $(this).data('thread_titles');
 					if(action=="expand"){
 						
-						
 						for(var i=0;i<posts.length;i++){
 							var post_string = posts[i];
 							post_string = escapeSpecialChars(post_string);
 							var thread_title = thread_titles[i]["title"];
 							thread_title = escapeSpecialChars(thread_title);
 							$(this).parent().parent().parent().append('<tr id="'+ids[i]+'"><td></td><td>'+timestamps[i]+'</td><td style = "cursor:pointer;" data-type = "thread" data-thread_id="'+thread_ids[i]+'"><pre class="pre_forum" style="white-space: pre-wrap;">'+thread_title+'</pre></td><td colspan = "2" style = "cursor:pointer;" align = "left" data-type = "post" data-thread_id="'+thread_ids[i]+'"><pre class="pre_forum" style="white-space: pre-wrap;">'+post_string+'</pre></td></tr> ');
-							
 						}
+						
 						$(this).html("Collapse");
 						$(this).data('action',"collapse");
 						$("td").click(function(){
@@ -1235,17 +1142,13 @@ HTML;
 							var item = document.getElementById(ids[i]);
 							item.remove();
 						}
-						
+						        
 						$(this).html("Expand");
 						$(this).data('action',"expand");
 					}
 					
-					
 					return false;
 				});
-
-
-				
 
 				function sortTable(sort_element_index, reverse=false){
 					var table = document.getElementById("forum_stats_table");
