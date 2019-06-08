@@ -36,13 +36,15 @@ class NavigationController extends AbstractController {
         }
     }
 
-    private function noAccess() {
+    /**
+     * @Route("/{_semester}/{_course}/no_access")
+     */
+    public function noAccess() {
         $this->core->getOutput()->renderOutput('Navigation', 'noAccessCourse');
     }
 
     /**
      * @Route("/{_semester}/{_course}")
-     * @Route("/{_semester}/{_course}/navigation")
      */
     public function navigationPage() {
         $gradeables_list = new GradeableList($this->core);

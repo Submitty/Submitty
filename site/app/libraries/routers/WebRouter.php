@@ -5,6 +5,7 @@ namespace app\libraries\routers;
 
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\Loader\AnnotationDirectoryLoader;
@@ -41,21 +42,21 @@ class WebRouter {
         $collection = $loader->load(realpath(__DIR__ . "/../../controllers"));
 
         $this->matcher = new UrlMatcher($collection, new RequestContext());
-        $this->parameters = $this->matcher->matchRequest($this->request);
-        $this->loginCheck();
+        try {
+            $this->parameters = $this->matcher->matchRequest($this->request);
+            $this->loadCourses();
+            $this->loginCheck();
+        }
+        catch (ResourceNotFoundException $e) {
+            // redirect to login page or home page
+            $this->loginCheck();
+        }
     }
 
     public function run() {
         $controllerName = $this->parameters['_controller'];
         $methodName = $this->parameters['_method'];
         $controller = new $controllerName($this->core);
-
-        if (in_array('semester', $this->parameters) && in_array('course', $this->parameters)) {
-            $semester = $this->parameters['semester'];
-            $course = $this->parameters['course'];
-            /** @noinspection PhpUnhandledExceptionInspection */
-            $this->core->loadConfig($semester, $course);
-        }
 
         foreach ($this->parameters as $key => $value) {
             if (Utils::startsWith($key, "_")) {
@@ -64,6 +65,15 @@ class WebRouter {
         }
 
         return call_user_func_array(array($controller, $methodName), $this->parameters);
+    }
+
+    private function loadCourses() {
+        if (in_array('_semester', $this->parameters) && in_array('_course', $this->parameters)) {
+            $semester = $this->parameters['_semester'];
+            $course = $this->parameters['_course'];
+            /** @noinspection PhpUnhandledExceptionInspection */
+            $this->core->loadConfig($semester, $course);
+        }
     }
 
     private function loginCheck() {
@@ -79,7 +89,7 @@ class WebRouter {
             $this->core->loadSubmittyUser();
             if (!Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
                 $this->request = Request::create(
-                    '/navigation/no_access',
+                    $this->parameters['_semester'] . '/' . $this->parameters['_course'] . '/no_access',
                     'GET'
                 );
                 $this->parameters = $this->matcher->matchRequest($this->request);
@@ -89,7 +99,7 @@ class WebRouter {
             && !$this->core->getAccess()->canI("course.view", ["semester" => $this->core->getConfig()->getSemester(), "course" => $this->core->getConfig()->getCourse()])
             && !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
             $this->request = Request::create(
-                '/navigation/no_access',
+                $this->parameters['_semester'] . '/' . $this->parameters['_course'] . '/no_access',
                 'GET'
             );
             $this->parameters = $this->matcher->matchRequest($this->request);
@@ -117,23 +127,6 @@ class WebRouter {
             else {
                 $this->request = Request::create(
                     '/authentication/login',
-                    'GET'
-                );
-                $this->parameters = $this->matcher->matchRequest($this->request);
-            }
-        }
-
-        if (empty($this->parameters['_controller']) && $this->core->getUser() !== null) {
-            if ($this->core->getConfig()->isCourseLoaded()) {
-                $this->request = Request::create(
-                    '/' . $this->core->getConfig()->getSemester() . '/' . $this->core->getConfig()->getCourse(),
-                    'GET'
-                );
-                $this->parameters = $this->matcher->matchRequest($this->request);
-            }
-            else {
-                $this->request = Request::create(
-                    '/home',
                     'GET'
                 );
                 $this->parameters = $this->matcher->matchRequest($this->request);
