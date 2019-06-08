@@ -669,6 +669,12 @@ HTML;
 
             $favorite = isset($thread['favorite']) && $thread['favorite'];
 
+            $fa_icon = "fa-question";
+            $fa_color = "#ffcc00";
+            $fa_margin_right = "5px";
+            $fa_font_size = "1.8em";
+            $tooltip = "Thread Unresolved";
+
             if (!isset($thread['status'])) {
                 $thread['status'] = 0;
             }
@@ -679,12 +685,6 @@ HTML;
                     $fa_margin_right = "0px";
                     $fa_font_size = "1.5em";
                     $tooltip = "Thread Resolved";
-                } else {
-                    $fa_icon = "fa-question";
-                    $fa_color = "#ffcc00";
-                    $fa_margin_right = "5px";
-                    $fa_font_size = "1.8em";
-                    $tooltip = "Thread Unresolved";
                 }
             }
 
