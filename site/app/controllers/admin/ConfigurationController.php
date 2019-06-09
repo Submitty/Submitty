@@ -4,6 +4,7 @@ namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
 use app\libraries\FileUtils;
+use app\controllers\forum\ForumController;
 
 class ConfigurationController extends AbstractController {
     public function run() {
@@ -110,6 +111,13 @@ class ConfigurationController extends AbstractController {
         }
         else if($name === 'upload_message') {
             $entry = nl2br($entry);
+        }
+
+        if($name === 'forum_enabled') {
+            if($entry == 1){
+                $ForumController = new ForumController($this->core);
+                $ForumController->addNewCategory(["General Questions", "Homework Help", "Quizzes", "Tests"]);
+            }
         }
 
         $config_ini = $this->core->getConfig()->getCourseJson();
