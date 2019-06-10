@@ -28,7 +28,7 @@ class PostgresqlDatabaseQueries extends DatabaseQueries{
         $this->course_db->query("
 SELECT u.*, ns.merge_threads, ns.all_new_threads,
         ns.all_new_posts, ns.all_modifications_forum,
-        ns.reply_in_post_thread, ns.merge_threads_email, ns.all_new_threads_email, 
+        ns.reply_in_post_thread, ns.merge_threads_email, ns.all_new_threads_email,
         ns.all_new_posts_email, ns.all_modifications_forum_email,
         ns.reply_in_post_thread_email, sr.grading_registration_sections
 FROM users u
@@ -113,13 +113,14 @@ ORDER BY SUBSTRING(u.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(u.reg
 
 
     public function insertSubmittyUser(User $user) {
-        $array = array($user->getId(), $user->getPassword(), $user->getLegalFirstName(), $user->getPreferredFirstName(),
+        $array = array($user->getId(), $user->getPassword(), $user->getNumericId(),
+                       $user->getLegalFirstName(), $user->getPreferredFirstName(),
                        $user->getLegalLastName(), $user->getPreferredLastName(), $user->getEmail(),
                        $this->submitty_db->convertBoolean($user->isUserUpdated()),
                        $this->submitty_db->convertBoolean($user->isInstructorUpdated()));
 
-        $this->submitty_db->query("INSERT INTO users (user_id, user_password, user_firstname, user_preferred_firstname, user_lastname, user_preferred_lastname, user_email, user_updated, instructor_updated)
-                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", $array);
+        $this->submitty_db->query("INSERT INTO users (user_id, user_password, user_numeric_id, user_firstname, user_preferred_firstname, user_lastname, user_preferred_lastname, user_email, user_updated, instructor_updated)
+                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $array);
     }
 
     public function insertCourseUser(User $user, $semester, $course) {
@@ -135,7 +136,7 @@ VALUES (?,?,?,?,?,?)", $params);
     }
 
     public function updateUser(User $user, $semester=null, $course=null) {
-        $params = array($user->getLegalFirstName(), $user->getPreferredFirstName(),
+        $params = array($user->getNumericId(), $user->getLegalFirstName(), $user->getPreferredFirstName(),
                        $user->getLegalLastName(), $user->getPreferredLastName(), $user->getEmail(),
                        $this->submitty_db->convertBoolean($user->isUserUpdated()),
                        $this->submitty_db->convertBoolean($user->isInstructorUpdated()));
@@ -149,7 +150,8 @@ VALUES (?,?,?,?,?,?)", $params);
         $this->submitty_db->query("
 UPDATE users
 SET
-  user_firstname=?, user_preferred_firstname=?, user_lastname=?, user_preferred_lastname=?,
+  user_numeric_id=?, user_firstname=?, user_preferred_firstname=?,
+  user_lastname=?, user_preferred_lastname=?,
   user_email=?, user_updated=?, instructor_updated=?{$extra}
 WHERE user_id=?", $params);
 

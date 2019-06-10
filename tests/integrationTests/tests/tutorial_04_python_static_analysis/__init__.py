@@ -37,9 +37,11 @@ def cleanup(test):
             glob.glob(os.path.join(test.testcase_path, "data", "test*")))
     subprocess.call(["rm"] + ["-f"] +
             glob.glob(os.path.join(test.testcase_path, "data", "*")))
+
+    os.mkdir(os.path.join(test.testcase_path ,"data" ,"test_output"))
     subprocess.call(["cp",
         os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "output.txt"),
-        os.path.join(test.testcase_path, "data")])
+        os.path.join(test.testcase_path, "data", "test_output")])
     
 @testcase
 def correct(test):
