@@ -71,7 +71,6 @@ class WebRouter {
     }
 
     public function run() {
-        echo var_dump($this->parameters);
         $controllerName = $this->parameters['_controller'];
         $methodName = $this->parameters['_method'];
         $controller = new $controllerName($this->core);
