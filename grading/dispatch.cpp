@@ -1109,7 +1109,7 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
 
 TestResults* dispatch::ImageDiff_doit(const TestCase &tc, const nlohmann::json& j, int autocheck_number) {
   std::string actual_file = j.value("actual_file","");
-  std::string expected_file = j.value("expected_file","");
+  std::string expected_file = "test_output/" + j.value("expected_file","");
   std::string acceptable_threshold_str = j.value("acceptable_threshold","");
 
   if(actual_file == "" || expected_file == "" || acceptable_threshold_str == ""){
