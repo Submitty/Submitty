@@ -262,12 +262,7 @@ function setupNumericTextCells() {
                 }
             });
         });
-
-        console.log(elem.attr("id"))
-        console.log(elem.data("origval"))
-        console.log(elem.data()) 
-        console.log(old_scores)  
-
+        
         submitAJAX(
             buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_numeric'}),
             {
