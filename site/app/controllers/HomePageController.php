@@ -38,6 +38,9 @@ class HomePageController extends AbstractController {
         }
     }
 
+    /**
+     * @Route("/home/change_password")
+     */
     public function changePassword(){
         $user = $this->core->getUser();
         if(!empty($_POST['new_password']) && !empty($_POST['confirm_new_password'])
@@ -52,6 +55,9 @@ class HomePageController extends AbstractController {
         $this->core->redirect($this->core->buildNewUrl(['home']));
     }
 
+    /**
+     * @Route("/home/change_username")
+     */
     public function changeUserName(){
         $user = $this->core->getUser();
         if(isset($_POST['user_firstname_change']) && isset($_POST['user_lastname_change'])) {

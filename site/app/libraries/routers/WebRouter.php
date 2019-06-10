@@ -52,12 +52,12 @@ class WebRouter {
 
         $this->matcher = new UrlMatcher($collection, new RequestContext());
 
-        $this->parameters = $this->matcher->matchRequest($this->request);
-        $this->loadCourses();
-        $this->loginCheck();
+//        $this->parameters = $this->matcher->matchRequest($this->request);
+//        $this->loadCourses();
+//        $this->loginCheck();
 
         /* UNCOMMENT ONCE THE ROUTER IS READY */
-        /*
+//        /*
             try {
                 $this->parameters = $this->matcher->matchRequest($this->request);
                 $this->loadCourses();
@@ -67,10 +67,11 @@ class WebRouter {
                 // redirect to login page or home page
                 $this->loginCheck();
             }
-        */
+//        */
     }
 
     public function run() {
+        echo var_dump($this->parameters);
         $controllerName = $this->parameters['_controller'];
         $methodName = $this->parameters['_method'];
         $controller = new $controllerName($this->core);
@@ -135,7 +136,7 @@ class WebRouter {
                     );
                     $this->parameters = $this->matcher->matchRequest($this->request);
                 }
-                else {
+                elseif (!Utils::endsWith($this->parameters['_controller'], 'HomePageController')) {
                     $this->request = Request::create(
                         '/home',
                         'GET'
