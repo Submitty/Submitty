@@ -52,12 +52,12 @@ class WebRouter {
 
         $this->matcher = new UrlMatcher($collection, new RequestContext());
 
-//        $this->parameters = $this->matcher->matchRequest($this->request);
-//        $this->loadCourses();
-//        $this->loginCheck();
+        $this->parameters = $this->matcher->matchRequest($this->request);
+        $this->loadCourses();
+        $this->loginCheck();
 
         /* UNCOMMENT ONCE THE ROUTER IS READY */
-//        /*
+        /*
             try {
                 $this->parameters = $this->matcher->matchRequest($this->request);
                 $this->loadCourses();
@@ -67,7 +67,7 @@ class WebRouter {
                 // redirect to login page or home page
                 $this->loginCheck();
             }
-//        */
+        */
     }
 
     public function run() {
