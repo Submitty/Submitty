@@ -38,7 +38,7 @@ class WebRouterTester extends BaseUnitTest {
         $this->assertEquals("loginForm", $router->parameters['_method']);
     }
 
-    /* REMOVE THE COMMENTS ONCE THE ROUTER IS READY */
+    /* UNCOMMENT ONCE THE ROUTER IS READY */
     /*
         public function testRedirectToLoginFromEverywhere() {
             $core = $this->createMockCore();

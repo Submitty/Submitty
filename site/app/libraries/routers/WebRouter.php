@@ -56,7 +56,7 @@ class WebRouter {
         $this->loadCourses();
         $this->loginCheck();
 
-        /* REMOVE THE COMMENTS ONCE THE ROUTER IS READY */
+        /* UNCOMMENT ONCE THE ROUTER IS READY */
         /*
             try {
                 $this->parameters = $this->matcher->matchRequest($this->request);
