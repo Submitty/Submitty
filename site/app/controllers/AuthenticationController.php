@@ -101,7 +101,7 @@ class AuthenticationController extends AbstractController {
      * login form (this being saved in the $_POST['old'] array). However, on failure to login, we want to continue
      * to maintain that old request data passing it back into the login form.
      *
-     * @Route("/authentication/checkLogin")
+     * @Route("/authentication/check_login")
      */
     public function checkLogin() {
         $this->isLoggedIn();
