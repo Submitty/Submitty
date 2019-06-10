@@ -285,7 +285,7 @@ class GlobalController extends AbstractController {
             ]);
 
             $sidebar_buttons[] = new Button($this->core, [
-                "href" => $this->core->buildUrl(array('component' => 'authentication', 'page' => 'logout')),
+                "href" => $this->core->buildNewUrl(['authentication', 'logout']),
                 "title" => "Logout ".$this->core->getUser()->getDisplayedFirstName(),
                 "id" => "logout",
                 "class" => "nav-row",

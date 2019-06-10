@@ -96,7 +96,7 @@ class WebRouter {
     }
 
     private function loginCheck() {
-        if (!$this->logged_in) {
+        if (!$this->logged_in && !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
             $this->request = Request::create(
                 '/authentication/login',
                 'GET',
@@ -143,7 +143,7 @@ class WebRouter {
                     $this->parameters = $this->matcher->matchRequest($this->request);
                 }
             }
-            else {
+            elseif (!Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
                 $this->request = Request::create(
                     '/authentication/login',
                     'GET'

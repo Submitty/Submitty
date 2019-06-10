@@ -312,9 +312,13 @@ class SubmissionController extends AbstractController {
             return array('error' => true, 'message' => 'Must be on a team to access submission.');
         }
         else {
-            $loc = array('component' => 'student',
-                         'gradeable_id' => $gradeable->getId());
-            $this->core->getOutput()->addBreadcrumb($gradeable->getTitle(), $this->core->buildUrl($loc));
+            $url = $this->core->buildNewUrl([
+                $this->core->getConfig()->getSemester(),
+                $this->core->getConfig()->getCourse(),
+                'student',
+                $gradeable->getId()
+            ]);
+            $this->core->getOutput()->addBreadcrumb($gradeable->getTitle(), $url);
             if (!$gradeable->hasAutogradingConfig()) {
                 $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
                                                        'unbuiltGradeable', $gradeable);
@@ -1561,7 +1565,12 @@ class SubmissionController extends AbstractController {
 
         $who = $_REQUEST['who'] ?? $this->core->getUser()->getId();
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $who, $who);
-        $url = $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId()));
+        $url = $this->core->buildNewUrl([
+            $this->core->getConfig()->getSemester(),
+            $this->core->getConfig()->getCourse(),
+            'student',
+            $gradeable->getId()
+        ]);
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
             $msg = "Invalid CSRF token. Refresh the page and try again.";
             $this->core->addErrorMessage($msg);

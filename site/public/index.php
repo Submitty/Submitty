@@ -133,7 +133,7 @@ if($core->getConfig()->getInstitutionName() !== ""){
 }
 $core->getOutput()->addBreadcrumb("Submitty", $core->getConfig()->getHomepageUrl());
 if($core->getConfig()->isCourseLoaded()){
-    $core->getOutput()->addBreadcrumb($core->getDisplayedCourseName(), $core->buildUrl(), $core->getConfig()->getCourseHomeUrl());
+    $core->getOutput()->addBreadcrumb($core->getDisplayedCourseName(), $core->buildNewUrl([$semester, $course]), $core->getConfig()->getCourseHomeUrl());
 }
 
 date_default_timezone_set($core->getConfig()->getTimezone()->getName());

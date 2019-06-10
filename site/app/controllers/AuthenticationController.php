@@ -50,7 +50,7 @@ class AuthenticationController extends AbstractController {
         }
     }
 
-    public function isLoggedIn() {
+    private function isLoggedIn() {
         if ($this->logged_in) {
             $redirect = array();
             if(isset($_REQUEST['old'])) {
@@ -100,6 +100,8 @@ class AuthenticationController extends AbstractController {
      * login, we want to redirect the user $_REQUEST the page they were attempting to goto before being sent to the
      * login form (this being saved in the $_POST['old'] array). However, on failure to login, we want to continue
      * to maintain that old request data passing it back into the login form.
+     *
+     * @Route("/authentication/checkLogin")
      */
     public function checkLogin() {
         $this->isLoggedIn();

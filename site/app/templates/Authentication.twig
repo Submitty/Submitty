@@ -5,9 +5,7 @@
         <!--
         <em>Note: Registered students have not yet been uploaded to the Submitty course databases.  Please check back later.</em>
         -->
-        <form action="{{ site_url }}" method="post" id="login">
-            <input type="hidden" name="component" value="authentication" />
-            <input type="hidden" name="page" value="checkLogin" />
+        <form action="{{ login_url }}" method="post" id="login">
             {% for key, value in old %}
                 <input type='hidden' name='old_{{ key }}' value='{{ value }}' />
             {% endfor %}
