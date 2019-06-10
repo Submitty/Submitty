@@ -233,12 +233,7 @@ function setupCheckboxCells() {
 }
 
 function setupNumericTextCells() {
-    // save old value so we can verify data is not stale
-    $("input[class=option-small-box]").focus(function() {
-        $(this).data('o_val', $(this).val());
-    });
-
-    $("input[class=option-small-box]").change(function() {
+    $("input.option-small-box").change(function() {
         elem = $(this);
         if(this.value == 0){
             elem.css("color", "#bbbbbb");
@@ -246,44 +241,55 @@ function setupNumericTextCells() {
         else{
             elem.css("color", "");
         }
+        
+        var row_num = elem.attr("id").split("-")[1];
+        var row_el = $("tr#row-" + row_num);
+        
         var scores = {};
         var old_scores = {};
         var total = 0;
 
-        old_scores[elem.data("id")] = elem.data("o_val");
+        row_el.children("td.option-small-input, td.option-small-output").each(function() {
+            $(this).children(".option-small-box").each(function(){
+                if($(this).data('num') === true){
+                    total += parseFloat(this.value);
+                    // ensure value is string (might not be on initial load from twig)
+                    old_scores[$(this).data("id")] = $(this).data("origval") + "";
+                    scores[$(this).data("id")] = this.value;
+                }
+                else if($(this).data('total') === true){
+                    this.value = total;
+                }
+            });
+        });
         
-        if(elem.data('num') === true){
-            total += parseFloat(this.value);
-        }
-        if(elem.data('total') === true){
-            this.value = total;
-        }
-        else{
-            scores[elem.data("id")] = this.value;
-        }
-
         submitAJAX(
             buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_numeric'}),
             {
                 'csrf_token': csrfToken,
-                'user_id': elem.parent().parent().data("user"),
-                'g_id': elem.parent().parent().data('gradeable'),
+                'user_id': row_el.data("user"),
+                'g_id': row_el.data('gradeable'),
                 'old_scores': old_scores,
                 'scores': scores
             },
             function() {
                 elem.css("background-color", "#ffffff");                                     // change the color
                 elem.attr("value", this.value);                                              // Stores the new input value
-                elem.parent().parent().children("td.option-small-output").each(function() {  
-                    elem.children(".option-small-box").each(function() {
-                        elem.attr("value", this.value);                                      // Finds the element that stores the total and updates it to reflect increase
+                row_el.children("td.option-small-output").each(function() {  
+                    $(this).children(".option-small-box").each(function() {
+                        $(this).attr("value", this.value);                                      // Finds the element that stores the total and updates it to reflect increase
                     });
                 });
             },
             function() {
                 elem.css("background-color", "#ff7777");
             }
-        );
+        );  
+        
+        // save old value so we can verify data is not stale
+        elem.data('origval', elem.attr("value"));
+        elem.attr('data-origval', elem.attr("value"));  
+        console.log(elem.data("origval"))           
     });
 
     $("input[class=csvButtonUpload]").change(function() {

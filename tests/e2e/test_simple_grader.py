@@ -4,6 +4,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+import time
 
 class TestSimpleGrader(BaseTestCase):
     
@@ -96,6 +97,7 @@ class TestSimpleGrader(BaseTestCase):
     # tests that the different people can grade the same cell (this has broken multiple times in the past)
     def test_multiple_graders(self):
         def template_func():
+            self.driver.refresh()
             # grade the first cell (as good as any other)
             grade_elem = self.driver.find_element_by_id("cell-0-0")
             # attribute where data is stored is different for lab/numeric
@@ -117,6 +119,7 @@ class TestSimpleGrader(BaseTestCase):
             WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//*[@id='cell-0-0' and @{}='{}']".format(attribute, next_score))))
             # if numeric, reset value so that test will continue to work as expected
             if next_score == "3.4":
+                self.driver.refresh()
                 grade_elem = self.driver.find_element_by_id("cell-0-0")
                 grade_elem.clear()
                 grade_elem.send_keys("3.3")
