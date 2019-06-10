@@ -163,6 +163,9 @@ class AuthenticationController extends AbstractController {
         }
     }
 
+    /**
+     * @Route("/authentication/vcs_login")
+     */
     public function vcsLogin() {
         if (empty($_POST['user_id']) || empty($_POST['password']) || empty($_POST['gradeable_id'])
             || empty($_POST['id']) || !$this->core->getConfig()->isCourseLoaded()) {
