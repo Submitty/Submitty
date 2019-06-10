@@ -133,6 +133,7 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'submit_url' => $submit_url,
             'gradeable' => $gradeable,
+            'newOptionBool' => true,
             'action' => $gradeable !== null ? 'template' : 'new',
             'template_list' => $template_list,
             'syllabus_buckets' => self::syllabus_buckets,
@@ -271,6 +272,7 @@ class AdminGradeableController extends AbstractController {
 
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'gradeable' => $gradeable,
+            'newOptionBool' => true,
             'action' => 'edit',
             'nav_tab' => $nav_tab,
             'semester' => $semester,

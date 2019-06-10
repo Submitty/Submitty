@@ -148,7 +148,7 @@ What is the lowest privileged user group that can grade this?
     }
 
     function onSectionTypeChange() {
-        if($('#rotating_section').is(':checked')) {
+        if($('#rotating_section').prop(':checked')) {
             // $('#rotating_data').show();
             disableElementChildren('#rotating_data', false);
         }
