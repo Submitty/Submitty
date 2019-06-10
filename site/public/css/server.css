@@ -12,7 +12,7 @@ body {
     position: relative;
 }
 :root {
-    --viewed_content: #e8f1f8;
+    --viewed_content: #e8f0f7;
 }
 #site-body {
     /* OLD SEAFOAM GREEN COLOR */
@@ -740,12 +740,11 @@ table tr.table-header {
 
 /* TODO: MAKE THIS CASCADE */
 .deleted {
-    background-color: #A9A9A9;
-    color: #4a4a4a;
+    background-color: #dcdcdc;
 }
 
 .deleted.active {
-    background-color: #505050;
+    background-color: #dcdcdc;
 }
 
 .new_post {
