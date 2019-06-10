@@ -30,6 +30,8 @@
     {# Admin submission type selector #}
     {% if core.getUser().accessFullGrading() %}
         <form id="submissionForm" method="post" style="width: 100%; ">
+	    <fieldset>
+            <legend> Select either normal, upload for a student or bulk upload </legend>	
             <div style="clear:both;">
                 <input type='radio' id="radio_normal" name="submission_type" checked="true">
                 <label for="radio_normal">Normal Submission</label>
@@ -75,6 +77,7 @@
                 </div>
                 <br />
             </div>
+            </fieldset>
         </form>
 
         <script type="text/javascript">
