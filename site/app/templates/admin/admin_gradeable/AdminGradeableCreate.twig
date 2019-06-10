@@ -131,16 +131,15 @@
                 <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val auto_save date-related"
                         {{ not (action != 'new' and gradeable.getTaGrading()) ? 'checked' : '' }} /> <label for="no_ta_grade">No</label>
             </div>
-
-
+            
             {% if regrade_enabled %}
                 <div id="regrade_request_enable_container">
                     Will grade inquiries be enabled for this assignment?
                     <br />
                     <input type="radio" id="yes_regrade_allowed" name="regrade_allowed" value="true" class="bool_val auto_save date-related"
-                            {{ action != 'new' and gradeable.isRegradeAllowed() ? 'checked' : '' }} /> Yes
+                            {{ action != 'new' and gradeable.isRegradeAllowed() ? 'checked' : '' }} /> <label for="yes_regrade_allowed">Yes</label>
                     <input type="radio" id="no_regrade_allowed" name="regrade_allowed" value="false" class="bool_val auto_save date-related"
-                            {{ not (action != 'new' and gradeable.isRegradeAllowed()) ? 'checked' : '' }} /> No
+                            {{ not (action != 'new' and gradeable.isRegradeAllowed()) ? 'checked' : '' }} /> <label for= "no_regrade_alowed">No</label>
                 </div>
             {% endif %}
 

@@ -209,6 +209,7 @@ create_and_set  u=rwx,g=rwxs,o=  $instructor  $ta_www_group   $course_dir/config
 #               drwxr-s---       instructor   ta_www_group    custom_validation_code/
 create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/bin
 create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/provided_code
+create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/instructor_solution
 create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/test_input
 create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/test_output
 create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/custom_validation_code
