@@ -2588,6 +2588,18 @@ AND gc_id IN (
                     array_merge($params, $not_send_users));
     }
 
+    //TODO: refactor this to use push notification function..
+    public function pushSingleNotification($notification) {
+        $params = array();
+        $params[] = $notification->getComponent();
+        $params[] = $notification->getNotifyMetadata();
+        $params[] = $notification->getNotifyContent();
+        $params[] = $notification->getNotifySource();
+        $params[] = $notification->getNotifyTarget();
+        $this->course_db->query("INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id)
+                VALUES (?, ?, ?, current_timestamp, ?, ?)", $params);
+     }
+
     /**
      * Returns notifications for a user
      *
