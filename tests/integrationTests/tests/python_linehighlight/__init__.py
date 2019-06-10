@@ -24,6 +24,7 @@ def initialize(test):
         if os.path.isdir(data_path):
             shutil.rmtree(data_path)
         os.mkdir(data_path)
+        os.mkdir(os.path.join(data_path, "test_output"))
     except OSError:
         pass
     try:
@@ -39,7 +40,7 @@ def initialize(test):
         os.path.join(test.testcase_path, "data")])
     subprocess.call(["cp",
         os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "output_instructor.txt"),
-        os.path.join(test.testcase_path, "data")])
+        os.path.join(test.testcase_path, "data", "test_output")])
 
     subprocess.call(["cp"] +
             glob.glob(os.path.join(SAMPLE_SUBMISSIONS, "*.py")) +
@@ -52,7 +53,7 @@ def initialize(test):
 @testcase
 def run_test(test):
     test.run_run()
-    test.diff("test01/output_correct.txt","data/output_instructor.txt")
+    test.diff("test01/output_correct.txt","data/test_output/output_instructor.txt")
     test.diff("test02/output_duplicates.txt","duplicate_lines.txt")
     test.diff("test03/output_duplicates.txt","duplicate_lines.txt")
     test.diff("test04/output_extra.txt","extra_lines.txt")

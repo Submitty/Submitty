@@ -652,7 +652,16 @@ function handleBulk(gradeable_id, num_pages, use_qr_codes = false, qr_prefix = "
  */
 function gatherInputAnswersByType(type){
     var input_answers = {};
-    var inputs = $("[id^="+type+"_]");
+
+    // If type is codebox only grab 'div' but not buttons with similar ids
+    if(type == "codebox")
+    {
+        var inputs = $("div[id^="+type+"_]");
+    }
+    else
+    {
+        var inputs = $("[id^="+type+"_]");
+    }
 
     if(type != "codebox"){
         inputs = inputs.serializeArray();

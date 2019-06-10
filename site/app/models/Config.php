@@ -357,8 +357,6 @@ class Config extends AbstractModel {
             }
         }
 
-        $this->upload_message = Utils::prepareHtmlString($this->upload_message);
-
         foreach (array('default_hw_late_days', 'default_student_late_days') as $key) {
             $this->$key = intval($this->$key);
         }

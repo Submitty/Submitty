@@ -30,10 +30,7 @@ def initialize(test):
     subprocess.call(["cp",
         os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
         os.path.join(test.testcase_path, "assignment_config")])
-    subprocess.call(["cp",
-        os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "hw01part1_sol.txt"),
-        os.path.join(test.testcase_path, "data")])
-
+    
 
 ############################################################################
 
@@ -43,6 +40,11 @@ def cleanup(test):
         os.path.join(test.testcase_path, "data/", "test01/execute_logfile.txt")])
     subprocess.call(["rm"] + ["-rf"] +
             glob.glob(os.path.join(test.testcase_path, "data", "test*")))
+    
+    os.mkdir(os.path.join(test.testcase_path, "data", "test_output"))
+    subprocess.call(["cp",
+        os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "hw01part1_sol.txt"),
+        os.path.join(test.testcase_path, "data", "test_output")])
 
 @testcase
 def correct(test):
@@ -54,7 +56,7 @@ def correct(test):
         os.path.join(test.testcase_path, "data")])
     test.run_run()
     test.run_validator()
-    test.diff("test01/STDOUT.txt","data/hw01part1_sol.txt")
+    test.diff("test01/STDOUT.txt","data/test_output/hw01part1_sol.txt")
     test.empty_file("test01/STDERR.txt")
     test.empty_json_diff("test01/0_diff.json")
     test.diff("grade.txt","grade.txt_correct","-b")
