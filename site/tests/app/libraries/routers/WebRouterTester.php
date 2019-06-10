@@ -38,28 +38,31 @@ class WebRouterTester extends BaseUnitTest {
         $this->assertEquals("loginForm", $router->parameters['_method']);
     }
 
-    /* UNCOMMENT ONCE THE ROUTER IS READY */
-    /*
-        public function testRedirectToLoginFromEverywhere() {
-            $core = $this->createMockCore();
+    public function testRedirectToLoginFromEverywhere() {
+        $everywhere = ["/everywhere", "/s19", "/sample", "/s19/../../sample", "/../../s19/sample"];
+        $core = $this->createMockCore();
+        foreach ($everywhere as $uri) {
             $request = Request::create(
-                "/everywhere"
+                $uri
             );
             $router = new WebRouter($request, $core, false);
             $this->assertEquals("app\controllers\AuthenticationController", $router->parameters['_controller']);
             $this->assertEquals("loginForm", $router->parameters['_method']);
         }
+    }
 
-        public function testRedirectToHomeFromEverywhere() {
-            $core = $this->createMockCore();
+    public function testRedirectToHomeFromEverywhere() {
+        $everywhere = ["/everywhere", "/s19", "/sample", "/s19/../../sample", "/../../s19/sample"];
+        $core = $this->createMockCore();
+        foreach ($everywhere as $uri) {
             $request = Request::create(
-                "/everywhere"
+                $uri
             );
             $router = new WebRouter($request, $core, true);
             $this->assertEquals("app\controllers\HomePageController", $router->parameters['_controller']);
             $this->assertEquals("showHomepage", $router->parameters['_method']);
         }
-    */
+    }
 
     public function testNoUser() {
         $core = $this->createMockCore(['semester' => 's19', 'course' => 'sample'], ['no_user' => true]);

@@ -292,38 +292,17 @@ if (empty($_REQUEST['component']) && $core->getUser() !== null) {
 /********************************************
 * END LOGIN CODE
 *********************************************/
-$caught = false;
+$supported_by_new_router = in_array($_REQUEST['component'], ['authentication', 'home']) ||
+    ($_REQUEST['component'] == 'navigation' && !in_array($_REQUEST['page'], ['notifications', 'notification_settings']));
 
-if ($is_api) {
-    $router = new app\libraries\routers\ApiRouter($request, $core);
-    $router->run();
-}
-else {
-    try {
-        $router = new app\libraries\routers\WebRouter($request, $core, $logged_in);
-        $router->run();
-    }
-    catch (Exception $e) {
-        $caught = true;
-    }
-}
-
-if ($caught) {
+if (!$supported_by_new_router) {
     switch($_REQUEST['component']) {
         case 'admin':
             $control = new app\controllers\AdminController($core);
             $control->run();
             break;
-        case 'authentication':
-            $control = new app\controllers\AuthenticationController($core, $logged_in);
-            $control->run();
-            break;
         case 'grading':
             $control = new app\controllers\GradingController($core);
-            $control->run();
-            break;
-        case 'home':
-            $control = new app\controllers\HomePageController($core);
             $control->run();
             break;
         case 'misc':
@@ -359,6 +338,10 @@ if ($caught) {
             $control->run();
             break;
     }
+}
+else {
+    $router = new app\libraries\routers\WebRouter($request, $core, $logged_in);
+    $router->run();
 }
 
 $core->getOutput()->displayOutput();
