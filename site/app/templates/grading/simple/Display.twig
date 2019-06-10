@@ -196,7 +196,7 @@
 
 {# Render one student's row in the table #}
 {% macro render_row(self, action, gradeable, section, grade, index, components_numeric) %}
-    <tr data-gradeable="{{ gradeable.getId() }}" data-user="{{  grade.getSubmitter().getId() }}" data-row="{{ index }}"
+    <tr id="row-{{ index }}" data-gradeable="{{ gradeable.getId() }}" data-user="{{  grade.getSubmitter().getId() }}" data-row="{{ index }}"
         {% if student.accessGrading() %}
             style='background: #7bd0f7;'
         {% endif %}
