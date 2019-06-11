@@ -79,17 +79,17 @@ class NotificationController extends AbstractController {
     public function changeSettings() {
         //Change settings for the current user...
         $new_settings = $_POST;
-        $result = ['error' => 'Notification settings could not be saved. Please try again.'];
         if($this->validateNotificationSettings(array_keys($new_settings))) {
             $values_not_sent = array_diff(self::NOTIFICATION_SELECTIONS, array_keys($new_settings));
             foreach(array_values($values_not_sent) as $value) {
                 $new_settings[$value] = 'false';
             }
             $this->core->getQueries()->updateNotificationSettings($new_settings);
-            $result = ['success' => 'Notification settings have been saved.'];
+            return $this->core->getOutput()->renderJsonSuccess('Notification settings have been saved.');
         }
-        $this->core->getOutput()->renderJson($result);
-        return $this->core->getOutput()->getOutput();
+        else {
+            return $this->core->getOutput()->renderJsonFail('Notification settings could not be saved. Please try again.');
+        }
     }
 
     private function validateNotificationSettings($columns) {
