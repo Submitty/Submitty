@@ -43,8 +43,8 @@
                     </td>
                     <td>
                         <a href="javascript:openFile('{{ file.url_full }}');" aria-label="View full PDF in a new window">
-			    <i class="fas fa-window-restore" aria-hidden="true"></i>
-			</a>
+                            <i class="fas fa-window-restore" aria-hidden="true"></i>
+			            </a>
                     </td>
                     <td id="input_area">
                         <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}"/>
@@ -58,7 +58,7 @@
 
                                 {# we should only submit on enter for normal bulk uploads or on the last team upload box #}
                                 {% if not team_assignment %} 
-                                    onkeydown="uploadOnEnter( {{ loop.index }} );"
+                                    onkeydown="uploadOnEnter( {{ loop.index }}, event );"
                                 {% else %}
                                     onkeydown="focusNextOnEnter({{ loop.index }}, 0)"
                                 {% endif %}
@@ -70,7 +70,7 @@
                                     <input type="text" id="bulk_user_id_{{ outer_loop.index }}[{{ i }}]" value ="" 
                                         {# if this is the last input box submit on enter, otherwise move to next box#}
                                         {% if i == (max_team_size - 1) %}
-                                            onkeydown="uploadOnEnter({{ outer_loop.index }});" 
+                                            onkeydown="uploadOnEnter({{ outer_loop.index }}, event);" 
                                         {% else %}
                                             onkeydown="focusNextOnEnter({{ outer_loop.index}}, {{ i }} )" 
                                         {% endif %}
@@ -161,15 +161,15 @@
     }
 
     //if the user presses 'enter' try and make a submission as if hitting the submit button
-    function uploadOnEnter(index){
-        var key = window.event.keyCode;
+    function uploadOnEnter(index, e = null){
+        key = window.event ? window.event.keyCode : e.keyCode;
         if(key === 13)
             uploadSplit(index);
     }
 
     //on enter move focus on the next submission box in a given row
-    function focusNextOnEnter(table_row, input_index ){
-        var key = window.event.keyCode;
+    function focusNextOnEnter(table_row, input_index, e = null ){
+        var key = window.event ? window.event.keyCode : e.keyCode;
         if(key !== 13)
             return;
         var input_box  = document.getElementById("bulk_user_id_" + String(table_row) + "[" + String(input_index + 1) + "]" ); 

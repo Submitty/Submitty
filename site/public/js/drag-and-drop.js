@@ -473,15 +473,15 @@ function displayPreviousSubmissionOptions(callback){
     $("#instructor-submit-option-new").attr('tabindex', '0');
     $("#instructor-submit-option-merge-1").attr('tabindex', '0');
     $("#instructor-submit-option-merge-2").attr('tabindex', '0');
-    form.find('input:radio')[radio_idx].focus();
-    var current_btn = radio_idx;
+    submit_btn.focus();
+    var current_btn = 4;
     if(form.css('display') !== 'none'){
-        $(document).keydown(function(e){
+        document.addEventListener("keydown", e => {
             if(e.keyCode == 9){
                 //on tab update the focus, cycle through the radio buttons and then
                 //the close/submit buttons and then back to the radio buttons
                 $('input[name=instructor-submit]').css({"outline": "none"});
-                event.preventDefault();
+                e.preventDefault();
                 if(current_btn === 0){
                     $("#instructor-submit-option-merge-1").focus();
                     $("#instructor-submit-option-merge-1").css({"outline" : "2px solid #C1E0FF"});
@@ -515,6 +515,8 @@ function displayPreviousSubmissionOptions(callback){
                 }else if(current_btn === 3){
                     //close the modal if the close button is selected
                     closer_btn.click();
+                }else if(current_btn === 4){
+                    submit_btn.click();
                 }
             }
         });
