@@ -369,21 +369,6 @@ function isValidSubmission(){
     return false;
 }
 
-function checkForPreviousSubmissions(csrf_token, gradeable_id, user_id){
-    var formData = new FormData();
-    var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'verify', 'gradeable_id': gradeable_id});
-
-    return $.ajax({
-        async: false,
-        url: url,
-        data: {
-            'csrf_token' : csrf_token,
-            'user_id' : user_id
-        },
-        type: 'POST',
-    });
-}
-
 /**
  * @param csrf_token
  * @param gradeable_id
