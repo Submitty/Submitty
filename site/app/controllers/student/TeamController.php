@@ -10,7 +10,7 @@ class TeamController extends AbstractController {
     public function run() {
         switch ($_REQUEST['action']) {
             case 'create_new_team':
-                $this->createNewTeam();
+                return $this->createNewTeam();
                 break;
             case 'leave_team':
                 $this->leaveTeam();

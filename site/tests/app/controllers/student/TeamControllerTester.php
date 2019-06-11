@@ -12,8 +12,7 @@ class TeamControllerTester extends BaseUnitTest {
 	private $core_settings = array();
 
 	public function setUp() : void{
-
-        $_REQUEST['gradeable_id'] = 'test';
+		$_REQUEST['gradeable_id'] = "test";
 
 		$core_settings['semester'] = "test";
         $core_settings['course'] = "test";
@@ -27,13 +26,20 @@ class TeamControllerTester extends BaseUnitTest {
 	}
 
 	//Test making teams 
-	public function testCreateTeamOnNonTeamGradeable(){
-		$gradeable = $this->createMockGradeable();
-		$this->core->getQueries()->method('getGradeableConfig')->willReturn($gradeable);
-
+	public function testCreateTeamOnNullGradeable(){
+		$this->core->getQueries()->method('getGradeableConfig')->with('test')->willReturn(false);
+		$_REQUEST['action'] = 'create_new_team';
 		$controller = new TeamController($this->core);
-		$controller->gradeable = $gradeable;
-		$response = $controller->createNewTeam();
+		$response = $controller->run();
+		$this->assertEquals(["error" => true, "message" => "Invalid or missing gradeable id!"] , $response);
+	}
+
+	//create a normal gradeable, we should not be able to create a team 
+	public function testCreateTeamOnNonTeamGradeable(){
+		$this->core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($this->createMockGradeable());
+		$_REQUEST['action'] = 'create_new_team';
+		$controller = new TeamController($this->core);
+		$response = $controller->run();
 		$this->assertEquals(["error" => true, "message" => "Test Gradeable is not a team assignment"] , $response);
 	}
 
@@ -43,11 +49,4 @@ class TeamControllerTester extends BaseUnitTest {
         $gradeable->method('getTitle')->willReturn("Test Gradeable");
         return $gradeable;
     }
-
-	//my first test :D
-	//this should bring coverage to a 100%
-	public function testHelloWorld(){
-		$shail = true;
-		$this->assertTrue($shail);
-	}
 }
