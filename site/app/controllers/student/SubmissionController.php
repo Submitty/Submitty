@@ -1493,9 +1493,7 @@ class SubmissionController extends AbstractController {
                 }
             }
         }
-        $return = array('success' => $success, 'error' => !$success, 'message' => $message);
-        $this->core->getOutput()->renderJson($return);
-        return $return;
+        return $this->uploadResultMessage($message, $success);
     }
 
     private function uploadResultMessage($message, $success = true, $show_msg = true) {
