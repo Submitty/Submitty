@@ -58,6 +58,7 @@ def write_research_csv(obj, status, message_type):
 
   with open(RESEARCH_CSV, append_write) as outfile:
     writer = csv.writer(outfile)
+    #sender, recipient, message, port, status, message_type, timestamp
     writer.writerow([obj['sender'].replace('_Actual', ''), obj['recipient'].replace('_Actual', ''), str(obj['message']), obj['port'], status, message_type, str(datetime.datetime.now())])
 
 
