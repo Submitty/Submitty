@@ -156,17 +156,17 @@ function updateCheckpointCell(elem, setFull) {
     if (!setFull && elem.data("score") === 1.0) {
         elem.data("score", 0.5);
         elem.css("background-color", "#88d0f4");
-        elem.css("border-right", "15px solid #f9f9f9");
+        elem.css("border-right", "60px solid #f9f9f9");
     }
     else if (!setFull && elem.data("score") === 0.5) {
         elem.data("score", 0);
         elem.css("background-color", "");
-        elem.css("border-right", "15px solid #ddd");
+        elem.css("border-right", "60px solid #ddd");
     }
     else {
         elem.data("score", 1);
         elem.css("background-color", "#149bdf");
-        elem.css("border-right", "15px solid #f9f9f9");
+        elem.css("border-right", "60px solid #f9f9f9");
     }
 }
 
@@ -176,6 +176,9 @@ function setupCheckboxCells() {
         var parent = $(this).parent();
         var elems = [];
         var scores = {};
+        var old_scores = {};
+
+        old_scores[$(this).data('id')] = $(this).data('score');
         updateCheckpointCell(this);
         elems.push(this);
         scores[$(this).data('id')] = $(this).data('score');
@@ -187,6 +190,7 @@ function setupCheckboxCells() {
               'csrf_token': csrfToken,
               'user_id': parent.data("user"),
               'g_id': parent.data('gradeable'),
+              'old_scores': old_scores,
               'scores': scores
             },
             function() {
@@ -199,8 +203,8 @@ function setupCheckboxCells() {
             function() {
                 elems.forEach(function(elem) {
                     console.log(elem);
-                    $(elem).css("border-right-width", "15px");
-                    $(elem).stop(true, true).animate({"border-right-color": "#DA4F49"}, 400);
+                    $(elem).stop(true, true);
+                    $(elem).css("border-right", "60px solid #DA4F49");
                 });
             }
         );
@@ -229,63 +233,63 @@ function setupCheckboxCells() {
 }
 
 function setupNumericTextCells() {
-    $("input[class=option-small-box]").change(function() {
-        elem = this;
+    $("input.option-small-box").change(function() {
+        elem = $(this);
         if(this.value == 0){
-            $(this).css("color", "#bbbbbb");
+            elem.css("color", "#bbbbbb");
         }
         else{
-            $(this).css("color", "");
+            elem.css("color", "");
         }
+        
+        var row_num = elem.attr("id").split("-")[1];
+        var row_el = $("tr#row-" + row_num);
+        
         var scores = {};
+        var old_scores = {};
         var total = 0;
-        $(this).parent().parent().children("td.option-small-input, td.option-small-output").each(function() {
+
+        row_el.children("td.option-small-input, td.option-small-output").each(function() {
             $(this).children(".option-small-box").each(function(){
                 if($(this).data('num') === true){
                     total += parseFloat(this.value);
-                }
-                if($(this).data('total') === true){
-                    this.value = total;
-                }
-                else{
+                    // ensure value is string (might not be on initial load from twig)
+                    old_scores[$(this).data("id")] = $(this).data("origval") + "";
                     scores[$(this).data("id")] = this.value;
+                }
+                else if($(this).data('total') === true){
+                    this.value = total;
                 }
             });
         });
-
-        // find number of users (num of input elements whose id starts with "cell-" and ends with 0)
-        var num_users = 0;
-        $("input[id^=cell-][id$=0]").each(function() {
-            // increment only if great-grandparent id ends with a digit (indicates section is not NULL)
-            if($(this).parent().parent().parent().attr("id").match(/\d+$/)) {
-                num_users++;
-            }
-        });
-        // find stats popup to access later
-        var stats_popup = $("#simple-stats-popup");
-        var num_graded_elem = stats_popup.find("#num-graded");
-
+        
         submitAJAX(
             buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_numeric'}),
             {
                 'csrf_token': csrfToken,
-                'user_id': $(this).parent().parent().data("user"),
-                'g_id': $(this).parent().parent().data('gradeable'),
+                'user_id': row_el.data("user"),
+                'g_id': row_el.data('gradeable'),
+                'old_scores': old_scores,
                 'scores': scores
             },
             function() {
-                $(elem).css("background-color", "#ffffff");                                     // change the color
-                $(elem).attr("value", elem.value);                                              // Stores the new input value
-                $(elem).parent().parent().children("td.option-small-output").each(function() {  
+                elem.css("background-color", "#ffffff");                                     // change the color
+                elem.attr("value", this.value);                                              // Stores the new input value
+                row_el.children("td.option-small-output").each(function() {  
                     $(this).children(".option-small-box").each(function() {
                         $(this).attr("value", this.value);                                      // Finds the element that stores the total and updates it to reflect increase
                     });
                 });
             },
             function() {
-                $(elem).css("background-color", "#ff7777");
+                elem.css("background-color", "#ff7777");
             }
-        );
+        );  
+        
+        // save old value so we can verify data is not stale
+        elem.data('origval', elem.attr("value"));
+        elem.attr('data-origval', elem.attr("value"));  
+        console.log(elem.data("origval"))           
     });
 
     $("input[class=csvButtonUpload]").change(function() {

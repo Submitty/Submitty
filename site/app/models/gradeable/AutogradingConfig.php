@@ -7,10 +7,6 @@ use app\exceptions\NotImplementedException;
 use app\libraries\Core;
 use app\libraries\Utils;
 use app\models\AbstractModel;
-use app\models\Email;
-use app\models\grading\AbstractGradingInput;
-use app\models\GradeableTestcase;
-use app\models\gradeable\AutogradingTestcase;
 
 /**
  * Class AutogradingConfig
@@ -66,11 +62,11 @@ class AutogradingConfig extends AbstractModel {
     protected $early_submission_minimum_days_early = 0;
     /** @property @var int The minimum number of points required to receive the early submission incentive */
     protected $early_submission_minimum_points = 0;
-    /** @property @var GradeableTestcase[] The test cases for which the points must be earned to satisfy the incentive */
+    /** @property @var AutogradingTestcase[] The test cases for which the points must be earned to satisfy the incentive */
     protected $early_submission_test_cases = [];
 
 
-    /* Properties accumulated from GradeableTestcase's */
+    /* Properties accumulated from the AutogradingTestcases */
 
     /** @property @var int Total number of non-hidden non-extra-credit ('normal') points for all test cases */
     protected $total_non_hidden_non_extra_credit = 0;

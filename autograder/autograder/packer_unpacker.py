@@ -144,6 +144,7 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
     # --------------------------------------------------------
     # various paths
     provided_code_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"provided_code",obj["gradeable"])
+    instructor_solution_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"instructor_solution",obj["gradeable"])
     test_input_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"test_input",obj["gradeable"])
     test_output_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"test_output",obj["gradeable"])
     custom_validation_code_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"custom_validation_code",obj["gradeable"])
@@ -167,6 +168,7 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
     os.mkdir(tmp_submission)
 
     copytree_if_exists(provided_code_path,os.path.join(tmp_autograding,"provided_code"))
+    copytree_if_exists(instructor_solution_path,os.path.join(tmp_autograding,"instructor_solution"))
     copytree_if_exists(test_input_path,os.path.join(tmp_autograding,"test_input"))
     copytree_if_exists(test_output_path,os.path.join(tmp_autograding,"test_output"))
     copytree_if_exists(custom_validation_code_path,os.path.join(tmp_autograding,"custom_validation_code"))

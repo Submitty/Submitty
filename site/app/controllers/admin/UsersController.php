@@ -86,6 +86,7 @@ class UsersController extends AbstractController {
         $user = $this->core->getQueries()->getUserById($user_id);
         $this->core->getOutput()->renderJson(array(
             'user_id' => $user->getId(),
+            'user_numeric_id' => $user->getNumericId(),
             'user_firstname' => $user->getLegalFirstName(),
             'user_lastname' => $user->getLegalLastName(),
             'user_preferred_firstname' => $user->getPreferredFirstName(),
@@ -157,6 +158,8 @@ class UsersController extends AbstractController {
             $user = $this->core->loadModel(User::class);
             $user->setId(trim($_POST['user_id']));
         }
+
+        $user->setNumericId(trim($_POST['user_numeric_id']));
 
         $user->setLegalFirstName(trim($_POST['user_firstname']));
         if (isset($_POST['user_preferred_firstname']) && trim($_POST['user_preferred_firstname']) != "") {

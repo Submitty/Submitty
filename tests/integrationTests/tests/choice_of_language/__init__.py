@@ -32,6 +32,7 @@ def cleanup(test):
         pass
     
     os.mkdir(os.path.join(test.testcase_path, "data"))
+    os.mkdir(os.path.join(test.testcase_path, "data", "test_output"))
     os.mkdir(os.path.join(test.testcase_path, "data", "part1"))
     os.mkdir(os.path.join(test.testcase_path, "data", "part2"))
     os.mkdir(os.path.join(test.testcase_path, "data", "part3"))
@@ -39,7 +40,7 @@ def cleanup(test):
 
     subprocess.call(["cp",
                      os.path.join(SAMPLE_ASSIGNMENT_CONFIG,"test_output", "output.txt"),
-                    os.path.join(test.testcase_path, "data")])
+                    os.path.join(test.testcase_path, "data", "test_output")])
 
 
 @testcase
