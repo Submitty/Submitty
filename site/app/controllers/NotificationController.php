@@ -38,7 +38,7 @@ class NotificationController extends AbstractController {
             case 'notification_settings':
                 $this->viewNotificationSettings();
                 break;
-        	case 'alter_notifcation_settings':
+        	case 'alter_notification_settings':
         		$this->changeSettings();
         		break;
         }
