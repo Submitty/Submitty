@@ -17,22 +17,6 @@ class ForumThreadView extends AbstractView {
     	$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
     	$this->core->getOutput()->addBreadcrumb("Search");
 
-    	$return = <<<HTML
-
-    	<style>
-	    	.hoverable:hover {
-			    -webkit-filter: brightness(85%);
-			    -webkit-transition: all .5s ease;
-			    -moz-transition: all .5s ease;
-			    -o-transition: all .5s ease;
-			    -ms-transition: all .5s ease;
-			    transition: all .5s ease;
-			}
-    	</style>
-
-    	<div class="content forum_content">
-HTML;
-
 		$buttons = array(
 			array(
 			"required_rank" => 4,
@@ -52,35 +36,8 @@ HTML;
 				"title" => 'Back to threads',
 				"onclick" => array(false)
 			)
-
 		);
 
-		$return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", [
-									"forum_bar_buttons_right" => $buttons,
-									"forum_bar_buttons_left" => [],
-									"show_threads" => false,
-									"thread_exists" => true,
-									"show_more" => false
-		]);
-
-		$return .= <<<HTML
-		<div id="search_wrapper">
-
-    	<table style="" class="table table-striped table-bordered persist-area table-hover">
-
-    	<thead class="persist-thead">
-            <tr>                
-                <td width="45%">Post Content</td>
-                <td width="25%">Author</td>
-                <td width="10%">Timestamp</td>
-            </tr>	
-
-        </thead>
-
-        <tbody>
-
-
-HTML;
 		$threadArray = array();
 		$fromIdtoTitle = array();
 		foreach($threads as $thread){
@@ -91,18 +48,21 @@ HTML;
 			$threadArray[$thread["thread_id"]][] = $thread;
 		}
 		$count = 1;
+
+		$thread_list = [];
+
 		foreach($threadArray as $thread_id => $data){
-			$thread_title = htmlentities($fromIdtoTitle[$thread_id], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-			$return .= <<<HTML
-			<tr class="info persist-header hoverable" title="Go to thread" style="cursor: pointer;" onclick="window.location = '{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id))}';">            
-				<td colspan="10" style="text-align: center"><h4>{$thread_title}</h4></td>
-			</tr>
-HTML;
+			$thread_title = $fromIdtoTitle[$thread_id];
+
+            $thread_link = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id));
+
+            $thread_list[$count-1] = Array("thread_title" => $thread_title, "thread_link" => $thread_link, "posts" => Array());
+
 			foreach($data as $post) {
-				$author = htmlentities($post['author'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+				$author = $post['author'];
 				$user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($post["p_author"]);
-				$first_name = htmlentities(trim($user_info["first_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-				$last_name = htmlentities(trim($user_info["last_name"]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+				$first_name = trim($user_info["first_name"]);
+				$last_name = trim($user_info["last_name"]);
 				$visible_username = $first_name . " " . substr($last_name, 0 , 1) . ".";
 
 				if($post["anonymous"]){
@@ -116,41 +76,30 @@ HTML;
                 if(!empty($pre_post)){
                     $post_content = $pre_post;
 				}
-				$post_content = htmlentities($post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+                $post_link = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)) . "#" . $post['p_id'];
+
 				$posted_on = date_format(DateUtils::parseDateTime($post['timestamp_post'], $this->core->getConfig()->getTimezone()), "n/j g:i A");
-				$return .= <<<HTML
 
-				<tr title="Go to post" style="cursor: pointer;" onclick="window.location = '{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id))}#{$post['p_id']}';" id="search-row-{$count}" class="hoverable">
-	                <td align="left"><pre class='pre_forum'><p class="post_content" style="white-space: pre-wrap; ">{$post_content}</p></pre></td>
-	                <td>{$visible_username}</td>
-	                <td>{$posted_on}</td>      
+                $thread_list[$count-1]["posts"][] = Array(
+                    "post_link" => $post_link,
+                    "count" => $count,
+                    "post_content" => $post_content,
+                    "visible_username" => $visible_username,
+                    "posted_on" => $posted_on
+                );
 
-		        </tr>
-	            
-
-HTML;
 				$count++;
 			}
 		}
-		
-            
 
-        $return .= <<<HTML
 
-        </tbody>
+        $return = $this->core->getOutput()->renderTwigTemplate("forum/searchResults.twig", [
+            "buttons" => $buttons,
+            "count_threads" => count($threads),
+            "threads" => $thread_list
+        ]);
 
-        </table>
-HTML;
-
-		if(count($threads) == 0) {
-		$return .= <<<HTML
-			<h4 style="padding-bottom:20px;text-align:center;margin-top:20px;">No threads match your search criteria.</h4>
-HTML;
-		}
-
-    	$return .= <<<HTML
-    	</div> </div> 
-HTML;
     	return $return;
     }
 	
@@ -590,162 +539,146 @@ HTML;
 		return $this->displayThreadList($threads, $filtering, $threadAnnouncement, $activeThreadTitle, $tempArray, $thread_id, $categories_ids);
 	}
 
-	public function displayThreadList($threads, $filtering, &$activeThreadAnnouncement, &$activeThreadTitle, &$activeThread, $thread_id_p, $current_categories_ids){
-					$return = "";
-					$used_active = false; //used for the first one if there is not thread_id set
-					$current_user = $this->core->getUser()->getId();
-					$display_thread_ids = $this->core->getUser()->getGroup() <= 2;
+    public function displayThreadList($threads, $filtering, &$activeThreadAnnouncement, &$activeThreadTitle, &$activeThread, $thread_id_p, $current_categories_ids)
+    {
+        $used_active = false; //used for the first one if there is not thread_id set
+        $current_user = $this->core->getUser()->getId();
+        $display_thread_ids = $this->core->getUser()->getGroup() <= 2;
 
-					$activeThreadAnnouncement = false;
-					$activeThreadTitle = "";
-					$function_date = 'date_format';
-					$activeThread = array();
+        $activeThreadAnnouncement = false;
+        $activeThreadTitle = "";
+        $function_date = 'date_format';
+        $activeThread = [];
 
-					foreach($threads as $thread){
-						$first_post = $this->core->getQueries()->getFirstPostForThread($thread["id"]);
-						if(is_null($first_post)) {
-							// Thread without any posts(eg. Merged Thread)
-							$first_post = array('content' => "");
-							$date = null;
-						} else {
-							$date = DateUtils::parseDateTime($first_post['timestamp'], $this->core->getConfig()->getTimezone());
-						}
-						if($thread['merged_thread_id'] != -1){
-							// For the merged threads
-							$thread['status'] = 0;
-						}
+        $thread_content = [];
 
-						$class = "thread_box";
-						// $current_categories_ids should be subset of $thread["categories_ids"]
-						$issubset = (count(array_intersect($current_categories_ids, $thread["categories_ids"])) == count($current_categories_ids));
-						if(((isset($_REQUEST["thread_id"]) && $_REQUEST["thread_id"] == $thread["id"]) || $thread_id_p == $thread["id"] || $thread_id_p == -1) && !$used_active && $issubset) {
-							$class .= " active";
-							$used_active = true;
-							$activeThreadTitle = ($display_thread_ids ? "({$thread['id']}) " : '') . $thread["title"];
-							$activeThread = $thread;
-							if($thread["pinned"])
-								$activeThreadAnnouncement = true;
-							if($thread_id_p == -1)
-								$thread_id_p = $thread["id"];
-						}
-						if(!$this->core->getQueries()->viewedThread($current_user, $thread["id"])){
-							$class .= " new_thread";
-						}
-						if($thread["deleted"]) {
-							$class .= " deleted";
-						}
-						//fix legacy code
-						$titleDisplay = html_entity_decode($thread['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        foreach ($threads as $thread) {
+            $first_post = $this->core->getQueries()->getFirstPostForThread($thread["id"]);
+            if (is_null($first_post)) {
+                // Thread without any posts(eg. Merged Thread)
+                $first_post = ['content' => ""];
+                $date = null;
+            } else {
+                $date = DateUtils::parseDateTime($first_post['timestamp'], $this->core->getConfig()->getTimezone());
+            }
+            if ($thread['merged_thread_id'] != -1) {
+                // For the merged threads
+                $thread['status'] = 0;
+            }
 
-						//replace tags from displaying in sidebar
-						$first_post_content = str_replace("[/code]", "", str_replace("[code]", "", strip_tags($first_post["content"])));
-						$temp_first_post_content = preg_replace('#\[url=(.*?)\](.*?)(\[/url\])#', '$2', $first_post_content);
+            $class = "thread_box";
+            // $current_categories_ids should be subset of $thread["categories_ids"]
+            $issubset = (count(array_intersect($current_categories_ids, $thread["categories_ids"])) == count($current_categories_ids));
+            if (((isset($_REQUEST["thread_id"]) && $_REQUEST["thread_id"] == $thread["id"]) || $thread_id_p == $thread["id"] || $thread_id_p == -1) && !$used_active && $issubset) {
+                $class .= " active";
+                $used_active = true;
+                $activeThreadTitle = ($display_thread_ids ? "({$thread['id']}) " : '') . $thread["title"];
+                $activeThread = $thread;
+                if ($thread["pinned"])
+                    $activeThreadAnnouncement = true;
+                if ($thread_id_p == -1)
+                    $thread_id_p = $thread["id"];
+            }
+            if (!$this->core->getQueries()->viewedThread($current_user, $thread["id"])) {
+                $class .= " new_thread";
+            }
+            if ($thread["deleted"]) {
+                $class .= " deleted";
+            }
+            //fix legacy code
+            $titleDisplay = $thread['title'];
 
-						if(!empty($temp_first_post_content)){
-							$first_post_content = $temp_first_post_content;
-						}
 
-						$sizeOfContent = strlen($first_post_content);
-						$contentDisplay = substr($first_post_content, 0, ($sizeOfContent < 80) ? $sizeOfContent : strrpos(substr($first_post_content, 0, 80), " "));
-						$titleLength = strlen($thread['title']);
+            //replace tags from displaying in sidebar
+            $first_post_content = str_replace("[/code]", "", str_replace("[code]", "", strip_tags($first_post["content"])));
+            $temp_first_post_content = preg_replace('#\[url=(.*?)\](.*?)(\[/url\])#', '$2', $first_post_content);
 
-						$titleDisplay = substr($titleDisplay, 0, ($titleLength < 40) ? $titleLength : strrpos(substr($titleDisplay, 0, 40), " "));
+            if (!empty($temp_first_post_content)) {
+                $first_post_content = $temp_first_post_content;
+            }
 
-						if(strlen($first_post["content"]) > 80){
-							$contentDisplay .= "...";
-						}
-						if(strlen($thread["title"]) > 40){
-							//Fix ... appearing
-							if(empty($titleDisplay))
-								$titleDisplay .= substr($thread['title'], 0, 30);
-							$titleDisplay .= "...";
-						}
-						$titleDisplay = ($display_thread_ids ? "({$thread['id']}) " : '') . $titleDisplay;
-						$titleDisplay = htmlentities($titleDisplay, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-						if($thread["current_user_posted"]) {
-							$icon = '<i class="fas fa-comments" title="You have contributed"></i> ';
-							$titleDisplay = $icon . $titleDisplay;
-						}
+            $sizeOfContent = strlen($first_post_content);
+            $contentDisplay = substr($first_post_content, 0, ($sizeOfContent < 80) ? $sizeOfContent : strrpos(substr($first_post_content, 0, 80), " "));
+            $titleLength = strlen($thread['title']);
 
-						$return .= <<<HTML
-						<a href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread['id']))}">
-						<div class="{$class}">
-HTML;
-						if($thread["pinned"] == true){
-							$return .= <<<HTML
-							<i class="fas fa-star" style="padding-left:3px;position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px; -webkit-text-stroke-color: black;" title = "Announcement" aria-hidden="true"></i>
-HTML;
-						}
-						if(isset($thread['favorite']) && $thread['favorite']) {
-							$return .= <<<HTML
-							<i class="fas fa-thumbtack" style="padding-left:3px;position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
-    -webkit-text-stroke-color: black;" title="Pinned as my favorite" aria-hidden="true"></i>
-HTML;
-						}
-						if($thread['merged_thread_id'] != -1) {
-							$return .= <<<HTML
-							<i class="fas fa-link" style="padding-left:3px;position:relative; float:right; display:inline-block; color: white; -webkit-text-stroke-width: 1px;
-    -webkit-text-stroke-color: black;" title="Thread Merged" aria-hidden="true"></i>
-HTML;
-						}
-						if (!isset($thread['status'])) {
-                            $thread['status'] = 0;
-                        }
-						if($thread['status'] !=0) {
-							if($thread['status'] == 1) {
-								$fa_icon = "fa-check";
-								$fa_color = "#5cb85c";
-								$fa_margin_right = "0px";
-								$fa_font_size = "1.5em";
-								$tooltip = "Thread Resolved";
-							} else {
-								$fa_icon = "fa-question";
-								$fa_color = "#ffcc00";
-								$fa_margin_right = "5px";
-								$fa_font_size = "1.8em";
-								$tooltip = "Thread Unresolved";
-							}
-							$return .= <<<HTML
-							<i class="fa ${fa_icon}" style="margin-right:${fa_margin_right}; padding-left:3px; position:relative; float:right; display:inline-block; color:${fa_color}; font-size:${fa_font_size};" title = "${tooltip}" aria-hidden="true"></i>
-HTML;
-						}
-						if($this->core->getQueries()->isThreadLocked($thread['id']))
-                        {
-                            $return .= <<<HTML
-                            <i class="fas fa-lock" style="padding-left:3px;position:relative; float:right; display:inline-block; color: white; -webkit-text-stroke-width: 1px;
-    -webkit-text-stroke-color: black;" title="Locked" aria-hidden="true"></i>
-HTML;
+            $titleDisplay = substr($titleDisplay, 0, ($titleLength < 40) ? $titleLength : strrpos(substr($titleDisplay, 0, 40), " "));
 
-                        }
-						$categories_content = array();
-						foreach ($thread["categories_desc"] as $category_desc) {
-							$categories_content[] = array(htmlentities($category_desc, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
-						}
-						for ($i = 0; $i < count($thread["categories_color"]); $i+=1) {
-							$categories_content[$i][] = $thread["categories_color"][$i];
-						}
-						$return .= <<<HTML
-						<h4>{$titleDisplay}</h4>
-						<h5 style="font-weight: normal;">{$contentDisplay}</h5>
-HTML;
-						foreach ($categories_content as $category_content) {
-							$return .= <<<HTML
-							<span class="label_forum" style="background-color: {$category_content[1]}">{$category_content[0]}</span>
-HTML;
-						}
-						if(!is_null($date)) {
-							$return .= <<<HTML
-							<h5 style="float:right; font-weight:normal;margin-top:5px">{$function_date($date,"n/j g:i A")}</h5>
-HTML;
-						}
-						$return .= <<<HTML
-						</div>
-						</a>
-						<hr style="margin-top: 0px;margin-bottom:0px;">
-HTML;
-					}
-					return $return;
-	}
+            if (strlen($first_post["content"]) > 80) {
+                $contentDisplay .= "...";
+            }
+            if (strlen($thread["title"]) > 40) {
+                //Fix ... appearing
+                if (empty($titleDisplay))
+                    $titleDisplay .= substr($thread['title'], 0, 30);
+                $titleDisplay .= "...";
+            }
+            $titleDisplay = ($display_thread_ids ? "({$thread['id']}) " : '') . $titleDisplay;
+
+            $link = $this->core->buildUrl(['component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread['id']]);
+
+            $favorite = isset($thread['favorite']) && $thread['favorite'];
+
+            $fa_icon = "fa-question";
+            $fa_color = "#ffcc00";
+            $fa_margin_right = "5px";
+            $fa_font_size = "1.8em";
+            $tooltip = "Thread Unresolved";
+
+            if (!isset($thread['status'])) {
+                $thread['status'] = 0;
+            }
+            if ($thread['status'] != 0) {
+                if ($thread['status'] == 1) {
+                    $fa_icon = "fa-check";
+                    $fa_color = "#5cb85c";
+                    $fa_margin_right = "0px";
+                    $fa_font_size = "1.5em";
+                    $tooltip = "Thread Resolved";
+                }
+            }
+
+            $categories_content = [];
+            foreach ($thread["categories_desc"] as $category_desc) {
+                $categories_content[] = [$category_desc];
+            }
+            for ($i = 0; $i < count($thread["categories_color"]); $i += 1) {
+                $categories_content[$i][] = $thread["categories_color"][$i];
+            }
+
+            $date_content = ["not_null" => !is_null($date)];
+
+            if (!is_null($date)) {
+                $date_content["formatted"] = $function_date($date, "n/j g:i A");
+            }
+
+            $thread_content[] = [
+                "title" => $titleDisplay,
+                "content" => $contentDisplay,
+                "categories" => $categories_content,
+                "link" => $link,
+                "class" => $class,
+                "pinned" => $thread["pinned"],
+                "favorite" => $favorite,
+                "merged_thread_id" => $thread['merged_thread_id'],
+                "status" => $thread["status"],
+                "fa_icon" => $fa_icon,
+                "fa_color" => $fa_color,
+                "fa_margin_right" => $fa_margin_right,
+                "fa_font_size" => $fa_font_size,
+                "tooltip" => $tooltip,
+                "is_locked" => $this->core->getQueries()->isThreadLocked($thread['id']),
+                "date" => $date_content,
+                "current_user_posted" => $thread["current_user_posted"]
+            ];
+        }
+
+
+        $return = $this->core->getOutput()->renderTwigTemplate("forum/displayThreadList.twig", [
+            "thread_content" => $thread_content,
+        ]);
+        
+        return $return;
+    }
 
 	public function filter_post_content($original_post_content) {
 		$post_content = html_entity_decode($original_post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
@@ -754,8 +687,6 @@ HTML;
 		if(!empty($pre_post)){
 			$post_content = $pre_post;
 		}
-
-		$post_content = htmlentities($post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
 		preg_match_all('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', $post_content, $result);
 		$accepted_schemes = array("https", "http");
@@ -997,97 +928,56 @@ HTML;
 		return $return;
 	}
 
-	public function createThread($category_colors) {
+    public function createThread($category_colors){
 
-		if(!$this->forumAccess()){
-			$this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
-			return;
-		}
+        if(!$this->forumAccess()){
+            $this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
+            return;
+        }
 
-		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
-		$this->core->getOutput()->addBreadcrumb("Create Thread", $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
-		$return = <<<HTML
-		<script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}vendor/jquery.are-you-sure/jquery.are-you-sure.js"></script>
-		<script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
-		<script> 
-			$( document ).ready(function() {
-				enableTabsInTextArea("[name=thread_post_content]");
-				$("#thread_form").submit(createThread);
-				$("form").areYouSure();
-			});
-		 </script>
-HTML;
-        if($this->core->getUser()->getGroup() <= 3){
+        $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
+        $this->core->getOutput()->addBreadcrumb("Create Thread", $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
+
+        $this->core->getOutput()->addInternalJs('drag-and-drop.js');
+        $this->core->getOutput()->addVendorJs('flatpickr/flatpickr.js');
+        $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
+
+        $this->core->getOutput()->addVendorCss('flatpickr/flatpickr.min.css');
+
+        $categories = "";
+        $category_colors;
+
+        if($this->core->getUser()->accessGrading()){
             $categories = $this->core->getQueries()->getCategories();
 
             $dummy_category = array('color' => '#000000', 'category_desc' => 'dummy', 'category_id' => "dummy");
             array_unshift($categories, $dummy_category);
-
-            $return .= $this->core->getOutput()->renderTwigTemplate("forum/CategoriesForm.twig", [
-                "categories" => $categories,
-                "category_colors" => $category_colors
-            ]);
         }
 
-		$return .= <<<HTML
-		<div class="content forum_content">
-		
-HTML;
+        $buttons = array(
+            array(
+                "required_rank" => 4,
+                "display_text" => 'Back to Threads',
+                "style" => 'position:relative;top:3px;float:right;',
+                "link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))),
+                "optional_class" => '',
+                "title" => 'Back to threads',
+                "onclick" => array(false)
+            )
+        );
 
-	$buttons = array(
-		array(
-			"required_rank" => 4,
-			"display_text" => 'Back to Threads',
-			"style" => 'position:relative;top:3px;float:right;',
-			"link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))),
-			"optional_class" => '',
-			"title" => 'Back to threads',
-			"onclick" => array(false)
-		)
-	);
+        $thread_exists = $this->core->getQueries()->threadExists();
 
-	$thread_exists = $this->core->getQueries()->threadExists();
+        $return = $this->core->getOutput()->renderTwigTemplate("forum/createThread.twig", [
+            "categories" => $categories,
+            "category_colors" => $category_colors,
+            "buttons" => $buttons,
+            "thread_exists" => $thread_exists,
+            "form_action" => $this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread')),
+        ]);
 
-	$return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", [
-								"forum_bar_buttons_right" => $buttons,
-								"forum_bar_buttons_left" => [],
-								"show_threads" => false,
-								"thread_exists" => $thread_exists,
-								"show_more" => false
-	]);
-
-
-		$return .= <<<HTML
-
-			<h3 style="margin-bottom:10px;"> Create Thread </h3>
-			<form style="margin-right: 15px; margin-left:15px;" id="thread_form" method="POST" action="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread'))}" enctype="multipart/form-data">
-HTML;
-                $this->core->getOutput()->addInternalJs("flatpickr.js");
-                $this->core->getOutput()->addInternalCss('flatpickr.min.css');
-				$return .= $this->core->getOutput()->renderTwigTemplate("forum/ThreadPostForm.twig", [
-					"show_title" => true,
-					"show_post" => true,
-					"post_textarea_large" => true,
-                    "show_lock_date" => true,
-					"post_content_placeholder" => "Enter your post here...",
-					"show_categories" => true,
-					"post_box_id" => 1,
-					"attachment_script" => true,
-					"show_anon" => true,
-					"show_thread_status" => true,
-					"show_announcement" => true,
-					"show_editcat" => true,
-					"submit_label" => "Submit Post",
-				]);
-			$return .= <<<HTML
-			</form>
-		</div>
-HTML;
-
-		return $return;
-	}
-
-
+        return $return;
+    }
 
 	public function statPage($users) {
 
@@ -1104,11 +994,6 @@ HTML;
 		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
 		$this->core->getOutput()->addBreadcrumb("Statistics", $this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats')));
 
-		$return = <<<HTML
-
-		<div class="content forum_content">
-
-HTML;
 
 		$buttons = array(
 			array(
@@ -1124,177 +1009,45 @@ HTML;
 
 		$thread_exists = $this->core->getQueries()->threadExists();
 
-		$return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", [
-									"forum_bar_buttons_right" => $buttons,
-									"forum_bar_buttons_left" => [],
-									"show_threads" => false,
-									"thread_exists" => $thread_exists
-		]);
+		$forumBarData = [
+            "forum_bar_buttons_right" => $buttons,
+            "forum_bar_buttons_left" => [],
+            "show_threads" => false,
+            "thread_exists" => $thread_exists
+		];
 
-		$return .= <<<HTML
-			<div style="padding-left:20px;padding-bottom: 10px;border-radius:3px;padding-right:20px;">
-				<table class="table table-striped table-bordered persist-area" id="forum_stats_table">
-					<tr>			
-				        <td style = "cursor:pointer;" width="15%" id="user_sort"><a href="javascript:void(0)">User</a></td>
-				        <td style = "cursor:pointer;" width="15%" id="total_posts_sort"><a href="javascript:void(0)">Total Posts (not deleted)</a></td>
-				        <td style = "cursor:pointer;" width="15%" id="total_threads_sort"><a href="javascript:void(0)">Total Threads</a></td>
-				        <td style = "cursor:pointer;" width="15%" id="total_deleted_sort"><a href="javascript:void(0)">Total Deleted Posts</a></td>
-				        <td width="40%">Show Posts</td>
-					</tr>
-HTML;
+		$userData = [];
+
 		foreach($users as $user => $details){
 			$first_name = $details["first_name"];
 			$last_name = $details["last_name"];
-			$post_count = count($details["posts"]);
-			$posts = htmlspecialchars(json_encode($details["posts"]), ENT_QUOTES, 'UTF-8');
-			$ids = htmlspecialchars(json_encode($details["id"]), ENT_QUOTES, 'UTF-8');
-			$timestamps = htmlspecialchars(json_encode($details["timestamps"]), ENT_QUOTES, 'UTF-8');
-			$thread_ids = htmlspecialchars(json_encode($details["thread_id"]), ENT_QUOTES, 'UTF-8');
-			$thread_titles = htmlspecialchars(json_encode($details["thread_title"]), ENT_QUOTES, 'UTF-8');
+            $post_count = count($details["posts"]);
+			$posts = json_encode($details["posts"]);
+			$ids = json_encode($details["id"]);
+			$timestamps = json_encode($details["timestamps"]);
+			$thread_ids = json_encode($details["thread_id"]);
+			$thread_titles = json_encode($details["thread_title"]);
 			$num_deleted = ($details["num_deleted_posts"]);
-			$return .= <<<HTML
-			<tbody>
-				<tr>
-					<td>{$last_name}, {$first_name}</td>
-					<td>{$post_count}</td>
-					<td>{$details["total_threads"]}</td>
-					<td>{$num_deleted}</td>
-					<td><button class="btn btn-default" data-action = "expand" data-posts="{$posts}" data-id="{$ids}" data-timestamps="{$timestamps}" data-thread_id="{$thread_ids}" data-thread_titles="{$thread_titles}">Expand</button></td>
-				</tr>
-			</tbody>
-HTML;
-			
+
+			$userData[] = [
+			    "last_name" => $last_name,
+                "first_name" => $first_name,
+                "post_count" => $post_count,
+                "details_total_threads" => $details["total_threads"],
+                "num_deleted" => $num_deleted,
+                "posts" => $posts,
+                "ids" => $ids,
+                "timestamps" => $timestamps,
+                "thread_ids" => $thread_ids,
+                "thread_titles" => $thread_titles
+            ];
 		}
-		
-		$return .= <<<HTML
-				</table>
-			</div>
-			</div>
+    
+    $return = $this->core->getOutput()->renderTwigTemplate("forum/StatPage.twig", [
+        "forumBarData" => $forumBarData,
+        "userData" => $userData
+    ]);
 
-			<script>
-				$("td").click(function(){
-				    var table_id = 0;
-				    switch ($(this).attr('id')) {
-				        case "user_sort":
-				            table_id = 0;
-				            break;
-                        case "total_posts_sort":
-                            table_id = 1;
-                            break;
-                        case "total_threads_sort":
-                            table_id = 2;
-                            break;
-                        case "total_deleted_sort":
-                            table_id = 3;
-                            break;
-                        default:
-                            table_id = 0;
-				    }
-				    
-                    if ($(this).html().indexOf(' ↓') > -1) {
-                        sortTable(table_id, true);
-                    } else {
-                        sortTable(table_id, false);
-                    }
-				});
-				
-				$("button").click(function(){
-					
-					var action = $(this).data('action');
-					var posts = $(this).data('posts');
-					var ids = $(this).data('id');
-					var timestamps = $(this).data('timestamps');
-					var thread_ids = $(this).data('thread_id');
-					var thread_titles = $(this).data('thread_titles');
-					if(action=="expand"){
-						
-						
-						for(var i=0;i<posts.length;i++){
-							var post_string = posts[i];
-							post_string = escapeSpecialChars(post_string);
-							var thread_title = thread_titles[i]["title"];
-							thread_title = escapeSpecialChars(thread_title);
-							$(this).parent().parent().parent().append('<tr id="'+ids[i]+'"><td></td><td>'+timestamps[i]+'</td><td style = "cursor:pointer;" data-type = "thread" data-thread_id="'+thread_ids[i]+'"><pre class="pre_forum" style="white-space: pre-wrap;">'+thread_title+'</pre></td><td colspan = "2" style = "cursor:pointer;" align = "left" data-type = "post" data-thread_id="'+thread_ids[i]+'"><pre class="pre_forum" style="white-space: pre-wrap;">'+post_string+'</pre></td></tr> ');
-							
-						}
-						$(this).html("Collapse");
-						$(this).data('action',"collapse");
-						$("td").click(function(){
-						
-							if($(this).data('type')=="post" || $(this).data('type')=="thread"){
-			
-								var id = $(this).data('thread_id');
-								var url = buildUrl({'component' : 'forum', 'page' : 'view_thread', 'thread_id' : id});
-								window.open(url);
-							}
-						
-					});
-					}
-					else{
-						for(var i=0;i<ids.length;i++){
-							var item = document.getElementById(ids[i]);
-							item.remove();
-						}
-						
-						$(this).html("Expand");
-						$(this).data('action',"expand");
-					}
-					
-					
-					return false;
-				});
-
-
-				
-
-				function sortTable(sort_element_index, reverse=false){
-					var table = document.getElementById("forum_stats_table");
-					var switching = true;
-					while(switching){
-						switching=false;
-						var rows = table.getElementsByTagName("TBODY");
-						for(var i=1;i<rows.length-1;i++){
-
-							var a = rows[i].getElementsByTagName("TR")[0].getElementsByTagName("TD")[sort_element_index];
-							var b = rows[i+1].getElementsByTagName("TR")[0].getElementsByTagName("TD")[sort_element_index];
-							if (reverse){
-							    if (sort_element_index == 0 ? a.innerHTML<b.innerHTML : parseInt(a.innerHTML) > parseInt(b.innerHTML)){
-                                    rows[i].parentNode.insertBefore(rows[i+1],rows[i]);
-                                    switching=true;
-							    } 
-							} else {
-                                if(sort_element_index == 0 ? a.innerHTML>b.innerHTML : parseInt(a.innerHTML) < parseInt(b.innerHTML)){
-                                    rows[i].parentNode.insertBefore(rows[i+1],rows[i]);
-                                    switching=true;
-                                }
-							}
-						}
-
-					}
-
-					var row0 = table.getElementsByTagName("TBODY")[0].getElementsByTagName("TR")[0];
-					var headers = row0.getElementsByTagName("TD");
-					
-					for(var i = 0;i<headers.length;i++){
-						var index = headers[i].innerHTML.indexOf(' ↓');
-						var reverse_index = headers[i].innerHTML.indexOf(' ↑');
-						
-						if(index > -1 || reverse_index > -1){
-							headers[i].innerHTML = headers[i].innerHTML.slice(0, -2);
-						} 
-					}
-                    
-					if (reverse) {
-                        headers[sort_element_index].innerHTML = headers[sort_element_index].innerHTML + ' ↑';
-					} else {
-					    headers[sort_element_index].innerHTML = headers[sort_element_index].innerHTML + ' ↓';
-					}
-
-				}
-
-
-			</script>
-HTML;
 		return $return;
 
 	}

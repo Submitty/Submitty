@@ -153,10 +153,13 @@ function showSimpleGraderStats(action) {
 
 function updateCheckpointCells(elems, score) {
     var scores = {}; // keep track of changes
+    var old_scores = {};
     
     elems = $(elems);
     elems.each(function(idx, el) {
         var elem = $(el);
+
+        old_scores[elem.data('id')] = elem.data('score');
 
         // set score
         if (score) {
@@ -177,34 +180,34 @@ function updateCheckpointCells(elems, score) {
         else elem.css("background-color", "");
 
         // create border we can animate to reflect ajax status
-        elem.css("border-right", "15px solid #ddd");
+        elem.css("border-right", "60px solid #ddd");
     });
 
     // get data for ajax url
     var parent = $(elems[0]).parent();
 
-    // update the actual information
+    // Update the buttons to reflect that they were clicked
     submitAJAX(
         buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_lab'}),
         {
-            'csrf_token': csrfToken,
-            'user_id': parent.data("user"),
-            'g_id': parent.data('gradeable'),
-            'scores': scores
+          'csrf_token': csrfToken,
+          'user_id': parent.data("user"),
+          'g_id': parent.data('gradeable'),
+          'old_scores': old_scores,
+          'scores': scores
         },
         function() {
-            elems.each(function(idx, el) {
-                var elem = $(el);
-                elem.animate({"border-right-width": "0px"}, 400);  // animate the box
-                elem.attr("data-score", elem.data("score"));       // update the score
+            elems.each(function(idx, elem) {
+                elem = $(elem);
+                elem.animate({"border-right-width": "0px"}, 400); // animate the box
+                elem.attr("data-score", elem.data("score"));      // update the score
             });
         },
         function() {
-            elems.each(function(idx, el) {
-                var elem = $(el);
-                // set box to red if failure
-                elem.css("border-right-width", "15px");
-                elem.stop(true, true).animate({"border-right-color": "#DA4F49"}, 400);
+            elems.each(function(idx, elem) {
+                elem = $(elem);
+                elem.stop(true, true);
+                elem.css("border-right", "60px solid #DA4F49");
             });
         }
     );
@@ -250,21 +253,25 @@ function setupNumericTextCells() {
         
         var row_num = elem.attr("id").split("-")[1];
         var row_el = $("tr#row-" + row_num);
-        console.log(row_el)
-        console.log(row_el.data("user"))
-        console.log(row_el.data('gradeable'))
-
         
         var scores = {};
+        var old_scores = {};
         var total = 0;
 
         row_el.children("td.option-small-input, td.option-small-output").each(function() {
-            $(this).children(".option-small-box").each(function(){
-                if($(this).data('num') === true){
+            $(this).children(".option-small-box").each(function(idx, child){
+                child = $(child);
+                if(child.data('num') === true){
                     total += parseFloat(this.value);
-                    scores[$(this).data("id")] = this.value;
+                    // ensure value is string (might not be on initial load from twig)
+                    old_scores[child.data("id")] = child.data("origval") + "";
+                    scores[child.data("id")] = this.value;
+
+                    // save old value so we can verify data is not stale
+                    child.data('origval', this.value);
+                    child.attr('data-origval', this.value);  
                 }
-                else if($(this).data('total') === true){
+                else if(child.data('total') === true){
                     this.value = total;
                 }
             });
@@ -276,6 +283,7 @@ function setupNumericTextCells() {
                 'csrf_token': csrfToken,
                 'user_id': row_el.data("user"),
                 'g_id': row_el.data('gradeable'),
+                'old_scores': old_scores,
                 'scores': scores
             },
             function() {
@@ -290,7 +298,7 @@ function setupNumericTextCells() {
             function() {
                 elem.css("background-color", "#ff7777");
             }
-        );  
+        );
     });
 
     $("input[class=csvButtonUpload]").change(function() {

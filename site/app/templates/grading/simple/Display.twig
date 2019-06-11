@@ -248,6 +248,7 @@
                     type="text"
                     id="cell-{{ index }}-{{ loop.index0 }}"
                     data-id="{{ component.getId() }}"
+                    data-origval="{{ component_grade.getScore() | default('0') }}"
                     value="{{ component_grade.getScore() | default('0') }}"
                     onclick="this.select()"
                     {% if component_grade.getGrader() != null %}
