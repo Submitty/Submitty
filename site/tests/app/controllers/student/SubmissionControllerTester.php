@@ -1,6 +1,6 @@
 <?php
 
-namespace tests\app\controllers\submission;
+namespace tests\app\controllers\student;
 
 use app\libraries\Core;
 use app\libraries\GradeableType;

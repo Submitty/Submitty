@@ -45,11 +45,13 @@ class TeamController extends AbstractController {
         if ($gradeable === false) {
             $this->core->addErrorMessage('Invalid or missing gradeable id!');
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            return array('error' => true, 'message' => 'Invalid or missing gradeable id!');
         }
 
         if (!$gradeable->isTeamAssignment()) {
             $this->core->addErrorMessage("{$gradeable->getTitle()} is not a team assignment");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            return array('error' => true, 'message' => $gradeable->getTitle() . " is not a team assignment");
         }
 
         $return_url = $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable_id, 'page' => 'team'));
@@ -58,6 +60,7 @@ class TeamController extends AbstractController {
         if ($graded_gradeable !== false) {
             $this->core->addErrorMessage("You must leave your current team before you can create a new team");
             $this->core->redirect($return_url);
+            return array('error' => true, 'message' => 'You must leave your current team before you can create a new team');
         }
 
         $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $user_id);
