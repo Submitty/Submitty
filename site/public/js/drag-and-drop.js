@@ -389,8 +389,8 @@ function validateUserId(csrf_token, gradeable_id, user_id){
             type : 'POST',
             success : function(response){ 
                 response = JSON.parse(response);
-                if(response['success']){
-                    resolve(response); 
+                if(response['status'] === 'success'){
+                    resolve(response['data']);
                 }else{
                     reject(response['message']);
                 }

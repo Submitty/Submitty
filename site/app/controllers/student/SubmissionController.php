@@ -349,16 +349,12 @@ class SubmissionController extends AbstractController {
     private function ajaxValidGradeable() {
         if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $this->core->getCsrfToken()) {
             $msg = "Invalid CSRF token. Refresh the page and try again.";
-            $return = array('success' => false, 'message' => $msg);
-            $this->core->getOutput()->renderJson($return);
-            return $return;
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
 
         if (!isset($_POST['user_id'])) {
             $msg = "Did not pass in user_id.";
-            $return = array('success' => false, 'message' => $msg);
-            $this->core->getOutput()->renderJson($return);
-            return $return;
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
 
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
@@ -382,9 +378,7 @@ class SubmissionController extends AbstractController {
         //If no user id's were submitted, give a graceful error.
         if (count($user_ids) === 0) {
             $msg = "No valid user ids were found.";
-            $return = array('success' => false, 'message' => $msg);
-            $this->core->getOutput()->renderJson($return);
-            return $return;
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
 
         //For every userid, we have to check that its real.
@@ -392,15 +386,11 @@ class SubmissionController extends AbstractController {
             $user = $this->core->getQueries()->getUserById($id);
             if ($user === null) {
                 $msg = "Invalid user id '{$id}'";
-                $return = array('success' => false, 'message' => $msg);
-                $this->core->getOutput()->renderJson($return);
-                return $return;
+                return $this->core->getOutput()->renderJsonFail($msg);
             }
             if (!$user->isLoaded()) {
                 $msg = "Invalid user id '{$id}'";
-                $return = array('success' => false, 'message' => $msg);
-                $this->core->getOutput()->renderJson($return);
-                return $return;
+                return $this->core->getOutput()->renderJsonFail($msg);
             }
         }
 
@@ -429,16 +419,12 @@ class SubmissionController extends AbstractController {
         if ($gradeable->isTeamAssignment() && $inconsistent_teams) {
             // Not all users were on the same team
             $msg = "Inconsistent teams. One or more users are on different teams.";
-            $return = array('success' => false, 'message' => $msg);
-            $this->core->getOutput()->renderJson($return);
-            return $return;
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
         //If a user not assigned to any team is matched with a user already on a team
         if($gradeable->isTeamAssignment() && $null_team_count != 0 && count($teams) != 0){
             $msg = "One or more users with no team are being submitted with another user already on a team";
-            $return = array('success' => false, 'message' => $msg);
-            $this->core->getOutput()->renderJson($return);
-            return $return;
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
 
         $highest_version = -1;
@@ -449,10 +435,8 @@ class SubmissionController extends AbstractController {
         }
 
         //If there has been a previous submission, we tag it so that we can pop up a warning.
-        $return = array('success' => true, 'highest_version' => $highest_version, 'previous_submission' => $highest_version > 0);
-        $this->core->getOutput()->renderJson($return);
-
-        return $return;
+        $return = array('highest_version' => $highest_version, 'previous_submission' => $highest_version > 0);
+        return $this->core->getOutput()->renderJsonSuccess($return);
     }
 
     /**
