@@ -1,176 +1,325 @@
-<div class="content">
-    <h1>Status of {{ gradeable_title }}</h1>
+<head>
+  <!-- Plotly.js -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+ {#<script type="text/javascript" language="javascript" src="{{ base_url }}vendor/jquery/jquery.min.js"></script>#}
+</head>
 
-    {% if graded_percentage == -1 %}
-        <div class="sub">
-            No Grading To Be Done! :)
+<body>
+    {# Top box #}
+    <div class="content">
+        <h1>Status of {{ gradeable_title }}</h1>
+        {# Bottom buttons #}
+        <div style="margin-top: 20px; vertical-align:bottom;">
+            {% if graded_percentage != -1 or core.getUser().accessFullGrading() or peer %}
+                <a class="btn btn-primary"
+                {% if core.getUser().accessAdmin() %}
+                href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action' :  'details', 'gradeable_id' :  gradeable_id, 'view' : 'all' }) }}">
+                {% else %}
+                href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action' :  'details', 'gradeable_id' :  gradeable_id, 'view' : (core.getUser().getGradingRegistrationSections()|length == 0) ? 'all' : null}) }}">
+                {% endif %}
+                Grading Details
+                </a>
+                {% if core.getUser().getGradingRegistrationSections()|length != 0 %}
+                    <a class="btn btn-primary"
+                    href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'grade', 'gradeable_id': gradeable_id}) }}">
+                        Grade Next Student
+                    </a>
+                    <a class="btn btn-primary"
+                    href="{{ core.buildUrl({'component': 'misc', 'page': 'download_all_assigned', 'dir': 'submissions', 'gradeable_id': gradeable_id}) }}">
+                        Download Zip of All Assigned Students
+                    </a>
+                {% endif %}
+                {% if core.getUser().accessFullGrading() and submitted_total %}
+                    <a class="btn btn-primary"
+                    href="{{ core.buildUrl({'component': 'misc', 'page': 'download_all_assigned', 'dir': 'submissions', 'gradeable_id': gradeable_id, 'type': 'All'}) }}">
+                        Download Zip of All Students
+                    </a>
+                {% endif %}
+            {% if core.getUser().accessFullGrading() %}
+                    <a class="btn btn-primary"
+                    href="{{ core.buildUrl({'component': 'submission', 'action': 'stat_page', 'gradeable_id': gradeable_id}) }}">
+                        Bulk Upload Forensics
+                    </a>
+                {% endif %}
+            {% endif %}
         </div>
-    {% else %}
-        <div class="row">
-            {# Left panel #}
-            <div class="box col-md-6">
-                {% if warnings|length > 0 %}
-                    <ul>
-                        {% for warning in warnings %}
-                            <li style="color:red; margin-left:1em">{{ warning }}</li>
-                        {% endfor %}
-                    </ul>
-                    <br/>
-                {% endif %}
+        {# /Bottom buttons #}
+    </div>
+    {# Top box #}
 
-                {% if team_assignment %}
-                    Students on a team: {{ team_total }}/{{ total_students }} ({{ team_percentage }}%)
-                    <br />
-                    <br />
-                    Number of teams: {{ total_submissions }}
-                    <br />
-                    <br />
-                    Teams who have submitted: {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
-                {% else %}
-                    Students who have submitted: {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
-                    <br />
-                    <br />
-                    Current percentage of grading done: {{ graded_total }} / {{ submitted_total }} ({{ graded_percentage }}%)
-                {% endif %}
+    {# Bottom box #}
+    <div class="content">
 
-                <br />
-                <br />
-                {% if peer %}
-                    Current percentage of students grading done: {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})
-                {% else %}
-                    By Grading Sections:
-                    <div style="margin-left: 20px">
-                        {% for key, section in sections %}
-                            Section {{ key }}: {{ section.graded }} / {{ section.total }} ({{ section.percentage }}%)<br />
-                        {% endfor %}
-                    </div>
-                    <br />
-                    Graders:
-                    <div style="margin-left: 20px">
-                        {% for key, section in sections %}
-                            Section {{ key }}:
-                            {% if section.valid_graders|length == 0 %}
-                                Nobody
-                            {% else %}
-                                {{ section.valid_graders | join(", ") }}
-                            {% endif %}
-                            <br />
-                        {% endfor %}
-                    </div>
-                {% endif %}
-
-                {% if ta_grades_released %}
-                    {% if team_assignment %}
-                        <br />
-                        Number of teams who have viewed their grade: {{ viewed_grade }} / {{ viewed_total }} ({{ viewed_percent }}%)
-                    {% else %}
-                        <br />
-                        Number of students who have viewed their grade: {{ viewed_grade }} / {{ viewed_total }} ({{ viewed_percent }}%)
-                    {% endif %}
-                {% endif %}
-
-                {% if core.getConfig().isRegradeEnabled() and not peer %}
-                    <br />
-                    <br />
-                    Number of students who have unresolved grade inquiries: {{ regrade_requests }}
-                {% endif %}
+        {% if graded_percentage == -1 %}
+            <div class="sub">
+                No Grading To Be Done! :)
             </div>
-            {# /Left panel #}
+        {% else %}
+            <div class="row">
+                {# Top panel #}         
+                <div class="box col-md-12">
+                <b>Statistics for {{gradeable_title}} in Graph Form: </b> 
+                {% if overall_average == null or overall_average.getCount() == 0 %}
+                    No assignments have been completely graded yet.
+                {% else %}
+                    {{overall_scores}}
+                    <div id="myDiv"><!-- Plotly chart will be drawn inside this DIV --></div>
+                    <script>
+                        
+                        var xValue = ['Lower','Average','Higher'];
+                        var yValue = [5.5, {{overall_average.getAverageScore() }},10.0 ];
+                        var yValue2 = [{{overall_average.getMaxValue()}},{{overall_average.getMaxValue()}},{{overall_average.getMaxValue()}}];
 
-            {# Right panel #}
-            {% if not peer %}
+                        var trace1 = {
+                            x: xValue, 
+                            y: yValue,
+                            name: 'Average Scores',
+                            type: 'bar',
+                            text: yValue,
+                            textposition: 'auto',
+                            hoverinfo: 'none',
+                            marker: {
+                                color: 'rgb(48,99,152)',
+                                opacity: 1.0,
+                                line: {
+                                color: 'rbg(170,170,170)',
+                                width: 1.5
+                                }
+                            }
+                        };
+
+                        var trace2 = {
+                            x: xValue,
+                            y: yValue2,
+                            name: 'Full Score',
+                            type: 'bar',
+                            text: yValue2,
+                            textposition: 'auto',
+                            hoverinfo: 'none',
+                            marker:{
+                                color: 'rgb(246,251,252)',
+                                opacity: 1.0,
+                                line: {
+                                    color: 'rbg(170,170,170)',
+                                    width: 1.5  
+                                }
+                            }
+                        };
+
+                        var data = [trace2,trace1];
+
+                        var layout = {
+                            title: 'Completely Graded Assignment',
+                            barmode: 'overlay',
+                            font: {
+                                family: '"Source Sans Pro", sans-serif',
+                            }
+                        };
+
+                        Plotly.newPlot('myDiv', data, layout, {modeBarButtonsToRemove: ['toImage'],displaylogo: false});
+                    </script> 
+                {% endif %}
+                <!-- second chart, to be made optional depending on manual components-->
+                {% if component_averages|length == 0 %}
+                    No components have been graded yet.
+                {% else %}
+                    <div id="myDiv2"><!-- Plotly chart will be drawn inside this DIV --></div>
+                    <script>
+
+                        var xValue = [];
+                        var yValue = [];
+                        var yValue2 = [];
+                        {% for comp in component_averages %}
+                            xValue.push('{{comp.getTitle()|escape("js")}}');
+                            yValue.push({{comp.getAverageScore()}});
+                            yValue2.push({{comp.getMaxValue()}});
+                        {% endfor %}
+                        
+
+                        var trace1 = {
+                            x: xValue, 
+                            y: yValue,
+                            name: 'Average Scores',
+                            type: 'bar',
+                            text: yValue,
+                            textposition: 'auto',
+                            hoverinfo: 'none',
+                            marker: {
+                                color: 'rgb(48,99,152)',
+                                opacity: 1.0,
+                                line: {
+                                color: 'rbg(170,170,170)',
+                                width: 1.5
+                                }
+                            }
+                        };
+
+                        var trace2 = {
+                            x: xValue,
+                            y: yValue2,
+                            name: 'Full Scores',
+                            type: 'bar',
+                            text: yValue2,
+                            textposition: 'auto',
+                            hoverinfo: 'none',
+                            marker: {
+                                color: 'rgb(246,251,252)',
+                                opacity: 1.0,
+                                line: {
+                                    color: 'rbg(170,170,170)',
+                                    width: 1.5  
+                                }
+                            }
+                        };
+
+                        var data = [trace2, trace1];
+
+                        var layout = {
+                            title: 'Manually Graded Component Averages',
+                            barmode: 'overlay',
+                            font: {
+                                family: '"Source Sans Pro", sans-serif',
+                            }
+                            
+                        };
+
+                        Plotly.newPlot('myDiv2', data, layout, {modeBarButtonsToRemove: ['toImage'],displaylogo: false});
+                    </script>
+                {% endif %}
+                     
+                </div>
+                {# Top panel #}
+            </div>
+            <div class="row">
+                {# Left panel #}
                 <div class="box col-md-6">
-                    <b>Statistics for Completely Graded Assignments: </b>
-                    <br/>
-                    <div style="margin-left: 20px">
-                        {% if overall_average == null or overall_average.getCount() == 0 %}
-                            No assignments have been completely graded yet.
-                        {% else %}
-                            Average: {{ overall_average.getAverageScore() }} / {{ overall_total }} ({{ overall_percentage }}%)<br/>
-                            Standard Deviation: {{ overall_average.getStandardDeviation() }} <br/>
-                            Count: {{ overall_average.getCount() }} <br/>
-                        {% endif %}
-                    </div>
-                    {% if autograding_non_extra_credit != 0 %}
-                        {# Only show autograder if we have autograding points #}
+                    {% if warnings|length > 0 %}
+                        <ul>
+                            {% for warning in warnings %}
+                                <li style="color:red; margin-left:1em">{{ warning }}</li>
+                            {% endfor %}
+                        </ul>
                         <br/>
-                        <b>Statistics for Autograding: </b>
-                        <br/>
+                    {% endif %}
+
+                    {% if team_assignment %}
+                        Students on a team: {{ team_total }}/{{ total_students }} ({{ team_percentage }}%)
+                        <br />
+                        <br />
+                        Number of teams: {{ total_submissions }}
+                        <br />
+                        <br />
+                        Teams who have submitted: {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
+                    {% else %}
+                        Students who have submitted: {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
+                        <br />
+                        <br />
+                        Current percentage of grading done: {{ graded_total }} / {{ submitted_total }} ({{ graded_percentage }}%)
+                    {% endif %}
+
+                    <br />
+                    <br />
+                    {% if peer %}
+                        Current percentage of students grading done: {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})
+                    {% else %}
+                        By Grading Sections:
                         <div style="margin-left: 20px">
-                            {% if autograded_average == null or autograded_average.getCount() == 0 %}
-                                No assignments have been submitted yet.
-                            {% else %}
-                                Average: {{ autograded_average.getAverageScore() }} / {{ autograding_non_extra_credit }} ({{ autograded_percentage }}%)<br/>
-                                Standard Deviation: {{ autograded_average.getStandardDeviation() }} <br/>
-                                Count: {{ autograded_average.getCount() }} <br/>
-                            {% endif %}
+                            {% for key, section in sections %}
+                                Section {{ key }}: {{ section.graded }} / {{ section.total }} ({{ section.percentage }}%)<br />
+                            {% endfor %}
+                        </div>
+                        <br />
+                        Graders:
+                        <div style="margin-left: 20px">
+                            {% for key, section in sections %}
+                                Section {{ key }}:
+                                {% if section.valid_graders|length == 0 %}
+                                    Nobody
+                                {% else %}
+                                    {{ section.valid_graders | join(", ") }}
+                                {% endif %}
+                                <br />
+                            {% endfor %}
                         </div>
                     {% endif %}
-                    <br/>
-                    <b>Statistics for Manually Graded Components: </b>
-                    <br/>
-                    <div style="margin-left: 20px">
-                        {% if component_averages|length == 0 %}
-                            No components have been graded yet.
-                        {% else %}
-                            {% for component in component_averages %}
-                                {{ component.getTitle() }}:<br/>
-                                <div style="margin-left: 40px">
-                                    Average:
-                                    {% if component.getMaxValue() > 0 %}
-                                        {{ component.getAverageScore() }} / {{ component.getMaxValue() }} ({{ component_percentages[loop.index0] }}%)
-                                    {% else %}
-                                        {{ component.getAverageScore() }}
-                                    {% endif %}
-                                    <br/>
-                                    Standard Deviation: {{ component.getStandardDeviation() }} <br/>
-                                    Count: {{ component.getCount() }} <br/>
-                                </div>
-                            {% endfor %}
-                            <br/>
-                            Overall Average: {{ component_overall_score }} / {{ component_overall_max }} ({{ component_overall_percentage }}%)
-                        {% endif %}
-                    </div>
-                </div>
-            {% endif %}
-            {# /Right panel #}
-        </div>
-    {% endif %}
 
-    {# Bottom buttons #}
-    <div style="margin-top: 20px; vertical-align:bottom;">
-        {% if graded_percentage != -1 or core.getUser().accessFullGrading() or peer %}
-            <a class="btn btn-primary"
-            {% if core.getUser().accessAdmin() %}
-               href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action' :  'details', 'gradeable_id' :  gradeable_id, 'view' : 'all' }) }}">
-            {% else %}
-               href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action' :  'details', 'gradeable_id' :  gradeable_id, 'view' : (core.getUser().getGradingRegistrationSections()|length == 0) ? 'all' : null}) }}">
-            {% endif %}
-            Grading Details
-            </a>
-            {% if core.getUser().getGradingRegistrationSections()|length != 0 %}
-                <a class="btn btn-primary"
-                   href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'grade', 'gradeable_id': gradeable_id}) }}">
-                    Grade Next Student
-                </a>
-                <a class="btn btn-primary"
-                   href="{{ core.buildUrl({'component': 'misc', 'page': 'download_all_assigned', 'dir': 'submissions', 'gradeable_id': gradeable_id}) }}">
-                    Download Zip of All Assigned Students
-                </a>
-            {% endif %}
-            {% if core.getUser().accessFullGrading() and submitted_total %}
-                <a class="btn btn-primary"
-                   href="{{ core.buildUrl({'component': 'misc', 'page': 'download_all_assigned', 'dir': 'submissions', 'gradeable_id': gradeable_id, 'type': 'All'}) }}">
-                    Download Zip of All Students
-                </a>
-            {% endif %}
-	    {% if core.getUser().accessFullGrading() %}
-                <a class="btn btn-primary"
-                   href="{{ core.buildUrl({'component': 'submission', 'action': 'stat_page', 'gradeable_id': gradeable_id}) }}">
-                    Bulk Upload Forensics
-                </a>
-            {% endif %}
+                    {% if ta_grades_released %}
+                        {% if team_assignment %}
+                            <br />
+                            Number of teams who have viewed their grade: {{ viewed_grade }} / {{ viewed_total }} ({{ viewed_percent }}%)
+                        {% else %}
+                            <br />
+                            Number of students who have viewed their grade: {{ viewed_grade }} / {{ viewed_total }} ({{ viewed_percent }}%)
+                        {% endif %}
+                    {% endif %}
+
+                    {% if core.getConfig().isRegradeEnabled() and not peer %}
+                        <br />
+                        <br />
+                        Number of students who have unresolved grade inquiries: {{ regrade_requests }}
+                    {% endif %}
+                </div>
+                {# /Left panel #}
+
+                {# Right panel #}
+                {% if not peer %}
+                    <div class="box col-md-6">
+                        <b>Statistics for Completely Graded Assignments: </b>
+                        <br/>
+                        <div style="margin-left: 20px">
+                            {% if overall_average == null or overall_average.getCount() == 0 %}
+                                No assignments have been completely graded yet.
+                            {% else %}
+                                Average: {{ overall_average.getAverageScore() }} / {{ overall_total }} ({{ overall_percentage }}%)<br/>
+                                Standard Deviation: {{ overall_average.getStandardDeviation() }} <br/>
+                                Count: {{ overall_average.getCount() }} <br/>
+                            {% endif %}
+                        </div>
+                        {% if autograding_non_extra_credit != 0 %}
+                            {# Only show autograder if we have autograding points #}
+                            <br/>
+                            <b>Statistics for Autograding: </b>
+                            <br/>
+                            <div style="margin-left: 20px">
+                                {% if autograded_average == null or autograded_average.getCount() == 0 %}
+                                    No assignments have been submitted yet.
+                                {% else %}
+                                    Average: {{ autograded_average.getAverageScore() }} / {{ autograding_non_extra_credit }} ({{ autograded_percentage }}%)<br/>
+                                    Standard Deviation: {{ autograded_average.getStandardDeviation() }} <br/>
+                                    Count: {{ autograded_average.getCount() }} <br/>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                        <br/>
+                        <b>Statistics for Manually Graded Components: </b>
+                        <br/>
+                        <div style="margin-left: 20px">
+                            {% if component_averages|length == 0 %}
+                                No components have been graded yet.
+                            {% else %}
+                                {% for component in component_averages %}
+                                    {{ component.getTitle() }}:<br/>
+                                    <div style="margin-left: 40px">
+                                        Average:
+                                        {% if component.getMaxValue() > 0 %}
+                                            {{ component.getAverageScore() }} / {{ component.getMaxValue() }} ({{ component_percentages[loop.index0] }}%)
+                                        {% else %}
+                                            {{ component.getAverageScore() }}
+                                        {% endif %}
+                                        <br/>
+                                        Standard Deviation: {{ component.getStandardDeviation() }} <br/>
+                                        Count: {{ component.getCount() }} <br/>
+                                    </div>
+                                {% endfor %}
+                                <br/>
+                                Overall Average: {{ component_overall_score }} / {{ component_overall_max }} ({{ component_overall_percentage }}%)
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+                {# /Right panel #}
+            </div>
         {% endif %}
+    {#Bottom box #}
     </div>
-    {# /Bottom buttons #}
-</div>
+</body>
