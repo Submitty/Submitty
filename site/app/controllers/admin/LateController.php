@@ -156,7 +156,7 @@ class LateController extends AbstractController {
         foreach($users as $user){
             $user_table[] = array('user_id' => $user->getId(),'user_firstname' => $user->getDisplayedFirstName(), 'user_lastname' => $user->getDisplayedLastName(), 'late_days' => $user->getAllowedLateDays(), 'datestamp' => $user->getSinceTimestamp(), 'late_day_exceptions' => $user->getLateDayExceptions());
         }
-        $this->core->getOutput()->renderJsonSuccess(array(
+        return $this->core->getOutput()->renderJsonSuccess(array(
             'users' => $user_table
         ));
     }
