@@ -369,21 +369,6 @@ function isValidSubmission(){
     return false;
 }
 
-function checkForPreviousSubmissions(csrf_token, gradeable_id, user_id){
-    var formData = new FormData();
-    var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'verify', 'gradeable_id': gradeable_id});
-
-    return $.ajax({
-        async: false,
-        url: url,
-        data: {
-            'csrf_token' : csrf_token,
-            'user_id' : user_id
-        },
-        type: 'POST',
-    });
-}
-
 /**
  * @param csrf_token
  * @param gradeable_id
@@ -404,8 +389,8 @@ function validateUserId(csrf_token, gradeable_id, user_id){
             type : 'POST',
             success : function(response){ 
                 response = JSON.parse(response);
-                if(response['success']){
-                    resolve(response); 
+                if(response['status'] === 'success'){
+                    resolve(response['data']);
                 }else{
                     reject(response['message']);
                 }
@@ -423,9 +408,9 @@ function validateUserId(csrf_token, gradeable_id, user_id){
 //function to display pop-up notification after bulk submission/delete
 function displaySubmissionMessage(json, index = 0){
     var message ='<div id="bulk_message_' + String(index) + '" class="inner-message alert alert-' +
-                        (json['success'] ? 'success' : 'error') + '">\
+                        (json['status'] === 'success' ? 'success' : 'error') + '">\
                     <a class="fas fa-times message-close" onclick="removeMessagePopup(\'bulk_message_' + String(index) + '\');"></a>\
-                    <i class="' + (json['success'] ? 'fas fa-check-circle' : 'fas fa-times-circle') +'"></i>' + json['message'] + 
+                    <i class="' + (json['status'] === 'success' ? 'fas fa-check-circle' : 'fas fa-times-circle') +'"></i>' + json['status'] === 'success' ? json['data'] : json['message'] +
                  '</div>';
 
     $('#messages').append(message);
@@ -510,7 +495,7 @@ function submitSplitItem(csrf_token, gradeable_id, user_id, path, merge_previous
             type: 'POST',
             success: function(response) {     
                 response = JSON.parse(response);
-                if (response['success']) {
+                if (response['status'] === 'success') {
                     resolve(response);
                 }
                 else {
@@ -545,7 +530,7 @@ function deleteSplitItem(csrf_token, gradeable_id, path) {
             type: 'POST',
             success: function(response) {
                 response = JSON.parse(response);
-                if (response['success']) {
+                if (response['status'] === 'success') {
                     resolve(response);
                 }else {
                     reject(response);
@@ -622,7 +607,7 @@ function handleBulk(gradeable_id, num_pages, use_qr_codes = false, qr_prefix = "
             $("#submit").prop("disabled", false);
             try {
                 data = JSON.parse(data);
-                if (data['success']) {
+                if (data['status'] === 'success') {
                     window.location.href = return_url;
                 }
                 else {
@@ -810,7 +795,7 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
             $("#submit").prop("disabled", false);
             try {
                 data = JSON.parse(data);
-                if (data['success']) {
+                if (data['status'] === 'success') {
                     window.location.href = return_url;
                 }
                 else {
@@ -878,7 +863,7 @@ function handleDownloadImages(csrf_token) {
             try {
                 data = JSON.parse(data);
 
-                if (data['success']) {
+                if (data['status'] === 'success') {
                     window.location.href = return_url;
                 }
                 else {
@@ -974,7 +959,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, cmPath, requested_p
             try {
                 var jsondata = JSON.parse(data);
 
-                if (jsondata['success']) {
+                if (jsondata['status'] === 'success') {
                     window.location.href = return_url;
                 }
                 else {
