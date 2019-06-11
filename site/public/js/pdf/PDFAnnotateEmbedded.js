@@ -75,7 +75,6 @@ function render(gradeable_id, user_id, grader_id, file_name, page_num, url = "")
                 $("a[value='zoomcustom']").text(parseInt(window.RENDER_OPTIONS.scale * 100) + "%");
                 viewer.innerHTML = '';
                 NUM_PAGES = pdf.numPages;
-                console.log(page_num)
                 for (let i=0; i<NUM_PAGES; i++) {
                     let page = PDFAnnotate.UI.createPage(i+1);
                     viewer.appendChild(page);
