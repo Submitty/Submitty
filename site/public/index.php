@@ -184,7 +184,7 @@ if (isset($_COOKIE[$cookie_key])) {
             }
         }
     }
-    catch (Exception $exc) {
+    catch (\InvalidArgumentException $exc) {
         // Invalid cookie data, delete it
         Utils::setCookie($cookie_key, "", time() - 3600);
     }

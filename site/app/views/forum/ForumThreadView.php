@@ -539,162 +539,146 @@ HTML;
 		return $this->displayThreadList($threads, $filtering, $threadAnnouncement, $activeThreadTitle, $tempArray, $thread_id, $categories_ids);
 	}
 
-	public function displayThreadList($threads, $filtering, &$activeThreadAnnouncement, &$activeThreadTitle, &$activeThread, $thread_id_p, $current_categories_ids){
-					$return = "";
-					$used_active = false; //used for the first one if there is not thread_id set
-					$current_user = $this->core->getUser()->getId();
-					$display_thread_ids = $this->core->getUser()->getGroup() <= 2;
+    public function displayThreadList($threads, $filtering, &$activeThreadAnnouncement, &$activeThreadTitle, &$activeThread, $thread_id_p, $current_categories_ids)
+    {
+        $used_active = false; //used for the first one if there is not thread_id set
+        $current_user = $this->core->getUser()->getId();
+        $display_thread_ids = $this->core->getUser()->getGroup() <= 2;
 
-					$activeThreadAnnouncement = false;
-					$activeThreadTitle = "";
-					$function_date = 'date_format';
-					$activeThread = array();
+        $activeThreadAnnouncement = false;
+        $activeThreadTitle = "";
+        $function_date = 'date_format';
+        $activeThread = [];
 
-					foreach($threads as $thread){
-						$first_post = $this->core->getQueries()->getFirstPostForThread($thread["id"]);
-						if(is_null($first_post)) {
-							// Thread without any posts(eg. Merged Thread)
-							$first_post = array('content' => "");
-							$date = null;
-						} else {
-							$date = DateUtils::parseDateTime($first_post['timestamp'], $this->core->getConfig()->getTimezone());
-						}
-						if($thread['merged_thread_id'] != -1){
-							// For the merged threads
-							$thread['status'] = 0;
-						}
+        $thread_content = [];
 
-						$class = "thread_box";
-						// $current_categories_ids should be subset of $thread["categories_ids"]
-						$issubset = (count(array_intersect($current_categories_ids, $thread["categories_ids"])) == count($current_categories_ids));
-						if(((isset($_REQUEST["thread_id"]) && $_REQUEST["thread_id"] == $thread["id"]) || $thread_id_p == $thread["id"] || $thread_id_p == -1) && !$used_active && $issubset) {
-							$class .= " active";
-							$used_active = true;
-							$activeThreadTitle = ($display_thread_ids ? "({$thread['id']}) " : '') . $thread["title"];
-							$activeThread = $thread;
-							if($thread["pinned"])
-								$activeThreadAnnouncement = true;
-							if($thread_id_p == -1)
-								$thread_id_p = $thread["id"];
-						}
-						if(!$this->core->getQueries()->viewedThread($current_user, $thread["id"])){
-							$class .= " new_thread";
-						}
-						if($thread["deleted"]) {
-							$class .= " deleted";
-						}
-						//fix legacy code
-						$titleDisplay = html_entity_decode($thread['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        foreach ($threads as $thread) {
+            $first_post = $this->core->getQueries()->getFirstPostForThread($thread["id"]);
+            if (is_null($first_post)) {
+                // Thread without any posts(eg. Merged Thread)
+                $first_post = ['content' => ""];
+                $date = null;
+            } else {
+                $date = DateUtils::parseDateTime($first_post['timestamp'], $this->core->getConfig()->getTimezone());
+            }
+            if ($thread['merged_thread_id'] != -1) {
+                // For the merged threads
+                $thread['status'] = 0;
+            }
 
-						//replace tags from displaying in sidebar
-						$first_post_content = str_replace("[/code]", "", str_replace("[code]", "", strip_tags($first_post["content"])));
-						$temp_first_post_content = preg_replace('#\[url=(.*?)\](.*?)(\[/url\])#', '$2', $first_post_content);
+            $class = "thread_box";
+            // $current_categories_ids should be subset of $thread["categories_ids"]
+            $issubset = (count(array_intersect($current_categories_ids, $thread["categories_ids"])) == count($current_categories_ids));
+            if (((isset($_REQUEST["thread_id"]) && $_REQUEST["thread_id"] == $thread["id"]) || $thread_id_p == $thread["id"] || $thread_id_p == -1) && !$used_active && $issubset) {
+                $class .= " active";
+                $used_active = true;
+                $activeThreadTitle = ($display_thread_ids ? "({$thread['id']}) " : '') . $thread["title"];
+                $activeThread = $thread;
+                if ($thread["pinned"])
+                    $activeThreadAnnouncement = true;
+                if ($thread_id_p == -1)
+                    $thread_id_p = $thread["id"];
+            }
+            if (!$this->core->getQueries()->viewedThread($current_user, $thread["id"])) {
+                $class .= " new_thread";
+            }
+            if ($thread["deleted"]) {
+                $class .= " deleted";
+            }
+            //fix legacy code
+            $titleDisplay = $thread['title'];
 
-						if(!empty($temp_first_post_content)){
-							$first_post_content = $temp_first_post_content;
-						}
 
-						$sizeOfContent = strlen($first_post_content);
-						$contentDisplay = substr($first_post_content, 0, ($sizeOfContent < 80) ? $sizeOfContent : strrpos(substr($first_post_content, 0, 80), " "));
-						$titleLength = strlen($thread['title']);
+            //replace tags from displaying in sidebar
+            $first_post_content = str_replace("[/code]", "", str_replace("[code]", "", strip_tags($first_post["content"])));
+            $temp_first_post_content = preg_replace('#\[url=(.*?)\](.*?)(\[/url\])#', '$2', $first_post_content);
 
-						$titleDisplay = substr($titleDisplay, 0, ($titleLength < 40) ? $titleLength : strrpos(substr($titleDisplay, 0, 40), " "));
+            if (!empty($temp_first_post_content)) {
+                $first_post_content = $temp_first_post_content;
+            }
 
-						if(strlen($first_post["content"]) > 80){
-							$contentDisplay .= "...";
-						}
-						if(strlen($thread["title"]) > 40){
-							//Fix ... appearing
-							if(empty($titleDisplay))
-								$titleDisplay .= substr($thread['title'], 0, 30);
-							$titleDisplay .= "...";
-						}
-						$titleDisplay = ($display_thread_ids ? "({$thread['id']}) " : '') . $titleDisplay;
-						$titleDisplay = htmlentities($titleDisplay, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-						if($thread["current_user_posted"]) {
-							$icon = '<i class="fas fa-comments" title="You have contributed"></i> ';
-							$titleDisplay = $icon . $titleDisplay;
-						}
+            $sizeOfContent = strlen($first_post_content);
+            $contentDisplay = substr($first_post_content, 0, ($sizeOfContent < 80) ? $sizeOfContent : strrpos(substr($first_post_content, 0, 80), " "));
+            $titleLength = strlen($thread['title']);
 
-						$return .= <<<HTML
-						<a href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread['id']))}">
-						<div class="{$class}">
-HTML;
-						if($thread["pinned"] == true){
-							$return .= <<<HTML
-							<i class="fas fa-star" style="padding-left:3px;position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px; -webkit-text-stroke-color: black;" title = "Announcement" aria-hidden="true"></i>
-HTML;
-						}
-						if(isset($thread['favorite']) && $thread['favorite']) {
-							$return .= <<<HTML
-							<i class="fas fa-thumbtack" style="padding-left:3px;position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;
-    -webkit-text-stroke-color: black;" title="Pinned as my favorite" aria-hidden="true"></i>
-HTML;
-						}
-						if($thread['merged_thread_id'] != -1) {
-							$return .= <<<HTML
-							<i class="fas fa-link" style="padding-left:3px;position:relative; float:right; display:inline-block; color: white; -webkit-text-stroke-width: 1px;
-    -webkit-text-stroke-color: black;" title="Thread Merged" aria-hidden="true"></i>
-HTML;
-						}
-						if (!isset($thread['status'])) {
-                            $thread['status'] = 0;
-                        }
-						if($thread['status'] !=0) {
-							if($thread['status'] == 1) {
-								$fa_icon = "fa-check";
-								$fa_color = "#5cb85c";
-								$fa_margin_right = "0px";
-								$fa_font_size = "1.5em";
-								$tooltip = "Thread Resolved";
-							} else {
-								$fa_icon = "fa-question";
-								$fa_color = "#ffcc00";
-								$fa_margin_right = "5px";
-								$fa_font_size = "1.8em";
-								$tooltip = "Thread Unresolved";
-							}
-							$return .= <<<HTML
-							<i class="fa ${fa_icon}" style="margin-right:${fa_margin_right}; padding-left:3px; position:relative; float:right; display:inline-block; color:${fa_color}; font-size:${fa_font_size};" title = "${tooltip}" aria-hidden="true"></i>
-HTML;
-						}
-						if($this->core->getQueries()->isThreadLocked($thread['id']))
-                        {
-                            $return .= <<<HTML
-                            <i class="fas fa-lock" style="padding-left:3px;position:relative; float:right; display:inline-block; color: white; -webkit-text-stroke-width: 1px;
-    -webkit-text-stroke-color: black;" title="Locked" aria-hidden="true"></i>
-HTML;
+            $titleDisplay = substr($titleDisplay, 0, ($titleLength < 40) ? $titleLength : strrpos(substr($titleDisplay, 0, 40), " "));
 
-                        }
-						$categories_content = array();
-						foreach ($thread["categories_desc"] as $category_desc) {
-							$categories_content[] = array(htmlentities($category_desc, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
-						}
-						for ($i = 0; $i < count($thread["categories_color"]); $i+=1) {
-							$categories_content[$i][] = $thread["categories_color"][$i];
-						}
-						$return .= <<<HTML
-						<h4>{$titleDisplay}</h4>
-						<h5 style="font-weight: normal;">{$contentDisplay}</h5>
-HTML;
-						foreach ($categories_content as $category_content) {
-							$return .= <<<HTML
-							<span class="label_forum" style="background-color: {$category_content[1]}">{$category_content[0]}</span>
-HTML;
-						}
-						if(!is_null($date)) {
-							$return .= <<<HTML
-							<h5 style="float:right; font-weight:normal;margin-top:5px">{$function_date($date,"n/j g:i A")}</h5>
-HTML;
-						}
-						$return .= <<<HTML
-						</div>
-						</a>
-						<hr style="margin-top: 0px;margin-bottom:0px;">
-HTML;
-					}
-					return $return;
-	}
+            if (strlen($first_post["content"]) > 80) {
+                $contentDisplay .= "...";
+            }
+            if (strlen($thread["title"]) > 40) {
+                //Fix ... appearing
+                if (empty($titleDisplay))
+                    $titleDisplay .= substr($thread['title'], 0, 30);
+                $titleDisplay .= "...";
+            }
+            $titleDisplay = ($display_thread_ids ? "({$thread['id']}) " : '') . $titleDisplay;
+
+            $link = $this->core->buildUrl(['component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread['id']]);
+
+            $favorite = isset($thread['favorite']) && $thread['favorite'];
+
+            $fa_icon = "fa-question";
+            $fa_color = "#ffcc00";
+            $fa_margin_right = "5px";
+            $fa_font_size = "1.8em";
+            $tooltip = "Thread Unresolved";
+
+            if (!isset($thread['status'])) {
+                $thread['status'] = 0;
+            }
+            if ($thread['status'] != 0) {
+                if ($thread['status'] == 1) {
+                    $fa_icon = "fa-check";
+                    $fa_color = "#5cb85c";
+                    $fa_margin_right = "0px";
+                    $fa_font_size = "1.5em";
+                    $tooltip = "Thread Resolved";
+                }
+            }
+
+            $categories_content = [];
+            foreach ($thread["categories_desc"] as $category_desc) {
+                $categories_content[] = [$category_desc];
+            }
+            for ($i = 0; $i < count($thread["categories_color"]); $i += 1) {
+                $categories_content[$i][] = $thread["categories_color"][$i];
+            }
+
+            $date_content = ["not_null" => !is_null($date)];
+
+            if (!is_null($date)) {
+                $date_content["formatted"] = $function_date($date, "n/j g:i A");
+            }
+
+            $thread_content[] = [
+                "title" => $titleDisplay,
+                "content" => $contentDisplay,
+                "categories" => $categories_content,
+                "link" => $link,
+                "class" => $class,
+                "pinned" => $thread["pinned"],
+                "favorite" => $favorite,
+                "merged_thread_id" => $thread['merged_thread_id'],
+                "status" => $thread["status"],
+                "fa_icon" => $fa_icon,
+                "fa_color" => $fa_color,
+                "fa_margin_right" => $fa_margin_right,
+                "fa_font_size" => $fa_font_size,
+                "tooltip" => $tooltip,
+                "is_locked" => $this->core->getQueries()->isThreadLocked($thread['id']),
+                "date" => $date_content,
+                "current_user_posted" => $thread["current_user_posted"]
+            ];
+        }
+
+
+        $return = $this->core->getOutput()->renderTwigTemplate("forum/displayThreadList.twig", [
+            "thread_content" => $thread_content,
+        ]);
+        
+        return $return;
+    }
 
 	public function filter_post_content($original_post_content) {
 		$post_content = html_entity_decode($original_post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
@@ -703,8 +687,6 @@ HTML;
 		if(!empty($pre_post)){
 			$post_content = $pre_post;
 		}
-
-		$post_content = htmlentities($post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
 		preg_match_all('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', $post_content, $result);
 		$accepted_schemes = array("https", "http");
