@@ -994,11 +994,6 @@ HTML;
 		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
 		$this->core->getOutput()->addBreadcrumb("Statistics", $this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats')));
 
-		$return = <<<HTML
-
-		<div class="content forum_content">
-
-HTML;
 
 		$buttons = array(
 			array(
@@ -1014,172 +1009,45 @@ HTML;
 
 		$thread_exists = $this->core->getQueries()->threadExists();
 
-		$return .= $this->core->getOutput()->renderTwigTemplate("forum/ForumBar.twig", [
-									"forum_bar_buttons_right" => $buttons,
-									"forum_bar_buttons_left" => [],
-									"show_threads" => false,
-									"thread_exists" => $thread_exists
-		]);
+		$forumBarData = [
+            "forum_bar_buttons_right" => $buttons,
+            "forum_bar_buttons_left" => [],
+            "show_threads" => false,
+            "thread_exists" => $thread_exists
+		];
 
-		$return .= <<<HTML
-			<div style="padding-left:20px;padding-bottom: 10px;border-radius:3px;padding-right:20px;">
-				<table class="table table-striped table-bordered persist-area" id="forum_stats_table">
-					<tr>			
-				        <td style = "cursor:pointer;" width="15%" id="user_sort"><a href="javascript:void(0)">User</a></td>
-				        <td style = "cursor:pointer;" width="15%" id="total_posts_sort"><a href="javascript:void(0)">Total Posts (not deleted)</a></td>
-				        <td style = "cursor:pointer;" width="15%" id="total_threads_sort"><a href="javascript:void(0)">Total Threads</a></td>
-				        <td style = "cursor:pointer;" width="15%" id="total_deleted_sort"><a href="javascript:void(0)">Total Deleted Posts</a></td>
-				        <td width="40%">Show Posts</td>
-					</tr>
-HTML;
+		$userData = [];
+
 		foreach($users as $user => $details){
 			$first_name = $details["first_name"];
 			$last_name = $details["last_name"];
-			$post_count = count($details["posts"]);
-			$posts = htmlspecialchars(json_encode($details["posts"]), ENT_QUOTES, 'UTF-8');
-			$ids = htmlspecialchars(json_encode($details["id"]), ENT_QUOTES, 'UTF-8');
-			$timestamps = htmlspecialchars(json_encode($details["timestamps"]), ENT_QUOTES, 'UTF-8');
-			$thread_ids = htmlspecialchars(json_encode($details["thread_id"]), ENT_QUOTES, 'UTF-8');
-			$thread_titles = htmlspecialchars(json_encode($details["thread_title"]), ENT_QUOTES, 'UTF-8');
+            $post_count = count($details["posts"]);
+			$posts = json_encode($details["posts"]);
+			$ids = json_encode($details["id"]);
+			$timestamps = json_encode($details["timestamps"]);
+			$thread_ids = json_encode($details["thread_id"]);
+			$thread_titles = json_encode($details["thread_title"]);
 			$num_deleted = ($details["num_deleted_posts"]);
-			$return .= <<<HTML
-			<tbody>
-				<tr>
-					<td>{$last_name}, {$first_name}</td>
-					<td>{$post_count}</td>
-					<td>{$details["total_threads"]}</td>
-					<td>{$num_deleted}</td>
-					<td><button class="btn btn-default" data-action = "expand" data-posts="{$posts}" data-id="{$ids}" data-timestamps="{$timestamps}" data-thread_id="{$thread_ids}" data-thread_titles="{$thread_titles}">Expand</button></td>
-				</tr>
-			</tbody>
-HTML;
-			
+
+			$userData[] = [
+			    "last_name" => $last_name,
+                "first_name" => $first_name,
+                "post_count" => $post_count,
+                "details_total_threads" => $details["total_threads"],
+                "num_deleted" => $num_deleted,
+                "posts" => $posts,
+                "ids" => $ids,
+                "timestamps" => $timestamps,
+                "thread_ids" => $thread_ids,
+                "thread_titles" => $thread_titles
+            ];
 		}
-		
-		$return .= <<<HTML
-				</table>
-			</div>
-			</div>
+    
+    $return = $this->core->getOutput()->renderTwigTemplate("forum/StatPage.twig", [
+        "forumBarData" => $forumBarData,
+        "userData" => $userData
+    ]);
 
-			<script>
-				$("td").click(function(){
-				    var table_id = 0;
-				    switch ($(this).attr('id')) {
-				        case "user_sort":
-				            table_id = 0;
-				            break;
-                        case "total_posts_sort":
-                            table_id = 1;
-                            break;
-                        case "total_threads_sort":
-                            table_id = 2;
-                            break;
-                        case "total_deleted_sort":
-                            table_id = 3;
-                            break;
-                        default:
-                            table_id = 0;
-				    }
-				    
-                    if ($(this).html().indexOf(' ↓') > -1) {
-                        sortTable(table_id, true);
-                    } else {
-                        sortTable(table_id, false);
-                    }
-				});
-				
-				$("button").click(function(){
-					
-					var action = $(this).data('action');
-					var posts = $(this).data('posts');
-					var ids = $(this).data('id');
-					var timestamps = $(this).data('timestamps');
-					var thread_ids = $(this).data('thread_id');
-					var thread_titles = $(this).data('thread_titles');
-					if(action=="expand"){
-						
-						for(var i=0;i<posts.length;i++){
-							var post_string = posts[i];
-							post_string = escapeSpecialChars(post_string);
-							var thread_title = thread_titles[i]["title"];
-							thread_title = escapeSpecialChars(thread_title);
-							$(this).parent().parent().parent().append('<tr id="'+ids[i]+'"><td></td><td>'+timestamps[i]+'</td><td style = "cursor:pointer;" data-type = "thread" data-thread_id="'+thread_ids[i]+'"><pre class="pre_forum" style="white-space: pre-wrap;">'+thread_title+'</pre></td><td colspan = "2" style = "cursor:pointer;" align = "left" data-type = "post" data-thread_id="'+thread_ids[i]+'"><pre class="pre_forum" style="white-space: pre-wrap;">'+post_string+'</pre></td></tr> ');
-						}
-						
-						$(this).html("Collapse");
-						$(this).data('action',"collapse");
-						$("td").click(function(){
-						
-							if($(this).data('type')=="post" || $(this).data('type')=="thread"){
-			
-								var id = $(this).data('thread_id');
-								var url = buildUrl({'component' : 'forum', 'page' : 'view_thread', 'thread_id' : id});
-								window.open(url);
-							}
-						
-					});
-					}
-					else{
-						for(var i=0;i<ids.length;i++){
-							var item = document.getElementById(ids[i]);
-							item.remove();
-						}
-						        
-						$(this).html("Expand");
-						$(this).data('action',"expand");
-					}
-					
-					return false;
-				});
-
-				function sortTable(sort_element_index, reverse=false){
-					var table = document.getElementById("forum_stats_table");
-					var switching = true;
-					while(switching){
-						switching=false;
-						var rows = table.getElementsByTagName("TBODY");
-						for(var i=1;i<rows.length-1;i++){
-
-							var a = rows[i].getElementsByTagName("TR")[0].getElementsByTagName("TD")[sort_element_index];
-							var b = rows[i+1].getElementsByTagName("TR")[0].getElementsByTagName("TD")[sort_element_index];
-							if (reverse){
-							    if (sort_element_index == 0 ? a.innerHTML<b.innerHTML : parseInt(a.innerHTML) > parseInt(b.innerHTML)){
-                                    rows[i].parentNode.insertBefore(rows[i+1],rows[i]);
-                                    switching=true;
-							    } 
-							} else {
-                                if(sort_element_index == 0 ? a.innerHTML>b.innerHTML : parseInt(a.innerHTML) < parseInt(b.innerHTML)){
-                                    rows[i].parentNode.insertBefore(rows[i+1],rows[i]);
-                                    switching=true;
-                                }
-							}
-						}
-
-					}
-
-					var row0 = table.getElementsByTagName("TBODY")[0].getElementsByTagName("TR")[0];
-					var headers = row0.getElementsByTagName("TD");
-					
-					for(var i = 0;i<headers.length;i++){
-						var index = headers[i].innerHTML.indexOf(' ↓');
-						var reverse_index = headers[i].innerHTML.indexOf(' ↑');
-						
-						if(index > -1 || reverse_index > -1){
-							headers[i].innerHTML = headers[i].innerHTML.slice(0, -2);
-						} 
-					}
-                    
-					if (reverse) {
-                        headers[sort_element_index].innerHTML = headers[sort_element_index].innerHTML + ' ↑';
-					} else {
-					    headers[sort_element_index].innerHTML = headers[sort_element_index].innerHTML + ' ↓';
-					}
-
-				}
-
-
-			</script>
-HTML;
 		return $return;
 
 	}
