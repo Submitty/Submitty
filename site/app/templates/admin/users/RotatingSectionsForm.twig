@@ -12,24 +12,16 @@
 
         $("[name='sort_type']").change(function() {
             var val = $(this).val();
-            if (val == "fewest") {
+			if (val != "redo") {
 				$('#redo_data').hide();
-                $("[name='sections']").val({{ max_section }}).addClass('disabled').attr('readonly', 'readonly');
-                $("[name='rotating_type']").val("random").addClass('disabled').attr('disabled', 'true');
-            }
-            else if (val == "drop_null" || val == "drop_all") {
-				$('#redo_data').hide();
-                $("[name='sections']").addClass('disabled').attr('readonly', 'readonly');
-                $("[name='rotating_type']").addClass('disabled').attr('disabled', 'true');
-            }
+			}
             else {
 				$('#redo_data').show();
-                $("[name='sections']").removeClass('disabled').prop('readonly', false);
-                $("[name='rotating_type']").removeClass('disabled').prop('disabled', false);
             }
         });
     });
 
+	
     $(document).ready(function() {
         $('#redo_data').hide();
     });
@@ -136,7 +128,7 @@
     <form action="{{ core.buildUrl({'component': 'admin', 'page': 'users', 'action': 'update_rotating_sections'}) }}" method="POST">
         <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
         <div class="row">
-            <div class="box col-md-6">
+            <div class="box col-md-6" id="left_box">
                 <h2>Current Rotating Section Counts</h2>
                 <div class="row">
                     <div class="col-md-6">
@@ -177,7 +169,7 @@
                     </div>
                 </div>
             </div>
-            <div class="box col-md-6">
+            <div class="box col-md-6" id="right_box" >
    				<fieldset>
 					
 					<label>
