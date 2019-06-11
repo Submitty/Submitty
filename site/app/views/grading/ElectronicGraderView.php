@@ -175,7 +175,7 @@ class ElectronicGraderView extends AbstractView {
                 //END OF ELSE
             }
         }
-        var_dump ($component_averages);
+        var_dump ($gradeable);
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Status.twig", [
             "gradeable_id" => $gradeable->getId(),
             "gradeable_title" => $gradeable->getTitle(),
