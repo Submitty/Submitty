@@ -456,9 +456,7 @@ class SubmissionController extends AbstractController {
 
         if (!isset($_POST['num_pages']) && !$is_qr) {
             $msg = "Did not pass in number of pages or files were too large.";
-            $return = array('success' => false, 'message' => $msg);
-            $this->core->getOutput()->renderJson($return);
-            return $return;
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
 
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
@@ -610,9 +608,7 @@ class SubmissionController extends AbstractController {
             }
         }
 
-        $return = array('success' => true);
-        $this->core->getOutput()->renderJson($return);
-        return $return;
+        return $this->core->getOutput()->renderJsonSuccess();
     }
 
     /**

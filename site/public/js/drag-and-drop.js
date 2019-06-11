@@ -607,7 +607,7 @@ function handleBulk(gradeable_id, num_pages, use_qr_codes = false, qr_prefix = "
             $("#submit").prop("disabled", false);
             try {
                 data = JSON.parse(data);
-                if (data['success']) {
+                if (data['status'] === 'success') {
                     window.location.href = return_url;
                 }
                 else {
