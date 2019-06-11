@@ -1207,6 +1207,10 @@ function downloadFileWithAnyRole(file_name, path) {
     window.location = buildUrl({'component': 'misc', 'page': 'download_file_with_any_role', 'dir': 'course_materials', 'file': file, 'path': path});
 }
 
+function downloadCourseMaterialZip(dir_name, path) {
+    window.location = buildUrl({'component': 'misc', 'page': 'download_course_material_zip', 'dir_name': dir_name, 'path': path});
+}
+
 function checkColorActivated() {
     var pos = 0;
     var seq = "&&((%'%'BA\r";
