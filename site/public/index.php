@@ -319,8 +319,8 @@ switch($_REQUEST['component']) {
         $control = new app\controllers\forum\ForumController($core);
         $control->run();
         break;
-    case 'notification_settings':
-        $control = new app\controllers\NotificationSettings($core);
+    case 'notification':
+        $control = new app\controllers\NotificationController($core);
         $control->run();
         break;
     case 'pdf':
