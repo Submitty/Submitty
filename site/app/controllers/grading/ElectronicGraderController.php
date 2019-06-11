@@ -39,6 +39,7 @@ class ElectronicGraderController extends GradingController {
                 break;
             case 'randomize_team_rotating_sections':
                 $this->randomizeTeamRotatingSections();
+                break;
             case 'grade':
                 $this->showGrading();
                 break;
