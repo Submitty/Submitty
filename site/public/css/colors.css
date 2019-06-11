@@ -1,0 +1,81 @@
+:root{
+    /*master color*/
+    --submitty-blue: #316498;
+    /*might wanna change blue borders/hover text/sidebar text to submitty blue*/
+
+    /*buttons, primarily but also can be used for notifications/anything
+    that requires this color scheme*/
+    --danger-red: #e84848;
+    --hover-danger-red: #ff6655;
+
+    --good-green: #5fb760;
+    --hover-good-green: #66cc77;
+    --disabled-good-green: #5cb85c;
+
+    --actionable-blue: #006392;
+    --hover-actionable-blue: #286090;
+    --disabled-actionable-blue: #368aae;
+
+    --default-white: #ffffff;
+    --hover-default-white: #f6fbfe;
+
+    /*the look of the webpage itself*/
+    --background-blue: #f6fbfe;
+    --main-body-white: #ffffff;
+    --drop-shadow: #888888;
+    --subheading-underscore-grey: #aaaaaa;
+
+    /*dropdown buttons*/
+    --hover-dropdown: #d1d1d1;
+    --divider-dropdown: #e5e5e5;
+    --disabled-dropdown: #777;
+
+    /*text and fonts*/
+    --text-black: #000000; /*use only on white/background-blue*/
+    --text-white: #ffffff; /*use on all colors*/
+    --hover-footer-text-blue: #405E90; /*replace with submitty blue?*/
+
+    /*discussion forum*/
+    --viewed-discussion-post-blue: #;
+    --deleted-discussion-post: #dcdcdc;
+    --important-post: #ffd700; /*is also for star color*/
+        /*instructor setting options*/
+    --post-label-grey: #777;
+    --hover-post-label-grey: #5e5e5e;
+    --post-label-blue: #337ab7;
+    --hover-post-label-blue: #286090;
+    --post-label-green: #5cb85c;
+    --hover-post-label-green: #449d44;
+    --post-label-teal: #5bc0de;
+    --hover-post-label-teal: #31b0d5;
+    --post-label-orange: #f0ad4e;
+    --hover-post-label-orange: #ec971f;
+    --post-label-red: #d9534f;
+    --hover-post-label-red: #c9302c;
+        /*these differ from the colors on the posts for some reason?
+        so I will put them here for reference
+        green-message: #008800
+        blue-message: #0a6496
+        red-message: #af0000
+        yellow-message: #ff9900
+        black-message: #000000*/
+
+    /*links*/
+    --external-link: #337ab7;
+    --external-link-hover: #23527c;
+    --external-link-disabled: #777;
+    --external-link-active: #991313;
+
+    /*checkboxes, radio buttons*/
+    --unchecked-checkbox: #ffffff;
+    --checked-checkbox: #316498;
+
+    /*sidebar*/
+    --selected-nav-sidebar: #d9e1e2;
+    --selected-nav-sidebar-text: #000000;
+    --nav-sidebar-text: #006398;
+
+    /*extra stuff*/
+    --help-icon-blue: #1E90FF; /*maybe change this to submitty blue??*/
+    --disabled-text-area: #d3d3d3;
+}
