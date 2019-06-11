@@ -7,6 +7,7 @@ import PyPDF2
 import sys
 import traceback
 from PyPDF2 import PdfFileWriter
+from . import write_to_log as logger
 
 try:
     from pdf2image import convert_from_bytes
@@ -21,7 +22,9 @@ def main(args):
     filename = args[0]
     split_path = args[1]
     num = int(args[2])
-    log_file = args[3]
+    log_file_path = args[3]
+
+    log_msg = "Process " + str(os.getpid()) + ": "
     try:
         # check that all pages are divisible
         pdfFileObj = open(filename, 'rb')
@@ -30,7 +33,7 @@ def main(args):
         if (total_pages % num != 0):
             msg = filename + " not divisible by " + str(num)
             print(msg)
-            log_file.write(msg + "\n")
+            logger.write_to_log(log_file_path, log_msg + msg)
             sys.exit(1)
 
         # recalculate the total # of pages for each file
@@ -41,6 +44,7 @@ def main(args):
 
         i = 0
         os.chdir(split_path)
+        buff = log_msg
         while i < total_pages:
             cover_writer = PdfFileWriter()
             cover_writer.addPage(pdfReader.getPage(i))
@@ -64,15 +68,20 @@ def main(args):
             with open(cover_filename, 'wb') as out:
                 cover_writer.write(out)
 
-            log_file.write("\tSplitting PDF at page " + str(i) + "\n")
+            buff += "Splitting PDF at page " + str(i) + ", "
 
             # save cover as image
             pdf_images = convert_from_bytes(open(cover_filename, 'rb').read())
             pdf_images[0].save('{}.jpg'.format(cover_filename[:-4]),
                                "JPEG", quality=100)
-    except Exception:
+
+        buff += "Finished splitting into " + str(int(total_pages/num)) + " files"
+        logger.write_to_log(log_file_path, buff)
+    except Exception as err:
+        print(err)
         traceback.print_exc()
-        log_file.write(traceback.format_exc())
+        logger.write_to_log(log_file_path, buff)
+        logger.write_to_log(log_file_path, traceback.format_exc())
 
 
 if __name__ == "__main__":

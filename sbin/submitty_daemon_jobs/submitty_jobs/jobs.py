@@ -11,10 +11,12 @@ import json
 import stat
 import traceback
 import datetime
+import fcntl
 from urllib.parse import unquote
 from . import bulk_qr_split
 from . import bulk_upload_split
 from . import INSTALL_DIR, DATA_DIR
+from . import write_to_log as logger
 
 
 class AbstractJob(ABC):
@@ -186,13 +188,6 @@ class BulkUpload(CourseJob):
         filename = self.job_details['filename']
         is_qr = self.job_details['is_qr']
 
-        log_path = os.path.join(DATA_DIR, "logs", "bulk_uploads")
-        log_file = os.path.join(
-        log_path, "{:04d}{:02d}{:02d}.txt".format(TODAY.year, TODAY.month,
-                                                  TODAY.day))
-
-        #create log file if it doesn't exist
-
         if is_qr and ('qr_prefix' not in self.job_details or 'qr_suffix' not in self.job_details):
             msg = "did not pass in qr prefix or suffix"
             print(msg)
@@ -207,6 +202,27 @@ class BulkUpload(CourseJob):
                 print(msg)
                 sys.exit(1)
             num  = self.job_details['num']
+
+        today = datetime.datetime.now()
+        log_path = os.path.join(DATA_DIR, "logs", "bulk_uploads")
+        log_file_path = os.path.join(log_path, 
+                                "{:04d}{:02d}{:02d}.txt".format(today.year, today.month,
+                                today.day))
+
+        pid = os.getpid()
+        log_msg = "Process " + str(pid) + ": Starting "
+        if is_qr:
+            log_msg += "QR bulk upload job, QR Prefx: \'" + qr_prefix + "\', QR Suffix: \'" + qr_suffix + "\'"
+        else:
+            log_msg += "Normal bulk upload job, pages per PDF: " + str(num)
+        
+        try:
+            logger.write_to_log(log_file_path, log_msg)
+        except Exception as err:
+            print(err)
+            traceback.print_exc()
+            sys.exit(1)
+
         #create paths
         try:
             with open("/usr/local/submitty/config/submitty.json", encoding='utf-8') as data_file:
@@ -216,12 +232,11 @@ class BulkUpload(CourseJob):
             uploads_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads")
             bulk_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads/bulk_pdf",gradeable_id,timestamp)
             split_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads/split_pdf",gradeable_id,timestamp)
-
         except Exception:
-            msg = "Failed while parsing args and creating paths"
+            msg = "Process " + str(pid) + ": Failed while parsing args and creating paths"
             print(msg)
             traceback.print_exc()
-            #log_file.write(traceback.format_exc())
+            logger.write_to_log(log_file_path, msg + "\n" + traceback.format_exc())
             sys.exit(1)
 
         #copy file over to correct folders
@@ -243,16 +258,17 @@ class BulkUpload(CourseJob):
             # move to copy folder
             os.chdir(split_path)
         except Exception:
-            msg = "Failed while copying files"
+            msg = "Process " + str(pid) + ": Failed while copying files"
             print(msg)
             traceback.print_exc()
+            logger.write_to_log(log_file_path, msg + "\n" + traceback.format_exc())
             sys.exit(1)
 
         try:
             if is_qr:
-                bulk_qr_split.main([filename, split_path, qr_prefix, qr_suffix, log_file])
+                bulk_qr_split.main([filename, split_path, qr_prefix, qr_suffix, log_file_path])
             else: 
-                bulk_upload_split.main([filename, split_path, num, log_file])
+                bulk_upload_split.main([filename, split_path, num, log_file_path])
 
             os.chdir(split_path)
             #if the original file has been deleted, continue as normal
