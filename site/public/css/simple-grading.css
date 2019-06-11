@@ -1,0 +1,19 @@
+.column-wrapper {
+    display:flex; 
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.row-wrapper {
+    display:flex; 
+    flex-direction:column;
+}
+
+#data-table td:focus, #data-table input:focus {
+    outline: 3px dashed #337ab7;
+}
+
+.fixed-top {
+    position: fixed;
+    top: 0;
+}
