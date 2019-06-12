@@ -58,8 +58,7 @@ class AuthenticationController extends AbstractController {
      * @Route("/authentication/logout")
      */
     public function logout() {
-        $cookie_id = 'submitty_session';
-        Utils::setCookie($cookie_id, '', time() - 3600);
+        Utils::setCookie('submitty_session', '', time() - 3600);
         $this->core->removeCurrentSession();
         $this->core->redirect($this->core->buildNewUrl(['authentication', 'login']));
     }
