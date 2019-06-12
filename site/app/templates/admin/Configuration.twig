@@ -39,7 +39,7 @@
                 </label>
             </div>
             <div class="option-input col-md-4"><input type="checkbox" name="forum_enabled" id="forum_enabled" value="true" {{ fields['forum_enabled'] ? 'checked': '' }} />
-                <span id="forum_enabled_message" style="display: {% if fields['forum_enabled'] %} inline-block; {% endif %}">Default categories created. <a href="{{ manage_categories_url }}" alt="Manage Categories">Click here to manage.</a></span>
+                <span id="forum_enabled_message" style="display: {% if fields['forum_enabled'] %} inline-block; {% endif %}"><span id="forum_enabled_message_first"></span> <a href="{{ manage_categories_url }}" alt="Manage Categories">Customize categories.</a></span>
             </div>
 
         </div>
@@ -281,15 +281,22 @@
             }
         });
 
+         var firstCheck = 0;
+
         $(document).on('change', '#forum_enabled', function(){
             var forum_enabled = $('#forum_enabled').is(":checked");
 
-            console.log(forum_enabled);
-
             if(!forum_enabled){
+                if(firstCheck == 1){
+                    $("#forum_enabled_message_first").empty();
+                }
                 $('#forum_enabled_message').hide();
             }
             else{
+                if(firstCheck == 0){
+                    $("#forum_enabled_message_first").append("Default categories created. ");
+                    firstCheck++;
+                }
                 $('#forum_enabled_message').show();
             }
         });
