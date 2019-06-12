@@ -17,7 +17,7 @@
     <div class="upperinfo">
         <h1 class="upperinfo-left">New submission for: {{ gradeable_name }}</h1>
         {% if has_due_date %}
-            <h3 class="upperinfo-right">Due: {{ formatted_due_date }}</h3>
+            <h2 class="upperinfo-right">Due: {{ formatted_due_date }}</h2>
         {% endif %}
     </div>
 
@@ -30,6 +30,8 @@
     {# Admin submission type selector #}
     {% if core.getUser().accessFullGrading() %}
         <form id="submissionForm" method="post" style="width: 100%; ">
+	    <fieldset>
+            <legend> Select either normal, upload for a student or bulk upload </legend>	
             <div style="clear:both;">
                 <input type='radio' id="radio_normal" name="submission_type" checked="true">
                 <label for="radio_normal">Normal Submission</label>
@@ -49,31 +51,33 @@
                 </div>
                 <div class="sub">
                     <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
-                    user_id: <input type="text" id= "user_id" value ="" placeholder="{{ user_id }}"/>
+                    <label for="user_id"> user_id: </label>
+		    <input type="text" id= "user_id" value ="" placeholder="{{ user_id }}"/>
                 </div>
             </div>
             <br />
             <div class = "sub" id="pdf_submit_button" style="display: none">
                 <div class="sub">
-                    Split by QR code?
+                    <label for="use_qr">Split by QR code?</label>
                     <input type="checkbox" id="use_qr">
                     <br />
-                    <span id="pages_prompt"># of page(s) per PDF:</span>
+                    <label id="pages_prompt" for="num_pages"># of page(s) per PDF:</label>
                     <span id="prefix_prompt">QR code prefix/suffix:
-                    <a style="text-decoration:none;" href = "https://submitty.org/instructor/exams#bulk-upload-and-split-with-qr-codes" target="_none">
-                        <i title="Bulk Upload QR Help" class="far fa-question-circle helpicon"></i>
+                    <a style="text-decoration:none;" aria-label="Help with QR bulk uploads" href = "https://submitty.org/instructor/exams#bulk-upload-and-split-with-qr-codes" target="_none">
+	                    <i aria-hidden="true" title="Bulk Upload QR Help" class="far fa-question-circle helpicon"></i>
                     </a>
                     </span>
                     <input type="number" id= "num_pages" placeholder="required"/>
-                    <input type="text" id="qr_prefix" placeholder="Prefix (optional)" />
-                    <input type="text" id="qr_suffix" placeholder="Suffix (optional)" />
+                    <input type="text" id="qr_prefix" placeholder="Prefix (optional)" aria-label="QR Prefix (Optional)" />
+                    <input type="text" id="qr_suffix" placeholder="Suffix (optional)" aria-label="QR Suffix (Optional)" />
                     <div id="expected_num_box">
-                    Expected Number of pages per PDF:
+                    <label for= "expected_pages_input"> Expected Number of pages per PDF: </label>
                     <input type="number" id= "expected_pages_input" placeholder="optional" onchange="highlightPageCount()" />
                     </div>
                 </div>
                 <br />
             </div>
+            </fieldset>
         </form>
 
         <script type="text/javascript">
@@ -374,14 +378,14 @@
                      role="text"
                      aria-label="Press enter to upload your {{ part }} file"
                      style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 150px;">
-                    <h3 class="label" id="label{{ loop.index }}">
+                    <h2 class="label" id="label{{ loop.index }}">
                         {% if part_names|length > 1 %}
                             Drag your {{ part }} here or click to open file browser
                         {% else %}
                             Drag your file(s) here or click to open file browser
                         {% endif %}
-                    </h3>
-                    <input type="file" name="files" id="input_file{{ loop.index }}" style="display: none" onchange="addFilesFromInput({{ loop.index }})" multiple />
+                    </h2>
+                    <input type="file" name="files" id="input_file{{ loop.index }}" style="display: none" onchange="addFilesFromInput({{ loop.index }})" multiple aria-label="Select Files to upload" />
                 </div>
             {% endfor %}
         </div>
