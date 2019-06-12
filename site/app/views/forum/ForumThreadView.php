@@ -110,7 +110,7 @@ class ForumThreadView extends AbstractView {
 	*/
 	public function showForumThreads($user, $posts, $unviewed_posts, $threadsHead, $show_deleted, $show_merged_thread, $display_option, $max_thread, $initialPageNumber) {
 		if(!$this->forumAccess()){
-			$this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
+			$this->core->redirect($this->core->buildNewUrl([$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse()]));
 			return;
 		}
 
@@ -929,11 +929,13 @@ HTML;
 	}
 
     public function createThread($category_colors){
-
-        if(!$this->forumAccess()){
-            $this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
-            return;
-        }
+		if(!$this->forumAccess()){
+			$this->core->redirect($this->core->buildNewUrl([
+				$this->core->getConfig()->getSemester(),
+				$this->core->getConfig()->getCourse()
+			]));
+			return;
+		}
 
         $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
         $this->core->getOutput()->addBreadcrumb("Create Thread", $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread')));
@@ -980,9 +982,8 @@ HTML;
     }
 
 	public function statPage($users) {
-
 		if(!$this->forumAccess()){
-			$this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
+			$this->core->redirect($this->core->buildNewUrl([$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse()]));
 			return;
 		}
 

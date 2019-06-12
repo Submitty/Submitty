@@ -10,7 +10,9 @@ use app\models\Config;
 use app\models\User;
 use ReflectionException;
 
+
 class BaseUnitTest extends \PHPUnit\Framework\TestCase {
+
     /** @noinspection PhpDocSignatureInspection */
     /**
      * Creates a mocked the Core object predefining things with known values so that we don't have to do this
@@ -73,29 +75,28 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
         }
         $core->method('getQueries')->willReturn($mock_queries);
 
-        /** @noinspection PhpUnhandledExceptionInspection */
-        $user = $this->createMockModel(User::class);
-        $user->method('getId')->willReturn("testUser");
-        if (isset($user_config['access_grading'])) {
-            $user->method('accessGrading')->willReturn($user_config['access_grading'] == true);
-        }
-        else {
-            $user->method('accessGrading')->willReturn(false);
-        }
-        if (isset($user_config['access_full_grading'])) {
-            $user->method('accessFullGrading')->willReturn($user_config['access_full_grading'] == true);
-        }
-        else {
-            $user->method('accessFullGrading')->willReturn(false);
-        }
-        if (isset($user_config['access_admin'])) {
-            $user->method('accessAdmin')->willReturn($user_config['access_admin'] == true);
-        }
-        else {
-            $user->method('accessAdmin')->willReturn(false);
-        }
+        if (!isset($user_config['no_user'])) {
+            /** @noinspection PhpUnhandledExceptionInspection */
+            $user = $this->createMockModel(User::class);
+            $user->method('getId')->willReturn("testUser");
+            if (isset($user_config['access_grading'])) {
+                $user->method('accessGrading')->willReturn($user_config['access_grading'] == true);
+            } else {
+                $user->method('accessGrading')->willReturn(false);
+            }
+            if (isset($user_config['access_full_grading'])) {
+                $user->method('accessFullGrading')->willReturn($user_config['access_full_grading'] == true);
+            } else {
+                $user->method('accessFullGrading')->willReturn(false);
+            }
+            if (isset($user_config['access_admin'])) {
+                $user->method('accessAdmin')->willReturn($user_config['access_admin'] == true);
+            } else {
+                $user->method('accessAdmin')->willReturn(false);
+            }
 
-        $core->method('getUser')->willReturn($user);
+            $core->method('getUser')->willReturn($user);
+        }
 
         /** @noinspection PhpParamsInspection */
         $output = new Output($core);

@@ -427,6 +427,8 @@ function displayPreviousSubmissionOptions(callback){
     var closer_btn = form.find(".close-button");
 
     var option;
+    submit_btn.attr('tabindex', '0');
+    closer_btn.attr('tabindex', '0');
     // on click, make submission based on which radio input was checked
     submit_btn.on('click', function() { 
         if($("#instructor-submit-option-new").is(":checked")) {
@@ -467,6 +469,58 @@ function displayPreviousSubmissionOptions(callback){
         radio_idx = parseInt(localStorage.getItem("instructor-submit-option"));
     }
     form.find('input:radio')[radio_idx].checked = true;
+    //since the modal object isn't rendered on the page manually set what the tab button does
+    $("#instructor-submit-option-new").attr('tabindex', '0');
+    $("#instructor-submit-option-merge-1").attr('tabindex', '0');
+    $("#instructor-submit-option-merge-2").attr('tabindex', '0');
+    submit_btn.focus();
+    var current_btn = 4;
+    if(form.css('display') !== 'none'){
+        document.addEventListener("keydown", e => {
+            if(e.keyCode == 9){
+                //on tab update the focus, cycle through the radio buttons and then
+                //the close/submit buttons and then back to the radio buttons
+                $('input[name=instructor-submit]').css({"outline": "none"});
+                e.preventDefault();
+                if(current_btn === 0){
+                    $("#instructor-submit-option-merge-1").focus();
+                    $("#instructor-submit-option-merge-1").css({"outline" : "2px solid #C1E0FF"});
+                }else if(current_btn === 1){
+                    $("#instructor-submit-option-merge-2").focus();
+                    $("#instructor-submit-option-merge-2").css({"outline" : "2px solid #C1E0FF"});
+                }else if(current_btn === 2){
+                    closer_btn.focus();
+                }else if(current_btn === 3){
+                    submit_btn.focus();
+                }else if(current_btn === 4){
+                    $("#instructor-submit-option-new").focus();
+                    $("#instructor-submit-option-new").css({"outline" : "2px solid #C1E0FF"});
+                }
+                current_btn = (current_btn == 4) ? 0 : current_btn + 1;
+            }else if(e.keyCode === 27){
+                //close the modal box on escape
+                closer_btn.click();
+            }else if(e.keyCode === 13){
+                //on enter update whatever the user is focussing on
+                //uncheck everything and then recheck the desired button to make sure it actually updates
+                if(current_btn === 1){
+                    $('input[name=instructor-submit]').prop('checked', false);
+                    $("#instructor-submit-option-merge-1").prop('checked', true);
+                }else if(current_btn === 2){
+                    $('input[name=instructor-submit]').prop('checked', false);
+                    $("#instructor-submit-option-merge-2").prop('checked', true);
+                }else if(current_btn === 0){
+                    $('input[name=instructor-submit]').prop('checked', false);
+                    $("#instructor-submit-option-new").prop('checked', true);
+                }else if(current_btn === 3){
+                    //close the modal if the close button is selected
+                    closer_btn.click();
+                }else if(current_btn === 4){
+                    submit_btn.click();
+                }
+            }
+        });
+    }
 }
 
 /**
