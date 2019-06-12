@@ -5,8 +5,17 @@ namespace tests\app\libraries\routers;
 use app\libraries\routers\WebRouter;
 use tests\BaseUnitTest;
 use Symfony\Component\HttpFoundation\Request;
+use Doctrine\Common\Annotations\AnnotationRegistry;
 
 class WebRouterTester extends BaseUnitTest {
+
+    /**
+     * Loads annotations for routers.
+     */
+    public static function setUpBeforeClass(): void {
+        $loader = require(__DIR__.'/../../../../vendor/autoload.php');
+        AnnotationRegistry::registerLoader([$loader, 'loadClass']);
+    }
 
     public function testLogin() {
         $core = $this->createMockCore();

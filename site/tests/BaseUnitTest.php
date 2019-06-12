@@ -9,18 +9,9 @@ use app\libraries\Utils;
 use app\models\Config;
 use app\models\User;
 use ReflectionException;
-use Doctrine\Common\Annotations\AnnotationRegistry;
 
 
 class BaseUnitTest extends \PHPUnit\Framework\TestCase {
-
-    /**
-     * Loads annotations for routers.
-     */
-    public static function setUpBeforeClass(): void {
-        $loader = require(__DIR__.'/../vendor/autoload.php');
-        AnnotationRegistry::registerLoader([$loader, 'loadClass']);
-    }
 
     /** @noinspection PhpDocSignatureInspection */
     /**

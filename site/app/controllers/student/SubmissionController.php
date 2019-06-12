@@ -272,12 +272,10 @@ class SubmissionController extends AbstractController {
 
     /**
      * @Route("/{_semester}/{_course}/student/{gradeable_id}")
+     * @Route("/{_semester}/{_course}/student/{gradeable_id}/{gradeable_version}")
      * @return array
      */
-    public function showHomeworkPage($gradeable_id = null) {
-        if (!isset($gradeable_id)) {
-            $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
-        }
+    public function showHomeworkPage($gradeable_id, $gradeable_version = null) {
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
         if($gradeable === null) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
@@ -291,7 +289,7 @@ class SubmissionController extends AbstractController {
         }
 
         // Attempt to put the version number to be in bounds of the gradeable
-        $version = intval($_REQUEST['gradeable_version'] ?? 0);
+        $version = intval($gradeable_version ?? 0);
         if ($version < 1 || $version > ($graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : 0)) {
             $version = $graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() : 0;
         }
