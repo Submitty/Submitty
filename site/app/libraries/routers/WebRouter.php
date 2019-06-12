@@ -30,6 +30,12 @@ class WebRouter {
     /** @var array */
     public $parameters;
 
+    /** @var string the controller to call */
+    public $controller_name;
+
+    /** @var string the method to call */
+    public $method_name;
+
     public function __construct(Request $request, Core $core, $logged_in) {
         $this->core = $core;
         $this->request = $request;
@@ -55,9 +61,9 @@ class WebRouter {
     }
 
     public function run() {
-        $controllerName = $this->parameters['_controller'];
-        $methodName = $this->parameters['_method'];
-        $controller = new $controllerName($this->core);
+        $this->controller_name = $this->parameters['_controller'];
+        $this->method_name = $this->parameters['_method'];
+        $controller = new $this->controller_name($this->core);
 
         foreach ($this->parameters as $key => $value) {
             if (Utils::startsWith($key, "_")) {
@@ -65,7 +71,12 @@ class WebRouter {
             }
         }
 
-        return call_user_func_array(array($controller, $methodName), $this->parameters);
+        // pass $_GET to controllers
+        // the user-specified $_GET should NOT override the controller name and method name matched
+        $this->request->query->remove('url');
+        $this->parameters = array_merge($this->parameters, $this->request->query->all());
+
+        return call_user_func_array([$controller, $this->method_name], $this->parameters);
     }
 
     private function loadCourses() {
