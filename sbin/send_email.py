@@ -117,7 +117,7 @@ def mark_sent(email_id, db):
 
 def store_error(email_id, db, myerror):
     """Mark an email as sent in the database."""
-    query_string = "UPDATE emails SET error={} WHERE id = {};".format(myerror, email_id)
+    query_string = "UPDATE emails SET error='{}' WHERE id = {};".format(myerror, email_id)
     db.execute(query_string)
 
 
