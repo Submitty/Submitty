@@ -49,15 +49,6 @@ class AuthenticationController extends AbstractController {
                 break;
         }
     }
-
-    /**
-     * @param string $old the url to redirect to after login
-     */
-    private function isLoggedIn($old = null) {
-        if ($this->logged_in) {
-            $this->core->redirect($old);
-        }
-    }
     
     /**
      * Logs out the current user from the system. This is done by both deleting the current going
@@ -67,12 +58,10 @@ class AuthenticationController extends AbstractController {
      * @Route("/authentication/logout")
      */
     public function logout() {
-        $cookie_id = 'submitty_session_id';
+        $cookie_id = 'submitty_session';
         Utils::setCookie($cookie_id, '', time() - 3600);
-        $redirect = array();
-        $redirect['page'] = 'login';
         $this->core->removeCurrentSession();
-        $this->core->redirect($this->core->buildUrl($redirect));
+        $this->core->redirect($this->core->buildNewUrl(['authentication', 'login']));
     }
     
     /**
@@ -84,7 +73,6 @@ class AuthenticationController extends AbstractController {
      * @var string $old the url to redirect to after login
      */
     public function loginForm($old = null) {
-        $this->isLoggedIn(base64_decode($old));
         $this->core->getOutput()->renderOutput('Authentication', 'loginForm', $old);
     }
     
@@ -98,13 +86,15 @@ class AuthenticationController extends AbstractController {
      * @Route("/authentication/check_login/{old}")
      *
      * @var string $old the url to redirect to after login
+     * @return bool
      */
     public function checkLogin($old = null) {
         if (isset($old)) {
             $old = base64_decode($old);
         }
-        $this->isLoggedIn($old);
-        $redirect = array();
+        if ($this->logged_in) {
+            $this->core->redirect($old);
+        }
         $no_redirect = !empty($_POST['no_redirect']) ? $_POST['no_redirect'] == 'true' : false;
         $_POST['stay_logged_in'] = (isset($_POST['stay_logged_in']));
         if (!isset($_POST['user_id']) || !isset($_POST['password'])) {
@@ -124,7 +114,6 @@ class AuthenticationController extends AbstractController {
         if ($this->core->authenticate($_POST['stay_logged_in']) === true) {
             $msg = "Successfully logged in as ".htmlentities($_POST['user_id']);
             $this->core->addSuccessMessage($msg);
-            $redirect['success_login'] = "true";
 
             if ($no_redirect) {
                 $this->core->getOutput()->renderJsonSuccess(['message' => $msg, 'authenticated' => true]);
