@@ -52,10 +52,10 @@ try:
     DB_PASSWORD = DATABASE_CONFIG['database_password']
 
 except Exception as config_fail_error:
-    LOG_FILE.write("[{}] ERROR: Email/Database Configuration Failed {}".format(
-        str(datetime.datetime.now()), str(config_fail_error)))
-    print("[{}] Error: Email/Database Configuration Failed {}".format(
-        str(datetime.datetime.now()), str(config_fail_error)))
+    e = "[{}] ERROR: Email/Database Configuration Failed {}".format(
+        str(datetime.datetime.now()), str(config_fail_error))
+    LOG_FILE.write(e+"\n")
+    print(e)
     exit(-1)
 
 
@@ -144,18 +144,17 @@ def send_email():
     db = setup_db()
     queued_emails = get_email_queue(db)
     mail_client = construct_mail_client()
-
     if len(queued_emails) == 0:
         return
 
     success_count = 0
 
     for email_data in queued_emails:
-
         if email_data["send_to"] == "":
             store_error(email_data["id"], db, "ERROR: empty recipient")
-            LOG_FILE.write("[{}] ERROR: empty recipient\n".format(
-                str(datetime.datetime.now())))
+            e="[{}] ERROR: empty recipient".format(str(datetime.datetime.now()))
+            LOG_FILE.write(e+"\n")
+            print(e)
             continue
 
         email = construct_mail_string(
@@ -169,13 +168,17 @@ def send_email():
 
         except Exception as email_send_error:
             store_error(email_data["id"], db, "ERROR: sending email")
-            LOG_FILE.write("[{}] ERROR: sending email to {}: {}\n".format(
+            e="[{}] ERROR: sending email to {}: {}".format(
                 str(datetime.datetime.now()),
                 email_data["send_to"],
-                str(email_send_error)))
+                str(email_send_error))
+            LOG_FILE.write(e+"\n")
+            print(e)
 
-        LOG_FILE.write("[{}] Sucessfully Emailed {} Users\n".format(
-            str(datetime.datetime.now()), success_count))
+        e="[{}] Sucessfully Emailed {} Users".format(
+            str(datetime.datetime.now()), success_count)
+        LOG_FILE.write(e+"\n")
+        print(e)
 
 
 def main():
@@ -183,8 +186,10 @@ def main():
     try:
         send_email()
     except Exception as email_send_error:
-        LOG_FILE.write("[{}] Error Sending Email: {}\n".format(
-            str(datetime.datetime.now()), str(email_send_error)))
+        e="[{}] Error Sending Email: {}".format(
+            str(datetime.datetime.now()), str(email_send_error))
+        LOG_FILE.write(e+"\n")
+        print(e)
 
 
 if __name__ == "__main__":
