@@ -8,7 +8,6 @@ use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Submitter;
 use app\models\gradeable\GradeableList;
-use app\models\Notification;
 use Symfony\Component\Routing\Annotation\Route;
 
 class NavigationController extends AbstractController {
@@ -20,15 +19,6 @@ class NavigationController extends AbstractController {
         switch ($_REQUEST['page']) {
             case 'no_access':
                 $this->noAccess();
-                break;
-            case 'notifications':
-                $this->notificationsHandler();
-                break;
-            case 'notification_settings':
-                $this->core->getOutput()->addBreadcrumb("Notification Settings");
-                $this->core->getOutput()->renderTwigOutput("NotificationSettings.twig",[
-                    'notification_saves' => $this->core->getUser()->getNotificationSettings()
-                ]);
                 break;
             default:
                 $this->navigationPage();
@@ -142,38 +132,5 @@ class NavigationController extends AbstractController {
         }
 
         return true;
-    }
-
-
-    private function notificationsHandler() {
-        $user_id = $this->core->getUser()->getId();
-        if(!empty($_GET['action'])) {
-            if($_GET['action'] == 'open_notification' && !empty($_GET['nid']) && is_numeric($_GET['nid']) && $_GET['nid'] >= 1) {
-                $metadata = $this->core->getQueries()->getNotificationInfoById($user_id, $_GET['nid'])['metadata'];
-                if(!$_GET['seen']) {
-                    $thread_id = Notification::getThreadIdIfExists($metadata);
-                    $this->core->getQueries()->markNotificationAsSeen($user_id, $_GET['nid'], $thread_id);
-                }
-                $this->core->redirect(Notification::getUrl($this->core, $metadata));
-            } else if($_GET['action'] == 'mark_as_seen' && !empty($_GET['nid']) && is_numeric($_GET['nid']) && $_GET['nid'] >= 1) {
-                $this->core->getQueries()->markNotificationAsSeen($user_id, $_GET['nid']);
-                $this->core->redirect($this->core->buildUrl(array('component' => 'navigation', 'page' => 'notifications')));
-            } else if($_GET['action'] == 'mark_all_as_seen') {
-                $this->core->getQueries()->markNotificationAsSeen($user_id, -1);
-                $this->core->redirect($this->core->buildUrl(array('component' => 'navigation', 'page' => 'notifications')));
-            }
-        } else {
-            // Show Notifications
-            $show_all = (!empty($_GET['show_all']) && $_GET['show_all'])?true:false;
-            $notifications = $this->core->getQueries()->getUserNotifications($user_id, $show_all);
-            $currentCourse = $this->core->getConfig()->getCourse();
-            $this->core->getOutput()->addBreadcrumb("Notifications");
-            return $this->core->getOutput()->renderTwigOutput("Notifications.twig", [
-                'course' => $currentCourse,
-                'show_all' => $show_all,
-                'notifications' => $notifications,
-                'notification_saves' => $this->core->getUser()->getNotificationSettings()
-            ]);
-        }
     }
 }

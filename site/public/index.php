@@ -292,6 +292,7 @@ if (empty($_REQUEST['component']) && $core->getUser() !== null) {
 /********************************************
 * END LOGIN CODE
 *********************************************/
+
 $supported_by_new_router = in_array($_REQUEST['component'], ['authentication', 'home']) ||
     ($_REQUEST['component'] == 'navigation' && !in_array($_REQUEST['page'], ['notifications', 'notification_settings']));
 
@@ -325,8 +326,8 @@ if (!$supported_by_new_router) {
             $control = new app\controllers\forum\ForumController($core);
             $control->run();
             break;
-        case 'notification_settings':
-            $control = new app\controllers\NotificationSettings($core);
+        case 'notification':
+            $control = new app\controllers\NotificationController($core);
             $control->run();
             break;
         case 'pdf':

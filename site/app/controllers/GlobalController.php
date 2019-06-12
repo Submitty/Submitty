@@ -67,7 +67,7 @@ class GlobalController extends AbstractController {
 
             if ($unread_notifications_count !== null) {
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'navigation', 'page' => 'notifications')),
+                    "href" => $this->core->buildUrl(array('component' => 'notification', 'page' => 'notifications')),
                     "title" => "Notifications",
                     "badge" => $unread_notifications_count,
                     "class" => "nav-row",
