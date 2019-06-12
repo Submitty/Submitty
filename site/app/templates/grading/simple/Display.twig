@@ -1,7 +1,5 @@
 {% import _self as self %}
 
-<link rel="stylesheet" type="text/css" href="{{ base_url }}css/simple-grading.css" />
-
 <div class="content">
     <h1>
         {{ gradeable.getTitle() }}
@@ -263,7 +261,7 @@
         {% endfor %}
 
         <td class="option-small-output">
-            <div class="option-small-box" style="text-align: center" type="text" border="none" id="total-{{ index }}" data-total="true">{{ total }}</div>
+            <div class="option-small-box cell-total" style="text-align: center" type="text" border="none" id="total-{{ index }}" data-total="true">{{ total }}</div>
         </td>
     {% endif %}
 

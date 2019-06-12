@@ -242,9 +242,12 @@ function setupCheckboxCells() {
 }
 
 function setupNumericTextCells() {
-    $("input.option-small-box").change(function() {
+    $(".cell-grade").change(function() {
         elem = $(this);
-        if(this.value == 0){
+        if (this.value == "") {
+            return;
+        }
+        if(this.value == 0) {
             elem.css("color", "#bbbbbb");
         }
         else{
@@ -258,23 +261,22 @@ function setupNumericTextCells() {
         var old_scores = {};
         var total = 0;
 
-        row_el.children("td.option-small-input, td.option-small-output").each(function() {
-            $(this).children(".option-small-box").each(function(idx, child){
-                child = $(child);
-                if(child.data('num') === true){
-                    total += parseFloat(this.value);
-                    // ensure value is string (might not be on initial load from twig)
-                    old_scores[child.data("id")] = child.data("origval") + "";
-                    scores[child.data("id")] = this.value;
+        row_el.find(".cell-grade").each(function() {
+            elem = $(this);
+            if (elem.data("num")) {
+                total += parseFloat(elem.val());
+                // ensure value is string (might not be on initial load from twig)
+                old_scores[elem.data("id")] = elem.data("origval") + "";
+                scores[elem.data("id")] = elem.val();
+    
+                // save old value so we can verify data is not stale
+                elem.data('origval', elem.val());
+                elem.attr('data-origval', elem.val());  
+            }
+        });
 
-                    // save old value so we can verify data is not stale
-                    child.data('origval', this.value);
-                    child.attr('data-origval', this.value);  
-                }
-                else if(child.data('total') === true){
-                    this.value = total;
-                }
-            });
+        row_el.find(".cell-total").each(function() {
+            this.value = total;
         });
 
         submitAJAX(
