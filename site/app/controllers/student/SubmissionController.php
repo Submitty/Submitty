@@ -16,6 +16,7 @@ use app\controllers\grading\ElectronicGraderController;
 use app\models\gradeable\SubmissionTextBox;
 use app\models\gradeable\SubmissionCodeBox;
 use app\models\gradeable\SubmissionMultipleChoice;
+use Symfony\Component\Routing\Annotation\Route;
 
 
 
@@ -103,7 +104,11 @@ class SubmissionController extends AbstractController {
                 break;
             case 'display':
             default:
-                return $this->showHomeworkPage();
+                
+                return $this->showHomeworkPage(
+                    $_REQUEST['gradeable_id'] ?? null,
+                    $_REQUEST['gradeable_version'] ?? 0
+                );
                 break;
         }
     }
@@ -269,8 +274,12 @@ class SubmissionController extends AbstractController {
         }
     }
 
-    private function showHomeworkPage() {
-        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+    /**
+     * @Route("/{_semester}/{_course}/student/{gradeable_id}")
+     * @Route("/{_semester}/{_course}/student/{gradeable_id}/{gradeable_version}")
+     * @return array
+     */
+    public function showHomeworkPage($gradeable_id, $gradeable_version = null) {
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
         if($gradeable === null) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
@@ -284,7 +293,7 @@ class SubmissionController extends AbstractController {
         }
 
         // Attempt to put the version number to be in bounds of the gradeable
-        $version = intval($_REQUEST['gradeable_version'] ?? 0);
+        $version = intval($gradeable_version ?? 0);
         if ($version < 1 || $version > ($graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : 0)) {
             $version = $graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() : 0;
         }
@@ -309,9 +318,8 @@ class SubmissionController extends AbstractController {
             return array('error' => true, 'message' => 'Must be on a team to access submission.');
         }
         else {
-            $loc = array('component' => 'student',
-                         'gradeable_id' => $gradeable->getId());
-            $this->core->getOutput()->addBreadcrumb($gradeable->getTitle(), $this->core->buildUrl($loc));
+            $url = $this->core->buildNewUrl([$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(), 'student', $gradeable->getId()]);
+            $this->core->getOutput()->addBreadcrumb($gradeable->getTitle(), $url);
             if (!$gradeable->hasAutogradingConfig()) {
                 $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
                                                        'unbuiltGradeable', $gradeable);
@@ -1538,7 +1546,7 @@ class SubmissionController extends AbstractController {
 
         $who = $_REQUEST['who'] ?? $this->core->getUser()->getId();
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $who, $who);
-        $url = $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId()));
+        $url = $this->core->buildNewUrl([$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(), 'student', $gradeable->getId()]);
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
             $msg = "Invalid CSRF token. Refresh the page and try again.";
             $this->core->addErrorMessage($msg);
