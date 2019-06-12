@@ -104,7 +104,11 @@ class SubmissionController extends AbstractController {
                 break;
             case 'display':
             default:
-                return $this->showHomeworkPage();
+                
+                return $this->showHomeworkPage(
+                    $_REQUEST['gradeable_id'] ?? null,
+                    $_REQUEST['gradeable_version'] ?? 0
+                );
                 break;
         }
     }
