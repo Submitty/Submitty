@@ -2523,7 +2523,7 @@ AND gc_id IN (
     }
 
     /**
-     * Generate notifcation rows
+     * Generate notification rows
      *
      * @param Notification $notification
      */
