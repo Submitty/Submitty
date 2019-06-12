@@ -159,7 +159,7 @@
 
 {# Render one student's row in the table #}
 {% macro render_row(self, action, gradeable, section, grade, index, components_numeric) %}
-    <tr data-gradeable="{{ gradeable.getId() }}" data-user="{{  grade.getSubmitter().getId() }}" data-row="{{ index }}"
+    <tr id="row-{{ index }}" data-gradeable="{{ gradeable.getId() }}" data-user="{{  grade.getSubmitter().getId() }}" data-row="{{ index }}"
         {% if student.accessGrading() %}
             style='background: #7bd0f7;'
         {% endif %}
@@ -230,6 +230,7 @@
                     type="text"
                     id="cell-{{ index }}-{{ loop.index0 }}"
                     data-id="{{ component.getId() }}"
+                    data-origval="{{ component_grade.getScore() | default('0') }}"
                     value="{{ component_grade.getScore() | default('0') }}"
                     {% if component_grade.getGrader() != null %}
                         data-grader="{{ component_grade.getGrader().getId() }}"

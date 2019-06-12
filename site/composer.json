@@ -15,7 +15,12 @@
     "ramsey/uuid": "^3.8.0",
     "aptoma/twig-markdown": "^3.1.0",
     "erusev/parsedown": "^1.7.3",
-    "lcobucci/jwt": "^3.2.5"
+    "lcobucci/jwt": "^3.2.5",
+    "symfony/routing": "^4.2",
+    "symfony/config": "^4.2",
+    "symfony/http-foundation": "^4.2",
+    "doctrine/annotations": "^1.6",
+    "doctrine/cache": "^1.8"
   },
   "autoload-dev": {
     "psr-4": {
