@@ -175,10 +175,10 @@ def send_email():
             LOG_FILE.write(e+"\n")
             print(e)
 
-        e="[{}] Sucessfully Emailed {} Users".format(
-            str(datetime.datetime.now()), success_count)
-        LOG_FILE.write(e+"\n")
-        print(e)
+    e="[{}] Sucessfully Emailed {} Users".format(
+        str(datetime.datetime.now()), success_count)
+    LOG_FILE.write(e+"\n")
+    print(e)
 
 
 def main():
