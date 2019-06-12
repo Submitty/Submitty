@@ -46,22 +46,28 @@ class NotificationController extends AbstractController {
 
     public function notificationsHandler() {
         $user_id = $this->core->getUser()->getId();
-        if(!empty($_GET['action'])) {
-            if($_GET['action'] == 'open_notification' && !empty($_GET['nid']) && is_numeric($_GET['nid']) && $_GET['nid'] >= 1) {
+        if (!empty($_GET['action'])) {
+            if ($_GET['action'] == 'open_notification' && !empty($_GET['nid']) && is_numeric($_GET['nid']) && $_GET['nid'] >= 1) {
                 $metadata = $this->core->getQueries()->getNotificationInfoById($user_id, $_GET['nid'])['metadata'];
-                if(!$_GET['seen']) {
+                if (!$_GET['seen']) {
                     $thread_id = Notification::getThreadIdIfExists($metadata);
                     $this->core->getQueries()->markNotificationAsSeen($user_id, $_GET['nid'], $thread_id);
                 }
                 $this->core->redirect(Notification::getUrl($this->core, $metadata));
-            } else if($_GET['action'] == 'mark_as_seen' && !empty($_GET['nid']) && is_numeric($_GET['nid']) && $_GET['nid'] >= 1) {
+            }
+            elseif ($_GET['action'] == 'mark_as_seen' && !empty($_GET['nid']) && is_numeric($_GET['nid']) && $_GET['nid'] >= 1) {
                 $this->core->getQueries()->markNotificationAsSeen($user_id, $_GET['nid']);
                 $this->core->redirect($this->core->buildUrl(array('component' => 'notification', 'page' => 'notifications')));
-            } else if($_GET['action'] == 'mark_all_as_seen') {
+            }
+            elseif ($_GET['action'] == 'mark_all_as_seen') {
                 $this->core->getQueries()->markNotificationAsSeen($user_id, -1);
                 $this->core->redirect($this->core->buildUrl(array('component' => 'notification', 'page' => 'notifications')));
             }
-        } else {
+            else {
+                $this->core->redirect($this->core->buildUrl(array('component' => 'notification', 'page' => 'notifications')));
+            }
+        }
+        else {
             // Show Notifications
             $show_all = (!empty($_GET['show_all']) && $_GET['show_all'])?true:false;
             $notifications = $this->core->getQueries()->getUserNotifications($user_id, $show_all);
@@ -72,14 +78,17 @@ class NotificationController extends AbstractController {
     }
 
     public function viewNotificationSettings() {
-        $notification_saves = $this->core->getUser()->getNotificationSettings();
-        $this->core->getOutput()->renderOutput('Notification', 'showNotificationSettings', $notification_saves);
+        $this->core->getOutput()->renderOutput(
+            'Notification',
+            'showNotificationSettings',
+            $this->core->getUser()->getNotificationSettings()
+        );
     }
 
     public function changeSettings() {
         //Change settings for the current user...
         $new_settings = $_POST;
-        if($this->validateNotificationSettings(array_keys($new_settings))) {
+        if ($this->validateNotificationSettings(array_keys($new_settings))) {
             $values_not_sent = array_diff(self::NOTIFICATION_SELECTIONS, array_keys($new_settings));
             foreach(array_values($values_not_sent) as $value) {
                 $new_settings[$value] = 'false';
@@ -93,7 +102,7 @@ class NotificationController extends AbstractController {
     }
 
     private function validateNotificationSettings($columns) {
-        if(count($columns) <= count(NotificationController::NOTIFICATION_SELECTIONS) && count(array_intersect($columns, self::NOTIFICATION_SELECTIONS)) == count($columns)) {
+        if (count($columns) <= count(NotificationController::NOTIFICATION_SELECTIONS) && count(array_intersect($columns, self::NOTIFICATION_SELECTIONS)) == count($columns)) {
             return true;
         }
         return false;
