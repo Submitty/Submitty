@@ -18,6 +18,7 @@ class AuthenticationControllerTester extends BaseUnitTest {
         $auth->method('setPassword')->willReturn(null);
         $auth->method('authenticate')->willReturn($authenticate);
         $core->method('getAuthentication')->willReturn($auth);
+        $core->method('authenticate')->willReturn($authenticate);
         return $core;
     }
 
@@ -215,5 +216,51 @@ class AuthenticationControllerTester extends BaseUnitTest {
             ],
             $response
         );
+    }
+
+    public function testLoginMissingUserId() {
+        unset($_POST['user_id']);
+        $_POST['no_redirect'] = true;
+        $_POST['password'] = 'test';
+        $core = $core = $this->getAuthenticationCore();
+        $controller = new AuthenticationController($core);
+        $response = $controller->checkLogin();
+        $this->assertEquals(['status' => 'fail', 'message' => 'Cannot leave user id or password blank'], $response);
+    }
+
+    public function testLoginMissingPassword() {
+        unset($_POST['password']);
+        $_POST['no_redirect'] = true;
+        $_POST['user_id'] = 'test';
+        $core = $this->getAuthenticationCore();
+        $controller = new AuthenticationController($core);
+        $response = $controller->checkLogin();
+        $this->assertEquals(['status' => 'fail', 'message' => 'Cannot leave user id or password blank'], $response);
+    }
+
+    public function testLoginSuccess() {
+        $_POST['no_redirect'] = true;
+        $_POST['user_id'] = 'test';
+        $_POST['password'] = 'test';
+        $core = $this->getAuthenticationCore(true);
+        $controller = new AuthenticationController($core);
+        $response = $controller->checkLogin();
+        $this->assertEquals(
+            [
+                'status' => 'success',
+                'data' => ['message' => "Successfully logged in as test", 'authenticated' => true]
+            ],
+            $response
+        );
+    }
+
+    public function testLoginFailure() {
+        $_POST['no_redirect'] = true;
+        $_POST['user_id'] = 'test';
+        $_POST['password'] = 'test';
+        $core = $this->getAuthenticationCore(false);
+        $controller = new AuthenticationController($core);
+        $response = $controller->checkLogin();
+        $this->assertEquals(['status' => 'fail', 'message' => "Could not login using that user id or password"], $response);
     }
 }

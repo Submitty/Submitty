@@ -86,7 +86,7 @@ class AuthenticationController extends AbstractController {
      * @Route("/authentication/check_login/{old}")
      *
      * @var string $old the url to redirect to after login
-     * @return bool
+     * @return bool | array depending on the truth value of $no_direct
      */
     public function checkLogin($old = null) {
         if (isset($old)) {
@@ -101,10 +101,10 @@ class AuthenticationController extends AbstractController {
             $msg = 'Cannot leave user id or password blank';
 
             if ($no_redirect) {
-                $this->core->getOutput()->renderJsonFail($msg);
+                return $this->core->getOutput()->renderJsonFail($msg);
             }
             else {
-                $this->core->addErrorMessage("Cannot leave user id or password blank");
+                $this->core->addErrorMessage($msg);
                 $this->core->redirect($old);
             }
             return false;
@@ -116,7 +116,7 @@ class AuthenticationController extends AbstractController {
             $this->core->addSuccessMessage($msg);
 
             if ($no_redirect) {
-                $this->core->getOutput()->renderJsonSuccess(['message' => $msg, 'authenticated' => true]);
+                return $this->core->getOutput()->renderJsonSuccess(['message' => $msg, 'authenticated' => true]);
             }
             else {
                 $this->core->redirect($old);
@@ -127,7 +127,7 @@ class AuthenticationController extends AbstractController {
             $msg = "Could not login using that user id or password";
             $this->core->addErrorMessage($msg);
             if ($no_redirect) {
-                $this->core->getOutput()->renderJsonFail($msg);
+                return $this->core->getOutput()->renderJsonFail($msg);
             }
             else {
                 $this->core->redirect($old);
