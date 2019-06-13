@@ -325,6 +325,10 @@ class GradedGradeable extends AbstractModel {
         return $file_contents;
     }
 
+    public function hasSubmission() {
+        return $this->gradeable->hasSubmission($this->submitter);
+    }
+
     /* Intentionally Unimplemented accessor methods */
 
     /** @internal */

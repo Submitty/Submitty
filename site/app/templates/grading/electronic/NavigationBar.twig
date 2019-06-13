@@ -34,7 +34,7 @@
             <button title="Show/Hide Discussion Posts" class="invisible-btn" onclick="toggleDiscussion(); updateCookies();"> <i class="fas fa-comment-alt icon-header" ></i> </button>
         {% endif %}
         {% if regrade_panel_available %}
-            <button title="Show/Hide Regrade Information (Press X)" class="invisible-btn" onclick="toggleRegrade(); updateCookies();"> <i class="fas fa-hand-paper icon-header" ></i> </button>
+            <button title="Show/Hide Grade Inquiry Information (Press X)" class="invisible-btn" onclick="toggleRegrade(); updateCookies();"> <i class="fas {{ grade_inquiry_pending ? 'fa-exclamation' : 'fa-hand-paper' }} grade_inquiry_icon icon-header" ></i> </button>
         {% endif %}
         <button title="Show Grading Settings" class="invisible-btn" onclick="showSettings();"> <i class="fas fa-wrench icon-header" ></i> </button>
         {# /Panel buttons #}

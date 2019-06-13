@@ -151,63 +151,72 @@ function showSimpleGraderStats(action) {
     }
 }
 
-function updateCheckpointCell(elem, setFull) {
-    elem = $(elem);
-    if (!setFull && elem.data("score") === 1.0) {
-        elem.data("score", 0.5);
-        elem.css("background-color", "#88d0f4");
-        elem.css("border-right", "60px solid #f9f9f9");
-    }
-    else if (!setFull && elem.data("score") === 0.5) {
-        elem.data("score", 0);
-        elem.css("background-color", "");
+function updateCheckpointCells(elems, score) {
+    var scores = {}; // keep track of changes
+    var old_scores = {};
+    
+    elems = $(elems);
+    elems.each(function(idx, el) {
+        var elem = $(el);
+
+        old_scores[elem.data('id')] = elem.data('score');
+
+        // set score
+        if (score) {
+            elem.data("score", score);
+        } 
+        // if no score set, toggle through options
+        else {
+            if (elem.data("score") === 1.0) elem.data("score", 0.5);
+            else if (elem.data("score") === 0.5) elem.data("score", 0);
+            else elem.data("score", 1);
+        }
+
+        scores[elem.data("id")] = elem.data("score");
+
+        // update css to reflect score
+        if (elem.data("score") === 1.0) elem.css("background-color", "#149bdf");
+        else if (elem.data("score") === 0.5) elem.css("background-color", "#88d0f4");
+        else elem.css("background-color", "");
+
+        // create border we can animate to reflect ajax status
         elem.css("border-right", "60px solid #ddd");
-    }
-    else {
-        elem.data("score", 1);
-        elem.css("background-color", "#149bdf");
-        elem.css("border-right", "60px solid #f9f9f9");
-    }
+    });
+
+    // get data for ajax url
+    var parent = $(elems[0]).parent();
+
+    // Update the buttons to reflect that they were clicked
+    submitAJAX(
+        buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_lab'}),
+        {
+          'csrf_token': csrfToken,
+          'user_id': parent.data("user"),
+          'g_id': parent.data('gradeable'),
+          'old_scores': old_scores,
+          'scores': scores
+        },
+        function() {
+            elems.each(function(idx, elem) {
+                elem = $(elem);
+                elem.animate({"border-right-width": "0px"}, 400); // animate the box
+                elem.attr("data-score", elem.data("score"));      // update the score
+            });
+        },
+        function() {
+            elems.each(function(idx, elem) {
+                elem = $(elem);
+                elem.stop(true, true);
+                elem.css("border-right", "60px solid #DA4F49");
+            });
+        }
+    );
 }
 
 function setupCheckboxCells() {
     // jQuery for the elements with the class cell-grade (those in the component columns)
     $("td.cell-grade").click(function() {
-        var parent = $(this).parent();
-        var elems = [];
-        var scores = {};
-        var old_scores = {};
-
-        old_scores[$(this).data('id')] = $(this).data('score');
-        updateCheckpointCell(this);
-        elems.push(this);
-        scores[$(this).data('id')] = $(this).data('score');
-
-        // Update the buttons to reflect that they were clicked
-        submitAJAX(
-            buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_lab'}),
-            {
-              'csrf_token': csrfToken,
-              'user_id': parent.data("user"),
-              'g_id': parent.data('gradeable'),
-              'old_scores': old_scores,
-              'scores': scores
-            },
-            function() {
-                elems.forEach(function(elem) {
-                    elem = $(elem);
-                    elem.animate({"border-right-width": "0px"}, 400);                                   // animate the box
-                    elem.attr("data-score", elem.data("score"));                                        // update the score
-                });
-            },
-            function() {
-                elems.forEach(function(elem) {
-                    console.log(elem);
-                    $(elem).stop(true, true);
-                    $(elem).css("border-right", "60px solid #DA4F49");
-                });
-            }
-        );
+        updateCheckpointCells(this);
     });
 
     // show all the hidden grades when this checkbox is clicked
@@ -233,9 +242,12 @@ function setupCheckboxCells() {
 }
 
 function setupNumericTextCells() {
-    $("input.option-small-box").change(function() {
+    $(".cell-grade").change(function() {
         elem = $(this);
-        if(this.value == 0){
+        if (this.value == "") {
+            return;
+        }
+        if(this.value == 0) {
             elem.css("color", "#bbbbbb");
         }
         else{
@@ -249,20 +261,24 @@ function setupNumericTextCells() {
         var old_scores = {};
         var total = 0;
 
-        row_el.children("td.option-small-input, td.option-small-output").each(function() {
-            $(this).children(".option-small-box").each(function(){
-                if($(this).data('num') === true){
-                    total += parseFloat(this.value);
-                    // ensure value is string (might not be on initial load from twig)
-                    old_scores[$(this).data("id")] = $(this).data("origval") + "";
-                    scores[$(this).data("id")] = this.value;
-                }
-                else if($(this).data('total') === true){
-                    this.value = total;
-                }
-            });
+        row_el.find(".cell-grade").each(function() {
+            elem = $(this);
+            if (elem.data("num")) {
+                total += parseFloat(elem.val());
+                // ensure value is string (might not be on initial load from twig)
+                old_scores[elem.data("id")] = elem.data("origval") + "";
+                scores[elem.data("id")] = elem.val();
+    
+                // save old value so we can verify data is not stale
+                elem.data('origval', elem.val());
+                elem.attr('data-origval', elem.val());  
+            }
         });
-        
+
+        row_el.find(".cell-total").each(function() {
+            this.value = total;
+        });
+
         submitAJAX(
             buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_numeric'}),
             {
@@ -284,12 +300,7 @@ function setupNumericTextCells() {
             function() {
                 elem.css("background-color", "#ff7777");
             }
-        );  
-        
-        // save old value so we can verify data is not stale
-        elem.data('origval', elem.attr("value"));
-        elem.attr('data-origval', elem.attr("value"));  
-        console.log(elem.data("origval"))           
+        );
     });
 
     $("input[class=csvButtonUpload]").change(function() {
@@ -434,29 +445,6 @@ function setupSimpleGrading(action) {
     }
     // search bar code starts here (see site/app/templates/grading/StudentSearch.twig for #student-search)
 
-    // updates the checkbox scores of elems:
-    // if is_all, updates all, else, updates only the elem at idx
-    // if !is_all and is the cell-all element, updates all the elements
-    function updateCheckboxScores(num, elems, is_all, idx=0) {
-        if(is_all) {                                // if updating all, update all non .cell-all cells individually
-            elems.each(function() {
-                updateCheckboxScores(num, elems, false, idx);
-                idx++;
-            });
-        }
-        else {                              // if updating one, click until the score matches 
-            elem = $(elems[idx]);
-            for(var i = 0; i < 2; i++) {
-                if(elem.data("score") == num) {
-                    break;
-                }
-                else {
-                    elem.click();
-                }
-            }
-        } 
-    }
-
     // highlights the first jquery-ui autocomplete result if there is only one
     function highlightOnSingleMatch(is_remove) {
         var matches = $("#student-search > ul > li");
@@ -469,140 +457,77 @@ function setupSimpleGrading(action) {
         }
     }
 
-    var dont_focus = true;                                          // set to allow toggling of focus on input element
-    var num_rows = $("td.cell-all").length;                         // the number of rows in the table
-    var search_bar_offset = $("#student-search").offset();          // the offset of the search bar: used to lock the searhc bar on scroll
-    var highlight_color = "#337ab7";                                // the color used in the border around the selected element in the table
-    var search_selector = action == 'lab'       ?                   // the selector being used varies depending on the action (lab/numeric are different)
-                         'td.cell-grade'     :
-                         'td.option-small-input';
-    var table_row = 0;                                              // the current row
-    var child_idx = 0;                                              // the index of the current element in the row
-    var child_elems = $("tr[data-row=0]").find(search_selector);    // the clickable elements in the current row
-
-    // outline the first element in the first row if able
-    if(child_elems.length) {
-        var child = $(child_elems[0]);
-        if(action == 'numeric') {
-            child = child.children("input");
-        }
-        child.css("outline", "3px dashed " + highlight_color);
-    }
-
-    // this is for unchanged key(movement in lab section, enter and tab & shift-tab)
-    $(document).on("keydown", function(event) {
-        if(action != "lab" || event.keyCode == 13 || event.keyCode == 9){
-            if(!$("#student-search-input").is(":focus")) {
-                // allow refocusing on the input field by pressing enter when it is not the focus
-                if(event.keyCode == 13) {
-                    dont_focus = false;
-                }
-                // movement commands
-                else if([37,38,39,40,9].includes(event.keyCode)) { // Arrow keys/tab unselect, bounds check, then move and reselect
-                    var child = $(child_elems[child_idx]);
-                    if(action == 'lab') {
-                        child.css("outline", "");
-                    }
-                    else {
-                        child.children("input").css("outline", "");
-                    }
-                    if(event.keyCode == 37 || (event.keyCode == 9 && event.shiftKey)) { // Left arrow/shift+tab
-                        if(event.keyCode == 9 && event.shiftKey) {
-                            event.preventDefault();
-                        }
-                        if(child_idx > 0 && (action == 'lab' || (event.keyCode == 9 && event.shiftKey) || child.children("input")[0].selectionStart == 0)) {
-                            child_idx--;
-                        }
-                    }
-                    else if(event.keyCode == 39 || event.keyCode == 9) {                // Right arrow/tab
-                        if(event.keyCode == 9) {
-                            event.preventDefault();
-                        }
-                        if(child_idx < child_elems.length - 1 && (action == 'lab' || event.keyCode == 9 || child.children("input")[0].selectionEnd == child.children("input")[0].value.length)) {
-                            child_idx++;
-                        }
-                    }
-                    else {
-                        event.preventDefault();
-                        if(event.keyCode == 38) {               // Up arrow
-                            if(table_row > 0) {
-                                table_row--;
-                            }
-                        }
-                        else if(table_row < num_rows - 1) {     // Down arrow
-                            table_row++;
-                        }
-                        child_elems = $("tr[data-row=" + table_row + "]").find(search_selector);
-                    }
-                    child = $(child_elems[child_idx]);
-                    if(action == 'lab') {
-                        child.css("outline", "3px dashed " + highlight_color);
-                    }
-                    else {
-                        child.children("input").css("outline", "3px dashed " + highlight_color).focus();
-                    }
-
-                    if((event.keyCode == 38 || event.keyCode == 40) && !child.isInViewport()) {
-                        $('html, body').animate( { scrollTop: child.offset().top - $(window).height()/2}, 50);
-                    }
-                }
-            }
-        }
+    var dont_hotkey_focus = true; // set to allow toggling of focus on input element so we can use enter as hotkey
+    
+    // prevent hotkey focus while already focused, so we dont override search functionality
+    $("#student-search-input").focus(function(event) {
+        dont_hotkey_focus = true;
     });
 
     // refocus on the input field by pressing enter
     $(document).on("keyup", function(event) {
-        if(event.keyCode == 13 && !dont_focus) {
+        if(event.keyCode == 13 && !dont_hotkey_focus) {
             $("#student-search-input").focus();
         }
     });
 
-    //this is for changeable movement key in lab section
-    function movement(direction,isLab){
-        if(!$("#student-search-input").is(":focus")) {
-            // Arrow keys unselect, bounds check, then move and reselect
-            var child = $(child_elems[child_idx]);
-            if(isLab) {
-                child.css("outline", "");
-            }
-            else {
-                child.children("input").css("outline", "");
-            }
-            if(direction == "left" ) {                      // Left arrow
-                if(child_idx > 0 ) {
-                    child_idx--;
-                }
-            }
-            else if(direction == "right" ) {                // Right arrow
-                if(child_idx < child_elems.length - 1 ) {
-                    child_idx++;
-                }
-            }
-            else{
-                if(direction == "up"  ) {                   // Up arrow
-                    if(table_row > 0) {
-                        table_row--;
-                    }
-                }
-                else if(table_row < num_rows - 1) {         // Down arrow
-                    table_row++;
-                }
-                child_elems = $("tr[data-row=" + table_row + "]").find(search_selector);
-            }
-            child = $(child_elems[child_idx]);
-            if(isLab) {
-                child.css("outline", "3px dashed " + highlight_color);
-            }
-            else {
-                child.children("input").css("outline", "3px dashed " + highlight_color).focus();
-            }
-
-            if((direction == "up" || direction == "down") && !child.isInViewport()) {
-                $('html, body').animate( { scrollTop: child.offset().top - $(window).height()/2}, 50);
-            }
+    // moves the selection to an adjacent cell
+    function movement(direction){
+        var prev_cell = $(".cell-grade:focus");
+        if(prev_cell.length) {         
+            // ids have the format cell-ROW#-COL#
+            var new_selector_array = prev_cell.attr("id").split("-");
+            new_selector_array[1] = parseInt(new_selector_array[1]);
+            new_selector_array[2] = parseInt(new_selector_array[2]);
             
+            // update row and col to get new val
+            if (direction == "up") new_selector_array[1] -= 1;
+            else if (direction == "down") new_selector_array[1] += 1;
+            else if (direction == "left") new_selector_array[2] -= 1;
+            else if (direction == "right") new_selector_array[2] += 1;
+            
+            // get new cell
+            var new_cell = $("#" + new_selector_array.join("-"));
+            if (new_cell.length) {
+                prev_cell.blur();
+                new_cell.focus();
+                new_cell.select(); // used to select text in input cells
+                
+                if((direction == "up" || direction == "down") && !new_cell.isInViewport()) {
+                    $('html, body').animate( { scrollTop: new_cell.offset().top - $(window).height()/2}, 50);
+                }
+            }
         }
     }
+
+    // default key movement 
+    $(document).on("keydown", function(event) {
+        // if input cell selected, use this to check if cursor is in the right place
+        var input_cell = $("input.cell-grade:focus");
+
+        // if there is no selection OR there is a selection to the far left with 0 length
+        if(event.keyCode == 37 && (!input_cell.length || (
+                input_cell[0].selectionStart == 0 && 
+                input_cell[0].selectionEnd - input_cell[0].selectionStart == 0))) {
+            event.preventDefault();
+            movement("left");
+        }
+        else if(event.keyCode == 38) {
+            event.preventDefault();
+            movement("up");
+        }
+        // if there is no selection OR there is a selection to the far right with 0 length
+        else if(event.keyCode == 39 && (!input_cell.length || (
+                input_cell[0].selectionEnd == input_cell[0].value.length && 
+                input_cell[0].selectionEnd - input_cell[0].selectionStart == 0))) {
+            event.preventDefault();
+            movement("right");
+        }
+        else if(event.keyCode == 40) {
+            event.preventDefault();
+            movement("down");
+        }
+    });  
     
     // register empty function locked event handlers for "enter" so they show up in the hotkeys menu
     registerKeyHandler({name: "Search", code: "Enter", locked: true}, function() {});
@@ -610,19 +535,19 @@ function setupSimpleGrading(action) {
     if(action == 'lab') {
         registerKeyHandler({name: "Move Right", code: "ArrowRight", locked: false}, function(event) {
             event.preventDefault();
-            movement("right",true);
+            movement("right");
         });
         registerKeyHandler({name: "Move Left", code: "ArrowLeft", locked: false}, function(event) {
             event.preventDefault();
-            movement("left",true);
+            movement("left");
         });
         registerKeyHandler({name: "Move Up", code: "ArrowUp", locked: false}, function(event) {
             event.preventDefault();
-            movement("up",true);
+            movement("up");
         });
         registerKeyHandler({name: "Move Down", code: "ArrowDown", locked: false}, function(event) {
             event.preventDefault();
-            movement("down",true);
+            movement("down");
         });
     }
     //the arrow keys in test section remain unchangeable as setting up other keys will disturb the input
@@ -633,95 +558,49 @@ function setupSimpleGrading(action) {
         registerKeyHandler({name: "Move Down", code: "ArrowDown", locked: true}, function(event) {});
     }
 
+    // check if a cell is focused, then update value
+    function keySetCurrentCell(event, options) {
+        var cell = $(".cell-grade:focus");
+        if (cell.length) {
+            updateCheckpointCells(cell, options.score);
+        }
+    }
+
+    // check if a cell is focused, then update the entire row
+    function keySetCurrentRow(event, options) {
+        var cell = $(".cell-grade:focus");
+        if (cell.length) {
+            updateCheckpointCells(cell.parent().find(".cell-grade"), options.score);
+        }
+    }
 
     // register keybinds for grading controls
     if(action == 'lab') {
-        registerKeyHandler({name: "Set Cell to 0", code: "KeyZ"}, function(event) {
-            if(!$("#student-search-input").is(":focus")) {
-                event.preventDefault();
-                updateCheckboxScores(0, child_elems, false, child_idx);
-            }
-        });
-        registerKeyHandler({name: "Set Cell to 0.5", code: "KeyX"}, function(event) {
-            if(!$("#student-search-input").is(":focus")) {
-                event.preventDefault();
-                updateCheckboxScores(0.5, child_elems, false, child_idx);
-            }
-        });
-        registerKeyHandler({name: "Set Cell to 1", code: "KeyC"}, function(event) {
-            if(!$("#student-search-input").is(":focus")) {
-                event.preventDefault();
-                updateCheckboxScores(1, child_elems, false, child_idx);
-            }
-        });
-        registerKeyHandler({name: "Cycle Cell Value", code: "KeyV"}, function(event) {
-            if(!$("#student-search-input").is(":focus")) {
-                event.preventDefault();
-                $(child_elems[child_idx]).click();
-            }
-        });
-        registerKeyHandler({name: "Set Row to 0", code: "KeyA"}, function(event) {
-            if(!$("#student-search-input").is(":focus")) {
-                event.preventDefault();
-                updateCheckboxScores(0, child_elems, true);
-            }
-        });
-        registerKeyHandler({name: "Set Row to 0.5", code: "KeyS"}, function(event) {
-            if(!$("#student-search-input").is(":focus")) {
-                event.preventDefault();
-                updateCheckboxScores(0.5, child_elems, true);
-            }
-        });
-        registerKeyHandler({name: "Set Row to 1", code: "KeyD"}, function(event) {
-            if(!$("#student-search-input").is(":focus")) {
-                event.preventDefault();
-                updateCheckboxScores(1, child_elems, true);
-            }
-        });
-        registerKeyHandler({name: "Cycle Row Value", code: "KeyF"}, function(event) {
-            if(!$("#student-search-input").is(":focus")) {
-                event.preventDefault();
-                $(child_elems).each(function() {
-                    $(this).click();
-                });
-            }
-        });
-    }
-    // for numeric gradeables, whenever an input field is focused, update location variables
-    else {
-        $("input[id^=cell-]").on("focus", function(event) {
-            $(child_elems[child_idx]).children("input").css("outline", "");
-            var tr_elem = $(this).parent().parent();
-            table_row = tr_elem.attr("data-row");
-            child_elems = tr_elem.find(search_selector);
-            child_idx = child_elems.index($(this).parent());
-            $(child_elems[child_idx]).children("input").css("outline", "3px dashed " + highlight_color);
-        });
+        registerKeyHandler({ name: "Set Cell to 0", code: "KeyZ", options: {score: 0} }, keySetCurrentCell);
+        registerKeyHandler({ name: "Set Cell to 0.5", code: "KeyX", options: {score: 0.5} }, keySetCurrentCell);
+        registerKeyHandler({ name: "Set Cell to 1", code: "KeyC", options: {score: 1} }, keySetCurrentCell);
+        registerKeyHandler({ name: "Cycle Cell Value", code: "KeyV", options: {score: null} }, keySetCurrentCell);
+        registerKeyHandler({ name: "Set Row to 0", code: "KeyA", options: {score: 0} }, keySetCurrentRow);
+        registerKeyHandler({ name: "Set Row to 0.5", code: "KeyS", options: {score: 0.5} }, keySetCurrentRow);
+        registerKeyHandler({ name: "Set Row to 1", code: "KeyD", options: {score: 1} }, keySetCurrentRow);
+        registerKeyHandler({ name: "Cycle Row Value", code: "KeyF", options: {score: null} }, keySetCurrentRow);
     }
 
     // when pressing enter in the search bar, go to the corresponding element
     $("#student-search-input").on("keyup", function(event) {
         if(event.keyCode == 13) { // Enter
             this.blur();
-            dont_focus = true; // dont allow refocusing until later
             var value = $(this).val();
             if(value != "") {
-                var prev_child_elem = $(child_elems[child_idx]);
+                var prev_cell = $(".cell-grade:focus");
                 // get the row number of the table element with the matching id
                 var tr_elem = $('table tbody tr[data-user="' + value +'"]');
                 // if a match is found, then use it to find the cell
                 if(tr_elem.length > 0) {
-                    table_row = tr_elem.attr("data-row");
-                    child_elems = $("tr[data-row=" + table_row + "]").find(search_selector);
-                    if(action == 'lab') {
-                        prev_child_elem.css("outline", "");
-                        $(child_elems[child_idx]).css("outline", "3px dashed " + highlight_color);
-                    }
-                    else {
-                        prev_child_elem.children("input").css("outline", "");
-                        $(child_elems[child_idx]).children("input").css("outline", "3px dashed " + highlight_color).focus();
-                    }
-                    $('html, body').animate( { scrollTop: $(child_elems).parent().offset().top - $(window).height()/2}, 50);
+                    var new_cell = $("#cell-" + tr_elem.attr("data-row") + "-0");
+                    prev_cell.blur();
+                    new_cell.focus();
+                    $('html, body').animate( { scrollTop: new_cell.offset().top - $(window).height()/2}, 50);
                 }
                 else {
                     // if no match is found and there is at least 1 matching autocomplete label, find its matching value
@@ -760,40 +639,35 @@ function setupSimpleGrading(action) {
         $(this).val("");
     });
 
+    // the offset of the search bar: used to lock the search bar on scroll
+    var search_bar_offset = $("#student-search-input").offset(); 
+
     // used to reposition the search field when the window scrolls
     $(window).on("scroll", function(event) {
-        var search_field = $("#student-search");
+        var search_field = $("#student-search-input");
         if(search_bar_offset.top < $(window).scrollTop()) {
-            search_field.css("top", 0);
-            search_field.css("left", search_bar_offset.left);
-            search_field.css("position", "fixed");
+            search_field.addClass("fixed-top");
         }
         else {
-            search_field.css("position", "relative");
-            search_field.css("left", "");
+            search_field.removeClass("fixed-top");
         }
     });
 
     // check if the search field needs to be repositioned when the page is loaded
     if(search_bar_offset.top < $(window).scrollTop()) {
-        var search_field = $("#student-search");
-        search_field.css("top", 0);
-        search_field.css("left", search_bar_offset.left);
-        search_field.css("position", "fixed");
+        var search_field = $("#student-search-input");
+        search_field.addClass("fixed-top");
     }
 
     // check if the search field needs to be repositioned when the page is resized
     $(window).on("resize", function(event) {
         var settings_btn_offset = $("#settings-btn").offset();
-        search_bar_offset = {   // NOTE: THE SEARCH BAR IS PLACED RELATIVE TO THE SETTINGS BUTTON
+        search_bar_offset = {  
             top : settings_btn_offset.top,
-            left : settings_btn_offset.left - $("#student-search").width()
         };
         if(search_bar_offset.top < $(window).scrollTop()) {
-            var search_field = $("#student-search");
-            search_field.css("top", 0);
-            search_field.css("left", search_bar_offset.left);
-            search_field.css("position", "fixed");
+            var search_field = $("#student-search-input");
+            search_field.addClass("fixed-top");
         }
     });
 
