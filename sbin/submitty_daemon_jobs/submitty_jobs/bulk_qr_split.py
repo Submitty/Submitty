@@ -134,13 +134,13 @@ def main(args):
             with open('decoded.json', 'w') as out:
                 json.dump(prev_data, out)
 
-        #write the buffer to the log file, so everything is at one line
+        # write the buffer to the log file, so everything is at one line
         logger.write_to_log(log_file_path, buff)
     except Exception:
         msg = "Failed when splitting pdf " + filename
         print(msg)
         traceback.print_exc()
-        #print everything in the buffer just in case it didn't write 
+        # print everything in the buffer just in case it didn't write
         logger.write_to_log(log_file_path, buff)
         logger.write_to_log(log_file_path, msg + "\n" + traceback.format_exc())
         sys.exit(1)

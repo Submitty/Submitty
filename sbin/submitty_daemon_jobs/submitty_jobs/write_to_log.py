@@ -1,6 +1,7 @@
 import fcntl
 import os
 
+"""Logging module for bulk upload"""
 
 def write_to_log(log_file_path, msg, newline=True):
     # create log file descriptor if it doesn't exist, if it does continue as normal
