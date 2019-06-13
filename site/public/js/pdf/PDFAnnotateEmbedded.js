@@ -79,13 +79,19 @@ function render(gradeable_id, user_id, grader_id, file_name, page_num, url = "")
                     let page = PDFAnnotate.UI.createPage(i+1);
                     viewer.appendChild(page);
                     let page_id = i+1;
-                    PDFAnnotate.UI.renderPage(page_id, window.RENDER_OPTIONS).then(([pdfPage, annotations]) => {
-                        let viewport = pdfPage.getViewport(window.RENDER_OPTIONS.scale, window.RENDER_OPTIONS.rotate);
-                        PAGE_HEIGHT = viewport.height;
-                        if(i == page_num) {
-                            $('#file_content').animate({scrollTop: page_num * PAGE_HEIGHT}, 500);
+                    PDFAnnotate.UI.renderPage(page_id, window.RENDER_OPTIONS).then(function(){
+                        if (i == page_num) {
+                            // scroll to page on load
+                            let zoom = parseInt(localStorage.getItem('scale')) || 1;
+                            let page1 = $(".page").filter(":first");
+                            //get css attr, remove 'px' : 
+                            let page_height = parseInt(page1.css("height").slice(0, -2));
+                            let page_margin_top = parseInt(page1.css("margin-top").slice(0, -2));
+                            let page_margin_bot = parseInt(page1.css("margin-bottom").slice(0, -2));
+                            // assuming margin-top < margin-bot: it overlaps on all pages but 1st so we add it once 
+                            let scrollY = zoom*(page_num)*(page_height+page_margin_bot)+page_margin_top;
+                            $('#file_content').animate({scrollTop: scrollY}, 500);
                         }
-                    }).then(function(){
                         document.getElementById('pageContainer'+page_id).addEventListener('mousedown', function(){
                             //Makes sure the panel don't move when writing on it.
                             $("#submission_browser").draggable('disable');
