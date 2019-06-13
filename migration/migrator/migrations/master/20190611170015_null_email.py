@@ -15,7 +15,7 @@ def up(config, database):
     # find a match (if it exists) from the users table to attempt to fillin the user_name for each prior email
     # note: if there are multiple usernames, it seems to pick one of them (without causing an error)
     # note: if there are no matches, it leaves it null
-    database.execute("UPDATE emails SET user_id=subquery.user_id FROM (SELECT user_id, user_email FROM users) AS subquery WHERE emails.recipient != '' and emails.recipient = subquery.user_email")
+    database.execute("UPDATE emails SET user_id=subquery.user_id FROM (SELECT DISTINCT ON(user_email) user_id, user_email FROM users) AS subquery WHERE emails.recipient != '' and emails.recipient = subquery.user_email")
 
     # throw out any emails that we were unable to match with a username
     database.execute("DELETE FROM emails WHERE user_id IS NULL or user_id=''")

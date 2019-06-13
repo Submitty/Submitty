@@ -2,6 +2,7 @@
 
 """
 Handles general sending of emails in Submitty.
+
 This is done by polling the emails table for queued emails and
 properly formatting/sending an email programmatically.
 """
