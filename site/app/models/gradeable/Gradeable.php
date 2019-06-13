@@ -217,7 +217,6 @@ class Gradeable extends AbstractModel {
         $this->setInstructionsUrl($details['instructions_url']);
         $this->setTypeInternal($details['type']);
         $this->setGraderAssignmentMethod($details['grader_assignment_method']);
-        $this->setGraderAssignmentMethod($details['grader_assignment_method']);
         $this->setMinGradingGroup($details['min_grading_group']);
         $this->setSyllabusBucket($details['syllabus_bucket']);
         $this->setTaInstructions($details['ta_instructions']);

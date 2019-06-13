@@ -63,7 +63,6 @@ class WebRouter {
     public function run() {
         $this->controller_name = $this->parameters['_controller'];
         $this->method_name = $this->parameters['_method'];
-        var_dump($this->core);
         $controller = new $this->controller_name($this->core);
 
         foreach ($this->parameters as $key => $value) {
