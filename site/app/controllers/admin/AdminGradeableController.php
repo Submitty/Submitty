@@ -675,13 +675,13 @@ class AdminGradeableController extends AbstractController {
         $gradeable_type = GradeableType::stringToType($details['type']);
         $gradeable_create_data = [
             'type' => $gradeable_type,
-            'grade_method' => 1,
+            'grader_assigment_method' => 1,
             'min_grading_group' => 1,
         ];
 
         $template_property_names = [
             'min_grading_group',
-            'grade_method',
+            'grader_assignment_method',
             'ta_instructions',
             'autograding_config_path',
             'student_view',
@@ -708,7 +708,7 @@ class AdminGradeableController extends AbstractController {
         } else {
             $non_template_property_values = [
                 'min_grading_group' => 1,
-                'grade_method' => 1,
+                'grader_assignment_method' => 1,
                 'ta_instructions' => '',
                 'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/upload_only/config',
                 'student_view' => true,
@@ -908,7 +908,7 @@ class AdminGradeableController extends AbstractController {
 
         $numeric_properties = [
             'precision',
-            'grade_method'
+            'grader_assignment_method'
         ];
 
         // Date properties all need to be set at once

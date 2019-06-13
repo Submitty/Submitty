@@ -1291,7 +1291,7 @@ class Gradeable(object):
         self.overall_ta_instructions = ""
         self.peer_grading = False
         self.grade_by_registration = True
-        self.grade_method = 1
+        self.grader_assignment_method = 1
         self.is_repository = False
         self.subdirectory = ""
         self.use_ta_grading = True
@@ -1372,9 +1372,9 @@ class Gradeable(object):
         else:
             self.title = self.id.replace("_", " ").title()
 
-        if 'g_grade_method' in gradeable:
-            self.grade_by_registration = gradeable['g_grade_method'] is 1
-            self.grade_method = gradeable['g_grade_method']
+        if 'g_grader_assignment_method' in gradeable:
+            self.grade_by_registration = gradeable['g_grader_assignment_method'] is 1
+            self.grader_assignment_method = gradeable['g_grader_assignment_method']
 
         if 'grading_rotating' in gradeable:
             self.grading_rotating = gradeable['grading_rotating']
@@ -1468,7 +1468,7 @@ class Gradeable(object):
                      g_instructions_url=self.instructions_url,
                      g_overall_ta_instructions=self.overall_ta_instructions,
                      g_gradeable_type=self.type,
-                     g_grade_method=self.grade_method,
+                     g_grader_assignment_method=self.grader_assignment_method,
                      g_ta_view_start_date=self.ta_view_date,
                      g_grade_start_date=self.grade_start_date,
                      g_grade_due_date=self.grade_due_date,

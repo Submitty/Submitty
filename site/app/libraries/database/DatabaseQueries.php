@@ -1193,7 +1193,7 @@ ORDER BY g.sections_rotating_id, g.user_id", $params);
      * @return array
      */
     public function getRotatingSectionsGradeableIDS() {
-        $this->course_db->query("SELECT g_id FROM gradeable WHERE g_grade_method = {0} ORDER BY g_grade_start_date ASC");
+        $this->course_db->query("SELECT g_id FROM gradeable WHERE g_grader_assignment_method = {0} ORDER BY g_grade_start_date ASC");
         return $this->course_db->rows();
     }
 
@@ -3121,7 +3121,7 @@ AND gc_id IN (
               g_instructions_url,
               g_overall_ta_instructions,
               g_gradeable_type,
-              g_grade_method,
+              g_grader_assignment_method,
               g_ta_view_start_date,
               g_grade_start_date,
               g_grade_due_date,
@@ -3239,7 +3239,7 @@ AND gc_id IN (
                 $gradeable->getInstructionsUrl(),
                 $gradeable->getTaInstructions(),
                 $gradeable->getType(),
-                $gradeable->getGradeMethod(),
+                $gradeable->getGraderAssignmentMethod(),
                 DateUtils::dateTimeToString($gradeable->getTaViewStartDate()),
                 DateUtils::dateTimeToString($gradeable->getGradeStartDate()),
                 DateUtils::dateTimeToString($gradeable->getGradeDueDate()),
@@ -3256,7 +3256,7 @@ AND gc_id IN (
                   g_instructions_url=?,
                   g_overall_ta_instructions=?,
                   g_gradeable_type=?,
-                  g_grade_method=?,
+                  g_grader_assignment_method=?,
                   g_ta_view_start_date=?,
                   g_grade_start_date=?,
                   g_grade_due_date=?,

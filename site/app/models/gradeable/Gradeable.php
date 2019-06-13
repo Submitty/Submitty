@@ -37,8 +37,8 @@ use app\models\User;
  * @method \DateTime getRegradeRequestDate()
  * @method string getSyllabusBucket()
  * @method void setSyllabusBucket($bucket)
- * @method void setGradeMethod($method)
- * @method int getGradeMethod()
+ * @method void setGraderAssignmentMethod($method)
+ * @method int getGraderAssignmentMethod()
  * @method string getTaInstructions()
  * @method void setTaInstructions($instructions)
  * @method string getAutogradingConfigPath()
@@ -91,7 +91,7 @@ class Gradeable extends AbstractModel {
     /** @property @var int The type of gradeable */
     protected $type = GradeableType::ELECTRONIC_FILE;
     /** @property @var int If the gradeable should be graded by all access (2) by registration section (1) or rotating sections (0) */
-    protected $grade_method = 1;
+    protected $grader_assignment_method = 1;
     protected $test_var = 1;
     /** @property @var int The minimum user group that can grade this gradeable (1=instructor) */
     protected $min_grading_group = 1;
@@ -216,7 +216,8 @@ class Gradeable extends AbstractModel {
         $this->setTitle($details['title']);
         $this->setInstructionsUrl($details['instructions_url']);
         $this->setTypeInternal($details['type']);
-        $this->setGradeMethod($details['grade_method']);
+        $this->setGraderAssignmentMethod($details['grader_assignment_method']);
+        $this->setGraderAssignmentMethod($details['grader_assignment_method']);
         $this->setMinGradingGroup($details['min_grading_group']);
         $this->setSyllabusBucket($details['syllabus_bucket']);
         $this->setTaInstructions($details['ta_instructions']);
@@ -252,7 +253,7 @@ class Gradeable extends AbstractModel {
 
 
     public function isGradeByRegistration() {
-        if ($this->getGradeMethod() == 1) {
+        if ($this->getGraderAssignmentMethod() == 1) {
             return true;
         }
         return false;

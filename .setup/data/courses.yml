@@ -50,7 +50,7 @@
 #
 #     g_overall_ta_instructions: [optional] string for additional details to TA for grading. Defaults to .
 #
-#     g_grade_method: [optional] integer between 0-2 inclusive, where 0 is grade by rotating section, 1 is grade by 
+#     g_grader_assignment_method: [optional] integer between 0-2 inclusive, where 0 is grade by rotating section, 1 is grade by 
 #         by registration section, and 2 is all access grading.  Defaults to 1: grade by registration section.
 #
 #     g_ta_view_start_date: when are TAs allowed to view this gradeable on the navigation page (before grading has started).
