@@ -675,13 +675,13 @@ class AdminGradeableController extends AbstractController {
         $gradeable_type = GradeableType::stringToType($details['type']);
         $gradeable_create_data = [
             'type' => $gradeable_type,
-            'grade_by_registration' => true,
+            'grade_method' => 1,
             'min_grading_group' => 1,
         ];
 
         $template_property_names = [
             'min_grading_group',
-            'grade_by_registration',
+            'grade_method',
             'ta_instructions',
             'autograding_config_path',
             'student_view',
@@ -708,7 +708,7 @@ class AdminGradeableController extends AbstractController {
         } else {
             $non_template_property_values = [
                 'min_grading_group' => 1,
-                'grade_by_registration' => true,
+                'grade_method' => 1,
                 'ta_instructions' => '',
                 'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/upload_only/config',
                 'student_view' => true,
@@ -890,12 +890,12 @@ class AdminGradeableController extends AbstractController {
         $trigger_rebuild = count(array_intersect($trigger_rebuild_props, array_keys($details))) > 0;
 
         $boolean_properties = [
-            'grade_by_registration',
             'ta_grading',
             'scanned_exam',
             'student_view',
             'student_view_after_grades',
             'student_submit',
+            'grade_by_registration',
             'peer_grading',
             'late_submission_allowed',
             'regrade_allowed',
@@ -907,7 +907,8 @@ class AdminGradeableController extends AbstractController {
         $discussion_ids = 'discussion_thread_id';
 
         $numeric_properties = [
-            'precision'
+            'precision',
+            'grade_method'
         ];
 
         // Date properties all need to be set at once
@@ -939,6 +940,7 @@ class AdminGradeableController extends AbstractController {
                 continue;
             }
 
+
             // Converts string array sep by ',' to json
             if($prop === $discussion_ids) {
                 $post_val = array_map('intval', explode(',', $post_val));
@@ -954,7 +956,6 @@ class AdminGradeableController extends AbstractController {
                     continue;
                 }
             }
-
             // Try to set the property
             try {
                 //convert the property name to a setter name
@@ -968,7 +969,6 @@ class AdminGradeableController extends AbstractController {
                 $errors[$prop] = $e->getMessage();
             }
         }
-
         // Set the dates last just in case the request contained parameters that
         //  affect date validation
         if ($date_set) {
@@ -987,11 +987,12 @@ class AdminGradeableController extends AbstractController {
                 $errors['server'] = $result;
             }
         }
-
+;
         // Be strict.  Only apply database changes if there were no errors
         if(count($errors) !== 0) {
             throw new ValidationException('', $errors);
         }
+
         $this->core->getQueries()->updateGradeable($gradeable);
 
         // Only return updated properties if the changes were applied

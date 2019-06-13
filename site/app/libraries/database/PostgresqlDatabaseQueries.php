@@ -387,7 +387,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
       FROM gradeable AS g
       LEFT JOIN
         grading_rotating AS gr ON g.g_id = gr.g_id
-      WHERE g_grade_by_registration = 'f'
+      WHERE g_grade_method = 0
     ) AS g
   ) as gu
   LEFT JOIN (
@@ -1362,7 +1362,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               g_instructions_url AS instructions_url,
               g_overall_ta_instructions AS ta_instructions,
               g_gradeable_type AS type,
-              g_grade_by_registration AS grade_by_registration,
+              g_grade_method AS grade_method,
               g_ta_view_start_date AS ta_view_start_date,
               g_grade_start_date AS grade_start_date,
               g_grade_due_date AS grade_due_date,

@@ -28,8 +28,6 @@ use app\models\User;
  * @method string getInstructionsUrl()
  * @method void setInstructionsUrl($url)
  * @method int getType()
- * @method bool isGradeByRegistration()
- * @method void setGradeByRegistration($grade_by_reg)
  * @method \DateTime getTaViewStartDate()
  * @method \DateTime getGradeStartDate()
  * @method \DateTime getGradeDueDate()
@@ -39,6 +37,8 @@ use app\models\User;
  * @method \DateTime getRegradeRequestDate()
  * @method string getSyllabusBucket()
  * @method void setSyllabusBucket($bucket)
+ * @method void setGradeMethod($method)
+ * @method int getGradeMethod()
  * @method string getTaInstructions()
  * @method void setTaInstructions($instructions)
  * @method string getAutogradingConfigPath()
@@ -90,8 +90,9 @@ class Gradeable extends AbstractModel {
     protected $instructions_url = "";
     /** @property @var int The type of gradeable */
     protected $type = GradeableType::ELECTRONIC_FILE;
-    /** @property @var bool If the gradeable should be graded per registration section (true) or rotating sections(false) */
-    protected $grade_by_registration = true;
+    /** @property @var int If the gradeable should be graded by all access (2) by registration section (1) or rotating sections (0) */
+    protected $grade_method = 1;
+    protected $test_var = 1;
     /** @property @var int The minimum user group that can grade this gradeable (1=instructor) */
     protected $min_grading_group = 1;
     /** @property @var string The syllabus classification of this gradeable */
@@ -215,7 +216,7 @@ class Gradeable extends AbstractModel {
         $this->setTitle($details['title']);
         $this->setInstructionsUrl($details['instructions_url']);
         $this->setTypeInternal($details['type']);
-        $this->setGradeByRegistration($details['grade_by_registration']);
+        $this->setGradeMethod($details['grade_method']);
         $this->setMinGradingGroup($details['min_grading_group']);
         $this->setSyllabusBucket($details['syllabus_bucket']);
         $this->setTaInstructions($details['ta_instructions']);
@@ -247,6 +248,14 @@ class Gradeable extends AbstractModel {
         // Set dates last
         $this->setDates($details);
         $this->modified = false;
+    }
+
+
+    public function isGradeByRegistration() {
+        if ($this->getGradeMethod() == 1) {
+            return true;
+        }
+        return false;
     }
 
     /**
