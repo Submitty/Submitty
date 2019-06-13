@@ -102,6 +102,29 @@ void fileStatus(const std::string &filename, bool &fileExists, bool &fileEmpty) 
   }
 }
 
+std::string getPathForInstructor(const TestCase &tc, std::string &filename){
+  struct stat st;
+  std::string expectedFolder;
+  std::string test_output_path = "test_output/";
+  std::string random_output_path = "random_output/" + tc.getPrefix();
+  if (stat((test_output_path + filename).c_str(), &st) >= 0) {
+    expectedFolder = test_output_path;
+  } else if (stat((random_output_path + filename).c_str(), &st) >= 0){
+    expectedFolder = random_output_path;
+  }
+  return expectedFolder;
+}
+
+std::string getPathForOutputFile(const TestCase &tc, std::string &filename, std::string &id){
+  std::string expectedPath = getPathForInstructor(tc, filename);
+  std::string requiredPath ;
+  if (expectedPath.substr(0,11) == "test_output"){
+    requiredPath = expectedPath + id + "/"; 
+  } else if (expectedPath.substr(0,13) == "random_output") {
+    requiredPath = expectedPath;
+  }
+  return requiredPath;
+}
 
 bool getFileContents(const std::string &filename, std::string &file_contents) {
   std::ifstream file(filename);

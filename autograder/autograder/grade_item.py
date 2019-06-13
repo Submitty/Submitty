@@ -534,12 +534,12 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     # RUN SOLUTION RUNNER
     with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
         print ("====================================\nRUNNER SOLUTION STARTS", file=f)
-    tmp_work_generated_output = os.path.join(tmp_work,"generated_output")
-    os.mkdir(tmp_work_generated_output)
+    tmp_work_random_output = os.path.join(tmp_work,"random_output")
+    os.mkdir(tmp_work_random_output)
 
     with open(os.path.join(tmp_logs,"solution_runner_log.txt"), 'w') as logfile:
         for testcase_num in range(1, len(my_testcases)+1):
-            testcase_folder = os.path.join(tmp_work_generated_output, "test{:02}".format(testcase_num))
+            testcase_folder = os.path.join(tmp_work_random_output, "test{:02}".format(testcase_num))
 
             os.makedirs(testcase_folder)
             os.chdir(testcase_folder)

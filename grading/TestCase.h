@@ -147,5 +147,7 @@ bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &
                       std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > &messages);
 
 void fileStatus(const std::string &filename, bool &fileExists, bool &fileEmpty);
+std::string getPathForInstructor(const TestCase &tc, std::string &filename);
+std::string getPathForOutputFile(const TestCase &tc, std::string &filename, std::string &id);
 
 #endif
