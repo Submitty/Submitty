@@ -77,8 +77,8 @@ class ElectronicGraderView extends AbstractView {
             $graded += $section['graded_components'];
             $total += $section['total_components'];
             if ($gradeable->isTeamAssignment()) {
-               $no_team_total += $section['no_team'];
-               $team_total += $section['team'];
+                $no_team_total += $section['no_team'];
+                $team_total += $section['team'];
             }
         }
         if ($total === 0 && $no_team_total === 0){
@@ -212,7 +212,7 @@ class ElectronicGraderView extends AbstractView {
     }
 
     public function statPage($users) {
-        
+
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
 
         $return = <<<HTML
@@ -221,8 +221,8 @@ class ElectronicGraderView extends AbstractView {
 
 HTML;
         $this->core->getOutput()->addBreadcrumb("Bulk Upload Forensics", $this->core->buildUrl(array('component' => 'submission', 'action' => 'stat_page', 'gradeable_id' => $gradeable_id)));
-        
-		$return .= <<<HTML
+
+        $return .= <<<HTML
 			<div style="padding-left:20px;padding-bottom: 10px;border-radius:3px;padding-right:20px;">
 				<table class="table table-striped table-bordered persist-area" id="content_upload_table">
 					<tr>			
@@ -233,14 +233,14 @@ HTML;
 					</tr>
 HTML;
 
-		foreach($users as $user => $details){
-			$first_name = htmlspecialchars($details["first_name"]);
-			$last_name = htmlspecialchars($details["last_name"]);
+        foreach($users as $user => $details){
+            $first_name = htmlspecialchars($details["first_name"]);
+            $last_name = htmlspecialchars($details["last_name"]);
             $upload_timestamp = $details["upload_time"];
             $submit_timestamp = $details["submit_time"];
             $filepath = htmlspecialchars($details["file"]);
-            
-			$return .= <<<HTML
+
+            $return .= <<<HTML
 			<tbody>
 				<tr>
 					<td>{$last_name}, {$first_name}</td>
@@ -250,10 +250,10 @@ HTML;
 				</tr>
 			</tbody>
 HTML;
-			
-		}
-		
-		$return .= <<<HTML
+
+        }
+
+        $return .= <<<HTML
 				</table>
 			</div>
 			</div>
@@ -312,11 +312,11 @@ HTML;
 
 			</script>
 HTML;
-		return $return;
+        return $return;
 
-	}
+    }
 
-    
+
 
     /**
      * @param Gradeable $gradeable
@@ -653,6 +653,7 @@ HTML;
             "next_student_url" => $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $graded_gradeable->getGradeableId(), 'who_id' => $next_id]),
             "home_url" => $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'details', 'gradeable_id' => $graded_gradeable->getGradeableId(), 'view' => (count($this->core->getUser()->getGradingRegistrationSections()) == 0) ? 'all' : null]),
             'regrade_panel_available' => $this->core->getConfig()->isRegradeEnabled(),
+            'grade_inquiry_pending' => $graded_gradeable->hasActiveRegradeRequest(),
             'discussion_based' => $graded_gradeable->getGradeable()->isDiscussionBased()
         ]);
     }
@@ -674,7 +675,7 @@ HTML;
         $posts_view = <<<HTML
             <span class="col grading_label">Discussion Posts</span>
 HTML;
-            
+
         $currentCourse = $this->core->getConfig()->getCourse();
 
         //Empty thread input

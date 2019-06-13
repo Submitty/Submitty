@@ -285,14 +285,15 @@
     {% elseif graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0 %}
         {% set contents = "Cancelled Submission" %}
         {% set btn_class = "btn-default" %}
+        {% if graded_gradeable.hasActiveRegradeRequest() %}
+            {% set contents = contents ~ " + Grade Inquiry" %}
+            {% set btn_class = "btn-danger" %}
+        {%  endif %}
     {% elseif graded_gradeable.getGradeable().isTaGrading() %}
         {% set contents = "Grade" %}
         {% set btn_class = "btn-primary" %}
         {% if graded_gradeable.getOrCreateTaGradedGradeable().anyGrades() %}
-            {% if graded_gradeable.hasActiveRegradeRequest() %}
-                {% set contents = "Grade Inquiry" %}
-                {% set btn_class = "btn-danger" %}
-            {% elseif graded_gradeable.getTaGradedGradeable().hasVersionConflict() %}
+            {% if graded_gradeable.getTaGradedGradeable().hasVersionConflict() %}
                 {% set contents = "Version Conflict" %}
                 {% set btn_class = "btn-primary" %}
             {% elseif not graded_gradeable.isTaGradingComplete() %}
@@ -302,6 +303,10 @@
                 {% set btn_class = "btn-default" %}
             {% endif %}
         {% endif %}
+        {% if graded_gradeable.hasActiveRegradeRequest() %}
+            {% set contents = contents ~ " + Grade Inquiry" %}
+            {% set btn_class = "btn-danger" %}
+        {%  endif %}
     {% else %}
         {% set contents = "View" %}
         {% set btn_class = "btn-primary" %}

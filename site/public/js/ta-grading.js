@@ -28,12 +28,18 @@ $(function() {
         setRegradeVisible(true);
         setDiscussionVisible(true);
         resetModules();
-        updateCookies();
     }
    else{
         readCookies();
-        updateCookies();
     }
+
+    //bring regrade panel to the front if grade inquiry is pending
+    if ($(".fa-exclamation")[0]) {
+      if (!isRegradeVisible())
+        toggleRegrade();
+      $('#regrade_info').css({'z-index':'40'});
+    }
+    updateCookies();
 
     $('body').css({'position':'fixed', 'width':'100%'});
 
@@ -92,36 +98,43 @@ function readCookies(){
     var output_width = document.cookie.replace(/(?:(?:^|.*;\s*)output_width\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var output_height = document.cookie.replace(/(?:(?:^|.*;\s*)output_height\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var output_visible = document.cookie.replace(/(?:(?:^|.*;\s*)output_visible\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    var output_z_index = document.cookie.replace(/(?:(?:^|.*;\s*)output_z_index\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+
 
     var files_top = document.cookie.replace(/(?:(?:^|.*;\s*)files_top\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var files_left = document.cookie.replace(/(?:(?:^|.*;\s*)files_left\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var files_width = document.cookie.replace(/(?:(?:^|.*;\s*)files_width\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var files_height = document.cookie.replace(/(?:(?:^|.*;\s*)files_height\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var files_visible = document.cookie.replace(/(?:(?:^|.*;\s*)files_visible\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    var files_z_index = document.cookie.replace(/(?:(?:^|.*;\s*)files_z_index\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
     var rubric_top = document.cookie.replace(/(?:(?:^|.*;\s*)rubric_top\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var rubric_left = document.cookie.replace(/(?:(?:^|.*;\s*)rubric_left\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var rubric_width = document.cookie.replace(/(?:(?:^|.*;\s*)rubric_width\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var rubric_height = document.cookie.replace(/(?:(?:^|.*;\s*)rubric_height\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var rubric_visible = document.cookie.replace(/(?:(?:^|.*;\s*)rubric_visible\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    var rubric_z_index = document.cookie.replace(/(?:(?:^|.*;\s*)rubric_z_index\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
     var status_top = document.cookie.replace(/(?:(?:^|.*;\s*)status_top\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var status_left = document.cookie.replace(/(?:(?:^|.*;\s*)status_left\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var status_width = document.cookie.replace(/(?:(?:^|.*;\s*)status_width\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var status_height = document.cookie.replace(/(?:(?:^|.*;\s*)status_height\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var status_visible = document.cookie.replace(/(?:(?:^|.*;\s*)status_visible\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    var status_z_index = document.cookie.replace(/(?:(?:^|.*;\s*)status_z_index\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
     var regrade_top = document.cookie.replace(/(?:(?:^|.*;\s*)regrade_top\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var regrade_left = document.cookie.replace(/(?:(?:^|.*;\s*)regrade_left\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var regrade_width = document.cookie.replace(/(?:(?:^|.*;\s*)regrade_width\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var regrade_height = document.cookie.replace(/(?:(?:^|.*;\s*)regrade_height\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var regrade_visible = document.cookie.replace(/(?:(?:^|.*;\s*)regrade_visible\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    var regrade_z_index = document.cookie.replace(/(?:(?:^|.*;\s*)regrade_z_index\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
     var discussion_top = document.cookie.replace(/(?:(?:^|.*;\s*)discussion_top\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var discussion_left = document.cookie.replace(/(?:(?:^|.*;\s*)discussion_left\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var discussion_width = document.cookie.replace(/(?:(?:^|.*;\s*)discussion_width\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var discussion_height = document.cookie.replace(/(?:(?:^|.*;\s*)discussion_height\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var discussion_visible = document.cookie.replace(/(?:(?:^|.*;\s*)discussion_visible\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    var discussion_z_index = document.cookie.replace(/(?:(?:^|.*;\s*)discussion_z_index\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
     var bar_wrapper_top = document.cookie.replace(/(?:(?:^|.*;\s*)bar_wrapper_top\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var bar_wrapper_left = document.cookie.replace(/(?:(?:^|.*;\s*)bar_wrapper_left\s*\=\s*([^;]*).*$)|^.*$/, "$1");
@@ -144,36 +157,42 @@ function readCookies(){
     (output_width) ? $("#autograding_results").css("width", output_width):{};
     (output_height) ? $("#autograding_results").css("height", output_height):{};
     (output_visible) ? $("#autograding_results").css("display", output_visible):{};
+    (output_z_index) ? $("#autograding_results").css("z-index", output_z_index):{};
 
     (rubric_top) ? $("#grading_rubric").css("top", rubric_top):{};
     (rubric_left) ? $("#grading_rubric").css("left", rubric_left):{};
     (rubric_width) ? $("#grading_rubric").css("width", rubric_width):{};
     (rubric_height) ? $("#grading_rubric").css("height", rubric_height):{};
     (rubric_visible) ? $("#grading_rubric").css("display", rubric_visible):{};
+    (rubric_z_index) ? $("#grading_rubric").css("z-index", rubric_z_index):{};
 
     (files_top) ? $("#submission_browser").css("top", files_top):{};
     (files_left) ? $("#submission_browser").css("left", files_left):{};
     (files_width) ? $("#submission_browser").css("width", files_width):{};
     (files_height) ? $("#submission_browser").css("height", files_height):{};
     (files_visible) ? $("#submission_browser").css("display", files_visible):{};
+    (files_z_index) ? $("#submission_browser").css("z-index", files_z_index):{};
 
     (status_top) ? $("#student_info").css("top", status_top):{};
     (status_left) ? $("#student_info").css("left", status_left):{};
     (status_width) ? $("#student_info").css("width", status_width):{};
     (status_height) ? $("#student_info").css("height", status_height):{};
     (status_visible) ? $("#student_info").css("display", status_visible):{};
+    (status_z_index) ? $("#student_info").css("z-index", status_z_index):{};
 
     (regrade_top) ? $("#regrade_info").css("top", regrade_top):{};
     (regrade_left) ? $("#regrade_info").css("left", regrade_left):{};
     (regrade_width) ? $("#regrade_info").css("width", regrade_width):{};
     (regrade_height) ? $("#regrade_info").css("height", regrade_height):{};
     (regrade_visible) ? $("#regrade_info").css("display", regrade_visible):{};
+    (regrade_z_index) ? $("#regrade_info").css("z-index", regrade_z_index):{};
 
     (discussion_top) ? $("#discussion_browser").css("top", discussion_top):{};
     (discussion_left) ? $("#discussion_browser").css("left", discussion_left):{};
     (discussion_width) ? $("#discussion_browser").css("width", discussion_width):{};
     (discussion_height) ? $("#discussion_browser").css("height", discussion_height):{};
     (discussion_visible) ? $("#discussion_browser").css("display", discussion_visible):{};
+    (discussion_z_index) ? $("#discussion_browser").css("z-index", discussion_z_index):{};
 
     (bar_wrapper_top) ? $("#bar_wrapper").css("top", bar_wrapper_top):{};
     (bar_wrapper_left) ? $("#bar_wrapper").css("left", bar_wrapper_left):{};
@@ -188,7 +207,7 @@ function readCookies(){
     (files_visible) ? ((files_visible) == "none" ? $(".grading_toolbar .fa-folder-open").removeClass("icon-selected") : $(".grading_toolbar .fa-folder-open").addClass("icon-selected")) : {};
     (rubric_visible) ? ((rubric_visible) == "none" ? $(".grading_toolbar .fa-edit").removeClass("icon-selected") : $(".grading_toolbar .fa-edit").addClass("icon-selected")) : {};
     (status_visible) ? ((status_visible) == "none" ? $(".grading_toolbar .fa-user").removeClass("icon-selected") : $(".grading_toolbar .fa-user").addClass("icon-selected")) : {};
-    (regrade_visible) ? ((regrade_visible) == "none" ? $(".grading_toolbar .fa-hand-paper").removeClass("icon-selected") : $(".grading_toolbar .fa-hand-paper").addClass("icon-selected")) : {};
+    (regrade_visible) ? ((regrade_visible) == "none" ? $(".grading_toolbar .grade_inquiry_icon").removeClass("icon-selected") : $(".grading_toolbar .grade_inquiry_icon").addClass("icon-selected")) : {};
     (discussion_visible) ? ((discussion_visible) == "none" ? $(".grading_toolbar .fa-comment-alt").removeClass("icon-selected") : $(".grading_toolbar .fa-comment-alt").addClass("icon-selected")) : {};
 
     (autoscroll) ? ((autoscroll) == "on" ? $('#autoscroll_id').prop('checked', true) : $('#autoscroll_id').prop('checked', false)) : {};
@@ -242,36 +261,42 @@ function updateCookies(){
     document.cookie = "output_width=" + $("#autograding_results").css("width") + "; path=/;";
     document.cookie = "output_height=" + $("#autograding_results").css("height") + "; path=/;";
     document.cookie = "output_visible=" + $("#autograding_results").css("display") + "; path=/;";
+    document.cookie = "output_z_index=" + $("#autograding_results").css("z-index") + "; path=/;";
 
     document.cookie = "rubric_top=" + $("#grading_rubric").css("top") + "; path=/;";
     document.cookie = "rubric_left=" + $("#grading_rubric").css("left") + "; path=/;";
     document.cookie = "rubric_width=" + $("#grading_rubric").css("width") + "; path=/;";
     document.cookie = "rubric_height=" + $("#grading_rubric").css("height") + "; path=/;";
     document.cookie = "rubric_visible=" + $("#grading_rubric").css("display") + "; path=/;";
+    document.cookie = "rubric_z_index=" + $("#grading_rubric").css("z-index") + "; path=/;";
 
     document.cookie = "files_top=" + $("#submission_browser").css("top") + "; path=/;";
     document.cookie = "files_left=" + $("#submission_browser").css("left") + "; path=/;";
     document.cookie = "files_width=" + $("#submission_browser").css("width") + "; path=/;";
     document.cookie = "files_height=" + $("#submission_browser").css("height") + "; path=/;";
     document.cookie = "files_visible=" + $("#submission_browser").css("display") + "; path=/;";
+    document.cookie = "files_z_index=" + $("#submission_browser").css("z-index") + "; path=/;";
 
     document.cookie = "status_top=" + $("#student_info").css("top") + "; path=/;";
     document.cookie = "status_left=" + $("#student_info").css("left") + "; path=/;";
     document.cookie = "status_width=" + $("#student_info").css("width") + "; path=/;";
     document.cookie = "status_height=" + $("#student_info").css("height") + "; path=/;";
     document.cookie = "status_visible=" + $("#student_info").css("display") + "; path=/;";
+    document.cookie = "status_z_index=" + $("#student_info").css("z-index") + "; path=/;";
 
     document.cookie = "regrade_top=" + $("#regrade_info").css("top") + "; path=/;";
     document.cookie = "regrade_left=" + $("#regrade_info").css("left") + "; path=/;";
     document.cookie = "regrade_width=" + $("#regrade_info").css("width") + "; path=/;";
     document.cookie = "regrade_height=" + $("#regrade_info").css("height") + "; path=/;";
     document.cookie = "regrade_visible=" + $("#regrade_info").css("display") + "; path=/;";
+    document.cookie = "regrade_z_index=" + $("#regrade_info").css("z-index") + "; path=/;";
 
     document.cookie = "discussion_top=" + $("#discussion_browser").css("top") + "; path=/;";
     document.cookie = "discussion_left=" + $("#discussion_browser").css("left") + "; path=/;";
     document.cookie = "discussion_width=" + $("#discussion_browser").css("width") + "; path=/;";
     document.cookie = "discussion_height=" + $("#discussion_browser").css("height") + "; path=/;";
     document.cookie = "discussion_visible=" + $("#discussion_browser").css("display") + "; path=/;";
+    document.cookie = "discussion_z_index=" + $("#discussion_browser").css("z-index") + "; path=/;";
 
     document.cookie = "bar_wrapper_top=" + $("#bar_wrapper").css("top") + "; path=/;";
     document.cookie = "bar_wrapper_left=" + $("#bar_wrapper").css("left") + "; path=/;";
@@ -400,7 +425,7 @@ function setInfoVisible(visible) {
 }
 
 function setRegradeVisible(visible) {
-    $('.grading_toolbar .fa-hand-paper').toggleClass('icon-selected', visible);
+    $('.grading_toolbar .grade_inquiry_icon').toggleClass('icon-selected', visible);
     $("#regrade_info").toggle(visible);
     hideIfEmpty("#regrade_info");
 }

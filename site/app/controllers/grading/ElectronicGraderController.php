@@ -210,7 +210,7 @@ class ElectronicGraderController extends GradingController {
 
     /**
      * Route for verifying the grader of a graded component
-     * @param bool verify all components or not 
+     * @param bool verify all components or not
      */
     private function ajaxVerifyComponent($verify_all = false) {
         if(!$this->core->getAccess()->canI("grading.electronic.verify_grader")){
@@ -2168,8 +2168,8 @@ class ElectronicGraderController extends GradingController {
         $graded_components = array();
         if (count($sections) > 0) {
             $total_users = ($gradeable->isTeamAssignment()) ?
-                            $this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable->getId(), $sections, $section_key) :
-                            $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key);
+                $this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable->getId(), $sections, $section_key) :
+                $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key);
             $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable->getId(), $sections, $section_key, $gradeable->isTeamAssignment());
         }
 
