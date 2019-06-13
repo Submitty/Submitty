@@ -29,7 +29,7 @@ except Exception as config_fail_error:
 
 
 DATA_DIR_PATH = SUBMITTY_CONFIG['submitty_data_dir']
-EMAIL_LOG_PATH = os.path.join(DATA_DIR_PATH,"logs","emails")
+EMAIL_LOG_PATH = os.path.join(DATA_DIR_PATH, "logs", "emails")
 TODAY = datetime.datetime.now()
 LOG_FILE = open(os.path.join(
     EMAIL_LOG_PATH, "{:04d}{:02d}{:02d}.txt".format(TODAY.year, TODAY.month,
@@ -152,7 +152,7 @@ def send_email():
     for email_data in queued_emails:
         if email_data["send_to"] == "":
             store_error(email_data["id"], db, "ERROR: empty recipient")
-            e="[{}] ERROR: empty recipient".format(str(datetime.datetime.now()))
+            e = "[{}] ERROR: empty recipient".format(str(datetime.datetime.now()))
             LOG_FILE.write(e+"\n")
             print(e)
             continue
@@ -168,14 +168,14 @@ def send_email():
 
         except Exception as email_send_error:
             store_error(email_data["id"], db, "ERROR: sending email")
-            e="[{}] ERROR: sending email to {}: {}".format(
+            e = "[{}] ERROR: sending email to {}: {}".format(
                 str(datetime.datetime.now()),
                 email_data["send_to"],
                 str(email_send_error))
             LOG_FILE.write(e+"\n")
             print(e)
 
-        e="[{}] Sucessfully Emailed {} Users".format(
+        e = "[{}] Sucessfully Emailed {} Users".format(
             str(datetime.datetime.now()), success_count)
         LOG_FILE.write(e+"\n")
         print(e)
@@ -186,7 +186,7 @@ def main():
     try:
         send_email()
     except Exception as email_send_error:
-        e="[{}] Error Sending Email: {}".format(
+        e = "[{}] Error Sending Email: {}".format(
             str(datetime.datetime.now()), str(email_send_error))
         LOG_FILE.write(e+"\n")
         print(e)
