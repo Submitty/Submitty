@@ -70,6 +70,7 @@
             <button class="btn btn-primary" type="button" onclick="openStat(event, 'Component Averages')">Component Averages</button>
             <div id = "Total Histogram" class = "tabcontent">
                 {% if overall_average == null or overall_average.getCount() == 0 %}
+                    <br/>
                     No assignments have been completely graded yet.
                 {% else %}
                     {% set bTA = [] %}
@@ -247,6 +248,7 @@
             <div id="Component Averages" class="tabcontent">
 
                 {% if component_averages|length == 0 %}
+                    <br/>
                     No components have been graded yet.
                 {% else %}
                     <div id="myDiv2"><!-- Plotly chart will be drawn inside this DIV --></div>
@@ -324,6 +326,7 @@
                 {% if autograding_non_extra_credit != 0 %}
                     {# Only show autograder if we have autograding points #}
                 {% if autograded_average == null or autograded_average.getCount() == 0 %}
+                    <br/>
                     No assignments have been submitted yet.
                 {% else %}
                     <div id="myDiv3"><!-- Plotly chart will be drawn inside this DIV --></div>
