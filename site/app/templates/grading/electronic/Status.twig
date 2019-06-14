@@ -1,4 +1,4 @@
-<head>
+<<head>
     <!-- Plotly.js -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     {#<script type="text/javascript" language="javascript" src="{{ base_url }}vendor/jquery/jquery.min.js"></script>#}
@@ -8,6 +8,17 @@
 <div class = "content">
     <h1>Status of {{ gradeable_title }}</h1>
     {# Top Buttons #}
+
+    {% if rotating_sections_error %}
+        <div class='content' style="background-color:#e84848">
+            <p> WARNING: This page may be inaccurate.  <br />
+                This gradeable is set to assign grades by Rotating Section, but Rotating Sections are not set up properly. <br />
+                To fix Rotating Sections, go to the Manage Sections page. <br />
+            </p>
+        </div>
+    {% endif %}
+
+    {# Top buttons #}
     <div style="margin-top: 20px; vertical-align:bottom;">
         {% if graded_percentage != -1 or core.getUser().accessFullGrading() or peer %}
             <a class="btn btn-primary"
@@ -46,192 +57,190 @@
 
 
 </div>
-    <div class = "content">
-
-
+<div class = "content">
+    {% if graded_percentage == -1 %}
+        <div class="sub">
+            No Grading To Be Done! :)
+        </div>
+    {% else %}
         <div class = "tab">
             <button class="btn btn-primary" type="button" onclick="openStat(event, 'Numerical Data')" id="defaultOpen">Numerical Data</button>
             <button class="btn btn-primary" type="button" onclick="openStat(event, 'Total Histogram')">Total Histogram</button>
             <button class="btn btn-primary" type="button" onclick="openStat(event, 'Autograding Histogram')">Autograding Histogram</button>
             <button class="btn btn-primary" type="button" onclick="openStat(event, 'Component Averages')">Component Averages</button>
             <div id = "Total Histogram" class = "tabcontent">
-                {% if graded_percentage == -1 %}
-                    <div class="sub">
-                        No Grading To Be Done! :)
-                    </div>
+                {% if overall_average == null or overall_average.getCount() == 0 %}
+                    No assignments have been completely graded yet.
                 {% else %}
-                     {% if overall_average == null or overall_average.getCount() == 0 %}
-                        No assignments have been completely graded yet.
-                    {% else %}
-                        {% set bTA = [] %}
-                        {% set tTA = [] %}
-                        {% set bAuto = [] %}
+                    {% set bTA = [] %}
+                    {% set tTA = [] %}
+                    {% set bAuto = [] %}
 
-                        {% set VerConf = 0 %}
-                        {% set noSub = 0 %}
-                        {% set noActive = 0 %}
-                        {% set GradeInq = 0 %}
-                        {% set IncompGrading = 0 %}
-                        {# Iterate through all the Scores #}
-                        {% for ov in overall_scores %}
-                            {# If Autograded, add the points to the array of autograded scores#}
-                            {% if ov.getAutoGradedGradeable().getHighestVersion() != 0 %}
-                                {% if ov.getGradeable().getAutogradingConfig().getTotalNonExtraCredit() != 0  %}
-                                    {%  set bAuto = bAuto|merge( [ov.getAutoGradedGradeable().getTotalPoints() ]) %}
-
-                                {% endif %}
-                            {% else %}
+                    {% set VerConf = 0 %}
+                    {% set noSub = 0 %}
+                    {% set noActive = 0 %}
+                    {% set GradeInq = 0 %}
+                    {% set IncompGrading = 0 %}
+                    {# Iterate through all the Scores #}
+                    {% for ov in overall_scores %}
+                        {# If Autograded, add the points to the array of autograded scores#}
+                        {% if ov.getAutoGradedGradeable().getHighestVersion() != 0 %}
+                            {% if ov.getGradeable().getAutogradingConfig().getTotalNonExtraCredit() != 0  %}
+                                {%  set bAuto = bAuto|merge( [ov.getAutoGradedGradeable().getTotalPoints() ]) %}
 
                             {% endif %}
+                        {% else %}
 
-                            {% if not ov.getAutoGradedGradeable().hasSubmission() %}
-                                {# if no submission and not in Null section add to count #}
-                                {% if ov.getTaGradedGradeable.getGradedGradeable.getSubmitter().getRegistrationSection() != NULL %}
-                                    {% set noSub = noSub +1 %}
-                                {% endif %}
-                            {% elseif ov.getAutoGradedGradeable().getActiveVersion() == 0 %}
-                                {# if no active version and not in Null section add to count #}
-                                {% if ov.getTaGradedGradeable.getGradedGradeable.getSubmitter().getRegistrationSection() != NULL %}
-                                    {% set noActive = noActive + 1 %}
-                                {% endif %}
-                            {% elseif ov.getGradeable().isTaGrading() %}
-                                {% if ov.getOrCreateTaGradedGradeable().anyGrades() %}
-                                    {# if grade inquiry and not in Null section add to count #}
-                                    {% if ov.hasActiveRegradeRequest() %}
-                                        {% if ov.getTaGradedGradeable.getGradedGradeable.getSubmitter().getRegistrationSection() != NULL %}
-                                            {% set noActive = noActive+1 %}
-                                        {% endif %}
-                                    {% elseif ov.getTaGradedGradeable().hasVersionConflict() %}
-                                        {# if version conflict and not in Null section add to count #}
-                                        {% if ov.getTaGradedGradeable.getGradedGradeable.getSubmitter().getRegistrationSection() != NULL %}
-                                            {% set VerConf = VerConf +1 %}
-                                        {% endif %}
+                        {% endif %}
 
-                                    {% elseif not ov.isTaGradingComplete() %}
-                                        {# if assignment incomplete and not in Null section add to count #}
-                                        {% set IncompGrading = IncompGrading +1 %}
-                                    {% elseif ov.isTaGradingComplete() %}
-                                        {# otherwise add the overall grade to array and total score possible to array (possible future use) #}
-                                        {% if ov.getTaGradedGradeable.getGradedGradeable.getSubmitter().getRegistrationSection() != NULL %}
-                                            {% set bTA = bTA|merge( [ ov.getTaGradedGradeable.getTotalScore()  ]) %}
-                                            {% set tTA = tTA|merge( [ ov.getGradeable().getTaPoints() ]) %}
+                        {% if not ov.getAutoGradedGradeable().hasSubmission() %}
+                            {# if no submission and not in Null section add to count #}
+                            {% if ov.getTaGradedGradeable.getGradedGradeable.getSubmitter().getRegistrationSection() != NULL %}
+                                {% set noSub = noSub +1 %}
+                            {% endif %}
+                        {% elseif ov.getAutoGradedGradeable().getActiveVersion() == 0 %}
+                            {# if no active version and not in Null section add to count #}
+                            {% if ov.getTaGradedGradeable.getGradedGradeable.getSubmitter().getRegistrationSection() != NULL %}
+                                {% set noActive = noActive + 1 %}
+                            {% endif %}
+                        {% elseif ov.getGradeable().isTaGrading() %}
+                            {% if ov.getOrCreateTaGradedGradeable().anyGrades() %}
+                                {# if grade inquiry and not in Null section add to count #}
+                                {% if ov.hasActiveRegradeRequest() %}
+                                    {% if ov.getTaGradedGradeable.getGradedGradeable.getSubmitter().getRegistrationSection() != NULL %}
+                                        {% set noActive = noActive+1 %}
+                                    {% endif %}
+                                {% elseif ov.getTaGradedGradeable().hasVersionConflict() %}
+                                    {# if version conflict and not in Null section add to count #}
+                                    {% if ov.getTaGradedGradeable.getGradedGradeable.getSubmitter().getRegistrationSection() != NULL %}
+                                        {% set VerConf = VerConf +1 %}
+                                    {% endif %}
 
-                                        {% endif %}
+                                {% elseif not ov.isTaGradingComplete() %}
+                                    {# if assignment incomplete and not in Null section add to count #}
+                                    {% set IncompGrading = IncompGrading +1 %}
+                                {% elseif ov.isTaGradingComplete() %}
+                                    {# otherwise add the overall grade to array and total score possible to array (possible future use) #}
+                                    {% if ov.getTaGradedGradeable.getGradedGradeable.getSubmitter().getRegistrationSection() != NULL %}
+                                        {% set bTA = bTA|merge( [ ov.getTaGradedGradeable.getTotalScore()  ]) %}
+                                        {% set tTA = tTA|merge( [ ov.getGradeable().getTaPoints() ]) %}
+
                                     {% endif %}
                                 {% endif %}
                             {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                    {# Setup for Histogram of Total Scores #}
+                    <div id="myDiv"><!-- Plotly chart will be drawn inside this DIV --></div>
+                    <script>
+                        var buckets = new Map();
+                        var buttonLayerHeight = 1.0;
+                        var ct = 0;
+                        var max = 0;
+                        var min = {{ overall_total }} + 50;
+                        var median = 0;
+                        var mode = 0;
+                        var modeCount = 0;
+                        var range = 0;
+
+                        {% for b in bTA %}
+                        ct++;
+                        if(buckets.has({{ b }})){
+                            buckets.set({{ b }},buckets.get({{ b }})+1);
+                        }
+                        else{
+                            (buckets.set({{ b }},1));
+                        }
                         {% endfor %}
-                        {# Setup for Histogram of Total Scores #}
-                        <div id="myDiv"><!-- Plotly chart will be drawn inside this DIV --></div>
-                        <script>
-                            var buckets = new Map();
-                            var buttonLayerHeight = 1.0;
-                            var ct = 0;
-                            var max = 0;
-                            var min = {{ overall_total }} + 50;
-                            var median = 0;
-                            var mode = 0;
-                            var modeCount = 0;
-                            var range = 0;
 
-                            {% for b in bTA %}
-                            ct++;
-                            if(buckets.has({{ b }})){
-                                buckets.set({{ b }},buckets.get({{ b }})+1);
+
+                        var xValue = [];
+                        var yValue = [];
+                        var yValue2 = [];
+                        var xValueSorted = [];
+
+                        for( var [key, value] of buckets){
+                            xValue.push(key);
+                            xValueSorted.push(key);
+                            yValue.push(value);
+                            if(value > modeCount){
+                                modeCount = value;
+                                mode = key;
                             }
-                            else{
-                                (buckets.set({{ b }},1));
+                            if(key<min){
+                                min = key;
                             }
-                            {% endfor %}
+                            if(key>max){
+                                max = key;
+                            }
+                        }
 
+                        range = max-min;
+                        xValueSorted.sort((a,b)=>a-b);
 
-                            var xValue = [];
-                            var yValue = [];
-                            var yValue2 = [];
-                            var xValueSorted = [];
+                        var len = xValueSorted.length;
 
-                            for( var [key, value] of buckets){
-                                xValue.push(key);
-                                xValueSorted.push(key);
-                                yValue.push(value);
-                                if(value > modeCount){
-                                    modeCount = value;
-                                    mode = key;
-                                }
-                                if(key<min){
-                                    min = key;
-                                }
-                                if(key>max){
-                                    max = key;
+                        len = len/2;
+                        len = Math.ceil(len);
+                        median = xValueSorted[xValueSorted.length-len];
+
+                        var trace1 = {
+                            x: xValue,
+                            y: yValue,
+                            name: 'Students with Each Score',
+                            type: 'bar',
+                            text: yValue,
+                            textposition: 'auto',
+                            hoverinfo: 'none',
+                            marker: {
+                                color: 'rgb(48,99,152)',
+                                opacity: 1.0,
+                                line: {
+                                    color: 'rbg(170,170,170)',
+                                    width: 1.5
                                 }
                             }
+                        };
 
-                            range = max-min;
-                            xValueSorted.sort((a,b)=>a-b);
+                        var data = [trace1];
 
-                            var len = xValueSorted.length;
+                        var layout = {
+                            title: 'Students with Each Score',
+                            xaxis: {
+                                title: 'Scores'
+                            },
+                            yaxis:{
+                                title: 'Number of Students'
+                            },
+                            barmode: 'overlay',
+                            font: {
+                                family: '"Source Sans Pro", sans-serif',
+                            }
+                        };
 
-                            len = len/2;
-                            len = Math.ceil(len);
-                            median = xValueSorted[xValueSorted.length-len];
+                        Plotly.newPlot('myDiv', data, layout, {displayModeBar: false,displaylogo: false});
 
-                            var trace1 = {
-                                x: xValue,
-                                y: yValue,
-                                name: 'Students with Each Score',
-                                type: 'bar',
-                                text: yValue,
-                                textposition: 'auto',
-                                hoverinfo: 'none',
-                                marker: {
-                                    color: 'rgb(48,99,152)',
-                                    opacity: 1.0,
-                                    line: {
-                                        color: 'rbg(170,170,170)',
-                                        width: 1.5
-                                    }
-                                }
-                            };
-
-                            var data = [trace1];
-
-                            var layout = {
-                                title: 'Students with Each Score',
-                                xaxis: {
-                                  title: 'Scores'
-                                },
-                                yaxis:{
-                                  title: 'Number of Students'
-                                },
-                                barmode: 'overlay',
-                                font: {
-                                    family: '"Source Sans Pro", sans-serif',
-                                }
-                            };
-
-                            Plotly.newPlot('myDiv', data, layout, {displayModeBar: false,displaylogo: false});
-
-                            document.write('<b>Mean: </b>'+{{ overall_average.getAverageScore() }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
-                            +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+max+
-                            '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+min+'&nbsp&nbsp&nbsp&nbsp'+'<b>Standard Deviation: </b>'+
-                            {{ overall_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+range);
+                        document.write('<b>Mean: </b>'+{{ overall_average.getAverageScore() }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
+                        +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+max+
+                        '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+min+'&nbsp&nbsp&nbsp&nbsp'+'<b>Standard Deviation: </b>'+
+                        {{ overall_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+range);
 
 
-                        </script>
-                        {{ "\n"|nl2br }}
-                        {{ mode }}
-                        Version Conflicts: {{ VerConf }}
-                        {{ "\n"|nl2br }}
-                        No Submissions: {{ noSub }}
-                        {{ "\n"|nl2br }}
-                        No Active Versions: {{ noActive }}
-                        {{ "\n"|nl2br }}
-                        Grade Inquiries: {{ GradeInq }}
-                        {{ "\n"|nl2br }}
-                        Incomplete Grading: {{ IncompGrading }}
-                    {% endif %}
-
+                    </script>
+                    {{ "\n"|nl2br }}
+                    {{ mode }}
+                    Version Conflicts: {{ VerConf }}
+                    {{ "\n"|nl2br }}
+                    No Submissions: {{ noSub }}
+                    {{ "\n"|nl2br }}
+                    No Active Versions: {{ noActive }}
+                    {{ "\n"|nl2br }}
+                    Grade Inquiries: {{ GradeInq }}
+                    {{ "\n"|nl2br }}
+                    Incomplete Grading: {{ IncompGrading }}
                 {% endif %}
+
+
             </div>
 
             {# Setup for Component Average Graphs#}
@@ -314,119 +323,119 @@
             <div id="Autograding Histogram" class="tabcontent">
                 {% if autograding_non_extra_credit != 0 %}
                     {# Only show autograder if we have autograding points #}
-                        {% if autograded_average == null or autograded_average.getCount() == 0 %}
-                            No assignments have been submitted yet.
-                        {% else %}
-                            <div id="myDiv3"><!-- Plotly chart will be drawn inside this DIV --></div>
-                            <script>
-                                var buckets = new Map();
-                                var buttonLayerHeight = 1.0;
-                                var ct = 0;
-                                var max = 0;
-                                var min = {{ overall_total }} + 50;
-                                var median = 0;
-                                var mode = 0;
-                                var modeCount = 0;
-                                var range = 0;
-
-                                {% for b in bAuto %}
-                                ct++;
-                                if(buckets.has({{ b }})){
-                                    buckets.set({{ b }},buckets.get({{ b }})+1);
-                                }
-                                else{
-                                    (buckets.set({{ b }},1));
-                                }
-                                {% endfor %}
-
-
-                                var xValue = [];
-                                var yValue = [];
-                                var yValue2 = [];
-                                var xValueSorted = [];
-
-                                for( var [key, value] of buckets){
-                                    xValue.push(key);
-                                    xValueSorted.push(key);
-                                    yValue.push(value);
-                                    if(value >= modeCount){
-                                        modeCount = value;
-                                        mode = key;
-                                    }
-                                    if(key<min){
-                                        min = key;
-                                    }
-                                    if(key>max){
-                                        max = key;
-                                    }
-                                }
-
-                                range = max-min;
-                                xValueSorted.sort((a,b)=>a-b);
-
-                                var len = xValueSorted.length;
-
-                                len = len/2;
-                                len = Math.ceil(len);
-                                median = xValueSorted[xValueSorted.length-len];
-
-                                var trace1 = {
-                                    x: xValue,
-                                    y: yValue,
-                                    name: 'Students with Each Score',
-                                    type: 'bar',
-                                    text: yValue,
-                                    textposition: 'auto',
-                                    hoverinfo: 'none',
-                                    marker: {
-                                        color: 'rgb(48,99,152)',
-                                        opacity: 1.0,
-                                        line: {
-                                            color: 'rbg(170,170,170)',
-                                            width: 1.5
-                                        }
-                                    }
-                                };
-
-                                var data = [trace1];
-
-                                var layout = {
-                                    title: 'Students with Each Score',
-                                    barmode: 'overlay',
-                                    xaxis: {
-                                        title: 'Scores'
-                                    },
-                                    yaxis:{
-                                        title: 'Number of Students'
-                                    },
-                                    font: {
-                                        family: '"Source Sans Pro", sans-serif',
-                                    }
-                                };
-
-                                Plotly.newPlot('myDiv3', data, layout, {displayModeBar: false,displaylogo: false});
-
-                                document.write('<b>Mean: </b>'+{{ overall_average.getAverageScore() }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
-                                +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+max+
-                                '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+min+'&nbsp&nbsp&nbsp&nbsp'+'<b>Standard Deviation: </b>'+
-                                {{ overall_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+range);
-
-
-                            </script>
-                            {{ "\n"|nl2br }}
-                            {{ mode }}
-                            Version Conflicts: {{ VerConf }}
-                            {{ "\n"|nl2br }}
-                            No Submissions: {{ noSub }}
-                            {{ "\n"|nl2br }}
-                            No Active Versions: {{ noActive }}
-                            {{ "\n"|nl2br }}
-                            Grade Inquiries: {{ GradeInq }}
-                            {{ "\n"|nl2br }}
-                            Incomplete Grading: {{ IncompGrading }}
-                        {% endif %}
+                {% if autograded_average == null or autograded_average.getCount() == 0 %}
+                    No assignments have been submitted yet.
                 {% else %}
-                    <br/>
+                    <div id="myDiv3"><!-- Plotly chart will be drawn inside this DIV --></div>
+                    <script>
+                        var buckets = new Map();
+                        var buttonLayerHeight = 1.0;
+                        var ct = 0;
+                        var max = 0;
+                        var min = {{ overall_total }} + 50;
+                        var median = 0;
+                        var mode = 0;
+                        var modeCount = 0;
+                        var range = 0;
+
+                        {% for b in bAuto %}
+                        ct++;
+                        if(buckets.has({{ b }})){
+                            buckets.set({{ b }},buckets.get({{ b }})+1);
+                        }
+                        else{
+                            (buckets.set({{ b }},1));
+                        }
+                        {% endfor %}
+
+
+                        var xValue = [];
+                        var yValue = [];
+                        var yValue2 = [];
+                        var xValueSorted = [];
+
+                        for( var [key, value] of buckets){
+                            xValue.push(key);
+                            xValueSorted.push(key);
+                            yValue.push(value);
+                            if(value >= modeCount){
+                                modeCount = value;
+                                mode = key;
+                            }
+                            if(key<min){
+                                min = key;
+                            }
+                            if(key>max){
+                                max = key;
+                            }
+                        }
+
+                        range = max-min;
+                        xValueSorted.sort((a,b)=>a-b);
+
+                        var len = xValueSorted.length;
+
+                        len = len/2;
+                        len = Math.ceil(len);
+                        median = xValueSorted[xValueSorted.length-len];
+
+                        var trace1 = {
+                            x: xValue,
+                            y: yValue,
+                            name: 'Students with Each Score',
+                            type: 'bar',
+                            text: yValue,
+                            textposition: 'auto',
+                            hoverinfo: 'none',
+                            marker: {
+                                color: 'rgb(48,99,152)',
+                                opacity: 1.0,
+                                line: {
+                                    color: 'rbg(170,170,170)',
+                                    width: 1.5
+                                }
+                            }
+                        };
+
+                        var data = [trace1];
+
+                        var layout = {
+                            title: 'Students with Each Score',
+                            barmode: 'overlay',
+                            xaxis: {
+                                title: 'Scores'
+                            },
+                            yaxis:{
+                                title: 'Number of Students'
+                            },
+                            font: {
+                                family: '"Source Sans Pro", sans-serif',
+                            }
+                        };
+
+                        Plotly.newPlot('myDiv3', data, layout, {displayModeBar: false,displaylogo: false});
+
+                        document.write('<b>Mean: </b>'+{{ overall_average.getAverageScore() }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
+                        +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+max+
+                        '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+min+'&nbsp&nbsp&nbsp&nbsp'+'<b>Standard Deviation: </b>'+
+                        {{ overall_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+range);
+
+
+                    </script>
+                    {{ "\n"|nl2br }}
+                    {{ mode }}
+                    Version Conflicts: {{ VerConf }}
+                    {{ "\n"|nl2br }}
+                    No Submissions: {{ noSub }}
+                    {{ "\n"|nl2br }}
+                    No Active Versions: {{ noActive }}
+                    {{ "\n"|nl2br }}
+                    Grade Inquiries: {{ GradeInq }}
+                    {{ "\n"|nl2br }}
+                    Incomplete Grading: {{ IncompGrading }}
+                {% endif %}
+                {% else %}
+                <br/>
                     No autograding for this gradeable
                 {% endif %}
 
@@ -568,8 +577,8 @@
 
             </div>
         </div>
-
-    </div>
+    {% endif %}
+</div>
 </body>
 {# Tab Buttons #}
 <script>
