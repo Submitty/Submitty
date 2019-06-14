@@ -37,7 +37,7 @@ class TokenManagerTester extends \PHPUnit\Framework\TestCase {
             'secret'
         );
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid signature for token');
         TokenManager::parseSessionToken((string) $token, 'https://submitty.org', '');
     }
@@ -50,7 +50,7 @@ class TokenManagerTester extends \PHPUnit\Framework\TestCase {
             'secret'
         );
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid claims in token');
         TokenManager::parseSessionToken((string) $token, 'https://wrong.org', 'secret');
     }
@@ -58,7 +58,7 @@ class TokenManagerTester extends \PHPUnit\Framework\TestCase {
     public function testWrongSessionTokenType() {
         // Generated at https://jwt.io/ with typ AAA
         $token = 'eyJ0eXAiOiJBQUEiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyIsInN1YiI6InVzZXJfaWQiLCJzZXNzaW9uX2lkIjoic2Vzc2lvbl9pZCJ9.H10IvoXjP-Gf2Z6fgT-e8V5TgHkohi48Xlq6lD4rHwg';
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid value for typ: JWT');
         TokenManager::parseSessionToken($token, 'https://submitty.org', 'secret');
     }
@@ -71,7 +71,7 @@ class TokenManagerTester extends \PHPUnit\Framework\TestCase {
 
     public function testMissingSessionId() {
         $token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyX2lkIiwiaXNzIjoiaHR0cHM6Ly9zdWJtaXR0eS5vcmciLCJleHBpcmVfdGltZSI6MH0.SDjPG61GUYWf5agRWJVZAd_iuiHHlQceuKeGgCsc1dY';
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Missing claims in session token');
         TokenManager::parseSessionToken($token, 'https://submitty.org', '');
     }
@@ -103,7 +103,7 @@ class TokenManagerTester extends \PHPUnit\Framework\TestCase {
             'secret'
         );
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid signature for token');
         TokenManager::parseApiToken((string) $token, 'https://submitty.org', '');
     }
@@ -115,14 +115,14 @@ class TokenManagerTester extends \PHPUnit\Framework\TestCase {
             'secret'
         );
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid claims in token');
         TokenManager::parseApiToken((string) $token, 'https://wrong.org', 'secret');
     }
 
     public function testMissingApiKey() {
         $token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyJ9.J9gYCSxsWhDg2SQ0ZU1-8vSBagRqfujj1zh3CJ7JGgM';
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Missing claims in api token');
         TokenManager::parseApiToken($token, 'https://submitty.org', 'secret');
     }

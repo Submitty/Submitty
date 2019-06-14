@@ -49,6 +49,17 @@
         <button style="float: right;" class="btn btn-primary" onclick="importTeamForm();">Import Teams Members</button>
     {% endif %}
     {# /Import+Export teams buttons #}
+		
+	{# Randomize team button #}
+	{% if (not gradeable.isGradeByRegistration()) and (show_export_teams_button or show_import_teams_button) %}
+		{% if past_grade_start_date %}
+			<Button style="float: left;" class="btn btn-default" onclick="randomizeRotatingGroupsButton()"> Randomly Re-Assign Teams to Rotating Sections</Button>
+		{% else %}
+			<a style="float: left;" class="btn btn-default" href="{{ core.buildUrl({'component': 'grading', 'page': 
+				'electronic', 'action': 'randomize_team_rotating_sections', 'gradeable_id': gradeable.getId()}) }}"> Randomly Re-Assign Teams to Rotating Sections</a>
+		{% endif %}
+	{% endif %}
+	
     <br />
     <br />
     {# This is a data table #}
@@ -285,14 +296,15 @@
     {% elseif graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0 %}
         {% set contents = "Cancelled Submission" %}
         {% set btn_class = "btn-default" %}
+        {% if graded_gradeable.hasActiveRegradeRequest() %}
+            {% set contents = contents ~ " + Grade Inquiry" %}
+            {% set btn_class = "btn-danger" %}
+        {%  endif %}
     {% elseif graded_gradeable.getGradeable().isTaGrading() %}
         {% set contents = "Grade" %}
         {% set btn_class = "btn-primary" %}
         {% if graded_gradeable.getOrCreateTaGradedGradeable().anyGrades() %}
-            {% if graded_gradeable.hasActiveRegradeRequest() %}
-                {% set contents = "Grade Inquiry" %}
-                {% set btn_class = "btn-danger" %}
-            {% elseif graded_gradeable.getTaGradedGradeable().hasVersionConflict() %}
+            {% if graded_gradeable.getTaGradedGradeable().hasVersionConflict() %}
                 {% set contents = "Version Conflict" %}
                 {% set btn_class = "btn-primary" %}
             {% elseif not graded_gradeable.isTaGradingComplete() %}
@@ -302,6 +314,10 @@
                 {% set btn_class = "btn-default" %}
             {% endif %}
         {% endif %}
+        {% if graded_gradeable.hasActiveRegradeRequest() %}
+            {% set contents = contents ~ " + Grade Inquiry" %}
+            {% set btn_class = "btn-danger" %}
+        {%  endif %}
     {% else %}
         {% set contents = "View" %}
         {% set btn_class = "btn-primary" %}
