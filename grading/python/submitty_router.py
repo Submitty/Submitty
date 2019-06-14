@@ -7,9 +7,13 @@ import datetime
 import errno
 from time import sleep
 import os
+import csv   
+import datetime
+
+print('THIS IS THE STANDARD ROUTER!')
 
 LOG_FILE = 'router_log.txt'
-
+RESEARCH_CSV = 'research.csv'
 '''
 SWITCHBOARD is a dict of the form
 {
@@ -48,6 +52,14 @@ def log(line):
     out_file.flush()
   print(line)
   sys.stdout.flush()
+
+def write_research_csv(obj, status, message_type):
+  append_write = 'a' if os.path.exists(RESEARCH_CSV) else 'w'
+
+  with open(RESEARCH_CSV, append_write) as outfile:
+    writer = csv.writer(outfile)
+    #sender, recipient, message, port, status, message_type, timestamp
+    writer.writerow([obj['sender'].replace('_Actual', ''), obj['recipient'].replace('_Actual', ''), str(obj['message']), obj['port'], status, message_type, str(datetime.datetime.now())])
 
 
 #knownhosts_tcp.csv and knownhosts_udp.csv are of the form
@@ -118,26 +130,36 @@ def connect_outgoing_socket(port):
   SWITCHBOARD[port]['outgoing_socket'] = sock
 
 def send_outgoing_message(data):
+  status = 'unset'
+  message_type = 'unset'
   try:
     port = data['port']
     message = data['message']
     sock = SWITCHBOARD[port]['outgoing_socket']
     recipient = data['recipient']
   except:
+    status = 'router_error'
     log("An error occurred internal to the router. Please report the following error to a Submitty Administrator")
     log(traceback.format_exc())
+    write_research_csv(data, status, message_type)
+    return
   try:
     if SWITCHBOARD[port]['connection_type'] == 'tcp':
+      message_type = 'tcp'
       sock.sendall(message)
     else:
+      message_type = 'udp'
       destination_address = (recipient, int(port))
       sock.sendto(message,destination_address)
     log('Sent message {!r} to {}'.format(message,recipient.replace('_Actual', '')))
+    status = 'success'
   except:
     log('Could not deliver message {!r} to {}'.format(message,recipient))
     SWITCHBOARD[port]['connected'] = False
     SWITCHBOARD[port]['connection'].close()
     SWITCHBOARD[port]['connection'] = None
+    status = 'failure'
+  write_research_csv(data, status, message_type)
 
 def process_queue():
   still_going = True
