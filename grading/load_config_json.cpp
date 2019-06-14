@@ -48,11 +48,16 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
 
   if (whole_config["autograding"].find("work_to_details") == whole_config["autograding"].end()) {
     whole_config["autograding"]["work_to_details"].push_back("test*/*.txt");
+    whole_config["autograding"]["work_to_details"].push_back("random_output/test*/*.txt");
     whole_config["autograding"]["work_to_details"].push_back("test*/*_diff.json");
     whole_config["autograding"]["work_to_details"].push_back("**/README.txt");
     whole_config["autograding"]["work_to_details"].push_back("input_*.txt");
     //todo check up on how this works.
     whole_config["autograding"]["work_to_details"].push_back("test*/input_*.txt");
+  }
+
+  if (whole_config["autograding"].find("work_to_random_output") == whole_config["autograding"].end()){
+    whole_config["autograding"]["work_to_random_output"].push_back("random_output/test*/*.txt");
   }
 
   if (whole_config["autograding"].find("use_checkout_subdirectory") == whole_config["autograding"].end()) {
