@@ -1,4 +1,4 @@
-"""user_email is now an optional field"""
+"""user_email is now an optional field & store user_id instead of just the email address"""
 
 
 def up(config, database):
@@ -34,4 +34,7 @@ def up(config, database):
 
 
 def down(config, database):
+
+    database.execute("ALTER TABLE emails DROP CONSTRAINT if exists emails_user_id_fk")
+
     pass

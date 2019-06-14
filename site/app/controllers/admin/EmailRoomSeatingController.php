@@ -52,11 +52,13 @@ Please email your instructor with any questions or concerns.';
         $course =  $this->core->getConfig()->getCourse();
         $seating_assignments_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "reports", "seating", $gradeable_id);
 
-        $classList = $this->core->getQueries()->getClassEmailListWithIds();
+        $classList = $this->core->getQueries()->getEmailListWithIds();
 
         foreach($classList as $user) {
             $user_id = $user['user_id'];
             $user_email = $user['user_email'];
+            $user_group = $user['user_group'];
+            $registration_section = $user['registration_section'];
 
             $room_seating_file = FileUtils::joinPaths($seating_assignments_path, "$user_id.json");
             $room_seating_json = FileUtils::readJsonFile($room_seating_file);

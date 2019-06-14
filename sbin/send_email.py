@@ -96,15 +96,17 @@ def construct_mail_client():
 def get_email_queue(db):
     """Get an active queue of emails waiting to be sent."""
     result = db.execute(
-        "SELECT * FROM emails WHERE sent IS NULL and error = '' ORDER BY id LIMIT 100;")
+        "SELECT id, user_id, recipient, subject, body FROM emails " +
+        "WHERE sent IS NULL and error = '' ORDER BY id LIMIT 100;")
 
     queued_emails = []
     for row in result:
         queued_emails.append({
             'id': row[0],
-            'send_to': row[1],
-            'subject': row[2],
-            'body': row[3]
+            'user_id': row[1],
+            'send_to': row[2],
+            'subject': row[3],
+            'body': row[4]
             })
 
     return queued_emails
@@ -153,8 +155,9 @@ def send_email():
 
     for email_data in queued_emails:
         if email_data["send_to"] == "":
-            store_error(email_data["id"], db, "ERROR: empty recipient")
-            e = "[{}] ERROR: empty recipient".format(str(datetime.datetime.now()))
+            store_error(email_data["id"], db, "ERROR: empty email address")
+            e = "[{}] ERROR: empty email address for recipient {}".format(
+                str(datetime.datetime.now()), email_data["user_id"])
             LOG_FILE.write(e+"\n")
             print(e)
             continue
@@ -169,9 +172,11 @@ def send_email():
             success_count += 1
 
         except Exception as email_send_error:
-            store_error(email_data["id"], db, "ERROR: sending email")
-            e = "[{}] ERROR: sending email to {}: {}".format(
+            store_error(email_data["id"], db, "ERROR: sending email "
+                        + str(email_send_error))
+            e = "[{}] ERROR: sending email to recipient {}, email {}: {}".format(
                 str(datetime.datetime.now()),
+                email_data["user_id"],
                 email_data["send_to"],
                 str(email_send_error))
             LOG_FILE.write(e+"\n")
