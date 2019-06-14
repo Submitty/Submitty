@@ -210,7 +210,7 @@ class BulkUpload(CourseJob):
                                 today.day))
 
         pid = os.getpid()
-        log_msg = "Process " + str(pid) + ": Starting "
+        log_msg = "Process " + str(pid) + ": Starting to split " + filename + " on " + timestamp + ". "
         if is_qr:
             log_msg += "QR bulk upload job, QR Prefx: \'" + qr_prefix + "\', QR Suffix: \'" + qr_suffix + "\'"
         else:

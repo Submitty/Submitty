@@ -111,7 +111,7 @@ def main(args):
                 pdf_writer.addPage(pdfPages.getPage(i))
             i += 1
 
-        buff += "Finished splitting into {} files\n".format(cover_index)
+        buff += "Finished splitting into {} files\n".format(id_index)
 
         # save whatever is left
         output_filename = '{}_{}.pdf'.format(filename[:-4], cover_index)
