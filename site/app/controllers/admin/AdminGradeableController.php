@@ -675,7 +675,7 @@ class AdminGradeableController extends AbstractController {
         $gradeable_type = GradeableType::stringToType($details['type']);
         $gradeable_create_data = [
             'type' => $gradeable_type,
-            'grader_assigment_method' => 1,
+            'grader_assignment_method' => 1,
             'min_grading_group' => 1,
         ];
 
