@@ -73,30 +73,34 @@ class Notification extends AbstractModel {
      * @param Core  $core
      * @param array $details
      */
-    public function __construct(Core $core, $details=array()) {
+    public function __construct(Core $core) {
         parent::__construct($core);
+    }
+
+    public static function createNotification($core, $component, $metadata, $content, $source, $target) {
+        $instance = new self($core);
+        $instance->setComponent($component);
+        $instance->setNotifyMetadata($metadata);
+        $instance->setNotifyContent($content);
+        $instance->setNotifySource($source);
+        $instance->setNotifyTarget($target);
+        return $instance;
+    }
+
+    public static function createViewOnlyNotification($core, $details) {
+        $instance = new self($core);
         if (count($details) == 0) {
-            return;
+            return null;
         }
-        if(!empty($details['view_only'])){
-            $this->setViewOnly(true);
-            $this->setId($details['id']);
-            $this->setSeen($details['seen']);
-            $this->setComponent($details['component']);
-            $this->setElapsedTime($details['elapsed_time']);
-            $this->setCreatedAt($details['created_at']);
-            $this->setNotifyMetadata($details['metadata']);
-            $this->setNotifyContent($details['content']);
-        } else {
-            $this->setViewOnly(false);
-            $this->setNotifyNotToSource(true);
-            $this->setCurrentUser($this->core->getUser()->getId());
-            $this->setComponent($details['component']);
-            $this->setNotifyMetadata($details['metadata']);
-            $this->setNotifyContent($details['content']);
-            $this->setNotifySource($details['source']);
-            $this->setNotifyTarget($details['target']);
-        }
+        $instance->setViewOnly(true);
+        $instance->setId($details['id']);
+        $instance->setSeen($details['seen']);
+        $instance->setComponent($details['component']);
+        $instance->setElapsedTime($details['elapsed_time']);
+        $instance->setCreatedAt($details['created_at']);
+        $instance->setNotifyMetadata($details['metadata']);
+        $instance->setNotifyContent($details['content']);
+        return $instance;
     }
 
     /**

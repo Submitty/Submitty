@@ -2645,7 +2645,7 @@ AND gc_id IN (
         $rows = $this->course_db->rows();
         $results = array();
         foreach ($rows as $row) {
-            $results[] = new Notification($this->core, array(
+            $results[] = Notification::createViewOnlyNotification($this->core, array(
                     'view_only' => true,
                     'id' => $row['id'],
                     'component' => $row['component'],
