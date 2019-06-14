@@ -1,10 +1,13 @@
-"""user_email is now an optional field & store user_id instead of just the email address"""
+"""
+user_email is now an optional field (but still non NULL).
+store user_id instead of just the email address.
+"""
 
 
 def up(config, database):
 
     # user_email is now an optional field in the users table
-    database.execute("ALTER TABLE ONLY users ALTER COLUMN user_email SET DATA TYPE character varying")
+    database.execute("ALTER TABLE ONLY users ALTER COLUMN user_email SET DATA TYPE character varying NOT NULL")
 
     # add an error column to the emails table
     database.execute("ALTER TABLE emails ADD COLUMN IF NOT EXISTS error CHARACTER VARYING DEFAULT ''")
