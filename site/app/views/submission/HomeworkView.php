@@ -349,6 +349,12 @@ class HomeworkView extends AbstractView {
         $my_repository = $graded_gradeable !== null ? $gradeable->getRepositoryPath($this->core->getUser(),$my_team) : "";
         $notebook_data = $graded_gradeable !== null ? $graded_gradeable->getUpdatedNotebook() : array();
 
+        // Import custom stylesheet to style notebook items
+        $this->core->getOutput()->addInternalCss('gradeable-notebook.css');
+
+        // Import custom js for notebook items
+        $this->core->getOutput()->addInternalJs('gradeable-notebook.js');
+
         $DATE_FORMAT = "m/d/Y @ H:i";
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
             'base_url' => $this->core->getConfig()->getBaseUrl(),
@@ -749,7 +755,6 @@ class HomeworkView extends AbstractView {
         }
 
         $posts = [];
-
         if ($graded_gradeable->hasRegradeRequest()) {
             $threads = $this->core->getQueries()->getRegradeDiscussion($graded_gradeable->getRegradeRequest());
             foreach ($threads as $thread) {
@@ -767,11 +772,13 @@ class HomeworkView extends AbstractView {
 
             }
         }
+
         return $this->core->getOutput()->renderTwigTemplate('submission/regrade/Discussion.twig', [
             'btn_type' => $btn_type,
             'url' => $url,
             'action' => $action,
             'posts' => $posts,
+            'has_submission' => $graded_gradeable->hasSubmission(),
             'gradeable_id' => $graded_gradeable->getGradeableId(),
             'thread_id' => $graded_gradeable->hasRegradeRequest() ? $graded_gradeable->getRegradeRequest()->getId() : 0,
             'submitter_id' => $graded_gradeable->getSubmitter()->getId(),

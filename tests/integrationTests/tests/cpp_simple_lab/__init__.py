@@ -24,6 +24,7 @@ def initialize(test):
         if os.path.isdir(data_path):
             shutil.rmtree(data_path)
         os.mkdir(data_path)
+        os.mkdir(os.path.join(data_path, "test_output"))
     except OSError:
         pass
 
@@ -43,7 +44,7 @@ def initialize(test):
 
     subprocess.call(["cp"] +
         glob.glob(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "*.txt")) +
-        [os.path.join(test.testcase_path, "data")])
+        [os.path.join(test.testcase_path, "data", "test_output")])
 
 
 ############################################################################
@@ -57,6 +58,11 @@ def cleanup(test):
         glob.glob(os.path.join(test.testcase_path, "data", "part*", "*")))
     subprocess.call(["rm"] + ["-f"] +
         glob.glob(os.path.join(test.testcase_path, "data", "*out")))
+
+    os.mkdir(os.path.join(test.testcase_path, "data", "test_output"))
+    subprocess.call(["cp"] +
+        glob.glob(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "*.txt")) +
+        [os.path.join(test.testcase_path, "data", "test_output")])
 
 @testcase
 def full_credit(test):
