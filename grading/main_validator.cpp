@@ -153,7 +153,8 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
         }
         expected = tcg.value("expected_file", "");
         if (expected != "") {
-          fileStatus(expected, expectedFileExists,expectedFileEmpty);
+          std::string expectedWithFolder = "test_output/" + expected;
+          fileStatus(expectedWithFolder, expectedFileExists,expectedFileEmpty);
           if (!expectedFileExists) {
             BROKEN_CONFIG_ERROR_MESSAGE = "ERROR!  Expected File '" + expected + "' does not exist";
             std::cout << BROKEN_CONFIG_ERROR_MESSAGE << std::endl;
@@ -162,7 +163,7 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
             // PREPARE THE JSON DIFF FILE
             std::stringstream diff_path;
             diff_path << my_testcase.getPrefix() << which_autocheck << "_diff.json";
-            std::ofstream diff_stream(diff_path.str().c_str());
+            std::ofstream diff_stream(diff_path.str().c_str()); 
             result.printJSON(diff_stream);
             std::stringstream expected_path;
             std::string id = hw_id;
