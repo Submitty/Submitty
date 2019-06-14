@@ -3,13 +3,13 @@
         $("[name='rotating_type']").change(function() {
             if ($(this).val() == "alphabetically") {
                 $("[name='fewest']").prop('checked', false).attr('onclick', 'return false').addClass("disabled");
-
+				
             }
             else {
                 $("[name='fewest']").attr('onclick', '').removeClass('disabled');
             }
         });
-
+		
         $("[name='sort_type']").change(function() {
             var val = $(this).val();
             if (val == "fewest") {

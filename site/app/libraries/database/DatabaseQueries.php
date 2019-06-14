@@ -1868,6 +1868,31 @@ WHERE gcm_id=?", $params);
         throw new NotImplementedException();
     }
 
+
+    /**
+     * Return an array of team_ids for a gradeable that have at least one user in the team
+     * @param string $g_id
+     * @return [ team ids ]
+     */
+    public function getTeamsWithMembersFromGradeableID($g_id) {
+        $team_map = $this->core->getQueries()->getTeamIdsAllGradeables();
+
+        if (!array_key_exists( $g_id ,$team_map)) {
+            return array();
+        }
+
+        $teams = $team_map[$g_id];
+
+        $this->course_db->query("SELECT team_id FROM teams");
+        $teams_with_members = array();
+        foreach ($this->course_db->rows() as $row) {
+            $teams_with_members[] = $row['team_id'];
+        }
+
+        return array_intersect($teams,$teams_with_members);
+    }
+
+
     /**
      * Add ($g_id,$user_id) pair to table seeking_team
      * @param string $g_id
@@ -2574,7 +2599,7 @@ AND gc_id IN (
     }
 
     /**
-     * Generate notifcation rows
+     * Generate notification rows
      *
      * @param Notification $notification
      */
@@ -2638,6 +2663,18 @@ AND gc_id IN (
                     SELECT ?, ?, ?, current_timestamp, ?, user_id as to_user_id FROM ({$target_users_query}) as u {$ignore_self_query}",
                     array_merge($params, $not_send_users));
     }
+
+    //TODO: refactor this to use push notification function..
+    public function pushSingleNotification($notification) {
+        $params = array();
+        $params[] = $notification->getComponent();
+        $params[] = $notification->getNotifyMetadata();
+        $params[] = $notification->getNotifyContent();
+        $params[] = $notification->getNotifySource();
+        $params[] = $notification->getNotifyTarget();
+        $this->course_db->query("INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id)
+                VALUES (?, ?, ?, current_timestamp, ?, ?)", $params);
+     }
 
     /**
      * Returns notifications for a user

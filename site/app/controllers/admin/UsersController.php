@@ -226,6 +226,24 @@ class UsersController extends AbstractController {
         $students = $this->core->getQueries()->getAllUsers();
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
         $non_null_counts = $this->core->getQueries()->getCountUsersRotatingSections();
+
+
+        //Adds "invisible" sections: rotating sections that exist but have no students assigned to them
+        $sections_with_students = array();
+        foreach ($non_null_counts as $rows) {
+            array_push($sections_with_students,$rows['rotating_section']);
+        }
+        for ($i = 1; $i <= $this->core->getQueries()->getMaxRotatingSection(); $i++) {
+            if ( !in_array($i,$sections_with_students) ) {
+                array_push($non_null_counts,[
+                    "rotating_section" => $i,
+                    "count" => 0
+                ]);
+            }
+        }
+
+
+
         $null_counts = $this->core->getQueries()->getCountNullUsersRotatingSections();
         $max_section = $this->core->getQueries()->getMaxRotatingSection();
         $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'rotatingSectionsForm', $students, $reg_sections,

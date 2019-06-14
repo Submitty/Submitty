@@ -49,7 +49,7 @@ def check_password(environ, user, password):
     }
 
     try:
-        req = requests.post(SUBMISSION_URL + '/index.php?semester={}&course={}&component=authentication&page=vcs_login'.format(semester, course), data=data)
+        req = requests.post(SUBMISSION_URL + '/{}/{}/authentication/vcs_login'.format(semester, course), data=data)
         response = req.json()
         if response['status'] == 'error':
             return None

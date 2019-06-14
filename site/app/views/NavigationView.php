@@ -364,7 +364,7 @@ class NavigationView extends AbstractView {
             "(due " . $gradeable->getSubmissionDueDate()->format(self::DATE_FORMAT) . ")";
         $points_percent = NAN;
 
-        $href = $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId()));
+        $href = $this->core->buildNewUrl([$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(), 'student', $gradeable->getId()]);
         $progress = null;
         $disabled = false;
 
