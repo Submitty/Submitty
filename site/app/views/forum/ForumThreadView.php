@@ -819,7 +819,8 @@ HTML;
 
         $offset = min(($reply_level - 1) * 30, 180);
 
-        $post_content = ($this->filter_post_content($post['content']));
+//        $post_content = ($this->filter_post_content($post['content']));
+        $post_content = $post['content'];
 
         $isThreadLocked = $this->core->getQueries()->isThreadLocked($thread_id);
         $userAccessFullGrading = $this->core->getUser()->accessFullGrading();
