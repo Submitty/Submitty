@@ -985,6 +985,7 @@ HTML;
         );
 
         $thread_exists = $this->core->getQueries()->threadExists();
+        $manage_categories_url = $this->core->buildUrl(array('component' => 'forum', 'page' => 'show_categories'));
 
         $return = $this->core->getOutput()->renderTwigTemplate("forum/createThread.twig", [
             "categories" => $categories,
@@ -992,6 +993,7 @@ HTML;
             "buttons" => $buttons,
             "thread_exists" => $thread_exists,
             "form_action" => $this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread')),
+            "manage_categories_url" => $manage_categories_url
         ]);
 
         return $return;
