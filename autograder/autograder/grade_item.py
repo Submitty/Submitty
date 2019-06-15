@@ -440,13 +440,10 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     # return to the main tmp directory
     os.chdir(tmp)
 
-
-    # --------------------------------------------------------------------
-    # make the runner directory
-
+# RUN SOLUTION RUNNER
     with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
-        print ("====================================\nRUNNER STARTS", file=f)
-        
+        print ("====================================\nINPUT GENERATION STARTS", file=f)
+    
     tmp_work = os.path.join(tmp,"TMP_WORK")
     tmp_work_test_input = os.path.join(tmp_work, "test_input")
     tmp_work_test_output = os.path.join(tmp_work, "test_output")
@@ -464,6 +461,63 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     os.mkdir(tmp_work_compiled)
     os.mkdir(tmp_work_checkout)
 
+    os.chdir(tmp_work)
+
+    tmp_work_random_input = os.path.join(tmp_work,"random_input")
+    os.mkdir(tmp_work_random_input)
+
+    with open(os.path.join(tmp_logs,"input_generator_log.txt"), 'w') as logfile:
+        for testcase_num in range(1, len(my_testcases)+1):
+            testcase_folder = os.path.join(tmp_work_random_input, "test{:02}".format(testcase_num))
+
+            os.makedirs(testcase_folder)
+            os.chdir(testcase_folder)
+            
+            # copy any instructor provided solution code files to testcase folder
+            copy_contents_into(job_id,instructor_solution_path,testcase_folder,tmp_logs)
+            
+            # copy compile.out to the current directory
+            shutil.copy (os.path.join(bin_path,"solution_runner.out"),os.path.join(testcase_folder,"my_solution_runner.out"))
+            add_permissions(os.path.join(testcase_folder,"my_solution_runner.out"), stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)          
+            untrusted_grant_rwx_access(which_untrusted, testcase_folder)
+            add_permissions_recursive(testcase_folder,
+                        stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                        stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                        stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+
+            compile_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
+                                                which_untrusted,
+                                                os.path.join(testcase_folder,"my_solution_runner.out"),
+                                                queue_obj["gradeable"],
+                                                queue_obj["who"],
+                                                str(queue_obj["version"]),
+                                                submission_string,
+                                                "input",
+                                                '--testcase', str(testcase_num)],
+                                                stdout=logfile, 
+                                                cwd=testcase_folder)
+            # remove the compilation program
+            untrusted_grant_rwx_access(which_untrusted, testcase_folder)
+            os.remove(os.path.join(testcase_folder,"my_solution_runner.out"))
+
+        if compile_success == 0:
+            print (which_machine,which_untrusted,"COMPILATION OK")
+        else:
+            print (which_machine,which_untrusted,"COMPILATION FAILURE")
+            grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,message="COMPILATION FAILURE")
+
+    # return to the main tmp directory
+    os.chdir(tmp_work)
+    subprocess.call(['ls', '-lR', '.'], stdout=open(tmp_logs + "/overall.txt", 'a'))
+
+    # --------------------------------------------------------------------
+
+    # --------------------------------------------------------------------
+    # make the runner directory
+
+    with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
+        print ("====================================\nRUNNER STARTS", file=f)
+        
     os.chdir(tmp_work)
 
     # move all executable files from the compilation directory to the main tmp directory
@@ -603,6 +657,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                                                 queue_obj["who"],
                                                 str(queue_obj["version"]),
                                                 submission_string,
+                                                "output",
                                                 '--testcase', str(testcase_num)],
                                                 stdout=logfile, 
                                                 cwd=testcase_folder)

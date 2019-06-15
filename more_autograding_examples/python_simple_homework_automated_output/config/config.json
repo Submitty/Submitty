@@ -4,6 +4,11 @@
             "title" : "Lab 1 Checkpoint 1",
             "details" : "python *.py",
             "command" : "python *.py",
+            "input_generator" : {
+                "command" : [ 
+                    "python generator.py 1> randominput.txt"
+                ]
+            },
             "points" : 0,
             "validation" : [
                 {

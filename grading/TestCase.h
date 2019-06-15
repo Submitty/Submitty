@@ -78,6 +78,7 @@ public:
   // -------------------------------
   // COMMANDS
   std::vector<std::string> getCommands() const;
+  std::vector<std::string> getInputGeneratorCommands() const;
 
 
   // -------------------------------

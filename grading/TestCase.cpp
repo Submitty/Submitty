@@ -278,6 +278,11 @@ std::vector<std::string> TestCase::getCommands() const {
 // =================================================================================
 // ACCESSORS
 
+std::vector <std::string> TestCase::getInputGeneratorCommands() const {
+    nlohmann::json Input_generator = _json.value("input_generator", nlohmann::json());
+    std::vector <std::string> commands = stringOrArrayOfStrings(Input_generator, "command");
+    return commands;
+}
 
 std::string TestCase::getTitle() const {
   const nlohmann::json::const_iterator& itr = _json.find("title");
