@@ -407,12 +407,17 @@ class Core {
 
     /**
      * @param array  $parts
+     * @param array  $query
      * @param string $hash
      *
      * @return string
      */
-    public function buildNewUrl($parts=array(), $hash = null) {
+    public function buildNewUrl($parts=array(), $query=array(), $hash = null) {
         $url = $this->getConfig()->getBaseUrl().implode("/", $parts);
+        $query_string = http_build_query($query);
+        if (!empty($query_string)) {
+            $url = $url . '?' . $query_string;
+        }
         return $url;
     }
 

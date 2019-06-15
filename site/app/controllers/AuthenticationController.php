@@ -79,7 +79,6 @@ class AuthenticationController extends AbstractController {
      * Display the login form to the user
      *
      * @Route("/authentication/login")
-     * @Route("/authentication/login/{old}")
      *
      * @var string $old the url to redirect to after login
      */
@@ -95,7 +94,6 @@ class AuthenticationController extends AbstractController {
      * to maintain that old request data passing it back into the login form.
      *
      * @Route("/authentication/check_login")
-     * @Route("/authentication/check_login/{old}")
      *
      * @var string $old the url to redirect to after login
      */
