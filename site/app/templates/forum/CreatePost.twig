@@ -88,15 +88,15 @@
             {% endif %}
         </h7>
     </span>
+
+    {% if post_attachment.exist == true %}
+        {% for attachment in post_attachment.files %}
+            <a href="#" style="text-decoration:none;display:inline-block;white-space: nowrap;" class="btn-default btn-sm post_button_color" onclick="openFileForum('forum_attachments', '{{ attachment.name }}', '{{ attachment.path }}')" > {{ attachment.name_display }} </a>
+        {% endfor %}
+    {% endif %}
+
+    {% set offset = offset + 30 %}
 </div>
-
-{% if post_attachment.exist == true %}
-    {% for attachment in post_attachment.files %}
-        <a href="#" style="text-decoration:none;display:inline-block;white-space: nowrap;" class="btn-default btn-sm post_button_color" onclick="openFileForum('forum_attachments', '{{ attachment.name }}', '{{ attachment.path }}')" > {{ attachment.name_display }} </a>
-    {% endfor %}
-{% endif %}
-
-{% set offset = offset + 30 %}
 
 {% if isThreadLocked != 1 or userAccessFullGrading %}
     <form class="reply-box post_reply_from" id="{{ post_id }}-reply" onsubmit="post.disabled=true; post.value='Submitting post...'; return true;" style="margin-left:{{ offset }}px" method="POST" action="{{ form_post_url }}" enctype="multipart/form-data">
