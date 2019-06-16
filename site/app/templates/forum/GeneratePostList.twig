@@ -62,7 +62,7 @@
 {% if userGroup <= 3 %}
     {% include "forum/MergeThreadsForm.twig" with {
         "current_thread_date" : merge_thread_content.current_thread_date,
-        "current_thread" : merge_thread_content.currentThread,
-        "possibleMerges" : merge_thread_content.merge_thread_list
+        "current_thread" : merge_thread_content.current_thread,
+        "possibleMerges" : merge_thread_content.possibleMerges
     } %}
 {% endif %}
