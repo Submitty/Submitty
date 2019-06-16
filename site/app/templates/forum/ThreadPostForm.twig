@@ -50,7 +50,6 @@
 <br/>
 {% endif %}
 {% if show_categories %}
-    {% set categories = core.getQueries().getCategories() %}
     <div id="category-selection-container" style="margin-bottom:10px;display: inline-block;" class="form-group row">
         <label for="cat" id="cat_label">Categories</label> <br>
         {% if categories | length == 0 %}
@@ -59,7 +58,8 @@
             </span>
         {% endif %}
         <div id='categories-pick-list'>
-        {% for category in core.getQueries().getCategories() %}
+
+        {% for category in categories %}
             <a class="btn cat-buttons" cat-color="{{ category.color }}" style="word-wrap: break-word; background-color: {{ category.color }}; color: white; max-width: 350px; text-align: left !important; white-space: unset !important;">{{ category.category_desc }}
                 <input type="checkbox" name="cat[]" value="{{ category.category_id }}">
             </a>
