@@ -52,7 +52,7 @@ class HomePageController extends AbstractController {
         else {
             $this->core->addErrorMessage("Must put same password in both boxes.");
         }
-        $this->core->redirect($this->core->buildNewUrl(['home'], false));
+        $this->core->redirect($this->core->buildNewUrl(['home']));
     }
 
     /**
@@ -75,7 +75,7 @@ class HomePageController extends AbstractController {
                 $this->core->addErrorMessage("Preferred names must not exceed 30 chars.  Letters, spaces, hyphens, apostrophes, periods, parentheses, and backquotes permitted.");
             }
         }
-        $this->core->redirect($this->core->buildNewUrl(['home'], false));
+        $this->core->redirect($this->core->buildNewUrl(['home']));
     }
 
     /**
