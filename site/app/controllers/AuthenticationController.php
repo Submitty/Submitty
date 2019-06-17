@@ -83,7 +83,7 @@ class AuthenticationController extends AbstractController {
      * @var string $old the url to redirect to after login
      */
     public function loginForm($old = null) {
-        $this->isLoggedIn(base64_decode($old));
+        $this->isLoggedIn(urldecode($old));
         $this->core->getOutput()->renderOutput('Authentication', 'loginForm', $old);
     }
     
@@ -99,7 +99,7 @@ class AuthenticationController extends AbstractController {
      */
     public function checkLogin($old = null) {
         if (isset($old)) {
-            $old = base64_decode($old);
+            $old = urldecode($old);
         }
         $this->isLoggedIn($old);
         $redirect = array();

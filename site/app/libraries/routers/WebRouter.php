@@ -95,7 +95,7 @@ class WebRouter {
             $this->request = Request::create(
                 '/authentication/login',
                 'GET',
-                ['old' => base64_encode($old_request_url)]
+                ['old' => urlencode($old_request_url)]
             );
             $this->parameters = $this->matcher->matchRequest($this->request);
         }
