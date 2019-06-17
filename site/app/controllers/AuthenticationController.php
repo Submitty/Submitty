@@ -148,7 +148,14 @@ class AuthenticationController extends AbstractController {
     }
 
     /**
-     * @Route("/authentication/vcs_login")
+     * Handle stateless authentication for the VCS endpoints.
+     *
+     * This endpoint is unique from the other authentication methods in
+     * that this requires a specific course so that we can check a user's
+     * status, as well as potentially information about a particular
+     * gradeable in that course.
+     *
+     * @Route("{_semester}/{_course}/authentication/vcs_login")
      */
     public function vcsLogin() {
         if (empty($_POST['user_id']) || empty($_POST['password']) || empty($_POST['gradeable_id'])
@@ -173,7 +180,13 @@ class AuthenticationController extends AbstractController {
             return $this->core->getOutput()->renderJsonSuccess(['message' => $msg, 'authenticated' => true]);
         }
 
-        $gradeable = $this->core->getQueries()->getGradeableConfig($_POST['gradeable_id']);
+        try {
+            $gradeable = $this->core->getQueries()->getGradeableConfig($_POST['gradeable_id']);
+        }
+        catch (\InvalidArgumentException $exc) {
+            $gradeable = null;
+        }
+
         if ($gradeable !== null && $gradeable->isTeamAssignment()) {
             if (!$this->core->getQueries()->getTeamById($_POST['id'])->hasMember($_POST['user_id'])) {
                 $msg = "This user is not a member of that team.";
