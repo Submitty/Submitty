@@ -20,7 +20,7 @@ class ImagesController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/grading/student_photos")
+     * @Route("/{_semester}/{_course}/student_photos")
      */
     public function viewImagesPage() {
         $user_group = $this->core->getUser()->getGroup();

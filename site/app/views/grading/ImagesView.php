@@ -63,7 +63,6 @@ class ImagesView extends AbstractView {
         $return_url = $this->core->buildNewUrl([
             $this->core->getConfig()->getSemester(),
             $this->core->getConfig()->getCourse(),
-            'grading',
             'student_photos'
         ]);
 
