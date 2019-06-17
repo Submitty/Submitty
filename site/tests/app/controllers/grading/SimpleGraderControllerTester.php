@@ -112,7 +112,7 @@ class SimpleGraderControllerTester extends BaseUnitTest {
         $_POST['scores'] = "123";
         $user = $this->createMockModel(User::class);
         $gradeable = $this->createMockModel(Gradeable::class);
-        $core = $this->createMockCore(['csrf_token' => true], [], ['getGradeableConfig' => $gradeable, 'getUserById' => $user]);
+        $core = $this->createMockCore(['csrf_token' => true], [], ['getGradeableConfig' => $gradeable, 'getUserById' => $user], ['canI' => false]);
         $controller = new SimpleGraderController($core);
         $response = $controller->save();
         $this->assertEquals(
