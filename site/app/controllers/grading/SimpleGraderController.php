@@ -19,19 +19,19 @@ class SimpleGraderController extends GradingController  {
         }
         switch ($_REQUEST['action']) {
             case 'lab':
-                $this->grade('lab');
+                $this->grade();
                 break;
             case 'save_lab':
-                $this->save('lab');
+                $this->save();
                 break;
             case 'numeric':
-                $this->grade('numeric');
+                $this->grade();
                 break;
             case 'save_numeric':
-                $this->save('numeric');
+                $this->save();
                 break;
             case 'upload_csv_numeric':
-                $this->UploadCSV('numeric');
+                $this->UploadCSV();
                 break;
             case 'print_lab':
                 $this->printLab();
@@ -117,7 +117,7 @@ class SimpleGraderController extends GradingController  {
         $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'displayPrintLab', $gradeable, $section, $students);
     }
 
-    public function grade($action) {
+    public function grade() {
         if (!isset($_REQUEST['g_id'])) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable');
         }
@@ -196,7 +196,7 @@ class SimpleGraderController extends GradingController  {
         $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'simpleDisplay', $gradeable, $rows, $student_full, $graders, $section_key, $show_all_sections_button, $sort);
     }
 
-    public function save($action) {
+    public function save() {
         if (!isset($_REQUEST['g_id']) || !isset($_REQUEST['user_id'])) {
             return $this->core->getOutput()->renderJsonFail('Did not pass in g_id or user_id');
         }
@@ -257,7 +257,7 @@ class SimpleGraderController extends GradingController  {
         return $this->core->getOutput()->renderJsonSuccess();
     }
 
-    public function UploadCSV($action) {
+    public function UploadCSV() {
 
         $users = $_POST['users'];
         $g_id = $_POST['g_id'];
