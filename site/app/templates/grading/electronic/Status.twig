@@ -1,7 +1,6 @@
 <head>
     <!-- Plotly.js -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    {#<script type="text/javascript" language="javascript" src="{{ base_url }}vendor/jquery/jquery.min.js"></script>#}
 </head>
 
 <body onload="document.getElementById('defaultOpen').click();">
@@ -63,10 +62,10 @@
         </div>
     {% else %}
         <div class = "tab">
-            <button class="btn btn-primary" type="button" onclick="openStat(event, 'Numerical Data')" id="defaultOpen">Numerical Data</button>
-            <button class="btn btn-primary" type="button" onclick="openStat(event, 'Total Histogram')">Total Histogram</button>
-            <button class="btn btn-primary" type="button" onclick="openStat(event, 'Autograding Histogram')">Autograding Histogram</button>
-            <button class="btn btn-primary" type="button" onclick="openStat(event, 'Component Averages')">Component Averages</button>
+            <button class="btn btn-primary" type="button" onclick="openStat(event, 'Numerical Data'), this.blur()" id="defaultOpen">Numerical Data</button>
+            <button class="btn btn-primary" type="button" onclick="openStat(event, 'Total Histogram'), this.blur()">Total Histogram</button>
+            <button class="btn btn-primary" type="button" onclick="openStat(event, 'Autograding Histogram'), this.blur()">Autograding Histogram</button>
+            <button class="btn btn-primary" type="button" onclick="openStat(event, 'Component Averages'), this.blur()">Component Averages</button>
             <div id = "Total Histogram" class = "tabcontent">
                 {% if overall_average == null or overall_average.getCount() == 0 %}
                     <br/>
@@ -444,7 +443,7 @@
             </div>
             <div id="Numerical Data" class="tabcontent">
                 <div class = "row">
-                    <div class = "col-md-6">
+                    <div class = "box col-md-6">
                         {# LEFT CHUNK#}
                         {% if warnings|length > 0 %}
                             <ul>
@@ -515,7 +514,7 @@
                         {% endif %}
                         {# LEFT CHUNK #}
                     </div>
-                    <div class = "col-md-6">
+                    <div class = "box col-md-6">
                         {# RIGHT CHUNK#}
                         {% if not peer %}
                             <br>
@@ -602,7 +601,8 @@
 
         // Show the current tab, and add an "active" class to the button that opened the tab
         document.getElementById(statName).style.display = "block";
-        evt.currentTarget.className += " active";
+        //to make active, do this, not good for current implementation
+        //evt.currentTarget.className += " active";
 
     }
     // Get the element with id="defaultOpen" and click on it
