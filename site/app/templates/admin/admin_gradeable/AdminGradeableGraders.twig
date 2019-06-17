@@ -152,13 +152,11 @@ What is the lowest privileged user group that can grade this?
             $(base_all_cb_name + 'all_' + id).prop('checked', all_checked);
         }
     }
-
+	
+	
     function onSectionTypeChange() {
         if($('#rotating_section').is(':checked')) {
             disableElementChildren('#rotating_data', false);
-        }
-		else if($('#all_access').is(':checked')) {
-           disableElementChildren('#rotating_data', false);
         }
         else {
             disableElementChildren('#rotating_data', true);
@@ -197,6 +195,7 @@ What is the lowest privileged user group that can grade this?
         $('#minimum_grading_group').change(onMinGraderChange);
 
         // update "all" check boxes
+	
         {% for grader in graders_from_usertypes[1] %}
         updateCheckBoxes('g1', "{{ grader[0] }}", 1);
         {% endfor %}
@@ -208,5 +207,9 @@ What is the lowest privileged user group that can grade this?
         {% endfor %}
 
     });
+	
+	
+	
+	
 
 </script>

@@ -158,7 +158,6 @@ class AdminGradeableController extends AbstractController {
                 $gradeable_section_history[$grader[0]] = [];
             }
         }
-
         // Construct a list of rotating gradeables
         $rotating_gradeables = [];
         foreach ($this->core->getQueries()->getGradeablesPastAndSection() as $row) {
@@ -268,7 +267,6 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addInternalJs('admin-gradeable-updates.js');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
-
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'gradeable' => $gradeable,
             'action' => 'edit',
@@ -626,7 +624,6 @@ class AdminGradeableController extends AbstractController {
         if ($gradeable === false) {
             return;
         }
-
         try {
             $this->updateGraders($gradeable, $_POST);
             // Finally, send the requester back the information
@@ -639,11 +636,9 @@ class AdminGradeableController extends AbstractController {
     }
 
     private function updateGraders(Gradeable $gradeable, $details) {
-        if (!isset($details['graders'])) {
-            throw new \InvalidArgumentException('Missing "graders" parameter');
-        }
+        $new_graders = $details['graders'] ?? array();
 
-        $gradeable->setRotatingGraderSections($details['graders']);
+        $gradeable->setRotatingGraderSections($new_graders);
         $this->core->getQueries()->updateGradeable($gradeable);
     }
 
@@ -888,7 +883,6 @@ class AdminGradeableController extends AbstractController {
         // Trigger a rebuild if the config changes
         $trigger_rebuild_props = ['autograding_config_path', 'vcs_subdirectory'];
         $trigger_rebuild = count(array_intersect($trigger_rebuild_props, array_keys($details))) > 0;
-
         $boolean_properties = [
             'ta_grading',
             'scanned_exam',
