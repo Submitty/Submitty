@@ -876,10 +876,10 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
 
 /**
  * @param csrf_token
+ * @param return_url
  */
-function handleDownloadImages(csrf_token) {
+function handleDownloadImages(csrf_token, return_url) {
     var image_submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload_images_files'});
-    var return_url = buildUrl({'component': 'grading', 'page': 'images', 'action': 'view_images_page'});
     var formData = new FormData();
     formData.append('csrf_token', csrf_token);
     formData.append('file_count', file_array.length);
@@ -930,7 +930,7 @@ function handleDownloadImages(csrf_token) {
             }
         },
         error: function(data) {
-            window.location.href = buildUrl({'component': 'grading', 'page': 'images', 'action': 'view_images_page'});
+            window.location.href = return_url;
         }
     });
 }

@@ -59,11 +59,20 @@ class ImagesView extends AbstractView {
         }
 
         $this->core->getOutput()->disableBuffer();
+
+        $return_url = $this->core->buildNewUrl([
+            $this->core->getConfig()->getSemester(),
+            $this->core->getConfig()->getCourse(),
+            'grading',
+            'student_photos'
+        ]);
+
         return $this->core->getOutput()->renderTwigTemplate("grading/Images.twig", [
             "sections" => $sections,
             "imageData" => $image_data,
             "errorImageData" => $error_image_data,
-            "hasInstructorPermission" => $instructor_permission
+            "hasInstructorPermission" => $instructor_permission,
+            "returnUrl" => $return_url
         ]);
     }
 }

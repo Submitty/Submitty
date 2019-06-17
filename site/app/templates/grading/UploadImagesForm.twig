@@ -20,7 +20,7 @@
     </div>
     <script type="text/javascript">
         function makeSubmission() {
-            handleDownloadImages('{{ core.getCsrfToken() }}');
+            handleDownloadImages('{{ core.getCsrfToken() }}', '{{ return_url }}');
         }
         $(function() {
             $("#submit").click(function(e){ // Submit button

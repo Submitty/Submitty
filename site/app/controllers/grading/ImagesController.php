@@ -5,12 +5,13 @@ namespace app\controllers\grading;
 use app\controllers\AbstractController;
 use app\libraries\FileUtils;
 use app\models\user;
+use Symfony\Component\Routing\Annotation\Route;
 
 class ImagesController extends AbstractController {
     public function run() {
         switch ($_REQUEST['action']) {
             case 'view_images_page':
-            		$this->viewImagesPage();
+                $this->viewImagesPage();
                 break;
             default:
                 $this->viewImagesPage();
@@ -18,6 +19,9 @@ class ImagesController extends AbstractController {
         }
     }
 
+    /**
+     * @Route("/{_semester}/{_course}/grading/student_photos")
+     */
     public function viewImagesPage() {
         $user_group = $this->core->getUser()->getGroup();
         $images_course_path = $this->core->getConfig()->getCoursePath();
@@ -26,7 +30,6 @@ class ImagesController extends AbstractController {
         if ($user_group === USER::GROUP_STUDENT || (($user_group === USER::GROUP_FULL_ACCESS_GRADER || $user_group === USER::GROUP_LIMITED_ACCESS_GRADER) && count($any_images_files) === 0)) { // student has no permissions to view image page
             $this->core->addErrorMessage("You have no permissions to see images.");
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
-            $this->core->redirect($this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page')));
             return;
         }
         $grader_sections = $this->core->getUser()->getGradingRegistrationSections();
