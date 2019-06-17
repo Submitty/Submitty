@@ -55,7 +55,7 @@ class GlobalController extends AbstractController {
                         "icon" => "fa-home"
                     ]);
                 }
-                $navigation_url = $this->core->buildNewUrl([]);
+                $navigation_url = $this->core->buildNewUrl();
                 $sidebar_buttons[] = new Button($this->core, [
                     "href" => $navigation_url,
                     "title" => "Gradeables",
