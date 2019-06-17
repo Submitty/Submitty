@@ -17,7 +17,7 @@
     </div>
 {% endblock %}
 {% block form %}
-    <form method="post" action="{{ core.buildNewUrl(['home', 'change_username']) }}">
+    <form method="post" action="{{ core.buildNewUrl(['home', 'change_username'], false) }}">
         {{ parent() }}
     </form>
 {% endblock %}

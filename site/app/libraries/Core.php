@@ -407,14 +407,14 @@ class Core {
 
     /**
      * Given some URL parameters (parts), build a URL for the site using those parts
-     * 
+     *
      * @param array  $parts
      * @param bool   $with_course_info adds /semester/course/ in the beginning of the url
      * @param string $hash
      *
      * @return string
      */
-    public function buildNewUrl($parts=array(), $with_course_info = false, $hash = null) {
+    public function buildNewUrl($parts=array(), $with_course_info = true, $hash = null) {
         if ($with_course_info) {
             array_unshift($parts, $this->getConfig()->getSemester(), $this->getConfig()->getCourse());
         }

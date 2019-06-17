@@ -55,7 +55,7 @@ class GlobalController extends AbstractController {
                         "icon" => "fa-home"
                     ]);
                 }
-                $navigation_url = $this->core->buildNewUrl([], true);
+                $navigation_url = $this->core->buildNewUrl([]);
                 $sidebar_buttons[] = new Button($this->core, [
                     "href" => $navigation_url,
                     "title" => "Gradeables",
@@ -286,7 +286,7 @@ class GlobalController extends AbstractController {
             ]);
 
             $sidebar_buttons[] = new Button($this->core, [
-                "href" => $this->core->buildNewUrl(['authentication', 'logout']),
+                "href" => $this->core->buildNewUrl(['authentication', 'logout'], false),
                 "title" => "Logout ".$this->core->getUser()->getDisplayedFirstName(),
                 "id" => "logout",
                 "class" => "nav-row",
