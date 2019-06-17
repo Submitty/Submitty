@@ -70,6 +70,7 @@ class ElectronicGraderView extends AbstractView {
         $component_overall_score = 0;
         $component_overall_max = 0;
         $component_overall_percentage = 0;
+        $this->core->getOutput()->addInternalJs('plotly-1.48.3.min.js');
 
         foreach ($sections as $key => $section) {
             if ($key === "NULL") {
