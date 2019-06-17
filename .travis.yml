@@ -90,6 +90,7 @@ jobs:
       php: 7.2
       script:
         - pushd site
+        - travis_retry composer install --prefer-dist --no-interaction
         - vendor/bin/phpunit --version
         - vendor/bin/phpunit --configuration tests/phpunit.xml
         - popd
@@ -112,7 +113,6 @@ jobs:
         - pushd python_submitty_utils
         - python3 setup.py test
         - popd
-
         - pushd migration
         - python3 -m unittest discover
         - popd
