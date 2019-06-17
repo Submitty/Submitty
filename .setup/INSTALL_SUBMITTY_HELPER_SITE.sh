@@ -126,13 +126,6 @@ for i in "${array[@]}"; do
     find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.${i} -exec chmod o+r {} \;
 done
 
-#Setup Email Cron Job
-crontab -u submitty_daemon -l > /tmp/cron_jobs
-grep "python3 ${SUBMITTY_INSTALL_DIR}/sbin/send_email.py" /tmp/cron_jobs || echo "* * * * * python3 ${SUBMITTY_INSTALL_DIR}/sbin/send_email.py" >> /tmp/cron_jobs
-crontab -u submitty_daemon -r
-crontab -u submitty_daemon /tmp/cron_jobs
-rm -f /tmp/cron_jobs
-
 # Set permissions of files
 # set special user $PHP_USER as owner & group of all website files
 find ${SUBMITTY_INSTALL_DIR}/site -exec chown ${PHP_USER}:${PHP_GROUP} {} \;
