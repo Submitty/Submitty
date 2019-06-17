@@ -180,7 +180,7 @@ if (isset($_COOKIE[$cookie_key])) {
             Utils::setCookie($cookie_key, "", time() - 3600);
         }
         else {
-            if ($expire_time > 0 || $reset_cookie) {
+            if ($expire_time > 0) {
                 Utils::setCookie(
                     $cookie_key,
                     (string) TokenManager::generateSessionToken(
