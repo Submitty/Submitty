@@ -29,7 +29,7 @@ class ImagesController extends AbstractController {
         $any_images_files = FileUtils::getAllFiles($images_path, array(), true);
         if ($user_group === USER::GROUP_STUDENT || (($user_group === USER::GROUP_FULL_ACCESS_GRADER || $user_group === USER::GROUP_LIMITED_ACCESS_GRADER) && count($any_images_files) === 0)) { // student has no permissions to view image page
             $this->core->addErrorMessage("You have no permissions to see images.");
-            $this->core->redirect($this->core->buildNewUrl([$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse()]));
+            $this->core->redirect($this->core->buildNewCourseUrl());
             return;
         }
         $grader_sections = $this->core->getUser()->getGradingRegistrationSections();

@@ -60,9 +60,7 @@ class ImagesView extends AbstractView {
 
         $this->core->getOutput()->disableBuffer();
 
-        $return_url = $this->core->buildNewUrl([
-            $this->core->getConfig()->getSemester(),
-            $this->core->getConfig()->getCourse(),
+        $return_url = $this->core->buildNewCourseUrl([
             'student_photos'
         ]);
 
