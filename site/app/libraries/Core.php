@@ -406,8 +406,10 @@ class Core {
     }
 
     /**
+     * Given some URL parameters (parts), build a URL for the site using those parts
+     * 
      * @param array  $parts
-     * @param bool   $with_course_info
+     * @param bool   $with_course_info adds /semester/course/ in the beginning of the url
      * @param string $hash
      *
      * @return string
