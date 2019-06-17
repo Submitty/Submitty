@@ -207,7 +207,7 @@ class SimpleGraderController extends GradingController  {
         $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
 
         $user = $this->core->getQueries()->getUserById($user_id);
-        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $this->core->getCsrfToken()) {
+        if (!$this->core->checkCsrfToken()) {
             return $this->core->getOutput()->renderJsonFail('Invalid CSRF token');
         } else if ($gradeable === null) {
             return $this->core->getOutput()->renderJsonFail('Invalid gradeable ID');
