@@ -889,7 +889,6 @@ class AdminGradeableController extends AbstractController {
             'student_view',
             'student_view_after_grades',
             'student_submit',
-            'grade_by_registration',
             'peer_grading',
             'late_submission_allowed',
             'regrade_allowed',
@@ -981,7 +980,7 @@ class AdminGradeableController extends AbstractController {
                 $errors['server'] = $result;
             }
         }
-;
+
         // Be strict.  Only apply database changes if there were no errors
         if(count($errors) !== 0) {
             throw new ValidationException('', $errors);

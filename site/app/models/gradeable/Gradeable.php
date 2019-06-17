@@ -92,7 +92,6 @@ class Gradeable extends AbstractModel {
     protected $type = GradeableType::ELECTRONIC_FILE;
     /** @property @var int If the gradeable should be graded by all access (2) by registration section (1) or rotating sections (0) */
     protected $grader_assignment_method = 1;
-    protected $test_var = 1;
     /** @property @var int The minimum user group that can grade this gradeable (1=instructor) */
     protected $min_grading_group = 1;
     /** @property @var string The syllabus classification of this gradeable */

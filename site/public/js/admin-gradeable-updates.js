@@ -109,7 +109,6 @@ $(document).ready(function () {
             saveGraders();
         }
 
-
         // Don't save if it we're ignoring it
         if ($(this).hasClass('ignore')) {
             return;
