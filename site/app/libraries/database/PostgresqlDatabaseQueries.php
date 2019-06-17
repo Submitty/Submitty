@@ -1139,7 +1139,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               ) AS egv ON egv.{$submitter_type}=egd.{$submitter_type} AND egv.g_id=egd.g_id
 
               /* Join grade inquiry */
-              LEFT JOIN regrade_requests AS rr ON rr.{$submitter_type}=gd.gd_{$submitter_type} AND rr.g_id=g.g_id
+              LEFT JOIN regrade_requests AS rr ON rr.{$submitter_type}={$submitter_type_ext} AND rr.g_id=g.g_id
             WHERE $selector
             $order";
 

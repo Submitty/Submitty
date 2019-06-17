@@ -54,8 +54,8 @@ if [ ! -d "${SUBMITTY_INSTALL_DIR}/Dafny" ]; then
     chmod 751 ${SUBMITTY_INSTALL_DIR}/Dafny
     pushd ${SUBMITTY_INSTALL_DIR}/Dafny > /dev/null
 
-    DAFNY_VER=v2.1.0
-    DAFNY_FILE=dafny-2.1.0.10108-x64-ubuntu-14.04.zip
+    DAFNY_VER=v2.3.0
+    DAFNY_FILE=dafny-2.3.0.10506-x64-ubuntu-16.04.zip
 
     wget https://github.com/Microsoft/dafny/releases/download/${DAFNY_VER}/${DAFNY_FILE} -o /dev/null > /dev/null 2>&1
     unzip ${DAFNY_FILE} > /dev/null

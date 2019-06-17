@@ -1817,6 +1817,31 @@ WHERE gcm_id=?", $params);
         throw new NotImplementedException();
     }
 
+
+    /**
+     * Return an array of team_ids for a gradeable that have at least one user in the team
+     * @param string $g_id
+     * @return [ team ids ]
+     */
+    public function getTeamsWithMembersFromGradeableID($g_id) {
+        $team_map = $this->core->getQueries()->getTeamIdsAllGradeables();
+
+        if (!array_key_exists( $g_id ,$team_map)) {
+            return array();
+        }
+
+        $teams = $team_map[$g_id];
+
+        $this->course_db->query("SELECT team_id FROM teams");
+        $teams_with_members = array();
+        foreach ($this->course_db->rows() as $row) {
+            $teams_with_members[] = $row['team_id'];
+        }
+
+        return array_intersect($teams,$teams_with_members);
+    }
+
+
     /**
      * Add ($g_id,$user_id) pair to table seeking_team
      * @param string $g_id
