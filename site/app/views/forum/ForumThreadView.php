@@ -110,7 +110,7 @@ class ForumThreadView extends AbstractView {
 	*/
 	public function showForumThreads($user, $posts, $unviewed_posts, $threadsHead, $show_deleted, $show_merged_thread, $display_option, $max_thread, $initialPageNumber) {
 		if(!$this->forumAccess()){
-			$this->core->redirect($this->core->buildNewUrl([$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse()]));
+			$this->core->redirect($this->core->buildNewUrl([], true));
 			return;
 		}
 
@@ -930,10 +930,7 @@ HTML;
 
     public function createThread($category_colors){
 		if(!$this->forumAccess()){
-			$this->core->redirect($this->core->buildNewUrl([
-				$this->core->getConfig()->getSemester(),
-				$this->core->getConfig()->getCourse()
-			]));
+			$this->core->redirect($this->core->buildNewUrl([], true));
 			return;
 		}
 
@@ -983,7 +980,7 @@ HTML;
 
 	public function statPage($users) {
 		if(!$this->forumAccess()){
-			$this->core->redirect($this->core->buildNewUrl([$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse()]));
+			$this->core->redirect($this->core->buildNewUrl([], true));
 			return;
 		}
 

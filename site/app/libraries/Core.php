@@ -407,11 +407,15 @@ class Core {
 
     /**
      * @param array  $parts
+     * @param bool   $with_course_info
      * @param string $hash
      *
      * @return string
      */
-    public function buildNewUrl($parts=array(), $hash = null) {
+    public function buildNewUrl($parts=array(), $with_course_info = false, $hash = null) {
+        if ($with_course_info) {
+            array_unshift($parts, $this->getConfig()->getSemester(), $this->getConfig()->getCourse());
+        }
         $url = $this->getConfig()->getBaseUrl().implode("/", $parts);
         return $url;
     }

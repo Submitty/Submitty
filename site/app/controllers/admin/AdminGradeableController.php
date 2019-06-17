@@ -1021,7 +1021,7 @@ class AdminGradeableController extends AbstractController {
         // this will cleanup the build files
         $this->enqueueBuildFile($g_id);
 
-        $this->core->redirect($this->core->buildNewUrl([$semester, $course]));
+        $this->core->redirect($this->core->buildNewUrl([], true));
     }
 
     private function writeFormConfig(Gradeable $gradeable) {
@@ -1168,7 +1168,7 @@ class AdminGradeableController extends AbstractController {
 
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        $this->core->redirect($this->core->buildNewUrl([$semester, $course]));
+        $this->core->redirect($this->core->buildNewUrl([], true));
     }
 
     private function checkRefresh() {
