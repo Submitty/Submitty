@@ -1,4 +1,3 @@
-{% if popup == false %}
 <div class="content forum_content">
 
     {% include "forum/ForumBar.twig" with {
@@ -12,8 +11,6 @@
 
     <div id="manage_categories_view" align="center">
         <div style="max-width: 750px;" align="left">
-
-{% endif %}
 
         <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
         <span  style="float: right;">
@@ -56,11 +53,9 @@
             {% endfor %}
         </ul>
 
-            {% if popup == false %}
         </div>
     </div>
 </div>
-{% endif %}
 
 <script type="text/javascript">
     $(function() {
