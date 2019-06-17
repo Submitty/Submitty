@@ -7,7 +7,7 @@ window.addEventListener("load", function() {
   }
 });
 
-window.addEventListener("resize", checkSidebarCollapse); 
+window.addEventListener("resize", checkSidebarCollapse);
 
 /**
  * Acts in a similar fashion to Core->buildUrl() function within the PHP code
@@ -170,6 +170,7 @@ function editUserForm(user_id) {
             if (!user.hasClass('readonly')) {
                 user.addClass('readonly');
             }
+            $('[name="user_numeric_id"]', form).val(json['user_numeric_id']);
             $('[name="user_firstname"]', form).val(json['user_firstname']);
             if (json['user_preferred_firstname'] === null) {
                 json['user_preferred_firstname'] = "";
@@ -231,6 +232,7 @@ function newUserForm() {
     form.css("display", "block");
     $('[name="edit_user"]', form).val("false");
     $('[name="user_id"]', form).removeClass('readonly').prop('readonly', false).val("");
+    $('[name="user_numeric_id"]', form).val("");
     $('[name="user_firstname"]', form).val("");
     $('[name="user_preferred_firstname"]', form).val("");
     $('[name="user_lastname"]', form).val("");
@@ -457,7 +459,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                             //console.log(data.ci[users_color]);
                             for(var pos in data.ci[users_color]) {
                                 var element = data.ci[users_color][pos];
-                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_prev_color": element[4], "data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; background: " + element[4]});   
+                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_prev_color": element[4], "data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; background: " + element[4]});
                             }
                         }
                         $('.CodeMirror')[0].CodeMirror.refresh();
@@ -514,7 +516,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                             //console.log(data.ci[users_color]);
                             for(var pos in data.ci[users_color]) {
                                 var element = data.ci[users_color][pos];
-                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});   
+                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});
                             }
                         }
                         	$('.CodeMirror')[0].CodeMirror.refresh();
@@ -546,7 +548,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                             for(var users_color in data.ci) {
                             for(var pos in data.ci[users_color]) {
                                 var element = data.ci[users_color][pos];
-                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});   
+                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});
                             }
                         }
                         	$('.CodeMirror')[0].CodeMirror.refresh();
@@ -578,7 +580,7 @@ function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user
         user_id_2 = JSON.parse($('[name="user_id_2"]', form).val())["user_id"];
         version_user_2 = JSON.parse($('[name="user_id_2"]', form).val())["version"];
     }
-    
+
     var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_matches_for_clicked_match',
                         'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'start':user_1_match_start.line, 'end': user_1_match_end.line});
 
@@ -1053,6 +1055,14 @@ function importTeamForm() {
     $('[name="upload_team"]', form).val(null);
 }
 
+
+function randomizeRotatingGroupsButton() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#randomize-button-warning");
+    form.css("display", "block");
+}
+
+
 /**
  * Toggles the page details box of the page, showing or not showing various information
  * such as number of queries run, length of time for script execution, and other details
@@ -1203,6 +1213,10 @@ function downloadFileWithAnyRole(file_name, path) {
         file = file.substring(file.lastIndexOf('/')+1);
     }
     window.location = buildUrl({'component': 'misc', 'page': 'download_file_with_any_role', 'dir': 'course_materials', 'file': file, 'path': path});
+}
+
+function downloadCourseMaterialZip(dir_name, path) {
+    window.location = buildUrl({'component': 'misc', 'page': 'download_course_material_zip', 'dir_name': dir_name, 'path': path});
 }
 
 function checkColorActivated() {
@@ -1479,7 +1493,8 @@ function publishFormWithAttachments(form, test_category, error_message) {
         return false;
     }
     if(test_category) {
-        if((!form.prop("ignore-cat")) && form.find('.cat-selected').length == 0) {
+
+        if((!form.prop("ignore-cat")) && form.find('.cat-selected').length == 0 && ($('.cat-buttons input').is(":checked") == false)) {
             alert("At least one category must be selected.");
             return false;
         }
@@ -2412,30 +2427,30 @@ function updateHomeworkExtensions(data) {
                 $('#messages').append(message);
                 return;
             }
-            if(json['error']){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['error'] + '</div>';
+            if(json['status'] === 'fail'){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
                 $('#messages').append(message);
                 return;
             }
-            if(json['is_team']){
+            if(json['data']['is_team']){
                 extensionPopup(json);
                 return;
             }
             var form = $("#load-homework-extensions");
             $('#my_table tr:gt(0)').remove();
-            var title = '<div class="option-title" id="title">Current Extensions for ' + json['gradeable_id'] + '</div>';
+            var title = '<div class="option-title" id="title">Current Extensions for ' + json['data']['gradeable_id'] + '</div>';
             $('#title').replaceWith(title);
-            if(json['users'].length === 0){
+            if(json['data']['users'].length === 0){
                 $('#my_table').append('<tr><td colspan="4">There are no extensions for this homework</td></tr>');
             }
-            json['users'].forEach(function(elem){
+            json['data']['users'].forEach(function(elem){
                 var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_day_exceptions'] + '</td></tr>'];
                 $('#my_table').append(bits.join('</td><td>'));
             });
             $('#user_id').val(this.defaultValue);
             $('#late_days').val(this.defaultValue);
             $('#csv_upload').val(this.defaultValue);
-            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Updated exceptions for ' + json['gradeable_id'] + '.</div>';
+            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Updated exceptions for ' + json['data']['gradeable_id'] + '.</div>';
             $('#messages').append(message);
         },
         error: function() {
@@ -2453,13 +2468,13 @@ function loadHomeworkExtensions(g_id, due_date) {
             var json = JSON.parse(data);
             var form = $("#load-homework-extensions");
             $('#my_table tr:gt(0)').remove();
-            var title = '<div class="option-title" id="title">Current Extensions for ' + json['gradeable_id'] + '</div>';
+            var title = '<div class="option-title" id="title">Current Extensions for ' + json['data']['gradeable_id'] + '</div>';
             $('#title').replaceWith(title);
             $('#due_date').text(due_date);
-            if(json['users'].length === 0){
+            if(json['data']['users'].length === 0){
                 $('#my_table').append('<tr><td colspan="4">There are no extensions for this homework</td></tr>');
             }
-            json['users'].forEach(function(elem){
+            json['data']['users'].forEach(function(elem){
                 var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_day_exceptions'] + '</td></tr>'];
                 $('#my_table').append(bits.join('</td><td>'));
             });
@@ -2485,10 +2500,10 @@ function addMarkdownCode(type, divTitle){
 
 function refreshOnResponseLateDays(json) {
     $('#late_day_table tr:gt(0)').remove();
-    if(json['users'].length === 0){
+    if(json['data']['users'].length === 0){
         $('#late_day_table').append('<tr><td colspan="6">No late days are currently entered.</td></tr>');
     }
-    json['users'].forEach(function(elem){
+    json['data']['users'].forEach(function(elem){
         elem_delete = "<a onclick=\"deleteLateDays('"+elem['user_id']+"', '"+elem['datestamp']+"');\"><i class='fas fa-trash'></i></a>";
         var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_days'], elem['datestamp'], elem_delete + '</td></tr>'];
         $('#late_day_table').append(bits.join('</td><td>'));
@@ -2507,8 +2522,8 @@ function updateLateDays(data) {
         contentType: false,
         success: function(data) {
             var json = JSON.parse(data);
-            if(json['error']){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['error'] + '</div>';
+            if(json['status'] === 'fail'){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
                 $('#messages').append(message);
                 return;
             }
@@ -2547,8 +2562,8 @@ function deleteLateDays(user_id, datestamp) {
             },
             success: function(data) {
                 var json = JSON.parse(data);
-                if(json['error']){
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['error'] + '</div>';
+                if(json['status'] === 'fail'){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
                     $('#messages').append(message);
                     return;
                 }

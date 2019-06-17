@@ -1,8 +1,8 @@
 <?php
 
-namespace app\libraries;
+namespace app\libraries\routers;
 
-class Router {
+class ClassicRouter {
     private $pieces = [];
 
     public function __construct(string $url) {

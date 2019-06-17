@@ -86,6 +86,7 @@ class UsersController extends AbstractController {
         $user = $this->core->getQueries()->getUserById($user_id);
         $this->core->getOutput()->renderJson(array(
             'user_id' => $user->getId(),
+            'user_numeric_id' => $user->getNumericId(),
             'user_firstname' => $user->getLegalFirstName(),
             'user_lastname' => $user->getLegalLastName(),
             'user_preferred_firstname' => $user->getPreferredFirstName(),
@@ -158,6 +159,8 @@ class UsersController extends AbstractController {
             $user->setId(trim($_POST['user_id']));
         }
 
+        $user->setNumericId(trim($_POST['user_numeric_id']));
+
         $user->setLegalFirstName(trim($_POST['user_firstname']));
         if (isset($_POST['user_preferred_firstname']) && trim($_POST['user_preferred_firstname']) != "") {
             $user->setPreferredFirstName(trim($_POST['user_preferred_firstname']));
@@ -223,6 +226,24 @@ class UsersController extends AbstractController {
         $students = $this->core->getQueries()->getAllUsers();
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
         $non_null_counts = $this->core->getQueries()->getCountUsersRotatingSections();
+
+
+        //Adds "invisible" sections: rotating sections that exist but have no students assigned to them
+        $sections_with_students = array();
+        foreach ($non_null_counts as $rows) {
+            array_push($sections_with_students,$rows['rotating_section']);
+        }
+        for ($i = 1; $i <= $this->core->getQueries()->getMaxRotatingSection(); $i++) {
+            if ( !in_array($i,$sections_with_students) ) {
+                array_push($non_null_counts,[
+                    "rotating_section" => $i,
+                    "count" => 0
+                ]);
+            }
+        }
+
+
+
         $null_counts = $this->core->getQueries()->getCountNullUsersRotatingSections();
         $max_section = $this->core->getQueries()->getMaxRotatingSection();
         $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'rotatingSectionsForm', $students, $reg_sections,

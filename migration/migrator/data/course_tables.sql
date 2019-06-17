@@ -452,6 +452,7 @@ CREATE TABLE sessions (
 CREATE TABLE users (
     user_id character varying NOT NULL,
     anon_id character varying,
+    user_numeric_id character varying,
     user_firstname character varying NOT NULL,
     user_preferred_firstname character varying,
     user_lastname character varying NOT NULL,
@@ -465,6 +466,10 @@ CREATE TABLE users (
     manual_registration boolean DEFAULT false,
     last_updated timestamp(6) with time zone,
     CONSTRAINT users_user_group_check CHECK ((user_group >= 1) AND (user_group <= 4))
+);
+
+CREATE INDEX users_user_numeric_id_idx ON users using btree (
+    user_numeric_id ASC NULLS LAST
 );
 
 
@@ -497,7 +502,7 @@ CREATE TABLE teams (
 CREATE TABLE regrade_requests (
     id serial NOT NULL PRIMARY KEY,
     g_id VARCHAR(255) NOT NULL,
-    timestamp TIMESTAMP NOT NULL,
+    timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
     user_id VARCHAR(255),
     team_id VARCHAR(255),
     status INTEGER DEFAULT 0 NOT NULL
@@ -524,7 +529,7 @@ CREATE TABLE notification_settings (
 CREATE TABLE regrade_discussion (
     id serial NOT NULL PRIMARY KEY,
     regrade_id INTEGER NOT NULL,
-    timestamp TIMESTAMP NOT NULL,
+    timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
     user_id VARCHAR(255) NOT NULL,
     content TEXT,
     deleted BOOLEAN DEFAULT FALSE NOT NULL
@@ -533,7 +538,7 @@ CREATE TABLE regrade_discussion (
 --
 -- Name: notifications_component_enum; Type: ENUM; Schema: public; Owner: -
 --
-CREATE TYPE notifications_component AS ENUM ('forum');
+CREATE TYPE notifications_component AS ENUM ('forum', 'student', 'grading');
 
 --
 -- Name: notifications; Type: TABLE; Schema: public; Owner: -

@@ -10,6 +10,8 @@ use app\exceptions\ValidationException;
  *
  * @method string getId()
  * @method void setId(string $id) Get the id of the loaded user
+ * @method void getNumericId()
+ * @method void setNumericId(string $id)
  * @method void setAnonId(string $anon_id)
  * @method string getPassword()
  * @method string getLegalFirstName() Get the first name of the loaded user
@@ -55,6 +57,8 @@ class User extends AbstractModel {
 
     /** @property @var string The id of this user which should be a unique identifier (ex: RCS ID at RPI) */
     protected $id;
+    /** @property @var string Alternate ID for a user, such as a campus assigned ID (ex: RIN at RPI) */
+    protected $numeric_id = null;
     /** @property @var string The anonymous id of this user which should be unique for each course they are in*/
     protected $anon_id;
     /**
@@ -131,6 +135,10 @@ class User extends AbstractModel {
         $this->setId($details['user_id']);
         if (isset($details['user_password'])) {
             $this->setPassword($details['user_password']);
+        }
+
+        if (isset($details['user_numeric_id'])) {
+            $this->setNumericId($details['user_numeric_id']);
         }
 
         if (!empty($details['anon_id'])) {

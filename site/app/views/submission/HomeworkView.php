@@ -272,9 +272,12 @@ class HomeworkView extends AbstractView {
 
         $image_data = [];
         if (!$gradeable->isVcs()) {
-            foreach ($notebook as $notebook_chunk) {
-                foreach ($notebook_chunk["images"] as $image) {
-                    $image_name = $image['name'];
+
+            // Prepare notebook image data for displaying
+            foreach ($notebook as $cell) {
+                if (isset($cell['type']) && $cell['type'] == "image")
+                {
+                    $image_name = $cell['image'];
                     $imgPath = FileUtils::joinPaths(
                         $this->core->getConfig()->getCoursePath(),
                         'test_input',
@@ -289,16 +292,6 @@ class HomeworkView extends AbstractView {
                         $inputimagesrc = 'data: ' . mime_content_type($imgPath) . ';charset=utf-8;base64,' . $inputImageData;
                         // insert the sample image data
                         $image_data[$image_name] = $inputimagesrc;
-                    }
-                }
-            }
-
-            // If alt text is not set for image then set it to default string
-            foreach ($notebook as $notebook_key => $notebook_value) {
-                foreach ($notebook[$notebook_key]['images'] as $image_key => $image_value) {
-                    if(!isset($image_value['alt']))
-                    {
-                        $notebook[$notebook_key]['images'][$image_key]['alt'] = "Instructor Provided Image";
                     }
                 }
             }
@@ -355,6 +348,12 @@ class HomeworkView extends AbstractView {
         $my_team = $graded_gradeable !== null ? $graded_gradeable->getSubmitter()->getTeam() : "";
         $my_repository = $graded_gradeable !== null ? $gradeable->getRepositoryPath($this->core->getUser(),$my_team) : "";
         $notebook_data = $graded_gradeable !== null ? $graded_gradeable->getUpdatedNotebook() : array();
+
+        // Import custom stylesheet to style notebook items
+        $this->core->getOutput()->addInternalCss('gradeable-notebook.css');
+
+        // Import custom js for notebook items
+        $this->core->getOutput()->addInternalJs('gradeable-notebook.js');
 
         $DATE_FORMAT = "m/d/Y @ H:i";
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
@@ -756,7 +755,6 @@ class HomeworkView extends AbstractView {
         }
 
         $posts = [];
-
         if ($graded_gradeable->hasRegradeRequest()) {
             $threads = $this->core->getQueries()->getRegradeDiscussion($graded_gradeable->getRegradeRequest());
             foreach ($threads as $thread) {
@@ -774,11 +772,13 @@ class HomeworkView extends AbstractView {
 
             }
         }
+
         return $this->core->getOutput()->renderTwigTemplate('submission/regrade/Discussion.twig', [
             'btn_type' => $btn_type,
             'url' => $url,
             'action' => $action,
             'posts' => $posts,
+            'has_submission' => $graded_gradeable->hasSubmission(),
             'gradeable_id' => $graded_gradeable->getGradeableId(),
             'thread_id' => $graded_gradeable->hasRegradeRequest() ? $graded_gradeable->getRegradeRequest()->getId() : 0,
             'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
