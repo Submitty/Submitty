@@ -1202,7 +1202,7 @@ ORDER BY g.sections_rotating_id, g.user_id", $params);
      *
      * @return array
      */
-    public function getGradeablesPastAndSection() {
+    public function getGradeablesPastAndSection($gradeable_id) {
         throw new NotImplementedException();
     }
 

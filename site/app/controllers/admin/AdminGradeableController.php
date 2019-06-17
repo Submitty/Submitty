@@ -160,13 +160,19 @@ class AdminGradeableController extends AbstractController {
         }
         // Construct a list of rotating gradeables
         $rotating_gradeables = [];
-        foreach ($this->core->getQueries()->getGradeablesPastAndSection() as $row) {
+        foreach ($this->core->getQueries()->getGradeablesPastAndSection($gradeable->getId()) as $row) {
             $gradeable_section_history[$row['user_id']][$row['g_id']] = $row['sections_rotating_id'];
 
             // Use the keys to remove duplicates
             $rotating_gradeables[$row['g_id']] = 1;
         }
         $rotating_gradeables = array_keys($rotating_gradeables);
+
+        if ($gradeable->getGraderAssignmentMethod() == 1) {
+            $current_g_id_key = array_search($gradeable->getId(),$rotating_gradeables);
+            unset($rotating_gradeables[$current_g_id_key]);
+            $rotating_gradeables = array_values($rotating_gradeables);
+        }
 
         // Get some global configuration data
         $num_rotating_sections = $this->core->getQueries()->getNumberRotatingSections();

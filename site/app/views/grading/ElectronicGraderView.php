@@ -423,12 +423,22 @@ HTML;
             }
 
             if (isset($graders[$section_title]) && count($graders[$section_title]) > 0) {
-                $section_graders = implode(", ", array_map(function (User $user) {
-                    return $user->getId();
-                }, $graders[$section_title]));
-            } else {
+                $section_grader_ids = [];
+                foreach ($graders[$section_title] as $user) {
+                    if ($user->getGroup() <= $gradeable->getMinGradingGroup()) {
+                        $section_grader_ids[] = $user->getId();
+                    }
+                }
+                if (count($section_grader_ids) > 0) {
+                    $section_graders = implode(", ", $section_grader_ids);
+                } else {
+                    $section_graders = "Nobody";
+                }
+            }
+            else {
                 $section_graders = "Nobody";
             }
+
             if ($peer) {
                 $section_graders = $this->core->getUser()->getId();
             }
