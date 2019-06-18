@@ -1021,7 +1021,7 @@ class AdminGradeableController extends AbstractController {
         // this will cleanup the build files
         $this->enqueueBuildFile($g_id);
 
-        $this->returnToNav();
+        $this->core->redirect($this->core->buildNewUrl([$semester, $course]));
     }
 
     private function writeFormConfig(Gradeable $gradeable) {
@@ -1165,8 +1165,10 @@ class AdminGradeableController extends AbstractController {
         } else {
             $this->core->addErrorMessage("Failed to update status of ".$g_id);
         }
-        $this->returnToNav();
 
+        $semester = $this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
+        $this->core->redirect($this->core->buildNewUrl([$semester, $course]));
     }
 
     private function checkRefresh() {
@@ -1184,11 +1186,6 @@ class AdminGradeableController extends AbstractController {
         }
         $this->core->getOutput()->renderString($refresh_string);
         return array('refresh' => $refresh_bool, 'string' => $refresh_string);
-    }
-
-    //return to the navigation page
-    private function returnToNav() {
-        $this->core->redirect($this->core->buildUrl(array()));
     }
 
     private function redirectToEdit($gradeable_id) {
