@@ -8,6 +8,7 @@ use app\exceptions\CurlException;
 use app\libraries\database\DatabaseFactory;
 use app\libraries\database\AbstractDatabase;
 use app\libraries\database\DatabaseQueries;
+use app\libraries\routers\ClassicRouter;
 use app\models\Config;
 use app\models\forum\Forum;
 use app\models\User;
@@ -57,7 +58,7 @@ class Core {
     /** @var Forum $forum */
     private $forum  = null;
 
-    /** @var Router */
+    /** @var ClassicRouter */
     private $router;
 
 
@@ -113,7 +114,7 @@ class Core {
                 $this->config->loadCourseJson($course_json_path);
             }
             else{
-              $message = "Unable to access configuration file " . $course_json_path . " for " . $semester . " " . $course . " please contact your system administrator.";
+                $message = "Unable to access configuration file " . $course_json_path . " for " . $semester . " " . $course . " please contact your system administrator.";
                 $this->addErrorMessage($message);
             }
         }
@@ -405,6 +406,33 @@ class Core {
     }
 
     /**
+     * Given some URL parameters (parts), build a URL for the site using those parts.
+     *
+     * @param array  $parts
+     *
+     * @return string
+     */
+    public function buildNewUrl($parts=array()) {
+        $url = $this->getConfig()->getBaseUrl().implode("/", $parts);
+        return $url;
+    }
+
+    /**
+     * Given some URL parameters (parts), build a URL for the site using those parts.
+     * This function will add the semester and course to the beginning of the new URL by default,
+     * if you do not prepend this part (e.g. for authentication-related URLs), please set
+     * $prepend_course_info to false.
+     *
+     * @param array  $parts
+     *
+     * @return string
+     */
+    public function buildNewCourseUrl($parts=array()) {
+        array_unshift($parts, $this->getConfig()->getSemester(), $this->getConfig()->getCourse());
+        return $this->buildNewUrl($parts);
+    }
+
+    /**
      * @param     $url
      * @param int $status_code
      */
@@ -532,11 +560,11 @@ class Core {
         }
     }
 
-    public function setRouter(Router $router) {
+    public function setRouter(ClassicRouter $router) {
         $this->router = $router;
     }
 
-    public function getRouter(): Router {
+    public function getRouter(): ClassicRouter {
         return $this->router;
     }
 

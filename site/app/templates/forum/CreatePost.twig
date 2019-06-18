@@ -1,0 +1,117 @@
+<div class="{% for class in classes %} {{ class }} {% endfor %}" id="{{ post_id }}" style="margin-left:{{ offset }}px;" reply-level="{{ reply_level }}">
+    {% if first == true %}
+        <h3 style="max-width: 95%; display:inline-block;word-wrap: break-word;margin-top:10px; margin-left: 5px;">
+
+            {% if userGroup <= 2 and activeThreadAnnouncement %}
+
+                <a style="display:inline-block; color:orange; " onClick="alterAnnouncement({{ activeThread.id }}, 'Are you sure you want to remove this thread as an announcement?', 'remove_announcement', '{{ csrf_token }}')" title="Remove Announcement"><i class="fas fa-star" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px; -webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
+
+            {% elseif activeThreadAnnouncement %}
+
+                <i class="fas fa-star" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px; -webkit-text-stroke-color: black;" title = "Announcement" aria-hidden="true"></i>
+
+            {% elseif userGroup <= 2 and not activeThreadAnnouncement %}
+
+                <a style="position:relative; display:inline-block; color:orange; " onClick="alterAnnouncement({{ activeThread.id }}, 'Are you sure you want to make this thread an announcement?', 'make_announcement', '{{ csrf_token }}')" title="Make thread an announcement"><i class="fas fa-star" title = "Make Announcement" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'gold')" style="position:relative; display:inline-block; color:#e0e0e0; -webkit-text-stroke-width: 1px; -webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
+
+            {% endif %}
+
+            {% if isCurrentFavorite %}
+
+                <a style="position:relative; display:inline-block; color:orange; " onClick="pinThread({{ activeThread.id }}, 'unpin_thread');" title="Pin Thread"><i class="fas fa-thumbtack" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')" style="position:relative; display:inline-block; color:gold; -webkit-text-stroke-width: 1px;-webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
+
+            {% else %}
+
+                <a style="position:relative; display:inline-block; color:orange; " onClick="pinThread({{ activeThread.id }}, 'pin_thread');" title="Pin Thread"><i class="fas fa-thumbtack" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'gold')" style="position:relative; display:inline-block; color:#e0e0e0; -webkit-text-stroke-width: 1px;-webkit-text-stroke-color: black;" aria-hidden="true"></i></a>
+
+            {% endif %}
+
+            {{ activeThreadTitle }}
+
+        </h3>
+
+    {% endif %}
+
+
+    <pre class='pre_forum'><p class="post_content" style="white-space: pre-wrap; ">{{ post_content | markdown }}</p></pre>
+
+    <hr style="margin-bottom:3px;">
+
+    {% if display_option == 'tree' %}
+        {% if not (isThreadLocked != 1 or userAccessFullGrading) %}
+            {#pass#}
+        {% elseif not first %}
+            <a class="btn btn-default btn-sm post_button_color" style=" text-decoration: none;" onClick="replyPost({{ post.id }})"> Reply</a>
+        {% else %}
+            <a class="btn btn-default btn-sm post_button_color" style=" text-decoration: none;" onClick="$('html, #posts_list').animate({ scrollTop: document.getElementById('posts_list').scrollHeight }, 'slow');"> Reply</a>
+        {% endif %}
+
+        {% if userGroup <= 3 %}
+
+            <a class="btn btn-default btn-sm post_button_color" style=" text-decoration: none;" onClick="showHistory({{ post.id }})">Show History</a>
+        {% endif %}
+    {% endif %}
+
+    {% if includeReply and (userGroup <= 3 or post.author_user_id == current_user) and first and thread_resolve_state == -1 %}
+        <a class="btn btn-default btn-sm post_button_color" style="text-decoration: none;" onClick="changeThreadStatus({{ post.thread_id }})" title="Mark thread as resolved">Mark as resolved</a>
+    {% endif %}
+
+    <span style="margin-top:8px;margin-left:10px;float:right;">
+
+        {% if userGroup <= 2 and post.author_user_id != current_user %}
+            <a style=" margin-right:2px;display:inline-block; color:black; " onClick='$(this).next().toggle();' title="Show/Hide email address"><i class="fas fa-envelope" aria-hidden="true"></i></a>
+            <a href="mailto:{{ author_email }}" style="display: none;">{{ author_email }}</a>
+        {% endif %}
+
+        {% if userGroup <= 2 %}
+            <a style=" margin-right:2px;display:inline-block; color:black; " onClick='changeName(this.parentNode, {{ post_user_info.info_name }}, {{ post_user_info.visible_user_json}}, {{ post_user_info.jscriptAnonFix}})' title="Show full user information"><i class="fas fa-eye" aria-hidden="true"></i></a>
+        {% endif %}
+
+        {% if not first %}
+            <a class="expand btn btn-default btn-sm post_button_color" style="float:right; text-decoration:none; margin-top: -8px" onClick="hidePosts(this, {{ post.id }})"></a>
+        {% endif %}
+
+        {% if userGroup <= 3 or post.author_user_id == current_user %}
+            {% if not (isThreadLocked != 1 or userAccessFullGrading == true) %}
+                {#pass#}
+            {% else %}
+                <a class="post_button" style="bottom: 1px;position:relative; display:inline-block; float:right;" onClick="deletePostToggle({{ post_buttons.delete.ud_toggle_status }}, {{ post.thread_id }}, {{ post.id }}, '{{ post.author_user_id }}', '{{ post_date }}', '{{ csrf_token }}' )" title="{{ post_buttons.delete.ud_button_title }}"><i class="fa {{ post_buttons.delete.ud_button_icon }}" aria-hidden="true"></i></a>
+                <a class="post_button" style="position:relative; display:inline-block; color:black; float:right;" onClick="editPost({{ post.id }}, {{ post.thread_id }}, {{ post_buttons.edit.shouldEditThread }}, '{{ csrf_token }}')" title="{{ post_buttons.edit.edit_button_title }}"><i class="fas fa-edit" aria-hidden="true"></i></a>
+            {% endif %}
+        {% endif %}
+
+        <h7 style="position:relative; right:5px;">
+			<strong id="post_user_id">{{ visible_username }}</strong>
+			{{ post_date }}
+            {% if edit_date is not null %}
+                (<i>Last edit at {{ edit_date }}</i>)
+            {% endif %}
+        </h7>
+    </span>
+
+    {% if post_attachment.exist == true %}
+        {% for attachment in post_attachment.files %}
+            <a href="#" style="text-decoration:none;display:inline-block;white-space: nowrap;" class="btn-default btn-sm post_button_color" onclick="openFileForum('forum_attachments', '{{ attachment.name }}', '{{ attachment.path }}')" > {{ attachment.name_display }} </a>
+        {% endfor %}
+    {% endif %}
+
+    {% set offset = offset + 30 %}
+</div>
+
+{% if isThreadLocked != 1 or userAccessFullGrading %}
+    <form class="reply-box post_reply_from" id="{{ post_id }}-reply" onsubmit="post.disabled=true; post.value='Submitting post...'; return true;" style="margin-left:{{ offset }}px" method="POST" action="{{ form_post_url }}" enctype="multipart/form-data">
+        <input type="hidden" name="thread_id" value="{{ thread_id }}" />
+        <input type="hidden" name="parent_id" value="{{ post_id }}" />
+        <br/>
+
+        {%  include "forum/ThreadPostForm.twig" with {
+            "show_post" : true,
+            "post_content_placeholder" : "Enter your reply to " ~ visible_username ~ "here...",
+            "show_merge_thread_button" : false,
+            "post_box_id" : post_box_id,
+            "show_anon" : true,
+            "submit_label" : "Submit Reply to " ~ visible_username,
+        } %}
+    </form>
+{% endif %}
+

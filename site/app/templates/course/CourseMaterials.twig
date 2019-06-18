@@ -62,6 +62,7 @@
                 <span class="fas fa-folder open-all-folder" style='vertical-align:text-top;font-size:20px'></span>
                 {{ dir }}
             </a>
+            <a onclick='downloadCourseMaterialZip("{{ dir }}", "{{ folderPath | url_encode }}")'><i class="fas fa-download" aria-hidden="true" title="Download the folder"></i></a>
             {% if userGroup == 1 %}
                 <a onclick='newDeleteCourseMaterialForm("{{ core.buildUrl({'component': 'misc', 'page': 'delete_course_material_folder', 'dir': 'course_materials', 'file': dir, 'path': folderPath }) }}", "{{ dir }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
             {% endif %}

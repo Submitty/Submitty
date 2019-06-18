@@ -53,7 +53,7 @@
     </script>
 {% endblock %}
 {% block form %}
-    <form method="post" action="{{ core.buildUrl({'page': 'change_username'}) }}">
+    <form method="post" action="{{ core.buildNewUrl(['home', 'change_username']) }}">
         {{ parent() }}
     </form>
 {% endblock %}
