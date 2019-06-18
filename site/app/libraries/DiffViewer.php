@@ -16,6 +16,11 @@ class DiffViewer {
     private $diff_file;
     private $image_difference;
 
+     /**
+     * @var bool
+     */
+    private $is_network_graph;
+
     private $built = false;
 
     /**
@@ -141,12 +146,13 @@ class DiffViewer {
      *
      * @throws \Exception
      */
-    public function __construct($actual_file, $expected_file, $diff_file, $image_difference, $id_prepend="id") {
+    public function __construct($actual_file, $expected_file, $diff_file, $image_difference, $id_prepend="id", $is_network_graph=False) {
         $this->id = rtrim($id_prepend, "_")."_";
         $this->actual_file = $actual_file;
         $this->expected_file = $expected_file;
         $this->diff_file = $diff_file;
         $this->image_difference = $image_difference;
+        $this->is_network_graph = $is_network_graph;
     }
 
     public function destroyViewer() {

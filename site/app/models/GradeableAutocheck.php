@@ -90,6 +90,11 @@ class GradeableAutocheck extends AbstractModel {
             $image_difference = $results_path . "/details/" . $details["image_difference_file"];
         }
 
-        $this->diff_viewer = new DiffViewer($actual_file, $expected_file, $difference_file, $image_difference, $this->index);
+        $is_network_graph = False;
+        if(isset($details["expected_file"]) && $details["network_graph"] == True){
+            $is_network_graph = True;
+        }
+
+        $this->diff_viewer = new DiffViewer($actual_file, $expected_file, $difference_file, $image_difference, $this->index, is_network_graph=$is_network_graph);
     }
 }
