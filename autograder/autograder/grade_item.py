@@ -594,7 +594,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     with open(os.path.join(tmp_logs,"solution_runner_log.txt"), 'w') as logfile:
         for testcase_num in range(1, len(my_testcases)+1):
             testcase_folder = os.path.join(tmp_work_random_output, "test{:02}".format(testcase_num))
-
+            random_input_folder = os.path.join(tmp_work, "random_input", "test{:02}".format(testcase_num))
             os.makedirs(testcase_folder)
             os.chdir(testcase_folder)
             
@@ -603,6 +603,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
             
             # copy test input into testcase folder
             copy_contents_into(job_id,test_input_path,testcase_folder,tmp_logs)
+            copy_contents_into(job_id,random_input_folder,testcase_folder,tmp_logs)
             
             # copy compile.out to the current directory
             shutil.copy (os.path.join(bin_path,"solution_runner.out"),os.path.join(testcase_folder,"my_solution_runner.out"))

@@ -71,6 +71,24 @@
                 }
             ]
         },
+        {
+            "title" : "Random Input",
+            "input_generator" : {
+                "command" : [ 
+                    "python generator.py 1> randominput.txt"
+                ]
+            },
+            "command" : "./a.out < randominput.txt",
+            "points" : 2,
+            "validation" : [
+                {
+                    "command" : [ "python solution.py < randominput.txt 1> frame_random.txt"],
+                    "method" : "diff",
+                    "actual_file" : "STDOUT.txt",
+                    "expected_file" : "frame_random.txt"
+                }
+            ]
+        },
 
         // ------------------------------------
         // ERROR CHECKING: FRAME SIZE
