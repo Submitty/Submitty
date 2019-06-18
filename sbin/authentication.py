@@ -71,9 +71,13 @@ if __name__ == "__main__":
     True
     False
     True
+    None
     """
     #
     print(check_password({'REQUEST_URI': '/git/s19/sample/open_homework/instructor'}, 'instructor', 'instructor'))
     print(check_password({'REQUEST_URI': '/git/s19/sample/open_homework/instructor'}, 'ta', 'ta'))
     print(check_password({'REQUEST_URI': '/git/s19/sample/open_homework/instructor'}, 'student', 'student'))
     print(check_password({'REQUEST_URI': '/git/s19/sample/open_homework/student'}, 'student', 'student'))
+    
+    # Wrong URI. Returns None.
+    print(check_password({'REQUEST_URI': '/git/s19/sample/instructor'}, 'instructor', 'instructor'))
