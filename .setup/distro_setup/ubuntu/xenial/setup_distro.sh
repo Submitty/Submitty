@@ -37,6 +37,7 @@ fi
 #################
 
 apt-get update -qqy
+yes | apt-get -qq dist-upgrade
 
 ############################
 # NTP: Network Time Protocol

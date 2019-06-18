@@ -16,6 +16,7 @@ fi
 #################
 
 apt-get -qqy update
+yes | apt-get -qq dist-upgrade
 
 apt-get install -qqy apt-transport-https ca-certificates curl software-properties-common
 apt-get install -qqy python python-dev python3 python3-dev libpython3.6
