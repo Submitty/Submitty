@@ -36,6 +36,16 @@ class WebRouter {
     /** @var string the method to call */
     public $method_name;
 
+    /**
+     * WebRouter constructor.
+     *
+     * The constructor parses the request and obtains raw parameters.
+     *
+     * @param Request $request
+     * @param Core $core
+     * @param $logged_in
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     */
     public function __construct(Request $request, Core $core, $logged_in) {
         $this->core = $core;
         $this->request = $request;
@@ -60,11 +70,34 @@ class WebRouter {
         }
     }
 
+    /**
+     * Runs the corresponding controller with parameters needed.
+     *
+     * @return mixed
+     */
     public function run() {
         $this->controller_name = $this->parameters['_controller'];
         $this->method_name = $this->parameters['_method'];
-        $controller = new $this->controller_name($this->core);
 
+        // Check CSRF token for POST requests
+        if ($this->request->isMethod("POST") &&
+            !$this->core->checkCsrfToken() &&
+            !Utils::endsWith($this->controller_name, 'AuthenticationController')) {
+            $msg = "Invalid CSRF token.";
+            $this->core->addErrorMessage($msg);
+            return $this->core->getOutput()->renderJsonFail($msg);
+        }
+
+        $this->processParameters();
+
+        $controller = new $this->controller_name($this->core);
+        return call_user_func_array([$controller, $this->method_name], $this->parameters);
+    }
+
+    /**
+     * Prepare the parameters for controllers
+     */
+    private function processParameters() {
         foreach ($this->parameters as $key => $value) {
             if (Utils::startsWith($key, "_")) {
                 unset($this->parameters[$key]);
@@ -75,8 +108,6 @@ class WebRouter {
         // the user-specified $_GET should NOT override the controller name and method name matched
         $this->request->query->remove('url');
         $this->parameters = array_merge($this->parameters, $this->request->query->all());
-
-        return call_user_func_array([$controller, $this->method_name], $this->parameters);
     }
 
     private function loadCourses() {

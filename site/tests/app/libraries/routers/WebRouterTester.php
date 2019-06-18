@@ -125,4 +125,20 @@ class WebRouterTester extends BaseUnitTest {
         $this->assertEquals("app\controllers\HomePageController", $router->controller_name);
         $this->assertEquals("showHomepage", $router->method_name);
     }
+
+    public function testWrongCsrfTokenForPost() {
+        $core = $this->createMockCore(['csrf_token' => false]);
+        $request = Request::create(
+            "/home/change_password",
+            'POST'
+        );
+        $router = new WebRouter($request, $core, true);
+        $this->assertEquals(
+            [
+                "status" => "fail",
+                "message" => "Invalid CSRF token."
+            ],
+            $router->run()
+        );
+    }
 }
