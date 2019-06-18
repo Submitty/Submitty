@@ -103,6 +103,8 @@ cp ${NODE_FOLDER}/pdfjs-dist/build/pdf.min.js ${VENDOR_FOLDER}/pdfjs
 cp ${NODE_FOLDER}/pdfjs-dist/build/pdf.worker.min.js ${VENDOR_FOLDER}/pdfjs
 cp ${NODE_FOLDER}/pdfjs-dist/web/pdf_viewer.css ${VENDOR_FOLDER}/pdfjs/pdf_viewer.css
 cp ${NODE_FOLDER}/pdfjs-dist/web/pdf_viewer.js ${VENDOR_FOLDER}/pdfjs/pdf_viewer.js
+cp -R ${NODE_FOLDER}/pdfjs-dist/cmaps ${VENDOR_FOLDER}/pdfjs
+
 # pdf-annotate.js
 cp -R "${NODE_FOLDER}/@submitty/pdf-annotate.js/dist" ${VENDOR_FOLDER}/pdf-annotate.js
 # twig.js
@@ -131,6 +133,7 @@ done
 find ${SUBMITTY_INSTALL_DIR}/site -exec chown ${PHP_USER}:${PHP_GROUP} {} \;
 find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -exec chown ${CGI_USER}:${CGI_GROUP} {} \;
 # "other" can read & execute these files
+find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.bcmap -exec chmod o+rx {} \;
 find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.ttf -exec chmod o+rx {} \;
 find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.eot -exec chmod o+rx {} \;
 find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.svg -exec chmod o+rx {} \;
