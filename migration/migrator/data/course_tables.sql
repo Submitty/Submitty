@@ -502,7 +502,7 @@ CREATE TABLE teams (
 CREATE TABLE regrade_requests (
     id serial NOT NULL PRIMARY KEY,
     g_id VARCHAR(255) NOT NULL,
-    timestamp TIMESTAMP NOT NULL,
+    timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
     user_id VARCHAR(255),
     team_id VARCHAR(255),
     status INTEGER DEFAULT 0 NOT NULL
@@ -529,7 +529,7 @@ CREATE TABLE notification_settings (
 CREATE TABLE regrade_discussion (
     id serial NOT NULL PRIMARY KEY,
     regrade_id INTEGER NOT NULL,
-    timestamp TIMESTAMP NOT NULL,
+    timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
     user_id VARCHAR(255) NOT NULL,
     content TEXT,
     deleted BOOLEAN DEFAULT FALSE NOT NULL
@@ -538,7 +538,7 @@ CREATE TABLE regrade_discussion (
 --
 -- Name: notifications_component_enum; Type: ENUM; Schema: public; Owner: -
 --
-CREATE TYPE notifications_component AS ENUM ('forum');
+CREATE TYPE notifications_component AS ENUM ('forum', 'student', 'grading');
 
 --
 -- Name: notifications; Type: TABLE; Schema: public; Owner: -

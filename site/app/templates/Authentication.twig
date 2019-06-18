@@ -5,12 +5,7 @@
         <!--
         <em>Note: Registered students have not yet been uploaded to the Submitty course databases.  Please check back later.</em>
         -->
-        <form action="{{ site_url }}" method="post" id="login">
-            <input type="hidden" name="component" value="authentication" />
-            <input type="hidden" name="page" value="checkLogin" />
-            {% for key, value in old %}
-                <input type='hidden' name='old_{{ key }}' value='{{ value }}' />
-            {% endfor %}
+        <form action="{{ login_url }}" method="post" id="login">
             <input type="text" name="user_id" onchange="$(this).val($(this).val().trim())" placeholder="User ID" required autofocus/><br />
             <input type="password" name="password" placeholder="Password" required /><br />
             <label for="stay_logged_in">Stay Logged In <input type="checkbox" name="stay_logged_in" id="stay_logged_in" checked /></label><br />

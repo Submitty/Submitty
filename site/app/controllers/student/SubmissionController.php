@@ -10,10 +10,13 @@ use app\libraries\GradeableType;
 use app\libraries\Logger;
 use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
+use app\models\Notification;
+use app\models\Email;
 use app\controllers\grading\ElectronicGraderController;
 use app\models\gradeable\SubmissionTextBox;
 use app\models\gradeable\SubmissionCodeBox;
 use app\models\gradeable\SubmissionMultipleChoice;
+use Symfony\Component\Routing\Annotation\Route;
 
 
 
@@ -101,7 +104,11 @@ class SubmissionController extends AbstractController {
                 break;
             case 'display':
             default:
-                return $this->showHomeworkPage();
+                
+                return $this->showHomeworkPage(
+                    $_REQUEST['gradeable_id'] ?? null,
+                    $_REQUEST['gradeable_version'] ?? 0
+                );
                 break;
         }
     }
@@ -135,6 +142,7 @@ class SubmissionController extends AbstractController {
 
         try {
             $this->core->getQueries()->insertNewRegradeRequest($graded_gradeable, $user, $content);
+            $this->notifyGradeInquiryOnCreate($graded_gradeable, $gradeable_id, $content);
             $this->core->getOutput()->renderJsonSuccess();
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
@@ -175,6 +183,7 @@ class SubmissionController extends AbstractController {
         try {
             $this->core->getQueries()->insertNewRegradePost($graded_gradeable->getRegradeRequest()->getId(), $user->getId(), $content);
             $graded_gradeable->getRegradeRequest()->setStatus($status);
+            $this->notifyGradeInquiryOnReply($graded_gradeable, $gradeable_id, $content);
             $this->core->getQueries()->saveRegradeRequest($graded_gradeable->getRegradeRequest());
             $this->core->getOutput()->renderJsonSuccess();
         } catch (\InvalidArgumentException $e) {
@@ -265,8 +274,12 @@ class SubmissionController extends AbstractController {
         }
     }
 
-    private function showHomeworkPage() {
-        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+    /**
+     * @Route("/{_semester}/{_course}/student/{gradeable_id}")
+     * @Route("/{_semester}/{_course}/student/{gradeable_id}/{gradeable_version}")
+     * @return array
+     */
+    public function showHomeworkPage($gradeable_id, $gradeable_version = null) {
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
         if($gradeable === null) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
@@ -280,7 +293,7 @@ class SubmissionController extends AbstractController {
         }
 
         // Attempt to put the version number to be in bounds of the gradeable
-        $version = intval($_REQUEST['gradeable_version'] ?? 0);
+        $version = intval($gradeable_version ?? 0);
         if ($version < 1 || $version > ($graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : 0)) {
             $version = $graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() : 0;
         }
@@ -305,9 +318,8 @@ class SubmissionController extends AbstractController {
             return array('error' => true, 'message' => 'Must be on a team to access submission.');
         }
         else {
-            $loc = array('component' => 'student',
-                         'gradeable_id' => $gradeable->getId());
-            $this->core->getOutput()->addBreadcrumb($gradeable->getTitle(), $this->core->buildUrl($loc));
+            $url = $this->core->buildNewCourseUrl(['student', $gradeable->getId()]);
+            $this->core->getOutput()->addBreadcrumb($gradeable->getTitle(), $url);
             if (!$gradeable->hasAutogradingConfig()) {
                 $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
                                                        'unbuiltGradeable', $gradeable);
@@ -345,16 +357,12 @@ class SubmissionController extends AbstractController {
     private function ajaxValidGradeable() {
         if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $this->core->getCsrfToken()) {
             $msg = "Invalid CSRF token. Refresh the page and try again.";
-            $return = array('success' => false, 'message' => $msg);
-            $this->core->getOutput()->renderJson($return);
-            return $return;
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
 
         if (!isset($_POST['user_id'])) {
             $msg = "Did not pass in user_id.";
-            $return = array('success' => false, 'message' => $msg);
-            $this->core->getOutput()->renderJson($return);
-            return $return;
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
 
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
@@ -378,9 +386,7 @@ class SubmissionController extends AbstractController {
         //If no user id's were submitted, give a graceful error.
         if (count($user_ids) === 0) {
             $msg = "No valid user ids were found.";
-            $return = array('success' => false, 'message' => $msg);
-            $this->core->getOutput()->renderJson($return);
-            return $return;
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
 
         //For every userid, we have to check that its real.
@@ -388,15 +394,11 @@ class SubmissionController extends AbstractController {
             $user = $this->core->getQueries()->getUserById($id);
             if ($user === null) {
                 $msg = "Invalid user id '{$id}'";
-                $return = array('success' => false, 'message' => $msg);
-                $this->core->getOutput()->renderJson($return);
-                return $return;
+                return $this->core->getOutput()->renderJsonFail($msg);
             }
             if (!$user->isLoaded()) {
                 $msg = "Invalid user id '{$id}'";
-                $return = array('success' => false, 'message' => $msg);
-                $this->core->getOutput()->renderJson($return);
-                return $return;
+                return $this->core->getOutput()->renderJsonFail($msg);
             }
         }
 
@@ -425,16 +427,12 @@ class SubmissionController extends AbstractController {
         if ($gradeable->isTeamAssignment() && $inconsistent_teams) {
             // Not all users were on the same team
             $msg = "Inconsistent teams. One or more users are on different teams.";
-            $return = array('success' => false, 'message' => $msg);
-            $this->core->getOutput()->renderJson($return);
-            return $return;
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
         //If a user not assigned to any team is matched with a user already on a team
         if($gradeable->isTeamAssignment() && $null_team_count != 0 && count($teams) != 0){
             $msg = "One or more users with no team are being submitted with another user already on a team";
-            $return = array('success' => false, 'message' => $msg);
-            $this->core->getOutput()->renderJson($return);
-            return $return;
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
 
         $highest_version = -1;
@@ -445,10 +443,8 @@ class SubmissionController extends AbstractController {
         }
 
         //If there has been a previous submission, we tag it so that we can pop up a warning.
-        $return = array('success' => true, 'highest_version' => $highest_version, 'previous_submission' => $highest_version > 0);
-        $this->core->getOutput()->renderJson($return);
-
-        return $return;
+        $return = array('highest_version' => $highest_version, 'previous_submission' => $highest_version > 0);
+        return $this->core->getOutput()->renderJsonSuccess($return);
     }
 
     /**
@@ -468,9 +464,7 @@ class SubmissionController extends AbstractController {
 
         if (!isset($_POST['num_pages']) && !$is_qr) {
             $msg = "Did not pass in number of pages or files were too large.";
-            $return = array('success' => false, 'message' => $msg);
-            $this->core->getOutput()->renderJson($return);
-            return $return;
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
 
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
@@ -622,9 +616,7 @@ class SubmissionController extends AbstractController {
             }
         }
 
-        $return = array('success' => true);
-        $this->core->getOutput()->renderJson($return);
-        return $return;
+        return $this->core->getOutput()->renderJsonSuccess();
     }
 
     /**
@@ -1509,15 +1501,10 @@ class SubmissionController extends AbstractController {
                 }
             }
         }
-        $return = array('success' => $success, 'error' => !$success, 'message' => $message);
-        $this->core->getOutput()->renderJson($return);
-        return $return;
+        return $this->uploadResultMessage($message, $success);
     }
 
     private function uploadResultMessage($message, $success = true, $show_msg = true) {
-        $return = array('success' => $success, 'error' => !$success, 'message' => $message);
-        $this->core->getOutput()->renderJson($return);
-
         if ($show_msg == true) {
             if ($success) {
                 $this->core->addSuccessMessage($message);
@@ -1526,7 +1513,12 @@ class SubmissionController extends AbstractController {
                 $this->core->addErrorMessage($message);
             }
         }
-        return $return;
+
+        if ($success == true) {
+            return $this->core->getOutput()->renderJsonSuccess($message);
+        } else {
+            return $this->core->getOutput()->renderJsonFail($message);
+        }
     }
 
 
@@ -1538,7 +1530,7 @@ class SubmissionController extends AbstractController {
                 $msg = "You do not have access to that page.";
                 $this->core->addErrorMessage($msg);
                 $this->core->redirect($this->core->getConfig()->getSiteUrl());
-                return array('error' => true, 'message' => $msg);
+                return $this->core->getOutput()->renderJsonFail($msg);
             }
             $ta = true;
         }
@@ -1549,17 +1541,17 @@ class SubmissionController extends AbstractController {
             $msg = "Invalid gradeable id.";
             $this->core->addErrorMessage($msg);
             $this->core->redirect($this->core->buildUrl(array('component' => 'student')));
-            return array('error' => true, 'message' => $msg);
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
 
         $who = $_REQUEST['who'] ?? $this->core->getUser()->getId();
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $who, $who);
-        $url = $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId()));
+        $url = $this->core->buildNewCourseUrl(['student', $gradeable->getId()]);
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
             $msg = "Invalid CSRF token. Refresh the page and try again.";
             $this->core->addErrorMessage($msg);
             $this->core->redirect($url);
-            return array('error' => true, 'message' => $msg);
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
 
         // If $graded_gradeable is null, that means its a team assignment and the user is on no team
@@ -1567,7 +1559,7 @@ class SubmissionController extends AbstractController {
             $msg = 'Must be on a team to access submission.';
             $this->core->addErrorMessage($msg);
             $this->core->redirect($this->core->getConfig()->getSiteUrl());
-            return array('error' => true, 'message' => $msg);
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
 
         $new_version = intval($_REQUEST['new_version']);
@@ -1575,7 +1567,7 @@ class SubmissionController extends AbstractController {
             $msg = "Cannot set the version below 0.";
             $this->core->addErrorMessage($msg);
             $this->core->redirect($url);
-            return array('error' => true, 'message' => $msg);
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
 
         $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
@@ -1583,14 +1575,14 @@ class SubmissionController extends AbstractController {
             $msg = "Cannot set the version past {$highest_version}.";
             $this->core->addErrorMessage($msg);
             $this->core->redirect($url);
-            return array('error' => true, 'message' => $msg);
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
 
         if (!$this->core->getUser()->accessGrading() && !$gradeable->isStudentSubmit()) {
             $msg = "Cannot submit for this assignment.";
             $this->core->addErrorMessage($msg);
             $this->core->redirect($url);
-            return array('error' => true, 'message' => $msg);
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
 
         $original_user_id = $this->core->getUser()->getId();
@@ -1603,7 +1595,7 @@ class SubmissionController extends AbstractController {
             $msg = "Failed to open settings file.";
             $this->core->addErrorMessage($msg);
             $this->core->redirect($url);
-            return array('error' => true, 'message' => $msg);
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
         $json["active_version"] = $new_version;
         $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
@@ -1616,7 +1608,7 @@ class SubmissionController extends AbstractController {
             $this->core->addErrorMessage($msg);
             $this->core->redirect($this->core->buildUrl(array('component' => 'student',
                                                               'gradeable_id' => $gradeable->getId())));
-            return array('error' => true, 'message' => $msg);
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
 
         $version = ($new_version > 0) ? $new_version : null;
@@ -1649,7 +1641,7 @@ class SubmissionController extends AbstractController {
                                                           'gradeable_version' => $new_version)));
         }
 
-        return array('error' => false, 'version' => $new_version, 'message' => $msg);
+        return $this->core->getOutput()->renderJsonSuccess(['version' => $new_version, 'message' => $msg]);
     }
 
     private function ajaxUploadImagesFiles() {
@@ -1970,7 +1962,7 @@ class SubmissionController extends AbstractController {
         $path_reset = $json_path;
         $users = array();
         if(!file_exists($json_path)) {
-            return;   
+            return;
         }
         $user_id_arr = array_slice(scandir($json_path), 2);
         $user = $user_id_arr[0];
@@ -1988,5 +1980,117 @@ class SubmissionController extends AbstractController {
         }
         $this->core->getOutput()->renderOutput('grading\ElectronicGrader', 'statPage', $users);
     }
+
+    private function notifyGradeInquiryOnCreate($graded_gradeable, $gradeable_id, $content){
+      //TODO: send notification to grader per component
+      if($graded_gradeable->hasTaGradingInfo()){
+        $course = $this->core->getConfig()->getCourse();
+        $gradeable_id = $graded_gradeable->getGradeable()->getId();
+        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+        $graders = $ta_graded_gradeable->getGraders();
+        $submitter = $graded_gradeable->getSubmitter();
+        $user_id = $this->core->getUser()->getId();
+
+        //TODO: build link in email body
+        $notification_subject = "[Submitty $course] New Regrade Request";
+        $notification_body = "A student has submitted a grade inquiry for gradeable $gradeable_id.\nStudent ID $user_id writes:\n$content\n\nPlease visit Submitty to follow up on this request";
+
+        foreach($graders as $grader){
+          if(!$grader->accessFullGrading()){
+            continue;
+          }
+
+          $new_grade_inquiry_notification = new Notification($this->core, array('component' => 'grading', 'type' => 'grade_inquiry_creation', 'gradeable_id' => $gradeable_id, 'grader_id' => $grader->getId(), 'submitter_id' => $user_id, 'who_id' => $submitter->getId()));
+          $this->core->getQueries()->pushSingleNotification($new_grade_inquiry_notification);
+          $grade_inquiry_email_data = [
+              "subject" => $notification_subject,
+              "body" => $notification_body,
+              "recipient" => $grader->getEmail()
+          ];
+          $new_grade_inquiry_email = new Email($this->core, grade_inquiry_email_data);
+          $this->core->getQueries()->createEmail($new_grade_inquiry_email);
+        }
+
+        if($submitter->isTeam()){
+          $submitting_team = $submitter->getTeam()->getMemberUsers();
+          foreach($submitting_team as $submitting_user){
+            if($submitting_user->getId() == $user_id){
+              continue;
+            }
+            $new_grade_inquiry_notification = new Notification($this->core, array('component' => 'student', 'type' => 'grade_inquiry_creation', 'gradeable_id' => $gradeable_id, 'submitter_id' => $user_id, 'who_id' => $submitting_user->getId()));
+            $this->core->getQueries()->pushSingleNotification($new_grade_inquiry_notification);
+          }
+        }
+      }
+    }
+    private function notifyGradeInquiryOnReply($graded_gradeable, $gradeable_id, $content) {
+      if($graded_gradeable->hasTaGradingInfo()){
+        $course = $this->core->getConfig()->getCourse();
+        $submitter = $graded_gradeable->getSubmitter();
+        $user = $this->core->getUser();
+        $is_grader = false;
+        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+        $graders = $ta_graded_gradeable->getGraders();
+        foreach($graders as $grader){
+          if($grader->getId() == $user->getId()){
+            $is_grader = true;
+            break;
+          }
+        }
+        //on a grader replying to discussion
+        if($is_grader == true){
+          //TODO: build link in notification body
+          $notification_subject = "[Submitty $course] Grade Inquiry Reply";
+          $notification_body = "An instructor or TA has posted a reply in your grade inquiry discussion.\n$content";
+          $submitter = $graded_gradeable->getSubmitter();
+          if($submitter->isTeam()){
+            $submitting_team = $submitter->getTeam()->getMemberUsers();
+            foreach($submitting_team as $submitting_user){
+              $new_grade_inquiry_notification = new Notification($this->core, array('component' => 'student', 'type' => 'grade_inquiry_reply', 'gradeable_id' => $gradeable_id, 'grader_id' => $user->getId(), 'submitter_id' => $submitting_user->getId()));
+              $this->core->getQueries()->pushSingleNotification($new_grade_inquiry_notification);
+              $grade_inquiry_reply_email_data = [
+                  "subject" => $notification_subject,
+                  "body" => $notification_body,
+                  "recipient" => $submitting_user->getEmail()
+              ];
+              $new_grade_inquiry_reply_email = new Email($this->core, $grade_inquiry_reply_email_data);
+              $this->core->getQueries()->createEmail($new_grade_inquiry_reply_email);
+            }
+          }
+          else{
+            $new_grade_inquiry_notification = new Notification($this->core, array('component' => 'student', 'type' => 'grade_inquiry_reply', 'gradeable_id' => $gradeable_id, 'grader_id' => $user->getId(), 'submitter_id' => $submitter->getId()));
+            $this->core->getQueries()->pushSingleNotification($new_grade_inquiry_notification);
+            $grade_inquiry_reply_email_data = [
+                "subject" => $notification_subject,
+                "body" => $notification_body,
+                "recipient" => $submitter->getUser()->getEmail()
+            ];
+            $new_grade_inquiry_reply_email = new Email($this->core, $grade_inquiry_reply_email_data);
+            $this->core->getQueries()->createEmail($new_grade_inquiry_reply_email);
+          }
+        }
+        //on a student replying to discussion
+        else{
+          $notification_subject = "[Submitty $course] Grade Inquiry Reply";
+          $notification_body = "A student has posted a reply in a grade inquiry discussion.\n$content";
+          //TODO: only notify relevant graders
+          foreach($graders as $grader){
+            if(!$grader->accessFullGrading()){
+              continue;
+            }
+            $new_grade_inquiry_notification = new Notification($this->core, array('component' => 'grading', 'type' => 'grade_inquiry_reply', 'gradeable_id' => $gradeable_id, 'grader_id' => $grader->getId(), 'submitter_id' => $user->getId(), 'who_id' => $submitter->getId()));
+            $this->core->getQueries()->pushSingleNotification($new_grade_inquiry_notification);
+            $grade_inquiry_reply_email_data = [
+                "subject" => $notification_subject,
+                "body" => $notification_body,
+                "recipient" => $grader->getEmail()
+            ];
+            $new_grade_inquiry_reply_email = new Email($this->core, $grade_inquiry_reply_email_data);
+            $this->core->getQueries()->createEmail($new_grade_inquiry_reply_email);
+          }
+        }
+      }
+    }
+
 
 }
