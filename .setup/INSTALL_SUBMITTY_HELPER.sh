@@ -255,6 +255,7 @@ mkdir -p ${SUBMITTY_DATA_DIR}/logs
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/emails
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding/stack_traces
+mkdir -p ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
 
 #Make site logging directories if not in worker mode.
 if [ "${WORKER}" == 0 ]; then
@@ -291,6 +292,9 @@ chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/auto
 
 chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/emails
 chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/emails
+
+chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
+chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
 
 #Set up shipper grading directories if not in worker mode.
 if [ "${WORKER}" == 0 ]; then
@@ -589,6 +593,12 @@ installed_commit=$(jq '.installed_commit' /usr/local/submitty/config/version.jso
 most_recent_git_tag=$(jq '.most_recent_git_tag' /usr/local/submitty/config/version.json)
 echo -e "Completed installation of the Submitty version ${most_recent_git_tag//\"/}, commit ${installed_commit//\"/}\n"
 
+################################################################################################################
+################################################################################################################
+# INSTALL SUBMITTY CRONTAB
+#############################################################
+
+cat "${SUBMITTY_REPOSITORY}/.setup/submitty_crontab" | envsubst | cat - > "/etc/cron.d/submitty"
 
 ################################################################################################################
 ################################################################################################################
