@@ -1055,6 +1055,14 @@ function importTeamForm() {
     $('[name="upload_team"]', form).val(null);
 }
 
+
+function randomizeRotatingGroupsButton() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#randomize-button-warning");
+    form.css("display", "block");
+}
+
+
 /**
  * Toggles the page details box of the page, showing or not showing various information
  * such as number of queries run, length of time for script execution, and other details
@@ -1485,7 +1493,8 @@ function publishFormWithAttachments(form, test_category, error_message) {
         return false;
     }
     if(test_category) {
-        if((!form.prop("ignore-cat")) && form.find('.cat-selected').length == 0) {
+
+        if((!form.prop("ignore-cat")) && form.find('.cat-selected').length == 0 && ($('.cat-buttons input').is(":checked") == false)) {
             alert("At least one category must be selected.");
             return false;
         }
@@ -2476,14 +2485,15 @@ function loadHomeworkExtensions(g_id, due_date) {
     });
 }
 
-function addBBCode(type, divTitle){
+function addMarkdownCode(type, divTitle){
     var cursor = $(divTitle).prop('selectionStart');
     var text = $(divTitle).val();
     var insert = "";
     if(type == 1) {
-        insert = "[url=http://example.com]display text[/url]";
+        insert = "[display text](url)";
     } else if(type == 0){
-        insert = "[code][/code]";
+        insert = "```language" +
+            "\ncode\n```";
     }
     $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));
 }

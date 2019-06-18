@@ -6,6 +6,7 @@ use app\libraries\Core;
 use app\libraries\database\DatabaseQueries;
 use app\libraries\Output;
 use app\libraries\Utils;
+use app\libraries\Access;
 use app\models\Config;
 use app\models\User;
 use ReflectionException;
@@ -24,7 +25,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
      *
      * @return Core
      */
-    protected function createMockCore($config_values=array(), $user_config=array(), $queries=array()) {
+    protected function createMockCore($config_values=array(), $user_config=array(), $queries=array(), $access=array()) {
         $core = $this->createMock(Core::class);
 
         $config = $this->createMockModel(Config::class);
@@ -68,6 +69,12 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
         else {
             $core->method('isTesting')->willReturn(true);
         }
+
+        $mock_access = $this->createMock(Access::class);
+        foreach ($access as $method => $value) {
+            $mock_access->method($method)->willReturn($value);
+        }
+        $core->method('getAccess')->willReturn($mock_access);
 
         $mock_queries = $this->createMock(DatabaseQueries::class);
         foreach ($queries as $method => $value) {

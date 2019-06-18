@@ -1,10 +1,10 @@
 <div class="content">
     <div style="float: right; margin-bottom: 20px;">
-         <a href="{{ core.buildUrl({"component": "navigation", "page": "notifications", "action": "mark_all_as_seen"}) }}" class="btn btn-primary">Mark all as seen</a>
+         <a href="{{ core.buildUrl({"component": "notification", "page": "notifications", "action": "mark_all_as_seen"}) }}" class="btn btn-primary">Mark all as seen</a>
         {% if show_all %}
-            <a href="{{ core.buildUrl({"component": "navigation", "page": "notifications"}) }}" class="btn btn-primary">Show unread only</a>
+            <a href="{{ core.buildUrl({"component": "notification", "page": "notifications"}) }}" class="btn btn-primary">Show unread only</a>
         {% else %}
-            <a href="{{ core.buildUrl({"component": "navigation", "page": "notifications", "show_all": "1"}) }}" class="btn btn-primary">Show All</a>
+            <a href="{{ core.buildUrl({"component": "notification", "page": "notifications", "show_all": "1"}) }}" class="btn btn-primary">Show All</a>
         {% endif %}
         <a href="{{ core.buildUrl({"component": "notification", "page": "notification_settings" }) }}" class="btn btn-primary">Settings</a>
     </div>
@@ -31,7 +31,7 @@
                             </td>
                             <td colspan="4">
                                 {% if hasLink %}
-                                    <a href="{{ core.buildUrl({"component": "navigation", "page": "notifications", "action": "open_notification", "nid": notification.getId(), "seen": notification.isSeen() }) }}">
+                                    <a href="{{ core.buildUrl({"component": "notification", "page": "notifications", "action": "open_notification", "nid": notification.getId(), "seen": notification.isSeen() }) }}">
                                 {% endif %}
                                     <div style="height: 100%; width: 100%;">
                                         {{ notification.getNotifyContent() }}
@@ -45,7 +45,7 @@
                             </td>
                             <td colspan="1">
                                 {% if not notification.isSeen() %}
-                                    <a href="{{ core.buildUrl({"component": "navigation", "page": "notifications", "action": "mark_as_seen", "nid": notification.getId() }) }}" title="Mark as seen">
+                                    <a href="{{ core.buildUrl({"component": "notification", "page": "notifications", "action": "mark_as_seen", "nid": notification.getId() }) }}" title="Mark as seen">
                                         <i class="fas fa-check" aria-hidden="true"></i>
                                     </a>
                                 {% endif %}

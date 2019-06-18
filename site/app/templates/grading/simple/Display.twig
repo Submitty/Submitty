@@ -1,20 +1,6 @@
 {% import _self as self %}
 
 <div class="content">
-    {#
-        Default is viewing your sections
-        Limited grader does not have "View All" option
-        If nothing to grade, Instructor will see all sections
-    #}
-    {% if show_all_sections_button %}
-        <div style="float: right; margin-bottom: 10px">
-            <a class="btn btn-default"
-               href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': action, 'g_id': gradeable.getId(), 'sort': sort, 'view': view_all ? null : "all"}) }}">
-                {{ view_all ? "View Your Sections" : "View All" }}
-            </a>
-        </div>
-    {% endif %}
-
     <h1>
         {{ gradeable.getTitle() }}
     </h1>
@@ -23,42 +9,71 @@
             Overall TA Instructions: {{ gradeable.getTaInstructions() }}
         {% endif %}
     </p>
-    <br>
-    <p style="float: left;">
-        {% if action == 'lab' %}
-            No Color - No Credit<br />
-            Dark Blue - Full Credit<br />
-            Light Blue - Half Credit<br />
-            Red - [SAVE ERROR] Refresh Page
-        {% else %}
-            Red - [SAVE ERROR] Refresh Page
-        {% endif %}
-    </p>
-    <button class="btn btn-primary" id="simple-stats-btn" style="float: right;" onclick='showSimpleGraderStats("{{ action }}")'>View Statistics</button>
-    <button class="btn btn-primary" id="settings-btn" style="float: right;" onclick='showSettings()'>Settings/Hotkeys</button>
 
+    <div class="column-wrapper" style="margin: 1em 0;">
+        {# Search box #}
+        {% include "grading/simple/StudentSearch.twig" %}
 
-    {# Search box #}
-    {% include "grading/simple/StudentSearch.twig" %}
+        <div>
+            <button class="btn btn-primary" id="settings-btn" onclick='showSettings()'>Settings/Hotkeys</button>
+            <button class="btn btn-primary" id="simple-stats-btn" onclick='showSimpleGraderStats("{{ action }}")'>View Statistics</button>
+        </div>
+    </div>
 
-    {% if action == 'lab' and core.getUser().accessFullGrading() %}
-        <br> <br>
-        <input type="checkbox" id="show-graders" style="float: right;">
-        <label for="show-graders" style="float: right; margin-top: 3px;">Show Graders</label>
-        <br> <br>
-        <input type="checkbox" id="show-dates" style="float: right;">
-        <label for="show-dates" style="float: right; margin-top: 3px;">Show Dates Graded</label>
-    {% endif %}
+    <div class="column-wrapper" style="margin: 1em 0;">
+        <p>
+            {% if action == 'lab' %}
+                No Color - No Credit<br />
+                Dark Blue - Full Credit<br />
+                Light Blue - Half Credit<br />
+                Red - [SAVE ERROR] Refresh Page
+            {% else %}
+                Red - [SAVE ERROR] Refresh Page
+            {% endif %}
+        </p>
+
+        <div class="row-wrapper">
+            {#
+                Default is viewing your sections
+                Limited grader does not have "View All" option
+                If nothing to grade, Instructor will see all sections
+            #}
+            {% if show_all_sections_button %}
+                <a 
+                    class="btn btn-default"
+                    href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': action, 'g_id': gradeable.getId(), 'sort': sort, 'view': view_all ? null : "all"}) }}"
+                >
+                    {{ view_all ? "View Your Sections" : "View All Sections" }}
+                </a>
+                <br />
+            {% endif %}
+
+            {% if action == 'lab' and core.getUser().accessFullGrading() %}
+                <label for="show-graders" class="column-wrapper">Show Graders
+                    <input type="checkbox" id="show-graders">
+                </label>
+                <label for="show-dates" class="column-wrapper">Show Dates Graded
+                    <input type="checkbox" id="show-dates">
+                </label>
+            {% endif %}
+        </div>
+    </div>
 
     {% if action == 'numeric' and core.getUser().accessAdmin() %}
-        <br> <br> <br>
-        <p style="float: right;">The CSV file should be formatted as such: <br />
-            user id,first name,last name,grade1,grade2,...,total points earned,text1,text2,...</p>
-        <input class="csvButtonUpload" type="file" id="csvUpload" style="float: right" accept=".csv, .txt">
-        <label for="csvUpload" style="float: right; padding-right: 10px;">Upload CSV</label>
+        <div class="column-wrapper">
+            <label for="csvUpload">Upload CSV
+                <input class="csvButtonUpload" type="file" id="csvUpload" accept=".csv, .txt"
+            </label>
+            <p>
+                The CSV file should be formatted as such: 
+                <br />
+                user id,first name,last name,grade1,grade2,...,total points earned,text1,text2,...
+            </p>
+        </div>
     {% endif %}
+
     {# This is a data table #}
-    <table class="table table-striped table-bordered persist-area" style="table-layout: fixed;">
+    <table id="data-table" class="table table-striped table-bordered persist-area" style="table-layout: fixed;">
         <caption />
         {# Table header #}
         <thead class="persist-thead">
@@ -191,6 +206,7 @@
             <td
                 class="cell-grade"
                 id="cell-{{ index }}-{{ loop.index0 }}"
+                tabindex="0"
                 data-id="{{ component.getId() }}"
                 data-score="{{ component_grade.getScore() | default('0') }}"
                 {% if component_grade.getGrader() != null %}
@@ -225,13 +241,14 @@
             {% set total = total + component_grade.getScore() %}
             <td class="option-small-input">
                 <input
-                    class="option-small-box"
+                    class="option-small-box cell-grade"
                     style="text-align: center; {{ component_grade.getScore() == 0 ? "color: #bbbbbb;" : "" }}"
                     type="text"
                     id="cell-{{ index }}-{{ loop.index0 }}"
                     data-id="{{ component.getId() }}"
                     data-origval="{{ component_grade.getScore() | default('0') }}"
                     value="{{ component_grade.getScore() | default('0') }}"
+                    onclick="this.select()"
                     {% if component_grade.getGrader() != null %}
                         data-grader="{{ component_grade.getGrader().getId() }}"
                     {% endif %}
@@ -244,7 +261,7 @@
         {% endfor %}
 
         <td class="option-small-output">
-            <input class="option-small-box" style="text-align: center" type="text" border="none" id="total-{{ index }}" value="{{ total }}" data-total="true" readonly>
+            <div class="option-small-box cell-total" style="text-align: center" type="text" border="none" id="total-{{ index }}" data-total="true">{{ total }}</div>
         </td>
     {% endif %}
 
@@ -254,10 +271,11 @@
         {% set component_grade = ta_grade.getGradedComponent(component) %}
         <td class="option-small-input">
             <input
-                class="option-small-box"
+                class="option-small-box cell-grade"
                 type="text"
                 id="cell-{{ index }}-{{ text_start + loop.index0 }}"
                 value="{{ component_grade.getComment() }}"
+                onclick="this.select()"
                 data-id="{{ component.getId() }}"
             />
         </td>
