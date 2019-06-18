@@ -114,7 +114,7 @@ class Core {
                 $this->config->loadCourseJson($course_json_path);
             }
             else{
-              $message = "Unable to access configuration file " . $course_json_path . " for " . $semester . " " . $course . " please contact your system administrator.";
+                $message = "Unable to access configuration file " . $course_json_path . " for " . $semester . " " . $course . " please contact your system administrator.";
                 $this->addErrorMessage($message);
             }
         }
