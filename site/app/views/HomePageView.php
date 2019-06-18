@@ -55,6 +55,8 @@ class HomePageView extends AbstractView {
         if ($user->getPreferredLastName() != "") {
             $autofill_preferred_name[1] = $user->getPreferredLastName();
         }
+
+        $this->core->getOutput()->addInternalCss('homepage.css');
         return $this->core->getOutput()->renderTwigTemplate('HomePage.twig', [
             "user" => $user,
             "user_first" => $autofill_preferred_name[0],
