@@ -1,0 +1,68 @@
+{% for post_d in  post_data %}
+
+    {% include "forum/CreatePost.twig" with {
+        "classes" : post_d.classes,
+        "post_id" : post_d.post_id,
+        "reply_level" : post_d.reply_level,
+        "offset" : post_d.offset,
+        "first" : post_d.first,
+        "post_content" : post_d.post_content,
+        "post" : post_d.post,
+        "display_option" : post_d.display_option,
+        "isThreadLocked" : post_d.isThreadLocked,
+        "userAccessFullGrading" : post_d.userAccessFullGrading,
+        "userGroup" : post_d.userGroup,
+        "includeReply" : post_d.includeReply,
+        "thread_resolve_state" : post_d.thread_resolve_state,
+        "current_user" : post_d.current_user,
+        "author_email" : post_d.author_email,
+        "post_user_info" : post_d.post_user_info,
+        "post_date" : post_d.post_date,
+        "edit_date" : post_d.edit_date,
+        "post_buttons" : post_d.post_buttons,
+        "visible_username" : post_d.visible_username,
+        "post_attachment" : post_d.post_attachment,
+        "form_post_url" : post_d.form_post_url,
+        "post_box_id" : post_d.post_box_id,
+        "activeThreadAnnouncement" : activeThreadAnnouncement,
+        "isCurrentFavorite" : isCurrentFavorite,
+        "activeThread": activeThread,
+        "csrf_token" : csrf_token,
+        "activeThreadTitle" : activeThreadTitle,
+        "thread_id": post_d.thread_id,
+        "parent_id": post_d.parent_id
+    } only %}
+
+{% endfor %}
+
+{% if (isThreadLocked != 1 or accessFullGrading) and includeReply %}
+
+    <hr style="border-top:1px solid #999;margin-bottom: 5px;" />
+
+    <form style="margin-right:17px;" class="post_reply_from" method="POST" onsubmit="post.disabled=true; post.value='Submitting post...'; return true;" action="{{ form_action_link }}" enctype="multipart/form-data">
+        <input type="hidden" name="thread_id" value="{{ thread_id }}" />
+        <input type="hidden" name="parent_id" value="{{ first_post_id }}" />
+        <input type="hidden" name="display_option" value="{{ display_option }}" />
+
+        {% include "forum/ThreadPostForm.twig" with {
+            "show_post" : true,
+            "post_content_placeholder" : "Enter your reply to all here...",
+            "show_merge_thread_button" : true,
+            "post_box_id" : post_box_id,
+            "attachment_script" : true,
+            "show_anon" : true,
+            "submit_label" : "Submit Reply to All",
+        } %}
+
+    </form>
+    <br/>
+
+{% endif %}
+
+{% if userGroup <= 3 %}
+    {% include "forum/MergeThreadsForm.twig" with {
+        "current_thread_date" : merge_thread_content.current_thread_date,
+        "current_thread" : merge_thread_content.current_thread,
+        "possibleMerges" : merge_thread_content.possibleMerges
+    } %}
+{% endif %}
