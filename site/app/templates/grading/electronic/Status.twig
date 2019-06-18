@@ -590,15 +590,15 @@
         }
 
         // Get all elements with class="tablinks" and remove the class "active"
-        tablinks = document.getElementsByClassName("tablinks");
+        tablinks = document.getElementsByClassName("btn btn-primary");
         for (i = 0; i < tablinks.length; i++) {
             tablinks[i].className = tablinks[i].className.replace(" active", "");
         }
+        console.log(tablinks);
 
         // Show the current tab, and add an "active" class to the button that opened the tab
         document.getElementById(statName).style.display = "block";
-        //to make active, do this, not good for current implementation
-        //evt.currentTarget.className += " active";
+        evt.currentTarget.className += " active";
 
     }
     // Get the element with id="defaultOpen" and click on it
