@@ -8,7 +8,7 @@ class AuthenticationView extends AbstractView {
             $old = urlencode($this->core->buildNewUrl(['home']));
         }
         return $this->core->getOutput()->renderTwigTemplate("Authentication.twig", [
-            "login_url" => $this->core->buildNewUrl(['authentication', 'check_login'], ['old' => $old])
+            "login_url" => $this->core->buildNewUrl(['authentication', 'check_login']) . '?' . http_build_query(['old' => $old])
         ]);
     }
 }
