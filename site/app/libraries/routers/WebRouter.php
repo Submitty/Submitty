@@ -94,10 +94,10 @@ class WebRouter {
             $old_request_url = $this->request->getUriForPath($this->request->getPathInfo());
             $this->request = Request::create(
                 '/authentication/login',
-                'GET'
+                'GET',
+                ['old' => urlencode($old_request_url)]
             );
             $this->parameters = $this->matcher->matchRequest($this->request);
-            $this->parameters['old'] = base64_encode($old_request_url);
         }
         elseif ($this->core->getUser() === null) {
             $this->core->loadSubmittyUser();
