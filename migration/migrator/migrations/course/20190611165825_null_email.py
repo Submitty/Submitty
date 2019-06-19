@@ -2,7 +2,7 @@
 
 
 def up(config, database, semester, course):
-    database.execute("ALTER TABLE ONLY users ALTER COLUMN user_email SET DATA TYPE character varying NOT NULL")
+    database.execute("ALTER TABLE users ALTER COLUMN user_email TYPE character varying, ALTER COLUMN user_email SET NOT NULL")
     pass
 
 
