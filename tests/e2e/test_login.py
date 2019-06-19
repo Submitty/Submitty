@@ -21,6 +21,14 @@ class TestLogin(BaseTestCase):
         self.assertEqual(1, len(cookies))
         self.assertRegex(cookies[0]['value'], r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$')
 
+    def test_login_from_login_page(self):
+        url = "/authentication/login"
+        self.log_in(url, title='Submitty')
+        self.assertEqual(self.test_url + "/home", self.driver.current_url)
+        cookies = list(filter(lambda x: x['name'] == 'submitty_token', self.driver.get_cookies()))
+        self.assertEqual(1, len(cookies))
+        self.assertRegex(cookies[0]['value'], r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$')
+
     def test_bad_login_password(self):
         self.get("/" + self.semester + "/sample")
         self.driver.find_element_by_id("login-guest")

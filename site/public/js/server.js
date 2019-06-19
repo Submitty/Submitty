@@ -2485,14 +2485,15 @@ function loadHomeworkExtensions(g_id, due_date) {
     });
 }
 
-function addBBCode(type, divTitle){
+function addMarkdownCode(type, divTitle){
     var cursor = $(divTitle).prop('selectionStart');
     var text = $(divTitle).val();
     var insert = "";
     if(type == 1) {
-        insert = "[url=http://example.com]display text[/url]";
+        insert = "[display text](url)";
     } else if(type == 0){
-        insert = "[code][/code]";
+        insert = "```language" +
+            "\ncode\n```";
     }
     $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));
 }

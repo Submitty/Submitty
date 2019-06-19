@@ -19,19 +19,19 @@ class SimpleGraderController extends GradingController  {
         }
         switch ($_REQUEST['action']) {
             case 'lab':
-                $this->grade('lab');
+                $this->grade();
                 break;
             case 'save_lab':
-                $this->save('lab');
+                $this->save();
                 break;
             case 'numeric':
-                $this->grade('numeric');
+                $this->grade();
                 break;
             case 'save_numeric':
-                $this->save('numeric');
+                $this->save();
                 break;
             case 'upload_csv_numeric':
-                $this->UploadCSV('numeric');
+                $this->UploadCSV();
                 break;
             case 'print_lab':
                 $this->printLab();
@@ -117,7 +117,7 @@ class SimpleGraderController extends GradingController  {
         $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'displayPrintLab', $gradeable, $section, $students);
     }
 
-    public function grade($action) {
+    public function grade() {
         if (!isset($_REQUEST['g_id'])) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable');
         }
@@ -196,11 +196,9 @@ class SimpleGraderController extends GradingController  {
         $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'simpleDisplay', $gradeable, $rows, $student_full, $graders, $section_key, $show_all_sections_button, $sort);
     }
 
-    public function save($action) {
+    public function save() {
         if (!isset($_REQUEST['g_id']) || !isset($_REQUEST['user_id'])) {
-            $response = array('status' => 'fail', 'message' => 'Did not pass in g_id or user_id');
-            $this->core->getOutput()->renderJson($response);
-            return $response;
+            return $this->core->getOutput()->renderJsonFail('Did not pass in g_id or user_id');
         }
         $g_id = $_REQUEST['g_id'];
         $user_id = $_REQUEST['user_id'];
@@ -209,22 +207,14 @@ class SimpleGraderController extends GradingController  {
         $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
 
         $user = $this->core->getQueries()->getUserById($user_id);
-        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $this->core->getCsrfToken()) {
-            $response = array('status' => 'fail', 'message' => 'Invalid CSRF token');
-            $this->core->getOutput()->renderJson($response);
-            return $response;
+        if (!$this->core->checkCsrfToken()) {
+            return $this->core->getOutput()->renderJsonFail('Invalid CSRF token');
         } else if ($gradeable === null) {
-            $response = array('status' => 'fail', 'message' => 'Invalid gradeable ID');
-            $this->core->getOutput()->renderJson($response);
-            return $response;
+            return $this->core->getOutput()->renderJsonFail('Invalid gradeable ID');
         } else if ($user === null) {
-            $response = array('status' => 'fail', 'message' => 'Invalid user ID');
-            $this->core->getOutput()->renderJson($response);
-            return $response;
+            return $this->core->getOutput()->renderJsonFail('Invalid user ID');
         } else if (!isset($_POST['scores']) || empty($_POST['scores'])) {
-            $response = array('status' => 'fail', 'message' => "Didn't submit any scores");
-            $this->core->getOutput()->renderJson($response);
-            return $response;
+            return $this->core->getOutput()->renderJsonFail("Didn't submit any scores");
         }
 
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, null);
@@ -249,15 +239,11 @@ class SimpleGraderController extends GradingController  {
                 } else {
                     if ($component->getUpperClamp() < $data ||
                         !is_numeric($data)) {
-                        $response = array('status' => 'fail', 'message' => "Save error: score must be a number less than the upper clamp");
-                        $this->core->getOutput()->renderJson($response);
-                        return $response;
+                        return $this->core->getOutput()->renderJsonFail("Save error: score must be a number less than the upper clamp");
                     }
                     $db_data = $component_grade->getTotalScore();
                     if ($original_data != $db_data) {
-                        $response = array('status' => 'fail', 'message' => "Save error: displayed stale data (" . $original_data . ") does not match database (" . $db_data . ")");
-                        $this->core->getOutput()->renderJson($response);
-                        return $response;
+                        return $this->core->getOutput()->renderJsonFail("Save error: displayed stale data (" . $original_data . ") does not match database (" . $db_data . ")");
                     }
                     $component_grade->setScore($data);
                 }
@@ -268,12 +254,10 @@ class SimpleGraderController extends GradingController  {
         $ta_graded_gradeable->setOverallComment('');
         $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
 
-        $response = array('status' => 'success', 'data' => null);
-        $this->core->getOutput()->renderJson($response);
-        return $response;
+        return $this->core->getOutput()->renderJsonSuccess();
     }
 
-    public function UploadCSV($action) {
+    public function UploadCSV() {
 
         $users = $_POST['users'];
         $g_id = $_POST['g_id'];
@@ -365,9 +349,7 @@ class SimpleGraderController extends GradingController  {
             }
         }
 
-        $response = array('status' => 'success', 'data' => $return_data);
-        $this->core->getOutput()->renderJson($response);
-        return $response;
+        return $this->core->getOutput()->renderJsonSuccess($return_data);
     }
 
 

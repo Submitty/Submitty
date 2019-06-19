@@ -79,12 +79,11 @@ class AuthenticationController extends AbstractController {
      * Display the login form to the user
      *
      * @Route("/authentication/login")
-     * @Route("/authentication/login/{old}")
      *
      * @var string $old the url to redirect to after login
      */
     public function loginForm($old = null) {
-        $this->isLoggedIn(base64_decode($old));
+        $this->isLoggedIn(urldecode($old));
         $this->core->getOutput()->renderOutput('Authentication', 'loginForm', $old);
     }
     
@@ -95,13 +94,12 @@ class AuthenticationController extends AbstractController {
      * to maintain that old request data passing it back into the login form.
      *
      * @Route("/authentication/check_login")
-     * @Route("/authentication/check_login/{old}")
      *
      * @var string $old the url to redirect to after login
      */
     public function checkLogin($old = null) {
         if (isset($old)) {
-            $old = base64_decode($old);
+            $old = urldecode($old);
         }
         $this->isLoggedIn($old);
         $redirect = array();
@@ -148,7 +146,14 @@ class AuthenticationController extends AbstractController {
     }
 
     /**
-     * @Route("/authentication/vcs_login")
+     * Handle stateless authentication for the VCS endpoints.
+     *
+     * This endpoint is unique from the other authentication methods in
+     * that this requires a specific course so that we can check a user's
+     * status, as well as potentially information about a particular
+     * gradeable in that course.
+     *
+     * @Route("{_semester}/{_course}/authentication/vcs_login")
      */
     public function vcsLogin() {
         if (empty($_POST['user_id']) || empty($_POST['password']) || empty($_POST['gradeable_id'])
@@ -173,7 +178,13 @@ class AuthenticationController extends AbstractController {
             return $this->core->getOutput()->renderJsonSuccess(['message' => $msg, 'authenticated' => true]);
         }
 
-        $gradeable = $this->core->getQueries()->getGradeableConfig($_POST['gradeable_id']);
+        try {
+            $gradeable = $this->core->getQueries()->getGradeableConfig($_POST['gradeable_id']);
+        }
+        catch (\InvalidArgumentException $exc) {
+            $gradeable = null;
+        }
+
         if ($gradeable !== null && $gradeable->isTeamAssignment()) {
             if (!$this->core->getQueries()->getTeamById($_POST['id'])->hasMember($_POST['user_id'])) {
                 $msg = "This user is not a member of that team.";
