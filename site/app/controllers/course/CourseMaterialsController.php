@@ -89,7 +89,7 @@ class CourseMaterialsController extends AbstractController {
             'action' => 'view_course_materials_page')));
     }
 
-    private function deleteCourseMaterialFolder() {
+    public function deleteCourseMaterialFolder() {
         // security check
         $dir = "course_materials";
         $path = $this->core->getAccess()->resolveDirPath($dir, $_REQUEST["path"]);
@@ -129,7 +129,7 @@ class CourseMaterialsController extends AbstractController {
             'action' => 'view_course_materials_page')));
     }
 
-    private function downloadCourseMaterialZip() {
+    public function downloadCourseMaterialZip() {
         $dir_name = $_REQUEST["dir_name"];
         $root_path = realpath($_REQUEST["path"]);
 
@@ -202,12 +202,13 @@ class CourseMaterialsController extends AbstractController {
             $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
                 'page' => 'course_materials',
                 'action' => 'view_course_materials_page')));
-            return;
         }
 
         if (!isset($_REQUEST['filename']) ||
             !isset($_REQUEST['checked'])) {
-            return;
+            $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
+                'page' => 'course_materials',
+                'action' => 'view_course_materials_page')));
         }
 
         $file_name = htmlspecialchars($_REQUEST['filename']);
@@ -240,12 +241,13 @@ class CourseMaterialsController extends AbstractController {
             $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
                 'page' => 'course_materials',
                 'action' => 'view_course_materials_page')));
-            return;
         }
 
         if (!isset($_REQUEST['filename']) ||
             !isset($_REQUEST['newdatatime'])) {
-            return;
+            $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
+                'page' => 'course_materials',
+                'action' => 'view_course_materials_page')));
         }
 
         $file_name = htmlspecialchars($_REQUEST['filename']);
