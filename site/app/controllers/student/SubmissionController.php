@@ -2087,7 +2087,7 @@ class SubmissionController extends AbstractController {
                 "subject" => $notification_subject,
                 "body" => $notification_body,
                 "recipient" => $grader->getEmail(),
-                "user_id" => $grader->getIs()
+                "user_id" => $grader->getId()
             ];
             $new_grade_inquiry_reply_email = new Email($this->core, $grade_inquiry_reply_email_data);
             $this->core->getQueries()->createEmail($new_grade_inquiry_reply_email);
