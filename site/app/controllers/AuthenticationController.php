@@ -67,7 +67,6 @@ class AuthenticationController extends AbstractController {
      * Display the login form to the user
      *
      * @Route("/authentication/login")
-     * @Route("/authentication/login/{old}")
      *
      * @var string $old the url to redirect to after login
      */
@@ -82,14 +81,13 @@ class AuthenticationController extends AbstractController {
      * to maintain that old request data passing it back into the login form.
      *
      * @Route("/authentication/check_login")
-     * @Route("/authentication/check_login/{old}")
      *
      * @var string $old the url to redirect to after login
      * @return bool | array depending on the truth value of $no_direct
      */
     public function checkLogin($old = null) {
         if (isset($old)) {
-            $old = base64_decode($old);
+            $old = urldecode($old);
         }
         if ($this->logged_in) {
             $this->core->redirect($old);

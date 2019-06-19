@@ -322,7 +322,7 @@ table tr.table-header {
     width: 100%;
     left: 0;
     top: 0;
-    z-index: 9999;
+    z-index: 999;
     font-size: 15px;
     font-weight: 600;
     margin-left:-1px;
@@ -595,7 +595,7 @@ table tr.table-header {
 }
 
 #alerts {
-
+    z-index: 9999;
 }
 
 #messages {

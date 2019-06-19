@@ -406,14 +406,30 @@ class Core {
     }
 
     /**
+     * Given some URL parameters (parts), build a URL for the site using those parts.
+     *
      * @param array  $parts
-     * @param string $hash
      *
      * @return string
      */
-    public function buildNewUrl($parts=array(), $hash = null) {
+    public function buildNewUrl($parts=array()) {
         $url = $this->getConfig()->getBaseUrl().implode("/", $parts);
         return $url;
+    }
+
+    /**
+     * Given some URL parameters (parts), build a URL for the site using those parts.
+     * This function will add the semester and course to the beginning of the new URL by default,
+     * if you do not prepend this part (e.g. for authentication-related URLs), please set
+     * $prepend_course_info to false.
+     *
+     * @param array  $parts
+     *
+     * @return string
+     */
+    public function buildNewCourseUrl($parts=array()) {
+        array_unshift($parts, $this->getConfig()->getSemester(), $this->getConfig()->getCourse());
+        return $this->buildNewUrl($parts);
     }
 
     /**

@@ -9,10 +9,14 @@ import shutil
 import subprocess
 import json
 import stat
+import traceback
+import datetime
+import fcntl
 from urllib.parse import unquote
 from . import bulk_qr_split
 from . import bulk_upload_split
 from . import INSTALL_DIR, DATA_DIR
+from . import write_to_log as logger
 
 
 class AbstractJob(ABC):
@@ -185,22 +189,40 @@ class BulkUpload(CourseJob):
         is_qr = self.job_details['is_qr']
 
         if is_qr and ('qr_prefix' not in self.job_details or 'qr_suffix' not in self.job_details):
-            print("did not pass in qr prefix or suffix")
+            msg = "did not pass in qr prefix or suffix"
+            print(msg)
             sys.exit(1)
 
         if is_qr:
             qr_prefix = unquote(unquote(self.job_details['qr_prefix']))
             qr_suffix = unquote(unquote(self.job_details['qr_suffix']))
-
-        script = ''
-        if is_qr:
-            script = Path(INSTALL_DIR, 'sbin', 'bulk_qr_split.py')
         else:
             if 'num' not in self.job_details:
-                print("did not pass in the number to divide " + filename + " by")
+                msg = "Did not pass in the number to divide " + filename + " by"
+                print(msg)
                 sys.exit(1)
             num  = self.job_details['num']
-            script = Path(INSTALL_DIR, 'sbin', 'bulk_upload_split.py')
+
+        today = datetime.datetime.now()
+        log_path = os.path.join(DATA_DIR, "logs", "bulk_uploads")
+        log_file_path = os.path.join(log_path, 
+                                "{:04d}{:02d}{:02d}.txt".format(today.year, today.month,
+                                today.day))
+
+        pid = os.getpid()
+        log_msg = "Process " + str(pid) + ": Starting to split " + filename + " on " + timestamp + ". "
+        if is_qr:
+            log_msg += "QR bulk upload job, QR Prefx: \'" + qr_prefix + "\', QR Suffix: \'" + qr_suffix + "\'"
+        else:
+            log_msg += "Normal bulk upload job, pages per PDF: " + str(num)
+        
+        try:
+            logger.write_to_log(log_file_path, log_msg)
+        except Exception as err:
+            print(err)
+            traceback.print_exc()
+            sys.exit(1)
+
         #create paths
         try:
             with open("/usr/local/submitty/config/submitty.json", encoding='utf-8') as data_file:
@@ -210,16 +232,27 @@ class BulkUpload(CourseJob):
             uploads_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads")
             bulk_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads/bulk_pdf",gradeable_id,timestamp)
             split_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads/split_pdf",gradeable_id,timestamp)
+        except Exception:
+            msg = "Process " + str(pid) + ": Failed while parsing args and creating paths"
+            print(msg)
+            traceback.print_exc()
+            logger.write_to_log(log_file_path, msg + "\n" + traceback.format_exc())
             root_split_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads/split_pdf")
         except Exception as err:
-            print("Failed while parsing args and creating paths")
-            print(err)
+            msg = "Process " + str(pid) + ": Failed while parsing args and creating paths"
+            print(msg)
+            traceback.print_exc()
+            logger.write_to_log(log_file_path, msg + "\n" + traceback.format_exc())
             sys.exit(1)
 
         #copy file over to correct folders
         try:
             if not os.path.exists(split_path):
-                os.makedirs(split_path)
+                #if the directory has been made by another job continue as normal
+                try:
+                    os.makedirs(split_path)
+                except Exception:
+                    pass
 
             # copy over file to new directory
             if not os.path.isfile(os.path.join(split_path, filename)):
@@ -227,22 +260,31 @@ class BulkUpload(CourseJob):
 
             # move to copy folder
             os.chdir(split_path)
-        except Exception as err:
-            print("Failed while copying files")
-            print(err)
+        except Exception:
+            msg = "Process " + str(pid) + ": Failed while copying files"
+            print(msg)
+            traceback.print_exc()
+            logger.write_to_log(log_file_path, msg + "\n" + traceback.format_exc())
             sys.exit(1)
 
         try:
             if is_qr:
-                bulk_qr_split.main([filename, split_path, qr_prefix, qr_suffix])
+                bulk_qr_split.main([filename, split_path, qr_prefix, qr_suffix, log_file_path])
             else: 
-                bulk_upload_split.main([filename, split_path, num])
+                bulk_upload_split.main([filename, split_path, num, log_file_path])
 
-            os.remove(filename)
+            os.chdir(split_path)
+            #if the original file has been deleted, continue as normal
+            try:
+                os.remove(filename)
+            except Exception:
+                pass
+
             os.chdir(current_path)
-        except Exception as err:
-            print("Failed to launch bulk_split subprocess!")
-            print(err)
+        except Exception:
+            msg = "Failed to launch bulk_split subprocess!"
+            print(msg)
+            traceback.print_exc()
             sys.exit(1)
 
         # reset permissions just in case, group needs read/write
