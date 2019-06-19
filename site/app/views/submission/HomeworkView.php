@@ -411,7 +411,10 @@ class HomeworkView extends AbstractView {
             foreach ($dir_files as $filename => $details) {
                 if($filename === 'decoded.json'){
                     $qr_file +=  FileUtils::readJsonFile($details['path']);
-                    $use_qr_codes = true;
+                    var_dump($qr_file);
+                    if($qr_file['is_qr']){
+                        $use_qr_codes = true;
+                    }
                 }
                 $clean_timestamp = str_replace('_', ' ', $timestamp);
                 $path = rawurlencode(htmlspecialchars($details['path']));
@@ -476,17 +479,15 @@ class HomeworkView extends AbstractView {
                 $count++;
             }
         }
-        if($use_qr_codes){
-            for ($i = 0; $i < count($files); $i++) {
-                if(!array_key_exists($files[$i]['filename_full'], $qr_file))
-                    continue;
-                $data = $qr_file[$files[$i]['filename_full']];
-                $is_valid = $this->core->getQueries()->getUserById($data['id']) !== null;
-                $files[$i] += ['page_count' => $data['page_count'],
-                               'id' => $data['id'],
-                               'valid' => $is_valid
-                              ];
-            }
+        for ($i = 0; $i < count($files); $i++) {
+            if(!array_key_exists($files[$i]['filename_full'], $qr_file))
+                continue;
+            $data = $qr_file[$files[$i]['filename_full']];
+            $is_valid = ( $use_qr_codes ) ? $this->core->getQueries()->getUserById($data['id']) !== null : true;
+            $files[$i] += ['page_count' => $data['page_count'],
+                           'id' => $data['id'],
+                           'valid' => $is_valid
+                          ];
         }
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();

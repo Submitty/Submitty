@@ -40,7 +40,8 @@ def main(args):
         page_count = 1
         prev_file = ''
         data = []
-        output = {}
+        output = {"is_qr" : True}
+        json_file = os.path.join(split_path, "decoded.json")
         for page_number in range(pdfPages.numPages):
             # convert pdf to series of images for scanning
             page = convert_from_bytes(
@@ -76,10 +77,12 @@ def main(args):
                 # save pdf
                 if i != 0 and prev_file != '':
                     output[prev_file]['page_count'] = page_count
+                    #update json file
+                    logger.write_to_json(json_file, output)
                     with open(prev_file, 'wb') as out:
                         pdf_writer.write(out)
 
-                    page.save('{}.jpg'.format(prev_file[:-4]), "JPEG", quality=100)
+                    page.save('{}_{}.jpg'.format(prev_file[:-4], i), "JPEG", quality=100)
 
                 if id_index == 1:
                     # correct first pdf's page count and print file
@@ -87,7 +90,7 @@ def main(args):
                     with open(prev_file, 'wb') as out:
                         pdf_writer.write(out)
 
-                    page.save('{}.jpg'.format(prev_file[:-4]), "JPEG", quality=100)
+                    page.save('{}_{}.jpg'.format(prev_file[:-4], i), "JPEG", quality=100)
 
                 # start a new pdf and grab the cover
                 cover_writer = PdfFileWriter()
@@ -117,23 +120,10 @@ def main(args):
         output_filename = '{}_{}.pdf'.format(filename[:-4], cover_index)
         output[output_filename]['id'] = data
         output[output_filename]['page_count'] = page_count
+        logger.write_to_json(json_file, output)
 
         with open(output_filename, 'wb') as out:
             pdf_writer.write(out)
-
-        if not os.path.exists('decoded.json'):
-            # write json to file for parsing page counts and decoded ids later
-            with open('decoded.json', 'w') as out:
-                json.dump(output, out, sort_keys=True, indent=4)
-        else:
-            with open('decoded.json') as file:
-                prev_data = json.load(file)
-
-            prev_data.update(output)
-
-            with open('decoded.json', 'w') as out:
-                json.dump(prev_data, out)
-
         # write the buffer to the log file, so everything is at one line
         logger.write_to_log(log_file_path, buff)
     except Exception:

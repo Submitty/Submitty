@@ -25,6 +25,8 @@ def main(args):
     log_file_path = args[3]
 
     log_msg = "Process " + str(os.getpid()) + ": "
+
+    output = {"is_qr" : False, "page_count" : num}
     try:
         # check that all pages are divisible
         pdfFileObj = open(filename, 'rb')
