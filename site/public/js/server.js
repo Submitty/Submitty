@@ -2634,7 +2634,7 @@ function changePermission(filename, checked) {
 
 function changeNewDateTime(filename, newdatatime) {
     // send to server to handle file permission change
-    var url = buildUrl({'component': 'misc', 'page': 'course_materials', 'action': 'modify_course_materials_file_time_stamp', 'filename': encodeURIComponent(filename), 'newdatatime': encodeURIComponent(newdatatime)});
+    var url = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'modify_course_materials_file_time_stamp', 'filename': encodeURIComponent(filename), 'newdatatime': encodeURIComponent(newdatatime)});
 
     $.ajax({
         url: url,
