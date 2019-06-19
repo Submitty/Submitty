@@ -76,7 +76,7 @@ Please email your instructor with any questions or concerns.';
         }
 
         $this->core->addSuccessMessage("Seating assignments have been sucessfully emailed!");
-        return $this->core->redirect($this->core->buildUrl());
+        $this->core->redirect($this->core->buildNewCourseUrl());
     }
 
     private function replacePlaceholders($message, $data) {
