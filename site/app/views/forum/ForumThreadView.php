@@ -859,10 +859,7 @@ class ForumThreadView extends AbstractView {
 
     public function createThread($category_colors){
 		if(!$this->forumAccess()){
-			$this->core->redirect($this->core->buildNewUrl([
-				$this->core->getConfig()->getSemester(),
-				$this->core->getConfig()->getCourse()
-			]));
+			$this->core->redirect($this->core->buildNewCourseUrl());
 			return;
 		}
 
@@ -912,7 +909,7 @@ class ForumThreadView extends AbstractView {
 
 	public function statPage($users) {
 		if(!$this->forumAccess()){
-			$this->core->redirect($this->core->buildNewUrl([$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse()]));
+			$this->core->redirect($this->core->buildNewCourseUrl());
 			return;
 		}
 

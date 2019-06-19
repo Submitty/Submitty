@@ -63,7 +63,11 @@ function render(gradeable_id, user_id, grader_id, file_name, page_num, url = "")
             } catch (err){
                 alert("Something went wrong, please try again later.");
             }
-            pdfjsLib.getDocument({data: pdfData}).then((pdf) => {
+            pdfjsLib.getDocument({
+                data: pdfData,
+                cMapUrl: '../../vendor/pdfjs/cmaps/',
+                cMapPacked: true
+            }).then((pdf) => {
                 window.RENDER_OPTIONS.pdfDocument = pdf;
                 let viewer = document.getElementById('viewer');
                 $(viewer).on('touchstart touchmove', function(e){

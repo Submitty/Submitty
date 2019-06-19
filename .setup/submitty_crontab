@@ -1,0 +1,13 @@
+
+# /etc/cron.d/submitty: crontab for Submitty
+#
+# THIS FILE IS AUTO-GENERATED AS PART OF SUBMITTY INSTALLATION!
+# YOU MUST EDIT .setup/submitty_crontab IN YOUR GIT REPOSITORY
+# AND THEN RE-INSTALL SUBMITTY.
+#
+# As part of the installation process, any variable defined in
+# INSTALL_SUBMITTY_HELPER_SITE.sh is processed and expanded
+# automatically.
+#
+# Run the send_email.py script every minute
+* * * * * submitty_daemon   python3 ${SUBMITTY_INSTALL_DIR}/sbin/send_email.py
