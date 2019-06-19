@@ -1,0 +1,13 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}set-folder-release-form{% endblock %}
+{% block title %}Set Folder Release{% endblock %}
+{% block body %}
+    <p>
+        Choose a time to release the contents of this folder<br>
+    </p>
+
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="btn btn-primary" id="submit" type="submit" value="Submit" />
+{% endblock %}
