@@ -252,9 +252,9 @@
                         var yValue = [];
                         var yValue2 = [];
                         {% for comp in component_averages %}
-                        xValue.push('{{comp.getTitle()|escape("js")}}');
-                        yValue.push({{comp.getAverageScore()}});
-                        yValue2.push({{comp.getMaxValue()}});
+                            xValue.push('{{comp.getTitle()|escape("js")}}');
+                            yValue.push({{comp.getAverageScore()}});
+                            yValue2.push({{comp.getMaxValue()}});
                         {% endfor %}
 
 
@@ -589,12 +589,11 @@
             tabcontent[i].style.display = "none";
         }
 
-        // Get all elements with class="tablinks" and remove the class "active"
+        // Get all elements with class="btn btn-primary" and remove the class "active"
         tablinks = document.getElementsByClassName("btn btn-primary");
         for (i = 0; i < tablinks.length; i++) {
             tablinks[i].className = tablinks[i].className.replace(" active", "");
         }
-        console.log(tablinks);
 
         // Show the current tab, and add an "active" class to the button that opened the tab
         document.getElementById(statName).style.display = "block";
