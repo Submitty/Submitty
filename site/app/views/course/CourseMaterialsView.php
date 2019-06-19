@@ -109,7 +109,8 @@ class CourseMaterialsView extends AbstractView {
             "submissions" => $submissions,
             "fileShares" => $file_shares,
             "fileReleaseDates" => $file_release_dates,
-            "userGroup" => $user_group
+            "userGroup" => $user_group//,
+            //changeDate => $change_date = 0
         ]);
     }
 }

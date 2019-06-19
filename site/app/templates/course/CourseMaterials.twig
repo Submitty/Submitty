@@ -31,19 +31,7 @@
 {% macro display_file(self, dir, fileShares, fileReleaseDates, path, id, indent, title, userGroup) %}
     <div>
         <div class="file-viewer">
-            {% if userGroup == 1 %}
-                {{ path }}
-                {% if ( (fileShares[path] == "1") )%}
-                    success
-                {% else %}
-                    failure
-                {% endif %}
-                <input id="share_checkbox_{{ id }}" type="checkbox"
-                        {% if ( (fileShares[path] == "1") )%}
-                            checked="true"
-                        {% endif %}
-                       onclick="shareToOther('{{ id }}', '{{ path }}')" name="ch1"/>
-            {% endif %}
+
             <k class="fas fa-file" style='vertical-align:text-bottom;'></k>
             {{ dir }}&nbsp;
             {% set dirExtension = dir|split('.')|last|lower %}
@@ -71,19 +59,6 @@
     <div>
 
         <div class="div-viewer">
-            {% if userGroup == 1 %}
-                {{ folderPath }}
-                {% if ( (fileShares[folderPath] == "1") )%}
-                   success
-                {% else %}
-                    failure {{ fileShares[folderPath] }}
-                {% endif %}
-                <input id="share_checkbox_{{ id }}" type="checkbox"
-                        {% if ( (fileShares[folderPath] == "1") )%}
-                            checked="true"
-                        {% endif %}
-                       onclick="shareToOther('{{ id }}', '{{ folderPath }}')" name="ch1"/>
-            {% endif %}
 
             <a class='openAllDiv openAllDiv{{ title }} openable-element-{{ title }}' id='{{ dir }}' onclick='openDivForCourseMaterials("{{ id }}");'>
                 <span class="fas fa-folder open-all-folder" style='vertical-align:text-top;font-size:20px'></span>
@@ -95,7 +70,7 @@
                     <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
 
                 <label for="latest-events">Share to student on</label>
-                <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26" value="{{ fileReleaseDates[dir]}}" onChange="setNewDateTime(this, '{{ path }}')"/>
+                <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26" value=" " onChange="setNewDateTime(this, '{{ folderPath }}')"/>
 
             {% endif %}
         </div>
@@ -116,8 +91,8 @@
     window.onload = function () {
         // loop thru each div_viewer_xxx
 
-        var jumpToScrollPostion = document.cookie.replace(/(?:(?:^|.*;\s*)jumpToScrollPostion\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-        if (jumpToScrollPostion.length > 0 && jumpToScrollPostion != '-1') {
+        var jumpToScrollPosition = document.cookie.replace(/(?:(?:^|.*;\s*)jumpToScrollPosition\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+        if (jumpToScrollPosition.length > 0 && jumpToScrollPosition != '-1') {
 
             $('[id^=div_viewer_]').each(function() {
             var number = this.id.replace('div_viewer_', '').trim();
@@ -133,8 +108,8 @@
             }
         });
             // jump to last location if scroll is enabled.
-            window.scrollTo(0, jumpToScrollPostion);
-            document.cookie = 'jumpToScrollPostion=-1';
+            window.scrollTo(0, jumpToScrollPosition);
+            document.cookie = 'jumpToScrollPosition=-1';
 
         }
         else {
@@ -169,8 +144,13 @@
         var newDateTime = $(me).val();
         //alert(newDateTime);
         changeNewDateTime(path, newDateTime);
-        console.log(path);
     }
+
+    //new function setANdGetNewDateTime(me, path, newDateTimeChild){
+        //var newDateTime = $(me).val();
+        //changeNewDateTime(path, newDateTime);
+        //newDateTimeChild = $(me).val();
+    //}
 
     $(document).ready(function() {
         flatpickr(".date_picker", {
