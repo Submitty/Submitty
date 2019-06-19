@@ -111,11 +111,6 @@ cp -R "${NODE_FOLDER}/@submitty/pdf-annotate.js/dist" ${VENDOR_FOLDER}/pdf-annot
 mkdir ${VENDOR_FOLDER}/twigjs
 cp ${NODE_FOLDER}/twig/twig.min.js ${VENDOR_FOLDER}/twigjs/
 
-# TEMPORARY (until we have generalized code for generating charts in html)
-# copy the zone chart images
-mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public/zone_images/
-cp ${SUBMITTY_INSTALL_DIR}/zone_images/* ${SUBMITTY_INSTALL_DIR}/site/public/zone_images/ 2>/dev/null
-
 # set the permissions of all files
 # $PHP_USER can read & execute all directories and read all files
 # "other" can cd into all subdirectories

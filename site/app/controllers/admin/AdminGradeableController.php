@@ -660,7 +660,7 @@ class AdminGradeableController extends AbstractController {
             $this->redirectToEdit($gradeable_id);
         } catch (\Exception $e) {
             $this->core->addErrorMessage($e);
-            $this->core->redirect($this->core->buildUrl());
+            $this->core->redirect($this->core->buildNewCourseUrl());
         }
     }
 
@@ -1205,7 +1205,7 @@ class AdminGradeableController extends AbstractController {
      * Exports components to json and downloads for user
      */
     private function exportComponentsRequest() {
-        $url = $this->core->buildUrl([]);
+        $url = $this->core->buildNewCourseUrl();
 
         $gradeable_id = $_GET['gradeable_id'] ?? '';
 
