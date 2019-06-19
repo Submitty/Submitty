@@ -231,6 +231,8 @@ def generate_random_ta_comment():
             if random.randrange(num + 2): continue
             line = aline
     return line.strip()
+def generate_random_student_comment():
+    return "Use lipsum to generate comment"
 
 def generate_versions_to_submit(num=3, original_value=3):
     if num == 1:
@@ -1446,18 +1448,17 @@ class Gradeable(object):
         self.components = []
         for i in range(len(gradeable['components'])):
             component = gradeable['components'][i]
-            if self.type < 2:
-                component['gc_is_text'] = False
-            elif self.type > 0:
-                component['gc_ta_comment'] = ""
-                component['gc_student_comment'] = ""
+            if self.type >= 0:
+                component['gc_ta_comment'] = generate_random_ta_comment()
+                component['gc_student_comment'] = generate_random_student_comment()
                 component['gc_page'] = 0
-
             if self.type == 1:
                 component['gc_lower_clamp'] = 0
                 component['gc_default'] = 0
                 component['gc_max_value'] = 1
                 component['gc_upper_clamp'] = 1
+            if self.type != 2:
+                component['gc_is_text'] = False
             i-=1;
             self.components.append(Component(component, i+1))
 
