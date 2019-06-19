@@ -175,10 +175,10 @@ class BulkUpload(CourseJob):
     def add_permissions_recursive(self,top_dir,root_perms,dir_perms,file_perms):
         for root, dirs, files in os.walk(top_dir):
             self.add_permissions(root,root_perms)
-        for d in dirs:
-            self.add_permissions(os.path.join(root, d),dir_perms)
-        for f in files:
-            self.add_permissions(os.path.join(root, f),file_perms)
+            for d in dirs:
+                self.add_permissions(os.path.join(root, d),dir_perms)
+            for f in files:
+                self.add_permissions(os.path.join(root, f),file_perms)
 
     def run_job(self):
         semester = self.job_details['semester']
