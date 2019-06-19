@@ -56,7 +56,7 @@ CREATE TABLE emails (
     body TEXT NOT NULL,
     created TIMESTAMP WITHOUT TIME zone NOT NULL,
     sent TIMESTAMP WITHOUT TIME zone,
-    error character varying
+    error character varying NOT NULL default ''
 );
 
 
