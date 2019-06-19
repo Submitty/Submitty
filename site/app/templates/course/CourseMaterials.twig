@@ -8,27 +8,28 @@
     {% endif %}
     <h1>Course Materials</h1>
     <div class="inner-container" id="file-container">
-        {{ self.display_files(self, submissions, fileShares, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath) }}
+        {{ self.display_files(self, submissions, fileShares, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath, changeDate) }}
+
     </div>
 </div>
 
-{% macro display_files(self, files, fileShares, fileReleaseDates, id, indent, title, userGroup, folderPath) %}
+{% macro display_files(self, files, fileShares, fileReleaseDates, id, indent, title, userGroup, folderPath,changeDate) %}
     {# Files on top #}
 
     {% for dir, path in files if path is not iterable %}
         {% if userGroup != 4 or fileShares[path] == "1" %}
-            {{ self.display_file(self, dir, fileShares, fileReleaseDates, path, id ~ "f" ~ loop.index, indent, title, userGroup) }}
+            {{ self.display_file(self, dir, fileShares, fileReleaseDates, path, id ~ "f" ~ loop.index, indent, title, userGroup, changeDate) }}
         {% endif %}
     {% endfor %}
 
     {# Directories underneath #}
     {% for dir, path in files if path is iterable %}
-        {{ self.display_dir(self, dir, fileShares, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, userGroup, folderPath ~ '/' ~ dir) }}
+        {{ self.display_dir(self, dir, fileShares, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, userGroup, folderPath ~ '/' ~ dir, changeDate) }}
     {% endfor %}
 {% endmacro %}
 
 
-{% macro display_file(self, dir, fileShares, fileReleaseDates, path, id, indent, title, userGroup) %}
+{% macro display_file(self, dir, fileShares, fileReleaseDates, path, id, indent, title, userGroup, changeDate) %}
     <div>
         <div class="file-viewer">
 
@@ -45,16 +46,23 @@
 
 
                 <label for="latest-events">Share to student on</label>
-                <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26" value="{{ fileReleaseDates[path]}}" onChange="setNewDateTime(this, '{{ path }}')"/>
+                {{ changeDate }}
+                {% if changeDate == 0 %}
+                    <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26" value="{{ fileReleaseDates[path]}}" onChange="setNewDateTime(this, '{{ path }}')"/>
+                {% else %}
+                    <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26" value="setChildNewDateTime('{{ path }}','{{ changeDate }}')" onChange="setNewDateTime(this, '{{ path }}')"/>
+                    {% set changeDate = 0 %}
+                {% endif %}
+
             {% endif %}
         </div>
         <div class="file-viewer-data" id="file_viewer_{{ id }}" style="margin-left:{{ indent * -15 }}px" data-file_name="{{ dir }}" data-file_url="{{ path }}"></div>
     </div>
 {% endmacro %}
 
-{% macro display_dir(self, dir, fileShares, fileReleaseDates, contents, id, indent, title, userGroup, folderPath) %}
+{% macro display_dir(self, dir, fileShares, fileReleaseDates, contents, id, indent, title, userGroup, folderPath, changeDate) %}
     {% if indent == 0 %}
-        {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, userGroup, folderPath) }}
+        {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, userGroup, folderPath, changeDate) }}
     {% else %}
     <div>
 
@@ -69,8 +77,15 @@
                 <a onclick='newDeleteCourseMaterialForm("{{ core.buildUrl({'component': 'misc', 'page': 'delete_course_material_folder', 'dir': 'course_materials', 'file': dir, 'path': folderPath }) }}", "{{ dir }}");'>
                     <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
 
-                <label for="latest-events">Share to student on</label>
-                <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26" value=" " onChange="setNewDateTime(this, '{{ folderPath }}')"/>
+
+                {# <label for="latest-events">Share to student on</label> #}
+                {% set prevTD = fileReleaseDates[folderPath]  %}
+                {% if userGroup == 1 %}
+                        <a onclick="setFolderRelease()" class="btn btn-primary">Set Folder Release</a>
+                {% endif %}
+                {# <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26" value=" {{ fileReleaseDates[folderPath] }} " onChange="setNewDateTime(this, '{{ folderPath }}')"/> #}
+                {# {% set changeDate = fileReleaseDates[folderPath] %} #}
+
 
             {% endif %}
         </div>
@@ -78,7 +93,7 @@
 
             {# Recurse #}
 
-            {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, userGroup, folderPath) }}
+            {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, userGroup, folderPath, changeDate) }}
 
         </div>
     </div>
@@ -90,7 +105,6 @@
 
     window.onload = function () {
         // loop thru each div_viewer_xxx
-
         var jumpToScrollPosition = document.cookie.replace(/(?:(?:^|.*;\s*)jumpToScrollPosition\s*\=\s*([^;]*).*$)|^.*$/, "$1");
         if (jumpToScrollPosition.length > 0 && jumpToScrollPosition != '-1') {
 
@@ -144,13 +158,13 @@
         var newDateTime = $(me).val();
         //alert(newDateTime);
         changeNewDateTime(path, newDateTime);
+        console.log(newDateTime);
     }
 
-    //new function setANdGetNewDateTime(me, path, newDateTimeChild){
-        //var newDateTime = $(me).val();
-        //changeNewDateTime(path, newDateTime);
-        //newDateTimeChild = $(me).val();
-    //}
+    function setChildNewDateTime(path, changeDate) {
+        console.log(changeDate);
+        changeNewDateTime(path,changeDate);
+    }
 
     $(document).ready(function() {
         flatpickr(".date_picker", {

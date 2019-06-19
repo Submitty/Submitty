@@ -376,6 +376,15 @@ function newUploadCourseMaterialsForm() {
 
 }
 
+function setFolderRelease(){
+
+    $('.popup-form').css('display', 'none');
+
+    var form = $("#set-folder-release-form");
+
+    form.css("display", "block");
+}
+
 function deletePlagiarismResultAndConfigForm(form_action, gradeable_title) {
     $('.popup-form').css('display', 'none');
     var form = $("#delete-plagiarism-result-and-config-form");

@@ -62,7 +62,18 @@ class CourseMaterialsView extends AbstractView {
                     if (!isset($working_dir[$dir])) {
                         $working_dir[$dir] = array();
                     }
+                    $expected_dir_path = FileUtils::joinPaths($expected_path, $dir);
                     $working_dir = &$working_dir[$dir];
+                    $file_datas[$expected_dir_path] = $isShareToOther;
+                    if( isset($json[$expected_dir_path])){
+                        $releaseDirData = $json[$expected_dir_path]['release_datetime'];
+                        $file_release_dates[$expected_dir_path] = $releaseDirData;
+                    }
+                    else{
+                        $file_release_dates[$expected_dir_path] = $releaseData;
+                    }
+
+
                 }
 
                 $working_dir[$filename] = $expected_file_path;
@@ -109,8 +120,8 @@ class CourseMaterialsView extends AbstractView {
             "submissions" => $submissions,
             "fileShares" => $file_shares,
             "fileReleaseDates" => $file_release_dates,
-            "userGroup" => $user_group//,
-            //changeDate => $change_date = 0
+            "userGroup" => $user_group,
+            "changeDate" => $change_date = 0
         ]);
     }
 }
