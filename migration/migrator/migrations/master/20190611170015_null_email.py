@@ -10,7 +10,7 @@ def up(config, database):
     database.execute("ALTER TABLE ONLY users ALTER COLUMN user_email SET DATA TYPE character varying NOT NULL")
 
     # add an error column to the emails table
-    database.execute("ALTER TABLE emails ADD COLUMN IF NOT EXISTS error CHARACTER VARYING DEFAULT ''")
+    database.execute("ALTER TABLE emails ADD COLUMN IF NOT EXISTS error CHARACTER VARYING NOT NULL DEFAULT ''")
 
     # add a user_id column to the emails table
     database.execute("ALTER TABLE emails ADD COLUMN IF NOT EXISTS user_id CHARACTER VARYING")
