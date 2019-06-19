@@ -12,6 +12,9 @@ use app\libraries\routers\ClassicRouter;
 use app\models\Config;
 use app\models\forum\Forum;
 use app\models\User;
+use app\NotificationFactory;
+
+
 
 /**
  * Class Core
@@ -61,6 +64,8 @@ class Core {
     /** @var ClassicRouter */
     private $router;
 
+    /** @var NotificationFactory */
+    private $notification_factory;
 
     /**
      * Core constructor.
@@ -551,7 +556,6 @@ class Core {
     public function getRouter(): ClassicRouter {
         return $this->router;
     }
-
     /**
      * We use this function to allow us to bypass certain "safe" PHP functions that we cannot
      * bypass via mocking or some other method (like is_uploaded_file). This method, which normally
@@ -562,5 +566,9 @@ class Core {
      */
     public function isTesting() {
         return false;
+    }
+
+    public function getNotificationFactory() {
+        return $this->notification_factory;
     }
 }

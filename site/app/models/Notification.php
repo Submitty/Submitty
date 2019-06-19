@@ -77,13 +77,11 @@ class Notification extends AbstractModel {
         parent::__construct($core);
     }
 
-    public static function createNotification($core, $component, $metadata, $content, $source, $target) {
+    public static function createNotification($core, $metadata, $content, $source) {
         $instance = new self($core);
-        $instance->setComponent($component);
         $instance->setNotifyMetadata($metadata);
         $instance->setNotifyContent($content);
         $instance->setNotifySource($source);
-        $instance->setNotifyTarget($target);
         return $instance;
     }
 
@@ -128,36 +126,6 @@ class Notification extends AbstractModel {
         $thread_id = array_key_exists('thread_id', $metadata[0]) ? $metadata[0]['thread_id'] : -1;
         return $thread_id;
     }
-
-    private function handleGrading($details) {
-      $this->setType($details['type']);
-
-      switch ($details['type']) {
-        case 'grade_inquiry_creation':
-          $this->actAsGradeInquiryCreation($details['gradeable_id'], $details['grader_id'], $details['submitter_id'], $details['who_id']);
-          break;
-        case 'grade_inquiry_reply':
-          $this->actAsGradeInquiryReply($details['gradeable_id'], $details['grader_id'], $details['submitter_id'], $details['who_id']);
-          break;
-        default:
-          return;
-      }
-    }
-
-   private function handleStudent($details) {
-     $this->setType($details['type']);
-
-     switch ($details['type']) {
-       case 'grade_inquiry_creation':
-          $this->actAsGradeInquiryCreation($details['gradeable_id'], '', $details['submitter_id'], $details['who_id']);
-          break;
-       case 'grade_inquiry_reply':
-          $this->actAsGradeInquiryReply($details['gradeable_id'], $details['grader_id'], $details['submitter_id'], '');
-          break;
-       default:
-        return;
-      }
-   }
 
     private function actAsUpdatedAnnouncementNotification($thread_id, $thread_title) {
         $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id))));

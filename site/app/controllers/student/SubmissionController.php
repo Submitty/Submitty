@@ -142,7 +142,7 @@ class SubmissionController extends AbstractController {
 
         try {
             $this->core->getQueries()->insertNewRegradeRequest($graded_gradeable, $user, $content);
-            $this->notifyGradeInquiryOnCreate($graded_gradeable, $gradeable_id, $content);
+            $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'new_grade_inquiry');
             $this->core->getOutput()->renderJsonSuccess();
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
@@ -1981,130 +1981,65 @@ class SubmissionController extends AbstractController {
         $this->core->getOutput()->renderOutput('grading\ElectronicGrader', 'statPage', $users);
     }
 
-    private function notifyGradeInquiryOnCreate($graded_gradeable, $gradeable_id, $content){
+    // merge these two functions
+    private function notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, $type){
       //TODO: send notification to grader per component
       if($graded_gradeable->hasTaGradingInfo()){
-        $course = $this->core->getConfig()->getCourse();
-        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
-        $graders = $ta_graded_gradeable->getGraders();
-        $submitter = $graded_gradeable->getSubmitter();
-        $user_id = $this->core->getUser()->getId();
+          $course = $this->core->getConfig()->getCourse();
+          $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+          $graders = $ta_graded_gradeable->getGraders();
+          $submitter = $graded_gradeable->getSubmitter();
+          $user_id = $this->core->getUser()->getId();
 
-        //TODO: build link in email body
-        $email_subject = "[Submitty $course] New Regrade Request";
-        $email_body = "A student has submitted a grade inquiry for gradeable $gradeable_id.\nStudent ID $user_id writes:\n$content\n\nPlease visit Submitty to follow up on this request";
-
-        foreach($graders as $grader){
-          if(!$grader->accessFullGrading()){
-            continue;
+          if ($type == 'new_grade_inquiry') {
+              // instructor/TA/Mentor submitted
+              if ($this->core->getUser()->accessGrading()) {
+                  $email_subject = "[Submitty $course] New Regrade Request";
+                  $email_body = "A Instructor/TA/Mentor submitted a grade inquiry for gradeable $gradeable_id.\n$user_id writes:\n$content\n\nPlease visit Submitty to follow up on this request";
+              }
+              // student submitted
+              else {
+                  $email_subject = "[Submitty $course] New Regrade Request";
+                  $email_body = "A student has submitted a grade inquiry for gradeable $gradeable_id.\n$user_id writes:\n$content\n\nPlease visit Submitty to follow up on this request";
+              }
+          } else {
+              if ($this->core->getUser()->accessGrading()) {
+                  $email_subject = "[Submitty $course] New Regrade Request";
+                  $email_body = "A Instructor/TA/Mentor made a post in a grade inquiry for gradeable $gradeable_id.\n$user_id writes:\n$content\n\nPlease visit Submitty to follow up on this request";
+              }
+              // student submitted
+              else {
+                  $email_subject = "[Submitty $course] New Regrade Request";
+                  $email_body = "A student has made a post in a grade inquiry for gradeable $gradeable_id.\n$user_id writes:\n$content\n\nPlease visit Submitty to follow up on this request";
+              }
           }
 
+          $recipients = array();
+          foreach ($graders as $grader) {
+              if ($grader->accessFullGrading && $grader->getId() != $user_id){
+                  $recipients[] = $grader->getId();
+              }
+          }
           $metadata = json_encode(array(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable_id, 'who_id' => $grader->getId())));
           $n_content = "New Grade Inquiry for ".$gradeable_id;
-          $new_grade_inquiry_notification = Notification::createNotification($this->core,'grading',$metadata,$n_content,$user_id,$grader->getId());
-          $this->core->getQueries()->pushSingleNotification($new_grade_inquiry_notification);
-          $grade_inquiry_email_data = [
-              "subject" => $email_subject,
-              "body" => $email_body,
-              "recipient" => $grader->getEmail(),
-              "user_id" => $grader->getId()
-          ];
-          $new_grade_inquiry_email = new Email($this->core, $grade_inquiry_email_data);
-          $this->core->getQueries()->createEmail($new_grade_inquiry_email);
-        }
+          $event = ['metadata' => $metadata, 'content' => $n_content, 'recipients' => $recipients];
+          $this->core->getNotificationFactory()->onGradeInquiryEvent($event);
 
-        if($submitter->isTeam()){
-          $submitting_team = $submitter->getTeam()->getMemberUsers();
-          foreach($submitting_team as $submitting_user){
-            if($submitting_user->getId() == $user_id){
-              continue;
-            }
-            $metadata = json_encode(array(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable_id, 'who_id' => $submitting_user->getId())));
-            $n_content = "New Grade Inquiry for ".$gradeable_id;
-            $new_grade_inquiry_notification = Notification::createNotification($this->core,'gradng',$metadata,$n_content,$user_id,$submitting_user->getId());
-            $this->core->getQueries()->pushSingleNotification($new_grade_inquiry_notification);
-          }
-        }
-      }
-    }
-    private function notifyGradeInquiryOnReply($graded_gradeable, $gradeable_id, $content) {
-      if($graded_gradeable->hasTaGradingInfo()){
-        $course = $this->core->getConfig()->getCourse();
-        $submitter = $graded_gradeable->getSubmitter();
-        $user = $this->core->getUser();
-        $is_grader = false;
-        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
-        $graders = $ta_graded_gradeable->getGraders();
-        foreach($graders as $grader){
-          if($grader->getId() == $user->getId()){
-            $is_grader = true;
-            break;
-          }
-        }
-        //on a grader replying to discussion
-        if($is_grader == true){
-          //TODO: build link in notification body
-          $email_subject = "[Submitty $course] Grade Inquiry Reply";
-          $email_body = "An instructor or TA has posted a reply in your grade inquiry discussion:\n$content";
-          $submitter = $graded_gradeable->getSubmitter();
+          $recipients = array();
           if($submitter->isTeam()){
-            $submitting_team = $submitter->getTeam()->getMemberUsers();
-            foreach($submitting_team as $submitting_user){
-              $metadata = json_encode(array(array('component' => 'student','gradeable_id' => $gradeable_id)));
-              $n_content = "An instructor/TA has replied to your grade inquiry ".$gradeable_id;
-              $new_grade_inquiry_notification = Notification::createNotification($this->core, 'student',$metadata,$n_content,$grader->getId(),$submitting_user->getId());
-              $this->core->getQueries()->pushSingleNotification($new_grade_inquiry_notification);
-
-              $grade_inquiry_reply_email_data = [
-                  "subject" => $email_subject,
-                  "body" => $email_body,
-                  "recipient" => $submitting_user->getEmail(),
-                  "user_id" => $submitting_user->getId()
-              ];
-              $new_grade_inquiry_reply_email = new Email($this->core, $grade_inquiry_reply_email_data);
-              $this->core->getQueries()->createEmail($new_grade_inquiry_reply_email);
-            }
+              $submitting_team = $submitter->getTeam()->getMemberUsers();
+              foreach($submitting_team as $submitting_user){
+                  if($submitting_user->getId() != $user_id) {
+                      $recipients[] = $submitting_user;
+                  }
+              }
           }
-          else{
-            $metadata = json_encode(array(array('component' => 'student','gradeable_id' => $gradeable_id)));
-            $n_content = "An instructor/TA has replied to your grade inquiry ".$gradeable_id;
-            $new_grade_inquiry_notification = Notification::createNotification($this->core, 'student',$metadata,$n_content,$grader->getId(),$submitter->getId());
-            $this->core->getQueries()->pushSingleNotification($new_grade_inquiry_notification);
+          $metadata = json_encode(array(array('component' => 'student', 'gradeable_id' => $gradeable_id, 'who_id' => $submitting_user->getId())));
+          $n_content = "New Grade Inquiry for ".$gradeable_id;
+          $event = ['metadata' => $metadata, 'content' => $n_content, 'recipients' => $recipients];
+          $this->core->getNotificationFactory()->onGradeInquiryEvent($event);
 
-            $grade_inquiry_reply_email_data = [
-                "subject" => $email_subject,
-                "body" => $email_body,
-                "recipient" => $submitter->getUser()->getEmail(),
-                "user_id" => $submitter->getUser()->getId()
-            ];
-            $new_grade_inquiry_reply_email = new Email($this->core, $grade_inquiry_reply_email_data);
-            $this->core->getQueries()->createEmail($new_grade_inquiry_reply_email);
-          }
-        }
-        //on a student replying to discussion
-        else{
-          $notification_subject = "[Submitty $course] Grade Inquiry Reply";
-          $notification_body = "A student has posted a reply in a grade inquiry discussion.\n$content";
-          //TODO: only notify relevant graders
-          foreach($graders as $grader){
-            if(!$grader->accessFullGrading()){
-              continue;
-            }
-            $metadata = json_encode(array(array('component' => 'student','gradeable_id' => $gradeable_id)));
-            $n_content = "A student has posted a reply in a grade inquiry discussion ".$gradeable_id;
-            $new_grade_inquiry_notification = Notification::createNotification($this->core, 'component',$metadata,$n_content,$grader->getId(),$submitter->getId());
-            $this->core->getQueries()->pushSingleNotification($new_grade_inquiry_notification);
-
-            $grade_inquiry_reply_email_data = [
-                "subject" => $notification_subject,
-                "body" => $notification_body,
-                "recipient" => $grader->getEmail(),
-                "user_id" => $grader->getId()
-            ];
-            $new_grade_inquiry_reply_email = new Email($this->core, $grade_inquiry_reply_email_data);
-            $this->core->getQueries()->createEmail($new_grade_inquiry_reply_email);
-          }
-        }
+          //TODO: Do emails
       }
     }
 

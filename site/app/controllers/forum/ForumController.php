@@ -3,12 +3,16 @@
 namespace app\controllers\forum;
 
 use app\libraries\Core;
+use app\libraries\database\DatabaseQueries;
 use app\models\Notification;
 use app\models\Email;
 use app\controllers\AbstractController;
 use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\libraries\DateUtils;
+use app\NotificationListener;
+use Symfony\Component\EventDispatcher\GenericEvent;
+
 
 /**
  * Class ForumHomeController
@@ -16,8 +20,7 @@ use app\libraries\DateUtils;
  * Controller to deal with the submitty home page. Once the user has been authenticated, but before they have
  * selected which course they want to access, they are forwarded to the home page.
  */
-class ForumController extends AbstractController {
-
+class ForumController extends AbstractController{
 	/**
      * ForumHomeController constructor.
      *
@@ -375,16 +378,18 @@ class ForumController extends AbstractController {
 
                 }
 
+                // NOTIFICATION/EMAIL
+                $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
                 if ($announcement) {
-                    $users = $this->core->getQueries()->getAllUsers();
-                    foreach ($users as $user) {
-                        if ($current_user_id == $user->getId())
-                            continue;
-                        $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
-                        $content = "\"New Announcement: \".$thread_title";
-                        $notification = Notification::createNotification($this->core,'forum',$metadata,$content,$current_user_id,$user->getId());
-                        $this->core->getQueries()->pushSingleNotification($notification);
-                    }
+                    $content = "\"New Announcement: \".$thread_title";
+                    $event = ['metadata' => $metadata, 'content' => $content, 'component' => 'forum'];
+                    $this->core->getNotificationFactory()->onNewAnnouncement($event);
+                }
+                // Just a thread
+                else {
+                    $content = "\"New Thread: \".$thread_title";
+                    $event = ['metadata' => $metadata, 'content' => $content, 'component' => 'forum'];
+                    $this->core->getNotificationFactory()->onNewThread($event);
                 }
 
                 if($email_announcement) {
@@ -449,20 +454,14 @@ class ForumController extends AbstractController {
                         move_uploaded_file($_FILES[$file_post]["tmp_name"][$i], $target_file);
                     }
                 }
-                // Notification to parent post author
-                $parent_post = $this->core->getQueries()->getPost($parent_id);
-                $parent_post_author_id = $parent_post['author_user_id'];
-                if ($parent_post_author_id != $current_user_id) {
-                    $anon_bool = ($anon == 1) ? true : false;
-                    $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$parent_id, (string)$post_id));
-                    $content = "Reply: A post '".Notification::textShortner($post_content).
-                        "' got new a reply from ".
-                        Utils::getDisplayNameForum($anon_bool, $this->core->getQueries()->getDisplayUserInfoFromUserId($this->core->getUser()->getId()));
-                    $notification = Notification::createNotification($this->core,'forum',$metadata,$content,$current_user_id,$parent_post_author_id);
-                    $this->core->getQueries()->pushSingleNotification($notification);
-                    $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'option' => $display_option, 'thread_id' => $thread_id));
-                }
 
+                // NOTIFICATION/EMAIL
+                $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
+                $content = "Reply: A post '".Notification::textShortner($post_content). "' got new a reply";
+                $event = ['metadata' => $metadata, 'content' => $content, 'post_id' => $post_id, 'thread_id' => $thread_id, 'component' => 'forum'];
+                $this->core->getNotificationFactory()->onNewPost($event);
+
+                $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'option' => $display_option, 'thread_id' => $thread_id));
             }
         }
         $this->core->getOutput()->renderJson($result);
@@ -516,13 +515,14 @@ class ForumController extends AbstractController {
             } else {
                 $type = "post";
             }
+
+            // NOTIFICATION/EMAIL
             $post_author_id = $post['author_user_id'];
             $metadata = json_encode(array());
-            $content = "Deleted: A thread/post '"
-                .Notification::textShortner($post["content"])."' was deleted by "
-                .Utils::getDisplayNameForum(false, $this->core->getQueries()->getDisplayUserInfoFromUserId($current_user_id));
-            $notification = Notification::createNotification($this->core,'forum',$metadata,$content,$current_user_id,$post_author_id);
-            $this->core->getQueries()->pushSingleNotification($notification);
+            $content = "Deleted: A thread/post '".Notification::textShortner($post["content"])."' was deleted ";
+            $event = ['metadata' => $metadata, 'content' => $content, 'recipient' => $post_author_id, 'component' => 'forum'];
+            $this->core->getNotificationFactory()->onPostModified($event);
+
             $this->core->getQueries()->removeNotificationsPost($post_id);
             $this->core->getOutput()->renderJson($response = array('type' => $type));
             return $this->core->getOutput()->getOutput();
@@ -533,14 +533,14 @@ class ForumController extends AbstractController {
                 $error = "Parent post must be undeleted first.";
                 $this->core->getOutput()->renderJson($response = array('error' => $error));
             } else {
-                /// We want to reload same thread again, in both case (thread/post undelete)
-                $type = "post";
+                // We want to reload same thread again, in both case (thread/post undelete)
+                // NOTIFICATION/EMAIL
                 $post_author_id = $post['author_user_id'];
                 $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id));
-                $content = "Undeleted: A thread/post '".Notification::textShortner($post["content"])."' has been undeleted by "
-                    .Utils::getDisplayNameForum(false, $this->core->getQueries()->getDisplayUserInfoFromUserId($this->core->getUser()->getId()));
-                $notification = Notification::createNotification($this->core,'forum',$metadata,$content,$current_user_id,$post_author_id);
-                $this->core->getQueries()->pushSingleNotification($notification);
+                $content = "Undeleted: A thread/post '".Notification::textShortner($post["content"])."' has been undeleted ";
+                $event = ['metadata' => $metadata, 'content' => $content, 'recipient' => $post_author_id, 'component' => "forum"];
+                $this->core->getNotificationFactory()->onPostModified($event);
+                $type = "post";
                 $this->core->getOutput()->renderJson($response = array('type' => $type));
             }
             return $this->core->getOutput()->getOutput();
@@ -582,12 +582,12 @@ class ForumController extends AbstractController {
                 }
             }
             if($any_changes) {
+                // NOTIFICATION/EMAIL :: Notify author
                 $post_author_id = $post['author_user_id'];
                 $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id));
-                $content = "Update: A thread/post '".Notification::textShortner($post["content"])."' got an edit from "
-                    .Utils::getDisplayNameForum(false, $this->core->getQueries()->getDisplayUserInfoFromUserId($this->core->getUser()->getId()));
-                $notification = Notification::createNotification($this->core,'forum',$metadata,$content,$current_user_id,$post_author_id);
-                $this->core->getQueries()->pushSingleNotification($notification);
+                $content = "Update: A thread/post '".Notification::textShortner($post["content"]);
+                $event = ['metadata' => $metadata, 'content' => $content, 'recipient' => $post_author_id, "component" => "forum"];
+                $this->core->getNotificationFactory()->onPostModified($event);
             }
             if($isError) {
                 $this->core->getOutput()->renderJson(['error' => $messageString]);
@@ -924,15 +924,16 @@ class ForumController extends AbstractController {
                             rename($child_post_dir, $parent_post_dir);
                         }
                     }
-                    // Notify thread author
+
+                    // NOTIFICATION/EMAIL :: Notify thread author
                     $child_thread = $this->core->getQueries()->getThread($child_thread_id)[0];
                     $child_thread_author = $child_thread['created_by'];
                     $child_thread_title = $child_thread['title'];
                     $parent_thread_title =$this->core->getQueries()->getThreadTitle($parent_thread_id)['title'];
                     $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $parent_thread_id), (string)$child_root_post));
                     $content = "Thread Merged: '".Notification::textShortner($child_thread_title)."' got merged into '".Notification::textShortner($parent_thread_title);
-                    $notification = Notification::createNotification($this->core,'forum',$metadata,$content,$current_user_id,$child_thread_author);
-                    $this->core->getQueries()->pushSingleNotification($notification);
+                    $event = ['metadata' => $metadata, 'content' => $content, 'recipient' => $child_thread_author, 'component' => 'forum'];
+                    $this->core->getNotificationFactory()->onThreadMerged($event);
                     $this->core->addSuccessMessage("Threads merged!");
                     $thread_id = $parent_thread_id;
                 } else {
@@ -967,5 +968,4 @@ class ForumController extends AbstractController {
       }
 
     }
-
 }
