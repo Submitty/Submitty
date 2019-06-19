@@ -64,26 +64,20 @@ if __name__ == "__main__":
     """
     To test this script, you'll have to run this as www-data or PHP_USER or CGI_USER so that when it creates the temp
     files, pam_check.cgi has access to them. Run it like this:
-    sudo -u www-data /usr/local/submitty/bin/authentication.py
+    sudo -u www-data /usr/local/submitty/sbin/authentication.py
     
     The output should be:
     True
     True
     False
     True
-    True
-    True
-    False
-    True
+    None
     """
     #
     print(check_password({'REQUEST_URI': '/git/s19/sample/open_homework/instructor'}, 'instructor', 'instructor'))
     print(check_password({'REQUEST_URI': '/git/s19/sample/open_homework/instructor'}, 'ta', 'ta'))
     print(check_password({'REQUEST_URI': '/git/s19/sample/open_homework/instructor'}, 'student', 'student'))
     print(check_password({'REQUEST_URI': '/git/s19/sample/open_homework/student'}, 'student', 'student'))
-
+    
+    # Wrong URI. Returns None.
     print(check_password({'REQUEST_URI': '/git/s19/sample/instructor'}, 'instructor', 'instructor'))
-    print(check_password({'REQUEST_URI': '/git/s19/sample/instructor'}, 'ta', 'ta'))
-    print(check_password({'REQUEST_URI': '/git/s19/sample/instructor'}, 'student', 'student'))
-    print(check_password({'REQUEST_URI': '/git/s19/sample/student'}, 'student', 'student'))
-
