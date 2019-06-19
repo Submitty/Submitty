@@ -40,7 +40,7 @@ def main(args):
         page_count = 1
         prev_file = ''
         data = []
-        output = {"is_qr" : True}
+        output = {"filename" : filename, "is_qr" : True}
         json_file = os.path.join(split_path, "decoded.json")
         for page_number in range(pdfPages.numPages):
             # convert pdf to series of images for scanning

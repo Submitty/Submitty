@@ -24,9 +24,11 @@ def main(args):
     num = int(args[2])
     log_file_path = args[3]
 
+    json_file = os.path.join(split_path, "decoded.json")
     log_msg = "Process " + str(os.getpid()) + ": "
 
-    output = {"is_qr" : False, "page_count" : num}
+    output = {"filename" : filename, "is_qr" : False, "page_count" : num}
+    logger.write_to_json(json_file, output)
     try:
         # check that all pages are divisible
         pdfFileObj = open(filename, 'rb')

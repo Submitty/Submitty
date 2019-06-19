@@ -285,6 +285,7 @@ class BulkUpload(CourseJob):
             msg = "Failed to launch bulk_split subprocess!"
             print(msg)
             traceback.print_exc()
+            logger.write_to_log(log_file_path, msg + "\n" + traceback.format_exc())
             sys.exit(1)
 
         # reset permissions just in case, group needs read/write
