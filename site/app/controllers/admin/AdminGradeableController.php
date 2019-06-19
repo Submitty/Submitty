@@ -158,9 +158,10 @@ class AdminGradeableController extends AbstractController {
                 $gradeable_section_history[$grader[0]] = [];
             }
         }
+
         // Construct a list of rotating gradeables
         $rotating_gradeables = [];
-        foreach ($this->core->getQueries()->getGradeablesPastAndSection($gradeable->getId()) as $row) {
+        foreach ($this->core->getQueries()->getGradeablesRotatingGraderHistory($gradeable->getId()) as $row) {
             $gradeable_section_history[$row['user_id']][$row['g_id']] = $row['sections_rotating_id'];
 
             // Use the keys to remove duplicates
@@ -168,6 +169,8 @@ class AdminGradeableController extends AbstractController {
         }
         $rotating_gradeables = array_keys($rotating_gradeables);
 
+        // The current gradeable will always load its grader history,
+        // but if it is grade by registration it should not be in $rotating_gradeables array
         if ($gradeable->getGraderAssignmentMethod() == 1) {
             $current_g_id_key = array_search($gradeable->getId(),$rotating_gradeables);
             unset($rotating_gradeables[$current_g_id_key]);
@@ -273,6 +276,7 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addInternalJs('admin-gradeable-updates.js');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
+
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'gradeable' => $gradeable,
             'action' => 'edit',
@@ -630,6 +634,7 @@ class AdminGradeableController extends AbstractController {
         if ($gradeable === false) {
             return;
         }
+
         try {
             $this->updateGraders($gradeable, $_POST);
             // Finally, send the requester back the information
@@ -889,6 +894,7 @@ class AdminGradeableController extends AbstractController {
         // Trigger a rebuild if the config changes
         $trigger_rebuild_props = ['autograding_config_path', 'vcs_subdirectory'];
         $trigger_rebuild = count(array_intersect($trigger_rebuild_props, array_keys($details))) > 0;
+
         $boolean_properties = [
             'ta_grading',
             'scanned_exam',
@@ -939,7 +945,6 @@ class AdminGradeableController extends AbstractController {
                 continue;
             }
 
-
             // Converts string array sep by ',' to json
             if($prop === $discussion_ids) {
                 $post_val = array_map('intval', explode(',', $post_val));
@@ -955,6 +960,7 @@ class AdminGradeableController extends AbstractController {
                     continue;
                 }
             }
+
             // Try to set the property
             try {
                 //convert the property name to a setter name
@@ -991,7 +997,6 @@ class AdminGradeableController extends AbstractController {
         if(count($errors) !== 0) {
             throw new ValidationException('', $errors);
         }
-
         $this->core->getQueries()->updateGradeable($gradeable);
 
         // Only return updated properties if the changes were applied

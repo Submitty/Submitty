@@ -104,11 +104,9 @@ $(document).ready(function () {
             saveGraders();
             return;
         }
-
         if ($('#all_access').is(':checked')) {
             saveGraders();
         }
-
         // Don't save if it we're ignoring it
         if ($(this).hasClass('ignore')) {
             return;
@@ -169,7 +167,6 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
             'action': 'update_gradeable',
             'id': gradeable_id
         }),
-
         data: p_values,
         success: function (response) {
             setGradeableUpdateComplete();
@@ -366,7 +363,7 @@ function serializeGraders() {
             }
             return;
         }
-
+        //check all boxes with right access level for all access
         if ($('#all_access').is(':checked')) {
             $(this).prop('checked', true);
         }
@@ -381,11 +378,13 @@ function serializeGraders() {
             graders[parts[3]].push(parts[2]);
         }
     });
+
     return graders;
 }
 
 function saveGraders() {
     let values = serializeGraders();
+
     $('#save_status').html('Saving Graders...');
     $.getJSON({
         type: "POST",

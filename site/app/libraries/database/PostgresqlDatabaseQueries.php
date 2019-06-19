@@ -373,7 +373,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
         return ($this->course_db->getRowCount() > 0) ? new SimpleStat($this->core, $this->course_db->rows()[0]) : null;
     }
-    public function getGradeablesPastAndSection($gradeable_id) {
+    public function getGradeablesRotatingGraderHistory($gradeable_id) {
         $params = [$gradeable_id];
         $this->course_db->query("
   SELECT

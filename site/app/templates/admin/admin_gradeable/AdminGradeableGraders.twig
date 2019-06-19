@@ -47,7 +47,6 @@ What is the lowest privileged user group that can grade this?
         <a class="helpicon" target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section"></a>
         <br />
     </legend>
-	
 	<input type="radio" name="grader_assignment_method" value="2" id="all_access"
         {{ (gradeable.getGraderAssignmentMethod() == 2) ? 'checked' : '' }}> All Access Grading
 	
@@ -57,8 +56,6 @@ What is the lowest privileged user group that can grade this?
     <input type='radio' name="grader_assignment_method" value="0" id="rotating_section"
         {{ (gradeable.getGraderAssignmentMethod() == 0) ? 'checked' : '' }}> Rotating Section
 		
-
-
     <div id="rotating_data">
         {% if rotating_gradeables|length != 0 and num_rotating_sections > 0 %}
             <br />
@@ -153,7 +150,6 @@ What is the lowest privileged user group that can grade this?
         }
     }
 	
-	
     function onSectionTypeChange() {
         if($('#rotating_section').is(':checked')) {
             disableElementChildren('#rotating_data', false);
@@ -195,7 +191,6 @@ What is the lowest privileged user group that can grade this?
         $('#minimum_grading_group').change(onMinGraderChange);
 
         // update "all" check boxes
-	
         {% for grader in graders_from_usertypes[1] %}
         updateCheckBoxes('g1', "{{ grader[0] }}", 1);
         {% endfor %}

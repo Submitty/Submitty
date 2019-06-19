@@ -28,6 +28,8 @@ use app\models\User;
  * @method string getInstructionsUrl()
  * @method void setInstructionsUrl($url)
  * @method int getType()
+ * @method int getGraderAssignmentMethod()
+ * @method void setGraderAssignmentMethod($method)
  * @method \DateTime getTaViewStartDate()
  * @method \DateTime getGradeStartDate()
  * @method \DateTime getGradeDueDate()
@@ -37,8 +39,6 @@ use app\models\User;
  * @method \DateTime getRegradeRequestDate()
  * @method string getSyllabusBucket()
  * @method void setSyllabusBucket($bucket)
- * @method void setGraderAssignmentMethod($method)
- * @method int getGraderAssignmentMethod()
  * @method string getTaInstructions()
  * @method void setTaInstructions($instructions)
  * @method string getAutogradingConfigPath()
@@ -247,14 +247,6 @@ class Gradeable extends AbstractModel {
         // Set dates last
         $this->setDates($details);
         $this->modified = false;
-    }
-
-
-    public function isGradeByRegistration() {
-        if ($this->getGraderAssignmentMethod() == 1) {
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -801,6 +793,17 @@ class Gradeable extends AbstractModel {
     /** @internal */
     public function setType($type) {
         throw new \BadFunctionCallException('Cannot change gradeable type');
+    }
+
+    /**
+     * gets bool representing if gradeable is set to grade by registration
+     * @return boolean
+     */
+    public function isGradeByRegistration() {
+        if ($this->getGraderAssignmentMethod() == 1) {
+            return true;
+        }
+        return false;
     }
 
     /**

@@ -1198,11 +1198,12 @@ ORDER BY g.sections_rotating_id, g.user_id", $params);
     }
 
     /**
-     * Get gradeables graded by rotating section in the past and the sections each grader graded
-     *
+     * Gets gradeables for all graders with the sections they were assigned to grade
+     * Only includes gradeables that are set to be graded by rotating section or all access, and were in the past
+     * With the exception of $gradeable_id, which will always be included
      * @return array
      */
-    public function getGradeablesPastAndSection($gradeable_id) {
+    public function getGradeablesRotatingGraderHistory($gradeable_id) {
         throw new NotImplementedException();
     }
 
@@ -3129,7 +3130,7 @@ AND gc_id IN (
             $gradeable->getInstructionsUrl(),
             $gradeable->getTaInstructions(),
             $gradeable->getType(),
-            $this->course_db->convertBoolean($gradeable->isGradeByRegistration()),
+            $gradeable->getGraderAssignmentMethod(),
             DateUtils::dateTimeToString($gradeable->getTaViewStartDate()),
             DateUtils::dateTimeToString($gradeable->getGradeStartDate()),
             DateUtils::dateTimeToString($gradeable->getGradeDueDate()),
@@ -3257,6 +3258,7 @@ AND gc_id IN (
      * @param \app\models\gradeable\Gradeable $gradeable The gradeable to update
      */
     public function updateGradeable(\app\models\gradeable\Gradeable $gradeable) {
+
         // If the gradeable has been modified, then update its properties
         if ($gradeable->isModified()) {
             $params = [
