@@ -61,7 +61,7 @@ class WebRouterTester extends BaseUnitTest {
     }
 
     public function testRedirectToHomeFromEverywhere() {
-        $everywhere = ["/everywhere", "/s19", "/sample", "/s19/../../sample", "/../../s19/sample"];
+        $everywhere = ["/everywhere", "/s19", "/sample", "/s19/../../sample", "/../../s19/sample", "/authentication/login"];
         $core = $this->createMockCore();
         foreach ($everywhere as $uri) {
             $request = Request::create(
