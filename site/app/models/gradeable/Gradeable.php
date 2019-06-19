@@ -4,6 +4,7 @@ namespace app\models\gradeable;
 
 use app\libraries\DateUtils;
 use app\libraries\GradeableType;
+use app\libraries\GradingMethod;
 use app\exceptions\ValidationException;
 use app\exceptions\NotImplementedException;
 use app\libraries\Utils;
@@ -91,7 +92,7 @@ class Gradeable extends AbstractModel {
     /** @property @var int The type of gradeable */
     protected $type = GradeableType::ELECTRONIC_FILE;
     /** @property @var int If the gradeable should be graded by all access (2) by registration section (1) or rotating sections (0) */
-    protected $grader_assignment_method = 1;
+    protected $grader_assignment_method = GradingMethod::REGISTRATION_SECTION;
     /** @property @var int The minimum user group that can grade this gradeable (1=instructor) */
     protected $min_grading_group = 1;
     /** @property @var string The syllabus classification of this gradeable */
@@ -800,7 +801,7 @@ class Gradeable extends AbstractModel {
      * @return boolean
      */
     public function isGradeByRegistration() {
-        if ($this->getGraderAssignmentMethod() == 1) {
+        if ($this->getGraderAssignmentMethod() == GradingMethod::REGISTRATION_SECTION) {
             return true;
         }
         return false;
