@@ -4,7 +4,6 @@ namespace app\models\gradeable;
 
 use app\libraries\DateUtils;
 use app\libraries\GradeableType;
-use app\libraries\GradingMethod;
 use app\exceptions\ValidationException;
 use app\exceptions\NotImplementedException;
 use app\libraries\Utils;
@@ -81,6 +80,11 @@ use app\models\User;
  * @method void setHasDueDate($has_due_date)
  */
 class Gradeable extends AbstractModel {
+    /* Enum range for grader_assignment_method */
+    const ROTATING_SECTION = 0;
+    const REGISTRATION_SECTION = 1;
+    const ALL_ACCESS = 2;
+
     /* Properties for all types of gradeables */
 
     /** @property @var string The course-wide unique gradeable id */
@@ -92,7 +96,7 @@ class Gradeable extends AbstractModel {
     /** @property @var int The type of gradeable */
     protected $type = GradeableType::ELECTRONIC_FILE;
     /** @property @var int If the gradeable should be graded by all access (2) by registration section (1) or rotating sections (0) */
-    protected $grader_assignment_method = GradingMethod::REGISTRATION_SECTION;
+    protected $grader_assignment_method = Gradeable::REGISTRATION_SECTION;
     /** @property @var int The minimum user group that can grade this gradeable (1=instructor) */
     protected $min_grading_group = 1;
     /** @property @var string The syllabus classification of this gradeable */
@@ -801,7 +805,7 @@ class Gradeable extends AbstractModel {
      * @return boolean
      */
     public function isGradeByRegistration() {
-        if ($this->getGraderAssignmentMethod() == GradingMethod::REGISTRATION_SECTION) {
+        if ($this->getGraderAssignmentMethod() == Gradeable::REGISTRATION_SECTION) {
             return true;
         }
         return false;

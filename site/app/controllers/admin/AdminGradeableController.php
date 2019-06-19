@@ -6,7 +6,6 @@ use app\controllers\AbstractController;
 use app\exceptions\ValidationException;
 use app\libraries\DateUtils;
 use app\libraries\GradeableType;
-use app\libraries\GradingMethod;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\Component;
 use app\models\gradeable\Mark;
@@ -172,7 +171,7 @@ class AdminGradeableController extends AbstractController {
 
         // The current gradeable will always load its grader history,
         // but if it is grade by registration it should not be in $rotating_gradeables array
-        if ($gradeable->getGraderAssignmentMethod() == GradingMethod::REGISTRATION_SECTION) {
+        if ($gradeable->getGraderAssignmentMethod() == Gradeable::REGISTRATION_SECTION) {
             $current_g_id_key = array_search($gradeable->getId(),$rotating_gradeables);
             unset($rotating_gradeables[$current_g_id_key]);
             $rotating_gradeables = array_values($rotating_gradeables);
@@ -685,7 +684,7 @@ class AdminGradeableController extends AbstractController {
         $gradeable_type = GradeableType::stringToType($details['type']);
         $gradeable_create_data = [
             'type' => $gradeable_type,
-            'grader_assignment_method' => GradingMethod::REGISTRATION_SECTION,
+            'grader_assignment_method' => Gradeable::REGISTRATION_SECTION,
             'min_grading_group' => 1,
         ];
 
@@ -718,7 +717,7 @@ class AdminGradeableController extends AbstractController {
         } else {
             $non_template_property_values = [
                 'min_grading_group' => 1,
-                'grader_assignment_method' => GradingMethod::REGISTRATION_SECTION,
+                'grader_assignment_method' => Gradeable::REGISTRATION_SECTION,
                 'ta_instructions' => '',
                 'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/upload_only/config',
                 'student_view' => true,
