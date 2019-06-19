@@ -4,6 +4,7 @@ namespace app\controllers\course;
 
 use app\controllers\AbstractController;
 use app\libraries\FileUtils;
+use app\libraries\Utils;
 
 class CourseMaterialsController extends AbstractController {
     public function run() {
@@ -58,11 +59,10 @@ class CourseMaterialsController extends AbstractController {
                 'action' => 'view_course_materials_page')));
         }
 
-        if ( unlink($path) )
-        {
+        if (unlink($path)) {
             $this->core->addSuccessMessage(basename($path) . " has been successfully removed.");
         }
-        else{
+        else {
             $this->core->addErrorMessage("Failed to remove " . basename($path));
         }
 
@@ -102,10 +102,9 @@ class CourseMaterialsController extends AbstractController {
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
         $json = FileUtils::readJsonFile($fp);
 
-        if ($json != false)
-        {
+        if ($json != false) {
             $all_files = FileUtils::getAllFiles($path);
-            foreach($all_files as $file){
+            foreach($all_files as $file) {
                 $filename = $file['path'];
                 unset($json[$filename]);
             }
@@ -113,11 +112,10 @@ class CourseMaterialsController extends AbstractController {
             file_put_contents($fp, FileUtils::encodeJson($json));
         }
 
-        if ( FileUtils::recursiveRmdir($path) )
-        {
+        if (FileUtils::recursiveRmdir($path)) {
             $this->core->addSuccessMessage(basename($path) . " has been successfully removed.");
         }
-        else{
+        else {
             $this->core->addErrorMessage("Failed to remove " . basename($path));
         }
 
@@ -219,8 +217,7 @@ class CourseMaterialsController extends AbstractController {
             $release_datetime  = $json[$file_name]['release_datetime'];
         }
 
-        if (!isset($release_datetime))
-        {
+        if (!isset($release_datetime)) {
             $release_datetime = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
         }
 
