@@ -105,10 +105,11 @@
             {% elseif btn_type == 'admin_closed' %}
                 {# Admin, request is closed #}
                 <input type="submit" value="Post" class="btn btn-primary" style="margin:15px 0px 0px 5px; float: right" onclick="$('#status').val(0);">
-                <input type="button" class="btn btn-default" id="cancelRegrade" value="Submit Grade Inquiry" style="margin:15px 0px 0px 5px; float: right" onclick="changeRegradeStatus({{ thread_id }}, '{{ gradeable_id}}', '{{ submitter_id }}', -1);">
+                <input type="submit" class="btn btn-default" value="Submit Grade Inquiry" style="margin:15px 0px 0px 5px; float: right" onclick="changeRegradeStatus({{ thread_id }}, '{{ gradeable_id}}', '{{ submitter_id }}', -1);">
             {% else %}
                 {# No request yet #}
-                <input type="submit" value="Submit Grade Inquiry" class="btn btn-primary" style="float: right" onclick="$('#status').val(-1);">
+                {% set disabled = not has_submission ? "disabled" : ""  %}
+                <input type="submit" value="Submit Grade Inquiry" class="btn btn-primary {{ disabled }}" style="float: right" onclick="$('#status').val(-1);" {{ disabled }}>
             {% endif %}
         </div>
     </form>

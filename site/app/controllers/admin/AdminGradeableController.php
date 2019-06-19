@@ -1010,8 +1010,6 @@ class AdminGradeableController extends AbstractController {
         $this->core->getQueries()->deleteGradeable($g_id);
 
         $course_path = $this->core->getConfig()->getCoursePath();
-        $semester = $this->core->getConfig()->getSemester();
-        $course = $this->core->getConfig()->getCourse();
 
         $file = FileUtils::joinPaths($course_path, "config", "form", "form_" . $g_id . ".json");
         if ((file_exists($file)) && (!unlink($file))) {
@@ -1021,7 +1019,7 @@ class AdminGradeableController extends AbstractController {
         // this will cleanup the build files
         $this->enqueueBuildFile($g_id);
 
-        $this->returnToNav();
+        $this->core->redirect($this->core->buildNewCourseUrl());
     }
 
     private function writeFormConfig(Gradeable $gradeable) {
@@ -1165,8 +1163,8 @@ class AdminGradeableController extends AbstractController {
         } else {
             $this->core->addErrorMessage("Failed to update status of ".$g_id);
         }
-        $this->returnToNav();
 
+        $this->core->redirect($this->core->buildNewCourseUrl());
     }
 
     private function checkRefresh() {
@@ -1184,11 +1182,6 @@ class AdminGradeableController extends AbstractController {
         }
         $this->core->getOutput()->renderString($refresh_string);
         return array('refresh' => $refresh_bool, 'string' => $refresh_string);
-    }
-
-    //return to the navigation page
-    private function returnToNav() {
-        $this->core->redirect($this->core->buildUrl(array()));
     }
 
     private function redirectToEdit($gradeable_id) {

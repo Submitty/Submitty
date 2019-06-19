@@ -83,4 +83,46 @@ class WebRouterTester extends BaseUnitTest {
         $this->assertEquals("noAccess", $router->parameters['_method']);
     }
 
+    public function testParamAttackNotLoggedIn() {
+        $core = $this->createMockCore(['semester' => 's19', 'course' => 'sample']);
+        $request = Request::create(
+            "/home",
+            'GET',
+            ['_controller' => 'app\controllers\OtherController', '_method' => 'otherMethod']
+        );
+        $router = new WebRouter($request, $core, false);
+        $this->assertEquals("app\controllers\AuthenticationController", $router->parameters['_controller']);
+        $this->assertEquals("loginForm", $router->parameters['_method']);
+        $this->assertFalse(isset($router->controller_name));
+        $this->assertFalse(isset($router->method_name));
+        $router->run();
+        $this->assertFalse(isset($router->parameters['_controller']));
+        $this->assertFalse(isset($router->parameters['_method']));
+        $this->assertEquals("app\controllers\AuthenticationController", $router->controller_name);
+        $this->assertEquals("loginForm", $router->method_name);
+    }
+
+    public function testParamAttackLoggedIn() {
+        $core = $this->createMockCore(
+            ['semester' => 's19', 'course' => 'sample', 'access_all' => true],
+            [],
+            ["getUnarchivedCoursesById" => array(), "getArchivedCoursesById" => array()],
+            ["canI" => true]
+        );
+        $request = Request::create(
+            "/home",
+            'GET',
+            ['_controller' => 'app\controllers\OtherController', '_method' => 'otherMethod']
+        );
+        $router = new WebRouter($request, $core, true);
+        $this->assertEquals("app\controllers\HomePageController", $router->parameters['_controller']);
+        $this->assertEquals("showHomepage", $router->parameters['_method']);
+        $this->assertFalse(isset($router->controller_name));
+        $this->assertFalse(isset($router->method_name));
+        $router->run();
+        $this->assertEquals("app\controllers\OtherController", $router->parameters['_controller']);
+        $this->assertEquals("otherMethod", $router->parameters['_method']);
+        $this->assertEquals("app\controllers\HomePageController", $router->controller_name);
+        $this->assertEquals("showHomepage", $router->method_name);
+    }
 }
