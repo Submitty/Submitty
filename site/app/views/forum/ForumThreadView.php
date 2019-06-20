@@ -872,15 +872,13 @@ class ForumThreadView extends AbstractView {
 
         $this->core->getOutput()->addVendorCss('flatpickr/flatpickr.min.css');
 
-        $categories = "";
         $category_colors;
 
-        if($this->core->getUser()->accessGrading()){
-            $categories = $this->core->getQueries()->getCategories();
+        $categories = $this->core->getQueries()->getCategories();
 
-            $dummy_category = array('color' => '#000000', 'category_desc' => 'dummy', 'category_id' => "dummy");
-            array_unshift($categories, $dummy_category);
-        }
+        $dummy_category = array('color' => '#000000', 'category_desc' => 'dummy', 'category_id' => "dummy");
+        array_unshift($categories, $dummy_category);
+
 
         $buttons = array(
             array(
