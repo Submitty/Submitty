@@ -22,12 +22,15 @@
     padding-left: 3rem;
 }
 
-/* Push recent and clear buttons down a little bit */
+/* Push recent and clear buttons down a little bit and shrink them slightly */
 .notebook .sa_clear_reset,
 .notebook .codebox_clear_reset,
-.notebook .mc_recent
+.notebook .mc_recent,
+.notebook .mc_clear
 {
     margin-top: 7px;
+    padding: 3px 6px;
+    font-size: 80%;
 }
 
 /* Set default font for short_answer boxes */
@@ -48,4 +51,25 @@
 .mc > label > *
 {
     margin-top: 0;
+}
+
+/* Style the color of notebook feedback messages */
+.notebook .feedback_msg_failure
+{
+    color: red;
+}
+
+.notebook .feedback_msg_warning
+{
+    color: orange;
+}
+
+.notebook .feedback_msg_info
+{
+    color: blue;
+}
+
+.notebook .feedback_msg_success
+{
+    color: green;
 }
