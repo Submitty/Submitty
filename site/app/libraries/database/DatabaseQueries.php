@@ -3653,22 +3653,11 @@ AND gc_id IN (
     }
 
     /**
-     * Gets a list of emails for all active particpants in a course
-     */
-    public function getClassEmailList(){
-        $parameters = array();
-        $this->course_db->query('SELECT user_email FROM users WHERE user_group != 4 OR registration_section IS NOT null', $parameters);
-
-        return $this->course_db->rows();
-    }
-
-    /**
     * Gets a list of emails with user ids for all active particpants in a course
     */
-
-    public function getClassEmailListWithIds() {
+    public function getEmailListWithIds() {
       $parameters = array();
-      $this->course_db->query('SELECT user_id, user_email FROM users WHERE registration_section IS NOT null', $parameters);
+      $this->course_db->query('SELECT user_id, user_email, user_group, registration_section FROM users WHERE user_group != 4 OR registration_section IS NOT null', $parameters);
 
       return $this->course_db->rows();
     }
@@ -3679,15 +3668,16 @@ AND gc_id IN (
      * @param Email $recipient
      */
     public function createEmail($email){
-        $parameters = array($email->getRecipient(), $email->getSubject(), $email->getBody());
+        $parameters = array($email->getUserId(), $email->getRecipient(), $email->getSubject(), $email->getBody());
 
         $this->submitty_db->query("
             INSERT INTO emails(
+              user_id,
               recipient,
               subject,
               body,
               created)
-            VALUES(?, ?, ?, NOW())", $parameters);
+            VALUES(?, ?, ?, ?, NOW())", $parameters);
     }
 
     /**
