@@ -10,4 +10,5 @@
 # automatically.
 #
 # Run the send_email.py script every minute
-* * * * * submitty_daemon   python3 ${SUBMITTY_INSTALL_DIR}/sbin/send_email.py
+#* * * * * submitty_daemon   python3 ${SUBMITTY_INSTALL_DIR}/sbin/send_email.py
+* * * * * submitty_daemon   python3 /usr/local/submitty/sbin/send_email.py
