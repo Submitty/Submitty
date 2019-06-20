@@ -175,10 +175,10 @@ class BulkUpload(CourseJob):
     def add_permissions_recursive(self,top_dir,root_perms,dir_perms,file_perms):
         for root, dirs, files in os.walk(top_dir):
             self.add_permissions(root,root_perms)
-        for d in dirs:
-            self.add_permissions(os.path.join(root, d),dir_perms)
-        for f in files:
-            self.add_permissions(os.path.join(root, f),file_perms)
+            for d in dirs:
+                self.add_permissions(os.path.join(root, d),dir_perms)
+            for f in files:
+                self.add_permissions(os.path.join(root, f),file_perms)
 
     def run_job(self):
         semester = self.job_details['semester']
@@ -237,7 +237,6 @@ class BulkUpload(CourseJob):
             print(msg)
             traceback.print_exc()
             logger.write_to_log(log_file_path, msg + "\n" + traceback.format_exc())
-            root_split_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads/split_pdf")
         except Exception as err:
             msg = "Process " + str(pid) + ": Failed while parsing args and creating paths"
             print(msg)
@@ -290,7 +289,7 @@ class BulkUpload(CourseJob):
         # reset permissions just in case, group needs read/write
         # access so submitty_php can view & delete pdfs when they are
         # assigned to a student and/or deleted
-        self.add_permissions_recursive(root_split_path,
+        self.add_permissions_recursive(split_path,
                                        stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |   stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP |   stat.S_ISGID,
                                        stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |   stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP |   stat.S_ISGID,
                                        stat.S_IRUSR | stat.S_IWUSR |                  stat.S_IRGRP | stat.S_IWGRP                                  )
