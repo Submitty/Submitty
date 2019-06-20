@@ -176,12 +176,28 @@ class ElectronicGraderView extends AbstractView {
                 //END OF ELSE
             }
         }
+
+        //determines if there are any valid rotating sections
+        $no_rotating_sections = false;
+        if (count($sections) === 0) {
+            $no_rotating_sections = true;
+        }
+        else {
+            if ($gradeable->isTeamAssignment()) {
+                $valid_teams_or_students = 0;
+                foreach ($sections as $section) {
+                    $valid_teams_or_students+= $section['no_team']+$section['team'];
+                }
+                $no_rotating_sections = $valid_teams_or_students === 0;
+            }
+        }
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Status.twig", [
             "gradeable_id" => $gradeable->getId(),
             "gradeable_title" => $gradeable->getTitle(),
             "team_assignment" => $gradeable->isTeamAssignment(),
             "ta_grades_released" => $gradeable->isTaGradeReleased(),
-            "rotating_sections_error" => (!$gradeable->isGradeByRegistration()) and ($total_students == 0),
+            "rotating_sections_error" => (!$gradeable->isGradeByRegistration()) and $no_rotating_sections
+                and $this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR,
             "autograding_non_extra_credit" => $gradeable->getAutogradingConfig()->getTotalNonExtraCredit(),
             "peer" => $peer,
             "team_total" => $team_total,
