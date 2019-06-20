@@ -24,11 +24,7 @@ try:
         DATABASE_CONFIG = json.load(open_file)
 
 except Exception as config_fail_error:
-<<<<<<< HEAD
-    print("[{}] ERRORL: CORE SUBMITTY CONFIGURATION ERROR {}".format(
-=======
     print("[{}] ERROR: CORE SUBMITTY CONFIGURATION ERROR {}".format(
->>>>>>> 3aa3b749165588b967eb76ba56b003b213a4ae07
         str(datetime.datetime.now()), str(config_fail_error)))
     exit(-1)
 
@@ -100,16 +96,11 @@ def construct_mail_client():
 def get_email_queue(db):
     """Get an active queue of emails waiting to be sent."""
     result = db.execute(
-<<<<<<< HEAD
-        "SELECT id, user_id, recipient, subject, body FROM emails " +
-        "WHERE sent IS NULL and error = '' ORDER BY id LIMIT 100;")
-=======
         "SELECT emails.id, emails.user_id, users.user_email, emails.subject," +
         " emails.body FROM emails INNER JOIN users ON" +
         " emails.user_id = users.user_id WHERE" +
         " emails.sent is NULL AND emails.error = ''" +
         " ORDER BY id LIMIT 100;")
->>>>>>> 3aa3b749165588b967eb76ba56b003b213a4ae07
 
     queued_emails = []
     for row in result:
@@ -167,18 +158,10 @@ def send_email():
 
     for email_data in queued_emails:
         if email_data["send_to"] == "":
-<<<<<<< HEAD
-            store_error(email_data["id"], db, "ERROR: empty email address")
-            e = "[{}] ERROR: empty email address for recipient {}".format(
-                str(datetime.datetime.now()), email_data["user_id"])
-            LOG_FILE.write(e+"\n")
-            print(e)
-=======
             store_error(email_data["id"], db, "WARNING: empty email address")
             e = "[{}] WARNING: empty email address for recipient {}".format(
                 str(datetime.datetime.now()), email_data["user_id"])
             LOG_FILE.write(e+"\n")
->>>>>>> 3aa3b749165588b967eb76ba56b003b213a4ae07
             continue
 
         email = construct_mail_string(
@@ -204,10 +187,6 @@ def send_email():
     e = "[{}] Sucessfully Emailed {} Users".format(
         str(datetime.datetime.now()), success_count)
     LOG_FILE.write(e+"\n")
-<<<<<<< HEAD
-    print(e)
-=======
->>>>>>> 3aa3b749165588b967eb76ba56b003b213a4ae07
 
 
 def main():

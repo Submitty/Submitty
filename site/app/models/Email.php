@@ -10,12 +10,10 @@ use app\libraries\Utils;
  * @method void     setSubject($sub)
  * @method void     setBody($bod)
  * @method void     setUserId($uid)
- * @method void     setRecipient($recip)
 
  * @method string   getSubject()
  * @method string   getBody()
  * @method string   getUserId()
- * @method string   getRecipient()
  */
 class Email extends AbstractModel {
     /** @property @var string Subject line of email */
@@ -25,10 +23,6 @@ class Email extends AbstractModel {
     /** @property @var string user name */
     protected $user_id;
 
-    /** @property @var string Intended receiver of email */
-    // NOTE: THIS IS ESSENTIALLY A DEPRECATED / LEGACY FIELD
-    protected $recipient;
-
 
   /**
    * Email constructor.
@@ -37,15 +31,14 @@ class Email extends AbstractModel {
    * @param array $details
    */
 
-    public function __construct(Core $core, $details=array()) {
+    public function __construct(Core $core,array $event) {
         parent::__construct($core);
-        if (count($details) == 0) {
+        if (count($event) == 0) {
             return;
         }
-        $this->setUserId($details["user_id"]);
-        $this->setRecipient($details["recipient"]);
-        $this->setSubject($this->formatSubject($details["subject"]));
-        $this->setBody($this->formatBody($details["body"]));
+        $this->setUserId($event["user_id"]);
+        $this->setSubject($this->formatSubject($event["subject"]));
+        $this->setBody($this->formatBody($event["content"]));
     }
 
     //inject course label into subject

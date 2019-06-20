@@ -7,17 +7,10 @@ store user_id instead of just the email address.
 def up(config, database):
 
     # user_email is now an optional field in the users table
-<<<<<<< HEAD
-    database.execute("ALTER TABLE ONLY users ALTER COLUMN user_email SET DATA TYPE character varying NOT NULL")
-
-    # add an error column to the emails table
-    database.execute("ALTER TABLE emails ADD COLUMN IF NOT EXISTS error CHARACTER VARYING DEFAULT ''")
-=======
     database.execute("ALTER TABLE users ALTER COLUMN user_email TYPE character varying, ALTER COLUMN user_email SET NOT NULL")
 
     # add an error column to the emails table
     database.execute("ALTER TABLE emails ADD COLUMN IF NOT EXISTS error CHARACTER VARYING NOT NULL DEFAULT ''")
->>>>>>> 3aa3b749165588b967eb76ba56b003b213a4ae07
 
     # add a user_id column to the emails table
     database.execute("ALTER TABLE emails ADD COLUMN IF NOT EXISTS user_id CHARACTER VARYING")

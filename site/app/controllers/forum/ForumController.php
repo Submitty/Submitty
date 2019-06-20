@@ -5,13 +5,10 @@ namespace app\controllers\forum;
 use app\libraries\Core;
 use app\libraries\database\DatabaseQueries;
 use app\models\Notification;
-use app\models\Email;
 use app\controllers\AbstractController;
 use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\libraries\DateUtils;
-use app\NotificationListener;
-use Symfony\Component\EventDispatcher\GenericEvent;
 
 
 /**
@@ -378,23 +375,20 @@ class ForumController extends AbstractController{
 
                 }
 
-                // NOTIFICATION/EMAIL
                 $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
                 if ($announcement) {
                     $content = "New Announcement: ".$thread_title;
-                    $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content];
+                    $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => 'New Announcement'];
                     $this->core->getNotificationFactory()->onNewAnnouncement($event);
                 }
                 // Just a thread
                 else {
                     $content = "New Thread: ".$thread_title;
-                    $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content];
+                    $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => 'New Thread'];
                     $this->core->getNotificationFactory()->onNewThread($event);
                 }
 
-                if($email_announcement) {
-                    $this->sendEmailAnnouncement($thread_title, $thread_post_content);
-                }
+
                 $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id));
             }
         }
@@ -520,7 +514,8 @@ class ForumController extends AbstractController{
             $post_author_id = $post['author_user_id'];
             $metadata = json_encode(array());
             $content = "Deleted: A thread/post '".Notification::textShortner($post["content"])."' was deleted ";
-            $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
+            $subject = "Your post was deleted";
+            $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
             $this->core->getNotificationFactory()->onPostModified($event);
 
             $this->core->getQueries()->removeNotificationsPost($post_id);
@@ -538,7 +533,8 @@ class ForumController extends AbstractController{
                 $post_author_id = $post['author_user_id'];
                 $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id));
                 $content = "Undeleted: A thread/post '".Notification::textShortner($post["content"])."' has been undeleted ";
-                $event = ['component' => "forum", 'metadata' => $metadata, 'content' => $content, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
+                $subject = "Your post was undeleted";
+                $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
                 $this->core->getNotificationFactory()->onPostModified($event);
                 $type = "post";
                 $this->core->getOutput()->renderJson($response = array('type' => $type));
@@ -582,11 +578,11 @@ class ForumController extends AbstractController{
                 }
             }
             if($any_changes) {
-                // NOTIFICATION/EMAIL :: Notify author
                 $post_author_id = $post['author_user_id'];
                 $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id));
                 $content = "Update: A thread/post '".Notification::textShortner($post["content"]);
-                $event = ["component" => "forum", 'metadata' => $metadata, 'content' => $content, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
+                $subject = "A thread/post was edited";
+                $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
                 $this->core->getNotificationFactory()->onPostModified($event);
             }
             if($isError) {
@@ -630,7 +626,8 @@ class ForumController extends AbstractController{
                     $parent_thread_title =$this->core->getQueries()->getThreadTitle($parent_thread_id)['title'];
                     $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $parent_thread_id), (string)$child_root_post));
                     $content = "Thread Merged: '".Notification::textShortner($child_thread_title)."' got merged into '".Notification::textShortner($parent_thread_title);
-                    $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'recipient' => $child_thread_author, 'preference' => 'merge_threads'];
+                    $subject = "A thread was merged";
+                    $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $child_thread_author, 'preference' => 'merge_threads'];
                     $this->core->getNotificationFactory()->onPostModified($event);
                     $this->core->addSuccessMessage("Threads merged!");
                     $thread_id = $parent_thread_id;
@@ -944,30 +941,5 @@ class ForumController extends AbstractController{
         }
         ksort($users);
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'statPage', $users);
-    }
-
-
-
-    private function sendEmailAnnouncement($thread_title, $thread_content) {
-      $class_list = $this->core->getQueries()->getEmailListWithIds();
-      $formatted_body = "An Instructor/TA made an announcement in the Submitty discussion forum:\n\n".$thread_content;
-
-      foreach($class_list as $user) {
-          $user_id = $user['user_id'];
-          $user_email = $user['user_email'];
-          $user_group = $user['user_group'];
-          $registration_section = $user['registration_section'];
-
-          $email_data = array(
-              "subject" => $thread_title,
-              "body" => $formatted_body,
-              "recipient" => $user_email,
-              "user_id" => $user_id
-          );
-
-          $announcement_email = new Email($this->core, $email_data);
-          $this->core->getQueries()->createEmail($announcement_email);
-      }
-
     }
 }

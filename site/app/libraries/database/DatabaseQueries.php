@@ -2595,34 +2595,50 @@ AND gc_id IN (
             $this->getTeamIdFromAnonId($anon_id);
     }
 
+    // NOTIFICATION/EMAIL QUERIES
+
     /**
-     * get all users except the current user
+     * get all users' ids
      *
      * @Param string $current_user_id
      */
-
     public function getAllUsersIds() {
         $query = "SELECT user_id FROM users";
         $this->course_db->query($query);
         return $this->rowsToArrayUserIds($this->course_db->rows());
     }
 
+    /**
+     * Get all users with a preference
+     * @param string $column
+     * @return array
+     */
     public function getAllUsersWithPreference(string $column) {
         $query = "SELECT user_id FROM notification_settings WHERE {$column} = 'true'";
         $this->course_db->query($query);
         return $this->rowsToArrayUserIds($this->course_db->rows());
     }
 
-    public function getAllThreadAuthors($thread_id) {
+    /**
+     * returns all authors who want to be notified if a post has been made in a thread they have posted in
+     * @param $thread_id
+     * @param $column ("reply_in_thread" or "reply_in_thread_email")
+     * @return array
+     */
+    public function getAllThreadAuthors($thread_id, $column) {
         $query = "SELECT author_user_id AS user_id FROM posts WHERE thread_id = {$thread_id} AND
                   EXISTS (
                   SELECT user_id FROM notification_settings WHERE
-                  user_id = author_user_id AND reply_in_post_thread = 'true');";
+                  user_id = author_user_id AND {$column} = 'true');";
         $this->course_db->query($query);
         return $this->rowsToArrayUserIds($this->course_db->rows());
 
     }
 
+    /*
+     * helper function to convert rows array to one dimensional array of user ids
+     *
+     */
     protected function rowsToArrayUserIds($rows) {
         $result = array();
         foreach ($rows as $row) {
@@ -2631,22 +2647,42 @@ AND gc_id IN (
         return $result;
     }
 
-    /**
-     * Generate notification rows
-     *
-     * @param Notification $notification
+    /*
+     * formats array of recipients to a string ie. [aphacker, aufded, bauchg] = 'aphacker','aufded','bauchg'
+     * @param array $recipients
      */
-    public function pushNotification($notification,$recipients){
-        $params = array();
-        $params[] = $notification->getComponent();
-        $params[] = $notification->getNotifyMetadata();
-        $params[] = $notification->getNotifyContent();
-        $params[] = $notification->getNotifySource();
+    private function formatRecipients(array $recipients) {
+        $formatted_recipients = implode("','",$recipients);
+        $formatted_recipients = "'{$formatted_recipients}'";
+        return $formatted_recipients;
+    }
+
+    /**
+     * Sends notifications to all recipients
+     * @param $notification
+     * @param $recipients
+     */
+    public function pushNotifications($notification, $recipients){
+        $params = array($notification->getComponent(), $notification->getNotifyMetadata(), $notification->getNotifyContent(), $notification->getNotifySource());
+        $formatted_recipients = $this->formatRecipients($recipients);
         $this->course_db->query("INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id)
                     SELECT ?, ?, ?, current_timestamp, ?, recipient 
-                    FROM unnest(ARRAY[{$recipients}]) recipient", $params);
+                    FROM unnest(ARRAY[{$formatted_recipients}]) recipient", $params);
 
 
+    }
+
+    /**
+     * Queues emails for all given recipients to be sent by email job
+     * @param Email $email
+     * @param string $recipients
+     */
+    public function pushEmails(Email $email, array $recipients){
+        $parameters = array($email->getSubject(), $email->getBody());
+        $formatted_recipients = $this->formatRecipients($recipients);
+        $this->submitty_db->query("
+            INSERT INTO emails(recipient, subject, body, created, user_id)
+            SELECT 'BLANK_EMAIL', ?, ?, NOW(),recipient FROM unnest(ARRAY[{$formatted_recipients}]) recipient", $parameters);
     }
 
     /**
@@ -3684,24 +3720,6 @@ AND gc_id IN (
       $this->course_db->query('SELECT user_id, user_email, user_group, registration_section FROM users WHERE user_group != 4 OR registration_section IS NOT null', $parameters);
 
       return $this->course_db->rows();
-    }
-
-    /**
-     * Queues an email to be sent by email job
-     * @param array $email_data
-     * @param Email $recipient
-     */
-    public function createEmail($email){
-        $parameters = array($email->getUserId(), $email->getRecipient(), $email->getSubject(), $email->getBody());
-
-        $this->submitty_db->query("
-            INSERT INTO emails(
-              user_id,
-              recipient,
-              subject,
-              body,
-              created)
-            VALUES(?, ?, ?, ?, NOW())", $parameters);
     }
 
     /**
