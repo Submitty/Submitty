@@ -11,13 +11,3 @@ def up(config):
     :type config: migrator.config.Config
     """
     os.system("pip3 install requests-html")
-
-
-def down(config):
-    """
-    Run down migration (rollback).
-
-    :param config: Object holding configuration details about Submitty
-    :type config: migrator.config.Config
-    """
-    pass
