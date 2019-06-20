@@ -840,7 +840,14 @@ class Course(object):
                                 os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, gradeable_path))
                             if not os.path.exists(submission_path):
                                 os.makedirs(submission_path)
-                            active_version = random.choice(range(1, versions_to_submit+1))
+                            # Reduce the propability to get a canceled submission (active_version = 0)
+                            # This is done my making other possibilities three times more likely
+                            version_population = []
+                            for version in range(1, versions_to_submit+1):
+                                version_population.append((version, 3))
+                            version_population = [(0,1)] + version_population
+                            version_population = [ver for ver, freq in version_population for i in range(freq)]
+                            active_version = random.choice(version_population)
                             if team_id is not None:
                                 json_history = {"active_version": active_version, "history": [], "team_history": []}
                             else:

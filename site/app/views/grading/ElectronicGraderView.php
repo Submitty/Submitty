@@ -35,6 +35,7 @@ class ElectronicGraderView extends AbstractView {
         array $sections,
         array $component_averages,
         $autograded_average,
+        $overall_scores,
         $overall_average,
         int $total_submissions,
         int $registered_but_not_rotating,
@@ -69,6 +70,7 @@ class ElectronicGraderView extends AbstractView {
         $component_overall_score = 0;
         $component_overall_max = 0;
         $component_overall_percentage = 0;
+        $this->core->getOutput()->addInternalJs('plotly-1.48.3.min.js');
 
         foreach ($sections as $key => $section) {
             if ($key === "NULL") {
@@ -174,7 +176,6 @@ class ElectronicGraderView extends AbstractView {
                 //END OF ELSE
             }
         }
-
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Status.twig", [
             "gradeable_id" => $gradeable->getId(),
             "gradeable_title" => $gradeable->getTitle(),
@@ -199,6 +200,7 @@ class ElectronicGraderView extends AbstractView {
             "viewed_total" => $viewed_total,
             "viewed_percent" => $viewed_percent,
             "overall_average" => $overall_average,
+            "overall_scores" => $overall_scores,
             "overall_total" => $overall_total,
             "overall_percentage" => $overall_percentage,
             "autograded_percentage" => $autograded_percentage,
@@ -549,6 +551,7 @@ HTML;
                 "team_edit_onclick" => "adminTeamForm(false, '{$team->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, [], [],{$gradeable->getTeamSizeMax()});"
             ];
         }
+
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
             "gradeable" => $gradeable,
             "sections" => $sections,

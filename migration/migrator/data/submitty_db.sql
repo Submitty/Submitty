@@ -56,7 +56,7 @@ CREATE TABLE emails (
     body TEXT NOT NULL,
     created TIMESTAMP WITHOUT TIME zone NOT NULL,
     sent TIMESTAMP WITHOUT TIME zone,
-    error character varying
+    error character varying NOT NULL default ''
 );
 
 
@@ -125,7 +125,7 @@ CREATE TABLE users (
     user_preferred_firstname character varying,
     user_lastname character varying NOT NULL,
     user_preferred_lastname character varying,
-    user_email character varying,
+    user_email character varying NOT NULL,
     user_updated BOOLEAN NOT NULL DEFAULT FALSE,
     instructor_updated BOOLEAN NOT NULL DEFAULT FALSE,
     last_updated timestamp(6) with time zone,
