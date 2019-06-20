@@ -325,8 +325,11 @@ class User extends AbstractModel {
    		    //Preferred first and last name may be "", alpha chars, white-space, certain punctuation AND between 0 and 30 chars.
    		    return preg_match("~^[a-zA-Z'`\-\.\(\) ]{0,30}$~", $data) === 1;
 		case 'user_email':
-			//Check email address for appropriate format. e.g. "user@university.edu", "user@cs.university.edu", etc.
-			return preg_match("~^[^(),:;<>@\\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?<!\-)(\.[a-zA-Z0-9]+)+$~", $data) === 1;
+                    // emails are allowed to be the empty string...
+                    if ($data === "") return true;
+                    // -- or ---
+                    // Check email address for appropriate format. e.g. "user@university.edu", "user@cs.university.edu", etc.
+                    return preg_match("~^[^(),:;<>@\\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?<!\-)(\.[a-zA-Z0-9]+)+$~", $data) === 1;
 		case 'user_group':
             //user_group check is a digit between 1 - 4.
 			return preg_match("~^[1-4]{1}$~", $data) === 1;

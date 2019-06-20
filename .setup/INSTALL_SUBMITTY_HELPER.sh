@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+# Fail the script if any command fails. If we need to capture the
+# exit code of a particular command, wrap it as so:
+# set +e
+# some_command
+# exit_code=$?
+# set -e
+set -e
+
 ########################################################################################################################
 ########################################################################################################################
 
@@ -55,6 +63,7 @@ fi
 ########################################################################################################################
 # CLONE OR UPDATE THE HELPER SUBMITTY CODE REPOSITORIES
 
+set +e
 /bin/bash ${SUBMITTY_REPOSITORY}/.setup/bin/update_repos.sh
 
 if [ $? -eq 1 ]; then
@@ -62,6 +71,7 @@ if [ $? -eq 1 ]; then
     echo -e "Exiting INSTALL_SUBMITTY_HELPER.sh\n"
     exit 1
 fi
+set -e
 
 
 ################################################################################################################
@@ -69,11 +79,12 @@ fi
 # REMEMBER IF THE ANY OF OUR DAEMONS ARE ACTIVE BEFORE INSTALLATION BEGINS
 # Note: We will stop & restart the daemons at the end of this script.
 #       But it may be necessary to stop the the daemons as part of the migration.
+set +e
 for i in "${DAEMONS[@]}"; do
     systemctl is-active --quiet ${i}
     declare is_${i}_active_before=$?
 done
-
+set -e
 
 ################################################################################################################
 ################################################################################################################
@@ -342,11 +353,13 @@ done
 mkdir -p ${SUBMITTY_INSTALL_DIR}/src/grading/lib
 pushd ${SUBMITTY_INSTALL_DIR}/src/grading/lib
 cmake ..
+set +e
 make
 if [ $? -ne 0 ] ; then
     echo "ERROR BUILDING AUTOGRADING LIBRARY"
     exit 1
 fi
+set -e
 popd > /dev/null
 
 # root will be owner & group of these files
@@ -505,7 +518,7 @@ clanginstall=${SUBMITTY_INSTALL_DIR}/clang-llvm/install
 
 ANALYSIS_TOOLS_REPO=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/AnalysisTools
 
-#copying commonAST scripts 
+# copying commonAST scripts
 mkdir -p ${clangsrc}/llvm/tools/clang/tools/extra/ASTMatcher/
 mkdir -p ${clangsrc}/llvm/tools/clang/tools/extra/UnionTool/
 
@@ -531,20 +544,21 @@ g++ commonAST/parser.cpp commonAST/traversal.cpp -o ${SUBMITTY_INSTALL_DIR}/Subm
 g++ commonAST/parserUnion.cpp commonAST/traversalUnion.cpp -o ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/unionCount.out
 popd > /dev/null
 
-# building clang ASTMatcher.cpp
-mkdir -p ${clanginstall}
-mkdir -p ${clangbuild}
-pushd ${clangbuild}
-# TODO: this cmake only needs to be done the first time...  could optimize commands later if slow?
-cmake .
-# FIXME: skipping this step until we actually use it, since it's expensive
-#ninja ASTMatcher UnionTool
-popd > /dev/null
+# FIXME: skipping this step as it has errors, and we don't use the output of it yet
 
-cp ${clangbuild}/bin/ASTMatcher ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/
-cp ${clangbuild}/bin/UnionTool ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/
-chmod o+rx ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/ASTMatcher
-chmod o+rx ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/UnionTool
+# building clang ASTMatcher.cpp
+# mkdir -p ${clanginstall}
+# mkdir -p ${clangbuild}
+# pushd ${clangbuild}
+# TODO: this cmake only needs to be done the first time...  could optimize commands later if slow?
+# cmake .
+#ninja ASTMatcher UnionTool
+# popd > /dev/null
+
+# cp ${clangbuild}/bin/ASTMatcher ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/
+# cp ${clangbuild}/bin/UnionTool ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/
+# chmod o+rx ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/ASTMatcher
+# chmod o+rx ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/UnionTool
 
 
 # change permissions
@@ -592,14 +606,18 @@ cat "${SUBMITTY_REPOSITORY}/.setup/submitty_crontab" | envsubst | cat - > "/etc/
 #############################################################
 # stop the any of the submitty daemons (if they're running)
 for i in "${DAEMONS[@]}"; do
+    set +e
     systemctl is-active --quiet ${i}
     is_active_now=$?
+    set -e
     if [[ "${is_active_now}" == "0" ]]; then
         systemctl stop ${i}
         echo -e "Stopped ${i}"
     fi
+    set +e
     systemctl is-active --quiet ${i}
     is_active_tmp=$?
+    set -e
     if [[ "$is_active_tmp" == "0" ]]; then
         echo -e "ERROR: did not successfully stop {$i}\n"
         exit 1
@@ -704,8 +722,10 @@ for i in "${DAEMONS[@]}"; do
     is_active=is_${i}_active_before
     if [[ "${!is_active}" == "0" ]]; then
         systemctl start ${i}
+        set +e
         systemctl is-active --quiet ${i}
         is_active_after=$?
+        set -e
         if [[ "$is_active_after" != "0" ]]; then
             echo -e "\nERROR!  Failed to restart ${i}\n"
         fi
@@ -767,6 +787,7 @@ if [ "${WORKER}" == 0 ]; then
         shift
         # pass any additional command line arguments to the run test suite
         rainbow_total=$((rainbow_total+1))
+        set +e
         python3 ${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_sample.py  "$@"
         
         if [[ $? -ne 0 ]]; then
@@ -775,6 +796,7 @@ if [ "${WORKER}" == 0 ]; then
             rainbow_counter=$((rainbow_counter+1))
             echo -e "\n[ SUCCEEDED ] sample test\n"
         fi
+        set -e
 
         echo -e "\nCompleted Rainbow Grades Test Suite. $rainbow_counter of $rainbow_total tests succeeded.\n"
     fi

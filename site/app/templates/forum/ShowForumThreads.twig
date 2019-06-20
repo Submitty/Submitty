@@ -1,0 +1,117 @@
+<style>body {min-width: 925px;}</style>
+
+<script>
+
+    $( document ).ready(function() {
+        enableTabsInTextArea('.post_content_reply');
+        saveScrollLocationOnRefresh('posts_list');
+        addCollapsable();
+        var b = $('#nav-buttons li a');
+        $.each(b, function(e) {
+            $(b[e]).tooltip('disable').attr('title', $(b[e]).attr('data-original-title'));
+        });
+        $('#'+'{{ display_option }}').attr('checked', 'checked'); //Saves the radiobutton state when refreshing the page
+        $(".post_reply_from").submit(publishPost);
+        $("form").areYouSure();
+    });
+
+</script>
+
+{%  include "forum/EditPostForm.twig" %}
+
+{%  include "forum/HistoryForm.twig" %}
+
+{%  include "forum/FilterForm.twig" with {
+    "categories" : filterFormData.categories,
+    "current_thread" : filterFormData.current_thread,
+    "current_category_ids" : filterFormData.current_category_ids,
+    "current_course" : filterFormData.current_course,
+    "cookie_selected_categories" : filterFormData.cookie_selected_categories,
+    "cookie_selected_thread_status" : filterFormData.cookie_selected_thread_status,
+    "cookie_selected_unread_value" : filterFormData.cookie_selected_unread_value,
+    "display_option" : filterFormData.display_option,
+    "thread_exists" : filterFormData.thread_exists
+} %}
+
+<div class="full_height content forum_content forum_show_threads">
+
+    {% if thread_exists == false %}
+
+        {%  include "forum/ForumBar.twig" with {
+            "current_thread" : button_params.current_thread,
+            "forum_bar_buttons_right" : button_params.forum_bar_buttons_right,
+            "show_more" : button_params.show_more,
+            "forum_bar_buttons_left" : button_params.forum_bar_buttons_left,
+            "show_threads" : button_params.show_threads,
+            "thread_exists" : button_params.thread_exists
+        } %}
+
+        <h4 style="text-align:center;">A thread hasn't been created yet. Be the first to do so!</h4>
+
+    {% else %}
+
+        {%  include "forum/ForumBar.twig" with {
+            "current_thread" : button_params.current_thread,
+            "forum_bar_buttons_right" : button_params.forum_bar_buttons_right,
+            "show_more" : button_params.show_more,
+            "show_threads" : button_params.show_threads,
+            "thread_exists" : button_params.thread_exists,
+            "more_data" : button_params.more_data,
+            "forum_bar_buttons_left" : button_params.forum_bar_buttons_left
+        } %}
+
+        <div style="position:relative; height:100%; overflow-y:hidden;" class="row">
+
+            <div id="thread_list" style="overflow-y: auto; height:81vh;" class="col-3" prev_page="{{ prev_page }}" next_page="{{ next_page }}">
+                <i class="fas fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
+                <i class="fas fa-caret-up fa-2x fa-fw fill-available" style="color:gray; {{ arrowup_visibility }}" aria-hidden="true"></i>
+
+                {% include "forum/displayThreadList.twig" with {
+                    "thread_content" : display_thread_content.thread_content,
+                } %}
+
+                <i class="fas fa-caret-down fa-2x fa-fw fill-available" style="color:gray;" aria-hidden="true"></i>
+                <i class="fas fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
+            </div>
+            <script type="text/javascript">
+                $(function(){
+                    dynamicScrollContentOnDemand($('#thread_list'), buildUrl({'component': 'forum', 'page': 'get_threads', 'page_number':'{{ '{{' }}#{{ '}}' }}'}), {{ currentThread }}, '', '{{ currentCourse }}');
+                    var active_thread = $('#thread_list .active');
+                    if(active_thread.length > 0) {
+                        active_thread[0].scrollIntoView(true);
+                    }
+                });
+            </script>
+            <div id="posts_list" style="overflow-y: auto; height:81vh;" class="col-9">
+
+                {% include "forum/GeneratePostList.twig" with {
+                    "userGroup" : generate_post_content.userGroup,
+                    "activeThread" : generate_post_content.activeThread,
+                    "activeThreadAnnouncement" : generate_post_content.activeThreadAnnouncement,
+                    "isCurrentFavorite": generate_post_content.isCurrentFavorite,
+                    "display_option" : generate_post_content.display_option,
+                    "post_data" : generate_post_content.post_data,
+                    "isThreadLocked" : generate_post_content.isThreadLocked,
+                    "accessFullGrading" : generate_post_content.accessFullGrading,
+                    "includeReply" : generate_post_content.includeReply,
+                    "thread_id" : generate_post_content.thread_id,
+                    "first_post_id" : generate_post_content.first_post_id,
+                    "form_action_link" : generate_post_content.form_action_link,
+                    "merge_thread_content" : generate_post_content.merge_thread_content,
+                    "csrf_token" : generate_post_content.csrf_token,
+                    "activeThreadTitle" : generate_post_content.activeThreadTitle,
+                    "post_box_id" : generate_post_content.post_box_id
+                } %}
+
+                <script>
+                    $(function() {
+                        generateCodeMirrorBlocks(document);
+                    });
+                </script>
+
+            </div>
+        </div>
+
+    {% endif %}
+
+</div>
