@@ -751,14 +751,16 @@ if [ ${WORKER} == 0 ]; then
 fi
 
 if [[ ${VAGRANT} == 1 ]]; then
-    # add email configuration stuff to database.json
-    jq '.email_sender |= "submitty@vagrant"' ${SUBMITTY_INSTALL_DIR}/config/database.json > ${SUBMITTY_INSTALL_DIR}/config/database.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/database.tmp ${SUBMITTY_INSTALL_DIR}/config/database.json
-    jq '.email_server_hostname |= "localhost"' ${SUBMITTY_INSTALL_DIR}/config/database.json > ${SUBMITTY_INSTALL_DIR}/config/database.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/database.tmp ${SUBMITTY_INSTALL_DIR}/config/database.json
-    jq '.email_server_port |= 25' ${SUBMITTY_INSTALL_DIR}/config/database.json > ${SUBMITTY_INSTALL_DIR}/config/database.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/database.tmp ${SUBMITTY_INSTALL_DIR}/config/database.json
-    jq '.email_logs_path |= "/var/local/submitty/logs/emails/"' ${SUBMITTY_INSTALL_DIR}/config/database.json > ${SUBMITTY_INSTALL_DIR}/config/database.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/database.tmp ${SUBMITTY_INSTALL_DIR}/config/database.json
-    jq '.email_reply_to |= "do-not-reply@vagrant"' ${SUBMITTY_INSTALL_DIR}/config/database.json > ${SUBMITTY_INSTALL_DIR}/config/database.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/database.tmp ${SUBMITTY_INSTALL_DIR}/config/database.json
-    chown root:${DAEMONPHP_GROUP} ${SUBMITTY_INSTALL_DIR}/config/database.json
-    chmod 440 ${SUBMITTY_INSTALL_DIR}/config/database.json
+    if [[ ! -f ${SUBMITTY_INSTALL_DIR}/config/email.json ]]; then
+        # add email configuration stuff to email.json
+        echo "{}" > ${SUBMITTY_INSTALL_DIR}/config/email.json
+        jq '.email_sender |= "submitty@vagrant"' ${SUBMITTY_INSTALL_DIR}/config/email.json > ${SUBMITTY_INSTALL_DIR}/config/email.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/email.tmp ${SUBMITTY_INSTALL_DIR}/config/email.json
+        jq '.email_server_hostname |= "localhost"' ${SUBMITTY_INSTALL_DIR}/config/email.json > ${SUBMITTY_INSTALL_DIR}/config/email.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/email.tmp ${SUBMITTY_INSTALL_DIR}/config/email.json
+        jq '.email_server_port |= 25' ${SUBMITTY_INSTALL_DIR}/config/email.json > ${SUBMITTY_INSTALL_DIR}/config/email.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/email.tmp ${SUBMITTY_INSTALL_DIR}/config/email.json
+        jq '.email_reply_to |= "do-not-reply@vagrant"' ${SUBMITTY_INSTALL_DIR}/config/email.json > ${SUBMITTY_INSTALL_DIR}/config/email.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/email.tmp ${SUBMITTY_INSTALL_DIR}/config/email.json
+    fi
+    chown root:${DAEMONPHP_GROUP} ${SUBMITTY_INSTALL_DIR}/config/email.json
+    chmod 440 ${SUBMITTY_INSTALL_DIR}/config/email.json
     rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/vagrant/nullsmtpd.service  /etc/systemd/system/nullsmtpd.service
     chown -R root:root /etc/systemd/system/nullsmtpd.service
     chmod 444 /etc/systemd/system/nullsmtpd.service

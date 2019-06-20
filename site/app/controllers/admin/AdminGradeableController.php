@@ -660,7 +660,7 @@ class AdminGradeableController extends AbstractController {
             $this->redirectToEdit($gradeable_id);
         } catch (\Exception $e) {
             $this->core->addErrorMessage($e);
-            $this->core->redirect($this->core->buildUrl());
+            $this->core->redirect($this->core->buildNewCourseUrl());
         }
     }
 
@@ -670,6 +670,7 @@ class AdminGradeableController extends AbstractController {
             throw new \InvalidArgumentException('Gradeable already exists');
         }
 
+        $default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
         // Create the gradeable with good default information
         //
         $gradeable_type = GradeableType::stringToType($details['type']);
@@ -714,7 +715,7 @@ class AdminGradeableController extends AbstractController {
                 'student_view' => true,
                 'student_view_after_grades' => false,
                 'student_submit' => true,
-                'late_days' => 0,
+                'late_days' => $default_late_days,
                 'precision' => 0.5
             ];
             $gradeable_create_data = array_merge($gradeable_create_data, $non_template_property_values);
@@ -1010,8 +1011,6 @@ class AdminGradeableController extends AbstractController {
         $this->core->getQueries()->deleteGradeable($g_id);
 
         $course_path = $this->core->getConfig()->getCoursePath();
-        $semester = $this->core->getConfig()->getSemester();
-        $course = $this->core->getConfig()->getCourse();
 
         $file = FileUtils::joinPaths($course_path, "config", "form", "form_" . $g_id . ".json");
         if ((file_exists($file)) && (!unlink($file))) {
@@ -1021,7 +1020,7 @@ class AdminGradeableController extends AbstractController {
         // this will cleanup the build files
         $this->enqueueBuildFile($g_id);
 
-        $this->core->redirect($this->core->buildNewUrl([$semester, $course]));
+        $this->core->redirect($this->core->buildNewCourseUrl());
     }
 
     private function writeFormConfig(Gradeable $gradeable) {
@@ -1166,9 +1165,7 @@ class AdminGradeableController extends AbstractController {
             $this->core->addErrorMessage("Failed to update status of ".$g_id);
         }
 
-        $semester = $this->core->getConfig()->getSemester();
-        $course = $this->core->getConfig()->getCourse();
-        $this->core->redirect($this->core->buildNewUrl([$semester, $course]));
+        $this->core->redirect($this->core->buildNewCourseUrl());
     }
 
     private function checkRefresh() {
@@ -1209,7 +1206,7 @@ class AdminGradeableController extends AbstractController {
      * Exports components to json and downloads for user
      */
     private function exportComponentsRequest() {
-        $url = $this->core->buildUrl([]);
+        $url = $this->core->buildNewCourseUrl();
 
         $gradeable_id = $_GET['gradeable_id'] ?? '';
 
