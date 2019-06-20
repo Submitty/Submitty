@@ -2548,51 +2548,39 @@ AND gc_id IN (
     }
 
     /**
-     * get all users except the current users
+     * get all users except the current user
      *
      * @Param string $current_user_id
      */
 
-    public function getAllOtherUsers(string $current_user_id) {
-        $query = "SELECT user_id FROM users WHERE user_id <> '".$current_user_id."'";
+    public function getAllUsersIds() {
+        $query = "SELECT user_id FROM users";
         $this->course_db->query($query);
-        return $this->course_db->rows();
+        return $this->rowsToArrayUserIds($this->course_db->rows());
     }
 
     public function getAllUsersWithPreference(string $column) {
         $query = "SELECT user_id FROM notification_settings WHERE {$column} = 'true'";
         $this->course_db->query($query);
-        return $this->course_db->rows();
-    }
-
-    // MOVE TO POSTGRESQL
-    public function getAllParentAuthors(string $post_author_id, string $post_id) {
-        $query = "WITH RECURSIVE parents AS (
-                  SELECT
-                    author_user_id, parent_id, id FROM  posts
-                  WHERE id = {$post_id}
-                  UNION SELECT
-                    p.author_user_id, p.parent_id, p.id, p.content
-                  FROM
-                    posts p
-                   INNER JOIN parents pa ON pa.parent_id = p.id
-                  ) SELECT DISTINCT 
-                    author_user_id
-                  FROM
-                    parents
-                   WHERE author_user_id <> '{$post_author_id}';";
-        $this->course_db->query($query);
-        return $this->course_db->rows();
+        return $this->rowsToArrayUserIds($this->course_db->rows());
     }
 
     public function getAllThreadAuthors($thread_id) {
-        $query = "SELECT author_user_id FROM posts WHERE thread_id = {$thread_id} AND
+        $query = "SELECT author_user_id AS user_id FROM posts WHERE thread_id = {$thread_id} AND
                   EXISTS (
                   SELECT user_id FROM notification_settings WHERE
                   user_id = author_user_id AND reply_in_post_thread = 'true');";
         $this->course_db->query($query);
-        return $this->course_db->rows();
+        return $this->rowsToArrayUserIds($this->course_db->rows());
 
+    }
+
+    protected function rowsToArrayUserIds($rows) {
+        $result = array();
+        foreach ($rows as $row) {
+            $result[] = $row['user_id'];
+        }
+        return $result;
     }
 
     /**
@@ -2606,11 +2594,9 @@ AND gc_id IN (
         $params[] = $notification->getNotifyMetadata();
         $params[] = $notification->getNotifyContent();
         $params[] = $notification->getNotifySource();
-
-        $target_users_query = "WHERE user_id IN (" . implode(',', $recipients) . ')';
-
         $this->course_db->query("INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id)
-                    SELECT ?, ?, ?, current_timestamp, ?, user_id as to_user_id FROM ({$target_users_query})", $params);
+                    SELECT ?, ?, ?, current_timestamp, ?, recipient 
+                    FROM unnest(ARRAY[{$recipients}]) recipient", $params);
 
 
     }

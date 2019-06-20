@@ -142,7 +142,7 @@ class SubmissionController extends AbstractController {
 
         try {
             $this->core->getQueries()->insertNewRegradeRequest($graded_gradeable, $user, $content);
-            $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'new_grade_inquiry');
+            $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'new');
             $this->core->getOutput()->renderJsonSuccess();
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
@@ -183,7 +183,7 @@ class SubmissionController extends AbstractController {
         try {
             $this->core->getQueries()->insertNewRegradePost($graded_gradeable->getRegradeRequest()->getId(), $user->getId(), $content);
             $graded_gradeable->getRegradeRequest()->setStatus($status);
-            $this->notifyGradeInquiryOnReply($graded_gradeable, $gradeable_id, $content);
+            $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'reply');
             $this->core->getQueries()->saveRegradeRequest($graded_gradeable->getRegradeRequest());
             $this->core->getOutput()->renderJsonSuccess();
         } catch (\InvalidArgumentException $e) {
@@ -1991,40 +1991,48 @@ class SubmissionController extends AbstractController {
           $submitter = $graded_gradeable->getSubmitter();
           $user_id = $this->core->getUser()->getId();
 
-          if ($type == 'new_grade_inquiry') {
+          if ($type == 'new') {
               // instructor/TA/Mentor submitted
               if ($this->core->getUser()->accessGrading()) {
                   $email_subject = "[Submitty $course] New Regrade Request";
                   $email_body = "A Instructor/TA/Mentor submitted a grade inquiry for gradeable $gradeable_id.\n$user_id writes:\n$content\n\nPlease visit Submitty to follow up on this request";
+                  $n_content = "An Instructor/TA/Mentor has made a new Grade Inquiry for ".$gradeable_id;
               }
               // student submitted
               else {
                   $email_subject = "[Submitty $course] New Regrade Request";
                   $email_body = "A student has submitted a grade inquiry for gradeable $gradeable_id.\n$user_id writes:\n$content\n\nPlease visit Submitty to follow up on this request";
+                  $n_content = "A student has submitted a new grade inquiry for ".$gradeable_id;
               }
-          } else {
+          } else if ($type == 'reply') {
               if ($this->core->getUser()->accessGrading()) {
                   $email_subject = "[Submitty $course] New Regrade Request";
                   $email_body = "A Instructor/TA/Mentor made a post in a grade inquiry for gradeable $gradeable_id.\n$user_id writes:\n$content\n\nPlease visit Submitty to follow up on this request";
+                  $n_content = "A instructor has replied to your Grade Inquiry for ".$gradeable_id;
               }
               // student submitted
               else {
                   $email_subject = "[Submitty $course] New Regrade Request";
                   $email_body = "A student has made a post in a grade inquiry for gradeable $gradeable_id.\n$user_id writes:\n$content\n\nPlease visit Submitty to follow up on this request";
+                  $n_content = "New reply in Grade Inquiry for ".$gradeable_id;
               }
+
           }
 
+          // send to graders
           $recipients = array();
           foreach ($graders as $grader) {
-              if ($grader->accessFullGrading && $grader->getId() != $user_id){
+              if ($grader->accessFullGrading() && $grader->getId() != $user_id){
                   $recipients[] = $grader->getId();
               }
           }
-          $metadata = json_encode(array(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable_id, 'who_id' => $grader->getId())));
-          $n_content = "New Grade Inquiry for ".$gradeable_id;
-          $event = ['metadata' => $metadata, 'content' => $n_content, 'recipients' => $recipients];
-          $this->core->getNotificationFactory()->onGradeInquiryEvent($event);
+          if (!empty($recipients)) {
+              $metadata = json_encode(array(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable_id, 'who_id' => $submitter->getId())));
+              $event = ['component' => 'grading', 'metadata' => $metadata, 'content' => $n_content, 'recipients' => $recipients];
+              $this->core->getNotificationFactory()->onGradeInquiryEvent($event);
+          }
 
+          // send to students
           $recipients = array();
           if($submitter->isTeam()){
               $submitting_team = $submitter->getTeam()->getMemberUsers();
@@ -2033,11 +2041,17 @@ class SubmissionController extends AbstractController {
                       $recipients[] = $submitting_user;
                   }
               }
+          } else {
+              if ($submitter->getUser()->getId() != $user_id) {
+                  $recipients[] = $submitter->getUser()->getId();
+              }
           }
-          $metadata = json_encode(array(array('component' => 'student', 'gradeable_id' => $gradeable_id, 'who_id' => $submitting_user->getId())));
-          $n_content = "New Grade Inquiry for ".$gradeable_id;
-          $event = ['metadata' => $metadata, 'content' => $n_content, 'recipients' => $recipients];
-          $this->core->getNotificationFactory()->onGradeInquiryEvent($event);
+          if (!empty($recipients)) {
+              $metadata = json_encode(array(array('component' => 'student', 'gradeable_id' => $gradeable_id)));
+              $event = ['component' => 'student', 'metadata' => $metadata, 'content' => $n_content, 'recipients' => $recipients];
+              $this->core->getNotificationFactory()->onGradeInquiryEvent($event);
+          }
+
 
           //TODO: Do emails
       }

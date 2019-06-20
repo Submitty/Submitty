@@ -381,14 +381,14 @@ class ForumController extends AbstractController{
                 // NOTIFICATION/EMAIL
                 $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
                 if ($announcement) {
-                    $content = "\"New Announcement: \".$thread_title";
-                    $event = ['metadata' => $metadata, 'content' => $content, 'component' => 'forum'];
+                    $content = "New Announcement: ".$thread_title;
+                    $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content];
                     $this->core->getNotificationFactory()->onNewAnnouncement($event);
                 }
                 // Just a thread
                 else {
-                    $content = "\"New Thread: \".$thread_title";
-                    $event = ['metadata' => $metadata, 'content' => $content, 'component' => 'forum'];
+                    $content = "New Thread: ".$thread_title;
+                    $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content];
                     $this->core->getNotificationFactory()->onNewThread($event);
                 }
 
@@ -458,7 +458,7 @@ class ForumController extends AbstractController{
                 // NOTIFICATION/EMAIL
                 $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
                 $content = "Reply: A post '".Notification::textShortner($post_content). "' got new a reply";
-                $event = ['metadata' => $metadata, 'content' => $content, 'post_id' => $post_id, 'thread_id' => $thread_id, 'component' => 'forum'];
+                $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'post_id' => $post_id, 'thread_id' => $thread_id];
                 $this->core->getNotificationFactory()->onNewPost($event);
 
                 $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'option' => $display_option, 'thread_id' => $thread_id));
@@ -520,7 +520,7 @@ class ForumController extends AbstractController{
             $post_author_id = $post['author_user_id'];
             $metadata = json_encode(array());
             $content = "Deleted: A thread/post '".Notification::textShortner($post["content"])."' was deleted ";
-            $event = ['metadata' => $metadata, 'content' => $content, 'recipient' => $post_author_id, 'component' => 'forum'];
+            $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
             $this->core->getNotificationFactory()->onPostModified($event);
 
             $this->core->getQueries()->removeNotificationsPost($post_id);
@@ -538,7 +538,7 @@ class ForumController extends AbstractController{
                 $post_author_id = $post['author_user_id'];
                 $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id));
                 $content = "Undeleted: A thread/post '".Notification::textShortner($post["content"])."' has been undeleted ";
-                $event = ['metadata' => $metadata, 'content' => $content, 'recipient' => $post_author_id, 'component' => "forum"];
+                $event = ['component' => "forum", 'metadata' => $metadata, 'content' => $content, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
                 $this->core->getNotificationFactory()->onPostModified($event);
                 $type = "post";
                 $this->core->getOutput()->renderJson($response = array('type' => $type));
@@ -586,7 +586,7 @@ class ForumController extends AbstractController{
                 $post_author_id = $post['author_user_id'];
                 $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id));
                 $content = "Update: A thread/post '".Notification::textShortner($post["content"]);
-                $event = ['metadata' => $metadata, 'content' => $content, 'recipient' => $post_author_id, "component" => "forum"];
+                $event = ["component" => "forum", 'metadata' => $metadata, 'content' => $content, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
                 $this->core->getNotificationFactory()->onPostModified($event);
             }
             if($isError) {
@@ -595,6 +595,53 @@ class ForumController extends AbstractController{
             }
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
         }
+    }
+
+    public function mergeThread(){
+        $current_user_id = $this->core->getUser()->getId();
+        $parent_thread_id = $_POST["merge_thread_parent"];
+        $child_thread_id = $_POST["merge_thread_child"];
+        preg_match('/\((.*?)\)/', $parent_thread_id, $result);
+        $parent_thread_id = $result[1];
+        $thread_id = $child_thread_id;
+        if($this->core->getAccess()->canI("forum.merge_thread")){
+            if(is_numeric($parent_thread_id) && is_numeric($child_thread_id)) {
+                $message = "";
+                $child_root_post = -1;
+                if($this->core->getQueries()->mergeThread($parent_thread_id, $child_thread_id, $message, $child_root_post)) {
+                    $child_thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $child_thread_id);
+                    if(is_dir($child_thread_dir)) {
+                        $parent_thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $parent_thread_id);
+                        if(!is_dir($parent_thread_dir)) {
+                            FileUtils::createDir($parent_thread_dir);
+                        }
+                        $child_posts_dirs = FileUtils::getAllDirs($child_thread_dir);
+                        foreach ($child_posts_dirs as $post_id) {
+                            $child_post_dir = FileUtils::joinPaths($child_thread_dir, $post_id);
+                            $parent_post_dir = FileUtils::joinPaths($parent_thread_dir, $post_id);
+                            rename($child_post_dir, $parent_post_dir);
+                        }
+                    }
+
+                    // NOTIFICATION/EMAIL :: Notify thread author
+                    $child_thread = $this->core->getQueries()->getThread($child_thread_id)[0];
+                    $child_thread_author = $child_thread['created_by'];
+                    $child_thread_title = $child_thread['title'];
+                    $parent_thread_title =$this->core->getQueries()->getThreadTitle($parent_thread_id)['title'];
+                    $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $parent_thread_id), (string)$child_root_post));
+                    $content = "Thread Merged: '".Notification::textShortner($child_thread_title)."' got merged into '".Notification::textShortner($parent_thread_title);
+                    $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'recipient' => $child_thread_author, 'preference' => 'merge_threads'];
+                    $this->core->getNotificationFactory()->onPostModified($event);
+                    $this->core->addSuccessMessage("Threads merged!");
+                    $thread_id = $parent_thread_id;
+                } else {
+                    $this->core->addErrorMessage("Merging Failed! ".$message);
+                }
+            }
+        } else {
+            $this->core->addErrorMessage("You do not have permissions to do that.");
+        }
+        $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
     }
 
     private function editThread(){
@@ -899,52 +946,7 @@ class ForumController extends AbstractController{
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'statPage', $users);
     }
 
-    public function mergeThread(){
-        $current_user_id = $this->core->getUser()->getId();
-        $parent_thread_id = $_POST["merge_thread_parent"];
-        $child_thread_id = $_POST["merge_thread_child"];
-        preg_match('/\((.*?)\)/', $parent_thread_id, $result);
-        $parent_thread_id = $result[1];
-        $thread_id = $child_thread_id;
-        if($this->core->getAccess()->canI("forum.merge_thread")){
-            if(is_numeric($parent_thread_id) && is_numeric($child_thread_id)) {
-                $message = "";
-                $child_root_post = -1;
-                if($this->core->getQueries()->mergeThread($parent_thread_id, $child_thread_id, $message, $child_root_post)) {
-                    $child_thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $child_thread_id);
-                    if(is_dir($child_thread_dir)) {
-                        $parent_thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $parent_thread_id);
-                        if(!is_dir($parent_thread_dir)) {
-                            FileUtils::createDir($parent_thread_dir);
-                        }
-                        $child_posts_dirs = FileUtils::getAllDirs($child_thread_dir);
-                        foreach ($child_posts_dirs as $post_id) {
-                            $child_post_dir = FileUtils::joinPaths($child_thread_dir, $post_id);
-                            $parent_post_dir = FileUtils::joinPaths($parent_thread_dir, $post_id);
-                            rename($child_post_dir, $parent_post_dir);
-                        }
-                    }
 
-                    // NOTIFICATION/EMAIL :: Notify thread author
-                    $child_thread = $this->core->getQueries()->getThread($child_thread_id)[0];
-                    $child_thread_author = $child_thread['created_by'];
-                    $child_thread_title = $child_thread['title'];
-                    $parent_thread_title =$this->core->getQueries()->getThreadTitle($parent_thread_id)['title'];
-                    $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $parent_thread_id), (string)$child_root_post));
-                    $content = "Thread Merged: '".Notification::textShortner($child_thread_title)."' got merged into '".Notification::textShortner($parent_thread_title);
-                    $event = ['metadata' => $metadata, 'content' => $content, 'recipient' => $child_thread_author, 'component' => 'forum'];
-                    $this->core->getNotificationFactory()->onThreadMerged($event);
-                    $this->core->addSuccessMessage("Threads merged!");
-                    $thread_id = $parent_thread_id;
-                } else {
-                    $this->core->addErrorMessage("Merging Failed! ".$message);
-                }
-            }
-        } else {
-            $this->core->addErrorMessage("You do not have permissions to do that.");
-        }
-        $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
-    }
 
     private function sendEmailAnnouncement($thread_title, $thread_content) {
       $class_list = $this->core->getQueries()->getEmailListWithIds();

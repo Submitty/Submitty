@@ -15,20 +15,21 @@ class NotificationFactory {
     protected $core;
 
     public function __construct(Core $core) {
-        $this->$core = $core;
+        $this->core = $core;
     }
 
     public function onNewAnnouncement(array $event) {
-        $recipients = $this->core->getQueries()->getAllOtherUsers($this->core->getUser()->getId());
+        $recipients = $this->core->getQueries()->getAllUsersIds();
         $this->createAndSendNotification($event, $recipients);
     }
 
     public function onNewThread(array $event) {
-        $recipients = $this->core->getQueries()->getAllUsersWithPreference("all_new_thread");
+        $recipients = $this->core->getQueries()->getAllUsersWithPreference("all_new_threads");
         $this->createAndSendNotification($event, $recipients);
     }
 
     public function onNewPost(array $event) {
+        // notify parent authors, people who want to know about all posts, and people who want to know about new posts in threads they have posted.
         $current_user_id = $this->core->getUser()->getId();
         $post_id = $event["post_id"];
         $thread_id = $event["thread_id"];
@@ -40,15 +41,9 @@ class NotificationFactory {
     }
 
     public function onPostModified(array $event) {
-        $recipients = array_unique($this->core->getQueries()->getAllUsersWithPreference("all_modification_forum"));
-        $recipients[] = $event['recipients'];
-        $recipients = array_unique($recipients);
-        $this->createAndSendNotification($event,$recipients);
-    }
-
-    public function onThreadMerged(array $event) {
-        $recipients = array_unique($this->core->getQueries()->getAllUsersWithPreference("merge_threads"));
-        $recipients[] = $event['recipients'];
+        // on post deleted undeleted edited and merged
+        $recipients = $this->core->getQueries()->getAllUsersWithPreference($event['preference']);
+        $recipients[] = $event['recipient'];
         $recipients = array_unique($recipients);
         $this->createAndSendNotification($event,$recipients);
     }
@@ -60,10 +55,17 @@ class NotificationFactory {
 
 
     public function createAndSendNotification(array $event, array $recipients) {
+        // if there are no recipients return
+        if (empty($recipients)) {
+            return;
+        }
+        $component = $event['component'];
         $metadata = $event['metadata'];
         $content = $event['content'];
         $current_user_id = $this->core->getUser()->getId();
-        $notification = Notification::createNotification($this->core,$metadata,$content,$current_user_id);
-        $this->core->getQueries()->pushNotification($notification,$recipients);
+        $notification = Notification::createNotification($this->core,$component,$metadata,$content,$current_user_id);
+        $formatted_recipients = implode("','",$recipients);
+        $formatted_recipients = "'{$formatted_recipients}'";
+        $this->core->getQueries()->pushNotification($notification,$formatted_recipients);
     }
 }

@@ -94,6 +94,7 @@ class Core {
         foreach (array('component', 'page', 'action') as $key) {
             $_REQUEST[$key] = (isset($_REQUEST[$key])) ? strtolower($_REQUEST[$key]) : "";
         }
+        $this->notification_factory = new NotificationFactory($this);
     }
 
     /**
