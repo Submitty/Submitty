@@ -22,7 +22,8 @@
         },
         {
             "type": "markdown",
-            "markdown_string": "The above animal:"
+            "markdown_string": "The above animal:",
+            "testcase_ref": "animal"
         },
         {
             "type": "short_answer",
@@ -81,6 +82,7 @@
             "type" : "FileCheck",
             "title" : "First Box",
             "actual_file" : "box_one.txt",
+            "testcase_label": "animal",
             "points" : 0
         },
         {
