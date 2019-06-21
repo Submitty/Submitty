@@ -82,7 +82,11 @@
             {% if button.isDisabled() %}
                 disabled
             {% else %}
-                href="{{ button.getHref() }}"
+				{% if button.hasOnClick() %}
+					onclick="{{ button.getOnclick() }}"
+				{% else %}
+					href="{{ button.getHref() }}"
+				{% endif %}
             {% endif %}
             {% if button.isTitleOnHover %}
                 title="{{ button.getTitle() }}"
