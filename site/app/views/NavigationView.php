@@ -721,11 +721,11 @@ class NavigationView extends AbstractView {
                 'page' => 'admin_gradeable',
                 'action' => 'quick_link',
                 'id' => $gradeable->getId(),
-                'quick_link_action' => 'close_submission']);
+                'quick_link_action' => 'close_submissions']);
 
             $button = new Button($this->core, [
-                "subtitle" => "CLOSE SUBMISSION NOW",
-                "onclick" => "displayCloseSubmissionWarning(\"".$url."\",\"".$gradeable->getTitle()."\");",
+                "subtitle" => "CLOSE SUBMISSIONS NOW",
+                "onclick" => "displayCloseSubmissionsWarning(\"".$url."\",\"".$gradeable->getTitle()."\");",
                 "class" => "btn btn-default btn-nav btn-nav-open",
                 "name" => "quick-link-btn"
             ]);
@@ -742,7 +742,7 @@ class NavigationView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("navigation/DeleteGradeableForm.twig");
     }
 
-    public function closeSubmissionWarning() {
-        return $this->core->getOutput()->renderTwigTemplate("navigation/CloseSubmissionWarning.twig");
+    public function closeSubmissionsWarning() {
+        return $this->core->getOutput()->renderTwigTemplate("navigation/CloseSubmissionsWarning.twig");
     }
 }

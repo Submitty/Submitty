@@ -22,7 +22,7 @@ use app\libraries\Core;
  * @method void setTitle(string $title)
  * @method void setSubtitle(string|null $subtitle)
  * @method void setHref(string|null $href)
- * @method void setOnClick(string|null $on_click)
+ * @method void setOnclick(string|null $on_click)
  * @method void setClass(string $class)
  * @method void setId(string|null $id)
  * @method void setDisabled(bool $disabled)
@@ -39,7 +39,7 @@ class Button extends AbstractModel {
     protected $subtitle;
     /** @property @var string|null $href */
     protected $href;
-    /** @property @var string|null $on_click */
+    /** @property @var string|null $onclick */
     protected $onclick;
     /** @property @var string $class */
     protected $class;
@@ -81,7 +81,11 @@ class Button extends AbstractModel {
         $this->icon = $details["icon"] ?? null;
     }
 
-    public function hasOnClick() {
+    /**
+     * checks whether a button has on onclick affect
+     * @return bool
+     */
+    public function hasOnclick() {
         return !($this->getOnclick() == null);
     }
 
