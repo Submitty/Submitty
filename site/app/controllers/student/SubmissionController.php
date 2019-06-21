@@ -2005,7 +2005,8 @@ class SubmissionController extends AbstractController {
           $grade_inquiry_email_data = [
               "subject" => $notification_subject,
               "body" => $notification_body,
-              "recipient" => $grader->getEmail()
+              "recipient" => $grader->getEmail(),
+              "user_id" => $grader->getId()
           ];
           $new_grade_inquiry_email = new Email($this->core, grade_inquiry_email_data);
           $this->core->getQueries()->createEmail($new_grade_inquiry_email);
@@ -2051,7 +2052,8 @@ class SubmissionController extends AbstractController {
               $grade_inquiry_reply_email_data = [
                   "subject" => $notification_subject,
                   "body" => $notification_body,
-                  "recipient" => $submitting_user->getEmail()
+                  "recipient" => $submitting_user->getEmail(),
+                  "user_id" => $submitting_user->getId()
               ];
               $new_grade_inquiry_reply_email = new Email($this->core, $grade_inquiry_reply_email_data);
               $this->core->getQueries()->createEmail($new_grade_inquiry_reply_email);
@@ -2063,7 +2065,8 @@ class SubmissionController extends AbstractController {
             $grade_inquiry_reply_email_data = [
                 "subject" => $notification_subject,
                 "body" => $notification_body,
-                "recipient" => $submitter->getUser()->getEmail()
+                "recipient" => $submitter->getUser()->getEmail(),
+                "user_id" => $submitter->getUser()->getId()
             ];
             $new_grade_inquiry_reply_email = new Email($this->core, $grade_inquiry_reply_email_data);
             $this->core->getQueries()->createEmail($new_grade_inquiry_reply_email);
@@ -2083,7 +2086,8 @@ class SubmissionController extends AbstractController {
             $grade_inquiry_reply_email_data = [
                 "subject" => $notification_subject,
                 "body" => $notification_body,
-                "recipient" => $grader->getEmail()
+                "recipient" => $grader->getEmail(),
+                "user_id" => $grader->getId()
             ];
             $new_grade_inquiry_reply_email = new Email($this->core, $grade_inquiry_reply_email_data);
             $this->core->getQueries()->createEmail($new_grade_inquiry_reply_email);
