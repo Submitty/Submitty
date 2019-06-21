@@ -2039,7 +2039,7 @@ class SubmissionController extends AbstractController {
               $submitting_team = $submitter->getTeam()->getMemberUsers();
               foreach($submitting_team as $submitting_user){
                   if($submitting_user->getId() != $user_id) {
-                      $recipients[] = $submitting_user;
+                      $recipients[] = $submitting_user->getId();
                   }
               }
           } else {
@@ -2049,7 +2049,7 @@ class SubmissionController extends AbstractController {
           }
           if (!empty($recipients)) {
               $metadata = json_encode(array(array('component' => 'student', 'gradeable_id' => $gradeable_id)));
-              $event = ['component' => 'student', 'metadata' => $metadata, 'content' => $n_content, 'subject' => $email_subject, '$recipients' => $recipients];
+              $event = ['component' => 'student', 'metadata' => $metadata, 'content' => $n_content, 'subject' => $email_subject, 'recipients' => $recipients];
               $this->core->getNotificationFactory()->onGradeInquiryEvent($event);
           }
           //TODO: Do emails

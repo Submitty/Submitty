@@ -22,6 +22,8 @@ class NotificationFactory {
         $this->core = $core;
     }
 
+    // ***********************************FORUM NOTIFICATIONS***********************************
+
     /**
      * @param array $event
      */
@@ -37,7 +39,7 @@ class NotificationFactory {
     public function onNewThread(array $event) {
         $recipients = $this->core->getQueries()->getAllUsersWithPreference("all_new_threads");
         $this->createAndSendNotifications($event, $recipients);
-        $recipients = $this->core->getQueries()->getAllUsersWithPreference("all_new_threads_emails");
+        $recipients = $this->core->getQueries()->getAllUsersWithPreference("all_new_threads_email");
         $this->createAndSendEmails($event,$recipients);
     }
 
@@ -52,12 +54,12 @@ class NotificationFactory {
 
         $parent_authors = $this->core->getQueries()->getAllParentAuthors($current_user_id,$post_id);
         $users_with_notification_preference = $this->core->getQueries()->getAllUsersWithPreference("all_new_posts");
-        $thread_authors_notification_preference = $this->core->getQueries()->getAllThreadAuthors($thread_id,"reply_in_thread");
+        $thread_authors_notification_preference = $this->core->getQueries()->getAllThreadAuthors($thread_id,"reply_in_post_thread");
         $notification_recipients = array_unique(array_merge($parent_authors, $users_with_notification_preference, $thread_authors_notification_preference));
         $this->createAndSendNotifications($event, $notification_recipients);
 
         $users_with_email_preference = $this->core->getQueries()->getAllUsersWithPreference("all_new_posts_email");
-        $thread_authors_email_preference = $this->core->getQueries()->getAllThreadAuthors($thread_id,"reply_in_thread_email");
+        $thread_authors_email_preference = $this->core->getQueries()->getAllThreadAuthors($thread_id,"reply_in_post_thread_email");
         $email_recipients = array_unique(array_merge($parent_authors, $users_with_email_preference, $thread_authors_email_preference));
         $this->createAndSendEmails($event, $email_recipients);
 
@@ -80,6 +82,8 @@ class NotificationFactory {
         $this->createAndSendEmails($event,$email_recipients);
     }
 
+    // ***********************************GRADE INQUIRY NOTIFICATIONS***********************************
+
     /**
      * @param array $event
      */
@@ -90,7 +94,7 @@ class NotificationFactory {
         $this->createAndSendEmails($event,$recipients);
     }
 
-
+    // ***********************************SENDERS***********************************
     /**
      * @param array $event
      * @param array $recipients

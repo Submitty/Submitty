@@ -450,9 +450,13 @@ class ForumController extends AbstractController{
                 }
 
                 // NOTIFICATION/EMAIL
+                $parent_post = $this->core->getQueries()->getPost($parent_id);
+                $parent_post_content = $parent_post['content'];
+
                 $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
-                $content = "Reply: A post '".Notification::textShortner($post_content). "' got new a reply";
-                $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'post_id' => $post_id, 'thread_id' => $thread_id];
+                $content = "Reply: A post '".Notification::textShortner($parent_post_content). "' got new a reply";
+                $subject = "A New Reply";
+                $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'post_id' => $post_id, 'thread_id' => $thread_id];
                 $this->core->getNotificationFactory()->onNewPost($event);
 
                 $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'option' => $display_option, 'thread_id' => $thread_id));
