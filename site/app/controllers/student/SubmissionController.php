@@ -1981,7 +1981,6 @@ class SubmissionController extends AbstractController {
         $this->core->getOutput()->renderOutput('grading\ElectronicGrader', 'statPage', $users);
     }
 
-    // merge these two functions
     private function notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, $type){
       //TODO: send notification to grader per component
       if($graded_gradeable->hasTaGradingInfo()){
@@ -2052,7 +2051,6 @@ class SubmissionController extends AbstractController {
               $event = ['component' => 'student', 'metadata' => $metadata, 'content' => $n_content, 'subject' => $email_subject, 'recipients' => $recipients];
               $this->core->getNotificationFactory()->onGradeInquiryEvent($event);
           }
-          //TODO: Do emails
       }
     }
 

@@ -3,7 +3,6 @@
 namespace app\controllers\forum;
 
 use app\libraries\Core;
-use app\libraries\database\DatabaseQueries;
 use app\models\Notification;
 use app\controllers\AbstractController;
 use app\libraries\Utils;
@@ -449,7 +448,6 @@ class ForumController extends AbstractController{
                     }
                 }
 
-                // NOTIFICATION/EMAIL
                 $parent_post = $this->core->getQueries()->getPost($parent_id);
                 $parent_post_content = $parent_post['content'];
 
@@ -514,7 +512,6 @@ class ForumController extends AbstractController{
                 $type = "post";
             }
 
-            // NOTIFICATION/EMAIL
             $post_author_id = $post['author_user_id'];
             $metadata = json_encode(array());
             $content = "Deleted: A thread/post '".Notification::textShortner($post["content"])."' was deleted ";
@@ -533,7 +530,6 @@ class ForumController extends AbstractController{
                 $this->core->getOutput()->renderJson($response = array('error' => $error));
             } else {
                 // We want to reload same thread again, in both case (thread/post undelete)
-                // NOTIFICATION/EMAIL
                 $post_author_id = $post['author_user_id'];
                 $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id));
                 $content = "Undeleted: A thread/post '".Notification::textShortner($post["content"])."' has been undeleted ";
@@ -623,7 +619,6 @@ class ForumController extends AbstractController{
                         }
                     }
 
-                    // NOTIFICATION/EMAIL :: Notify thread author
                     $child_thread = $this->core->getQueries()->getThread($child_thread_id)[0];
                     $child_thread_author = $child_thread['created_by'];
                     $child_thread_title = $child_thread['title'];

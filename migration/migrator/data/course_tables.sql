@@ -457,7 +457,7 @@ CREATE TABLE users (
     user_preferred_firstname character varying,
     user_lastname character varying NOT NULL,
     user_preferred_lastname character varying,
-    user_email character varying,
+    user_email character varying NOT NULL,
     user_group integer NOT NULL,
     registration_section character varying(255),
     rotating_section integer,
