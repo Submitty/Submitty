@@ -1,5 +1,9 @@
 body {min-width: 925px;}
 
+.float-right{
+    float: right;
+}
+
 .forum_content {
     flex-grow: 1;
     padding: 0px;
@@ -99,4 +103,27 @@ body {min-width: 925px;}
     display: none;
     margin-right: 15px;
     margin-bottom: 60px;
+}
+
+#new_category_text{
+    resize: none;
+}
+
+#ui-category-list{
+    padding-left: 1em;
+}
+
+.category-color-picker{
+    color: white;
+    font-size: 14px;
+    height: 18px;
+    padding: 0px;
+}
+
+.categorylistitem-desc span{
+    word-wrap: break-word;
+}
+
+.categorylistitem-editdesc input{
+    padding: 0;
 }

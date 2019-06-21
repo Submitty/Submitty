@@ -1,3 +1,34 @@
+$(function(){
+    $("#ui-category-list").sortable({
+        items : '.category-sortable',
+        handle: ".handle",
+        update: function (event, ui) {
+            reorderCategories();
+        }
+    });
+    $("#ui-category-list").find(".fa-edit").click(function() {
+        var item = $(this).parent().parent().parent();
+        var category_desc = item.find(".categorylistitem-desc span").text().trim();
+        item.find(".categorylistitem-editdesc input").val(category_desc);
+        item.find(".categorylistitem-desc").hide();
+        item.find(".categorylistitem-editdesc").show();
+
+    });
+    $("#ui-category-list").find(".fa-times").click(function() {
+        var item = $(this).parent().parent().parent();
+        item.find(".categorylistitem-editdesc").hide();
+        item.find(".categorylistitem-desc").show();
+    });
+
+    var refresh_color_select = function(element) {
+        $(element).css("background-color",$(element).val());
+    }
+
+    $(".category-color-picker").each(function(){
+        refresh_color_select($(this));
+    });
+});
+
 function openFileForum(directory, file, path ){
     var url = buildUrl({'component': 'misc', 'page': 'display_file', 'dir': directory, 'file': file, 'path': path});
     window.open(url,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
@@ -972,3 +1003,11 @@ function addMarkdownCode(type, divTitle){
     }
     $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));
 }
+
+function checkInputMaxLength(obj){
+    if($(obj).val().length == $(obj).attr('maxLength')){
+        alert('Maximum input length reached!');
+        $(obj).val($(obj).val().substr(0, $(obj).val().length));
+    }
+}
+
