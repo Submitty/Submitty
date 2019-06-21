@@ -1578,30 +1578,4 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         return $versions;
     }
 
-    /**
-     * Gets All Parent Authors who this user responded to
-     * @param string $post_author_id current_user_id
-     * @param string $post_id   the parent post id
-
-     */
-    public function getAllParentAuthors(string $post_author_id, string $post_id) {
-        $query = "SELECT * FROM
-                  (WITH RECURSIVE parents AS (
-                  SELECT
-                    author_user_id, parent_id, id FROM  posts
-                  WHERE id = {$post_id}
-                  UNION SELECT
-                    p.author_user_id, p.parent_id, p.id
-                  FROM
-                    posts p
-                   INNER JOIN parents pa ON pa.parent_id = p.id
-                  ) SELECT DISTINCT 
-                    author_user_id AS user_id
-                  FROM
-                    parents
-                  WHERE author_user_id <> '{$post_author_id}') AS parents;";
-        $this->course_db->query($query);
-        return $this->rowsToArrayUserIds($this->course_db->rows());
-    }
-
 }
