@@ -92,7 +92,8 @@ class LateController extends AbstractController {
                 return $this->core->getOutput()->renderJsonFail($error);
             }
             $user = $this->core->getQueries()->getSubmittyUser($_POST['user_id']);
-            if (!isset($_POST['user_id']) || $_POST['user_id'] == "" || empty($user) || $user->getId() !== $_POST['user_id']) {
+            $isUserNotInCourse = empty($this->core->getQueries()->getUsersById(array($_POST['user_id'])));
+            if (!isset($_POST['user_id']) || $_POST['user_id'] == "" || $isUserNotInCourse || $user->getId() !== $_POST['user_id']) {
                 $error = "Invalid Student ID";
                 return $this->core->getOutput()->renderJsonFail($error);
             }

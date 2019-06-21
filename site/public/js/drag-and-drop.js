@@ -366,6 +366,13 @@ function isValidSubmission(){
             }
         }
     }
+
+    // If is_notebook is set then always valid submission
+    if(window.hasOwnProperty('is_notebook'))
+    {
+        return true;
+    }
+
     return false;
 }
 

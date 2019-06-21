@@ -84,7 +84,7 @@ class UsersController extends AbstractController {
     public function ajaxGetUserDetails() {
         $user_id = $_REQUEST['user_id'];
         $user = $this->core->getQueries()->getUserById($user_id);
-        $this->core->getOutput()->renderJson(array(
+        $this->core->getOutput()->renderJsonSuccess(array(
             'user_id' => $user->getId(),
             'user_numeric_id' => $user->getNumericId(),
             'user_firstname' => $user->getLegalFirstName(),
