@@ -38,13 +38,14 @@ def write_to_json(json_path, json_data):
         with os.fdopen(json_fd, 'w') as file:
             json.dump(json_data, file, sort_keys=True, indent=4)
     except Exception:
-        json_fd = os.open(json_path, os.O_APPEND | os.O_WRONLY) 
+        json_fd = os.open(json_path, os.O_APPEND | os.O_RDWR ) 
         fcntl.flock(json_fd, fcntl.LOCK_EX)
 
         with os.fdopen(json_fd, 'r+') as file:
             prev_data = json.load(file)
             prev_data.update(json_data)
+            
+            file.truncate(0)
+            json.dump(prev_data, file, sort_keys=True, indent=4)
 
-            file.seek(0)
-            json.dump(prev_data, file)
 
