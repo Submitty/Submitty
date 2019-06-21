@@ -603,7 +603,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
             
             # copy test input into testcase folder
             copy_contents_into(job_id,test_input_path,testcase_folder,tmp_logs)
-            copy_contents_into(job_id,random_input_folder,testcase_folder,tmp_logs)
+            pattern_copy("random_input_to_runner",[".txt"],random_input_folder,testcase_folder,tmp_logs)
             
             # copy compile.out to the current directory
             shutil.copy (os.path.join(bin_path,"solution_runner.out"),os.path.join(testcase_folder,"my_solution_runner.out"))

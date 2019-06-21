@@ -333,7 +333,7 @@ def setup_folder_for_grading(target_folder, tmp_work, job_id, tmp_logs, testcase
     grade_item.copy_contents_into(job_id,tmp_work_compiled  ,target_folder,tmp_logs)
     grade_item.copy_contents_into(job_id,tmp_work_checkout  ,target_folder,tmp_logs)
     grade_item.copy_contents_into(job_id,tmp_work_test_input,target_folder,tmp_logs)
-    grade_item.copy_contents_into(job_id,tmp_work_random_input,target_folder,tmp_logs)
+    grade_item.pattern_copy("random_input_to_runner",["*.txt"],tmp_work_random_input,target_folder,tmp_logs)
     #copy the compiled runner to the test directory
     shutil.copy(my_runner,target_folder)
 
