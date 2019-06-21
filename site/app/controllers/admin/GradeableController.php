@@ -160,7 +160,7 @@ class GradeableController extends AbstractController {
                     $inuse_config[] = $gradeable->getId();
                 }
             }
-            $this->core->getOutput()->renderJson($inuse_config);
+            $this->core->getOutput()->renderJsonSuccess($inuse_config);
         }
     }
 
