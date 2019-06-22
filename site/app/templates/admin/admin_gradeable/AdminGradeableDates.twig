@@ -71,8 +71,8 @@
 
                 <p id="late-days-message" style="max-width:600px;">
                     Note: Submissions received after the deadline will be automatically recorded as a zero if late days are not allowed
-                                        for this assignment (or the student does not have sufficient late days to cover the submission) and no excused
-                                        absence extension is entered for this student for this gradeable. See
+                                                                                for this assignment (or the student does not have sufficient late days to cover the submission) and no excused
+                                                                                absence extension is entered for this student for this gradeable. See
                     <a href="http://submitty.org/student/late_days" target="_blank">Late Days & Extensions.
                         <i class="helpicon" style="font-style:normal;"></i>
                     </a>
@@ -144,13 +144,13 @@
                             switch (index) {
                                 case 0: date = new Date();
                                     break;
-                                case 1: date = new Date(Date.now() + 24 * 60 * 60 * 1000);
+                                case 1: date = new Date("9999-01-01 00:00:00");
                                     break;
                             }
                             fp.setDate(date);
                         }
                     }
-                )], 
+                )],
             allowInput: true,
             enableTime: true,
             enableSeconds: true,
@@ -158,5 +158,4 @@
             dateFormat: "Y-m-d H:i:S"
         });
     });
-    
 </script>
