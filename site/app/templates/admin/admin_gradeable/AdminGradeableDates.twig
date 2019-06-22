@@ -2,7 +2,7 @@
     <input name="ta_view_start_date" id="date_ta_view" class="date_picker" type="text" value="{{ gradeable.getTaViewStartDate()|date(date_format) }}">
     <label for="date_ta_view">TA Beta Testing Date (visible to TAs)</label>
 
-    <br />
+    <br/>
 
 
     <div class="electronic_file electronic_file_dates">
@@ -10,13 +10,13 @@
             <input name="team_lock_date" id="date_team_lock" class="date_picker" type="text" value="{{ gradeable.getTeamLockDate()|date(date_format) }}">
             <label for="date_team_lock">Team Lock Date (Instructors can still manually manage teams)</label>
 
-            <br />
+            <br/>
         </div>
 
         <input id="date_submit" name="submission_open_date" class="date_picker" type="text" value="{{ gradeable.getSubmissionOpenDate()|date(date_format) }}">
         <label for="date_submit">Submission Open Date (submission available to students)</label>
 
-        <br />
+        <br/>
 
         <div id="due_date_options_container">
             <div>Will this assignment have a due date?
@@ -35,18 +35,18 @@
         <input name="grade_start_date" id="date_grade" class="date_picker" type="text" value="{{ gradeable.getGradeStartDate()|date(date_format) }}">
         <label for="date_grade">TA/Instructor Manual Grading Open Date (grading may begin)</label>
 
-        <br />
+        <br/>
 
         <input name="grade_due_date" id="date_grade_due" class="date_picker" type="text" value="{{ gradeable.getGradeDueDate()|date(date_format) }}">
         <label for="date_grade_due">TA/Instructor Manual Grading Due Date</label>
 
-        <br />
+        <br/>
     </div>
 
     <input name="grade_released_date" id="date_released" class="date_picker" type="text" value="{{ gradeable.getGradeReleasedDate()|date(date_format) }}">
     <label for="date_released">Grades Released Date (grades will be visible to students)</label>
 
-    <br />
+    <br/>
 
     <div class="electronic_file electronic_file_dates">
         <div class="regrade_request_date" {{ regrade_allowed != true or regrade_enabled != true ? 'hidden' : '' }}>
@@ -56,37 +56,42 @@
 
         <div id="late_days_options_container" {{ gradeable.hasDueDate() and gradeable.isStudentSubmit() ? '' : 'hidden' }}>
             Should submissions be accepted after the due date?
-            <br />
-            <input type="radio" id = "yes_late_submission" name="late_submission_allowed" value="true"
-                    {{ action != 'new' and gradeable.isLateSubmissionAllowed() ? 'checked' : '' }}> <label for="yes_late_submission">Yes</label>
+            <br/>
+            <input type="radio" id="yes_late_submission" name="late_submission_allowed" value="true" {{ action != 'new' and gradeable.isLateSubmissionAllowed() ? 'checked' : '' }}>
+            <label for="yes_late_submission">Yes</label>
 
-            <input type="radio" id = "no_late_submission" name="late_submission_allowed" value ="false"
-                    {{ not (action != 'new' and gradeable.isLateSubmissionAllowed()) ? 'checked' :  '' }}> <label for="no_late_submission">No</label>
-            <br />
+            <input type="radio" id="no_late_submission" name="late_submission_allowed" value="false" {{ not (action != 'new' and gradeable.isLateSubmissionAllowed()) ? 'checked' : '' }}>
+            <label for="no_late_submission">No</label>
+            <br/>
             <div class="yes-late-submission">
                 <label for="late_days">How many late days may students use on this assignment?</label>
                 <input style="width: 50px" id="late_days" name="late_days" class="int_val" type="text" value="{{ gradeable.getLateDays() }}"/>
 
-                <br />
+                <br/>
 
-                <p style="max-width:600px;" id="late-days-message">
-                Note: Submissions received after the deadline will be automatically recorded as a zero if late days are not allowed
-                    for this assignment (or the student does not have sufficient late days to cover the submission) and no excused
-                    absence extension is entered for this student for this gradeable. See 
-                    <a target=_blank href="http://submitty.org/student/late_days">Late Days & Extensions. <i style="font-style:normal;" class="helpicon"></i></a>
+                <p id="late-days-message" style="max-width:600px;">
+                    Note: Submissions received after the deadline will be automatically recorded as a zero if late days are not allowed
+                                        for this assignment (or the student does not have sufficient late days to cover the submission) and no excused
+                                        absence extension is entered for this student for this gradeable. See
+                    <a href="http://submitty.org/student/late_days" target="_blank">Late Days & Extensions.
+                        <i class="helpicon" style="font-style:normal;"></i>
+                    </a>
                 </p>
             </div>
         </div>
     </div>
 
-    <br />
+    <br/>
 
-    <input type="button" class="btn btn-default" value="Show All Dates" id="show_all_dates" onclick="showAllDates()" />
-    <input type="button" class="btn btn-primary" value="Hide Irrelevant Dates" id="hide_dates" onclick="hideDates()" hidden/>
+    <input class="btn btn-default" id="show_all_dates" onclick="showAllDates()" type="button" value="Show All Dates"/>
+    <input class="btn btn-primary" hidden id="hide_dates" onclick="hideDates()" type="button" value="Hide Irrelevant Dates"/>
 
-    <br />
-    <span id="gray_date_warning" hidden>Note: grayed-out dates are for debugging & consistency checks.  These dates are not relevant with your current assignment configuration.</span>
-    <div id="timezone-container"><i>Time Zone: {{ timezone_string }}</i></div>
+    <br/>
+    <span hidden id="gray_date_warning">Note: grayed-out dates are for debugging & consistency checks.  These dates are not relevant with your current assignment configuration.</span>
+    <div id="timezone-container">
+        <i>Time Zone:
+            {{ timezone_string }}</i>
+    </div>
 </div>
 
 <script type="text/javascript">
@@ -110,11 +115,11 @@
         }
     }
 
-    $(document).ready(function() {
-        $('input[name=has_due_date]').change(function() {
+    $(document).ready(function () {
+        $('input[name=has_due_date]').change(function () {
             let cont = $('#due_date_container');
             let cont1 = $('#late_days_options_container');
-            if($('#has_due_date_no').is(':checked')) {
+            if ($('#has_due_date_no').is(':checked')) {
                 cont.hide();
                 cont1.hide();
             } else {
@@ -123,12 +128,35 @@
             }
         });
         flatpickr(".date_picker", {
+            plugins: [ShortcutButtonsPlugin(
+                    {
+                        button: [
+                            {
+                                label: "Now"
+                            }, 
+                            {
+                                label: "End of time"
+                            }
+                        ],
+                        label: "or",
+                        onClick: (index, fp) => {
+                            let date;
+                            switch (index) {
+                                case 0: date = new Date();
+                                    break;
+                                case 1: date = new Date(Date.now() + 24 * 60 * 60 * 1000);
+                                    break;
+                            }
+                            fp.setDate(date);
+                        }
+                    }
+                )], 
             allowInput: true,
             enableTime: true,
             enableSeconds: true,
             time_24hr: true,
-            dateFormat: "Y-m-d H:i:S",
+            dateFormat: "Y-m-d H:i:S"
         });
     });
-
+    
 </script>
