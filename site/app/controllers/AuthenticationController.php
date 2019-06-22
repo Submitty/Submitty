@@ -111,7 +111,7 @@ class AuthenticationController extends AbstractController {
         $this->core->getAuthentication()->setUserId($_POST['user_id']);
         $this->core->getAuthentication()->setPassword($_POST['password']);
         if ($this->core->authenticate($_POST['stay_logged_in']) === true) {
-            Logger::logAccess($this->core->getUser()->getId(), $_COOKIE['submitty_token'], "login");
+            Logger::logAccess($_POST['user_id'], $_COOKIE['submitty_token'], "login");
             $msg = "Successfully logged in as ".htmlentities($_POST['user_id']);
             $this->core->addSuccessMessage($msg);
 
