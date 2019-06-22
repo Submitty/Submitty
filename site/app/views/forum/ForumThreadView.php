@@ -125,11 +125,13 @@ class ForumThreadView extends AbstractView {
         //Body Style is necessary to make sure that the forum is still readable...
         $this->core->getOutput()->addVendorCss('codemirror/codemirror.css');
         $this->core->getOutput()->addVendorCss('codemirror/theme/eclipse.css');
+        $this->core->getOutput()->addInternalCss('forum.css');
         $this->core->getOutput()->addVendorJs('codemirror/codemirror.js');
         $this->core->getOutput()->addVendorJs('codemirror/mode/clike/clike.js');
         $this->core->getOutput()->addVendorJs('codemirror/mode/python/python.js');
         $this->core->getOutput()->addVendorJs('codemirror/mode/shell/shell.js');
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
+        $this->core->getOutput()->addInternalJs('forum.js');
         $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
         $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
 
@@ -432,6 +434,8 @@ class ForumThreadView extends AbstractView {
             $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('chosen-js', 'chosen.jquery.min.js'));
             $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
             $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
+            $this->core->getOutput()->addInternalJs('forum.js');
+            $this->core->getOutput()->addInternalCss('forum.css');
             $current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
             $current_thread_date = $current_thread_first_post["timestamp"];
             $merge_thread_list = $this->core->getQueries()->getThreadsBefore($current_thread_date, 1);
@@ -872,6 +876,9 @@ class ForumThreadView extends AbstractView {
 
         $this->core->getOutput()->addVendorCss('flatpickr/flatpickr.min.css');
 
+        $this->core->getOutput()->addInternalJs('forum.js');
+        $this->core->getOutput()->addInternalCss('forum.css');
+
         $categories = "";
         $category_colors;
 
@@ -921,6 +928,8 @@ class ForumThreadView extends AbstractView {
 		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
 		$this->core->getOutput()->addBreadcrumb("Statistics", $this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats')));
 
+        $this->core->getOutput()->addInternalJs('forum.js');
+        $this->core->getOutput()->addInternalCss('forum.css');
 
 		$buttons = array(
 			array(
