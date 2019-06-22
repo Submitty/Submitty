@@ -328,7 +328,8 @@ class ForumThreadView extends AbstractView {
             "currentThread" => $currentThread,
             "currentCourse" => $currentCourse,
             "generate_post_content" => $generatePostContent,
-            "display_option" => $display_option
+            "display_option" => $display_option,
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
         return $return;
     }
@@ -900,6 +901,7 @@ class ForumThreadView extends AbstractView {
             "buttons" => $buttons,
             "thread_exists" => $thread_exists,
             "form_action" => $this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread')),
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
 
         return $return;

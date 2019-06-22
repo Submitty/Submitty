@@ -725,6 +725,9 @@ class NavigationView extends AbstractView {
     }
 
     public function deleteGradeableForm() {
-        return $this->core->getOutput()->renderTwigTemplate("navigation/DeleteGradeableForm.twig");
+        return $this->core->getOutput()->renderTwigTemplate(
+            "navigation/DeleteGradeableForm.twig",
+            ['csrf_token' => $this->core->getCsrfToken()]
+        );
     }
 }
