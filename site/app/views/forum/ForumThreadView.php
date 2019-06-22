@@ -171,6 +171,7 @@ class ForumThreadView extends AbstractView {
         }
 
         $categories = $this->core->getQueries()->getCategories();
+
         $cookieSelectedCategories = array();
         $cookieSelectedThreadStatus = array();
         $cookieSelectedUnread = false;

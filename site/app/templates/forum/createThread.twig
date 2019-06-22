@@ -1,4 +1,4 @@
-{%  include "forum/CategoriesForm.twig" with {"categories" : categories, "category_colors" : category_colors} %}
+{%  include "forum/CategoriesForm.twig" with {"categories": categories, "category_colors": category_colors} %}
 
 <div class="content forum_content">
 
@@ -10,8 +10,8 @@
         "show_more" : False
     } %}
 
-    <h3 style="margin-bottom:10px;"> Create Thread </h3>
-    <form style="margin-right: 15px; margin-left:15px;" id="thread_form" method="POST" action="{{ form_action }}" enctype="multipart/form-data">
+    <h3 class="create-thread-title"> Create Thread </h3>
+    <form id="thread_form" method="POST" action="{{ form_action }}" enctype="multipart/form-data">
 
         {%  include "forum/ThreadPostForm.twig" with {
             "show_title" : true,

@@ -1011,3 +1011,47 @@ function checkInputMaxLength(obj){
     }
 }
 
+function sortTable(sort_element_index, reverse=false){
+    var table = document.getElementById("forum_stats_table");
+    var switching = true;
+    while(switching){
+        switching=false;
+        var rows = table.getElementsByTagName("TBODY");
+        for(var i=1;i<rows.length-1;i++){
+
+            var a = rows[i].getElementsByTagName("TR")[0].getElementsByTagName("TD")[sort_element_index];
+            var b = rows[i+1].getElementsByTagName("TR")[0].getElementsByTagName("TD")[sort_element_index];
+            if (reverse){
+                if (sort_element_index == 0 ? a.innerHTML<b.innerHTML : parseInt(a.innerHTML) > parseInt(b.innerHTML)){
+                    rows[i].parentNode.insertBefore(rows[i+1],rows[i]);
+                    switching=true;
+                }
+            } else {
+                if(sort_element_index == 0 ? a.innerHTML>b.innerHTML : parseInt(a.innerHTML) < parseInt(b.innerHTML)){
+                    rows[i].parentNode.insertBefore(rows[i+1],rows[i]);
+                    switching=true;
+                }
+            }
+        }
+
+    }
+
+    var row0 = table.getElementsByTagName("TBODY")[0].getElementsByTagName("TR")[0];
+    var headers = row0.getElementsByTagName("TD");
+
+    for(var i = 0;i<headers.length;i++){
+        var index = headers[i].innerHTML.indexOf(' ↓');
+        var reverse_index = headers[i].innerHTML.indexOf(' ↑');
+
+        if(index > -1 || reverse_index > -1){
+            headers[i].innerHTML = headers[i].innerHTML.slice(0, -2);
+        }
+    }
+
+    if (reverse) {
+        headers[sort_element_index].innerHTML = headers[sort_element_index].innerHTML + ' ↑';
+    } else {
+        headers[sort_element_index].innerHTML = headers[sort_element_index].innerHTML + ' ↓';
+    }
+
+}
