@@ -16,6 +16,7 @@ use app\models\gradeable\LateDays;
 use app\models\gradeable\Mark;
 use app\models\gradeable\Submitter;
 use app\models\User;
+use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * Class ReportController
@@ -38,12 +39,27 @@ class ReportController extends AbstractController {
         }
     }
 
+    /**
+     * @Route("/{_semester}/{_course}/reports")
+     */
     public function showReportPage() {
+        if (!$this->core->getUser()->accessAdmin()) {
+            $this->core->getOutput()->showError("This account cannot access admin pages");
+        }
+
         $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
     }
 
-    /** Generates grade summary files for every user */
+    /**
+     * Generates grade summary files for every user
+     *
+     * @Route("/{_semester}/{_course}/reports/summaries")
+     */
     public function generateGradeSummaries() {
+        if (!$this->core->getUser()->accessAdmin()) {
+            $this->core->getOutput()->showError("This account cannot access admin pages");
+        }
+
         $base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'all_grades');
         $g_sort_keys = [
             'type',
@@ -63,8 +79,16 @@ class ReportController extends AbstractController {
         $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
     }
 
-    /** Generates and offers download of CSV grade report */
+    /**
+     * Generates and offers download of CSV grade report
+     *
+     * @Route("/{_semester}/{_course}/reports/csv")
+     */
     public function generateCSVReport() {
+        if (!$this->core->getUser()->accessAdmin()) {
+            $this->core->getOutput()->showError("This account cannot access admin pages");
+        }
+
         $g_sort_keys = [
             'syllabus_bucket',
             'g_id',
