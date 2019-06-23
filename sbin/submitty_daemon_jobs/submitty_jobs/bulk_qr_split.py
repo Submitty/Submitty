@@ -35,8 +35,7 @@ def main(args):
         pdf_writer = PdfFileWriter()
         i = cover_index = id_index = 0
         page_count = 1
-        prev_file = ''
-        data = []
+        prev_file = data = ''
         output = {"filename": filename, "is_qr": True}
         json_file = os.path.join(split_path, "decoded.json")
         for page_number in range(pdfPages.numPages):
@@ -110,6 +109,24 @@ def main(args):
                 page_count = 1
                 prev_file = output_filename
             else:
+                # the first pdf page doesn't have a qr code
+                if i == 0:
+                    output_filename = '{}_{}.pdf'.format(filename[:-4], i)
+                    cover_filename = '{}_{}_cover.pdf'.format(filename[:-4], i)
+                    output[output_filename] = {}
+                    # set the value as blank so a human can check what happened
+                    output[output_filename]['id'] = "BLANK"
+                    prev_file = output_filename
+                    id_index += 1
+                    cover_writer = PdfFileWriter()
+                    # save cover
+                    cover_writer.addPage(pdfPages.getPage(i))
+                    with open(cover_filename, 'wb') as out:
+                        cover_writer.write(out)
+
+                    # save cover image
+                    page.save('{}.jpg'.format(cover_filename[:-4]), "JPEG", quality=100)
+
                 # add pages to current split_pdf
                 page_count += 1
                 pdf_writer.addPage(pdfPages.getPage(i))
