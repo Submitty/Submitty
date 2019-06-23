@@ -2,10 +2,8 @@
 
 """Split PDFS by QR code and move images and PDFs to correct folder."""
 
-import json
 import os
 import traceback
-import sys
 import numpy
 from . import write_to_log as logger
 
@@ -17,9 +15,8 @@ try:
     from pyzbar.pyzbar import ZBarSymbol
     import cv2
 except ImportError:
-    print("One or more required python modules not installed correctly")
     traceback.print_exc()
-    sys.exit(1)
+    raise ImportError("One or more required python modules not installed correctly")
 
 
 def main(args):
@@ -40,7 +37,7 @@ def main(args):
         page_count = 1
         prev_file = ''
         data = []
-        output = {"filename" : filename, "is_qr" : True}
+        output = {"filename": filename, "is_qr": True}
         json_file = os.path.join(split_path, "decoded.json")
         for page_number in range(pdfPages.numPages):
             # convert pdf to series of images for scanning
@@ -64,10 +61,12 @@ def main(args):
                 else:
                     pre = data[0:len(qr_prefix)]
                     suf = data[(len(data)-len(qr_suffix)):len(data)]
+
                     if qr_prefix != '' and pre == qr_prefix:
                         data = data[len(qr_prefix):]
                     if qr_suffix != '' and suf == qr_suffix:
                         data = data[:-len(qr_suffix)]
+
                 cover_index = i
                 cover_filename = '{}_{}_cover.pdf'.format(filename[:-4], i)
                 output_filename = '{}_{}.pdf'.format(filename[:-4], cover_index)
@@ -77,12 +76,13 @@ def main(args):
                 # save pdf
                 if i != 0 and prev_file != '':
                     output[prev_file]['page_count'] = page_count
-                    #update json file
+                    # update json file
                     logger.write_to_json(json_file, output)
                     with open(prev_file, 'wb') as out:
                         pdf_writer.write(out)
 
-                    page.save('{}_{}.jpg'.format(prev_file[:-4], i), "JPEG", quality=100)
+                    page.save('{}_{}.jpg'.format(prev_file[:-4], i),
+                              "JPEG", quality=100)
 
                 if id_index == 1:
                     # correct first pdf's page count and print file
@@ -90,7 +90,8 @@ def main(args):
                     with open(prev_file, 'wb') as out:
                         pdf_writer.write(out)
 
-                    page.save('{}_{}.jpg'.format(prev_file[:-4], i), "JPEG", quality=100)
+                    page.save('{}_{}.jpg'.format(prev_file[:-4], i),
+                              "JPEG", quality=100)
 
                 # start a new pdf and grab the cover
                 cover_writer = PdfFileWriter()
@@ -124,7 +125,7 @@ def main(args):
 
         with open(output_filename, 'wb') as out:
             pdf_writer.write(out)
-        # write the buffer to the log file, so everything is at one line
+        # write the buffer to the log file, so everything is on one line
         logger.write_to_log(log_file_path, buff)
     except Exception:
         msg = "Failed when splitting pdf " + filename
@@ -133,7 +134,6 @@ def main(args):
         # print everything in the buffer just in case it didn't write
         logger.write_to_log(log_file_path, buff)
         logger.write_to_log(log_file_path, msg + "\n" + traceback.format_exc())
-        sys.exit(1)
 
 
 if __name__ == "__main__":
