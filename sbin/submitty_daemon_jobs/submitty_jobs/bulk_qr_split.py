@@ -35,7 +35,7 @@ def main(args):
         pdf_writer = PdfFileWriter()
         i = cover_index = id_index = 0
         page_count = 1
-        prev_file = data = ''
+        prev_file = data = "BLANK"
         output = {"filename": filename, "is_qr": True}
         json_file = os.path.join(split_path, "decoded.json")
         for page_number in range(pdfPages.numPages):
