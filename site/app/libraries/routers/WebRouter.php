@@ -27,6 +27,9 @@ class WebRouter {
     /** @var UrlMatcher  */
     protected $matcher;
 
+    /** @var bool */
+    protected $api_authorized = true;
+
     /** @var array */
     public $parameters;
 
@@ -56,6 +59,11 @@ class WebRouter {
                 if ($this->parameters['_method'] === 'navigationPage') {
                     throw new ResourceNotFoundException;
                 }
+                // prevent user that is not logged in from going anywhere except AuthenticationController
+                if (!$this->logged_in &&
+                    !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
+                    $this->api_authorized = false;
+                }
             }
             catch (ResourceNotFoundException $e) {
                 $this->parameters = null;
@@ -77,6 +85,10 @@ class WebRouter {
     public function run() {
         if (is_null($this->parameters)) {
             return $this->core->getOutput()->renderJsonFail("Endpoint not found.");
+        }
+
+        if (!$this->api_authorized) {
+            return $this->core->getOutput()->renderJsonFail("Unauthorized access. Please log in.");
         }
 
         $this->controller_name = $this->parameters['_controller'];
