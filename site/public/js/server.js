@@ -160,7 +160,7 @@ function editUserForm(user_id) {
     $.ajax({
         url: url,
         success: function(data) {
-            var json = JSON.parse(data);
+            var json = JSON.parse(data)['data'];
             var form = $("#edit-user-form");
             form.css("display", "block");
             $('[name="edit_user"]', form).val("true");
@@ -1073,6 +1073,14 @@ function importTeamForm() {
     $('[name="upload_team"]', form).val(null);
 }
 
+
+function randomizeRotatingGroupsButton() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#randomize-button-warning");
+    form.css("display", "block");
+}
+
+
 /**
  * Toggles the page details box of the page, showing or not showing various information
  * such as number of queries run, length of time for script execution, and other details
@@ -1518,7 +1526,8 @@ function publishFormWithAttachments(form, test_category, error_message) {
         return false;
     }
     if(test_category) {
-        if((!form.prop("ignore-cat")) && form.find('.cat-selected').length == 0) {
+
+        if((!form.prop("ignore-cat")) && form.find('.cat-selected').length == 0 && ($('.cat-buttons input').is(":checked") == false)) {
             alert("At least one category must be selected.");
             return false;
         }
@@ -2451,30 +2460,30 @@ function updateHomeworkExtensions(data) {
                 $('#messages').append(message);
                 return;
             }
-            if(json['error']){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['error'] + '</div>';
+            if(json['status'] === 'fail'){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
                 $('#messages').append(message);
                 return;
             }
-            if(json['is_team']){
+            if(json['data']['is_team']){
                 extensionPopup(json);
                 return;
             }
             var form = $("#load-homework-extensions");
             $('#my_table tr:gt(0)').remove();
-            var title = '<div class="option-title" id="title">Current Extensions for ' + json['gradeable_id'] + '</div>';
+            var title = '<div class="option-title" id="title">Current Extensions for ' + json['data']['gradeable_id'] + '</div>';
             $('#title').replaceWith(title);
-            if(json['users'].length === 0){
+            if(json['data']['users'].length === 0){
                 $('#my_table').append('<tr><td colspan="4">There are no extensions for this homework</td></tr>');
             }
-            json['users'].forEach(function(elem){
+            json['data']['users'].forEach(function(elem){
                 var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_day_exceptions'] + '</td></tr>'];
                 $('#my_table').append(bits.join('</td><td>'));
             });
             $('#user_id').val(this.defaultValue);
             $('#late_days').val(this.defaultValue);
             $('#csv_upload').val(this.defaultValue);
-            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Updated exceptions for ' + json['gradeable_id'] + '.</div>';
+            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Updated exceptions for ' + json['data']['gradeable_id'] + '.</div>';
             $('#messages').append(message);
         },
         error: function() {
@@ -2492,13 +2501,13 @@ function loadHomeworkExtensions(g_id, due_date) {
             var json = JSON.parse(data);
             var form = $("#load-homework-extensions");
             $('#my_table tr:gt(0)').remove();
-            var title = '<div class="option-title" id="title">Current Extensions for ' + json['gradeable_id'] + '</div>';
+            var title = '<div class="option-title" id="title">Current Extensions for ' + json['data']['gradeable_id'] + '</div>';
             $('#title').replaceWith(title);
             $('#due_date').text(due_date);
-            if(json['users'].length === 0){
+            if(json['data']['users'].length === 0){
                 $('#my_table').append('<tr><td colspan="4">There are no extensions for this homework</td></tr>');
             }
-            json['users'].forEach(function(elem){
+            json['data']['users'].forEach(function(elem){
                 var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_day_exceptions'] + '</td></tr>'];
                 $('#my_table').append(bits.join('</td><td>'));
             });
@@ -2509,24 +2518,25 @@ function loadHomeworkExtensions(g_id, due_date) {
     });
 }
 
-function addBBCode(type, divTitle){
+function addMarkdownCode(type, divTitle){
     var cursor = $(divTitle).prop('selectionStart');
     var text = $(divTitle).val();
     var insert = "";
     if(type == 1) {
-        insert = "[url=http://example.com]display text[/url]";
+        insert = "[display text](url)";
     } else if(type == 0){
-        insert = "[code][/code]";
+        insert = "```language" +
+            "\ncode\n```";
     }
     $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));
 }
 
 function refreshOnResponseLateDays(json) {
     $('#late_day_table tr:gt(0)').remove();
-    if(json['users'].length === 0){
+    if(json['data']['users'].length === 0){
         $('#late_day_table').append('<tr><td colspan="6">No late days are currently entered.</td></tr>');
     }
-    json['users'].forEach(function(elem){
+    json['data']['users'].forEach(function(elem){
         elem_delete = "<a onclick=\"deleteLateDays('"+elem['user_id']+"', '"+elem['datestamp']+"');\"><i class='fas fa-trash'></i></a>";
         var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_days'], elem['datestamp'], elem_delete + '</td></tr>'];
         $('#late_day_table').append(bits.join('</td><td>'));
@@ -2545,8 +2555,8 @@ function updateLateDays(data) {
         contentType: false,
         success: function(data) {
             var json = JSON.parse(data);
-            if(json['error']){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['error'] + '</div>';
+            if(json['status'] === 'fail'){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
                 $('#messages').append(message);
                 return;
             }
@@ -2585,8 +2595,8 @@ function deleteLateDays(user_id, datestamp) {
             },
             success: function(data) {
                 var json = JSON.parse(data);
-                if(json['error']){
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['error'] + '</div>';
+                if(json['status'] === 'fail'){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
                     $('#messages').append(message);
                     return;
                 }

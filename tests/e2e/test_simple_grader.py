@@ -119,12 +119,11 @@ class TestSimpleGrader(BaseTestCase):
             WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//*[@id='cell-0-0' and @{}='{}']".format(attribute, next_score))))
             # if numeric, reset value so that test will continue to work as expected
             if next_score == "3.4":
-                self.driver.refresh()
                 grade_elem = self.driver.find_element_by_id("cell-0-0")
                 grade_elem.clear()
                 grade_elem.send_keys("3.3")
                 grade_elem.send_keys(Keys.ARROW_RIGHT)
-        
+
         lab_func = self.insert_kwargs(template_func, is_lab=True)
         test_func = self.insert_kwargs(template_func, is_lab=False)
         self.run_tests(lab_func, test_func, lab_func, test_func, users=[("instructor", "Quinn"), ("ta", "Jill")])
