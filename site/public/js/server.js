@@ -376,13 +376,22 @@ function newUploadCourseMaterialsForm() {
 
 }
 
-function setFolderRelease(){
+function setFolderRelease(changeActionVariable,releaseDates,id,inDir){
 
     $('.popup-form').css('display', 'none');
 
     var form = $("#set-folder-release-form");
 
     form.css("display", "block");
+
+    $('[name="release_date"]', form).val(releaseDates);
+    $('[name="release_date"]',form).attr('data-fP',changeActionVariable);
+
+    inDir = JSON.stringify(inDir);
+    $('[name="submit"]',form).attr('data-iden',id);
+    $('[name="submit"]',form).attr('data-inDir',inDir);
+
+
 }
 
 function deletePlagiarismResultAndConfigForm(form_action, gradeable_title) {
@@ -1253,7 +1262,22 @@ function openDiv(id) {
 }
 
 function openDivForCourseMaterials(num) {
-    var elem = $('#div_viewer_' + num);
+    var elem = $('#div_viewer' + num);
+    if (elem.hasClass('open')) {
+        elem.hide();
+        elem.removeClass('open');
+        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
+    }
+    else {
+        elem.show();
+        elem.addClass('open');
+        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
+    }
+    return false;
+}
+
+function openAllDivForCourseMaterials() {
+    var elem = $("[id ^= 'div_viewer_']");
     if (elem.hasClass('open')) {
         elem.hide();
         elem.removeClass('open');
@@ -2634,7 +2658,6 @@ function changePermission(filename, checked) {
 function changeNewDateTime(filename, newdatatime) {
     // send to server to handle file permission change
     var url = buildUrl({'component': 'misc', 'page': 'modify_course_materials_file_time_stamp', 'filename': encodeURIComponent(filename), 'newdatatime': encodeURIComponent(newdatatime)});
-
     $.ajax({
         url: url,
         success: function(data) {},
