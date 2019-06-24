@@ -39,8 +39,12 @@
 
 {% macro render_diff_element(check, element, side, popup_css_file, index, check_index) %}
     <!-- Readded css here so the popups have the css -->
-
-    <div class='diff-element'>
+    <div class=
+      {% if element.type != "sequence_diagram" %}
+        'diff-element'>
+      {% else %}
+        'mermaid-element'>
+      {% endif %}
         <h4>
             {{ element.title }}
             {% if element.show_popup %}
@@ -71,6 +75,15 @@
                 <div id="div_{{ index }}_{{ check_index }}">
                     {{ element.src|raw }}
                 </div>
+            {% elseif element.type == "sequence_diagram" %}
+             <div class="mermaid" id="div_{{ index }}_{{ check_index }}">
+                sequenceDiagram
+                {{ element.src |escape}}
+              </div>
+              <script>
+                mermaid.init( undefined, "#div_{{ index }}_{{ check_index }}");
+                $(document.getElementById('div_{{ index }}_{{ check_index }}')).find("[id*='mermaid']")[0].setAttribute("height", "40%");
+              </script> 
             {% endif %}
         </div>
     </div>

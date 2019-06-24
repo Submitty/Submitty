@@ -3,17 +3,22 @@ import sys
 import csv
 import traceback
 import queue
-import datetime
 import errno
 from time import sleep
 import os
-import csv   
 import datetime
+import random
+from datetime import timedelta  
 
-print('THIS IS THE STANDARD ROUTER!')
+#Set instructor seed to a positive integer value to make certain router functionality deterministic.
+INSTRUCTOR_SEED = None
+
+if INSTRUCTOR_SEED != None:
+  random.seed( INSTRUCTOR_SEED )
+
 
 LOG_FILE = 'router_log.txt'
-RESEARCH_CSV = 'research.csv'
+SEQUENCE_DIAGRAM_FILE = 'sequence_diagram.txt'
 '''
 SWITCHBOARD is a dict of the form
 {
@@ -36,7 +41,54 @@ RUNNING = True
 
 
 ##################################################################################################################
-# HELPER FUNCTIONS
+# INSTRUCTOR FUNCTIONS
+##################################################################################################################
+'''
+This function may be used to manipulate when a message will be processed (forwarded to its recipient) and
+what its contents are. It must return a tuple of the form (<time to be processed>, data), where data is a 
+dictionary containing 'sender', 'recipient', 'port', and 'message'. It is not recommended that port, sender,
+or recipient be manipulated.
+'''
+def manipulate_recieved_data(sender, recipient, port, message):
+  # Use this time to process the student message instantly
+  process_time = datetime.datetime.now()
+  # Leave blank to avoid outputting a message to the student on their sequence diagram
+  message_to_student = ""
+  
+  #EXAMPLE: modify one bit of the student's message in 1/10 messages.
+  if random.randint(1,10) == 10:
+    # Convert the message int an array of bytes
+    m_array = bytearray(message)
+    # Determine which bit will be flipped
+    flipbit = random.randint(0,len(message)-1 )
+    # Flip the bit
+    m_array[0] = s_array[0] + 1
+    # Update the message
+    message = bytes(m_array)
+    # OPTIONAL: Tell the student that their message was corrupted via a message in their sequence diagram.
+    message_to_student = "Message Corrupted"
+  #EXAMPLE: delay the student message by up to 1 second in 1/10 messages
+  elif random.randint(1,10) == 10:
+    # Choose an amount of delay (in ms) between .1 and 1 second.
+    milliseconds_dela = random.randint(100,1000)
+    # Extend the processing time that far into the future
+    process_time = process_time + timedelta(milliseconds=milliseconds_dela)
+    # OPTIONAL: add a message to the student's sequence diagram that lets them know about the delay
+    message_to_student = "Message delayed by {0} milliseconds".format(milliseconds_dela)
+
+
+  data = {
+    'sender' : sender,
+    'recipient' : recipient,
+    'port' : port,
+    'message' : message,
+    'message_to_student' : message_to_student
+  }
+  return (process_time, data)
+
+
+##################################################################################################################
+# LOGGING FUNCTIONS
 ##################################################################################################################
 def convert_queue_obj_to_string(obj):
   str = '\tSENDER: {0}\n\tRECIPIENT: {1}\n\tPORT: {2}\n\tCONTENT: {3}'.format(obj['sender'], obj['recipient'], obj['port'], obj['message'])
@@ -53,18 +105,42 @@ def log(line):
   print(line)
   sys.stdout.flush()
 
-def write_research_csv(obj, status, message_type):
-  append_write = 'a' if os.path.exists(RESEARCH_CSV) else 'w'
+def write_sequence_file(obj, status, message_type):
+  append_write = 'a' if os.path.exists(SEQUENCE_DIAGRAM_FILE) else 'w'
 
-  with open(RESEARCH_CSV, append_write) as outfile:
-    writer = csv.writer(outfile)
-    #sender, recipient, message, port, status, message_type, timestamp
-    writer.writerow([obj['sender'].replace('_Actual', ''), obj['recipient'].replace('_Actual', ''), str(obj['message']), obj['port'], status, message_type, str(datetime.datetime.now())])
+  #select the proper arrow type for the message
+  if obj['status'] == 'success':
+    if message_type == 'tcp':
+      arrow = '->>'
+    else:
+      arrow = '-->>'
+  else:
+    if message_type == 'tcp':
+      arrow = '-x'
+    else:
+      arrow = '--x'
+
+  sender = obj['sender'].replace('_Actual', '')
+  recipient = arrow,obj['recipient'].replace('_Actual', '')
+  with open(SEQUENCE_DIAGRAM_FILE, append_write) as outfile:
+    outfile.write('{0}{1}{2}: {3}\n'.format(sender,recipient, str(obj['message'])))
+    if 'message_to_student' in obj:
+      outfile.write('Note right of {0}: {1}'.format(sender, obj['message_to_student']))
+    # writer = csv.writer(outfile)
+    # #sender, recipient, message, port, status, message_type, timestamp
+    # writer.writerow([obj['sender'].replace('_Actual', ''), obj['recipient'].replace('_Actual', ''), str(obj['message']), obj['port'], status, message_type, str(datetime.datetime.now())])
 
 
-#knownhosts_tcp.csv and knownhosts_udp.csv are of the form
-#sender,recipient,port_number
-# such that sender sends all communications to recipient via port_number. 
+
+##################################################################################################################
+# SWITCHBOARD FUNCTION
+##################################################################################################################
+
+'''
+knownhosts_tcp.csv and knownhosts_udp.csv are of the form
+sender,recipient,port_number
+such that sender sends all communications to recipient via port_number. 
+'''
 def build_switchboard():
   try:
     #Read the known_hosts.csv see the top of the file for the specification
@@ -141,7 +217,7 @@ def send_outgoing_message(data):
     status = 'router_error'
     log("An error occurred internal to the router. Please report the following error to a Submitty Administrator")
     log(traceback.format_exc())
-    write_research_csv(data, status, message_type)
+    write_sequence_file(data, status, message_type)
     return
   try:
     if SWITCHBOARD[port]['connection_type'] == 'tcp':
@@ -159,7 +235,7 @@ def send_outgoing_message(data):
     SWITCHBOARD[port]['connection'].close()
     SWITCHBOARD[port]['connection'] = None
     status = 'failure'
-  write_research_csv(data, status, message_type)
+  write_sequence_file(data, status, message_type)
 
 def process_queue():
   still_going = True
@@ -255,16 +331,8 @@ def listen_to_sockets():
       connect_outgoing_socket(port)
       recipient = SWITCHBOARD[port]['recipient']
       
-      data = {
-        'sender' : sender,
-        'recipient' : recipient,
-        'port' : port,
-        'message' : message
-      }
+      tup = manipulate_recieved_data(sender, recipient, port, message)
 
-      #TODO allow rules to change what time is used for the priority queue.
-      currentTime = datetime.datetime.now()
-      tup = (currentTime, data)
       QUEUE.put(tup)
     except socket.timeout as e:
       #This is likely an acceptable error caused by non-blocking sockets having nothing to read.

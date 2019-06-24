@@ -119,6 +119,7 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
     // JSON FOR THIS FILE DISPLAY
     nlohmann::json autocheck_j;
     autocheck_j["description"] = tcg.value("description",filenames[FN]);
+    autocheck_j["display_as_sequence_diagram"] = tcg.value("sequence_diagram", false);
     bool actual_file_to_print = false;
     std::string autocheckid = std::to_string(which_autocheck);
     if (filenames.size() > 1) {

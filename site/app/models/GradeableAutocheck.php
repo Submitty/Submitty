@@ -35,6 +35,9 @@ class GradeableAutocheck extends AbstractModel {
     /** @property @var boolean If this check's file is in results_public */
     protected $public;
 
+    /** @property @var boolean If this check's file should be displayed as a sequence diagram */
+    protected $display_as_sequence_diagram;
+
     /**
      * GradeableAutocheck constructor.
      *
@@ -60,6 +63,12 @@ class GradeableAutocheck extends AbstractModel {
             }
         }
         
+        if(isset($details["display_as_sequence_diagram"])){
+            $this->display_as_sequence_diagram = $details["display_as_sequence_diagram"];
+        }else{
+            $this->display_as_sequence_diagram = FALSE;
+        }
+
         $actual_file = $expected_file = $difference_file = $image_difference ="";
 
         if(isset($details["actual_file"])) {
@@ -91,10 +100,10 @@ class GradeableAutocheck extends AbstractModel {
         }
 
         $is_network_graph = False;
-        if(isset($details["expected_file"]) && $details["network_graph"] == True){
+        if(isset($details["expected_file"])){
             $is_network_graph = True;
         }
 
-        $this->diff_viewer = new DiffViewer($actual_file, $expected_file, $difference_file, $image_difference, $this->index, is_network_graph=$is_network_graph);
+        $this->diff_viewer = new DiffViewer($actual_file, $expected_file, $difference_file, $image_difference, $this->index);
     }
 }
