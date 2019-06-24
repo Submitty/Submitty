@@ -53,7 +53,7 @@ def manipulate_recieved_data(sender, recipient, port, message):
   # Use this time to process the student message instantly
   process_time = datetime.datetime.now()
   # Leave blank to avoid outputting a message to the student on their sequence diagram
-  message_to_student = ""
+  message_to_student = None
   
   #EXAMPLE: modify one bit of the student's message in 1/10 messages.
   if random.randint(1,10) == 10:
@@ -62,11 +62,11 @@ def manipulate_recieved_data(sender, recipient, port, message):
     # Determine which bit will be flipped
     flipbit = random.randint(0,len(message)-1 )
     # Flip the bit
-    m_array[0] = s_array[0] + 1
+    m_array[flipbit] = m_array[flipbit] + 1
     # Update the message
     message = bytes(m_array)
     # OPTIONAL: Tell the student that their message was corrupted via a message in their sequence diagram.
-    message_to_student = "Message Corrupted"
+    message_to_student = "Corrupted"
   #EXAMPLE: delay the student message by up to 1 second in 1/10 messages
   elif random.randint(1,10) == 10:
     # Choose an amount of delay (in ms) between .1 and 1 second.
@@ -74,7 +74,7 @@ def manipulate_recieved_data(sender, recipient, port, message):
     # Extend the processing time that far into the future
     process_time = process_time + timedelta(milliseconds=milliseconds_dela)
     # OPTIONAL: add a message to the student's sequence diagram that lets them know about the delay
-    message_to_student = "Message delayed by {0} milliseconds".format(milliseconds_dela)
+    message_to_student = "Delayed {0} ms".format(milliseconds_dela)
 
 
   data = {
@@ -109,7 +109,7 @@ def write_sequence_file(obj, status, message_type):
   append_write = 'a' if os.path.exists(SEQUENCE_DIAGRAM_FILE) else 'w'
 
   #select the proper arrow type for the message
-  if obj['status'] == 'success':
+  if status == 'success':
     if message_type == 'tcp':
       arrow = '->>'
     else:
@@ -121,11 +121,11 @@ def write_sequence_file(obj, status, message_type):
       arrow = '--x'
 
   sender = obj['sender'].replace('_Actual', '')
-  recipient = arrow,obj['recipient'].replace('_Actual', '')
+  recipient = obj['recipient'].replace('_Actual', '')
   with open(SEQUENCE_DIAGRAM_FILE, append_write) as outfile:
-    outfile.write('{0}{1}{2}: {3}\n'.format(sender,recipient, str(obj['message'])))
-    if 'message_to_student' in obj:
-      outfile.write('Note right of {0}: {1}'.format(sender, obj['message_to_student']))
+    outfile.write('{0}{1}{2}: {3}\n'.format(sender,arrow,recipient, str(obj['message'])))
+    if 'message_to_student' in obj and obj['message_to_student'] != None and obj['message_to_student'].strip() != '':
+      outfile.write('Note right of {0}: {1}\n'.format(sender, obj['message_to_student']))
     # writer = csv.writer(outfile)
     # #sender, recipient, message, port, status, message_type, timestamp
     # writer.writerow([obj['sender'].replace('_Actual', ''), obj['recipient'].replace('_Actual', ''), str(obj['message']), obj['port'], status, message_type, str(datetime.datetime.now())])

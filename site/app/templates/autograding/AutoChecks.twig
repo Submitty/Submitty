@@ -81,8 +81,7 @@
                 {{ element.src |escape}}
               </div>
               <script>
-                mermaid.init( undefined, "#div_{{ index }}_{{ check_index }}");
-                $(document.getElementById('div_{{ index }}_{{ check_index }}')).find("[id*='mermaid']")[0].setAttribute("height", "40%");
+                mermaid.init( { "useMaxWidth" : false, "startOnLoad" : false }, "#div_{{ index }}_{{ check_index }}");
               </script> 
             {% endif %}
         </div>
