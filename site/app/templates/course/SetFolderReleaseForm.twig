@@ -2,12 +2,53 @@
 {% block popup_id %}set-folder-release-form{% endblock %}
 {% block title %}Set Folder Release{% endblock %}
 {% block body %}
-    <p>
-        Choose a time to release the contents of this folder<br>
-    </p>
+
+    <center> <b>Choose a time to release the contents of this folder:</b>
+    <br/>
+    <br/>
+    <input name="release_date" id="date_to_release" class="date_picker" type="text" size="26" value="2019-06-24 12:00:00" data-fP=" " onChange="getNewDateTime(this)"/>
+
+    </center>
+    <script>
+
+        function getNewDateTime(me){
+            var releaseDate = document.getElementById("date_to_release");
+            var folderPath = releaseDate.dataset.fP;
+
+            // pass filename to server to record the new date and time of the file to be released
+            var newDateTime = $(me).val();
+
+            releaseDate.value = newDateTime;
+
+
+           // changeNewDateTime(folderPath, newDateTime);
+        }
+        function confirm( ){
+            var directory = document.getElementById("submit");
+            var dirArr = JSON.parse(directory.dataset.indir);
+            var ID = directory.dataset.iden;
+            console.log(ID);
+            var releaseDate = document.getElementById("date_to_release");
+
+            dirArr.forEach(function (element) {
+                console.log(element, releaseDate.value);
+                setChildNewDateTime(element,releaseDate.value);
+                //changeNewDateTime(element, releaseDate.value);
+            });
+            var selectedDiv = 'date_to_release_'+ID;
+            console.log(selectedDiv);
+            $("[id^="+selectedDiv+"]").val(releaseDate.value);
+
+        }
+
+
+    </script>
 
 {% endblock %}
+
 {% block buttons %}
     {{ block('close_button') }}
-    <input class="btn btn-primary" id="submit" type="submit" value="Submit" />
+    <input name="submit" class="btn btn-primary" id="submit" type="submit" value="Submit" data-iden=" "; data-inDir=' ' onclick="confirm()"/>
+    {# <button name="close" class="btn btn-default" id="close" type="close" value="Close" onclick="rload()"> Close </button> #}
 {% endblock %}
+

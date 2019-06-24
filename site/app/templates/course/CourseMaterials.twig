@@ -3,33 +3,43 @@
 <div class="content">
     {% if userGroup == 1 %}
         <div style="float: right; margin-bottom: 20px;">
+            <a onclick='openAllDivForCourseMaterials();' class="btn btn-primary">Open/Close All Folders</a>
+            <a onclick='setFolderRelease("{{ folderPath }}","{{ fileReleaseDates[folderPath] }}","{{ id }}",
+                    [{% for key,value in inDir %}
+                    {% if key == folderPath %}
+                        {% for f in value %}
+                                "{{ f }}",
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}]
+                    )' class="btn btn-primary">Set All Release Dates</a>
             <a onclick="newUploadCourseMaterialsForm()" class="btn btn-primary">Upload Course Materials</a>
         </div>
     {% endif %}
     <h1>Course Materials</h1>
     <div class="inner-container" id="file-container">
-        {{ self.display_files(self, submissions, fileShares, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath, changeDate) }}
+        {{ self.display_files(self, submissions, fileShares, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath,inDir) }}
 
     </div>
 </div>
 
-{% macro display_files(self, files, fileShares, fileReleaseDates, id, indent, title, userGroup, folderPath,changeDate) %}
+{% macro display_files(self, files, fileShares, fileReleaseDates, id, indent, title, userGroup, folderPath,inDir) %}
     {# Files on top #}
 
     {% for dir, path in files if path is not iterable %}
         {% if userGroup != 4 or fileShares[path] == "1" %}
-            {{ self.display_file(self, dir, fileShares, fileReleaseDates, path, id ~ "f" ~ loop.index, indent, title, userGroup, changeDate) }}
+            {{ self.display_file(self, dir, fileShares, fileReleaseDates, path, id ~ "f" ~ loop.index, indent, title, userGroup,inDir) }}
         {% endif %}
     {% endfor %}
 
     {# Directories underneath #}
     {% for dir, path in files if path is iterable %}
-        {{ self.display_dir(self, dir, fileShares, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, userGroup, folderPath ~ '/' ~ dir, changeDate) }}
+        {{ self.display_dir(self, dir, fileShares, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, userGroup, folderPath ~ '/' ~ dir,inDir) }}
     {% endfor %}
 {% endmacro %}
 
 
-{% macro display_file(self, dir, fileShares, fileReleaseDates, path, id, indent, title, userGroup, changeDate) %}
+{% macro display_file(self, dir, fileShares, fileReleaseDates, path, id, indent, title, userGroup,inDir) %}
     <div>
         <div class="file-viewer">
 
@@ -46,13 +56,8 @@
 
 
                 <label for="latest-events">Share to student on</label>
-                {{ changeDate }}
-                {% if changeDate == 0 %}
-                    <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26" value="{{ fileReleaseDates[path]}}" onChange="setNewDateTime(this, '{{ path }}')"/>
-                {% else %}
-                    <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26" value="setChildNewDateTime('{{ path }}','{{ changeDate }}')" onChange="setNewDateTime(this, '{{ path }}')"/>
-                    {% set changeDate = 0 %}
-                {% endif %}
+                <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26" value="{{ fileReleaseDates[path]}}" onChange="setNewDateTime(this, '{{ path }}')"/>
+
 
             {% endif %}
         </div>
@@ -60,14 +65,13 @@
     </div>
 {% endmacro %}
 
-{% macro display_dir(self, dir, fileShares, fileReleaseDates, contents, id, indent, title, userGroup, folderPath, changeDate) %}
+{% macro display_dir(self, dir, fileShares, fileReleaseDates, contents, id, indent, title, userGroup, folderPath,inDir) %}
     {% if indent == 0 %}
-        {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, userGroup, folderPath, changeDate) }}
+        {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir) }}
     {% else %}
     <div>
 
         <div class="div-viewer">
-
             <a class='openAllDiv openAllDiv{{ title }} openable-element-{{ title }}' id='{{ dir }}' onclick='openDivForCourseMaterials("{{ id }}");'>
                 <span class="fas fa-folder open-all-folder" style='vertical-align:text-top;font-size:20px'></span>
                 {{ dir }}
@@ -77,15 +81,13 @@
                 <a onclick='newDeleteCourseMaterialForm("{{ core.buildUrl({'component': 'misc', 'page': 'delete_course_material_folder', 'dir': 'course_materials', 'file': dir, 'path': folderPath }) }}", "{{ dir }}");'>
                     <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
 
-
-                {# <label for="latest-events">Share to student on</label> #}
-                {% set prevTD = fileReleaseDates[folderPath]  %}
-                {% if userGroup == 1 %}
-                        <a onclick="setFolderRelease()" class="btn btn-primary">Set Folder Release</a>
-                {% endif %}
-                {# <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26" value=" {{ fileReleaseDates[folderPath] }} " onChange="setNewDateTime(this, '{{ folderPath }}')"/> #}
-                {# {% set changeDate = fileReleaseDates[folderPath] %} #}
-
+                <a onclick='setFolderRelease("{{ folderPath }}","{{ fileReleaseDates[folderPath] }}","{{ id }}",
+                [{% for key,value in inDir %}
+                    {% if value == dir %}
+                            "{{ key}}",
+                    {% endif %}
+                {% endfor %}]
+                        )' class="btn btn-primary">Set Folder Release Date</a>
 
             {% endif %}
         </div>
@@ -93,7 +95,7 @@
 
             {# Recurse #}
 
-            {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, userGroup, folderPath, changeDate) }}
+            {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir) }}
 
         </div>
     </div>
@@ -157,12 +159,13 @@
         // pass filename to server to record the new date and time of the file to be released
         var newDateTime = $(me).val();
         //alert(newDateTime);
+        console.log(path, newDateTime);
         changeNewDateTime(path, newDateTime);
-        console.log(newDateTime);
     }
 
+
     function setChildNewDateTime(path, changeDate) {
-        console.log(changeDate);
+        console.log(path, changeDate);
         changeNewDateTime(path,changeDate);
     }
 
@@ -179,5 +182,6 @@
 
 
 {% include('admin/users/UserForm.twig') with {'action': 'update_student'} %}
+{% include('course/SetFolderReleaseForm.twig') %}
 {% include('course/UploadCourseMaterialsForm.twig') %}
 {% include('course/DeleteCourseMaterialForm.twig') %}
