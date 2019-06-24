@@ -40,6 +40,9 @@ class MiscController extends AbstractController {
             case 'download_all_assigned':
                 $this->downloadAssignedZips();
                 break;
+            case 'download_course_material_zip':
+                $this->downloadCourseMaterialZip();
+                break;
             case 'base64_encode_pdf':
                 $this->encodePDF();
                 break;
@@ -49,8 +52,8 @@ class MiscController extends AbstractController {
             case 'modify_course_materials_file_time_stamp':
                 $this->modifyCourseMaterialsFileTimeStamp();
                 break;
-            case 'check_qr_upload_progress':
-                $this->checkQRUploadProgress();
+            case 'check_bulk_progress':
+                $this->checkBulkProgress();
                 break;
         }
     }
@@ -495,6 +498,69 @@ class MiscController extends AbstractController {
         unlink($zip_name); //deletes the random zip file
     }
 
+    private function downloadCourseMaterialZip() {
+        $dir_name = $_REQUEST["dir_name"];
+        $root_path = realpath($_REQUEST["path"]);
+
+        // check if the user has access to course materials
+        if (!$this->core->getAccess()->canI("path.read", ["dir" => 'course_materials', "path" => $root_path])) {
+            $this->core->getOutput()->showError("You do not have access to this folder");
+            return false;
+        }
+
+        $temp_dir = "/tmp";
+        // makes a random zip file name on the server
+        $temp_name = uniqid($this->core->getUser()->getId(), true);
+        $zip_name = $temp_dir . "/" . $temp_name . ".zip";
+        $zip_file_name = preg_replace('/\s+/', '_', $dir_name) . ".zip";
+
+        $zip = new \ZipArchive();
+        $zip->open($zip_name, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+
+        if(!$this->core->getUser()->accessGrading()) {
+            // if the user is not the instructor
+            // download all accessible files according to course_materials_file_data.json
+            $file_data = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
+            $json = FileUtils::readJsonFile($file_data);
+            foreach ($json as $path => $file) {
+                // check if the file is in the requested folder
+                if (!Utils::startsWith(realpath($path), $root_path)) {
+                    continue;
+                }
+                if ($file['checked'] === '1' &&
+                    $file['release_datetime'] < $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")) {
+                    $relative_path = substr($path, strlen($root_path) + 1);
+                    $zip->addFile($path, $relative_path);
+                }
+            }
+        }
+        else {
+            // if the user is an instructor
+            // download all files
+            $files = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($root_path),
+                \RecursiveIteratorIterator::LEAVES_ONLY
+            );
+
+            foreach ($files as $name => $file) {
+                if (!$file->isDir()) {
+                    $file_path = $file->getRealPath();
+                    $relativePath = substr($file_path, strlen($root_path) + 1);
+
+                    $zip->addFile($file_path, $relativePath);
+                }
+            }
+        }
+
+        $zip->close();
+        header("Content-type: application/zip");
+        header("Content-Disposition: attachment; filename=$zip_file_name");
+        header("Content-length: " . filesize($zip_name));
+        header("Pragma: no-cache");
+        header("Expires: 0");
+        readfile("$zip_name");
+        unlink($zip_name); //deletes the random zip file
+    }
 
     public function modifyCourseMaterialsFilePermission() {
 
@@ -570,7 +636,7 @@ class MiscController extends AbstractController {
         }
     }
 
-    public function checkQRUploadProgress(){
+    public function checkBulkProgress(){
         $gradeable_id = $_POST['gradeable_id'] ?? NULL;
         if($gradeable_id === NULL){
             $result = ['error' => "gradeable_id cannot be null"];
@@ -585,11 +651,11 @@ class MiscController extends AbstractController {
         $complete_count = 0;
         try{
             foreach(scandir($job_path) as $job){
-                if(strpos($job, 'qr_upload_') !== false)
+                if(strpos($job, 'bulk_upload_') !== false)
                     $found = true;
                 else
                     continue;
-                //remove 'qr_upload_' and '.json' from job file name
+                //remove 'bulk_upload_' and '.json' from job file name
                 $result[] = substr($job,11,-5);
             }
             //look in the split upload folder to see what is complete
