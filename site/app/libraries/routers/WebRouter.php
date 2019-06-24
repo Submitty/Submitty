@@ -48,13 +48,12 @@ class WebRouter {
         $collection = $loader->load(realpath(__DIR__ . "/../../controllers"));
 
         $this->matcher = new UrlMatcher($collection, new RequestContext());
-
         if ($is_api) {
             try {
                 $this->parameters = $this->matcher->matchRequest($this->request);
             }
             catch (ResourceNotFoundException $e) {
-                // TODO: 404
+                $this->parameters = null;
             }
         }
         else {
@@ -71,6 +70,10 @@ class WebRouter {
     }
 
     public function run() {
+        if (is_null($this->parameters)) {
+            return $this->core->getOutput()->renderJsonFail("Endpoint not found.");
+        }
+
         $this->controller_name = $this->parameters['_controller'];
         $this->method_name = $this->parameters['_method'];
         $controller = new $this->controller_name($this->core);
