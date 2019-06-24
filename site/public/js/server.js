@@ -1262,7 +1262,7 @@ function openDiv(id) {
 }
 
 function openDivForCourseMaterials(num) {
-    var elem = $('#div_viewer' + num);
+    var elem = $('#div_viewer_' + num);
     if (elem.hasClass('open')) {
         elem.hide();
         elem.removeClass('open');
