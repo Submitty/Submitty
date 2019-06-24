@@ -200,6 +200,25 @@ if (isset($_COOKIE[$cookie_key])) {
     }
 }
 
+// check if the user has a valid jwt in the header
+$api_logged_in = false;
+$jwt = $request->headers->get("authorization");
+if (!empty($jwt)) {
+    try {
+        $token = TokenManager::parseApiToken(
+            $request->headers->get("authorization"),
+            $core->getConfig()->getBaseUrl(),
+            $core->getConfig()->getSecretSession()
+        );
+        $api_logged_in = true;
+    }
+    catch (\InvalidArgumentException $exc) {
+        $core->getOutput()->renderJsonFail("Invalid token.");
+        $core->getOutput()->displayOutput();
+        return;
+    }
+}
+
 // Prevent anyone who isn't logged in from going to any other controller than authentication
 if (!$logged_in) {
     if ($_REQUEST['component'] != 'authentication') {
@@ -299,7 +318,7 @@ if ($is_api) {
     $core->getOutput()->disableRender();
     $core->disableRedirects();
 
-    $router = new app\libraries\routers\WebRouter($request, $core, $logged_in, true);
+    $router = new app\libraries\routers\WebRouter($request, $core, $api_logged_in, true);
     $router->run();
 }
 elseif (!$supported_by_new_router) {

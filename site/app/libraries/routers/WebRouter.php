@@ -46,11 +46,16 @@ class WebRouter {
         $annotationLoader = new AnnotatedRouteLoader(new AnnotationReader());
         $loader = new AnnotationDirectoryLoader($fileLocator, $annotationLoader);
         $collection = $loader->load(realpath(__DIR__ . "/../../controllers"));
+        $context = new RequestContext();
 
-        $this->matcher = new UrlMatcher($collection, new RequestContext());
+        $this->matcher = new UrlMatcher($collection, $context->fromRequest($this->request));
         if ($is_api) {
             try {
                 $this->parameters = $this->matcher->matchRequest($this->request);
+                // prevent /api/something from being matched to /{_semester}/{_course}
+                if ($this->parameters['_method'] === 'navigationPage') {
+                    throw new ResourceNotFoundException;
+                }
             }
             catch (ResourceNotFoundException $e) {
                 $this->parameters = null;

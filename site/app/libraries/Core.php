@@ -383,6 +383,37 @@ class Core {
     }
 
     /**
+     * Authenticates the user against user's api key. Returns the json web token generated for the user.
+     *
+     * @return string | null
+     *
+     * @throws AuthenticationException
+     */
+    public function authenticateJwt() {
+        $user_id = $this->authentication->getUserId();
+        try {
+            if ($this->authentication->authenticate()) {
+                // Set the cookie to last for 7 days
+                $token = (string) TokenManager::generateApiToken(
+                    $this->database_queries->getSubmittyUserApiKey($user_id),
+                    $this->getConfig()->getBaseUrl(),
+                    $this->getConfig()->getSecretSession()
+                );
+                return $token;
+            }
+        }
+        catch (\Exception $e) {
+            // We wrap all non AuthenticationExceptions so that they get specially processed in the
+            // ExceptionHandler to remove password details
+            if ($e instanceof AuthenticationException) {
+                throw $e;
+            }
+            throw new AuthenticationException($e->getMessage(), $e->getCode(), $e);
+        }
+        return null;
+    }
+
+    /**
      * Checks the inputted $csrf_token against the one that is loaded from the session table for the particular
      * signed in user.
      *

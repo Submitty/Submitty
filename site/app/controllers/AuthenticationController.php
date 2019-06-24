@@ -119,6 +119,28 @@ class AuthenticationController extends AbstractController {
     }
 
     /**
+     * @Route("/api/token", methods={"POST"})
+     *
+     * @return array
+     */
+    public function getToken() {
+        if (!isset($_POST['user_id']) || !isset($_POST['password'])) {
+            $msg = 'Cannot leave user id or password blank';
+            return $this->core->getOutput()->renderJsonFail($msg);
+        }
+        $this->core->getAuthentication()->setUserId($_POST['user_id']);
+        $this->core->getAuthentication()->setPassword($_POST['password']);
+        $token = $this->core->authenticateJwt();
+        if ($token) {
+            return $this->core->getOutput()->renderJsonSuccess(['token' => $token]);
+        }
+        else {
+            $msg = "Could not login using that user id or password";
+            return $this->core->getOutput()->renderJsonFail($msg);
+        }
+    }
+
+    /**
      * Handle stateless authentication for the VCS endpoints.
      *
      * This endpoint is unique from the other authentication methods in
