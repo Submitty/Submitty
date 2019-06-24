@@ -295,7 +295,14 @@ if (empty($_REQUEST['component']) && $core->getUser() !== null) {
 
 $supported_by_new_router = in_array($_REQUEST['component'], ['authentication', 'home', 'navigation']);
 
-if (!$supported_by_new_router) {
+if ($is_api) {
+    $core->getOutput()->disableRender();
+    $core->disableRedirects();
+
+    $router = new app\libraries\routers\WebRouter($request, $core, $logged_in, true);
+    $router->run();
+}
+elseif (!$supported_by_new_router) {
     switch($_REQUEST['component']) {
         case 'admin':
             $control = new app\controllers\AdminController($core);

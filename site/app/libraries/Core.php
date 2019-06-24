@@ -61,6 +61,9 @@ class Core {
     /** @var ClassicRouter */
     private $router;
 
+    /** @var bool */
+    private $redirect = true;
+
 
     /**
      * Core constructor.
@@ -89,6 +92,13 @@ class Core {
         foreach (array('component', 'page', 'action') as $key) {
             $_REQUEST[$key] = (isset($_REQUEST[$key])) ? strtolower($_REQUEST[$key]) : "";
         }
+    }
+
+    /**
+     * Disable all redirects for API calls.
+     */
+    public function disableRedirects() {
+        $this->redirect = false;
     }
 
     /**
@@ -437,6 +447,9 @@ class Core {
      * @param int $status_code
      */
     public function redirect($url, $status_code = 302) {
+        if (!$this->redirect) {
+            return;
+        }
         header('Location: ' . $url, true, $status_code);
         die();
     }

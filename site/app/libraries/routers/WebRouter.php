@@ -36,7 +36,7 @@ class WebRouter {
     /** @var string the method to call */
     public $method_name;
 
-    public function __construct(Request $request, Core $core, $logged_in) {
+    public function __construct(Request $request, Core $core, $logged_in, $is_api = false) {
         $this->core = $core;
         $this->request = $request;
         $this->logged_in = $logged_in;
@@ -49,14 +49,24 @@ class WebRouter {
 
         $this->matcher = new UrlMatcher($collection, new RequestContext());
 
-        try {
-            $this->parameters = $this->matcher->matchRequest($this->request);
-            $this->loadCourses();
-            $this->loginCheck();
+        if ($is_api) {
+            try {
+                $this->parameters = $this->matcher->matchRequest($this->request);
+            }
+            catch (ResourceNotFoundException $e) {
+                // TODO: 404
+            }
         }
-        catch (ResourceNotFoundException $e) {
-            // redirect to login page or home page
-            $this->loginCheck();
+        else {
+            try {
+                $this->parameters = $this->matcher->matchRequest($this->request);
+                $this->loadCourses();
+                $this->loginCheck();
+            }
+            catch (ResourceNotFoundException $e) {
+                // redirect to login page or home page
+                $this->loginCheck();
+            }
         }
     }
 
