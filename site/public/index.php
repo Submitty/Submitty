@@ -180,7 +180,7 @@ if (isset($_COOKIE[$cookie_key])) {
             Utils::setCookie($cookie_key, "", time() - 3600);
         }
         else {
-            if ($expire_time > 0 || $reset_cookie) {
+            if ($expire_time > 0) {
                 Utils::setCookie(
                     $cookie_key,
                     (string) TokenManager::generateSessionToken(
@@ -293,8 +293,7 @@ if (empty($_REQUEST['component']) && $core->getUser() !== null) {
 * END LOGIN CODE
 *********************************************/
 
-$supported_by_new_router = in_array($_REQUEST['component'], ['authentication', 'home']) ||
-    ($_REQUEST['component'] == 'navigation' && !in_array($_REQUEST['page'], ['notifications', 'notification_settings']));
+$supported_by_new_router = in_array($_REQUEST['component'], ['authentication', 'home', 'navigation']);
 
 if (!$supported_by_new_router) {
     switch($_REQUEST['component']) {
@@ -316,10 +315,6 @@ if (!$supported_by_new_router) {
             break;
         case 'submission':
             $control = new app\controllers\StudentController($core);
-            $control->run();
-            break;
-        case 'navigation':
-            $control = new app\controllers\NavigationController($core);
             $control->run();
             break;
         case 'forum':

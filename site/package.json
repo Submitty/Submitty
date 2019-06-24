@@ -15,7 +15,7 @@
     "@submitty/pdf-annotate.js": "^2.0.2",
     "bootstrap": "^4.3.1",
     "chosen-js": "^1.8.7",
-    "codemirror": "~5.47.0",
+    "codemirror": "~5.48.0",
     "flatpickr": "~4.6.1",
     "jquery": "^3.4.1",
     "jquery-ui-dist": "^1.12.1",
