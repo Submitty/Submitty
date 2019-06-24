@@ -91,6 +91,17 @@ class DatabaseQueries {
         return ($this->submitty_db->getRowCount() > 0) ? $this->submitty_db->row()['api_key'] : null;
     }
 
+    /**
+     * Gets a user from their api key.
+     * @param $api_key
+     *
+     * @return string | null
+     */
+    public function getSubmittyUserByApiKey($api_key) {
+        $this->submitty_db->query("SELECT user_id FROM users WHERE api_key=?", array($api_key));
+        return ($this->submitty_db->getRowCount() > 0) ? $this->submitty_db->row()['user_id'] : null;
+    }
+
 
     /**
      * Gets a user from the database given a user_id.

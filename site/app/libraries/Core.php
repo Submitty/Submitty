@@ -339,6 +339,23 @@ class Core {
     }
 
     /**
+     * Given an api_key (which should be coming from a parsed JWT), the database is queried to find
+     * a user id that matches the api key, and returning the user_id.
+     *
+     * @param string $api_key
+     *
+     * @return bool
+     */
+    public function getApiUser(string $api_key): bool {
+        $user_id = $this->database_queries->getSubmittyUserByApiKey($api_key);
+        if ($user_id === null) {
+            return false;
+        }
+        $this->loadUser($user_id);
+        return true;
+    }
+
+    /**
      * Remove the currently loaded session within the session manager
      */
     public function removeCurrentSession() {
