@@ -937,7 +937,7 @@ TestResults* dispatch::warnIfNotEmpty_doit (const TestCase &tc, const nlohmann::
     return new TestResults(1.0,messages);
   }
   if (student_file_contents != "") {
-    if (j.find("jvm_memory") != j.end() && j["jvm_memory"] == true &&
+    if (j.find("jvm_memory") != j.end() && j["jvm_memory"].get<bool>() == true &&
         JavaToolOptionsCheck(student_file_contents)) {
       return new TestResults(1.0);
     }
