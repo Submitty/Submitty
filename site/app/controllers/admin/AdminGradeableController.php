@@ -679,6 +679,7 @@ class AdminGradeableController extends AbstractController {
             throw new \InvalidArgumentException('Gradeable already exists');
         }
 
+        $default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
         // Create the gradeable with good default information
         //
         $gradeable_type = GradeableType::stringToType($details['type']);
@@ -723,7 +724,7 @@ class AdminGradeableController extends AbstractController {
                 'student_view' => true,
                 'student_view_after_grades' => false,
                 'student_submit' => true,
-                'late_days' => 0,
+                'late_days' => $default_late_days,
                 'precision' => 0.5
             ];
             $gradeable_create_data = array_merge($gradeable_create_data, $non_template_property_values);
@@ -1159,6 +1160,15 @@ class AdminGradeableController extends AbstractController {
                 $success = true;
             } else {
                 $message .= "Student access already open for ";
+                $success = false;
+            }
+        } else if ($action === "close_submissions") {
+            if ($dates['submission_due_date'] > $now) {
+                $this->shiftDates($dates, 'submission_due_date', $now);
+                $message .= "Closed assignment ";
+                $success = true;
+            } else {
+                $message .= "Grading already closed for ";
                 $success = false;
             }
         }

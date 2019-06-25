@@ -18,16 +18,14 @@
             <td width="53%">PDF preview</td>
             <td width="5%">Full PDF</td>
             <td width="15%">User ID</td>
-            {% if use_qr_codes %}
-                <td>Page Count</td>
-            {% endif %}
+            <td>Page Count</td>
             <td width="8%">Submit</td>
             <td width="8%">Delete</td>
         </tr>
         </thead>
         <tbody>
             {% for file in files %}
-                {% if use_qr_codes and file["valid"] == false %}
+                {% if file["valid"] == false %}
                     <tr class="tr tr-vertically-centered" style="background-color:pink;" id="row-{{ loop.index}}">
                 {% else %}
                     <tr class="tr tr-vertically-centered" id="row-{{ loop.index }}" >
@@ -50,12 +48,7 @@
                         <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}"/>
                         <div id="users_{{ loop.index }}">
                             <input type="text" id="bulk_user_id_{{ loop.index }}" aria-label = "Enter User ID to assign" 
-                                {% if use_qr_codes %}
-                                    value ="{{ file["id"] }}"
-                                {% else %}
-                                    value =""
-                                {% endif %}
-
+                                value ="{{ file["id"] }}"
                                 {# we should only submit on enter for normal bulk uploads or on the last team upload box #}
                                 {% if not team_assignment %} 
                                     onkeydown="uploadOnEnter( {{ loop.index }}, event );"
@@ -79,11 +72,9 @@
                             {% endif %}
                         </div>
                     </td>
-                    {% if use_qr_codes %}
-                        <td class="pdf_page_count" id="page_count_{{ loop.index }}">
-                            {{ file["page_count"] }}
-                        </td>
-                    {% endif %}
+                    <td class="pdf_page_count" id="page_count_{{ loop.index }}">
+                        {{ file["page_count"] }}
+                    </td>
                     <td>
                         <button type="button" id="bulk_submit_{{ loop.index }}" class="btn btn-primary"
                         onclick="uploadSplit( {{ loop.index }} )">Submit</button>
@@ -244,18 +235,18 @@
             //allow user to retry assigning on failure
             toggleButtons(index, false);
             console.error(response);
-            displaySubmissionMessage({'success' : false, 'message' : response});
+            displaySubmissionMessage(response);
         });
     }
 
     function uploadSplitHelper(user_id,path,index = 0,merge_previous = false,clobber = false){
         submitSplitItem(CSRF, g_id, user_id, path, merge_previous, clobber)
         .then(function(submit_response){
-            displaySubmissionMessage(submit_response,index);
+            displaySubmissionMessage(submit_response);
             moveToNextSubmission(index);
         })
         .catch(function(submit_response){
-            displaySubmissionMessage({'success' : false, 'message' : submit_response}, index);
+            displaySubmissionMessage(submit_response);
             console.error(submit_response);
             //allow user to retry assigning on failure
             toggleButtons(index, false);
@@ -275,12 +266,12 @@
         if(confirm("Are you sure you want to delete this submission?")){
             deleteSplitItem(CSRF,g_id,path)
             .then(function(submit_response){
-                displaySubmissionMessage(submit_response, index);
+                displaySubmissionMessage(submit_response);
                 moveToNextSubmission(index);
             })
             .catch(function(submit_response){
                 console.error(submit_response);
-                displaySubmissionMessage({'success' : false, 'message' : submit_response}, index);
+                displaySubmissionMessage(submit_response);
 
                 toggleButtons(index, false);
             });
@@ -335,7 +326,7 @@
             }
         })
         .catch(function(response){
-            displaySubmissionMessage({'success' : false, 'message' : response}, index);
+            displaySubmissionMessage(response);
             console.error(response);
             return submitAll(index + 1);
         });
@@ -368,12 +359,12 @@
 
         deleteSplitItem(CSRF,g_id,path)
         .then(function(submit_response){
-            displaySubmissionMessage(submit_response, index);
+            displaySubmissionMessage(submit_response);
             return deleteAll(index + 1);
         })
         .catch(function(submit_response){
             console.error(submit_response);
-            displaySubmissionMessage({'success' : false, 'message' : submit_response}, index);
+            displaySubmissionMessage(submit_response);
 
             toggleButtons(index, false);
 
