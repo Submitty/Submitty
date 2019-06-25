@@ -212,7 +212,7 @@ class AdminGradeableController extends AbstractController {
         $config_repo_name = $this->core->getConfig()->getPrivateRepository();
         $all_repository_config_paths = array();
         if ($config_repo_name !== '') {
-            $repository_config_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), $config_repo_name);
+            $repository_config_dir = $config_repo_name;
             $all_repository_configs = FileUtils::getAllFiles($repository_config_dir);
             foreach ($all_repository_configs as $file) {
                 $all_repository_config_paths[] = $file['path'];

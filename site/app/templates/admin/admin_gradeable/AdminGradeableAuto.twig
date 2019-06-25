@@ -3,7 +3,7 @@
     <fieldset>
         <input type="radio" class="config_option ignore" name="config_option" id="config_option_defaults" value="defaults"/> <label for="config_option_defaults">Provided autograding configurations</label>
         <input type="radio" class="config_option ignore" name="config_option" id="config_option_uploaded" value="uploaded"/> <label for="config_option_uploaded">Custom uploaded autograding configurations</label>
-        {% if repo_name != "" %}
+        {% if config_repo_name != "" %}
             <input type="radio" class="config_option ignore" name="config_option" id="config_option_repo" value="repo"/> <label for="config_option_repo">Use Private repository ({{ config_repo_name }})</label>
         {% endif %}
         <input type="radio" class="config_option ignore" name="config_option" id="config_option_manual" value="manual"/> <label for="config_option_manual">Other full path</label>
@@ -169,7 +169,7 @@
             manual_input.val($('#select_uploaded_config').val());
             manual_input.change();
         } else if (checked_val === 'repo') {
-            manual_input.val($('#select_repository_config_config').val());
+            manual_input.val($('#select_repository_config').val());
             manual_input.change();
         }
     }
