@@ -490,21 +490,167 @@ fi
 
 ################################################################################################################
 ################################################################################################################
+# CREATE/UPDATE version.json
+
+echo "Create tmp file"
+VERSION_FILE=${SUBMITTY_INSTALL_DIR}/config/version.json
+tmp_file=$(mktemp)
+tmp_version_file=$(mktemp)
+
+if [ ! -f ${VERSION_FILE} ]; then
+    echo "{}" > ${VERSION_FILE}
+fi
+
+cat ${VERSION_FILE} > ${tmp_version_file}
+
+set +e
+pushd ${SUBMITTY_REPOSITORY} > /dev/null
+installed_commit=$(git rev-parse HEAD 2>/dev/null)
+if [ $? != "0" ]; then
+    installed_commit="unknown"
+fi
+most_recent_git_tag=$(git describe --tag --abbrev=0 2>/dev/null)
+if [ $? != "0" ]; then
+    most_recent_git_tag="unknown"
+fi
+popd > /dev/null
+set -e
+
+cat <<< "$(jq ".installed_commit = \"${installed_commit}\"" < ${tmp_version_file})" > ${tmp_version_file}
+cat <<< "$(jq ".most_recent_git_tag = \"${most_recent_git_tag}\"" < ${tmp_version_file})" > ${tmp_version_file}
+
+################################################################################################################
+################################################################################################################
+# INSTALL 3RD PARTY PROJECTS
+#############################################################
+
+#################################################################
+# JAR SETUP
+#################
+
+# -----------------------------------------
+echo "Checking JUnit..."
+if [ "$(jq -r '.junit_version' ${VERSION_FILE})" != "${JUNIT_VERSION}" ]; then
+    echo "Updating JUnit to ${JUNIT_VERSION}..."
+    mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit
+    pushd ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit > /dev/null
+    rm -rf junit*jar
+    wget http://repo1.maven.org/maven2/junit/junit/${JUNIT_VERSION}/junit-${JUNIT_VERSION}.jar -o /dev/null > /dev/null 2>&1
+    popd > /dev/null
+    cat <<< "$(jq ".junit_version = \"${JUNIT_VERSION}\"" < ${tmp_version_file})" > ${tmp_version_file}
+fi
+
+echo "Checking Hamcrest..."
+if [ "$(jq -r '.hamcrest_version' ${VERSION_FILE})" != "${HAMCREST_VERSION}" ]; then
+    echo "Updating Hamcrest to ${HAMCREST_VERSION}..."
+    mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/hamcrest
+    pushd ${SUBMITTY_INSTALL_DIR}/java_tools/hamcrest > /dev/null
+    rm -rf hamcrest*.jar
+    wget http://repo1.maven.org/maven2/org/hamcrest/hamcrest-core/${HAMCREST_VERSION}/hamcrest-core-${HAMCREST_VERSION}.jar -o /dev/null > /dev/null 2>&1
+    popd > /dev/null
+    cat <<< "$(jq ".hamcrest_version = \"${HAMCREST_VERSION}\"" < ${tmp_version_file})" > ${tmp_version_file}
+fi
+
+# TODO:  Want to Install JUnit 5.0
+# And maybe also Hamcrest 2.0 (or maybe that piece isn't needed anymore)
+
+# EMMA is a tool for computing code coverage of Java programs
+echo "Checking emma..."
+if [ "$(jq -r '.emma_version' ${VERSION_FILE})" != "${EMMA_VERSION}" ]; then
+    echo "Updating emma to ${EMMA_VERSION}..."
+    mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/emma
+    pushd ${SUBMITTY_INSTALL_DIR}/java_tools/emma > /dev/null
+    wget https://github.com/Submitty/emma/archive/${EMMA_VERSION}.zip -O emma-${EMMA_VERSION}.zip -o /dev/null > /dev/null 2>&1
+    unzip emma-${EMMA_VERSION}.zip > /dev/null
+    mv emma-${EMMA_VERSION}/lib/emma.jar emma.jar
+    rm -rf emma-${EMMA_VERSION}*
+    chmod o+r . *.jar
+    popd > /dev/null
+    cat <<< "$(jq ".emma_version = \"${EMMA_VERSION}\"" < ${tmp_version_file})" > ${tmp_version_file}
+fi
+
+# JaCoCo is a replacement for EMMA
+echo "Checking JaCoCo..."
+if [ "$(jq -r '.jacoco_version' ${VERSION_FILE})" != "${JACOCO_VERSION}" ]; then
+    echo "Updating JaCoCo to ${JACOCO_VERSION}..."
+    mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/jacoco
+    pushd ${SUBMITTY_INSTALL_DIR}/java_tools/jacoco > /dev/null
+    wget https://github.com/jacoco/jacoco/releases/download/v${JACOCO_VERSION}/jacoco-${JACOCO_VERSION}.zip -o /dev/null > /dev/null 2>&1
+    mkdir jacoco-${JACOCO_VERSION}
+    unzip jacoco-${JACOCO_VERSION}.zip -d jacoco-${JACOCO_VERSION} > /dev/null
+    mv jacoco-${JACOCO_VERSION}/lib/jacococli.jar jacococli.jar
+    mv jacoco-${JACOCO_VERSION}/lib/jacocoagent.jar jacocoagent.jar
+    rm -rf jacoco-${JACOCO_VERSION}
+    rm -f jacoco-${JACOCO_VERSION}.zip
+    chmod o+r . *.jar
+    popd > /dev/null
+    cat <<< "$(jq ".jacoco_version = \"${JACOCO_VERSION}\"" < ${tmp_version_file})" > ${tmp_version_file}
+fi
+
+# fix all java_tools permissions
+chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/java_tools
+chmod -R 755 ${SUBMITTY_INSTALL_DIR}/java_tools
+
+
+#################################################################
+# DRMEMORY SETUP
+#################
+
+# Dr Memory is a tool for detecting memory errors in C++ programs (similar to Valgrind)
+echo "Checking DrMemory..."
+if [ "$(jq -r '.drmemory_version' ${VERSION_FILE})" != "${DRMEMORY_VERSION}" ]; then
+    echo "Updating DrMemory to ${DRMEMORY_VERSION}..."
+    pushd /tmp > /dev/null
+    wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEMORY_TAG}/DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz -o /dev/null > /dev/null 2>&1
+    tar -xpzf DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz
+    rsync --delete -a /tmp/DrMemory-Linux-${DRMEMORY_VERSION}/ ${SUBMITTY_INSTALL_DIR}/drmemory
+    rm -rf /tmp/DrMemory*
+
+    chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/drmemory
+    chmod -R 755 ${SUBMITTY_INSTALL_DIR}/drmemory
+    popd > /dev/null
+    cat <<< "$(jq ".drmemory_version = \"${DRMEMORY_VERSION}\"" < ${tmp_version_file})" > ${tmp_version_file}
+fi
+
+#################################################################
+# TCLAPP SETUP
+#################
+echo "Checking TCLAPP..."
+if [ "$(jq -r '.tclapp_version' ${VERSION_FILE})" != "${TCLAPP_VERSION}" ]; then
+    echo "Updating TCLAPP to ${TCLAPP_VERSION}..."
+    pushd /tmp > /dev/null
+    wget https://sourceforge.net/projects/tclap/files/tclap-${TCLAPP_VERSION}.tar.gz -o /dev/null > /dev/null 2>&1
+    tar -xpzf tclap-${TCLAPP_VERSION}.tar.gz
+    rm /tmp/tclap-${TCLAPP_VERSION}.tar.gz
+    cd tclap-${TCLAPP_VERSION}/
+    sed -i 's/SUBDIRS = include examples docs tests msc config/SUBDIRS = include docs msc config/' Makefile.in
+    bash configure
+    make
+    make install
+    cd /tmp
+    rm -rf /tmp/tclap-${TCLAPP_VERSION}
+    popd > /dev/null
+    cat <<< "$(jq ".tclapp_version = \"${TCLAPP_VERSION}\"" < ${tmp_version_file})" > ${tmp_version_file}
+fi
+
+
+################################################################################################################
+################################################################################################################
 # COMPILE AND INSTALL ANALYSIS TOOLS
 
 echo -e "Compile and install analysis tools"
 
 mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
-pushd ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-if [[ ! -f VERSION || $(< VERSION) != "${AnalysisTools_Version}" ]]; then
+if [ "$(jq -r '.analysis_tools_version' ${VERSION_FILE})" != "${AnalysisTools_Version}" ]; then
+    echo "Updating analysis tools to ${AnalysisTools_Version}..."
+    pushd ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
     for b in count plagiarism diagnostics;
         do wget -nv "https://github.com/Submitty/AnalysisTools/releases/download/${AnalysisTools_Version}/${b}" -O ${b}
     done
-
-    echo ${AnalysisTools_Version} > VERSION
+    popd > /dev/null
+    cat <<< "$(jq ".analysis_tools_version = \"${AnalysisTools_Version}\"" < ${tmp_version_file})" > ${tmp_version_file}
 fi
-popd > /dev/null
 
 # change permissions
 chown -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
@@ -581,24 +727,17 @@ fi
 
 /bin/bash ${SUBMITTY_REPOSITORY}/../Lichen/install_lichen.sh
 
-
-################################################################################################################
-################################################################################################################
-
-# Obtains the current git hash and tag and stores them in the appropriate jsons.
-python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py
-chmod o+r ${SUBMITTY_INSTALL_DIR}/config/version.json
-
-installed_commit=$(jq '.installed_commit' /usr/local/submitty/config/version.json)
-most_recent_git_tag=$(jq '.most_recent_git_tag' /usr/local/submitty/config/version.json)
-echo -e "Completed installation of the Submitty version ${most_recent_git_tag//\"/}, commit ${installed_commit//\"/}\n"
-
 ################################################################################################################
 ################################################################################################################
 # INSTALL SUBMITTY CRONTAB
 #############################################################
 
 cat "${SUBMITTY_REPOSITORY}/.setup/submitty_crontab" | envsubst | cat - > "/etc/cron.d/submitty"
+
+# Chmod the Version file, complete installation
+mv ${tmp_version_file} ${VERSION_FILE}
+chmod o+r ${VERSION_FILE}
+echo -e "Completed installation of the Submitty version ${most_recent_git_tag//\"/}, commit ${installed_commit//\"/}\n"
 
 ################################################################################################################
 ################################################################################################################

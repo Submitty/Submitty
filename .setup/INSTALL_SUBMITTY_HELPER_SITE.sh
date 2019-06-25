@@ -62,6 +62,7 @@ su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm install --loglevel=e
 NODE_FOLDER=${SUBMITTY_INSTALL_DIR}/site/node_modules
 VENDOR_FOLDER=${SUBMITTY_INSTALL_DIR}/site/public/vendor
 # clean out the old install so we don't leave anything behind
+echo "Copy NPM dependencies..."
 rm -rf ${VENDOR_FOLDER}
 mkdir ${VENDOR_FOLDER}
 # fontawesome
@@ -114,6 +115,7 @@ cp ${NODE_FOLDER}/twig/twig.min.js ${VENDOR_FOLDER}/twigjs/
 # set the permissions of all files
 # $PHP_USER can read & execute all directories and read all files
 # "other" can cd into all subdirectories
+echo "Set permissions on files..."
 chmod -R 440 ${SUBMITTY_INSTALL_DIR}/site
 find ${SUBMITTY_INSTALL_DIR}/site -type d -exec chmod ogu+x {} \;
 

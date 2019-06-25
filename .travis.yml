@@ -274,7 +274,7 @@ jobs:
         - pushd ${TRAVIS_BUILD_DIR}/python_submitty_utils
         - pip3 install .
         - popd
-        - sudo bash .setup/travis/autograder.sh
+        # - sudo bash .setup/travis/autograder.sh
         - psql -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
         - PGPASSWORD=submitty_dbuser psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
         - sudo bash .setup/travis/setup.sh
