@@ -28,6 +28,27 @@ function buildUrl(parts) {
     return document.body.dataset.siteUrl + constructed;
 }
 
+/**
+ * Acts in a similar fashion to Core->buildNewUrl() function within the PHP code
+ *
+ * @param {object} parts - Object representing URL parts to append to the URL
+ * @returns {string} - Built up URL to use
+ */
+function buildNewUrl(parts = []) {
+    return document.body.dataset.baseUrl + parts.join('/');
+}
+
+/**
+ * Acts in a similar fashion to Core->buildNewCourseUrl() function within the PHP code
+ * Course information is prepended to the URL constructed.
+ *
+ * @param {object} parts - Object representing URL parts to append to the URL
+ * @returns {string} - Built up URL to use
+ */
+function buildNewCourseUrl(parts = []) {
+    return document.body.dataset.courseUrl + '/' + parts.join('/');
+}
+
 function changeDiffView(div_name, gradeable_id, who_id, version, index, autocheck_cnt, helper_id){
     var actual_div_name = "#" + div_name + "_0";
     var expected_div_name = "#" + div_name + "_1";
