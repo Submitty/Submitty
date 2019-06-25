@@ -160,7 +160,7 @@ function editUserForm(user_id) {
     $.ajax({
         url: url,
         success: function(data) {
-            var json = JSON.parse(data);
+            var json = JSON.parse(data)['data'];
             var form = $("#edit-user-form");
             form.css("display", "block");
             $('[name="edit_user"]', form).val("true");
