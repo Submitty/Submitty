@@ -17,6 +17,7 @@ body {min-width: 925px;}
 
 .pre_forum {
     font-family: inherit;
+    max-width: 70vw;
 }
 
 #forum_bar {
