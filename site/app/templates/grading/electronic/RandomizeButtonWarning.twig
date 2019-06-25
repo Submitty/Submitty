@@ -1,0 +1,14 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}randomize-button-warning{% endblock %}
+{% block title %}WARNING: Grading may be in progress!{% endblock %}
+{% block body %}
+    <p> Updating the sections for this gradeable will change the submissions assigned to each grader.<br />
+        If grading has begun, this may interupt or redistribute grade submissions.<br /><br /><br />
+        Are you sure you want to continue? <br /><br />
+    </p><br />
+{% endblock %}
+{% block buttons %}
+    <a style="float: left;" onclick="$('#{{ block('popup_id') }}').css('display', 'none'); event.stopPropagation();" class="btn btn-default close-button"> Cancel </a>
+    <a style="float: right;" class="btn btn-primary" href="{{ core.buildUrl({'component': 'grading', 'page': 
+				'electronic', 'action': 'randomize_team_rotating_sections', 'gradeable_id': gradeable_id}) }}"> Randomly Re-Assign Teams to Rotating Sections </a>
+{% endblock %}

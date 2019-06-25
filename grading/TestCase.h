@@ -45,6 +45,7 @@ public:
 
   int getID() const { return test_case_id; }
   std::string getTitle() const;
+  std::string getTestcaseLabel() const;
   std::string getDetails () const { return _json.value("details",""); }
 
   int getPoints() const { return _json.value("points", 0); }
