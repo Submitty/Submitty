@@ -11,6 +11,7 @@ import shutil
 import string
 import tzlocal
 import tempfile
+import readline
 
 
 def get_uid(user):
@@ -146,7 +147,14 @@ defaults = {'database_host': 'localhost',
             'institution_name' : '',
             'username_change_text' : 'Submitty welcomes individuals of all ages, backgrounds, citizenships, disabilities, sex, education, ethnicities, family statuses, genders, gender identities, geographical locations, languages, military experience, political views, races, religions, sexual orientations, socioeconomic statuses, and work experiences. In an effort to create an inclusive environment, you may specify a preferred name to be used instead of what was provided on the registration roster.',
             'institution_homepage' : '',
-            'timezone' : tzlocal.get_localzone().zone}
+            'timezone' : tzlocal.get_localzone().zone,
+            'email_enabled': 'true',
+            'email_user': '',
+            'email_password': '',
+            'email_sender': 'submitty@myuniversity.edu',
+            'email_reply_to': 'submitty_do_not_reply@myuniversity.edu',
+            'email_server_hostname': 'mail.myuniversity.edu',
+            'email_server_port': 25}
 
 loaded_defaults = {}
 if os.path.isfile(CONFIGURATION_JSON):
@@ -239,6 +247,35 @@ else:
 
     CGI_URL = SUBMISSION_URL + '/cgi-bin'
 
+    print("NOTE: Emails can be set up at a later time in the config/email.json file")
+    while True:
+        is_email_enabled = get_input("Will Submitty use email notifications? [y/n]", 'y').lower()
+        if (is_email_enabled == 'y') :
+            EMAIL_ENABLED = 'true';
+            EMAIL_USER = get_input("What is the email user?", defaults['email_user'])
+            EMAIL_PASSWORD = get_input("What is the email password",defaults['email_password'])
+            EMAIL_SENDER = get_input("What is the email sender address (the address that will appear in the From: line)?",defaults['email_sender'])
+            EMAIL_REPLY_TO = get_input("What is the email reply to address?", defaults['email_reply_to'])
+            EMAIL_SERVER_HOSTNAME = get_input("What is the email server hostname?", defaults['email_server_hostname'])
+            try:
+                EMAIL_SERVER_PORT = int(get_input("What is the email server port?", defaults['email_server_port']))
+            except ValueError:
+                EMAIL_SERVER_PORT = defaults['email_server_port']
+            break;
+            
+        elif (is_email_enabled == 'n') :
+            EMAIL_ENABLED = 'false'
+            EMAIL_USER = defaults['email_user']
+            EMAIL_PASSWORD = defaults['email_password']
+            EMAIL_SENDER = defaults['email_sender']
+            EMAIL_REPLY_TO = defaults['email_reply_to']
+            EMAIL_SERVER_HOSTNAME = defaults['email_server_hostname']
+            EMAIL_SERVER_PORT = defaults['email_server_port']
+            break
+    print()
+
+
+
 ##############################################################################
 # make the installation setup directory
 
@@ -295,6 +332,14 @@ else:
     config['institution_homepage'] = INSTITUTION_HOMEPAGE
     config['debugging_enabled'] = DEBUGGING_ENABLED
 
+    config['email_enabled'] = EMAIL_ENABLED
+    config['email_user'] = EMAIL_USER
+    config['email_password'] = EMAIL_PASSWORD
+    config['email_sender'] = EMAIL_SENDER
+    config['email_reply_to'] = EMAIL_REPLY_TO
+    config['email_server_hostname'] = EMAIL_SERVER_HOSTNAME
+    config['email_server_port'] = EMAIL_SERVER_PORT
+
     config['site_log_path'] = TAGRADING_LOG_PATH
 
 config['autograding_log_path'] = AUTOGRADING_LOG_PATH
@@ -345,6 +390,7 @@ SUBMITTY_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty.json')
 SUBMITTY_USERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty_users.json')
 WORKERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'autograding_workers.json')
 SECRETS_PHP_JSON = os.path.join(CONFIG_INSTALL_DIR, 'secrets_submitty_php.json')
+EMAIL_JSON = os.path.join(CONFIG_INSTALL_DIR, 'email.json')
 
 #If the workers.json exists, rescue it from the destruction of config (move it to a temp directory).
 tmp_autograding_workers_file = ""
@@ -469,6 +515,25 @@ if not args.worker:
         json.dump(config, json_file, indent=2)
     shutil.chown(SECRETS_PHP_JSON, 'root', PHP_GROUP)
     os.chmod(SECRETS_PHP_JSON, 0o440)
+
+##############################################################################
+# Write email json
+
+config = OrderedDict()
+config['email_enabled'] = EMAIL_ENABLED
+config['email_user'] = EMAIL_USER
+config['email_password'] = EMAIL_PASSWORD
+config['email_sender'] = EMAIL_SENDER
+config['email_reply_to'] = EMAIL_REPLY_TO
+config['email_server_hostname'] = EMAIL_SERVER_HOSTNAME
+config['email_server_port'] = EMAIL_SERVER_PORT
+
+with open(EMAIL_JSON, 'w') as json_file:
+    json.dump(config, json_file, indent=2)
+shutil.chown(EMAIL_JSON, 'root', DAEMONPHP_GROUP)
+os.chmod(EMAIL_JSON, 0o440)
+
+
 
 
 ##############################################################################
